@@ -100,4 +100,100 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get appName => 'Delwaqty';
+
+  @override
+  String get appNameAr => 'الدقة';
+
+  @override
+  String get splashTagline => 'Precision in every detail';
+
+  @override
+  String get splashLoading => 'Preparing your experience...';
+
+  @override
+  String get onboardingNext => 'Next';
+
+  @override
+  String get onboardingSkip => 'Skip';
+
+  @override
+  String get onboardingDone => 'Get Started';
+
+  @override
+  String get onboardingTitle1 => 'Track Your Expenses';
+
+  @override
+  String get onboardingDesc1 =>
+      'Keep track of every transaction with ease. Know where your money goes.';
+
+  @override
+  String get onboardingTitle2 => 'Smart Budgeting';
+
+  @override
+  String get onboardingDesc2 =>
+      'Set budgets, track spending, and achieve your financial goals effortlessly.';
+
+  @override
+  String get onboardingTitle3 => 'Beautiful Reports';
+
+  @override
+  String get onboardingDesc3 =>
+      'Visualize your finances with elegant charts and insightful reports.';
+
+  @override
+  String get onboardingTitle4 => 'Secure & Private';
+
+  @override
+  String get onboardingDesc4 =>
+      'Your financial data is encrypted and protected with industry-leading security.';
+
+  @override
+  String get welcomeTitle => 'Welcome to Delwaqty';
+
+  @override
+  String get welcomeSubtitle => 'Your personal finance companion';
+
+  @override
+  String get welcomeLoginButton => 'I already have an account';
+
+  @override
+  String get welcomeRegisterButton => 'Create a new account';
+
+  @override
+  String get welcomeGuestButton => 'Continue as guest';
+
+  @override
+  String get fullName => 'Full Name';
+
+  @override
+  String get confirmPassword => 'Confirm Password';
+
+  @override
+  String get alreadyHaveAccount => 'Already have an account?';
+
+  @override
+  String get dontHaveAccount => 'Don\'t have an account?';
+
+  @override
+  String get resetEmailSent =>
+      'Password reset link has been sent to your email.';
+
+  @override
+  String get resetEmailHint =>
+      'Enter your email address and we\'ll send you a link to reset your password.';
+
+  @override
+  String get backToLogin => 'Back to Login';
+
+  @override
+  String get noConnection => 'No internet connection';
+
+  @override
+  String get connectionRestored => 'Internet connection restored';
+
+  @override
+  String get continueAsGuest => 'Continue as guest';
+
+  @override
+  String get getStarted => 'Get Started';
 }

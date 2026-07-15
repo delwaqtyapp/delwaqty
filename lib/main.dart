@@ -12,6 +12,7 @@ import 'package:delwaqty/data/repositories/profile_repository_impl.dart';
 import 'package:delwaqty/domain/usecases/auth/auth_usecases.dart';
 import 'package:delwaqty/domain/usecases/user/get_user.dart';
 import 'package:delwaqty/domain/usecases/profile/profile_usecases.dart';
+import 'package:delwaqty/services/connectivity/connectivity_service.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' as sb;
 
@@ -56,6 +57,9 @@ void main() async {
   if (!supabaseInitialized) {
     debugPrint('App running without backend connectivity.');
   }
+
+  final connectivityService = ConnectivityService();
+  await connectivityService.initialize();
 
   runApp(
     ProviderScope(

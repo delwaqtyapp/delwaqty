@@ -7,6 +7,9 @@ import 'package:delwaqty/features/settings/presentation/pages/settings_page.dart
 import 'package:delwaqty/features/auth/presentation/pages/login_page.dart';
 import 'package:delwaqty/features/auth/presentation/pages/register_page.dart';
 import 'package:delwaqty/features/auth/presentation/pages/forgot_password_page.dart';
+import 'package:delwaqty/features/splash/presentation/pages/splash_page.dart';
+import 'package:delwaqty/features/onboarding/presentation/pages/onboarding_page.dart';
+import 'package:delwaqty/features/welcome/presentation/pages/welcome_page.dart';
 import 'package:delwaqty/features/auth/domain/auth_state.dart';
 import 'package:delwaqty/features/auth/presentation/auth_provider.dart';
 
@@ -24,17 +27,23 @@ final goRouterProvider = Provider<GoRouter>((ref) {
 
   return GoRouter(
     navigatorKey: _rootNavigatorKey,
-    initialLocation: '/home',
+    initialLocation: '/splash',
     refreshListenable: refreshNotifier,
     redirect: (context, state) {
       final authState = ref.read(authStateProvider);
       final isAuth = authState is AuthAuthenticated;
+
+      final isSplash = state.matchedLocation == '/splash';
+      final isOnboarding = state.matchedLocation == '/onboarding';
+      final isWelcome = state.matchedLocation == '/welcome';
       final isAuthRoute = state.matchedLocation == '/login' ||
           state.matchedLocation == '/register' ||
           state.matchedLocation == '/forgot-password';
 
-      if (!isAuth && !isAuthRoute) {
-        return '/login';
+      if (isSplash || isOnboarding) return null;
+
+      if (!isAuth && !isAuthRoute && !isWelcome) {
+        return '/welcome';
       }
       if (isAuth && isAuthRoute) {
         return '/home';
@@ -42,6 +51,21 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       return null;
     },
     routes: [
+      GoRoute(
+        path: '/splash',
+        name: 'splash',
+        builder: (context, state) => const SplashPage(),
+      ),
+      GoRoute(
+        path: '/onboarding',
+        name: 'onboarding',
+        builder: (context, state) => const OnboardingPage(),
+      ),
+      GoRoute(
+        path: '/welcome',
+        name: 'welcome',
+        builder: (context, state) => const WelcomePage(),
+      ),
       GoRoute(
         path: '/login',
         name: 'login',

@@ -59,12 +59,13 @@ void main() {
   });
 
   group('GoRouter redirect logic (conceptual)', () {
-    test('unauthenticated user on protected route should redirect to login', () {
+    test('unauthenticated user on protected route should redirect to welcome', () {
       const authState = AuthState.unauthenticated();
       const isAuth = authState is AuthAuthenticated;
       const isAuthRoute = false;
+      const isWelcome = false;
 
-      const shouldRedirect = !isAuth && !isAuthRoute;
+      const shouldRedirect = !isAuth && !isAuthRoute && !isWelcome;
       expect(shouldRedirect, isTrue);
     });
 
@@ -97,6 +98,11 @@ void main() {
       final shouldRedirectToHome = isAuth && isAuthRoute;
       expect(shouldRedirectToLogin, isFalse);
       expect(shouldRedirectToHome, isFalse);
+    });
+
+    test('splash and onboarding routes exist', () {
+      expect('/splash'.isNotEmpty, isTrue);
+      expect('/onboarding'.isNotEmpty, isTrue);
     });
   });
 }

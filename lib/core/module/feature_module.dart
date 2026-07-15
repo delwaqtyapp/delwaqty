@@ -12,6 +12,11 @@ enum ModuleCapability {
   hasAI,
   hasOfflineMode,
   hasDeepLinks,
+  requiresMap,
+  requiresPayments,
+  requiresDelivery,
+  requiresChat,
+  requiresWallet,
 }
 
 class DrawerEntry {

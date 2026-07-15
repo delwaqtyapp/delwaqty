@@ -1,8 +1,7 @@
-# Roadmap
+# Delwaqty Roadmap
 
-## Phase 1: Foundation Stabilization ✅
+## Sprint 1: Foundation Stabilization ✅
 **Status:** Complete
-**Duration:** Completed
 
 - [x] Clean Architecture setup (Domain/Data/Presentation/Core)
 - [x] Material 3 theming (light/dark)
@@ -12,183 +11,261 @@
 - [x] Reusable UI components
 - [x] Auth flow (Login, Register, Forgot Password)
 - [x] Supabase data sources and repository implementations
-- [x] Unit tests for utilities (51 tests, all passing)
+- [x] Unit tests for utilities (51 tests)
 - [x] `flutter analyze` → 0 issues
 
----
-
-## Phase 1.5: Sprint 1 — Bug Fixes & Dead Code Cleanup ✅
+## Sprint 2: Bug Fixes & Dead Code Cleanup ✅
 **Status:** Complete
-**Duration:** Completed
 
-### Bugs Fixed
 - [x] Fix `watchProfile()` StreamController memory leak
-- [x] Implement `refreshSession()` using Supabase's `refreshSession()` API
-- [x] Fix `_signIn` getter shadow warning in `auth_provider.dart`
+- [x] Implement `refreshSession()` using Supabase API
+- [x] Remove unused Dio infrastructure
+- [x] Remove unused packages (connectivity_plus, riverpod_annotation, etc.)
+- [x] Wire `handleException()` into auth provider
+- [x] Improve GoRouter rebuild performance
 
-### Dead Code Removed
-- [x] Remove unused Dio infrastructure (`dio_client.dart`, `api_interceptor.dart`, `network_info.dart`)
-- [x] Remove unused `connectivity_plus` from pubspec.yaml
-- [x] Remove unused `riverpod_annotation` from pubspec.yaml
-- [x] Remove unused `riverpod_generator` from pubspec.yaml
-- [x] Remove unused `dio` from pubspec.yaml
-- [x] Remove unused `handleException()` DioException tests
-- [x] Remove unused shared widgets (`ResponsiveLayout`, `EmptyStateWidget`, `AppLoading`)
-- [x] Remove unused `Helpers` class in `utils/helpers.dart`
-- [x] Remove unused `PaginatedResult` and `PaginationParams` entities
+## Sprint 3: Real App Features ✅
+**Status:** Complete
 
-### Infrastructure Added
-- [x] Wire `handleException()` into auth provider for typed error mapping
-- [x] Improve GoRouter rebuild performance with `refreshListenable`
-- [x] Remove Dio dependency from `error_handler.dart`
+- [x] Splash screen with animated logo and initialization routing
+- [x] 4-page onboarding with PageView, dots, skip/next/done
+- [x] Welcome page with login/register/guest entry points
+- [x] Animated widgets (FadeIn, SlideIn, GradientBackground)
+- [x] Connectivity service for network monitoring
+- [x] Tests: 114 → 127
 
----
+## Sprint 4: Core App Features ✅
+**Status:** Complete
 
-## Phase 2: Core Feature Development
-**Status:** Pending
-**Priority:** High
-**Duration:** 2-3 weeks
+- [x] Profile page with avatar, edit capabilities
+- [x] Home page with dashboard content
+- [x] Settings page (theme, language, notifications)
+- [x] Expense tracking with categories
+- [x] Category management
+- [x] Navigation drawer with module entries
 
-### Profile Feature
-- [ ] Profile page (view/edit profile)
-- [ ] Avatar upload with image picker
-- [ ] Profile completion flow
-- [ ] Profile state management (Riverpod provider)
+## Sprint 5: Data & Charts ✅
+**Status:** Complete
 
-### Home Feature
-- [ ] Real home page content (replace placeholder)
-- [ ] Dashboard or main screen based on user role
-- [ ] Pull-to-refresh functionality
+- [x] Dashboard with expense summaries
+- [x] Monthly/weekly/daily views
+- [x] Data synchronization with Supabase
+- [x] Notification repository and mock data
+- [x] Mock expense and category repositories
 
-### Settings Feature
-- [ ] User account settings (change email, password)
-- [ ] Notification preferences
-- [ ] App version and build info
-- [ ] About page
+## Sprint 6: Advanced Features ✅
+**Status:** Complete
 
-### Error Handling Integration
-- [ ] Wire `handleException()` into all repository implementations (currently only in auth provider)
-- [ ] Create `Failure`-aware UI (error states in pages)
-- [ ] Add error boundaries for unhandled exceptions
+- [x] Push notification infrastructure (FCM service built)
+- [x] Offline support patterns
+- [x] Multi-currency foundation (Money entity)
+- [x] Receipt data models
+- [x] Advanced error handling integration
 
----
+## Sprint 7: FeatureModule Plugin Architecture ✅
+**Status:** Complete
+**Tests:** 127 → 259
 
-## Phase 3: Advanced Features
-**Status:** Pending
-**Priority:** Medium
-**Duration:** 3-4 weeks
+- [x] Abstract `FeatureModule` contract with lifecycle hooks
+- [x] `FeatureRegistry` singleton with dependency resolution
+- [x] Dynamic route generation from module registration
+- [x] Dynamic navigation (bottom nav + drawer) from modules
+- [x] Badge aggregation system across modules
+- [x] All 9 existing modules converted to FeatureModule pattern
+- [x] Zero core modifications needed for new features
+- [x] Documentation: MODULE_SYSTEM.md, SYSTEM_ARCHITECTURE.md
 
-### Networking & Caching
-- [ ] Implement pagination for list features
-- [ ] Add image caching (`cached_network_image`)
-- [ ] Add request cancellation support
-- [ ] Implement offline-first caching (if needed)
+## Sprint 8: Generic Commerce Engine ✅
+**Status:** Complete
+**Tests:** 259 → 443
 
-### Push Notifications
-- [ ] Wire FCM service into app lifecycle
-- [ ] Handle foreground/background notifications
-- [ ] Deep linking from notifications
-- [ ] Notification preferences per type
+- [x] 15 Freezed domain entities (Merchant, Product, Cart, Order, etc.)
+- [x] 8 repository interfaces with full method contracts
+- [x] 8 mock implementations with sample Saudi merchant data
+- [x] 7 reusable presentation widgets
+- [x] 6 presentation screens (discovery, merchant detail, product detail, cart, checkout, orders)
+- [x] Merchant-type agnostic design — one codebase for all merchant types
+- [x] Search infrastructure with filtering
+- [x] Deep link route patterns
 
-### State Management Improvements
-- [ ] Evaluate `@riverpod` code generation for new features
-- [ ] Add provider tests for auth flow
-- [ ] Add provider tests for profile flow
+## Sprint 9: Design System + Platform Services + Observability + Security + Database ✅
+**Status:** Complete
+**Date:** July 16, 2026
 
-### Security Hardening
-- [ ] Add ProGuard/R8 rules for Android release builds
-- [ ] Implement screenshot prevention on sensitive screens
-- [ ] Add certificate pinning (if custom API endpoints are added)
-- [ ] Verify iOS App Transport Security settings
+- [x] Design system with semantic color tokens (AppColors)
+- [x] Spacing system (AppSpacing)
+- [x] Theme provider with persistence
+- [x] Connectivity service integration
+- [x] Secure storage service (FlutterSecureStorage)
+- [x] SharedPreferences service
+- [x] Comprehensive security review (SECURITY_REVIEW.md)
+- [x] Performance review (PERFORMANCE_REVIEW.md)
+- [x] Code quality audit (CODE_QUALITY.md)
+- [x] Dependency audit (DEPENDENCIES.md)
+- [x] Project scoring (PROJECT_SCORE.md)
+- [x] System architecture documentation
+- [x] Database patterns established (Supabase + RLS)
+- [x] Error hierarchy with typed failures
+- [x] Context, String, DateTime extensions
 
----
+## Sprint 10: Commerce Engine Mock Data + Presentation Polish
+**Status:** Complete
 
-## Phase 4: Production Readiness
-**Status:** Pending
-**Priority:** Medium
-**Duration:** 2-3 weeks
+- [x] Mock merchant data (Al Baik, Tamimi, Nahdi, Jarir, IKEA)
+- [x] Mock product data for each merchant type
+- [x] Mock cart, order, coupon, review repositories
+- [x] CommerceDiscoveryPage with search and type filters
+- [x] MerchantDetailPage with product grid
+- [x] ProductDetailPage with variant selector
+- [x] CartPage with quantity controls and totals
+- [x] CheckoutPage with address and payment
+- [x] OrdersPage with status tracking
 
-### Testing
-- [ ] Widget tests for all reusable components
-- [ ] Repository implementation tests (mock Supabase data sources)
-- [ ] Use case tests (mock repositories)
-- [ ] Integration tests for auth flow
-- [ ] Golden tests for critical UI states
+## Sprint 11: Commerce Presentation Polish
+**Status:** Complete
 
-### CI/CD
-- [ ] GitHub Actions workflow for linting and testing
-- [ ] Build automation for Android and iOS
-- [ ] Code coverage reporting
-- [ ] Automated release notes
+- [x] MerchantCard with rating, type badge, delivery ETA
+- [x] ProductCard with price, discount, availability
+- [x] CartBadge with item count
+- [x] RatingStars display widget
+- [x] PriceTag with strikethrough for discounts
+- [x] DeliveryInfo with time, fee, minimum order
+- [x] MerchantTypeChip for filtering
+- [x] Responsive grid layouts
 
-### Documentation
-- [ ] API documentation for public methods
+## Sprint 12: AI Core Foundation
+**Status:** Planned
+
+- [ ] AI service abstraction layer (abstract interfaces)
+- [ ] LLM provider abstraction (OpenAI, Gemini, Claude)
+- [ ] Smart search with AI-powered suggestions
+- [ ] Product recommendation engine
+- [ ] Natural language query processing
+- [ ] AI module registration in FeatureRegistry
+
+## Sprint 13: AI Core Integration
+**Status:** Planned
+
+- [ ] Voice input processing
+- [ ] Chat-based commerce (find products via conversation)
+- [ ] AI-powered customer support
+- [ ] Merchant analytics with AI insights
+- [ ] Automated categorization
+
+## Sprint 14: Safety + Payments + Location
+**Status:** Planned
+
+- [ ] Payment gateway abstraction (Mada, STC Pay, Apple Pay, COD)
+- [ ] Wallet system with top-up and transfers
+- [ ] Driver location tracking
+- [ ] Geocoding and address autocomplete
+- [ ] Delivery route optimization
+- [ ] Safety features (emergency contacts, trip sharing)
+
+## Sprint 15: Documentation + Architecture Diagrams
+**Status:** Planned
+
+- [ ] Comprehensive architecture diagrams
+- [ ] API documentation for all public interfaces
 - [ ] Contributing guidelines
-- [ ] Architecture decision records (ADRs)
+- [ ] Code generation templates
+- [ ] Module development guide
+- [ ] Deployment documentation
 
-### Performance
-- [ ] App profiling with DevTools
-- [ ] Startup time optimization
-- [ ] Memory leak detection
-- [ ] Asset optimization
+## Sprint 16-20: Super Admin Platform
+**Status:** Partially Complete (Sprint 16 skeleton built)
+
+### Sprint 16: Admin Platform Skeleton ✅
+- [x] Admin domain models (AdminUser, AdminDashboard, AdminActivityLog, AdminPermission)
+- [x] AdminModule with FeatureModule registration
+- [x] AdminDashboardPage with stat cards and activity feed
+- [x] AdminUsersPage with user management skeleton
+- [x] AdminMerchantsPage with merchant management skeleton
+- [x] AdminOrdersPage with order management skeleton
+- [x] AdminSettingsPage with platform settings skeleton
+
+### Sprint 17: Admin Backend Integration
+- [ ] AdminRepository interface with full CRUD operations
+- [ ] Mock admin repository with sample data
+- [ ] Admin dashboard provider with real-time data
+- [ ] User management CRUD operations
+- [ ] Merchant approval workflow
+- [ ] Order dispute resolution system
+
+### Sprint 18: Admin Analytics & Reporting
+- [ ] Revenue analytics with charts
+- [ ] User growth metrics
+- [ ] Merchant performance analytics
+- [ ] Order volume and trends
+- [ ] Driver performance metrics
+- [ ] Export reports (PDF, CSV)
+
+### Sprint 19: Admin Security & Audit
+- [ ] Role-based access control (RBAC)
+- [ ] Admin activity logging
+- [ ] Audit trail for all admin actions
+- [ ] Admin authentication with 2FA
+- [ ] IP whitelist for admin access
+- [ ] Session management
+
+### Sprint 20: Admin Polish
+- [ ] Real-time notifications for admin alerts
+- [ ] Dashboard customization (widget arrangement)
+- [ ] Admin search across all entities
+- [ ] Bulk operations (mass user/merchant actions)
+- [ ] Admin mobile responsive design
+- [ ] Admin dark mode optimization
+
+## Sprint 21+: Future Engines
+**Status:** Planned
+
+### Map Engine
+- [ ] Interactive map with merchant locations
+- [ ] Geocoding and reverse geocoding
+- [ ] Delivery tracking with real-time driver positions
+- [ ] Route optimization
+- [ ] Area-based merchant discovery
+
+### Search Engine
+- [ ] Full-text search across all modules
+- [ ] Faceted filtering (type, price, rating, distance)
+- [ ] Search suggestions and autocomplete
+- [ ] Recent searches history
+- [ ] AI-powered search ranking
+
+### Voice Engine
+- [ ] Voice commands for navigation
+- [ ] Voice search for products
+- [ ] Voice-based order placement
+- [ ] Multi-language voice support (Arabic, English)
+
+### Chat Engine
+- [ ] In-app messaging (user ↔ merchant, user ↔ driver)
+- [ ] Group chats for delivery coordination
+- [ ] Chatbot integration
+- [ ] File and image sharing
+- [ ] Read receipts and typing indicators
 
 ---
 
-## Phase 5: Scale & Polish
-**Status:** Pending
-**Priority:** Low
-**Duration:** 4-6 weeks
+## Milestones
 
-### Feature Scaling
-- [ ] Add 5-10 additional features following the established pattern
-- [ ] Implement deep linking
-- [ ] Add multi-language support beyond EN/AR
-- [ ] Implement feature flags
-
-### UI Polish
-- [ ] Animations and transitions
-- [ ] Haptic feedback
-- [ ] Accessibility audit (WCAG compliance)
-- [ ] Tablet/desktop layout support
-
-### Monitoring
-- [ ] Crash reporting (Firebase Crashlytics or Sentry)
-- [ ] Analytics integration
-- [ ] Performance monitoring
-- [ ] User feedback mechanism
-
----
-
-## Timeline Summary
-
-| Phase | Duration | Dependencies | Status |
-|---|---|---|---|
-| Phase 1: Foundation | — | — | ✅ Complete |
-| Phase 1.5: Sprint 1 | — | Phase 1 | ✅ Complete |
-| Phase 2: Core Features | 2-3 weeks | Phase 1.5 | Pending |
-| Phase 3: Advanced Features | 3-4 weeks | Phase 2 | Pending |
-| Phase 4: Production Readiness | 2-3 weeks | Phase 2 | Pending |
-| Phase 5: Scale & Polish | 4-6 weeks | Phase 3-4 | Pending |
-| **Total** | **11-16 weeks** | — | — |
-
----
+| Milestone | Target Date | Status |
+|-----------|-------------|--------|
+| Foundation & Auth | Sprint 1-2 | ✅ Complete |
+| Core UI & Features | Sprint 3-6 | ✅ Complete |
+| Plugin Architecture | Sprint 7 | ✅ Complete |
+| Commerce Engine | Sprint 8-11 | ✅ Complete |
+| Platform Services | Sprint 9 | ✅ Complete |
+| AI Core | Sprint 12-13 | Planned |
+| Payments & Location | Sprint 14 | Planned |
+| Documentation | Sprint 15 | Planned |
+| Super Admin | Sprint 16-20 | In Progress |
+| Future Engines | Sprint 21+ | Planned |
+| **MVP Launch** | Sprint 20 | Target |
 
 ## Critical Path
 
 ```
-Phase 1.5 (Sprint 1) ✅ → Phase 2 (Core Features) → Phase 4 (Production Readiness)
+Foundation ✅ → Plugin Architecture ✅ → Commerce Engine ✅ → AI Core → Payments → Admin Platform → MVP Launch
 ```
-
-Phase 3 (Advanced Features) and Phase 5 (Scale & Polish) can be parallelized with Phase 4.
-
----
-
-## Risk Factors
-
-| Risk | Impact | Mitigation |
-|---|---|---|
-| Supabase RLS policies not configured | High — data access broken | Verify before Phase 2 |
-| FCM integration complexity | Medium — delayed notifications | Phase 3 can be deferred |
-| Test coverage gap | High — regression risk | Prioritize Phase 4 testing |
-| Manual Riverpod boilerplate | Medium — slows development | Evaluate code-gen in Phase 3 |
-| Arabic RTL edge cases | Medium — poor UX for Arabic users | Test early with native speakers |

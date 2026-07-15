@@ -58,7 +58,7 @@ void main() {
 
     testWidgets('renders filled variant by default', (tester) async {
       await tester.pumpWidget(buildTestWidget());
-      expect(find.byType(ElevatedButton), findsOneWidget);
+      expect(find.byType(FilledButton), findsOneWidget);
     });
 
     testWidgets('renders outlined variant', (tester) async {
@@ -90,7 +90,7 @@ void main() {
       // The button should be wrapped in a SizedBox with width: double.infinity
       final sizedBox = tester.widget<SizedBox>(
         find.ancestor(
-          of: find.byType(ElevatedButton),
+          of: find.byType(FilledButton),
           matching: find.byType(SizedBox),
         ).first,
       );

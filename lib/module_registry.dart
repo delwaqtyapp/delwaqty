@@ -9,6 +9,7 @@ import 'package:delwaqty/features/settings/settings_module.dart';
 import 'package:delwaqty/features/profile/profile_module.dart';
 import 'package:delwaqty/features/notifications/notifications_module.dart';
 import 'package:delwaqty/features/commerce/commerce_module.dart';
+import 'package:delwaqty/features/admin/admin_module.dart';
 
 void registerAllModules() {
   final registry = FeatureRegistry.instance;
@@ -24,6 +25,7 @@ void registerAllModules() {
     SettingsModule(),
     ProfileModule(),
     NotificationsModule(),
+    AdminModule(),
   ]);
 
   registry.freeze();

@@ -1,7 +1,14 @@
 import 'package:flutter/material.dart';
 import 'app_colors.dart';
+import 'app_spacing.dart';
+import 'app_text_styles.dart';
 
+/// Builds the complete [ThemeData] for both light and dark modes.
+///
+/// Consumes the design-token classes so that every themed widget references
+/// the central system rather than hard-coded values.
 abstract final class AppTheme {
+  /// Creates the light [ThemeData].
   static ThemeData lightTheme({String? fontFamily}) {
     final colorScheme = ColorScheme.fromSeed(
       seedColor: AppColors.primaryLight,
@@ -15,6 +22,7 @@ abstract final class AppTheme {
     return _buildTheme(colorScheme, fontFamily);
   }
 
+  /// Creates the dark [ThemeData].
   static ThemeData darkTheme({String? fontFamily}) {
     final colorScheme = ColorScheme.fromSeed(
       seedColor: AppColors.primaryDark,
@@ -34,35 +42,45 @@ abstract final class AppTheme {
       useMaterial3: true,
       colorScheme: colorScheme,
       fontFamily: fontFamily,
+      textTheme: AppTextStyles.toTextTheme().apply(
+        bodyColor: colorScheme.onSurface,
+        displayColor: colorScheme.onSurface,
+      ),
       appBarTheme: AppBarTheme(
         centerTitle: true,
-        elevation: 0,
-        scrolledUnderElevation: 1,
+        elevation: AppElevationValues.none,
+        scrolledUnderElevation: AppElevationValues.xs,
         backgroundColor: colorScheme.surface,
         foregroundColor: colorScheme.onSurface,
       ),
       scaffoldBackgroundColor: colorScheme.surface,
       cardTheme: CardThemeData(
-        elevation: 0,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
+        elevation: AppElevationValues.none,
+        shape: const RoundedRectangleBorder(
+          borderRadius: AppSpacing.borderRadiusLg,
         ),
         color: colorScheme.surfaceContainerLowest,
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          elevation: 0,
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
+          elevation: AppElevationValues.none,
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.buttonPaddingHorizontal,
+            vertical: AppSpacing.buttonPaddingVertical,
+          ),
+          shape: const RoundedRectangleBorder(
+            borderRadius: AppSpacing.borderRadiusLg,
           ),
         ),
       ),
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.buttonPaddingHorizontal,
+            vertical: AppSpacing.buttonPaddingVertical,
+          ),
+          shape: const RoundedRectangleBorder(
+            borderRadius: AppSpacing.borderRadiusLg,
           ),
         ),
       ),
@@ -70,28 +88,30 @@ abstract final class AppTheme {
         filled: true,
         fillColor: colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: AppSpacing.borderRadiusLg,
           borderSide: BorderSide(color: colorScheme.outline),
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: AppSpacing.borderRadiusLg,
           borderSide: BorderSide(color: colorScheme.outline),
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: AppSpacing.borderRadiusLg,
           borderSide: BorderSide(color: colorScheme.primary, width: 2),
         ),
         errorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: AppSpacing.borderRadiusLg,
           borderSide: BorderSide(color: colorScheme.error),
         ),
-        contentPadding:
-            const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.fieldPaddingHorizontal,
+          vertical: AppSpacing.fieldPaddingVertical,
+        ),
       ),
-      snackBarTheme: SnackBarThemeData(
+      snackBarTheme: const SnackBarThemeData(
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: AppSpacing.borderRadiusMd,
         ),
       ),
       dividerTheme: DividerThemeData(
@@ -103,8 +123,17 @@ abstract final class AppTheme {
         selectedItemColor: colorScheme.primary,
         unselectedItemColor: colorScheme.onSurfaceVariant,
         type: BottomNavigationBarType.fixed,
-        elevation: 8,
+        elevation: AppElevationValues.lg,
       ),
     );
   }
+}
+
+/// Internal elevation constants used by [AppTheme].
+///
+/// Named to avoid clashing with [AppElevation] during the transition period.
+abstract final class AppElevationValues {
+  static const double none = 0;
+  static const double xs = 1;
+  static const double lg = 8;
 }

@@ -1,0 +1,72 @@
+import 'dart:typed_data';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:delwaqty/services/supabase/supabase_service.dart';
+import 'package:delwaqty/services/logger/app_logger.dart';
+import 'package:delwaqty/data/models/user_model.dart';
+
+final supabaseProfileDataSourceProvider =
+    Provider<SupabaseProfileDataSource>((ref) {
+  return SupabaseProfileDataSource(
+    ref.watch(supabaseClientProvider),
+    ref.watch(loggerProvider),
+  );
+});
+
+class SupabaseProfileDataSource {
+  SupabaseProfileDataSource(this._client, this._logger);
+
+  final SupabaseClient _client;
+  final AppLogger _logger;
+
+  static const String _tableName = 'profiles';
+
+  Future<UserModel> getProfile(String userId) async {
+    try {
+      final data = await _client
+          .from(_tableName)
+          .select()
+          .eq('id', userId)
+          .single();
+      return UserModel.fromSupabase(data);
+    } catch (e, stack) {
+      _logger.e('Failed to get profile for $userId', e, stack);
+      rethrow;
+    }
+  }
+
+  Future<UserModel> updateProfile({
+    required String userId,
+    required Map<String, dynamic> data,
+  }) async {
+    try {
+      final updated = await _client
+          .from(_tableName)
+          .update({...data, 'updated_at': DateTime.now().toIso8601String()})
+          .eq('id', userId)
+          .select()
+          .single();
+      return UserModel.fromSupabase(updated);
+    } catch (e, stack) {
+      _logger.e('Failed to update profile for $userId', e, stack);
+      rethrow;
+    }
+  }
+
+  Future<String> uploadAvatar({
+    required String userId,
+    required Uint8List bytes,
+    required String fileName,
+  }) async {
+    try {
+      final path = 'avatars/$userId/$fileName';
+      await _client.storage.from('profiles').uploadBinary(path, bytes);
+      final url = _client.storage.from('profiles').getPublicUrl(path);
+      _logger.i('Avatar uploaded for $userId');
+      return url;
+    } catch (e, stack) {
+      _logger.e('Failed to upload avatar for $userId', e, stack);
+      rethrow;
+    }
+  }
+}

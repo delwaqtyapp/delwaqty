@@ -1,0 +1,103 @@
+import 'package:flutter_test/flutter_test.dart';
+import 'package:mocktail/mocktail.dart';
+import 'package:delwaqty/domain/entities/user.dart';
+import 'package:delwaqty/domain/repositories/profile_repository.dart';
+import 'package:delwaqty/domain/usecases/profile/profile_usecases.dart';
+
+class MockProfileRepository extends Mock implements ProfileRepository {}
+
+void main() {
+  late MockProfileRepository mockRepository;
+
+  final testUser = User(
+    id: 'user-123',
+    email: 'test@example.com',
+    fullName: 'John Doe',
+    createdAt: DateTime(2024, 1, 15),
+  );
+
+  setUp(() {
+    mockRepository = MockProfileRepository();
+  });
+
+  group('GetProfileUseCase', () {
+    late GetProfileUseCase useCase;
+
+    setUp(() {
+      useCase = GetProfileUseCase(mockRepository);
+    });
+
+    test('calls getProfile on repository with correct userId', () async {
+      when(() => mockRepository.getProfile('user-123'))
+          .thenAnswer((_) async => testUser);
+
+      final result = await useCase('user-123');
+
+      expect(result, testUser);
+      verify(() => mockRepository.getProfile('user-123')).called(1);
+    });
+
+    test('propagates exceptions from repository', () async {
+      when(() => mockRepository.getProfile(any()))
+          .thenThrow(Exception('Profile not found'));
+
+      expect(() => useCase('user-123'), throwsA(isA<Exception>()));
+    });
+  });
+
+  group('UpdateProfileUseCase', () {
+    late UpdateProfileUseCase useCase;
+
+    setUp(() {
+      useCase = UpdateProfileUseCase(mockRepository);
+    });
+
+    test('calls updateProfile on repository', () async {
+      final data = {'full_name': 'Jane Doe'};
+      final updatedUser = testUser.copyWith(fullName: 'Jane Doe');
+
+      when(() => mockRepository.updateProfile(
+            userId: 'user-123',
+            data: data,
+          )).thenAnswer((_) async => updatedUser);
+
+      final result = await useCase(userId: 'user-123', data: data);
+
+      expect(result.fullName, 'Jane Doe');
+      verify(() => mockRepository.updateProfile(
+            userId: 'user-123',
+            data: data,
+          )).called(1);
+    });
+  });
+
+  group('UploadAvatarUseCase', () {
+    late UploadAvatarUseCase useCase;
+
+    setUp(() {
+      useCase = UploadAvatarUseCase(mockRepository);
+    });
+
+    test('calls uploadAvatar on repository', () async {
+      const avatarUrl = 'https://example.com/avatar.jpg';
+      when(() => mockRepository.uploadAvatar(
+            userId: 'user-123',
+            bytes: any(named: 'bytes'),
+            fileName: 'avatar.jpg',
+          )).thenAnswer((_) async => avatarUrl);
+
+      final result = await useCase(
+        userId: 'user-123',
+        bytes: [1, 2, 3],
+        fileName: 'avatar.jpg',
+      );
+
+      expect(result, avatarUrl);
+      verify(() => mockRepository.uploadAvatar(
+            userId: 'user-123',
+            bytes: [1, 2, 3],
+            fileName: 'avatar.jpg',
+          )).called(1);
+    });
+  });
+}

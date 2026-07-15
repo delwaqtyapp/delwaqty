@@ -194,4 +194,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get getStarted => 'ابدأ الآن';
+
+  @override
+  String get appearance => 'المظهر';
 }

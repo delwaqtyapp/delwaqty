@@ -4,6 +4,8 @@ import 'package:go_router/go_router.dart';
 import 'package:delwaqty/shared/widgets/app_shell.dart';
 import 'package:delwaqty/features/home/presentation/pages/home_page.dart';
 import 'package:delwaqty/features/settings/presentation/pages/settings_page.dart';
+import 'package:delwaqty/features/profile/presentation/pages/profile_page.dart';
+import 'package:delwaqty/features/notifications/presentation/pages/notification_center_page.dart';
 import 'package:delwaqty/features/auth/presentation/pages/login_page.dart';
 import 'package:delwaqty/features/auth/presentation/pages/register_page.dart';
 import 'package:delwaqty/features/auth/presentation/pages/forgot_password_page.dart';
@@ -80,6 +82,16 @@ final goRouterProvider = Provider<GoRouter>((ref) {
         path: '/forgot-password',
         name: 'forgot-password',
         builder: (context, state) => const ForgotPasswordPage(),
+      ),
+      GoRoute(
+        path: '/profile',
+        name: 'profile',
+        builder: (context, state) => const ProfilePage(),
+      ),
+      GoRoute(
+        path: '/notifications',
+        name: 'notifications',
+        builder: (context, state) => const NotificationCenterPage(),
       ),
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) {

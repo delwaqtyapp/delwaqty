@@ -60,5 +60,6 @@
   "noConnection": "لا يوجد اتصال بالإنترنت",
   "connectionRestored": "تم استعادة الاتصال بالإنترنت",
   "continueAsGuest": "المتابعة كضيف",
-  "getStarted": "ابدأ الآن"
+  "getStarted": "ابدأ الآن",
+  "appearance": "المظهر"
 }

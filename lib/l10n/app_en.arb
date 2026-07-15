@@ -59,5 +59,6 @@
   "noConnection": "No internet connection",
   "connectionRestored": "Internet connection restored",
   "continueAsGuest": "Continue as guest",
-  "getStarted": "Get Started"
+  "getStarted": "Get Started",
+  "appearance": "Appearance"
 }

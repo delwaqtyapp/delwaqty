@@ -57,6 +57,15 @@ dependencies:
   # Connectivity
   connectivity_plus: ^6.0.3
 
+  # Google Maps
+  google_maps_flutter: ^2.10.0
+
+  # HTTP client
+  http: ^1.2.0
+
+  # Crypto
+  crypto: ^3.0.3
+
   # Firebase
   firebase_core: ^2.30.1
   firebase_messaging: ^14.8.2

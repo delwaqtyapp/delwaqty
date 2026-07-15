@@ -316,6 +316,115 @@ Use soft delete pattern: entities have a `deletedAt` timestamp. Queries filter o
 
 ---
 
+## ADR-013: Workspace Location at /root/Projects/delwaqty
+
+**Date:** Sprint 10
+**Status:** Accepted
+**Deciders:** Core team
+
+### Context
+The project needs a consistent, reproducible workspace location that works for local development and can be backed up.
+
+### Decision
+Place the workspace at `/root/Projects/delwaqty` with a dedicated backup directory at `/root/Projects/delwaqty_backup_<timestamp>`.
+
+### Rationale
+- Predictable location for CI/CD and automation scripts
+- Backup directory follows timestamped naming for easy identification
+- Separates project from other workspace files
+- All build scripts assume this as the root directory
+
+### Consequences
+- Build scripts and setup scripts assume `/root/Projects/delwaqty` as working directory
+- Backup is manual (not automated in CI)
+- Migration to a different machine requires updating paths in documentation
+
+---
+
+## ADR-014: Environment Variables via --dart-define
+
+**Date:** Sprint 9
+**Status:** Accepted
+**Deciders:** Core team
+
+### Context
+Secrets (API keys, database URLs) must not be committed to version control. Need a build-time injection mechanism that works with both `flutter run` and `flutter build`.
+
+### Decision
+Use `--dart-define` for all secrets. Config classes (`SupabaseConfig`, `MapsConfig`, `CloudflareConfig`) read values via `String.fromEnvironment()`. A `.env` file is supported via `--dart-define-from-file=.env`.
+
+### Rationale
+- No secrets in source code or `.env` committed to git
+- Works with `flutter run` and `flutter build`
+- `.env` file support via `--dart-define-from-file` for convenience
+- Compile-time constants enable tree-shaking
+- Separate dev/prod configs via different variable names
+
+### Consequences
+- Every developer needs a `.env` file (template provided via `.env.example`)
+- Build commands require `--dart-define` flags or `--dart-define-from-file`
+- No runtime secret rotation (requires rebuild)
+- Config classes are `abstract final` — no instantiation, no mutation
+
+---
+
+## ADR-015: Cloudflare for CDN/Storage (Not Replacing Supabase)
+
+**Date:** Sprint 9
+**Status:** Accepted
+**Deciders:** Core team
+
+### Context
+Asset delivery (images, static files) needs a CDN for performance. Supabase handles the database and auth, but static asset delivery is better handled by a dedicated CDN.
+
+### Decision
+Use Cloudflare R2 for asset storage and Cloudflare CDN for delivery. Cloudflare does NOT replace Supabase as the primary database or auth provider.
+
+### Rationale
+- Supabase remains the primary database (PostgreSQL) and auth provider
+- Cloudflare R2 provides S3-compatible object storage at lower cost
+- Cloudflare CDN provides global edge caching for asset delivery
+- Separation of concerns: database vs. asset delivery
+- CDN domain (`cdn.delwaqty.com`) can be changed without affecting database
+
+### Consequences
+- Two separate infrastructure providers to manage
+- Asset URLs use Cloudflare CDN, data queries use Supabase
+- Clear boundary: Supabase = data + auth, Cloudflare = assets + CDN
+- `.env` file needs both Supabase and Cloudflare credentials
+
+---
+
+## ADR-016: APK Workflow with Timestamped Releases
+
+**Date:** Sprint 10
+**Status:** Accepted
+**Deciders:** Core team
+
+### Context
+Need a consistent build process that produces testable APKs. Developers need quick builds for iteration and full builds for validation.
+
+### Decision
+Provide multiple build scripts:
+- `build.sh` — Full build (pub get → analyze → test → debug APK → copy to releases/)
+- `scripts/dev_build.sh` — Quick dev build without full test suite
+- `scripts/test_and_build.sh` — Test first, then build release APK
+
+### Rationale
+- `build.sh` ensures quality by running analyze + test before building
+- `dev_build.sh` enables fast iteration during development
+- All APKs go to `releases/` directory for easy access
+- `releases/Delwaqty-Latest.apk` is always the most recent build
+- Git remote setup script provides one-command GitHub configuration
+
+### Consequences
+- `releases/` directory should be in `.gitignore` (binary files)
+- CI/CD can use `build.sh` for automated builds
+- Release builds require Android signing configuration
+- APK naming is simple (not timestamped) — use git tags for versioning
+
+---
+
 ## Summary
 
 | ADR | Decision | Status | Impact |
@@ -332,3 +441,7 @@ Use soft delete pattern: entities have a `deletedAt` timestamp. Queries filter o
 | 010 | Provider-Agnostic AI | Proposed | Future AI integration |
 | 011 | UUID Identification | Accepted | Entity identity |
 | 012 | Soft Delete | Accepted | Data safety |
+| 013 | Workspace Location | Accepted | Development environment |
+| 014 | Environment via --dart-define | Accepted | Secrets management |
+| 015 | Cloudflare CDN/Storage | Accepted | Asset delivery architecture |
+| 016 | APK Build Workflow | Accepted | Build and release process |

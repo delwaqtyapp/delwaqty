@@ -88,6 +88,35 @@ Delwaqty uses a plugin-based module architecture. Every feature is a self-contai
 
 ---
 
+## Sprint 10: Workspace Setup + Infrastructure
+
+Sprint 10 finalized the workspace configuration and build infrastructure:
+
+### Workspace
+- **Location:** `/root/Projects/delwaqty` (140MB)
+- **Git:** 10 commits on `master` branch
+- **Config files:** `lib/config/` — Supabase, Google Maps, Cloudflare, Environment, Service Locator
+
+### Build Infrastructure
+- `build.sh` — Full build pipeline (analyze → test → debug APK)
+- `scripts/dev_build.sh` — Quick dev build
+- `scripts/test_and_build.sh` — Test + release build
+- `scripts/setup_git_remote.sh` — One-command GitHub setup
+
+### Environment Configuration
+All secrets injected via `--dart-define` or `.env` file:
+- Supabase: dev/prod URLs and anon keys
+- Google Maps: API key with Saudi Arabia defaults
+- Cloudflare: R2 bucket and CDN domain
+
+### Commerce Engine Polish
+Sprint 10 also completed the commerce presentation layer:
+- 7 reusable widgets (MerchantCard, ProductCard, CartBadge, etc.)
+- 6 presentation screens (discovery through checkout)
+- Mock data for 5 Saudi merchants (Al Baik, Tamimi, Nahdi, Jarir, IKEA)
+
+---
+
 ## Adding a New Module
 
 1. Create `lib/features/{name}/{name}_module.dart`

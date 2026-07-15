@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:delwaqty/core/extensions/context_extensions.dart';
 import 'package:delwaqty/core/utils/icon_mapper.dart';
+import 'package:delwaqty/core/utils/currency_formatter.dart';
 import 'package:delwaqty/data/providers.dart';
 import 'package:delwaqty/domain/entities/category.dart';
 import 'package:delwaqty/shared/widgets/stat_card.dart';
 import 'package:delwaqty/shared/widgets/section_header.dart';
+import 'package:delwaqty/shared/widgets/budget_progress_bar.dart';
 import 'package:delwaqty/shared/widgets/loading_skeleton.dart';
 import 'package:delwaqty/shared/widgets/empty_state.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
@@ -105,19 +107,19 @@ class ReportsPage extends ConsumerWidget {
       children: [
         StatCard(
           title: l10n.totalIncome,
-          value: '\$${totalIncome.toStringAsFixed(2)}',
+          value: CurrencyFormatter.format(totalIncome),
           icon: Icons.arrow_downward_rounded,
           color: Colors.green,
         ),
         StatCard(
           title: l10n.totalExpenses,
-          value: '\$${totalExpenses.toStringAsFixed(2)}',
+          value: CurrencyFormatter.format(totalExpenses),
           icon: Icons.arrow_upward_rounded,
           color: context.colorScheme.error,
         ),
         StatCard(
           title: l10n.balance,
-          value: '\$${balance.toStringAsFixed(2)}',
+          value: CurrencyFormatter.format(balance),
           icon: Icons.account_balance_wallet_rounded,
           color: balance >= 0 ? Colors.green : context.colorScheme.error,
         ),
@@ -221,7 +223,7 @@ class _CategoryBreakdownSection extends StatelessWidget {
                             ),
                           ),
                           Text(
-                            '\$${entry.value.toStringAsFixed(2)}',
+                            CurrencyFormatter.format(entry.value),
                             style: context.textTheme.bodyMedium?.copyWith(
                               fontWeight: FontWeight.w600,
                             ),
@@ -236,16 +238,11 @@ class _CategoryBreakdownSection extends StatelessWidget {
                         ],
                       ),
                       const SizedBox(height: 6),
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(4),
-                        child: LinearProgressIndicator(
-                          value: ratio,
-                          minHeight: 8,
-                          backgroundColor:
-                              context.colorScheme.surfaceContainerHighest,
-                          color: category?.categoryColor ??
-                              context.colorScheme.primary,
-                        ),
+                      BudgetProgressBar(
+                        spent: entry.value,
+                        budget: total,
+                        showLabel: false,
+                        categoryColor: category?.categoryColor,
                       ),
                     ],
                   ),
@@ -332,7 +329,7 @@ class _MonthlyTrendPlaceholder extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
                         Text(
-                          '\$${(values[i] / 1000).toStringAsFixed(1)}k',
+                          CurrencyFormatter.formatCompact(values[i]),
                           style: context.textTheme.labelSmall?.copyWith(
                             color: context.colorScheme.onSurfaceVariant,
                           ),

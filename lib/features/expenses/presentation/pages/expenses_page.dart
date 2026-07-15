@@ -2,12 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:delwaqty/domain/entities/expense.dart';
-import 'package:delwaqty/domain/entities/category.dart';
 import 'package:delwaqty/data/providers.dart';
 import 'package:delwaqty/shared/widgets/app_search_bar.dart';
+import 'package:delwaqty/shared/widgets/expense_list_tile.dart';
 import 'package:delwaqty/shared/widgets/loading_skeleton.dart';
 import 'package:delwaqty/shared/widgets/error_state.dart';
 import 'package:delwaqty/shared/widgets/empty_state.dart';
+import 'package:delwaqty/shared/widgets/confirm_dialog.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 
 class ExpensesPage extends ConsumerStatefulWidget {
@@ -145,11 +146,29 @@ class _ExpensesPageState extends ConsumerState<ExpensesPage> {
                       final category = categories
                           .where((c) => c.id == expense.categoryId)
                           .toList();
-                      return _ExpenseListTile(
+                      return ExpenseListTile(
                         expense: expense,
                         category: category.isNotEmpty ? category.first : null,
                         onTap: () =>
                             context.push('/expenses/${expense.id}'),
+                        onDismissed: () async {
+                          final confirmed = await ConfirmDialog.show(
+                            context,
+                            title: l10n.deleteExpense,
+                            message: l10n.deleteExpenseConfirm,
+                            confirmLabel: l10n.delete,
+                            cancelLabel: l10n.cancel,
+                            isDestructive: true,
+                          );
+                          if (confirmed && context.mounted) {
+                            final repo = ref.read(expenseRepositoryProvider);
+                            await repo.deleteExpense(expense.id);
+                            ref.invalidate(expensesProvider);
+                            ref.invalidate(totalExpensesProvider);
+                          } else {
+                            ref.invalidate(expensesProvider);
+                          }
+                        },
                       );
                     },
                   ),
@@ -220,129 +239,5 @@ class _FilterChip extends StatelessWidget {
         ),
       ),
     );
-  }
-}
-
-class _ExpenseListTile extends StatelessWidget {
-  const _ExpenseListTile({
-    required this.expense,
-    this.category,
-    this.onTap,
-  });
-
-  final Expense expense;
-  final Category? category;
-  final VoidCallback? onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final categoryColor = category?.categoryColor ??
-        Theme.of(context).colorScheme.primary;
-    final categoryName = category?.name ?? 'Other';
-
-    return Material(
-      color: Colors.transparent,
-      borderRadius: BorderRadius.circular(16),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(16),
-        child: Padding(
-          padding: const EdgeInsets.all(12),
-          child: Row(
-            children: [
-              Container(
-                width: 48,
-                height: 48,
-                decoration: BoxDecoration(
-                  color: categoryColor.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Icon(
-                  _getTypeIcon(expense.type),
-                  color: categoryColor,
-                  size: 24,
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      expense.title,
-                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                            fontWeight: FontWeight.w500,
-                          ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      '$categoryName · ${_formatDate(expense.date, context)}',
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: Theme.of(context)
-                                .colorScheme
-                                .onSurfaceVariant,
-                          ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(width: 8),
-              Text(
-                _formatAmount(expense),
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
-                      color: _getAmountColor(context),
-                    ),
-              ),
-              const SizedBox(width: 4),
-              Icon(
-                Icons.chevron_right_rounded,
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-                size: 20,
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Color _getAmountColor(BuildContext context) {
-    return switch (expense.type) {
-      ExpenseType.income => Colors.green,
-      ExpenseType.expense => Theme.of(context).colorScheme.error,
-      ExpenseType.transfer => Theme.of(context).colorScheme.primary,
-    };
-  }
-
-  String _formatAmount(Expense expense) {
-    final prefix = switch (expense.type) {
-      ExpenseType.income => '+',
-      ExpenseType.transfer => '↕',
-      ExpenseType.expense => '-',
-    };
-    return '$prefix\$${expense.amount.toStringAsFixed(2)}';
-  }
-
-  IconData _getTypeIcon(ExpenseType type) {
-    return switch (type) {
-      ExpenseType.income => Icons.arrow_downward_rounded,
-      ExpenseType.transfer => Icons.swap_horiz_rounded,
-      ExpenseType.expense => Icons.arrow_upward_rounded,
-    };
-  }
-
-  String _formatDate(DateTime date, BuildContext context) {
-    final now = DateTime.now();
-    final diff = now.difference(date);
-
-    if (diff.inMinutes < 60) return '${diff.inMinutes}m ago';
-    if (diff.inHours < 24) return '${diff.inHours}h ago';
-    if (diff.inDays < 7) return '${diff.inDays}d ago';
-    return '${date.day}/${date.month}/${date.year}';
   }
 }

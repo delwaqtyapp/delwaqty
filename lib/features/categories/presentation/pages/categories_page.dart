@@ -7,6 +7,8 @@ import 'package:delwaqty/data/providers.dart';
 import 'package:delwaqty/domain/entities/category.dart';
 import 'package:delwaqty/shared/widgets/loading_skeleton.dart';
 import 'package:delwaqty/shared/widgets/empty_state.dart';
+import 'package:delwaqty/shared/widgets/budget_progress_bar.dart';
+import 'package:delwaqty/core/utils/currency_formatter.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 
 class CategoriesPage extends ConsumerWidget {
@@ -102,9 +104,6 @@ class _CategoryCard extends StatelessWidget {
     final l10n = AppLocalizations.of(context);
     final colorScheme = context.colorScheme;
     final iconData = categoryIconFromName(category.icon);
-    final progress = category.budget > 0
-        ? (category.spent / category.budget).clamp(0.0, 1.0)
-        : 0.0;
     final remaining = category.budget - category.spent;
 
     return GestureDetector(
@@ -140,27 +139,23 @@ class _CategoryCard extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             if (category.budget > 0) ...[
-              ClipRRect(
-                borderRadius: BorderRadius.circular(4),
-                child: LinearProgressIndicator(
-                  value: progress,
-                  minHeight: 6,
-                  backgroundColor: colorScheme.surfaceContainerHighest,
-                  color: progress > 0.9
-                      ? colorScheme.error
-                      : category.categoryColor,
-                ),
+              BudgetProgressBar(
+                spent: category.spent,
+                budget: category.budget,
+                height: 6,
+                showLabel: false,
+                categoryColor: category.categoryColor,
               ),
               const SizedBox(height: 6),
               Text(
-                '\$${category.spent.toStringAsFixed(0)} / \$${category.budget.toStringAsFixed(0)}',
+                '${CurrencyFormatter.format(category.spent)} / ${CurrencyFormatter.format(category.budget)}',
                 style: context.textTheme.bodySmall?.copyWith(
                   color: colorScheme.onSurfaceVariant,
                 ),
               ),
             ] else
               Text(
-                '\$${category.spent.toStringAsFixed(0)}',
+                CurrencyFormatter.format(category.spent),
                 style: context.textTheme.bodyMedium?.copyWith(
                   fontWeight: FontWeight.w600,
                   color: category.categoryColor,
@@ -169,7 +164,7 @@ class _CategoryCard extends StatelessWidget {
             const Spacer(),
             if (category.budget > 0)
               Text(
-                '${remaining >= 0 ? l10n.remaining : l10n.overBudget}: \$${remaining.abs().toStringAsFixed(0)}',
+                '${remaining >= 0 ? l10n.remaining : l10n.overBudget}: ${CurrencyFormatter.format(remaining.abs())}',
                 style: context.textTheme.bodySmall?.copyWith(
                   color: remaining >= 0 ? Colors.green : colorScheme.error,
                   fontWeight: FontWeight.w500,

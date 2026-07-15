@@ -6,6 +6,9 @@ import 'package:delwaqty/domain/entities/category.dart';
 import 'package:delwaqty/data/providers.dart';
 import 'package:delwaqty/shared/widgets/loading_skeleton.dart';
 import 'package:delwaqty/shared/widgets/error_state.dart';
+import 'package:delwaqty/shared/widgets/confirm_dialog.dart';
+import 'package:delwaqty/shared/widgets/animated_counter.dart';
+import 'package:delwaqty/core/utils/date_formatter.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 
 class ExpenseDetailPage extends ConsumerWidget {
@@ -93,13 +96,13 @@ class ExpenseDetailPage extends ConsumerWidget {
                       ),
                     ),
                     const SizedBox(height: 16),
-                    Text(
-                      _formatAmount(expense, context),
-                      style:
-                          Theme.of(context).textTheme.headlineMedium?.copyWith(
-                                fontWeight: FontWeight.bold,
-                                color: _getAmountColor(expense, context),
-                              ),
+                    AnimatedCounter(
+                      value: expense.amount,
+                      prefix: _getAmountPrefix(expense),
+                      style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: _getAmountColor(expense, context),
+                          ),
                     ),
                     const SizedBox(height: 8),
                     Text(
@@ -155,7 +158,7 @@ class ExpenseDetailPage extends ConsumerWidget {
                     _DetailRow(
                       icon: Icons.calendar_today_rounded,
                       label: l10n.date,
-                      value: _formatFullDate(expense.date, context),
+                      value: DateFormatter.formatFull(expense.date),
                     ),
                     const Divider(height: 24),
                     _DetailRow(
@@ -280,7 +283,7 @@ class ExpenseDetailPage extends ConsumerWidget {
               ],
               const SizedBox(height: 16),
               Text(
-                '${l10n.createdAt}: ${_formatFullDate(expense.createdAt, context)}',
+                '${l10n.createdAt}: ${DateFormatter.formatFull(expense.createdAt)}',
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
                       color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
@@ -307,43 +310,29 @@ class ExpenseDetailPage extends ConsumerWidget {
     );
   }
 
-  void _confirmDelete(
+  Future<void> _confirmDelete(
     BuildContext context,
     WidgetRef ref,
     Expense expense,
     AppLocalizations l10n,
-  ) {
-    showDialog<void>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(l10n.deleteExpense),
-        content: Text(l10n.deleteExpenseConfirm),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: Text(l10n.cancel),
-          ),
-          TextButton(
-            onPressed: () async {
-              Navigator.of(context).pop();
-              final repo = ref.read(expenseRepositoryProvider);
-              await repo.deleteExpense(expense.id);
-              ref.invalidate(expensesProvider);
-              ref.invalidate(totalExpensesProvider);
-              if (context.mounted) {
-                context.pop();
-              }
-            },
-            child: Text(
-              l10n.delete,
-              style: TextStyle(
-                color: Theme.of(context).colorScheme.error,
-              ),
-            ),
-          ),
-        ],
-      ),
+  ) async {
+    final confirmed = await ConfirmDialog.show(
+      context,
+      title: l10n.deleteExpense,
+      message: l10n.deleteExpenseConfirm,
+      confirmLabel: l10n.delete,
+      cancelLabel: l10n.cancel,
+      isDestructive: true,
     );
+    if (confirmed && context.mounted) {
+      final repo = ref.read(expenseRepositoryProvider);
+      await repo.deleteExpense(expense.id);
+      ref.invalidate(expensesProvider);
+      ref.invalidate(totalExpensesProvider);
+      if (context.mounted) {
+        context.pop();
+      }
+    }
   }
 
   Color _getAmountColor(Expense expense, BuildContext context) {
@@ -354,13 +343,12 @@ class ExpenseDetailPage extends ConsumerWidget {
     };
   }
 
-  String _formatAmount(Expense expense, BuildContext context) {
-    final prefix = switch (expense.type) {
+  String? _getAmountPrefix(Expense expense) {
+    return switch (expense.type) {
       ExpenseType.income => '+',
-      ExpenseType.transfer => '↕',
+      ExpenseType.transfer => '\u21c4',
       ExpenseType.expense => '-',
     };
-    return '$prefix\$${expense.amount.toStringAsFixed(2)}';
   }
 
   IconData _getTypeIcon(ExpenseType type) {
@@ -377,10 +365,6 @@ class ExpenseDetailPage extends ConsumerWidget {
       ExpenseType.transfer => l10n.filterTransfer,
       ExpenseType.expense => l10n.filterExpense,
     };
-  }
-
-  String _formatFullDate(DateTime date, BuildContext context) {
-    return '${date.day}/${date.month}/${date.year}';
   }
 }
 

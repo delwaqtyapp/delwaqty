@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:delwaqty/domain/entities/expense.dart';
-import 'package:delwaqty/data/providers.dart';
+import 'package:delwaqty/features/expenses/expenses_module.dart';
 import 'package:delwaqty/shared/widgets/app_search_bar.dart';
 import 'package:delwaqty/shared/widgets/expense_list_tile.dart';
 import 'package:delwaqty/shared/widgets/loading_skeleton.dart';

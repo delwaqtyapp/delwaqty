@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:delwaqty/domain/entities/expense.dart';
 import 'package:delwaqty/domain/entities/category.dart';
-import 'package:delwaqty/data/providers.dart';
+import 'package:delwaqty/features/expenses/expenses_module.dart';
 import 'package:delwaqty/shared/widgets/loading_skeleton.dart';
 import 'package:delwaqty/shared/widgets/error_state.dart';
 import 'package:delwaqty/shared/widgets/confirm_dialog.dart';

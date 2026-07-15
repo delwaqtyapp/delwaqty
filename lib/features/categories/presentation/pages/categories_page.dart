@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:delwaqty/core/extensions/context_extensions.dart';
 import 'package:delwaqty/core/utils/icon_mapper.dart';
-import 'package:delwaqty/data/providers.dart';
+import 'package:delwaqty/features/expenses/expenses_module.dart';
 import 'package:delwaqty/domain/entities/category.dart';
 import 'package:delwaqty/shared/widgets/loading_skeleton.dart';
 import 'package:delwaqty/shared/widgets/empty_state.dart';

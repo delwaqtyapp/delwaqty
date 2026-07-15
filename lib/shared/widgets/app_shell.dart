@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:delwaqty/core/localization/locale_provider.dart';
+import 'package:delwaqty/core/module/feature_module.dart';
+import 'package:delwaqty/core/module/feature_registry.dart';
 import 'package:delwaqty/core/theme/theme_mode_provider.dart';
-import 'package:delwaqty/data/providers.dart';
 import 'package:delwaqty/features/auth/domain/auth_state.dart';
 import 'package:delwaqty/features/auth/presentation/auth_provider.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
@@ -12,8 +13,6 @@ class AppShell extends ConsumerWidget {
   const AppShell({super.key, required this.navigationShell});
 
   final StatefulNavigationShell navigationShell;
-
-  int get _currentIndex => navigationShell.currentIndex;
 
   void _onTap(int index) {
     navigationShell.goBranch(
@@ -27,24 +26,17 @@ class AppShell extends ConsumerWidget {
     final themeMode = ref.watch(themeModeProvider);
     final locale = ref.watch(localeProvider);
     final l10n = AppLocalizations.of(context);
-    final unreadAsync = ref.watch(unreadCountProvider);
     final authState = ref.watch(authStateProvider);
+    final registry = FeatureRegistry.instance;
+    final navModules = registry.navModules;
+    final drawerEntries = registry.allDrawerEntries;
 
     return Scaffold(
       appBar: AppBar(
         title: Text(l10n.appTitle),
         actions: [
           IconButton(
-            icon: Badge(
-              label: unreadAsync.when(
-                data: (count) => count > 0 ? Text('$count') : null,
-                loading: () => null,
-                error: (_, __) => null,
-              ),
-              isLabelVisible: unreadAsync.valueOrNull != null &&
-                  unreadAsync.value! > 0,
-              child: const Icon(Icons.notifications_outlined),
-            ),
+            icon: const Icon(Icons.notifications_outlined),
             onPressed: () => context.push('/notifications'),
           ),
         ],
@@ -55,40 +47,18 @@ class AppShell extends ConsumerWidget {
         themeMode: themeMode,
         locale: locale,
         ref: ref,
-        onNavigate: (index) {
-          Navigator.of(context).pop();
-          _onTap(index);
-        },
-        onProfile: () {
-          Navigator.of(context).pop();
-          context.push('/profile');
-        },
-        onNotifications: () {
-          Navigator.of(context).pop();
-          context.push('/notifications');
-        },
+        drawerEntries: drawerEntries,
       ),
       body: navigationShell,
       bottomNavigationBar: NavigationBar(
-        selectedIndex: _currentIndex,
+        selectedIndex: navigationShell.currentIndex,
         onDestinationSelected: _onTap,
-        destinations: [
-          NavigationDestination(
-            icon: const Icon(Icons.home_outlined),
-            selectedIcon: const Icon(Icons.home),
-            label: l10n.home,
-          ),
-          NavigationDestination(
-            icon: const Icon(Icons.receipt_long_outlined),
-            selectedIcon: const Icon(Icons.receipt_long),
-            label: l10n.expenses,
-          ),
-          NavigationDestination(
-            icon: const Icon(Icons.settings_outlined),
-            selectedIcon: const Icon(Icons.settings),
-            label: l10n.settings,
-          ),
-        ],
+        destinations: navModules.map((module) {
+          return NavigationDestination(
+            icon: Icon(module.icon),
+            label: module.name(context),
+          );
+        }).toList(),
       ),
     );
   }
@@ -101,9 +71,7 @@ class _AppDrawer extends StatelessWidget {
     required this.themeMode,
     required this.locale,
     required this.ref,
-    required this.onNavigate,
-    required this.onProfile,
-    required this.onNotifications,
+    required this.drawerEntries,
   });
 
   final AuthState authState;
@@ -111,9 +79,7 @@ class _AppDrawer extends StatelessWidget {
   final ThemeMode themeMode;
   final Locale locale;
   final WidgetRef ref;
-  final void Function(int) onNavigate;
-  final VoidCallback onProfile;
-  final VoidCallback onNotifications;
+  final List drawerEntries;
 
   @override
   Widget build(BuildContext context) {
@@ -123,6 +89,12 @@ class _AppDrawer extends StatelessWidget {
     final userEmail = authState is AuthAuthenticated
         ? (authState as AuthAuthenticated).user.email
         : '';
+
+    final bodyEntries =
+        drawerEntries.where((e) => e.position == DrawerPosition.body).toList();
+    final footerEntries = drawerEntries
+        .where((e) => e.position == DrawerPosition.footer)
+        .toList();
 
     return Drawer(
       child: SafeArea(
@@ -178,25 +150,12 @@ class _AppDrawer extends StatelessWidget {
               ),
             ),
             const Divider(),
-            ListTile(
-              leading: const Icon(Icons.home_outlined),
-              title: Text(l10n.home),
-              onTap: () => onNavigate(0),
-            ),
-            ListTile(
-              leading: const Icon(Icons.receipt_long_outlined),
-              title: Text(l10n.expenses),
-              onTap: () => onNavigate(1),
-            ),
-            ListTile(
-              leading: const Icon(Icons.person_outline_rounded),
-              title: Text(l10n.profile),
-              onTap: onProfile,
-            ),
-            ListTile(
-              leading: const Icon(Icons.notifications_outlined),
-              title: Text(l10n.notifications),
-              onTap: onNotifications,
+            ...bodyEntries.map(
+              (entry) => ListTile(
+                leading: Icon(entry.icon),
+                title: Text(entry.label(context)),
+                onTap: () => entry.onTap(context, ref),
+              ),
             ),
             const Divider(),
             ListTile(
@@ -221,6 +180,17 @@ class _AppDrawer extends StatelessWidget {
                 ref.read(localeProvider.notifier).toggleLocale();
               },
             ),
+            if (footerEntries.isNotEmpty) ...[
+              const Spacer(),
+              const Divider(),
+              ...footerEntries.map(
+                (entry) => ListTile(
+                  leading: Icon(entry.icon),
+                  title: Text(entry.label(context)),
+                  onTap: () => entry.onTap(context, ref),
+                ),
+              ),
+            ],
             const Spacer(),
             const Divider(),
             ListTile(

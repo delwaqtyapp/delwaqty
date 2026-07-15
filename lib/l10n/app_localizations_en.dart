@@ -199,4 +199,170 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get appearance => 'Appearance';
+
+  @override
+  String get expenses => 'Expenses';
+
+  @override
+  String get addExpense => 'Add Expense';
+
+  @override
+  String get editExpense => 'Edit Expense';
+
+  @override
+  String get expenseDetail => 'Expense Detail';
+
+  @override
+  String get deleteExpense => 'Delete Expense';
+
+  @override
+  String get deleteExpenseConfirm =>
+      'Are you sure you want to delete this expense? This action cannot be undone.';
+
+  @override
+  String get title => 'Title';
+
+  @override
+  String get titleHint => 'Enter expense title';
+
+  @override
+  String get titleRequired => 'Title is required';
+
+  @override
+  String get amount => 'Amount';
+
+  @override
+  String get amountHint => '0.00';
+
+  @override
+  String get amountRequired => 'Amount is required';
+
+  @override
+  String get amountInvalid => 'Amount must be greater than 0';
+
+  @override
+  String get category => 'Category';
+
+  @override
+  String get categoryRequired => 'Please select a category';
+
+  @override
+  String get date => 'Date';
+
+  @override
+  String get note => 'Note';
+
+  @override
+  String get noteHint => 'Add a note (optional)';
+
+  @override
+  String get type => 'Type';
+
+  @override
+  String get recurring => 'Recurring';
+
+  @override
+  String get receipt => 'Receipt';
+
+  @override
+  String get createdAt => 'Created at';
+
+  @override
+  String get searchExpenses => 'Search expenses...';
+
+  @override
+  String get noExpenses => 'No expenses yet';
+
+  @override
+  String get noExpensesMessage =>
+      'Start tracking your expenses by adding your first entry.';
+
+  @override
+  String get filterAll => 'All';
+
+  @override
+  String get filterIncome => 'Income';
+
+  @override
+  String get filterExpense => 'Expense';
+
+  @override
+  String get filterTransfer => 'Transfer';
+
+  @override
+  String get back => 'Back';
+
+  @override
+  String get expenseNotFound => 'Expense not found';
+
+  @override
+  String get notifications => 'Notifications';
+
+  @override
+  String get categories => 'Categories';
+
+  @override
+  String get addCategory => 'Add Category';
+
+  @override
+  String get editCategory => 'Edit Category';
+
+  @override
+  String get categoryName => 'Category Name';
+
+  @override
+  String get selectIcon => 'Select Icon';
+
+  @override
+  String get selectColor => 'Select Color';
+
+  @override
+  String get budget => 'Budget';
+
+  @override
+  String get remaining => 'Remaining';
+
+  @override
+  String get overBudget => 'Over Budget';
+
+  @override
+  String get noCategories => 'No Categories';
+
+  @override
+  String get noCategoriesMessage =>
+      'Create categories to organize your expenses.';
+
+  @override
+  String get confirmDeleteCategory =>
+      'Are you sure you want to delete this category?';
+
+  @override
+  String get reports => 'Reports';
+
+  @override
+  String get totalIncome => 'Total Income';
+
+  @override
+  String get totalExpenses => 'Total Expenses';
+
+  @override
+  String get balance => 'Balance';
+
+  @override
+  String get categoryBreakdown => 'Category Breakdown';
+
+  @override
+  String get monthlyTrend => 'Monthly Trend';
+
+  @override
+  String get last6Months => 'Last 6 Months';
+
+  @override
+  String get noExpensesYet => 'No Expenses Yet';
+
+  @override
+  String get startTracking => 'Start tracking to see your spending breakdown.';
+
+  @override
+  String get requiredField => 'This field is required';
 }

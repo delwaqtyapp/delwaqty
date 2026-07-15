@@ -79,6 +79,11 @@ class AppShell extends ConsumerWidget {
             label: l10n.home,
           ),
           NavigationDestination(
+            icon: const Icon(Icons.receipt_long_outlined),
+            selectedIcon: const Icon(Icons.receipt_long),
+            label: l10n.expenses,
+          ),
+          NavigationDestination(
             icon: const Icon(Icons.settings_outlined),
             selectedIcon: const Icon(Icons.settings),
             label: l10n.settings,
@@ -179,13 +184,18 @@ class _AppDrawer extends StatelessWidget {
               onTap: () => onNavigate(0),
             ),
             ListTile(
+              leading: const Icon(Icons.receipt_long_outlined),
+              title: Text(l10n.expenses),
+              onTap: () => onNavigate(1),
+            ),
+            ListTile(
               leading: const Icon(Icons.person_outline_rounded),
               title: Text(l10n.profile),
               onTap: onProfile,
             ),
             ListTile(
               leading: const Icon(Icons.notifications_outlined),
-              title: const Text('Notifications'),
+              title: Text(l10n.notifications),
               onTap: onNotifications,
             ),
             const Divider(),

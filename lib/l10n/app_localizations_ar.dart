@@ -178,7 +178,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get resetEmailHint =>
-      'أدخل بريدك الإلكتروني وسنرسل لك رابطاً لإعادة تعيين كلمة المرور.';
+      'أدخل بريدك الإلكتروني وسنإرسال لك رابطاً لإعادة تعيين كلمة المرور.';
 
   @override
   String get backToLogin => 'العودة لتسجيل الدخول';
@@ -197,4 +197,167 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get appearance => 'المظهر';
+
+  @override
+  String get expenses => 'المصروفات';
+
+  @override
+  String get addExpense => 'إضافة مصروف';
+
+  @override
+  String get editExpense => 'تعديل المصروف';
+
+  @override
+  String get expenseDetail => 'تفاصيل المصروف';
+
+  @override
+  String get deleteExpense => 'حذف المصروف';
+
+  @override
+  String get deleteExpenseConfirm =>
+      'هل أنت متأكد من حذف هذا المصريف؟ لا يمكن التراجع عن هذا الإجراء.';
+
+  @override
+  String get title => 'العنوان';
+
+  @override
+  String get titleHint => 'أدخل عنوان المصروف';
+
+  @override
+  String get titleRequired => 'العنوان مطلوب';
+
+  @override
+  String get amount => 'المبلغ';
+
+  @override
+  String get amountHint => '0.00';
+
+  @override
+  String get amountRequired => 'المبلغ مطلوب';
+
+  @override
+  String get amountInvalid => 'يجب أن يكون المبلغ أكبر من 0';
+
+  @override
+  String get category => 'الفئة';
+
+  @override
+  String get categoryRequired => 'يرجى اختيار فئة';
+
+  @override
+  String get date => 'التاريخ';
+
+  @override
+  String get note => 'ملاحظة';
+
+  @override
+  String get noteHint => 'أضف ملاحظة (اختياري)';
+
+  @override
+  String get type => 'النوع';
+
+  @override
+  String get recurring => 'متكرر';
+
+  @override
+  String get receipt => 'الإيصال';
+
+  @override
+  String get createdAt => 'أنشئ في';
+
+  @override
+  String get searchExpenses => 'البحث في المصروفات...';
+
+  @override
+  String get noExpenses => 'لا توجد مصروفات بعد';
+
+  @override
+  String get noExpensesMessage => 'ابدأ بتتبع مصروفاتك بإضافة أول قيد.';
+
+  @override
+  String get filterAll => 'الكل';
+
+  @override
+  String get filterIncome => 'الدخل';
+
+  @override
+  String get filterExpense => 'المصروف';
+
+  @override
+  String get filterTransfer => 'التحويل';
+
+  @override
+  String get back => 'رجوع';
+
+  @override
+  String get expenseNotFound => 'المصروف غير موجود';
+
+  @override
+  String get notifications => 'الإشعارات';
+
+  @override
+  String get categories => 'الفئات';
+
+  @override
+  String get addCategory => 'إضافة فئة';
+
+  @override
+  String get editCategory => 'تعديل الفئة';
+
+  @override
+  String get categoryName => 'اسم الفئة';
+
+  @override
+  String get selectIcon => 'اختر الأيقونة';
+
+  @override
+  String get selectColor => 'اختر اللون';
+
+  @override
+  String get budget => 'الميزانية';
+
+  @override
+  String get remaining => 'المتبقي';
+
+  @override
+  String get overBudget => 'تجاوز الميزانية';
+
+  @override
+  String get noCategories => 'لا توجد فئات';
+
+  @override
+  String get noCategoriesMessage => 'أنشئ فئات لتنظيم مصروفاتك.';
+
+  @override
+  String get confirmDeleteCategory => 'هل أنت متأكد من حذف هذه الفئة؟';
+
+  @override
+  String get reports => 'التقارير';
+
+  @override
+  String get totalIncome => 'إجمالي الدخل';
+
+  @override
+  String get totalExpenses => 'إجمالي المصروفات';
+
+  @override
+  String get balance => 'الرصيد';
+
+  @override
+  String get categoryBreakdown => 'تفصيل حسب الفئة';
+
+  @override
+  String get monthlyTrend => 'الاتجاه الشهري';
+
+  @override
+  String get last6Months => 'آخر 6 أشهر';
+
+  @override
+  String get noExpensesYet => 'لا توجد مصروفات بعد';
+
+  @override
+  String get startTracking => 'ابدأ التتبع لرؤية تفصيل إنفاقك.';
+
+  @override
+  String get requiredField => 'هذا الحقل مطلوب';
 }

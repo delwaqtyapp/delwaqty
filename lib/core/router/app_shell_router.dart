@@ -6,14 +6,21 @@ import 'package:delwaqty/features/home/presentation/pages/home_page.dart';
 import 'package:delwaqty/features/settings/presentation/pages/settings_page.dart';
 import 'package:delwaqty/features/profile/presentation/pages/profile_page.dart';
 import 'package:delwaqty/features/notifications/presentation/pages/notification_center_page.dart';
+import 'package:delwaqty/features/expenses/presentation/pages/expenses_page.dart';
+import 'package:delwaqty/features/expenses/presentation/pages/add_expense_page.dart';
+import 'package:delwaqty/features/expenses/presentation/pages/expense_detail_page.dart';
 import 'package:delwaqty/features/auth/presentation/pages/login_page.dart';
 import 'package:delwaqty/features/auth/presentation/pages/register_page.dart';
 import 'package:delwaqty/features/auth/presentation/pages/forgot_password_page.dart';
 import 'package:delwaqty/features/splash/presentation/pages/splash_page.dart';
 import 'package:delwaqty/features/onboarding/presentation/pages/onboarding_page.dart';
 import 'package:delwaqty/features/welcome/presentation/pages/welcome_page.dart';
+import 'package:delwaqty/features/categories/presentation/pages/categories_page.dart';
+import 'package:delwaqty/features/categories/presentation/pages/add_category_page.dart';
+import 'package:delwaqty/features/reports/presentation/pages/reports_page.dart';
 import 'package:delwaqty/features/auth/domain/auth_state.dart';
 import 'package:delwaqty/features/auth/presentation/auth_provider.dart';
+import 'package:delwaqty/domain/entities/category.dart';
 
 final GlobalKey<NavigatorState> _rootNavigatorKey =
     GlobalKey<NavigatorState>(debugLabel: 'root');
@@ -93,6 +100,43 @@ final goRouterProvider = Provider<GoRouter>((ref) {
         name: 'notifications',
         builder: (context, state) => const NotificationCenterPage(),
       ),
+      GoRoute(
+        path: '/categories',
+        name: 'categories',
+        builder: (context, state) => const CategoriesPage(),
+      ),
+      GoRoute(
+        path: '/categories/add',
+        name: 'add-category',
+        builder: (context, state) {
+          final category = state.extra as Category?;
+          return AddCategoryPage(existingCategory: category);
+        },
+      ),
+      GoRoute(
+        path: '/reports',
+        name: 'reports',
+        builder: (context, state) => const ReportsPage(),
+      ),
+      GoRoute(
+        path: '/expenses/add',
+        name: 'add-expense',
+        builder: (context, state) => const AddExpensePage(),
+      ),
+      GoRoute(
+        path: '/expenses/:id/edit',
+        name: 'edit-expense',
+        builder: (context, state) => AddExpensePage(
+          expenseId: state.pathParameters['id'],
+        ),
+      ),
+      GoRoute(
+        path: '/expenses/:id',
+        name: 'expense-detail',
+        builder: (context, state) => ExpenseDetailPage(
+          expenseId: state.pathParameters['id']!,
+        ),
+      ),
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) {
           return AppShell(navigationShell: navigationShell);
@@ -104,6 +148,15 @@ final goRouterProvider = Provider<GoRouter>((ref) {
                 path: '/home',
                 name: 'home',
                 builder: (context, state) => const HomePage(),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/expenses',
+                name: 'expenses',
+                builder: (context, state) => const ExpensesPage(),
               ),
             ],
           ),

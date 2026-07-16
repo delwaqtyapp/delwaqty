@@ -32,10 +32,10 @@ class SupabaseAuthDataSource {
         email: email,
         password: password,
       );
-      _logger.i('Sign in successful for ${response.user?.email}');
+      _logger.i('Email sign in successful for ${response.user?.email}');
       return response;
     } catch (e, stack) {
-      _logger.e('Sign in failed', e, stack);
+      _logger.e('Email sign in failed', e, stack);
       rethrow;
     }
   }
@@ -51,10 +51,77 @@ class SupabaseAuthDataSource {
         password: password,
         data: {'full_name': fullName},
       );
-      _logger.i('Sign up successful for ${response.user?.email}');
+      _logger.i('Email sign up successful for ${response.user?.email}');
       return response;
     } catch (e, stack) {
-      _logger.e('Sign up failed', e, stack);
+      _logger.e('Email sign up failed', e, stack);
+      rethrow;
+    }
+  }
+
+  Future<void> signInWithPhone({required String phone}) async {
+    try {
+      await _auth.signInWithOtp(phone: phone);
+      _logger.i('OTP sent to $phone');
+    } catch (e, stack) {
+      _logger.e('Phone OTP send failed', e, stack);
+      rethrow;
+    }
+  }
+
+  Future<AuthResponse> verifyOTP({
+    required String phone,
+    required String otp,
+  }) async {
+    try {
+      final response = await _auth.verifyOTP(
+        phone: phone,
+        token: otp,
+        type: OtpType.sms,
+      );
+      _logger.i('OTP verified for $phone');
+      return response;
+    } catch (e, stack) {
+      _logger.e('OTP verification failed', e, stack);
+      rethrow;
+    }
+  }
+
+  Future<bool> signInWithGoogle() async {
+    try {
+      final response = await _auth.signInWithOAuth(
+        OAuthProvider.google,
+        redirectTo: 'io.delwaqty://login-callback',
+      );
+      _logger.i('Google sign in initiated');
+      return response;
+    } catch (e, stack) {
+      _logger.e('Google sign in failed', e, stack);
+      rethrow;
+    }
+  }
+
+  Future<bool> signInWithApple() async {
+    try {
+      final response = await _auth.signInWithOAuth(
+        OAuthProvider.apple,
+        redirectTo: 'io.delwaqty://login-callback',
+      );
+      _logger.i('Apple sign in initiated');
+      return response;
+    } catch (e, stack) {
+      _logger.e('Apple sign in failed', e, stack);
+      rethrow;
+    }
+  }
+
+  Future<AuthResponse> signInAnonymously() async {
+    try {
+      final response = await _auth.signInAnonymously();
+      _logger.i('Anonymous sign in successful');
+      return response;
+    } catch (e, stack) {
+      _logger.e('Anonymous sign in failed', e, stack);
       rethrow;
     }
   }
@@ -85,6 +152,18 @@ class SupabaseAuthDataSource {
       _logger.i('Session refreshed successfully');
     } catch (e, stack) {
       _logger.e('Session refresh failed', e, stack);
+      rethrow;
+    }
+  }
+
+  Future<void> deleteAccount() async {
+    try {
+      final user = _auth.currentUser;
+      if (user == null) throw Exception('No authenticated user');
+      await _client.functions.invoke('delete-user');
+      _logger.i('Account deletion requested');
+    } catch (e, stack) {
+      _logger.e('Account deletion failed', e, stack);
       rethrow;
     }
   }

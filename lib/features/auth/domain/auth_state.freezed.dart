@@ -23,6 +23,7 @@ mixin _$AuthState {
     required TResult Function() loading,
     required TResult Function(User user) authenticated,
     required TResult Function() unauthenticated,
+    required TResult Function(String phone) phoneVerificationRequired,
     required TResult Function(String message) error,
   }) => throw _privateConstructorUsedError;
   @optionalTypeArgs
@@ -31,6 +32,7 @@ mixin _$AuthState {
     TResult? Function()? loading,
     TResult? Function(User user)? authenticated,
     TResult? Function()? unauthenticated,
+    TResult? Function(String phone)? phoneVerificationRequired,
     TResult? Function(String message)? error,
   }) => throw _privateConstructorUsedError;
   @optionalTypeArgs
@@ -39,6 +41,7 @@ mixin _$AuthState {
     TResult Function()? loading,
     TResult Function(User user)? authenticated,
     TResult Function()? unauthenticated,
+    TResult Function(String phone)? phoneVerificationRequired,
     TResult Function(String message)? error,
     required TResult orElse(),
   }) => throw _privateConstructorUsedError;
@@ -48,6 +51,8 @@ mixin _$AuthState {
     required TResult Function(AuthLoading value) loading,
     required TResult Function(AuthAuthenticated value) authenticated,
     required TResult Function(AuthUnauthenticated value) unauthenticated,
+    required TResult Function(AuthPhoneVerification value)
+    phoneVerificationRequired,
     required TResult Function(AuthError value) error,
   }) => throw _privateConstructorUsedError;
   @optionalTypeArgs
@@ -56,6 +61,7 @@ mixin _$AuthState {
     TResult? Function(AuthLoading value)? loading,
     TResult? Function(AuthAuthenticated value)? authenticated,
     TResult? Function(AuthUnauthenticated value)? unauthenticated,
+    TResult? Function(AuthPhoneVerification value)? phoneVerificationRequired,
     TResult? Function(AuthError value)? error,
   }) => throw _privateConstructorUsedError;
   @optionalTypeArgs
@@ -64,6 +70,7 @@ mixin _$AuthState {
     TResult Function(AuthLoading value)? loading,
     TResult Function(AuthAuthenticated value)? authenticated,
     TResult Function(AuthUnauthenticated value)? unauthenticated,
+    TResult Function(AuthPhoneVerification value)? phoneVerificationRequired,
     TResult Function(AuthError value)? error,
     required TResult orElse(),
   }) => throw _privateConstructorUsedError;
@@ -136,6 +143,7 @@ class _$AuthInitialImpl implements AuthInitial {
     required TResult Function() loading,
     required TResult Function(User user) authenticated,
     required TResult Function() unauthenticated,
+    required TResult Function(String phone) phoneVerificationRequired,
     required TResult Function(String message) error,
   }) {
     return initial();
@@ -148,6 +156,7 @@ class _$AuthInitialImpl implements AuthInitial {
     TResult? Function()? loading,
     TResult? Function(User user)? authenticated,
     TResult? Function()? unauthenticated,
+    TResult? Function(String phone)? phoneVerificationRequired,
     TResult? Function(String message)? error,
   }) {
     return initial?.call();
@@ -160,6 +169,7 @@ class _$AuthInitialImpl implements AuthInitial {
     TResult Function()? loading,
     TResult Function(User user)? authenticated,
     TResult Function()? unauthenticated,
+    TResult Function(String phone)? phoneVerificationRequired,
     TResult Function(String message)? error,
     required TResult orElse(),
   }) {
@@ -176,6 +186,8 @@ class _$AuthInitialImpl implements AuthInitial {
     required TResult Function(AuthLoading value) loading,
     required TResult Function(AuthAuthenticated value) authenticated,
     required TResult Function(AuthUnauthenticated value) unauthenticated,
+    required TResult Function(AuthPhoneVerification value)
+    phoneVerificationRequired,
     required TResult Function(AuthError value) error,
   }) {
     return initial(this);
@@ -188,6 +200,7 @@ class _$AuthInitialImpl implements AuthInitial {
     TResult? Function(AuthLoading value)? loading,
     TResult? Function(AuthAuthenticated value)? authenticated,
     TResult? Function(AuthUnauthenticated value)? unauthenticated,
+    TResult? Function(AuthPhoneVerification value)? phoneVerificationRequired,
     TResult? Function(AuthError value)? error,
   }) {
     return initial?.call(this);
@@ -200,6 +213,7 @@ class _$AuthInitialImpl implements AuthInitial {
     TResult Function(AuthLoading value)? loading,
     TResult Function(AuthAuthenticated value)? authenticated,
     TResult Function(AuthUnauthenticated value)? unauthenticated,
+    TResult Function(AuthPhoneVerification value)? phoneVerificationRequired,
     TResult Function(AuthError value)? error,
     required TResult orElse(),
   }) {
@@ -261,6 +275,7 @@ class _$AuthLoadingImpl implements AuthLoading {
     required TResult Function() loading,
     required TResult Function(User user) authenticated,
     required TResult Function() unauthenticated,
+    required TResult Function(String phone) phoneVerificationRequired,
     required TResult Function(String message) error,
   }) {
     return loading();
@@ -273,6 +288,7 @@ class _$AuthLoadingImpl implements AuthLoading {
     TResult? Function()? loading,
     TResult? Function(User user)? authenticated,
     TResult? Function()? unauthenticated,
+    TResult? Function(String phone)? phoneVerificationRequired,
     TResult? Function(String message)? error,
   }) {
     return loading?.call();
@@ -285,6 +301,7 @@ class _$AuthLoadingImpl implements AuthLoading {
     TResult Function()? loading,
     TResult Function(User user)? authenticated,
     TResult Function()? unauthenticated,
+    TResult Function(String phone)? phoneVerificationRequired,
     TResult Function(String message)? error,
     required TResult orElse(),
   }) {
@@ -301,6 +318,8 @@ class _$AuthLoadingImpl implements AuthLoading {
     required TResult Function(AuthLoading value) loading,
     required TResult Function(AuthAuthenticated value) authenticated,
     required TResult Function(AuthUnauthenticated value) unauthenticated,
+    required TResult Function(AuthPhoneVerification value)
+    phoneVerificationRequired,
     required TResult Function(AuthError value) error,
   }) {
     return loading(this);
@@ -313,6 +332,7 @@ class _$AuthLoadingImpl implements AuthLoading {
     TResult? Function(AuthLoading value)? loading,
     TResult? Function(AuthAuthenticated value)? authenticated,
     TResult? Function(AuthUnauthenticated value)? unauthenticated,
+    TResult? Function(AuthPhoneVerification value)? phoneVerificationRequired,
     TResult? Function(AuthError value)? error,
   }) {
     return loading?.call(this);
@@ -325,6 +345,7 @@ class _$AuthLoadingImpl implements AuthLoading {
     TResult Function(AuthLoading value)? loading,
     TResult Function(AuthAuthenticated value)? authenticated,
     TResult Function(AuthUnauthenticated value)? unauthenticated,
+    TResult Function(AuthPhoneVerification value)? phoneVerificationRequired,
     TResult Function(AuthError value)? error,
     required TResult orElse(),
   }) {
@@ -428,6 +449,7 @@ class _$AuthAuthenticatedImpl implements AuthAuthenticated {
     required TResult Function() loading,
     required TResult Function(User user) authenticated,
     required TResult Function() unauthenticated,
+    required TResult Function(String phone) phoneVerificationRequired,
     required TResult Function(String message) error,
   }) {
     return authenticated(user);
@@ -440,6 +462,7 @@ class _$AuthAuthenticatedImpl implements AuthAuthenticated {
     TResult? Function()? loading,
     TResult? Function(User user)? authenticated,
     TResult? Function()? unauthenticated,
+    TResult? Function(String phone)? phoneVerificationRequired,
     TResult? Function(String message)? error,
   }) {
     return authenticated?.call(user);
@@ -452,6 +475,7 @@ class _$AuthAuthenticatedImpl implements AuthAuthenticated {
     TResult Function()? loading,
     TResult Function(User user)? authenticated,
     TResult Function()? unauthenticated,
+    TResult Function(String phone)? phoneVerificationRequired,
     TResult Function(String message)? error,
     required TResult orElse(),
   }) {
@@ -468,6 +492,8 @@ class _$AuthAuthenticatedImpl implements AuthAuthenticated {
     required TResult Function(AuthLoading value) loading,
     required TResult Function(AuthAuthenticated value) authenticated,
     required TResult Function(AuthUnauthenticated value) unauthenticated,
+    required TResult Function(AuthPhoneVerification value)
+    phoneVerificationRequired,
     required TResult Function(AuthError value) error,
   }) {
     return authenticated(this);
@@ -480,6 +506,7 @@ class _$AuthAuthenticatedImpl implements AuthAuthenticated {
     TResult? Function(AuthLoading value)? loading,
     TResult? Function(AuthAuthenticated value)? authenticated,
     TResult? Function(AuthUnauthenticated value)? unauthenticated,
+    TResult? Function(AuthPhoneVerification value)? phoneVerificationRequired,
     TResult? Function(AuthError value)? error,
   }) {
     return authenticated?.call(this);
@@ -492,6 +519,7 @@ class _$AuthAuthenticatedImpl implements AuthAuthenticated {
     TResult Function(AuthLoading value)? loading,
     TResult Function(AuthAuthenticated value)? authenticated,
     TResult Function(AuthUnauthenticated value)? unauthenticated,
+    TResult Function(AuthPhoneVerification value)? phoneVerificationRequired,
     TResult Function(AuthError value)? error,
     required TResult orElse(),
   }) {
@@ -563,6 +591,7 @@ class _$AuthUnauthenticatedImpl implements AuthUnauthenticated {
     required TResult Function() loading,
     required TResult Function(User user) authenticated,
     required TResult Function() unauthenticated,
+    required TResult Function(String phone) phoneVerificationRequired,
     required TResult Function(String message) error,
   }) {
     return unauthenticated();
@@ -575,6 +604,7 @@ class _$AuthUnauthenticatedImpl implements AuthUnauthenticated {
     TResult? Function()? loading,
     TResult? Function(User user)? authenticated,
     TResult? Function()? unauthenticated,
+    TResult? Function(String phone)? phoneVerificationRequired,
     TResult? Function(String message)? error,
   }) {
     return unauthenticated?.call();
@@ -587,6 +617,7 @@ class _$AuthUnauthenticatedImpl implements AuthUnauthenticated {
     TResult Function()? loading,
     TResult Function(User user)? authenticated,
     TResult Function()? unauthenticated,
+    TResult Function(String phone)? phoneVerificationRequired,
     TResult Function(String message)? error,
     required TResult orElse(),
   }) {
@@ -603,6 +634,8 @@ class _$AuthUnauthenticatedImpl implements AuthUnauthenticated {
     required TResult Function(AuthLoading value) loading,
     required TResult Function(AuthAuthenticated value) authenticated,
     required TResult Function(AuthUnauthenticated value) unauthenticated,
+    required TResult Function(AuthPhoneVerification value)
+    phoneVerificationRequired,
     required TResult Function(AuthError value) error,
   }) {
     return unauthenticated(this);
@@ -615,6 +648,7 @@ class _$AuthUnauthenticatedImpl implements AuthUnauthenticated {
     TResult? Function(AuthLoading value)? loading,
     TResult? Function(AuthAuthenticated value)? authenticated,
     TResult? Function(AuthUnauthenticated value)? unauthenticated,
+    TResult? Function(AuthPhoneVerification value)? phoneVerificationRequired,
     TResult? Function(AuthError value)? error,
   }) {
     return unauthenticated?.call(this);
@@ -627,6 +661,7 @@ class _$AuthUnauthenticatedImpl implements AuthUnauthenticated {
     TResult Function(AuthLoading value)? loading,
     TResult Function(AuthAuthenticated value)? authenticated,
     TResult Function(AuthUnauthenticated value)? unauthenticated,
+    TResult Function(AuthPhoneVerification value)? phoneVerificationRequired,
     TResult Function(AuthError value)? error,
     required TResult orElse(),
   }) {
@@ -639,6 +674,178 @@ class _$AuthUnauthenticatedImpl implements AuthUnauthenticated {
 
 abstract class AuthUnauthenticated implements AuthState {
   const factory AuthUnauthenticated() = _$AuthUnauthenticatedImpl;
+}
+
+/// @nodoc
+abstract class _$$AuthPhoneVerificationImplCopyWith<$Res> {
+  factory _$$AuthPhoneVerificationImplCopyWith(
+    _$AuthPhoneVerificationImpl value,
+    $Res Function(_$AuthPhoneVerificationImpl) then,
+  ) = __$$AuthPhoneVerificationImplCopyWithImpl<$Res>;
+  @useResult
+  $Res call({String phone});
+}
+
+/// @nodoc
+class __$$AuthPhoneVerificationImplCopyWithImpl<$Res>
+    extends _$AuthStateCopyWithImpl<$Res, _$AuthPhoneVerificationImpl>
+    implements _$$AuthPhoneVerificationImplCopyWith<$Res> {
+  __$$AuthPhoneVerificationImplCopyWithImpl(
+    _$AuthPhoneVerificationImpl _value,
+    $Res Function(_$AuthPhoneVerificationImpl) _then,
+  ) : super(_value, _then);
+
+  /// Create a copy of AuthState
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({Object? phone = null}) {
+    return _then(
+      _$AuthPhoneVerificationImpl(
+        phone: null == phone
+            ? _value.phone
+            : phone // ignore: cast_nullable_to_non_nullable
+                  as String,
+      ),
+    );
+  }
+}
+
+/// @nodoc
+
+class _$AuthPhoneVerificationImpl implements AuthPhoneVerification {
+  const _$AuthPhoneVerificationImpl({required this.phone});
+
+  @override
+  final String phone;
+
+  @override
+  String toString() {
+    return 'AuthState.phoneVerificationRequired(phone: $phone)';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _$AuthPhoneVerificationImpl &&
+            (identical(other.phone, phone) || other.phone == phone));
+  }
+
+  @override
+  int get hashCode => Object.hash(runtimeType, phone);
+
+  /// Create a copy of AuthState
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  @pragma('vm:prefer-inline')
+  _$$AuthPhoneVerificationImplCopyWith<_$AuthPhoneVerificationImpl>
+  get copyWith =>
+      __$$AuthPhoneVerificationImplCopyWithImpl<_$AuthPhoneVerificationImpl>(
+        this,
+        _$identity,
+      );
+
+  @override
+  @optionalTypeArgs
+  TResult when<TResult extends Object?>({
+    required TResult Function() initial,
+    required TResult Function() loading,
+    required TResult Function(User user) authenticated,
+    required TResult Function() unauthenticated,
+    required TResult Function(String phone) phoneVerificationRequired,
+    required TResult Function(String message) error,
+  }) {
+    return phoneVerificationRequired(phone);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult? whenOrNull<TResult extends Object?>({
+    TResult? Function()? initial,
+    TResult? Function()? loading,
+    TResult? Function(User user)? authenticated,
+    TResult? Function()? unauthenticated,
+    TResult? Function(String phone)? phoneVerificationRequired,
+    TResult? Function(String message)? error,
+  }) {
+    return phoneVerificationRequired?.call(phone);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult maybeWhen<TResult extends Object?>({
+    TResult Function()? initial,
+    TResult Function()? loading,
+    TResult Function(User user)? authenticated,
+    TResult Function()? unauthenticated,
+    TResult Function(String phone)? phoneVerificationRequired,
+    TResult Function(String message)? error,
+    required TResult orElse(),
+  }) {
+    if (phoneVerificationRequired != null) {
+      return phoneVerificationRequired(phone);
+    }
+    return orElse();
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult map<TResult extends Object?>({
+    required TResult Function(AuthInitial value) initial,
+    required TResult Function(AuthLoading value) loading,
+    required TResult Function(AuthAuthenticated value) authenticated,
+    required TResult Function(AuthUnauthenticated value) unauthenticated,
+    required TResult Function(AuthPhoneVerification value)
+    phoneVerificationRequired,
+    required TResult Function(AuthError value) error,
+  }) {
+    return phoneVerificationRequired(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult? mapOrNull<TResult extends Object?>({
+    TResult? Function(AuthInitial value)? initial,
+    TResult? Function(AuthLoading value)? loading,
+    TResult? Function(AuthAuthenticated value)? authenticated,
+    TResult? Function(AuthUnauthenticated value)? unauthenticated,
+    TResult? Function(AuthPhoneVerification value)? phoneVerificationRequired,
+    TResult? Function(AuthError value)? error,
+  }) {
+    return phoneVerificationRequired?.call(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult maybeMap<TResult extends Object?>({
+    TResult Function(AuthInitial value)? initial,
+    TResult Function(AuthLoading value)? loading,
+    TResult Function(AuthAuthenticated value)? authenticated,
+    TResult Function(AuthUnauthenticated value)? unauthenticated,
+    TResult Function(AuthPhoneVerification value)? phoneVerificationRequired,
+    TResult Function(AuthError value)? error,
+    required TResult orElse(),
+  }) {
+    if (phoneVerificationRequired != null) {
+      return phoneVerificationRequired(this);
+    }
+    return orElse();
+  }
+}
+
+abstract class AuthPhoneVerification implements AuthState {
+  const factory AuthPhoneVerification({required final String phone}) =
+      _$AuthPhoneVerificationImpl;
+
+  String get phone;
+
+  /// Create a copy of AuthState
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  _$$AuthPhoneVerificationImplCopyWith<_$AuthPhoneVerificationImpl>
+  get copyWith => throw _privateConstructorUsedError;
 }
 
 /// @nodoc
@@ -715,6 +922,7 @@ class _$AuthErrorImpl implements AuthError {
     required TResult Function() loading,
     required TResult Function(User user) authenticated,
     required TResult Function() unauthenticated,
+    required TResult Function(String phone) phoneVerificationRequired,
     required TResult Function(String message) error,
   }) {
     return error(message);
@@ -727,6 +935,7 @@ class _$AuthErrorImpl implements AuthError {
     TResult? Function()? loading,
     TResult? Function(User user)? authenticated,
     TResult? Function()? unauthenticated,
+    TResult? Function(String phone)? phoneVerificationRequired,
     TResult? Function(String message)? error,
   }) {
     return error?.call(message);
@@ -739,6 +948,7 @@ class _$AuthErrorImpl implements AuthError {
     TResult Function()? loading,
     TResult Function(User user)? authenticated,
     TResult Function()? unauthenticated,
+    TResult Function(String phone)? phoneVerificationRequired,
     TResult Function(String message)? error,
     required TResult orElse(),
   }) {
@@ -755,6 +965,8 @@ class _$AuthErrorImpl implements AuthError {
     required TResult Function(AuthLoading value) loading,
     required TResult Function(AuthAuthenticated value) authenticated,
     required TResult Function(AuthUnauthenticated value) unauthenticated,
+    required TResult Function(AuthPhoneVerification value)
+    phoneVerificationRequired,
     required TResult Function(AuthError value) error,
   }) {
     return error(this);
@@ -767,6 +979,7 @@ class _$AuthErrorImpl implements AuthError {
     TResult? Function(AuthLoading value)? loading,
     TResult? Function(AuthAuthenticated value)? authenticated,
     TResult? Function(AuthUnauthenticated value)? unauthenticated,
+    TResult? Function(AuthPhoneVerification value)? phoneVerificationRequired,
     TResult? Function(AuthError value)? error,
   }) {
     return error?.call(this);
@@ -779,6 +992,7 @@ class _$AuthErrorImpl implements AuthError {
     TResult Function(AuthLoading value)? loading,
     TResult Function(AuthAuthenticated value)? authenticated,
     TResult Function(AuthUnauthenticated value)? unauthenticated,
+    TResult Function(AuthPhoneVerification value)? phoneVerificationRequired,
     TResult Function(AuthError value)? error,
     required TResult orElse(),
   }) {

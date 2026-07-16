@@ -46,6 +46,72 @@ class SignUpUseCase {
   }
 }
 
+final signInWithPhoneUseCaseProvider = Provider<SignInWithPhoneUseCase>((ref) {
+  return SignInWithPhoneUseCase(ref.watch(authRepositoryProvider));
+});
+
+class SignInWithPhoneUseCase {
+  SignInWithPhoneUseCase(this._repository);
+
+  final AuthRepository _repository;
+
+  Future<void> call({required String phone}) {
+    return _repository.signInWithPhone(phone: phone);
+  }
+}
+
+final verifyOTPUseCaseProvider = Provider<VerifyOTPUseCase>((ref) {
+  return VerifyOTPUseCase(ref.watch(authRepositoryProvider));
+});
+
+class VerifyOTPUseCase {
+  VerifyOTPUseCase(this._repository);
+
+  final AuthRepository _repository;
+
+  Future<AuthResult> call({required String phone, required String otp}) {
+    return _repository.verifyOTP(phone: phone, otp: otp);
+  }
+}
+
+final signInWithGoogleUseCaseProvider = Provider<SignInWithGoogleUseCase>((ref) {
+  return SignInWithGoogleUseCase(ref.watch(authRepositoryProvider));
+});
+
+class SignInWithGoogleUseCase {
+  SignInWithGoogleUseCase(this._repository);
+
+  final AuthRepository _repository;
+
+  Future<AuthResult> call() => _repository.signInWithGoogle();
+}
+
+final signInWithAppleUseCaseProvider = Provider<SignInWithAppleUseCase>((ref) {
+  return SignInWithAppleUseCase(ref.watch(authRepositoryProvider));
+});
+
+class SignInWithAppleUseCase {
+  SignInWithAppleUseCase(this._repository);
+
+  final AuthRepository _repository;
+
+  Future<AuthResult> call() => _repository.signInWithApple();
+}
+
+final signInAnonymouslyUseCaseProvider = Provider<SignInAnonymouslyUseCase>((
+  ref,
+) {
+  return SignInAnonymouslyUseCase(ref.watch(authRepositoryProvider));
+});
+
+class SignInAnonymouslyUseCase {
+  SignInAnonymouslyUseCase(this._repository);
+
+  final AuthRepository _repository;
+
+  Future<AuthResult> call() => _repository.signInAnonymously();
+}
+
 final signOutUseCaseProvider = Provider<SignOutUseCase>((ref) {
   return SignOutUseCase(ref.watch(authRepositoryProvider));
 });
@@ -70,4 +136,16 @@ class ResetPasswordUseCase {
   Future<void> call({required String email}) {
     return _repository.resetPassword(email: email);
   }
+}
+
+final deleteAccountUseCaseProvider = Provider<DeleteAccountUseCase>((ref) {
+  return DeleteAccountUseCase(ref.watch(authRepositoryProvider));
+});
+
+class DeleteAccountUseCase {
+  DeleteAccountUseCase(this._repository);
+
+  final AuthRepository _repository;
+
+  Future<void> call() => _repository.deleteAccount();
 }

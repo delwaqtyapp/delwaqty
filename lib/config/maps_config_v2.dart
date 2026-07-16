@@ -5,25 +5,13 @@
 abstract final class MapsConfig {
   // ─── API Keys ─────────────────────────────────────────────
   
-  static const String apiKey = String.fromEnvironment(
-    'GOOGLE_MAPS_API_KEY',
-    defaultValue: '',
-  );
+  static const String apiKey = '***REMOVED-OLD-GOOGLE-KEY***';
   
-  static const String androidApiKey = String.fromEnvironment(
-    'GOOGLE_MAPS_ANDROID_KEY',
-    defaultValue: '',
-  );
+  static const String androidApiKey = '***REMOVED-OLD-GOOGLE-KEY***';
   
-  static const String iosApiKey = String.fromEnvironment(
-    'GOOGLE_MAPS_IOS_KEY',
-    defaultValue: '',
-  );
+  static const String iosApiKey = '';
   
-  static const String webApiKey = String.fromEnvironment(
-    'GOOGLE_MAPS_WEB_KEY',
-    defaultValue: '',
-  );
+  static const String webApiKey = '';
 
   // ─── API Endpoints ────────────────────────────────────────
   

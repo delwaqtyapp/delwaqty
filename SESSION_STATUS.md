@@ -6,9 +6,8 @@
 
 ## Current Task
 
-Phase 3 — Supabase database schema deployed successfully via Management API.
-14 tables, 29 RLS policies, 16 indexes, 8 default categories, all verified.
-Ready to proceed to Firebase setup.
+Phase 3 — Supabase database schema deployed. Firebase project wired.
+Both services verified. Ready for Google Maps API key.
 
 ---
 
@@ -68,7 +67,7 @@ Ready to proceed to Firebase setup.
 | Blocker | Status | Action Required | Impact |
 |---------|--------|----------------|--------|
 | Supabase DB schema | ✅ Deployed | None | Tables, policies, indexes all live |
-| Firebase google-services.json | ⏳ Pending | Firebase Console | Wire real Firebase project |
+| Firebase google-services.json | ✅ Wired | None | Real Firebase project connected |
 | Google Maps API key | ⏳ Pending | Google Cloud Console | Enable Maps SDK |
 | Cloudflare credentials | ⏳ Pending | Cloudflare Dashboard | R2 + CDN |
 
@@ -76,4 +75,4 @@ Ready to proceed to Firebase setup.
 
 ## Next Task
 
-Proceed to Firebase setup — create project and obtain google-services.json.
+Proceed to Google Maps API key setup.

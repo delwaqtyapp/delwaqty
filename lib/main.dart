@@ -42,10 +42,11 @@ void main() async {
     try {
       await Firebase.initializeApp(
         options: const FirebaseOptions(
-          apiKey: '',
-          appId: '',
-          messagingSenderId: '',
-          projectId: '',
+          apiKey: 'AIzaSyBsBH-EQilAypJ2LGVyOK40UpqGWfjHt1A',
+          appId: '1:772052634679:android:17267a5736408b918b43b2',
+          messagingSenderId: '772052634679',
+          projectId: 'delwaqty0',
+          storageBucket: 'delwaqty0.firebasestorage.app',
         ),
       );
       if (FirebaseConfig.enableCrashlytics) {

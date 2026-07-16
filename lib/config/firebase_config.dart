@@ -5,13 +5,11 @@
 abstract final class FirebaseConfig {
   // ─── Project Settings ─────────────────────────────────────
   
-  static const String projectId = String.fromEnvironment(
-    'FIREBASE_PROJECT_ID',
-    defaultValue: '',
-  );
-  
-  static const String androidPackageName = 'com.delwaqty.app';
-  static const String iosBundleId = 'com.delwaqty.app';
+  static const String projectId = 'delwaqty0';
+  static const String androidPackageName = 'com.example.delwaqty';
+  static const String iosBundleId = 'com.example.delwaqty';
+  static const String androidAppId = '1:772052634679:android:17267a5736408b918b43b2';
+  static const String storageBucket = 'delwaqty0.firebasestorage.app';
 
   // ─── Service Toggles ──────────────────────────────────────
   

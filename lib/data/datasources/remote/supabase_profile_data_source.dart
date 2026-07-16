@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:typed_data';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -19,7 +20,7 @@ class SupabaseProfileDataSource {
   final SupabaseClient _client;
   final AppLogger _logger;
 
-  static const String _tableName = 'profiles';
+  static const String _tableName = 'users';
 
   Future<UserModel> getProfile(String userId) async {
     try {
@@ -53,6 +54,16 @@ class SupabaseProfileDataSource {
     }
   }
 
+  Future<void> deleteProfile(String userId) async {
+    try {
+      await _client.from(_tableName).delete().eq('id', userId);
+      _logger.i('Profile deleted for $userId');
+    } catch (e, stack) {
+      _logger.e('Failed to delete profile for $userId', e, stack);
+      rethrow;
+    }
+  }
+
   Future<String> uploadAvatar({
     required String userId,
     required Uint8List bytes,
@@ -68,5 +79,43 @@ class SupabaseProfileDataSource {
       _logger.e('Failed to upload avatar for $userId', e, stack);
       rethrow;
     }
+  }
+
+  Stream<UserModel> watchProfile(String userId) {
+    final controller = StreamController<UserModel>.broadcast();
+
+    Future<void> fetch() async {
+      try {
+        final model = await getProfile(userId);
+        if (!controller.isClosed) {
+          controller.add(model);
+        }
+      } catch (e) {
+        if (!controller.isClosed) {
+          controller.addError(e);
+        }
+      }
+    }
+
+    fetch();
+
+    final subscription = _client
+        .from(_tableName)
+        .stream(primaryKey: ['id'])
+        .eq('id', userId)
+        .listen((data) {
+      if (data.isNotEmpty && !controller.isClosed) {
+        controller.add(UserModel.fromSupabase(data.first));
+      }
+    });
+
+    controller.onCancel = () {
+      subscription.cancel();
+      if (!controller.isClosed) {
+        controller.close();
+      }
+    };
+
+    return controller.stream;
   }
 }

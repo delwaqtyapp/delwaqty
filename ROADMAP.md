@@ -1,7 +1,7 @@
 # ROADMAP.md — Delwaqty Development Roadmap
 
 > **Last updated:** 2026-07-16
-> **Authority:** PROJECT_CONSTITUTION.md §15
+> **Authority:** PROJECT_CONSTITUTION.md §15 (v2.0)
 
 ---
 
@@ -37,71 +37,45 @@
 | Reviews | ⏳ Mock (Supabase reviews table exists, not wired) |
 | Coupons | ⏳ Mock (Supabase coupons table exists, not wired) |
 
-## Next Steps (per Constitution §15)
+## Next Steps (Constitution v2.0 §15)
 
-### 1. Finalize Commerce Domain Model
-- [ ] Wire Reviews to Supabase (reviews table exists)
-- [ ] Wire Coupons to Supabase (coupons table exists)
+### Phase 5: Platform Kernel Documentation
+- [x] Platform Kernel Architecture (`architecture/KERNEL.md`)
+- [x] Platform Engine Catalog (`architecture/ENGINES.md`)
+- [x] Plugin System (`architecture/PLUGIN_SYSTEM.md`)
+- [x] Engine Interfaces (`architecture/ENGINE_INTERFACES.md`)
+- [x] Domain Guide (`architecture/DOMAIN_GUIDE.md`)
+- [x] Plugin Lifecycle (`architecture/PLUGIN_LIFECYCLE.md`)
+- [x] Dependency Rules (`architecture/DEPENDENCY_RULES.md`)
+- [x] Platform Services (`architecture/PLATFORM_SERVICES.md`)
+- [x] Event Architecture (`architecture/EVENT_ARCHITECTURE.md`)
+- [x] API Contracts (`architecture/API_CONTRACTS.md`)
+- [x] Security Model (`architecture/SECURITY_MODEL.md`)
+- [x] Performance Guide (`architecture/PERFORMANCE_GUIDE.md`)
+- [x] Scalability Guide (`architecture/SCALABILITY_GUIDE.md`)
+- [x] Observability (`architecture/OBSERVABILITY.md`)
+
+### Phase 6: Commerce Core (Next after Kernel)
+- [ ] Wire Reviews to Supabase
+- [ ] Wire Coupons to Supabase
 - [ ] Delete remaining mock files
-- [ ] Verify end-to-end commerce flow
+- [ ] Branch Management domain design
+- [ ] Catalog Management domain design
+- [ ] Inventory domain design
+- [ ] Pricing Engine domain design
 
-### 2. Merchant Platform
+### Phase 7: Merchant Platform
 - [ ] Merchant registration flow
 - [ ] Merchant dashboard
 - [ ] Product CRUD for merchants
 - [ ] Order management for merchants
 
-### 3. Restaurant Module
-- [ ] Restaurant-specific features (menu, table booking)
+### Phase 8: Restaurant Plugin
+- [ ] Restaurant domain design
+- [ ] Menu management
+- [ ] Table booking
 - [ ] Restaurant admin portal
-
-### 4. Customer Ordering Flow
-- [ ] Full checkout with payment
-- [ ] Order tracking with real-time status
-- [ ] Delivery address management
-
-### 5. Driver Platform
-- [ ] Driver registration and onboarding
-- [ ] Order assignment and dispatch
-- [ ] Real-time location tracking
-- [ ] Delivery completion flow
-
-### 6. Admin Platform
-- [ ] Admin dashboard with live data
-- [ ] User management
-- [ ] Merchant management
-- [ ] Order oversight
-
-### 7. Marketplace
-- [ ] Buy & Sell listings
-- [ ] Category management
-- [ ] Search and filtering
-
-### 8. Ride Hailing
-- [ ] Ride request flow
-- [ ] Driver matching
-- [ ] Real-time tracking
-- [ ] Fare calculation
-
-### 9. Home Services
-- [ ] Service booking
-- [ ] Provider matching
-- [ ] Scheduling
-
-### 10. Wallet & Payments
-- [ ] Digital wallet
-- [ ] Payment gateway integration (Stripe/Moyasar)
-- [ ] QR payments
-- [ ] Bill payments
-
-### 11. Subscriptions
-- [ ] Subscription plans
-- [ ] Recurring billing
-
-### 12. AI Assistant
-- [ ] Provider-agnostic AI engine
-- [ ] Natural language ordering
-- [ ] Recommendations
+- [ ] Customer ordering flow
 
 ---
 

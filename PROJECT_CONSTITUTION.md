@@ -1,6 +1,6 @@
 # PROJECT_CONSTITUTION.md — Delwaqty
 
-> **Version 1.0 — Adopted 2026-07-16**
+> **Version 2.0 — Adopted 2026-07-16**
 > **This document is the highest-level project authority.**
 > **It overrides all temporary prompts.**
 > **Every AI agent and contributor MUST follow these principles permanently.**
@@ -59,22 +59,38 @@ Everything must live inside **one ecosystem**.
 
 ---
 
-## 4. ARCHITECTURE
+## 4. ARCHITECTURE — PLATFORM KERNEL
+
+Delwaqty is NOT a collection of applications. Delwaqty is a **Platform**.
+
+Every business feature must run on top of one shared **Platform Core**.
+
+No feature may bypass the Platform Core.
 
 Maintain these principles at all times:
 
-- **Clean Architecture** — Domain / Data / Presentation layers
+- **Platform Kernel** — Logical core owning all cross-cutting capabilities
+- **Engine Architecture** — Reusable engines for each domain capability
+- **Plugin System** — Business features as Plugins communicating only through Platform APIs
+- **Clean Architecture** — Domain / Data / Presentation layers within each Engine and Plugin
 - **SOLID** — Single responsibility, open-closed, Liskov substitution, interface segregation, dependency inversion
 - **Feature-first** — Code organized by feature, not by type
-- **Plugin Architecture** — Features register via `FeatureModule`
 - **Riverpod Dependency Injection** — All dependencies injected via providers
-- **Reusable Components** — Shared widgets in `lib/shared/`
 - **Repository Pattern** — Abstract interfaces in domain, implementations in data
 - **Service Layer** — Platform services behind abstract interfaces
+
+**Architectural Rules:**
+
+- No Plugin may bypass the Platform Kernel
+- No Plugin may directly call another Plugin
+- All cross-plugin communication must happen through Platform Services, Events, or Public Interfaces
+- Every Engine must define: Responsibilities, Public API, Events, Dependencies, Extension Points
 
 Every module must be independently testable.
 Every module must register automatically.
 Every service must register automatically.
+
+Full architecture documentation lives in `architecture/`.
 
 ---
 
@@ -102,6 +118,7 @@ Always maintain:
 | SESSION_STATUS.md | Project root | Live task tracker |
 | AGENTS.md | Project root | AI agent rules |
 | ROADMAP.md | Project root | Feature roadmap |
+| architecture/ | Project root | Platform Kernel architecture docs |
 | docs/DECISION_LOG.md | docs/ | Architecture Decision Records |
 | docs/PROJECT_HEALTH.md | docs/ | Project health metrics |
 | docs/PRODUCTION_STATUS.md | docs/ | Production readiness |
@@ -242,21 +259,27 @@ Delete obsolete mocks immediately.
 
 Do NOT randomly choose features. Follow this order:
 
-1. Finalize Commerce Domain Model
-2. Merchant Platform
-3. Restaurant Module
-4. Restaurant Admin Portal
-5. Customer Ordering Flow
-6. Driver Platform
-7. Dispatch System
-8. Admin Platform
-9. Marketplace
-10. Ride Hailing
-11. Home Services
-12. Wallet
-13. Payments
-14. Subscriptions
-15. AI Assistant
+1. Platform Kernel Documentation
+2. Platform Engine Specifications
+3. Commerce Core
+4. Merchant Platform
+5. Branch Management
+6. Catalog Management
+7. Inventory
+8. Pricing Engine
+9. Orders
+10. Restaurant Plugin
+11. Restaurant Administration
+12. Customer Ordering
+13. Driver Platform
+14. Dispatch Platform
+15. Marketplace Plugin
+16. Ride Plugin
+17. Home Services Plugin
+18. Wallet
+19. Payments
+20. Subscriptions
+21. AI Assistant
 
 ---
 
@@ -296,3 +319,68 @@ The objective is NOT shipping another mobile application.
 The objective is building one of the world's most scalable, maintainable and production-ready Super Platforms.
 
 Every decision from this point forward must move Delwaqty toward that objective.
+
+---
+
+## 19. PLATFORM KERNEL ARCHITECTURE
+
+The Platform Kernel is the logical core of Delwaqty. It is NOT an operating system kernel. It is the architectural foundation that every feature runs on top of.
+
+**Core Principle:** Every business feature must run on top of one shared Platform Core. No feature may bypass the Platform Core.
+
+Full specifications live in `architecture/`:
+- `architecture/KERNEL.md` — Kernel architecture
+- `architecture/ENGINES.md` — Engine catalog
+- `architecture/PLUGIN_SYSTEM.md` — Plugin architecture
+- `architecture/ENGINE_INTERFACES.md` — Engine public APIs
+- `architecture/DEPENDENCY_RULES.md` — Dependency rules
+- `architecture/EVENT_ARCHITECTURE.md` — Event system
+- `architecture/PLATFORM_SERVICES.md` — Platform services
+
+---
+
+## 20. PLATFORM ENGINES
+
+The Platform Kernel is organized around reusable Engines. Each Engine owns a cross-cutting domain capability.
+
+| Engine | Responsibility |
+|--------|---------------|
+| Identity Engine | Authentication, Authorization, Roles, Permissions, Profiles, Devices, Sessions |
+| Commerce Engine | Merchants, Branches, Catalogs, Products, Variants, Modifiers, Inventory, Pricing, Taxes, Fees, Offers, Coupons, Orders |
+| Marketplace Engine | Listings, Categories, Search, Favorites, Media, Messaging |
+| Mobility Engine | Ride Hailing, Drivers, Vehicles, Trips, Navigation, Tracking, Dispatch |
+| Home Services Engine | Providers, Scheduling, Availability, Bookings, Technicians |
+| Payments Engine | Wallet, Cards, Cash, QR, Invoices, Refunds, Installments |
+| Notifications Engine | Push, SMS, Email, WhatsApp, In-App, Templates, Campaigns |
+| Maps Engine | Location, Places, Routes, Navigation, Tracking, Geocoding |
+| Search Engine | Nearby Search, Global Search, Recommendations, Ranking, Filtering |
+| Analytics Engine | Events, Metrics, Dashboards, Funnels, Reporting |
+| Logging Engine | Application Logs, Audit Logs, Security Logs, Monitoring |
+| AI Engine | Recommendations, Predictions, Context Awareness, Natural Language, Provider Abstraction |
+| Storage Engine | Media, Documents, Images, CDN, Caching, Synchronization |
+
+---
+
+## 21. PLUGIN SYSTEM
+
+Every business capability becomes a Plugin. Plugins communicate only through Platform APIs.
+
+**Plugin Examples:** Restaurant, Pharmacy, Grocery, Marketplace, Cars, Furniture, Electronics, Home Services, Laundry, Cleaning, Ride, Courier, Travel, Hotels, Medical, Bills, Wallet.
+
+**Plugin Rules:**
+- No Plugin may bypass the Platform Kernel
+- No Plugin may directly call another Plugin
+- All communication must happen through Platform Services, Events, or Public Interfaces
+- Every Plugin must define: Capabilities, Required Engines, Optional Engines, Permissions, Navigation, Storage, Events, Background Tasks, Dependencies
+
+---
+
+## 22. IMPLEMENTATION RULE
+
+Do NOT refactor the existing codebase immediately.
+
+First: Design the Platform Kernel. Design every Engine. Document every responsibility. Document every public interface. Document dependencies.
+
+Only after the documentation is approved should implementation begin.
+
+Migration strategy: Do NOT rewrite working code. Document first. Refactor only when necessary. Keep production stable.

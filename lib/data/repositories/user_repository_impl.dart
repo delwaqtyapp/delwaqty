@@ -73,7 +73,8 @@ class UserRepositoryImpl implements UserRepository {
   @override
   Future<void> deleteUser(String id) async {
     try {
-      _logger.i('Delete user requested for: $id');
+      await _profileDataSource.deleteProfile(id);
+      _logger.i('User profile deleted: $id');
     } catch (e) {
       _logger.e('Failed to delete user: $id', e);
       throw ServerException(message: e.toString());

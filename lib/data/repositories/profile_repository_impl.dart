@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'dart:typed_data';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:delwaqty/domain/repositories/profile_repository.dart';
@@ -65,30 +64,6 @@ class ProfileRepositoryImpl implements ProfileRepository {
 
   @override
   Stream<User> watchProfile(String userId) {
-    final controller = StreamController<User>.broadcast();
-
-    Future<void> fetch() async {
-      try {
-        final model = await _dataSource.getProfile(userId);
-        if (!controller.isClosed) {
-          controller.add(model.toEntity());
-        }
-      } catch (e) {
-        _logger.e('Failed to watch profile: $userId', e);
-        if (!controller.isClosed) {
-          controller.addError(e);
-        }
-      }
-    }
-
-    fetch();
-
-    controller.onCancel = () {
-      if (!controller.isClosed) {
-        controller.close();
-      }
-    };
-
-    return controller.stream;
+    return _dataSource.watchProfile(userId).map((model) => model.toEntity());
   }
 }

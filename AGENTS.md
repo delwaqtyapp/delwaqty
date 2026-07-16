@@ -5,10 +5,21 @@
 
 ---
 
+## HIGHEST AUTHORITY
+
+**`PROJECT_CONSTITUTION.md`** is the highest-level project authority.
+
+Every rule in this file must conform to the Constitution.
+
+If any conflict exists between this file and the Constitution, **the Constitution wins**.
+
+---
+
 ## 1. Pre-Development Protocol
 
 Before writing ANY code:
 
+- [ ] Read `PROJECT_CONSTITUTION.md` (highest authority)
 - [ ] Read `docs/HANDOFF/` (all files)
 - [ ] Read `AGENTS.md` (this file)
 - [ ] Read `SESSION_STATUS.md`
@@ -39,7 +50,7 @@ Follow the existing ADR format (Context / Decision / Rationale / Consequences).
 Every roadmap change MUST update:
 
 ```
-docs/ROADMAP.md
+ROADMAP.md
 ```
 
 ## 5. Architecture-First Development

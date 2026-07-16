@@ -1,45 +1,47 @@
 import 'dart:async';
-import 'dart:math';
+import 'package:geolocator/geolocator.dart' as geo;
 import 'package:delwaqty/features/commerce/domain/entities/geo_location.dart';
 import 'package:delwaqty/services/location/location_service.dart';
 
-/// Mock implementation of [LocationService] for development.
-///
-/// Returns fake Riyadh coordinates and streams periodic updates
-/// centred around the same location with slight jitter.
 class LocationServiceImpl implements LocationService {
-  /// Default Riyadh centre coordinates used as the fake location.
-  static const GeoLocation _defaultRiyadh = GeoLocation(
-    latitude: 24.7136,
-    longitude: 46.6753,
-    address: 'King Fahd Road',
-    city: 'Riyadh',
-    district: 'Al Olaya',
-  );
-
-  final _rng = Random(42);
   final _controller = StreamController<GeoLocation>.broadcast();
-  Timer? _timer;
+  StreamSubscription<geo.Position>? _positionSubscription;
 
   @override
   Future<GeoLocation> getCurrentLocation() async {
-    return _defaultRiyadh;
+    final position = await geo.Geolocator.getCurrentPosition(
+      locationSettings: const geo.LocationSettings(
+        accuracy: geo.LocationAccuracy.high,
+        timeLimit: Duration(seconds: 10),
+      ),
+    );
+    return GeoLocation(
+      latitude: position.latitude,
+      longitude: position.longitude,
+    );
   }
 
   @override
   Stream<GeoLocation> streamLocationUpdates() {
-    _timer?.cancel();
-    _timer = Timer.periodic(const Duration(seconds: 5), (_) {
-      _controller.add(
-        GeoLocation(
-          latitude: _defaultRiyadh.latitude + _rng.nextDouble() * 0.001,
-          longitude: _defaultRiyadh.longitude + _rng.nextDouble() * 0.001,
-          address: _defaultRiyadh.address,
-          city: _defaultRiyadh.city,
-          district: _defaultRiyadh.district,
-        ),
-      );
-    });
+    _positionSubscription?.cancel();
+    _positionSubscription = geo.Geolocator.getPositionStream(
+      locationSettings: const geo.LocationSettings(
+        accuracy: geo.LocationAccuracy.high,
+        distanceFilter: 10,
+      ),
+    ).listen(
+      (position) {
+        _controller.add(
+          GeoLocation(
+            latitude: position.latitude,
+            longitude: position.longitude,
+          ),
+        );
+      },
+      onError: (e) {
+        _controller.addError(e);
+      },
+    );
     return _controller.stream;
   }
 
@@ -50,15 +52,7 @@ class LocationServiceImpl implements LocationService {
     double lat2,
     double lng2,
   ) {
-    const earthRadius = 6371000.0;
-    final dLat = _toRad(lat2 - lat1);
-    final dLng = _toRad(lng2 - lng1);
-    final a =
-        sin(dLat / 2) * sin(dLat / 2) +
-        cos(_toRad(lat1)) * cos(_toRad(lat2)) *
-            sin(dLng / 2) * sin(dLng / 2);
-    final c = 2 * atan2(sqrt(a), sqrt(1 - a));
-    return earthRadius * c;
+    return geo.Geolocator.distanceBetween(lat1, lng1, lat2, lng2);
   }
 
   @override
@@ -71,19 +65,33 @@ class LocationServiceImpl implements LocationService {
 
   @override
   Future<PermissionStatus> checkPermission() async {
-    return PermissionStatus.granted;
+    geo.LocationPermission permission = await geo.Geolocator.checkPermission();
+    return _mapPermission(permission);
   }
 
   @override
   Future<PermissionStatus> requestPermission() async {
-    return PermissionStatus.granted;
+    geo.LocationPermission permission = await geo.Geolocator.requestPermission();
+    return _mapPermission(permission);
   }
 
-  double _toRad(double deg) => deg * pi / 180.0;
+  PermissionStatus _mapPermission(geo.LocationPermission permission) {
+    return switch (permission) {
+      geo.LocationPermission.always ||
+      geo.LocationPermission.whileInUse =>
+        PermissionStatus.granted,
+      geo.LocationPermission.denied => PermissionStatus.denied,
+      geo.LocationPermission.deniedForever => PermissionStatus.deniedForever,
+      geo.LocationPermission.unableToDetermine => PermissionStatus.unknown,
+    };
+  }
 
-  /// Releases resources held by this service.
+  Future<bool> isLocationServiceEnabled() {
+    return geo.Geolocator.isLocationServiceEnabled();
+  }
+
   void dispose() {
-    _timer?.cancel();
+    _positionSubscription?.cancel();
     _controller.close();
   }
 }

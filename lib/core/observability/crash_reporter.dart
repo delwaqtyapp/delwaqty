@@ -223,3 +223,56 @@ class NoOpCrashReporter extends CrashReporter {
   @override
   Future<void> flush() async {}
 }
+
+/// Firebase Crashlytics implementation of [CrashReporter].
+class FirebaseCrashReporter extends CrashReporter {
+  FirebaseCrashReporter(this._crashlytics);
+
+  final dynamic _crashlytics;
+
+  @override
+  Future<void> initialize(String dsn) async {
+    await _crashlytics.setCrashlyticsCollectionEnabled(true);
+  }
+
+  @override
+  String captureException(
+    Object error,
+    StackTrace stackTrace, {
+    CrashSeverity severity = CrashSeverity.error,
+    Map<String, dynamic>? context,
+  }) {
+    _crashlytics.recordError(
+      error,
+      stackTrace,
+      reason: context?['reason'] as String?,
+      printDetails: false,
+    );
+    return 'crashlytics-${DateTime.now().millisecondsSinceEpoch}';
+  }
+
+  @override
+  void addBreadcrumb(String message, {String? category, Map<String, dynamic>? data}) {
+    _crashlytics.log(message);
+  }
+
+  @override
+  void setUser(String userId, {String? email, String? name}) {
+    _crashlytics.setUserIdentifier(userId);
+    if (email != null) _crashlytics.setCustomKey('email', email);
+    if (name != null) _crashlytics.setCustomKey('name', name);
+  }
+
+  @override
+  void setTag(String key, String value) {
+    _crashlytics.setCustomKey(key, value);
+  }
+
+  @override
+  void log(String message) {
+    _crashlytics.log(message);
+  }
+
+  @override
+  Future<void> flush() async {}
+}

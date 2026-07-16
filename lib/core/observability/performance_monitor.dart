@@ -140,3 +140,55 @@ class _NoOpTrace implements Trace {
   @override
   void stop() {}
 }
+
+/// Firebase Performance implementation of [PerformanceMonitor].
+class FirebasePerformanceMonitor extends PerformanceMonitor {
+  FirebasePerformanceMonitor(this._performance);
+
+  final dynamic _performance;
+
+  @override
+  Trace startTrace(String name) {
+    final trace = _performance.newTrace(name);
+    trace.start();
+    return FirebaseTrace(trace);
+  }
+
+  @override
+  void recordMetric(String name, int value) {
+    final trace = _performance.newTrace(name);
+    trace.start();
+    trace.setMetric(name, value);
+    trace.stop();
+  }
+
+  @override
+  void recordTiming(String name, Duration duration) {
+    final trace = _performance.newTrace(name);
+    trace.start();
+    trace.setMetric('${name}_ms', duration.inMilliseconds);
+    trace.stop();
+  }
+}
+
+/// Firebase Performance trace wrapper.
+class FirebaseTrace implements Trace {
+  FirebaseTrace(this._trace);
+
+  final dynamic _trace;
+
+  @override
+  void incrementCounter(String counterName, {int incrementBy = 1}) {
+    _trace.incrementCounter(counterName, incrementBy);
+  }
+
+  @override
+  void putAttribute(String key, String value) {
+    _trace.putAttribute(key, value);
+  }
+
+  @override
+  void stop() {
+    _trace.stop();
+  }
+}

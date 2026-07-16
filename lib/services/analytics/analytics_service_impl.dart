@@ -1,25 +1,22 @@
-import 'dart:convert';
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:delwaqty/services/analytics/analytics_service.dart';
 
-/// Console-logging mock implementation of [AnalyticsService] for development.
-///
-/// Prints all analytics events to the debug console. Useful during local
-/// development to verify that events are being fired correctly.
 class AnalyticsServiceImpl implements AnalyticsService {
+  AnalyticsServiceImpl(this._analytics);
+
+  final FirebaseAnalytics _analytics;
+
   @override
   void logEvent(String event, {Map<String, dynamic>? parameters}) {
-    final buffer = StringBuffer('[Analytics] event: $event');
-    if (parameters != null && parameters.isNotEmpty) {
-      buffer.write(' params: ${jsonEncode(parameters)}');
-    }
-    // ignore: avoid_print
-    print(buffer.toString());
+    final params = parameters?.map(
+      (key, value) => MapEntry(key, value.toString()),
+    );
+    _analytics.logEvent(name: event, parameters: params);
   }
 
   @override
   void logScreenView(String screenName) {
-    // ignore: avoid_print
-    print('[Analytics] screen_view: $screenName');
+    _analytics.logScreenView(screenName: screenName);
   }
 
   @override
@@ -28,32 +25,39 @@ class AnalyticsServiceImpl implements AnalyticsService {
     required String currency,
     required List<Map<String, dynamic>> items,
   }) {
-    // ignore: avoid_print
-    print(
-      '[Analytics] purchase: $amount $currency, items: ${items.length}',
+    _analytics.logPurchase(
+      currency: currency,
+      value: amount,
+      items: items
+          .map((item) => AnalyticsEventItem(
+                itemId: item['id'] as String?,
+                itemName: item['name'] as String?,
+                itemCategory: item['category'] as String?,
+              ))
+          .toList(),
     );
   }
 
   @override
   void setUserId(String userId) {
-    // ignore: avoid_print
-    print('[Analytics] setUserId: $userId');
+    _analytics.setUserId(id: userId);
   }
 
   @override
   void setUserProperty(String name, String value) {
-    // ignore: avoid_print
-    print('[Analytics] setUserProperty: $name = $value');
+    _analytics.setUserProperty(name: name, value: value);
   }
 
   @override
   void logError(Object error, {StackTrace? stackTrace}) {
-    // ignore: avoid_print
-    print('[Analytics] error: $error');
-    if (stackTrace != null) {
-      // ignore: avoid_print
-      print('[Analytics] stackTrace: $stackTrace');
-    }
+    _analytics.logEvent(
+      name: 'app_error',
+      parameters: {
+        'error_type': error.runtimeType.toString(),
+        'error_message': error.toString(),
+        if (stackTrace != null) 'stack_trace': stackTrace.toString(),
+      },
+    );
   }
 
   @override
@@ -62,9 +66,13 @@ class AnalyticsServiceImpl implements AnalyticsService {
     required String variable,
     required Duration time,
   }) {
-    // ignore: avoid_print
-    print(
-      '[Analytics] timing: $category/$variable = ${time.inMilliseconds}ms',
+    _analytics.logEvent(
+      name: 'timing',
+      parameters: {
+        'category': category,
+        'variable': variable,
+        'time_ms': time.inMilliseconds,
+      },
     );
   }
 }

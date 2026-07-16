@@ -116,7 +116,7 @@
 
 | Service | Credential | Status |
 |---------|-----------|--------|
-| Supabase | DB schema deployment | Manual action required |
+| Supabase | DB schema deployment | ✅ Deployed via Management API |
 | Google Maps | API key | Not provided |
 | Firebase | google-services.json | Not provided |
 | Cloudflare | Account + API token | Not provided |
@@ -125,8 +125,8 @@
 
 ## Next Action
 
-1. Deploy Supabase DB schema (manual)
-2. Harden RLS policies
+1. ~~Deploy Supabase DB schema~~ ✅ DONE
+2. Obtain Firebase google-services.json
 3. Obtain Google Maps API key
-4. Obtain Firebase credentials
-5. Obtain Cloudflare credentials
+4. Obtain Cloudflare credentials
+5. Replace mock repositories with real Supabase implementations

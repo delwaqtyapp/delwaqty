@@ -6,9 +6,9 @@
 
 ## Current Task
 
-Phase 2.2 — Production hardening complete. Retry utility, enhanced error handling, and friendly error messages added.
-
-All priorities blocked on external credentials. Code hardened for production readiness.
+Phase 3 — Supabase database schema deployed successfully via Management API.
+14 tables, 29 RLS policies, 16 indexes, 8 default categories, all verified.
+Ready to proceed to Firebase setup.
 
 ---
 
@@ -65,16 +65,15 @@ All priorities blocked on external credentials. Code hardened for production rea
 
 ## Remaining Blockers
 
-| Blocker | Action Required | Impact |
-|---------|----------------|--------|
-| Supabase DB schema | Dashboard SQL Editor | Replace all mock repos |
-| Firebase google-services.json | Firebase Console | Wire real Firebase project |
-| Google Maps API key | Google Cloud Console | Enable Maps SDK |
-| Cloudflare credentials | Cloudflare Dashboard | R2 + CDN |
+| Blocker | Status | Action Required | Impact |
+|---------|--------|----------------|--------|
+| Supabase DB schema | ✅ Deployed | None | Tables, policies, indexes all live |
+| Firebase google-services.json | ⏳ Pending | Firebase Console | Wire real Firebase project |
+| Google Maps API key | ⏳ Pending | Google Cloud Console | Enable Maps SDK |
+| Cloudflare credentials | ⏳ Pending | Cloudflare Dashboard | R2 + CDN |
 
 ---
 
 ## Next Task
 
-Awaiting user action: Deploy Supabase DB schema.
-Once deployed: replace mock repos → first end-to-end flow.
+Proceed to Firebase setup — create project and obtain google-services.json.

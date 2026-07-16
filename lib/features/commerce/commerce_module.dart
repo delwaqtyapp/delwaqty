@@ -12,12 +12,14 @@ import 'package:delwaqty/features/commerce/domain/repositories/coupon_repository
 import 'package:delwaqty/features/commerce/domain/repositories/favorite_repository.dart';
 import 'package:delwaqty/data/repositories/merchant_repository_impl.dart';
 import 'package:delwaqty/data/repositories/catalog_category_repository_impl.dart';
-import 'package:delwaqty/features/commerce/data/repositories/mock/mock_product_repository.dart';
+import 'package:delwaqty/data/repositories/product_repository_impl.dart';
+import 'package:delwaqty/data/repositories/favorite_repository_impl.dart';
+import 'package:delwaqty/data/datasources/remote/supabase_product_data_source.dart';
+import 'package:delwaqty/data/datasources/remote/supabase_favorite_data_source.dart';
 import 'package:delwaqty/features/commerce/data/repositories/mock/mock_cart_repository.dart';
 import 'package:delwaqty/features/commerce/data/repositories/mock/mock_order_repository.dart';
 import 'package:delwaqty/features/commerce/data/repositories/mock/mock_review_repository.dart';
 import 'package:delwaqty/features/commerce/data/repositories/mock/mock_coupon_repository.dart';
-import 'package:delwaqty/features/commerce/data/repositories/mock/mock_favorite_repository.dart';
 import 'package:delwaqty/features/commerce/presentation/pages/commerce_discovery_page.dart';
 import 'package:delwaqty/features/commerce/presentation/pages/merchant_detail_page.dart';
 import 'package:delwaqty/features/commerce/presentation/pages/product_detail_page.dart';
@@ -31,8 +33,14 @@ final merchantRepositoryProvider = Provider<MerchantRepository>(
   (ref) => ref.watch(merchantRepositoryImplProvider),
 );
 
+final productRepositoryImplProvider = Provider<ProductRepositoryImpl>((ref) {
+  return ProductRepositoryImpl(
+    ref.watch(supabaseProductDataSourceProvider),
+  );
+});
+
 final productRepositoryProvider = Provider<ProductRepository>(
-  (_) => MockProductRepository(),
+  (ref) => ref.watch(productRepositoryImplProvider),
 );
 
 final catalogCategoryRepositoryProvider = Provider<CatalogCategoryRepository>(
@@ -55,8 +63,14 @@ final couponRepositoryProvider = Provider<CouponRepository>(
   (_) => MockCouponRepository(),
 );
 
+final favoriteRepositoryImplProvider = Provider<FavoriteRepositoryImpl>((ref) {
+  return FavoriteRepositoryImpl(
+    ref.watch(supabaseFavoriteDataSourceProvider),
+  );
+});
+
 final favoriteRepositoryProvider = Provider<FavoriteRepository>(
-  (_) => MockFavoriteRepository(),
+  (ref) => ref.watch(favoriteRepositoryImplProvider),
 );
 
 // ─── Commerce Module ───

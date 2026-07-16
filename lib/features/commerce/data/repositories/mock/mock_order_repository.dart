@@ -31,6 +31,7 @@ class MockOrderRepository implements OrderRepository {
   @override
   Future<Order> createOrder({
     required String merchantId,
+    required String merchantName,
     required List<CartItem> items,
     required double subtotal,
     required double deliveryFee,
@@ -43,7 +44,7 @@ class MockOrderRepository implements OrderRepository {
     final order = Order(
       id: 'order_${DateTime.now().millisecondsSinceEpoch}',
       merchantId: merchantId,
-      merchantName: '',
+      merchantName: merchantName,
       items: items
           .map((ci) => OrderItem(
                 productId: ci.productId,

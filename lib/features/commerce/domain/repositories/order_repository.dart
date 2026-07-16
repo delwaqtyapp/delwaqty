@@ -10,6 +10,7 @@ abstract interface class OrderRepository {
   Future<Order?> getOrderById(String id);
   Future<Order> createOrder({
     required String merchantId,
+    required String merchantName,
     required List<CartItem> items,
     required double subtotal,
     required double deliveryFee,

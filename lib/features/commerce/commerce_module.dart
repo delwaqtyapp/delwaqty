@@ -14,10 +14,11 @@ import 'package:delwaqty/data/repositories/merchant_repository_impl.dart';
 import 'package:delwaqty/data/repositories/catalog_category_repository_impl.dart';
 import 'package:delwaqty/data/repositories/product_repository_impl.dart';
 import 'package:delwaqty/data/repositories/favorite_repository_impl.dart';
+import 'package:delwaqty/data/repositories/order_repository_impl.dart';
+import 'package:delwaqty/data/repositories/local_cart_repository.dart';
 import 'package:delwaqty/data/datasources/remote/supabase_product_data_source.dart';
 import 'package:delwaqty/data/datasources/remote/supabase_favorite_data_source.dart';
-import 'package:delwaqty/features/commerce/data/repositories/mock/mock_cart_repository.dart';
-import 'package:delwaqty/features/commerce/data/repositories/mock/mock_order_repository.dart';
+import 'package:delwaqty/data/datasources/remote/supabase_order_data_source.dart';
 import 'package:delwaqty/features/commerce/data/repositories/mock/mock_review_repository.dart';
 import 'package:delwaqty/features/commerce/data/repositories/mock/mock_coupon_repository.dart';
 import 'package:delwaqty/features/commerce/presentation/pages/commerce_discovery_page.dart';
@@ -48,11 +49,17 @@ final catalogCategoryRepositoryProvider = Provider<CatalogCategoryRepository>(
 );
 
 final cartRepositoryProvider = Provider<CartRepository>(
-  (_) => MockCartRepository(),
+  (ref) => ref.watch(localCartRepositoryProvider),
 );
 
+final orderRepositoryImplProvider = Provider<OrderRepositoryImpl>((ref) {
+  return OrderRepositoryImpl(
+    ref.watch(supabaseOrderDataSourceProvider),
+  );
+});
+
 final orderRepositoryProvider = Provider<OrderRepository>(
-  (_) => MockOrderRepository(),
+  (ref) => ref.watch(orderRepositoryImplProvider),
 );
 
 final reviewRepositoryProvider = Provider<ReviewRepository>(

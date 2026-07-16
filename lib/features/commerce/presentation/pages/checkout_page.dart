@@ -136,6 +136,7 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
                     final orderRepo = ref.read(orderRepositoryProvider);
                     await orderRepo.createOrder(
                       merchantId: cart.merchantId,
+                      merchantName: cart.merchantName,
                       items: cart.items,
                       subtotal: cart.subtotal,
                       deliveryFee: cart.deliveryFee,

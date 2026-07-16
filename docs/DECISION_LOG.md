@@ -527,6 +527,66 @@ Optimize the development workflow for mobile-first development with quick iterat
 - Code generation runs on-demand, not automatically
 - Testing is optional for quick iterations
 
+## ADR-021: AGENTS.md as Permanent Governance File
+
+**Date:** Sprint 11
+**Status:** Accepted
+**Deciders:** Core team
+
+### Context
+
+AI agents and contributors need a single, persistent reference for project rules. Chat history is ephemeral and unreliable. Rules must live in the repository itself so every agent session starts with the same governance.
+
+### Decision
+
+Create `AGENTS.md` at the project root containing all permanent architectural rules, development protocols, coding standards, and workflow requirements. Every AI agent MUST read this file before writing code.
+
+### Rationale
+
+- Repository is the single source of truth (not chat history)
+- Rules persist across sessions, agents, and machines
+- Every contributor (human or AI) follows identical standards
+- Pre-commit gates prevent broken code from being committed
+- SESSION_STATUS.md provides real-time task tracking
+
+### Consequences
+
+- AGENTS.md is the first file every agent reads
+- SESSION_STATUS.md is updated continuously
+- All architectural decisions go to DECISION_LOG.md
+- All roadmap changes go to ROADMAP.md
+- Agents work autonomously unless blocked by credentials or decisions
+
+---
+
+## ADR-022: Windows Desktop Development Workstation
+
+**Date:** Sprint 11
+**Status:** Accepted
+**Deciders:** Core team
+
+### Context
+
+Development moves from Linux aarch64 (Termux/PRoot) to a Windows laptop with a physical Android device (DNP NX9). Corporation restrictions prohibit global installs and system modifications.
+
+### Decision
+
+Portable toolchain under `E:\app\` with environment variables set per-session. Flutter 3.44.6 (Dart 3.12.2), Node.js v24.16.0, pub cache and Gradle home on E: drive.
+
+### Rationale
+
+- No admin privileges available
+- Cross-drive I/O (C: ↔ E:) causes Kotlin incremental compilation failures
+- Keeping all artifacts on one volume eliminates the issue
+- Device connected via USB for direct deployment and Hot Reload
+
+### Consequences
+
+- Must set `$env:PUB_CACHE` and `$env:GRADLE_USER_HOME` each terminal session
+- Flutter command: `& "E:\app\flutter\bin\flutter.bat"`
+- Android SDK remains on C: (user profile) but Gradle cache moves to E:
+- Developer Mode symlink warning is non-blocking for Android builds
+
 ---
 
 ## Summary
@@ -553,3 +613,5 @@ Optimize the development workflow for mobile-first development with quick iterat
 | 018 | GitHub Repository Setup | Accepted | Code hosting and CI/CD |
 | 019 | Multi-Environment Configuration | Accepted | Environment isolation |
 | 020 | Mobile Development Workflow | Accepted | Development optimization |
+| 021 | AGENTS.md Governance | Accepted | AI agent rules persistence |
+| 022 | Windows Desktop Workstation | Accepted | Portable dev environment |

@@ -1,4 +1,9 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:delwaqty/services/image/image_service.dart';
+
+final imageServiceProvider = Provider<ImageService>((ref) {
+  return ImageServiceImpl();
+});
 
 /// Mock implementation of [ImageService] for development.
 ///

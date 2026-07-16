@@ -1,7 +1,12 @@
 import 'dart:async';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:geolocator/geolocator.dart' as geo;
 import 'package:delwaqty/features/commerce/domain/entities/geo_location.dart';
 import 'package:delwaqty/services/location/location_service.dart';
+
+final locationServiceProvider = Provider<LocationService>((ref) {
+  return LocationServiceImpl();
+});
 
 class LocationServiceImpl implements LocationService {
   final _controller = StreamController<GeoLocation>.broadcast();

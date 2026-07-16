@@ -6,9 +6,9 @@
 
 ## Current Task
 
-Phase 2 Production Connection — Platform services migrated to real implementations.
+Phase 2.1 — Real Production Backend — Service wiring and provider DI **COMPLETE**.
 
-Firebase upgraded to v4.x. Location, Analytics, Notifications, Crash Reporting, Performance Monitoring all using real SDKs.
+All real service implementations wired to Riverpod providers. Firebase initialized in main.dart (graceful fallback). Obsolete mock auth service deleted. StorageService replaced with real SharedPreferences + SecureStorage. Android build fixed (compileSdk 36, desugaring, minSdk 21).
 
 ---
 
@@ -16,12 +16,25 @@ Firebase upgraded to v4.x. Location, Analytics, Notifications, Crash Reporting, 
 
 | File | Change |
 |------|--------|
-| `pubspec.yaml` | Firebase v4.x, geolocator, flutter_local_notifications, flutter_secure_storage v10 |
-| `lib/services/location/location_service_impl.dart` | Replaced mock with real geolocator implementation |
-| `lib/services/analytics/analytics_service_impl.dart` | Replaced mock with real Firebase Analytics |
-| `lib/services/notification/notification_service_impl.dart` | Replaced mock with real FCM + flutter_local_notifications |
-| `lib/core/observability/crash_reporter.dart` | Added FirebaseCrashReporter implementation |
-| `lib/core/observability/performance_monitor.dart` | Added FirebasePerformanceMonitor implementation |
+| `lib/main.dart` | Firebase initialization, crashlytics error handler |
+| `lib/services/analytics/analytics_service_impl.dart` | Added `analyticsServiceProvider` |
+| `lib/services/location/location_service_impl.dart` | Added `locationServiceProvider` |
+| `lib/services/notification/notification_service_impl.dart` | Added `notificationServiceProvider` |
+| `lib/services/storage/storage_service_impl.dart` | Replaced in-memory mock with real SharedPreferences + SecureStorage |
+| `lib/services/image/image_service_impl.dart` | Added `imageServiceProvider` |
+| `lib/services/maps/maps_service.dart` | Added `mapsServiceProvider` |
+| `lib/services/search/search_service_impl.dart` | Added `searchServiceProvider` |
+| `android/app/build.gradle.kts` | compileSdk=36, desugaring, minSdk=21 |
+| `pubspec.yaml` | Removed geocoding (stale Android plugin) |
+
+---
+
+## Files Deleted
+
+| File | Reason |
+|------|--------|
+| `lib/services/authentication/auth_service.dart` | Obsolete — replaced by domain AuthRepository |
+| `lib/services/authentication/auth_service_impl.dart` | Obsolete mock — real auth via Supabase GoTrue |
 
 ---
 
@@ -29,10 +42,11 @@ Firebase upgraded to v4.x. Location, Analytics, Notifications, Crash Reporting, 
 
 | Decision | Rationale |
 |----------|-----------|
-| Firebase upgraded to v4.x | v2.x had win32 version conflict with geolocator v14 |
-| flutter_secure_storage upgraded to v10 | Required for win32 v6 compatibility |
-| Removed permission_handler from location | geolocator handles permissions natively |
-| Kept permission_handler in pubspec | Other features may need it |
+| Removed geocoding package | geocoding_android compiled against android-33; geocoding via Google Maps HTTP API in GoogleMapsServiceImpl |
+| compileSdk=36 | Required by geolocator_android, flutter_secure_storage, google_maps_flutter, etc. |
+| Desugaring enabled | Required by flutter_local_notifications |
+| minSdk=21 | Required by flutter_local_notifications |
+| Firebase init uses empty options | Placeholder until google-services.json is available; will switch to DefaultFirebaseOptions |
 
 ---
 
@@ -40,16 +54,18 @@ Firebase upgraded to v4.x. Location, Analytics, Notifications, Crash Reporting, 
 
 | Check | Result |
 |-------|--------|
+| `flutter pub get` | Success |
 | `flutter analyze` | 0 errors, 0 warnings |
 | `flutter test` | 443/443 passing |
+| `flutter build apk --debug` | Build successful |
 
 ---
 
 ## Services Status
 
-| Service | Status | Implementation |
-|---------|--------|----------------|
-| Auth (6 providers) | Real | Supabase GoTrue |
+| Service | Status | Provider |
+|---------|--------|----------|
+| Auth | Real | Supabase GoTrue |
 | Location | Real | geolocator |
 | Analytics | Real | Firebase Analytics |
 | Crash Reporting | Real | Firebase Crashlytics |
@@ -58,31 +74,33 @@ Firebase upgraded to v4.x. Location, Analytics, Notifications, Crash Reporting, 
 | Local Notifications | Real | flutter_local_notifications |
 | Cloudflare R2 | Real | S3-compatible API |
 | Connectivity | Real | connectivity_plus |
-| Logger | Real | Logger package |
 | Maps | Real | GoogleMapsServiceImpl |
-| Storage (KV) | Real | SharedPreferences + SecureStorage |
-| Search | Mock | Needs Algolia/Elastic |
-| Payment | Mock | Needs Stripe SDK |
-| Image Picker | Mock | Needs platform implementation |
+| KV Storage | Real | SharedPreferences + SecureStorage |
+| Logger | Real | Logger package |
+| Search | Mock | Needs Algolia |
+| Payment | Mock | Needs Stripe |
+| Image Picker | Mock | Needs platform impl |
 
 ---
 
 ## Remaining Work
 
-### Blocked on Manual Action
+### Blocked on External Action
 - [ ] Deploy Supabase DB schema (Dashboard SQL Editor)
+- [ ] Firebase google-services.json → main.dart switch to DefaultFirebaseOptions
 - [ ] Google Maps API key
-- [ ] Firebase project setup (google-services.json)
 - [ ] Cloudflare credentials
 
-### Next
-- [ ] Wire real Firebase initialization in main.dart
-- [ ] Wire real Location/Analytics/Notifications providers
-- [ ] Replace mock repos with Supabase implementations (after DB deploy)
-- [ ] Delete obsolete mock code
+### Next (After DB Deployed)
+- [ ] Replace mock repositories with real Supabase implementations
+- [ ] Delete obsolete mock repositories
+- [ ] Wire Firebase Crashlytics/Analytics initialization with real project
+- [ ] Wire Google Maps with real API key
+- [ ] Wire Cloudflare R2 with real credentials
 
 ---
 
 ## Next Task
 
-Wire Firebase initialization in main.dart and connect real service providers.
+Awaiting user action: Deploy Supabase DB schema via Dashboard SQL Editor.
+Once deployed, replace mock repositories with real Supabase implementations.

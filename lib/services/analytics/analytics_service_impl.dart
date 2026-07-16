@@ -1,5 +1,10 @@
 import 'package:firebase_analytics/firebase_analytics.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:delwaqty/services/analytics/analytics_service.dart';
+
+final analyticsServiceProvider = Provider<AnalyticsService>((ref) {
+  return AnalyticsServiceImpl(FirebaseAnalytics.instance);
+});
 
 class AnalyticsServiceImpl implements AnalyticsService {
   AnalyticsServiceImpl(this._analytics);

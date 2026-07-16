@@ -2,7 +2,15 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:delwaqty/services/notification/notification_service.dart';
+
+final notificationServiceProvider = Provider<NotificationService>((ref) {
+  return NotificationServiceImpl(
+    FirebaseMessaging.instance,
+    FlutterLocalNotificationsPlugin(),
+  );
+});
 
 @pragma('vm:entry-point')
 Future<void> _onBackgroundMessage(RemoteMessage message) async {}

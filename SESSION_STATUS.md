@@ -6,9 +6,9 @@
 
 ## Current Task
 
-Desktop workstation setup and environment verification — **COMPLETE**.
+CI/CD pipeline overhaul — **COMPLETE** (commit pending).
 
-Delwaqty development environment is fully operational on the Windows laptop (DNP NX9 device connected via USB).
+Single `ci.yml` workflow: format check → lint → test (with coverage) → build (debug + release) → release on master. Flutter 3.44.6 pinned. Redundant `auto_sync.yml` removed.
 
 ---
 
@@ -16,9 +16,12 @@ Delwaqty development environment is fully operational on the Windows laptop (DNP
 
 | File | Change |
 |------|--------|
-| `android/local.properties` | Updated SDK/Flutter paths from Linux to Windows |
-| `AGENTS.md` | **Created** — permanent architectural rules for AI agents |
-| `SESSION_STATUS.md` | **Created** — this file |
+| `.github/workflows/ci.yml` | Rewritten — pinned Flutter 3.44.6, added format check, caching, coverage, concurrency |
+| `.github/workflows/auto_sync.yml` | **Deleted** — redundant with ci.yml |
+| `docs/ROADMAP.md` | Sprint 11 CI/CD marked done, milestones updated |
+| `docs/DECISION_LOG.md` | Added ADR-022 (CI/CD pipeline) |
+| `AGENTS.md` | Created (previous session) |
+| `SESSION_STATUS.md` | Created (previous session) |
 
 ---
 
@@ -31,6 +34,7 @@ Delwaqty development environment is fully operational on the Windows laptop (DNP
 | `$env:PUB_CACHE = "E:\app\pub-cache"` | Avoids cross-drive Kotlin incremental compilation errors |
 | `$env:GRADLE_USER_HOME = "E:\app\.gradle"` | Keeps all build artifacts on E: drive |
 | Developer Mode warning is non-blocking | Symlink warning only affects Windows desktop; Android builds work fine |
+| AGENTS.md as governance file | Persistent rules for every AI agent session (ADR-021) |
 
 ---
 
@@ -59,9 +63,9 @@ Delwaqty development environment is fully operational on the Windows laptop (DNP
 - [ ] Cloudflare R2 credentials → `.env.dev`
 
 ### Infrastructure
-- [ ] GitHub Actions CI/CD pipeline
-- [ ] Cloudflare R2 bucket configuration
-- [ ] Environment variable injection in CI
+- [x] GitHub Actions CI/CD pipeline — analyze, test, build, release
+- [ ] Cloudflare R2 bucket configuration (blocked: manual setup)
+- [ ] Environment variable injection in CI (blocked: needs Cloudflare credentials)
 
 ### Next Sprints (12-20)
 - Admin Platform Backend (Sprint 12-14)

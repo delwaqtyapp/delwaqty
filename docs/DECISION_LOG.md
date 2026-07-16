@@ -559,7 +559,39 @@ Create `AGENTS.md` at the project root containing all permanent architectural ru
 
 ---
 
-## ADR-022: Windows Desktop Development Workstation
+## ADR-022: CI/CD Pipeline Architecture
+
+**Date:** Sprint 11
+**Status:** Accepted
+**Deciders:** Core team
+
+### Context
+
+The project needs automated quality gates and build artifact delivery. Previous CI was incomplete (no Flutter version pinning, no format check, no caching, redundant workflows).
+
+### Decision
+
+Single `ci.yml` workflow with four jobs: analyze (format + lint), test (with coverage), build (debug + release APK), release (GitHub Release on master push). Flutter 3.44.6 pinned. Java 17 for Android. Concurrency groups prevent duplicate runs.
+
+### Rationale
+
+- Pinned versions ensure reproducible builds across local and CI
+- `dart format --set-exit-if-changed` enforces consistent formatting
+- Separate jobs fail fast (format issue blocks test, test failure blocks build)
+- Coverage artifact enables historical tracking
+- Concurrency groups save CI minutes on rapid pushes
+- Single workflow replaces two redundant ones (ci.yml + auto_sync.yml)
+
+### Consequences
+
+- Every PR is checked for format, lint, test, and build
+- Master pushes produce release artifacts automatically
+- Flutter version must be updated in one place (`env.FLUTTER_VERSION`)
+- `dart format` must pass locally before pushing
+
+---
+
+## ADR-023: Windows Desktop Development Workstation
 
 **Date:** Sprint 11
 **Status:** Accepted
@@ -614,4 +646,5 @@ Portable toolchain under `E:\app\` with environment variables set per-session. F
 | 019 | Multi-Environment Configuration | Accepted | Environment isolation |
 | 020 | Mobile Development Workflow | Accepted | Development optimization |
 | 021 | AGENTS.md Governance | Accepted | AI agent rules persistence |
-| 022 | Windows Desktop Workstation | Accepted | Portable dev environment |
+| 022 | CI/CD Pipeline | Accepted | Automated quality gates and artifact delivery |
+| 023 | Windows Desktop Workstation | Accepted | Portable dev environment |

@@ -119,7 +119,7 @@
 | Supabase | DB schema deployment | ✅ Deployed via Management API |
 | Firebase | google-services.json | ✅ Wired (delwaqty0 project) |
 | Google Maps | API key | ✅ Wired (5 APIs enabled) |
-| Cloudflare | Account + API token | Not provided |
+| Cloudflare | Account + API token | ✅ Wired (R2 bucket + S3 token) |
 
 ---
 
@@ -128,5 +128,6 @@
 1. ~~Deploy Supabase DB schema~~ ✅ DONE
 2. ~~Obtain Firebase google-services.json~~ ✅ DONE
 3. ~~Obtain Google Maps API key~~ ✅ DONE
-4. Obtain Cloudflare credentials
+4. ~~Obtain Cloudflare credentials~~ ✅ DONE
 5. Replace mock repositories with real Supabase implementations
+6. Build first end-to-end production flow

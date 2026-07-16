@@ -5,10 +5,7 @@
 abstract final class CloudflareConfig {
   // ─── Account ──────────────────────────────────────────────
   
-  static const String accountId = String.fromEnvironment(
-    'CLOUDFLARE_ACCOUNT_ID',
-    defaultValue: '',
-  );
+  static const String accountId = '9926100b5ebd116ea215d09ad09c2f78';
   
   static const String apiToken = String.fromEnvironment(
     'CLOUDFLARE_API_TOKEN',
@@ -17,15 +14,13 @@ abstract final class CloudflareConfig {
 
   // ─── R2 Storage ───────────────────────────────────────────
   
-  static const String r2Bucket = String.fromEnvironment(
-    'CLOUDFLARE_R2_BUCKET',
-    defaultValue: 'delwaqty-assets',
-  );
+  static const String r2Bucket = 'delwaqty-assets';
   
-  static const String r2AccountId = String.fromEnvironment(
-    'CLOUDFLARE_R2_ACCOUNT_ID',
-    defaultValue: '',
-  );
+  static const String r2AccountId = '9926100b5ebd116ea215d09ad09c2f78';
+  
+  static const String r2AccessKeyId = 'c9d7a83e716768d5225ec238b2f9c90f';
+  
+  static const String r2SecretAccessKey = 'a53c6b483b1c61062492e08481480edf5de6ca9bf5df02bb9af68f70570afd11';
 
   // ─── CDN ──────────────────────────────────────────────────
   

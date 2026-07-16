@@ -6,8 +6,9 @@
 
 ## Current Task
 
-Phase 3 — Supabase, Firebase, Google Maps all wired and verified.
-Ready for Cloudflare R2 setup.
+Phase 3 COMPLETE — All 4 external services wired and verified.
+Supabase DB deployed, Firebase wired, Google Maps configured, Cloudflare R2 ready.
+Next: Replace all mock repositories with real implementations.
 
 ---
 
@@ -69,10 +70,10 @@ Ready for Cloudflare R2 setup.
 | Supabase DB schema | ✅ Deployed | None | Tables, policies, indexes all live |
 | Firebase google-services.json | ✅ Wired | None | Real Firebase project connected |
 | Google Maps API key | ✅ Wired | None | Maps SDK + 5 APIs enabled |
-| Cloudflare credentials | ⏳ Pending | Cloudflare Dashboard | R2 + CDN |
+| Cloudflare R2 | ✅ Wired | None | Bucket + API token ready |
 
 ---
 
 ## Next Task
 
-Proceed to Cloudflare R2 setup for image storage.
+Replace all mock repositories with real Supabase implementations. Build first end-to-end production flow.

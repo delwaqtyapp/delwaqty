@@ -3,7 +3,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:delwaqty/app/app.dart';
-import 'package:delwaqty/core/constants/api_constants.dart';
 import 'package:delwaqty/data/datasources/local/shared_preferences_service.dart';
 import 'package:delwaqty/data/datasources/local/secure_storage_service.dart';
 import 'package:delwaqty/data/repositories/auth_repository_impl.dart';
@@ -14,8 +13,8 @@ import 'package:delwaqty/domain/usecases/user/get_user.dart';
 import 'package:delwaqty/domain/usecases/profile/profile_usecases.dart';
 import 'package:delwaqty/module_registry.dart';
 import 'package:delwaqty/services/connectivity/connectivity_service.dart';
+import 'package:delwaqty/services/supabase/supabase_initializer.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:supabase_flutter/supabase_flutter.dart' as sb;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -36,26 +35,10 @@ void main() async {
   final sharedPrefsService = SharedPreferencesService(sharedPreferences);
   final secureStorageService = SecureStorageService(secureStorage);
 
-  bool supabaseInitialized = false;
-
-  if (ApiConstants.baseUrl.isEmpty || ApiConstants.supabaseAnonKey.isEmpty) {
-    debugPrint(
-      'WARNING: Supabase credentials not provided. '
-      'Run with --dart-define=API_BASE_URL=... --dart-define=SUPABASE_ANON_KEY=...',
-    );
-  } else {
-    try {
-      await sb.Supabase.initialize(
-        url: ApiConstants.baseUrl,
-        publishableKey: ApiConstants.supabaseAnonKey,
-      );
-      supabaseInitialized = true;
-    } catch (e) {
-      debugPrint('Supabase initialization failed: $e');
-    }
-  }
-
-  if (!supabaseInitialized) {
+  try {
+    await SupabaseInitializer.initialize();
+  } catch (e) {
+    debugPrint('Supabase initialization failed: $e');
     debugPrint('App running without backend connectivity.');
   }
 

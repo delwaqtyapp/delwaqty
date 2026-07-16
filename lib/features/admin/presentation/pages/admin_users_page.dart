@@ -1,40 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:delwaqty/features/admin/domain/entities/admin_models.dart';
+import 'package:delwaqty/services/admin/admin_service.dart';
+import 'package:delwaqty/services/admin/admin_providers.dart';
 
-class AdminUsersPage extends StatelessWidget {
+class AdminUsersPage extends ConsumerWidget {
   const AdminUsersPage({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final sampleUsers = [
-      AdminUser(
-        id: 'usr-001',
-        name: 'Ahmed Al-Farsi',
-        email: 'ahmed@example.com',
-        role: AdminRole.admin,
-        status: AdminUserStatus.active,
-        lastLogin: DateTime.now().subtract(const Duration(minutes: 30)),
-        createdAt: DateTime(2024, 1, 15),
-      ),
-      AdminUser(
-        id: 'usr-002',
-        name: 'Sara Hassan',
-        email: 'sara@example.com',
-        role: AdminRole.support,
-        status: AdminUserStatus.active,
-        lastLogin: DateTime.now().subtract(const Duration(hours: 3)),
-        createdAt: DateTime(2024, 3, 22),
-      ),
-      AdminUser(
-        id: 'usr-003',
-        name: 'Mohammed Al-Qahtani',
-        email: 'mohammed@example.com',
-        role: AdminRole.moderator,
-        status: AdminUserStatus.suspended,
-        lastLogin: DateTime.now().subtract(const Duration(days: 14)),
-        createdAt: DateTime(2024, 6, 1),
-      ),
-    ];
+  Widget build(BuildContext context, WidgetRef ref) {
+    final usersAsync = ref.watch(adminUsersProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -42,8 +17,12 @@ class AdminUsersPage extends StatelessWidget {
         actions: [
           IconButton(
             icon: const Icon(Icons.person_add_outlined),
-            onPressed: () {},
+            onPressed: () => _showAddUserDialog(context, ref),
             tooltip: 'Add Admin User',
+          ),
+          IconButton(
+            icon: const Icon(Icons.refresh),
+            onPressed: () => ref.invalidate(adminUsersProvider),
           ),
         ],
       ),
@@ -59,35 +38,183 @@ class AdminUsersPage extends StatelessWidget {
                   borderRadius: BorderRadius.circular(12),
                 ),
               ),
+              onChanged: (value) {
+                ref.invalidate(adminUsersProvider);
+              },
             ),
           ),
           Expanded(
-            child: ListView.separated(
-              itemCount: sampleUsers.length,
-              separatorBuilder: (_, __) => const Divider(height: 1),
-              itemBuilder: (context, index) {
-                final user = sampleUsers[index];
-                return ListTile(
-                  leading: CircleAvatar(
-                    child: Text(user.name[0]),
-                  ),
-                  title: Text(user.name),
-                  subtitle: Text(user.email),
-                  trailing: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      _RoleChip(role: user.role),
-                      const SizedBox(width: 8),
-                      _StatusDot(status: user.status),
-                    ],
-                  ),
-                  onTap: () {},
+            child: usersAsync.when(
+              loading: () => const Center(child: CircularProgressIndicator()),
+              error: (e, _) => Center(child: Text('Error: $e')),
+              data: (users) {
+                if (users.isEmpty) {
+                  return const Center(child: Text('No users found'));
+                }
+                return ListView.separated(
+                  itemCount: users.length,
+                  separatorBuilder: (_, __) => const Divider(height: 1),
+                  itemBuilder: (context, index) {
+                    final user = users[index];
+                    return _UserTile(
+                      user: user,
+                      onStatusChanged: (status) async {
+                        final adminService = ref.read(adminServiceProvider);
+                        await adminService.updateUser(
+                          user.copyWith(status: status),
+                        );
+                        ref.invalidate(adminUsersProvider);
+                      },
+                      onDelete: () async {
+                        final adminService = ref.read(adminServiceProvider);
+                        await adminService.deleteUser(user.id);
+                        ref.invalidate(adminUsersProvider);
+                      },
+                    );
+                  },
                 );
               },
             ),
           ),
         ],
       ),
+    );
+  }
+
+  void _showAddUserDialog(BuildContext context, WidgetRef ref) {
+    final nameController = TextEditingController();
+    final emailController = TextEditingController();
+    AdminRole selectedRole = AdminRole.support;
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Add Admin User'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: nameController,
+              decoration: const InputDecoration(
+                labelText: 'Name',
+                border: OutlineInputBorder(),
+              ),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: emailController,
+              decoration: const InputDecoration(
+                labelText: 'Email',
+                border: OutlineInputBorder(),
+              ),
+            ),
+            const SizedBox(height: 12),
+            DropdownButtonFormField<AdminRole>(
+              value: selectedRole,
+              decoration: const InputDecoration(
+                labelText: 'Role',
+                border: OutlineInputBorder(),
+              ),
+              items: AdminRole.values.map((role) {
+                return DropdownMenuItem(
+                  value: role,
+                  child: Text(role.name.toUpperCase()),
+                );
+              }).toList(),
+              onChanged: (value) {
+                if (value != null) selectedRole = value;
+              },
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              final adminService = ref.read(adminServiceProvider);
+              await adminService.createUser(
+                AdminUser(
+                  id: '',
+                  name: nameController.text,
+                  email: emailController.text,
+                  role: selectedRole,
+                  status: AdminUserStatus.pending,
+                  createdAt: DateTime.now(),
+                ),
+              );
+              ref.invalidate(adminUsersProvider);
+              if (context.mounted) Navigator.pop(context);
+            },
+            child: const Text('Create'),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _UserTile extends StatelessWidget {
+  const _UserTile({
+    required this.user,
+    required this.onStatusChanged,
+    required this.onDelete,
+  });
+
+  final AdminUser user;
+  final Function(AdminUserStatus) onStatusChanged;
+  final VoidCallback onDelete;
+
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      leading: CircleAvatar(
+        child: Text(user.name[0]),
+      ),
+      title: Text(user.name),
+      subtitle: Text(user.email),
+      trailing: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          _RoleChip(role: user.role),
+          const SizedBox(width: 8),
+          _StatusDot(status: user.status),
+          PopupMenuButton<String>(
+            onSelected: (value) {
+              switch (value) {
+                case 'activate':
+                  onStatusChanged(AdminUserStatus.active);
+                  break;
+                case 'suspend':
+                  onStatusChanged(AdminUserStatus.suspended);
+                  break;
+                case 'delete':
+                  onDelete();
+                  break;
+              }
+            },
+            itemBuilder: (context) => [
+              if (user.status != AdminUserStatus.active)
+                const PopupMenuItem(
+                  value: 'activate',
+                  child: Text('Activate'),
+                ),
+              if (user.status != AdminUserStatus.suspended)
+                const PopupMenuItem(
+                  value: 'suspend',
+                  child: Text('Suspend'),
+                ),
+              const PopupMenuItem(
+                value: 'delete',
+                child: Text('Delete', style: TextStyle(color: Colors.red)),
+              ),
+            ],
+          ),
+        ],
+      ),
+      onTap: () {},
     );
   }
 }

@@ -1,10 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:delwaqty/services/admin/admin_service.dart';
+import 'package:delwaqty/services/admin/admin_providers.dart';
 
-class AdminMerchantsPage extends StatelessWidget {
+class AdminMerchantsPage extends ConsumerWidget {
   const AdminMerchantsPage({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final merchantsAsync = ref.watch(adminMerchantsProvider);
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Merchant Management'),
@@ -13,6 +18,10 @@ class AdminMerchantsPage extends StatelessWidget {
             icon: const Icon(Icons.filter_list_outlined),
             onPressed: () {},
             tooltip: 'Filter',
+          ),
+          IconButton(
+            icon: const Icon(Icons.refresh),
+            onPressed: () => ref.invalidate(adminMerchantsProvider),
           ),
         ],
       ),
@@ -28,34 +37,38 @@ class AdminMerchantsPage extends StatelessWidget {
                   borderRadius: BorderRadius.circular(12),
                 ),
               ),
+              onChanged: (value) {
+                ref.invalidate(adminMerchantsProvider);
+              },
             ),
           ),
           Expanded(
-            child: ListView(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              children: const [
-                _MerchantTile(
-                  name: 'Al Baik',
-                  type: 'Restaurant',
-                  status: 'Verified',
-                  orders: '12,450',
-                  rating: 4.8,
-                ),
-                _MerchantTile(
-                  name: 'Tamimi Markets',
-                  type: 'Grocery',
-                  status: 'Verified',
-                  orders: '8,320',
-                  rating: 4.6,
-                ),
-                _MerchantTile(
-                  name: 'Nahdi Pharmacy',
-                  type: 'Pharmacy',
-                  status: 'Pending Review',
-                  orders: '5,100',
-                  rating: 4.5,
-                ),
-              ],
+            child: merchantsAsync.when(
+              loading: () => const Center(child: CircularProgressIndicator()),
+              error: (e, _) => Center(child: Text('Error: $e')),
+              data: (merchants) {
+                if (merchants.isEmpty) {
+                  return const Center(child: Text('No merchants found'));
+                }
+                return ListView.builder(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  itemCount: merchants.length,
+                  itemBuilder: (context, index) {
+                    final merchant = merchants[index];
+                    return _MerchantTile(
+                      merchant: merchant,
+                      onStatusChanged: (status) async {
+                        final adminService = ref.read(adminServiceProvider);
+                        await adminService.updateMerchantStatus(
+                          merchant['id'] as String,
+                          status,
+                        );
+                        ref.invalidate(adminMerchantsProvider);
+                      },
+                    );
+                  },
+                );
+              },
             ),
           ),
         ],
@@ -66,44 +79,73 @@ class AdminMerchantsPage extends StatelessWidget {
 
 class _MerchantTile extends StatelessWidget {
   const _MerchantTile({
-    required this.name,
-    required this.type,
-    required this.status,
-    required this.orders,
-    required this.rating,
+    required this.merchant,
+    required this.onStatusChanged,
   });
 
-  final String name;
-  final String type;
-  final String status;
-  final String orders;
-  final double rating;
+  final Map<String, dynamic> merchant;
+  final Function(String) onStatusChanged;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isVerified = status == 'Verified';
+    final name = merchant['name'] as String? ?? 'Unknown';
+    final type = merchant['type'] as String? ?? 'General';
+    final status = merchant['status'] as String? ?? 'pending';
+    final isVerified = status == 'verified';
 
     return Card(
       margin: const EdgeInsets.only(bottom: 8),
       child: ListTile(
         leading: CircleAvatar(
-          backgroundColor: isVerified ? Colors.green.withOpacity(0.1) : Colors.orange.withOpacity(0.1),
+          backgroundColor: isVerified
+              ? Colors.green.withOpacity(0.1)
+              : Colors.orange.withOpacity(0.1),
           child: Icon(
             Icons.store_outlined,
             color: isVerified ? Colors.green : Colors.orange,
           ),
         ),
         title: Text(name),
-        subtitle: Text('$type · $orders orders'),
+        subtitle: Text(type),
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.star, color: Colors.amber, size: 16),
-            const SizedBox(width: 2),
-            Text(
-              rating.toString(),
-              style: theme.textTheme.bodySmall?.copyWith(fontWeight: FontWeight.bold),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+              decoration: BoxDecoration(
+                color: isVerified
+                    ? Colors.green.withOpacity(0.1)
+                    : Colors.orange.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Text(
+                status.toUpperCase(),
+                style: theme.textTheme.labelSmall?.copyWith(
+                  color: isVerified ? Colors.green : Colors.orange,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+            PopupMenuButton<String>(
+              onSelected: (value) => onStatusChanged(value),
+              itemBuilder: (context) => [
+                if (!isVerified)
+                  const PopupMenuItem(
+                    value: 'verified',
+                    child: Text('Verify'),
+                  ),
+                if (status != 'suspended')
+                  const PopupMenuItem(
+                    value: 'suspended',
+                    child: Text('Suspend'),
+                  ),
+                if (status != 'pending')
+                  const PopupMenuItem(
+                    value: 'pending',
+                    child: Text('Set Pending'),
+                  ),
+              ],
             ),
           ],
         ),

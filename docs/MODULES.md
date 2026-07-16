@@ -2,7 +2,9 @@
 
 Delwaqty uses a plugin-based module architecture. Every feature is a self-contained `FeatureModule` that registers its routes, providers, navigation entries, and lifecycle hooks with the platform core.
 
-## Registered Modules
+**GitHub:** https://github.com/delwaqtyapp/delwaqty
+
+## Registered Modules (11)
 
 | Module | ID | Nav Tab | Priority | Capabilities | Routes |
 |--------|----|---------|----------|--------------|--------|
@@ -17,6 +19,8 @@ Delwaqty uses a plugin-based module architecture. Every feature is a self-contai
 | ProfileModule | `profile` | No | — | — | `/profile` |
 | NotificationsModule | `notifications` | No | 55 | `hasNotifications` | `/notifications` |
 | AdminModule | `admin` | No | 100 | `searchable`, `hasNotifications` | `/admin/*` |
+
+> **Note:** The `categories` and `reports` features exist in `lib/features/` but do not yet have `FeatureModule` implementations registered in the module registry.
 
 ---
 
@@ -94,7 +98,8 @@ Sprint 10 finalized the workspace configuration and build infrastructure:
 
 ### Workspace
 - **Location:** `/root/Projects/delwaqty` (140MB)
-- **Git:** 10 commits on `master` branch
+- **Git:** 12 commits on `master` branch
+- **GitHub:** https://github.com/delwaqtyapp/delwaqty
 - **Config files:** `lib/config/` — Supabase, Google Maps, Cloudflare, Environment, Service Locator
 
 ### Build Infrastructure
@@ -105,7 +110,7 @@ Sprint 10 finalized the workspace configuration and build infrastructure:
 
 ### Environment Configuration
 All secrets injected via `--dart-define` or `.env` file:
-- Supabase: dev/prod URLs and anon keys
+- Supabase: dev/staging/prod URLs and anon keys
 - Google Maps: API key with Saudi Arabia defaults
 - Cloudflare: R2 bucket and CDN domain
 
@@ -114,6 +119,20 @@ Sprint 10 also completed the commerce presentation layer:
 - 7 reusable widgets (MerchantCard, ProductCard, CartBadge, etc.)
 - 6 presentation screens (discovery through checkout)
 - Mock data for 5 Saudi merchants (Al Baik, Tamimi, Nahdi, Jarir, IKEA)
+
+---
+
+## Sprint 11: Infrastructure Integration
+
+- [x] GitHub repository setup (https://github.com/delwaqtyapp/delwaqty)
+- [x] Multi-environment configuration (.env.dev, .env.staging, .env.prod)
+- [x] Security documentation (SECURITY.md)
+- [x] API plan documentation (API_PLAN.md)
+- [x] Database plan documentation (DATABASE_PLAN.md)
+- [x] Workspace setup documentation (WORKSPACE_SETUP.md)
+- [ ] Supabase project provisioning
+- [ ] Cloudflare R2 bucket configuration
+- [ ] GitHub Actions CI/CD pipeline
 
 ---
 

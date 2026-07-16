@@ -275,16 +275,27 @@ Tier 3: CROSS-MODULE
 
 ## Environment Configuration
 
+### Multi-Environment Setup
+
+| Environment | File | Purpose |
+|-------------|------|---------|
+| Development | `.env.dev` | Local development with Supabase dev project |
+| Staging | `.env.staging` | Pre-production testing |
+| Production | `.env.prod` | Live production environment |
+| Template | `.env.example` | Reference for all required variables |
+
 ### Supabase (Primary Database)
 
 | Variable | Purpose | Injected Via |
 |----------|---------|-------------|
 | SUPABASE_DEV_URL | Dev database URL | --dart-define |
 | SUPABASE_DEV_ANON_KEY | Dev auth key | --dart-define |
+| SUPABASE_STAGING_URL | Staging database URL | --dart-define |
+| SUPABASE_STAGING_ANON_KEY | Staging auth key | --dart-define |
 | SUPABASE_PROD_URL | Production database URL | --dart-define |
 | SUPABASE_PROD_ANON_KEY | Production auth key | --dart-define |
 
-Config: `lib/config/supabase_config.dart` — auto-selects dev/prod based on build mode.
+Config: `lib/config/supabase_config.dart` — auto-selects dev/staging/prod based on build mode and environment.
 
 ### Google Maps
 
@@ -292,7 +303,7 @@ Config: `lib/config/supabase_config.dart` — auto-selects dev/prod based on bui
 |----------|---------|-------------|
 | GOOGLE_MAPS_API_KEY | Maps SDK, Directions, Places, Geocoding | --dart-define |
 
-Config: `lib/config/maps_config.dart` — default center: Riyadh, Saudi Arabia.
+Config: `lib/config/maps_config.dart` — default center: Riyadh, Saudi Arabia (24.7136, 46.6753).
 
 ### Cloudflare (CDN/Storage, NOT replacing Supabase)
 
@@ -307,7 +318,7 @@ Config: `lib/config/cloudflare_config.dart` — R2 for storage, CDN for delivery
 
 ### Environment
 
-Config: `lib/config/environment.dart` — development/staging/production enum.
+Config: `lib/config/environment.dart` — development/staging/production enum with automatic config selection.
 
 ---
 

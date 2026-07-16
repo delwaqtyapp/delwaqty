@@ -6,6 +6,8 @@ Delwaqty is a **Platform Operating System (POS)** for everyday life — a super 
 
 The platform kernel is the real product. Every service — commerce, delivery, payments, AI, maps, search — is a plug-in module running on the same platform core. Individual services are replaceable. The kernel is permanent.
 
+**GitHub:** https://github.com/delwaqtyapp/delwaqty
+
 ## Core Philosophy
 
 > **Every service is a plugin. The platform kernel is the product.**
@@ -46,6 +48,8 @@ Each service is a self-contained module:
 | Settings | ✅ Built | Theme, language, account management |
 | Profile | ✅ Built | User profile management |
 | Admin Panel | ✅ Built | Super admin dashboard, user/merchant/order management, platform settings |
+| Categories | ✅ Built | Category management for commerce |
+| Reports | ✅ Built | Reporting infrastructure |
 | AI Core | Planned | LLM integration, smart search, recommendations, voice |
 | Map Engine | Planned | Location services, geocoding, routing, delivery tracking |
 | Search Engine | Planned | Full-text search across all modules, filters, suggestions |
@@ -89,6 +93,33 @@ Modules declare their dependencies via `dependsOn`. The registry resolves them t
 
 ### 7. Accessibility by Default
 RTL support, semantic labels, proper contrast ratios, and responsive layouts are built in, not bolted on.
+
+## Infrastructure Status
+
+### Backend
+- **Database:** Supabase (PostgreSQL) with Row Level Security
+- **Auth:** Supabase Auth with JWT tokens
+- **Real-time:** Supabase Realtime for live updates
+- **Edge Functions:** Planned for notifications, payments, coupon validation
+
+### Storage & CDN
+- **Assets:** Cloudflare R2 (S3-compatible) for images and documents
+- **CDN:** Cloudflare CDN for global edge caching
+- **Primary Domain:** cdn.delwaqty.com
+
+### Mobile
+- **Framework:** Flutter 3.44.6+ (Dart ^3.12.2)
+- **Platforms:** Android, iOS, Web, Linux, macOS, Windows
+- **State:** 11 registered FeatureModule plugins
+- **Build:** Automated pipeline (analyze → test → APK)
+
+### Development Environment
+- **Workspace:** /root/Projects/delwaqty (Linux aarch64)
+- **Git:** 12 commits, master branch
+- **GitHub:** https://github.com/delwaqtyapp/delwaqty
+- **CI/CD:** GitHub Actions (planned)
+
+---
 
 ## Success Metrics
 

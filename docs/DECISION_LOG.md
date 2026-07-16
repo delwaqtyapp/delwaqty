@@ -425,6 +425,110 @@ Provide multiple build scripts:
 
 ---
 
+## ADR-017: Infrastructure Integration Phase
+
+**Date:** Sprint 11
+**Status:** Accepted
+**Deciders:** Core team
+
+### Context
+The project needs a structured approach to integrate external infrastructure (Supabase, Cloudflare, GitHub) into the development workflow.
+
+### Decision
+Dedicate Sprint 11 as an infrastructure integration phase, creating all necessary documentation, configuration, and CI/CD setup before proceeding with feature development.
+
+### Rationale
+- Documentation-first approach ensures reproducibility
+- Multi-environment configuration prevents environment drift
+- Security policies established before production deployment
+- API and database plans provide clear integration targets
+
+### Consequences
+- Sprint 11 is documentation and configuration focused
+- Feature development pauses until infrastructure is stable
+- All team members have clear environment setup instructions
+- Reduces integration risk in later sprints
+
+---
+
+## ADR-018: GitHub Repository Setup
+
+**Date:** Sprint 11
+**Status:** Accepted
+**Deciders:** Core team
+
+### Context
+The project needs a central code repository with proper branching, access control, and CI/CD integration.
+
+### Decision
+Host the repository at https://github.com/delwaqtyapp/delwaqty with master as the primary branch.
+
+### Rationale
+- GitHub provides free hosting for private repositories
+- Built-in CI/CD via GitHub Actions
+- Issue tracking and project management
+- Pull request workflow for code review
+
+### Consequences
+- All commits are pushed to GitHub
+- Branch protection rules can be enforced
+- GitHub Actions can automate builds and tests
+- Fork-based workflow for external contributors
+
+---
+
+## ADR-019: Multi-Environment Configuration
+
+**Date:** Sprint 11
+**Status:** Accepted
+**Deciders:** Core team
+
+### Context
+The app needs to connect to different Supabase projects and service endpoints depending on whether it's running in development, staging, or production.
+
+### Decision
+Use separate `.env` files for each environment (`.env.dev`, `.env.staging`, `.env.prod`) with a `.env.example` template. Inject values via `--dart-define-from-file`.
+
+### Rationale
+- Prevents accidental production data access during development
+- Each environment has isolated database and auth
+- Easy to switch environments by changing the env file
+- Template ensures all required variables are documented
+
+### Consequences
+- Developers must maintain separate env files
+- CI/CD pipelines inject environment-specific values
+- Environment selection is compile-time (not runtime)
+- Config classes auto-select based on build mode
+
+---
+
+## ADR-020: Mobile Development Workflow
+
+**Date:** Sprint 11
+**Status:** Accepted
+**Deciders:** Core team
+
+### Context
+The primary development happens on a Linux aarch64 device (Termux/PRoot on Android), which has limited resources and tooling compared to a standard development machine.
+
+### Decision
+Optimize the development workflow for mobile-first development with quick iteration cycles and minimal resource usage.
+
+### Rationale
+- `dev_build.sh` skips full test suite for faster iteration
+- Mock repositories eliminate need for backend connectivity
+- Environment files allow quick context switching
+- Build scripts handle analysis, testing, and APK generation
+
+### Consequences
+- Development can happen on a mobile device
+- Full builds still require the complete pipeline
+- Code generation runs on-demand, not automatically
+- Testing is optional for quick iterations
+
+---
+
 ## Summary
 
 | ADR | Decision | Status | Impact |
@@ -445,3 +549,7 @@ Provide multiple build scripts:
 | 014 | Environment via --dart-define | Accepted | Secrets management |
 | 015 | Cloudflare CDN/Storage | Accepted | Asset delivery architecture |
 | 016 | APK Build Workflow | Accepted | Build and release process |
+| 017 | Infrastructure Integration Phase | Accepted | Sprint 11 focus |
+| 018 | GitHub Repository Setup | Accepted | Code hosting and CI/CD |
+| 019 | Multi-Environment Configuration | Accepted | Environment isolation |
+| 020 | Mobile Development Workflow | Accepted | Development optimization |

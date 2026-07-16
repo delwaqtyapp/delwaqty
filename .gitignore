@@ -40,11 +40,15 @@ app.*.map.json
 /android/app/profile
 /android/app/release
 
-# Environment files
+# Environment files (secrets)
 .env
 .env.*
 !.env.example
 *.env
+.env.dev
+.env.staging
+.env.prod
+.env.local
 
 # Build artifacts
 /build/
@@ -82,3 +86,18 @@ app.*.map.json
 *.tmp
 *.bak
 *.swp
+
+# Flutter Version Management
+.fvm/
+
+# Android signing keys
+*.jks
+*.keystore
+
+# Proguard
+**/proguard-rules.pro
+**/proguard-*.pro
+
+# CI/CD generated
+*.hmac
+.github/secrets*

@@ -23,15 +23,20 @@ Coupon _$CouponFromJson(Map<String, dynamic> json) {
 mixin _$Coupon {
   String get id => throw _privateConstructorUsedError;
   String get code => throw _privateConstructorUsedError;
+  String? get description => throw _privateConstructorUsedError;
   CouponType get type => throw _privateConstructorUsedError;
   double get value => throw _privateConstructorUsedError;
   double? get minimumOrder => throw _privateConstructorUsedError;
   double? get maximumDiscount => throw _privateConstructorUsedError;
-  List<String> get applicableMerchantIds => throw _privateConstructorUsedError;
+  String? get merchantId => throw _privateConstructorUsedError;
+  String? get branchId => throw _privateConstructorUsedError;
+  String? get productId => throw _privateConstructorUsedError;
+  String? get categoryId => throw _privateConstructorUsedError;
   int? get usageLimit => throw _privateConstructorUsedError;
   int? get usedCount => throw _privateConstructorUsedError;
   DateTime? get expiresAt => throw _privateConstructorUsedError;
   bool get isActive => throw _privateConstructorUsedError;
+  DateTime? get createdAt => throw _privateConstructorUsedError;
 
   /// Serializes this Coupon to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -50,15 +55,20 @@ abstract class $CouponCopyWith<$Res> {
   $Res call({
     String id,
     String code,
+    String? description,
     CouponType type,
     double value,
     double? minimumOrder,
     double? maximumDiscount,
-    List<String> applicableMerchantIds,
+    String? merchantId,
+    String? branchId,
+    String? productId,
+    String? categoryId,
     int? usageLimit,
     int? usedCount,
     DateTime? expiresAt,
     bool isActive,
+    DateTime? createdAt,
   });
 }
 
@@ -79,15 +89,20 @@ class _$CouponCopyWithImpl<$Res, $Val extends Coupon>
   $Res call({
     Object? id = null,
     Object? code = null,
+    Object? description = freezed,
     Object? type = null,
     Object? value = null,
     Object? minimumOrder = freezed,
     Object? maximumDiscount = freezed,
-    Object? applicableMerchantIds = null,
+    Object? merchantId = freezed,
+    Object? branchId = freezed,
+    Object? productId = freezed,
+    Object? categoryId = freezed,
     Object? usageLimit = freezed,
     Object? usedCount = freezed,
     Object? expiresAt = freezed,
     Object? isActive = null,
+    Object? createdAt = freezed,
   }) {
     return _then(
       _value.copyWith(
@@ -99,6 +114,10 @@ class _$CouponCopyWithImpl<$Res, $Val extends Coupon>
                 ? _value.code
                 : code // ignore: cast_nullable_to_non_nullable
                       as String,
+            description: freezed == description
+                ? _value.description
+                : description // ignore: cast_nullable_to_non_nullable
+                      as String?,
             type: null == type
                 ? _value.type
                 : type // ignore: cast_nullable_to_non_nullable
@@ -115,10 +134,22 @@ class _$CouponCopyWithImpl<$Res, $Val extends Coupon>
                 ? _value.maximumDiscount
                 : maximumDiscount // ignore: cast_nullable_to_non_nullable
                       as double?,
-            applicableMerchantIds: null == applicableMerchantIds
-                ? _value.applicableMerchantIds
-                : applicableMerchantIds // ignore: cast_nullable_to_non_nullable
-                      as List<String>,
+            merchantId: freezed == merchantId
+                ? _value.merchantId
+                : merchantId // ignore: cast_nullable_to_non_nullable
+                      as String?,
+            branchId: freezed == branchId
+                ? _value.branchId
+                : branchId // ignore: cast_nullable_to_non_nullable
+                      as String?,
+            productId: freezed == productId
+                ? _value.productId
+                : productId // ignore: cast_nullable_to_non_nullable
+                      as String?,
+            categoryId: freezed == categoryId
+                ? _value.categoryId
+                : categoryId // ignore: cast_nullable_to_non_nullable
+                      as String?,
             usageLimit: freezed == usageLimit
                 ? _value.usageLimit
                 : usageLimit // ignore: cast_nullable_to_non_nullable
@@ -135,6 +166,10 @@ class _$CouponCopyWithImpl<$Res, $Val extends Coupon>
                 ? _value.isActive
                 : isActive // ignore: cast_nullable_to_non_nullable
                       as bool,
+            createdAt: freezed == createdAt
+                ? _value.createdAt
+                : createdAt // ignore: cast_nullable_to_non_nullable
+                      as DateTime?,
           )
           as $Val,
     );
@@ -152,15 +187,20 @@ abstract class _$$CouponImplCopyWith<$Res> implements $CouponCopyWith<$Res> {
   $Res call({
     String id,
     String code,
+    String? description,
     CouponType type,
     double value,
     double? minimumOrder,
     double? maximumDiscount,
-    List<String> applicableMerchantIds,
+    String? merchantId,
+    String? branchId,
+    String? productId,
+    String? categoryId,
     int? usageLimit,
     int? usedCount,
     DateTime? expiresAt,
     bool isActive,
+    DateTime? createdAt,
   });
 }
 
@@ -180,15 +220,20 @@ class __$$CouponImplCopyWithImpl<$Res>
   $Res call({
     Object? id = null,
     Object? code = null,
+    Object? description = freezed,
     Object? type = null,
     Object? value = null,
     Object? minimumOrder = freezed,
     Object? maximumDiscount = freezed,
-    Object? applicableMerchantIds = null,
+    Object? merchantId = freezed,
+    Object? branchId = freezed,
+    Object? productId = freezed,
+    Object? categoryId = freezed,
     Object? usageLimit = freezed,
     Object? usedCount = freezed,
     Object? expiresAt = freezed,
     Object? isActive = null,
+    Object? createdAt = freezed,
   }) {
     return _then(
       _$CouponImpl(
@@ -200,6 +245,10 @@ class __$$CouponImplCopyWithImpl<$Res>
             ? _value.code
             : code // ignore: cast_nullable_to_non_nullable
                   as String,
+        description: freezed == description
+            ? _value.description
+            : description // ignore: cast_nullable_to_non_nullable
+                  as String?,
         type: null == type
             ? _value.type
             : type // ignore: cast_nullable_to_non_nullable
@@ -216,10 +265,22 @@ class __$$CouponImplCopyWithImpl<$Res>
             ? _value.maximumDiscount
             : maximumDiscount // ignore: cast_nullable_to_non_nullable
                   as double?,
-        applicableMerchantIds: null == applicableMerchantIds
-            ? _value._applicableMerchantIds
-            : applicableMerchantIds // ignore: cast_nullable_to_non_nullable
-                  as List<String>,
+        merchantId: freezed == merchantId
+            ? _value.merchantId
+            : merchantId // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        branchId: freezed == branchId
+            ? _value.branchId
+            : branchId // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        productId: freezed == productId
+            ? _value.productId
+            : productId // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        categoryId: freezed == categoryId
+            ? _value.categoryId
+            : categoryId // ignore: cast_nullable_to_non_nullable
+                  as String?,
         usageLimit: freezed == usageLimit
             ? _value.usageLimit
             : usageLimit // ignore: cast_nullable_to_non_nullable
@@ -236,6 +297,10 @@ class __$$CouponImplCopyWithImpl<$Res>
             ? _value.isActive
             : isActive // ignore: cast_nullable_to_non_nullable
                   as bool,
+        createdAt: freezed == createdAt
+            ? _value.createdAt
+            : createdAt // ignore: cast_nullable_to_non_nullable
+                  as DateTime?,
       ),
     );
   }
@@ -247,16 +312,21 @@ class _$CouponImpl implements _Coupon {
   const _$CouponImpl({
     required this.id,
     required this.code,
+    this.description,
     required this.type,
     required this.value,
     this.minimumOrder,
     this.maximumDiscount,
-    final List<String> applicableMerchantIds = const [],
+    this.merchantId,
+    this.branchId,
+    this.productId,
+    this.categoryId,
     this.usageLimit,
     this.usedCount,
     this.expiresAt,
     this.isActive = true,
-  }) : _applicableMerchantIds = applicableMerchantIds;
+    this.createdAt,
+  });
 
   factory _$CouponImpl.fromJson(Map<String, dynamic> json) =>
       _$$CouponImplFromJson(json);
@@ -266,6 +336,8 @@ class _$CouponImpl implements _Coupon {
   @override
   final String code;
   @override
+  final String? description;
+  @override
   final CouponType type;
   @override
   final double value;
@@ -273,16 +345,14 @@ class _$CouponImpl implements _Coupon {
   final double? minimumOrder;
   @override
   final double? maximumDiscount;
-  final List<String> _applicableMerchantIds;
   @override
-  @JsonKey()
-  List<String> get applicableMerchantIds {
-    if (_applicableMerchantIds is EqualUnmodifiableListView)
-      return _applicableMerchantIds;
-    // ignore: implicit_dynamic_type
-    return EqualUnmodifiableListView(_applicableMerchantIds);
-  }
-
+  final String? merchantId;
+  @override
+  final String? branchId;
+  @override
+  final String? productId;
+  @override
+  final String? categoryId;
   @override
   final int? usageLimit;
   @override
@@ -292,10 +362,12 @@ class _$CouponImpl implements _Coupon {
   @override
   @JsonKey()
   final bool isActive;
+  @override
+  final DateTime? createdAt;
 
   @override
   String toString() {
-    return 'Coupon(id: $id, code: $code, type: $type, value: $value, minimumOrder: $minimumOrder, maximumDiscount: $maximumDiscount, applicableMerchantIds: $applicableMerchantIds, usageLimit: $usageLimit, usedCount: $usedCount, expiresAt: $expiresAt, isActive: $isActive)';
+    return 'Coupon(id: $id, code: $code, description: $description, type: $type, value: $value, minimumOrder: $minimumOrder, maximumDiscount: $maximumDiscount, merchantId: $merchantId, branchId: $branchId, productId: $productId, categoryId: $categoryId, usageLimit: $usageLimit, usedCount: $usedCount, expiresAt: $expiresAt, isActive: $isActive, createdAt: $createdAt)';
   }
 
   @override
@@ -305,16 +377,22 @@ class _$CouponImpl implements _Coupon {
             other is _$CouponImpl &&
             (identical(other.id, id) || other.id == id) &&
             (identical(other.code, code) || other.code == code) &&
+            (identical(other.description, description) ||
+                other.description == description) &&
             (identical(other.type, type) || other.type == type) &&
             (identical(other.value, value) || other.value == value) &&
             (identical(other.minimumOrder, minimumOrder) ||
                 other.minimumOrder == minimumOrder) &&
             (identical(other.maximumDiscount, maximumDiscount) ||
                 other.maximumDiscount == maximumDiscount) &&
-            const DeepCollectionEquality().equals(
-              other._applicableMerchantIds,
-              _applicableMerchantIds,
-            ) &&
+            (identical(other.merchantId, merchantId) ||
+                other.merchantId == merchantId) &&
+            (identical(other.branchId, branchId) ||
+                other.branchId == branchId) &&
+            (identical(other.productId, productId) ||
+                other.productId == productId) &&
+            (identical(other.categoryId, categoryId) ||
+                other.categoryId == categoryId) &&
             (identical(other.usageLimit, usageLimit) ||
                 other.usageLimit == usageLimit) &&
             (identical(other.usedCount, usedCount) ||
@@ -322,7 +400,9 @@ class _$CouponImpl implements _Coupon {
             (identical(other.expiresAt, expiresAt) ||
                 other.expiresAt == expiresAt) &&
             (identical(other.isActive, isActive) ||
-                other.isActive == isActive));
+                other.isActive == isActive) &&
+            (identical(other.createdAt, createdAt) ||
+                other.createdAt == createdAt));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
@@ -331,15 +411,20 @@ class _$CouponImpl implements _Coupon {
     runtimeType,
     id,
     code,
+    description,
     type,
     value,
     minimumOrder,
     maximumDiscount,
-    const DeepCollectionEquality().hash(_applicableMerchantIds),
+    merchantId,
+    branchId,
+    productId,
+    categoryId,
     usageLimit,
     usedCount,
     expiresAt,
     isActive,
+    createdAt,
   );
 
   /// Create a copy of Coupon
@@ -360,15 +445,20 @@ abstract class _Coupon implements Coupon {
   const factory _Coupon({
     required final String id,
     required final String code,
+    final String? description,
     required final CouponType type,
     required final double value,
     final double? minimumOrder,
     final double? maximumDiscount,
-    final List<String> applicableMerchantIds,
+    final String? merchantId,
+    final String? branchId,
+    final String? productId,
+    final String? categoryId,
     final int? usageLimit,
     final int? usedCount,
     final DateTime? expiresAt,
     final bool isActive,
+    final DateTime? createdAt,
   }) = _$CouponImpl;
 
   factory _Coupon.fromJson(Map<String, dynamic> json) = _$CouponImpl.fromJson;
@@ -378,6 +468,8 @@ abstract class _Coupon implements Coupon {
   @override
   String get code;
   @override
+  String? get description;
+  @override
   CouponType get type;
   @override
   double get value;
@@ -386,7 +478,13 @@ abstract class _Coupon implements Coupon {
   @override
   double? get maximumDiscount;
   @override
-  List<String> get applicableMerchantIds;
+  String? get merchantId;
+  @override
+  String? get branchId;
+  @override
+  String? get productId;
+  @override
+  String? get categoryId;
   @override
   int? get usageLimit;
   @override
@@ -395,6 +493,8 @@ abstract class _Coupon implements Coupon {
   DateTime? get expiresAt;
   @override
   bool get isActive;
+  @override
+  DateTime? get createdAt;
 
   /// Create a copy of Coupon
   /// with the given fields replaced by the non-null parameter values.

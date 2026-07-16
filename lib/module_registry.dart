@@ -10,6 +10,7 @@ import 'package:delwaqty/features/profile/profile_module.dart';
 import 'package:delwaqty/features/notifications/notifications_module.dart';
 import 'package:delwaqty/features/commerce/commerce_module.dart';
 import 'package:delwaqty/features/admin/admin_module.dart';
+import 'package:delwaqty/features/restaurant/restaurant_module.dart';
 
 void registerAllModules() {
   final registry = FeatureRegistry.instance;
@@ -22,6 +23,7 @@ void registerAllModules() {
     HomeModule(),
     ExpensesModule(),
     CommerceModule(),
+    RestaurantModule(),
     SettingsModule(),
     ProfileModule(),
     NotificationsModule(),

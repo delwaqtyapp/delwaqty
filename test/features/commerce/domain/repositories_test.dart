@@ -484,6 +484,7 @@ void main() {
     test('createOrder creates and returns order', () async {
       final order = await repo.createOrder(
         merchantId: 'm1',
+        merchantName: 'Test Merchant',
         items: [
           CartItem(
             id: 'ci1',
@@ -508,6 +509,7 @@ void main() {
     test('createOrder adds to orders list', () async {
       await repo.createOrder(
         merchantId: 'm1',
+        merchantName: 'Test Merchant',
         items: [
           CartItem(
             id: 'ci1',
@@ -530,6 +532,7 @@ void main() {
     test('getOrderById returns order', () async {
       final created = await repo.createOrder(
         merchantId: 'm1',
+        merchantName: 'Test Merchant',
         items: [],
         subtotal: 0.0,
         deliveryFee: 0.0,
@@ -550,6 +553,7 @@ void main() {
     test('getOrders filters by status', () async {
       await repo.createOrder(
         merchantId: 'm1',
+        merchantName: 'Test Merchant',
         items: [],
         subtotal: 0.0,
         deliveryFee: 0.0,
@@ -567,6 +571,7 @@ void main() {
     test('getOrders respects limit', () async {
       await repo.createOrder(
         merchantId: 'm1',
+        merchantName: 'Test Merchant',
         items: [],
         subtotal: 0.0,
         deliveryFee: 0.0,
@@ -575,6 +580,7 @@ void main() {
       );
       await repo.createOrder(
         merchantId: 'm1',
+        merchantName: 'Test Merchant',
         items: [],
         subtotal: 0.0,
         deliveryFee: 0.0,
@@ -589,6 +595,7 @@ void main() {
     test('cancelOrder cancels the order', () async {
       final created = await repo.createOrder(
         merchantId: 'm1',
+        merchantName: 'Test Merchant',
         items: [],
         subtotal: 0.0,
         deliveryFee: 0.0,
@@ -629,6 +636,7 @@ void main() {
     test('submitReview creates and returns review', () async {
       final review = await repo.submitReview(
         merchantId: 'm1',
+        userId: 'user_1',
         rating: 4.5,
         comment: 'Great!',
       );
@@ -638,13 +646,12 @@ void main() {
       expect(review.rating, 4.5);
       expect(review.comment, 'Great!');
       expect(review.userId, 'user_1');
-      expect(review.userName, 'Current User');
     });
 
     test('getMerchantReviews returns reviews for merchant', () async {
-      await repo.submitReview(merchantId: 'm1', rating: 5.0);
-      await repo.submitReview(merchantId: 'm1', rating: 4.0);
-      await repo.submitReview(merchantId: 'm2', rating: 3.0);
+      await repo.submitReview(merchantId: 'm1', userId: 'u1', rating: 5.0);
+      await repo.submitReview(merchantId: 'm1', userId: 'u2', rating: 4.0);
+      await repo.submitReview(merchantId: 'm2', userId: 'u3', rating: 3.0);
 
       final reviews = await repo.getMerchantReviews('m1');
       expect(reviews.length, 2);
@@ -656,6 +663,7 @@ void main() {
     test('getReviewById returns review', () async {
       final submitted = await repo.submitReview(
         merchantId: 'm1',
+        userId: 'user_1',
         rating: 4.0,
       );
 

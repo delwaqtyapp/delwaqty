@@ -771,22 +771,26 @@ void main() {
         value: 10,
       );
 
-      expect(coupon.applicableMerchantIds, isEmpty);
       expect(coupon.isActive, true);
       expect(coupon.minimumOrder, isNull);
       expect(coupon.maximumDiscount, isNull);
       expect(coupon.expiresAt, isNull);
+      expect(coupon.merchantId, isNull);
+      expect(coupon.branchId, isNull);
+      expect(coupon.productId, isNull);
+      expect(coupon.categoryId, isNull);
     });
 
     test('fromJson roundtrip preserves data', () {
       final original = Coupon(
         id: 'c1',
         code: 'SAVE10',
+        description: 'Save 10 percent',
         type: CouponType.percentage,
         value: 10,
         minimumOrder: 30.0,
         maximumDiscount: 50.0,
-        applicableMerchantIds: ['m1'],
+        merchantId: 'm1',
         usageLimit: 100,
         usedCount: 5,
         expiresAt: now,

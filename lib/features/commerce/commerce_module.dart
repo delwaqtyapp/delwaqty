@@ -19,8 +19,10 @@ import 'package:delwaqty/data/repositories/local_cart_repository.dart';
 import 'package:delwaqty/data/datasources/remote/supabase_product_data_source.dart';
 import 'package:delwaqty/data/datasources/remote/supabase_favorite_data_source.dart';
 import 'package:delwaqty/data/datasources/remote/supabase_order_data_source.dart';
-import 'package:delwaqty/features/commerce/data/repositories/mock/mock_review_repository.dart';
-import 'package:delwaqty/features/commerce/data/repositories/mock/mock_coupon_repository.dart';
+import 'package:delwaqty/data/datasources/remote/supabase_review_data_source.dart';
+import 'package:delwaqty/data/datasources/remote/supabase_coupon_data_source.dart';
+import 'package:delwaqty/data/repositories/review_repository_impl.dart';
+import 'package:delwaqty/data/repositories/coupon_repository_impl.dart';
 import 'package:delwaqty/features/commerce/presentation/pages/commerce_discovery_page.dart';
 import 'package:delwaqty/features/commerce/presentation/pages/merchant_detail_page.dart';
 import 'package:delwaqty/features/commerce/presentation/pages/product_detail_page.dart';
@@ -62,12 +64,24 @@ final orderRepositoryProvider = Provider<OrderRepository>(
   (ref) => ref.watch(orderRepositoryImplProvider),
 );
 
+final reviewRepositoryImplProvider = Provider<ReviewRepositoryImpl>((ref) {
+  return ReviewRepositoryImpl(
+    ref.watch(supabaseReviewDataSourceProvider),
+  );
+});
+
 final reviewRepositoryProvider = Provider<ReviewRepository>(
-  (_) => MockReviewRepository(),
+  (ref) => ref.watch(reviewRepositoryImplProvider),
 );
 
+final couponRepositoryImplProvider = Provider<CouponRepositoryImpl>((ref) {
+  return CouponRepositoryImpl(
+    ref.watch(supabaseCouponDataSourceProvider),
+  );
+});
+
 final couponRepositoryProvider = Provider<CouponRepository>(
-  (_) => MockCouponRepository(),
+  (ref) => ref.watch(couponRepositoryImplProvider),
 );
 
 final favoriteRepositoryImplProvider = Provider<FavoriteRepositoryImpl>((ref) {

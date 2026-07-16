@@ -1,15 +1,14 @@
 # SESSION_STATUS.md
 
-> **Last updated:** 2026-07-16
+> **Last updated:** 2026-07-17
 
 ---
 
 ## Current Task
 
-PROJECT CONSTITUTION ADOPTED — Version 1.0.
-All documentation synchronized. GitHub identity permanently fixed.
-Phase 4 complete — 15 of 17 repositories now real Supabase implementations.
-Next: Wire Reviews + Coupons (final 2 mocks), then proceed to Merchant Platform per Constitution §15.
+Phase 5 — Restaurant Plugin data layer COMPLETE.
+All 8 entities, 8 repository interfaces, 8 data sources, 8 repository implementations created.
+RestaurantModule registered in module_registry. 443 tests passing.
 
 ---
 
@@ -17,14 +16,21 @@ Next: Wire Reviews + Coupons (final 2 mocks), then proceed to Merchant Platform 
 
 | File | Change |
 |------|--------|
-| `PROJECT_CONSTITUTION.md` | Created — highest-level project authority |
-| `AGENTS.md` | Updated — references Constitution as highest authority |
-| `ROADMAP.md` | Created — root-level roadmap per Constitution §6 |
-| `docs/PROJECT_HEALTH.md` | Created — project health metrics |
-| `docs/PRODUCTION_STATUS.md` | Created — production readiness tracking |
-| `docs/MIGRATION_REPORT.md` | Created — mock→real migration tracking |
-| `docs/GITHUB_CREDENTIAL_BACKUP.md` | Created — pre-cleanup credential snapshot |
-| `docs/GITHUB_IDENTITY_REPORT.md` | Created — identity fix report |
+| `lib/features/restaurant/data/datasources/remote/supabase_modifier_data_source.dart` | Created |
+| `lib/features/restaurant/data/datasources/remote/supabase_restaurant_settings_data_source.dart` | Created |
+| `lib/features/restaurant/data/datasources/remote/supabase_offer_data_source.dart` | Created |
+| `lib/features/restaurant/data/datasources/remote/supabase_reservation_data_source.dart` | Created |
+| `lib/features/restaurant/data/datasources/remote/supabase_order_tracking_data_source.dart` | Created |
+| `lib/features/restaurant/data/repositories/branch_repository_impl.dart` | Created |
+| `lib/features/restaurant/data/repositories/working_hours_repository_impl.dart` | Created |
+| `lib/features/restaurant/data/repositories/delivery_zone_repository_impl.dart` | Created |
+| `lib/features/restaurant/data/repositories/modifier_repository_impl.dart` | Created |
+| `lib/features/restaurant/data/repositories/restaurant_settings_repository_impl.dart` | Created |
+| `lib/features/restaurant/data/repositories/offer_repository_impl.dart` | Created |
+| `lib/features/restaurant/data/repositories/reservation_repository_impl.dart` | Created |
+| `lib/features/restaurant/data/repositories/order_tracking_repository_impl.dart` | Created |
+| `lib/features/restaurant/restaurant_module.dart` | Created — provider wiring + module registration |
+| `lib/module_registry.dart` | Updated — RestaurantModule added |
 
 ---
 
@@ -32,9 +38,9 @@ Next: Wire Reviews + Coupons (final 2 mocks), then proceed to Merchant Platform 
 
 | Decision | Rationale |
 |----------|-----------|
-| PROJECT_CONSTITUTION.md adopted | Permanent project authority, overrides temporary prompts |
-| Constitution §15 development order | Ensures systematic feature development |
-| ROADMAP.md at project root | Constitution §6 requires it, aligns with AGENTS.md |
+| Restaurant data layer in feature/restaurant/data/ | Follows Constitution §8 — plugin boundary isolation |
+| RestaurantModule registered after CommerceModule | Commerce dependency for merchant/product repos |
+| All repos use ServerException wrapping | Consistent with existing Phase 4 pattern |
 
 ---
 
@@ -42,53 +48,26 @@ Next: Wire Reviews + Coupons (final 2 mocks), then proceed to Merchant Platform 
 
 | Check | Result |
 |-------|--------|
-| `flutter analyze` | 0 errors, 4 info lints |
+| `flutter analyze` | 0 errors, 0 warnings (info-level only) |
 | `flutter test` | 443/443 passing |
-| Git fetch/pull/push | ✅ Works without prompt |
-| GitHub identity | ✅ Single account (delwaqtyapp) |
 
 ---
 
-## Services Status
+## Restaurant Plugin Files
 
-| Service | Status | Provider |
-|---------|--------|----------|
-| Auth | ✅ Real | Supabase GoTrue |
-| Profile | ✅ Real | Supabase Realtime |
-| User | ✅ Real | Supabase (deleteUser) |
-| Location | ✅ Real | geolocator |
-| Analytics | ✅ Real | Firebase Analytics |
-| Crash Reporting | ✅ Real | Firebase Crashlytics |
-| Performance | ✅ Real | Firebase Performance |
-| Notifications | ✅ Real | FCM + flutter_local_notifications |
-| Maps | ✅ Real | Google Maps (5 APIs) |
-| Storage | ✅ Real | SharedPreferences + SecureStorage |
-| Merchant | ✅ Real | Supabase merchants table |
-| CatalogCategory | ✅ Real | Supabase catalog_categories table |
-| Product | ✅ Real | Supabase products table |
-| Favorite | ✅ Real | Supabase favorites table |
-| Cart | ✅ Real | SharedPreferences |
-| Order | ✅ Real | Supabase orders + order_items |
-| Reviews | ⏳ Mock | Supabase reviews table exists, not wired |
-| Coupons | ⏳ Mock | Supabase coupons table exists, not wired |
-| Search | ⏳ Mock | Per Constitution — intentional |
-| Payment | ⏳ Mock | Per Constitution §15 — not started |
-| Image Picker | ⏳ Mock | Per Constitution — intentional |
-
----
-
-## Infrastructure Status
-
-| Blocker | Status |
-|---------|--------|
-| Supabase DB | ✅ Deployed (14 tables, 29 RLS, 16 indexes) |
-| Firebase | ✅ Wired (delwaqty0) |
-| Google Maps | ✅ Wired (5 APIs) |
-| Cloudflare R2 | ✅ Wired (delwaqty-assets) |
-| GitHub Identity | ✅ Fixed (single account) |
+| Layer | Files | Status |
+|-------|-------|--------|
+| Domain entities | Branch, WorkingHours, DeliveryZone, ProductModifier, RestaurantSettings, Offer, Reservation, OrderTracking | ✅ 8/8 |
+| Domain repositories | branch, working_hours, delivery_zone, modifier, restaurant_settings, offer, reservation, order_tracking | ✅ 8/8 |
+| Data sources | supabase_branch, supabase_working_hours, supabase_delivery_zone, supabase_modifier, supabase_restaurant_settings, supabase_offer, supabase_reservation, supabase_order_tracking | ✅ 8/8 |
+| Repository impls | branch, working_hours, delivery_zone, modifier, restaurant_settings, offer, reservation, order_tracking | ✅ 8/8 |
+| Module wiring | RestaurantModule + module_registry | ✅ |
 
 ---
 
 ## Next Task
 
-Wire Reviews and Coupons to Supabase (final 2 mocks), then proceed to Merchant Platform per Constitution §15 development order.
+1. Wire Reviews + Coupons mocks to real Supabase (final 2 from Phase 4)
+2. Build customer journey UI (nearby → restaurant → menu → cart → order → track)
+3. Build merchant dashboard UI
+4. Add driver assignment/tracking interfaces

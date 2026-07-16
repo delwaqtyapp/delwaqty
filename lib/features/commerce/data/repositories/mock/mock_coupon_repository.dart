@@ -33,6 +33,39 @@ class MockCouponRepository implements CouponRepository {
     }
     return coupon;
   }
+
+  @override
+  Future<Coupon> applyCoupon(String code, double orderTotal) async {
+    final coupon = await validateCoupon(code, orderTotal);
+    if (coupon == null) throw Exception('Invalid or expired coupon');
+    return coupon;
+  }
+
+  @override
+  Future<List<Coupon>> getMerchantCoupons(String merchantId) async =>
+      _coupons.where((c) => c.merchantId == merchantId).toList();
+
+  @override
+  Future<List<Coupon>> getBranchCoupons(String branchId) async =>
+      _coupons.where((c) => c.branchId == branchId).toList();
+
+  @override
+  Future<List<Coupon>> getProductCoupons(String productId) async =>
+      _coupons.where((c) => c.productId == productId).toList();
+
+  @override
+  Future<List<Coupon>> getCategoryCoupons(String categoryId) async =>
+      _coupons.where((c) => c.categoryId == categoryId).toList();
+
+  @override
+  Future<CouponStatus> getCouponStatus(String code) async {
+    final coupon = await getCouponByCode(code);
+    if (coupon == null) throw Exception('Coupon not found');
+    if (!coupon.isActive) return CouponStatus.inactive;
+    if (coupon.expiresAt != null && coupon.expiresAt!.isBefore(DateTime.now())) return CouponStatus.expired;
+    if (coupon.usageLimit != null && coupon.usedCount != null && coupon.usedCount! >= coupon.usageLimit!) return CouponStatus.usedUp;
+    return CouponStatus.active;
+  }
 }
 
 List<Coupon> _sampleCoupons() => [

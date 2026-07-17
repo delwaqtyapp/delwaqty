@@ -19,25 +19,30 @@
 | Phase 4: Mock → Real Migration | 4.1-4.5 | ✅ Complete |
 | Phase 5: Platform Kernel Docs | 15 architecture docs | ✅ Complete |
 | Phase 5.1: Restaurant Domain | Data layer complete | ✅ Complete |
+| Sprint 20: Production Polish | Premium widgets, core screens, L10n | ✅ Complete |
+| Sprint 21: Real Functionality | Notifications, bugs, RLS, performance | ✅ Complete |
 
 ## Current State
 
 | System | Status |
 |--------|--------|
 | Supabase DB | ✅ Deployed (24 tables, 27 RLS policies, 31 FK relationships) |
+| Supabase RLS | ✅ Migration 005 applied (role-based policies on all 23 tables) |
+| Supabase Trigger | ✅ Migration 006 applied (auto-create profile on signup) |
 | Firebase | ✅ Wired (delwaqty0, FCM, Analytics, Crashlytics) |
 | Google Maps | ✅ Wired (5 APIs, Android manifest) |
 | Cloudflare R2 | ✅ Wired (bucket: delwaqty-assets) |
-| Auth (Supabase GoTrue) | ✅ Real |
-| Profile (Supabase) | ✅ Real |
-| Merchants | ✅ Real |
+| Auth (Supabase GoTrue) | ✅ Real (login, register, logout, reset password, session, guest) |
+| Profile (Supabase) | ✅ Real (view, edit, avatar) |
+| Merchants | ✅ Real (CRUD, search, filters) |
 | Catalog Categories | ✅ Real |
-| Products | ✅ Real |
-| Favorites | ✅ Real |
-| Cart | ✅ Real (SharedPreferences) |
-| Orders | ✅ Real |
-| Reviews | ✅ Real (9 methods) |
-| Coupons | ✅ Real (9 methods) |
+| Products | ✅ Real (CRUD, variants, search) |
+| Favorites | ✅ Real (toggle, list, filter) |
+| Cart | ✅ Local (SharedPreferences, cross-device sync deferred) |
+| Orders | ✅ Real (create, track, history) |
+| Reviews | ✅ Real (submit, list, average) |
+| Coupons | ✅ Real (validate, apply, types) |
+| Notifications | ✅ Real (Supabase: get, mark read, delete, unread count) |
 | Branches | ✅ Real (6 methods) |
 | Working Hours | ✅ Real (4 methods) |
 | Delivery Zones | ✅ Real (6 methods) |
@@ -64,7 +69,7 @@
 - [x] Empty States — consistent EmptyState widget across all screens
 - [x] Error States — consistent ErrorState widget across all screens
 - [x] Loading States — skeleton loading, circular indicators
-- [x] Localization — 170+ ARB strings (English + Arabic)
+- [x] Localization — 197+ ARB strings (English + Arabic)
 - [ ] Reservations — slot picker, booking, management
 - [ ] Reviews & Ratings — submit, view, filter
 

@@ -1,23 +1,22 @@
+import 'dart:math' as math;
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:delwaqty/services/supabase/supabase_service.dart';
-import 'package:delwaqty/services/logger/app_logger.dart';
 import 'package:delwaqty/features/ride/domain/entities/ride.dart';
+import 'package:delwaqty/features/ride/domain/entities/fare_quote.dart';
 
 final supabaseRideDataSourceProvider = Provider<SupabaseRideDataSource>((ref) {
-  return SupabaseRideDataSource(
-    ref.watch(supabaseClientProvider),
-    ref.watch(loggerProvider),
-  );
+  return SupabaseRideDataSource(ref.watch(supabaseClientProvider));
 });
 
 class SupabaseRideDataSource {
-  SupabaseRideDataSource(this._client, this._logger);
+  SupabaseRideDataSource(this._client);
 
   final SupabaseClient _client;
-  final AppLogger _logger;
 
   static const String _ridesTable = 'rides';
+  static const double _avgSpeedKmh = 28.0;
 
   Ride _rideFromRow(Map<String, dynamic> row) {
     final statusStr = row['status'] as String? ?? 'searching';
@@ -49,8 +48,18 @@ class SupabaseRideDataSource {
       rideType: rideType,
       status: status,
       fare: (row['fare'] as num?)?.toDouble(),
+      baseFare: (row['base_fare'] as num?)?.toDouble(),
+      distanceFare: (row['distance_fare'] as num?)?.toDouble(),
+      timeFare: (row['time_fare'] as num?)?.toDouble(),
+      surgeMultiplier: (row['surge_multiplier'] as num?)?.toDouble() ?? 1.0,
+      discountAmount: (row['discount_amount'] as num?)?.toDouble() ?? 0.0,
+      promoCode: row['promo_code'] as String?,
+      paymentMethod: row['payment_method'] as String? ?? 'cash',
+      paymentStatus: row['payment_status'] as String? ?? 'pending',
+      pickupOtp: row['pickup_otp'] as String?,
+      currency: row['currency'] as String? ?? 'EGP',
       distance: (row['distance'] as num?)?.toDouble(),
-      estimatedMinutes: row['estimated_minutes'] as int?,
+      estimatedMinutes: (row['estimated_minutes'] as num?)?.toInt(),
       driverLatitude: (row['driver_latitude'] as num?)?.toDouble(),
       driverLongitude: (row['driver_longitude'] as num?)?.toDouble(),
       createdAt: DateTime.parse(row['created_at'] as String),
@@ -65,6 +74,82 @@ class SupabaseRideDataSource {
     );
   }
 
+  double _haversineKm(double lat1, double lon1, double lat2, double lon2) {
+    const r = 6371.0;
+    final dLat = _deg2rad(lat2 - lat1);
+    final dLon = _deg2rad(lon2 - lon1);
+    final a = math.sin(dLat / 2) * math.sin(dLat / 2) +
+        math.cos(_deg2rad(lat1)) *
+            math.cos(_deg2rad(lat2)) *
+            math.sin(dLon / 2) *
+            math.sin(dLon / 2);
+    return r * 2 * math.asin(math.min(1.0, math.sqrt(a)));
+  }
+
+  double _deg2rad(double d) => d * math.pi / 180.0;
+
+  Future<List<FareQuote>> getFareQuotes({
+    required double pickupLatitude,
+    required double pickupLongitude,
+    required double dropoffLatitude,
+    required double dropoffLongitude,
+  }) async {
+    final distanceKm = _haversineKm(
+      pickupLatitude,
+      pickupLongitude,
+      dropoffLatitude,
+      dropoffLongitude,
+    );
+    final durationMin = (distanceKm / _avgSpeedKmh) * 60.0;
+    final quotes = <FareQuote>[];
+    for (final type in RideType.values) {
+      final data = await _client.rpc('estimate_fare', params: {
+        'p_category': type.name,
+        'p_distance_km': distanceKm,
+        'p_duration_min': durationMin,
+        'p_surge': 1.0,
+      });
+      final map = Map<String, dynamic>.from(data as Map);
+      final eta = 2 + (type.index % 3) * 2;
+      quotes.add(FareQuote(
+        rideType: type,
+        baseFare: (map['base_fare'] as num).toDouble(),
+        distanceFare: (map['distance_fare'] as num).toDouble(),
+        timeFare: (map['time_fare'] as num).toDouble(),
+        surgeMultiplier: (map['surge_multiplier'] as num).toDouble(),
+        total: (map['total'] as num).toDouble(),
+        minimumFare: (map['minimum_fare'] as num).toDouble(),
+        currency: map['currency'] as String? ?? 'EGP',
+        distanceKm: distanceKm,
+        durationMinutes: durationMin,
+        etaMinutes: eta,
+      ));
+    }
+    return quotes;
+  }
+
+  Future<PromoResult> validatePromo({
+    required String code,
+    required double fare,
+    required String userId,
+  }) async {
+    final data = await _client.rpc('validate_promo', params: {
+      'p_code': code.toUpperCase(),
+      'p_user_id': userId,
+      'p_fare': fare,
+    });
+    final map = Map<String, dynamic>.from(data as Map);
+    final valid = map['valid'] as bool? ?? false;
+    if (!valid) {
+      return PromoResult(valid: false, reason: map['reason'] as String?);
+    }
+    return PromoResult(
+      valid: true,
+      discount: (map['discount'] as num?)?.toDouble() ?? 0.0,
+      promoId: map['promo_id'] as String?,
+    );
+  }
+
   Future<Ride> requestRide({
     required String riderId,
     required double pickupLatitude,
@@ -74,269 +159,143 @@ class SupabaseRideDataSource {
     required double dropoffLongitude,
     required String dropoffAddress,
     required RideType rideType,
+    required double fare,
+    required FareQuote quote,
+    String? promoCode,
+    double discountAmount = 0,
+    String paymentMethod = 'cash',
   }) async {
-    try {
-      final data = await _client.from(_ridesTable).insert({
-        'rider_id': riderId,
-        'pickup_latitude': pickupLatitude,
-        'pickup_longitude': pickupLongitude,
-        'pickup_address': pickupAddress,
-        'dropoff_latitude': dropoffLatitude,
-        'dropoff_longitude': dropoffLongitude,
-        'dropoff_address': dropoffAddress,
-        'ride_type': rideType.name,
-        'status': RideStatus.searching.name,
-        'created_at': DateTime.now().toIso8601String(),
-      }).select().single();
-      return _rideFromRow(data);
-    } catch (e, stack) {
-      _logger.e('Failed to request ride', e, stack);
-      return _mockRide(
-        riderId: riderId,
-        pickupLatitude: pickupLatitude,
-        pickupLongitude: pickupLongitude,
-        pickupAddress: pickupAddress,
-        dropoffLatitude: dropoffLatitude,
-        dropoffLongitude: dropoffLongitude,
-        dropoffAddress: dropoffAddress,
-        rideType: rideType,
+    final data = await _client.from(_ridesTable).insert({
+      'rider_id': riderId,
+      'pickup_latitude': pickupLatitude,
+      'pickup_longitude': pickupLongitude,
+      'pickup_address': pickupAddress,
+      'dropoff_latitude': dropoffLatitude,
+      'dropoff_longitude': dropoffLongitude,
+      'dropoff_address': dropoffAddress,
+      'ride_type': rideType.name,
+      'status': RideStatus.searching.name,
+      'fare': fare,
+      'base_fare': quote.baseFare,
+      'distance_fare': quote.distanceFare,
+      'time_fare': quote.timeFare,
+      'surge_multiplier': quote.surgeMultiplier,
+      'discount_amount': discountAmount,
+      'promo_code': promoCode,
+      'payment_method': paymentMethod,
+      'distance': quote.distanceKm,
+      'estimated_minutes': quote.durationMinutes.ceil(),
+      'currency': quote.currency,
+    }).select().single();
+    return _rideFromRow(data);
+  }
+
+  Future<List<NearbyDriver>> findNearbyDrivers({
+    required double latitude,
+    required double longitude,
+    required RideType rideType,
+    double radiusKm = 8,
+    int limit = 10,
+  }) async {
+    final data = await _client.rpc('find_nearest_drivers', params: {
+      'p_lat': latitude,
+      'p_lon': longitude,
+      'p_category': rideType.name,
+      'p_radius_km': radiusKm,
+      'p_limit': limit,
+    });
+    return (data as List).map((row) {
+      final map = Map<String, dynamic>.from(row as Map);
+      return NearbyDriver(
+        driverId: map['driver_id'] as String,
+        fullName: map['full_name'] as String? ?? '',
+        latitude: (map['latitude'] as num).toDouble(),
+        longitude: (map['longitude'] as num).toDouble(),
+        distanceKm: (map['distance_km'] as num).toDouble(),
+        rating: (map['rating'] as num?)?.toDouble() ?? 0.0,
       );
-    }
+    }).toList();
+  }
+
+  Stream<Ride> watchRide(String rideId) {
+    return _client
+        .from(_ridesTable)
+        .stream(primaryKey: ['id'])
+        .eq('id', rideId)
+        .map((rows) => rows.isNotEmpty ? _rideFromRow(rows.first) : null)
+        .where((ride) => ride != null)
+        .cast<Ride>();
+  }
+
+  Future<Ride?> getRide(String rideId) async {
+    final data =
+        await _client.from(_ridesTable).select().eq('id', rideId).maybeSingle();
+    if (data == null) return null;
+    return _rideFromRow(data);
   }
 
   Future<void> cancelRide(String rideId, {String? reason}) async {
-    try {
-      await _client.from(_ridesTable).update({
-        'status': RideStatus.cancelled.name,
-        'cancellation_reason': reason,
-        'cancelled_at': DateTime.now().toIso8601String(),
-      }).eq('id', rideId);
-    } catch (e, stack) {
-      _logger.e('Failed to cancel ride', e, stack);
-    }
+    await _client.from(_ridesTable).update({
+      'status': RideStatus.cancelled.name,
+      'cancellation_reason': reason,
+      'cancelled_at': DateTime.now().toIso8601String(),
+    }).eq('id', rideId);
   }
 
   Future<Ride?> getActiveRide(String riderId) async {
-    try {
-      final data = await _client
-          .from(_ridesTable)
-          .select()
-          .eq('rider_id', riderId)
-          .inFilter('status', [
-            RideStatus.searching.name,
-            RideStatus.matched.name,
-            RideStatus.arrived.name,
-            RideStatus.inTrip.name,
-          ])
-          .order('created_at', ascending: false)
-          .maybeSingle();
-      if (data == null) return null;
-      return _rideFromRow(data);
-    } catch (e, stack) {
-      _logger.e('Failed to get active ride', e, stack);
-      return null;
-    }
+    final data = await _client
+        .from(_ridesTable)
+        .select()
+        .eq('rider_id', riderId)
+        .inFilter('status', [
+          RideStatus.searching.name,
+          RideStatus.matched.name,
+          RideStatus.arrived.name,
+          RideStatus.inTrip.name,
+        ])
+        .order('created_at', ascending: false)
+        .limit(1)
+        .maybeSingle();
+    if (data == null) return null;
+    return _rideFromRow(data);
   }
 
-  Future<List<Ride>> getRideHistory(String riderId, {int limit = 20, int offset = 0}) async {
-    try {
-      final data = await _client
-          .from(_ridesTable)
-          .select()
-          .eq('rider_id', riderId)
-          .inFilter('status', [RideStatus.completed.name, RideStatus.cancelled.name])
-          .order('created_at', ascending: false)
-          .range(offset, offset + limit - 1);
-      return (data as List)
-          .map((row) => _rideFromRow(row as Map<String, dynamic>))
-          .toList();
-    } catch (e, stack) {
-      _logger.e('Failed to get ride history', e, stack);
-      return _mockRideHistory();
-    }
+  Future<List<Ride>> getRideHistory(String riderId,
+      {int limit = 20, int offset = 0}) async {
+    final data = await _client
+        .from(_ridesTable)
+        .select()
+        .eq('rider_id', riderId)
+        .inFilter('status', [RideStatus.completed.name, RideStatus.cancelled.name])
+        .order('created_at', ascending: false)
+        .range(offset, offset + limit - 1);
+    return (data as List)
+        .map((row) => _rideFromRow(row as Map<String, dynamic>))
+        .toList();
   }
 
-  Future<void> rateRide(String rideId, int rating, {String? feedback, double? tip}) async {
-    try {
-      await _client.from(_ridesTable).update({
-        'rating': rating,
-        'feedback': feedback,
-        'tip': tip,
-      }).eq('id', rideId);
-    } catch (e, stack) {
-      _logger.e('Failed to rate ride', e, stack);
-    }
+  Future<void> rateRide(String rideId, int rating,
+      {String? feedback, double? tip}) async {
+    await _client.from(_ridesTable).update({
+      'rating': rating,
+      'feedback': feedback,
+      'tip': tip,
+    }).eq('id', rideId);
   }
 
   Future<void> shareTrip(String rideId) async {
-    try {
-      await _client.from(_ridesTable).update({
-        'is_shared_trip': true,
-      }).eq('id', rideId);
-    } catch (e, stack) {
-      _logger.e('Failed to share trip', e, stack);
-    }
+    await _client.from(_ridesTable).update({
+      'is_shared_trip': true,
+    }).eq('id', rideId);
   }
 
   Future<void> reportIssue(String rideId, String issue) async {
-    try {
-      await _client.from('ride_issues').insert({
-        'ride_id': rideId,
-        'issue': issue,
-        'created_at': DateTime.now().toIso8601String(),
-      });
-    } catch (e, stack) {
-      _logger.e('Failed to report issue', e, stack);
-    }
-  }
-
-  Future<Map<String, double>> getFareEstimate({
-    required double pickupLatitude,
-    required double pickupLongitude,
-    required double dropoffLatitude,
-    required double dropoffLongitude,
-    required RideType rideType,
-  }) async {
-    try {
-      final data = await _client.rpc('estimate_ride_fare', params: {
-        'p_pickup_lat': pickupLatitude,
-        'p_pickup_lng': pickupLongitude,
-        'p_dropoff_lat': dropoffLatitude,
-        'p_dropoff_lng': dropoffLongitude,
-        'p_ride_type': rideType.name,
-      });
-      return {
-        'fare': (data['fare'] as num?)?.toDouble() ?? _estimateFareLocally(pickupLatitude, pickupLongitude, dropoffLatitude, dropoffLongitude, rideType),
-        'distance': (data['distance'] as num?)?.toDouble() ?? _haversineDistance(pickupLatitude, pickupLongitude, dropoffLatitude, dropoffLongitude),
-        'estimatedMinutes': (data['estimated_minutes'] as num?)?.toDouble() ?? 15,
-      };
-    } catch (e, stack) {
-      _logger.e('Failed to get fare estimate from API, using local', e, stack);
-      final distance = _haversineDistance(pickupLatitude, pickupLongitude, dropoffLatitude, dropoffLongitude);
-      return {
-        'fare': _estimateFareLocally(pickupLatitude, pickupLongitude, dropoffLatitude, dropoffLongitude, rideType),
-        'distance': distance,
-        'estimatedMinutes': (distance / 0.5).ceilToDouble(),
-      };
-    }
-  }
-
-  double _haversineDistance(double lat1, double lng1, double lat2, double lng2) {
-    const earthRadius = 6371.0;
-    final dLat = _degToRad(lat2 - lat1);
-    final dLng = _degToRad(lng2 - lng1);
-    final a = (dLat / 2) * (dLat / 2) +
-        _degToRad(lat1) * _degToRad(lat2) * (dLng / 2) * (dLng / 2);
-    final c = 2 * _approxAtan(a);
-    return earthRadius * c;
-  }
-
-  double _degToRad(double deg) => deg * (3.141592653589793 / 180.0);
-
-  double _approxAtan(double x) {
-    return x < 1.0 ? x / (1.0 + 0.28 * x * x) : 1.5708 - 2.0 / (x + 1.35);
-  }
-
-  double _estimateFareLocally(
-    double pickupLat,
-    double pickupLng,
-    double dropoffLat,
-    double dropoffLng,
-    RideType type,
-  ) {
-    final distance = _haversineDistance(pickupLat, pickupLng, dropoffLat, dropoffLng);
-    double baseFare;
-    double perKm;
-    switch (type) {
-      case RideType.economy:
-        baseFare = 5.0;
-        perKm = 1.5;
-        break;
-      case RideType.comfort:
-        baseFare = 8.0;
-        perKm = 2.5;
-        break;
-      case RideType.premium:
-        baseFare = 12.0;
-        perKm = 4.0;
-        break;
-    }
-    return baseFare + (distance * perKm);
-  }
-
-  Ride _mockRide({
-    required String riderId,
-    required double pickupLatitude,
-    required double pickupLongitude,
-    required String pickupAddress,
-    required double dropoffLatitude,
-    required double dropoffLongitude,
-    required String dropoffAddress,
-    required RideType rideType,
-  }) {
-    final distance = _haversineDistance(pickupLatitude, pickupLongitude, dropoffLatitude, dropoffLongitude);
-    return Ride(
-      id: 'mock-${DateTime.now().millisecondsSinceEpoch}',
-      riderId: riderId,
-      pickupLatitude: pickupLatitude,
-      pickupLongitude: pickupLongitude,
-      pickupAddress: pickupAddress,
-      dropoffLatitude: dropoffLatitude,
-      dropoffLongitude: dropoffLongitude,
-      dropoffAddress: dropoffAddress,
-      rideType: rideType,
-      fare: _estimateFareLocally(pickupLatitude, pickupLongitude, dropoffLatitude, dropoffLongitude, rideType),
-      distance: distance,
-      estimatedMinutes: (distance / 0.5).ceil(),
-      createdAt: DateTime.now(),
-    );
-  }
-
-  List<Ride> _mockRideHistory() {
-    return [
-      Ride(
-        id: 'hist-1',
-        riderId: 'mock',
-        pickupLatitude: 24.7136,
-        pickupLongitude: 46.6753,
-        pickupAddress: 'King Fahd Road, Riyadh',
-        dropoffLatitude: 24.6877,
-        dropoffLongitude: 46.7219,
-        dropoffAddress: 'Riyadh Gallery Mall',
-        status: RideStatus.completed,
-        fare: 25.0,
-        distance: 8.5,
-        estimatedMinutes: 18,
-        driverName: 'Ahmed M.',
-        driverPhone: '+966501234567',
-        vehicleType: 'Toyota Camry',
-        vehiclePlate: 'ABC 1234',
-        vehicleColor: 'White',
-        createdAt: DateTime.now().subtract(const Duration(days: 2)),
-        completedAt: DateTime.now().subtract(const Duration(days: 2, minutes: -20)),
-      ),
-      Ride(
-        id: 'hist-2',
-        riderId: 'mock',
-        pickupLatitude: 24.7136,
-        pickupLongitude: 46.6753,
-        pickupAddress: 'Olaya Street, Riyadh',
-        dropoffLatitude: 24.6956,
-        dropoffLongitude: 46.6833,
-        dropoffAddress: 'King Abdullah Financial District',
-        rideType: RideType.comfort,
-        status: RideStatus.completed,
-        fare: 35.0,
-        distance: 5.2,
-        estimatedMinutes: 12,
-        driverName: 'Saud K.',
-        driverPhone: '+966509876543',
-        vehicleType: 'Hyundai Sonata',
-        vehiclePlate: 'XYZ 5678',
-        vehicleColor: 'Black',
-        createdAt: DateTime.now().subtract(const Duration(days: 5)),
-        completedAt: DateTime.now().subtract(const Duration(days: 5, minutes: -14)),
-      ),
-    ];
+    final ride = await getRide(rideId);
+    await _client.from('complaints').insert({
+      'ride_id': rideId,
+      'reporter_id': ride?.riderId,
+      'category': 'sos',
+      'description': issue,
+    });
   }
 }

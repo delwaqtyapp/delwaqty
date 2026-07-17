@@ -2045,4 +2045,92 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get pageNotFound => 'Page not found';
+
+  @override
+  String get fareBreakdown => 'Fare breakdown';
+
+  @override
+  String get driverFound => 'Driver found!';
+
+  @override
+  String get noDriversFound =>
+      'No drivers available nearby. Please try again shortly.';
+
+  @override
+  String get pickupCode => 'Pickup code';
+
+  @override
+  String get shareCodeWithDriver =>
+      'Share this code with your driver at pickup';
+
+  @override
+  String get passengers => 'Passengers';
+
+  @override
+  String get luggage => 'Luggage';
+
+  @override
+  String get choosePayment => 'Payment method';
+
+  @override
+  String get promoRemoved => 'Promo removed';
+
+  @override
+  String get confirmDestination => 'Confirm destination';
+
+  @override
+  String get waitingForAcceptance => 'Contacting nearby drivers...';
+
+  @override
+  String driversNearby(Object count) {
+    return '$count drivers nearby';
+  }
+
+  @override
+  String get yourDriver => 'Your driver';
+
+  @override
+  String get vehicleDetails => 'Vehicle details';
+
+  @override
+  String arrivesInMinutes(Object minutes) {
+    return 'Arrives in $minutes min';
+  }
+
+  @override
+  String get bookAnotherRide => 'Book another ride';
+
+  @override
+  String get tripCancelled => 'Trip cancelled';
+
+  @override
+  String get loadingMap => 'Loading map...';
+
+  @override
+  String seatsAndBags(Object bags, Object seats) {
+    return '$seats seats, $bags bags';
+  }
+
+  @override
+  String seatsOnly(Object seats) {
+    return '$seats seats';
+  }
+
+  @override
+  String get rideEconomyDesc => 'Affordable everyday rides';
+
+  @override
+  String get rideComfortDesc => 'Newer cars with extra legroom';
+
+  @override
+  String get ridePremiumDesc => 'Luxury cars, top-rated drivers';
+
+  @override
+  String get rideXLDesc => 'Spacious rides for groups';
+
+  @override
+  String get rideMotorbikeDesc => 'Fast and cheap for one';
+
+  @override
+  String get rideTaxiDesc => 'Metered street taxis';
 }

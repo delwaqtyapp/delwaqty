@@ -544,7 +544,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get highestRated => 'الأعلى تقييماً';
 
   @override
-  String get discount => 'خصم';
+  String get discount => 'الخصم';
 
   @override
   String get enterCouponCode => 'أدخل كود الخصم';
@@ -2039,4 +2039,91 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get pageNotFound => 'الصفحة غير موجودة';
+
+  @override
+  String get fareBreakdown => 'تفاصيل الأجرة';
+
+  @override
+  String get driverFound => 'تم العثور على سائق!';
+
+  @override
+  String get noDriversFound =>
+      'لا يوجد سائقون متاحون بالقرب منك. حاول مرة أخرى بعد قليل.';
+
+  @override
+  String get pickupCode => 'رمز الركوب';
+
+  @override
+  String get shareCodeWithDriver => 'شارك هذا الرمز مع السائق عند الركوب';
+
+  @override
+  String get passengers => 'الركاب';
+
+  @override
+  String get luggage => 'الأمتعة';
+
+  @override
+  String get choosePayment => 'طريقة الدفع';
+
+  @override
+  String get promoRemoved => 'تمت إزالة الكوبون';
+
+  @override
+  String get confirmDestination => 'تأكيد الوجهة';
+
+  @override
+  String get waitingForAcceptance => 'جارٍ التواصل مع السائقين القريبين...';
+
+  @override
+  String driversNearby(Object count) {
+    return '$count سائقون بالقرب منك';
+  }
+
+  @override
+  String get yourDriver => 'سائقك';
+
+  @override
+  String get vehicleDetails => 'تفاصيل المركبة';
+
+  @override
+  String arrivesInMinutes(Object minutes) {
+    return 'يصل خلال $minutes دقيقة';
+  }
+
+  @override
+  String get bookAnotherRide => 'احجز رحلة أخرى';
+
+  @override
+  String get tripCancelled => 'تم إلغاء الرحلة';
+
+  @override
+  String get loadingMap => 'جارٍ تحميل الخريطة...';
+
+  @override
+  String seatsAndBags(Object bags, Object seats) {
+    return '$seats مقاعد، $bags حقائب';
+  }
+
+  @override
+  String seatsOnly(Object seats) {
+    return '$seats مقاعد';
+  }
+
+  @override
+  String get rideEconomyDesc => 'رحلات يومية بأسعار مناسبة';
+
+  @override
+  String get rideComfortDesc => 'سيارات أحدث بمساحة أكبر';
+
+  @override
+  String get ridePremiumDesc => 'سيارات فاخرة وسائقون مميزون';
+
+  @override
+  String get rideXLDesc => 'رحلات واسعة للمجموعات';
+
+  @override
+  String get rideMotorbikeDesc => 'سريعة ورخيصة لشخص واحد';
+
+  @override
+  String get rideTaxiDesc => 'تاكسي الشارع بالعداد';
 }

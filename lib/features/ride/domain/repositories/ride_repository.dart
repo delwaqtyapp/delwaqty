@@ -1,6 +1,19 @@
 import 'package:delwaqty/features/ride/domain/entities/ride.dart';
+import 'package:delwaqty/features/ride/domain/entities/fare_quote.dart';
 
 abstract interface class RideRepository {
+  Future<List<FareQuote>> getFareQuotes({
+    required double pickupLatitude,
+    required double pickupLongitude,
+    required double dropoffLatitude,
+    required double dropoffLongitude,
+  });
+
+  Future<PromoResult> validatePromo({
+    required String code,
+    required double fare,
+  });
+
   Future<Ride> requestRide({
     required double pickupLatitude,
     required double pickupLongitude,
@@ -9,7 +22,22 @@ abstract interface class RideRepository {
     required double dropoffLongitude,
     required String dropoffAddress,
     required RideType rideType,
+    required double fare,
+    required FareQuote quote,
+    String? promoCode,
+    double discountAmount,
+    String paymentMethod,
   });
+
+  Future<List<NearbyDriver>> findNearbyDrivers({
+    required double latitude,
+    required double longitude,
+    required RideType rideType,
+  });
+
+  Stream<Ride> watchRide(String rideId);
+
+  Future<Ride?> getRide(String rideId);
 
   Future<void> cancelRide(String rideId, {String? reason});
 
@@ -22,12 +50,4 @@ abstract interface class RideRepository {
   Future<void> shareTrip(String rideId);
 
   Future<void> reportIssue(String rideId, String issue);
-
-  Future<Map<String, double>> getFareEstimate({
-    required double pickupLatitude,
-    required double pickupLongitude,
-    required double dropoffLatitude,
-    required double dropoffLongitude,
-    required RideType rideType,
-  });
 }

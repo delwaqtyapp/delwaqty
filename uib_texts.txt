@@ -1,0 +1,7 @@
+﻿إنشاء حساب
+الاسم الكامل is required
+Email is required
+Password is required
+Password is required
+إنشاء حساب
+لدي حساب بالفعل؟ تسجيل الدخول

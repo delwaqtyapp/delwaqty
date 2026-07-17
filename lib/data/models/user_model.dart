@@ -54,16 +54,31 @@ class UserModel with _$UserModel {
     updatedAt: updatedAt,
   );
 
-  Map<String, dynamic> toSupabaseJson() => {
-    'id': id,
-    'email': email,
-    'full_name': fullName,
-    'phone': phone,
-    'avatar_url': avatarUrl,
-    'language': language,
-    'is_onboarded': isOnboarded,
-    'role': role,
-    'created_at': createdAt.toIso8601String(),
-    'updated_at': updatedAt?.toIso8601String(),
-  };
+  Map<String, dynamic> toInsertJson() {
+    final json = <String, dynamic>{
+      'id': id,
+      'email': email,
+      'full_name': fullName,
+      'language': language,
+      'is_onboarded': isOnboarded,
+      'role': role,
+    };
+    if (phone != null) json['phone'] = phone;
+    if (avatarUrl != null) json['avatar_url'] = avatarUrl;
+    return json;
+  }
+
+  Map<String, dynamic> toUpdateJson() {
+    final json = <String, dynamic>{
+      'full_name': fullName,
+      'language': language,
+      'is_onboarded': isOnboarded,
+      'role': role,
+    };
+    if (phone != null) json['phone'] = phone;
+    if (avatarUrl != null) json['avatar_url'] = avatarUrl;
+    return json;
+  }
+
+  Map<String, dynamic> toSupabaseJson() => toInsertJson();
 }

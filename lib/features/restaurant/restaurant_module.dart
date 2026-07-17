@@ -35,6 +35,7 @@ import 'package:delwaqty/features/restaurant/presentation/pages/restaurant_offer
 import 'package:delwaqty/features/restaurant/presentation/pages/restaurant_reviews_page.dart';
 import 'package:delwaqty/features/restaurant/presentation/pages/restaurant_reservation_page.dart';
 import 'package:delwaqty/features/restaurant/presentation/pages/restaurant_order_tracking_page.dart';
+import 'package:delwaqty/features/restaurant/presentation/pages/restaurant_gallery_page.dart';
 
 final branchRepositoryProvider = Provider<BranchRepository>(
   (ref) => BranchRepositoryImpl(ref.watch(supabaseBranchDataSourceProvider)),
@@ -154,6 +155,12 @@ class RestaurantModule extends FeatureModule {
               path: 'order-tracking/:orderId',
               builder: (context, state) => RestaurantOrderTrackingPage(
                 orderId: state.pathParameters['orderId']!,
+              ),
+            ),
+            GoRoute(
+              path: 'gallery',
+              builder: (context, state) => RestaurantGalleryPage(
+                merchantId: state.pathParameters['merchantId']!,
               ),
             ),
           ],

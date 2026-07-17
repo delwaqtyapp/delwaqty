@@ -1234,4 +1234,63 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get favoritesTab => 'Favorites';
+
+  @override
+  String get noGalleryImages => 'No gallery images available yet.';
+
+  @override
+  String get addOns => 'Add-ons';
+
+  @override
+  String get orderCompletedTitle => 'Order Placed!';
+
+  @override
+  String get orderCompletedMessage =>
+      'Your order has been placed successfully. You can track it in real-time.';
+
+  @override
+  String estimatedArrivalTime(Object minutes) {
+    return 'Estimated arrival: $minutes min';
+  }
+
+  @override
+  String get glassCardLabel => 'Glass Card';
+
+  @override
+  String get skeletonLoading => 'Loading...';
+
+  @override
+  String get menuCategories => 'Categories';
+
+  @override
+  String get popularFirst => 'Popular First';
+
+  @override
+  String get priceLowToHigh => 'Price: Low to High';
+
+  @override
+  String get priceHighToLow => 'Price: High to Low';
+
+  @override
+  String get filterByCategory => 'Filter by category';
+
+  @override
+  String itemAddedToCartSuccess(Object name) {
+    return '$name added to cart';
+  }
+
+  @override
+  String get viewFullMenuHint => 'Browse the complete menu';
+
+  @override
+  String get restaurantGallery => 'Restaurant Gallery';
+
+  @override
+  String get shareThisRestaurant => 'Share this restaurant with friends';
+
+  @override
+  String get reportIssue => 'Report an Issue';
+
+  @override
+  String get callRestaurant => 'Call Restaurant';
 }

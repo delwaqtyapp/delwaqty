@@ -21,6 +21,8 @@
 | Phase 5.1: Restaurant Domain | Data layer complete | ✅ Complete |
 | Sprint 20: Production Polish | Premium widgets, core screens, L10n | ✅ Complete |
 | Sprint 21: Real Functionality | Notifications, bugs, RLS, performance | ✅ Complete |
+| Sprint 22-24: Restaurant Presentation | Restaurant module, favorites, dead code cleanup | ✅ Complete |
+| Sprint 25: Restaurant UX Polish | Glass Cards, Lottie, skeletons, Hero, Gallery, deletion policy | ✅ Complete |
 
 ## Current State
 
@@ -70,8 +72,8 @@
 - [x] Error States — consistent ErrorState widget across all screens
 - [x] Loading States — skeleton loading, circular indicators
 - [x] Localization — 197+ ARB strings (English + Arabic)
-- [ ] Reservations — slot picker, booking, management
-- [ ] Reviews & Ratings — submit, view, filter
+- [x] Reservations — slot picker, booking, management
+- [x] Reviews & Ratings — submit, view, filter
 
 ### Phase 7: Presentation Layer — Merchant
 - [ ] Merchant Dashboard — overview, analytics, quick actions
@@ -119,3 +121,8 @@
 | 18 | Security audit, finance cleanup, localization (Phase 5.5) | ✅ |
 | 19 | Customer Presentation Layer — all screens (Phase 6) | ✅ |
 | 20 | Production Polish — RLS, premium UX, animations, security hardening | ✅ |
+| 21 | Real Functionality — Notifications, bugs, RLS, performance | ✅ |
+| 22 | Admin rewrite, L10n, dead code cleanup, commerce polish | ✅ |
+| 23 | Restaurant module full presentation layer (5 pages, 5 widgets) | ✅ |
+| 24 | Favorites, dead code cleanup, modifier integration, restaurant order tracking | ✅ |
+| 25 | Restaurant UX polish — Glass Cards, Lottie, skeletons, Hero, Gallery, L10n, deletion policy | ✅ |

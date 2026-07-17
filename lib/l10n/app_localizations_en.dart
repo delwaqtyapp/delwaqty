@@ -99,7 +99,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get ok => 'OK';
 
   @override
-  String get appName => 'App Name';
+  String get appName => 'Delwaqty';
 
   @override
   String get appNameAr => 'دلوقتي';
@@ -861,6 +861,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get riyadhSaudiArabia => 'Riyadh, Saudi Arabia';
 
   @override
+  String get searchingForLocation => 'Searching for location...';
+
+  @override
   String get dineIn => 'Dine In';
 
   @override
@@ -1136,6 +1139,126 @@ class AppLocalizationsEn extends AppLocalizations {
   String get reportRestaurant => 'Report';
 
   @override
+  String get merchantDashboard => 'Merchant Dashboard';
+
+  @override
+  String get overview => 'Overview';
+
+  @override
+  String get quickActions => 'Quick Actions';
+
+  @override
+  String get todayOrders => 'Today\'s Orders';
+
+  @override
+  String get viewOrders => 'View Orders';
+
+  @override
+  String get manageProducts => 'Manage Products';
+
+  @override
+  String get createOffer => 'Create Offer';
+
+  @override
+  String get orders => 'Orders';
+
+  @override
+  String get accepted => 'Accepted';
+
+  @override
+  String get customer => 'Customer';
+
+  @override
+  String get accept => 'Accept';
+
+  @override
+  String get reject => 'Reject';
+
+  @override
+  String get markReady => 'Mark Ready';
+
+  @override
+  String get editProduct => 'Edit Product';
+
+  @override
+  String get addProduct => 'Add Product';
+
+  @override
+  String get saveChanges => 'Save Changes';
+
+  @override
+  String get invalidImageUrl => 'Invalid image URL';
+
+  @override
+  String get addProductImage => 'Add product image';
+
+  @override
+  String get productName => 'Product Name';
+
+  @override
+  String get enterProductName => 'Enter product name';
+
+  @override
+  String get fieldRequired => 'This field is required';
+
+  @override
+  String get description => 'Description';
+
+  @override
+  String get enterDescription => 'Enter description';
+
+  @override
+  String get price => 'Price';
+
+  @override
+  String get invalidPrice => 'Please enter a valid price';
+
+  @override
+  String get category => 'Category';
+
+  @override
+  String get enterCategory => 'Enter category';
+
+  @override
+  String get imageUrl => 'Image URL';
+
+  @override
+  String get available => 'Available';
+
+  @override
+  String get unavailable => 'Unavailable';
+
+  @override
+  String get productAvailableHint => 'Toggle product availability';
+
+  @override
+  String get featuredProductHint => 'Show this product on the home page';
+
+  @override
+  String get productUpdated => 'Product updated successfully';
+
+  @override
+  String get productCreated => 'Product created successfully';
+
+  @override
+  String get noProductsFound => 'No products found';
+
+  @override
+  String get noResultsFound => 'No results found';
+
+  @override
+  String get deleteProduct => 'Delete Product';
+
+  @override
+  String get areYouSureYouWantToDelete => 'Are you sure you want to delete';
+
+  @override
+  String get areYouSureYouWantToLogout => 'Are you sure you want to log out?';
+
+  @override
+  String get productDeleted => 'Product deleted';
+
+  @override
   String get reservationDetails => 'Reservation Details';
 
   @override
@@ -1293,4 +1416,279 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get callRestaurant => 'Call Restaurant';
+
+  @override
+  String get wallet => 'Wallet';
+
+  @override
+  String get availableBalance => 'Available Balance';
+
+  @override
+  String get topUp => 'Top Up';
+
+  @override
+  String get transactions => 'Transactions';
+
+  @override
+  String get recentTransactions => 'Recent Transactions';
+
+  @override
+  String get noTransactions => 'No transactions yet';
+
+  @override
+  String get topUpToGetStarted => 'Top up your wallet to get started';
+
+  @override
+  String get selectAmount => 'Select Amount';
+
+  @override
+  String get bankTransfer => 'Bank Transfer';
+
+  @override
+  String get confirmTopUp => 'Confirm Top Up';
+
+  @override
+  String get loginToViewWallet => 'Please log in to view your wallet';
+
+  @override
+  String get driverDashboard => 'Driver Dashboard';
+
+  @override
+  String get online => 'Online';
+
+  @override
+  String get offline => 'Offline';
+
+  @override
+  String get totalDeliveries => 'Total Deliveries';
+
+  @override
+  String get earnings => 'Earnings';
+
+  @override
+  String get vehicleInfo => 'Vehicle Info';
+
+  @override
+  String get availableDeliveries => 'Available Deliveries';
+
+  @override
+  String get todayRevenue => 'Today\'s Revenue';
+
+  @override
+  String get pendingOrders => 'Pending Orders';
+
+  @override
+  String get inProgress => 'In Progress';
+
+  @override
+  String fieldRequiredWithName(Object field) {
+    return '$field is required';
+  }
+
+  @override
+  String get emailRequired => 'Email is required';
+
+  @override
+  String get emailInvalid => 'Enter a valid email address';
+
+  @override
+  String get phoneRequired => 'Phone number is required';
+
+  @override
+  String get phoneInvalid => 'Enter a valid phone number';
+
+  @override
+  String get passwordRequired => 'Password is required';
+
+  @override
+  String get passwordTooShort => 'Password must be at least 8 characters';
+
+  @override
+  String fieldMustBeAtLeast(Object field, Object min) {
+    return '$field must be at least $min characters';
+  }
+
+  @override
+  String fieldMustBeAtMost(Object field, Object max) {
+    return '$field must be at most $max characters';
+  }
+
+  @override
+  String get passwordsDoNotMatch => 'Passwords do not match';
+
+  @override
+  String get security => 'Security';
+
+  @override
+  String get privacy => 'Privacy';
+
+  @override
+  String get changePassword => 'Change Password';
+
+  @override
+  String get twoFactorAuth => 'Two-Factor Authentication';
+
+  @override
+  String get loginActivity => 'Login Activity';
+
+  @override
+  String get dataPrivacy => 'Data & Privacy';
+
+  @override
+  String get locationSharing => 'Location Sharing';
+
+  @override
+  String get notificationPreferences => 'Notification Preferences';
+
+  @override
+  String get currentLocation => 'Current Location';
+
+  @override
+  String get whereTo => 'Where to?';
+
+  @override
+  String get work => 'Work';
+
+  @override
+  String get economy => 'Economy';
+
+  @override
+  String get comfort => 'Comfort';
+
+  @override
+  String get premium => 'Premium';
+
+  @override
+  String get rateYourTrip => 'Rate your trip';
+
+  @override
+  String get rateDriverPrompt => 'How was your driver?';
+
+  @override
+  String get addFeedback => 'Add your feedback...';
+
+  @override
+  String get submitRating => 'Submit Rating';
+
+  @override
+  String get noRidesYet => 'No rides yet';
+
+  @override
+  String get startFirstRide => 'Book your first ride now!';
+
+  @override
+  String get rideHistory => 'Ride History';
+
+  @override
+  String get rideDetails => 'Ride Details';
+
+  @override
+  String get pickup => 'Pickup Location';
+
+  @override
+  String get dropoff => 'Dropoff Location';
+
+  @override
+  String get fare => 'Fare';
+
+  @override
+  String get distance => 'Distance';
+
+  @override
+  String get time => 'Time';
+
+  @override
+  String get type => 'Type';
+
+  @override
+  String get close => 'Close';
+
+  @override
+  String get driverArriving => 'Driver is arriving';
+
+  @override
+  String get inTrip => 'In Trip';
+
+  @override
+  String get arrived => 'Arrived';
+
+  @override
+  String get driverEnRoute => 'Driver is en route';
+
+  @override
+  String get shareTrip => 'Share Trip';
+
+  @override
+  String get sos => 'SOS';
+
+  @override
+  String get tripShared => 'Trip shared successfully!';
+
+  @override
+  String get emergencyAlert => 'Emergency Alert';
+
+  @override
+  String get emergencyConfirmation =>
+      'Are you sure you want to call emergency services?';
+
+  @override
+  String get confirmSOS => 'Confirm SOS';
+
+  @override
+  String get emergencyServicesNotified =>
+      'Emergency services have been notified.';
+
+  @override
+  String get cancelReasonWrongAddress => 'Wrong address entered';
+
+  @override
+  String get cancelReasonChangedMind => 'Changed my mind';
+
+  @override
+  String get cancelReasonDriverDelay => 'Driver is taking too long';
+
+  @override
+  String get cancelReasonOther => 'Other reason';
+
+  @override
+  String get cancelRide => 'Cancel Ride';
+
+  @override
+  String get keepRide => 'Keep Ride';
+
+  @override
+  String get cheapest => 'Cheapest';
+
+  @override
+  String get medium => 'Medium-sized car';
+
+  @override
+  String get luxury => 'Luxury car';
+
+  @override
+  String get chooseRideType => 'Choose a ride type';
+
+  @override
+  String get tripProtected => 'Your trip is protected with SOS coverage';
+
+  @override
+  String get confirmRide => 'Confirm Ride';
+
+  @override
+  String get enterDestination => 'Enter destination address';
+
+  @override
+  String get savedPlace => 'Saved place';
+
+  @override
+  String get setDestination => 'Set Destination';
+
+  @override
+  String get destination => 'Destination';
+
+  @override
+  String get trackRide => 'Track Ride';
+
+  @override
+  String get matched => 'Driver Matched';
 }

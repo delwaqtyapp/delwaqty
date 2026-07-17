@@ -66,6 +66,7 @@ class _LoginPageState extends ConsumerState<LoginPage>
     ref.listen<AuthState>(authStateProvider, (prev, next) {
       next.whenOrNull(
         error: (message) => context.showAppSnackBar(message, isError: true),
+        authenticated: (_) => context.go('/home'),
       );
     });
 
@@ -178,13 +179,22 @@ class _LoginPageState extends ConsumerState<LoginPage>
   }
 
   Widget _buildSocialButtons(AppLocalizations l10n) {
+    void showComingSoon() {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Coming soon'),
+          duration: Duration(seconds: 1),
+        ),
+      );
+    }
+
     return Column(
       children: [
         AnimatedSlideIn(
           delay: const Duration(milliseconds: 300),
           beginOffset: const Offset(0, 0.15),
           child: _SocialButton(
-            onPressed: () {},
+            onPressed: showComingSoon,
             icon: Icons.g_mobiledata_rounded,
             label: l10n.loginWithGoogle,
             backgroundColor: Colors.white,
@@ -196,7 +206,7 @@ class _LoginPageState extends ConsumerState<LoginPage>
           delay: const Duration(milliseconds: 350),
           beginOffset: const Offset(0, 0.15),
           child: _SocialButton(
-            onPressed: () {},
+            onPressed: showComingSoon,
             icon: Icons.apple_rounded,
             label: l10n.loginWithApple,
             backgroundColor: Colors.black,
@@ -208,7 +218,7 @@ class _LoginPageState extends ConsumerState<LoginPage>
           delay: const Duration(milliseconds: 400),
           beginOffset: const Offset(0, 0.15),
           child: _SocialButton(
-            onPressed: () {},
+            onPressed: showComingSoon,
             icon: Icons.facebook_rounded,
             label: l10n.loginWithFacebook,
             backgroundColor: const Color(0xFF1877F2),
@@ -220,7 +230,7 @@ class _LoginPageState extends ConsumerState<LoginPage>
           delay: const Duration(milliseconds: 450),
           beginOffset: const Offset(0, 0.15),
           child: _SocialButton(
-            onPressed: () {},
+            onPressed: showComingSoon,
             icon: Icons.phone_rounded,
             label: l10n.loginWithPhone,
             backgroundColor: context.colorScheme.primaryContainer,

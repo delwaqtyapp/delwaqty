@@ -39,23 +39,49 @@ class SupabaseReviewDataSource {
     return ReviewSummary(averageRating: avg, totalReviews: total);
   }
 
-  Future<List<Review>> getMerchantReviews(String merchantId) async {
-    final data = await _client
+  Future<List<Review>> getMerchantReviews(
+    String merchantId, {
+    int? limit,
+    int? offset,
+  }) async {
+    dynamic query = _client
         .from('reviews')
         .select()
-        .eq('merchant_id', merchantId)
-        .order('created_at', ascending: false);
+        .eq('merchant_id', merchantId);
+
+    query = query.order('created_at', ascending: false);
+
+    if (offset != null && limit != null) {
+      query = query.range(offset, offset + limit - 1);
+    } else if (limit != null) {
+      query = query.limit(limit);
+    }
+
+    final data = await query;
     return (data as List)
         .map((r) => _fromRow(r as Map<String, dynamic>))
         .toList();
   }
 
-  Future<List<Review>> getProductReviews(String productId) async {
-    final data = await _client
+  Future<List<Review>> getProductReviews(
+    String productId, {
+    int? limit,
+    int? offset,
+  }) async {
+    dynamic query = _client
         .from('reviews')
         .select()
-        .eq('product_id', productId)
-        .order('created_at', ascending: false);
+        .eq('product_id', productId);
+
+    query = query.order('created_at', ascending: false);
+
+    if (offset != null && limit != null) {
+      query = query.range(offset, offset + limit - 1);
+    } else if (limit != null) {
+      query = query.limit(limit);
+    }
+
+    final data = await query;
     return (data as List)
         .map((r) => _fromRow(r as Map<String, dynamic>))
         .toList();

@@ -99,7 +99,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get ok => 'موافق';
 
   @override
-  String get appName => 'اسم التطبيق';
+  String get appName => 'دلوقتي';
 
   @override
   String get appNameAr => 'دلوقتي';
@@ -415,7 +415,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get orderConfirmedMessage => 'تم تأكيد طلبك وبدأ المطعم بتحضيره.';
 
   @override
-  String get preparing => 'جاري التحضير';
+  String get preparing => 'قيد التحضير';
 
   @override
   String get ready => 'جاهز';
@@ -842,7 +842,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get helpCenter => 'مركز المساعدة';
 
   @override
-  String get about => 'عن المطعم';
+  String get about => 'حول التطبيق';
 
   @override
   String get version => 'الإصدار 1.0.0';
@@ -855,6 +855,9 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get riyadhSaudiArabia => 'الرياض، المملكة العربية السعودية';
+
+  @override
+  String get searchingForLocation => 'جارٍ البحث عن الموقع...';
 
   @override
   String get dineIn => 'صالة الطعام';
@@ -1132,6 +1135,126 @@ class AppLocalizationsAr extends AppLocalizations {
   String get reportRestaurant => 'إبلاغ';
 
   @override
+  String get merchantDashboard => 'لوحة تحكم التاجر';
+
+  @override
+  String get overview => 'نظرة عامة';
+
+  @override
+  String get quickActions => 'إجراءات سريعة';
+
+  @override
+  String get todayOrders => 'طلبات اليوم';
+
+  @override
+  String get viewOrders => 'عرض الطلبات';
+
+  @override
+  String get manageProducts => 'إدارة المنتجات';
+
+  @override
+  String get createOffer => 'إنشاء عرض';
+
+  @override
+  String get orders => 'الطلبات';
+
+  @override
+  String get accepted => 'مقبول';
+
+  @override
+  String get customer => 'العميل';
+
+  @override
+  String get accept => 'قبول';
+
+  @override
+  String get reject => 'رفض';
+
+  @override
+  String get markReady => 'تعيين كجاهز';
+
+  @override
+  String get editProduct => 'تعديل المنتج';
+
+  @override
+  String get addProduct => 'إضافة منتج';
+
+  @override
+  String get saveChanges => 'حفظ التغييرات';
+
+  @override
+  String get invalidImageUrl => 'رابط الصورة غير صالح';
+
+  @override
+  String get addProductImage => 'إضافة صورة المنتج';
+
+  @override
+  String get productName => 'اسم المنتج';
+
+  @override
+  String get enterProductName => 'أدخل اسم المنتج';
+
+  @override
+  String get fieldRequired => 'هذا الحقل مطلوب';
+
+  @override
+  String get description => 'الوصف';
+
+  @override
+  String get enterDescription => 'أدخل الوصف';
+
+  @override
+  String get price => 'السعر';
+
+  @override
+  String get invalidPrice => 'الرجاء إدخال سعر صالح';
+
+  @override
+  String get category => 'القسم';
+
+  @override
+  String get enterCategory => 'أدخل القسم';
+
+  @override
+  String get imageUrl => 'رابط الصورة';
+
+  @override
+  String get available => 'متاح';
+
+  @override
+  String get unavailable => 'غير متاح';
+
+  @override
+  String get productAvailableHint => 'تفعيل توفر المنتج';
+
+  @override
+  String get featuredProductHint => 'عرض هذا المنتج في الصفحة الرئيسية';
+
+  @override
+  String get productUpdated => 'تم تحديث المنتج بنجاح';
+
+  @override
+  String get productCreated => 'تم إنشاء المنتج بنجاح';
+
+  @override
+  String get noProductsFound => 'لم يتم العثور على منتجات';
+
+  @override
+  String get noResultsFound => 'لم يتم العثور على نتائج';
+
+  @override
+  String get deleteProduct => 'حذف المنتج';
+
+  @override
+  String get areYouSureYouWantToDelete => 'هل أنت متأكد أنك تريد حذف';
+
+  @override
+  String get areYouSureYouWantToLogout => 'هل أنت متأكد أنك تريد تسجيل الخروج؟';
+
+  @override
+  String get productDeleted => 'تم حذف المنتج';
+
+  @override
   String get reservationDetails => 'تفاصيل الحجز';
 
   @override
@@ -1288,4 +1411,278 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get callRestaurant => 'اتصل بالمطعم';
+
+  @override
+  String get wallet => 'المحفظة';
+
+  @override
+  String get availableBalance => 'الرصيد المتاح';
+
+  @override
+  String get topUp => 'شحن الرصيد';
+
+  @override
+  String get transactions => 'المعاملات';
+
+  @override
+  String get recentTransactions => 'آخر المعاملات';
+
+  @override
+  String get noTransactions => 'لا توجد معاملات بعد';
+
+  @override
+  String get topUpToGetStarted => 'اشحن محفظتك للبدء';
+
+  @override
+  String get selectAmount => 'اختر المبلغ';
+
+  @override
+  String get bankTransfer => 'تحويل بنكي';
+
+  @override
+  String get confirmTopUp => 'تأكيد الشحن';
+
+  @override
+  String get loginToViewWallet => 'سجل الدخول لعرض محفظتك';
+
+  @override
+  String get driverDashboard => 'لوحة تحكم السائق';
+
+  @override
+  String get online => 'متصل';
+
+  @override
+  String get offline => 'غير متصل';
+
+  @override
+  String get totalDeliveries => 'إجمالي التوصيلات';
+
+  @override
+  String get earnings => 'الأرباح';
+
+  @override
+  String get vehicleInfo => 'معلومات المركبة';
+
+  @override
+  String get availableDeliveries => 'التوصيلات المتاحة';
+
+  @override
+  String get todayRevenue => 'إيرادات اليوم';
+
+  @override
+  String get pendingOrders => 'الطلبات المعلقة';
+
+  @override
+  String get inProgress => 'قيد التنفيذ';
+
+  @override
+  String fieldRequiredWithName(Object field) {
+    return '$field مطلوب';
+  }
+
+  @override
+  String get emailRequired => 'البريد الإلكتروني مطلوب';
+
+  @override
+  String get emailInvalid => 'أدخل عنوان بريد إلكتروني صحيح';
+
+  @override
+  String get phoneRequired => 'رقم الهاتف مطلوب';
+
+  @override
+  String get phoneInvalid => 'أدخل رقم هاتف صحيح';
+
+  @override
+  String get passwordRequired => 'كلمة المرور مطلوبة';
+
+  @override
+  String get passwordTooShort => 'يجب أن تكون كلمة المرور 8 أحرف على الأقل';
+
+  @override
+  String fieldMustBeAtLeast(Object field, Object min) {
+    return 'يجب أن يكون $field $min أحرف على الأقل';
+  }
+
+  @override
+  String fieldMustBeAtMost(Object field, Object max) {
+    return 'يجب ألا يتجاوز $field $max حرف';
+  }
+
+  @override
+  String get passwordsDoNotMatch => 'كلمتا المرور غير متطابقتين';
+
+  @override
+  String get security => 'الأمان';
+
+  @override
+  String get privacy => 'الخصوصية';
+
+  @override
+  String get changePassword => 'تغيير كلمة المرور';
+
+  @override
+  String get twoFactorAuth => 'المصادقة الثنائية';
+
+  @override
+  String get loginActivity => 'نشاط تسجيل الدخول';
+
+  @override
+  String get dataPrivacy => 'البيانات والخصوصية';
+
+  @override
+  String get locationSharing => 'مشاركة الموقع';
+
+  @override
+  String get notificationPreferences => 'تفضيلات الإشعارات';
+
+  @override
+  String get currentLocation => 'الموقع الحالي';
+
+  @override
+  String get whereTo => 'إلى أين؟';
+
+  @override
+  String get work => 'العمل';
+
+  @override
+  String get economy => 'اقتصادي';
+
+  @override
+  String get comfort => 'مريح';
+
+  @override
+  String get premium => 'فاخر';
+
+  @override
+  String get rateYourTrip => 'قيم رحلتك';
+
+  @override
+  String get rateDriverPrompt => 'كيف كان السائق؟';
+
+  @override
+  String get addFeedback => 'أضف ملاحظاتك...';
+
+  @override
+  String get submitRating => 'إرسال التقييم';
+
+  @override
+  String get noRidesYet => 'لا توجد رحلات بعد';
+
+  @override
+  String get startFirstRide => 'احجز رحلتك الأولى الآن!';
+
+  @override
+  String get rideHistory => 'سجل الرحلات';
+
+  @override
+  String get rideDetails => 'تفاصيل الرحلة';
+
+  @override
+  String get pickup => 'موقع الالتقاء';
+
+  @override
+  String get dropoff => 'موقع النزول';
+
+  @override
+  String get fare => 'الأجرة';
+
+  @override
+  String get distance => 'المسافة';
+
+  @override
+  String get time => 'الوقت';
+
+  @override
+  String get type => 'النوع';
+
+  @override
+  String get close => 'إغلاق';
+
+  @override
+  String get driverArriving => 'السائق يقترب';
+
+  @override
+  String get inTrip => 'في الطريق';
+
+  @override
+  String get arrived => 'وصلنا';
+
+  @override
+  String get driverEnRoute => 'السائق في طريقه إليك';
+
+  @override
+  String get shareTrip => 'مشاركة الرحلة';
+
+  @override
+  String get sos => 'طوارئ SOS';
+
+  @override
+  String get tripShared => 'تم مشاركة الرحلة بنجاح!';
+
+  @override
+  String get emergencyAlert => 'تنبيه طوارئ';
+
+  @override
+  String get emergencyConfirmation =>
+      'هل أنت متأكد من رغبتك في الاتصال بخدمات الطوارئ؟';
+
+  @override
+  String get confirmSOS => 'تأكيد الطوارئ';
+
+  @override
+  String get emergencyServicesNotified => 'تم إخطار خدمات الطوارئ.';
+
+  @override
+  String get cancelReasonWrongAddress => 'تم إدخال عنوان خاطئ';
+
+  @override
+  String get cancelReasonChangedMind => 'غيرت رأيي';
+
+  @override
+  String get cancelReasonDriverDelay => 'السائق يستغرق وقتاً طويلاً';
+
+  @override
+  String get cancelReasonOther => 'سبب آخر';
+
+  @override
+  String get cancelRide => 'إلغاء الرحلة';
+
+  @override
+  String get keepRide => 'الإبقاء على الرحلة';
+
+  @override
+  String get cheapest => 'الأرخص سعراً';
+
+  @override
+  String get medium => 'سيارة متوسطة الحجم';
+
+  @override
+  String get luxury => 'سيارة فاخرة';
+
+  @override
+  String get chooseRideType => 'اختر نوع الرحلة';
+
+  @override
+  String get tripProtected => 'رحلتك محمية بتغطية طوارئ SOS';
+
+  @override
+  String get confirmRide => 'تأكيد الرحلة';
+
+  @override
+  String get enterDestination => 'أدخل عنوان وجهتك';
+
+  @override
+  String get savedPlace => 'مكان محفوظ';
+
+  @override
+  String get setDestination => 'تحديد الوجهة';
+
+  @override
+  String get destination => 'الوجهة';
+
+  @override
+  String get trackRide => 'تتبع الرحلة';
+
+  @override
+  String get matched => 'تم العثور على سائق';
 }

@@ -109,7 +109,7 @@ class _RestaurantReservationPageState extends ConsumerState<RestaurantReservatio
                     return PremiumEmptyState(
                       icon: Icons.event_busy_outlined,
                       title: l10n.noSlotsAvailable,
-                      message: l10n.tryDifferentDate ?? l10n.searchNoResultsMessage,
+                      message: l10n.tryDifferentDate,
                     );
                   }
                   return Wrap(

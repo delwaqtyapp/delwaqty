@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -8,17 +9,158 @@ import 'package:delwaqty/features/commerce/domain/entities/catalog_category.dart
 import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
 import 'package:delwaqty/shared/widgets/premium_empty_state.dart';
 import 'package:delwaqty/shared/widgets/error_state.dart';
-import 'package:delwaqty/shared/widgets/shimmer_loading.dart';
+import 'package:delwaqty/shared/widgets/skeleton_loader.dart';
 
 final _categoriesProvider = FutureProvider.family<List<CatalogCategory>, String>((ref, merchantId) async {
   final repo = ref.watch(catalogCategoryRepositoryProvider);
   return repo.getCategories(merchantId);
 });
 
-final _productsProvider = FutureProvider.family<List<Product>, String>((ref, merchantId) async {
-  final repo = ref.watch(productRepositoryProvider);
-  return repo.getProducts(merchantId: merchantId);
-});
+class MenuState {
+  final List<Product> products;
+  final bool hasMore;
+  final bool isLoadingMore;
+  final int offset;
+  final String? categoryId;
+  final String searchQuery;
+
+  const MenuState({
+    this.products = const [],
+    this.hasMore = true,
+    this.isLoadingMore = false,
+    this.offset = 0,
+    this.categoryId,
+    this.searchQuery = '',
+  });
+
+  MenuState copyWith({
+    List<Product>? products,
+    bool? hasMore,
+    bool? isLoadingMore,
+    int? offset,
+    String? categoryId,
+    bool clearCategory = false,
+    String? searchQuery,
+  }) {
+    return MenuState(
+      products: products ?? this.products,
+      hasMore: hasMore ?? this.hasMore,
+      isLoadingMore: isLoadingMore ?? this.isLoadingMore,
+      offset: offset ?? this.offset,
+      categoryId: clearCategory ? null : (categoryId ?? this.categoryId),
+      searchQuery: searchQuery ?? this.searchQuery,
+    );
+  }
+}
+
+class RestaurantMenuNotifier extends AutoDisposeFamilyAsyncNotifier<MenuState, String> {
+  static const _limit = 20;
+
+  @override
+  FutureOr<MenuState> build(String merchantId) async {
+    final repo = ref.watch(productRepositoryProvider);
+    final products = await repo.getProducts(
+      merchantId: merchantId,
+      limit: _limit,
+      offset: 0,
+    );
+    return MenuState(
+      products: products,
+      hasMore: products.length >= _limit,
+      offset: products.length,
+    );
+  }
+
+  Future<void> loadNextPage() async {
+    final currentState = state.valueOrNull;
+    if (currentState == null || currentState.isLoadingMore || !currentState.hasMore) return;
+
+    state = AsyncValue.data(currentState.copyWith(isLoadingMore: true));
+
+    try {
+      final repo = ref.read(productRepositoryProvider);
+      final products = await repo.getProducts(
+        merchantId: arg,
+        categoryId: currentState.categoryId,
+        limit: _limit,
+        offset: currentState.offset,
+      );
+
+      final newProducts = [...currentState.products, ...products];
+      state = AsyncValue.data(currentState.copyWith(
+        products: newProducts,
+        hasMore: products.length >= _limit,
+        isLoadingMore: false,
+        offset: currentState.offset + products.length,
+      ));
+    } catch (e, stack) {
+      state = AsyncValue.error(e, stack);
+    }
+  }
+
+  Future<void> setCategory(String? categoryId) async {
+    final currentState = state.valueOrNull;
+    if (currentState == null) return;
+
+    state = const AsyncValue.loading();
+
+    try {
+      final repo = ref.read(productRepositoryProvider);
+      final products = await repo.getProducts(
+        merchantId: arg,
+        categoryId: categoryId,
+        limit: _limit,
+        offset: 0,
+      );
+
+      state = AsyncValue.data(MenuState(
+        products: products,
+        hasMore: products.length >= _limit,
+        offset: products.length,
+        categoryId: categoryId,
+        searchQuery: currentState.searchQuery,
+      ));
+    } catch (e, stack) {
+      state = AsyncValue.error(e, stack);
+    }
+  }
+
+  Future<void> setSearchQuery(String query) async {
+    final currentState = state.valueOrNull;
+    if (currentState == null) return;
+
+    state = const AsyncValue.loading();
+
+    try {
+      final repo = ref.read(productRepositoryProvider);
+      List<Product> products;
+      if (query.isEmpty) {
+        products = await repo.getProducts(
+          merchantId: arg,
+          categoryId: currentState.categoryId,
+          limit: _limit,
+          offset: 0,
+        );
+      } else {
+        products = await repo.searchProducts(query, merchantId: arg);
+      }
+
+      state = AsyncValue.data(MenuState(
+        products: products,
+        hasMore: query.isEmpty ? products.length >= _limit : false,
+        offset: products.length,
+        categoryId: currentState.categoryId,
+        searchQuery: query,
+      ));
+    } catch (e, stack) {
+      state = AsyncValue.error(e, stack);
+    }
+  }
+}
+
+final restaurantMenuProvider = AsyncNotifierProvider.autoDispose.family<RestaurantMenuNotifier, MenuState, String>(
+  RestaurantMenuNotifier.new,
+);
 
 class RestaurantMenuPage extends ConsumerStatefulWidget {
   const RestaurantMenuPage({super.key, required this.merchantId, this.merchantName});
@@ -31,13 +173,34 @@ class RestaurantMenuPage extends ConsumerStatefulWidget {
 }
 
 class _RestaurantMenuPageState extends ConsumerState<RestaurantMenuPage> {
-  String? _selectedCategoryId;
-  String _searchQuery = '';
   final _searchController = TextEditingController();
   final _scrollController = ScrollController();
+  Timer? _debounce;
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController.addListener(_onScroll);
+  }
+
+  void _onScroll() {
+    if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 200) {
+      ref.read(restaurantMenuProvider(widget.merchantId).notifier).loadNextPage();
+    }
+  }
+
+  void _debounceSearch(String query) {
+    if (_debounce?.isActive ?? false) _debounce!.cancel();
+    _debounce = Timer(const Duration(milliseconds: 500), () {
+      if (mounted) {
+        ref.read(restaurantMenuProvider(widget.merchantId).notifier).setSearchQuery(query.trim());
+      }
+    });
+  }
 
   @override
   void dispose() {
+    _debounce?.cancel();
     _searchController.dispose();
     _scrollController.dispose();
     super.dispose();
@@ -48,7 +211,7 @@ class _RestaurantMenuPageState extends ConsumerState<RestaurantMenuPage> {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final categoriesAsync = ref.watch(_categoriesProvider(widget.merchantId));
-    final productsAsync = ref.watch(_productsProvider(widget.merchantId));
+    final menuStateAsync = ref.watch(restaurantMenuProvider(widget.merchantId));
 
     return Scaffold(
       appBar: AppBar(
@@ -60,16 +223,16 @@ class _RestaurantMenuPageState extends ConsumerState<RestaurantMenuPage> {
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
             child: TextField(
               controller: _searchController,
-              onChanged: (v) => setState(() => _searchQuery = v.toLowerCase()),
+              onChanged: _debounceSearch,
               decoration: InputDecoration(
                 hintText: l10n.searchMenu,
                 prefixIcon: const Icon(Icons.search, size: 20),
-                suffixIcon: _searchQuery.isNotEmpty
+                suffixIcon: _searchController.text.isNotEmpty
                     ? IconButton(
                         icon: const Icon(Icons.clear, size: 18),
                         onPressed: () {
                           _searchController.clear();
-                          setState(() => _searchQuery = '');
+                          ref.read(restaurantMenuProvider(widget.merchantId).notifier).setSearchQuery('');
                         },
                       )
                     : null,
@@ -86,6 +249,8 @@ class _RestaurantMenuPageState extends ConsumerState<RestaurantMenuPage> {
           categoriesAsync.when(
             data: (categories) {
               if (categories.isEmpty) return const SizedBox.shrink();
+              final menuState = menuStateAsync.valueOrNull;
+              final selectedCategoryId = menuState?.categoryId;
               return SizedBox(
                 height: 40,
                 child: ListView(
@@ -94,16 +259,16 @@ class _RestaurantMenuPageState extends ConsumerState<RestaurantMenuPage> {
                   children: [
                     _CategoryChip(
                       label: l10n.allCategories,
-                      isSelected: _selectedCategoryId == null,
-                      onTap: () => setState(() => _selectedCategoryId = null),
+                      isSelected: selectedCategoryId == null,
+                      onTap: () => ref.read(restaurantMenuProvider(widget.merchantId).notifier).setCategory(null),
                     ),
                     const SizedBox(width: 8),
                     ...categories.map((cat) => Padding(
                       padding: const EdgeInsets.only(right: 8),
                       child: _CategoryChip(
                         label: cat.name,
-                        isSelected: _selectedCategoryId == cat.id,
-                        onTap: () => setState(() => _selectedCategoryId = cat.id),
+                        isSelected: selectedCategoryId == cat.id,
+                        onTap: () => ref.read(restaurantMenuProvider(widget.merchantId).notifier).setCategory(cat.id),
                       ),
                     )),
                   ],
@@ -115,20 +280,10 @@ class _RestaurantMenuPageState extends ConsumerState<RestaurantMenuPage> {
           ),
           const SizedBox(height: 8),
           Expanded(
-            child: productsAsync.when(
-              data: (products) {
-                var filtered = products;
-                if (_selectedCategoryId != null) {
-                  filtered = filtered.where((p) => p.categoryId == _selectedCategoryId).toList();
-                }
-                if (_searchQuery.isNotEmpty) {
-                  filtered = filtered.where((p) =>
-                    p.name.toLowerCase().contains(_searchQuery) ||
-                    (p.description?.toLowerCase().contains(_searchQuery) ?? false) ||
-                    p.tags.any((t) => t.toLowerCase().contains(_searchQuery))
-                  ).toList();
-                }
-                if (filtered.isEmpty) {
+            child: menuStateAsync.when(
+              data: (menuState) {
+                final products = menuState.products;
+                if (products.isEmpty) {
                   return PremiumEmptyState(
                     icon: Icons.restaurant_menu_rounded,
                     title: l10n.noProductsInCategory,
@@ -137,15 +292,23 @@ class _RestaurantMenuPageState extends ConsumerState<RestaurantMenuPage> {
                 }
                 return RefreshIndicator(
                   onRefresh: () async {
-                    ref.invalidate(_productsProvider(widget.merchantId));
+                    ref.invalidate(restaurantMenuProvider(widget.merchantId));
                     ref.invalidate(_categoriesProvider(widget.merchantId));
                   },
                   child: ListView.builder(
                     controller: _scrollController,
                     padding: const EdgeInsets.all(16),
-                    itemCount: filtered.length,
+                    itemCount: products.length + (menuState.hasMore ? 1 : 0),
                     itemBuilder: (context, index) {
-                      final product = filtered[index];
+                      if (index == products.length) {
+                        return const Padding(
+                          padding: EdgeInsets.symmetric(vertical: 16),
+                          child: Center(
+                            child: CircularProgressIndicator(),
+                          ),
+                        );
+                      }
+                      final product = products[index];
                       return AnimatedFadeIn(
                         delay: Duration(milliseconds: index * 50),
                         child: _ProductListTile(
@@ -160,14 +323,7 @@ class _RestaurantMenuPageState extends ConsumerState<RestaurantMenuPage> {
                   ),
                 );
               },
-              loading: () => ListView.builder(
-                padding: const EdgeInsets.all(16),
-                itemCount: 6,
-                itemBuilder: (_, __) => Padding(
-                  padding: const EdgeInsets.only(bottom: 12),
-                  child: ShimmerCard(height: 80),
-                ),
-              ),
+              loading: () => const RestaurantMenuSkeleton(),
               error: (_, __) => Center(
                 child: ErrorState(message: AppLocalizations.of(context).errorLoading),
               ),

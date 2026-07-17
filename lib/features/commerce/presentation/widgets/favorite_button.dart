@@ -75,7 +75,6 @@ class _FavoriteButtonState extends ConsumerState<FavoriteButton> {
       }
 
       final l10n = AppLocalizations.of(context);
-      final prev = _isFav;
       setState(() => _isFav = !_isFav);
 
       final repo = ref.read(favoriteRepositoryProvider);

@@ -21,7 +21,6 @@ class RestaurantOffersPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
-    final theme = Theme.of(context);
     final offersAsync = ref.watch(_offersProvider(merchantId));
 
     return Scaffold(
@@ -164,11 +163,11 @@ class _OfferCard extends StatelessWidget {
                   const SizedBox(height: 8),
                   Row(
                     children: [
-                      if (offer.minimumOrder != null && offer.minimumOrder! > 0) ...[
+                      if (offer.minimumOrder > 0) ...[
                         Icon(Icons.shopping_cart_outlined, size: 14, color: theme.colorScheme.onSurfaceVariant),
                         const SizedBox(width: 4),
                         Text(
-                          l10n.minOrderRequired(offer.minimumOrder!.toStringAsFixed(0), l10n.sar),
+                          l10n.minOrderRequired(offer.minimumOrder.toStringAsFixed(0), l10n.sar),
                           style: theme.textTheme.bodySmall?.copyWith(
                             color: theme.colorScheme.onSurfaceVariant,
                           ),

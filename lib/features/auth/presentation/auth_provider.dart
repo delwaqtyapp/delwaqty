@@ -13,6 +13,8 @@ final authStateProvider = NotifierProvider<AuthStateNotifier, AuthState>(
 
 class AuthStateNotifier extends Notifier<AuthState> {
   StreamSubscription? _authSubscription;
+  bool _isSignUpInProgress = false;
+  bool _isSignInInProgress = false;
 
   @override
   AuthState build() {
@@ -47,8 +49,11 @@ class AuthStateNotifier extends Notifier<AuthState> {
       _logger.i('Auth event: ${event.type}');
       switch (event.type) {
         case AuthEventType.signedIn:
-          checkAuthStatus();
+          if (!_isSignUpInProgress && !_isSignInInProgress) {
+            checkAuthStatus();
+          }
         case AuthEventType.signedOut:
+          _isSignUpInProgress = false;
           state = const AuthState.unauthenticated();
         case AuthEventType.tokenRefreshed:
           _logger.i('Token refreshed');
@@ -83,6 +88,7 @@ class AuthStateNotifier extends Notifier<AuthState> {
   }
 
   Future<void> signIn({required String email, required String password}) async {
+    _isSignInInProgress = true;
     state = const AuthState.loading();
     try {
       await _signInUseCase(email: email, password: password);
@@ -92,6 +98,8 @@ class AuthStateNotifier extends Notifier<AuthState> {
       _logger.e('Sign in failed', e);
       final failure = handleException(e);
       state = AuthState.error(message: failure.message);
+    } finally {
+      _isSignInInProgress = false;
     }
   }
 
@@ -100,6 +108,7 @@ class AuthStateNotifier extends Notifier<AuthState> {
     required String password,
     String? fullName,
   }) async {
+    _isSignUpInProgress = true;
     state = const AuthState.loading();
     try {
       final result = await _signUpUseCase(
@@ -109,15 +118,17 @@ class AuthStateNotifier extends Notifier<AuthState> {
       );
       if (result.accessToken == null) {
         state = AuthState.emailConfirmationRequired(email: email);
+        _isSignUpInProgress = false;
         return;
       }
-      await Future.delayed(const Duration(milliseconds: 500));
       final user = await ref.read(getCurrentUserUseCaseProvider).call();
       state = AuthState.authenticated(user: user);
     } catch (e) {
       _logger.e('Sign up failed', e);
       final failure = handleException(e);
       state = AuthState.error(message: failure.message);
+    } finally {
+      _isSignUpInProgress = false;
     }
   }
 

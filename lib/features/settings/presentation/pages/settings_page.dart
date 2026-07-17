@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:delwaqty/core/extensions/context_extensions.dart';
 import 'package:delwaqty/core/localization/locale_provider.dart';
 import 'package:delwaqty/core/theme/theme_mode_provider.dart';
@@ -32,14 +33,14 @@ class SettingsPage extends ConsumerWidget {
               leading: const Icon(Icons.person_outline_rounded),
               title: Text(l10n.profile),
               trailing: const Icon(Icons.chevron_right_rounded),
-              onTap: () {},
+              onTap: () => context.push('/profile'),
             ),
             const Divider(height: 1),
             ListTile(
               leading: const Icon(Icons.lock_outline_rounded),
               title: Text(l10n.privacySecurity),
               trailing: const Icon(Icons.chevron_right_rounded),
-              onTap: () {},
+              onTap: () => context.push('/settings/privacy-security'),
             ),
           ]),
         ),
@@ -51,7 +52,7 @@ class SettingsPage extends ConsumerWidget {
               leading: const Icon(Icons.help_outline_rounded),
               title: Text(l10n.helpCenter),
               trailing: const Icon(Icons.chevron_right_rounded),
-              onTap: () {},
+              onTap: () => context.push('/settings/help-center'),
             ),
             const Divider(height: 1),
             ListTile(
@@ -59,7 +60,7 @@ class SettingsPage extends ConsumerWidget {
               title: Text(l10n.about),
               subtitle: Text(l10n.version),
               trailing: const Icon(Icons.chevron_right_rounded),
-              onTap: () {},
+              onTap: () => context.push('/settings/about'),
             ),
           ]),
         ),
@@ -71,14 +72,14 @@ class SettingsPage extends ConsumerWidget {
               leading: const Icon(Icons.description_outlined),
               title: Text(l10n.termsOfService),
               trailing: const Icon(Icons.chevron_right_rounded),
-              onTap: () {},
+              onTap: () => context.push('/settings/terms-of-service'),
             ),
             const Divider(height: 1),
             ListTile(
               leading: const Icon(Icons.privacy_tip_outlined),
               title: Text(l10n.privacyPolicy),
               trailing: const Icon(Icons.chevron_right_rounded),
-              onTap: () {},
+              onTap: () => context.push('/settings/privacy-policy'),
             ),
           ]),
         ),

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
@@ -7,29 +8,125 @@ import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
 import 'package:delwaqty/shared/widgets/premium_empty_state.dart';
 import 'package:delwaqty/shared/widgets/error_state.dart';
 import 'package:delwaqty/shared/widgets/app_snackbar.dart';
-import 'package:delwaqty/shared/widgets/shimmer_loading.dart';
+import 'package:delwaqty/shared/widgets/skeleton_loader.dart';
 
-final _reviewsProvider = FutureProvider.family<List<Review>, String>((ref, merchantId) async {
-  final repo = ref.watch(reviewRepositoryProvider);
-  return repo.getMerchantReviews(merchantId);
-});
+class ReviewsState {
+  final List<Review> reviews;
+  final bool hasMore;
+  final bool isLoadingMore;
+  final int offset;
+
+  const ReviewsState({
+    this.reviews = const [],
+    this.hasMore = true,
+    this.isLoadingMore = false,
+    this.offset = 0,
+  });
+
+  ReviewsState copyWith({
+    List<Review>? reviews,
+    bool? hasMore,
+    bool? isLoadingMore,
+    int? offset,
+  }) {
+    return ReviewsState(
+      reviews: reviews ?? this.reviews,
+      hasMore: hasMore ?? this.hasMore,
+      isLoadingMore: isLoadingMore ?? this.isLoadingMore,
+      offset: offset ?? this.offset,
+    );
+  }
+}
+
+class RestaurantReviewsNotifier extends AutoDisposeFamilyAsyncNotifier<ReviewsState, String> {
+  static const _limit = 10;
+
+  @override
+  FutureOr<ReviewsState> build(String merchantId) async {
+    final repo = ref.watch(reviewRepositoryProvider);
+    final reviews = await repo.getMerchantReviews(
+      merchantId,
+      limit: _limit,
+      offset: 0,
+    );
+    return ReviewsState(
+      reviews: reviews,
+      hasMore: reviews.length >= _limit,
+      offset: reviews.length,
+    );
+  }
+
+  Future<void> loadNextPage() async {
+    final currentState = state.valueOrNull;
+    if (currentState == null || currentState.isLoadingMore || !currentState.hasMore) return;
+
+    state = AsyncValue.data(currentState.copyWith(isLoadingMore: true));
+
+    try {
+      final repo = ref.read(reviewRepositoryProvider);
+      final reviews = await repo.getMerchantReviews(
+        arg,
+        limit: _limit,
+        offset: currentState.offset,
+      );
+
+      final newReviews = [...currentState.reviews, ...reviews];
+      state = AsyncValue.data(currentState.copyWith(
+        reviews: newReviews,
+        hasMore: reviews.length >= _limit,
+        isLoadingMore: false,
+        offset: currentState.offset + reviews.length,
+      ));
+    } catch (e, stack) {
+      state = AsyncValue.error(e, stack);
+    }
+  }
+}
+
+final restaurantReviewsProvider = AsyncNotifierProvider.autoDispose.family<RestaurantReviewsNotifier, ReviewsState, String>(
+  RestaurantReviewsNotifier.new,
+);
 
 final _summaryProvider = FutureProvider.family<ReviewSummary, String>((ref, merchantId) async {
   final repo = ref.watch(reviewRepositoryProvider);
   return repo.getMerchantRatingSummary(merchantId);
 });
 
-class RestaurantReviewsPage extends ConsumerWidget {
+class RestaurantReviewsPage extends ConsumerStatefulWidget {
   const RestaurantReviewsPage({super.key, required this.merchantId});
 
   final String merchantId;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<RestaurantReviewsPage> createState() => _RestaurantReviewsPageState();
+}
+
+class _RestaurantReviewsPageState extends ConsumerState<RestaurantReviewsPage> {
+  final _scrollController = ScrollController();
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController.addListener(_onScroll);
+  }
+
+  void _onScroll() {
+    if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 200) {
+      ref.read(restaurantReviewsProvider(widget.merchantId).notifier).loadNextPage();
+    }
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final theme = Theme.of(context);
-    final reviewsAsync = ref.watch(_reviewsProvider(merchantId));
-    final summaryAsync = ref.watch(_summaryProvider(merchantId));
+    final reviewsAsync = ref.watch(restaurantReviewsProvider(widget.merchantId));
+    final summaryAsync = ref.watch(_summaryProvider(widget.merchantId));
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.reviews)),
@@ -37,13 +134,14 @@ class RestaurantReviewsPage extends ConsumerWidget {
         children: [
           summaryAsync.when(
             data: (summary) => _RatingSummary(summary: summary),
-            loading: () => const SizedBox(height: 120, child: ShimmerCard()),
+            loading: () => const SizedBox(height: 120, child: Center(child: CircularProgressIndicator())),
             error: (_, __) => const SizedBox.shrink(),
           ),
           const Divider(),
           Expanded(
             child: reviewsAsync.when(
-              data: (reviews) {
+              data: (reviewsState) {
+                final reviews = reviewsState.reviews;
                 if (reviews.isEmpty) {
                   return Center(
                     child: PremiumEmptyState(
@@ -55,14 +153,23 @@ class RestaurantReviewsPage extends ConsumerWidget {
                 }
                 return RefreshIndicator(
                   onRefresh: () async {
-                    ref.invalidate(_reviewsProvider(merchantId));
-                    ref.invalidate(_summaryProvider(merchantId));
+                    ref.invalidate(restaurantReviewsProvider(widget.merchantId));
+                    ref.invalidate(_summaryProvider(widget.merchantId));
                   },
                   child: ListView.separated(
+                    controller: _scrollController,
                     padding: const EdgeInsets.all(16),
-                    itemCount: reviews.length,
+                    itemCount: reviews.length + (reviewsState.hasMore ? 1 : 0),
                     separatorBuilder: (_, __) => const Divider(height: 1),
                     itemBuilder: (context, index) {
+                      if (index == reviews.length) {
+                        return const Padding(
+                          padding: EdgeInsets.symmetric(vertical: 16),
+                          child: Center(
+                            child: CircularProgressIndicator(),
+                          ),
+                        );
+                      }
                       final review = reviews[index];
                       return AnimatedFadeIn(
                         delay: Duration(milliseconds: index * 60),
@@ -72,14 +179,7 @@ class RestaurantReviewsPage extends ConsumerWidget {
                   ),
                 );
               },
-              loading: () => ListView.builder(
-                padding: const EdgeInsets.all(16),
-                itemCount: 4,
-                itemBuilder: (_, __) => Padding(
-                  padding: const EdgeInsets.only(bottom: 16),
-                  child: ShimmerCard(height: 80),
-                ),
-              ),
+              loading: () => const RestaurantReviewsSkeleton(),
               error: (_, __) => Center(
                 child: ErrorState(message: l10n.errorLoading),
               ),
@@ -99,10 +199,8 @@ class RestaurantReviewsPage extends ConsumerWidget {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (context) => _WriteReviewSheet(merchantId: merchantId),
+      backgroundColor: Colors.transparent,
+      builder: (context) => _WriteReviewSheet(merchantId: widget.merchantId),
     );
   }
 }
@@ -403,7 +501,7 @@ class _WriteReviewSheetState extends ConsumerState<_WriteReviewSheet> {
         comment: _commentController.text.isNotEmpty ? _commentController.text : null,
       );
       if (mounted) {
-        ref.invalidate(_reviewsProvider(widget.merchantId));
+        ref.invalidate(restaurantReviewsProvider(widget.merchantId));
         ref.invalidate(_summaryProvider(widget.merchantId));
         AppSnackbar.success(context, message: AppLocalizations.of(context).reviewSubmitted);
         Navigator.pop(context);

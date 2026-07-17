@@ -1,10 +1,8 @@
-/// Google Maps configuration.
+import 'package:delwaqty/config/app_config.dart';
+
+/// Google Maps configuration — delegates to [AppConfig].
 abstract final class MapsConfig {
-  /// Google Maps API key (Android/iOS/web).
-  static const String apiKey = String.fromEnvironment(
-    'GOOGLE_MAPS_API_KEY',
-    defaultValue: 'your-google-maps-api-key',
-  );
+  static String get apiKey => AppConfig.mapsApiKey;
 
   /// Default map center (Riyadh, Saudi Arabia).
   static const double defaultLat = 24.7136;

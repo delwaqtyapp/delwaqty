@@ -1,16 +1,22 @@
-/// Firebase configuration for all services.
-///
-/// Firebase provides: Auth, FCM, Crashlytics, Analytics, Performance, Remote Config, App Check.
-/// Configuration is done via google-services.json (Android) and GoogleService-Info.plist (iOS).
-abstract final class FirebaseConfig {
-  // ─── Project Settings ─────────────────────────────────────
+import 'package:delwaqty/config/app_config.dart';
 
-  static const String projectId = 'delwaqty0';
+/// Firebase configuration — delegates to [AppConfig].
+///
+/// Service toggles and remote config defaults remain local since
+/// they are not environment-specific and are safe to hardcode.
+abstract final class FirebaseConfig {
+  // ─── Project Settings (from AppConfig) ─────────────────────
+
+  static String get projectId => AppConfig.firebaseProjectId;
+  static String get apiKey => AppConfig.firebaseApiKey;
+  static String get androidAppId => AppConfig.firebaseAppId;
+  static String get messagingSenderId => AppConfig.firebaseMessagingSenderId;
+  static String get storageBucket => AppConfig.firebaseStorageBucket;
+
+  // ─── Package Names ─────────────────────────────────────────
+
   static const String androidPackageName = 'com.example.delwaqty';
   static const String iosBundleId = 'com.example.delwaqty';
-  static const String androidAppId =
-      '1:772052634679:android:17267a5736408b918b43b2';
-  static const String storageBucket = 'delwaqty0.firebasestorage.app';
 
   // ─── Service Toggles ──────────────────────────────────────
 
@@ -20,7 +26,7 @@ abstract final class FirebaseConfig {
   static const bool enableAnalytics = true;
   static const bool enablePerformance = true;
   static const bool enableRemoteConfig = true;
-  static const bool enableAppCheck = false; // Enable after App Review
+  static const bool enableAppCheck = false;
 
   // ─── Remote Config Defaults ───────────────────────────────
 

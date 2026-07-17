@@ -1,3 +1,4 @@
+import 'package:delwaqty/data/models/user_model.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:delwaqty/domain/repositories/user_repository.dart';
 import 'package:delwaqty/domain/entities/user.dart';
@@ -32,8 +33,25 @@ class UserRepositoryImpl implements UserRepository {
       if (supabaseUser == null) {
         throw const AuthException(message: 'No authenticated user');
       }
-      final model = await _profileDataSource.getProfile(supabaseUser.id);
-      return model.toEntity();
+      try {
+        final model = await _profileDataSource.getProfile(supabaseUser.id);
+        return model.toEntity();
+      } catch (e) {
+        _logger.w('Profile not found in users table for authenticated user: ${supabaseUser.id}. Creating default profile...');
+        final defaultModel = UserModel(
+          id: supabaseUser.id,
+          email: supabaseUser.email ?? '',
+          fullName: supabaseUser.userMetadata?['full_name'] as String? ?? 'User',
+          phone: supabaseUser.phone,
+          avatarUrl: supabaseUser.userMetadata?['avatar_url'] as String?,
+          language: 'en',
+          isOnboarded: false,
+          role: 'customer',
+          createdAt: DateTime.now(),
+        );
+        final created = await _profileDataSource.createProfile(defaultModel);
+        return created.toEntity();
+      }
     } on AuthException {
       rethrow;
     } catch (e) {
@@ -45,8 +63,29 @@ class UserRepositoryImpl implements UserRepository {
   @override
   Future<User> getUserById(String id) async {
     try {
-      final model = await _profileDataSource.getProfile(id);
-      return model.toEntity();
+      try {
+        final model = await _profileDataSource.getProfile(id);
+        return model.toEntity();
+      } catch (e) {
+        final supabaseUser = _authDataSource.currentSupabaseUser;
+        if (supabaseUser != null && supabaseUser.id == id) {
+          _logger.w('Profile not found in users table for user by ID: $id (matches current user). Creating default profile...');
+          final defaultModel = UserModel(
+            id: supabaseUser.id,
+            email: supabaseUser.email ?? '',
+            fullName: supabaseUser.userMetadata?['full_name'] as String? ?? 'User',
+            phone: supabaseUser.phone,
+            avatarUrl: supabaseUser.userMetadata?['avatar_url'] as String?,
+            language: 'en',
+            isOnboarded: false,
+            role: 'customer',
+            createdAt: DateTime.now(),
+          );
+          final created = await _profileDataSource.createProfile(defaultModel);
+          return created.toEntity();
+        }
+        rethrow;
+      }
     } catch (e) {
       _logger.e('Failed to get user by id: $id', e);
       throw ServerException(message: e.toString());

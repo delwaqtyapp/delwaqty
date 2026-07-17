@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -5,6 +6,8 @@ import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:delwaqty/app/app.dart';
+import 'package:delwaqty/config/app_config.dart';
+import 'package:delwaqty/config/config_validator.dart';
 import 'package:delwaqty/config/firebase_config.dart';
 import 'package:delwaqty/data/datasources/local/shared_preferences_service.dart';
 import 'package:delwaqty/data/repositories/auth_repository_impl.dart';
@@ -25,6 +28,11 @@ void main() async {
     DeviceOrientation.portraitDown,
   ]);
 
+  // ── Validate configuration before any service init ──────────
+  if (kDebugMode) AppConfig.logConfig();
+  ConfigValidator.validateOrThrow();
+
+  // ── Initialize services ─────────────────────────────────────
   final results = await Future.wait([
     SharedPreferences.getInstance(),
     _initFirebase(),
@@ -64,11 +72,9 @@ Future<void> _initFirebase() async {
   try {
     await Firebase.initializeApp(
       options: FirebaseOptions(
-        apiKey: const String.fromEnvironment('FIREBASE_API_KEY'),
-        appId: const String.fromEnvironment('FIREBASE_APP_ID'),
-        messagingSenderId: const String.fromEnvironment(
-          'FIREBASE_MESSAGING_SENDER_ID',
-        ),
+        apiKey: FirebaseConfig.apiKey,
+        appId: FirebaseConfig.androidAppId,
+        messagingSenderId: FirebaseConfig.messagingSenderId,
         projectId: FirebaseConfig.projectId,
         storageBucket: FirebaseConfig.storageBucket,
       ),

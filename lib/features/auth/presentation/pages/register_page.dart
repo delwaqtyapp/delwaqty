@@ -56,6 +56,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
     ref.listen<AuthState>(authStateProvider, (prev, next) {
       next.whenOrNull(
         error: (message) => context.showAppSnackBar(message, isError: true),
+        authenticated: (_) => context.go('/home'),
         emailConfirmationRequired: (email) {
           showDialog(
             context: context,

@@ -23,16 +23,34 @@ final _featuredFutureProvider = FutureProvider<List<Merchant>>((ref) async {
 
 final _selectedTypeProvider = StateProvider<MerchantType?>((_) => null);
 
-class CommerceDiscoveryPage extends ConsumerWidget {
+class CommerceDiscoveryPage extends ConsumerStatefulWidget {
   const CommerceDiscoveryPage({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<CommerceDiscoveryPage> createState() => _CommerceDiscoveryPageState();
+}
+
+class _CommerceDiscoveryPageState extends ConsumerState<CommerceDiscoveryPage> {
+  bool _initialFilterSet = false;
+
+  @override
+  Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final selectedType = ref.watch(_selectedTypeProvider);
     final merchantsAsync = ref.watch(_merchantsFutureProvider);
     final featuredAsync = ref.watch(_featuredFutureProvider);
+
+    final extra = GoRouterState.of(context).uri.queryParameters['type'];
+    if (!_initialFilterSet && extra != null) {
+      _initialFilterSet = true;
+      final match = MerchantType.values.where((t) => t.name == extra).firstOrNull;
+      if (match != null) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          ref.read(_selectedTypeProvider.notifier).state = match;
+        });
+      }
+    }
 
     return Scaffold(
       appBar: AppBar(

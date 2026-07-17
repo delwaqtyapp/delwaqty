@@ -205,7 +205,7 @@ class _AppDrawer extends StatelessWidget {
                   builder: (context) => AlertDialog(
                     title: Text(l10n.logout),
                     content: Text(
-                      'Are you sure you want to ${l10n.logout.toLowerCase()}?',
+                      l10n.areYouSureYouWantToLogout,
                     ),
                     actions: [
                       TextButton(

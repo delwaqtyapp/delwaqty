@@ -26,6 +26,8 @@ class ProfilePage extends ConsumerWidget {
 
     final isAdmin = authState is AuthAuthenticated &&
         (authState.user.role == 'admin' || authState.user.role == 'owner');
+    final isDriver = authState is AuthAuthenticated && authState.user.role == 'driver';
+    final isMerchant = authState is AuthAuthenticated && authState.user.role == 'merchant';
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.profile)),
@@ -38,11 +40,11 @@ class ProfilePage extends ConsumerWidget {
             delay: const Duration(milliseconds: 100),
             child: _buildSettingsSection(context, ref, l10n, themeMode, locale),
           ),
-          if (isAdmin) ...[
+          if (isAdmin || isDriver || isMerchant) ...[
             const SizedBox(height: 16),
             AnimatedFadeIn(
               delay: const Duration(milliseconds: 150),
-              child: _buildAdminButton(context, l10n),
+              child: _buildRolePortals(context, l10n, isAdmin, isDriver, isMerchant),
             ),
           ],
           const SizedBox(height: 24),
@@ -172,6 +174,13 @@ class ProfilePage extends ConsumerWidget {
       child: Column(
         children: [
           ListTile(
+            leading: const Icon(Icons.account_balance_wallet_outlined),
+            title: Text(l10n.wallet),
+            trailing: const Icon(Icons.chevron_right_rounded),
+            onTap: () => context.push('/wallet'),
+          ),
+          const Divider(height: 1),
+          ListTile(
             leading: const Icon(Icons.notifications_outlined),
             title: Text(l10n.notifications),
             trailing: const Icon(Icons.chevron_right_rounded),
@@ -204,15 +213,52 @@ class ProfilePage extends ConsumerWidget {
     );
   }
 
-  Widget _buildAdminButton(BuildContext context, AppLocalizations l10n) {
-    return FilledButton.tonalIcon(
-      onPressed: () => context.push('/admin'),
-      icon: const Icon(Icons.admin_panel_settings_outlined),
-      label: Text(l10n.admin),
-      style: FilledButton.styleFrom(
-        padding: const EdgeInsets.symmetric(vertical: 16),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      ),
+  Widget _buildRolePortals(
+    BuildContext context,
+    AppLocalizations l10n,
+    bool isAdmin,
+    bool isDriver,
+    bool isMerchant,
+  ) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        if (isAdmin) ...[
+          FilledButton.tonalIcon(
+            onPressed: () => context.push('/admin'),
+            icon: const Icon(Icons.admin_panel_settings_outlined),
+            label: Text(l10n.admin),
+            style: FilledButton.styleFrom(
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            ),
+          ),
+          const SizedBox(height: 12),
+        ],
+        if (isDriver || isAdmin) ...[
+          FilledButton.tonalIcon(
+            onPressed: () => context.push('/driver'),
+            icon: const Icon(Icons.delivery_dining_outlined),
+            label: Text(l10n.driverDashboard),
+            style: FilledButton.styleFrom(
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            ),
+          ),
+          const SizedBox(height: 12),
+        ],
+        if (isMerchant || isAdmin) ...[
+          FilledButton.tonalIcon(
+            onPressed: () => context.push('/merchant-dashboard'),
+            icon: const Icon(Icons.store_outlined),
+            label: Text(l10n.merchantDashboard),
+            style: FilledButton.styleFrom(
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            ),
+          ),
+        ],
+      ],
     );
   }
 
@@ -228,7 +274,7 @@ class ProfilePage extends ConsumerWidget {
           builder: (context) => AlertDialog(
             title: Text(l10n.logout),
             content: Text(
-              'Are you sure you want to ${l10n.logout.toLowerCase()}?',
+              l10n.areYouSureYouWantToLogout,
             ),
             actions: [
               TextButton(

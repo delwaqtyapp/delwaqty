@@ -197,5 +197,10 @@
   "trustedMerchants": "Trusted Merchants",
   "trustedMerchantsDesc": "Only verified and top-rated stores",
   "liveTracking": "Live Tracking",
-  "liveTrackingDesc": "Track your orders in real-time"
+  "liveTrackingDesc": "Track your orders in real-time",
+  "guestMode": "Guest Mode",
+  "guestModeHint": "Sign in to access your orders, favorites, and profile.",
+  "noResults": "No results found",
+  "errorLoading": "Something went wrong. Please try again.",
+  "nearbyEmptyHint": "No merchants found nearby. Try expanding your search."
 }

@@ -133,6 +133,7 @@ class CommerceModule extends FeatureModule {
               builder: (context, state) => ProductDetailPage(
                 productId: state.pathParameters['productId']!,
                 merchantId: state.pathParameters['id']!,
+                merchantName: (state.extra as String?) ?? '',
               ),
             ),
           ],

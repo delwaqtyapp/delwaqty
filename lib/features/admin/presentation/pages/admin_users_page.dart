@@ -233,7 +233,7 @@ class _RoleChip extends StatelessWidget {
           fontWeight: FontWeight.bold,
         ),
       ),
-      backgroundColor: color.withOpacity(0.1),
+      backgroundColor: color.withValues(alpha: 0.1),
       visualDensity: VisualDensity.compact,
       padding: EdgeInsets.zero,
     );

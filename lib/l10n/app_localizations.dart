@@ -1285,6 +1285,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Track your orders in real-time'**
   String get liveTrackingDesc;
+
+  /// No description provided for @guestMode.
+  ///
+  /// In en, this message translates to:
+  /// **'Guest Mode'**
+  String get guestMode;
+
+  /// No description provided for @guestModeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in to access your orders, favorites, and profile.'**
+  String get guestModeHint;
+
+  /// No description provided for @noResults.
+  ///
+  /// In en, this message translates to:
+  /// **'No results found'**
+  String get noResults;
+
+  /// No description provided for @errorLoading.
+  ///
+  /// In en, this message translates to:
+  /// **'Something went wrong. Please try again.'**
+  String get errorLoading;
+
+  /// No description provided for @nearbyEmptyHint.
+  ///
+  /// In en, this message translates to:
+  /// **'No merchants found nearby. Try expanding your search.'**
+  String get nearbyEmptyHint;
 }
 
 class _AppLocalizationsDelegate

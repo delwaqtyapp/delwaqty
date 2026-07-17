@@ -516,16 +516,13 @@ CREATE POLICY "inventory_update_merchant" ON public.product_inventory
 -- =============================================================
 -- TABLE: catalog_categories (if exists, public read)
 -- =============================================================
-DO $$
+DO $body$
 BEGIN
   IF EXISTS (SELECT FROM pg_tables WHERE schemaname = 'public' AND tablename = 'catalog_categories') THEN
     EXECUTE 'ALTER TABLE public.catalog_categories ENABLE ROW LEVEL SECURITY';
 
-    -- Drop existing policies if any
-    EXECUTE 'DO $$ BEGIN
-      DROP POLICY IF EXISTS "Catalog categories viewable by everyone" ON public.catalog_categories;
-    EXCEPTION WHEN OTHERS THEN NULL; END $$';
+    DROP POLICY IF EXISTS "Catalog categories viewable by everyone" ON public.catalog_categories;
 
     EXECUTE 'CREATE POLICY "catalog_categories_select_public" ON public.catalog_categories FOR SELECT USING (true)';
   END IF;
-END $$;
+END $body$;

@@ -17,11 +17,13 @@ class ProductDetailPage extends ConsumerStatefulWidget {
   const ProductDetailPage({
     required this.productId,
     required this.merchantId,
+    this.merchantName = '',
     super.key,
   });
 
   final String productId;
   final String merchantId;
+  final String merchantName;
 
   @override
   ConsumerState<ProductDetailPage> createState() => _ProductDetailPageState();
@@ -289,7 +291,7 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage> {
                         final cartRepo = ref.read(cartRepositoryProvider);
                         await cartRepo.addToCart(
                           merchantId: widget.merchantId,
-                          merchantName: '',
+                          merchantName: widget.merchantName,
                           item: commerce.CartItem(
                             id: 'ci_${DateTime.now().millisecondsSinceEpoch}',
                             productId: product.id,

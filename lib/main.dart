@@ -27,7 +27,13 @@ void main() async {
     DeviceOrientation.portraitDown,
   ]);
 
-  final sharedPreferences = await SharedPreferences.getInstance();
+  final results = await Future.wait([
+    SharedPreferences.getInstance(),
+    _initFirebase(),
+    _initSupabase(),
+  ]);
+
+  final sharedPreferences = results[0] as SharedPreferences;
   const secureStorage = FlutterSecureStorage(
     aOptions: AndroidOptions(encryptedSharedPreferences: true),
     iOptions: IOSOptions(
@@ -37,36 +43,6 @@ void main() async {
 
   final sharedPrefsService = SharedPreferencesService(sharedPreferences);
   final secureStorageService = SecureStorageService(secureStorage);
-
-  if (FirebaseConfig.isConfigured) {
-    try {
-      await Firebase.initializeApp(
-        options: FirebaseOptions(
-          apiKey: const String.fromEnvironment('FIREBASE_API_KEY'),
-          appId: const String.fromEnvironment('FIREBASE_APP_ID'),
-          messagingSenderId: const String.fromEnvironment(
-            'FIREBASE_MESSAGING_SENDER_ID',
-          ),
-          projectId: FirebaseConfig.projectId,
-          storageBucket: FirebaseConfig.storageBucket,
-        ),
-      );
-      if (FirebaseConfig.enableCrashlytics) {
-        FlutterError.onError =
-            FirebaseCrashlytics.instance.recordFlutterFatalError;
-      }
-    } catch (e) {
-      debugPrint('Firebase initialization failed: $e');
-      debugPrint('App running without Firebase.');
-    }
-  }
-
-  try {
-    await SupabaseInitializer.initialize();
-  } catch (e) {
-    debugPrint('Supabase initialization failed: $e');
-    debugPrint('App running without backend connectivity.');
-  }
 
   final connectivityService = ConnectivityService();
   await connectivityService.initialize();
@@ -91,4 +67,37 @@ void main() async {
       child: const App(),
     ),
   );
+}
+
+Future<void> _initFirebase() async {
+  if (!FirebaseConfig.isConfigured) return;
+  try {
+    await Firebase.initializeApp(
+      options: FirebaseOptions(
+        apiKey: const String.fromEnvironment('FIREBASE_API_KEY'),
+        appId: const String.fromEnvironment('FIREBASE_APP_ID'),
+        messagingSenderId: const String.fromEnvironment(
+          'FIREBASE_MESSAGING_SENDER_ID',
+        ),
+        projectId: FirebaseConfig.projectId,
+        storageBucket: FirebaseConfig.storageBucket,
+      ),
+    );
+    if (FirebaseConfig.enableCrashlytics) {
+      FlutterError.onError =
+          FirebaseCrashlytics.instance.recordFlutterFatalError;
+    }
+  } catch (e) {
+    debugPrint('Firebase initialization failed: $e');
+    debugPrint('App running without Firebase.');
+  }
+}
+
+Future<void> _initSupabase() async {
+  try {
+    await SupabaseInitializer.initialize();
+  } catch (e) {
+    debugPrint('Supabase initialization failed: $e');
+    debugPrint('App running without backend connectivity.');
+  }
 }

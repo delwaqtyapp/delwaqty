@@ -6,12 +6,12 @@ import 'package:go_router/go_router.dart';
 import 'package:delwaqty/core/module/feature_module.dart';
 import 'package:delwaqty/domain/entities/app_notification.dart';
 import 'package:delwaqty/domain/repositories/notification_repository.dart';
-import 'package:delwaqty/data/repositories/mock/mock_notification_repository.dart';
+import 'package:delwaqty/data/repositories/supabase_notification_repository_impl.dart';
 import 'package:delwaqty/features/notifications/presentation/pages/notification_center_page.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 
 final notificationRepositoryProvider = Provider<NotificationRepository>((ref) {
-  return MockNotificationRepository();
+  return ref.watch(supabaseNotificationRepositoryImplProvider);
 });
 
 final notificationsProvider = FutureProvider.autoDispose<List<AppNotification>>(

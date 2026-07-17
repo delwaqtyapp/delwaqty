@@ -197,5 +197,10 @@
   "trustedMerchants": "متاجر موثوقة",
   "trustedMerchantsDesc": "فقط متاجر موثّقة وبتقييم عالي",
   "liveTracking": "تتبع مباشر",
-  "liveTrackingDesc": "تتبع طلباتك لحظة بلحظة"
+  "liveTrackingDesc": "تتبع طلباتك لحظة بلحظة",
+  "guestMode": "وضع الزائر",
+  "guestModeHint": "سجّل الدخول للوصول إلى طلباتك ومفضلتك وملفك الشخصي.",
+  "noResults": "لا توجد نتائج",
+  "errorLoading": "حدث خطأ ما. يرجى المحاولة مرة أخرى.",
+  "nearbyEmptyHint": "لم يتم العثور على متاجر قريبة. حاول توسيع نطاق البحث."
 }

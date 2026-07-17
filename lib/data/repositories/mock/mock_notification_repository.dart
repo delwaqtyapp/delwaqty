@@ -77,8 +77,9 @@ class MockNotificationRepository implements NotificationRepository {
 
   @override
   Future<void> markAllAsRead() async {
-    _notifications.clear();
-    _notifications.addAll(_notifications.map((n) => n.copyWith(isRead: true)));
+    for (var i = 0; i < _notifications.length; i++) {
+      _notifications[i] = _notifications[i].copyWith(isRead: true);
+    }
   }
 
   @override

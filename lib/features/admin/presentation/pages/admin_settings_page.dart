@@ -2,6 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:delwaqty/services/admin/admin_service.dart';
 import 'package:delwaqty/services/admin/admin_providers.dart';
+import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
+import 'package:delwaqty/shared/widgets/premium_empty_state.dart';
+import 'package:delwaqty/shared/widgets/app_loader.dart';
+import 'package:delwaqty/l10n/app_localizations.dart';
 
 class AdminSettingsPage extends ConsumerStatefulWidget {
   const AdminSettingsPage({super.key});
@@ -51,11 +55,12 @@ class _AdminSettingsPageState extends ConsumerState<AdminSettingsPage> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final settingsAsync = ref.watch(platformSettingsProvider);
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Platform Settings'),
+        title: Text(l10n.platformSettings),
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),
@@ -64,114 +69,144 @@ class _AdminSettingsPageState extends ConsumerState<AdminSettingsPage> {
         ],
       ),
       body: settingsAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('Error: $e')),
+        loading: () => const Center(
+          child: AppLoaderCircular(),
+        ),
+        error: (e, _) => Center(
+          child: PremiumEmptyState(
+            icon: Icons.error_outline_rounded,
+            title: l10n.error,
+            message: l10n.errorLoading,
+            actionLabel: l10n.retry,
+            onAction: () => ref.invalidate(platformSettingsProvider),
+          ),
+        ),
         data: (_) => SingleChildScrollView(
           padding: const EdgeInsets.all(16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                'General Settings',
-                style: Theme.of(
-                  context,
-                ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+              AnimatedFadeIn(
+                child: Text(
+                  l10n.generalSettings,
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
               ),
               const SizedBox(height: 16),
-              Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    children: [
-                      TextField(
-                        controller: _appNameController,
-                        decoration: const InputDecoration(
-                          labelText: 'App Name',
-                          border: OutlineInputBorder(),
+              AnimatedFadeIn(
+                delay: const Duration(milliseconds: 100),
+                child: Card(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      children: [
+                        TextField(
+                          controller: _appNameController,
+                          decoration: InputDecoration(
+                            labelText: l10n.appName,
+                            border: const OutlineInputBorder(),
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 12),
-                      TextField(
-                        controller: _supportEmailController,
-                        decoration: const InputDecoration(
-                          labelText: 'Support Email',
-                          border: OutlineInputBorder(),
+                        const SizedBox(height: 12),
+                        TextField(
+                          controller: _supportEmailController,
+                          decoration: InputDecoration(
+                            labelText: l10n.supportEmail,
+                            border: const OutlineInputBorder(),
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 12),
-                      TextField(
-                        controller: _maxDriversPerZoneController,
-                        decoration: const InputDecoration(
-                          labelText: 'Max Drivers Per Zone',
-                          border: OutlineInputBorder(),
+                        const SizedBox(height: 12),
+                        TextField(
+                          controller: _maxDriversPerZoneController,
+                          decoration: InputDecoration(
+                            labelText: l10n.maxDriversPerZone,
+                            border: const OutlineInputBorder(),
+                          ),
+                          keyboardType: TextInputType.number,
                         ),
-                        keyboardType: TextInputType.number,
-                      ),
-                      const SizedBox(height: 12),
-                      SwitchListTile(
-                        title: const Text('Maintenance Mode'),
-                        subtitle: const Text('Temporarily disable the app'),
-                        value: _maintenanceMode,
-                        onChanged: (value) {
-                          setState(() => _maintenanceMode = value);
-                        },
-                      ),
-                    ],
+                        const SizedBox(height: 12),
+                        SwitchListTile(
+                          title: Text(l10n.maintenanceMode),
+                          subtitle: Text(l10n.maintenanceModeDesc),
+                          value: _maintenanceMode,
+                          onChanged: (value) {
+                            setState(() => _maintenanceMode = value);
+                          },
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
               const SizedBox(height: 24),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: _isLoading ? null : _saveSettings,
-                  child: _isLoading
-                      ? const SizedBox(
-                          height: 20,
-                          width: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : const Text('Save Settings'),
+              AnimatedFadeIn(
+                delay: const Duration(milliseconds: 200),
+                child: SizedBox(
+                  width: double.infinity,
+                  child: FilledButton(
+                    onPressed: _isLoading ? null : _saveSettings,
+                    child: _isLoading
+                        ? const SizedBox(
+                            height: 20,
+                            width: 20,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                            ),
+                          )
+                        : Text(l10n.saveSettings),
+                  ),
                 ),
               ),
               const SizedBox(height: 24),
-              Text(
-                'Danger Zone',
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: Colors.red,
+              AnimatedFadeIn(
+                delay: const Duration(milliseconds: 300),
+                child: Text(
+                  l10n.dangerZone,
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: Theme.of(context).colorScheme.error,
+                  ),
                 ),
               ),
               const SizedBox(height: 16),
-              Card(
-                child: ListTile(
-                  title: const Text('Reset All Data'),
-                  subtitle: const Text('Permanently delete all platform data'),
-                  trailing: const Icon(Icons.warning, color: Colors.red),
-                  onTap: () {
-                    showDialog(
-                      context: context,
-                      builder: (context) => AlertDialog(
-                        title: const Text('Reset All Data?'),
-                        content: const Text(
-                          'This action cannot be undone. All data will be permanently deleted.',
-                        ),
-                        actions: [
-                          TextButton(
-                            onPressed: () => Navigator.pop(context),
-                            child: const Text('Cancel'),
-                          ),
-                          TextButton(
-                            onPressed: () => Navigator.pop(context),
-                            child: const Text(
-                              'Reset',
-                              style: TextStyle(color: Colors.red),
+              AnimatedFadeIn(
+                delay: const Duration(milliseconds: 400),
+                child: Card(
+                  child: ListTile(
+                    title: Text(l10n.resetAllData),
+                    subtitle: Text(l10n.resetAllDataDesc),
+                    trailing: Icon(
+                      Icons.warning,
+                      color: Theme.of(context).colorScheme.error,
+                    ),
+                    onTap: () {
+                      showDialog(
+                        context: context,
+                        builder: (context) => AlertDialog(
+                          title: Text(l10n.resetAllDataTitle),
+                          content: Text(l10n.resetAllDataWarning),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.pop(context),
+                              child: Text(l10n.cancel),
                             ),
-                          ),
-                        ],
-                      ),
-                    );
-                  },
+                            TextButton(
+                              onPressed: () => Navigator.pop(context),
+                              child: Text(
+                                l10n.reset,
+                                style: TextStyle(
+                                  color:
+                                      Theme.of(context).colorScheme.error,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                  ),
                 ),
               ),
             ],
@@ -182,6 +217,7 @@ class _AdminSettingsPageState extends ConsumerState<AdminSettingsPage> {
   }
 
   Future<void> _saveSettings() async {
+    final l10n = AppLocalizations.of(context);
     setState(() => _isLoading = true);
 
     final adminService = ref.read(adminServiceProvider);
@@ -198,7 +234,7 @@ class _AdminSettingsPageState extends ConsumerState<AdminSettingsPage> {
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(success ? 'Settings saved' : 'Failed to save settings'),
+          content: Text(success ? l10n.settingsSaved : l10n.settingsFailed),
           backgroundColor: success ? Colors.green : Colors.red,
         ),
       );

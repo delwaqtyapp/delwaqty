@@ -3,22 +3,27 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:delwaqty/features/admin/domain/entities/admin_models.dart';
 import 'package:delwaqty/services/admin/admin_service.dart';
 import 'package:delwaqty/services/admin/admin_providers.dart';
+import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
+import 'package:delwaqty/shared/widgets/premium_empty_state.dart';
+import 'package:delwaqty/shared/widgets/app_loader.dart';
+import 'package:delwaqty/l10n/app_localizations.dart';
 
 class AdminUsersPage extends ConsumerWidget {
   const AdminUsersPage({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final usersAsync = ref.watch(adminUsersProvider);
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('User Management'),
+        title: Text(l10n.userManagement),
         actions: [
           IconButton(
             icon: const Icon(Icons.person_add_outlined),
-            onPressed: () => _showAddUserDialog(context, ref),
-            tooltip: 'Add Admin User',
+            onPressed: () => _showAddUserDialog(context, ref, l10n),
+            tooltip: l10n.addUser,
           ),
           IconButton(
             icon: const Icon(Icons.refresh),
@@ -32,7 +37,7 @@ class AdminUsersPage extends ConsumerWidget {
             padding: const EdgeInsets.all(16),
             child: TextField(
               decoration: InputDecoration(
-                hintText: 'Search users...',
+                hintText: l10n.searchUsers,
                 prefixIcon: const Icon(Icons.search),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -45,31 +50,51 @@ class AdminUsersPage extends ConsumerWidget {
           ),
           Expanded(
             child: usersAsync.when(
-              loading: () => const Center(child: CircularProgressIndicator()),
-              error: (e, _) => Center(child: Text('Error: $e')),
+              loading: () => const Center(
+                child: AppLoaderCircular(),
+              ),
+              error: (e, _) => Center(
+                child: PremiumEmptyState(
+                  icon: Icons.error_outline_rounded,
+                  title: l10n.error,
+                  message: l10n.errorLoading,
+                  actionLabel: l10n.retry,
+                  onAction: () => ref.invalidate(adminUsersProvider),
+                ),
+              ),
               data: (users) {
                 if (users.isEmpty) {
-                  return const Center(child: Text('No users found'));
+                  return PremiumEmptyState(
+                    icon: Icons.people_outline_rounded,
+                    title: l10n.noUsersFound,
+                    message: l10n.noUsersFound,
+                  );
                 }
                 return ListView.separated(
                   itemCount: users.length,
                   separatorBuilder: (_, __) => const Divider(height: 1),
                   itemBuilder: (context, index) {
                     final user = users[index];
-                    return _UserTile(
-                      user: user,
-                      onStatusChanged: (status) async {
-                        final adminService = ref.read(adminServiceProvider);
-                        await adminService.updateUser(
-                          user.copyWith(status: status),
-                        );
-                        ref.invalidate(adminUsersProvider);
-                      },
-                      onDelete: () async {
-                        final adminService = ref.read(adminServiceProvider);
-                        await adminService.deleteUser(user.id);
-                        ref.invalidate(adminUsersProvider);
-                      },
+                    return AnimatedFadeIn(
+                      delay: Duration(milliseconds: index * 50),
+                      child: _UserTile(
+                        user: user,
+                        l10n: l10n,
+                        onStatusChanged: (status) async {
+                          final adminService =
+                              ref.read(adminServiceProvider);
+                          await adminService.updateUser(
+                            user.copyWith(status: status),
+                          );
+                          ref.invalidate(adminUsersProvider);
+                        },
+                        onDelete: () async {
+                          final adminService =
+                              ref.read(adminServiceProvider);
+                          await adminService.deleteUser(user.id);
+                          ref.invalidate(adminUsersProvider);
+                        },
+                      ),
                     );
                   },
                 );
@@ -81,7 +106,11 @@ class AdminUsersPage extends ConsumerWidget {
     );
   }
 
-  void _showAddUserDialog(BuildContext context, WidgetRef ref) {
+  void _showAddUserDialog(
+    BuildContext context,
+    WidgetRef ref,
+    AppLocalizations l10n,
+  ) {
     final nameController = TextEditingController();
     final emailController = TextEditingController();
     AdminRole selectedRole = AdminRole.support;
@@ -89,31 +118,31 @@ class AdminUsersPage extends ConsumerWidget {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Add Admin User'),
+        title: Text(l10n.addUser),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             TextField(
               controller: nameController,
-              decoration: const InputDecoration(
-                labelText: 'Name',
-                border: OutlineInputBorder(),
+              decoration: InputDecoration(
+                labelText: l10n.fullName,
+                border: const OutlineInputBorder(),
               ),
             ),
             const SizedBox(height: 12),
             TextField(
               controller: emailController,
-              decoration: const InputDecoration(
-                labelText: 'Email',
-                border: OutlineInputBorder(),
+              decoration: InputDecoration(
+                labelText: l10n.email,
+                border: const OutlineInputBorder(),
               ),
             ),
             const SizedBox(height: 12),
             DropdownButtonFormField<AdminRole>(
               value: selectedRole,
-              decoration: const InputDecoration(
-                labelText: 'Role',
-                border: OutlineInputBorder(),
+              decoration: InputDecoration(
+                labelText: l10n.role,
+                border: const OutlineInputBorder(),
               ),
               items: AdminRole.values.map((role) {
                 return DropdownMenuItem(
@@ -130,9 +159,9 @@ class AdminUsersPage extends ConsumerWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: Text(l10n.cancel),
           ),
-          ElevatedButton(
+          FilledButton(
             onPressed: () async {
               final adminService = ref.read(adminServiceProvider);
               await adminService.createUser(
@@ -148,7 +177,7 @@ class AdminUsersPage extends ConsumerWidget {
               ref.invalidate(adminUsersProvider);
               if (context.mounted) Navigator.pop(context);
             },
-            child: const Text('Create'),
+            child: Text(l10n.create),
           ),
         ],
       ),
@@ -159,11 +188,13 @@ class AdminUsersPage extends ConsumerWidget {
 class _UserTile extends StatelessWidget {
   const _UserTile({
     required this.user,
+    required this.l10n,
     required this.onStatusChanged,
     required this.onDelete,
   });
 
   final AdminUser user;
+  final AppLocalizations l10n;
   final Function(AdminUserStatus) onStatusChanged;
   final VoidCallback onDelete;
 
@@ -195,12 +226,21 @@ class _UserTile extends StatelessWidget {
             },
             itemBuilder: (context) => [
               if (user.status != AdminUserStatus.active)
-                const PopupMenuItem(value: 'activate', child: Text('Activate')),
+                PopupMenuItem(
+                  value: 'activate',
+                  child: Text(l10n.activate),
+                ),
               if (user.status != AdminUserStatus.suspended)
-                const PopupMenuItem(value: 'suspend', child: Text('Suspend')),
-              const PopupMenuItem(
+                PopupMenuItem(
+                  value: 'suspend',
+                  child: Text(l10n.suspend),
+                ),
+              PopupMenuItem(
                 value: 'delete',
-                child: Text('Delete', style: TextStyle(color: Colors.red)),
+                child: Text(
+                  l10n.delete,
+                  style: TextStyle(color: Theme.of(context).colorScheme.error),
+                ),
               ),
             ],
           ),

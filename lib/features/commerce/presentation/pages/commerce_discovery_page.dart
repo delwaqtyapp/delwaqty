@@ -6,6 +6,10 @@ import 'package:delwaqty/features/commerce/domain/entities/merchant.dart';
 import 'package:delwaqty/features/commerce/presentation/widgets/merchant_card.dart';
 import 'package:delwaqty/features/commerce/presentation/widgets/merchant_type_chip.dart';
 import 'package:delwaqty/features/commerce/presentation/widgets/cart_badge.dart';
+import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
+import 'package:delwaqty/shared/widgets/premium_empty_state.dart';
+import 'package:delwaqty/shared/widgets/shimmer_loading.dart';
+import 'package:delwaqty/l10n/app_localizations.dart';
 
 final _merchantsFutureProvider = FutureProvider<List<Merchant>>((ref) async {
   final repo = ref.watch(merchantRepositoryProvider);
@@ -24,6 +28,7 @@ class CommerceDiscoveryPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final selectedType = ref.watch(_selectedTypeProvider);
     final merchantsAsync = ref.watch(_merchantsFutureProvider);
@@ -31,7 +36,7 @@ class CommerceDiscoveryPage extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Discover'),
+        title: Text(l10n.discover),
         actions: [CartBadge(onTap: () => context.push('/market/cart'))],
       ),
       body: RefreshIndicator(
@@ -42,105 +47,113 @@ class CommerceDiscoveryPage extends ConsumerWidget {
         child: ListView(
           padding: const EdgeInsets.all(16),
           children: [
-            // Search bar
-            TextField(
-              decoration: InputDecoration(
-                hintText: 'Search merchants, products...',
-                prefixIcon: const Icon(Icons.search),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
+            AnimatedFadeIn(
+              child: TextField(
+                decoration: InputDecoration(
+                  hintText: l10n.searchMerchantsProducts,
+                  prefixIcon: const Icon(Icons.search),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  filled: true,
+                  fillColor: theme.colorScheme.surfaceContainerHighest
+                      .withValues(alpha: 0.3),
                 ),
-                filled: true,
-                fillColor: theme.colorScheme.surfaceContainerHighest.withValues(
-                  alpha: 0.3,
-                ),
+                onTap: () => context.push('/market/search'),
+                readOnly: true,
               ),
-              onTap: () => context.push('/market/search'),
-              readOnly: true,
             ),
             const SizedBox(height: 16),
 
-            // Category chips
-            SizedBox(
-              height: 40,
-              child: ListView(
-                scrollDirection: Axis.horizontal,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.only(right: 8),
-                    child: FilterChip(
-                      label: const Text('All'),
-                      selected: selectedType == null,
-                      onSelected: (_) =>
-                          ref.read(_selectedTypeProvider.notifier).state = null,
-                    ),
-                  ),
-                  ...MerchantType.values.map(
-                    (type) => Padding(
+            AnimatedFadeIn(
+              delay: const Duration(milliseconds: 100),
+              child: SizedBox(
+                height: 40,
+                child: ListView(
+                  scrollDirection: Axis.horizontal,
+                  children: [
+                    Padding(
                       padding: const EdgeInsets.only(right: 8),
-                      child: MerchantTypeChip(
-                        type: type,
-                        onTap: () =>
-                            ref.read(_selectedTypeProvider.notifier).state =
-                                type,
+                      child: FilterChip(
+                        label: Text(l10n.all),
+                        selected: selectedType == null,
+                        onSelected: (_) => ref
+                            .read(_selectedTypeProvider.notifier)
+                            .state = null,
                       ),
                     ),
-                  ),
-                ],
+                    ...MerchantType.values.map(
+                      (type) => Padding(
+                        padding: const EdgeInsets.only(right: 8),
+                        child: MerchantTypeChip(
+                          type: type,
+                          onTap: () => ref
+                              .read(_selectedTypeProvider.notifier)
+                              .state = type,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
             const SizedBox(height: 16),
 
-            // Featured merchants
             featuredAsync.when(
               data: (merchants) {
                 if (merchants.isEmpty) return const SizedBox();
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Featured',
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
+                return AnimatedFadeIn(
+                  delay: const Duration(milliseconds: 200),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        l10n.featured,
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 8),
-                    SizedBox(
-                      height: 180,
-                      child: ListView.separated(
-                        scrollDirection: Axis.horizontal,
-                        itemCount: merchants.length,
-                        separatorBuilder: (_, __) => const SizedBox(width: 12),
-                        itemBuilder: (context, index) {
-                          final merchant = merchants[index];
-                          return SizedBox(
-                            width: 260,
-                            child: MerchantCard(
-                              merchant: merchant,
-                              onTap: () => context.push(
-                                '/market/merchant/${merchant.id}',
+                      const SizedBox(height: 8),
+                      SizedBox(
+                        height: 180,
+                        child: ListView.separated(
+                          scrollDirection: Axis.horizontal,
+                          itemCount: merchants.length,
+                          separatorBuilder: (_, __) =>
+                              const SizedBox(width: 12),
+                          itemBuilder: (context, index) {
+                            final merchant = merchants[index];
+                            return SizedBox(
+                              width: 260,
+                              child: MerchantCard(
+                                merchant: merchant,
+                                onTap: () => context.push(
+                                  '/market/merchant/${merchant.id}',
+                                ),
                               ),
-                            ),
-                          );
-                        },
+                            );
+                          },
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 24),
-                  ],
+                      const SizedBox(height: 24),
+                    ],
+                  ),
                 );
               },
               loading: () => const SizedBox(
                 height: 180,
                 child: Center(child: CircularProgressIndicator()),
               ),
-              error: (e, _) => const SizedBox(),
+              error: (_, __) => const SizedBox(),
             ),
 
-            // All merchants
-            Text(
-              'All Merchants',
-              style: theme.textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
+            AnimatedFadeIn(
+              delay: const Duration(milliseconds: 300),
+              child: Text(
+                l10n.allMerchants,
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
             const SizedBox(height: 8),
@@ -152,10 +165,12 @@ class CommerceDiscoveryPage extends ConsumerWidget {
                     : merchants;
 
                 if (filtered.isEmpty) {
-                  return const Center(
-                    child: Padding(
-                      padding: EdgeInsets.all(32),
-                      child: Text('No merchants found'),
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 40),
+                    child: PremiumEmptyState(
+                      icon: Icons.store_outlined,
+                      title: l10n.noMerchantsFound,
+                      message: l10n.nearbyEmptyHint,
                     ),
                   );
                 }
@@ -163,7 +178,8 @@ class CommerceDiscoveryPage extends ConsumerWidget {
                 return GridView.builder(
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  gridDelegate:
+                      const SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 2,
                     mainAxisSpacing: 12,
                     crossAxisSpacing: 12,
@@ -180,17 +196,26 @@ class CommerceDiscoveryPage extends ConsumerWidget {
                   },
                 );
               },
-              loading: () => const Center(
-                child: Padding(
-                  padding: EdgeInsets.all(32),
-                  child: CircularProgressIndicator(),
-                ),
+              loading: () => GridView.count(
+                crossAxisCount: 2,
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                mainAxisSpacing: 12,
+                crossAxisSpacing: 12,
+                childAspectRatio: 0.8,
+                children: const [
+                  ShimmerCard(height: 200),
+                  ShimmerCard(height: 200),
+                  ShimmerCard(height: 200),
+                  ShimmerCard(height: 200),
+                ],
               ),
-              error: (e, _) => Center(
-                child: Padding(
-                  padding: const EdgeInsets.all(32),
-                  child: Text('Error: $e'),
-                ),
+              error: (e, _) => PremiumEmptyState(
+                icon: Icons.error_outline_rounded,
+                title: l10n.error,
+                message: l10n.errorLoading,
+                actionLabel: l10n.retry,
+                onAction: () => ref.invalidate(_merchantsFutureProvider),
               ),
             ),
           ],

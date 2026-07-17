@@ -99,7 +99,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get ok => 'موافق';
 
   @override
-  String get appName => 'دلوقتي';
+  String get appName => 'اسم التطبيق';
 
   @override
   String get appNameAr => 'دلوقتي';
@@ -649,4 +649,210 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get admin => 'مدير';
+
+  @override
+  String get discover => 'اكتشف';
+
+  @override
+  String get searchMerchantsProducts => 'ابحث عن متاجر ومنتجات...';
+
+  @override
+  String get all => 'الكل';
+
+  @override
+  String get featured => 'مميزة';
+
+  @override
+  String get allMerchants => 'جميع المتاجر';
+
+  @override
+  String get noMerchantsFound => 'لم يتم العثور على متاجر';
+
+  @override
+  String get open => 'مفتوح';
+
+  @override
+  String get closed => 'مغلق';
+
+  @override
+  String get markAllRead => 'تعيين الكل كمقروء';
+
+  @override
+  String get noNotifications => 'لا توجد إشعارات';
+
+  @override
+  String get noNotificationsMessage =>
+      'لا شيء جديد! ستظهر الإشعارات الجديدة هنا.';
+
+  @override
+  String get adminDashboard => 'لوحة التحكم';
+
+  @override
+  String get platformOverview => 'نظرة عامة على المنصة';
+
+  @override
+  String get totalUsers => 'إجمالي المستخدمين';
+
+  @override
+  String get totalMerchants => 'المتاجر';
+
+  @override
+  String get totalOrders => 'إجمالي الطلبات';
+
+  @override
+  String get revenue => 'الإيرادات';
+
+  @override
+  String get activeDrivers => 'السائقون النشطون';
+
+  @override
+  String get pendingOrdersStat => 'الطلبات المعلقة';
+
+  @override
+  String get recentActivity => 'النشاط الأخير';
+
+  @override
+  String get noDataAvailable => 'لا توجد بيانات';
+
+  @override
+  String get noRecentActivity => 'لا يوجد نشاط حديث';
+
+  @override
+  String get errorLoadingMetrics => 'خطأ في تحميل الإحصائيات';
+
+  @override
+  String get errorLoadingActivity => 'خطأ في تحميل النشاط';
+
+  @override
+  String get userManagement => 'إدارة المستخدمين';
+
+  @override
+  String get searchUsers => 'ابحث عن مستخدمين...';
+
+  @override
+  String get addUser => 'إضافة مستخدم مشرف';
+
+  @override
+  String get noUsersFound => 'لم يتم العثور على مستخدمين';
+
+  @override
+  String get activate => 'تفعيل';
+
+  @override
+  String get suspend => 'إيقاف';
+
+  @override
+  String get role => 'الدور';
+
+  @override
+  String get create => 'إنشاء';
+
+  @override
+  String get orderManagement => 'إدارة الطلبات';
+
+  @override
+  String get searchOrders => 'ابحث عن طلبات...';
+
+  @override
+  String get filterOrders => 'تصفية الطلبات';
+
+  @override
+  String get noOrdersFound => 'لم يتم العثور على طلبات';
+
+  @override
+  String get markInTransit => 'تعيين كـجاري التوصيل';
+
+  @override
+  String get markDelivered => 'تعيين كـتم التوصيل';
+
+  @override
+  String get cancelOrder => 'إلغاء الطلب';
+
+  @override
+  String get merchantManagement => 'إدارة المتاجر';
+
+  @override
+  String get searchMerchantsAdmin => 'ابحث عن متاجر...';
+
+  @override
+  String get noMerchantsAdmin => 'لم يتم العثور على متاجر';
+
+  @override
+  String get filter => 'تصفية';
+
+  @override
+  String get verify => 'توثيق';
+
+  @override
+  String get setPending => 'تعيين كـمعلق';
+
+  @override
+  String get platformSettings => 'إعدادات المنصة';
+
+  @override
+  String get generalSettings => 'الإعدادات العامة';
+
+  @override
+  String get supportEmail => 'بريد الدعم الفني';
+
+  @override
+  String get maxDriversPerZone => 'الحد الأقصى للسائقين لكل منطقة';
+
+  @override
+  String get maintenanceMode => 'وضع الصيانة';
+
+  @override
+  String get maintenanceModeDesc => 'تعطيل التطبيق مؤقتاً';
+
+  @override
+  String get saveSettings => 'حفظ الإعدادات';
+
+  @override
+  String get settingsSaved => 'تم حفظ الإعدادات';
+
+  @override
+  String get settingsFailed => 'فشل في حفظ الإعدادات';
+
+  @override
+  String get dangerZone => 'منطقة الخطر';
+
+  @override
+  String get resetAllData => 'إعادة تعيين جميع البيانات';
+
+  @override
+  String get resetAllDataDesc => 'حذف جميع بيانات المنصة نهائياً';
+
+  @override
+  String get resetAllDataTitle => 'إعادة تعيين جميع البيانات؟';
+
+  @override
+  String get resetAllDataWarning =>
+      'لا يمكن التراجع عن هذا الإجراء. سيتم حذف جميع البيانات نهائياً.';
+
+  @override
+  String get reset => 'إعادة تعيين';
+
+  @override
+  String get account => 'الحساب';
+
+  @override
+  String get privacySecurity => 'الخصوصية والأمان';
+
+  @override
+  String get helpCenter => 'مركز المساعدة';
+
+  @override
+  String get about => 'حول التطبيق';
+
+  @override
+  String get version => 'الإصدار 1.0.0';
+
+  @override
+  String get legal => 'القانونية';
+
+  @override
+  String get verified => 'موثق';
+
+  @override
+  String get riyadhSaudiArabia => 'الرياض، المملكة العربية السعودية';
 }

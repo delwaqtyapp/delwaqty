@@ -2,22 +2,27 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:delwaqty/services/admin/admin_service.dart';
 import 'package:delwaqty/services/admin/admin_providers.dart';
+import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
+import 'package:delwaqty/shared/widgets/premium_empty_state.dart';
+import 'package:delwaqty/shared/widgets/app_loader.dart';
+import 'package:delwaqty/l10n/app_localizations.dart';
 
 class AdminMerchantsPage extends ConsumerWidget {
   const AdminMerchantsPage({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final merchantsAsync = ref.watch(adminMerchantsProvider);
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Merchant Management'),
+        title: Text(l10n.merchantManagement),
         actions: [
           IconButton(
             icon: const Icon(Icons.filter_list_outlined),
             onPressed: () {},
-            tooltip: 'Filter',
+            tooltip: l10n.filter,
           ),
           IconButton(
             icon: const Icon(Icons.refresh),
@@ -31,7 +36,7 @@ class AdminMerchantsPage extends ConsumerWidget {
             padding: const EdgeInsets.all(16),
             child: TextField(
               decoration: InputDecoration(
-                hintText: 'Search merchants...',
+                hintText: l10n.searchMerchantsAdmin,
                 prefixIcon: const Icon(Icons.search),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -44,27 +49,46 @@ class AdminMerchantsPage extends ConsumerWidget {
           ),
           Expanded(
             child: merchantsAsync.when(
-              loading: () => const Center(child: CircularProgressIndicator()),
-              error: (e, _) => Center(child: Text('Error: $e')),
+              loading: () => const Center(
+                child: AppLoaderCircular(),
+              ),
+              error: (e, _) => Center(
+                child: PremiumEmptyState(
+                  icon: Icons.error_outline_rounded,
+                  title: l10n.error,
+                  message: l10n.errorLoading,
+                  actionLabel: l10n.retry,
+                  onAction: () => ref.invalidate(adminMerchantsProvider),
+                ),
+              ),
               data: (merchants) {
                 if (merchants.isEmpty) {
-                  return const Center(child: Text('No merchants found'));
+                  return PremiumEmptyState(
+                    icon: Icons.store_outlined,
+                    title: l10n.noMerchantsAdmin,
+                    message: l10n.noMerchantsAdmin,
+                  );
                 }
                 return ListView.builder(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   itemCount: merchants.length,
                   itemBuilder: (context, index) {
                     final merchant = merchants[index];
-                    return _MerchantTile(
-                      merchant: merchant,
-                      onStatusChanged: (status) async {
-                        final adminService = ref.read(adminServiceProvider);
-                        await adminService.updateMerchantStatus(
-                          merchant['id'] as String,
-                          status,
-                        );
-                        ref.invalidate(adminMerchantsProvider);
-                      },
+                    return AnimatedFadeIn(
+                      delay: Duration(milliseconds: index * 50),
+                      child: _MerchantTile(
+                        merchant: merchant,
+                        l10n: l10n,
+                        onStatusChanged: (status) async {
+                          final adminService =
+                              ref.read(adminServiceProvider);
+                          await adminService.updateMerchantStatus(
+                            merchant['id'] as String,
+                            status,
+                          );
+                          ref.invalidate(adminMerchantsProvider);
+                        },
+                      ),
                     );
                   },
                 );
@@ -78,18 +102,30 @@ class AdminMerchantsPage extends ConsumerWidget {
 }
 
 class _MerchantTile extends StatelessWidget {
-  const _MerchantTile({required this.merchant, required this.onStatusChanged});
+  const _MerchantTile({
+    required this.merchant,
+    required this.l10n,
+    required this.onStatusChanged,
+  });
 
   final Map<String, dynamic> merchant;
+  final AppLocalizations l10n;
   final Function(String) onStatusChanged;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final name = merchant['name'] as String? ?? 'Unknown';
-    final type = merchant['type'] as String? ?? 'General';
+    final name = merchant['name'] as String? ?? '';
+    final type = merchant['type'] as String? ?? '';
     final status = merchant['status'] as String? ?? 'pending';
     final isVerified = status == 'verified';
+
+    final statusLabel = switch (status) {
+      'verified' => l10n.verified,
+      'suspended' => l10n.suspend,
+      'pending' => l10n.pending,
+      _ => status,
+    };
 
     return Card(
       margin: const EdgeInsets.only(bottom: 8),
@@ -117,7 +153,7 @@ class _MerchantTile extends StatelessWidget {
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Text(
-                status.toUpperCase(),
+                statusLabel,
                 style: theme.textTheme.labelSmall?.copyWith(
                   color: isVerified ? Colors.green : Colors.orange,
                   fontWeight: FontWeight.bold,
@@ -128,16 +164,19 @@ class _MerchantTile extends StatelessWidget {
               onSelected: (value) => onStatusChanged(value),
               itemBuilder: (context) => [
                 if (!isVerified)
-                  const PopupMenuItem(value: 'verified', child: Text('Verify')),
+                  PopupMenuItem(
+                    value: 'verified',
+                    child: Text(l10n.verify),
+                  ),
                 if (status != 'suspended')
-                  const PopupMenuItem(
+                  PopupMenuItem(
                     value: 'suspended',
-                    child: Text('Suspend'),
+                    child: Text(l10n.suspend),
                   ),
                 if (status != 'pending')
-                  const PopupMenuItem(
+                  PopupMenuItem(
                     value: 'pending',
-                    child: Text('Set Pending'),
+                    child: Text(l10n.setPending),
                   ),
               ],
             ),

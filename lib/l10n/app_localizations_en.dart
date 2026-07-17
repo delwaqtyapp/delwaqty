@@ -99,7 +99,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get ok => 'OK';
 
   @override
-  String get appName => 'Delwaqty';
+  String get appName => 'App Name';
 
   @override
   String get appNameAr => 'دلوقتي';
@@ -653,4 +653,210 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get admin => 'Admin';
+
+  @override
+  String get discover => 'Discover';
+
+  @override
+  String get searchMerchantsProducts => 'Search merchants, products...';
+
+  @override
+  String get all => 'All';
+
+  @override
+  String get featured => 'Featured';
+
+  @override
+  String get allMerchants => 'All Merchants';
+
+  @override
+  String get noMerchantsFound => 'No merchants found';
+
+  @override
+  String get open => 'Open';
+
+  @override
+  String get closed => 'Closed';
+
+  @override
+  String get markAllRead => 'Mark all read';
+
+  @override
+  String get noNotifications => 'No notifications';
+
+  @override
+  String get noNotificationsMessage =>
+      'You\'re all caught up! New notifications will appear here.';
+
+  @override
+  String get adminDashboard => 'Admin Dashboard';
+
+  @override
+  String get platformOverview => 'Platform Overview';
+
+  @override
+  String get totalUsers => 'Total Users';
+
+  @override
+  String get totalMerchants => 'Merchants';
+
+  @override
+  String get totalOrders => 'Total Orders';
+
+  @override
+  String get revenue => 'Revenue';
+
+  @override
+  String get activeDrivers => 'Active Drivers';
+
+  @override
+  String get pendingOrdersStat => 'Pending Orders';
+
+  @override
+  String get recentActivity => 'Recent Activity';
+
+  @override
+  String get noDataAvailable => 'No data available';
+
+  @override
+  String get noRecentActivity => 'No recent activity';
+
+  @override
+  String get errorLoadingMetrics => 'Error loading metrics';
+
+  @override
+  String get errorLoadingActivity => 'Error loading activity';
+
+  @override
+  String get userManagement => 'User Management';
+
+  @override
+  String get searchUsers => 'Search users...';
+
+  @override
+  String get addUser => 'Add Admin User';
+
+  @override
+  String get noUsersFound => 'No users found';
+
+  @override
+  String get activate => 'Activate';
+
+  @override
+  String get suspend => 'Suspend';
+
+  @override
+  String get role => 'Role';
+
+  @override
+  String get create => 'Create';
+
+  @override
+  String get orderManagement => 'Order Management';
+
+  @override
+  String get searchOrders => 'Search orders...';
+
+  @override
+  String get filterOrders => 'Filter Orders';
+
+  @override
+  String get noOrdersFound => 'No orders found';
+
+  @override
+  String get markInTransit => 'Mark In Transit';
+
+  @override
+  String get markDelivered => 'Mark Delivered';
+
+  @override
+  String get cancelOrder => 'Cancel Order';
+
+  @override
+  String get merchantManagement => 'Merchant Management';
+
+  @override
+  String get searchMerchantsAdmin => 'Search merchants...';
+
+  @override
+  String get noMerchantsAdmin => 'No merchants found';
+
+  @override
+  String get filter => 'Filter';
+
+  @override
+  String get verify => 'Verify';
+
+  @override
+  String get setPending => 'Set Pending';
+
+  @override
+  String get platformSettings => 'Platform Settings';
+
+  @override
+  String get generalSettings => 'General Settings';
+
+  @override
+  String get supportEmail => 'Support Email';
+
+  @override
+  String get maxDriversPerZone => 'Max Drivers Per Zone';
+
+  @override
+  String get maintenanceMode => 'Maintenance Mode';
+
+  @override
+  String get maintenanceModeDesc => 'Temporarily disable the app';
+
+  @override
+  String get saveSettings => 'Save Settings';
+
+  @override
+  String get settingsSaved => 'Settings saved';
+
+  @override
+  String get settingsFailed => 'Failed to save settings';
+
+  @override
+  String get dangerZone => 'Danger Zone';
+
+  @override
+  String get resetAllData => 'Reset All Data';
+
+  @override
+  String get resetAllDataDesc => 'Permanently delete all platform data';
+
+  @override
+  String get resetAllDataTitle => 'Reset All Data?';
+
+  @override
+  String get resetAllDataWarning =>
+      'This action cannot be undone. All data will be permanently deleted.';
+
+  @override
+  String get reset => 'Reset';
+
+  @override
+  String get account => 'Account';
+
+  @override
+  String get privacySecurity => 'Privacy & Security';
+
+  @override
+  String get helpCenter => 'Help Center';
+
+  @override
+  String get about => 'About';
+
+  @override
+  String get version => 'Version 1.0.0';
+
+  @override
+  String get legal => 'Legal';
+
+  @override
+  String get verified => 'Verified';
+
+  @override
+  String get riyadhSaudiArabia => 'Riyadh, Saudi Arabia';
 }

@@ -80,6 +80,7 @@ class _TransactionTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final isCredit = transaction.type == TransactionType.topup ||
         transaction.type == TransactionType.refund;
@@ -136,7 +137,7 @@ class _TransactionTile extends StatelessWidget {
               ),
             ),
             Text(
-              '${isCredit ? '+' : '-'}${transaction.amount.toStringAsFixed(2)} SAR',
+              '${isCredit ? '+' : '-'}${l10n.amountWithCurrency(transaction.amount.toStringAsFixed(2), l10n.currencySymbol)}',
               style: theme.textTheme.bodyMedium?.copyWith(
                 fontWeight: FontWeight.w700,
                 color: isCredit ? Colors.green.shade700 : theme.colorScheme.error,

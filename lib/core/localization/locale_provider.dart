@@ -15,7 +15,7 @@ class LocaleNotifier extends Notifier<Locale> {
     if (savedLocale != null) {
       return Locale(savedLocale);
     }
-    return WidgetsBinding.instance.platformDispatcher.locale;
+    return const Locale('ar');
   }
 
   Future<void> setLocale(Locale locale) async {

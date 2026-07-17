@@ -13,7 +13,7 @@ Failure handleException(Object error) {
       TimeoutException(:final message) => Failure.network(message: message),
       RateLimitException(:final message, :final retryAfter) => Failure.server(
         message: retryAfter != null
-            ? 'Too many requests. Please wait ${retryAfter.inSeconds}s.'
+            ? 'طلبات كثيرة جداً. يرجى الانتظار ${retryAfter.inSeconds} ثانية.'
             : message,
       ),
       UnexpectedException(:final message) => Failure.unexpected(
@@ -27,23 +27,23 @@ Failure handleException(Object error) {
       message.contains('Connection refused') ||
       message.contains('Network is unreachable')) {
     return Failure.network(
-      message: 'No internet connection. Please check your network.',
+      message: 'لا يوجد اتصال بالإنترنت. يرجى التحقق من الشبكة.',
     );
   }
   if (message.contains('TimeoutException') || message.contains('Timed out')) {
-    return Failure.network(message: 'Request timed out. Please try again.');
+    return Failure.network(message: 'انتهت مهلة الطلب. يرجى المحاولة مرة أخرى.');
   }
 
-  return Failure.unexpected(message: 'An unexpected error occurred.');
+  return Failure.unexpected(message: 'حدث خطأ غير متوقع.');
 }
 
 String _friendlyMessage(String message, int? statusCode) {
-  if (statusCode == 401) return 'Session expired. Please sign in again.';
-  if (statusCode == 403) return 'You don\'t have permission for this action.';
-  if (statusCode == 404) return 'Resource not found.';
-  if (statusCode == 429) return 'Too many requests. Please wait a moment.';
+  if (statusCode == 401) return 'انتهت الجلسة. يرجى تسجيل الدخول مرة أخرى.';
+  if (statusCode == 403) return 'ليس لديك صلاحية لتنفيذ هذا الإجراء.';
+  if (statusCode == 404) return 'المورد غير موجود.';
+  if (statusCode == 429) return 'طلبات كثيرة جداً. يرجى الانتظار قليلاً.';
   if (statusCode != null && statusCode >= 500) {
-    return 'Server error. Please try again later.';
+    return 'خطأ في الخادم. يرجى المحاولة لاحقاً.';
   }
   return message;
 }

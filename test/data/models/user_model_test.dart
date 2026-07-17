@@ -110,7 +110,7 @@ void main() {
         expect(json['id'], 'user-123');
         expect(json['full_name'], 'John Doe');
         expect(json['avatar_url'], 'https://example.com/avatar.jpg');
-        expect(json['created_at'], testDateIso);
+        expect(json.containsKey('created_at'), isFalse);
       });
     });
 

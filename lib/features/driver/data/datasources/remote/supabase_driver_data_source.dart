@@ -71,7 +71,7 @@ class SupabaseDriverDataSource {
           .eq('user_id', userId)
           .maybeSingle();
       if (data == null) return null;
-      return _profileFromRow(data as Map<String, dynamic>);
+      return _profileFromRow(data);
     } catch (e, stack) {
       _logger.e('Failed to get driver profile', e, stack);
       rethrow;
@@ -92,7 +92,7 @@ class SupabaseDriverDataSource {
           })
           .select()
           .single();
-      return _profileFromRow(data as Map<String, dynamic>);
+      return _profileFromRow(data);
     } catch (e, stack) {
       _logger.e('Failed to register driver', e, stack);
       rethrow;

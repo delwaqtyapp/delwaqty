@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:delwaqty/core/module/feature_registry.dart';
 import 'package:delwaqty/features/auth/domain/auth_state.dart';
 import 'package:delwaqty/features/auth/presentation/auth_provider.dart';
+import 'package:delwaqty/l10n/app_localizations.dart';
 
 final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>(
   debugLabel: 'root',
@@ -77,7 +78,10 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       registry.buildShellRoute(),
       ...registry.allShellSubRoutes,
     ],
-    errorBuilder: (context, state) =>
-        Scaffold(body: Center(child: Text('Page not found: ${state.uri}'))),
+    errorBuilder: (context, state) => Scaffold(
+      body: Center(
+        child: Text('${AppLocalizations.of(context).pageNotFound}: ${state.uri}'),
+      ),
+    ),
   );
 });

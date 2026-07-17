@@ -38,8 +38,8 @@ class RestaurantOrderTrackingPage extends ConsumerWidget {
                     height: MediaQuery.sizeOf(context).height * 0.7,
                     child: EmptyState(
                       icon: Icons.timeline_outlined,
-                      title: 'No tracking data',
-                      message: 'Tracking updates will appear here.',
+                      title: l10n.noTrackingData,
+                      message: l10n.trackingUpdatesHint,
                     ),
                   ),
                 ],

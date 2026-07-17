@@ -209,7 +209,7 @@ class _RestaurantReservationPageState extends ConsumerState<RestaurantReservatio
             itemBuilder: (context, index) {
               final date = dates[index];
               final isSelected = _isSameDay(date, _selectedDate);
-              final dayName = index == 0 ? l10n.today : index == 1 ? l10n.tomorrow : _getDayName(date.weekday);
+              final dayName = index == 0 ? l10n.today : index == 1 ? l10n.tomorrow : _getDayName(date.weekday, l10n);
 
               return GestureDetector(
                 onTap: () => setState(() {
@@ -357,8 +357,16 @@ class _RestaurantReservationPageState extends ConsumerState<RestaurantReservatio
   bool _isSameDay(DateTime a, DateTime b) =>
       a.year == b.year && a.month == b.month && a.day == b.day;
 
-  String _getDayName(int weekday) {
-    const names = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+  String _getDayName(int weekday, AppLocalizations l10n) {
+    final names = [
+      l10n.weekdayMon,
+      l10n.weekdayTue,
+      l10n.weekdayWed,
+      l10n.weekdayThu,
+      l10n.weekdayFri,
+      l10n.weekdaySat,
+      l10n.weekdaySun,
+    ];
     return names[weekday - 1];
   }
 

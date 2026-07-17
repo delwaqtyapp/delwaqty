@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:delwaqty/core/theme/app_spacing.dart';
 import 'package:delwaqty/core/theme/app_elevation.dart';
+import 'package:delwaqty/l10n/app_localizations.dart';
 
 /// A collection of reusable loader components for the Delwaqty platform.
 ///
@@ -73,7 +74,7 @@ class AppLoader {
   static Future<void> showOverlay(BuildContext context) {
     return showGeneralDialog(
       context: context,
-      barrierLabel: 'Loading',
+      barrierLabel: AppLocalizations.of(context).loading,
       transitionBuilder: (context, animation, secondaryAnimation, child) {
         return FadeTransition(opacity: animation, child: child);
       },

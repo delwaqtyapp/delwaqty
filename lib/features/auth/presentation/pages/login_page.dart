@@ -181,9 +181,9 @@ class _LoginPageState extends ConsumerState<LoginPage>
   Widget _buildSocialButtons(AppLocalizations l10n) {
     void showComingSoon() {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Coming soon'),
-          duration: Duration(seconds: 1),
+        SnackBar(
+          content: Text(l10n.comingSoon),
+          duration: const Duration(seconds: 1),
         ),
       );
     }

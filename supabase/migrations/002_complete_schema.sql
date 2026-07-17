@@ -4,14 +4,36 @@
 -- This replaces 001_initial_schema.sql fully
 -- =============================================================
 
--- ─── Users ──────────────────────────────────────────────────
--- Drop old users table if it exists (re-run safe)
-DROP TABLE IF EXISTS favorites CASCADE;
-DROP TABLE IF EXISTS reviews CASCADE;
+-- ─── Drop ALL existing tables (safe re-run) ─────────────────
+-- Order matters: children before parents
+DROP TABLE IF EXISTS wallet_transactions CASCADE;
+DROP TABLE IF EXISTS wallets CASCADE;
+DROP TABLE IF EXISTS notification_tokens CASCADE;
+DROP TABLE IF EXISTS notifications CASCADE;
+DROP TABLE IF EXISTS activity_logs CASCADE;
 DROP TABLE IF EXISTS order_items CASCADE;
 DROP TABLE IF EXISTS orders CASCADE;
-DROP TABLE IF EXISTS notifications CASCADE;
+DROP TABLE IF EXISTS favorites CASCADE;
+DROP TABLE IF EXISTS reviews CASCADE;
+DROP TABLE IF EXISTS product_modifier_options CASCADE;
+DROP TABLE IF EXISTS product_modifier_groups CASCADE;
+DROP TABLE IF EXISTS products CASCADE;
+DROP TABLE IF EXISTS coupons CASCADE;
+DROP TABLE IF EXISTS user_addresses CASCADE;
+DROP TABLE IF EXISTS drivers CASCADE;
+DROP TABLE IF EXISTS rides CASCADE;
+DROP TABLE IF EXISTS merchants CASCADE;
+DROP TABLE IF EXISTS admin_users CASCADE;
+DROP TABLE IF EXISTS categories CASCADE;
+DROP TABLE IF EXISTS platform_settings CASCADE;
 DROP TABLE IF EXISTS users CASCADE;
+
+-- Drop old triggers/functions if they exist
+DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
+DROP TRIGGER IF EXISTS users_updated_at ON users;
+DROP FUNCTION IF EXISTS handle_new_user() CASCADE;
+DROP FUNCTION IF EXISTS update_updated_at_column() CASCADE;
+
 
 CREATE TABLE IF NOT EXISTS users (
   id UUID PRIMARY KEY,

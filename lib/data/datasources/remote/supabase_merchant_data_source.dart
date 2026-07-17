@@ -38,11 +38,11 @@ class SupabaseMerchantDataSource {
       longitude: (row['longitude'] as num?)?.toDouble() ?? 0.0,
       address: row['address'] as String?,
       rating: (row['rating'] as num?)?.toDouble() ?? 0.0,
-      ratingCount: row['total_orders'] as int? ?? 0,
+      ratingCount: (row['total_reviews'] as int?) ?? (row['total_orders'] as int?) ?? 0,
       imageUrl: row['logo_url'] as String?,
       description: row['description'] as String?,
-      isVerified: (row['status'] as String?) == 'verified',
-      isFeatured: (row['status'] as String?) == 'featured',
+      isVerified: (row['status'] as String?) == 'active',
+      isFeatured: (row['is_featured'] as bool?) ?? false,
       deliveryAvailable: true,
       pickupAvailable: true,
       createdAt: DateTime.parse(row['created_at'] as String),
@@ -61,7 +61,7 @@ class SupabaseMerchantDataSource {
     int offset = 0,
   }) async {
     try {
-      var query = _client.from(_tableName).select();
+      var query = _client.from(_tableName).select().eq('status', 'active');
 
       if (type != null) {
         query = query.eq('type', type.name);
@@ -72,6 +72,7 @@ class SupabaseMerchantDataSource {
       }
 
       final data = await query
+          .order('is_featured', ascending: false)
           .order('rating', ascending: false)
           .range(offset, offset + limit - 1);
 
@@ -102,7 +103,8 @@ class SupabaseMerchantDataSource {
       final data = await _client
           .from(_tableName)
           .select()
-          .eq('status', 'featured')
+          .eq('status', 'active')
+          .eq('is_featured', true)
           .order('rating', ascending: false)
           .limit(10);
       return (data as List).map((row) => _fromRow(_rowToMap(row))).toList();

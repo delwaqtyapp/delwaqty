@@ -4,8 +4,12 @@
 -- This replaces 001_initial_schema.sql fully
 -- =============================================================
 
--- ─── Drop ALL existing tables (safe re-run) ─────────────────
--- Order matters: children before parents
+-- ─── Drop triggers/functions FIRST (before tables) ──────────
+DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
+DROP FUNCTION IF EXISTS handle_new_user() CASCADE;
+DROP FUNCTION IF EXISTS update_updated_at_column() CASCADE;
+
+-- ─── Drop ALL tables (safe re-run, children before parents) ──
 DROP TABLE IF EXISTS wallet_transactions CASCADE;
 DROP TABLE IF EXISTS wallets CASCADE;
 DROP TABLE IF EXISTS notification_tokens CASCADE;
@@ -27,12 +31,6 @@ DROP TABLE IF EXISTS admin_users CASCADE;
 DROP TABLE IF EXISTS categories CASCADE;
 DROP TABLE IF EXISTS platform_settings CASCADE;
 DROP TABLE IF EXISTS users CASCADE;
-
--- Drop old triggers/functions if they exist
-DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
-DROP TRIGGER IF EXISTS users_updated_at ON users;
-DROP FUNCTION IF EXISTS handle_new_user() CASCADE;
-DROP FUNCTION IF EXISTS update_updated_at_column() CASCADE;
 
 
 CREATE TABLE IF NOT EXISTS users (

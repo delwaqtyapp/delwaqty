@@ -88,7 +88,7 @@ class SupabaseRideDataSource {
         'status': RideStatus.searching.name,
         'created_at': DateTime.now().toIso8601String(),
       }).select().single();
-      return _rideFromRow(data as Map<String, dynamic>);
+      return _rideFromRow(data);
     } catch (e, stack) {
       _logger.e('Failed to request ride', e, stack);
       return _mockRide(
@@ -131,7 +131,7 @@ class SupabaseRideDataSource {
           .order('created_at', ascending: false)
           .maybeSingle();
       if (data == null) return null;
-      return _rideFromRow(data as Map<String, dynamic>);
+      return _rideFromRow(data);
     } catch (e, stack) {
       _logger.e('Failed to get active ride', e, stack);
       return null;
@@ -285,7 +285,6 @@ class SupabaseRideDataSource {
       dropoffLongitude: dropoffLongitude,
       dropoffAddress: dropoffAddress,
       rideType: rideType,
-      status: RideStatus.searching,
       fare: _estimateFareLocally(pickupLatitude, pickupLongitude, dropoffLatitude, dropoffLongitude, rideType),
       distance: distance,
       estimatedMinutes: (distance / 0.5).ceil(),
@@ -304,7 +303,6 @@ class SupabaseRideDataSource {
         dropoffLatitude: 24.6877,
         dropoffLongitude: 46.7219,
         dropoffAddress: 'Riyadh Gallery Mall',
-        rideType: RideType.economy,
         status: RideStatus.completed,
         fare: 25.0,
         distance: 8.5,

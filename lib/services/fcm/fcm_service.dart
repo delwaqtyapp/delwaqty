@@ -44,9 +44,7 @@ class FCMService {
       });
 
       FirebaseMessaging.onMessageOpenedApp.listen((message) {
-        _logger.i(
-          'FCM message opened app: ${message.notification?.title}',
-        );
+        _logger.i('FCM message opened app: ${message.notification?.title}');
       });
     } catch (e, stack) {
       _logger.e('FCM initialization failed', e, stack);

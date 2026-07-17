@@ -3,9 +3,10 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:delwaqty/services/supabase/supabase_service.dart';
 import 'package:delwaqty/features/restaurant/domain/entities/delivery_zone.dart';
 
-final supabaseDeliveryZoneDataSourceProvider = Provider<SupabaseDeliveryZoneDataSource>((ref) {
-  return SupabaseDeliveryZoneDataSource(ref.watch(supabaseClientProvider));
-});
+final supabaseDeliveryZoneDataSourceProvider =
+    Provider<SupabaseDeliveryZoneDataSource>((ref) {
+      return SupabaseDeliveryZoneDataSource(ref.watch(supabaseClientProvider));
+    });
 
 class SupabaseDeliveryZoneDataSource {
   SupabaseDeliveryZoneDataSource(this._client);
@@ -24,37 +25,56 @@ class SupabaseDeliveryZoneDataSource {
   );
 
   Future<List<DeliveryZone>> getZones(String merchantId) async {
-    final data = await _client.from('delivery_zones').select().eq('merchant_id', merchantId).order('radius_km');
-    return (data as List).map((r) => _fromRow(r as Map<String, dynamic>)).toList();
+    final data = await _client
+        .from('delivery_zones')
+        .select()
+        .eq('merchant_id', merchantId)
+        .order('radius_km');
+    return (data as List)
+        .map((r) => _fromRow(r as Map<String, dynamic>))
+        .toList();
   }
 
   Future<DeliveryZone?> getZoneById(String id) async {
-    final data = await _client.from('delivery_zones').select().eq('id', id).maybeSingle();
+    final data = await _client
+        .from('delivery_zones')
+        .select()
+        .eq('id', id)
+        .maybeSingle();
     return data != null ? _fromRow(data) : null;
   }
 
   Future<DeliveryZone> createZone(DeliveryZone zone) async {
-    final data = await _client.from('delivery_zones').insert({
-      'merchant_id': zone.merchantId,
-      'name': zone.name,
-      'radius_km': zone.radiusKm,
-      'delivery_fee': zone.deliveryFee,
-      'minimum_order': zone.minimumOrder,
-      'estimated_minutes': zone.estimatedMinutes,
-      'is_active': zone.isActive,
-    }).select().single();
+    final data = await _client
+        .from('delivery_zones')
+        .insert({
+          'merchant_id': zone.merchantId,
+          'name': zone.name,
+          'radius_km': zone.radiusKm,
+          'delivery_fee': zone.deliveryFee,
+          'minimum_order': zone.minimumOrder,
+          'estimated_minutes': zone.estimatedMinutes,
+          'is_active': zone.isActive,
+        })
+        .select()
+        .single();
     return _fromRow(data);
   }
 
   Future<DeliveryZone> updateZone(DeliveryZone zone) async {
-    final data = await _client.from('delivery_zones').update({
-      'name': zone.name,
-      'radius_km': zone.radiusKm,
-      'delivery_fee': zone.deliveryFee,
-      'minimum_order': zone.minimumOrder,
-      'estimated_minutes': zone.estimatedMinutes,
-      'is_active': zone.isActive,
-    }).eq('id', zone.id).select().single();
+    final data = await _client
+        .from('delivery_zones')
+        .update({
+          'name': zone.name,
+          'radius_km': zone.radiusKm,
+          'delivery_fee': zone.deliveryFee,
+          'minimum_order': zone.minimumOrder,
+          'estimated_minutes': zone.estimatedMinutes,
+          'is_active': zone.isActive,
+        })
+        .eq('id', zone.id)
+        .select()
+        .single();
     return _fromRow(data);
   }
 

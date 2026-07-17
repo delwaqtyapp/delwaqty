@@ -25,8 +25,8 @@ abstract final class AppIcons {
   /// Profile / account tab icon.
   static const IconData navProfile = Icons.person_rounded;
 
-  /// Wallet / payments tab icon.
-  static const IconData navWallet = Icons.account_balance_wallet_rounded;
+  /// Services tab icon.
+  static const IconData navServices = Icons.grid_view_rounded;
 
   /// Notifications bell icon.
   static const IconData navNotifications = Icons.notifications_outlined;
@@ -301,8 +301,8 @@ abstract final class AppIcons {
   /// Shield / security icon.
   static const IconData shield = Icons.shield_rounded;
 
-  /// Wallet icon.
-  static const IconData wallet = Icons.account_balance_wallet_rounded;
+  /// Payment icon.
+  static const IconData payment = Icons.payments_rounded;
 
   /// Credit card icon.
   static const IconData creditCard = Icons.credit_card_rounded;

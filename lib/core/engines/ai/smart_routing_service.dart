@@ -1,10 +1,7 @@
 /// A geographic coordinate.
 class GeoPoint {
   /// Creates a [GeoPoint] instance.
-  const GeoPoint({
-    required this.latitude,
-    required this.longitude,
-  });
+  const GeoPoint({required this.latitude, required this.longitude});
 
   /// Latitude in decimal degrees.
   final double latitude;
@@ -360,44 +357,39 @@ class DebugSmartRoutingService implements SmartRoutingService {
     GeoPoint origin,
     List<GeoPoint> destinations, {
     RouteConstraints? constraints,
-  }) async =>
-      OptimizedRoute(
-        waypoints: [origin, ...destinations],
-        totalDistance: 0,
-        totalDuration: Duration.zero,
-      );
+  }) async => OptimizedRoute(
+    waypoints: [origin, ...destinations],
+    totalDistance: 0,
+    totalDuration: Duration.zero,
+  );
 
   @override
   Future<ETAResult> predictArrivalTime(
     GeoPoint origin,
     GeoPoint destination, {
     TransportMode mode = TransportMode.driving,
-  }) async =>
-      ETAResult(duration: const Duration(minutes: 15), distance: 5.0);
+  }) async => ETAResult(duration: const Duration(minutes: 15), distance: 5.0);
 
   @override
   Future<DriverMatch> findOptimalDriver(
     RoutingOrder order,
     List<DriverCandidate> candidates,
-  ) async =>
-      DriverMatch(
-        driverId: candidates.firstOrNull?.id ?? '',
-        score: 0.5,
-        estimatedPickupTime: const Duration(minutes: 5),
-        distance: 2.0,
-      );
+  ) async => DriverMatch(
+    driverId: candidates.firstOrNull?.id ?? '',
+    score: 0.5,
+    estimatedPickupTime: const Duration(minutes: 5),
+    distance: 2.0,
+  );
 
   @override
   Future<LoadBalancingResult> balanceLoad(
     List<RoutingOrder> orders,
     List<DriverCandidate> drivers,
-  ) async =>
-      LoadBalancingResult(assignments: {}, unassignedOrders: []);
+  ) async => LoadBalancingResult(assignments: {}, unassignedOrders: []);
 
   @override
   Future<TrafficCondition> getTrafficCondition(
     GeoPoint origin,
     GeoPoint destination,
-  ) async =>
-      TrafficCondition(level: TrafficLevel.freeFlow, delayFactor: 1.0);
+  ) async => TrafficCondition(level: TrafficLevel.freeFlow, delayFactor: 1.0);
 }

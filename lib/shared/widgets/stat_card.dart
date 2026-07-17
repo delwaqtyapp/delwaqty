@@ -54,8 +54,8 @@ class StatCard extends StatelessWidget {
                 child: Text(
                   title,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: colorScheme.onSurfaceVariant,
-                      ),
+                    color: colorScheme.onSurfaceVariant,
+                  ),
                 ),
               ),
             ],
@@ -63,9 +63,9 @@ class StatCard extends StatelessWidget {
           const SizedBox(height: 12),
           Text(
             value,
-            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+            style: Theme.of(
+              context,
+            ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
           ),
           if (subtitle != null || trend != null) ...[
             const SizedBox(height: 4),
@@ -76,8 +76,8 @@ class StatCard extends StatelessWidget {
                     child: Text(
                       subtitle!,
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: colorScheme.onSurfaceVariant,
-                          ),
+                        color: colorScheme.onSurfaceVariant,
+                      ),
                     ),
                   ),
                 if (trend != null) ...[
@@ -86,19 +86,17 @@ class StatCard extends StatelessWidget {
                         ? Icons.trending_up_rounded
                         : Icons.trending_down_rounded,
                     size: 16,
-                    color: trendIsPositive == true
-                        ? Colors.green
-                        : Colors.red,
+                    color: trendIsPositive == true ? Colors.green : Colors.red,
                   ),
                   const SizedBox(width: 4),
                   Text(
                     trend!,
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: trendIsPositive == true
-                              ? Colors.green
-                              : Colors.red,
-                          fontWeight: FontWeight.w500,
-                        ),
+                      color: trendIsPositive == true
+                          ? Colors.green
+                          : Colors.red,
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
                 ],
               ],

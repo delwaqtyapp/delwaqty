@@ -37,8 +37,7 @@ class SharedPreferencesService {
     return _prefs.clear();
   }
 
-  bool get isOnboardingComplete =>
-      getBool(key: StorageKeys.onboardingComplete);
+  bool get isOnboardingComplete => getBool(key: StorageKeys.onboardingComplete);
 
   Future<void> setOnboardingComplete() {
     return saveBool(key: StorageKeys.onboardingComplete, value: true);

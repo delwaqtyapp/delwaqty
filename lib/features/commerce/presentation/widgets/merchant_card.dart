@@ -3,11 +3,7 @@ import 'package:delwaqty/features/commerce/domain/entities/merchant.dart';
 import 'package:delwaqty/core/theme/app_colors.dart';
 
 class MerchantCard extends StatelessWidget {
-  const MerchantCard({
-    required this.merchant,
-    required this.onTap,
-    super.key,
-  });
+  const MerchantCard({required this.merchant, required this.onTap, super.key});
 
   final Merchant merchant;
   final VoidCallback onTap;
@@ -173,8 +169,11 @@ class MerchantCard extends StatelessWidget {
                   if (merchant.deliveryAvailable)
                     Row(
                       children: [
-                        const Icon(Icons.delivery_dining,
-                            size: 14, color: Colors.grey),
+                        const Icon(
+                          Icons.delivery_dining,
+                          size: 14,
+                          color: Colors.grey,
+                        ),
                         const SizedBox(width: 4),
                         Text(
                           merchant.estimatedDeliveryMinutes != null

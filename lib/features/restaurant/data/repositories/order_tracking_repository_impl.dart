@@ -9,19 +9,28 @@ class OrderTrackingRepositoryImpl implements OrderTrackingRepository {
 
   @override
   Future<List<OrderTracking>> getTracking(String orderId) async {
-    try { return await _dataSource.getTracking(orderId); }
-    catch (e) { throw ServerException(message: e.toString()); }
+    try {
+      return await _dataSource.getTracking(orderId);
+    } catch (e) {
+      throw ServerException(message: e.toString());
+    }
   }
 
   @override
   Future<OrderTracking> addTracking(OrderTracking tracking) async {
-    try { return await _dataSource.addTracking(tracking); }
-    catch (e) { throw ServerException(message: e.toString()); }
+    try {
+      return await _dataSource.addTracking(tracking);
+    } catch (e) {
+      throw ServerException(message: e.toString());
+    }
   }
 
   @override
   Future<OrderTracking?> getLatestTracking(String orderId) async {
-    try { return await _dataSource.getLatestTracking(orderId); }
-    catch (e) { throw ServerException(message: e.toString()); }
+    try {
+      return await _dataSource.getLatestTracking(orderId);
+    } catch (e) {
+      throw ServerException(message: e.toString());
+    }
   }
 }

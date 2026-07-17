@@ -8,33 +8,57 @@ class ReservationRepositoryImpl implements ReservationRepository {
   final SupabaseReservationDataSource _dataSource;
 
   @override
-  Future<List<Reservation>> getReservations(String merchantId, {ReservationStatus? status}) async {
-    try { return await _dataSource.getReservations(merchantId, status: status); }
-    catch (e) { throw ServerException(message: e.toString()); }
+  Future<List<Reservation>> getReservations(
+    String merchantId, {
+    ReservationStatus? status,
+  }) async {
+    try {
+      return await _dataSource.getReservations(merchantId, status: status);
+    } catch (e) {
+      throw ServerException(message: e.toString());
+    }
   }
 
   @override
-  Future<List<Reservation>> getUserReservations(String userId, {ReservationStatus? status}) async {
-    try { return await _dataSource.getUserReservations(userId, status: status); }
-    catch (e) { throw ServerException(message: e.toString()); }
+  Future<List<Reservation>> getUserReservations(
+    String userId, {
+    ReservationStatus? status,
+  }) async {
+    try {
+      return await _dataSource.getUserReservations(userId, status: status);
+    } catch (e) {
+      throw ServerException(message: e.toString());
+    }
   }
 
   @override
   Future<Reservation?> getReservationById(String id) async {
-    try { return await _dataSource.getReservationById(id); }
-    catch (e) { throw ServerException(message: e.toString()); }
+    try {
+      return await _dataSource.getReservationById(id);
+    } catch (e) {
+      throw ServerException(message: e.toString());
+    }
   }
 
   @override
   Future<Reservation> createReservation(Reservation reservation) async {
-    try { return await _dataSource.createReservation(reservation); }
-    catch (e) { throw ServerException(message: e.toString()); }
+    try {
+      return await _dataSource.createReservation(reservation);
+    } catch (e) {
+      throw ServerException(message: e.toString());
+    }
   }
 
   @override
-  Future<Reservation> updateReservation(String id, ReservationStatus status) async {
-    try { return await _dataSource.updateReservation(id, status); }
-    catch (e) { throw ServerException(message: e.toString()); }
+  Future<Reservation> updateReservation(
+    String id,
+    ReservationStatus status,
+  ) async {
+    try {
+      return await _dataSource.updateReservation(id, status);
+    } catch (e) {
+      throw ServerException(message: e.toString());
+    }
   }
 
   @override
@@ -53,13 +77,21 @@ class ReservationRepositoryImpl implements ReservationRepository {
         specialRequests: specialRequests,
         tableNumber: tableNumber,
       );
-    } catch (e) { throw ServerException(message: e.toString()); }
+    } catch (e) {
+      throw ServerException(message: e.toString());
+    }
   }
 
   @override
-  Future<Reservation> cancelReservation(String reservationId, {String? reason}) async {
-    try { return await _dataSource.cancelReservation(reservationId, reason: reason); }
-    catch (e) { throw ServerException(message: e.toString()); }
+  Future<Reservation> cancelReservation(
+    String reservationId, {
+    String? reason,
+  }) async {
+    try {
+      return await _dataSource.cancelReservation(reservationId, reason: reason);
+    } catch (e) {
+      throw ServerException(message: e.toString());
+    }
   }
 
   @override
@@ -76,6 +108,8 @@ class ReservationRepositoryImpl implements ReservationRepository {
         partySize: partySize,
         branchId: branchId,
       );
-    } catch (e) { throw ServerException(message: e.toString()); }
+    } catch (e) {
+      throw ServerException(message: e.toString());
+    }
   }
 }

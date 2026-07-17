@@ -24,16 +24,18 @@ class WelcomePage extends ConsumerWidget {
               children: [
                 const Spacer(flex: 2),
                 AnimatedFadeIn(
-                  duration: const Duration(milliseconds: 800),
+                  duration: const Duration(milliseconds: 1000),
                   child: Container(
-                    width: 140,
-                    height: 140,
+                    width: 120,
+                    height: 120,
                     decoration: BoxDecoration(
-                      color: context.colorScheme.primary,
-                      borderRadius: BorderRadius.circular(35),
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(30),
                       boxShadow: [
                         BoxShadow(
-                          color: context.colorScheme.primary.withValues(alpha: 0.3),
+                          color: context.colorScheme.primary.withValues(
+                            alpha: 0.3,
+                          ),
                           blurRadius: 30,
                           offset: const Offset(0, 10),
                         ),
@@ -42,9 +44,10 @@ class WelcomePage extends ConsumerWidget {
                     child: Center(
                       child: Text(
                         l10n.appNameAr,
-                        style: context.textTheme.headlineLarge?.copyWith(
-                          color: context.colorScheme.onPrimary,
+                        style: TextStyle(
+                          fontSize: 32,
                           fontWeight: FontWeight.bold,
+                          color: context.colorScheme.primary,
                         ),
                       ),
                     ),
@@ -57,7 +60,7 @@ class WelcomePage extends ConsumerWidget {
                     l10n.welcomeTitle,
                     style: context.textTheme.headlineSmall?.copyWith(
                       fontWeight: FontWeight.bold,
-                      color: context.colorScheme.onSurface,
+                      color: Colors.white,
                     ),
                     textAlign: TextAlign.center,
                   ),
@@ -68,7 +71,7 @@ class WelcomePage extends ConsumerWidget {
                   child: Text(
                     l10n.welcomeSubtitle,
                     style: context.textTheme.bodyLarge?.copyWith(
-                      color: context.colorScheme.onSurfaceVariant,
+                      color: Colors.white.withValues(alpha: 0.85),
                     ),
                     textAlign: TextAlign.center,
                   ),
@@ -96,13 +99,11 @@ class WelcomePage extends ConsumerWidget {
                 AnimatedFadeIn(
                   delay: const Duration(milliseconds: 800),
                   child: TextButton(
-                    onPressed: () {
-                      // TODO: Implement guest mode
-                    },
+                    onPressed: () {},
                     child: Text(
                       l10n.welcomeGuestButton,
-                      style: context.textTheme.bodyMedium?.copyWith(
-                        color: context.colorScheme.onSurfaceVariant,
+                      style: TextStyle(
+                        color: Colors.white.withValues(alpha: 0.7),
                       ),
                     ),
                   ),

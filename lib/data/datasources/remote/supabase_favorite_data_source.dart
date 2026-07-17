@@ -4,13 +4,14 @@ import 'package:delwaqty/services/supabase/supabase_service.dart';
 import 'package:delwaqty/services/logger/app_logger.dart';
 import 'package:delwaqty/features/commerce/domain/entities/favorite.dart';
 
-final supabaseFavoriteDataSourceProvider =
-    Provider<SupabaseFavoriteDataSource>((ref) {
-  return SupabaseFavoriteDataSource(
-    ref.watch(supabaseClientProvider),
-    ref.watch(loggerProvider),
-  );
-});
+final supabaseFavoriteDataSourceProvider = Provider<SupabaseFavoriteDataSource>(
+  (ref) {
+    return SupabaseFavoriteDataSource(
+      ref.watch(supabaseClientProvider),
+      ref.watch(loggerProvider),
+    );
+  },
+);
 
 class SupabaseFavoriteDataSource {
   SupabaseFavoriteDataSource(this._client, this._logger);
@@ -38,10 +39,7 @@ class SupabaseFavoriteDataSource {
       final userId = _userId;
       if (userId == null) return [];
 
-      var query = _client
-          .from(_tableName)
-          .select()
-          .eq('user_id', userId);
+      var query = _client.from(_tableName).select().eq('user_id', userId);
 
       if (type == FavoriteType.product) {
         query = query.not('product_id', 'is', null);
@@ -64,7 +62,9 @@ class SupabaseFavoriteDataSource {
       final userId = _userId;
       if (userId == null) return false;
 
-      final column = type == FavoriteType.product ? 'product_id' : 'merchant_id';
+      final column = type == FavoriteType.product
+          ? 'product_id'
+          : 'merchant_id';
       final data = await _client
           .from(_tableName)
           .select('id')
@@ -86,7 +86,9 @@ class SupabaseFavoriteDataSource {
       final userId = _userId;
       if (userId == null) throw Exception('User not authenticated');
 
-      final column = type == FavoriteType.product ? 'product_id' : 'merchant_id';
+      final column = type == FavoriteType.product
+          ? 'product_id'
+          : 'merchant_id';
       final existing = await _client
           .from(_tableName)
           .select('id')

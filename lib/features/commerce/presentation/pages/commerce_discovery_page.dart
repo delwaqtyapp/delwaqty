@@ -32,11 +32,7 @@ class CommerceDiscoveryPage extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Discover'),
-        actions: [
-          CartBadge(
-            onTap: () => context.push('/market/cart'),
-          ),
-        ],
+        actions: [CartBadge(onTap: () => context.push('/market/cart'))],
       ),
       body: RefreshIndicator(
         onRefresh: () async {
@@ -55,8 +51,9 @@ class CommerceDiscoveryPage extends ConsumerWidget {
                   borderRadius: BorderRadius.circular(12),
                 ),
                 filled: true,
-                fillColor: theme.colorScheme.surfaceContainerHighest
-                    .withValues(alpha: 0.3),
+                fillColor: theme.colorScheme.surfaceContainerHighest.withValues(
+                  alpha: 0.3,
+                ),
               ),
               onTap: () => context.push('/market/search'),
               readOnly: true,
@@ -75,8 +72,7 @@ class CommerceDiscoveryPage extends ConsumerWidget {
                       label: const Text('All'),
                       selected: selectedType == null,
                       onSelected: (_) =>
-                          ref.read(_selectedTypeProvider.notifier).state =
-                              null,
+                          ref.read(_selectedTypeProvider.notifier).state = null,
                     ),
                   ),
                   ...MerchantType.values.map(
@@ -84,9 +80,9 @@ class CommerceDiscoveryPage extends ConsumerWidget {
                       padding: const EdgeInsets.only(right: 8),
                       child: MerchantTypeChip(
                         type: type,
-                        onTap: () => ref
-                            .read(_selectedTypeProvider.notifier)
-                            .state = type,
+                        onTap: () =>
+                            ref.read(_selectedTypeProvider.notifier).state =
+                                type,
                       ),
                     ),
                   ),
@@ -167,8 +163,7 @@ class CommerceDiscoveryPage extends ConsumerWidget {
                 return GridView.builder(
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
-                  gridDelegate:
-                      const SliverGridDelegateWithFixedCrossAxisCount(
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 2,
                     mainAxisSpacing: 12,
                     crossAxisSpacing: 12,
@@ -179,9 +174,8 @@ class CommerceDiscoveryPage extends ConsumerWidget {
                     final merchant = filtered[index];
                     return MerchantCard(
                       merchant: merchant,
-                      onTap: () => context.push(
-                        '/market/merchant/${merchant.id}',
-                      ),
+                      onTap: () =>
+                          context.push('/market/merchant/${merchant.id}'),
                     );
                   },
                 );

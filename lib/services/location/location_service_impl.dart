@@ -29,34 +29,30 @@ class LocationServiceImpl implements LocationService {
   @override
   Stream<GeoLocation> streamLocationUpdates() {
     _positionSubscription?.cancel();
-    _positionSubscription = geo.Geolocator.getPositionStream(
-      locationSettings: const geo.LocationSettings(
-        accuracy: geo.LocationAccuracy.high,
-        distanceFilter: 10,
-      ),
-    ).listen(
-      (position) {
-        _controller.add(
-          GeoLocation(
-            latitude: position.latitude,
-            longitude: position.longitude,
+    _positionSubscription =
+        geo.Geolocator.getPositionStream(
+          locationSettings: const geo.LocationSettings(
+            accuracy: geo.LocationAccuracy.high,
+            distanceFilter: 10,
           ),
+        ).listen(
+          (position) {
+            _controller.add(
+              GeoLocation(
+                latitude: position.latitude,
+                longitude: position.longitude,
+              ),
+            );
+          },
+          onError: (e) {
+            _controller.addError(e);
+          },
         );
-      },
-      onError: (e) {
-        _controller.addError(e);
-      },
-    );
     return _controller.stream;
   }
 
   @override
-  double calculateDistance(
-    double lat1,
-    double lng1,
-    double lat2,
-    double lng2,
-  ) {
+  double calculateDistance(double lat1, double lng1, double lat2, double lng2) {
     return geo.Geolocator.distanceBetween(lat1, lng1, lat2, lng2);
   }
 
@@ -76,15 +72,15 @@ class LocationServiceImpl implements LocationService {
 
   @override
   Future<PermissionStatus> requestPermission() async {
-    geo.LocationPermission permission = await geo.Geolocator.requestPermission();
+    geo.LocationPermission permission =
+        await geo.Geolocator.requestPermission();
     return _mapPermission(permission);
   }
 
   PermissionStatus _mapPermission(geo.LocationPermission permission) {
     return switch (permission) {
       geo.LocationPermission.always ||
-      geo.LocationPermission.whileInUse =>
-        PermissionStatus.granted,
+      geo.LocationPermission.whileInUse => PermissionStatus.granted,
       geo.LocationPermission.denied => PermissionStatus.denied,
       geo.LocationPermission.deniedForever => PermissionStatus.deniedForever,
       geo.LocationPermission.unableToDetermine => PermissionStatus.unknown,

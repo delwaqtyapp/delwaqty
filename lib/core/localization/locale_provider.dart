@@ -3,8 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:delwaqty/core/constants/storage_keys.dart';
 import 'package:delwaqty/data/datasources/local/shared_preferences_service.dart';
 
-final localeProvider =
-    NotifierProvider<LocaleNotifier, Locale>(LocaleNotifier.new);
+final localeProvider = NotifierProvider<LocaleNotifier, Locale>(
+  LocaleNotifier.new,
+);
 
 class LocaleNotifier extends Notifier<Locale> {
   @override
@@ -27,8 +28,9 @@ class LocaleNotifier extends Notifier<Locale> {
   }
 
   Future<void> toggleLocale() async {
-    final newLocale =
-        state.languageCode == 'ar' ? const Locale('en') : const Locale('ar');
+    final newLocale = state.languageCode == 'ar'
+        ? const Locale('en')
+        : const Locale('ar');
     await setLocale(newLocale);
   }
 }

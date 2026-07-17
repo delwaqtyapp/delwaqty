@@ -29,6 +29,9 @@ import 'package:delwaqty/features/commerce/presentation/pages/product_detail_pag
 import 'package:delwaqty/features/commerce/presentation/pages/cart_page.dart';
 import 'package:delwaqty/features/commerce/presentation/pages/checkout_page.dart';
 import 'package:delwaqty/features/commerce/presentation/pages/orders_page.dart';
+import 'package:delwaqty/features/commerce/presentation/pages/search_page.dart';
+import 'package:delwaqty/features/commerce/presentation/pages/order_tracking_page.dart';
+import 'package:delwaqty/features/commerce/presentation/pages/order_completed_page.dart';
 
 // ─── Repository Providers ───
 
@@ -37,9 +40,7 @@ final merchantRepositoryProvider = Provider<MerchantRepository>(
 );
 
 final productRepositoryImplProvider = Provider<ProductRepositoryImpl>((ref) {
-  return ProductRepositoryImpl(
-    ref.watch(supabaseProductDataSourceProvider),
-  );
+  return ProductRepositoryImpl(ref.watch(supabaseProductDataSourceProvider));
 });
 
 final productRepositoryProvider = Provider<ProductRepository>(
@@ -55,9 +56,7 @@ final cartRepositoryProvider = Provider<CartRepository>(
 );
 
 final orderRepositoryImplProvider = Provider<OrderRepositoryImpl>((ref) {
-  return OrderRepositoryImpl(
-    ref.watch(supabaseOrderDataSourceProvider),
-  );
+  return OrderRepositoryImpl(ref.watch(supabaseOrderDataSourceProvider));
 });
 
 final orderRepositoryProvider = Provider<OrderRepository>(
@@ -65,9 +64,7 @@ final orderRepositoryProvider = Provider<OrderRepository>(
 );
 
 final reviewRepositoryImplProvider = Provider<ReviewRepositoryImpl>((ref) {
-  return ReviewRepositoryImpl(
-    ref.watch(supabaseReviewDataSourceProvider),
-  );
+  return ReviewRepositoryImpl(ref.watch(supabaseReviewDataSourceProvider));
 });
 
 final reviewRepositoryProvider = Provider<ReviewRepository>(
@@ -75,9 +72,7 @@ final reviewRepositoryProvider = Provider<ReviewRepository>(
 );
 
 final couponRepositoryImplProvider = Provider<CouponRepositoryImpl>((ref) {
-  return CouponRepositoryImpl(
-    ref.watch(supabaseCouponDataSourceProvider),
-  );
+  return CouponRepositoryImpl(ref.watch(supabaseCouponDataSourceProvider));
 });
 
 final couponRepositoryProvider = Provider<CouponRepository>(
@@ -85,9 +80,7 @@ final couponRepositoryProvider = Provider<CouponRepository>(
 );
 
 final favoriteRepositoryImplProvider = Provider<FavoriteRepositoryImpl>((ref) {
-  return FavoriteRepositoryImpl(
-    ref.watch(supabaseFavoriteDataSourceProvider),
-  );
+  return FavoriteRepositoryImpl(ref.watch(supabaseFavoriteDataSourceProvider));
 });
 
 final favoriteRepositoryProvider = Provider<FavoriteRepository>(
@@ -113,9 +106,7 @@ class CommerceModule extends FeatureModule {
   int get navPriority => 0;
 
   @override
-  Set<ModuleCapability> get capabilities => {
-        ModuleCapability.hasDeepLinks,
-      };
+  Set<ModuleCapability> get capabilities => {ModuleCapability.hasDeepLinks};
 
   @override
   List<String> get dependsOn => [];
@@ -128,40 +119,50 @@ class CommerceModule extends FeatureModule {
 
   @override
   List<RouteBase> get standaloneRoutes => [
+    GoRoute(
+      path: '/market',
+      builder: (context, state) => const CommerceDiscoveryPage(),
+      routes: [
         GoRoute(
-          path: '/market',
-          builder: (context, state) => const CommerceDiscoveryPage(),
+          path: 'merchant/:id',
+          builder: (context, state) =>
+              MerchantDetailPage(merchantId: state.pathParameters['id']!),
           routes: [
             GoRoute(
-              path: 'merchant/:id',
-              builder: (context, state) => MerchantDetailPage(
+              path: 'product/:productId',
+              builder: (context, state) => ProductDetailPage(
+                productId: state.pathParameters['productId']!,
                 merchantId: state.pathParameters['id']!,
               ),
-              routes: [
-                GoRoute(
-                  path: 'product/:productId',
-                  builder: (context, state) => ProductDetailPage(
-                    productId: state.pathParameters['productId']!,
-                    merchantId: state.pathParameters['id']!,
-                  ),
-                ),
-              ],
-            ),
-            GoRoute(
-              path: 'cart',
-              builder: (context, state) => const CartPage(),
-            ),
-            GoRoute(
-              path: 'checkout',
-              builder: (context, state) => const CheckoutPage(),
-            ),
-            GoRoute(
-              path: 'orders',
-              builder: (context, state) => const OrdersPage(),
             ),
           ],
         ),
-      ];
+        GoRoute(path: 'cart', builder: (context, state) => const CartPage()),
+        GoRoute(
+          path: 'checkout',
+          builder: (context, state) => const CheckoutPage(),
+        ),
+        GoRoute(
+          path: 'search',
+          builder: (context, state) => const SearchPage(),
+        ),
+        GoRoute(
+          path: 'orders',
+          builder: (context, state) => const OrdersPage(),
+        ),
+        GoRoute(
+          path: 'order-completed/:orderId',
+          builder: (context, state) =>
+              OrderCompletedPage(orderId: state.pathParameters['orderId']!),
+        ),
+        GoRoute(
+          path: 'orders/:orderId/tracking',
+          builder: (context, state) =>
+              OrderTrackingPage(orderId: state.pathParameters['orderId']!),
+        ),
+      ],
+    ),
+  ];
 
   @override
   List<Override> providerOverrides(Ref ref) => [];

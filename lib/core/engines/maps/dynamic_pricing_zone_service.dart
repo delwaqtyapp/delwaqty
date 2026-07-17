@@ -1,10 +1,7 @@
 /// A geographic coordinate point.
 class GeoPoint {
   /// Creates a [GeoPoint] instance.
-  const GeoPoint({
-    required this.latitude,
-    required this.longitude,
-  });
+  const GeoPoint({required this.latitude, required this.longitude});
 
   /// Latitude in decimal degrees.
   final double latitude;
@@ -16,9 +13,7 @@ class GeoPoint {
 /// A polygon defined by geographic coordinates.
 class GeoPolygon {
   /// Creates a [GeoPolygon] instance.
-  const GeoPolygon({
-    required this.points,
-  });
+  const GeoPolygon({required this.points});
 
   /// Ordered list of coordinates defining the polygon boundary.
   final List<GeoPoint> points;

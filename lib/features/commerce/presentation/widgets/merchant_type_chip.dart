@@ -3,11 +3,7 @@ import 'package:delwaqty/features/commerce/domain/entities/merchant.dart';
 import 'package:delwaqty/core/theme/app_colors.dart';
 
 class MerchantTypeChip extends StatelessWidget {
-  const MerchantTypeChip({
-    required this.type,
-    this.onTap,
-    super.key,
-  });
+  const MerchantTypeChip({required this.type, this.onTap, super.key});
 
   final MerchantType type;
   final VoidCallback? onTap;

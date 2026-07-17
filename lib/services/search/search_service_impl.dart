@@ -75,10 +75,6 @@ class SearchServiceImpl implements SearchService {
   @override
   Future<List<String>> getSuggestions(String query) async {
     if (query.isEmpty) return const [];
-    return [
-      '$query near me',
-      '$query delivery',
-      '$query open now',
-    ];
+    return ['$query near me', '$query delivery', '$query open now'];
   }
 }

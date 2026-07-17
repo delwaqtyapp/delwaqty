@@ -110,9 +110,7 @@ abstract final class AppTheme {
       ),
       snackBarTheme: const SnackBarThemeData(
         behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(
-          borderRadius: AppSpacing.borderRadiusMd,
-        ),
+        shape: RoundedRectangleBorder(borderRadius: AppSpacing.borderRadiusMd),
       ),
       dividerTheme: DividerThemeData(
         color: colorScheme.outlineVariant,

@@ -205,11 +205,7 @@ class StaticMapOptions {
 /// A marker on a static map.
 class StaticMapMarker {
   /// Creates a [StaticMapMarker] instance.
-  const StaticMapMarker({
-    required this.coordinate,
-    this.label,
-    this.color,
-  });
+  const StaticMapMarker({required this.coordinate, this.label, this.color});
 
   /// Position of the marker.
   final GeoCoordinate coordinate;
@@ -224,10 +220,7 @@ class StaticMapMarker {
 /// A polygon defined by geographic coordinates.
 class GeoPolygon {
   /// Creates a [GeoPolygon] instance.
-  const GeoPolygon({
-    required this.points,
-    this.name,
-  });
+  const GeoPolygon({required this.points, this.name});
 
   /// Ordered list of coordinates defining the polygon boundary.
   final List<GeoCoordinate> points;

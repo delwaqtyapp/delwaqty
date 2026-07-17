@@ -41,16 +41,19 @@ void main() async {
   if (FirebaseConfig.isConfigured) {
     try {
       await Firebase.initializeApp(
-        options: const FirebaseOptions(
-          apiKey: 'AIzaSyBsBH-EQilAypJ2LGVyOK40UpqGWfjHt1A',
-          appId: '1:772052634679:android:17267a5736408b918b43b2',
-          messagingSenderId: '772052634679',
-          projectId: 'delwaqty0',
-          storageBucket: 'delwaqty0.firebasestorage.app',
+        options: FirebaseOptions(
+          apiKey: const String.fromEnvironment('FIREBASE_API_KEY'),
+          appId: const String.fromEnvironment('FIREBASE_APP_ID'),
+          messagingSenderId: const String.fromEnvironment(
+            'FIREBASE_MESSAGING_SENDER_ID',
+          ),
+          projectId: FirebaseConfig.projectId,
+          storageBucket: FirebaseConfig.storageBucket,
         ),
       );
       if (FirebaseConfig.enableCrashlytics) {
-        FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterFatalError;
+        FlutterError.onError =
+            FirebaseCrashlytics.instance.recordFlutterFatalError;
       }
     } catch (e) {
       debugPrint('Firebase initialization failed: $e');

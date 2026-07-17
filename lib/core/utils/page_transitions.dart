@@ -5,9 +5,10 @@ class AppPageTransitions {
     return PageRouteBuilder<T>(
       pageBuilder: (context, animation, secondaryAnimation) => page,
       transitionsBuilder: (context, animation, secondaryAnimation, child) {
-        final tween = Tween(begin: 0.0, end: 1.0).chain(
-          CurveTween(curve: Curves.easeOut),
-        );
+        final tween = Tween(
+          begin: 0.0,
+          end: 1.0,
+        ).chain(CurveTween(curve: Curves.easeOut));
         final fadeAnimation = animation.drive(tween);
         final slideAnimation = Tween<Offset>(
           begin: const Offset(0, 0.05),
@@ -28,13 +29,11 @@ class AppPageTransitions {
     return PageRouteBuilder<T>(
       pageBuilder: (context, animation, secondaryAnimation) => page,
       transitionsBuilder: (context, animation, secondaryAnimation, child) {
-        final tween = Tween(begin: const Offset(1, 0), end: Offset.zero).chain(
-          CurveTween(curve: Curves.easeOutCubic),
-        );
-        return SlideTransition(
-          position: animation.drive(tween),
-          child: child,
-        );
+        final tween = Tween(
+          begin: const Offset(1, 0),
+          end: Offset.zero,
+        ).chain(CurveTween(curve: Curves.easeOutCubic));
+        return SlideTransition(position: animation.drive(tween), child: child);
       },
     );
   }
@@ -43,14 +42,11 @@ class AppPageTransitions {
     return PageRouteBuilder<T>(
       pageBuilder: (context, animation, secondaryAnimation) => page,
       transitionsBuilder: (context, animation, secondaryAnimation, child) {
-        final tween =
-            Tween(begin: const Offset(0, 1), end: Offset.zero).chain(
-          CurveTween(curve: Curves.easeOutCubic),
-        );
-        return SlideTransition(
-          position: animation.drive(tween),
-          child: child,
-        );
+        final tween = Tween(
+          begin: const Offset(0, 1),
+          end: Offset.zero,
+        ).chain(CurveTween(curve: Curves.easeOutCubic));
+        return SlideTransition(position: animation.drive(tween), child: child);
       },
     );
   }
@@ -59,18 +55,17 @@ class AppPageTransitions {
     return PageRouteBuilder<T>(
       pageBuilder: (context, animation, secondaryAnimation) => page,
       transitionsBuilder: (context, animation, secondaryAnimation, child) {
-        final scaleAnimation = Tween<double>(begin: 0.95, end: 1.0).animate(
-          CurvedAnimation(parent: animation, curve: Curves.easeOut),
-        );
-        final fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-          CurvedAnimation(parent: animation, curve: Curves.easeOut),
-        );
+        final scaleAnimation = Tween<double>(
+          begin: 0.95,
+          end: 1.0,
+        ).animate(CurvedAnimation(parent: animation, curve: Curves.easeOut));
+        final fadeAnimation = Tween<double>(
+          begin: 0.0,
+          end: 1.0,
+        ).animate(CurvedAnimation(parent: animation, curve: Curves.easeOut));
         return ScaleTransition(
           scale: scaleAnimation,
-          child: FadeTransition(
-            opacity: fadeAnimation,
-            child: child,
-          ),
+          child: FadeTransition(opacity: fadeAnimation, child: child),
         );
       },
     );

@@ -92,8 +92,12 @@ class XorEncryptionService extends EncryptionService {
 
   @override
   String generateSecureRandom(int length) {
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    const chars =
+        'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
     final rng = Random.secure();
-    return List.generate(length, (_) => chars[rng.nextInt(chars.length)]).join();
+    return List.generate(
+      length,
+      (_) => chars[rng.nextInt(chars.length)],
+    ).join();
   }
 }

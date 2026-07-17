@@ -19,84 +19,68 @@ class SettingsPage extends ConsumerWidget {
       padding: const EdgeInsets.all(16),
       children: [
         AnimatedFadeIn(
-          child: _buildSection(
-            context,
-            l10n.appearance,
-            [
-              _buildThemeTile(context, ref, l10n, themeMode),
-              _buildLanguageTile(context, ref, l10n, locale),
-            ],
-          ),
+          child: _buildSection(context, l10n.appearance, [
+            _buildThemeTile(context, ref, l10n, themeMode),
+            _buildLanguageTile(context, ref, l10n, locale),
+          ]),
         ),
         const SizedBox(height: 16),
         AnimatedFadeIn(
           delay: const Duration(milliseconds: 100),
-          child: _buildSection(
-            context,
-            'Account',
-            [
-              ListTile(
-                leading: const Icon(Icons.person_outline_rounded),
-                title: Text(l10n.profile),
-                trailing: const Icon(Icons.chevron_right_rounded),
-                onTap: () {},
-              ),
-              const Divider(height: 1),
-              ListTile(
-                leading: const Icon(Icons.lock_outline_rounded),
-                title: const Text('Privacy & Security'),
-                trailing: const Icon(Icons.chevron_right_rounded),
-                onTap: () {},
-              ),
-            ],
-          ),
+          child: _buildSection(context, 'Account', [
+            ListTile(
+              leading: const Icon(Icons.person_outline_rounded),
+              title: Text(l10n.profile),
+              trailing: const Icon(Icons.chevron_right_rounded),
+              onTap: () {},
+            ),
+            const Divider(height: 1),
+            ListTile(
+              leading: const Icon(Icons.lock_outline_rounded),
+              title: const Text('Privacy & Security'),
+              trailing: const Icon(Icons.chevron_right_rounded),
+              onTap: () {},
+            ),
+          ]),
         ),
         const SizedBox(height: 16),
         AnimatedFadeIn(
           delay: const Duration(milliseconds: 200),
-          child: _buildSection(
-            context,
-            'Support',
-            [
-              ListTile(
-                leading: const Icon(Icons.help_outline_rounded),
-                title: const Text('Help Center'),
-                trailing: const Icon(Icons.chevron_right_rounded),
-                onTap: () {},
-              ),
-              const Divider(height: 1),
-              ListTile(
-                leading: const Icon(Icons.info_outline_rounded),
-                title: const Text('About'),
-                subtitle: const Text('Version 1.0.0'),
-                trailing: const Icon(Icons.chevron_right_rounded),
-                onTap: () {},
-              ),
-            ],
-          ),
+          child: _buildSection(context, 'Support', [
+            ListTile(
+              leading: const Icon(Icons.help_outline_rounded),
+              title: const Text('Help Center'),
+              trailing: const Icon(Icons.chevron_right_rounded),
+              onTap: () {},
+            ),
+            const Divider(height: 1),
+            ListTile(
+              leading: const Icon(Icons.info_outline_rounded),
+              title: const Text('About'),
+              subtitle: const Text('Version 1.0.0'),
+              trailing: const Icon(Icons.chevron_right_rounded),
+              onTap: () {},
+            ),
+          ]),
         ),
         const SizedBox(height: 16),
         AnimatedFadeIn(
           delay: const Duration(milliseconds: 300),
-          child: _buildSection(
-            context,
-            'Legal',
-            [
-              ListTile(
-                leading: const Icon(Icons.description_outlined),
-                title: const Text('Terms of Service'),
-                trailing: const Icon(Icons.chevron_right_rounded),
-                onTap: () {},
-              ),
-              const Divider(height: 1),
-              ListTile(
-                leading: const Icon(Icons.privacy_tip_outlined),
-                title: const Text('Privacy Policy'),
-                trailing: const Icon(Icons.chevron_right_rounded),
-                onTap: () {},
-              ),
-            ],
-          ),
+          child: _buildSection(context, 'Legal', [
+            ListTile(
+              leading: const Icon(Icons.description_outlined),
+              title: const Text('Terms of Service'),
+              trailing: const Icon(Icons.chevron_right_rounded),
+              onTap: () {},
+            ),
+            const Divider(height: 1),
+            ListTile(
+              leading: const Icon(Icons.privacy_tip_outlined),
+              title: const Text('Privacy Policy'),
+              trailing: const Icon(Icons.chevron_right_rounded),
+              onTap: () {},
+            ),
+          ]),
         ),
         const SizedBox(height: 32),
       ],
@@ -188,20 +172,12 @@ class SettingsPage extends ConsumerWidget {
       title: Text(l10n.language),
       trailing: SegmentedButton<String>(
         segments: const [
-          ButtonSegment(
-            value: 'en',
-            label: Text('EN'),
-          ),
-          ButtonSegment(
-            value: 'ar',
-            label: Text('عر'),
-          ),
+          ButtonSegment(value: 'en', label: Text('EN')),
+          ButtonSegment(value: 'ar', label: Text('عر')),
         ],
         selected: {locale.languageCode},
         onSelectionChanged: (selected) {
-          ref
-              .read(localeProvider.notifier)
-              .setLocale(Locale(selected.first));
+          ref.read(localeProvider.notifier).setLocale(Locale(selected.first));
         },
         style: ButtonStyle(
           visualDensity: VisualDensity.compact,

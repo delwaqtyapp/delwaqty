@@ -7,8 +7,9 @@ import 'package:delwaqty/domain/usecases/user/get_user.dart';
 import 'package:delwaqty/core/errors/error_handler.dart';
 import 'package:delwaqty/services/logger/app_logger.dart';
 
-final authStateProvider =
-    NotifierProvider<AuthStateNotifier, AuthState>(AuthStateNotifier.new);
+final authStateProvider = NotifierProvider<AuthStateNotifier, AuthState>(
+  AuthStateNotifier.new,
+);
 
 class AuthStateNotifier extends Notifier<AuthState> {
   StreamSubscription? _authSubscription;
@@ -81,10 +82,7 @@ class AuthStateNotifier extends Notifier<AuthState> {
     }
   }
 
-  Future<void> signIn({
-    required String email,
-    required String password,
-  }) async {
+  Future<void> signIn({required String email, required String password}) async {
     state = const AuthState.loading();
     try {
       await _signInUseCase(email: email, password: password);
@@ -104,7 +102,11 @@ class AuthStateNotifier extends Notifier<AuthState> {
   }) async {
     state = const AuthState.loading();
     try {
-      await _signUpUseCase(email: email, password: password, fullName: fullName);
+      await _signUpUseCase(
+        email: email,
+        password: password,
+        fullName: fullName,
+      );
       final user = await ref.read(getCurrentUserUseCaseProvider).call();
       state = AuthState.authenticated(user: user);
     } catch (e) {

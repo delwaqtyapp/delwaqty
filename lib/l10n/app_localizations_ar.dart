@@ -9,13 +9,13 @@ class AppLocalizationsAr extends AppLocalizations {
   AppLocalizationsAr([String locale = 'ar']) : super(locale);
 
   @override
-  String get appTitle => 'الدقة';
+  String get appTitle => 'دلوقتي';
 
   @override
   String get hello => 'مرحباً';
 
   @override
-  String get welcome => 'أهلاً بك';
+  String get welcome => 'أهلاً';
 
   @override
   String get login => 'تسجيل الدخول';
@@ -24,7 +24,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get logout => 'تسجيل الخروج';
 
   @override
-  String get register => 'التسجيل';
+  String get register => 'إنشاء حساب';
 
   @override
   String get email => 'البريد الإلكتروني';
@@ -99,16 +99,16 @@ class AppLocalizationsAr extends AppLocalizations {
   String get ok => 'موافق';
 
   @override
-  String get appName => 'الدقة';
+  String get appName => 'دلوقتي';
 
   @override
-  String get appNameAr => 'الدقة';
+  String get appNameAr => 'دلوقتي';
 
   @override
-  String get splashTagline => 'الدقة في كل تفصيل';
+  String get splashTagline => 'كل خدمة... في تطبيق واحد';
 
   @override
-  String get splashLoading => 'جاري تجهيز تجربتك...';
+  String get splashLoading => 'جاري تحضير تجربتك...';
 
   @override
   String get onboardingNext => 'التالي';
@@ -120,36 +120,45 @@ class AppLocalizationsAr extends AppLocalizations {
   String get onboardingDone => 'ابدأ الآن';
 
   @override
-  String get onboardingTitle1 => 'تتبع مصروفاتك';
+  String get onboardingTitle1 => 'كل احتياجاتك... في تطبيق واحد';
 
   @override
-  String get onboardingDesc1 => 'تتبع كل معاملة بسهولة. اعرف أين تذهب أموالك.';
+  String get onboardingDesc1 =>
+      'اطلب الطعام، احجز الخدمات، تسوق أونلاين، واحصل على أي شيء بالوصول. كل ما تحتاجه، في متناول يدك.';
 
   @override
-  String get onboardingTitle2 => 'ميزانية ذكية';
+  String get onboardingTitle2 => 'اطلب الطعام';
 
   @override
   String get onboardingDesc2 =>
-      'حدد ميزانياتك، وتتبع إنفاقك، وحقق أهدافك المالية بسهولة.';
+      'تصفح المطاعم، استكشف القوائم، خصّص وجبتك، واحصل على توصيل سريع لبابك.';
 
   @override
-  String get onboardingTitle3 => 'تقارير جميلة';
+  String get onboardingTitle3 => 'احجز الخدمات';
 
   @override
-  String get onboardingDesc3 => 'تصور أموالك برسوم بيانية أنيقة وتقارير مفيدة.';
+  String get onboardingDesc3 =>
+      'تنظيف، كهربائي، سباك، تصليح تكييف — احجز محترفين موثوقين في ثوانٍ.';
 
   @override
-  String get onboardingTitle4 => 'آمن وخاص';
+  String get onboardingTitle4 => 'تتبع طلبك';
 
   @override
   String get onboardingDesc4 =>
-      'بياناتك المالية مشفرة ومحمية بأعلى معايير الأمان.';
+      'تتبع مباشر، خريطة حية، وقت الوصول للسائق، وإشعارات فورية لكل طلب.';
 
   @override
-  String get welcomeTitle => 'مرحباً بك في الدقة';
+  String get onboardingTitle5 => 'ابدأ الآن';
 
   @override
-  String get welcomeSubtitle => 'رفيقك الشخصي للأمور المالية';
+  String get onboardingDesc5 =>
+      'كل شيء يدور حول دلوقتي. تطبيقك الخارق للحياة اليومية.';
+
+  @override
+  String get welcomeTitle => 'مرحباً بك في دلوقتي';
+
+  @override
+  String get welcomeSubtitle => 'اطلب. تسوق. تنقل. احجز. كله في دلوقتي.';
 
   @override
   String get welcomeLoginButton => 'لدي حساب بالفعل';
@@ -178,7 +187,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get resetEmailHint =>
-      'أدخل بريدك الإلكتروني وسنإرسال لك رابطاً لإعادة تعيين كلمة المرور.';
+      'أدخل بريدك الإلكتروني وسنرسل لك رابطاً لإعادة تعيين كلمة المرور.';
 
   @override
   String get backToLogin => 'العودة لتسجيل الدخول';
@@ -193,171 +202,362 @@ class AppLocalizationsAr extends AppLocalizations {
   String get continueAsGuest => 'المتابعة كضيف';
 
   @override
-  String get getStarted => 'ابدأ الآن';
+  String get getStarted => 'ابدأ';
 
   @override
   String get appearance => 'المظهر';
 
   @override
-  String get expenses => 'المصروفات';
-
-  @override
-  String get addExpense => 'إضافة مصروف';
-
-  @override
-  String get editExpense => 'تعديل المصروف';
-
-  @override
-  String get expenseDetail => 'تفاصيل المصروف';
-
-  @override
-  String get deleteExpense => 'حذف المصروف';
-
-  @override
-  String get deleteExpenseConfirm =>
-      'هل أنت متأكد من حذف هذا المصريف؟ لا يمكن التراجع عن هذا الإجراء.';
-
-  @override
-  String get title => 'العنوان';
-
-  @override
-  String get titleHint => 'أدخل عنوان المصروف';
-
-  @override
-  String get titleRequired => 'العنوان مطلوب';
-
-  @override
-  String get amount => 'المبلغ';
-
-  @override
-  String get amountHint => '0.00';
-
-  @override
-  String get amountRequired => 'المبلغ مطلوب';
-
-  @override
-  String get amountInvalid => 'يجب أن يكون المبلغ أكبر من 0';
-
-  @override
-  String get category => 'الفئة';
-
-  @override
-  String get categoryRequired => 'يرجى اختيار فئة';
-
-  @override
-  String get date => 'التاريخ';
-
-  @override
-  String get note => 'ملاحظة';
-
-  @override
-  String get noteHint => 'أضف ملاحظة (اختياري)';
-
-  @override
-  String get type => 'النوع';
-
-  @override
-  String get recurring => 'متكرر';
-
-  @override
-  String get receipt => 'الإيصال';
-
-  @override
-  String get createdAt => 'أنشئ في';
-
-  @override
-  String get searchExpenses => 'البحث في المصروفات...';
-
-  @override
-  String get noExpenses => 'لا توجد مصروفات بعد';
-
-  @override
-  String get noExpensesMessage => 'ابدأ بتتبع مصروفاتك بإضافة أول قيد.';
-
-  @override
-  String get filterAll => 'الكل';
-
-  @override
-  String get filterIncome => 'الدخل';
-
-  @override
-  String get filterExpense => 'المصروف';
-
-  @override
-  String get filterTransfer => 'التحويل';
+  String get notifications => 'الإشعارات';
 
   @override
   String get back => 'رجوع';
 
   @override
-  String get expenseNotFound => 'المصروف غير موجود';
-
-  @override
-  String get notifications => 'الإشعارات';
-
-  @override
-  String get categories => 'الفئات';
-
-  @override
-  String get addCategory => 'إضافة فئة';
-
-  @override
-  String get editCategory => 'تعديل الفئة';
-
-  @override
-  String get categoryName => 'اسم الفئة';
-
-  @override
-  String get selectIcon => 'اختر الأيقونة';
-
-  @override
-  String get selectColor => 'اختر اللون';
-
-  @override
-  String get budget => 'الميزانية';
-
-  @override
-  String get remaining => 'المتبقي';
-
-  @override
-  String get overBudget => 'تجاوز الميزانية';
-
-  @override
-  String get noCategories => 'لا توجد فئات';
-
-  @override
-  String get noCategoriesMessage => 'أنشئ فئات لتنظيم مصروفاتك.';
-
-  @override
-  String get confirmDeleteCategory => 'هل أنت متأكد من حذف هذه الفئة؟';
-
-  @override
-  String get reports => 'التقارير';
-
-  @override
-  String get totalIncome => 'إجمالي الدخل';
-
-  @override
-  String get totalExpenses => 'إجمالي المصروفات';
-
-  @override
-  String get balance => 'الرصيد';
-
-  @override
-  String get categoryBreakdown => 'تفصيل حسب الفئة';
-
-  @override
-  String get monthlyTrend => 'الاتجاه الشهري';
-
-  @override
-  String get last6Months => 'آخر 6 أشهر';
-
-  @override
-  String get noExpensesYet => 'لا توجد مصروفات بعد';
-
-  @override
-  String get startTracking => 'ابدأ التتبع لرؤية تفصيل إنفاقك.';
-
-  @override
   String get requiredField => 'هذا الحقل مطلوب';
+
+  @override
+  String get search => 'بحث';
+
+  @override
+  String get searchHint => 'ابحث عن مطاعم، متاجر، خدمات...';
+
+  @override
+  String get searchNoResults => 'لم يتم العثور على نتائج';
+
+  @override
+  String get searchNoResultsMessage => 'جرّب مصطلح بحث مختلف أو تصفح الفئات.';
+
+  @override
+  String get sortBy => 'ترتيب حسب';
+
+  @override
+  String get sortByDistance => 'المسافة';
+
+  @override
+  String get sortByRating => 'التقييم';
+
+  @override
+  String get sortByPrice => 'السعر';
+
+  @override
+  String get popular => 'الأشهر';
+
+  @override
+  String get restaurants => 'المطاعم';
+
+  @override
+  String get grocery => 'البقالة';
+
+  @override
+  String get pharmacy => 'الصيدلية';
+
+  @override
+  String get ride => 'النقل';
+
+  @override
+  String get homeServices => 'خدمات المنزل';
+
+  @override
+  String get delivery => 'التوصيل';
+
+  @override
+  String get offers => 'العروض';
+
+  @override
+  String get recommended => 'الموصى بها';
+
+  @override
+  String get nearby => 'القريبة';
+
+  @override
+  String get recentOrders => 'الطلبات الأخيرة';
+
+  @override
+  String get viewAll => 'عرض الكل';
+
+  @override
+  String get addToCart => 'أضف للسلة';
+
+  @override
+  String get cart => 'سلة المشتريات';
+
+  @override
+  String get checkout => 'الدفع';
+
+  @override
+  String get placeOrder => 'تأكيد الطلب';
+
+  @override
+  String get orderPlaced => 'تم الطلب!';
+
+  @override
+  String get orderTracking => 'تتبع الطلب';
+
+  @override
+  String get orderHistory => 'سجل الطلبات';
+
+  @override
+  String get myOrders => 'طلباتي';
+
+  @override
+  String get deliveryAddress => 'عنوان التوصيل';
+
+  @override
+  String get paymentMethod => 'طريقة الدفع';
+
+  @override
+  String get orderSummary => 'ملخص الطلب';
+
+  @override
+  String get subtotal => 'المجموع الفرعي';
+
+  @override
+  String get deliveryFee => 'رسوم التوصيل';
+
+  @override
+  String get tax => 'الضريبة';
+
+  @override
+  String get total => 'الإجمالي';
+
+  @override
+  String get estimatedTime => 'الوقت المقدر';
+
+  @override
+  String get estimatedArrival => 'الوقت المقدر للوصول';
+
+  @override
+  String get minutes => 'دقيقة';
+
+  @override
+  String get emptyCart => 'سلتك فارغة';
+
+  @override
+  String get emptyCartMessage => 'أضف منتجات من المطاعم والمتاجر للبدء.';
+
+  @override
+  String get clearCart => 'تفريغ السلة';
+
+  @override
+  String get browseMerchants => 'تصفح المتاجر';
+
+  @override
+  String get proceedToCheckout => 'متابعة للدفع';
+
+  @override
+  String get noOrders => 'لا توجد طلبات بعد';
+
+  @override
+  String get noOrdersMessage => 'سيظهر سجل طلباتك هنا.';
+
+  @override
+  String get categoriesTitle => 'الفئات';
+
+  @override
+  String get workingHours => 'ساعات العمل';
+
+  @override
+  String get deliveryTime => 'وقت التوصيل';
+
+  @override
+  String get rating => 'التقييم';
+
+  @override
+  String get reviews => 'التقييمات';
+
+  @override
+  String get menu => 'القائمة';
+
+  @override
+  String get details => 'التفاصيل';
+
+  @override
+  String get gallery => 'المعرض';
+
+  @override
+  String get offersTab => 'العروض';
+
+  @override
+  String get branches => 'الفروع';
+
+  @override
+  String get selectBranch => 'اختر الفرع';
+
+  @override
+  String get applyCoupon => 'تطبيق كود الخصم';
+
+  @override
+  String get couponCode => 'كود الخصم';
+
+  @override
+  String get removeCoupon => 'إزالة كود الخصم';
+
+  @override
+  String get couponApplied => 'تم تطبيق كود الخصم!';
+
+  @override
+  String get couponInvalid => 'كود الخصم غير صالح';
+
+  @override
+  String get quantity => 'الكمية';
+
+  @override
+  String get specialInstructions => 'تعليمات خاصة';
+
+  @override
+  String get specialInstructionsHint => 'هل لديك حساسية أو تفضيلات؟';
+
+  @override
+  String get orderConfirmed => 'تم تأكيد الطلب';
+
+  @override
+  String get orderConfirmedMessage => 'تم تأكيد طلبك وبدأ المطعم بتحضيره.';
+
+  @override
+  String get preparing => 'جاري التحضير';
+
+  @override
+  String get ready => 'جاهز';
+
+  @override
+  String get outForDelivery => 'في الطريق';
+
+  @override
+  String get delivered => 'تم التوصيل';
+
+  @override
+  String get cancelled => 'ملغي';
+
+  @override
+  String get rateOrder => 'تقييم الطلب';
+
+  @override
+  String get reorder => 'إعادة الطلب';
+
+  @override
+  String get callDriver => 'الاتصال بالسائق';
+
+  @override
+  String get chatDriver => 'محادثة السائق';
+
+  @override
+  String get shareLocation => 'مشاركة الموقع';
+
+  @override
+  String get thankYou => 'شكراً لك!';
+
+  @override
+  String get orderSuccessMessage =>
+      'تم وضع طلبك بنجاح. يمكنك تتبعه في الوقت الفعلي.';
+
+  @override
+  String get backToHome => 'العودة للرئيسية';
+
+  @override
+  String get trackYourOrder => 'تتبع طلبك';
+
+  @override
+  String get itemAddedToCart => 'تمت إضافة المنتج للسلة';
+
+  @override
+  String get viewCart => 'عرض السلة';
+
+  @override
+  String get selectDeliveryAddress => 'اختر عنوان التوصيل';
+
+  @override
+  String get addNewAddress => 'إضافة عنوان جديد';
+
+  @override
+  String get savedAddresses => 'العناوين المحفوظة';
+
+  @override
+  String get noSavedAddresses => 'لا توجد عناوين محفوظة بعد';
+
+  @override
+  String get addressLine1 => 'العنوان السطر الأول';
+
+  @override
+  String get addressLine2 => 'العنوان السطر الثاني';
+
+  @override
+  String get city => 'المدينة';
+
+  @override
+  String get postalCode => 'الرمز البريدي';
+
+  @override
+  String get cashOnDelivery => 'الدفع عند الاستلام';
+
+  @override
+  String get creditCard => 'بطاقة ائتمان';
+
+  @override
+  String get digitalWallet => 'المحفظة الرقمية';
+
+  @override
+  String get selectPaymentMethod => 'اختر طريقة الدفع';
+
+  @override
+  String get apply => 'تطبيق';
+
+  @override
+  String get orderDetails => 'تفاصيل الطلب';
+
+  @override
+  String get orderTimeline => 'تسلسل الطلب';
+
+  @override
+  String itemCount(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count منتج',
+      zero: 'لا منتجات',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get itemCountOther => 'منتجات';
+
+  @override
+  String get sar => 'ر.س';
+
+  @override
+  String get searchRestaurants => 'ابحث عن مطاعم...';
+
+  @override
+  String get searchProducts => 'ابحث عن منتجات...';
+
+  @override
+  String get filters => 'الفلاتر';
+
+  @override
+  String get openNow => 'مفتوح الآن';
+
+  @override
+  String get freeDelivery => 'توصيل مجاني';
+
+  @override
+  String get highestRated => 'الأعلى تقييماً';
+
+  @override
+  String get discount => 'خصم';
+
+  @override
+  String get enterCouponCode => 'أدخل كود الخصم';
+
+  @override
+  String get pending => 'قيد الانتظار';
+
+  @override
+  String get confirmed => 'تم التأكيد';
+
+  @override
+  String get pickedUp => 'تم الاستلام';
+
+  @override
+  String get inTransit => 'في الطريق';
 }

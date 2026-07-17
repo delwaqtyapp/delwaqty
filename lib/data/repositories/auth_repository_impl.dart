@@ -262,7 +262,10 @@ class AuthRepositoryImpl implements AuthRepository {
       'apple' => AuthProviderType.apple,
       'phone' => AuthProviderType.phone,
       'email' => AuthProviderType.email,
-      _ => user.email != null ? AuthProviderType.email : AuthProviderType.anonymous,
+      _ =>
+        user.email != null
+            ? AuthProviderType.email
+            : AuthProviderType.anonymous,
     };
   }
 }

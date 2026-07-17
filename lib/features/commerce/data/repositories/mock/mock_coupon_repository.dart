@@ -28,7 +28,8 @@ class MockCouponRepository implements CouponRepository {
     if (coupon.minimumOrder != null && orderTotal < coupon.minimumOrder!) {
       return null;
     }
-    if (coupon.expiresAt != null && coupon.expiresAt!.isBefore(DateTime.now())) {
+    if (coupon.expiresAt != null &&
+        coupon.expiresAt!.isBefore(DateTime.now())) {
       return null;
     }
     return coupon;
@@ -62,37 +63,41 @@ class MockCouponRepository implements CouponRepository {
     final coupon = await getCouponByCode(code);
     if (coupon == null) throw Exception('Coupon not found');
     if (!coupon.isActive) return CouponStatus.inactive;
-    if (coupon.expiresAt != null && coupon.expiresAt!.isBefore(DateTime.now())) return CouponStatus.expired;
-    if (coupon.usageLimit != null && coupon.usedCount != null && coupon.usedCount! >= coupon.usageLimit!) return CouponStatus.usedUp;
+    if (coupon.expiresAt != null && coupon.expiresAt!.isBefore(DateTime.now()))
+      return CouponStatus.expired;
+    if (coupon.usageLimit != null &&
+        coupon.usedCount != null &&
+        coupon.usedCount! >= coupon.usageLimit!)
+      return CouponStatus.usedUp;
     return CouponStatus.active;
   }
 }
 
 List<Coupon> _sampleCoupons() => [
-      Coupon(
-        id: 'coupon_1',
-        code: 'SAVE10',
-        type: CouponType.percentage,
-        value: 10,
-        minimumOrder: 30,
-        maximumDiscount: 50,
-        expiresAt: DateTime.now().add(const Duration(days: 30)),
-      ),
-      Coupon(
-        id: 'coupon_2',
-        code: 'FREEDEL',
-        type: CouponType.freeDelivery,
-        value: 0,
-        minimumOrder: 50,
-        expiresAt: DateTime.now().add(const Duration(days: 14)),
-      ),
-      Coupon(
-        id: 'coupon_3',
-        code: 'WELCOME20',
-        type: CouponType.percentage,
-        value: 20,
-        minimumOrder: 50,
-        maximumDiscount: 100,
-        expiresAt: DateTime.now().add(const Duration(days: 60)),
-      ),
-    ];
+  Coupon(
+    id: 'coupon_1',
+    code: 'SAVE10',
+    type: CouponType.percentage,
+    value: 10,
+    minimumOrder: 30,
+    maximumDiscount: 50,
+    expiresAt: DateTime.now().add(const Duration(days: 30)),
+  ),
+  Coupon(
+    id: 'coupon_2',
+    code: 'FREEDEL',
+    type: CouponType.freeDelivery,
+    value: 0,
+    minimumOrder: 50,
+    expiresAt: DateTime.now().add(const Duration(days: 14)),
+  ),
+  Coupon(
+    id: 'coupon_3',
+    code: 'WELCOME20',
+    type: CouponType.percentage,
+    value: 20,
+    minimumOrder: 50,
+    maximumDiscount: 100,
+    expiresAt: DateTime.now().add(const Duration(days: 60)),
+  ),
+];

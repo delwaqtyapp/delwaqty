@@ -5,8 +5,9 @@ import 'package:delwaqty/services/logger/app_logger.dart';
 import 'package:delwaqty/features/commerce/domain/entities/order.dart';
 import 'package:delwaqty/features/commerce/domain/entities/cart.dart';
 
-final supabaseOrderDataSourceProvider =
-    Provider<SupabaseOrderDataSource>((ref) {
+final supabaseOrderDataSourceProvider = Provider<SupabaseOrderDataSource>((
+  ref,
+) {
   return SupabaseOrderDataSource(
     ref.watch(supabaseClientProvider),
     ref.watch(loggerProvider),
@@ -24,22 +25,32 @@ class SupabaseOrderDataSource {
 
   String? get _userId => _client.auth.currentUser?.id;
 
-  Order _fromRow(Map<String, dynamic> row, [List<Map<String, dynamic>>? items]) {
-    final orderItems = items?.map((i) => OrderItem(
-          productId: i['product_id'] as String,
-          productName: i['product_name'] as String? ?? '',
-          variantName: i['variant_name'] as String?,
-          quantity: i['quantity'] as int,
-          unitPrice: (i['unit_price'] as num).toDouble(),
-          totalPrice: (i['total_price'] as num).toDouble(),
-        )).toList() ?? [];
+  Order _fromRow(
+    Map<String, dynamic> row, [
+    List<Map<String, dynamic>>? items,
+  ]) {
+    final orderItems =
+        items
+            ?.map(
+              (i) => OrderItem(
+                productId: i['product_id'] as String,
+                productName: i['product_name'] as String? ?? '',
+                variantName: i['variant_name'] as String?,
+                quantity: i['quantity'] as int,
+                unitPrice: (i['unit_price'] as num).toDouble(),
+                totalPrice: (i['total_price'] as num).toDouble(),
+              ),
+            )
+            .toList() ??
+        [];
 
     return Order(
       id: row['id'] as String,
       merchantId: row['merchant_id'] as String,
       merchantName: row['merchant_name'] as String? ?? '',
       items: orderItems,
-      subtotal: (row['total_amount'] as num).toDouble() -
+      subtotal:
+          (row['total_amount'] as num).toDouble() -
           (row['delivery_fee'] as num? ?? 0).toDouble() -
           (row['tax'] as num? ?? 0).toDouble() +
           (row['discount'] as num? ?? 0).toDouble(),
@@ -49,7 +60,8 @@ class SupabaseOrderDataSource {
       status: _parseStatus(row['status'] as String),
       deliveryAddress: row['delivery_address'] as String?,
       paymentMethod: row['payment_method'] as String?,
-      specialInstructions: row['special_instructions'] as String? ?? row['notes'] as String?,
+      specialInstructions:
+          row['special_instructions'] as String? ?? row['notes'] as String?,
       confirmedAt: row['confirmed_at'] != null
           ? DateTime.parse(row['confirmed_at'] as String)
           : null,
@@ -89,10 +101,7 @@ class SupabaseOrderDataSource {
       final userId = _userId;
       if (userId == null) return [];
 
-      var query = _client
-          .from(_ordersTable)
-          .select()
-          .eq('user_id', userId);
+      var query = _client.from(_ordersTable).select().eq('user_id', userId);
 
       if (status != null) {
         query = query.eq('status', status.name);
@@ -160,19 +169,23 @@ class SupabaseOrderDataSource {
       final userId = _userId;
       if (userId == null) throw Exception('User not authenticated');
 
-      final orderData = await _client.from(_ordersTable).insert({
-        'user_id': userId,
-        'merchant_id': merchantId,
-        'merchant_name': merchantName,
-        'status': OrderStatus.pending.name,
-        'total_amount': total,
-        'delivery_fee': deliveryFee,
-        'tax': 0,
-        'discount': discount,
-        'delivery_address': deliveryAddress,
-        'payment_method': paymentMethod,
-        'special_instructions': specialInstructions,
-      }).select().single();
+      final orderData = await _client
+          .from(_ordersTable)
+          .insert({
+            'user_id': userId,
+            'merchant_id': merchantId,
+            'merchant_name': merchantName,
+            'status': OrderStatus.pending.name,
+            'total_amount': total,
+            'delivery_fee': deliveryFee,
+            'tax': 0,
+            'discount': discount,
+            'delivery_address': deliveryAddress,
+            'payment_method': paymentMethod,
+            'special_instructions': specialInstructions,
+          })
+          .select()
+          .single();
 
       final orderId = orderData['id'] as String;
 
@@ -189,24 +202,28 @@ class SupabaseOrderDataSource {
       }
 
       _logger.i('Created order: $orderId');
-      return _fromRow(orderData, items.map((ci) => {
-        'product_id': ci.productId,
-        'product_name': ci.productName,
-        'variant_name': ci.variantName,
-        'quantity': ci.quantity,
-        'unit_price': ci.unitPrice,
-        'total_price': ci.unitPrice * ci.quantity,
-      }).toList());
+      return _fromRow(
+        orderData,
+        items
+            .map(
+              (ci) => {
+                'product_id': ci.productId,
+                'product_name': ci.productName,
+                'variant_name': ci.variantName,
+                'quantity': ci.quantity,
+                'unit_price': ci.unitPrice,
+                'total_price': ci.unitPrice * ci.quantity,
+              },
+            )
+            .toList(),
+      );
     } catch (e, stack) {
       _logger.e('Failed to create order', e, stack);
       rethrow;
     }
   }
 
-  Future<Order> cancelOrder({
-    required String orderId,
-    String? reason,
-  }) async {
+  Future<Order> cancelOrder({required String orderId, String? reason}) async {
     try {
       final data = await _client
           .from(_ordersTable)

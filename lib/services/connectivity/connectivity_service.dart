@@ -39,9 +39,7 @@ class ConnectivityService {
   }
 
   void _updateStatus(List<ConnectivityResult> results) {
-    final hasConnection = results.any(
-      (r) => r != ConnectivityResult.none,
-    );
+    final hasConnection = results.any((r) => r != ConnectivityResult.none);
     final newStatus = hasConnection
         ? ConnectivityStatus.connected
         : ConnectivityStatus.disconnected;

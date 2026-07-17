@@ -7,6 +7,11 @@ import 'package:delwaqty/features/commerce/domain/entities/cart.dart'
     as commerce;
 import 'package:delwaqty/features/commerce/presentation/widgets/price_tag.dart';
 import 'package:delwaqty/features/commerce/presentation/widgets/cart_badge.dart';
+import 'package:delwaqty/l10n/app_localizations.dart';
+import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
+import 'package:delwaqty/shared/widgets/app_loader.dart';
+import 'package:delwaqty/shared/widgets/error_state.dart';
+import 'package:delwaqty/core/extensions/context_extensions.dart';
 
 class ProductDetailPage extends ConsumerStatefulWidget {
   const ProductDetailPage({
@@ -35,24 +40,31 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context);
     final productRepo = ref.watch(productRepositoryProvider);
 
     return FutureBuilder<Product?>(
       future: productRepo.getProductById(widget.productId),
       builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Scaffold(
+            appBar: AppBar(title: Text(l10n.loading)),
+            body: const Center(child: AppLoaderCircular()),
+          );
+        }
+
         final product = snapshot.data;
         if (product == null) {
           return Scaffold(
-            appBar: AppBar(title: const Text('Product')),
-            body: const Center(child: Text('Product not found')),
+            appBar: AppBar(title: Text(l10n.error)),
+            body: ErrorState(message: l10n.noData),
           );
         }
 
         final selectedVariant = _selectedVariantId != null
             ? product.variants
-                .where((v) => v.id == _selectedVariantId)
-                .firstOrNull
+                  .where((v) => v.id == _selectedVariantId)
+                  .firstOrNull
             : null;
         final unitPrice = selectedVariant?.price ?? product.price;
         final totalPrice = unitPrice * _quantity;
@@ -60,24 +72,43 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage> {
         return Scaffold(
           appBar: AppBar(
             title: Text(product.name),
-            actions: [
-              CartBadge(
-                onTap: () => context.push('/market/cart'),
-              ),
-            ],
+            actions: [CartBadge(onTap: () => context.push('/market/cart'))],
           ),
           body: ListView(
             children: [
-              // Product image
-              Container(
-                height: 250,
-                width: double.infinity,
-                color: theme.colorScheme.primaryContainer.withValues(alpha: 0.3),
-                child: const Center(
-                  child: Icon(
-                    Icons.shopping_bag_outlined,
-                    size: 80,
-                    color: Colors.grey,
+              Hero(
+                tag: 'product-${product.id}',
+                child: Container(
+                  height: 280,
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        context.colorScheme.primaryContainer.withValues(
+                          alpha: 0.6,
+                        ),
+                        context.colorScheme.surface,
+                      ],
+                    ),
+                  ),
+                  child: Center(
+                    child: Container(
+                      width: 120,
+                      height: 120,
+                      decoration: BoxDecoration(
+                        color: context.colorScheme.primary.withValues(
+                          alpha: 0.1,
+                        ),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        Icons.shopping_bag_outlined,
+                        size: 64,
+                        color: context.colorScheme.primary,
+                      ),
+                    ),
                   ),
                 ),
               ),
@@ -86,94 +117,163 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      product.name,
-                      style: theme.textTheme.headlineSmall?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    if (product.description != null)
-                      Text(
-                        product.description!,
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          color: Colors.grey[600],
-                        ),
-                      ),
-                    const SizedBox(height: 12),
-                    PriceTag(
-                      price: unitPrice,
-                      originalPrice: product.originalPrice,
-                      size: 'large',
-                    ),
-
-                    // Variants
-                    if (product.variants.isNotEmpty) ...[
-                      const SizedBox(height: 20),
-                      Text(
-                        'Size',
-                        style: theme.textTheme.titleSmall?.copyWith(
+                    AnimatedFadeIn(
+                      delay: const Duration(milliseconds: 100),
+                      child: Text(
+                        product.name,
+                        style: context.textTheme.headlineSmall?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
                       ),
+                    ),
+                    if (product.description != null &&
+                        product.description!.isNotEmpty) ...[
                       const SizedBox(height: 8),
-                      Wrap(
-                        spacing: 8,
-                        children: product.variants.map((v) {
-                          final isSelected = v.id == _selectedVariantId;
-                          return ChoiceChip(
-                            label: Text(
-                              '${v.name} - ${v.price.toStringAsFixed(0)} SAR',
-                            ),
-                            selected: isSelected,
-                            onSelected: v.isAvailable
-                                ? (_) => setState(
-                                    () => _selectedVariantId = v.id)
-                                : null,
-                          );
-                        }).toList(),
+                      AnimatedFadeIn(
+                        delay: const Duration(milliseconds: 200),
+                        child: Text(
+                          product.description!,
+                          style: context.textTheme.bodyMedium?.copyWith(
+                            color: context.colorScheme.onSurfaceVariant,
+                          ),
+                        ),
                       ),
                     ],
-
-                    // Quantity
-                    const SizedBox(height: 20),
-                    Text(
-                      'Quantity',
-                      style: theme.textTheme.titleSmall?.copyWith(
-                        fontWeight: FontWeight.bold,
+                    const SizedBox(height: 12),
+                    AnimatedFadeIn(
+                      delay: const Duration(milliseconds: 300),
+                      child: PriceTag(
+                        price: unitPrice,
+                        originalPrice: product.originalPrice,
+                        size: 'large',
                       ),
                     ),
-                    const SizedBox(height: 8),
-                    Row(
-                      children: [
-                        IconButton(
-                          onPressed: _quantity > 1
-                              ? () => setState(() => _quantity--)
-                              : null,
-                          icon: const Icon(Icons.remove_circle_outline),
-                        ),
-                        Text(
-                          '$_quantity',
-                          style: theme.textTheme.titleMedium?.copyWith(
+                    if (product.variants.isNotEmpty) ...[
+                      const SizedBox(height: 24),
+                      AnimatedFadeIn(
+                        delay: const Duration(milliseconds: 400),
+                        child: Text(
+                          l10n.details,
+                          style: context.textTheme.titleSmall?.copyWith(
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-                        IconButton(
-                          onPressed: () => setState(() => _quantity++),
-                          icon: const Icon(Icons.add_circle_outline),
-                        ),
-                      ],
-                    ),
-
-                    // Special instructions
-                    const SizedBox(height: 20),
-                    TextField(
-                      controller: _instructionsController,
-                      decoration: const InputDecoration(
-                        labelText: 'Special instructions (optional)',
-                        border: OutlineInputBorder(),
                       ),
-                      maxLines: 2,
+                      const SizedBox(height: 10),
+                      AnimatedFadeIn(
+                        delay: const Duration(milliseconds: 450),
+                        child: Wrap(
+                          spacing: 8,
+                          runSpacing: 8,
+                          children: product.variants.map((v) {
+                            final isSelected = v.id == _selectedVariantId;
+                            return ChoiceChip(
+                              label: Text(
+                                '${v.name} - ${v.price.toStringAsFixed(0)} SAR',
+                              ),
+                              selected: isSelected,
+                              selectedColor:
+                                  context.colorScheme.primaryContainer,
+                              onSelected: v.isAvailable
+                                  ? (_) => setState(
+                                      () => _selectedVariantId = v.id,
+                                    )
+                                  : null,
+                            );
+                          }).toList(),
+                        ),
+                      ),
+                    ],
+                    const SizedBox(height: 24),
+                    AnimatedFadeIn(
+                      delay: const Duration(milliseconds: 500),
+                      child: Text(
+                        l10n.quantity,
+                        style: context.textTheme.titleSmall?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    AnimatedFadeIn(
+                      delay: const Duration(milliseconds: 550),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: context.colorScheme.surfaceContainerHighest
+                              .withValues(alpha: 0.3),
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            IconButton(
+                              onPressed: _quantity > 1
+                                  ? () => setState(() => _quantity--)
+                                  : null,
+                              icon: Icon(
+                                Icons.remove_circle_outline,
+                                color: _quantity > 1
+                                    ? context.colorScheme.primary
+                                    : context.colorScheme.onSurfaceVariant
+                                          .withValues(alpha: 0.4),
+                              ),
+                            ),
+                            AnimatedSwitcher(
+                              duration: const Duration(milliseconds: 200),
+                              child: Text(
+                                '$_quantity',
+                                key: ValueKey(_quantity),
+                                style: context.textTheme.titleMedium?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                            IconButton(
+                              onPressed: () => setState(() => _quantity++),
+                              icon: Icon(
+                                Icons.add_circle_outline,
+                                color: context.colorScheme.primary,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                    AnimatedFadeIn(
+                      delay: const Duration(milliseconds: 600),
+                      child: TextField(
+                        controller: _instructionsController,
+                        decoration: InputDecoration(
+                          hintText: l10n.specialInstructions,
+                          hintStyle: TextStyle(
+                            color: context.colorScheme.onSurfaceVariant
+                                .withValues(alpha: 0.5),
+                          ),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide(
+                              color: context.colorScheme.outline.withValues(
+                                alpha: 0.3,
+                              ),
+                            ),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide(
+                              color: context.colorScheme.primary,
+                            ),
+                          ),
+                        ),
+                        maxLines: 3,
+                      ),
                     ),
                   ],
                 ),
@@ -186,14 +286,12 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage> {
               child: FilledButton.icon(
                 onPressed: product.isAvailable
                     ? () async {
-                        final cartRepo =
-                            ref.read(cartRepositoryProvider);
+                        final cartRepo = ref.read(cartRepositoryProvider);
                         await cartRepo.addToCart(
                           merchantId: widget.merchantId,
                           merchantName: '',
                           item: commerce.CartItem(
-                            id:
-                                'ci_${DateTime.now().millisecondsSinceEpoch}',
+                            id: 'ci_${DateTime.now().millisecondsSinceEpoch}',
                             productId: product.id,
                             productName: product.name,
                             variantName: selectedVariant?.name,
@@ -205,12 +303,11 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage> {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
                               content: Text(
-                                'Added $_quantity ${product.name} to cart',
+                                '${l10n.addToCart} - ${totalPrice.toStringAsFixed(0)} SAR',
                               ),
                               action: SnackBarAction(
-                                label: 'View Cart',
-                                onPressed: () =>
-                                    context.push('/market/cart'),
+                                label: l10n.cart,
+                                onPressed: () => context.push('/market/cart'),
                               ),
                             ),
                           );
@@ -218,7 +315,9 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage> {
                       }
                     : null,
                 icon: const Icon(Icons.add_shopping_cart),
-                label: Text('Add to Cart - ${totalPrice.toStringAsFixed(0)} SAR'),
+                label: Text(
+                  '${l10n.addToCart} - ${totalPrice.toStringAsFixed(0)} SAR',
+                ),
               ),
             ),
           ),

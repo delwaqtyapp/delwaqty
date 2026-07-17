@@ -7,14 +7,12 @@ library;
 /// The result of a single validation check.
 class ValidationResult {
   /// Creates a valid [ValidationResult].
-  const ValidationResult.valid()
-      : isValid = true,
-        errors = const [];
+  const ValidationResult.valid() : isValid = true, errors = const [];
 
   /// Creates an invalid [ValidationResult] with the given [errors].
   const ValidationResult.invalid(List<String> errors)
-      : isValid = false,
-        this.errors = errors;
+    : isValid = false,
+      this.errors = errors;
 
   /// Whether the validated input is valid.
   final bool isValid;
@@ -68,7 +66,9 @@ class DefaultInputValidator extends InputValidator {
     } else if (!_emailRegex.hasMatch(email)) {
       errors.add('Email format is invalid');
     }
-    return errors.isEmpty ? ValidationResult.valid() : ValidationResult.invalid(errors);
+    return errors.isEmpty
+        ? ValidationResult.valid()
+        : ValidationResult.invalid(errors);
   }
 
   @override
@@ -77,7 +77,8 @@ class DefaultInputValidator extends InputValidator {
     if (password.isEmpty) {
       errors.add('Password is required');
     } else {
-      if (password.length < 8) errors.add('Password must be at least 8 characters');
+      if (password.length < 8)
+        errors.add('Password must be at least 8 characters');
       if (!RegExp(r'[A-Z]').hasMatch(password)) {
         errors.add('Password must contain at least one uppercase letter');
       }
@@ -88,7 +89,9 @@ class DefaultInputValidator extends InputValidator {
         errors.add('Password must contain at least one digit');
       }
     }
-    return errors.isEmpty ? ValidationResult.valid() : ValidationResult.invalid(errors);
+    return errors.isEmpty
+        ? ValidationResult.valid()
+        : ValidationResult.invalid(errors);
   }
 
   @override
@@ -96,10 +99,14 @@ class DefaultInputValidator extends InputValidator {
     final errors = <String>[];
     if (phone.isEmpty) {
       errors.add('Phone number is required');
-    } else if (!_phoneRegex.hasMatch(phone.replaceAll(RegExp(r'[\s\-()]'), ''))) {
+    } else if (!_phoneRegex.hasMatch(
+      phone.replaceAll(RegExp(r'[\s\-()]'), ''),
+    )) {
       errors.add('Phone number format is invalid');
     }
-    return errors.isEmpty ? ValidationResult.valid() : ValidationResult.invalid(errors);
+    return errors.isEmpty
+        ? ValidationResult.valid()
+        : ValidationResult.invalid(errors);
   }
 
   @override
@@ -112,7 +119,9 @@ class DefaultInputValidator extends InputValidator {
     } else if (name.trim().length > 100) {
       errors.add('Name must be at most 100 characters');
     }
-    return errors.isEmpty ? ValidationResult.valid() : ValidationResult.invalid(errors);
+    return errors.isEmpty
+        ? ValidationResult.valid()
+        : ValidationResult.invalid(errors);
   }
 
   @override
@@ -125,7 +134,9 @@ class DefaultInputValidator extends InputValidator {
     } else if (address.trim().length > 500) {
       errors.add('Address must be at most 500 characters');
     }
-    return errors.isEmpty ? ValidationResult.valid() : ValidationResult.invalid(errors);
+    return errors.isEmpty
+        ? ValidationResult.valid()
+        : ValidationResult.invalid(errors);
   }
 
   @override
@@ -151,7 +162,8 @@ class NoOpInputValidator extends InputValidator {
   ValidationResult validateEmail(String email) => ValidationResult.valid();
 
   @override
-  ValidationResult validatePassword(String password) => ValidationResult.valid();
+  ValidationResult validatePassword(String password) =>
+      ValidationResult.valid();
 
   @override
   ValidationResult validatePhone(String phone) => ValidationResult.valid();

@@ -33,19 +33,19 @@ class PageRequest {
 
   /// Returns a [PageRequest] for the next page.
   PageRequest get nextPage => PageRequest(
-        page: page + 1,
-        pageSize: pageSize,
-        sortBy: sortBy,
-        sortOrder: sortOrder,
-      );
+    page: page + 1,
+    pageSize: pageSize,
+    sortBy: sortBy,
+    sortOrder: sortOrder,
+  );
 
   /// Returns a [PageRequest] for the previous page, clamped to 0.
   PageRequest get previousPage => PageRequest(
-        page: page > 0 ? page - 1 : 0,
-        pageSize: pageSize,
-        sortBy: sortBy,
-        sortOrder: sortOrder,
-      );
+    page: page > 0 ? page - 1 : 0,
+    pageSize: pageSize,
+    sortBy: sortBy,
+    sortOrder: sortOrder,
+  );
 
   @override
   String toString() =>

@@ -16,8 +16,8 @@ class PriceTag extends StatelessWidget {
     final base = size == 'small'
         ? Theme.of(context).textTheme.bodySmall
         : size == 'large'
-            ? Theme.of(context).textTheme.titleLarge
-            : Theme.of(context).textTheme.titleMedium;
+        ? Theme.of(context).textTheme.titleLarge
+        : Theme.of(context).textTheme.titleMedium;
     return (base ?? const TextStyle()).copyWith(
       fontWeight: FontWeight.bold,
       color: Theme.of(context).colorScheme.primary,

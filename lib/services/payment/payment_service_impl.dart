@@ -62,7 +62,10 @@ class PaymentServiceImpl implements PaymentService {
   }
 
   @override
-  Future<PaymentResult> refundPayment(String paymentId, {double? amount}) async {
+  Future<PaymentResult> refundPayment(
+    String paymentId, {
+    double? amount,
+  }) async {
     return PaymentResult(
       success: true,
       status: PaymentStatus.refunded,

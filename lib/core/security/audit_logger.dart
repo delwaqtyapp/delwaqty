@@ -86,16 +86,18 @@ class InMemoryAuditLogger extends AuditLogger {
     String? details,
     Map<String, dynamic>? metadata,
   }) {
-    _entries.add(AuditEntry(
-      id: 'audit-${++_counter}',
-      action: action,
-      resource: resource,
-      resourceId: resourceId,
-      userId: userId,
-      details: details,
-      metadata: metadata,
-      timestamp: DateTime.now(),
-    ));
+    _entries.add(
+      AuditEntry(
+        id: 'audit-${++_counter}',
+        action: action,
+        resource: resource,
+        resourceId: resourceId,
+        userId: userId,
+        details: details,
+        metadata: metadata,
+        timestamp: DateTime.now(),
+      ),
+    );
   }
 
   @override
@@ -132,18 +134,20 @@ class InMemoryAuditLogger extends AuditLogger {
   }
 
   Map<String, dynamic> _entryToMap(AuditEntry e) => {
-        'id': e.id,
-        'action': e.action,
-        'resource': e.resource,
-        'resourceId': e.resourceId,
-        'userId': e.userId,
-        'details': e.details,
-        'metadata': e.metadata,
-        'timestamp': e.timestamp.toIso8601String(),
-      };
+    'id': e.id,
+    'action': e.action,
+    'resource': e.resource,
+    'resourceId': e.resourceId,
+    'userId': e.userId,
+    'details': e.details,
+    'metadata': e.metadata,
+    'timestamp': e.timestamp.toIso8601String(),
+  };
 
   String _toCsv() {
-    final buffer = StringBuffer('id,action,resource,resourceId,userId,details,timestamp\n');
+    final buffer = StringBuffer(
+      'id,action,resource,resourceId,userId,details,timestamp\n',
+    );
     for (final e in _entries) {
       buffer.writeln(
         '${e.id},${e.action},${e.resource ?? ''},${e.resourceId ?? ''},${e.userId ?? ''},${e.details ?? ''},${e.timestamp.toIso8601String()}',
@@ -171,8 +175,7 @@ class NoOpAuditLogger extends AuditLogger {
     String? resource,
     DateTime? since,
     int? limit,
-  }) =>
-      [];
+  }) => [];
 
   @override
   String export(String format) => '';

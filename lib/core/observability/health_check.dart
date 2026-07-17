@@ -31,39 +31,44 @@ class HealthCheckResult {
   });
 
   /// Creates a healthy result.
-  const HealthCheckResult.healthy(String name, {String? message, Duration? duration})
-      : this(
-          name: name,
-          status: HealthStatus.healthy,
-          message: message,
-          duration: duration,
-        );
+  const HealthCheckResult.healthy(
+    String name, {
+    String? message,
+    Duration? duration,
+  }) : this(
+         name: name,
+         status: HealthStatus.healthy,
+         message: message,
+         duration: duration,
+       );
 
   /// Creates an unhealthy result.
-  const HealthCheckResult.unhealthy(String name, {String? message, Duration? duration})
-      : this(
-          name: name,
-          status: HealthStatus.unhealthy,
-          message: message,
-          duration: duration,
-        );
+  const HealthCheckResult.unhealthy(
+    String name, {
+    String? message,
+    Duration? duration,
+  }) : this(
+         name: name,
+         status: HealthStatus.unhealthy,
+         message: message,
+         duration: duration,
+       );
 
   /// Creates a degraded result.
-  const HealthCheckResult.degraded(String name, {String? message, Duration? duration})
-      : this(
-          name: name,
-          status: HealthStatus.degraded,
-          message: message,
-          duration: duration,
-        );
+  const HealthCheckResult.degraded(
+    String name, {
+    String? message,
+    Duration? duration,
+  }) : this(
+         name: name,
+         status: HealthStatus.degraded,
+         message: message,
+         duration: duration,
+       );
 
   /// Creates an unknown result.
   const HealthCheckResult.unknown(String name, {String? message})
-      : this(
-          name: name,
-          status: HealthStatus.unknown,
-          message: message,
-        );
+    : this(name: name, status: HealthStatus.unknown, message: message);
 
   /// The check name.
   final String name;
@@ -130,11 +135,15 @@ class DefaultHealthCheckService extends HealthCheckService {
   Future<bool> isHealthy() async {
     final results = await runAll();
     return results.values.every(
-      (r) => r.status == HealthStatus.healthy || r.status == HealthStatus.degraded,
+      (r) =>
+          r.status == HealthStatus.healthy || r.status == HealthStatus.degraded,
     );
   }
 
-  Future<HealthCheckResult> _safeRun(String name, HealthCheckFunction check) async {
+  Future<HealthCheckResult> _safeRun(
+    String name,
+    HealthCheckFunction check,
+  ) async {
     final stopwatch = Stopwatch()..start();
     try {
       final result = await check();

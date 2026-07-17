@@ -46,14 +46,16 @@ class MockOrderRepository implements OrderRepository {
       merchantId: merchantId,
       merchantName: merchantName,
       items: items
-          .map((ci) => OrderItem(
-                productId: ci.productId,
-                productName: ci.productName,
-                variantName: ci.variantName,
-                quantity: ci.quantity,
-                unitPrice: ci.unitPrice,
-                totalPrice: ci.unitPrice * ci.quantity,
-              ))
+          .map(
+            (ci) => OrderItem(
+              productId: ci.productId,
+              productName: ci.productName,
+              variantName: ci.variantName,
+              quantity: ci.quantity,
+              unitPrice: ci.unitPrice,
+              totalPrice: ci.unitPrice * ci.quantity,
+            ),
+          )
           .toList(),
       subtotal: subtotal,
       deliveryFee: deliveryFee,
@@ -70,10 +72,7 @@ class MockOrderRepository implements OrderRepository {
   }
 
   @override
-  Future<Order> cancelOrder({
-    required String orderId,
-    String? reason,
-  }) async {
+  Future<Order> cancelOrder({required String orderId, String? reason}) async {
     final index = _orders.indexWhere((o) => o.id == orderId);
     if (index < 0) throw StateError('Order not found');
     _orders[index] = _orders[index].copyWith(

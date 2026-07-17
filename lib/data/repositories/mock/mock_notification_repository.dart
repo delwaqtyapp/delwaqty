@@ -5,38 +5,38 @@ class MockNotificationRepository implements NotificationRepository {
   final List<AppNotification> _notifications = [
     AppNotification(
       id: '1',
-      title: 'Budget Alert',
-      body: 'You have spent 80% of your Groceries budget this month.',
-      type: NotificationType.warning,
+      title: 'Order Confirmed',
+      body: 'Your order from Al Baik has been confirmed and is being prepared.',
+      type: NotificationType.success,
       createdAt: DateTime.now().subtract(const Duration(hours: 2)),
     ),
     AppNotification(
       id: '2',
-      title: 'Expense Added',
-      body: 'Your expense of \$85.50 for Grocery Shopping has been recorded.',
-      type: NotificationType.success,
+      title: 'Delivery on the Way',
+      body: 'Your order from Panda Grocery is on the way. ETA: 15 min.',
+      type: NotificationType.info,
       isRead: true,
       createdAt: DateTime.now().subtract(const Duration(hours: 5)),
     ),
     AppNotification(
       id: '3',
-      title: 'Monthly Report',
-      body: 'Your monthly financial report for June is ready.',
+      title: 'New Offer Available',
+      body: 'Get 20% off your next order from selected restaurants!',
       type: NotificationType.info,
-      deepLink: '/reports/june',
+      deepLink: '/market',
       createdAt: DateTime.now().subtract(const Duration(days: 1)),
     ),
     AppNotification(
       id: '4',
-      title: 'Bill Reminder',
-      body: 'Your electric bill is due in 3 days.',
+      title: 'Service Reminder',
+      body: 'Your AC maintenance appointment is tomorrow at 10 AM.',
       type: NotificationType.reminder,
       createdAt: DateTime.now().subtract(const Duration(days: 2)),
     ),
     AppNotification(
       id: '5',
       title: 'Welcome to Delwaqty',
-      body: 'Start tracking your expenses and achieve your financial goals.',
+      body: 'Explore restaurants, shops, and services all in one app.',
       type: NotificationType.info,
       isRead: true,
       createdAt: DateTime.now().subtract(const Duration(days: 7)),
@@ -78,9 +78,7 @@ class MockNotificationRepository implements NotificationRepository {
   @override
   Future<void> markAllAsRead() async {
     _notifications.clear();
-    _notifications.addAll(
-      _notifications.map((n) => n.copyWith(isRead: true)),
-    );
+    _notifications.addAll(_notifications.map((n) => n.copyWith(isRead: true)));
   }
 
   @override

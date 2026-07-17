@@ -8,20 +8,32 @@ class WorkingHoursRepositoryImpl implements WorkingHoursRepository {
   final SupabaseWorkingHoursDataSource _dataSource;
 
   @override
-  Future<List<WorkingHours>> getHours(String merchantId, {String? branchId}) async {
-    try { return await _dataSource.getHours(merchantId, branchId: branchId); }
-    catch (e) { throw ServerException(message: e.toString()); }
+  Future<List<WorkingHours>> getHours(
+    String merchantId, {
+    String? branchId,
+  }) async {
+    try {
+      return await _dataSource.getHours(merchantId, branchId: branchId);
+    } catch (e) {
+      throw ServerException(message: e.toString());
+    }
   }
 
   @override
   Future<void> setHours(List<WorkingHours> hours) async {
-    try { await _dataSource.setHours(hours); }
-    catch (e) { throw ServerException(message: e.toString()); }
+    try {
+      await _dataSource.setHours(hours);
+    } catch (e) {
+      throw ServerException(message: e.toString());
+    }
   }
 
   @override
   Future<void> deleteHours(String merchantId, {String? branchId}) async {
-    try { await _dataSource.deleteHours(merchantId, branchId: branchId); }
-    catch (e) { throw ServerException(message: e.toString()); }
+    try {
+      await _dataSource.deleteHours(merchantId, branchId: branchId);
+    } catch (e) {
+      throw ServerException(message: e.toString());
+    }
   }
 }

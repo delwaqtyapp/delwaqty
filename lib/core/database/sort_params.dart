@@ -6,10 +6,7 @@ library;
 /// Describes how results should be sorted.
 class SortParams {
   /// Creates a [SortParams].
-  const SortParams({
-    required this.field,
-    this.ascending = true,
-  });
+  const SortParams({required this.field, this.ascending = true});
 
   /// The field name to sort by.
   final String field;

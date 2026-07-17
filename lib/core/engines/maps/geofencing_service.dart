@@ -1,10 +1,7 @@
 /// A geographic coordinate point.
 class GeoPoint {
   /// Creates a [GeoPoint] instance.
-  const GeoPoint({
-    required this.latitude,
-    required this.longitude,
-  });
+  const GeoPoint({required this.latitude, required this.longitude});
 
   /// Latitude in decimal degrees.
   final double latitude;

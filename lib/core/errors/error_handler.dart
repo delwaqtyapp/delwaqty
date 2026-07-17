@@ -4,20 +4,21 @@ import 'package:delwaqty/core/errors/exceptions.dart';
 Failure handleException(Object error) {
   if (error is AppException) {
     return switch (error) {
-      ServerException(:final message, :final statusCode) =>
-        Failure.server(message: _friendlyMessage(message, statusCode)),
+      ServerException(:final message, :final statusCode) => Failure.server(
+        message: _friendlyMessage(message, statusCode),
+      ),
       CacheException(:final message) => Failure.cache(message: message),
       NetworkException(:final message) => Failure.network(message: message),
       AuthException(:final message) => Failure.auth(message: message),
       TimeoutException(:final message) => Failure.network(message: message),
-      RateLimitException(:final message, :final retryAfter) =>
-        Failure.server(
-          message: retryAfter != null
-              ? 'Too many requests. Please wait ${retryAfter.inSeconds}s.'
-              : message,
-        ),
-      UnexpectedException(:final message) =>
-        Failure.unexpected(message: message),
+      RateLimitException(:final message, :final retryAfter) => Failure.server(
+        message: retryAfter != null
+            ? 'Too many requests. Please wait ${retryAfter.inSeconds}s.'
+            : message,
+      ),
+      UnexpectedException(:final message) => Failure.unexpected(
+        message: message,
+      ),
     };
   }
 
@@ -29,11 +30,8 @@ Failure handleException(Object error) {
       message: 'No internet connection. Please check your network.',
     );
   }
-  if (message.contains('TimeoutException') ||
-      message.contains('Timed out')) {
-    return Failure.network(
-      message: 'Request timed out. Please try again.',
-    );
+  if (message.contains('TimeoutException') || message.contains('Timed out')) {
+    return Failure.network(message: 'Request timed out. Please try again.');
   }
 
   return Failure.unexpected(message: 'An unexpected error occurred.');

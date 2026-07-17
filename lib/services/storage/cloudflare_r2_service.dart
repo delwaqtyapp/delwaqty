@@ -10,9 +10,8 @@ import 'package:delwaqty/services/image/image_service.dart';
 /// Uses Cloudflare R2 for asset storage with CDN delivery.
 /// Falls back to Supabase Storage when R2 is unavailable.
 class CloudflareR2ServiceImpl implements ImageService {
-  CloudflareR2ServiceImpl({
-    http.Client? httpClient,
-  }) : _httpClient = httpClient ?? http.Client();
+  CloudflareR2ServiceImpl({http.Client? httpClient})
+    : _httpClient = httpClient ?? http.Client();
 
   final http.Client _httpClient;
   final _cache = <String, String>{};
@@ -28,7 +27,8 @@ class CloudflareR2ServiceImpl implements ImageService {
     final key = '$folder/$fileName';
     final bytes = await file.readAsBytes();
 
-    final url = '${CloudflareConfig.r2BaseUrl}/${CloudflareConfig.r2Bucket}/$key';
+    final url =
+        '${CloudflareConfig.r2BaseUrl}/${CloudflareConfig.r2Bucket}/$key';
     final date = HttpDate.format(DateTime.now().toUtc());
 
     final signature = _signRequest(
@@ -41,7 +41,8 @@ class CloudflareR2ServiceImpl implements ImageService {
     final response = await _httpClient.put(
       Uri.parse(url),
       headers: {
-        'Authorization': 'AWS4-HMAC-SHA256 Credential=${CloudflareConfig.accountId}/$date/${CloudflareConfig.accountId}/s3/aws4_request, SignedHeaders=host;date, Signature=$signature',
+        'Authorization':
+            'AWS4-HMAC-SHA256 Credential=${CloudflareConfig.accountId}/$date/${CloudflareConfig.accountId}/s3/aws4_request, SignedHeaders=host;date, Signature=$signature',
         'Date': date,
         'Content-Type': 'application/octet-stream',
         'Content-Length': bytes.length.toString(),
@@ -79,7 +80,8 @@ class CloudflareR2ServiceImpl implements ImageService {
     final response = await _httpClient.delete(
       Uri.parse(storageUrl),
       headers: {
-        'Authorization': 'AWS4-HMAC-SHA256 Credential=${CloudflareConfig.accountId}/$date/${CloudflareConfig.accountId}/s3/aws4_request, SignedHeaders=host;date, Signature=$signature',
+        'Authorization':
+            'AWS4-HMAC-SHA256 Credential=${CloudflareConfig.accountId}/$date/${CloudflareConfig.accountId}/s3/aws4_request, SignedHeaders=host;date, Signature=$signature',
         'Date': date,
       },
     );

@@ -108,10 +108,7 @@ class AppBottomSheet {
           top: Radius.circular(AppSpacing.radiusXl),
         ),
       ),
-      builder: (context) => _FullScreenBottomSheet(
-        title: title,
-        child: child,
-      ),
+      builder: (context) => _FullScreenBottomSheet(title: title, child: child),
     );
   }
 }
@@ -153,10 +150,7 @@ class _BottomSheetContent extends StatelessWidget {
 
 /// Full-screen bottom sheet with its own app bar.
 class _FullScreenBottomSheet extends StatelessWidget {
-  const _FullScreenBottomSheet({
-    required this.title,
-    required this.child,
-  });
+  const _FullScreenBottomSheet({required this.title, required this.child});
 
   final String title;
   final Widget child;

@@ -266,10 +266,7 @@ abstract interface class SearchEngine {
   ///
   /// [query] is a natural language question. [context] provides
   /// additional context for disambiguation.
-  Future<List<SearchResult>> semanticSearch(
-    String query, {
-    String? context,
-  });
+  Future<List<SearchResult>> semanticSearch(String query, {String? context});
 
   /// Returns available search filters for the given result [type].
   Future<List<SearchFilterOption>> getSearchFilters(String type);
@@ -277,5 +274,8 @@ abstract interface class SearchEngine {
   /// Returns the search history for the given [userId].
   ///
   /// [limit] caps the number of entries returned.
-  Future<List<SearchHistoryEntry>> getSearchHistory(String userId, {int? limit});
+  Future<List<SearchHistoryEntry>> getSearchHistory(
+    String userId, {
+    int? limit,
+  });
 }

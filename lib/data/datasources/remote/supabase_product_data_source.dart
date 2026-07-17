@@ -4,8 +4,9 @@ import 'package:delwaqty/services/supabase/supabase_service.dart';
 import 'package:delwaqty/services/logger/app_logger.dart';
 import 'package:delwaqty/features/commerce/domain/entities/product.dart';
 
-final supabaseProductDataSourceProvider =
-    Provider<SupabaseProductDataSource>((ref) {
+final supabaseProductDataSourceProvider = Provider<SupabaseProductDataSource>((
+  ref,
+) {
   return SupabaseProductDataSource(
     ref.watch(supabaseClientProvider),
     ref.watch(loggerProvider),
@@ -48,7 +49,10 @@ class SupabaseProductDataSource {
     int offset = 0,
   }) async {
     try {
-      var query = _client.from(_tableName).select().eq('merchant_id', merchantId);
+      var query = _client
+          .from(_tableName)
+          .select()
+          .eq('merchant_id', merchantId);
 
       if (categoryId != null) {
         query = query.eq('category', categoryId);
@@ -103,7 +107,10 @@ class SupabaseProductDataSource {
     }
   }
 
-  Future<List<Product>> searchProducts(String query, {String? merchantId}) async {
+  Future<List<Product>> searchProducts(
+    String query, {
+    String? merchantId,
+  }) async {
     try {
       var q = _client
           .from(_tableName)

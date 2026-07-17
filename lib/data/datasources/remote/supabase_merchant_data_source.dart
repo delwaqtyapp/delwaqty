@@ -5,13 +5,14 @@ import 'package:delwaqty/services/logger/app_logger.dart';
 import 'package:delwaqty/features/commerce/domain/entities/merchant.dart';
 import 'package:delwaqty/features/commerce/domain/entities/search_filter.dart';
 
-final supabaseMerchantDataSourceProvider =
-    Provider<SupabaseMerchantDataSource>((ref) {
-  return SupabaseMerchantDataSource(
-    ref.watch(supabaseClientProvider),
-    ref.watch(loggerProvider),
-  );
-});
+final supabaseMerchantDataSourceProvider = Provider<SupabaseMerchantDataSource>(
+  (ref) {
+    return SupabaseMerchantDataSource(
+      ref.watch(supabaseClientProvider),
+      ref.watch(loggerProvider),
+    );
+  },
+);
 
 class SupabaseMerchantDataSource {
   SupabaseMerchantDataSource(this._client, this._logger);
@@ -83,8 +84,11 @@ class SupabaseMerchantDataSource {
 
   Future<Merchant?> getMerchantById(String id) async {
     try {
-      final data =
-          await _client.from(_tableName).select().eq('id', id).maybeSingle();
+      final data = await _client
+          .from(_tableName)
+          .select()
+          .eq('id', id)
+          .maybeSingle();
       if (data == null) return null;
       return _fromRow(_rowToMap(data));
     } catch (e, stack) {

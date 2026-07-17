@@ -1,10 +1,7 @@
 /// A geographic coordinate point.
 class GeoPoint {
   /// Creates a [GeoPoint] instance.
-  const GeoPoint({
-    required this.latitude,
-    required this.longitude,
-  });
+  const GeoPoint({required this.latitude, required this.longitude});
 
   /// Latitude in decimal degrees.
   final double latitude;
@@ -51,10 +48,7 @@ class DriverLocation {
 /// Heatmap data point for visualization.
 class HeatmapDataPoint {
   /// Creates a [HeatmapDataPoint] instance.
-  const HeatmapDataPoint({
-    required this.coordinate,
-    required this.intensity,
-  });
+  const HeatmapDataPoint({required this.coordinate, required this.intensity});
 
   /// Geographic coordinate of the data point.
   final GeoPoint coordinate;
@@ -66,11 +60,7 @@ class HeatmapDataPoint {
 /// Aggregated heatmap data for driver density visualization.
 class HeatmapData {
   /// Creates a [HeatmapData] instance.
-  const HeatmapData({
-    required this.points,
-    this.boundingBox,
-    this.timestamp,
-  });
+  const HeatmapData({required this.points, this.boundingBox, this.timestamp});
 
   /// List of weighted data points.
   final List<HeatmapDataPoint> points;
@@ -85,10 +75,7 @@ class HeatmapData {
 /// Bounding box for heatmap data.
 class HeatmapBoundingBox {
   /// Creates a [HeatmapBoundingBox] instance.
-  const HeatmapBoundingBox({
-    required this.northEast,
-    required this.southWest,
-  });
+  const HeatmapBoundingBox({required this.northEast, required this.southWest});
 
   /// North-east corner of the bounding box.
   final GeoPoint northEast;

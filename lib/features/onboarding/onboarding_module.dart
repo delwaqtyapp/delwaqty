@@ -21,10 +21,10 @@ class OnboardingModule extends FeatureModule {
 
   @override
   List<RouteBase> get standaloneRoutes => [
-        GoRoute(
-          path: '/onboarding',
-          name: 'onboarding',
-          builder: (context, state) => const OnboardingPage(),
-        ),
-      ];
+    GoRoute(
+      path: '/onboarding',
+      name: 'onboarding',
+      builder: (context, state) => const OnboardingPage(),
+    ),
+  ];
 }

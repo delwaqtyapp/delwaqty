@@ -1,7 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:delwaqty/features/commerce/commerce_module.dart';
 import 'package:delwaqty/features/commerce/domain/entities/order.dart';
+import 'package:delwaqty/l10n/app_localizations.dart';
+import 'package:delwaqty/core/extensions/context_extensions.dart';
+import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
+import 'package:delwaqty/shared/widgets/empty_state.dart';
+import 'package:delwaqty/shared/widgets/app_loader.dart';
+import 'package:delwaqty/shared/widgets/error_state.dart';
 
 final _ordersFutureProvider = FutureProvider<List<Order>>((ref) async {
   final repo = ref.watch(orderRepositoryProvider);
@@ -13,86 +20,144 @@ class OrdersPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context);
+    final colorScheme = context.colorScheme;
+    final textTheme = context.textTheme;
     final ordersAsync = ref.watch(_ordersFutureProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('My Orders')),
-      body: ordersAsync.when(
-        data: (orders) {
-          if (orders.isEmpty) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
+      appBar: AppBar(title: Text(l10n.myOrders)),
+      body: RefreshIndicator(
+        onRefresh: () async => ref.invalidate(_ordersFutureProvider),
+        child: ordersAsync.when(
+          data: (orders) {
+            if (orders.isEmpty) {
+              return ListView(
                 children: [
-                  Icon(Icons.receipt_long,
-                      size: 64, color: Colors.grey[400]),
-                  const SizedBox(height: 16),
-                  Text(
-                    'No orders yet',
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      color: Colors.grey,
+                  SizedBox(
+                    height: MediaQuery.sizeOf(context).height * 0.7,
+                    child: EmptyState(
+                      icon: Icons.receipt_long_outlined,
+                      title: l10n.noOrders,
+                      message: l10n.noOrdersMessage,
                     ),
                   ),
                 ],
-              ),
-            );
-          }
+              );
+            }
 
-          return ListView.separated(
-            padding: const EdgeInsets.all(16),
-            itemCount: orders.length,
-            separatorBuilder: (_, __) => const Divider(),
-            itemBuilder: (context, index) {
-              final order = orders[index];
-              return Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              order.merchantName.isNotEmpty
-                                  ? order.merchantName
-                                  : 'Order #${order.id.substring(order.id.length - 6)}',
-                              style: theme.textTheme.titleSmall?.copyWith(
-                                fontWeight: FontWeight.bold,
+            return ListView.builder(
+              padding: const EdgeInsets.all(16),
+              itemCount: orders.length,
+              itemBuilder: (context, index) {
+                final order = orders[index];
+                final canTrack =
+                    order.status != OrderStatus.delivered &&
+                    order.status != OrderStatus.cancelled;
+
+                return AnimatedFadeIn(
+                  delay: Duration(milliseconds: 80 * index),
+                  child: Card(
+                    margin: const EdgeInsets.only(bottom: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    elevation: 0,
+                    color: colorScheme.surfaceContainerLow,
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(16),
+                      onTap: canTrack
+                          ? () => context.push('/market/orders/${order.id}')
+                          : null,
+                      child: Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: Text(
+                                    order.merchantName.isNotEmpty
+                                        ? order.merchantName
+                                        : 'Order #${order.id.substring(order.id.length - 6)}',
+                                    style: textTheme.titleSmall?.copyWith(
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                                _StatusChip(status: order.status),
+                              ],
+                            ),
+                            const SizedBox(height: 8),
+                            Row(
+                              children: [
+                                Text(
+                                  '${order.items.length} ${order.items.length == 1 ? 'item' : 'items'}',
+                                  style: textTheme.bodySmall?.copyWith(
+                                    color: colorScheme.onSurfaceVariant,
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                Container(
+                                  width: 4,
+                                  height: 4,
+                                  decoration: BoxDecoration(
+                                    color: colorScheme.onSurfaceVariant,
+                                    shape: BoxShape.circle,
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                Text(
+                                  '${order.total.toStringAsFixed(0)} ${l10n.sar}',
+                                  style: textTheme.bodySmall?.copyWith(
+                                    color: colorScheme.onSurfaceVariant,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              _formatDate(order.createdAt),
+                              style: textTheme.bodySmall?.copyWith(
+                                color: colorScheme.onSurfaceVariant,
                               ),
                             ),
-                          ),
-                          _StatusChip(status: order.status),
-                        ],
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        '${order.items.length} item(s) · ${order.total.toStringAsFixed(0)} SAR',
-                        style: theme.textTheme.bodySmall,
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        _formatDate(order.createdAt),
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: Colors.grey,
+                          ],
                         ),
                       ),
-                    ],
+                    ),
                   ),
-                ),
-              );
-            },
-          );
-        },
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('Error: $e')),
+                );
+              },
+            );
+          },
+          loading: () => ListView(
+            children: const [
+              SizedBox(height: 16),
+              SkeletonCard(),
+              SkeletonCard(),
+              SkeletonCard(),
+            ],
+          ),
+          error: (e, _) => ErrorState(
+            title: l10n.error,
+            message: e.toString(),
+            onRetry: () => ref.invalidate(_ordersFutureProvider),
+            retryLabel: l10n.retry,
+          ),
+        ),
       ),
     );
   }
 
   String _formatDate(DateTime date) {
-    return '${date.day}/${date.month}/${date.year} ${date.hour}:${date.minute.toString().padLeft(2, '0')}';
+    final day = date.day.toString().padLeft(2, '0');
+    final month = date.month.toString().padLeft(2, '0');
+    final hour = date.hour.toString().padLeft(2, '0');
+    final minute = date.minute.toString().padLeft(2, '0');
+    return '$day/$month/${date.year} $hour:$minute';
   }
 }
 
@@ -103,26 +168,28 @@ class _StatusChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final (label, color) = switch (status) {
-      OrderStatus.pending => ('Pending', Colors.orange),
-      OrderStatus.confirmed => ('Confirmed', Colors.blue),
-      OrderStatus.preparing => ('Preparing', Colors.purple),
-      OrderStatus.ready => ('Ready', Colors.teal),
-      OrderStatus.pickedUp => ('Picked Up', Colors.indigo),
-      OrderStatus.inTransit => ('In Transit', Colors.cyan),
-      OrderStatus.delivered => ('Delivered', Colors.green),
-      OrderStatus.cancelled => ('Cancelled', Colors.red),
+    final l10n = AppLocalizations.of(context);
+
+    final (labelKey, color) = switch (status) {
+      OrderStatus.pending => (l10n.pending, Colors.orange),
+      OrderStatus.confirmed => (l10n.confirmed, Colors.blue),
+      OrderStatus.preparing => (l10n.preparing, Colors.purple),
+      OrderStatus.ready => (l10n.ready, Colors.teal),
+      OrderStatus.pickedUp => (l10n.pickedUp, Colors.indigo),
+      OrderStatus.inTransit => (l10n.inTransit, Colors.cyan),
+      OrderStatus.delivered => (l10n.delivered, Colors.green),
+      OrderStatus.cancelled => (l10n.cancelled, Colors.red),
     };
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(20),
         border: Border.all(color: color.withValues(alpha: 0.3)),
       ),
       child: Text(
-        label,
+        labelKey,
         style: TextStyle(
           fontSize: 11,
           color: color,

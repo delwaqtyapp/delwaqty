@@ -21,10 +21,10 @@ class SplashModule extends FeatureModule {
 
   @override
   List<RouteBase> get standaloneRoutes => [
-        GoRoute(
-          path: '/splash',
-          name: 'splash',
-          builder: (context, state) => const SplashPage(),
-        ),
-      ];
+    GoRoute(
+      path: '/splash',
+      name: 'splash',
+      builder: (context, state) => const SplashPage(),
+    ),
+  ];
 }

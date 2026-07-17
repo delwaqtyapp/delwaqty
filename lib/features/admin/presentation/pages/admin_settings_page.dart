@@ -73,9 +73,9 @@ class _AdminSettingsPageState extends ConsumerState<AdminSettingsPage> {
             children: [
               Text(
                 'General Settings',
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+                style: Theme.of(
+                  context,
+                ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 16),
               Card(
@@ -188,7 +188,8 @@ class _AdminSettingsPageState extends ConsumerState<AdminSettingsPage> {
     final success = await adminService.updateSettings({
       'app_name': _appNameController.text,
       'support_email': _supportEmailController.text,
-      'max_drivers_per_zone': int.tryParse(_maxDriversPerZoneController.text) ?? 10,
+      'max_drivers_per_zone':
+          int.tryParse(_maxDriversPerZoneController.text) ?? 10,
       'maintenance_mode': _maintenanceMode,
     });
 

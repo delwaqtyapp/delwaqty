@@ -78,10 +78,7 @@ class AdminMerchantsPage extends ConsumerWidget {
 }
 
 class _MerchantTile extends StatelessWidget {
-  const _MerchantTile({
-    required this.merchant,
-    required this.onStatusChanged,
-  });
+  const _MerchantTile({required this.merchant, required this.onStatusChanged});
 
   final Map<String, dynamic> merchant;
   final Function(String) onStatusChanged;
@@ -131,10 +128,7 @@ class _MerchantTile extends StatelessWidget {
               onSelected: (value) => onStatusChanged(value),
               itemBuilder: (context) => [
                 if (!isVerified)
-                  const PopupMenuItem(
-                    value: 'verified',
-                    child: Text('Verify'),
-                  ),
+                  const PopupMenuItem(value: 'verified', child: Text('Verify')),
                 if (status != 'suspended')
                   const PopupMenuItem(
                     value: 'suspended',

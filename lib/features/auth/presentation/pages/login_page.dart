@@ -34,7 +34,9 @@ class _LoginPageState extends ConsumerState<LoginPage> {
 
   void _handleLogin() {
     if (!_formKey.currentState!.validate()) return;
-    ref.read(authStateProvider.notifier).signIn(
+    ref
+        .read(authStateProvider.notifier)
+        .signIn(
           email: _emailController.text.trim(),
           password: _passwordController.text,
         );

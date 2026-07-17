@@ -160,8 +160,8 @@ class DefaultAppLogger extends AppLogger {
   DefaultAppLogger({
     LogLevel initialLevel = LogLevel.debug,
     int maxBuffer = 500,
-  })  : _currentLevel = initialLevel,
-        _maxBuffer = maxBuffer;
+  }) : _currentLevel = initialLevel,
+       _maxBuffer = maxBuffer;
 
   final Queue<LogEntry> _buffer = Queue<LogEntry>();
   LogLevel _currentLevel;
@@ -340,40 +340,58 @@ class NoOpAppLogger extends AppLogger {
   List<LogEntry> get buffer => [];
 
   @override
-  void verbose(String tag, String message,
-          {Object? error,
-          StackTrace? stackTrace,
-          Map<String, dynamic>? parameters}) {}
+  void verbose(
+    String tag,
+    String message, {
+    Object? error,
+    StackTrace? stackTrace,
+    Map<String, dynamic>? parameters,
+  }) {}
 
   @override
-  void debug(String tag, String message,
-          {Object? error,
-          StackTrace? stackTrace,
-          Map<String, dynamic>? parameters}) {}
+  void debug(
+    String tag,
+    String message, {
+    Object? error,
+    StackTrace? stackTrace,
+    Map<String, dynamic>? parameters,
+  }) {}
 
   @override
-  void info(String tag, String message,
-          {Object? error,
-          StackTrace? stackTrace,
-          Map<String, dynamic>? parameters}) {}
+  void info(
+    String tag,
+    String message, {
+    Object? error,
+    StackTrace? stackTrace,
+    Map<String, dynamic>? parameters,
+  }) {}
 
   @override
-  void warning(String tag, String message,
-          {Object? error,
-          StackTrace? stackTrace,
-          Map<String, dynamic>? parameters}) {}
+  void warning(
+    String tag,
+    String message, {
+    Object? error,
+    StackTrace? stackTrace,
+    Map<String, dynamic>? parameters,
+  }) {}
 
   @override
-  void error(String tag, String message,
-          {Object? error,
-          StackTrace? stackTrace,
-          Map<String, dynamic>? parameters}) {}
+  void error(
+    String tag,
+    String message, {
+    Object? error,
+    StackTrace? stackTrace,
+    Map<String, dynamic>? parameters,
+  }) {}
 
   @override
-  void fatal(String tag, String message,
-          {Object? error,
-          StackTrace? stackTrace,
-          Map<String, dynamic>? parameters}) {}
+  void fatal(
+    String tag,
+    String message, {
+    Object? error,
+    StackTrace? stackTrace,
+    Map<String, dynamic>? parameters,
+  }) {}
 
   @override
   void clearBuffer() {}

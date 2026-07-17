@@ -173,20 +173,32 @@ abstract final class AppSpacing {
   static const double radiusFull = 999;
 
   /// Convenience [BorderRadius] for small corners.
-  static const BorderRadius borderRadiusSm = BorderRadius.all(Radius.circular(radiusSm));
+  static const BorderRadius borderRadiusSm = BorderRadius.all(
+    Radius.circular(radiusSm),
+  );
 
   /// Convenience [BorderRadius] for medium corners.
-  static const BorderRadius borderRadiusMd = BorderRadius.all(Radius.circular(radiusMd));
+  static const BorderRadius borderRadiusMd = BorderRadius.all(
+    Radius.circular(radiusMd),
+  );
 
   /// Convenience [BorderRadius] for large corners.
-  static const BorderRadius borderRadiusLg = BorderRadius.all(Radius.circular(radiusLg));
+  static const BorderRadius borderRadiusLg = BorderRadius.all(
+    Radius.circular(radiusLg),
+  );
 
   /// Convenience [BorderRadius] for extra large corners.
-  static const BorderRadius borderRadiusXl = BorderRadius.all(Radius.circular(radiusXl));
+  static const BorderRadius borderRadiusXl = BorderRadius.all(
+    Radius.circular(radiusXl),
+  );
 
   /// Convenience [BorderRadius] for double extra large corners.
-  static const BorderRadius borderRadiusXxl = BorderRadius.all(Radius.circular(radiusXxl));
+  static const BorderRadius borderRadiusXxl = BorderRadius.all(
+    Radius.circular(radiusXxl),
+  );
 
   /// Convenience [BorderRadius] for fully rounded corners.
-  static const BorderRadius borderRadiusFull = BorderRadius.all(Radius.circular(radiusFull));
+  static const BorderRadius borderRadiusFull = BorderRadius.all(
+    Radius.circular(radiusFull),
+  );
 }

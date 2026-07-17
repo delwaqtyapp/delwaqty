@@ -126,10 +126,7 @@ class AppSnackbar {
     final snackBar = SnackBar(
       content: Row(
         children: [
-          if (icon != null) ...[
-            icon,
-            const SizedBox(width: AppSpacing.sm),
-          ],
+          if (icon != null) ...[icon, const SizedBox(width: AppSpacing.sm)],
           Expanded(child: Text(message)),
         ],
       ),

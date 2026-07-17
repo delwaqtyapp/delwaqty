@@ -170,9 +170,7 @@ class _UserTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListTile(
-      leading: CircleAvatar(
-        child: Text(user.name[0]),
-      ),
+      leading: CircleAvatar(child: Text(user.name[0])),
       title: Text(user.name),
       subtitle: Text(user.email),
       trailing: Row(
@@ -197,15 +195,9 @@ class _UserTile extends StatelessWidget {
             },
             itemBuilder: (context) => [
               if (user.status != AdminUserStatus.active)
-                const PopupMenuItem(
-                  value: 'activate',
-                  child: Text('Activate'),
-                ),
+                const PopupMenuItem(value: 'activate', child: Text('Activate')),
               if (user.status != AdminUserStatus.suspended)
-                const PopupMenuItem(
-                  value: 'suspend',
-                  child: Text('Suspend'),
-                ),
+                const PopupMenuItem(value: 'suspend', child: Text('Suspend')),
               const PopupMenuItem(
                 value: 'delete',
                 child: Text('Delete', style: TextStyle(color: Colors.red)),
@@ -266,10 +258,7 @@ class _StatusDot extends StatelessWidget {
       child: Container(
         width: 10,
         height: 10,
-        decoration: BoxDecoration(
-          color: color,
-          shape: BoxShape.circle,
-        ),
+        decoration: BoxDecoration(color: color, shape: BoxShape.circle),
       ),
     );
   }

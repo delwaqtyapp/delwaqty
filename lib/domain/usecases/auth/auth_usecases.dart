@@ -16,10 +16,7 @@ class SignInUseCase {
 
   final AuthRepository _repository;
 
-  Future<AuthResult> call({
-    required String email,
-    required String password,
-  }) {
+  Future<AuthResult> call({required String email, required String password}) {
     return _repository.signInWithEmail(email: email, password: password);
   }
 }
@@ -74,7 +71,9 @@ class VerifyOTPUseCase {
   }
 }
 
-final signInWithGoogleUseCaseProvider = Provider<SignInWithGoogleUseCase>((ref) {
+final signInWithGoogleUseCaseProvider = Provider<SignInWithGoogleUseCase>((
+  ref,
+) {
   return SignInWithGoogleUseCase(ref.watch(authRepositoryProvider));
 });
 

@@ -7,8 +7,10 @@ part 'auth_state.freezed.dart';
 class AuthState with _$AuthState {
   const factory AuthState.initial() = AuthInitial;
   const factory AuthState.loading() = AuthLoading;
-  const factory AuthState.authenticated({required User user}) = AuthAuthenticated;
+  const factory AuthState.authenticated({required User user}) =
+      AuthAuthenticated;
   const factory AuthState.unauthenticated() = AuthUnauthenticated;
-  const factory AuthState.phoneVerificationRequired({required String phone}) = AuthPhoneVerification;
+  const factory AuthState.phoneVerificationRequired({required String phone}) =
+      AuthPhoneVerification;
   const factory AuthState.error({required String message}) = AuthError;
 }

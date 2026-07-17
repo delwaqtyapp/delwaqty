@@ -1,8 +1,15 @@
 enum AuthProviderType { email, phone, google, apple, anonymous }
 
 abstract class AuthRepository {
-  Future<AuthResult> signInWithEmail({required String email, required String password});
-  Future<AuthResult> signUpWithEmail({required String email, required String password, String? fullName});
+  Future<AuthResult> signInWithEmail({
+    required String email,
+    required String password,
+  });
+  Future<AuthResult> signUpWithEmail({
+    required String email,
+    required String password,
+    String? fullName,
+  });
   Future<void> signInWithPhone({required String phone});
   Future<AuthResult> verifyOTP({required String phone, required String otp});
   Future<AuthResult> signInWithGoogle();
@@ -41,12 +48,7 @@ class AuthResult {
 }
 
 class AuthEvent {
-  const AuthEvent({
-    required this.type,
-    this.userId,
-    this.email,
-    this.provider,
-  });
+  const AuthEvent({required this.type, this.userId, this.email, this.provider});
 
   final AuthEventType type;
   final String? userId;
@@ -54,4 +56,10 @@ class AuthEvent {
   final AuthProviderType? provider;
 }
 
-enum AuthEventType { signedIn, signedOut, tokenRefreshed, passwordRecovery, mfaChallenge }
+enum AuthEventType {
+  signedIn,
+  signedOut,
+  tokenRefreshed,
+  passwordRecovery,
+  mfaChallenge,
+}

@@ -44,6 +44,5 @@ class Coupon with _$Coupon {
     DateTime? createdAt,
   }) = _Coupon;
 
-  factory Coupon.fromJson(Map<String, dynamic> json) =>
-      _$CouponFromJson(json);
+  factory Coupon.fromJson(Map<String, dynamic> json) => _$CouponFromJson(json);
 }

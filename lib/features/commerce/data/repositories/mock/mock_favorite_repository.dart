@@ -27,12 +27,14 @@ class MockFavoriteRepository implements FavoriteRepository {
     if (existing >= 0) {
       _favorites.removeAt(existing);
     } else {
-      _favorites.add(Favorite(
-        id: 'fav_${DateTime.now().millisecondsSinceEpoch}',
-        targetId: targetId,
-        type: type,
-        createdAt: DateTime.now(),
-      ));
+      _favorites.add(
+        Favorite(
+          id: 'fav_${DateTime.now().millisecondsSinceEpoch}',
+          targetId: targetId,
+          type: type,
+          createdAt: DateTime.now(),
+        ),
+      );
     }
   }
 }

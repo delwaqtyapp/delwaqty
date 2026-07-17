@@ -46,9 +46,6 @@ class _AnimatedFadeInState extends State<AnimatedFadeIn>
 
   @override
   Widget build(BuildContext context) {
-    return FadeTransition(
-      opacity: _animation,
-      child: widget.child,
-    );
+    return FadeTransition(opacity: _animation, child: widget.child);
   }
 }

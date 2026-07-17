@@ -37,7 +37,11 @@ abstract class CrashReporter {
   });
 
   /// Adds a breadcrumb to the current session.
-  void addBreadcrumb(String message, {String? category, Map<String, dynamic>? data});
+  void addBreadcrumb(
+    String message, {
+    String? category,
+    Map<String, dynamic>? data,
+  });
 
   /// Sets the current user context.
   void setUser(String userId, {String? email, String? name});
@@ -82,53 +86,66 @@ class DebugCrashReporter extends CrashReporter {
     Map<String, dynamic>? context,
   }) {
     final eventId = _generateEventId();
-    _exceptions.add(CapturedException(
-      eventId: eventId,
-      error: error,
-      stackTrace: stackTrace,
-      severity: severity,
-      context: context,
-      timestamp: DateTime.now(),
-    ));
+    _exceptions.add(
+      CapturedException(
+        eventId: eventId,
+        error: error,
+        stackTrace: stackTrace,
+        severity: severity,
+        context: context,
+        timestamp: DateTime.now(),
+      ),
+    );
     return eventId;
   }
 
   @override
-  void addBreadcrumb(String message, {String? category, Map<String, dynamic>? data}) {
-    _breadcrumbs.add(Breadcrumb(
-      message: message,
-      category: category,
-      data: data,
-      timestamp: DateTime.now(),
-    ));
+  void addBreadcrumb(
+    String message, {
+    String? category,
+    Map<String, dynamic>? data,
+  }) {
+    _breadcrumbs.add(
+      Breadcrumb(
+        message: message,
+        category: category,
+        data: data,
+        timestamp: DateTime.now(),
+      ),
+    );
   }
 
   @override
   void setUser(String userId, {String? email, String? name}) {
-    _breadcrumbs.add(Breadcrumb(
-      message: 'setUser: $userId',
-      category: 'user',
-      data: {'userId': userId, if (email != null) 'email': email, if (name != null) 'name': name},
-      timestamp: DateTime.now(),
-    ));
+    _breadcrumbs.add(
+      Breadcrumb(
+        message: 'setUser: $userId',
+        category: 'user',
+        data: {
+          'userId': userId,
+          if (email != null) 'email': email,
+          if (name != null) 'name': name,
+        },
+        timestamp: DateTime.now(),
+      ),
+    );
   }
 
   @override
   void setTag(String key, String value) {
-    _breadcrumbs.add(Breadcrumb(
-      message: 'setTag: $key=$value',
-      category: 'tag',
-      data: {key: value},
-      timestamp: DateTime.now(),
-    ));
+    _breadcrumbs.add(
+      Breadcrumb(
+        message: 'setTag: $key=$value',
+        category: 'tag',
+        data: {key: value},
+        timestamp: DateTime.now(),
+      ),
+    );
   }
 
   @override
   void log(String message) {
-    _breadcrumbs.add(Breadcrumb(
-      message: message,
-      timestamp: DateTime.now(),
-    ));
+    _breadcrumbs.add(Breadcrumb(message: message, timestamp: DateTime.now()));
   }
 
   @override
@@ -205,11 +222,14 @@ class NoOpCrashReporter extends CrashReporter {
     StackTrace stackTrace, {
     CrashSeverity severity = CrashSeverity.error,
     Map<String, dynamic>? context,
-  }) =>
-      '';
+  }) => '';
 
   @override
-  void addBreadcrumb(String message, {String? category, Map<String, dynamic>? data}) {}
+  void addBreadcrumb(
+    String message, {
+    String? category,
+    Map<String, dynamic>? data,
+  }) {}
 
   @override
   void setUser(String userId, {String? email, String? name}) {}
@@ -252,7 +272,11 @@ class FirebaseCrashReporter extends CrashReporter {
   }
 
   @override
-  void addBreadcrumb(String message, {String? category, Map<String, dynamic>? data}) {
+  void addBreadcrumb(
+    String message, {
+    String? category,
+    Map<String, dynamic>? data,
+  }) {
     _crashlytics.log(message);
   }
 

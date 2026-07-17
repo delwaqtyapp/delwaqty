@@ -19,8 +19,7 @@ class Review with _$Review {
     DateTime? updatedAt,
   }) = _Review;
 
-  factory Review.fromJson(Map<String, dynamic> json) =>
-      _$ReviewFromJson(json);
+  factory Review.fromJson(Map<String, dynamic> json) => _$ReviewFromJson(json);
 }
 
 @freezed

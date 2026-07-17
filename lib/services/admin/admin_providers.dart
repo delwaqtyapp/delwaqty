@@ -9,7 +9,9 @@ final dashboardMetricsProvider = FutureProvider<AdminDashboard?>((ref) async {
 });
 
 /// Provider for recent activity.
-final recentActivityProvider = FutureProvider<List<AdminActivityLog>>((ref) async {
+final recentActivityProvider = FutureProvider<List<AdminActivityLog>>((
+  ref,
+) async {
   final adminService = ref.watch(adminServiceProvider);
   return adminService.getRecentActivity();
 });
@@ -21,19 +23,25 @@ final adminUsersProvider = FutureProvider<List<AdminUser>>((ref) async {
 });
 
 /// Provider for merchants list.
-final adminMerchantsProvider = FutureProvider<List<Map<String, dynamic>>>((ref) async {
+final adminMerchantsProvider = FutureProvider<List<Map<String, dynamic>>>((
+  ref,
+) async {
   final adminService = ref.watch(adminServiceProvider);
   return adminService.getMerchants();
 });
 
 /// Provider for orders list.
-final adminOrdersProvider = FutureProvider<List<Map<String, dynamic>>>((ref) async {
+final adminOrdersProvider = FutureProvider<List<Map<String, dynamic>>>((
+  ref,
+) async {
   final adminService = ref.watch(adminServiceProvider);
   return adminService.getOrders();
 });
 
 /// Provider for platform settings.
-final platformSettingsProvider = FutureProvider<Map<String, dynamic>>((ref) async {
+final platformSettingsProvider = FutureProvider<Map<String, dynamic>>((
+  ref,
+) async {
   final adminService = ref.watch(adminServiceProvider);
   return adminService.getSettings();
 });

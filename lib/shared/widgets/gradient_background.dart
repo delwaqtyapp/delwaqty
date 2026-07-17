@@ -2,11 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:delwaqty/core/theme/app_colors.dart';
 
 class GradientBackground extends StatelessWidget {
-  const GradientBackground({
-    super.key,
-    required this.child,
-    this.colors,
-  });
+  const GradientBackground({super.key, required this.child, this.colors});
 
   final Widget child;
   final List<Color>? colors;
@@ -14,7 +10,8 @@ class GradientBackground extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final effectiveColors = colors ??
+    final effectiveColors =
+        colors ??
         (isDark
             ? [
                 AppColors.primaryDark.withValues(alpha: 0.3),

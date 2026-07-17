@@ -15,8 +15,7 @@ class ForgotPasswordPage extends ConsumerStatefulWidget {
   const ForgotPasswordPage({super.key});
 
   @override
-  ConsumerState<ForgotPasswordPage> createState() =>
-      _ForgotPasswordPageState();
+  ConsumerState<ForgotPasswordPage> createState() => _ForgotPasswordPageState();
 }
 
 class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
@@ -35,9 +34,9 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
     if (!_formKey.currentState!.validate()) return;
     setState(() => _isLoading = true);
     try {
-      await ref.read(authStateProvider.notifier).resetPassword(
-            email: _emailController.text.trim(),
-          );
+      await ref
+          .read(authStateProvider.notifier)
+          .resetPassword(email: _emailController.text.trim());
       if (mounted) {
         setState(() {
           _isLoading = false;

@@ -14,11 +14,12 @@ final notificationRepositoryProvider = Provider<NotificationRepository>((ref) {
   return MockNotificationRepository();
 });
 
-final notificationsProvider =
-    FutureProvider.autoDispose<List<AppNotification>>((ref) async {
-  final repo = ref.watch(notificationRepositoryProvider);
-  return repo.getNotifications();
-});
+final notificationsProvider = FutureProvider.autoDispose<List<AppNotification>>(
+  (ref) async {
+    final repo = ref.watch(notificationRepositoryProvider);
+    return repo.getNotifications();
+  },
+);
 
 final unreadCountProvider = FutureProvider.autoDispose<int>((ref) async {
   final repo = ref.watch(notificationRepositoryProvider);
@@ -43,18 +44,16 @@ class NotificationsModule extends FeatureModule {
   int get navPriority => 55;
 
   @override
-  Set<ModuleCapability> get capabilities => {
-        ModuleCapability.hasNotifications,
-      };
+  Set<ModuleCapability> get capabilities => {ModuleCapability.hasNotifications};
 
   @override
   List<RouteBase> get shellSubRoutes => [
-        GoRoute(
-          path: '/notifications',
-          name: 'notifications',
-          builder: (context, state) => const NotificationCenterPage(),
-        ),
-      ];
+    GoRoute(
+      path: '/notifications',
+      name: 'notifications',
+      builder: (context, state) => const NotificationCenterPage(),
+    ),
+  ];
 
   @override
   Stream<int>? badgeStream(Ref ref) {
@@ -72,24 +71,25 @@ class NotificationsModule extends FeatureModule {
 
   @override
   List<DrawerEntry> get drawerEntries => [
-        DrawerEntry(
-          id: 'notifications',
-          label: (ctx) => AppLocalizations.of(ctx).notifications,
-          icon: Icons.notifications_outlined,
-          badgeStream: (ref) {
-            final controller = StreamController<int>();
-            void check() async {
-              final repo = ref.read(notificationRepositoryProvider);
-              final count = await repo.getUnreadCount();
-              controller.add(count);
-            }
-            check();
-            return controller.stream;
-          },
-          onTap: (ctx, ref) {
-            Navigator.of(ctx).pop();
-            ctx.push('/notifications');
-          },
-        ),
-      ];
+    DrawerEntry(
+      id: 'notifications',
+      label: (ctx) => AppLocalizations.of(ctx).notifications,
+      icon: Icons.notifications_outlined,
+      badgeStream: (ref) {
+        final controller = StreamController<int>();
+        void check() async {
+          final repo = ref.read(notificationRepositoryProvider);
+          final count = await repo.getUnreadCount();
+          controller.add(count);
+        }
+
+        check();
+        return controller.stream;
+      },
+      onTap: (ctx, ref) {
+        Navigator.of(ctx).pop();
+        ctx.push('/notifications');
+      },
+    ),
+  ];
 }

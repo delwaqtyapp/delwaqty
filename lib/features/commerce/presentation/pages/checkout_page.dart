@@ -2,6 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:delwaqty/features/commerce/commerce_module.dart';
+import 'package:delwaqty/features/commerce/domain/entities/cart.dart'
+    as commerce;
+import 'package:delwaqty/l10n/app_localizations.dart';
+import 'package:delwaqty/core/extensions/context_extensions.dart';
+import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
+import 'package:delwaqty/shared/widgets/app_loader.dart';
 
 class CheckoutPage extends ConsumerStatefulWidget {
   const CheckoutPage({super.key});
@@ -12,7 +18,6 @@ class CheckoutPage extends ConsumerStatefulWidget {
 
 class _CheckoutPageState extends ConsumerState<CheckoutPage> {
   String _paymentMethod = 'card';
-  String _deliveryAddress = '';
   final _addressController = TextEditingController();
   final _couponController = TextEditingController();
   bool _isPlacing = false;
@@ -26,144 +31,320 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context);
+    final colorScheme = context.colorScheme;
+    final textTheme = context.textTheme;
+    final cartAsync = ref.watch(_cartFutureProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Checkout')),
-      body: ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
-          // Delivery address
-          Text(
-            'Delivery Address',
-            style: theme.textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 8),
-          TextField(
-            controller: _addressController,
-            decoration: const InputDecoration(
-              hintText: 'Enter delivery address',
-              border: OutlineInputBorder(),
-              prefixIcon: Icon(Icons.location_on),
-            ),
-            onChanged: (v) => _deliveryAddress = v,
-          ),
-          const SizedBox(height: 24),
+      appBar: AppBar(title: Text(l10n.checkout)),
+      body: cartAsync.when(
+        data: (cart) {
+          if (cart == null || cart.items.isEmpty) {
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.shopping_cart_outlined,
+                    size: 64,
+                    color: colorScheme.onSurfaceVariant,
+                  ),
+                  const SizedBox(height: 16),
+                  Text(l10n.emptyCart, style: textTheme.titleMedium),
+                  const SizedBox(height: 8),
+                  FilledButton.tonal(
+                    onPressed: () => context.go('/market'),
+                    child: Text(l10n.browseMerchants),
+                  ),
+                ],
+              ),
+            );
+          }
 
-          // Payment method
-          Text(
-            'Payment Method',
-            style: theme.textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 8),
-          SegmentedButton<String>(
-            segments: const [
-              ButtonSegment(value: 'card', label: Text('Card'), icon: Icon(Icons.credit_card)),
-              ButtonSegment(value: 'cash', label: Text('Cash'), icon: Icon(Icons.money)),
-              ButtonSegment(value: 'wallet', label: Text('Wallet'), icon: Icon(Icons.account_balance_wallet)),
-            ],
-            selected: {_paymentMethod},
-            onSelectionChanged: (v) => setState(() => _paymentMethod = v.first),
-          ),
-          const SizedBox(height: 24),
-
-          // Coupon
-          Text(
-            'Coupon Code',
-            style: theme.textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Row(
+          return ListView(
+            padding: const EdgeInsets.all(16),
             children: [
-              Expanded(
+              AnimatedFadeIn(child: _SectionTitle(title: l10n.deliveryAddress)),
+              const SizedBox(height: 8),
+              AnimatedFadeIn(
+                delay: const Duration(milliseconds: 100),
                 child: TextField(
-                  controller: _couponController,
-                  decoration: const InputDecoration(
-                    hintText: 'Enter coupon code',
-                    border: OutlineInputBorder(),
+                  controller: _addressController,
+                  decoration: InputDecoration(
+                    hintText: l10n.selectDeliveryAddress,
+                    prefixIcon: const Icon(Icons.location_on_outlined),
+                    border: const OutlineInputBorder(),
                   ),
                 ),
               ),
-              const SizedBox(width: 8),
-              FilledButton.tonal(
-                onPressed: () async {
-                  final code = _couponController.text.trim();
-                  if (code.isEmpty) return;
-                  final repo = ref.read(couponRepositoryProvider);
-                  final coupon = await repo.validateCoupon(code, 0);
-                  if (context.mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(
-                          coupon != null
-                              ? 'Coupon applied: ${coupon.value}% off'
-                              : 'Invalid coupon',
+              Align(
+                alignment: Alignment.centerRight,
+                child: TextButton(
+                  onPressed: () {},
+                  child: Text(l10n.addNewAddress),
+                ),
+              ),
+              const SizedBox(height: 16),
+              AnimatedFadeIn(
+                delay: const Duration(milliseconds: 200),
+                child: _SectionTitle(title: l10n.paymentMethod),
+              ),
+              const SizedBox(height: 8),
+              AnimatedFadeIn(
+                delay: const Duration(milliseconds: 300),
+                child: SegmentedButton<String>(
+                  segments: [
+                    ButtonSegment(
+                      value: 'card',
+                      label: Text(l10n.creditCard),
+                      icon: const Icon(Icons.credit_card),
+                    ),
+                    ButtonSegment(
+                      value: 'cash',
+                      label: Text(l10n.cashOnDelivery),
+                      icon: const Icon(Icons.payments_outlined),
+                    ),
+                    ButtonSegment(
+                      value: 'wallet',
+                      label: Text(l10n.digitalWallet),
+                      icon: const Icon(Icons.account_balance_wallet_outlined),
+                    ),
+                  ],
+                  selected: {_paymentMethod},
+                  onSelectionChanged: (v) =>
+                      setState(() => _paymentMethod = v.first),
+                ),
+              ),
+              const SizedBox(height: 24),
+              AnimatedFadeIn(
+                delay: const Duration(milliseconds: 400),
+                child: _SectionTitle(title: l10n.couponCode),
+              ),
+              const SizedBox(height: 8),
+              AnimatedFadeIn(
+                delay: const Duration(milliseconds: 500),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        controller: _couponController,
+                        decoration: InputDecoration(
+                          hintText: l10n.enterCouponCode,
+                          border: const OutlineInputBorder(),
                         ),
                       ),
-                    );
-                  }
-                },
-                child: const Text('Apply'),
+                    ),
+                    const SizedBox(width: 8),
+                    FilledButton.tonal(
+                      onPressed: () async {
+                        final code = _couponController.text.trim();
+                        if (code.isEmpty) return;
+                        final repo = ref.read(couponRepositoryProvider);
+                        final coupon = await repo.validateCoupon(
+                          code,
+                          cart.total,
+                        );
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                coupon != null
+                                    ? '${l10n.couponApplied} ${coupon.value}%'
+                                    : l10n.couponInvalid,
+                              ),
+                              backgroundColor: coupon != null
+                                  ? colorScheme.primary
+                                  : colorScheme.error,
+                            ),
+                          );
+                        }
+                      },
+                      child: Text(l10n.apply),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 24),
+              AnimatedFadeIn(
+                delay: const Duration(milliseconds: 600),
+                child: _SectionTitle(title: l10n.orderSummary),
+              ),
+              const SizedBox(height: 8),
+              AnimatedFadeIn(
+                delay: const Duration(milliseconds: 700),
+                child: Card(
+                  elevation: 0,
+                  color: colorScheme.surfaceContainerLow,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      children: [
+                        _SummaryRow(
+                          label: l10n.subtotal,
+                          value:
+                              '${cart.subtotal.toStringAsFixed(0)} ${l10n.sar}',
+                        ),
+                        if (cart.deliveryFee > 0)
+                          _SummaryRow(
+                            label: l10n.deliveryFee,
+                            value:
+                                '${cart.deliveryFee.toStringAsFixed(0)} ${l10n.sar}',
+                          ),
+                        if (cart.discount > 0)
+                          _SummaryRow(
+                            label: l10n.discount,
+                            value:
+                                '-${cart.discount.toStringAsFixed(0)} ${l10n.sar}',
+                            color: colorScheme.primary,
+                          ),
+                        Divider(color: colorScheme.outlineVariant),
+                        _SummaryRow(
+                          label: l10n.total,
+                          value: '${cart.total.toStringAsFixed(0)} ${l10n.sar}',
+                          isBold: true,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 24),
+              AnimatedFadeIn(
+                delay: const Duration(milliseconds: 800),
+                child: SizedBox(
+                  width: double.infinity,
+                  child: FilledButton(
+                    onPressed: _isPlacing ? null : () => _placeOrder(cart),
+                    child: _isPlacing
+                        ? AppLoader.circular(
+                            size: 20,
+                            strokeWidth: 2,
+                            color: colorScheme.onPrimary,
+                          )
+                        : Text(l10n.placeOrder),
+                  ),
+                ),
+              ),
+            ],
+          );
+        },
+        loading: () => Center(child: AppLoader.circular()),
+        error: (e, _) => Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.error_outline, size: 48, color: colorScheme.error),
+              const SizedBox(height: 16),
+              Text(l10n.error, style: textTheme.titleMedium),
+              const SizedBox(height: 8),
+              FilledButton.tonal(
+                onPressed: () => ref.invalidate(_cartFutureProvider),
+                child: Text(l10n.retry),
               ),
             ],
           ),
-          const SizedBox(height: 32),
+        ),
+      ),
+    );
+  }
 
-          // Place order
-          FilledButton(
-            onPressed: _isPlacing
-                ? null
-                : () async {
-                    setState(() => _isPlacing = true);
-                    final cartRepo = ref.read(cartRepositoryProvider);
-                    final cart = await cartRepo.getCurrentCart();
-                    if (cart == null || cart.items.isEmpty) {
-                      if (context.mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Cart is empty')),
-                        );
-                      }
-                      setState(() => _isPlacing = false);
-                      return;
-                    }
+  Future<void> _placeOrder(commerce.Cart cart) async {
+    final l10n = AppLocalizations.of(context);
+    final cs = context.colorScheme;
+    setState(() => _isPlacing = true);
 
-                    final orderRepo = ref.read(orderRepositoryProvider);
-                    await orderRepo.createOrder(
-                      merchantId: cart.merchantId,
-                      merchantName: cart.merchantName,
-                      items: cart.items,
-                      subtotal: cart.subtotal,
-                      deliveryFee: cart.deliveryFee,
-                      discount: cart.discount,
-                      total: cart.total,
-                      deliveryAddress: _deliveryAddress,
-                      paymentMethod: _paymentMethod,
-                    );
-                    await cartRepo.clearCart();
+    try {
+      final orderRepo = ref.read(orderRepositoryProvider);
+      final order = await orderRepo.createOrder(
+        merchantId: cart.merchantId,
+        merchantName: cart.merchantName,
+        items: cart.items,
+        subtotal: cart.subtotal,
+        deliveryFee: cart.deliveryFee,
+        discount: cart.discount,
+        total: cart.total,
+        deliveryAddress: _addressController.text,
+        paymentMethod: _paymentMethod,
+      );
 
-                    if (context.mounted) {
-                      context.go('/market/orders');
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Order placed successfully!'),
-                        ),
-                      );
-                    }
-                    setState(() => _isPlacing = false);
-                  },
-            child: _isPlacing
-                ? const SizedBox(
-                    height: 20,
-                    width: 20,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  )
-                : const Text('Place Order'),
+      await ref.read(cartRepositoryProvider).clearCart();
+      ref.invalidate(_cartFutureProvider);
+
+      if (!mounted) return;
+      context.go('/market/order-completed/${order.id}');
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.error), backgroundColor: cs.error),
+      );
+    } finally {
+      if (mounted) {
+        setState(() => _isPlacing = false);
+      }
+    }
+  }
+}
+
+final _cartFutureProvider = FutureProvider.autoDispose<commerce.Cart?>((
+  ref,
+) async {
+  final repo = ref.watch(cartRepositoryProvider);
+  return repo.getCurrentCart();
+});
+
+class _SectionTitle extends StatelessWidget {
+  const _SectionTitle({required this.title});
+
+  final String title;
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      title,
+      style: context.textTheme.titleMedium?.copyWith(
+        fontWeight: FontWeight.bold,
+      ),
+    );
+  }
+}
+
+class _SummaryRow extends StatelessWidget {
+  const _SummaryRow({
+    required this.label,
+    required this.value,
+    this.color,
+    this.isBold = false,
+  });
+
+  final String label;
+  final String value;
+  final Color? color;
+  final bool isBold;
+
+  @override
+  Widget build(BuildContext context) {
+    final textTheme = context.textTheme;
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            label,
+            style: textTheme.bodyMedium?.copyWith(
+              fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
+            ),
+          ),
+          Text(
+            value,
+            style: textTheme.bodyMedium?.copyWith(
+              color: color,
+              fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
+            ),
           ),
         ],
       ),

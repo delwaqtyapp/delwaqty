@@ -52,11 +52,19 @@
 ## Next Steps (Constitution v2.0 §15)
 
 ### Phase 6: Presentation Layer — Customer
-- [ ] Customer Home — nearby restaurants, search, categories
-- [ ] Restaurant Details — info, branches, hours, delivery zones
-- [ ] Menu Browser — categories, products, modifiers, variants
-- [ ] Cart & Checkout — items, coupons, payment, order placement
-- [ ] Order Tracking — real-time status, order history
+- [x] Customer Home — nearby restaurants, search, categories (Premium Super App design)
+- [x] Restaurant/Merchant Details — info, menu, Hero animations, ratings
+- [x] Product Details — variants, quantity, add-to-cart
+- [x] Search — debounced search, filters, sort by distance/rating/price
+- [x] Cart — swipe-to-delete, quantity controls, summary
+- [x] Checkout — address, payment method, coupon, order summary
+- [x] Order Tracking — real-time timeline, driver info
+- [x] Order Completed — celebration page with animations
+- [x] Orders History — pull-to-refresh, status chips
+- [x] Empty States — consistent EmptyState widget across all screens
+- [x] Error States — consistent ErrorState widget across all screens
+- [x] Loading States — skeleton loading, circular indicators
+- [x] Localization — 170+ ARB strings (English + Arabic)
 - [ ] Reservations — slot picker, booking, management
 - [ ] Reviews & Ratings — submit, view, filter
 
@@ -103,3 +111,5 @@
 | 15 | Mock → Real migration (Products, Favorites) | ✅ |
 | 16 | Mock → Real migration (Cart, Orders) | ✅ |
 | 17 | Restaurant domain data layer (Phase 5.1) | ✅ |
+| 18 | Security audit, finance cleanup, localization (Phase 5.5) | ✅ |
+| 19 | Customer Presentation Layer — all screens (Phase 6) | ✅ |

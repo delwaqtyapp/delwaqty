@@ -29,6 +29,11 @@ import 'package:delwaqty/features/restaurant/domain/repositories/offer_repositor
 import 'package:delwaqty/features/restaurant/domain/repositories/reservation_repository.dart';
 import 'package:delwaqty/features/restaurant/domain/repositories/order_tracking_repository.dart';
 import 'package:delwaqty/features/restaurant/domain/repositories/inventory_repository.dart';
+import 'package:delwaqty/features/restaurant/presentation/pages/restaurant_detail_page.dart';
+import 'package:delwaqty/features/restaurant/presentation/pages/restaurant_menu_page.dart';
+import 'package:delwaqty/features/restaurant/presentation/pages/restaurant_offers_page.dart';
+import 'package:delwaqty/features/restaurant/presentation/pages/restaurant_reviews_page.dart';
+import 'package:delwaqty/features/restaurant/presentation/pages/restaurant_reservation_page.dart';
 
 final branchRepositoryProvider = Provider<BranchRepository>(
   (ref) => BranchRepositoryImpl(ref.watch(supabaseBranchDataSourceProvider)),
@@ -106,6 +111,47 @@ class RestaurantModule extends FeatureModule {
 
   @override
   List<RouteBase> get shellSubRoutes => [];
+
+  @override
+  List<RouteBase> get standaloneRoutes => [
+        GoRoute(
+          path: '/restaurant/:merchantId',
+          builder: (context, state) => RestaurantDetailPage(
+            merchantId: state.pathParameters['merchantId']!,
+          ),
+          routes: [
+            GoRoute(
+              path: 'menu',
+              builder: (context, state) {
+                final merchantId = state.pathParameters['merchantId']!;
+                final merchantName = state.extra as String?;
+                return RestaurantMenuPage(
+                  merchantId: merchantId,
+                  merchantName: merchantName,
+                );
+              },
+            ),
+            GoRoute(
+              path: 'offers',
+              builder: (context, state) => RestaurantOffersPage(
+                merchantId: state.pathParameters['merchantId']!,
+              ),
+            ),
+            GoRoute(
+              path: 'reviews',
+              builder: (context, state) => RestaurantReviewsPage(
+                merchantId: state.pathParameters['merchantId']!,
+              ),
+            ),
+            GoRoute(
+              path: 'reservation',
+              builder: (context, state) => RestaurantReservationPage(
+                merchantId: state.pathParameters['merchantId']!,
+              ),
+            ),
+          ],
+        ),
+      ];
 
   @override
   List<Override> providerOverrides(Ref ref) => [];

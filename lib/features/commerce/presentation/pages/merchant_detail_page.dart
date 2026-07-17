@@ -16,20 +16,33 @@ import 'package:delwaqty/shared/widgets/error_state.dart';
 import 'package:delwaqty/shared/widgets/empty_state.dart';
 import 'package:delwaqty/core/extensions/context_extensions.dart';
 
-class MerchantDetailPage extends ConsumerWidget {
+class MerchantDetailPage extends ConsumerStatefulWidget {
   const MerchantDetailPage({required this.merchantId, super.key});
 
   final String merchantId;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<MerchantDetailPage> createState() =>
+      _MerchantDetailPageState();
+}
+
+class _MerchantDetailPageState extends ConsumerState<MerchantDetailPage> {
+  Key _refreshKey = UniqueKey();
+
+  Future<void> _onRefresh() async {
+    setState(() => _refreshKey = UniqueKey());
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final merchantRepo = ref.watch(merchantRepositoryProvider);
     final productRepo = ref.watch(productRepositoryProvider);
     final categoryRepo = ref.watch(catalogCategoryRepositoryProvider);
 
     return FutureBuilder<Merchant?>(
-      future: merchantRepo.getMerchantById(merchantId),
+      key: _refreshKey,
+      future: merchantRepo.getMerchantById(widget.merchantId),
       builder: (context, merchantSnap) {
         if (merchantSnap.connectionState == ConnectionState.waiting) {
           return Scaffold(
@@ -51,7 +64,9 @@ class MerchantDetailPage extends ConsumerWidget {
             title: Text(merchant.name),
             actions: [CartBadge(onTap: () => context.push('/market/cart'))],
           ),
-          body: ListView(
+          body: RefreshIndicator(
+            onRefresh: _onRefresh,
+            child: ListView(
             children: [
               Hero(
                 tag: 'merchant-${merchant.id}',
@@ -198,7 +213,7 @@ class MerchantDetailPage extends ConsumerWidget {
                           ),
                           const SizedBox(width: 4),
                           Text(
-                            merchant.isOpenNow ? 'Open' : 'Closed',
+                            merchant.isOpenNow ? l10n.open : l10n.closed,
                             style: context.textTheme.bodySmall?.copyWith(
                               fontWeight: FontWeight.w600,
                               color: merchant.isOpenNow
@@ -213,7 +228,7 @@ class MerchantDetailPage extends ConsumerWidget {
                     AnimatedFadeIn(
                       delay: const Duration(milliseconds: 600),
                       child: FutureBuilder<List<CatalogCategory>>(
-                        future: categoryRepo.getCategories(merchantId),
+                        future: categoryRepo.getCategories(widget.merchantId),
                         builder: (context, catSnap) {
                           final categories = catSnap.data ?? [];
                           if (categories.isEmpty) return const SizedBox();
@@ -251,7 +266,8 @@ class MerchantDetailPage extends ConsumerWidget {
                 ),
               ),
               FutureBuilder<List<Product>>(
-                future: productRepo.getProducts(merchantId: merchantId),
+                key: _refreshKey,
+                future: productRepo.getProducts(merchantId: widget.merchantId),
                 builder: (context, prodSnap) {
                   if (prodSnap.connectionState == ConnectionState.waiting) {
                     return const Center(
@@ -293,7 +309,7 @@ class MerchantDetailPage extends ConsumerWidget {
                         child: ProductCard(
                           product: product,
                           onTap: () => context.push(
-                            '/market/merchant/$merchantId/product/${product.id}',
+                            '/market/merchant/${widget.merchantId}/product/${product.id}',
                             extra: merchant.name,
                           ),
                         ),
@@ -305,6 +321,7 @@ class MerchantDetailPage extends ConsumerWidget {
               const SizedBox(height: 32),
             ],
           ),
+         ),
         );
       },
     );

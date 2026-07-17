@@ -27,24 +27,29 @@ class HomePage extends ConsumerWidget {
 
     return Scaffold(
       body: SafeArea(
-        child: CustomScrollView(
-          slivers: [
-            SliverToBoxAdapter(
-              child: _buildHeader(context, l10n, isGuest),
-            ),
-            SliverToBoxAdapter(child: _buildSearchBar(context, l10n)),
-            SliverToBoxAdapter(child: _buildServiceGrid(context, l10n)),
-            SliverToBoxAdapter(
-              child: _buildSectionTitle(context, l10n.nearby, l10n),
-            ),
-            _buildMerchantList(context, ref, l10n),
-            SliverToBoxAdapter(child: _buildPromoBanner(context, l10n)),
-            SliverToBoxAdapter(
-              child: _buildSectionTitle(context, l10n.popular, l10n),
-            ),
-            _buildMerchantList(context, ref, l10n),
-            SliverToBoxAdapter(child: const SizedBox(height: 100)),
-          ],
+        child: RefreshIndicator(
+          onRefresh: () async {
+            ref.invalidate(_merchantsFutureProvider);
+          },
+          child: CustomScrollView(
+            slivers: [
+              SliverToBoxAdapter(
+                child: _buildHeader(context, l10n, isGuest),
+              ),
+              SliverToBoxAdapter(child: _buildSearchBar(context, l10n)),
+              SliverToBoxAdapter(child: _buildServiceGrid(context, l10n)),
+              SliverToBoxAdapter(
+                child: _buildSectionTitle(context, l10n.nearby, l10n),
+              ),
+              _buildMerchantList(context, ref, l10n),
+              SliverToBoxAdapter(child: _buildPromoBanner(context, l10n)),
+              SliverToBoxAdapter(
+                child: _buildSectionTitle(context, l10n.popular, l10n),
+              ),
+              _buildMerchantList(context, ref, l10n),
+              SliverToBoxAdapter(child: const SizedBox(height: 100)),
+            ],
+          ),
         ),
       ),
     );
@@ -106,7 +111,7 @@ class HomePage extends ConsumerWidget {
                       ),
                       const SizedBox(width: 4),
                       Text(
-                        'Riyadh, Saudi Arabia',
+                        l10n.riyadhSaudiArabia,
                         style: context.textTheme.bodySmall?.copyWith(
                           color: context.colorScheme.onSurfaceVariant,
                         ),

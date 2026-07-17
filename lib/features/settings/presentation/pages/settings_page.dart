@@ -27,7 +27,7 @@ class SettingsPage extends ConsumerWidget {
         const SizedBox(height: 16),
         AnimatedFadeIn(
           delay: const Duration(milliseconds: 100),
-          child: _buildSection(context, 'Account', [
+          child: _buildSection(context, l10n.account, [
             ListTile(
               leading: const Icon(Icons.person_outline_rounded),
               title: Text(l10n.profile),
@@ -37,7 +37,7 @@ class SettingsPage extends ConsumerWidget {
             const Divider(height: 1),
             ListTile(
               leading: const Icon(Icons.lock_outline_rounded),
-              title: const Text('Privacy & Security'),
+              title: Text(l10n.privacySecurity),
               trailing: const Icon(Icons.chevron_right_rounded),
               onTap: () {},
             ),
@@ -46,18 +46,18 @@ class SettingsPage extends ConsumerWidget {
         const SizedBox(height: 16),
         AnimatedFadeIn(
           delay: const Duration(milliseconds: 200),
-          child: _buildSection(context, 'Support', [
+          child: _buildSection(context, l10n.helpCenter, [
             ListTile(
               leading: const Icon(Icons.help_outline_rounded),
-              title: const Text('Help Center'),
+              title: Text(l10n.helpCenter),
               trailing: const Icon(Icons.chevron_right_rounded),
               onTap: () {},
             ),
             const Divider(height: 1),
             ListTile(
               leading: const Icon(Icons.info_outline_rounded),
-              title: const Text('About'),
-              subtitle: const Text('Version 1.0.0'),
+              title: Text(l10n.about),
+              subtitle: Text(l10n.version),
               trailing: const Icon(Icons.chevron_right_rounded),
               onTap: () {},
             ),
@@ -66,17 +66,17 @@ class SettingsPage extends ConsumerWidget {
         const SizedBox(height: 16),
         AnimatedFadeIn(
           delay: const Duration(milliseconds: 300),
-          child: _buildSection(context, 'Legal', [
+          child: _buildSection(context, l10n.legal, [
             ListTile(
               leading: const Icon(Icons.description_outlined),
-              title: const Text('Terms of Service'),
+              title: Text(l10n.termsOfService),
               trailing: const Icon(Icons.chevron_right_rounded),
               onTap: () {},
             ),
             const Divider(height: 1),
             ListTile(
               leading: const Icon(Icons.privacy_tip_outlined),
-              title: const Text('Privacy Policy'),
+              title: Text(l10n.privacyPolicy),
               trailing: const Icon(Icons.chevron_right_rounded),
               onTap: () {},
             ),

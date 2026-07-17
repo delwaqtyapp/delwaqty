@@ -3,18 +3,21 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:delwaqty/domain/entities/app_notification.dart';
 import 'package:delwaqty/features/notifications/notifications_module.dart';
 import 'package:delwaqty/shared/widgets/loading_skeleton.dart';
-import 'package:delwaqty/shared/widgets/empty_state.dart';
+import 'package:delwaqty/shared/widgets/premium_empty_state.dart';
+import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
+import 'package:delwaqty/l10n/app_localizations.dart';
 
 class NotificationCenterPage extends ConsumerWidget {
   const NotificationCenterPage({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final notificationsAsync = ref.watch(notificationsProvider);
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Notifications'),
+        title: Text(l10n.notifications),
         actions: [
           TextButton(
             onPressed: () async {
@@ -23,18 +26,17 @@ class NotificationCenterPage extends ConsumerWidget {
               ref.invalidate(notificationsProvider);
               ref.invalidate(unreadCountProvider);
             },
-            child: const Text('Mark all read'),
+            child: Text(l10n.markAllRead),
           ),
         ],
       ),
       body: notificationsAsync.when(
         data: (notifications) {
           if (notifications.isEmpty) {
-            return const EmptyState(
+            return PremiumEmptyState(
               icon: Icons.notifications_none_rounded,
-              title: 'No notifications',
-              message:
-                  'You\'re all caught up! New notifications will appear here.',
+              title: l10n.noNotifications,
+              message: l10n.noNotificationsMessage,
             );
           }
           return ListView.separated(
@@ -43,14 +45,17 @@ class NotificationCenterPage extends ConsumerWidget {
             separatorBuilder: (_, __) => const SizedBox(height: 8),
             itemBuilder: (context, index) {
               final notification = notifications[index];
-              return _NotificationCard(
-                notification: notification,
-                onTap: () async {
-                  final repo = ref.read(notificationRepositoryProvider);
-                  await repo.markAsRead(notification.id);
-                  ref.invalidate(notificationsProvider);
-                  ref.invalidate(unreadCountProvider);
-                },
+              return AnimatedFadeIn(
+                delay: Duration(milliseconds: index * 50),
+                child: _NotificationCard(
+                  notification: notification,
+                  onTap: () async {
+                    final repo = ref.read(notificationRepositoryProvider);
+                    await repo.markAsRead(notification.id);
+                    ref.invalidate(notificationsProvider);
+                    ref.invalidate(unreadCountProvider);
+                  },
+                ),
               );
             },
           );
@@ -60,11 +65,11 @@ class NotificationCenterPage extends ConsumerWidget {
           itemCount: 5,
           itemBuilder: (context, index) => const SkeletonListTile(),
         ),
-        error: (e, _) => EmptyState(
+        error: (e, _) => PremiumEmptyState(
           icon: Icons.error_outline_rounded,
-          title: 'Error',
+          title: l10n.error,
           message: e.toString(),
-          actionLabel: 'Retry',
+          actionLabel: l10n.retry,
           onAction: () => ref.invalidate(notificationsProvider),
         ),
       ),
@@ -119,7 +124,9 @@ class _NotificationCard extends StatelessWidget {
                         Expanded(
                           child: Text(
                             notification.title,
-                            style: Theme.of(context).textTheme.bodyMedium
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodyMedium
                                 ?.copyWith(
                                   fontWeight: notification.isRead
                                       ? FontWeight.normal

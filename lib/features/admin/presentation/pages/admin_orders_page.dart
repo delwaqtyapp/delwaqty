@@ -2,17 +2,22 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:delwaqty/services/admin/admin_service.dart';
 import 'package:delwaqty/services/admin/admin_providers.dart';
+import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
+import 'package:delwaqty/shared/widgets/premium_empty_state.dart';
+import 'package:delwaqty/shared/widgets/app_loader.dart';
+import 'package:delwaqty/l10n/app_localizations.dart';
 
 class AdminOrdersPage extends ConsumerWidget {
   const AdminOrdersPage({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final ordersAsync = ref.watch(adminOrdersProvider);
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Order Management'),
+        title: Text(l10n.orderManagement),
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),
@@ -29,7 +34,7 @@ class AdminOrdersPage extends ConsumerWidget {
                 Expanded(
                   child: TextField(
                     decoration: InputDecoration(
-                      hintText: 'Search orders...',
+                      hintText: l10n.searchOrders,
                       prefixIcon: const Icon(Icons.search),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
@@ -44,34 +49,53 @@ class AdminOrdersPage extends ConsumerWidget {
                 IconButton(
                   icon: const Icon(Icons.filter_list_outlined),
                   onPressed: () {},
-                  tooltip: 'Filter Orders',
+                  tooltip: l10n.filterOrders,
                 ),
               ],
             ),
           ),
           Expanded(
             child: ordersAsync.when(
-              loading: () => const Center(child: CircularProgressIndicator()),
-              error: (e, _) => Center(child: Text('Error: $e')),
+              loading: () => const Center(
+                child: AppLoaderCircular(),
+              ),
+              error: (e, _) => Center(
+                child: PremiumEmptyState(
+                  icon: Icons.error_outline_rounded,
+                  title: l10n.error,
+                  message: l10n.errorLoading,
+                  actionLabel: l10n.retry,
+                  onAction: () => ref.invalidate(adminOrdersProvider),
+                ),
+              ),
               data: (orders) {
                 if (orders.isEmpty) {
-                  return const Center(child: Text('No orders found'));
+                  return PremiumEmptyState(
+                    icon: Icons.receipt_long_rounded,
+                    title: l10n.noOrdersFound,
+                    message: l10n.noOrdersFound,
+                  );
                 }
                 return ListView.builder(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   itemCount: orders.length,
                   itemBuilder: (context, index) {
                     final order = orders[index];
-                    return _OrderTile(
-                      order: order,
-                      onStatusChanged: (status) async {
-                        final adminService = ref.read(adminServiceProvider);
-                        await adminService.updateOrderStatus(
-                          order['id'] as String,
-                          status,
-                        );
-                        ref.invalidate(adminOrdersProvider);
-                      },
+                    return AnimatedFadeIn(
+                      delay: Duration(milliseconds: index * 50),
+                      child: _OrderTile(
+                        order: order,
+                        l10n: l10n,
+                        onStatusChanged: (status) async {
+                          final adminService =
+                              ref.read(adminServiceProvider);
+                          await adminService.updateOrderStatus(
+                            order['id'] as String,
+                            status,
+                          );
+                          ref.invalidate(adminOrdersProvider);
+                        },
+                      ),
                     );
                   },
                 );
@@ -85,9 +109,14 @@ class AdminOrdersPage extends ConsumerWidget {
 }
 
 class _OrderTile extends StatelessWidget {
-  const _OrderTile({required this.order, required this.onStatusChanged});
+  const _OrderTile({
+    required this.order,
+    required this.l10n,
+    required this.onStatusChanged,
+  });
 
   final Map<String, dynamic> order;
+  final AppLocalizations l10n;
   final Function(String) onStatusChanged;
 
   @override
@@ -98,8 +127,8 @@ class _OrderTile extends StatelessWidget {
     final status = order['status'] as String? ?? 'pending';
     final users = order['users'] as Map<String, dynamic>?;
     final merchants = order['merchants'] as Map<String, dynamic>?;
-    final customerName = users?['name'] as String? ?? 'Unknown';
-    final merchantName = merchants?['name'] as String? ?? 'Unknown';
+    final customerName = users?['name'] as String? ?? '';
+    final merchantName = merchants?['name'] as String? ?? '';
 
     final statusColor = switch (status) {
       'delivered' => Colors.green,
@@ -107,6 +136,14 @@ class _OrderTile extends StatelessWidget {
       'pending' => Colors.orange,
       'cancelled' => Colors.red,
       _ => Colors.grey,
+    };
+
+    final statusLabel = switch (status) {
+      'delivered' => l10n.delivered,
+      'in_transit' => l10n.inTransit,
+      'pending' => l10n.pending,
+      'cancelled' => l10n.cancelled,
+      _ => status,
     };
 
     return Card(
@@ -144,7 +181,7 @@ class _OrderTile extends StatelessWidget {
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Text(
-                status.toUpperCase(),
+                statusLabel,
                 style: theme.textTheme.labelSmall?.copyWith(
                   color: statusColor,
                   fontWeight: FontWeight.bold,
@@ -157,21 +194,22 @@ class _OrderTile extends StatelessWidget {
           onSelected: (value) => onStatusChanged(value),
           itemBuilder: (context) => [
             if (status != 'in_transit')
-              const PopupMenuItem(
+              PopupMenuItem(
                 value: 'in_transit',
-                child: Text('Mark In Transit'),
+                child: Text(l10n.markInTransit),
               ),
             if (status != 'delivered')
-              const PopupMenuItem(
+              PopupMenuItem(
                 value: 'delivered',
-                child: Text('Mark Delivered'),
+                child: Text(l10n.markDelivered),
               ),
             if (status != 'cancelled')
-              const PopupMenuItem(
+              PopupMenuItem(
                 value: 'cancelled',
                 child: Text(
-                  'Cancel Order',
-                  style: TextStyle(color: Colors.red),
+                  l10n.cancelOrder,
+                  style:
+                      TextStyle(color: Theme.of(context).colorScheme.error),
                 ),
               ),
           ],

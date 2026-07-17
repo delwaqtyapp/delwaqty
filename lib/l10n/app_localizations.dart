@@ -281,7 +281,7 @@ abstract class AppLocalizations {
   /// No description provided for @appName.
   ///
   /// In en, this message translates to:
-  /// **'Delwaqty'**
+  /// **'App Name'**
   String get appName;
 
   /// No description provided for @appNameAr.
@@ -1339,6 +1339,414 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Admin'**
   String get admin;
+
+  /// No description provided for @discover.
+  ///
+  /// In en, this message translates to:
+  /// **'Discover'**
+  String get discover;
+
+  /// No description provided for @searchMerchantsProducts.
+  ///
+  /// In en, this message translates to:
+  /// **'Search merchants, products...'**
+  String get searchMerchantsProducts;
+
+  /// No description provided for @all.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get all;
+
+  /// No description provided for @featured.
+  ///
+  /// In en, this message translates to:
+  /// **'Featured'**
+  String get featured;
+
+  /// No description provided for @allMerchants.
+  ///
+  /// In en, this message translates to:
+  /// **'All Merchants'**
+  String get allMerchants;
+
+  /// No description provided for @noMerchantsFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No merchants found'**
+  String get noMerchantsFound;
+
+  /// No description provided for @open.
+  ///
+  /// In en, this message translates to:
+  /// **'Open'**
+  String get open;
+
+  /// No description provided for @closed.
+  ///
+  /// In en, this message translates to:
+  /// **'Closed'**
+  String get closed;
+
+  /// No description provided for @markAllRead.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark all read'**
+  String get markAllRead;
+
+  /// No description provided for @noNotifications.
+  ///
+  /// In en, this message translates to:
+  /// **'No notifications'**
+  String get noNotifications;
+
+  /// No description provided for @noNotificationsMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'re all caught up! New notifications will appear here.'**
+  String get noNotificationsMessage;
+
+  /// No description provided for @adminDashboard.
+  ///
+  /// In en, this message translates to:
+  /// **'Admin Dashboard'**
+  String get adminDashboard;
+
+  /// No description provided for @platformOverview.
+  ///
+  /// In en, this message translates to:
+  /// **'Platform Overview'**
+  String get platformOverview;
+
+  /// No description provided for @totalUsers.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Users'**
+  String get totalUsers;
+
+  /// No description provided for @totalMerchants.
+  ///
+  /// In en, this message translates to:
+  /// **'Merchants'**
+  String get totalMerchants;
+
+  /// No description provided for @totalOrders.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Orders'**
+  String get totalOrders;
+
+  /// No description provided for @revenue.
+  ///
+  /// In en, this message translates to:
+  /// **'Revenue'**
+  String get revenue;
+
+  /// No description provided for @activeDrivers.
+  ///
+  /// In en, this message translates to:
+  /// **'Active Drivers'**
+  String get activeDrivers;
+
+  /// No description provided for @pendingOrdersStat.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending Orders'**
+  String get pendingOrdersStat;
+
+  /// No description provided for @recentActivity.
+  ///
+  /// In en, this message translates to:
+  /// **'Recent Activity'**
+  String get recentActivity;
+
+  /// No description provided for @noDataAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'No data available'**
+  String get noDataAvailable;
+
+  /// No description provided for @noRecentActivity.
+  ///
+  /// In en, this message translates to:
+  /// **'No recent activity'**
+  String get noRecentActivity;
+
+  /// No description provided for @errorLoadingMetrics.
+  ///
+  /// In en, this message translates to:
+  /// **'Error loading metrics'**
+  String get errorLoadingMetrics;
+
+  /// No description provided for @errorLoadingActivity.
+  ///
+  /// In en, this message translates to:
+  /// **'Error loading activity'**
+  String get errorLoadingActivity;
+
+  /// No description provided for @userManagement.
+  ///
+  /// In en, this message translates to:
+  /// **'User Management'**
+  String get userManagement;
+
+  /// No description provided for @searchUsers.
+  ///
+  /// In en, this message translates to:
+  /// **'Search users...'**
+  String get searchUsers;
+
+  /// No description provided for @addUser.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Admin User'**
+  String get addUser;
+
+  /// No description provided for @noUsersFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No users found'**
+  String get noUsersFound;
+
+  /// No description provided for @activate.
+  ///
+  /// In en, this message translates to:
+  /// **'Activate'**
+  String get activate;
+
+  /// No description provided for @suspend.
+  ///
+  /// In en, this message translates to:
+  /// **'Suspend'**
+  String get suspend;
+
+  /// No description provided for @role.
+  ///
+  /// In en, this message translates to:
+  /// **'Role'**
+  String get role;
+
+  /// No description provided for @create.
+  ///
+  /// In en, this message translates to:
+  /// **'Create'**
+  String get create;
+
+  /// No description provided for @orderManagement.
+  ///
+  /// In en, this message translates to:
+  /// **'Order Management'**
+  String get orderManagement;
+
+  /// No description provided for @searchOrders.
+  ///
+  /// In en, this message translates to:
+  /// **'Search orders...'**
+  String get searchOrders;
+
+  /// No description provided for @filterOrders.
+  ///
+  /// In en, this message translates to:
+  /// **'Filter Orders'**
+  String get filterOrders;
+
+  /// No description provided for @noOrdersFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No orders found'**
+  String get noOrdersFound;
+
+  /// No description provided for @markInTransit.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark In Transit'**
+  String get markInTransit;
+
+  /// No description provided for @markDelivered.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark Delivered'**
+  String get markDelivered;
+
+  /// No description provided for @cancelOrder.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel Order'**
+  String get cancelOrder;
+
+  /// No description provided for @merchantManagement.
+  ///
+  /// In en, this message translates to:
+  /// **'Merchant Management'**
+  String get merchantManagement;
+
+  /// No description provided for @searchMerchantsAdmin.
+  ///
+  /// In en, this message translates to:
+  /// **'Search merchants...'**
+  String get searchMerchantsAdmin;
+
+  /// No description provided for @noMerchantsAdmin.
+  ///
+  /// In en, this message translates to:
+  /// **'No merchants found'**
+  String get noMerchantsAdmin;
+
+  /// No description provided for @filter.
+  ///
+  /// In en, this message translates to:
+  /// **'Filter'**
+  String get filter;
+
+  /// No description provided for @verify.
+  ///
+  /// In en, this message translates to:
+  /// **'Verify'**
+  String get verify;
+
+  /// No description provided for @setPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Set Pending'**
+  String get setPending;
+
+  /// No description provided for @platformSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Platform Settings'**
+  String get platformSettings;
+
+  /// No description provided for @generalSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'General Settings'**
+  String get generalSettings;
+
+  /// No description provided for @supportEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Support Email'**
+  String get supportEmail;
+
+  /// No description provided for @maxDriversPerZone.
+  ///
+  /// In en, this message translates to:
+  /// **'Max Drivers Per Zone'**
+  String get maxDriversPerZone;
+
+  /// No description provided for @maintenanceMode.
+  ///
+  /// In en, this message translates to:
+  /// **'Maintenance Mode'**
+  String get maintenanceMode;
+
+  /// No description provided for @maintenanceModeDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Temporarily disable the app'**
+  String get maintenanceModeDesc;
+
+  /// No description provided for @saveSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Save Settings'**
+  String get saveSettings;
+
+  /// No description provided for @settingsSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Settings saved'**
+  String get settingsSaved;
+
+  /// No description provided for @settingsFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to save settings'**
+  String get settingsFailed;
+
+  /// No description provided for @dangerZone.
+  ///
+  /// In en, this message translates to:
+  /// **'Danger Zone'**
+  String get dangerZone;
+
+  /// No description provided for @resetAllData.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset All Data'**
+  String get resetAllData;
+
+  /// No description provided for @resetAllDataDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Permanently delete all platform data'**
+  String get resetAllDataDesc;
+
+  /// No description provided for @resetAllDataTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset All Data?'**
+  String get resetAllDataTitle;
+
+  /// No description provided for @resetAllDataWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'This action cannot be undone. All data will be permanently deleted.'**
+  String get resetAllDataWarning;
+
+  /// No description provided for @reset.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset'**
+  String get reset;
+
+  /// No description provided for @account.
+  ///
+  /// In en, this message translates to:
+  /// **'Account'**
+  String get account;
+
+  /// No description provided for @privacySecurity.
+  ///
+  /// In en, this message translates to:
+  /// **'Privacy & Security'**
+  String get privacySecurity;
+
+  /// No description provided for @helpCenter.
+  ///
+  /// In en, this message translates to:
+  /// **'Help Center'**
+  String get helpCenter;
+
+  /// No description provided for @about.
+  ///
+  /// In en, this message translates to:
+  /// **'About'**
+  String get about;
+
+  /// No description provided for @version.
+  ///
+  /// In en, this message translates to:
+  /// **'Version 1.0.0'**
+  String get version;
+
+  /// No description provided for @legal.
+  ///
+  /// In en, this message translates to:
+  /// **'Legal'**
+  String get legal;
+
+  /// No description provided for @verified.
+  ///
+  /// In en, this message translates to:
+  /// **'Verified'**
+  String get verified;
+
+  /// No description provided for @riyadhSaudiArabia.
+  ///
+  /// In en, this message translates to:
+  /// **'Riyadh, Saudi Arabia'**
+  String get riyadhSaudiArabia;
 }
 
 class _AppLocalizationsDelegate

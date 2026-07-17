@@ -28,6 +28,7 @@ mixin _$UserModel {
   String? get avatarUrl => throw _privateConstructorUsedError;
   String get language => throw _privateConstructorUsedError;
   bool get isOnboarded => throw _privateConstructorUsedError;
+  String get role => throw _privateConstructorUsedError;
   DateTime get createdAt => throw _privateConstructorUsedError;
   DateTime? get updatedAt => throw _privateConstructorUsedError;
 
@@ -54,6 +55,7 @@ abstract class $UserModelCopyWith<$Res> {
     String? avatarUrl,
     String language,
     bool isOnboarded,
+    String role,
     DateTime createdAt,
     DateTime? updatedAt,
   });
@@ -81,6 +83,7 @@ class _$UserModelCopyWithImpl<$Res, $Val extends UserModel>
     Object? avatarUrl = freezed,
     Object? language = null,
     Object? isOnboarded = null,
+    Object? role = null,
     Object? createdAt = null,
     Object? updatedAt = freezed,
   }) {
@@ -114,6 +117,10 @@ class _$UserModelCopyWithImpl<$Res, $Val extends UserModel>
                 ? _value.isOnboarded
                 : isOnboarded // ignore: cast_nullable_to_non_nullable
                       as bool,
+            role: null == role
+                ? _value.role
+                : role // ignore: cast_nullable_to_non_nullable
+                      as String,
             createdAt: null == createdAt
                 ? _value.createdAt
                 : createdAt // ignore: cast_nullable_to_non_nullable
@@ -145,6 +152,7 @@ abstract class _$$UserModelImplCopyWith<$Res>
     String? avatarUrl,
     String language,
     bool isOnboarded,
+    String role,
     DateTime createdAt,
     DateTime? updatedAt,
   });
@@ -171,6 +179,7 @@ class __$$UserModelImplCopyWithImpl<$Res>
     Object? avatarUrl = freezed,
     Object? language = null,
     Object? isOnboarded = null,
+    Object? role = null,
     Object? createdAt = null,
     Object? updatedAt = freezed,
   }) {
@@ -204,6 +213,10 @@ class __$$UserModelImplCopyWithImpl<$Res>
             ? _value.isOnboarded
             : isOnboarded // ignore: cast_nullable_to_non_nullable
                   as bool,
+        role: null == role
+            ? _value.role
+            : role // ignore: cast_nullable_to_non_nullable
+                  as String,
         createdAt: null == createdAt
             ? _value.createdAt
             : createdAt // ignore: cast_nullable_to_non_nullable
@@ -228,6 +241,7 @@ class _$UserModelImpl extends _UserModel {
     this.avatarUrl,
     this.language = 'en',
     this.isOnboarded = false,
+    this.role = 'customer',
     required this.createdAt,
     this.updatedAt,
   }) : super._();
@@ -252,13 +266,16 @@ class _$UserModelImpl extends _UserModel {
   @JsonKey()
   final bool isOnboarded;
   @override
+  @JsonKey()
+  final String role;
+  @override
   final DateTime createdAt;
   @override
   final DateTime? updatedAt;
 
   @override
   String toString() {
-    return 'UserModel(id: $id, email: $email, fullName: $fullName, phone: $phone, avatarUrl: $avatarUrl, language: $language, isOnboarded: $isOnboarded, createdAt: $createdAt, updatedAt: $updatedAt)';
+    return 'UserModel(id: $id, email: $email, fullName: $fullName, phone: $phone, avatarUrl: $avatarUrl, language: $language, isOnboarded: $isOnboarded, role: $role, createdAt: $createdAt, updatedAt: $updatedAt)';
   }
 
   @override
@@ -277,6 +294,7 @@ class _$UserModelImpl extends _UserModel {
                 other.language == language) &&
             (identical(other.isOnboarded, isOnboarded) ||
                 other.isOnboarded == isOnboarded) &&
+            (identical(other.role, role) || other.role == role) &&
             (identical(other.createdAt, createdAt) ||
                 other.createdAt == createdAt) &&
             (identical(other.updatedAt, updatedAt) ||
@@ -294,6 +312,7 @@ class _$UserModelImpl extends _UserModel {
     avatarUrl,
     language,
     isOnboarded,
+    role,
     createdAt,
     updatedAt,
   );
@@ -321,6 +340,7 @@ abstract class _UserModel extends UserModel {
     final String? avatarUrl,
     final String language,
     final bool isOnboarded,
+    final String role,
     required final DateTime createdAt,
     final DateTime? updatedAt,
   }) = _$UserModelImpl;
@@ -343,6 +363,8 @@ abstract class _UserModel extends UserModel {
   String get language;
   @override
   bool get isOnboarded;
+  @override
+  String get role;
   @override
   DateTime get createdAt;
   @override

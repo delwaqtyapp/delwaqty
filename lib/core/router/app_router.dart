@@ -42,6 +42,13 @@ final goRouterProvider = Provider<GoRouter>((ref) {
         (r) => state.matchedLocation.startsWith(r),
       );
 
+      final isAdminRoute = state.matchedLocation.startsWith('/admin');
+      final isAdmin = isAuth &&
+          authState.whenOrNull(
+                authenticated: (user) => user.role == 'admin' || user.role == 'owner',
+              ) ==
+              true;
+
       if (isSplash || isOnboarding) return null;
 
       if (!canAccess && !isAuthRoute && !isWelcome) {
@@ -49,6 +56,9 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       }
       if (isGuest && isRestricted) {
         return '/login';
+      }
+      if (isAdminRoute && !isAdmin) {
+        return '/home';
       }
       if (isAuth && isAuthRoute) {
         return '/home';

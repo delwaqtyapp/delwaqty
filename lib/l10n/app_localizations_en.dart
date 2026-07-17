@@ -639,4 +639,18 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get nearbyEmptyHint =>
       'No merchants found nearby. Try expanding your search.';
+
+  @override
+  String get checkYourEmail => 'Check Your Email';
+
+  @override
+  String emailConfirmationSent(Object email) {
+    return 'We sent a confirmation link to $email. Please check your inbox and click the link to activate your account.';
+  }
+
+  @override
+  String get goToLogin => 'Go to Login';
+
+  @override
+  String get admin => 'Admin';
 }

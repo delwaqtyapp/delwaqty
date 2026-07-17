@@ -1315,6 +1315,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No merchants found nearby. Try expanding your search.'**
   String get nearbyEmptyHint;
+
+  /// No description provided for @checkYourEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Check Your Email'**
+  String get checkYourEmail;
+
+  /// No description provided for @emailConfirmationSent.
+  ///
+  /// In en, this message translates to:
+  /// **'We sent a confirmation link to {email}. Please check your inbox and click the link to activate your account.'**
+  String emailConfirmationSent(Object email);
+
+  /// No description provided for @goToLogin.
+  ///
+  /// In en, this message translates to:
+  /// **'Go to Login'**
+  String get goToLogin;
+
+  /// No description provided for @admin.
+  ///
+  /// In en, this message translates to:
+  /// **'Admin'**
+  String get admin;
 }
 
 class _AppLocalizationsDelegate

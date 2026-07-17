@@ -56,6 +56,32 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
     ref.listen<AuthState>(authStateProvider, (prev, next) {
       next.whenOrNull(
         error: (message) => context.showAppSnackBar(message, isError: true),
+        emailConfirmationRequired: (email) {
+          showDialog(
+            context: context,
+            builder: (ctx) => AlertDialog(
+              icon: Icon(
+                Icons.mark_email_read_outlined,
+                size: 48,
+                color: context.colorScheme.primary,
+              ),
+              title: Text(l10n.checkYourEmail),
+              content: Text(
+                l10n.emailConfirmationSent(email),
+                textAlign: TextAlign.center,
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(ctx).pop();
+                    context.go('/login');
+                  },
+                  child: Text(l10n.goToLogin),
+                ),
+              ],
+            ),
+          );
+        },
       );
     });
 

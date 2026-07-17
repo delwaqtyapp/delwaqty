@@ -13,6 +13,7 @@ class User with _$User {
     String? avatarUrl,
     @Default('en') String language,
     @Default(false) bool isOnboarded,
+    @Default('customer') String role,
     required DateTime createdAt,
     DateTime? updatedAt,
   }) = _User;

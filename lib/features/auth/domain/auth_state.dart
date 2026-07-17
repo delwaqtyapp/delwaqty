@@ -13,5 +13,7 @@ class AuthState with _$AuthState {
   const factory AuthState.unauthenticated() = AuthUnauthenticated;
   const factory AuthState.phoneVerificationRequired({required String phone}) =
       AuthPhoneVerification;
+  const factory AuthState.emailConfirmationRequired({required String email}) =
+      AuthEmailConfirmationRequired;
   const factory AuthState.error({required String message}) = AuthError;
 }

@@ -28,6 +28,7 @@ mixin _$User {
   String? get avatarUrl => throw _privateConstructorUsedError;
   String get language => throw _privateConstructorUsedError;
   bool get isOnboarded => throw _privateConstructorUsedError;
+  String get role => throw _privateConstructorUsedError;
   DateTime get createdAt => throw _privateConstructorUsedError;
   DateTime? get updatedAt => throw _privateConstructorUsedError;
 
@@ -53,6 +54,7 @@ abstract class $UserCopyWith<$Res> {
     String? avatarUrl,
     String language,
     bool isOnboarded,
+    String role,
     DateTime createdAt,
     DateTime? updatedAt,
   });
@@ -80,6 +82,7 @@ class _$UserCopyWithImpl<$Res, $Val extends User>
     Object? avatarUrl = freezed,
     Object? language = null,
     Object? isOnboarded = null,
+    Object? role = null,
     Object? createdAt = null,
     Object? updatedAt = freezed,
   }) {
@@ -113,6 +116,10 @@ class _$UserCopyWithImpl<$Res, $Val extends User>
                 ? _value.isOnboarded
                 : isOnboarded // ignore: cast_nullable_to_non_nullable
                       as bool,
+            role: null == role
+                ? _value.role
+                : role // ignore: cast_nullable_to_non_nullable
+                      as String,
             createdAt: null == createdAt
                 ? _value.createdAt
                 : createdAt // ignore: cast_nullable_to_non_nullable
@@ -143,6 +150,7 @@ abstract class _$$UserImplCopyWith<$Res> implements $UserCopyWith<$Res> {
     String? avatarUrl,
     String language,
     bool isOnboarded,
+    String role,
     DateTime createdAt,
     DateTime? updatedAt,
   });
@@ -167,6 +175,7 @@ class __$$UserImplCopyWithImpl<$Res>
     Object? avatarUrl = freezed,
     Object? language = null,
     Object? isOnboarded = null,
+    Object? role = null,
     Object? createdAt = null,
     Object? updatedAt = freezed,
   }) {
@@ -200,6 +209,10 @@ class __$$UserImplCopyWithImpl<$Res>
             ? _value.isOnboarded
             : isOnboarded // ignore: cast_nullable_to_non_nullable
                   as bool,
+        role: null == role
+            ? _value.role
+            : role // ignore: cast_nullable_to_non_nullable
+                  as String,
         createdAt: null == createdAt
             ? _value.createdAt
             : createdAt // ignore: cast_nullable_to_non_nullable
@@ -224,6 +237,7 @@ class _$UserImpl implements _User {
     this.avatarUrl,
     this.language = 'en',
     this.isOnboarded = false,
+    this.role = 'customer',
     required this.createdAt,
     this.updatedAt,
   });
@@ -248,13 +262,16 @@ class _$UserImpl implements _User {
   @JsonKey()
   final bool isOnboarded;
   @override
+  @JsonKey()
+  final String role;
+  @override
   final DateTime createdAt;
   @override
   final DateTime? updatedAt;
 
   @override
   String toString() {
-    return 'User(id: $id, email: $email, fullName: $fullName, phone: $phone, avatarUrl: $avatarUrl, language: $language, isOnboarded: $isOnboarded, createdAt: $createdAt, updatedAt: $updatedAt)';
+    return 'User(id: $id, email: $email, fullName: $fullName, phone: $phone, avatarUrl: $avatarUrl, language: $language, isOnboarded: $isOnboarded, role: $role, createdAt: $createdAt, updatedAt: $updatedAt)';
   }
 
   @override
@@ -273,6 +290,7 @@ class _$UserImpl implements _User {
                 other.language == language) &&
             (identical(other.isOnboarded, isOnboarded) ||
                 other.isOnboarded == isOnboarded) &&
+            (identical(other.role, role) || other.role == role) &&
             (identical(other.createdAt, createdAt) ||
                 other.createdAt == createdAt) &&
             (identical(other.updatedAt, updatedAt) ||
@@ -290,6 +308,7 @@ class _$UserImpl implements _User {
     avatarUrl,
     language,
     isOnboarded,
+    role,
     createdAt,
     updatedAt,
   );
@@ -317,6 +336,7 @@ abstract class _User implements User {
     final String? avatarUrl,
     final String language,
     final bool isOnboarded,
+    final String role,
     required final DateTime createdAt,
     final DateTime? updatedAt,
   }) = _$UserImpl;
@@ -337,6 +357,8 @@ abstract class _User implements User {
   String get language;
   @override
   bool get isOnboarded;
+  @override
+  String get role;
   @override
   DateTime get createdAt;
   @override

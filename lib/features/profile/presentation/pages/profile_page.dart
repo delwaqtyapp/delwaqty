@@ -24,6 +24,9 @@ class ProfilePage extends ConsumerWidget {
       return _buildGuestProfile(context, ref, l10n);
     }
 
+    final isAdmin = authState is AuthAuthenticated &&
+        (authState.user.role == 'admin' || authState.user.role == 'owner');
+
     return Scaffold(
       appBar: AppBar(title: Text(l10n.profile)),
       body: ListView(
@@ -35,6 +38,13 @@ class ProfilePage extends ConsumerWidget {
             delay: const Duration(milliseconds: 100),
             child: _buildSettingsSection(context, ref, l10n, themeMode, locale),
           ),
+          if (isAdmin) ...[
+            const SizedBox(height: 16),
+            AnimatedFadeIn(
+              delay: const Duration(milliseconds: 150),
+              child: _buildAdminButton(context, l10n),
+            ),
+          ],
           const SizedBox(height: 24),
           AnimatedFadeIn(
             delay: const Duration(milliseconds: 200),
@@ -190,6 +200,18 @@ class ProfilePage extends ConsumerWidget {
             onTap: () => ref.read(localeProvider.notifier).toggleLocale(),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildAdminButton(BuildContext context, AppLocalizations l10n) {
+    return FilledButton.tonalIcon(
+      onPressed: () => context.push('/admin'),
+      icon: const Icon(Icons.admin_panel_settings_outlined),
+      label: Text(l10n.admin),
+      style: FilledButton.styleFrom(
+        padding: const EdgeInsets.symmetric(vertical: 16),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
     );
   }

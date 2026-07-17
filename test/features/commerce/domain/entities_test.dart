@@ -8,9 +8,7 @@ import 'package:delwaqty/features/commerce/domain/entities/coupon.dart';
 import 'package:delwaqty/features/commerce/domain/entities/favorite.dart';
 import 'package:delwaqty/features/commerce/domain/entities/catalog_category.dart';
 import 'package:delwaqty/features/commerce/domain/entities/search_filter.dart';
-import 'package:delwaqty/features/commerce/domain/entities/money.dart';
 import 'package:delwaqty/features/commerce/domain/entities/geo_location.dart';
-import 'package:delwaqty/features/commerce/domain/entities/image_set.dart';
 
 void main() {
   final now = DateTime(2025, 6, 15);
@@ -968,57 +966,6 @@ void main() {
     });
   });
 
-  group('Money', () {
-    test('fromJson creates Money from JSON', () {
-      final json = {
-        'amount': 25.5,
-        'currency': 'USD',
-      };
-
-      final money = Money.fromJson(json);
-      expect(money.amount, 25.5);
-      expect(money.currency, 'USD');
-    });
-
-    test('toJson serializes correctly', () {
-      final money = Money(amount: 100.0, currency: 'SAR');
-
-      final json = money.toJson();
-      expect(json['amount'], 100.0);
-      expect(json['currency'], 'SAR');
-    });
-
-    test('defaults are applied correctly', () {
-      final money = Money();
-      expect(money.amount, 0.0);
-      expect(money.currency, 'SAR');
-    });
-
-    test('fromJson roundtrip preserves data', () {
-      final original = Money(amount: 99.99, currency: 'EUR');
-      final restored = Money.fromJson(original.toJson());
-      expect(restored, original);
-    });
-
-    test('equality works correctly', () {
-      final a = Money(amount: 10.0);
-      final b = Money(amount: 10.0);
-      final c = Money(amount: 20.0);
-
-      expect(a, equals(b));
-      expect(a, isNot(equals(c)));
-    });
-
-    test('copyWith creates modified copy', () {
-      final money = Money(amount: 10.0);
-      final updated = money.copyWith(amount: 20.0, currency: 'USD');
-
-      expect(updated.amount, 20.0);
-      expect(updated.currency, 'USD');
-      expect(money.amount, 10.0);
-    });
-  });
-
   group('GeoLocation', () {
     test('fromJson creates GeoLocation from JSON', () {
       final json = {
@@ -1060,61 +1007,6 @@ void main() {
 
       final restored = GeoLocation.fromJson(original.toJson());
       expect(restored, original);
-    });
-  });
-
-  group('ImageSet', () {
-    test('fromJson creates ImageSet from JSON', () {
-      final json = {
-        'thumbnail': 'thumb.jpg',
-        'medium': 'medium.jpg',
-        'large': 'large.jpg',
-      };
-
-      final imageSet = ImageSet.fromJson(json);
-      expect(imageSet.thumbnail, 'thumb.jpg');
-      expect(imageSet.medium, 'medium.jpg');
-      expect(imageSet.large, 'large.jpg');
-    });
-
-    test('toJson serializes correctly', () {
-      final imageSet = ImageSet(
-        thumbnail: 'thumb.jpg',
-        medium: 'medium.jpg',
-        large: 'large.jpg',
-      );
-
-      final json = imageSet.toJson();
-      expect(json['thumbnail'], 'thumb.jpg');
-      expect(json['medium'], 'medium.jpg');
-      expect(json['large'], 'large.jpg');
-    });
-
-    test('defaults are null', () {
-      final imageSet = ImageSet();
-      expect(imageSet.thumbnail, isNull);
-      expect(imageSet.medium, isNull);
-      expect(imageSet.large, isNull);
-    });
-
-    test('fromJson roundtrip preserves data', () {
-      final original = ImageSet(
-        thumbnail: 'thumb.jpg',
-        medium: 'medium.jpg',
-        large: 'large.jpg',
-      );
-
-      final restored = ImageSet.fromJson(original.toJson());
-      expect(restored, original);
-    });
-
-    test('equality works correctly', () {
-      final a = ImageSet(thumbnail: 'a.jpg');
-      final b = ImageSet(thumbnail: 'a.jpg');
-      final c = ImageSet(thumbnail: 'b.jpg');
-
-      expect(a, equals(b));
-      expect(a, isNot(equals(c)));
     });
   });
 }

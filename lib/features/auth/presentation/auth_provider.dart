@@ -107,6 +107,8 @@ class AuthStateNotifier extends Notifier<AuthState> {
         password: password,
         fullName: fullName,
       );
+      // Wait for trigger to create profile
+      await Future.delayed(const Duration(milliseconds: 500));
       final user = await ref.read(getCurrentUserUseCaseProvider).call();
       state = AuthState.authenticated(user: user);
     } catch (e) {
@@ -211,5 +213,9 @@ class AuthStateNotifier extends Notifier<AuthState> {
       final failure = handleException(e);
       state = AuthState.error(message: failure.message);
     }
+  }
+
+  void enterGuestMode() {
+    state = const AuthState.guest();
   }
 }

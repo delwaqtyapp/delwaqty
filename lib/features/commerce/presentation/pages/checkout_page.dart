@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:delwaqty/features/commerce/commerce_module.dart';
 import 'package:delwaqty/features/commerce/domain/entities/cart.dart'
     as commerce;
+import 'package:delwaqty/features/commerce/domain/entities/coupon.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 import 'package:delwaqty/core/extensions/context_extensions.dart';
 import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
@@ -145,17 +146,45 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
                           code,
                           cart.total,
                         );
-                        if (context.mounted) {
+                        if (!mounted) return;
+                        if (coupon != null) {
+                          double discount = 0;
+                          switch (coupon.type) {
+                            case CouponType.percentage:
+                              discount = cart.subtotal * (coupon.value / 100);
+                              if (coupon.maximumDiscount != null &&
+                                  discount > coupon.maximumDiscount!) {
+                                discount = coupon.maximumDiscount!;
+                              }
+                              break;
+                            case CouponType.fixed:
+                              discount = coupon.value;
+                              break;
+                            case CouponType.freeDelivery:
+                              discount = cart.deliveryFee;
+                              break;
+                          }
+                          final cartRepo = ref.read(cartRepositoryProvider);
+                          await cartRepo.applyCoupon(
+                            coupon.code,
+                            discount: discount,
+                          );
+                          ref.invalidate(_cartFutureProvider);
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  '${l10n.couponApplied} -${discount.toStringAsFixed(0)} ${l10n.sar}',
+                                ),
+                                backgroundColor: colorScheme.primary,
+                              ),
+                            );
+                          }
+                        } else {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
-                              content: Text(
-                                coupon != null
-                                    ? '${l10n.couponApplied} ${coupon.value}%'
-                                    : l10n.couponInvalid,
-                              ),
-                              backgroundColor: coupon != null
-                                  ? colorScheme.primary
-                                  : colorScheme.error,
+                              content: Text(l10n.couponInvalid),
+                              backgroundColor: colorScheme.error,
                             ),
                           );
                         }

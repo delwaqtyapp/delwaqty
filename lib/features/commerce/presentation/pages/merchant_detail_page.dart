@@ -294,6 +294,7 @@ class MerchantDetailPage extends ConsumerWidget {
                           product: product,
                           onTap: () => context.push(
                             '/market/merchant/$merchantId/product/${product.id}',
+                            extra: merchant.name,
                           ),
                         ),
                       );

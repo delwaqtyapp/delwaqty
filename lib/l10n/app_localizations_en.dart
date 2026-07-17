@@ -622,4 +622,21 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get liveTrackingDesc => 'Track your orders in real-time';
+
+  @override
+  String get guestMode => 'Guest Mode';
+
+  @override
+  String get guestModeHint =>
+      'Sign in to access your orders, favorites, and profile.';
+
+  @override
+  String get noResults => 'No results found';
+
+  @override
+  String get errorLoading => 'Something went wrong. Please try again.';
+
+  @override
+  String get nearbyEmptyHint =>
+      'No merchants found nearby. Try expanding your search.';
 }

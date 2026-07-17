@@ -618,4 +618,21 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get liveTrackingDesc => 'تتبع طلباتك لحظة بلحظة';
+
+  @override
+  String get guestMode => 'وضع الزائر';
+
+  @override
+  String get guestModeHint =>
+      'سجّل الدخول للوصول إلى طلباتك ومفضلتك وملفك الشخصي.';
+
+  @override
+  String get noResults => 'لا توجد نتائج';
+
+  @override
+  String get errorLoading => 'حدث خطأ ما. يرجى المحاولة مرة أخرى.';
+
+  @override
+  String get nearbyEmptyHint =>
+      'لم يتم العثور على متاجر قريبة. حاول توسيع نطاق البحث.';
 }

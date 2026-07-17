@@ -9,6 +9,7 @@ class AuthState with _$AuthState {
   const factory AuthState.loading() = AuthLoading;
   const factory AuthState.authenticated({required User user}) =
       AuthAuthenticated;
+  const factory AuthState.guest() = AuthGuest;
   const factory AuthState.unauthenticated() = AuthUnauthenticated;
   const factory AuthState.phoneVerificationRequired({required String phone}) =
       AuthPhoneVerification;

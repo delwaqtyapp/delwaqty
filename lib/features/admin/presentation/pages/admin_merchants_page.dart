@@ -96,8 +96,8 @@ class _MerchantTile extends StatelessWidget {
       child: ListTile(
         leading: CircleAvatar(
           backgroundColor: isVerified
-              ? Colors.green.withOpacity(0.1)
-              : Colors.orange.withOpacity(0.1),
+              ? Colors.green.withValues(alpha: 0.1)
+              : Colors.orange.withValues(alpha: 0.1),
           child: Icon(
             Icons.store_outlined,
             color: isVerified ? Colors.green : Colors.orange,
@@ -112,8 +112,8 @@ class _MerchantTile extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
               decoration: BoxDecoration(
                 color: isVerified
-                    ? Colors.green.withOpacity(0.1)
-                    : Colors.orange.withOpacity(0.1),
+                    ? Colors.green.withValues(alpha: 0.1)
+                    : Colors.orange.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Text(

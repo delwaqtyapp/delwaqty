@@ -123,13 +123,13 @@ class LocalCartRepository implements CartRepository {
   }
 
   @override
-  Future<Cart> applyCoupon(String couponCode) async {
+  Future<Cart> applyCoupon(String couponCode, {double discount = 0}) async {
     if (_cart == null) throw StateError('No active cart');
-    final discount = _cart!.subtotal * 0.1;
+    final effectiveDiscount = discount > 0 ? discount : _cart!.discount;
     _cart = _cart!.copyWith(
       couponCode: couponCode,
-      discount: discount,
-      total: _cart!.subtotal + _cart!.deliveryFee - discount,
+      discount: effectiveDiscount,
+      total: _cart!.subtotal + _cart!.deliveryFee - effectiveDiscount,
       updatedAt: DateTime.now(),
     );
     await _saveCart();

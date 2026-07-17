@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:delwaqty/core/extensions/context_extensions.dart';
 import 'package:delwaqty/core/localization/locale_provider.dart';
 import 'package:delwaqty/core/theme/theme_mode_provider.dart';
@@ -17,6 +18,11 @@ class ProfilePage extends ConsumerWidget {
     final authState = ref.watch(authStateProvider);
     final themeMode = ref.watch(themeModeProvider);
     final locale = ref.watch(localeProvider);
+    final isGuest = authState is AuthGuest;
+
+    if (isGuest) {
+      return _buildGuestProfile(context, ref, l10n);
+    }
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.profile)),
@@ -27,16 +33,11 @@ class ProfilePage extends ConsumerWidget {
           const SizedBox(height: 24),
           AnimatedFadeIn(
             delay: const Duration(milliseconds: 100),
-            child: _buildStatsRow(context),
-          ),
-          const SizedBox(height: 24),
-          AnimatedFadeIn(
-            delay: const Duration(milliseconds: 200),
             child: _buildSettingsSection(context, ref, l10n, themeMode, locale),
           ),
           const SizedBox(height: 24),
           AnimatedFadeIn(
-            delay: const Duration(milliseconds: 300),
+            delay: const Duration(milliseconds: 200),
             child: _buildLogoutButton(context, ref, l10n),
           ),
         ],
@@ -44,7 +45,59 @@ class ProfilePage extends ConsumerWidget {
     );
   }
 
+  Widget _buildGuestProfile(
+    BuildContext context,
+    WidgetRef ref,
+    AppLocalizations l10n,
+  ) {
+    return Scaffold(
+      appBar: AppBar(title: Text(l10n.profile)),
+      body: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(32),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.person_outline_rounded,
+                size: 80,
+                color: context.colorScheme.primary.withValues(alpha: 0.3),
+              ),
+              const SizedBox(height: 24),
+              Text(
+                l10n.guestMode,
+                style: context.textTheme.headlineSmall?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 12),
+              Text(
+                l10n.guestModeHint,
+                style: context.textTheme.bodyMedium?.copyWith(
+                  color: context.colorScheme.onSurfaceVariant,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 32),
+              FilledButton(
+                onPressed: () => context.pushNamed('login'),
+                child: Text(l10n.login),
+              ),
+              const SizedBox(height: 12),
+              OutlinedButton(
+                onPressed: () => context.pushNamed('register'),
+                child: Text(l10n.register),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _buildProfileHeader(BuildContext context, AuthState authState) {
+    final user = authState is AuthAuthenticated ? authState.user : null;
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
@@ -62,8 +115,8 @@ class ProfilePage extends ConsumerWidget {
             ),
             child: Center(
               child: Text(
-                authState is AuthAuthenticated
-                    ? (authState.user.fullName?.substring(0, 1) ?? 'U')
+                (user?.fullName?.isNotEmpty == true)
+                    ? user!.fullName![0].toUpperCase()
                     : 'U',
                 style: context.textTheme.headlineMedium?.copyWith(
                   color: context.colorScheme.onPrimary,
@@ -74,64 +127,19 @@ class ProfilePage extends ConsumerWidget {
           ),
           const SizedBox(height: 16),
           Text(
-            authState is AuthAuthenticated
-                ? (authState.user.fullName ?? 'User')
-                : 'User',
+            user?.fullName ?? 'User',
             style: context.textTheme.titleLarge?.copyWith(
               fontWeight: FontWeight.bold,
             ),
           ),
           const SizedBox(height: 4),
           Text(
-            authState is AuthAuthenticated ? authState.user.email : '',
+            user?.email ?? '',
             style: context.textTheme.bodyMedium?.copyWith(
               color: context.colorScheme.onSurfaceVariant,
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildStatsRow(BuildContext context) {
-    return Row(
-      children: [
-        _buildStatItem(context, 'Orders', '12'),
-        _buildStatItem(context, 'Favorites', '8'),
-        _buildStatItem(context, 'Rewards', '3'),
-      ],
-    );
-  }
-
-  Widget _buildStatItem(BuildContext context, String label, String value) {
-    return Expanded(
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 16),
-        decoration: BoxDecoration(
-          color: context.colorScheme.surfaceContainerLowest,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: context.colorScheme.outlineVariant.withValues(alpha: 0.5),
-          ),
-        ),
-        child: Column(
-          children: [
-            Text(
-              value,
-              style: context.textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: context.colorScheme.primary,
-              ),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              label,
-              style: context.textTheme.bodySmall?.copyWith(
-                color: context.colorScheme.onSurfaceVariant,
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }
@@ -154,17 +162,10 @@ class ProfilePage extends ConsumerWidget {
       child: Column(
         children: [
           ListTile(
-            leading: const Icon(Icons.person_outline_rounded),
-            title: Text(l10n.profile),
-            trailing: const Icon(Icons.chevron_right_rounded),
-            onTap: () {},
-          ),
-          const Divider(height: 1),
-          ListTile(
             leading: const Icon(Icons.notifications_outlined),
-            title: const Text('Notifications'),
+            title: Text(l10n.notifications),
             trailing: const Icon(Icons.chevron_right_rounded),
-            onTap: () {},
+            onTap: () => context.push('/notifications'),
           ),
           const Divider(height: 1),
           ListTile(

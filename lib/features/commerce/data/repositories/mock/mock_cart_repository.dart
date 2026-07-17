@@ -82,17 +82,15 @@ class MockCartRepository implements CartRepository {
   }
 
   @override
-  Future<Cart> applyCoupon(String couponCode) async {
+  Future<Cart> applyCoupon(String couponCode, {double discount = 0}) async {
     if (_cart == null) throw StateError('No active cart');
-    if (couponCode.toUpperCase() == 'SAVE10') {
-      final discount = _cart!.subtotal * 0.1;
-      _cart = _cart!.copyWith(
-        couponCode: couponCode,
-        discount: discount,
-        total: _cart!.subtotal + _cart!.deliveryFee - discount,
-        updatedAt: DateTime.now(),
-      );
-    }
+    final effectiveDiscount = discount > 0 ? discount : _cart!.subtotal * 0.1;
+    _cart = _cart!.copyWith(
+      couponCode: couponCode,
+      discount: effectiveDiscount,
+      total: _cart!.subtotal + _cart!.deliveryFee - effectiveDiscount,
+      updatedAt: DateTime.now(),
+    );
     return _cart!;
   }
 

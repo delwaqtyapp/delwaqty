@@ -26,6 +26,8 @@ final goRouterProvider = Provider<GoRouter>((ref) {
     redirect: (context, state) {
       final authState = ref.read(authStateProvider);
       final isAuth = authState is AuthAuthenticated;
+      final isGuest = authState is AuthGuest;
+      final canAccess = isAuth || isGuest;
 
       final isSplash = state.matchedLocation == '/splash';
       final isOnboarding = state.matchedLocation == '/onboarding';
@@ -35,10 +37,18 @@ final goRouterProvider = Provider<GoRouter>((ref) {
           state.matchedLocation == '/register' ||
           state.matchedLocation == '/forgot-password';
 
+      final restrictedRoutes = ['/market/checkout', '/market/orders'];
+      final isRestricted = restrictedRoutes.any(
+        (r) => state.matchedLocation.startsWith(r),
+      );
+
       if (isSplash || isOnboarding) return null;
 
-      if (!isAuth && !isAuthRoute && !isWelcome) {
+      if (!canAccess && !isAuthRoute && !isWelcome) {
         return '/welcome';
+      }
+      if (isGuest && isRestricted) {
+        return '/login';
       }
       if (isAuth && isAuthRoute) {
         return '/home';

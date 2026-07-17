@@ -13,6 +13,6 @@ abstract interface class CartRepository {
   });
   Future<Cart> removeFromCart({required String cartItemId});
   Future<Cart> clearCart();
-  Future<Cart> applyCoupon(String couponCode);
+  Future<Cart> applyCoupon(String couponCode, {double discount = 0});
   Future<Cart> removeCoupon();
 }

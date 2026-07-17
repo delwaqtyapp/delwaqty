@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:delwaqty/core/extensions/context_extensions.dart';
+import 'package:delwaqty/features/auth/presentation/auth_provider.dart';
 import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
 import 'package:delwaqty/shared/widgets/animated_slide_in.dart';
 import 'package:delwaqty/shared/widgets/app_button.dart';
@@ -99,7 +100,10 @@ class WelcomePage extends ConsumerWidget {
                 AnimatedFadeIn(
                   delay: const Duration(milliseconds: 800),
                   child: TextButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      ref.read(authStateProvider.notifier).enterGuestMode();
+                      context.go('/home');
+                    },
                     child: Text(
                       l10n.welcomeGuestButton,
                       style: TextStyle(

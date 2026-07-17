@@ -6,11 +6,11 @@ import 'package:delwaqty/features/commerce/domain/entities/catalog_category.dart
 
 final supabaseCatalogCategoryDataSourceProvider =
     Provider<SupabaseCatalogCategoryDataSource>((ref) {
-  return SupabaseCatalogCategoryDataSource(
-    ref.watch(supabaseClientProvider),
-    ref.watch(loggerProvider),
-  );
-});
+      return SupabaseCatalogCategoryDataSource(
+        ref.watch(supabaseClientProvider),
+        ref.watch(loggerProvider),
+      );
+    });
 
 class SupabaseCatalogCategoryDataSource {
   SupabaseCatalogCategoryDataSource(this._client, this._logger);

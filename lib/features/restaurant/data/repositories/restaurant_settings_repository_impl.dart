@@ -9,13 +9,19 @@ class RestaurantSettingsRepositoryImpl implements RestaurantSettingsRepository {
 
   @override
   Future<RestaurantSettings?> getSettings(String merchantId) async {
-    try { return await _dataSource.getSettings(merchantId); }
-    catch (e) { throw ServerException(message: e.toString()); }
+    try {
+      return await _dataSource.getSettings(merchantId);
+    } catch (e) {
+      throw ServerException(message: e.toString());
+    }
   }
 
   @override
   Future<RestaurantSettings> updateSettings(RestaurantSettings settings) async {
-    try { return await _dataSource.updateSettings(settings); }
-    catch (e) { throw ServerException(message: e.toString()); }
+    try {
+      return await _dataSource.updateSettings(settings);
+    } catch (e) {
+      throw ServerException(message: e.toString());
+    }
   }
 }

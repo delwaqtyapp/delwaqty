@@ -9,18 +9,21 @@ import 'package:delwaqty/features/commerce/presentation/widgets/product_card.dar
 import 'package:delwaqty/features/commerce/presentation/widgets/rating_stars.dart';
 import 'package:delwaqty/features/commerce/presentation/widgets/delivery_info.dart';
 import 'package:delwaqty/features/commerce/presentation/widgets/cart_badge.dart';
+import 'package:delwaqty/l10n/app_localizations.dart';
+import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
+import 'package:delwaqty/shared/widgets/app_loader.dart';
+import 'package:delwaqty/shared/widgets/error_state.dart';
+import 'package:delwaqty/shared/widgets/empty_state.dart';
+import 'package:delwaqty/core/extensions/context_extensions.dart';
 
 class MerchantDetailPage extends ConsumerWidget {
-  const MerchantDetailPage({
-    required this.merchantId,
-    super.key,
-  });
+  const MerchantDetailPage({required this.merchantId, super.key});
 
   final String merchantId;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context);
     final merchantRepo = ref.watch(merchantRepositoryProvider);
     final productRepo = ref.watch(productRepositoryProvider);
     final categoryRepo = ref.watch(catalogCategoryRepositoryProvider);
@@ -28,38 +31,61 @@ class MerchantDetailPage extends ConsumerWidget {
     return FutureBuilder<Merchant?>(
       future: merchantRepo.getMerchantById(merchantId),
       builder: (context, merchantSnap) {
+        if (merchantSnap.connectionState == ConnectionState.waiting) {
+          return Scaffold(
+            appBar: AppBar(title: Text(l10n.loading)),
+            body: const Center(child: AppLoaderCircular()),
+          );
+        }
+
         final merchant = merchantSnap.data;
         if (merchant == null) {
           return Scaffold(
-            appBar: AppBar(title: const Text('Merchant')),
-            body: const Center(child: Text('Merchant not found')),
+            appBar: AppBar(title: Text(l10n.error)),
+            body: ErrorState(message: l10n.noData),
           );
         }
 
         return Scaffold(
           appBar: AppBar(
             title: Text(merchant.name),
-            actions: [
-              CartBadge(
-                onTap: () => context.push('/market/cart'),
-              ),
-            ],
+            actions: [CartBadge(onTap: () => context.push('/market/cart'))],
           ),
           body: ListView(
             children: [
-              // Merchant header
-              Container(
-                height: 180,
-                width: double.infinity,
-                color: Theme.of(context)
-                    .colorScheme
-                    .primaryContainer
-                    .withValues(alpha: 0.3),
-                child: Center(
-                  child: Icon(
-                    _typeIcon(merchant.type),
-                    size: 64,
-                    color: Theme.of(context).colorScheme.primary,
+              Hero(
+                tag: 'merchant-${merchant.id}',
+                child: Container(
+                  height: 220,
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        context.colorScheme.primaryContainer.withValues(
+                          alpha: 0.6,
+                        ),
+                        context.colorScheme.surface,
+                      ],
+                    ),
+                  ),
+                  child: Center(
+                    child: Container(
+                      width: 100,
+                      height: 100,
+                      decoration: BoxDecoration(
+                        color: context.colorScheme.primary.withValues(
+                          alpha: 0.1,
+                        ),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        _typeIcon(merchant.type),
+                        size: 52,
+                        color: context.colorScheme.primary,
+                      ),
+                    ),
                   ),
                 ),
               ),
@@ -68,106 +94,182 @@ class MerchantDetailPage extends ConsumerWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            merchant.name,
-                            style: theme.textTheme.headlineSmall?.copyWith(
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                        if (merchant.isVerified)
-                          const Icon(Icons.verified,
-                              color: Colors.blue, size: 20),
-                      ],
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      merchant.description ?? '',
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        color: Colors.grey[600],
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    RatingStars(
-                      rating: merchant.rating,
-                      showCount: true,
-                      count: merchant.ratingCount,
-                    ),
-                    const SizedBox(height: 12),
-                    DeliveryInfo(
-                      estimatedMinutes: merchant.estimatedDeliveryMinutes,
-                      deliveryFee: merchant.deliveryFee,
-                      minimumOrder: merchant.minimumOrder,
-                    ),
-                    if (merchant.address != null) ...[
-                      const SizedBox(height: 8),
-                      Row(
+                    AnimatedFadeIn(
+                      delay: const Duration(milliseconds: 100),
+                      child: Row(
                         children: [
-                          const Icon(Icons.location_on,
-                              size: 16, color: Colors.grey),
-                          const SizedBox(width: 4),
                           Expanded(
                             child: Text(
-                              merchant.address!,
-                              style: theme.textTheme.bodySmall,
+                              merchant.name,
+                              style: context.textTheme.headlineSmall?.copyWith(
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                          if (merchant.isVerified)
+                            Icon(
+                              Icons.verified,
+                              color: context.colorScheme.primary,
+                              size: 22,
+                            ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    if (merchant.description != null &&
+                        merchant.description!.isNotEmpty)
+                      AnimatedFadeIn(
+                        delay: const Duration(milliseconds: 200),
+                        child: Text(
+                          merchant.description!,
+                          style: context.textTheme.bodyMedium?.copyWith(
+                            color: context.colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                      ),
+                    const SizedBox(height: 12),
+                    AnimatedFadeIn(
+                      delay: const Duration(milliseconds: 300),
+                      child: RatingStars(
+                        rating: merchant.rating,
+                        showCount: true,
+                        count: merchant.ratingCount,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    AnimatedFadeIn(
+                      delay: const Duration(milliseconds: 400),
+                      child: DeliveryInfo(
+                        estimatedMinutes: merchant.estimatedDeliveryMinutes,
+                        deliveryFee: merchant.deliveryFee,
+                        minimumOrder: merchant.minimumOrder,
+                      ),
+                    ),
+                    if (merchant.address != null) ...[
+                      const SizedBox(height: 10),
+                      AnimatedFadeIn(
+                        delay: const Duration(milliseconds: 500),
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.location_on_outlined,
+                              size: 18,
+                              color: context.colorScheme.onSurfaceVariant,
+                            ),
+                            const SizedBox(width: 6),
+                            Expanded(
+                              child: Text(
+                                merchant.address!,
+                                style: context.textTheme.bodySmall?.copyWith(
+                                  color: context.colorScheme.onSurfaceVariant,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                    const SizedBox(height: 10),
+                    AnimatedFadeIn(
+                      delay: const Duration(milliseconds: 550),
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.access_time_outlined,
+                            size: 18,
+                            color: context.colorScheme.onSurfaceVariant,
+                          ),
+                          const SizedBox(width: 6),
+                          Text(
+                            l10n.workingHours,
+                            style: context.textTheme.bodySmall?.copyWith(
+                              color: context.colorScheme.onSurfaceVariant,
+                            ),
+                          ),
+                          const Spacer(),
+                          Icon(
+                            merchant.isOpenNow
+                                ? Icons.check_circle_outline
+                                : Icons.cancel_outlined,
+                            size: 18,
+                            color: merchant.isOpenNow
+                                ? Colors.green
+                                : context.colorScheme.error,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            merchant.isOpenNow ? 'Open' : 'Closed',
+                            style: context.textTheme.bodySmall?.copyWith(
+                              fontWeight: FontWeight.w600,
+                              color: merchant.isOpenNow
+                                  ? Colors.green
+                                  : context.colorScheme.error,
                             ),
                           ),
                         ],
                       ),
-                    ],
-                    const SizedBox(height: 16),
-
-                    // Categories
-                    FutureBuilder<List<CatalogCategory>>(
-                      future: categoryRepo.getCategories(merchantId),
-                      builder: (context, catSnap) {
-                        final categories = catSnap.data ?? [];
-                        if (categories.isEmpty) return const SizedBox();
-                        return SizedBox(
-                          height: 36,
-                          child: ListView.separated(
-                            scrollDirection: Axis.horizontal,
-                            itemCount: categories.length,
-                            separatorBuilder: (_, __) =>
-                                const SizedBox(width: 8),
-                            itemBuilder: (context, index) {
-                              final cat = categories[index];
-                              return ActionChip(
-                                label: Text(cat.name),
-                                onPressed: () {},
-                              );
-                            },
-                          ),
-                        );
-                      },
                     ),
                     const SizedBox(height: 16),
-
-                    // Products
-                    Text(
-                      'Menu',
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
+                    AnimatedFadeIn(
+                      delay: const Duration(milliseconds: 600),
+                      child: FutureBuilder<List<CatalogCategory>>(
+                        future: categoryRepo.getCategories(merchantId),
+                        builder: (context, catSnap) {
+                          final categories = catSnap.data ?? [];
+                          if (categories.isEmpty) return const SizedBox();
+                          return SizedBox(
+                            height: 40,
+                            child: ListView.separated(
+                              scrollDirection: Axis.horizontal,
+                              itemCount: categories.length,
+                              separatorBuilder: (_, __) =>
+                                  const SizedBox(width: 8),
+                              itemBuilder: (context, index) {
+                                final cat = categories[index];
+                                return ActionChip(
+                                  label: Text(cat.name),
+                                  onPressed: () {},
+                                );
+                              },
+                            ),
+                          );
+                        },
                       ),
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 20),
+                    AnimatedFadeIn(
+                      delay: const Duration(milliseconds: 700),
+                      child: Text(
+                        l10n.menu,
+                        style: context.textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
                   ],
                 ),
               ),
-
-              // Product grid
               FutureBuilder<List<Product>>(
                 future: productRepo.getProducts(merchantId: merchantId),
                 builder: (context, prodSnap) {
-                  final products = prodSnap.data ?? [];
-                  if (products.isEmpty) {
+                  if (prodSnap.connectionState == ConnectionState.waiting) {
                     return const Center(
                       child: Padding(
                         padding: EdgeInsets.all(32),
-                        child: Text('No products available'),
+                        child: AppLoaderCircular(),
+                      ),
+                    );
+                  }
+
+                  final products = prodSnap.data ?? [];
+                  if (products.isEmpty) {
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: EmptyState(
+                        icon: Icons.shopping_bag_outlined,
+                        title: l10n.menu,
+                        message: l10n.noData,
                       ),
                     );
                   }
@@ -178,18 +280,21 @@ class MerchantDetailPage extends ConsumerWidget {
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     gridDelegate:
                         const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
-                      mainAxisSpacing: 12,
-                      crossAxisSpacing: 12,
-                      childAspectRatio: 0.75,
-                    ),
+                          crossAxisCount: 2,
+                          mainAxisSpacing: 12,
+                          crossAxisSpacing: 12,
+                          childAspectRatio: 0.75,
+                        ),
                     itemCount: products.length,
                     itemBuilder: (context, index) {
                       final product = products[index];
-                      return ProductCard(
-                        product: product,
-                        onTap: () => context.push(
-                          '/market/merchant/$merchantId/product/${product.id}',
+                      return Hero(
+                        tag: 'product-${product.id}',
+                        child: ProductCard(
+                          product: product,
+                          onTap: () => context.push(
+                            '/market/merchant/$merchantId/product/${product.id}',
+                          ),
                         ),
                       );
                     },

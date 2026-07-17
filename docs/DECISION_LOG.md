@@ -648,3 +648,5 @@ Portable toolchain under `E:\app\` with environment variables set per-session. F
 | 021 | AGENTS.md Governance | Accepted | AI agent rules persistence |
 | 022 | CI/CD Pipeline | Accepted | Automated quality gates and artifact delivery |
 | 023 | Windows Desktop Workstation | Accepted | Portable dev environment |
+| 024 | Super App Presentation Layer | Accepted | 11 customer screens with premium UI |
+| 025 | Finance Code Removal | Accepted | Remove expenses/budgets/categories entirely |

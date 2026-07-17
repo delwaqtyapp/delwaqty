@@ -10,5 +10,9 @@ abstract interface class OfferRepository {
   Future<Offer> createOffer(Offer offer);
   Future<Offer> updateOffer(Offer offer);
   Future<void> deleteOffer(String id);
-  Future<double> calculateDiscount(String offerId, double orderTotal, List<String> productIds);
+  Future<double> calculateDiscount(
+    String offerId,
+    double orderTotal,
+    List<String> productIds,
+  );
 }

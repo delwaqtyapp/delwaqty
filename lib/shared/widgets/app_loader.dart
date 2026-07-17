@@ -24,26 +24,17 @@ class AppLoader {
       key: key,
       width: size,
       height: size,
-      child: CircularProgressIndicator(
-        strokeWidth: strokeWidth,
-        color: color,
-      ),
+      child: CircularProgressIndicator(strokeWidth: strokeWidth, color: color),
     );
   }
 
   /// A small circular progress indicator suitable for inline use (buttons, chips).
-  static Widget small({
-    Key? key,
-    Color? color,
-  }) {
+  static Widget small({Key? key, Color? color}) {
     return SizedBox(
       key: key,
       width: 20,
       height: 20,
-      child: CircularProgressIndicator(
-        strokeWidth: 2,
-        color: color,
-      ),
+      child: CircularProgressIndicator(strokeWidth: 2, color: color),
     );
   }
 
@@ -135,10 +126,7 @@ class AppLoaderCircular extends StatelessWidget {
     return SizedBox(
       width: size,
       height: size,
-      child: CircularProgressIndicator(
-        strokeWidth: strokeWidth,
-        color: color,
-      ),
+      child: CircularProgressIndicator(strokeWidth: strokeWidth, color: color),
     );
   }
 }
@@ -219,9 +207,10 @@ class _LoadingSkeletonState extends State<LoadingSkeleton>
       vsync: this,
       duration: const Duration(milliseconds: 1200),
     )..repeat(reverse: true);
-    _animation = Tween<double>(begin: 0.3, end: 0.6).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
-    );
+    _animation = Tween<double>(
+      begin: 0.3,
+      end: 0.6,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
   }
 
   @override
@@ -239,9 +228,7 @@ class _LoadingSkeletonState extends State<LoadingSkeleton>
           width: widget.width,
           height: widget.height,
           decoration: BoxDecoration(
-            color: Theme.of(context)
-                .colorScheme
-                .surfaceContainerHighest
+            color: Theme.of(context).colorScheme.surfaceContainerHighest
                 .withValues(alpha: _animation.value),
             borderRadius: BorderRadius.circular(widget.borderRadius),
           ),
@@ -265,10 +252,7 @@ class SkeletonListTile extends StatelessWidget {
       ),
       child: Row(
         children: [
-          const LoadingSkeleton(
-            width: 48,
-            height: 48,
-          ),
+          const LoadingSkeleton(width: 48, height: 48),
           const SizedBox(width: AppSpacing.lg),
           Expanded(
             child: Column(
@@ -308,10 +292,9 @@ class SkeletonCard extends StatelessWidget {
         vertical: AppSpacing.cardMarginVertical,
       ),
       decoration: BoxDecoration(
-        color: Theme.of(context)
-            .colorScheme
-            .surfaceContainerHighest
-            .withValues(alpha: 0.3),
+        color: Theme.of(
+          context,
+        ).colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
         borderRadius: AppSpacing.borderRadiusXl,
       ),
       child: const Padding(

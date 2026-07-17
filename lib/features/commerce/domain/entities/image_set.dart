@@ -5,11 +5,8 @@ part 'image_set.g.dart';
 
 @freezed
 class ImageSet with _$ImageSet {
-  const factory ImageSet({
-    String? thumbnail,
-    String? medium,
-    String? large,
-  }) = _ImageSet;
+  const factory ImageSet({String? thumbnail, String? medium, String? large}) =
+      _ImageSet;
 
   factory ImageSet.fromJson(Map<String, dynamic> json) =>
       _$ImageSetFromJson(json);

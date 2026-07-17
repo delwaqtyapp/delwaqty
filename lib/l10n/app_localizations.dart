@@ -287,13 +287,13 @@ abstract class AppLocalizations {
   /// No description provided for @appNameAr.
   ///
   /// In en, this message translates to:
-  /// **'الدقة'**
+  /// **'دلوقتي'**
   String get appNameAr;
 
   /// No description provided for @splashTagline.
   ///
   /// In en, this message translates to:
-  /// **'Precision in every detail'**
+  /// **'Every service. One app.'**
   String get splashTagline;
 
   /// No description provided for @splashLoading.
@@ -323,50 +323,62 @@ abstract class AppLocalizations {
   /// No description provided for @onboardingTitle1.
   ///
   /// In en, this message translates to:
-  /// **'Track Your Expenses'**
+  /// **'All your needs... in one app'**
   String get onboardingTitle1;
 
   /// No description provided for @onboardingDesc1.
   ///
   /// In en, this message translates to:
-  /// **'Keep track of every transaction with ease. Know where your money goes.'**
+  /// **'Order food, book services, shop online, and get anything delivered. Everything you need, right at your fingertips.'**
   String get onboardingDesc1;
 
   /// No description provided for @onboardingTitle2.
   ///
   /// In en, this message translates to:
-  /// **'Smart Budgeting'**
+  /// **'Order Food'**
   String get onboardingTitle2;
 
   /// No description provided for @onboardingDesc2.
   ///
   /// In en, this message translates to:
-  /// **'Set budgets, track spending, and achieve your financial goals effortlessly.'**
+  /// **'Browse restaurants, explore menus, customize your meal, and get it delivered fast to your door.'**
   String get onboardingDesc2;
 
   /// No description provided for @onboardingTitle3.
   ///
   /// In en, this message translates to:
-  /// **'Beautiful Reports'**
+  /// **'Book Services'**
   String get onboardingTitle3;
 
   /// No description provided for @onboardingDesc3.
   ///
   /// In en, this message translates to:
-  /// **'Visualize your finances with elegant charts and insightful reports.'**
+  /// **'Cleaning, electrician, plumber, AC repair — book trusted professionals in seconds.'**
   String get onboardingDesc3;
 
   /// No description provided for @onboardingTitle4.
   ///
   /// In en, this message translates to:
-  /// **'Secure & Private'**
+  /// **'Track Your Order'**
   String get onboardingTitle4;
 
   /// No description provided for @onboardingDesc4.
   ///
   /// In en, this message translates to:
-  /// **'Your financial data is encrypted and protected with industry-leading security.'**
+  /// **'Real-time tracking, live map, driver ETA, and instant notifications for every order.'**
   String get onboardingDesc4;
+
+  /// No description provided for @onboardingTitle5.
+  ///
+  /// In en, this message translates to:
+  /// **'Start Now'**
+  String get onboardingTitle5;
+
+  /// No description provided for @onboardingDesc5.
+  ///
+  /// In en, this message translates to:
+  /// **'Everything revolves around Delwaqty. Your super app for everyday life.'**
+  String get onboardingDesc5;
 
   /// No description provided for @welcomeTitle.
   ///
@@ -377,7 +389,7 @@ abstract class AppLocalizations {
   /// No description provided for @welcomeSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Your personal finance companion'**
+  /// **'Order. Shop. Move. Book. All in Delwaqty.'**
   String get welcomeSubtitle;
 
   /// No description provided for @welcomeLoginButton.
@@ -470,179 +482,11 @@ abstract class AppLocalizations {
   /// **'Appearance'**
   String get appearance;
 
-  /// No description provided for @expenses.
+  /// No description provided for @notifications.
   ///
   /// In en, this message translates to:
-  /// **'Expenses'**
-  String get expenses;
-
-  /// No description provided for @addExpense.
-  ///
-  /// In en, this message translates to:
-  /// **'Add Expense'**
-  String get addExpense;
-
-  /// No description provided for @editExpense.
-  ///
-  /// In en, this message translates to:
-  /// **'Edit Expense'**
-  String get editExpense;
-
-  /// No description provided for @expenseDetail.
-  ///
-  /// In en, this message translates to:
-  /// **'Expense Detail'**
-  String get expenseDetail;
-
-  /// No description provided for @deleteExpense.
-  ///
-  /// In en, this message translates to:
-  /// **'Delete Expense'**
-  String get deleteExpense;
-
-  /// No description provided for @deleteExpenseConfirm.
-  ///
-  /// In en, this message translates to:
-  /// **'Are you sure you want to delete this expense? This action cannot be undone.'**
-  String get deleteExpenseConfirm;
-
-  /// No description provided for @title.
-  ///
-  /// In en, this message translates to:
-  /// **'Title'**
-  String get title;
-
-  /// No description provided for @titleHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Enter expense title'**
-  String get titleHint;
-
-  /// No description provided for @titleRequired.
-  ///
-  /// In en, this message translates to:
-  /// **'Title is required'**
-  String get titleRequired;
-
-  /// No description provided for @amount.
-  ///
-  /// In en, this message translates to:
-  /// **'Amount'**
-  String get amount;
-
-  /// No description provided for @amountHint.
-  ///
-  /// In en, this message translates to:
-  /// **'0.00'**
-  String get amountHint;
-
-  /// No description provided for @amountRequired.
-  ///
-  /// In en, this message translates to:
-  /// **'Amount is required'**
-  String get amountRequired;
-
-  /// No description provided for @amountInvalid.
-  ///
-  /// In en, this message translates to:
-  /// **'Amount must be greater than 0'**
-  String get amountInvalid;
-
-  /// No description provided for @category.
-  ///
-  /// In en, this message translates to:
-  /// **'Category'**
-  String get category;
-
-  /// No description provided for @categoryRequired.
-  ///
-  /// In en, this message translates to:
-  /// **'Please select a category'**
-  String get categoryRequired;
-
-  /// No description provided for @date.
-  ///
-  /// In en, this message translates to:
-  /// **'Date'**
-  String get date;
-
-  /// No description provided for @note.
-  ///
-  /// In en, this message translates to:
-  /// **'Note'**
-  String get note;
-
-  /// No description provided for @noteHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Add a note (optional)'**
-  String get noteHint;
-
-  /// No description provided for @type.
-  ///
-  /// In en, this message translates to:
-  /// **'Type'**
-  String get type;
-
-  /// No description provided for @recurring.
-  ///
-  /// In en, this message translates to:
-  /// **'Recurring'**
-  String get recurring;
-
-  /// No description provided for @receipt.
-  ///
-  /// In en, this message translates to:
-  /// **'Receipt'**
-  String get receipt;
-
-  /// No description provided for @createdAt.
-  ///
-  /// In en, this message translates to:
-  /// **'Created at'**
-  String get createdAt;
-
-  /// No description provided for @searchExpenses.
-  ///
-  /// In en, this message translates to:
-  /// **'Search expenses...'**
-  String get searchExpenses;
-
-  /// No description provided for @noExpenses.
-  ///
-  /// In en, this message translates to:
-  /// **'No expenses yet'**
-  String get noExpenses;
-
-  /// No description provided for @noExpensesMessage.
-  ///
-  /// In en, this message translates to:
-  /// **'Start tracking your expenses by adding your first entry.'**
-  String get noExpensesMessage;
-
-  /// No description provided for @filterAll.
-  ///
-  /// In en, this message translates to:
-  /// **'All'**
-  String get filterAll;
-
-  /// No description provided for @filterIncome.
-  ///
-  /// In en, this message translates to:
-  /// **'Income'**
-  String get filterIncome;
-
-  /// No description provided for @filterExpense.
-  ///
-  /// In en, this message translates to:
-  /// **'Expense'**
-  String get filterExpense;
-
-  /// No description provided for @filterTransfer.
-  ///
-  /// In en, this message translates to:
-  /// **'Transfer'**
-  String get filterTransfer;
+  /// **'Notifications'**
+  String get notifications;
 
   /// No description provided for @back.
   ///
@@ -650,149 +494,683 @@ abstract class AppLocalizations {
   /// **'Back'**
   String get back;
 
-  /// No description provided for @expenseNotFound.
-  ///
-  /// In en, this message translates to:
-  /// **'Expense not found'**
-  String get expenseNotFound;
-
-  /// No description provided for @notifications.
-  ///
-  /// In en, this message translates to:
-  /// **'Notifications'**
-  String get notifications;
-
-  /// No description provided for @categories.
-  ///
-  /// In en, this message translates to:
-  /// **'Categories'**
-  String get categories;
-
-  /// No description provided for @addCategory.
-  ///
-  /// In en, this message translates to:
-  /// **'Add Category'**
-  String get addCategory;
-
-  /// No description provided for @editCategory.
-  ///
-  /// In en, this message translates to:
-  /// **'Edit Category'**
-  String get editCategory;
-
-  /// No description provided for @categoryName.
-  ///
-  /// In en, this message translates to:
-  /// **'Category Name'**
-  String get categoryName;
-
-  /// No description provided for @selectIcon.
-  ///
-  /// In en, this message translates to:
-  /// **'Select Icon'**
-  String get selectIcon;
-
-  /// No description provided for @selectColor.
-  ///
-  /// In en, this message translates to:
-  /// **'Select Color'**
-  String get selectColor;
-
-  /// No description provided for @budget.
-  ///
-  /// In en, this message translates to:
-  /// **'Budget'**
-  String get budget;
-
-  /// No description provided for @remaining.
-  ///
-  /// In en, this message translates to:
-  /// **'Remaining'**
-  String get remaining;
-
-  /// No description provided for @overBudget.
-  ///
-  /// In en, this message translates to:
-  /// **'Over Budget'**
-  String get overBudget;
-
-  /// No description provided for @noCategories.
-  ///
-  /// In en, this message translates to:
-  /// **'No Categories'**
-  String get noCategories;
-
-  /// No description provided for @noCategoriesMessage.
-  ///
-  /// In en, this message translates to:
-  /// **'Create categories to organize your expenses.'**
-  String get noCategoriesMessage;
-
-  /// No description provided for @confirmDeleteCategory.
-  ///
-  /// In en, this message translates to:
-  /// **'Are you sure you want to delete this category?'**
-  String get confirmDeleteCategory;
-
-  /// No description provided for @reports.
-  ///
-  /// In en, this message translates to:
-  /// **'Reports'**
-  String get reports;
-
-  /// No description provided for @totalIncome.
-  ///
-  /// In en, this message translates to:
-  /// **'Total Income'**
-  String get totalIncome;
-
-  /// No description provided for @totalExpenses.
-  ///
-  /// In en, this message translates to:
-  /// **'Total Expenses'**
-  String get totalExpenses;
-
-  /// No description provided for @balance.
-  ///
-  /// In en, this message translates to:
-  /// **'Balance'**
-  String get balance;
-
-  /// No description provided for @categoryBreakdown.
-  ///
-  /// In en, this message translates to:
-  /// **'Category Breakdown'**
-  String get categoryBreakdown;
-
-  /// No description provided for @monthlyTrend.
-  ///
-  /// In en, this message translates to:
-  /// **'Monthly Trend'**
-  String get monthlyTrend;
-
-  /// No description provided for @last6Months.
-  ///
-  /// In en, this message translates to:
-  /// **'Last 6 Months'**
-  String get last6Months;
-
-  /// No description provided for @noExpensesYet.
-  ///
-  /// In en, this message translates to:
-  /// **'No Expenses Yet'**
-  String get noExpensesYet;
-
-  /// No description provided for @startTracking.
-  ///
-  /// In en, this message translates to:
-  /// **'Start tracking to see your spending breakdown.'**
-  String get startTracking;
-
   /// No description provided for @requiredField.
   ///
   /// In en, this message translates to:
   /// **'This field is required'**
   String get requiredField;
+
+  /// No description provided for @search.
+  ///
+  /// In en, this message translates to:
+  /// **'Search'**
+  String get search;
+
+  /// No description provided for @searchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search restaurants, shops, services...'**
+  String get searchHint;
+
+  /// No description provided for @searchNoResults.
+  ///
+  /// In en, this message translates to:
+  /// **'No results found'**
+  String get searchNoResults;
+
+  /// No description provided for @searchNoResultsMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Try a different search term or browse categories.'**
+  String get searchNoResultsMessage;
+
+  /// No description provided for @sortBy.
+  ///
+  /// In en, this message translates to:
+  /// **'Sort by'**
+  String get sortBy;
+
+  /// No description provided for @sortByDistance.
+  ///
+  /// In en, this message translates to:
+  /// **'Distance'**
+  String get sortByDistance;
+
+  /// No description provided for @sortByRating.
+  ///
+  /// In en, this message translates to:
+  /// **'Rating'**
+  String get sortByRating;
+
+  /// No description provided for @sortByPrice.
+  ///
+  /// In en, this message translates to:
+  /// **'Price'**
+  String get sortByPrice;
+
+  /// No description provided for @popular.
+  ///
+  /// In en, this message translates to:
+  /// **'Popular'**
+  String get popular;
+
+  /// No description provided for @restaurants.
+  ///
+  /// In en, this message translates to:
+  /// **'Restaurants'**
+  String get restaurants;
+
+  /// No description provided for @grocery.
+  ///
+  /// In en, this message translates to:
+  /// **'Grocery'**
+  String get grocery;
+
+  /// No description provided for @pharmacy.
+  ///
+  /// In en, this message translates to:
+  /// **'Pharmacy'**
+  String get pharmacy;
+
+  /// No description provided for @ride.
+  ///
+  /// In en, this message translates to:
+  /// **'Ride'**
+  String get ride;
+
+  /// No description provided for @homeServices.
+  ///
+  /// In en, this message translates to:
+  /// **'Home Services'**
+  String get homeServices;
+
+  /// No description provided for @delivery.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivery'**
+  String get delivery;
+
+  /// No description provided for @offers.
+  ///
+  /// In en, this message translates to:
+  /// **'Offers'**
+  String get offers;
+
+  /// No description provided for @recommended.
+  ///
+  /// In en, this message translates to:
+  /// **'Recommended'**
+  String get recommended;
+
+  /// No description provided for @nearby.
+  ///
+  /// In en, this message translates to:
+  /// **'Nearby'**
+  String get nearby;
+
+  /// No description provided for @recentOrders.
+  ///
+  /// In en, this message translates to:
+  /// **'Recent Orders'**
+  String get recentOrders;
+
+  /// No description provided for @viewAll.
+  ///
+  /// In en, this message translates to:
+  /// **'View All'**
+  String get viewAll;
+
+  /// No description provided for @addToCart.
+  ///
+  /// In en, this message translates to:
+  /// **'Add to Cart'**
+  String get addToCart;
+
+  /// No description provided for @cart.
+  ///
+  /// In en, this message translates to:
+  /// **'Cart'**
+  String get cart;
+
+  /// No description provided for @checkout.
+  ///
+  /// In en, this message translates to:
+  /// **'Checkout'**
+  String get checkout;
+
+  /// No description provided for @placeOrder.
+  ///
+  /// In en, this message translates to:
+  /// **'Place Order'**
+  String get placeOrder;
+
+  /// No description provided for @orderPlaced.
+  ///
+  /// In en, this message translates to:
+  /// **'Order Placed!'**
+  String get orderPlaced;
+
+  /// No description provided for @orderTracking.
+  ///
+  /// In en, this message translates to:
+  /// **'Order Tracking'**
+  String get orderTracking;
+
+  /// No description provided for @orderHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'Order History'**
+  String get orderHistory;
+
+  /// No description provided for @myOrders.
+  ///
+  /// In en, this message translates to:
+  /// **'My Orders'**
+  String get myOrders;
+
+  /// No description provided for @deliveryAddress.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivery Address'**
+  String get deliveryAddress;
+
+  /// No description provided for @paymentMethod.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment Method'**
+  String get paymentMethod;
+
+  /// No description provided for @orderSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Order Summary'**
+  String get orderSummary;
+
+  /// No description provided for @subtotal.
+  ///
+  /// In en, this message translates to:
+  /// **'Subtotal'**
+  String get subtotal;
+
+  /// No description provided for @deliveryFee.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivery Fee'**
+  String get deliveryFee;
+
+  /// No description provided for @tax.
+  ///
+  /// In en, this message translates to:
+  /// **'Tax'**
+  String get tax;
+
+  /// No description provided for @total.
+  ///
+  /// In en, this message translates to:
+  /// **'Total'**
+  String get total;
+
+  /// No description provided for @estimatedTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Estimated Time'**
+  String get estimatedTime;
+
+  /// No description provided for @estimatedArrival.
+  ///
+  /// In en, this message translates to:
+  /// **'Estimated Arrival'**
+  String get estimatedArrival;
+
+  /// No description provided for @minutes.
+  ///
+  /// In en, this message translates to:
+  /// **'min'**
+  String get minutes;
+
+  /// No description provided for @emptyCart.
+  ///
+  /// In en, this message translates to:
+  /// **'Your cart is empty'**
+  String get emptyCart;
+
+  /// No description provided for @emptyCartMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Add items from restaurants and shops to get started.'**
+  String get emptyCartMessage;
+
+  /// No description provided for @clearCart.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear Cart'**
+  String get clearCart;
+
+  /// No description provided for @browseMerchants.
+  ///
+  /// In en, this message translates to:
+  /// **'Browse Merchants'**
+  String get browseMerchants;
+
+  /// No description provided for @proceedToCheckout.
+  ///
+  /// In en, this message translates to:
+  /// **'Proceed to Checkout'**
+  String get proceedToCheckout;
+
+  /// No description provided for @noOrders.
+  ///
+  /// In en, this message translates to:
+  /// **'No orders yet'**
+  String get noOrders;
+
+  /// No description provided for @noOrdersMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Your order history will appear here.'**
+  String get noOrdersMessage;
+
+  /// No description provided for @categoriesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Categories'**
+  String get categoriesTitle;
+
+  /// No description provided for @workingHours.
+  ///
+  /// In en, this message translates to:
+  /// **'Working Hours'**
+  String get workingHours;
+
+  /// No description provided for @deliveryTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivery Time'**
+  String get deliveryTime;
+
+  /// No description provided for @rating.
+  ///
+  /// In en, this message translates to:
+  /// **'Rating'**
+  String get rating;
+
+  /// No description provided for @reviews.
+  ///
+  /// In en, this message translates to:
+  /// **'Reviews'**
+  String get reviews;
+
+  /// No description provided for @menu.
+  ///
+  /// In en, this message translates to:
+  /// **'Menu'**
+  String get menu;
+
+  /// No description provided for @details.
+  ///
+  /// In en, this message translates to:
+  /// **'Details'**
+  String get details;
+
+  /// No description provided for @gallery.
+  ///
+  /// In en, this message translates to:
+  /// **'Gallery'**
+  String get gallery;
+
+  /// No description provided for @offersTab.
+  ///
+  /// In en, this message translates to:
+  /// **'Offers'**
+  String get offersTab;
+
+  /// No description provided for @branches.
+  ///
+  /// In en, this message translates to:
+  /// **'Branches'**
+  String get branches;
+
+  /// No description provided for @selectBranch.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Branch'**
+  String get selectBranch;
+
+  /// No description provided for @applyCoupon.
+  ///
+  /// In en, this message translates to:
+  /// **'Apply Coupon'**
+  String get applyCoupon;
+
+  /// No description provided for @couponCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Coupon Code'**
+  String get couponCode;
+
+  /// No description provided for @removeCoupon.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove Coupon'**
+  String get removeCoupon;
+
+  /// No description provided for @couponApplied.
+  ///
+  /// In en, this message translates to:
+  /// **'Coupon applied!'**
+  String get couponApplied;
+
+  /// No description provided for @couponInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid coupon code'**
+  String get couponInvalid;
+
+  /// No description provided for @quantity.
+  ///
+  /// In en, this message translates to:
+  /// **'Quantity'**
+  String get quantity;
+
+  /// No description provided for @specialInstructions.
+  ///
+  /// In en, this message translates to:
+  /// **'Special Instructions'**
+  String get specialInstructions;
+
+  /// No description provided for @specialInstructionsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Any allergies or preferences?'**
+  String get specialInstructionsHint;
+
+  /// No description provided for @orderConfirmed.
+  ///
+  /// In en, this message translates to:
+  /// **'Order Confirmed'**
+  String get orderConfirmed;
+
+  /// No description provided for @orderConfirmedMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Your order has been confirmed and the merchant is preparing it.'**
+  String get orderConfirmedMessage;
+
+  /// No description provided for @preparing.
+  ///
+  /// In en, this message translates to:
+  /// **'Preparing'**
+  String get preparing;
+
+  /// No description provided for @ready.
+  ///
+  /// In en, this message translates to:
+  /// **'Ready'**
+  String get ready;
+
+  /// No description provided for @outForDelivery.
+  ///
+  /// In en, this message translates to:
+  /// **'Out for Delivery'**
+  String get outForDelivery;
+
+  /// No description provided for @delivered.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivered'**
+  String get delivered;
+
+  /// No description provided for @cancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancelled'**
+  String get cancelled;
+
+  /// No description provided for @rateOrder.
+  ///
+  /// In en, this message translates to:
+  /// **'Rate Order'**
+  String get rateOrder;
+
+  /// No description provided for @reorder.
+  ///
+  /// In en, this message translates to:
+  /// **'Reorder'**
+  String get reorder;
+
+  /// No description provided for @callDriver.
+  ///
+  /// In en, this message translates to:
+  /// **'Call Driver'**
+  String get callDriver;
+
+  /// No description provided for @chatDriver.
+  ///
+  /// In en, this message translates to:
+  /// **'Chat with Driver'**
+  String get chatDriver;
+
+  /// No description provided for @shareLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Share Location'**
+  String get shareLocation;
+
+  /// No description provided for @thankYou.
+  ///
+  /// In en, this message translates to:
+  /// **'Thank You!'**
+  String get thankYou;
+
+  /// No description provided for @orderSuccessMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Your order has been placed successfully. You can track it in real-time.'**
+  String get orderSuccessMessage;
+
+  /// No description provided for @backToHome.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to Home'**
+  String get backToHome;
+
+  /// No description provided for @trackYourOrder.
+  ///
+  /// In en, this message translates to:
+  /// **'Track Your Order'**
+  String get trackYourOrder;
+
+  /// No description provided for @itemAddedToCart.
+  ///
+  /// In en, this message translates to:
+  /// **'Item added to cart'**
+  String get itemAddedToCart;
+
+  /// No description provided for @viewCart.
+  ///
+  /// In en, this message translates to:
+  /// **'View Cart'**
+  String get viewCart;
+
+  /// No description provided for @selectDeliveryAddress.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Delivery Address'**
+  String get selectDeliveryAddress;
+
+  /// No description provided for @addNewAddress.
+  ///
+  /// In en, this message translates to:
+  /// **'Add New Address'**
+  String get addNewAddress;
+
+  /// No description provided for @savedAddresses.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved Addresses'**
+  String get savedAddresses;
+
+  /// No description provided for @noSavedAddresses.
+  ///
+  /// In en, this message translates to:
+  /// **'No saved addresses yet'**
+  String get noSavedAddresses;
+
+  /// No description provided for @addressLine1.
+  ///
+  /// In en, this message translates to:
+  /// **'Address Line 1'**
+  String get addressLine1;
+
+  /// No description provided for @addressLine2.
+  ///
+  /// In en, this message translates to:
+  /// **'Address Line 2'**
+  String get addressLine2;
+
+  /// No description provided for @city.
+  ///
+  /// In en, this message translates to:
+  /// **'City'**
+  String get city;
+
+  /// No description provided for @postalCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Postal Code'**
+  String get postalCode;
+
+  /// No description provided for @cashOnDelivery.
+  ///
+  /// In en, this message translates to:
+  /// **'Cash on Delivery'**
+  String get cashOnDelivery;
+
+  /// No description provided for @creditCard.
+  ///
+  /// In en, this message translates to:
+  /// **'Credit Card'**
+  String get creditCard;
+
+  /// No description provided for @digitalWallet.
+  ///
+  /// In en, this message translates to:
+  /// **'Digital Wallet'**
+  String get digitalWallet;
+
+  /// No description provided for @selectPaymentMethod.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Payment Method'**
+  String get selectPaymentMethod;
+
+  /// No description provided for @apply.
+  ///
+  /// In en, this message translates to:
+  /// **'Apply'**
+  String get apply;
+
+  /// No description provided for @orderDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Order Details'**
+  String get orderDetails;
+
+  /// No description provided for @orderTimeline.
+  ///
+  /// In en, this message translates to:
+  /// **'Order Timeline'**
+  String get orderTimeline;
+
+  /// No description provided for @itemCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{No items} =1{1 item} other{{count} items}}'**
+  String itemCount(num count);
+
+  /// No description provided for @itemCountOther.
+  ///
+  /// In en, this message translates to:
+  /// **'items'**
+  String get itemCountOther;
+
+  /// No description provided for @sar.
+  ///
+  /// In en, this message translates to:
+  /// **'SAR'**
+  String get sar;
+
+  /// No description provided for @searchRestaurants.
+  ///
+  /// In en, this message translates to:
+  /// **'Search restaurants...'**
+  String get searchRestaurants;
+
+  /// No description provided for @searchProducts.
+  ///
+  /// In en, this message translates to:
+  /// **'Search products...'**
+  String get searchProducts;
+
+  /// No description provided for @filters.
+  ///
+  /// In en, this message translates to:
+  /// **'Filters'**
+  String get filters;
+
+  /// No description provided for @openNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Now'**
+  String get openNow;
+
+  /// No description provided for @freeDelivery.
+  ///
+  /// In en, this message translates to:
+  /// **'Free Delivery'**
+  String get freeDelivery;
+
+  /// No description provided for @highestRated.
+  ///
+  /// In en, this message translates to:
+  /// **'Highest Rated'**
+  String get highestRated;
+
+  /// No description provided for @discount.
+  ///
+  /// In en, this message translates to:
+  /// **'Discount'**
+  String get discount;
+
+  /// No description provided for @enterCouponCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter coupon code'**
+  String get enterCouponCode;
+
+  /// No description provided for @pending.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending'**
+  String get pending;
+
+  /// No description provided for @confirmed.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirmed'**
+  String get confirmed;
+
+  /// No description provided for @pickedUp.
+  ///
+  /// In en, this message translates to:
+  /// **'Picked Up'**
+  String get pickedUp;
+
+  /// No description provided for @inTransit.
+  ///
+  /// In en, this message translates to:
+  /// **'In Transit'**
+  String get inTransit;
 }
 
 class _AppLocalizationsDelegate

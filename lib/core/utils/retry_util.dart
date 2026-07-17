@@ -24,8 +24,8 @@ class RetryUtil {
       } catch (e) {
         attempt++;
 
-        final shouldRetry = (retryWhen?.call(e) ?? _isRetryable(e)) &&
-            attempt < maxRetries;
+        final shouldRetry =
+            (retryWhen?.call(e) ?? _isRetryable(e)) && attempt < maxRetries;
 
         if (!shouldRetry) {
           _logger.e('Operation failed after $attempt attempts', e);

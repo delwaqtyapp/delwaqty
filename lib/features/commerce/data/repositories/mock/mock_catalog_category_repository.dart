@@ -22,52 +22,52 @@ class MockCatalogCategoryRepository implements CatalogCategoryRepository {
 }
 
 Map<String, List<CatalogCategory>> _sampleData() => {
-      'm1': [
-        CatalogCategory(
-          id: 'c1',
-          merchantId: 'm1',
-          name: 'Meals',
-          icon: 'meal',
-          sortOrder: 0,
-        ),
-        CatalogCategory(
-          id: 'c2',
-          merchantId: 'm1',
-          name: 'Sides',
-          icon: 'side',
-          sortOrder: 1,
-        ),
-      ],
-      'm2': [
-        CatalogCategory(
-          id: 'c3',
-          merchantId: 'm2',
-          name: 'Dairy & Bakery',
-          icon: 'dairy',
-          sortOrder: 0,
-        ),
-        CatalogCategory(
-          id: 'c4',
-          merchantId: 'm2',
-          name: 'Fresh Produce',
-          icon: 'fresh',
-          sortOrder: 1,
-        ),
-      ],
-      'm3': [
-        CatalogCategory(
-          id: 'c5',
-          merchantId: 'm3',
-          name: 'Medicines',
-          icon: 'medicine',
-          sortOrder: 0,
-        ),
-        CatalogCategory(
-          id: 'c6',
-          merchantId: 'm3',
-          name: 'Vitamins & Supplements',
-          icon: 'vitamin',
-          sortOrder: 1,
-        ),
-      ],
-    };
+  'm1': [
+    CatalogCategory(
+      id: 'c1',
+      merchantId: 'm1',
+      name: 'Meals',
+      icon: 'meal',
+      sortOrder: 0,
+    ),
+    CatalogCategory(
+      id: 'c2',
+      merchantId: 'm1',
+      name: 'Sides',
+      icon: 'side',
+      sortOrder: 1,
+    ),
+  ],
+  'm2': [
+    CatalogCategory(
+      id: 'c3',
+      merchantId: 'm2',
+      name: 'Dairy & Bakery',
+      icon: 'dairy',
+      sortOrder: 0,
+    ),
+    CatalogCategory(
+      id: 'c4',
+      merchantId: 'm2',
+      name: 'Fresh Produce',
+      icon: 'fresh',
+      sortOrder: 1,
+    ),
+  ],
+  'm3': [
+    CatalogCategory(
+      id: 'c5',
+      merchantId: 'm3',
+      name: 'Medicines',
+      icon: 'medicine',
+      sortOrder: 0,
+    ),
+    CatalogCategory(
+      id: 'c6',
+      merchantId: 'm3',
+      name: 'Vitamins & Supplements',
+      icon: 'vitamin',
+      sortOrder: 1,
+    ),
+  ],
+};

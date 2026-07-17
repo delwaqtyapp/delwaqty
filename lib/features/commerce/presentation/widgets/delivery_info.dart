@@ -26,10 +26,7 @@ class DeliveryInfo extends StatelessWidget {
             children: [
               const Icon(Icons.access_time, size: 16, color: Colors.grey),
               const SizedBox(width: 4),
-              Text(
-                '$estimatedMinutes min',
-                style: theme.textTheme.bodySmall,
-              ),
+              Text('$estimatedMinutes min', style: theme.textTheme.bodySmall),
             ],
           ),
         if (deliveryFee != null)
@@ -50,8 +47,11 @@ class DeliveryInfo extends StatelessWidget {
           Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(Icons.shopping_bag_outlined,
-                  size: 16, color: Colors.grey),
+              const Icon(
+                Icons.shopping_bag_outlined,
+                size: 16,
+                color: Colors.grey,
+              ),
               const SizedBox(width: 4),
               Text(
                 'Min ${minimumOrder!.toStringAsFixed(0)} SAR',

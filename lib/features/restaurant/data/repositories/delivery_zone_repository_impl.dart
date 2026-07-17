@@ -9,31 +9,46 @@ class DeliveryZoneRepositoryImpl implements DeliveryZoneRepository {
 
   @override
   Future<List<DeliveryZone>> getZones(String merchantId) async {
-    try { return await _dataSource.getZones(merchantId); }
-    catch (e) { throw ServerException(message: e.toString()); }
+    try {
+      return await _dataSource.getZones(merchantId);
+    } catch (e) {
+      throw ServerException(message: e.toString());
+    }
   }
 
   @override
   Future<DeliveryZone?> getZoneById(String id) async {
-    try { return await _dataSource.getZoneById(id); }
-    catch (e) { throw ServerException(message: e.toString()); }
+    try {
+      return await _dataSource.getZoneById(id);
+    } catch (e) {
+      throw ServerException(message: e.toString());
+    }
   }
 
   @override
   Future<DeliveryZone> createZone(DeliveryZone zone) async {
-    try { return await _dataSource.createZone(zone); }
-    catch (e) { throw ServerException(message: e.toString()); }
+    try {
+      return await _dataSource.createZone(zone);
+    } catch (e) {
+      throw ServerException(message: e.toString());
+    }
   }
 
   @override
   Future<DeliveryZone> updateZone(DeliveryZone zone) async {
-    try { return await _dataSource.updateZone(zone); }
-    catch (e) { throw ServerException(message: e.toString()); }
+    try {
+      return await _dataSource.updateZone(zone);
+    } catch (e) {
+      throw ServerException(message: e.toString());
+    }
   }
 
   @override
   Future<void> deleteZone(String id) async {
-    try { await _dataSource.deleteZone(id); }
-    catch (e) { throw ServerException(message: e.toString()); }
+    try {
+      await _dataSource.deleteZone(id);
+    } catch (e) {
+      throw ServerException(message: e.toString());
+    }
   }
 }

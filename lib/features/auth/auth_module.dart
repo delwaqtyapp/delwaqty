@@ -23,20 +23,20 @@ class AuthModule extends FeatureModule {
 
   @override
   List<RouteBase> get standaloneRoutes => [
-        GoRoute(
-          path: '/login',
-          name: 'login',
-          builder: (context, state) => const LoginPage(),
-        ),
-        GoRoute(
-          path: '/register',
-          name: 'register',
-          builder: (context, state) => const RegisterPage(),
-        ),
-        GoRoute(
-          path: '/forgot-password',
-          name: 'forgot-password',
-          builder: (context, state) => const ForgotPasswordPage(),
-        ),
-      ];
+    GoRoute(
+      path: '/login',
+      name: 'login',
+      builder: (context, state) => const LoginPage(),
+    ),
+    GoRoute(
+      path: '/register',
+      name: 'register',
+      builder: (context, state) => const RegisterPage(),
+    ),
+    GoRoute(
+      path: '/forgot-password',
+      name: 'forgot-password',
+      builder: (context, state) => const ForgotPasswordPage(),
+    ),
+  ];
 }

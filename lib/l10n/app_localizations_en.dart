@@ -102,10 +102,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get appName => 'Delwaqty';
 
   @override
-  String get appNameAr => 'الدقة';
+  String get appNameAr => 'دلوقتي';
 
   @override
-  String get splashTagline => 'Precision in every detail';
+  String get splashTagline => 'Every service. One app.';
 
   @override
   String get splashLoading => 'Preparing your experience...';
@@ -120,38 +120,45 @@ class AppLocalizationsEn extends AppLocalizations {
   String get onboardingDone => 'Get Started';
 
   @override
-  String get onboardingTitle1 => 'Track Your Expenses';
+  String get onboardingTitle1 => 'All your needs... in one app';
 
   @override
   String get onboardingDesc1 =>
-      'Keep track of every transaction with ease. Know where your money goes.';
+      'Order food, book services, shop online, and get anything delivered. Everything you need, right at your fingertips.';
 
   @override
-  String get onboardingTitle2 => 'Smart Budgeting';
+  String get onboardingTitle2 => 'Order Food';
 
   @override
   String get onboardingDesc2 =>
-      'Set budgets, track spending, and achieve your financial goals effortlessly.';
+      'Browse restaurants, explore menus, customize your meal, and get it delivered fast to your door.';
 
   @override
-  String get onboardingTitle3 => 'Beautiful Reports';
+  String get onboardingTitle3 => 'Book Services';
 
   @override
   String get onboardingDesc3 =>
-      'Visualize your finances with elegant charts and insightful reports.';
+      'Cleaning, electrician, plumber, AC repair — book trusted professionals in seconds.';
 
   @override
-  String get onboardingTitle4 => 'Secure & Private';
+  String get onboardingTitle4 => 'Track Your Order';
 
   @override
   String get onboardingDesc4 =>
-      'Your financial data is encrypted and protected with industry-leading security.';
+      'Real-time tracking, live map, driver ETA, and instant notifications for every order.';
+
+  @override
+  String get onboardingTitle5 => 'Start Now';
+
+  @override
+  String get onboardingDesc5 =>
+      'Everything revolves around Delwaqty. Your super app for everyday life.';
 
   @override
   String get welcomeTitle => 'Welcome to Delwaqty';
 
   @override
-  String get welcomeSubtitle => 'Your personal finance companion';
+  String get welcomeSubtitle => 'Order. Shop. Move. Book. All in Delwaqty.';
 
   @override
   String get welcomeLoginButton => 'I already have an account';
@@ -201,168 +208,360 @@ class AppLocalizationsEn extends AppLocalizations {
   String get appearance => 'Appearance';
 
   @override
-  String get expenses => 'Expenses';
-
-  @override
-  String get addExpense => 'Add Expense';
-
-  @override
-  String get editExpense => 'Edit Expense';
-
-  @override
-  String get expenseDetail => 'Expense Detail';
-
-  @override
-  String get deleteExpense => 'Delete Expense';
-
-  @override
-  String get deleteExpenseConfirm =>
-      'Are you sure you want to delete this expense? This action cannot be undone.';
-
-  @override
-  String get title => 'Title';
-
-  @override
-  String get titleHint => 'Enter expense title';
-
-  @override
-  String get titleRequired => 'Title is required';
-
-  @override
-  String get amount => 'Amount';
-
-  @override
-  String get amountHint => '0.00';
-
-  @override
-  String get amountRequired => 'Amount is required';
-
-  @override
-  String get amountInvalid => 'Amount must be greater than 0';
-
-  @override
-  String get category => 'Category';
-
-  @override
-  String get categoryRequired => 'Please select a category';
-
-  @override
-  String get date => 'Date';
-
-  @override
-  String get note => 'Note';
-
-  @override
-  String get noteHint => 'Add a note (optional)';
-
-  @override
-  String get type => 'Type';
-
-  @override
-  String get recurring => 'Recurring';
-
-  @override
-  String get receipt => 'Receipt';
-
-  @override
-  String get createdAt => 'Created at';
-
-  @override
-  String get searchExpenses => 'Search expenses...';
-
-  @override
-  String get noExpenses => 'No expenses yet';
-
-  @override
-  String get noExpensesMessage =>
-      'Start tracking your expenses by adding your first entry.';
-
-  @override
-  String get filterAll => 'All';
-
-  @override
-  String get filterIncome => 'Income';
-
-  @override
-  String get filterExpense => 'Expense';
-
-  @override
-  String get filterTransfer => 'Transfer';
+  String get notifications => 'Notifications';
 
   @override
   String get back => 'Back';
 
   @override
-  String get expenseNotFound => 'Expense not found';
-
-  @override
-  String get notifications => 'Notifications';
-
-  @override
-  String get categories => 'Categories';
-
-  @override
-  String get addCategory => 'Add Category';
-
-  @override
-  String get editCategory => 'Edit Category';
-
-  @override
-  String get categoryName => 'Category Name';
-
-  @override
-  String get selectIcon => 'Select Icon';
-
-  @override
-  String get selectColor => 'Select Color';
-
-  @override
-  String get budget => 'Budget';
-
-  @override
-  String get remaining => 'Remaining';
-
-  @override
-  String get overBudget => 'Over Budget';
-
-  @override
-  String get noCategories => 'No Categories';
-
-  @override
-  String get noCategoriesMessage =>
-      'Create categories to organize your expenses.';
-
-  @override
-  String get confirmDeleteCategory =>
-      'Are you sure you want to delete this category?';
-
-  @override
-  String get reports => 'Reports';
-
-  @override
-  String get totalIncome => 'Total Income';
-
-  @override
-  String get totalExpenses => 'Total Expenses';
-
-  @override
-  String get balance => 'Balance';
-
-  @override
-  String get categoryBreakdown => 'Category Breakdown';
-
-  @override
-  String get monthlyTrend => 'Monthly Trend';
-
-  @override
-  String get last6Months => 'Last 6 Months';
-
-  @override
-  String get noExpensesYet => 'No Expenses Yet';
-
-  @override
-  String get startTracking => 'Start tracking to see your spending breakdown.';
-
-  @override
   String get requiredField => 'This field is required';
+
+  @override
+  String get search => 'Search';
+
+  @override
+  String get searchHint => 'Search restaurants, shops, services...';
+
+  @override
+  String get searchNoResults => 'No results found';
+
+  @override
+  String get searchNoResultsMessage =>
+      'Try a different search term or browse categories.';
+
+  @override
+  String get sortBy => 'Sort by';
+
+  @override
+  String get sortByDistance => 'Distance';
+
+  @override
+  String get sortByRating => 'Rating';
+
+  @override
+  String get sortByPrice => 'Price';
+
+  @override
+  String get popular => 'Popular';
+
+  @override
+  String get restaurants => 'Restaurants';
+
+  @override
+  String get grocery => 'Grocery';
+
+  @override
+  String get pharmacy => 'Pharmacy';
+
+  @override
+  String get ride => 'Ride';
+
+  @override
+  String get homeServices => 'Home Services';
+
+  @override
+  String get delivery => 'Delivery';
+
+  @override
+  String get offers => 'Offers';
+
+  @override
+  String get recommended => 'Recommended';
+
+  @override
+  String get nearby => 'Nearby';
+
+  @override
+  String get recentOrders => 'Recent Orders';
+
+  @override
+  String get viewAll => 'View All';
+
+  @override
+  String get addToCart => 'Add to Cart';
+
+  @override
+  String get cart => 'Cart';
+
+  @override
+  String get checkout => 'Checkout';
+
+  @override
+  String get placeOrder => 'Place Order';
+
+  @override
+  String get orderPlaced => 'Order Placed!';
+
+  @override
+  String get orderTracking => 'Order Tracking';
+
+  @override
+  String get orderHistory => 'Order History';
+
+  @override
+  String get myOrders => 'My Orders';
+
+  @override
+  String get deliveryAddress => 'Delivery Address';
+
+  @override
+  String get paymentMethod => 'Payment Method';
+
+  @override
+  String get orderSummary => 'Order Summary';
+
+  @override
+  String get subtotal => 'Subtotal';
+
+  @override
+  String get deliveryFee => 'Delivery Fee';
+
+  @override
+  String get tax => 'Tax';
+
+  @override
+  String get total => 'Total';
+
+  @override
+  String get estimatedTime => 'Estimated Time';
+
+  @override
+  String get estimatedArrival => 'Estimated Arrival';
+
+  @override
+  String get minutes => 'min';
+
+  @override
+  String get emptyCart => 'Your cart is empty';
+
+  @override
+  String get emptyCartMessage =>
+      'Add items from restaurants and shops to get started.';
+
+  @override
+  String get clearCart => 'Clear Cart';
+
+  @override
+  String get browseMerchants => 'Browse Merchants';
+
+  @override
+  String get proceedToCheckout => 'Proceed to Checkout';
+
+  @override
+  String get noOrders => 'No orders yet';
+
+  @override
+  String get noOrdersMessage => 'Your order history will appear here.';
+
+  @override
+  String get categoriesTitle => 'Categories';
+
+  @override
+  String get workingHours => 'Working Hours';
+
+  @override
+  String get deliveryTime => 'Delivery Time';
+
+  @override
+  String get rating => 'Rating';
+
+  @override
+  String get reviews => 'Reviews';
+
+  @override
+  String get menu => 'Menu';
+
+  @override
+  String get details => 'Details';
+
+  @override
+  String get gallery => 'Gallery';
+
+  @override
+  String get offersTab => 'Offers';
+
+  @override
+  String get branches => 'Branches';
+
+  @override
+  String get selectBranch => 'Select Branch';
+
+  @override
+  String get applyCoupon => 'Apply Coupon';
+
+  @override
+  String get couponCode => 'Coupon Code';
+
+  @override
+  String get removeCoupon => 'Remove Coupon';
+
+  @override
+  String get couponApplied => 'Coupon applied!';
+
+  @override
+  String get couponInvalid => 'Invalid coupon code';
+
+  @override
+  String get quantity => 'Quantity';
+
+  @override
+  String get specialInstructions => 'Special Instructions';
+
+  @override
+  String get specialInstructionsHint => 'Any allergies or preferences?';
+
+  @override
+  String get orderConfirmed => 'Order Confirmed';
+
+  @override
+  String get orderConfirmedMessage =>
+      'Your order has been confirmed and the merchant is preparing it.';
+
+  @override
+  String get preparing => 'Preparing';
+
+  @override
+  String get ready => 'Ready';
+
+  @override
+  String get outForDelivery => 'Out for Delivery';
+
+  @override
+  String get delivered => 'Delivered';
+
+  @override
+  String get cancelled => 'Cancelled';
+
+  @override
+  String get rateOrder => 'Rate Order';
+
+  @override
+  String get reorder => 'Reorder';
+
+  @override
+  String get callDriver => 'Call Driver';
+
+  @override
+  String get chatDriver => 'Chat with Driver';
+
+  @override
+  String get shareLocation => 'Share Location';
+
+  @override
+  String get thankYou => 'Thank You!';
+
+  @override
+  String get orderSuccessMessage =>
+      'Your order has been placed successfully. You can track it in real-time.';
+
+  @override
+  String get backToHome => 'Back to Home';
+
+  @override
+  String get trackYourOrder => 'Track Your Order';
+
+  @override
+  String get itemAddedToCart => 'Item added to cart';
+
+  @override
+  String get viewCart => 'View Cart';
+
+  @override
+  String get selectDeliveryAddress => 'Select Delivery Address';
+
+  @override
+  String get addNewAddress => 'Add New Address';
+
+  @override
+  String get savedAddresses => 'Saved Addresses';
+
+  @override
+  String get noSavedAddresses => 'No saved addresses yet';
+
+  @override
+  String get addressLine1 => 'Address Line 1';
+
+  @override
+  String get addressLine2 => 'Address Line 2';
+
+  @override
+  String get city => 'City';
+
+  @override
+  String get postalCode => 'Postal Code';
+
+  @override
+  String get cashOnDelivery => 'Cash on Delivery';
+
+  @override
+  String get creditCard => 'Credit Card';
+
+  @override
+  String get digitalWallet => 'Digital Wallet';
+
+  @override
+  String get selectPaymentMethod => 'Select Payment Method';
+
+  @override
+  String get apply => 'Apply';
+
+  @override
+  String get orderDetails => 'Order Details';
+
+  @override
+  String get orderTimeline => 'Order Timeline';
+
+  @override
+  String itemCount(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count items',
+      one: '1 item',
+      zero: 'No items',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get itemCountOther => 'items';
+
+  @override
+  String get sar => 'SAR';
+
+  @override
+  String get searchRestaurants => 'Search restaurants...';
+
+  @override
+  String get searchProducts => 'Search products...';
+
+  @override
+  String get filters => 'Filters';
+
+  @override
+  String get openNow => 'Open Now';
+
+  @override
+  String get freeDelivery => 'Free Delivery';
+
+  @override
+  String get highestRated => 'Highest Rated';
+
+  @override
+  String get discount => 'Discount';
+
+  @override
+  String get enterCouponCode => 'Enter coupon code';
+
+  @override
+  String get pending => 'Pending';
+
+  @override
+  String get confirmed => 'Confirmed';
+
+  @override
+  String get pickedUp => 'Picked Up';
+
+  @override
+  String get inTransit => 'In Transit';
 }

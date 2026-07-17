@@ -120,21 +120,21 @@ class AppCard extends StatelessWidget {
 
     return switch (variant) {
       AppCardVariant.elevated => BoxDecoration(
-          color: backgroundColor ?? colors.surfaceContainerLowest,
-          borderRadius: radius,
-          boxShadow: AppElevation.shadowSm,
-        ),
+        color: backgroundColor ?? colors.surfaceContainerLowest,
+        borderRadius: radius,
+        boxShadow: AppElevation.shadowSm,
+      ),
       AppCardVariant.filled => BoxDecoration(
-          color: backgroundColor ?? colors.surfaceContainerHighest.withValues(alpha: 0.3),
-          borderRadius: radius,
-        ),
+        color:
+            backgroundColor ??
+            colors.surfaceContainerHighest.withValues(alpha: 0.3),
+        borderRadius: radius,
+      ),
       AppCardVariant.outlined => BoxDecoration(
-          color: backgroundColor ?? colors.surfaceContainerLowest,
-          borderRadius: radius,
-          border: Border.all(
-            color: borderColor ?? colors.outlineVariant,
-          ),
-        ),
+        color: backgroundColor ?? colors.surfaceContainerLowest,
+        borderRadius: radius,
+        border: Border.all(color: borderColor ?? colors.outlineVariant),
+      ),
     };
   }
 }

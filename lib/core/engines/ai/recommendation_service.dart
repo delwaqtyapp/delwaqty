@@ -94,10 +94,7 @@ class UserPreferences {
 /// A price range constraint for preferences.
 class PriceRange {
   /// Creates a [PriceRange] instance.
-  const PriceRange({
-    required this.min,
-    required this.max,
-  });
+  const PriceRange({required this.min, required this.max});
 
   /// Minimum price in the range.
   final double min;
@@ -214,10 +211,7 @@ abstract interface class RecommendationService {
   Future<UserPreferences> getUserPreferences(String userId);
 
   /// Updates a single [preference] for the given [userId].
-  Future<void> updatePreference(
-    String userId,
-    Map<String, dynamic> preference,
-  );
+  Future<void> updatePreference(String userId, Map<String, dynamic> preference);
 
   /// Tracks a user [action] on the specified [itemId].
   Future<void> trackInteraction(

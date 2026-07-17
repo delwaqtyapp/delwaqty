@@ -52,11 +52,7 @@ enum SearchFieldType {
 /// A document to be indexed in the search engine.
 class IndexDocument {
   /// Creates an [IndexDocument] instance.
-  const IndexDocument({
-    required this.id,
-    required this.data,
-    this.timestamp,
-  });
+  const IndexDocument({required this.id, required this.data, this.timestamp});
 
   /// Unique document identifier.
   final String id;

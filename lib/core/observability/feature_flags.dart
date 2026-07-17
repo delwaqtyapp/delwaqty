@@ -10,31 +10,31 @@ import 'dart:async';
 class FeatureFlagValue {
   /// Boolean value.
   const FeatureFlagValue.bool(this.boolValue)
-      : stringValue = null,
-        intValue = null,
-        doubleValue = null,
-        _type = _FlagType.bool;
+    : stringValue = null,
+      intValue = null,
+      doubleValue = null,
+      _type = _FlagType.bool;
 
   /// String value.
   const FeatureFlagValue.string(this.stringValue)
-      : boolValue = null,
-        intValue = null,
-        doubleValue = null,
-        _type = _FlagType.string;
+    : boolValue = null,
+      intValue = null,
+      doubleValue = null,
+      _type = _FlagType.string;
 
   /// Integer value.
   const FeatureFlagValue.integer(this.intValue)
-      : boolValue = null,
-        stringValue = null,
-        doubleValue = null,
-        _type = _FlagType.integer;
+    : boolValue = null,
+      stringValue = null,
+      doubleValue = null,
+      _type = _FlagType.integer;
 
   /// Double value.
   const FeatureFlagValue.floating(this.doubleValue)
-      : boolValue = null,
-        stringValue = null,
-        intValue = null,
-        _type = _FlagType.double;
+    : boolValue = null,
+      stringValue = null,
+      intValue = null,
+      _type = _FlagType.double;
 
   final bool? boolValue;
   final String? stringValue;
@@ -60,10 +60,7 @@ enum _FlagType { bool, string, integer, double }
 /// Event emitted when a flag value changes.
 class FeatureFlagEvent {
   /// Creates a [FeatureFlagEvent].
-  const FeatureFlagEvent({
-    required this.flagName,
-    required this.newValue,
-  });
+  const FeatureFlagEvent({required this.flagName, required this.newValue});
 
   /// The name of the flag that changed.
   final String flagName;
@@ -123,7 +120,8 @@ class InMemoryFeatureFlags extends FeatureFlags {
   @override
   String getString(String flagName, String defaultValue) {
     final value = _resolve(flagName);
-    if (value != null && value.isString) return value.stringValue ?? defaultValue;
+    if (value != null && value.isString)
+      return value.stringValue ?? defaultValue;
     return defaultValue;
   }
 
@@ -137,7 +135,8 @@ class InMemoryFeatureFlags extends FeatureFlags {
   @override
   double getDouble(String flagName, double defaultValue) {
     final value = _resolve(flagName);
-    if (value != null && value.isDouble) return value.doubleValue ?? defaultValue;
+    if (value != null && value.isDouble)
+      return value.doubleValue ?? defaultValue;
     return defaultValue;
   }
 
@@ -159,10 +158,9 @@ class InMemoryFeatureFlags extends FeatureFlags {
   /// Sets a flag value and notifies listeners.
   void setFlag(String flagName, FeatureFlagValue value) {
     _flags[flagName] = value;
-    _getController(flagName).add(FeatureFlagEvent(
-      flagName: flagName,
-      newValue: value,
-    ));
+    _getController(
+      flagName,
+    ).add(FeatureFlagEvent(flagName: flagName, newValue: value));
   }
 
   /// Removes a flag so it falls back to the default.

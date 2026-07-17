@@ -35,35 +35,48 @@ final branchRepositoryProvider = Provider<BranchRepository>(
 );
 
 final workingHoursRepositoryProvider = Provider<WorkingHoursRepository>(
-  (ref) => WorkingHoursRepositoryImpl(ref.watch(supabaseWorkingHoursDataSourceProvider)),
+  (ref) => WorkingHoursRepositoryImpl(
+    ref.watch(supabaseWorkingHoursDataSourceProvider),
+  ),
 );
 
 final deliveryZoneRepositoryProvider = Provider<DeliveryZoneRepository>(
-  (ref) => DeliveryZoneRepositoryImpl(ref.watch(supabaseDeliveryZoneDataSourceProvider)),
+  (ref) => DeliveryZoneRepositoryImpl(
+    ref.watch(supabaseDeliveryZoneDataSourceProvider),
+  ),
 );
 
 final modifierRepositoryProvider = Provider<ModifierRepository>(
-  (ref) => ModifierRepositoryImpl(ref.watch(supabaseModifierDataSourceProvider)),
+  (ref) =>
+      ModifierRepositoryImpl(ref.watch(supabaseModifierDataSourceProvider)),
 );
 
-final restaurantSettingsRepositoryProvider = Provider<RestaurantSettingsRepository>(
-  (ref) => RestaurantSettingsRepositoryImpl(ref.watch(supabaseRestaurantSettingsDataSourceProvider)),
-);
+final restaurantSettingsRepositoryProvider =
+    Provider<RestaurantSettingsRepository>(
+      (ref) => RestaurantSettingsRepositoryImpl(
+        ref.watch(supabaseRestaurantSettingsDataSourceProvider),
+      ),
+    );
 
 final offerRepositoryProvider = Provider<OfferRepository>(
   (ref) => OfferRepositoryImpl(ref.watch(supabaseOfferDataSourceProvider)),
 );
 
 final reservationRepositoryProvider = Provider<ReservationRepository>(
-  (ref) => ReservationRepositoryImpl(ref.watch(supabaseReservationDataSourceProvider)),
+  (ref) => ReservationRepositoryImpl(
+    ref.watch(supabaseReservationDataSourceProvider),
+  ),
 );
 
 final orderTrackingRepositoryProvider = Provider<OrderTrackingRepository>(
-  (ref) => OrderTrackingRepositoryImpl(ref.watch(supabaseOrderTrackingDataSourceProvider)),
+  (ref) => OrderTrackingRepositoryImpl(
+    ref.watch(supabaseOrderTrackingDataSourceProvider),
+  ),
 );
 
 final inventoryRepositoryProvider = Provider<InventoryRepository>(
-  (ref) => InventoryRepositoryImpl(ref.watch(supabaseInventoryDataSourceProvider)),
+  (ref) =>
+      InventoryRepositoryImpl(ref.watch(supabaseInventoryDataSourceProvider)),
 );
 
 class RestaurantModule extends FeatureModule {
@@ -83,9 +96,7 @@ class RestaurantModule extends FeatureModule {
   int get navPriority => 10;
 
   @override
-  Set<ModuleCapability> get capabilities => {
-        ModuleCapability.hasDeepLinks,
-      };
+  Set<ModuleCapability> get capabilities => {ModuleCapability.hasDeepLinks};
 
   @override
   List<String> get dependsOn => ['commerce'];

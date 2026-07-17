@@ -25,33 +25,33 @@ class AdminModule extends FeatureModule {
 
   @override
   Set<ModuleCapability> get capabilities => {
-        ModuleCapability.searchable,
-        ModuleCapability.hasNotifications,
-      };
+    ModuleCapability.searchable,
+    ModuleCapability.hasNotifications,
+  };
 
   @override
   List<RouteBase> get standaloneRoutes => [
+    GoRoute(
+      path: '/admin',
+      builder: (context, state) => const AdminDashboardPage(),
+      routes: [
         GoRoute(
-          path: '/admin',
-          builder: (context, state) => const AdminDashboardPage(),
-          routes: [
-            GoRoute(
-              path: 'users',
-              builder: (context, state) => const AdminUsersPage(),
-            ),
-            GoRoute(
-              path: 'merchants',
-              builder: (context, state) => const AdminMerchantsPage(),
-            ),
-            GoRoute(
-              path: 'orders',
-              builder: (context, state) => const AdminOrdersPage(),
-            ),
-            GoRoute(
-              path: 'settings',
-              builder: (context, state) => const AdminSettingsPage(),
-            ),
-          ],
+          path: 'users',
+          builder: (context, state) => const AdminUsersPage(),
         ),
-      ];
+        GoRoute(
+          path: 'merchants',
+          builder: (context, state) => const AdminMerchantsPage(),
+        ),
+        GoRoute(
+          path: 'orders',
+          builder: (context, state) => const AdminOrdersPage(),
+        ),
+        GoRoute(
+          path: 'settings',
+          builder: (context, state) => const AdminSettingsPage(),
+        ),
+      ],
+    ),
+  ];
 }

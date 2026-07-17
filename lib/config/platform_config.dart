@@ -42,7 +42,8 @@ class PlatformConfig {
   /// Returns a list of missing configurations.
   static List<String> get missingConfigurations {
     final missing = <String>[];
-    if (!supabaseReady) missing.add('Supabase (SUPABASE_URL, SUPABASE_ANON_KEY)');
+    if (!supabaseReady)
+      missing.add('Supabase (SUPABASE_URL, SUPABASE_ANON_KEY)');
     if (!firebaseReady) missing.add('Firebase (google-services.json)');
     if (!mapsReady) missing.add('Google Maps (GOOGLE_MAPS_API_KEY)');
     if (!cloudflareReady) missing.add('Cloudflare (ACCOUNT_ID, R2_BUCKET)');
@@ -59,7 +60,7 @@ class PlatformConfig {
     buffer.writeln('Google Maps: ${mapsReady ? "✅" : "❌"}');
     buffer.writeln('Cloudflare:  ${cloudflareReady ? "✅" : "❌"}');
     buffer.writeln('');
-    
+
     if (missingConfigurations.isNotEmpty) {
       buffer.writeln('Missing:');
       for (final item in missingConfigurations) {
@@ -68,7 +69,7 @@ class PlatformConfig {
     } else {
       buffer.writeln('All services configured! ✅');
     }
-    
+
     return buffer.toString();
   }
 }

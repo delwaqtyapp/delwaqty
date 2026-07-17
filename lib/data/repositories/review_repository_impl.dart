@@ -9,20 +9,29 @@ class ReviewRepositoryImpl implements ReviewRepository {
 
   @override
   Future<List<Review>> getMerchantReviews(String merchantId) async {
-    try { return await _dataSource.getMerchantReviews(merchantId); }
-    catch (e) { throw ServerException(message: e.toString()); }
+    try {
+      return await _dataSource.getMerchantReviews(merchantId);
+    } catch (e) {
+      throw ServerException(message: e.toString());
+    }
   }
 
   @override
   Future<List<Review>> getProductReviews(String productId) async {
-    try { return await _dataSource.getProductReviews(productId); }
-    catch (e) { throw ServerException(message: e.toString()); }
+    try {
+      return await _dataSource.getProductReviews(productId);
+    } catch (e) {
+      throw ServerException(message: e.toString());
+    }
   }
 
   @override
   Future<Review?> getReviewById(String id) async {
-    try { return await _dataSource.getReviewById(id); }
-    catch (e) { throw ServerException(message: e.toString()); }
+    try {
+      return await _dataSource.getReviewById(id);
+    } catch (e) {
+      throw ServerException(message: e.toString());
+    }
   }
 
   @override
@@ -45,7 +54,9 @@ class ReviewRepositoryImpl implements ReviewRepository {
         comment: comment,
         imageUrls: imageUrls,
       );
-    } catch (e) { throw ServerException(message: e.toString()); }
+    } catch (e) {
+      throw ServerException(message: e.toString());
+    }
   }
 
   @override
@@ -62,25 +73,36 @@ class ReviewRepositoryImpl implements ReviewRepository {
         comment: comment,
         imageUrls: imageUrls,
       );
-    } catch (e) { throw ServerException(message: e.toString()); }
+    } catch (e) {
+      throw ServerException(message: e.toString());
+    }
   }
 
   @override
   Future<void> deleteReview(String reviewId) async {
-    try { await _dataSource.deleteReview(reviewId); }
-    catch (e) { throw ServerException(message: e.toString()); }
+    try {
+      await _dataSource.deleteReview(reviewId);
+    } catch (e) {
+      throw ServerException(message: e.toString());
+    }
   }
 
   @override
   Future<ReviewSummary> getMerchantRatingSummary(String merchantId) async {
-    try { return await _dataSource.getMerchantRatingSummary(merchantId); }
-    catch (e) { throw ServerException(message: e.toString()); }
+    try {
+      return await _dataSource.getMerchantRatingSummary(merchantId);
+    } catch (e) {
+      throw ServerException(message: e.toString());
+    }
   }
 
   @override
   Future<ReviewSummary> getProductRatingSummary(String productId) async {
-    try { return await _dataSource.getProductRatingSummary(productId); }
-    catch (e) { throw ServerException(message: e.toString()); }
+    try {
+      return await _dataSource.getProductRatingSummary(productId);
+    } catch (e) {
+      throw ServerException(message: e.toString());
+    }
   }
 
   @override

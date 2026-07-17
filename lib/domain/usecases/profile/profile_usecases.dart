@@ -61,6 +61,6 @@ class UploadAvatarUseCase {
 
 final watchProfileUseCaseProvider = StreamProvider.autoDispose
     .family<User, String>((ref, userId) {
-  final repository = ref.watch(profileRepositoryProvider);
-  return repository.watchProfile(userId);
-});
+      final repository = ref.watch(profileRepositoryProvider);
+      return repository.watchProfile(userId);
+    });

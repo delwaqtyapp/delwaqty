@@ -22,23 +22,23 @@ class ProfileModule extends FeatureModule {
 
   @override
   List<RouteBase> get shellSubRoutes => [
-        GoRoute(
-          path: '/profile',
-          name: 'profile',
-          builder: (context, state) => const ProfilePage(),
-        ),
-      ];
+    GoRoute(
+      path: '/profile',
+      name: 'profile',
+      builder: (context, state) => const ProfilePage(),
+    ),
+  ];
 
   @override
   List<DrawerEntry> get drawerEntries => [
-        DrawerEntry(
-          id: 'profile',
-          label: (ctx) => AppLocalizations.of(ctx).profile,
-          icon: Icons.person_outline_rounded,
-          onTap: (ctx, ref) {
-            Navigator.of(ctx).pop();
-            ctx.push('/profile');
-          },
-        ),
-      ];
+    DrawerEntry(
+      id: 'profile',
+      label: (ctx) => AppLocalizations.of(ctx).profile,
+      icon: Icons.person_outline_rounded,
+      onTap: (ctx, ref) {
+        Navigator.of(ctx).pop();
+        ctx.push('/profile');
+      },
+    ),
+  ];
 }

@@ -85,10 +85,7 @@ class AdminOrdersPage extends ConsumerWidget {
 }
 
 class _OrderTile extends StatelessWidget {
-  const _OrderTile({
-    required this.order,
-    required this.onStatusChanged,
-  });
+  const _OrderTile({required this.order, required this.onStatusChanged});
 
   final Map<String, dynamic> order;
   final Function(String) onStatusChanged;
@@ -172,7 +169,10 @@ class _OrderTile extends StatelessWidget {
             if (status != 'cancelled')
               const PopupMenuItem(
                 value: 'cancelled',
-                child: Text('Cancel Order', style: TextStyle(color: Colors.red)),
+                child: Text(
+                  'Cancel Order',
+                  style: TextStyle(color: Colors.red),
+                ),
               ),
           ],
         ),

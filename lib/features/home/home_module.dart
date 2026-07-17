@@ -35,14 +35,14 @@ class HomeModule extends FeatureModule {
 
   @override
   List<DrawerEntry> get drawerEntries => [
-        DrawerEntry(
-          id: 'home',
-          label: (ctx) => AppLocalizations.of(ctx).home,
-          icon: Icons.home_outlined,
-          onTap: (ctx, ref) {
-            Navigator.of(ctx).pop();
-            ctx.go('/home');
-          },
-        ),
-      ];
+    DrawerEntry(
+      id: 'home',
+      label: (ctx) => AppLocalizations.of(ctx).home,
+      icon: Icons.home_outlined,
+      onTap: (ctx, ref) {
+        Navigator.of(ctx).pop();
+        ctx.go('/home');
+      },
+    ),
+  ];
 }

@@ -3,9 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:delwaqty/services/supabase/supabase_service.dart';
 import 'package:delwaqty/services/logger/app_logger.dart';
 
-final supabaseAuthDataSourceProvider = Provider<SupabaseAuthDataSource>((
-  ref,
-) {
+final supabaseAuthDataSourceProvider = Provider<SupabaseAuthDataSource>((ref) {
   return SupabaseAuthDataSource(
     ref.watch(supabaseClientProvider),
     ref.watch(loggerProvider),

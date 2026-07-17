@@ -29,7 +29,6 @@ final badgeAggregatorProvider = StreamProvider<Map<String, int>>((ref) {
 });
 
 final totalUnreadProvider = Provider<int>((ref) {
-  final counts =
-      ref.watch(badgeAggregatorProvider).valueOrNull ?? {};
+  final counts = ref.watch(badgeAggregatorProvider).valueOrNull ?? {};
   return counts.values.fold(0, (sum, c) => sum + c);
 });

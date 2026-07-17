@@ -34,11 +34,13 @@ class AnalyticsServiceImpl implements AnalyticsService {
       currency: currency,
       value: amount,
       items: items
-          .map((item) => AnalyticsEventItem(
-                itemId: item['id'] as String?,
-                itemName: item['name'] as String?,
-                itemCategory: item['category'] as String?,
-              ))
+          .map(
+            (item) => AnalyticsEventItem(
+              itemId: item['id'] as String?,
+              itemName: item['name'] as String?,
+              itemCategory: item['category'] as String?,
+            ),
+          )
           .toList(),
     );
   }

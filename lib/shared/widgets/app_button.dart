@@ -111,11 +111,31 @@ class AppButton extends StatelessWidget {
     final colors = Theme.of(context).colorScheme;
 
     final button = switch (variant) {
-      AppButtonVariant.filled => _buildFilledButton(context, effectiveOnPressed, colors),
-      AppButtonVariant.tonal => _buildTonalButton(context, effectiveOnPressed, colors),
-      AppButtonVariant.outlined => _buildOutlinedButton(context, effectiveOnPressed, colors),
-      AppButtonVariant.text => _buildTextButton(context, effectiveOnPressed, colors),
-      AppButtonVariant.elevated => _buildElevatedButton(context, effectiveOnPressed, colors),
+      AppButtonVariant.filled => _buildFilledButton(
+        context,
+        effectiveOnPressed,
+        colors,
+      ),
+      AppButtonVariant.tonal => _buildTonalButton(
+        context,
+        effectiveOnPressed,
+        colors,
+      ),
+      AppButtonVariant.outlined => _buildOutlinedButton(
+        context,
+        effectiveOnPressed,
+        colors,
+      ),
+      AppButtonVariant.text => _buildTextButton(
+        context,
+        effectiveOnPressed,
+        colors,
+      ),
+      AppButtonVariant.elevated => _buildElevatedButton(
+        context,
+        effectiveOnPressed,
+        colors,
+      ),
     };
 
     if (isExpanded) {
@@ -127,17 +147,17 @@ class AppButton extends StatelessWidget {
   ButtonStyle _baseStyle(BuildContext context) {
     final padding = switch (size) {
       AppButtonSize.small => const EdgeInsets.symmetric(
-          horizontal: AppSpacing.lg,
-          vertical: AppSpacing.sm,
-        ),
+        horizontal: AppSpacing.lg,
+        vertical: AppSpacing.sm,
+      ),
       AppButtonSize.medium => const EdgeInsets.symmetric(
-          horizontal: AppSpacing.xxl,
-          vertical: AppSpacing.md,
-        ),
+        horizontal: AppSpacing.xxl,
+        vertical: AppSpacing.md,
+      ),
       AppButtonSize.large => const EdgeInsets.symmetric(
-          horizontal: AppSpacing.xxxl,
-          vertical: AppSpacing.xl,
-        ),
+        horizontal: AppSpacing.xxxl,
+        vertical: AppSpacing.xl,
+      ),
     };
 
     return ButtonStyle(
@@ -159,10 +179,7 @@ class AppButton extends StatelessWidget {
       return SizedBox(
         height: 20,
         width: 20,
-        child: CircularProgressIndicator(
-          strokeWidth: 2,
-          color: spinnerColor,
-        ),
+        child: CircularProgressIndicator(strokeWidth: 2, color: spinnerColor),
       );
     }
 
@@ -178,10 +195,7 @@ class AppButton extends StatelessWidget {
       ],
     ];
 
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: children,
-    );
+    return Row(mainAxisSize: MainAxisSize.min, children: children);
   }
 
   Widget _buildFilledButton(

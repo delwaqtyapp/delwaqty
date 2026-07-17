@@ -2,11 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:delwaqty/features/commerce/domain/entities/product.dart';
 
 class ProductCard extends StatelessWidget {
-  const ProductCard({
-    required this.product,
-    required this.onTap,
-    super.key,
-  });
+  const ProductCard({required this.product, required this.onTap, super.key});
 
   final Product product;
   final VoidCallback onTap;
@@ -32,36 +28,38 @@ class ProductCard extends StatelessWidget {
                 fit: StackFit.expand,
                 children: [
                   Container(
-                    color: Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.15),
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.primaryContainer.withValues(alpha: 0.15),
                     child: Icon(
                       Icons.shopping_bag_outlined,
                       size: 36,
                       color: Theme.of(context).colorScheme.primary,
                     ),
-                ),
-                if (hasDiscount)
-                  Positioned(
-                    top: 4,
-                    left: 4,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 4,
-                        vertical: 2,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.red,
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                      child: Text(
-                        '-${((1 - product.price / product.originalPrice!) * 100).round()}%',
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 10,
-                          fontWeight: FontWeight.bold,
+                  ),
+                  if (hasDiscount)
+                    Positioned(
+                      top: 4,
+                      left: 4,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 4,
+                          vertical: 2,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.red,
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: Text(
+                          '-${((1 - product.price / product.originalPrice!) * 100).round()}%',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
                     ),
-                  ),
                   if (!product.isAvailable)
                     Container(
                       color: Colors.black.withValues(alpha: 0.5),

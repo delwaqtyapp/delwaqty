@@ -40,26 +40,26 @@ class UserModel with _$UserModel {
   }
 
   User toEntity() => User(
-        id: id,
-        email: email,
-        fullName: fullName,
-        phone: phone,
-        avatarUrl: avatarUrl,
-        language: language,
-        isOnboarded: isOnboarded,
-        createdAt: createdAt,
-        updatedAt: updatedAt,
-      );
+    id: id,
+    email: email,
+    fullName: fullName,
+    phone: phone,
+    avatarUrl: avatarUrl,
+    language: language,
+    isOnboarded: isOnboarded,
+    createdAt: createdAt,
+    updatedAt: updatedAt,
+  );
 
   Map<String, dynamic> toSupabaseJson() => {
-        'id': id,
-        'email': email,
-        'full_name': fullName,
-        'phone': phone,
-        'avatar_url': avatarUrl,
-        'language': language,
-        'is_onboarded': isOnboarded,
-        'created_at': createdAt.toIso8601String(),
-        'updated_at': updatedAt?.toIso8601String(),
-      };
+    'id': id,
+    'email': email,
+    'full_name': fullName,
+    'phone': phone,
+    'avatar_url': avatarUrl,
+    'language': language,
+    'is_onboarded': isOnboarded,
+    'created_at': createdAt.toIso8601String(),
+    'updated_at': updatedAt?.toIso8601String(),
+  };
 }

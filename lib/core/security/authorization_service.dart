@@ -52,9 +52,9 @@ class InMemoryAuthorizationService extends AuthorizationService {
     required List<AccessRule> rules,
     List<String> roles = const [],
     Map<String, List<String>> rolePermissions = const {},
-  })  : _rules = List.unmodifiable(rules),
-        _roles = List<String>.from(roles),
-        _rolePermissions = Map.of(rolePermissions);
+  }) : _rules = List.unmodifiable(rules),
+       _roles = List<String>.from(roles),
+       _rolePermissions = Map.of(rolePermissions);
 
   final List<AccessRule> _rules;
   final List<String> _roles;

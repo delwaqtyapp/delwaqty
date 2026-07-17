@@ -5,8 +5,9 @@ import 'package:delwaqty/core/module/feature_registry.dart';
 import 'package:delwaqty/features/auth/domain/auth_state.dart';
 import 'package:delwaqty/features/auth/presentation/auth_provider.dart';
 
-final GlobalKey<NavigatorState> _rootNavigatorKey =
-    GlobalKey<NavigatorState>(debugLabel: 'root');
+final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>(
+  debugLabel: 'root',
+);
 
 final goRouterProvider = Provider<GoRouter>((ref) {
   final registry = FeatureRegistry.instance;
@@ -29,7 +30,8 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       final isSplash = state.matchedLocation == '/splash';
       final isOnboarding = state.matchedLocation == '/onboarding';
       final isWelcome = state.matchedLocation == '/welcome';
-      final isAuthRoute = state.matchedLocation == '/login' ||
+      final isAuthRoute =
+          state.matchedLocation == '/login' ||
           state.matchedLocation == '/register' ||
           state.matchedLocation == '/forgot-password';
 
@@ -48,10 +50,7 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       registry.buildShellRoute(),
       ...registry.allShellSubRoutes,
     ],
-    errorBuilder: (context, state) => Scaffold(
-      body: Center(
-        child: Text('Page not found: ${state.uri}'),
-      ),
-    ),
+    errorBuilder: (context, state) =>
+        Scaffold(body: Center(child: Text('Page not found: ${state.uri}'))),
   );
 });

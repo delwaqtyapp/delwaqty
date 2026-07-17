@@ -4,7 +4,6 @@ import 'package:delwaqty/features/onboarding/onboarding_module.dart';
 import 'package:delwaqty/features/welcome/welcome_module.dart';
 import 'package:delwaqty/features/auth/auth_module.dart';
 import 'package:delwaqty/features/home/home_module.dart';
-import 'package:delwaqty/features/expenses/expenses_module.dart';
 import 'package:delwaqty/features/settings/settings_module.dart';
 import 'package:delwaqty/features/profile/profile_module.dart';
 import 'package:delwaqty/features/notifications/notifications_module.dart';
@@ -21,7 +20,6 @@ void registerAllModules() {
     WelcomeModule(),
     AuthModule(),
     HomeModule(),
-    ExpensesModule(),
     CommerceModule(),
     RestaurantModule(),
     SettingsModule(),

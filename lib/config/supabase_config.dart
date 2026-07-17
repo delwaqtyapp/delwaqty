@@ -28,9 +28,8 @@ abstract final class SupabaseConfig {
   );
 
   /// Returns the appropriate URL based on the build mode.
-  static String get url => const bool.fromEnvironment('dart.tool.product')
-      ? prodUrl
-      : devUrl;
+  static String get url =>
+      const bool.fromEnvironment('dart.tool.product') ? prodUrl : devUrl;
 
   /// Returns the appropriate anon key based on the build mode.
   static String get anonKey => const bool.fromEnvironment('dart.tool.product')

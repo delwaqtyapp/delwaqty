@@ -67,10 +67,7 @@ class OrderRepositoryImpl implements OrderRepository {
   }
 
   @override
-  Future<Order> cancelOrder({
-    required String orderId,
-    String? reason,
-  }) async {
+  Future<Order> cancelOrder({required String orderId, String? reason}) async {
     try {
       return await _dataSource.cancelOrder(orderId: orderId, reason: reason);
     } catch (e) {

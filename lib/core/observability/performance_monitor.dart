@@ -49,16 +49,20 @@ class DebugPerformanceMonitor extends PerformanceMonitor {
 
   @override
   void recordMetric(String name, int value) {
-    _metrics.add(RecordedMetric(name: name, value: value, timestamp: DateTime.now()));
+    _metrics.add(
+      RecordedMetric(name: name, value: value, timestamp: DateTime.now()),
+    );
   }
 
   @override
   void recordTiming(String name, Duration duration) {
-    _metrics.add(RecordedMetric(
-      name: name,
-      value: duration.inMilliseconds,
-      timestamp: DateTime.now(),
-    ));
+    _metrics.add(
+      RecordedMetric(
+        name: name,
+        value: duration.inMilliseconds,
+        timestamp: DateTime.now(),
+      ),
+    );
   }
 }
 

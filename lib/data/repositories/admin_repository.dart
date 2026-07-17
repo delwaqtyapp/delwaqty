@@ -6,7 +6,7 @@ import 'package:delwaqty/features/admin/domain/entities/admin_models.dart';
 /// Provides CRUD operations for users, merchants, orders, and dashboard metrics.
 class AdminRepository {
   AdminRepository({SupabaseClient? client})
-      : _client = client ?? Supabase.instance.client;
+    : _client = client ?? Supabase.instance.client;
 
   final SupabaseClient _client;
 
@@ -16,14 +16,31 @@ class AdminRepository {
   Future<AdminDashboard> getDashboardMetrics() async {
     try {
       final usersResponse = await _client.from('users').select('id').count();
-      final merchantsResponse = await _client.from('merchants').select('id').count();
+      final merchantsResponse = await _client
+          .from('merchants')
+          .select('id')
+          .count();
       final ordersResponse = await _client.from('orders').select('id').count();
-      final deliveredOrders = await _client.from('orders').select('total_amount').eq('status', 'delivered');
-      final activeDriversResponse = await _client.from('drivers').select('id').eq('is_active', true).count();
-      final pendingOrdersResponse = await _client.from('orders').select('id').eq('status', 'pending').count();
+      final deliveredOrders = await _client
+          .from('orders')
+          .select('total_amount')
+          .eq('status', 'delivered');
+      final activeDriversResponse = await _client
+          .from('drivers')
+          .select('id')
+          .eq('is_active', true)
+          .count();
+      final pendingOrdersResponse = await _client
+          .from('orders')
+          .select('id')
+          .eq('status', 'pending')
+          .count();
 
-      final totalRevenue = (deliveredOrders as List)
-          .fold<double>(0, (sum, order) => sum + ((order['total_amount'] as num?)?.toDouble() ?? 0));
+      final totalRevenue = (deliveredOrders as List).fold<double>(
+        0,
+        (sum, order) =>
+            sum + ((order['total_amount'] as num?)?.toDouble() ?? 0),
+      );
 
       return AdminDashboard(
         totalUsers: usersResponse.count,
@@ -102,12 +119,16 @@ class AdminRepository {
   /// Creates a new admin user.
   Future<AdminUser> createUser(AdminUser user) async {
     try {
-      final response = await _client.from('admin_users').insert({
-        'name': user.name,
-        'email': user.email,
-        'role': user.role.name,
-        'status': user.status.name,
-      }).select().single();
+      final response = await _client
+          .from('admin_users')
+          .insert({
+            'name': user.name,
+            'email': user.email,
+            'role': user.role.name,
+            'status': user.status.name,
+          })
+          .select()
+          .single();
 
       return AdminUser(
         id: response['id'] as String,
@@ -188,10 +209,13 @@ class AdminRepository {
   /// Updates merchant status (verify, suspend, etc.).
   Future<void> updateMerchantStatus(String merchantId, String status) async {
     try {
-      await _client.from('merchants').update({
-        'status': status,
-        'updated_at': DateTime.now().toIso8601String(),
-      }).eq('id', merchantId);
+      await _client
+          .from('merchants')
+          .update({
+            'status': status,
+            'updated_at': DateTime.now().toIso8601String(),
+          })
+          .eq('id', merchantId);
     } catch (e) {
       throw AdminException('Failed to update merchant status: $e');
     }
@@ -234,10 +258,13 @@ class AdminRepository {
   /// Updates order status.
   Future<void> updateOrderStatus(String orderId, String status) async {
     try {
-      await _client.from('orders').update({
-        'status': status,
-        'updated_at': DateTime.now().toIso8601String(),
-      }).eq('id', orderId);
+      await _client
+          .from('orders')
+          .update({
+            'status': status,
+            'updated_at': DateTime.now().toIso8601String(),
+          })
+          .eq('id', orderId);
     } catch (e) {
       throw AdminException('Failed to update order status: $e');
     }

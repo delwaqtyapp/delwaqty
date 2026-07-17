@@ -9,14 +9,20 @@ class InventoryRepositoryImpl implements InventoryRepository {
 
   @override
   Future<ProductInventory?> getInventory(String productId) async {
-    try { return await _dataSource.getInventory(productId); }
-    catch (e) { throw ServerException(message: e.toString()); }
+    try {
+      return await _dataSource.getInventory(productId);
+    } catch (e) {
+      throw ServerException(message: e.toString());
+    }
   }
 
   @override
   Future<List<ProductInventory>> getMerchantInventory(String merchantId) async {
-    try { return await _dataSource.getMerchantInventory(merchantId); }
-    catch (e) { throw ServerException(message: e.toString()); }
+    try {
+      return await _dataSource.getMerchantInventory(merchantId);
+    } catch (e) {
+      throw ServerException(message: e.toString());
+    }
   }
 
   @override
@@ -31,7 +37,9 @@ class InventoryRepositoryImpl implements InventoryRepository {
           ? merchantId
           : (existing?.merchantId ?? '');
       if (resolvedMerchantId.isEmpty) {
-        throw ServerException(message: 'merchantId is required for new inventory');
+        throw ServerException(
+          message: 'merchantId is required for new inventory',
+        );
       }
       return await _dataSource.upsertInventory(
         productId: productId,
@@ -40,7 +48,9 @@ class InventoryRepositoryImpl implements InventoryRepository {
         isInStock: stockQuantity > 0,
         lowStockThreshold: existing?.lowStockThreshold ?? 10,
       );
-    } catch (e) { throw ServerException(message: e.toString()); }
+    } catch (e) {
+      throw ServerException(message: e.toString());
+    }
   }
 
   @override
@@ -48,8 +58,14 @@ class InventoryRepositoryImpl implements InventoryRepository {
     required String productId,
     required int adjustment,
   }) async {
-    try { return await _dataSource.adjustStock(productId: productId, adjustment: adjustment); }
-    catch (e) { throw ServerException(message: e.toString()); }
+    try {
+      return await _dataSource.adjustStock(
+        productId: productId,
+        adjustment: adjustment,
+      );
+    } catch (e) {
+      throw ServerException(message: e.toString());
+    }
   }
 
   @override
@@ -57,8 +73,14 @@ class InventoryRepositoryImpl implements InventoryRepository {
     required String productId,
     required int quantity,
   }) async {
-    try { return await _dataSource.reserveStock(productId: productId, quantity: quantity); }
-    catch (e) { throw ServerException(message: e.toString()); }
+    try {
+      return await _dataSource.reserveStock(
+        productId: productId,
+        quantity: quantity,
+      );
+    } catch (e) {
+      throw ServerException(message: e.toString());
+    }
   }
 
   @override
@@ -66,20 +88,32 @@ class InventoryRepositoryImpl implements InventoryRepository {
     required String productId,
     required int quantity,
   }) async {
-    try { return await _dataSource.releaseStock(productId: productId, quantity: quantity); }
-    catch (e) { throw ServerException(message: e.toString()); }
+    try {
+      return await _dataSource.releaseStock(
+        productId: productId,
+        quantity: quantity,
+      );
+    } catch (e) {
+      throw ServerException(message: e.toString());
+    }
   }
 
   @override
   Future<List<String>> getOutOfStockProductIds(String merchantId) async {
-    try { return await _dataSource.getOutOfStockProductIds(merchantId); }
-    catch (e) { throw ServerException(message: e.toString()); }
+    try {
+      return await _dataSource.getOutOfStockProductIds(merchantId);
+    } catch (e) {
+      throw ServerException(message: e.toString());
+    }
   }
 
   @override
   Future<List<String>> getLowStockProductIds(String merchantId) async {
-    try { return await _dataSource.getLowStockProductIds(merchantId); }
-    catch (e) { throw ServerException(message: e.toString()); }
+    try {
+      return await _dataSource.getLowStockProductIds(merchantId);
+    } catch (e) {
+      throw ServerException(message: e.toString());
+    }
   }
 
   @override

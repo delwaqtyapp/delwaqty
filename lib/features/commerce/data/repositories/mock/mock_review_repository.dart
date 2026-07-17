@@ -74,16 +74,20 @@ class MockReviewRepository implements ReviewRepository {
   @override
   Future<ReviewSummary> getMerchantRatingSummary(String merchantId) async {
     final reviews = await getMerchantReviews(merchantId);
-    if (reviews.isEmpty) return const ReviewSummary(averageRating: 0, totalReviews: 0);
-    final avg = reviews.map((r) => r.rating).reduce((a, b) => a + b) / reviews.length;
+    if (reviews.isEmpty)
+      return const ReviewSummary(averageRating: 0, totalReviews: 0);
+    final avg =
+        reviews.map((r) => r.rating).reduce((a, b) => a + b) / reviews.length;
     return ReviewSummary(averageRating: avg, totalReviews: reviews.length);
   }
 
   @override
   Future<ReviewSummary> getProductRatingSummary(String productId) async {
     final reviews = await getProductReviews(productId);
-    if (reviews.isEmpty) return const ReviewSummary(averageRating: 0, totalReviews: 0);
-    final avg = reviews.map((r) => r.rating).reduce((a, b) => a + b) / reviews.length;
+    if (reviews.isEmpty)
+      return const ReviewSummary(averageRating: 0, totalReviews: 0);
+    final avg =
+        reviews.map((r) => r.rating).reduce((a, b) => a + b) / reviews.length;
     return ReviewSummary(averageRating: avg, totalReviews: reviews.length);
   }
 

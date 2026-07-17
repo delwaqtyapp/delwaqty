@@ -33,18 +33,17 @@ class NotificationServiceImpl implements NotificationService {
 
   @override
   Future<void> initialize() async {
-    await _messaging.requestPermission(
-      alert: true,
-      badge: true,
-      sound: true,
-    );
+    await _messaging.requestPermission(alert: true, badge: true, sound: true);
 
     await _localNotifications
         .resolvePlatformSpecificImplementation<
-            AndroidFlutterLocalNotificationsPlugin>()
+          AndroidFlutterLocalNotificationsPlugin
+        >()
         ?.createNotificationChannel(_channel);
 
-    const androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
+    const androidSettings = AndroidInitializationSettings(
+      '@mipmap/ic_launcher',
+    );
     const iosSettings = DarwinInitializationSettings(
       requestAlertPermission: false,
       requestBadgePermission: false,
@@ -61,11 +60,13 @@ class NotificationServiceImpl implements NotificationService {
         final payload = details.payload;
         if (payload != null) {
           final data = jsonDecode(payload) as Map<String, dynamic>;
-          _tapController.add(NotificationMessage(
-            title: data['title'] as String? ?? '',
-            body: data['body'] as String? ?? '',
-            data: data,
-          ));
+          _tapController.add(
+            NotificationMessage(
+              title: data['title'] as String? ?? '',
+              body: data['body'] as String? ?? '',
+              data: data,
+            ),
+          );
         }
       },
     );
@@ -73,21 +74,25 @@ class NotificationServiceImpl implements NotificationService {
     FirebaseMessaging.onMessage.listen((message) {
       final notification = message.notification;
       if (notification != null) {
-        _messageController.add(NotificationMessage(
-          title: notification.title ?? '',
-          body: notification.body ?? '',
-          data: message.data,
-        ));
+        _messageController.add(
+          NotificationMessage(
+            title: notification.title ?? '',
+            body: notification.body ?? '',
+            data: message.data,
+          ),
+        );
         _showLocalNotification(message);
       }
     });
 
     FirebaseMessaging.onMessageOpenedApp.listen((message) {
-      _tapController.add(NotificationMessage(
-        title: message.notification?.title ?? '',
-        body: message.notification?.body ?? '',
-        data: message.data,
-      ));
+      _tapController.add(
+        NotificationMessage(
+          title: message.notification?.title ?? '',
+          body: message.notification?.body ?? '',
+          data: message.data,
+        ),
+      );
     });
 
     FirebaseMessaging.onBackgroundMessage(_onBackgroundMessage);

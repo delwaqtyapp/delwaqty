@@ -290,11 +290,7 @@ class AppDropdownField<T> extends StatelessWidget {
 /// A single item for [AppDropdownField].
 class AppDropdownItem<T> {
   /// Creates a dropdown item.
-  const AppDropdownItem({
-    required this.value,
-    required this.label,
-    this.icon,
-  });
+  const AppDropdownItem({required this.value, required this.label, this.icon});
 
   /// The underlying value of this item.
   final T value;
@@ -346,12 +342,11 @@ class _AppSearchField extends StatelessWidget {
         decoration: InputDecoration(
           hintText: hint ?? 'Search...',
           hintStyle: TextStyle(color: colors.onSurfaceVariant),
-          prefixIcon: prefixIcon ??
-              Icon(
-                AppIcons.actionSearch,
-                color: colors.onSurfaceVariant,
-              ),
-          suffixIcon: suffixIcon ??
+          prefixIcon:
+              prefixIcon ??
+              Icon(AppIcons.actionSearch, color: colors.onSurfaceVariant),
+          suffixIcon:
+              suffixIcon ??
               (controller?.text.isNotEmpty == true
                   ? IconButton(
                       icon: const Icon(AppIcons.actionClear, size: 20),

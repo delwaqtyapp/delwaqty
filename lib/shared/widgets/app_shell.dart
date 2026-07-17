@@ -90,8 +90,9 @@ class _AppDrawer extends StatelessWidget {
         ? (authState as AuthAuthenticated).user.email
         : '';
 
-    final bodyEntries =
-        drawerEntries.where((e) => e.position == DrawerPosition.body).toList();
+    final bodyEntries = drawerEntries
+        .where((e) => e.position == DrawerPosition.body)
+        .toList();
     final footerEntries = drawerEntries
         .where((e) => e.position == DrawerPosition.footer)
         .toList();
@@ -116,12 +117,8 @@ class _AppDrawer extends StatelessWidget {
                       height: 64,
                       child: Center(
                         child: Text(
-                          userName.isNotEmpty
-                              ? userName[0].toUpperCase()
-                              : 'U',
-                          style: Theme.of(context)
-                              .textTheme
-                              .headlineMedium
+                          userName.isNotEmpty ? userName[0].toUpperCase() : 'U',
+                          style: Theme.of(context).textTheme.headlineMedium
                               ?.copyWith(
                                 color: Theme.of(context).colorScheme.onPrimary,
                                 fontWeight: FontWeight.bold,
@@ -133,18 +130,16 @@ class _AppDrawer extends StatelessWidget {
                   const SizedBox(height: 16),
                   Text(
                     userName,
-                    style:
-                        Theme.of(context).textTheme.titleMedium?.copyWith(
-                              fontWeight: FontWeight.w600,
-                            ),
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                   const SizedBox(height: 4),
                   Text(
                     userEmail,
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color:
-                              Theme.of(context).colorScheme.onSurfaceVariant,
-                        ),
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
                   ),
                 ],
               ),
@@ -174,8 +169,9 @@ class _AppDrawer extends StatelessWidget {
             ListTile(
               leading: const Icon(Icons.language_rounded),
               title: Text(l10n.language),
-              subtitle:
-                  Text(locale.languageCode == 'ar' ? 'العربية' : 'English'),
+              subtitle: Text(
+                locale.languageCode == 'ar' ? 'العربية' : 'English',
+              ),
               onTap: () {
                 ref.read(localeProvider.notifier).toggleLocale();
               },
@@ -200,8 +196,7 @@ class _AppDrawer extends StatelessWidget {
               ),
               title: Text(
                 l10n.logout,
-                style:
-                    TextStyle(color: Theme.of(context).colorScheme.error),
+                style: TextStyle(color: Theme.of(context).colorScheme.error),
               ),
               onTap: () {
                 Navigator.of(context).pop();

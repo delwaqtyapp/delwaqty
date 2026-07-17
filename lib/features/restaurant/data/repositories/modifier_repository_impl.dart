@@ -9,25 +9,37 @@ class ModifierRepositoryImpl implements ModifierRepository {
 
   @override
   Future<List<ProductModifier>> getModifiers(String productId) async {
-    try { return await _dataSource.getModifiers(productId); }
-    catch (e) { throw ServerException(message: e.toString()); }
+    try {
+      return await _dataSource.getModifiers(productId);
+    } catch (e) {
+      throw ServerException(message: e.toString());
+    }
   }
 
   @override
   Future<ProductModifier> createModifier(ProductModifier modifier) async {
-    try { return await _dataSource.createModifier(modifier); }
-    catch (e) { throw ServerException(message: e.toString()); }
+    try {
+      return await _dataSource.createModifier(modifier);
+    } catch (e) {
+      throw ServerException(message: e.toString());
+    }
   }
 
   @override
   Future<ProductModifier> updateModifier(ProductModifier modifier) async {
-    try { return await _dataSource.updateModifier(modifier); }
-    catch (e) { throw ServerException(message: e.toString()); }
+    try {
+      return await _dataSource.updateModifier(modifier);
+    } catch (e) {
+      throw ServerException(message: e.toString());
+    }
   }
 
   @override
   Future<void> deleteModifier(String id) async {
-    try { await _dataSource.deleteModifier(id); }
-    catch (e) { throw ServerException(message: e.toString()); }
+    try {
+      await _dataSource.deleteModifier(id);
+    } catch (e) {
+      throw ServerException(message: e.toString());
+    }
   }
 }

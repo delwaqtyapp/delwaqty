@@ -19,15 +19,11 @@ class ProfilePage extends ConsumerWidget {
     final locale = ref.watch(localeProvider);
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(l10n.profile),
-      ),
+      appBar: AppBar(title: Text(l10n.profile)),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          AnimatedFadeIn(
-            child: _buildProfileHeader(context, authState),
-          ),
+          AnimatedFadeIn(child: _buildProfileHeader(context, authState)),
           const SizedBox(height: 24),
           AnimatedFadeIn(
             delay: const Duration(milliseconds: 100),
@@ -100,9 +96,9 @@ class ProfilePage extends ConsumerWidget {
   Widget _buildStatsRow(BuildContext context) {
     return Row(
       children: [
-        _buildStatItem(context, 'Transactions', '24'),
-        _buildStatItem(context, 'Categories', '7'),
-        _buildStatItem(context, 'Budgets', '3'),
+        _buildStatItem(context, 'Orders', '12'),
+        _buildStatItem(context, 'Favorites', '8'),
+        _buildStatItem(context, 'Rewards', '3'),
       ],
     );
   }
@@ -190,8 +186,7 @@ class ProfilePage extends ConsumerWidget {
             title: Text(l10n.language),
             subtitle: Text(locale.languageCode == 'ar' ? 'العربية' : 'English'),
             trailing: const Icon(Icons.chevron_right_rounded),
-            onTap: () =>
-                ref.read(localeProvider.notifier).toggleLocale(),
+            onTap: () => ref.read(localeProvider.notifier).toggleLocale(),
           ),
         ],
       ),
@@ -210,7 +205,8 @@ class ProfilePage extends ConsumerWidget {
           builder: (context) => AlertDialog(
             title: Text(l10n.logout),
             content: Text(
-                'Are you sure you want to ${l10n.logout.toLowerCase()}?'),
+              'Are you sure you want to ${l10n.logout.toLowerCase()}?',
+            ),
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(context).pop(),
@@ -230,20 +226,17 @@ class ProfilePage extends ConsumerWidget {
           ),
         );
       },
-      icon: Icon(
-        Icons.logout_rounded,
-        color: context.colorScheme.error,
-      ),
+      icon: Icon(Icons.logout_rounded, color: context.colorScheme.error),
       label: Text(
         l10n.logout,
         style: TextStyle(color: context.colorScheme.error),
       ),
       style: OutlinedButton.styleFrom(
-        side: BorderSide(color: context.colorScheme.error.withValues(alpha: 0.5)),
-        padding: const EdgeInsets.symmetric(vertical: 16),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
+        side: BorderSide(
+          color: context.colorScheme.error.withValues(alpha: 0.5),
         ),
+        padding: const EdgeInsets.symmetric(vertical: 16),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
     );
   }

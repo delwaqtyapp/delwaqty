@@ -3,9 +3,12 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:delwaqty/services/supabase/supabase_service.dart';
 import 'package:delwaqty/features/restaurant/domain/entities/restaurant_settings.dart';
 
-final supabaseRestaurantSettingsDataSourceProvider = Provider<SupabaseRestaurantSettingsDataSource>((ref) {
-  return SupabaseRestaurantSettingsDataSource(ref.watch(supabaseClientProvider));
-});
+final supabaseRestaurantSettingsDataSourceProvider =
+    Provider<SupabaseRestaurantSettingsDataSource>((ref) {
+      return SupabaseRestaurantSettingsDataSource(
+        ref.watch(supabaseClientProvider),
+      );
+    });
 
 class SupabaseRestaurantSettingsDataSource {
   SupabaseRestaurantSettingsDataSource(this._client);
@@ -23,41 +26,56 @@ class SupabaseRestaurantSettingsDataSource {
     autoAcceptOrders: row['auto_accept_orders'] as bool? ?? false,
     printerEnabled: row['printer_enabled'] as bool? ?? false,
     createdAt: DateTime.parse(row['created_at'] as String),
-    updatedAt: row['updated_at'] != null ? DateTime.parse(row['updated_at'] as String) : null,
+    updatedAt: row['updated_at'] != null
+        ? DateTime.parse(row['updated_at'] as String)
+        : null,
   );
 
   Future<RestaurantSettings?> getSettings(String merchantId) async {
-    final data = await _client.from('restaurant_settings').select().eq('merchant_id', merchantId).maybeSingle();
+    final data = await _client
+        .from('restaurant_settings')
+        .select()
+        .eq('merchant_id', merchantId)
+        .maybeSingle();
     return data != null ? _fromRow(data) : null;
   }
 
   Future<RestaurantSettings> updateSettings(RestaurantSettings settings) async {
     final existing = await getSettings(settings.merchantId);
     if (existing == null) {
-      final data = await _client.from('restaurant_settings').insert({
-        'merchant_id': settings.merchantId,
-        'accepts_reservations': settings.acceptsReservations,
-        'has_dine_in': settings.hasDineIn,
-        'has_takeaway': settings.hasTakeaway,
-        'has_delivery': settings.hasDelivery,
-        'average_prep_time': settings.averagePrepTime,
-        'max_orders_per_hour': settings.maxOrdersPerHour,
-        'auto_accept_orders': settings.autoAcceptOrders,
-        'printer_enabled': settings.printerEnabled,
-      }).select().single();
+      final data = await _client
+          .from('restaurant_settings')
+          .insert({
+            'merchant_id': settings.merchantId,
+            'accepts_reservations': settings.acceptsReservations,
+            'has_dine_in': settings.hasDineIn,
+            'has_takeaway': settings.hasTakeaway,
+            'has_delivery': settings.hasDelivery,
+            'average_prep_time': settings.averagePrepTime,
+            'max_orders_per_hour': settings.maxOrdersPerHour,
+            'auto_accept_orders': settings.autoAcceptOrders,
+            'printer_enabled': settings.printerEnabled,
+          })
+          .select()
+          .single();
       return _fromRow(data);
     }
-    final data = await _client.from('restaurant_settings').update({
-      'accepts_reservations': settings.acceptsReservations,
-      'has_dine_in': settings.hasDineIn,
-      'has_takeaway': settings.hasTakeaway,
-      'has_delivery': settings.hasDelivery,
-      'average_prep_time': settings.averagePrepTime,
-      'max_orders_per_hour': settings.maxOrdersPerHour,
-      'auto_accept_orders': settings.autoAcceptOrders,
-      'printer_enabled': settings.printerEnabled,
-      'updated_at': DateTime.now().toIso8601String(),
-    }).eq('merchant_id', settings.merchantId).select().single();
+    final data = await _client
+        .from('restaurant_settings')
+        .update({
+          'accepts_reservations': settings.acceptsReservations,
+          'has_dine_in': settings.hasDineIn,
+          'has_takeaway': settings.hasTakeaway,
+          'has_delivery': settings.hasDelivery,
+          'average_prep_time': settings.averagePrepTime,
+          'max_orders_per_hour': settings.maxOrdersPerHour,
+          'auto_accept_orders': settings.autoAcceptOrders,
+          'printer_enabled': settings.printerEnabled,
+          'updated_at': DateTime.now().toIso8601String(),
+        })
+        .eq('merchant_id', settings.merchantId)
+        .select()
+        .single();
     return _fromRow(data);
   }
 }

@@ -6,8 +6,9 @@ import 'package:delwaqty/services/supabase/supabase_service.dart';
 import 'package:delwaqty/services/logger/app_logger.dart';
 import 'package:delwaqty/data/models/user_model.dart';
 
-final supabaseProfileDataSourceProvider =
-    Provider<SupabaseProfileDataSource>((ref) {
+final supabaseProfileDataSourceProvider = Provider<SupabaseProfileDataSource>((
+  ref,
+) {
   return SupabaseProfileDataSource(
     ref.watch(supabaseClientProvider),
     ref.watch(loggerProvider),
@@ -104,10 +105,10 @@ class SupabaseProfileDataSource {
         .stream(primaryKey: ['id'])
         .eq('id', userId)
         .listen((data) {
-      if (data.isNotEmpty && !controller.isClosed) {
-        controller.add(UserModel.fromSupabase(data.first));
-      }
-    });
+          if (data.isNotEmpty && !controller.isClosed) {
+            controller.add(UserModel.fromSupabase(data.first));
+          }
+        });
 
     controller.onCancel = () {
       subscription.cancel();

@@ -51,9 +51,6 @@ class _AnimatedSlideInState extends State<AnimatedSlideIn>
 
   @override
   Widget build(BuildContext context) {
-    return SlideTransition(
-      position: _animation,
-      child: widget.child,
-    );
+    return SlideTransition(position: _animation, child: widget.child);
   }
 }

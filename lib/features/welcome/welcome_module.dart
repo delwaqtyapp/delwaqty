@@ -21,10 +21,10 @@ class WelcomeModule extends FeatureModule {
 
   @override
   List<RouteBase> get standaloneRoutes => [
-        GoRoute(
-          path: '/welcome',
-          name: 'welcome',
-          builder: (context, state) => const WelcomePage(),
-        ),
-      ];
+    GoRoute(
+      path: '/welcome',
+      name: 'welcome',
+      builder: (context, state) => const WelcomePage(),
+    ),
+  ];
 }

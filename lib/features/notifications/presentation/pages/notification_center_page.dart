@@ -33,7 +33,8 @@ class NotificationCenterPage extends ConsumerWidget {
             return const EmptyState(
               icon: Icons.notifications_none_rounded,
               title: 'No notifications',
-              message: 'You\'re all caught up! New notifications will appear here.',
+              message:
+                  'You\'re all caught up! New notifications will appear here.',
             );
           }
           return ListView.separated(
@@ -72,10 +73,7 @@ class NotificationCenterPage extends ConsumerWidget {
 }
 
 class _NotificationCard extends StatelessWidget {
-  const _NotificationCard({
-    required this.notification,
-    this.onTap,
-  });
+  const _NotificationCard({required this.notification, this.onTap});
 
   final AppNotification notification;
   final VoidCallback? onTap;
@@ -121,9 +119,7 @@ class _NotificationCard extends StatelessWidget {
                         Expanded(
                           child: Text(
                             notification.title,
-                            style: Theme.of(context)
-                                .textTheme
-                                .bodyMedium
+                            style: Theme.of(context).textTheme.bodyMedium
                                 ?.copyWith(
                                   fontWeight: notification.isRead
                                       ? FontWeight.normal
@@ -146,8 +142,8 @@ class _NotificationCard extends StatelessWidget {
                     Text(
                       notification.body,
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: colorScheme.onSurfaceVariant,
-                          ),
+                        color: colorScheme.onSurfaceVariant,
+                      ),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -155,8 +151,8 @@ class _NotificationCard extends StatelessWidget {
                     Text(
                       _formatTime(notification.createdAt),
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: colorScheme.onSurfaceVariant,
-                          ),
+                        color: colorScheme.onSurfaceVariant,
+                      ),
                     ),
                   ],
                 ),

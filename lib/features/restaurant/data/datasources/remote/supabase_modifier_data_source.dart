@@ -3,9 +3,11 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:delwaqty/services/supabase/supabase_service.dart';
 import 'package:delwaqty/features/restaurant/domain/entities/product_modifier.dart';
 
-final supabaseModifierDataSourceProvider = Provider<SupabaseModifierDataSource>((ref) {
-  return SupabaseModifierDataSource(ref.watch(supabaseClientProvider));
-});
+final supabaseModifierDataSourceProvider = Provider<SupabaseModifierDataSource>(
+  (ref) {
+    return SupabaseModifierDataSource(ref.watch(supabaseClientProvider));
+  },
+);
 
 class SupabaseModifierDataSource {
   SupabaseModifierDataSource(this._client);
@@ -23,30 +25,45 @@ class SupabaseModifierDataSource {
   );
 
   Future<List<ProductModifier>> getModifiers(String productId) async {
-    final data = await _client.from('product_modifiers').select().eq('product_id', productId).order('sort_order');
-    return (data as List).map((r) => _fromRow(r as Map<String, dynamic>)).toList();
+    final data = await _client
+        .from('product_modifiers')
+        .select()
+        .eq('product_id', productId)
+        .order('sort_order');
+    return (data as List)
+        .map((r) => _fromRow(r as Map<String, dynamic>))
+        .toList();
   }
 
   Future<ProductModifier> createModifier(ProductModifier modifier) async {
-    final data = await _client.from('product_modifiers').insert({
-      'product_id': modifier.productId,
-      'name': modifier.name,
-      'description': modifier.description,
-      'price_adjustment': modifier.priceAdjustment,
-      'is_available': modifier.isAvailable,
-      'sort_order': modifier.sortOrder,
-    }).select().single();
+    final data = await _client
+        .from('product_modifiers')
+        .insert({
+          'product_id': modifier.productId,
+          'name': modifier.name,
+          'description': modifier.description,
+          'price_adjustment': modifier.priceAdjustment,
+          'is_available': modifier.isAvailable,
+          'sort_order': modifier.sortOrder,
+        })
+        .select()
+        .single();
     return _fromRow(data);
   }
 
   Future<ProductModifier> updateModifier(ProductModifier modifier) async {
-    final data = await _client.from('product_modifiers').update({
-      'name': modifier.name,
-      'description': modifier.description,
-      'price_adjustment': modifier.priceAdjustment,
-      'is_available': modifier.isAvailable,
-      'sort_order': modifier.sortOrder,
-    }).eq('id', modifier.id).select().single();
+    final data = await _client
+        .from('product_modifiers')
+        .update({
+          'name': modifier.name,
+          'description': modifier.description,
+          'price_adjustment': modifier.priceAdjustment,
+          'is_available': modifier.isAvailable,
+          'sort_order': modifier.sortOrder,
+        })
+        .eq('id', modifier.id)
+        .select()
+        .single();
     return _fromRow(data);
   }
 

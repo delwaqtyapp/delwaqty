@@ -20,9 +20,9 @@ abstract class BaseEntity {
     this.deletedAt,
     this.version = 0,
     this.metadata = const {},
-  })  : id = id ?? UuidGenerator.generate(),
-        createdAt = createdAt ?? DateTime.now(),
-        updatedAt = updatedAt ?? DateTime.now();
+  }) : id = id ?? UuidGenerator.generate(),
+       createdAt = createdAt ?? DateTime.now(),
+       updatedAt = updatedAt ?? DateTime.now();
 
   /// Globally unique identifier (UUID v4).
   final String id;

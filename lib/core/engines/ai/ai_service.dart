@@ -123,10 +123,7 @@ class ClassificationAlternative {
 /// A chat message for conversational AI.
 class ChatMessage {
   /// Creates a [ChatMessage] instance.
-  const ChatMessage({
-    required this.role,
-    required this.content,
-  });
+  const ChatMessage({required this.role, required this.content});
 
   /// The role of the message sender.
   final ChatRole role;
@@ -171,10 +168,17 @@ abstract interface class AIService {
   Future<AIResult> analyzeText(String text, {String? task});
 
   /// Generates text based on the given [prompt].
-  Future<String> generateText(String prompt, {int? maxTokens, double? temperature});
+  Future<String> generateText(
+    String prompt, {
+    int? maxTokens,
+    double? temperature,
+  });
 
   /// Classifies [content] into one of the provided [categories].
-  Future<ClassificationResult> classifyContent(String content, List<String> categories);
+  Future<ClassificationResult> classifyContent(
+    String content,
+    List<String> categories,
+  );
 
   /// Extracts named entities from the given [text].
   Future<List<Entity>> extractEntities(String text);
@@ -195,7 +199,11 @@ abstract interface class AIService {
   Future<List<double>> embed(String text);
 
   /// Sends a conversational chat request with the given [messages].
-  Stream<String> chat(List<ChatMessage> messages, {String? systemPrompt, double? temperature});
+  Stream<String> chat(
+    List<ChatMessage> messages, {
+    String? systemPrompt,
+    double? temperature,
+  });
 
   /// Checks whether the AI service is currently available and reachable.
   Future<bool> isAvailable();
@@ -211,12 +219,20 @@ class DebugAIService implements AIService {
       AIResult(text: text, confidence: 0.5);
 
   @override
-  Future<String> generateText(String prompt, {int? maxTokens, double? temperature}) async =>
-      'Generated text for: $prompt';
+  Future<String> generateText(
+    String prompt, {
+    int? maxTokens,
+    double? temperature,
+  }) async => 'Generated text for: $prompt';
 
   @override
-  Future<ClassificationResult> classifyContent(String content, List<String> categories) async =>
-      ClassificationResult(label: categories.firstOrNull ?? 'unknown', confidence: 0.5);
+  Future<ClassificationResult> classifyContent(
+    String content,
+    List<String> categories,
+  ) async => ClassificationResult(
+    label: categories.firstOrNull ?? 'unknown',
+    confidence: 0.5,
+  );
 
   @override
   Future<List<Entity>> extractEntities(String text) async => [];
@@ -237,8 +253,11 @@ class DebugAIService implements AIService {
   Future<List<double>> embed(String text) async => [];
 
   @override
-  Stream<String> chat(List<ChatMessage> messages, {String? systemPrompt, double? temperature}) =>
-      Stream.value('Debug response');
+  Stream<String> chat(
+    List<ChatMessage> messages, {
+    String? systemPrompt,
+    double? temperature,
+  }) => Stream.value('Debug response');
 
   @override
   Future<bool> isAvailable() async => true;

@@ -128,12 +128,11 @@ class AppDialog {
       barrierLabel: title,
       transitionDuration: AppAnimation.normal,
       transitionBuilder: (context, animation, secondaryAnimation, child) {
-        final tween = Tween(begin: const Offset(0, 1), end: Offset.zero)
-            .chain(CurveTween(curve: AppAnimation.standard));
-        return SlideTransition(
-          position: animation.drive(tween),
-          child: child,
-        );
+        final tween = Tween(
+          begin: const Offset(0, 1),
+          end: Offset.zero,
+        ).chain(CurveTween(curve: AppAnimation.standard));
+        return SlideTransition(position: animation.drive(tween), child: child);
       },
       pageBuilder: (context, animation, secondaryAnimation) {
         return _FullScreenDialog(title: title, builder: builder);
@@ -154,7 +153,9 @@ class AppDialog {
       context: context,
       isScrollControlled: isScrollControlled,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(AppSpacing.radiusXl)),
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(AppSpacing.radiusXl),
+        ),
       ),
       builder: (context) => DraggableScrollableSheet(
         initialChildSize: isScrollControlled ? 0.7 : 0.5,
@@ -189,7 +190,10 @@ class _HandleBar extends StatelessWidget {
     final colors = Theme.of(context).colorScheme;
     return Center(
       child: Container(
-        margin: const EdgeInsets.only(top: AppSpacing.sm, bottom: AppSpacing.md),
+        margin: const EdgeInsets.only(
+          top: AppSpacing.sm,
+          bottom: AppSpacing.md,
+        ),
         width: 40,
         height: 4,
         decoration: BoxDecoration(
@@ -203,10 +207,7 @@ class _HandleBar extends StatelessWidget {
 
 /// Full-screen dialog with a close button in the app bar.
 class _FullScreenDialog extends StatelessWidget {
-  const _FullScreenDialog({
-    required this.title,
-    required this.builder,
-  });
+  const _FullScreenDialog({required this.title, required this.builder});
 
   final String title;
   final Widget Function(BuildContext) builder;

@@ -48,7 +48,10 @@ class ProductRepositoryImpl implements ProductRepository {
   }
 
   @override
-  Future<List<Product>> searchProducts(String query, {String? merchantId}) async {
+  Future<List<Product>> searchProducts(
+    String query, {
+    String? merchantId,
+  }) async {
     try {
       return await _dataSource.searchProducts(query, merchantId: merchantId);
     } catch (e) {

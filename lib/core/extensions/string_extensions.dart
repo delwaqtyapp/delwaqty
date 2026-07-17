@@ -17,6 +17,5 @@ extension StringExtensions on String {
   bool get isValidEmail =>
       RegExp(r'^[\w-]+(\.[\w-]+)*@([\w-]+\.)+[a-zA-Z]{2,7}$').hasMatch(this);
 
-  bool get isValidPhone =>
-      RegExp(r'^[+]?[0-9]{10,15}$').hasMatch(this);
+  bool get isValidPhone => RegExp(r'^[+]?[0-9]{10,15}$').hasMatch(this);
 }

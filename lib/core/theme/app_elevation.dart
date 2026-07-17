@@ -36,67 +36,31 @@ abstract final class AppElevation {
 
   /// Shadow for extra small elevation.
   static const List<BoxShadow> shadowXs = [
-    BoxShadow(
-      color: Color(0x0A000000),
-      blurRadius: 1,
-      offset: Offset(0, 1),
-    ),
+    BoxShadow(color: Color(0x0A000000), blurRadius: 1, offset: Offset(0, 1)),
   ];
 
   /// Shadow for small elevation.
   static const List<BoxShadow> shadowSm = [
-    BoxShadow(
-      color: Color(0x14000000),
-      blurRadius: 2,
-      offset: Offset(0, 1),
-    ),
-    BoxShadow(
-      color: Color(0x0A000000),
-      blurRadius: 1,
-      offset: Offset(0, 1),
-    ),
+    BoxShadow(color: Color(0x14000000), blurRadius: 2, offset: Offset(0, 1)),
+    BoxShadow(color: Color(0x0A000000), blurRadius: 1, offset: Offset(0, 1)),
   ];
 
   /// Shadow for medium elevation.
   static const List<BoxShadow> shadowMd = [
-    BoxShadow(
-      color: Color(0x1A000000),
-      blurRadius: 4,
-      offset: Offset(0, 2),
-    ),
-    BoxShadow(
-      color: Color(0x0F000000),
-      blurRadius: 2,
-      offset: Offset(0, 1),
-    ),
+    BoxShadow(color: Color(0x1A000000), blurRadius: 4, offset: Offset(0, 2)),
+    BoxShadow(color: Color(0x0F000000), blurRadius: 2, offset: Offset(0, 1)),
   ];
 
   /// Shadow for large elevation.
   static const List<BoxShadow> shadowLg = [
-    BoxShadow(
-      color: Color(0x21000000),
-      blurRadius: 8,
-      offset: Offset(0, 4),
-    ),
-    BoxShadow(
-      color: Color(0x14000000),
-      blurRadius: 4,
-      offset: Offset(0, 2),
-    ),
+    BoxShadow(color: Color(0x21000000), blurRadius: 8, offset: Offset(0, 4)),
+    BoxShadow(color: Color(0x14000000), blurRadius: 4, offset: Offset(0, 2)),
   ];
 
   /// Shadow for extra large elevation.
   static const List<BoxShadow> shadowXl = [
-    BoxShadow(
-      color: Color(0x29000000),
-      blurRadius: 12,
-      offset: Offset(0, 6),
-    ),
-    BoxShadow(
-      color: Color(0x1A000000),
-      blurRadius: 6,
-      offset: Offset(0, 3),
-    ),
+    BoxShadow(color: Color(0x29000000), blurRadius: 12, offset: Offset(0, 6)),
+    BoxShadow(color: Color(0x1A000000), blurRadius: 6, offset: Offset(0, 3)),
   ];
 
   // ---------------------------------------------------------------------------

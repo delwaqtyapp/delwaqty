@@ -30,9 +30,9 @@ class AdminDashboardPage extends ConsumerWidget {
           children: [
             Text(
               'Platform Overview',
-              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
             dashboardAsync.when(
@@ -57,8 +57,8 @@ class AdminDashboardPage extends ConsumerWidget {
                     final crossAxisCount = constraints.maxWidth > 900
                         ? 3
                         : constraints.maxWidth > 600
-                            ? 2
-                            : 1;
+                        ? 2
+                        : 1;
                     return GridView.count(
                       crossAxisCount: crossAxisCount,
                       shrinkWrap: true,
@@ -87,7 +87,8 @@ class AdminDashboardPage extends ConsumerWidget {
                         ),
                         _StatCard(
                           title: 'Revenue',
-                          value: 'SAR ${dashboard.totalRevenue.toStringAsFixed(0)}',
+                          value:
+                              'SAR ${dashboard.totalRevenue.toStringAsFixed(0)}',
                           icon: Icons.payments_outlined,
                           color: Colors.purple,
                         ),
@@ -112,9 +113,9 @@ class AdminDashboardPage extends ConsumerWidget {
             const SizedBox(height: 24),
             Text(
               'Recent Activity',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
             activityAsync.when(
@@ -143,7 +144,9 @@ class AdminDashboardPage extends ConsumerWidget {
                             child: Icon(_getActivityIcon(activities[i].action)),
                           ),
                           title: Text(activities[i].action),
-                          subtitle: Text('${activities[i].resource} · ${_formatTime(activities[i].timestamp)}'),
+                          subtitle: Text(
+                            '${activities[i].resource} · ${_formatTime(activities[i].timestamp)}',
+                          ),
                           trailing: const Icon(Icons.chevron_right),
                           onTap: () {},
                         ),
@@ -161,16 +164,19 @@ class AdminDashboardPage extends ConsumerWidget {
   }
 
   IconData _getActivityIcon(String action) {
-    if (action.toLowerCase().contains('create') || action.toLowerCase().contains('register')) {
+    if (action.toLowerCase().contains('create') ||
+        action.toLowerCase().contains('register')) {
       return Icons.person_add;
     }
     if (action.toLowerCase().contains('order')) {
       return Icons.shopping_cart;
     }
-    if (action.toLowerCase().contains('dispute') || action.toLowerCase().contains('report')) {
+    if (action.toLowerCase().contains('dispute') ||
+        action.toLowerCase().contains('report')) {
       return Icons.warning_amber;
     }
-    if (action.toLowerCase().contains('payout') || action.toLowerCase().contains('payment')) {
+    if (action.toLowerCase().contains('payout') ||
+        action.toLowerCase().contains('payment')) {
       return Icons.payments;
     }
     return Icons.info_outline;

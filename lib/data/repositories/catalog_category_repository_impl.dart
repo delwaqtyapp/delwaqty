@@ -7,11 +7,11 @@ import 'package:delwaqty/services/logger/app_logger.dart';
 
 final catalogCategoryRepositoryImplProvider =
     Provider<CatalogCategoryRepositoryImpl>((ref) {
-  return CatalogCategoryRepositoryImpl(
-    ref.watch(supabaseCatalogCategoryDataSourceProvider),
-    ref.watch(loggerProvider),
-  );
-});
+      return CatalogCategoryRepositoryImpl(
+        ref.watch(supabaseCatalogCategoryDataSourceProvider),
+        ref.watch(loggerProvider),
+      );
+    });
 
 class CatalogCategoryRepositoryImpl implements CatalogCategoryRepository {
   CatalogCategoryRepositoryImpl(this._dataSource, this._logger);

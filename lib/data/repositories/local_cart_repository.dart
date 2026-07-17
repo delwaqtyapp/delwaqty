@@ -54,8 +54,9 @@ class LocalCartRepository implements CartRepository {
     } else if (_cart == null) {
       _cart = _createNewCart(merchantId, merchantName, item);
     } else {
-      final existingIndex =
-          _cart!.items.indexWhere((i) => i.productId == item.productId);
+      final existingIndex = _cart!.items.indexWhere(
+        (i) => i.productId == item.productId,
+      );
       if (existingIndex >= 0) {
         final existing = _cart!.items[existingIndex];
         final updated = existing.copyWith(
@@ -148,8 +149,7 @@ class LocalCartRepository implements CartRepository {
     return _cart!;
   }
 
-  Cart _createNewCart(
-      String merchantId, String merchantName, CartItem item) {
+  Cart _createNewCart(String merchantId, String merchantName, CartItem item) {
     return Cart(
       id: 'cart_${DateTime.now().millisecondsSinceEpoch}',
       merchantId: merchantId,
@@ -162,8 +162,10 @@ class LocalCartRepository implements CartRepository {
   }
 
   Cart _rebuildCart(List<CartItem> items) {
-    final subtotal =
-        items.fold(0.0, (sum, i) => sum + i.unitPrice * i.quantity);
+    final subtotal = items.fold(
+      0.0,
+      (sum, i) => sum + i.unitPrice * i.quantity,
+    );
     final discount = _cart?.discount ?? 0;
     return _cart!.copyWith(
       items: items,

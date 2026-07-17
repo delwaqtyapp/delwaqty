@@ -12,8 +12,8 @@ import 'package:delwaqty/services/maps/maps_service.dart';
 /// Requires `GOOGLE_MAPS_API_KEY` environment variable to be set.
 class GoogleMapsServiceImpl implements MapsService {
   GoogleMapsServiceImpl({String? apiKey, http.Client? httpClient})
-      : _apiKey = apiKey ?? MapsConfig.apiKey,
-        _httpClient = httpClient ?? http.Client();
+    : _apiKey = apiKey ?? MapsConfig.apiKey,
+      _httpClient = httpClient ?? http.Client();
 
   final String _apiKey;
   final http.Client _httpClient;
@@ -26,8 +26,8 @@ class GoogleMapsServiceImpl implements MapsService {
   GoogleMapsServiceImpl._({
     required String apiKey,
     required http.Client httpClient,
-  })  : _apiKey = apiKey,
-        _httpClient = httpClient;
+  }) : _apiKey = apiKey,
+       _httpClient = httpClient;
 
   /// Creates an instance with a custom HTTP client (useful for testing).
   factory GoogleMapsServiceImpl.withClient(
@@ -42,21 +42,21 @@ class GoogleMapsServiceImpl implements MapsService {
 
   @override
   Future<Route> getRoute(GeoLocation origin, GeoLocation destination) async {
-    final uri = Uri.parse(_directionsBaseUrl).replace(queryParameters: {
-      'origin': '${origin.latitude},${origin.longitude}',
-      'destination': '${destination.latitude},${destination.longitude}',
-      'key': _apiKey,
-      'mode': 'driving',
-      'language': 'ar',
-    });
+    final uri = Uri.parse(_directionsBaseUrl).replace(
+      queryParameters: {
+        'origin': '${origin.latitude},${origin.longitude}',
+        'destination': '${destination.latitude},${destination.longitude}',
+        'key': _apiKey,
+        'mode': 'driving',
+        'language': 'ar',
+      },
+    );
 
     final response = await _httpClient.get(uri);
     final data = jsonDecode(response.body) as Map<String, dynamic>;
 
     if (data['status'] != 'OK') {
-      throw MapsServiceException(
-        'Directions API error: ${data['status']}',
-      );
+      throw MapsServiceException('Directions API error: ${data['status']}');
     }
 
     final routes = data['routes'] as List<dynamic>;
@@ -71,21 +71,30 @@ class GoogleMapsServiceImpl implements MapsService {
     final distance = (leg['distance'] as Map<String, dynamic>)['value'] as int;
     final duration = (leg['duration'] as Map<String, dynamic>)['value'] as int;
     final polyline =
-        (route['overview_polyline'] as Map<String, dynamic>)['points'] as String;
+        (route['overview_polyline'] as Map<String, dynamic>)['points']
+            as String;
 
     final steps = (leg['steps'] as List<dynamic>).map((step) {
       final s = step as Map<String, dynamic>;
       return RouteStep(
         instruction: _stripHtml(s['html_instructions'] as String),
-        distanceMetres: ((s['distance'] as Map<String, dynamic>)['value'] as int).toDouble(),
-        duration: Duration(seconds: (s['duration'] as Map<String, dynamic>)['value'] as int),
+        distanceMetres:
+            ((s['distance'] as Map<String, dynamic>)['value'] as int)
+                .toDouble(),
+        duration: Duration(
+          seconds: (s['duration'] as Map<String, dynamic>)['value'] as int,
+        ),
         startLocation: GeoLocation(
-          latitude: (s['start_location'] as Map<String, dynamic>)['lat'] as double,
-          longitude: (s['start_location'] as Map<String, dynamic>)['lng'] as double,
+          latitude:
+              (s['start_location'] as Map<String, dynamic>)['lat'] as double,
+          longitude:
+              (s['start_location'] as Map<String, dynamic>)['lng'] as double,
         ),
         endLocation: GeoLocation(
-          latitude: (s['end_location'] as Map<String, dynamic>)['lat'] as double,
-          longitude: (s['end_location'] as Map<String, dynamic>)['lng'] as double,
+          latitude:
+              (s['end_location'] as Map<String, dynamic>)['lat'] as double,
+          longitude:
+              (s['end_location'] as Map<String, dynamic>)['lng'] as double,
         ),
       );
     }).toList();
@@ -100,12 +109,14 @@ class GoogleMapsServiceImpl implements MapsService {
 
   @override
   Future<Duration> getETA(GeoLocation origin, GeoLocation destination) async {
-    final uri = Uri.parse(_directionsBaseUrl).replace(queryParameters: {
-      'origin': '${origin.latitude},${origin.longitude}',
-      'destination': '${destination.latitude},${destination.longitude}',
-      'key': _apiKey,
-      'mode': 'driving',
-    });
+    final uri = Uri.parse(_directionsBaseUrl).replace(
+      queryParameters: {
+        'origin': '${origin.latitude},${origin.longitude}',
+        'destination': '${destination.latitude},${destination.longitude}',
+        'key': _apiKey,
+        'mode': 'driving',
+      },
+    );
 
     final response = await _httpClient.get(uri);
     final data = jsonDecode(response.body) as Map<String, dynamic>;
@@ -117,9 +128,12 @@ class GoogleMapsServiceImpl implements MapsService {
     final routes = data['routes'] as List<dynamic>;
     if (routes.isEmpty) throw const MapsServiceException('No route found');
 
-    final legs = (routes.first as Map<String, dynamic>)['legs'] as List<dynamic>;
+    final legs =
+        (routes.first as Map<String, dynamic>)['legs'] as List<dynamic>;
     final durationValue =
-        ((legs.first as Map<String, dynamic>)['duration'] as Map<String, dynamic>)['value'] as int;
+        ((legs.first as Map<String, dynamic>)['duration']
+                as Map<String, dynamic>)['value']
+            as int;
 
     return Duration(seconds: durationValue);
   }
@@ -130,13 +144,15 @@ class GoogleMapsServiceImpl implements MapsService {
     String type,
     double radius,
   ) async {
-    final uri = Uri.parse(_placesBaseUrl).replace(queryParameters: {
-      'location': '${location.latitude},${location.longitude}',
-      'radius': radius.toInt().toString(),
-      'type': type,
-      'key': _apiKey,
-      'language': 'ar',
-    });
+    final uri = Uri.parse(_placesBaseUrl).replace(
+      queryParameters: {
+        'location': '${location.latitude},${location.longitude}',
+        'radius': radius.toInt().toString(),
+        'type': type,
+        'key': _apiKey,
+        'language': 'ar',
+      },
+    );
 
     final response = await _httpClient.get(uri);
     final data = jsonDecode(response.body) as Map<String, dynamic>;
@@ -148,8 +164,9 @@ class GoogleMapsServiceImpl implements MapsService {
     final results = data['results'] as List<dynamic>? ?? [];
     return results.map((result) {
       final r = result as Map<String, dynamic>;
-      final geo = (r['geometry'] as Map<String, dynamic>)['location']
-          as Map<String, dynamic>;
+      final geo =
+          (r['geometry'] as Map<String, dynamic>)['location']
+              as Map<String, dynamic>;
       return NearbyPlace(
         id: r['place_id'] as String,
         name: r['name'] as String,
@@ -159,7 +176,8 @@ class GoogleMapsServiceImpl implements MapsService {
         ),
         type: type,
         rating: r['rating'] as double?,
-        isOpenNow: (r['opening_hours'] as Map<String, dynamic>?)?['open_now'] as bool?,
+        isOpenNow:
+            (r['opening_hours'] as Map<String, dynamic>?)?['open_now'] as bool?,
       );
     }).toList();
   }
@@ -212,7 +230,8 @@ class GoogleMapsServiceImpl implements MapsService {
     const earthRadius = 6371000.0;
     final dLat = _toRadians(lat2 - lat1);
     final dLon = _toRadians(lon2 - lon1);
-    final a = sin(dLat / 2) * sin(dLat / 2) +
+    final a =
+        sin(dLat / 2) * sin(dLat / 2) +
         cos(_toRadians(lat1)) *
             cos(_toRadians(lat2)) *
             sin(dLon / 2) *

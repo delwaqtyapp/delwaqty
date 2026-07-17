@@ -1,6 +1,6 @@
 # SESSION_STATUS.md
 
-> **Last updated:** 2026-07-18 Session 4
+> **Last updated:** 2026-07-18 Session 4 (Milestone 2)
 
 ---
 
@@ -36,8 +36,25 @@ Building a complete ride-hailing ecosystem (Uber/Careem/DiDi/inDrive-class). Exe
 | `lib/shared/widgets/app_loader.dart` | Localized loader barrier label |
 | `test/data/models/user_model_test.dart` | Fixed pre-existing insert-payload expectation |
 
+### MILESTONE 2 - TRANSPORTATION SCHEMA (COMPLETE)
+
+Applied `supabase/migrations/007_transportation_platform.sql` to project `bttnlkmwhorjamzemwda` via the Supabase Management API.
+
+**New tables (15):** `vehicles`, `driver_documents`, `ride_requests`, `trip_events`, `driver_earnings`, `withdrawal_requests`, `ride_ratings`, `complaints`, `driver_locations`, `saved_places`, `trusted_contacts`, `favorite_drivers`, `promo_codes`, `promo_redemptions`, `ride_pricing`.
+
+**Extended tables:** `rides` (pricing breakdown, surge, promo, payment_method/status, pickup_otp, currency; ride_type expanded to economy/comfort/premium/xl/motorbike/taxi); `drivers` (verification_status, active_vehicle_id, total_trips, location_updated_at).
+
+**RPCs (6):** `haversine_km`, `estimate_fare` (pricing engine), `find_nearest_drivers` (dispatch, excludes busy drivers, radius+category filter), `accept_ride` (atomic assignment + OTP), `advance_ride` (state machine matched->arrived->inTrip[OTP]->completed + earnings credit), `validate_promo`.
+
+**RLS:** enabled on all new tables with owner/participant scoped policies; public read for `ride_pricing`, active `promo_codes`, and `ride_ratings`.
+
+**Seed:** 6 `ride_pricing` rows (EGP), `WELCOME20` promo.
+
+**Verified live:** `estimate_fare('economy',5,12,1.0)` = 33.50 EGP; `validate_promo('WELCOME20',...,100)` = 20 EGP discount. `flutter analyze` = 0 errors / 0 warnings.
+
 ### Next Milestones (in order)
-- **M2:** Complete Supabase ride-hailing schema (drivers, vehicles, driver_documents, ride_requests, rides, trip_events, driver_earnings, ratings, complaints, driver_locations) + RLS.
+- **M3:** Pricing engine integration in Dart (wire `estimate_fare` into ride booking, expand `RideType` entity to 6 categories).
+- **M4:** Dispatch engine (nearest-driver offers, `accept_ride`/`advance_ride` trip lifecycle in Dart data source, remove mock fallback).
 - **M3:** Pricing engine (base/distance/time/surge/promo).
 - **M4:** Dispatch engine (nearest-driver RPC, trip lifecycle state machine).
 - **M5:** Passenger experience (real backend, no mock).

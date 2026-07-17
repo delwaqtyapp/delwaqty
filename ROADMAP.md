@@ -58,6 +58,18 @@
 
 ## Next Steps (Constitution v2.0 §15)
 
+### Phase 8: Transportation Platform (Ride-Hailing Ecosystem)
+- [x] M1: Full Arabic-default localization + EGP currency (sprint 28)
+- [x] M2: Transportation Supabase schema + pricing/dispatch/lifecycle RPCs (sprint 29)
+- [ ] M3: Pricing engine integration (Dart) + 6 ride categories
+- [ ] M4: Dispatch engine + trip lifecycle (remove mock fallback)
+- [ ] M5: Passenger experience on real backend
+- [ ] M6: Driver experience on real backend
+- [ ] M7: Google Maps integration (live tracking)
+- [ ] M8: Realtime sync (driver locations, ride status)
+- [ ] M9: Safety (SOS, trusted contacts, OTP-gated trips)
+- [ ] M10: Admin dashboard (drivers, complaints, promos)
+
 ### Phase 6: Presentation Layer — Customer
 - [x] Customer Home — nearby restaurants, search, categories (Premium Super App design)
 - [x] Restaurant/Merchant Details — info, menu, Hero animations, ratings

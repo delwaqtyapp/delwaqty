@@ -564,4 +564,62 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get inTransit => 'In Transit';
+
+  @override
+  String get onboardingTitle6 => 'Shop Online';
+
+  @override
+  String get onboardingDesc6 =>
+      'From groceries to electronics, fashion to furniture — shop from hundreds of stores and get fast delivery.';
+
+  @override
+  String get loginWithGoogle => 'Continue with Google';
+
+  @override
+  String get loginWithApple => 'Continue with Apple';
+
+  @override
+  String get loginWithFacebook => 'Continue with Facebook';
+
+  @override
+  String get loginWithPhone => 'Continue with Phone';
+
+  @override
+  String get orContinueWith => 'Or continue with';
+
+  @override
+  String get agreementPrefix => 'By continuing, you agree to our ';
+
+  @override
+  String get termsOfService => 'Terms of Service';
+
+  @override
+  String get and => ' and ';
+
+  @override
+  String get privacyPolicy => 'Privacy Policy';
+
+  @override
+  String get superAppTagline => 'Your everyday super app';
+
+  @override
+  String get allServicesInOneApp => 'All services in one app';
+
+  @override
+  String get fastDelivery => 'Fast Delivery';
+
+  @override
+  String get fastDeliveryDesc => 'Get your orders delivered in minutes';
+
+  @override
+  String get trustedMerchants => 'Trusted Merchants';
+
+  @override
+  String get trustedMerchantsDesc => 'Only verified and top-rated stores';
+
+  @override
+  String get liveTracking => 'Live Tracking';
+
+  @override
+  String get liveTrackingDesc => 'Track your orders in real-time';
 }

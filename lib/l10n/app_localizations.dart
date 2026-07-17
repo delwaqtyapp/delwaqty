@@ -1171,6 +1171,120 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'In Transit'**
   String get inTransit;
+
+  /// No description provided for @onboardingTitle6.
+  ///
+  /// In en, this message translates to:
+  /// **'Shop Online'**
+  String get onboardingTitle6;
+
+  /// No description provided for @onboardingDesc6.
+  ///
+  /// In en, this message translates to:
+  /// **'From groceries to electronics, fashion to furniture — shop from hundreds of stores and get fast delivery.'**
+  String get onboardingDesc6;
+
+  /// No description provided for @loginWithGoogle.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue with Google'**
+  String get loginWithGoogle;
+
+  /// No description provided for @loginWithApple.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue with Apple'**
+  String get loginWithApple;
+
+  /// No description provided for @loginWithFacebook.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue with Facebook'**
+  String get loginWithFacebook;
+
+  /// No description provided for @loginWithPhone.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue with Phone'**
+  String get loginWithPhone;
+
+  /// No description provided for @orContinueWith.
+  ///
+  /// In en, this message translates to:
+  /// **'Or continue with'**
+  String get orContinueWith;
+
+  /// No description provided for @agreementPrefix.
+  ///
+  /// In en, this message translates to:
+  /// **'By continuing, you agree to our '**
+  String get agreementPrefix;
+
+  /// No description provided for @termsOfService.
+  ///
+  /// In en, this message translates to:
+  /// **'Terms of Service'**
+  String get termsOfService;
+
+  /// No description provided for @and.
+  ///
+  /// In en, this message translates to:
+  /// **' and '**
+  String get and;
+
+  /// No description provided for @privacyPolicy.
+  ///
+  /// In en, this message translates to:
+  /// **'Privacy Policy'**
+  String get privacyPolicy;
+
+  /// No description provided for @superAppTagline.
+  ///
+  /// In en, this message translates to:
+  /// **'Your everyday super app'**
+  String get superAppTagline;
+
+  /// No description provided for @allServicesInOneApp.
+  ///
+  /// In en, this message translates to:
+  /// **'All services in one app'**
+  String get allServicesInOneApp;
+
+  /// No description provided for @fastDelivery.
+  ///
+  /// In en, this message translates to:
+  /// **'Fast Delivery'**
+  String get fastDelivery;
+
+  /// No description provided for @fastDeliveryDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Get your orders delivered in minutes'**
+  String get fastDeliveryDesc;
+
+  /// No description provided for @trustedMerchants.
+  ///
+  /// In en, this message translates to:
+  /// **'Trusted Merchants'**
+  String get trustedMerchants;
+
+  /// No description provided for @trustedMerchantsDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Only verified and top-rated stores'**
+  String get trustedMerchantsDesc;
+
+  /// No description provided for @liveTracking.
+  ///
+  /// In en, this message translates to:
+  /// **'Live Tracking'**
+  String get liveTracking;
+
+  /// No description provided for @liveTrackingDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Track your orders in real-time'**
+  String get liveTrackingDesc;
 }
 
 class _AppLocalizationsDelegate

@@ -56,10 +56,10 @@ class OfferBannerCard extends StatelessWidget {
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
-          if (offer.minimumOrder != null && offer.minimumOrder! > 0) ...[
+          if (offer.minimumOrder > 0) ...[
             const SizedBox(height: 4),
             Text(
-              l10n.minOrderRequired(offer.minimumOrder!.toStringAsFixed(0), l10n.sar),
+              l10n.minOrderRequired(offer.minimumOrder.toStringAsFixed(0), l10n.sar),
               style: theme.textTheme.bodySmall?.copyWith(
                 color: theme.colorScheme.onSurfaceVariant,
                 fontSize: 10,

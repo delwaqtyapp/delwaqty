@@ -249,6 +249,8 @@ class AuthRepositoryImpl implements AuthRepository {
       sb.AuthChangeEvent.signedOut => AuthEventType.signedOut,
       sb.AuthChangeEvent.tokenRefreshed => AuthEventType.tokenRefreshed,
       sb.AuthChangeEvent.passwordRecovery => AuthEventType.passwordRecovery,
+      sb.AuthChangeEvent.userUpdated => AuthEventType.signedIn,
+      sb.AuthChangeEvent.mfaChallengeVerified => AuthEventType.mfaChallenge,
       _ => AuthEventType.signedIn,
     };
   }

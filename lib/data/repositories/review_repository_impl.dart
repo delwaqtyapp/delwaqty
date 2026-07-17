@@ -8,18 +8,34 @@ class ReviewRepositoryImpl implements ReviewRepository {
   final SupabaseReviewDataSource _dataSource;
 
   @override
-  Future<List<Review>> getMerchantReviews(String merchantId) async {
+  Future<List<Review>> getMerchantReviews(
+    String merchantId, {
+    int? limit,
+    int? offset,
+  }) async {
     try {
-      return await _dataSource.getMerchantReviews(merchantId);
+      return await _dataSource.getMerchantReviews(
+        merchantId,
+        limit: limit,
+        offset: offset,
+      );
     } catch (e) {
       throw ServerException(message: e.toString());
     }
   }
 
   @override
-  Future<List<Review>> getProductReviews(String productId) async {
+  Future<List<Review>> getProductReviews(
+    String productId, {
+    int? limit,
+    int? offset,
+  }) async {
     try {
-      return await _dataSource.getProductReviews(productId);
+      return await _dataSource.getProductReviews(
+        productId,
+        limit: limit,
+        offset: offset,
+      );
     } catch (e) {
       throw ServerException(message: e.toString());
     }

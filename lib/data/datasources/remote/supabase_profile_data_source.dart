@@ -55,6 +55,20 @@ class SupabaseProfileDataSource {
     }
   }
 
+  Future<UserModel> createProfile(UserModel model) async {
+    try {
+      final data = await _client
+          .from(_tableName)
+          .insert(model.toSupabaseJson())
+          .select()
+          .single();
+      return UserModel.fromSupabase(data);
+    } catch (e, stack) {
+      _logger.e('Failed to create profile for ${model.id}', e, stack);
+      rethrow;
+    }
+  }
+
   Future<void> deleteProfile(String userId) async {
     try {
       await _client.from(_tableName).delete().eq('id', userId);

@@ -1,8 +1,16 @@
 import 'package:delwaqty/features/commerce/domain/entities/review.dart';
 
 abstract interface class ReviewRepository {
-  Future<List<Review>> getMerchantReviews(String merchantId);
-  Future<List<Review>> getProductReviews(String productId);
+  Future<List<Review>> getMerchantReviews(
+    String merchantId, {
+    int? limit,
+    int? offset,
+  });
+  Future<List<Review>> getProductReviews(
+    String productId, {
+    int? limit,
+    int? offset,
+  });
   Future<Review?> getReviewById(String id);
   Future<Review> submitReview({
     required String merchantId,

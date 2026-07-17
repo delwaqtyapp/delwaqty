@@ -6,6 +6,7 @@ import 'package:delwaqty/features/commerce/domain/entities/merchant.dart';
 import 'package:delwaqty/features/commerce/commerce_module.dart';
 import 'package:delwaqty/features/auth/domain/auth_state.dart';
 import 'package:delwaqty/features/auth/presentation/auth_provider.dart';
+import 'package:delwaqty/features/location/presentation/providers/location_provider.dart';
 import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
 import 'package:delwaqty/shared/widgets/premium_empty_state.dart';
 import 'package:delwaqty/shared/widgets/shimmer_loading.dart';
@@ -24,17 +25,19 @@ class HomePage extends ConsumerWidget {
     final l10n = AppLocalizations.of(context);
     final authState = ref.watch(authStateProvider);
     final isGuest = authState is AuthGuest;
+    final locationAsync = ref.watch(userLocationProvider);
 
     return Scaffold(
       body: SafeArea(
         child: RefreshIndicator(
           onRefresh: () async {
             ref.invalidate(_merchantsFutureProvider);
+            ref.read(userLocationProvider.notifier).refresh();
           },
           child: CustomScrollView(
             slivers: [
               SliverToBoxAdapter(
-                child: _buildHeader(context, l10n, isGuest),
+                child: _buildHeader(context, l10n, isGuest, locationAsync),
               ),
               SliverToBoxAdapter(child: _buildSearchBar(context, l10n)),
               SliverToBoxAdapter(child: _buildServiceGrid(context, l10n)),
@@ -59,7 +62,17 @@ class HomePage extends ConsumerWidget {
     BuildContext context,
     AppLocalizations l10n,
     bool isGuest,
+    AsyncValue<UserLocation?> locationAsync,
   ) {
+    final locationText = locationAsync.when(
+      data: (loc) => loc?.detailedAddress.isNotEmpty == true
+          ? loc!.detailedAddress
+          : l10n.riyadhSaudiArabia,
+      loading: () => l10n.searchingForLocation,
+      error: (_, __) => l10n.searchingForLocation,
+    );
+    final isLocationLoading =
+        locationAsync is AsyncLoading || locationAsync is AsyncError;
     return AnimatedFadeIn(
       child: Padding(
         padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
@@ -110,12 +123,22 @@ class HomePage extends ConsumerWidget {
                         color: context.colorScheme.primary,
                       ),
                       const SizedBox(width: 4),
-                      Text(
-                        l10n.riyadhSaudiArabia,
-                        style: context.textTheme.bodySmall?.copyWith(
-                          color: context.colorScheme.onSurfaceVariant,
+                      if (isLocationLoading)
+                        SizedBox(
+                          width: 12,
+                          height: 12,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 1.5,
+                            color: context.colorScheme.primary,
+                          ),
+                        )
+                      else
+                        Text(
+                          locationText,
+                          style: context.textTheme.bodySmall?.copyWith(
+                            color: context.colorScheme.onSurfaceVariant,
+                          ),
                         ),
-                      ),
                     ],
                   ),
                   Text(
@@ -253,8 +276,23 @@ class HomePage extends ConsumerWidget {
               color: service.color,
               delay: Duration(milliseconds: 250 + index * 50),
               onTap: () {
-                if (index == 0) context.push('/market');
-                if (index == 7) context.push('/settings');
+                if (index == 0) {
+                  context.push('/market');
+                } else if (index == 1) {
+                  context.push('/market?type=grocery');
+                } else if (index == 2) {
+                  context.push('/market?type=pharmacy');
+                } else if (index == 3) {
+                  context.push('/ride/book');
+                } else if (index == 4) {
+                  context.push('/market?type=home');
+                } else if (index == 5) {
+                  context.push('/ride/book');
+                } else if (index == 6) {
+                  context.push('/market');
+                } else if (index == 7) {
+                  context.push('/settings');
+                }
               },
             );
           },

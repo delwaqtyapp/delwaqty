@@ -16,6 +16,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage>
     with TickerProviderStateMixin {
   final PageController _pageController = PageController();
   int _currentPage = 0;
+  int _previousPage = 0;
   static const int _totalPages = 6;
 
   late final AnimationController _enterController;
@@ -37,6 +38,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage>
       CurvedAnimation(parent: _enterController, curve: Curves.elasticOut),
     );
     _enterController.forward();
+    _bgController.forward(from: 1.0); // start fully in state
   }
 
   @override
@@ -78,9 +80,11 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage>
       body: AnimatedBuilder(
         animation: _bgController,
         builder: (context, child) {
-          final fromColor = _bgController.value < 0.5
-              ? _getColor(_currentPage)
-              : _getColor(_currentPage);
+          final fromColor = Color.lerp(
+            _getColor(_previousPage),
+            _getColor(_currentPage),
+            _bgController.value,
+          )!;
           return Container(
             decoration: BoxDecoration(
               gradient: LinearGradient(
@@ -121,7 +125,11 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage>
                   controller: _pageController,
                   itemCount: _totalPages,
                   onPageChanged: (index) {
-                    setState(() => _currentPage = index);
+                    setState(() {
+                      _previousPage = _currentPage;
+                      _currentPage = index;
+                    });
+                    _bgController.forward(from: 0.0);
                     _enterController
                       ..reset()
                       ..forward();

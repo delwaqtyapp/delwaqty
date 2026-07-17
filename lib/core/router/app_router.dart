@@ -27,7 +27,10 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       final authState = ref.read(authStateProvider);
       final isAuth = authState is AuthAuthenticated;
       final isGuest = authState is AuthGuest;
-      final canAccess = isAuth || isGuest;
+      final isPendingVerification =
+          authState is AuthEmailConfirmationRequired ||
+          authState is AuthPhoneVerification;
+      final canAccess = isAuth || isGuest || isPendingVerification;
 
       final isSplash = state.matchedLocation == '/splash';
       final isOnboarding = state.matchedLocation == '/onboarding';
@@ -50,6 +53,10 @@ final goRouterProvider = Provider<GoRouter>((ref) {
               true;
 
       if (isSplash || isOnboarding) return null;
+
+      if (isPendingVerification && !isAuthRoute) {
+        return '/register';
+      }
 
       if (!canAccess && !isAuthRoute && !isWelcome) {
         return '/welcome';

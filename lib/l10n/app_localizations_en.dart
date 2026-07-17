@@ -859,4 +859,354 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get riyadhSaudiArabia => 'Riyadh, Saudi Arabia';
+
+  @override
+  String get dineIn => 'Dine In';
+
+  @override
+  String get takeaway => 'Takeaway';
+
+  @override
+  String get reserveATable => 'Reserve a Table';
+
+  @override
+  String get noBranches => 'No branches available';
+
+  @override
+  String get primaryBranch => 'Main';
+
+  @override
+  String get distanceAway => 'away';
+
+  @override
+  String get km => 'km';
+
+  @override
+  String get prepTime => 'Prep Time';
+
+  @override
+  String avgPrepTime(Object minutes) {
+    return 'Avg. $minutes min';
+  }
+
+  @override
+  String opensAt(Object time) {
+    return 'Opens at $time';
+  }
+
+  @override
+  String closesAt(Object time) {
+    return 'Closes at $time';
+  }
+
+  @override
+  String get closedToday => 'Closed today';
+
+  @override
+  String get openToday => 'Open today';
+
+  @override
+  String get selectDate => 'Select Date';
+
+  @override
+  String get selectTime => 'Select Time';
+
+  @override
+  String get partySize => 'Party Size';
+
+  @override
+  String get guests => 'guests';
+
+  @override
+  String get availableSlots => 'Available Slots';
+
+  @override
+  String get noSlotsAvailable => 'No available slots for this date';
+
+  @override
+  String get confirmReservation => 'Confirm Reservation';
+
+  @override
+  String get reservationConfirmed => 'Reservation Confirmed!';
+
+  @override
+  String get reservationPending => 'Reservation Pending';
+
+  @override
+  String get reservationCancelled => 'Reservation Cancelled';
+
+  @override
+  String get cancelReservation => 'Cancel Reservation';
+
+  @override
+  String get modifyReservation => 'Modify Reservation';
+
+  @override
+  String get specialRequests => 'Special Requests';
+
+  @override
+  String get specialRequestsHint => 'Any dietary needs or seating preferences?';
+
+  @override
+  String get duration => 'Duration';
+
+  @override
+  String minutesValue(Object value) {
+    return '$value min';
+  }
+
+  @override
+  String get myReservations => 'My Reservations';
+
+  @override
+  String get noReservations => 'No reservations yet';
+
+  @override
+  String get noReservationsMessage =>
+      'Book a table at your favorite restaurant.';
+
+  @override
+  String get upcomingReservations => 'Upcoming';
+
+  @override
+  String get pastReservations => 'Past';
+
+  @override
+  String get activeOffers => 'Active Offers';
+
+  @override
+  String get noOffersAvailable => 'No offers available';
+
+  @override
+  String validUntil(Object date) {
+    return 'Valid until $date';
+  }
+
+  @override
+  String minOrderRequired(Object amount, Object currency) {
+    return 'Min. order $amount $currency';
+  }
+
+  @override
+  String get useOffer => 'Use Offer';
+
+  @override
+  String get offerExpired => 'Offer expired';
+
+  @override
+  String get automaticOffers => 'Auto-applied Offers';
+
+  @override
+  String percentageOff(Object value) {
+    return '$value% off';
+  }
+
+  @override
+  String fixedOff(Object amount, Object currency) {
+    return '$amount $currency off';
+  }
+
+  @override
+  String get deliveryZones => 'Delivery Zones';
+
+  @override
+  String get deliversTo => 'Delivers to';
+
+  @override
+  String zoneDeliveryFee(Object currency, Object fee) {
+    return 'Delivery: $fee $currency';
+  }
+
+  @override
+  String zoneMinOrder(Object amount, Object currency) {
+    return 'Min. order: $amount $currency';
+  }
+
+  @override
+  String estimatedDeliveryTime(Object minutes) {
+    return '~$minutes min';
+  }
+
+  @override
+  String get noDeliveryZones => 'Delivery not available';
+
+  @override
+  String get chooseOptions => 'Choose options';
+
+  @override
+  String get requiredOption => 'Required';
+
+  @override
+  String get optionalOption => 'Optional';
+
+  @override
+  String get selectOne => 'Select one';
+
+  @override
+  String selectUpTo(Object count) {
+    return 'Select up to $count';
+  }
+
+  @override
+  String additionalCost(Object amount, Object currency) {
+    return '+$amount $currency';
+  }
+
+  @override
+  String get searchMenu => 'Search menu...';
+
+  @override
+  String get noProductsInCategory => 'No items in this category';
+
+  @override
+  String get popularItems => 'Popular Items';
+
+  @override
+  String get allCategories => 'All Categories';
+
+  @override
+  String get outOfStock => 'Out of Stock';
+
+  @override
+  String get inStock => 'In Stock';
+
+  @override
+  String get writeReview => 'Write a Review';
+
+  @override
+  String get ratingBreakdown => 'Rating Breakdown';
+
+  @override
+  String basedOnReviews(Object count) {
+    return 'Based on $count reviews';
+  }
+
+  @override
+  String get noReviewsYet => 'No reviews yet';
+
+  @override
+  String get beTheFirst => 'Be the first to review!';
+
+  @override
+  String get yourRating => 'Your Rating';
+
+  @override
+  String get yourReview => 'Your Review';
+
+  @override
+  String get submitReview => 'Submit Review';
+
+  @override
+  String get reviewSubmitted => 'Review submitted! Thank you.';
+
+  @override
+  String get selectBranchFirst => 'Please select a branch first';
+
+  @override
+  String get today => 'Today';
+
+  @override
+  String get tomorrow => 'Tomorrow';
+
+  @override
+  String get fullMenu => 'Full Menu';
+
+  @override
+  String get viewFullMenu => 'View Full Menu';
+
+  @override
+  String get allOffers => 'All Offers';
+
+  @override
+  String get allReviews => 'All Reviews';
+
+  @override
+  String get contactInfo => 'Contact Info';
+
+  @override
+  String get phone => 'Phone';
+
+  @override
+  String get directions => 'Directions';
+
+  @override
+  String get shareRestaurant => 'Share Restaurant';
+
+  @override
+  String get reportRestaurant => 'Report';
+
+  @override
+  String get reservationDetails => 'Reservation Details';
+
+  @override
+  String partyOf(Object count) {
+    return 'Party of $count';
+  }
+
+  @override
+  String atTime(Object time) {
+    return 'at $time';
+  }
+
+  @override
+  String onDate(Object date) {
+    return 'on $date';
+  }
+
+  @override
+  String table(Object number) {
+    return 'Table $number';
+  }
+
+  @override
+  String get seatInfo => 'Seating info';
+
+  @override
+  String get noItems => 'No items';
+
+  @override
+  String get addItem => 'Add Item';
+
+  @override
+  String get removeItem => 'Remove';
+
+  @override
+  String maxQuantity(Object quantity) {
+    return 'Max $quantity';
+  }
+
+  @override
+  String minQuantity(Object quantity) {
+    return 'Min $quantity';
+  }
+
+  @override
+  String get monday => 'Monday';
+
+  @override
+  String get tuesday => 'Tuesday';
+
+  @override
+  String get wednesday => 'Wednesday';
+
+  @override
+  String get thursday => 'Thursday';
+
+  @override
+  String get friday => 'Friday';
+
+  @override
+  String get saturday => 'Saturday';
+
+  @override
+  String get sunday => 'Sunday';
+
+  @override
+  String get tryDifferentDate => 'Try a different date or party size.';
+
+  @override
+  String get minimumOrder => 'Min. order';
+
+  @override
+  String get perGuest => 'per guest';
 }

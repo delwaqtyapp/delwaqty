@@ -1747,6 +1747,624 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Riyadh, Saudi Arabia'**
   String get riyadhSaudiArabia;
+
+  /// No description provided for @dineIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Dine In'**
+  String get dineIn;
+
+  /// No description provided for @takeaway.
+  ///
+  /// In en, this message translates to:
+  /// **'Takeaway'**
+  String get takeaway;
+
+  /// No description provided for @reserveATable.
+  ///
+  /// In en, this message translates to:
+  /// **'Reserve a Table'**
+  String get reserveATable;
+
+  /// No description provided for @noBranches.
+  ///
+  /// In en, this message translates to:
+  /// **'No branches available'**
+  String get noBranches;
+
+  /// No description provided for @primaryBranch.
+  ///
+  /// In en, this message translates to:
+  /// **'Main'**
+  String get primaryBranch;
+
+  /// No description provided for @distanceAway.
+  ///
+  /// In en, this message translates to:
+  /// **'away'**
+  String get distanceAway;
+
+  /// No description provided for @km.
+  ///
+  /// In en, this message translates to:
+  /// **'km'**
+  String get km;
+
+  /// No description provided for @prepTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Prep Time'**
+  String get prepTime;
+
+  /// No description provided for @avgPrepTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Avg. {minutes} min'**
+  String avgPrepTime(Object minutes);
+
+  /// No description provided for @opensAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Opens at {time}'**
+  String opensAt(Object time);
+
+  /// No description provided for @closesAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Closes at {time}'**
+  String closesAt(Object time);
+
+  /// No description provided for @closedToday.
+  ///
+  /// In en, this message translates to:
+  /// **'Closed today'**
+  String get closedToday;
+
+  /// No description provided for @openToday.
+  ///
+  /// In en, this message translates to:
+  /// **'Open today'**
+  String get openToday;
+
+  /// No description provided for @selectDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Date'**
+  String get selectDate;
+
+  /// No description provided for @selectTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Time'**
+  String get selectTime;
+
+  /// No description provided for @partySize.
+  ///
+  /// In en, this message translates to:
+  /// **'Party Size'**
+  String get partySize;
+
+  /// No description provided for @guests.
+  ///
+  /// In en, this message translates to:
+  /// **'guests'**
+  String get guests;
+
+  /// No description provided for @availableSlots.
+  ///
+  /// In en, this message translates to:
+  /// **'Available Slots'**
+  String get availableSlots;
+
+  /// No description provided for @noSlotsAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'No available slots for this date'**
+  String get noSlotsAvailable;
+
+  /// No description provided for @confirmReservation.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm Reservation'**
+  String get confirmReservation;
+
+  /// No description provided for @reservationConfirmed.
+  ///
+  /// In en, this message translates to:
+  /// **'Reservation Confirmed!'**
+  String get reservationConfirmed;
+
+  /// No description provided for @reservationPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Reservation Pending'**
+  String get reservationPending;
+
+  /// No description provided for @reservationCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'Reservation Cancelled'**
+  String get reservationCancelled;
+
+  /// No description provided for @cancelReservation.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel Reservation'**
+  String get cancelReservation;
+
+  /// No description provided for @modifyReservation.
+  ///
+  /// In en, this message translates to:
+  /// **'Modify Reservation'**
+  String get modifyReservation;
+
+  /// No description provided for @specialRequests.
+  ///
+  /// In en, this message translates to:
+  /// **'Special Requests'**
+  String get specialRequests;
+
+  /// No description provided for @specialRequestsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Any dietary needs or seating preferences?'**
+  String get specialRequestsHint;
+
+  /// No description provided for @duration.
+  ///
+  /// In en, this message translates to:
+  /// **'Duration'**
+  String get duration;
+
+  /// No description provided for @minutesValue.
+  ///
+  /// In en, this message translates to:
+  /// **'{value} min'**
+  String minutesValue(Object value);
+
+  /// No description provided for @myReservations.
+  ///
+  /// In en, this message translates to:
+  /// **'My Reservations'**
+  String get myReservations;
+
+  /// No description provided for @noReservations.
+  ///
+  /// In en, this message translates to:
+  /// **'No reservations yet'**
+  String get noReservations;
+
+  /// No description provided for @noReservationsMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Book a table at your favorite restaurant.'**
+  String get noReservationsMessage;
+
+  /// No description provided for @upcomingReservations.
+  ///
+  /// In en, this message translates to:
+  /// **'Upcoming'**
+  String get upcomingReservations;
+
+  /// No description provided for @pastReservations.
+  ///
+  /// In en, this message translates to:
+  /// **'Past'**
+  String get pastReservations;
+
+  /// No description provided for @activeOffers.
+  ///
+  /// In en, this message translates to:
+  /// **'Active Offers'**
+  String get activeOffers;
+
+  /// No description provided for @noOffersAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'No offers available'**
+  String get noOffersAvailable;
+
+  /// No description provided for @validUntil.
+  ///
+  /// In en, this message translates to:
+  /// **'Valid until {date}'**
+  String validUntil(Object date);
+
+  /// No description provided for @minOrderRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Min. order {amount} {currency}'**
+  String minOrderRequired(Object amount, Object currency);
+
+  /// No description provided for @useOffer.
+  ///
+  /// In en, this message translates to:
+  /// **'Use Offer'**
+  String get useOffer;
+
+  /// No description provided for @offerExpired.
+  ///
+  /// In en, this message translates to:
+  /// **'Offer expired'**
+  String get offerExpired;
+
+  /// No description provided for @automaticOffers.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto-applied Offers'**
+  String get automaticOffers;
+
+  /// No description provided for @percentageOff.
+  ///
+  /// In en, this message translates to:
+  /// **'{value}% off'**
+  String percentageOff(Object value);
+
+  /// No description provided for @fixedOff.
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} {currency} off'**
+  String fixedOff(Object amount, Object currency);
+
+  /// No description provided for @deliveryZones.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivery Zones'**
+  String get deliveryZones;
+
+  /// No description provided for @deliversTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivers to'**
+  String get deliversTo;
+
+  /// No description provided for @zoneDeliveryFee.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivery: {fee} {currency}'**
+  String zoneDeliveryFee(Object currency, Object fee);
+
+  /// No description provided for @zoneMinOrder.
+  ///
+  /// In en, this message translates to:
+  /// **'Min. order: {amount} {currency}'**
+  String zoneMinOrder(Object amount, Object currency);
+
+  /// No description provided for @estimatedDeliveryTime.
+  ///
+  /// In en, this message translates to:
+  /// **'~{minutes} min'**
+  String estimatedDeliveryTime(Object minutes);
+
+  /// No description provided for @noDeliveryZones.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivery not available'**
+  String get noDeliveryZones;
+
+  /// No description provided for @chooseOptions.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose options'**
+  String get chooseOptions;
+
+  /// No description provided for @requiredOption.
+  ///
+  /// In en, this message translates to:
+  /// **'Required'**
+  String get requiredOption;
+
+  /// No description provided for @optionalOption.
+  ///
+  /// In en, this message translates to:
+  /// **'Optional'**
+  String get optionalOption;
+
+  /// No description provided for @selectOne.
+  ///
+  /// In en, this message translates to:
+  /// **'Select one'**
+  String get selectOne;
+
+  /// No description provided for @selectUpTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Select up to {count}'**
+  String selectUpTo(Object count);
+
+  /// No description provided for @additionalCost.
+  ///
+  /// In en, this message translates to:
+  /// **'+{amount} {currency}'**
+  String additionalCost(Object amount, Object currency);
+
+  /// No description provided for @searchMenu.
+  ///
+  /// In en, this message translates to:
+  /// **'Search menu...'**
+  String get searchMenu;
+
+  /// No description provided for @noProductsInCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'No items in this category'**
+  String get noProductsInCategory;
+
+  /// No description provided for @popularItems.
+  ///
+  /// In en, this message translates to:
+  /// **'Popular Items'**
+  String get popularItems;
+
+  /// No description provided for @allCategories.
+  ///
+  /// In en, this message translates to:
+  /// **'All Categories'**
+  String get allCategories;
+
+  /// No description provided for @outOfStock.
+  ///
+  /// In en, this message translates to:
+  /// **'Out of Stock'**
+  String get outOfStock;
+
+  /// No description provided for @inStock.
+  ///
+  /// In en, this message translates to:
+  /// **'In Stock'**
+  String get inStock;
+
+  /// No description provided for @writeReview.
+  ///
+  /// In en, this message translates to:
+  /// **'Write a Review'**
+  String get writeReview;
+
+  /// No description provided for @ratingBreakdown.
+  ///
+  /// In en, this message translates to:
+  /// **'Rating Breakdown'**
+  String get ratingBreakdown;
+
+  /// No description provided for @basedOnReviews.
+  ///
+  /// In en, this message translates to:
+  /// **'Based on {count} reviews'**
+  String basedOnReviews(Object count);
+
+  /// No description provided for @noReviewsYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No reviews yet'**
+  String get noReviewsYet;
+
+  /// No description provided for @beTheFirst.
+  ///
+  /// In en, this message translates to:
+  /// **'Be the first to review!'**
+  String get beTheFirst;
+
+  /// No description provided for @yourRating.
+  ///
+  /// In en, this message translates to:
+  /// **'Your Rating'**
+  String get yourRating;
+
+  /// No description provided for @yourReview.
+  ///
+  /// In en, this message translates to:
+  /// **'Your Review'**
+  String get yourReview;
+
+  /// No description provided for @submitReview.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit Review'**
+  String get submitReview;
+
+  /// No description provided for @reviewSubmitted.
+  ///
+  /// In en, this message translates to:
+  /// **'Review submitted! Thank you.'**
+  String get reviewSubmitted;
+
+  /// No description provided for @selectBranchFirst.
+  ///
+  /// In en, this message translates to:
+  /// **'Please select a branch first'**
+  String get selectBranchFirst;
+
+  /// No description provided for @today.
+  ///
+  /// In en, this message translates to:
+  /// **'Today'**
+  String get today;
+
+  /// No description provided for @tomorrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Tomorrow'**
+  String get tomorrow;
+
+  /// No description provided for @fullMenu.
+  ///
+  /// In en, this message translates to:
+  /// **'Full Menu'**
+  String get fullMenu;
+
+  /// No description provided for @viewFullMenu.
+  ///
+  /// In en, this message translates to:
+  /// **'View Full Menu'**
+  String get viewFullMenu;
+
+  /// No description provided for @allOffers.
+  ///
+  /// In en, this message translates to:
+  /// **'All Offers'**
+  String get allOffers;
+
+  /// No description provided for @allReviews.
+  ///
+  /// In en, this message translates to:
+  /// **'All Reviews'**
+  String get allReviews;
+
+  /// No description provided for @contactInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Contact Info'**
+  String get contactInfo;
+
+  /// No description provided for @phone.
+  ///
+  /// In en, this message translates to:
+  /// **'Phone'**
+  String get phone;
+
+  /// No description provided for @directions.
+  ///
+  /// In en, this message translates to:
+  /// **'Directions'**
+  String get directions;
+
+  /// No description provided for @shareRestaurant.
+  ///
+  /// In en, this message translates to:
+  /// **'Share Restaurant'**
+  String get shareRestaurant;
+
+  /// No description provided for @reportRestaurant.
+  ///
+  /// In en, this message translates to:
+  /// **'Report'**
+  String get reportRestaurant;
+
+  /// No description provided for @reservationDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Reservation Details'**
+  String get reservationDetails;
+
+  /// No description provided for @partyOf.
+  ///
+  /// In en, this message translates to:
+  /// **'Party of {count}'**
+  String partyOf(Object count);
+
+  /// No description provided for @atTime.
+  ///
+  /// In en, this message translates to:
+  /// **'at {time}'**
+  String atTime(Object time);
+
+  /// No description provided for @onDate.
+  ///
+  /// In en, this message translates to:
+  /// **'on {date}'**
+  String onDate(Object date);
+
+  /// No description provided for @table.
+  ///
+  /// In en, this message translates to:
+  /// **'Table {number}'**
+  String table(Object number);
+
+  /// No description provided for @seatInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Seating info'**
+  String get seatInfo;
+
+  /// No description provided for @noItems.
+  ///
+  /// In en, this message translates to:
+  /// **'No items'**
+  String get noItems;
+
+  /// No description provided for @addItem.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Item'**
+  String get addItem;
+
+  /// No description provided for @removeItem.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove'**
+  String get removeItem;
+
+  /// No description provided for @maxQuantity.
+  ///
+  /// In en, this message translates to:
+  /// **'Max {quantity}'**
+  String maxQuantity(Object quantity);
+
+  /// No description provided for @minQuantity.
+  ///
+  /// In en, this message translates to:
+  /// **'Min {quantity}'**
+  String minQuantity(Object quantity);
+
+  /// No description provided for @monday.
+  ///
+  /// In en, this message translates to:
+  /// **'Monday'**
+  String get monday;
+
+  /// No description provided for @tuesday.
+  ///
+  /// In en, this message translates to:
+  /// **'Tuesday'**
+  String get tuesday;
+
+  /// No description provided for @wednesday.
+  ///
+  /// In en, this message translates to:
+  /// **'Wednesday'**
+  String get wednesday;
+
+  /// No description provided for @thursday.
+  ///
+  /// In en, this message translates to:
+  /// **'Thursday'**
+  String get thursday;
+
+  /// No description provided for @friday.
+  ///
+  /// In en, this message translates to:
+  /// **'Friday'**
+  String get friday;
+
+  /// No description provided for @saturday.
+  ///
+  /// In en, this message translates to:
+  /// **'Saturday'**
+  String get saturday;
+
+  /// No description provided for @sunday.
+  ///
+  /// In en, this message translates to:
+  /// **'Sunday'**
+  String get sunday;
+
+  /// No description provided for @tryDifferentDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Try a different date or party size.'**
+  String get tryDifferentDate;
+
+  /// No description provided for @minimumOrder.
+  ///
+  /// In en, this message translates to:
+  /// **'Min. order'**
+  String get minimumOrder;
+
+  /// No description provided for @perGuest.
+  ///
+  /// In en, this message translates to:
+  /// **'per guest'**
+  String get perGuest;
 }
 
 class _AppLocalizationsDelegate

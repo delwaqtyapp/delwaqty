@@ -842,7 +842,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get helpCenter => 'مركز المساعدة';
 
   @override
-  String get about => 'حول التطبيق';
+  String get about => 'عن المطعم';
 
   @override
   String get version => 'الإصدار 1.0.0';
@@ -855,4 +855,354 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get riyadhSaudiArabia => 'الرياض، المملكة العربية السعودية';
+
+  @override
+  String get dineIn => 'صالة الطعام';
+
+  @override
+  String get takeaway => 'طلبات خارجية';
+
+  @override
+  String get reserveATable => 'احجز طاولة';
+
+  @override
+  String get noBranches => 'لا توجد فروع متاحة';
+
+  @override
+  String get primaryBranch => 'الفرع الرئيسي';
+
+  @override
+  String get distanceAway => 'بعيد';
+
+  @override
+  String get km => 'كم';
+
+  @override
+  String get prepTime => 'وقت التحضير';
+
+  @override
+  String avgPrepTime(Object minutes) {
+    return 'متوسط $minutes دقيقة';
+  }
+
+  @override
+  String opensAt(Object time) {
+    return 'يفتح الساعة $time';
+  }
+
+  @override
+  String closesAt(Object time) {
+    return 'يغلق الساعة $time';
+  }
+
+  @override
+  String get closedToday => 'مغلق اليوم';
+
+  @override
+  String get openToday => 'مفتوح اليوم';
+
+  @override
+  String get selectDate => 'اختر التاريخ';
+
+  @override
+  String get selectTime => 'اختر الوقت';
+
+  @override
+  String get partySize => 'عدد الأشخاص';
+
+  @override
+  String get guests => 'ضيوف';
+
+  @override
+  String get availableSlots => 'الأوقات المتاحة';
+
+  @override
+  String get noSlotsAvailable => 'لا توجد أوقات متاحة لهذا التاريخ';
+
+  @override
+  String get confirmReservation => 'تأكيد الحجز';
+
+  @override
+  String get reservationConfirmed => 'تم تأكيد الحجز!';
+
+  @override
+  String get reservationPending => 'الحجز قيد الانتظار';
+
+  @override
+  String get reservationCancelled => 'تم إلغاء الحجز';
+
+  @override
+  String get cancelReservation => 'إلغاء الحجز';
+
+  @override
+  String get modifyReservation => 'تعديل الحجز';
+
+  @override
+  String get specialRequests => 'طلبات خاصة';
+
+  @override
+  String get specialRequestsHint =>
+      'هل لديك احتياجات غذائية أو تفضيلات في الجلوس؟';
+
+  @override
+  String get duration => 'المدة';
+
+  @override
+  String minutesValue(Object value) {
+    return '$value دقيقة';
+  }
+
+  @override
+  String get myReservations => 'حجوزاتي';
+
+  @override
+  String get noReservations => 'لا توجد حجوزات بعد';
+
+  @override
+  String get noReservationsMessage => 'احجز طاولة في مطعمك المفضل.';
+
+  @override
+  String get upcomingReservations => 'القادمة';
+
+  @override
+  String get pastReservations => 'السابقة';
+
+  @override
+  String get activeOffers => 'العروض النشطة';
+
+  @override
+  String get noOffersAvailable => 'لا توجد عروض متاحة';
+
+  @override
+  String validUntil(Object date) {
+    return 'صالح حتى $date';
+  }
+
+  @override
+  String minOrderRequired(Object amount, Object currency) {
+    return 'الحد الأدنى للطلب $amount $currency';
+  }
+
+  @override
+  String get useOffer => 'استخدم العرض';
+
+  @override
+  String get offerExpired => 'انتهى العرض';
+
+  @override
+  String get automaticOffers => 'عروض تلقائية';
+
+  @override
+  String percentageOff(Object value) {
+    return 'خصم $value%';
+  }
+
+  @override
+  String fixedOff(Object amount, Object currency) {
+    return 'خصم $amount $currency';
+  }
+
+  @override
+  String get deliveryZones => 'مناطق التوصيل';
+
+  @override
+  String get deliversTo => 'يوصل إلى';
+
+  @override
+  String zoneDeliveryFee(Object currency, Object fee) {
+    return 'التوصيل: $fee $currency';
+  }
+
+  @override
+  String zoneMinOrder(Object amount, Object currency) {
+    return 'الحد الأدنى: $amount $currency';
+  }
+
+  @override
+  String estimatedDeliveryTime(Object minutes) {
+    return '≈$minutes دقيقة';
+  }
+
+  @override
+  String get noDeliveryZones => 'التوصيل غير متاح';
+
+  @override
+  String get chooseOptions => 'اختر الخيارات';
+
+  @override
+  String get requiredOption => 'مطلوب';
+
+  @override
+  String get optionalOption => 'اختياري';
+
+  @override
+  String get selectOne => 'اختر واحداً';
+
+  @override
+  String selectUpTo(Object count) {
+    return 'اختر حتى $count';
+  }
+
+  @override
+  String additionalCost(Object amount, Object currency) {
+    return '+$amount $currency';
+  }
+
+  @override
+  String get searchMenu => 'ابحث في القائمة...';
+
+  @override
+  String get noProductsInCategory => 'لا توجد منتجات في هذا التصنيف';
+
+  @override
+  String get popularItems => 'الأكثر طلباً';
+
+  @override
+  String get allCategories => 'جميع التصنيفات';
+
+  @override
+  String get outOfStock => 'نفذ من المخزون';
+
+  @override
+  String get inStock => 'متوفر';
+
+  @override
+  String get writeReview => 'اكتب تقييم';
+
+  @override
+  String get ratingBreakdown => 'توزيع التقييمات';
+
+  @override
+  String basedOnReviews(Object count) {
+    return 'بناءً على $count تقييم';
+  }
+
+  @override
+  String get noReviewsYet => 'لا توجد تقييمات بعد';
+
+  @override
+  String get beTheFirst => 'كن أول من يقيّم!';
+
+  @override
+  String get yourRating => 'تقييمك';
+
+  @override
+  String get yourReview => 'تعليقك';
+
+  @override
+  String get submitReview => 'إرسال التقييم';
+
+  @override
+  String get reviewSubmitted => 'تم إرسال التقييم! شكراً لك.';
+
+  @override
+  String get selectBranchFirst => 'يرجى اختيار الفرع أولاً';
+
+  @override
+  String get today => 'اليوم';
+
+  @override
+  String get tomorrow => 'غداً';
+
+  @override
+  String get fullMenu => 'القائمة الكاملة';
+
+  @override
+  String get viewFullMenu => 'عرض القائمة الكاملة';
+
+  @override
+  String get allOffers => 'جميع العروض';
+
+  @override
+  String get allReviews => 'جميع التقييمات';
+
+  @override
+  String get contactInfo => 'معلومات الاتصال';
+
+  @override
+  String get phone => 'الهاتف';
+
+  @override
+  String get directions => 'الاتجاهات';
+
+  @override
+  String get shareRestaurant => 'مشاركة المطعم';
+
+  @override
+  String get reportRestaurant => 'إبلاغ';
+
+  @override
+  String get reservationDetails => 'تفاصيل الحجز';
+
+  @override
+  String partyOf(Object count) {
+    return 'طاقم $count أشخاص';
+  }
+
+  @override
+  String atTime(Object time) {
+    return 'الساعة $time';
+  }
+
+  @override
+  String onDate(Object date) {
+    return 'بتاريخ $date';
+  }
+
+  @override
+  String table(Object number) {
+    return 'طاولة $number';
+  }
+
+  @override
+  String get seatInfo => 'معلومات الجلوس';
+
+  @override
+  String get noItems => 'لا توجد منتجات';
+
+  @override
+  String get addItem => 'إضافة منتج';
+
+  @override
+  String get removeItem => 'إزالة';
+
+  @override
+  String maxQuantity(Object quantity) {
+    return 'الحد الأقصى $quantity';
+  }
+
+  @override
+  String minQuantity(Object quantity) {
+    return 'الحد الأدنى $quantity';
+  }
+
+  @override
+  String get monday => 'الاثنين';
+
+  @override
+  String get tuesday => 'الثلاثاء';
+
+  @override
+  String get wednesday => 'الأربعاء';
+
+  @override
+  String get thursday => 'الخميس';
+
+  @override
+  String get friday => 'الجمعة';
+
+  @override
+  String get saturday => 'السبت';
+
+  @override
+  String get sunday => 'الأحد';
+
+  @override
+  String get tryDifferentDate => 'جرّب تاريخاً أو عدد أشخاص مختلفاً.';
+
+  @override
+  String get minimumOrder => 'الحد الأدنى للطلب';
+
+  @override
+  String get perGuest => 'للشخص';
 }

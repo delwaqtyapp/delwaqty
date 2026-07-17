@@ -2413,6 +2413,114 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Favorites'**
   String get favoritesTab;
+
+  /// No description provided for @noGalleryImages.
+  ///
+  /// In en, this message translates to:
+  /// **'No gallery images available yet.'**
+  String get noGalleryImages;
+
+  /// No description provided for @addOns.
+  ///
+  /// In en, this message translates to:
+  /// **'Add-ons'**
+  String get addOns;
+
+  /// No description provided for @orderCompletedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Order Placed!'**
+  String get orderCompletedTitle;
+
+  /// No description provided for @orderCompletedMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Your order has been placed successfully. You can track it in real-time.'**
+  String get orderCompletedMessage;
+
+  /// No description provided for @estimatedArrivalTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Estimated arrival: {minutes} min'**
+  String estimatedArrivalTime(Object minutes);
+
+  /// No description provided for @glassCardLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Glass Card'**
+  String get glassCardLabel;
+
+  /// No description provided for @skeletonLoading.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading...'**
+  String get skeletonLoading;
+
+  /// No description provided for @menuCategories.
+  ///
+  /// In en, this message translates to:
+  /// **'Categories'**
+  String get menuCategories;
+
+  /// No description provided for @popularFirst.
+  ///
+  /// In en, this message translates to:
+  /// **'Popular First'**
+  String get popularFirst;
+
+  /// No description provided for @priceLowToHigh.
+  ///
+  /// In en, this message translates to:
+  /// **'Price: Low to High'**
+  String get priceLowToHigh;
+
+  /// No description provided for @priceHighToLow.
+  ///
+  /// In en, this message translates to:
+  /// **'Price: High to Low'**
+  String get priceHighToLow;
+
+  /// No description provided for @filterByCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Filter by category'**
+  String get filterByCategory;
+
+  /// No description provided for @itemAddedToCartSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} added to cart'**
+  String itemAddedToCartSuccess(Object name);
+
+  /// No description provided for @viewFullMenuHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Browse the complete menu'**
+  String get viewFullMenuHint;
+
+  /// No description provided for @restaurantGallery.
+  ///
+  /// In en, this message translates to:
+  /// **'Restaurant Gallery'**
+  String get restaurantGallery;
+
+  /// No description provided for @shareThisRestaurant.
+  ///
+  /// In en, this message translates to:
+  /// **'Share this restaurant with friends'**
+  String get shareThisRestaurant;
+
+  /// No description provided for @reportIssue.
+  ///
+  /// In en, this message translates to:
+  /// **'Report an Issue'**
+  String get reportIssue;
+
+  /// No description provided for @callRestaurant.
+  ///
+  /// In en, this message translates to:
+  /// **'Call Restaurant'**
+  String get callRestaurant;
 }
 
 class _AppLocalizationsDelegate

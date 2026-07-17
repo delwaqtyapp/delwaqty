@@ -6,7 +6,6 @@ import 'package:delwaqty/features/restaurant/domain/entities/offer.dart';
 import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
 import 'package:delwaqty/shared/widgets/premium_empty_state.dart';
 import 'package:delwaqty/shared/widgets/error_state.dart';
-import 'package:delwaqty/shared/widgets/app_loader.dart';
 import 'package:delwaqty/shared/widgets/shimmer_loading.dart';
 
 final _offersProvider = FutureProvider.family<List<Offer>, String>((ref, merchantId) async {

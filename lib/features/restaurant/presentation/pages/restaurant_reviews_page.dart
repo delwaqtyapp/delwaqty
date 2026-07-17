@@ -6,7 +6,6 @@ import 'package:delwaqty/features/commerce/domain/entities/review.dart';
 import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
 import 'package:delwaqty/shared/widgets/premium_empty_state.dart';
 import 'package:delwaqty/shared/widgets/error_state.dart';
-import 'package:delwaqty/shared/widgets/app_loader.dart';
 import 'package:delwaqty/shared/widgets/app_snackbar.dart';
 import 'package:delwaqty/shared/widgets/shimmer_loading.dart';
 

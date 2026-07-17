@@ -73,19 +73,24 @@ class MerchantCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            AspectRatio(
-              aspectRatio: 16 / 9,
-              child: Stack(
-                fit: StackFit.expand,
-                children: [
-                  Container(
-                    color: AppColors.primaryLight.withValues(alpha: 0.3),
-                    child: Icon(
-                      _typeIcon(merchant.type),
-                      size: 48,
-                      color: Theme.of(context).colorScheme.primary,
-                    ),
-                  ),
+            Hero(
+              tag: 'merchant-${merchant.id}',
+              child: AspectRatio(
+                aspectRatio: 16 / 9,
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    if (merchant.imageUrl != null)
+                      Image.network(merchant.imageUrl!, fit: BoxFit.cover)
+                    else
+                      Container(
+                        color: AppColors.primaryLight.withValues(alpha: 0.3),
+                        child: Icon(
+                          _typeIcon(merchant.type),
+                          size: 48,
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
+                      ),
                   if (merchant.isVerified)
                     Positioned(
                       top: 8,
@@ -141,6 +146,7 @@ class MerchantCard extends StatelessWidget {
                     ),
                   ),
                 ],
+              ),
               ),
             ),
             Padding(

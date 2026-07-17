@@ -1230,4 +1230,62 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get favoritesTab => 'المفضلة';
+
+  @override
+  String get noGalleryImages => 'لا توجد صور في المعرض بعد.';
+
+  @override
+  String get addOns => 'إضافات';
+
+  @override
+  String get orderCompletedTitle => 'تم الطلب!';
+
+  @override
+  String get orderCompletedMessage => 'تم طلبك بنجاح. يمكنك تتبعه بشكل مباشر.';
+
+  @override
+  String estimatedArrivalTime(Object minutes) {
+    return 'الوصول المتوقع: $minutes دقيقة';
+  }
+
+  @override
+  String get glassCardLabel => 'بطاقة زجاجية';
+
+  @override
+  String get skeletonLoading => 'جاري التحميل...';
+
+  @override
+  String get menuCategories => 'الأقسام';
+
+  @override
+  String get popularFirst => 'الأكثر شعبية أولاً';
+
+  @override
+  String get priceLowToHigh => 'السعر: من الأقل إلى الأعلى';
+
+  @override
+  String get priceHighToLow => 'السعر: من الأعلى إلى الأقل';
+
+  @override
+  String get filterByCategory => 'تصفية حسب القسم';
+
+  @override
+  String itemAddedToCartSuccess(Object name) {
+    return 'تمت إضافة $name للسلة';
+  }
+
+  @override
+  String get viewFullMenuHint => 'تصفح القائمة الكاملة';
+
+  @override
+  String get restaurantGallery => 'معرض المطعم';
+
+  @override
+  String get shareThisRestaurant => 'شارك هذا المطعم مع أصدقائك';
+
+  @override
+  String get reportIssue => 'الإبلاغ عن مشكلة';
+
+  @override
+  String get callRestaurant => 'اتصل بالمطعم';
 }

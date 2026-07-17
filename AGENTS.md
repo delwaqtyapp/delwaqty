@@ -123,6 +123,23 @@ Every major milestone MUST produce:
 
 If you discover a significantly better architecture, **refactor early** while preserving production quality.
 
+## 12.1. Code Deletion Classification (MANDATORY)
+
+**Every deletion decision MUST classify the component first.**
+
+| Category | Definition | Deletion Rule |
+|----------|-----------|---------------|
+| **Production Dead Code** | Never referenced, no future value | Safe to delete |
+| **Dormant Infrastructure** | Not currently used, designed for future platform capabilities | Keep or archive cleanly. Do NOT delete. |
+| **Core Platform Layer** | Auth, Security, Analytics, Notifications, Payments, Search, Maps, Logging, Storage, Observability, AI, Configuration, Feature Flags | Never remove without proving a superior replacement exists. Document the reason. |
+
+Before deleting ANY code, module, service, engine, utility, or abstraction:
+1. Classify it into one of the three categories above.
+2. If it is Dormant Infrastructure or Core Platform Layer, it must NOT be deleted unless:
+   - A superior replacement already exists in the codebase
+   - The reason is documented in `docs/DECISION_LOG.md`
+3. Never delete code simply because it is unused today.
+
 ## 13. Coding Standards
 
 - No comments unless requested

@@ -224,7 +224,7 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage> {
                       AnimatedFadeIn(
                         delay: const Duration(milliseconds: 470),
                         child: Text(
-                          'Add-ons',
+                          l10n.addOns,
                           style: context.textTheme.titleSmall?.copyWith(
                             fontWeight: FontWeight.bold,
                           ),

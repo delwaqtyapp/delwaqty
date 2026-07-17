@@ -8,7 +8,6 @@ import 'package:delwaqty/features/commerce/domain/entities/catalog_category.dart
 import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
 import 'package:delwaqty/shared/widgets/premium_empty_state.dart';
 import 'package:delwaqty/shared/widgets/error_state.dart';
-import 'package:delwaqty/shared/widgets/app_loader.dart';
 import 'package:delwaqty/shared/widgets/shimmer_loading.dart';
 
 final _categoriesProvider = FutureProvider.family<List<CatalogCategory>, String>((ref, merchantId) async {

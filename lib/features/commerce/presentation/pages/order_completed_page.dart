@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
+import 'package:lottie/lottie.dart';
 
 class OrderCompletedPage extends StatefulWidget {
   const OrderCompletedPage({super.key, required this.orderId});
@@ -66,17 +67,23 @@ class _OrderCompletedPageState extends State<OrderCompletedPage>
                 AnimatedFadeIn(
                   child: ScaleTransition(
                     scale: _scaleAnimation,
-                    child: Container(
-                      width: 100,
-                      height: 100,
-                      decoration: BoxDecoration(
-                        color: colorScheme.primary,
-                        shape: BoxShape.circle,
-                      ),
-                      child: const Icon(
-                        Icons.check,
-                        color: Colors.white,
-                        size: 56,
+                    child: Lottie.asset(
+                      'assets/lottie/order_success.json',
+                      width: 150,
+                      height: 150,
+                      repeat: false,
+                      errorBuilder: (_, __, ___) => Container(
+                        width: 100,
+                        height: 100,
+                        decoration: BoxDecoration(
+                          color: colorScheme.primary,
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(
+                          Icons.check,
+                          color: Colors.white,
+                          size: 56,
+                        ),
                       ),
                     ),
                   ),

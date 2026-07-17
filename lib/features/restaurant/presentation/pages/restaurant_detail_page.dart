@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
-import 'package:delwaqty/features/commerce/domain/repositories/merchant_repository.dart';
 import 'package:delwaqty/features/commerce/domain/entities/merchant.dart';
 import 'package:delwaqty/features/commerce/presentation/widgets/rating_stars.dart';
 import 'package:delwaqty/features/commerce/presentation/widgets/delivery_info.dart';
@@ -21,9 +20,10 @@ import 'package:delwaqty/features/restaurant/presentation/widgets/offer_banner_c
 import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
 import 'package:delwaqty/shared/widgets/premium_empty_state.dart';
 import 'package:delwaqty/shared/widgets/error_state.dart';
-import 'package:delwaqty/shared/widgets/app_loader.dart';
 import 'package:delwaqty/shared/widgets/section_header.dart';
 import 'package:delwaqty/shared/widgets/shimmer_loading.dart';
+import 'package:delwaqty/shared/widgets/glass_card.dart';
+import 'package:delwaqty/shared/widgets/skeleton_loader.dart';
 
 final _merchantProvider = FutureProvider.family<Merchant?, String>((ref, id) async {
   final repo = ref.watch(merchantRepositoryProvider);
@@ -92,7 +92,7 @@ class _RestaurantDetailPageState extends ConsumerState<RestaurantDetailPage> {
           }
           return _buildBody(context, l10n, theme, merchant);
         },
-        loading: () => const Center(child: AppLoaderCircular()),
+        loading: () => const RestaurantDetailSkeleton(),
         error: (_, __) => Center(
           child: ErrorState(
             message: l10n.errorLoading,
@@ -238,9 +238,11 @@ class _RestaurantDetailPageState extends ConsumerState<RestaurantDetailPage> {
         icon: const Icon(Icons.arrow_back_ios_new),
         onPressed: () => context.pop(),
       ),
-      actions: [CartBadge(onTap: () {})],
+      actions: [CartBadge(onTap: () => context.push('/market/cart'))],
       flexibleSpace: FlexibleSpaceBar(
-        background: Stack(
+        background: Hero(
+          tag: 'merchant-${merchant.id}',
+          child: Stack(
           fit: StackFit.expand,
           children: [
             if (merchant.imageUrl != null)
@@ -307,6 +309,7 @@ class _RestaurantDetailPageState extends ConsumerState<RestaurantDetailPage> {
               ),
             ),
           ],
+        ),
         ),
       ),
     );
@@ -445,6 +448,7 @@ class _RestaurantDetailPageState extends ConsumerState<RestaurantDetailPage> {
       (Icons.local_offer_outlined, l10n.offers, '/restaurant/${widget.merchantId}/offers'),
       (Icons.reviews_outlined, l10n.reviews, '/restaurant/${widget.merchantId}/reviews'),
       (Icons.calendar_today_outlined, l10n.reserveATable, '/restaurant/${widget.merchantId}/reservation'),
+      (Icons.photo_library_outlined, l10n.gallery, '/restaurant/${widget.merchantId}/gallery'),
     ];
 
     return Column(
@@ -491,13 +495,15 @@ class _RestaurantDetailPageState extends ConsumerState<RestaurantDetailPage> {
   }
 
   Widget _buildDeliveryZonesSection(BuildContext context, AppLocalizations l10n) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        SectionHeader(title: l10n.deliveryZones),
-        const SizedBox(height: 8),
-        DeliveryZoneCard(merchantId: widget.merchantId),
-      ],
+    return GlassCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SectionHeader(title: l10n.deliveryZones),
+          const SizedBox(height: 8),
+          DeliveryZoneCard(merchantId: widget.merchantId),
+        ],
+      ),
     );
   }
 

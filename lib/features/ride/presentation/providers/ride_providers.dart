@@ -1,11 +1,16 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:delwaqty/services/supabase/supabase_service.dart';
 import 'package:delwaqty/features/ride/domain/entities/ride.dart';
+import 'package:delwaqty/features/ride/domain/entities/fare_quote.dart';
 import 'package:delwaqty/features/ride/domain/repositories/ride_repository.dart';
 import 'package:delwaqty/features/ride/data/datasources/remote/supabase_ride_data_source.dart';
 import 'package:delwaqty/features/ride/data/repositories/ride_repository_impl.dart';
 
 final rideRepositoryImplProvider = Provider<RideRepositoryImpl>((ref) {
-  return RideRepositoryImpl(ref.watch(supabaseRideDataSourceProvider));
+  return RideRepositoryImpl(
+    ref.watch(supabaseRideDataSourceProvider),
+    ref.watch(supabaseClientProvider),
+  );
 });
 
 final rideRepositoryProvider = Provider<RideRepository>(
@@ -22,7 +27,12 @@ final rideHistoryProvider = FutureProvider<List<Ride>>((ref) async {
   return repo.getRideHistory();
 });
 
-enum BookingStep { location, review, confirmed }
+final rideStreamProvider = StreamProvider.family<Ride, String>((ref, rideId) {
+  final repo = ref.watch(rideRepositoryProvider);
+  return repo.watchRide(rideId);
+});
+
+enum BookingStep { location, review }
 
 class RideBookingState {
   const RideBookingState({
@@ -33,9 +43,12 @@ class RideBookingState {
     this.dropoffLatitude,
     this.dropoffLongitude,
     this.rideType = RideType.economy,
-    this.estimatedFare,
-    this.estimatedDistance,
-    this.estimatedMinutes,
+    this.quotes = const [],
+    this.isEstimating = false,
+    this.promoCode,
+    this.promoDiscount = 0,
+    this.promoError,
+    this.paymentMethod = 'cash',
     this.step = BookingStep.location,
     this.isRequesting = false,
     this.error,
@@ -48,39 +61,55 @@ class RideBookingState {
   final double? dropoffLatitude;
   final double? dropoffLongitude;
   final RideType rideType;
-  final double? estimatedFare;
-  final double? estimatedDistance;
-  final int? estimatedMinutes;
+  final List<FareQuote> quotes;
+  final bool isEstimating;
+  final String? promoCode;
+  final double promoDiscount;
+  final String? promoError;
+  final String paymentMethod;
   final BookingStep step;
   final bool isRequesting;
   final String? error;
 
+  bool get hasPickup => pickupLatitude != null && pickupLongitude != null;
+  bool get hasDropoff => dropoffLatitude != null && dropoffLongitude != null;
+
   bool get isReadyToBook =>
-      pickupLatitude != null &&
-      pickupLongitude != null &&
-      dropoffLatitude != null &&
-      dropoffLongitude != null &&
+      hasPickup &&
+      hasDropoff &&
       pickupAddress.isNotEmpty &&
-      dropoffAddress.isNotEmpty;
+      dropoffAddress.isNotEmpty &&
+      selectedQuote != null;
+
+  FareQuote? get selectedQuote {
+    for (final q in quotes) {
+      if (q.rideType == rideType) return q;
+    }
+    return null;
+  }
+
+  double get finalFare {
+    final base = selectedQuote?.total ?? 0;
+    final f = base - promoDiscount;
+    return f < 0 ? 0 : f;
+  }
 
   RideBookingState copyWith({
     String? pickupAddress,
     double? pickupLatitude,
     double? pickupLongitude,
-    bool clearPickupLat = false,
-    bool clearPickupLng = false,
     String? dropoffAddress,
     double? dropoffLatitude,
     double? dropoffLongitude,
-    bool clearDropoffLat = false,
-    bool clearDropoffLng = false,
     RideType? rideType,
-    double? estimatedFare,
-    bool clearFare = false,
-    double? estimatedDistance,
-    bool clearDistance = false,
-    int? estimatedMinutes,
-    bool clearMinutes = false,
+    List<FareQuote>? quotes,
+    bool? isEstimating,
+    String? promoCode,
+    bool clearPromoCode = false,
+    double? promoDiscount,
+    String? promoError,
+    bool clearPromoError = false,
+    String? paymentMethod,
     BookingStep? step,
     bool? isRequesting,
     String? error,
@@ -88,15 +117,18 @@ class RideBookingState {
   }) {
     return RideBookingState(
       pickupAddress: pickupAddress ?? this.pickupAddress,
-      pickupLatitude: clearPickupLat ? null : (pickupLatitude ?? this.pickupLatitude),
-      pickupLongitude: clearPickupLng ? null : (pickupLongitude ?? this.pickupLongitude),
+      pickupLatitude: pickupLatitude ?? this.pickupLatitude,
+      pickupLongitude: pickupLongitude ?? this.pickupLongitude,
       dropoffAddress: dropoffAddress ?? this.dropoffAddress,
-      dropoffLatitude: clearDropoffLat ? null : (dropoffLatitude ?? this.dropoffLatitude),
-      dropoffLongitude: clearDropoffLng ? null : (dropoffLongitude ?? this.dropoffLongitude),
+      dropoffLatitude: dropoffLatitude ?? this.dropoffLatitude,
+      dropoffLongitude: dropoffLongitude ?? this.dropoffLongitude,
       rideType: rideType ?? this.rideType,
-      estimatedFare: clearFare ? null : (estimatedFare ?? this.estimatedFare),
-      estimatedDistance: clearDistance ? null : (estimatedDistance ?? this.estimatedDistance),
-      estimatedMinutes: clearMinutes ? null : (estimatedMinutes ?? this.estimatedMinutes),
+      quotes: quotes ?? this.quotes,
+      isEstimating: isEstimating ?? this.isEstimating,
+      promoCode: clearPromoCode ? null : (promoCode ?? this.promoCode),
+      promoDiscount: promoDiscount ?? this.promoDiscount,
+      promoError: clearPromoError ? null : (promoError ?? this.promoError),
+      paymentMethod: paymentMethod ?? this.paymentMethod,
       step: step ?? this.step,
       isRequesting: isRequesting ?? this.isRequesting,
       error: clearError ? null : (error ?? this.error),
@@ -116,7 +148,7 @@ class RideBookingNotifier extends StateNotifier<RideBookingState> {
       pickupLongitude: lng,
       clearError: true,
     );
-    _updateEstimate();
+    _refreshQuotes();
   }
 
   void setDropoff(String address, double lat, double lng) {
@@ -126,39 +158,83 @@ class RideBookingNotifier extends StateNotifier<RideBookingState> {
       dropoffLongitude: lng,
       clearError: true,
     );
-    _updateEstimate();
+    _refreshQuotes();
   }
 
   void setRideType(RideType type) {
     state = state.copyWith(rideType: type);
-    _updateEstimate();
+    _revalidatePromo();
+  }
+
+  void setPaymentMethod(String method) {
+    state = state.copyWith(paymentMethod: method);
   }
 
   void setStep(BookingStep step) {
     state = state.copyWith(step: step);
   }
 
-  Future<void> _updateEstimate() async {
-    if (!state.isReadyToBook) return;
+  Future<void> _refreshQuotes() async {
+    if (!state.hasPickup || !state.hasDropoff) return;
+    state = state.copyWith(isEstimating: true, clearError: true);
     try {
       final repo = _ref.read(rideRepositoryProvider);
-      final estimate = await repo.getFareEstimate(
+      final quotes = await repo.getFareQuotes(
         pickupLatitude: state.pickupLatitude!,
         pickupLongitude: state.pickupLongitude!,
         dropoffLatitude: state.dropoffLatitude!,
         dropoffLongitude: state.dropoffLongitude!,
-        rideType: state.rideType,
       );
       state = state.copyWith(
-        estimatedFare: estimate['fare'],
-        estimatedDistance: estimate['distance'],
-        estimatedMinutes: estimate['estimatedMinutes']?.toInt(),
+        quotes: quotes,
+        isEstimating: false,
+        step: BookingStep.review,
       );
-    } catch (_) {}
+      await _revalidatePromo();
+    } catch (e) {
+      state = state.copyWith(isEstimating: false, error: e.toString());
+    }
+  }
+
+  Future<void> applyPromo(String code) async {
+    if (code.trim().isEmpty) return;
+    final quote = state.selectedQuote;
+    if (quote == null) return;
+    state = state.copyWith(clearPromoError: true);
+    try {
+      final repo = _ref.read(rideRepositoryProvider);
+      final result = await repo.validatePromo(code: code.trim(), fare: quote.total);
+      if (result.valid) {
+        state = state.copyWith(
+          promoCode: code.trim().toUpperCase(),
+          promoDiscount: result.discount,
+          clearPromoError: true,
+        );
+      } else {
+        state = state.copyWith(
+          promoDiscount: 0,
+          clearPromoCode: true,
+          promoError: result.reason ?? 'invalid',
+        );
+      }
+    } catch (e) {
+      state = state.copyWith(promoError: e.toString());
+    }
+  }
+
+  void clearPromo() {
+    state = state.copyWith(clearPromoCode: true, promoDiscount: 0, clearPromoError: true);
+  }
+
+  Future<void> _revalidatePromo() async {
+    final code = state.promoCode;
+    if (code == null || code.isEmpty) return;
+    await applyPromo(code);
   }
 
   Future<Ride?> confirmRide() async {
     if (!state.isReadyToBook) return null;
+    final quote = state.selectedQuote!;
     state = state.copyWith(isRequesting: true, clearError: true);
     try {
       final repo = _ref.read(rideRepositoryProvider);
@@ -170,8 +246,13 @@ class RideBookingNotifier extends StateNotifier<RideBookingState> {
         dropoffLongitude: state.dropoffLongitude!,
         dropoffAddress: state.dropoffAddress,
         rideType: state.rideType,
+        fare: state.finalFare,
+        quote: quote,
+        promoCode: state.promoCode,
+        discountAmount: state.promoDiscount,
+        paymentMethod: state.paymentMethod,
       );
-      state = state.copyWith(isRequesting: false, step: BookingStep.confirmed);
+      state = state.copyWith(isRequesting: false);
       _ref.invalidate(activeRideProvider);
       return ride;
     } catch (e) {
@@ -189,17 +270,3 @@ final rideBookingProvider =
     StateNotifierProvider<RideBookingNotifier, RideBookingState>((ref) {
   return RideBookingNotifier(ref);
 });
-
-final fareEstimateProvider =
-    FutureProvider.family<Map<String, double>, ({double pickupLat, double pickupLng, double dropoffLat, double dropoffLng, RideType rideType})>(
-  (ref, params) async {
-    final repo = ref.watch(rideRepositoryProvider);
-    return repo.getFareEstimate(
-      pickupLatitude: params.pickupLat,
-      pickupLongitude: params.pickupLng,
-      dropoffLatitude: params.dropoffLat,
-      dropoffLongitude: params.dropoffLng,
-      rideType: params.rideType,
-    );
-  },
-);

@@ -1,11 +1,49 @@
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:delwaqty/features/ride/domain/entities/ride.dart';
+import 'package:delwaqty/features/ride/domain/entities/fare_quote.dart';
 import 'package:delwaqty/features/ride/domain/repositories/ride_repository.dart';
 import 'package:delwaqty/features/ride/data/datasources/remote/supabase_ride_data_source.dart';
 
 class RideRepositoryImpl implements RideRepository {
-  RideRepositoryImpl(this._dataSource);
+  RideRepositoryImpl(this._dataSource, this._client);
 
   final SupabaseRideDataSource _dataSource;
+  final SupabaseClient _client;
+
+  String get _riderId {
+    final id = _client.auth.currentUser?.id;
+    if (id == null) {
+      throw StateError('No authenticated user');
+    }
+    return id;
+  }
+
+  @override
+  Future<List<FareQuote>> getFareQuotes({
+    required double pickupLatitude,
+    required double pickupLongitude,
+    required double dropoffLatitude,
+    required double dropoffLongitude,
+  }) {
+    return _dataSource.getFareQuotes(
+      pickupLatitude: pickupLatitude,
+      pickupLongitude: pickupLongitude,
+      dropoffLatitude: dropoffLatitude,
+      dropoffLongitude: dropoffLongitude,
+    );
+  }
+
+  @override
+  Future<PromoResult> validatePromo({
+    required String code,
+    required double fare,
+  }) {
+    return _dataSource.validatePromo(
+      code: code,
+      fare: fare,
+      userId: _riderId,
+    );
+  }
 
   @override
   Future<Ride> requestRide({
@@ -16,9 +54,14 @@ class RideRepositoryImpl implements RideRepository {
     required double dropoffLongitude,
     required String dropoffAddress,
     required RideType rideType,
+    required double fare,
+    required FareQuote quote,
+    String? promoCode,
+    double discountAmount = 0,
+    String paymentMethod = 'cash',
   }) {
     return _dataSource.requestRide(
-      riderId: 'current-user',
+      riderId: _riderId,
       pickupLatitude: pickupLatitude,
       pickupLongitude: pickupLongitude,
       pickupAddress: pickupAddress,
@@ -26,8 +69,32 @@ class RideRepositoryImpl implements RideRepository {
       dropoffLongitude: dropoffLongitude,
       dropoffAddress: dropoffAddress,
       rideType: rideType,
+      fare: fare,
+      quote: quote,
+      promoCode: promoCode,
+      discountAmount: discountAmount,
+      paymentMethod: paymentMethod,
     );
   }
+
+  @override
+  Future<List<NearbyDriver>> findNearbyDrivers({
+    required double latitude,
+    required double longitude,
+    required RideType rideType,
+  }) {
+    return _dataSource.findNearbyDrivers(
+      latitude: latitude,
+      longitude: longitude,
+      rideType: rideType,
+    );
+  }
+
+  @override
+  Stream<Ride> watchRide(String rideId) => _dataSource.watchRide(rideId);
+
+  @override
+  Future<Ride?> getRide(String rideId) => _dataSource.getRide(rideId);
 
   @override
   Future<void> cancelRide(String rideId, {String? reason}) {
@@ -36,12 +103,12 @@ class RideRepositoryImpl implements RideRepository {
 
   @override
   Future<Ride?> getActiveRide() {
-    return _dataSource.getActiveRide('current-user');
+    return _dataSource.getActiveRide(_riderId);
   }
 
   @override
   Future<List<Ride>> getRideHistory({int limit = 20, int offset = 0}) {
-    return _dataSource.getRideHistory('current-user', limit: limit, offset: offset);
+    return _dataSource.getRideHistory(_riderId, limit: limit, offset: offset);
   }
 
   @override
@@ -57,22 +124,5 @@ class RideRepositoryImpl implements RideRepository {
   @override
   Future<void> reportIssue(String rideId, String issue) {
     return _dataSource.reportIssue(rideId, issue);
-  }
-
-  @override
-  Future<Map<String, double>> getFareEstimate({
-    required double pickupLatitude,
-    required double pickupLongitude,
-    required double dropoffLatitude,
-    required double dropoffLongitude,
-    required RideType rideType,
-  }) {
-    return _dataSource.getFareEstimate(
-      pickupLatitude: pickupLatitude,
-      pickupLongitude: pickupLongitude,
-      dropoffLatitude: dropoffLatitude,
-      dropoffLongitude: dropoffLongitude,
-      rideType: rideType,
-    );
   }
 }

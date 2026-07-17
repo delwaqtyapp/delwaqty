@@ -5,7 +5,43 @@ part 'ride.g.dart';
 
 enum RideStatus { searching, matched, arrived, inTrip, completed, cancelled }
 
-enum RideType { economy, comfort, premium }
+enum RideType { economy, comfort, premium, xl, motorbike, taxi }
+
+extension RideTypeX on RideType {
+  int get passengerCapacity {
+    switch (this) {
+      case RideType.economy:
+        return 4;
+      case RideType.comfort:
+        return 4;
+      case RideType.premium:
+        return 4;
+      case RideType.xl:
+        return 6;
+      case RideType.motorbike:
+        return 1;
+      case RideType.taxi:
+        return 4;
+    }
+  }
+
+  int get luggageCapacity {
+    switch (this) {
+      case RideType.economy:
+        return 2;
+      case RideType.comfort:
+        return 2;
+      case RideType.premium:
+        return 3;
+      case RideType.xl:
+        return 4;
+      case RideType.motorbike:
+        return 0;
+      case RideType.taxi:
+        return 2;
+    }
+  }
+}
 
 @freezed
 class Ride with _$Ride {
@@ -28,6 +64,16 @@ class Ride with _$Ride {
     @Default(RideType.economy) RideType rideType,
     @Default(RideStatus.searching) RideStatus status,
     double? fare,
+    double? baseFare,
+    double? distanceFare,
+    double? timeFare,
+    @Default(1.0) double surgeMultiplier,
+    @Default(0.0) double discountAmount,
+    String? promoCode,
+    @Default('cash') String paymentMethod,
+    @Default('pending') String paymentStatus,
+    String? pickupOtp,
+    @Default('EGP') String currency,
     double? distance,
     int? estimatedMinutes,
     double? driverLatitude,

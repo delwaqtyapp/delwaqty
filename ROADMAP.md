@@ -61,7 +61,7 @@
 ### Phase 8: Transportation Platform (Ride-Hailing Ecosystem)
 - [x] M1: Full Arabic-default localization + EGP currency (sprint 28)
 - [x] M2: Transportation Supabase schema + pricing/dispatch/lifecycle RPCs (sprint 29)
-- [ ] M3: Pricing engine integration (Dart) + 6 ride categories
+- [x] M3: Passenger booking flow on real backend (6 categories, fare/promo, Maps, Realtime tracking, no mock) (sprint 30)
 - [ ] M4: Dispatch engine + trip lifecycle (remove mock fallback)
 - [ ] M5: Passenger experience on real backend
 - [ ] M6: Driver experience on real backend

@@ -1,6 +1,6 @@
 # SESSION_STATUS.md
 
-> **Last updated:** 2026-07-18 Session 4 (Milestone 2)
+> **Last updated:** 2026-07-18 Session 4 (Milestone 3)
 
 ---
 
@@ -51,6 +51,25 @@ Applied `supabase/migrations/007_transportation_platform.sql` to project `bttnlk
 **Seed:** 6 `ride_pricing` rows (EGP), `WELCOME20` promo.
 
 **Verified live:** `estimate_fare('economy',5,12,1.0)` = 33.50 EGP; `validate_promo('WELCOME20',...,100)` = 20 EGP discount. `flutter analyze` = 0 errors / 0 warnings.
+
+### MILESTONE 3 - PASSENGER BOOKING FLOW ON REAL BACKEND (COMPLETE)
+
+Full passenger booking journey wired end-to-end onto the M2 backend with **zero mock data**.
+
+**Domain:** `RideType` expanded to 6 categories (economy/comfort/premium/xl/motorbike/taxi) with `RideTypeX` (passenger + luggage capacity). `Ride` entity extended (baseFare, distanceFare, timeFare, surgeMultiplier, discountAmount, promoCode, paymentMethod, paymentStatus, pickupOtp, currency). New `FareQuote`, `PromoResult`, `NearbyDriver` entities. Freezed regenerated.
+
+**Data:** `supabase_ride_data_source.dart` rebuilt on real RPCs (`estimate_fare`, `validate_promo`, `find_nearest_drivers`, `accept_ride`/`advance_ride`) - **all mock removed**. `watchRide` uses Supabase Realtime (`.stream(primaryKey:['id'])`). `ride_repository_impl.dart` uses the real authenticated user id.
+
+**Presentation:** `RideBookingNotifier` (setPickup/setDropoff/setRideType/refreshQuotes/applyPromo/clearPromo/confirmRide) + `rideStreamProvider` (Realtime). Rewrote `ride_booking_page.dart` (real GoogleMap, 6 category cards with live price/ETA/capacity, fare breakdown, promo apply/clear, confirm -> find drivers -> tracking) and `ride_tracking_page.dart` (Realtime status steps, searching state, driver card, OTP box, map, cancel/SOS/share, rating on completion). New widgets `RideMap` (markers + polyline + fitBounds) and `RideTypeInfo` (localized name/desc/icon).
+
+**l10n:** Added ride keys to EN + AR; renamed collision `estimatedArrival` -> `arrivesInMinutes`. `flutter gen-l10n` clean.
+
+**Verified:** `flutter analyze` = 0 errors / 0 warnings; `flutter test` = 366/366; debug APK built (`--dart-define-from-file=.env.dev`), installed on DNP NX9 (`A3SQUT5A28003808`), launches without crash/fatal logcat.
+
+**Known limitations (M3):**
+- Driver-side acceptance not built - passenger stays on "searching" until a driver is assigned (Realtime flips to `matched`). Driver app flow is M4/M6.
+- Dropoff uses a positional offset placeholder (no destination geocoding/search UI yet).
+- Interactive on-device booking walkthrough (tap-through) not automated; launch + stability verified.
 
 ### Next Milestones (in order)
 - **M3:** Pricing engine integration in Dart (wire `estimate_fare` into ride booking, expand `RideType` entity to 6 categories).

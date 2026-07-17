@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:delwaqty/core/extensions/context_extensions.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 import 'package:delwaqty/features/location/presentation/providers/location_provider.dart';
 import 'package:delwaqty/features/ride/domain/entities/ride.dart';
 import 'package:delwaqty/features/ride/presentation/providers/ride_providers.dart';
+import 'package:delwaqty/features/ride/presentation/widgets/ride_map.dart';
+import 'package:delwaqty/features/ride/presentation/widgets/ride_type_info.dart';
 import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
 
 class RideBookingPage extends ConsumerStatefulWidget {
@@ -18,16 +21,19 @@ class RideBookingPage extends ConsumerStatefulWidget {
 class _RideBookingPageState extends ConsumerState<RideBookingPage> {
   final _pickupController = TextEditingController();
   final _dropoffController = TextEditingController();
-  final _pickupFocus = FocusNode();
-  final _dropoffFocus = FocusNode();
+  final _promoController = TextEditingController();
 
   @override
   void dispose() {
     _pickupController.dispose();
     _dropoffController.dispose();
-    _pickupFocus.dispose();
-    _dropoffFocus.dispose();
+    _promoController.dispose();
     super.dispose();
+  }
+
+  String _money(BuildContext context, double amount) {
+    final l10n = AppLocalizations.of(context);
+    return l10n.amountWithCurrency(amount.toStringAsFixed(0), l10n.currencySymbol);
   }
 
   @override
@@ -47,11 +53,19 @@ class _RideBookingPageState extends ConsumerState<RideBookingPage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     _buildHeader(context, l10n),
+                    if (booking.hasPickup) _buildMap(context, booking),
                     _buildLocationInputs(context, l10n, booking, locationAsync),
                     if (booking.step == BookingStep.review) ...[
-                      _buildMapView(context),
-                      _buildRideTypeSelector(context, l10n, booking),
-                      _buildFareSummary(context, l10n, booking),
+                      if (booking.isEstimating)
+                        const Padding(
+                          padding: EdgeInsets.all(24),
+                          child: Center(child: CircularProgressIndicator()),
+                        )
+                      else if (booking.quotes.isNotEmpty) ...[
+                        _buildRideTypeSelector(context, l10n, booking),
+                        _buildPromoSection(context, l10n, booking),
+                        _buildFareBreakdown(context, l10n, booking),
+                      ],
                     ],
                     _buildSafetyBadge(context, l10n),
                     const SizedBox(height: 100),
@@ -59,7 +73,8 @@ class _RideBookingPageState extends ConsumerState<RideBookingPage> {
                 ),
               ),
             ),
-            if (booking.step == BookingStep.review) _buildBottomBar(context, l10n, booking),
+            if (booking.step == BookingStep.review && booking.selectedQuote != null)
+              _buildBottomBar(context, l10n, booking),
           ],
         ),
       ),
@@ -81,22 +96,30 @@ class _RideBookingPageState extends ConsumerState<RideBookingPage> {
                   color: context.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: Icon(
-                  Icons.arrow_back_rounded,
-                  color: context.colorScheme.onSurface,
-                  size: 22,
-                ),
+                child: Icon(Icons.arrow_back_rounded,
+                    color: context.colorScheme.onSurface, size: 22),
               ),
             ),
             const SizedBox(width: 8),
             Text(
               l10n.ride,
-              style: context.textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.w800,
-              ),
+              style: context.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800),
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildMap(BuildContext context, RideBookingState booking) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
+      child: RideMap(
+        pickup: LatLng(booking.pickupLatitude!, booking.pickupLongitude!),
+        dropoff: booking.hasDropoff
+            ? LatLng(booking.dropoffLatitude!, booking.dropoffLongitude!)
+            : null,
+        height: 180,
       ),
     );
   }
@@ -110,22 +133,14 @@ class _RideBookingPageState extends ConsumerState<RideBookingPage> {
     return AnimatedFadeIn(
       delay: const Duration(milliseconds: 100),
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
+        padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
         child: Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
             color: context.colorScheme.surfaceContainerLowest,
             borderRadius: BorderRadius.circular(20),
             border: Border.all(
-              color: context.colorScheme.outlineVariant.withValues(alpha: 0.2),
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.04),
-                blurRadius: 12,
-                offset: const Offset(0, 2),
-              ),
-            ],
+                color: context.colorScheme.outlineVariant.withValues(alpha: 0.2)),
           ),
           child: Column(
             children: [
@@ -137,24 +152,18 @@ class _RideBookingPageState extends ConsumerState<RideBookingPage> {
                         width: 10,
                         height: 10,
                         decoration: BoxDecoration(
-                          color: context.colorScheme.primary,
-                          shape: BoxShape.circle,
-                        ),
+                            color: context.colorScheme.primary, shape: BoxShape.circle),
                       ),
                       Container(
                         width: 2,
                         height: 28,
-                        decoration: BoxDecoration(
-                          color: context.colorScheme.outlineVariant.withValues(alpha: 0.4),
-                        ),
+                        color: context.colorScheme.outlineVariant.withValues(alpha: 0.4),
                       ),
                       Container(
                         width: 10,
                         height: 10,
                         decoration: BoxDecoration(
-                          color: context.colorScheme.error,
-                          shape: BoxShape.circle,
-                        ),
+                            color: context.colorScheme.error, shape: BoxShape.circle),
                       ),
                     ],
                   ),
@@ -164,31 +173,17 @@ class _RideBookingPageState extends ConsumerState<RideBookingPage> {
                       children: [
                         _buildLocationField(
                           context,
-                          controller: _pickupController,
-                          focusNode: _pickupFocus,
-                          hint: booking.pickupAddress.isEmpty
-                              ? l10n.currentLocation
-                              : booking.pickupAddress,
-                          isCurrentLocation: booking.pickupAddress.isEmpty,
-                          onTap: () {
-                            final loc = locationAsync.valueOrNull;
-                            if (loc != null) {
-                              _pickupController.text = loc.detailedAddress;
-                              ref.read(rideBookingProvider.notifier).setPickup(
-                                    loc.detailedAddress,
-                                    loc.latitude,
-                                    loc.longitude,
-                                  );
-                            }
-                          },
+                          text: booking.pickupAddress,
+                          hint: l10n.currentLocation,
+                          isCurrent: true,
+                          onTap: () => _useCurrentLocation(l10n, locationAsync),
                         ),
                         const SizedBox(height: 8),
                         _buildLocationField(
                           context,
-                          controller: _dropoffController,
-                          focusNode: _dropoffFocus,
+                          text: booking.dropoffAddress,
                           hint: l10n.whereTo,
-                          isCurrentLocation: false,
+                          isCurrent: false,
                           onTap: () => _showDropoffPicker(context, l10n),
                         ),
                       ],
@@ -205,14 +200,26 @@ class _RideBookingPageState extends ConsumerState<RideBookingPage> {
     );
   }
 
+  void _useCurrentLocation(AppLocalizations l10n, AsyncValue<UserLocation?> loc) {
+    final value = loc.valueOrNull;
+    if (value != null) {
+      final address =
+          value.detailedAddress.isNotEmpty ? value.detailedAddress : l10n.currentLocation;
+      _pickupController.text = address;
+      ref
+          .read(rideBookingProvider.notifier)
+          .setPickup(address, value.latitude, value.longitude);
+    }
+  }
+
   Widget _buildLocationField(
     BuildContext context, {
-    required TextEditingController controller,
-    required FocusNode focusNode,
+    required String text,
     required String hint,
-    required bool isCurrentLocation,
+    required bool isCurrent,
     required VoidCallback onTap,
   }) {
+    final hasValue = text.isNotEmpty;
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -223,39 +230,27 @@ class _RideBookingPageState extends ConsumerState<RideBookingPage> {
         ),
         child: Row(
           children: [
-            if (isCurrentLocation) ...[
-              Icon(
-                Icons.my_location_rounded,
-                size: 16,
-                color: context.colorScheme.primary,
-              ),
+            if (isCurrent) ...[
+              Icon(Icons.my_location_rounded, size: 16, color: context.colorScheme.primary),
               const SizedBox(width: 8),
             ],
             Expanded(
-              child: controller.text.isNotEmpty
-                  ? Text(
-                      controller.text,
-                      style: context.textTheme.bodyMedium?.copyWith(
-                        fontWeight: FontWeight.w500,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    )
-                  : Text(
-                      hint,
-                      style: context.textTheme.bodyMedium?.copyWith(
-                        color: isCurrentLocation
-                            ? context.colorScheme.primary
-                            : context.colorScheme.onSurfaceVariant,
-                        fontWeight: isCurrentLocation ? FontWeight.w600 : FontWeight.w400,
-                      ),
-                    ),
+              child: Text(
+                hasValue ? text : hint,
+                style: context.textTheme.bodyMedium?.copyWith(
+                  color: hasValue
+                      ? context.colorScheme.onSurface
+                      : (isCurrent
+                          ? context.colorScheme.primary
+                          : context.colorScheme.onSurfaceVariant),
+                  fontWeight: hasValue ? FontWeight.w500 : FontWeight.w400,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
             ),
-            Icon(
-              Icons.chevron_right_rounded,
-              color: context.colorScheme.onSurfaceVariant,
-              size: 20,
-            ),
+            Icon(Icons.chevron_right_rounded,
+                color: context.colorScheme.onSurfaceVariant, size: 20),
           ],
         ),
       ),
@@ -275,14 +270,11 @@ class _RideBookingPageState extends ConsumerState<RideBookingPage> {
           label: l10n.home,
           onTap: () {
             final loc = locationAsync.valueOrNull;
-            final lat = loc?.latitude ?? 24.7136;
-            final lng = loc?.longitude ?? 46.6753;
-            ref.read(rideBookingProvider.notifier).setDropoff(
-                  l10n.home,
-                  lat,
-                  lng,
-                );
+            if (loc == null) return;
             _dropoffController.text = l10n.home;
+            ref
+                .read(rideBookingProvider.notifier)
+                .setDropoff(l10n.home, loc.latitude + 0.03, loc.longitude + 0.02);
           },
         ),
         const SizedBox(width: 8),
@@ -292,14 +284,11 @@ class _RideBookingPageState extends ConsumerState<RideBookingPage> {
           label: l10n.work,
           onTap: () {
             final loc = locationAsync.valueOrNull;
-            final lat = (loc?.latitude ?? 24.7136) + 0.02;
-            final lng = (loc?.longitude ?? 46.6753) + 0.01;
-            ref.read(rideBookingProvider.notifier).setDropoff(
-                  l10n.work,
-                  lat,
-                  lng,
-                );
+            if (loc == null) return;
             _dropoffController.text = l10n.work;
+            ref
+                .read(rideBookingProvider.notifier)
+                .setDropoff(l10n.work, loc.latitude + 0.05, loc.longitude - 0.02);
           },
         ),
       ],
@@ -338,107 +327,10 @@ class _RideBookingPageState extends ConsumerState<RideBookingPage> {
     );
   }
 
-  Widget _buildMapView(BuildContext context) {
+  Widget _buildRideTypeSelector(
+      BuildContext context, AppLocalizations l10n, RideBookingState booking) {
     return AnimatedFadeIn(
       delay: const Duration(milliseconds: 200),
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
-        child: Container(
-          height: 180,
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [
-                context.colorScheme.primaryContainer.withValues(alpha: 0.3),
-                context.colorScheme.secondaryContainer.withValues(alpha: 0.2),
-              ],
-            ),
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(
-              color: context.colorScheme.outlineVariant.withValues(alpha: 0.2),
-            ),
-          ),
-          child: Stack(
-            children: [
-              Center(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      Icons.map_rounded,
-                      size: 40,
-                      color: context.colorScheme.primary.withValues(alpha: 0.4),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      'Map View',
-                      style: context.textTheme.bodyMedium?.copyWith(
-                        color: context.colorScheme.onSurfaceVariant,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      'Google Maps integration',
-                      style: context.textTheme.bodySmall?.copyWith(
-                        color: context.colorScheme.onSurfaceVariant.withValues(alpha: 0.6),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Positioned(
-                top: 12,
-                right: 12,
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: context.colorScheme.surface.withValues(alpha: 0.8),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Text(
-                    'API Key Set',
-                    style: context.textTheme.labelSmall?.copyWith(
-                      color: context.colorScheme.primary,
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildRideTypeSelector(BuildContext context, AppLocalizations l10n, RideBookingState booking) {
-    final types = [
-      (
-        type: RideType.economy,
-        name: l10n.economy,
-        desc: l10n.cheapest,
-        icon: Icons.directions_car_rounded,
-        multiplier: 1.0,
-      ),
-      (
-        type: RideType.comfort,
-        name: l10n.comfort,
-        desc: l10n.medium,
-        icon: Icons.local_taxi_rounded,
-        multiplier: 1.6,
-      ),
-      (
-        type: RideType.premium,
-        name: l10n.premium,
-        desc: l10n.luxury,
-        icon: Icons.star_rounded,
-        multiplier: 2.4,
-      ),
-    ];
-
-    return AnimatedFadeIn(
-      delay: const Duration(milliseconds: 300),
       child: Padding(
         padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
         child: Column(
@@ -446,28 +338,25 @@ class _RideBookingPageState extends ConsumerState<RideBookingPage> {
           children: [
             Text(
               l10n.chooseRideType,
-              style: context.textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w700,
-              ),
+              style: context.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
             ),
             const SizedBox(height: 12),
-            ...types.map((t) {
-              final isSelected = booking.rideType == t.type;
-              final fare = booking.estimatedFare != null
-                  ? (booking.estimatedFare! * t.multiplier).toStringAsFixed(1)
-                  : '—';
-
+            ...booking.quotes.map((quote) {
+              final info = RideTypeInfo.of(quote.rideType, l10n);
+              final isSelected = booking.rideType == quote.rideType;
               return Padding(
                 padding: const EdgeInsets.only(bottom: 8),
                 child: GestureDetector(
-                  onTap: () => ref.read(rideBookingProvider.notifier).setRideType(t.type),
+                  onTap: () =>
+                      ref.read(rideBookingProvider.notifier).setRideType(quote.rideType),
                   child: AnimatedContainer(
                     duration: const Duration(milliseconds: 200),
                     padding: const EdgeInsets.all(14),
                     decoration: BoxDecoration(
                       color: isSelected
                           ? context.colorScheme.primaryContainer.withValues(alpha: 0.4)
-                          : context.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+                          : context.colorScheme.surfaceContainerHighest
+                              .withValues(alpha: 0.3),
                       borderRadius: BorderRadius.circular(16),
                       border: Border.all(
                         color: isSelected
@@ -484,40 +373,61 @@ class _RideBookingPageState extends ConsumerState<RideBookingPage> {
                           decoration: BoxDecoration(
                             color: isSelected
                                 ? context.colorScheme.primary.withValues(alpha: 0.15)
-                                : context.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+                                : context.colorScheme.surfaceContainerHighest
+                                    .withValues(alpha: 0.5),
                             borderRadius: BorderRadius.circular(12),
                           ),
-                          child: Icon(
-                            t.icon,
-                            color: isSelected
-                                ? context.colorScheme.primary
-                                : context.colorScheme.onSurfaceVariant,
-                            size: 26,
-                          ),
+                          child: Icon(info.icon,
+                              color: isSelected
+                                  ? context.colorScheme.primary
+                                  : context.colorScheme.onSurfaceVariant,
+                              size: 26),
                         ),
                         const SizedBox(width: 14),
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(
-                                t.name,
-                                style: context.textTheme.bodyLarge?.copyWith(
-                                  fontWeight: FontWeight.w700,
-                                ),
+                              Row(
+                                children: [
+                                  Text(
+                                    info.name,
+                                    style: context.textTheme.bodyLarge
+                                        ?.copyWith(fontWeight: FontWeight.w700),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Icon(Icons.person_rounded,
+                                      size: 13,
+                                      color: context.colorScheme.onSurfaceVariant),
+                                  Text(
+                                    '${quote.rideType.passengerCapacity}',
+                                    style: context.textTheme.labelSmall?.copyWith(
+                                        color: context.colorScheme.onSurfaceVariant),
+                                  ),
+                                  if (quote.rideType.luggageCapacity > 0) ...[
+                                    const SizedBox(width: 6),
+                                    Icon(Icons.luggage_rounded,
+                                        size: 13,
+                                        color: context.colorScheme.onSurfaceVariant),
+                                    Text(
+                                      '${quote.rideType.luggageCapacity}',
+                                      style: context.textTheme.labelSmall?.copyWith(
+                                          color: context.colorScheme.onSurfaceVariant),
+                                    ),
+                                  ],
+                                ],
                               ),
                               const SizedBox(height: 2),
                               Text(
-                                t.desc,
+                                l10n.arrivesInMinutes(quote.etaMinutes),
                                 style: context.textTheme.bodySmall?.copyWith(
-                                  color: context.colorScheme.onSurfaceVariant,
-                                ),
+                                    color: context.colorScheme.onSurfaceVariant),
                               ),
                             ],
                           ),
                         ),
                         Text(
-                          '$fare SAR',
+                          _money(context, quote.total),
                           style: context.textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.w800,
                             color: isSelected
@@ -525,13 +435,11 @@ class _RideBookingPageState extends ConsumerState<RideBookingPage> {
                                 : context.colorScheme.onSurface,
                           ),
                         ),
-                        const SizedBox(width: 8),
-                        if (isSelected)
-                          Icon(
-                            Icons.check_circle_rounded,
-                            color: context.colorScheme.primary,
-                            size: 22,
-                          ),
+                        if (isSelected) ...[
+                          const SizedBox(width: 6),
+                          Icon(Icons.check_circle_rounded,
+                              color: context.colorScheme.primary, size: 20),
+                        ],
                       ],
                     ),
                   ),
@@ -544,9 +452,110 @@ class _RideBookingPageState extends ConsumerState<RideBookingPage> {
     );
   }
 
-  Widget _buildFareSummary(BuildContext context, AppLocalizations l10n, RideBookingState booking) {
-    if (booking.estimatedDistance == null) return const SizedBox.shrink();
+  Widget _buildPromoSection(
+      BuildContext context, AppLocalizations l10n, RideBookingState booking) {
+    final hasPromo = booking.promoCode != null && booking.promoDiscount > 0;
+    return AnimatedFadeIn(
+      delay: const Duration(milliseconds: 300),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
+        child: hasPromo
+            ? Container(
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                decoration: BoxDecoration(
+                  color: Colors.green.withValues(alpha: 0.08),
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(color: Colors.green.withValues(alpha: 0.3)),
+                ),
+                child: Row(
+                  children: [
+                    Icon(Icons.local_offer_rounded, color: Colors.green[700], size: 18),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        '${booking.promoCode}  -${_money(context, booking.promoDiscount)}',
+                        style: context.textTheme.bodyMedium?.copyWith(
+                            fontWeight: FontWeight.w600, color: Colors.green[800]),
+                      ),
+                    ),
+                    GestureDetector(
+                      onTap: () {
+                        _promoController.clear();
+                        ref.read(rideBookingProvider.notifier).clearPromo();
+                      },
+                      child: Icon(Icons.close_rounded,
+                          size: 18, color: context.colorScheme.onSurfaceVariant),
+                    ),
+                  ],
+                ),
+              )
+            : Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: TextField(
+                          controller: _promoController,
+                          textCapitalization: TextCapitalization.characters,
+                          decoration: InputDecoration(
+                            hintText: l10n.promoCode,
+                            prefixIcon:
+                                const Icon(Icons.local_offer_outlined, size: 20),
+                            isDense: true,
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(14),
+                              borderSide: BorderSide(
+                                  color: context.colorScheme.outlineVariant
+                                      .withValues(alpha: 0.3)),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(14),
+                              borderSide: BorderSide(
+                                  color: context.colorScheme.outlineVariant
+                                      .withValues(alpha: 0.3)),
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      SizedBox(
+                        height: 48,
+                        child: ElevatedButton(
+                          onPressed: () => ref
+                              .read(rideBookingProvider.notifier)
+                              .applyPromo(_promoController.text),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: context.colorScheme.primary,
+                            foregroundColor: context.colorScheme.onPrimary,
+                            elevation: 0,
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(14)),
+                          ),
+                          child: Text(l10n.applyPromo),
+                        ),
+                      ),
+                    ],
+                  ),
+                  if (booking.promoError != null)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 6, left: 4),
+                      child: Text(
+                        l10n.promoInvalid,
+                        style: context.textTheme.bodySmall
+                            ?.copyWith(color: context.colorScheme.error),
+                      ),
+                    ),
+                ],
+              ),
+      ),
+    );
+  }
 
+  Widget _buildFareBreakdown(
+      BuildContext context, AppLocalizations l10n, RideBookingState booking) {
+    final quote = booking.selectedQuote;
+    if (quote == null) return const SizedBox.shrink();
     return AnimatedFadeIn(
       delay: const Duration(milliseconds: 400),
       child: Padding(
@@ -557,36 +566,41 @@ class _RideBookingPageState extends ConsumerState<RideBookingPage> {
             color: context.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
             borderRadius: BorderRadius.circular(16),
           ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
+          child: Column(
             children: [
-              _buildStatItem(
-                context,
-                Icons.straighten_rounded,
-                '${booking.estimatedDistance!.toStringAsFixed(1)} km',
-                l10n.distance,
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(l10n.fareBreakdown,
+                      style: context.textTheme.titleSmall
+                          ?.copyWith(fontWeight: FontWeight.w700)),
+                  Text(
+                    '${quote.distanceKm.toStringAsFixed(1)} km · ${quote.durationMinutes.ceil()} ${l10n.minutesShort}',
+                    style: context.textTheme.bodySmall
+                        ?.copyWith(color: context.colorScheme.onSurfaceVariant),
+                  ),
+                ],
               ),
-              Container(
-                width: 1,
-                height: 32,
-                color: context.colorScheme.outlineVariant.withValues(alpha: 0.3),
-              ),
-              _buildStatItem(
-                context,
-                Icons.schedule_rounded,
-                '${booking.estimatedMinutes ?? '—'} min',
-                l10n.time,
-              ),
-              Container(
-                width: 1,
-                height: 32,
-                color: context.colorScheme.outlineVariant.withValues(alpha: 0.3),
-              ),
-              _buildStatItem(
-                context,
-                Icons.payments_rounded,
-                '${booking.estimatedFare?.toStringAsFixed(1) ?? '—'} SAR',
-                l10n.fare,
+              const SizedBox(height: 12),
+              _fareRow(context, l10n.baseFare, _money(context, quote.baseFare)),
+              _fareRow(context, l10n.distanceFare, _money(context, quote.distanceFare)),
+              _fareRow(context, l10n.timeFare, _money(context, quote.timeFare)),
+              if (booking.promoDiscount > 0)
+                _fareRow(context, l10n.discount, '-${_money(context, booking.promoDiscount)}',
+                    highlight: true),
+              const Divider(height: 20),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(l10n.totalFare,
+                      style: context.textTheme.titleMedium
+                          ?.copyWith(fontWeight: FontWeight.w800)),
+                  Text(
+                    _money(context, booking.finalFare),
+                    style: context.textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.w800, color: context.colorScheme.primary),
+                  ),
+                ],
               ),
             ],
           ),
@@ -595,26 +609,22 @@ class _RideBookingPageState extends ConsumerState<RideBookingPage> {
     );
   }
 
-  Widget _buildStatItem(BuildContext context, IconData icon, String value, String label) {
-    return Column(
-      children: [
-        Icon(icon, size: 20, color: context.colorScheme.primary),
-        const SizedBox(height: 4),
-        Text(
-          value,
-          style: context.textTheme.bodyMedium?.copyWith(
-            fontWeight: FontWeight.w700,
-          ),
-        ),
-        const SizedBox(height: 2),
-        Text(
-          label,
-          style: context.textTheme.bodySmall?.copyWith(
-            color: context.colorScheme.onSurfaceVariant,
-            fontSize: 11,
-          ),
-        ),
-      ],
+  Widget _fareRow(BuildContext context, String label, String value,
+      {bool highlight = false}) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 3),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(label,
+              style: context.textTheme.bodyMedium?.copyWith(
+                  color: context.colorScheme.onSurfaceVariant)),
+          Text(value,
+              style: context.textTheme.bodyMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: highlight ? Colors.green[700] : context.colorScheme.onSurface)),
+        ],
+      ),
     );
   }
 
@@ -622,31 +632,23 @@ class _RideBookingPageState extends ConsumerState<RideBookingPage> {
     return AnimatedFadeIn(
       delay: const Duration(milliseconds: 500),
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(20, 24, 20, 0),
+        padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           decoration: BoxDecoration(
             color: Colors.green.withValues(alpha: 0.08),
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: Colors.green.withValues(alpha: 0.2),
-            ),
+            border: Border.all(color: Colors.green.withValues(alpha: 0.2)),
           ),
           child: Row(
             children: [
-              Icon(
-                Icons.shield_rounded,
-                color: Colors.green[600],
-                size: 20,
-              ),
+              Icon(Icons.shield_rounded, color: Colors.green[600], size: 20),
               const SizedBox(width: 10),
               Expanded(
                 child: Text(
                   l10n.tripProtected,
-                  style: context.textTheme.bodySmall?.copyWith(
-                    color: Colors.green[800],
-                    fontWeight: FontWeight.w600,
-                  ),
+                  style: context.textTheme.bodySmall
+                      ?.copyWith(color: Colors.green[800], fontWeight: FontWeight.w600),
                 ),
               ),
             ],
@@ -656,15 +658,15 @@ class _RideBookingPageState extends ConsumerState<RideBookingPage> {
     );
   }
 
-  Widget _buildBottomBar(BuildContext context, AppLocalizations l10n, RideBookingState booking) {
+  Widget _buildBottomBar(
+      BuildContext context, AppLocalizations l10n, RideBookingState booking) {
     return Container(
       padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
       decoration: BoxDecoration(
         color: context.colorScheme.surface,
         border: Border(
           top: BorderSide(
-            color: context.colorScheme.outlineVariant.withValues(alpha: 0.2),
-          ),
+              color: context.colorScheme.outlineVariant.withValues(alpha: 0.2)),
         ),
       ),
       child: Column(
@@ -673,12 +675,9 @@ class _RideBookingPageState extends ConsumerState<RideBookingPage> {
           if (booking.error != null)
             Padding(
               padding: const EdgeInsets.only(bottom: 8),
-              child: Text(
-                booking.error!,
-                style: context.textTheme.bodySmall?.copyWith(
-                  color: context.colorScheme.error,
-                ),
-              ),
+              child: Text(booking.error!,
+                  style: context.textTheme.bodySmall
+                      ?.copyWith(color: context.colorScheme.error)),
             ),
           SizedBox(
             width: double.infinity,
@@ -686,21 +685,13 @@ class _RideBookingPageState extends ConsumerState<RideBookingPage> {
             child: ElevatedButton(
               onPressed: booking.isRequesting || !booking.isReadyToBook
                   ? null
-                  : () async {
-                      final ride = await ref.read(rideBookingProvider.notifier).confirmRide();
-                      if (ride != null && context.mounted) {
-                        context.push('/ride/tracking/${ride.id}');
-                        ref.read(rideBookingProvider.notifier).reset();
-                      }
-                    },
+                  : () => _confirm(context, l10n),
               style: ElevatedButton.styleFrom(
                 backgroundColor: context.colorScheme.primary,
                 foregroundColor: context.colorScheme.onPrimary,
                 disabledBackgroundColor: context.colorScheme.surfaceContainerHighest,
                 disabledForegroundColor: context.colorScheme.onSurfaceVariant,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
-                ),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                 elevation: 0,
               ),
               child: booking.isRequesting
@@ -708,22 +699,48 @@ class _RideBookingPageState extends ConsumerState<RideBookingPage> {
                       width: 24,
                       height: 24,
                       child: CircularProgressIndicator(
-                        strokeWidth: 2.5,
-                        color: context.colorScheme.onPrimary,
-                      ),
+                          strokeWidth: 2.5, color: context.colorScheme.onPrimary),
                     )
                   : Text(
-                      l10n.confirmRide,
+                      '${l10n.confirmRide} · ${_money(context, booking.finalFare)}',
                       style: context.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w700,
-                        color: context.colorScheme.onPrimary,
-                      ),
+                          fontWeight: FontWeight.w700,
+                          color: context.colorScheme.onPrimary),
                     ),
             ),
           ),
         ],
       ),
     );
+  }
+
+  Future<void> _confirm(BuildContext context, AppLocalizations l10n) async {
+    final notifier = ref.read(rideBookingProvider.notifier);
+    final ride = await notifier.confirmRide();
+    if (ride == null || !context.mounted) return;
+
+    final booking = ref.read(rideBookingProvider);
+    final drivers = await ref.read(rideRepositoryProvider).findNearbyDrivers(
+          latitude: booking.pickupLatitude!,
+          longitude: booking.pickupLongitude!,
+          rideType: ride.rideType,
+        );
+    if (!context.mounted) return;
+
+    if (drivers.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(l10n.noDriversFound),
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        ),
+      );
+    }
+    context.push('/ride/tracking/${ride.id}');
+    notifier.reset();
+    _pickupController.clear();
+    _dropoffController.clear();
+    _promoController.clear();
   }
 
   void _showDropoffPicker(BuildContext context, AppLocalizations l10n) {
@@ -755,108 +772,41 @@ class _RideBookingPageState extends ConsumerState<RideBookingPage> {
                 ),
               ),
               const SizedBox(height: 20),
-              Text(
-                l10n.whereTo,
-                style: context.textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.w800,
-                ),
-              ),
+              Text(l10n.whereTo,
+                  style: context.textTheme.titleLarge
+                      ?.copyWith(fontWeight: FontWeight.w800)),
               const SizedBox(height: 16),
               TextField(
                 controller: controller,
                 autofocus: true,
+                onSubmitted: (_) => _applyDropoff(ctx, controller.text),
                 decoration: InputDecoration(
                   hintText: l10n.enterDestination,
-                  prefixIcon: Icon(
-                    Icons.search_rounded,
-                    color: context.colorScheme.onSurfaceVariant,
-                  ),
+                  prefixIcon: Icon(Icons.search_rounded,
+                      color: context.colorScheme.onSurfaceVariant),
                   border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(14),
-                    borderSide: BorderSide(
-                      color: context.colorScheme.outlineVariant.withValues(alpha: 0.3),
-                    ),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(14),
-                    borderSide: BorderSide(
-                      color: context.colorScheme.outlineVariant.withValues(alpha: 0.3),
-                    ),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(14),
-                    borderSide: BorderSide(
-                      color: context.colorScheme.primary,
-                      width: 2,
-                    ),
-                  ),
+                      borderRadius: BorderRadius.circular(14),
+                      borderSide: BorderSide(
+                          color: context.colorScheme.outlineVariant
+                              .withValues(alpha: 0.3))),
                 ),
-              ),
-              const SizedBox(height: 12),
-              _buildQuickDestination(
-                context,
-                icon: Icons.home_rounded,
-                title: l10n.home,
-                subtitle: l10n.savedPlace,
-                onTap: () {
-                  Navigator.pop(ctx);
-                  _dropoffController.text = l10n.home;
-                  final loc = ref.read(userLocationProvider).valueOrNull;
-                  ref.read(rideBookingProvider.notifier).setDropoff(
-                        l10n.home,
-                        loc?.latitude ?? 24.7136,
-                        loc?.longitude ?? 46.6753,
-                      );
-                },
-              ),
-              _buildQuickDestination(
-                context,
-                icon: Icons.work_rounded,
-                title: l10n.work,
-                subtitle: l10n.savedPlace,
-                onTap: () {
-                  Navigator.pop(ctx);
-                  _dropoffController.text = l10n.work;
-                  final loc = ref.read(userLocationProvider).valueOrNull;
-                  ref.read(rideBookingProvider.notifier).setDropoff(
-                        l10n.work,
-                        (loc?.latitude ?? 24.7136) + 0.02,
-                        (loc?.longitude ?? 46.6753) + 0.01,
-                      );
-                },
               ),
               const SizedBox(height: 12),
               SizedBox(
                 width: double.infinity,
                 height: 50,
                 child: ElevatedButton(
-                  onPressed: () {
-                    if (controller.text.isNotEmpty) {
-                      Navigator.pop(ctx);
-                      _dropoffController.text = controller.text;
-                      final loc = ref.read(userLocationProvider).valueOrNull;
-                      final randomOffset = 0.005 + (DateTime.now().millisecond % 100) * 0.0001;
-                      ref.read(rideBookingProvider.notifier).setDropoff(
-                            controller.text,
-                            (loc?.latitude ?? 24.7136) + randomOffset,
-                            (loc?.longitude ?? 46.6753) + randomOffset,
-                          );
-                    }
-                  },
+                  onPressed: () => _applyDropoff(ctx, controller.text),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: context.colorScheme.primary,
                     foregroundColor: context.colorScheme.onPrimary,
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(14),
-                    ),
+                        borderRadius: BorderRadius.circular(14)),
                     elevation: 0,
                   ),
-                  child: Text(
-                    l10n.setDestination,
-                    style: context.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
+                  child: Text(l10n.setDestination,
+                      style: context.textTheme.titleMedium
+                          ?.copyWith(fontWeight: FontWeight.w700)),
                 ),
               ),
               const SizedBox(height: 8),
@@ -867,41 +817,17 @@ class _RideBookingPageState extends ConsumerState<RideBookingPage> {
     );
   }
 
-  Widget _buildQuickDestination(
-    BuildContext context, {
-    required IconData icon,
-    required String title,
-    required String subtitle,
-    required VoidCallback onTap,
-  }) {
-    return ListTile(
-      onTap: onTap,
-      leading: Container(
-        width: 44,
-        height: 44,
-        decoration: BoxDecoration(
-          color: context.colorScheme.primaryContainer.withValues(alpha: 0.3),
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Icon(icon, color: context.colorScheme.primary, size: 22),
-      ),
-      title: Text(
-        title,
-        style: context.textTheme.bodyLarge?.copyWith(
-          fontWeight: FontWeight.w600,
-        ),
-      ),
-      subtitle: Text(
-        subtitle,
-        style: context.textTheme.bodySmall?.copyWith(
-          color: context.colorScheme.onSurfaceVariant,
-        ),
-      ),
-      trailing: Icon(
-        Icons.chevron_right_rounded,
-        color: context.colorScheme.onSurfaceVariant,
-      ),
-      contentPadding: EdgeInsets.zero,
-    );
+  void _applyDropoff(BuildContext sheetCtx, String text) {
+    if (text.trim().isEmpty) return;
+    Navigator.pop(sheetCtx);
+    _dropoffController.text = text.trim();
+    final loc = ref.read(userLocationProvider).valueOrNull;
+    final baseLat = ref.read(rideBookingProvider).pickupLatitude ?? loc?.latitude ?? 30.0444;
+    final baseLng =
+        ref.read(rideBookingProvider).pickupLongitude ?? loc?.longitude ?? 31.2357;
+    final offset = 0.01 + (DateTime.now().millisecond % 100) * 0.0002;
+    ref
+        .read(rideBookingProvider.notifier)
+        .setDropoff(text.trim(), baseLat + offset, baseLng + offset);
   }
 }

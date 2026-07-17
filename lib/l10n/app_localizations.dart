@@ -3985,6 +3985,162 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Page not found'**
   String get pageNotFound;
+
+  /// No description provided for @fareBreakdown.
+  ///
+  /// In en, this message translates to:
+  /// **'Fare breakdown'**
+  String get fareBreakdown;
+
+  /// No description provided for @driverFound.
+  ///
+  /// In en, this message translates to:
+  /// **'Driver found!'**
+  String get driverFound;
+
+  /// No description provided for @noDriversFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No drivers available nearby. Please try again shortly.'**
+  String get noDriversFound;
+
+  /// No description provided for @pickupCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Pickup code'**
+  String get pickupCode;
+
+  /// No description provided for @shareCodeWithDriver.
+  ///
+  /// In en, this message translates to:
+  /// **'Share this code with your driver at pickup'**
+  String get shareCodeWithDriver;
+
+  /// No description provided for @passengers.
+  ///
+  /// In en, this message translates to:
+  /// **'Passengers'**
+  String get passengers;
+
+  /// No description provided for @luggage.
+  ///
+  /// In en, this message translates to:
+  /// **'Luggage'**
+  String get luggage;
+
+  /// No description provided for @choosePayment.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment method'**
+  String get choosePayment;
+
+  /// No description provided for @promoRemoved.
+  ///
+  /// In en, this message translates to:
+  /// **'Promo removed'**
+  String get promoRemoved;
+
+  /// No description provided for @confirmDestination.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm destination'**
+  String get confirmDestination;
+
+  /// No description provided for @waitingForAcceptance.
+  ///
+  /// In en, this message translates to:
+  /// **'Contacting nearby drivers...'**
+  String get waitingForAcceptance;
+
+  /// No description provided for @driversNearby.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} drivers nearby'**
+  String driversNearby(Object count);
+
+  /// No description provided for @yourDriver.
+  ///
+  /// In en, this message translates to:
+  /// **'Your driver'**
+  String get yourDriver;
+
+  /// No description provided for @vehicleDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Vehicle details'**
+  String get vehicleDetails;
+
+  /// No description provided for @arrivesInMinutes.
+  ///
+  /// In en, this message translates to:
+  /// **'Arrives in {minutes} min'**
+  String arrivesInMinutes(Object minutes);
+
+  /// No description provided for @bookAnotherRide.
+  ///
+  /// In en, this message translates to:
+  /// **'Book another ride'**
+  String get bookAnotherRide;
+
+  /// No description provided for @tripCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'Trip cancelled'**
+  String get tripCancelled;
+
+  /// No description provided for @loadingMap.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading map...'**
+  String get loadingMap;
+
+  /// No description provided for @seatsAndBags.
+  ///
+  /// In en, this message translates to:
+  /// **'{seats} seats, {bags} bags'**
+  String seatsAndBags(Object bags, Object seats);
+
+  /// No description provided for @seatsOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'{seats} seats'**
+  String seatsOnly(Object seats);
+
+  /// No description provided for @rideEconomyDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Affordable everyday rides'**
+  String get rideEconomyDesc;
+
+  /// No description provided for @rideComfortDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Newer cars with extra legroom'**
+  String get rideComfortDesc;
+
+  /// No description provided for @ridePremiumDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Luxury cars, top-rated drivers'**
+  String get ridePremiumDesc;
+
+  /// No description provided for @rideXLDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Spacious rides for groups'**
+  String get rideXLDesc;
+
+  /// No description provided for @rideMotorbikeDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Fast and cheap for one'**
+  String get rideMotorbikeDesc;
+
+  /// No description provided for @rideTaxiDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Metered street taxis'**
+  String get rideTaxiDesc;
 }
 
 class _AppLocalizationsDelegate

@@ -779,3 +779,32 @@ Introduce migration `007_transportation_platform.sql` that:
 - Migration comments are ASCII-only after the Management API rejected UTF-8 box-drawing characters in the JSON payload.
 
 ---
+
+## ADR-030: M3 Passenger Booking Flow on Real Backend (No Mock)
+
+**Date:** Sprint 30
+**Status:** Accepted
+**Deciders:** Lead Software Architect
+
+### Context
+With the M2 transportation schema and RPCs live, the passenger ride module still relied on a mock-fallback data source. M3 required the full passenger journey (pickup -> destination -> map -> fare -> 6 categories -> ETA -> breakdown -> promo -> book -> driver search -> acceptance -> OTP -> Realtime tracking) to run entirely on the real backend.
+
+### Decision
+1. Remove all mock data from `supabase_ride_data_source.dart`; call real RPCs (`estimate_fare`, `validate_promo`, `find_nearest_drivers`, `accept_ride`/`advance_ride`) and map M2 columns via `_rideFromRow`.
+2. Expand `RideType` to 6 categories with `RideTypeX` capacity metadata; extend the `Ride` entity with pricing breakdown, promo, payment, OTP, and currency. Add `FareQuote`/`PromoResult`/`NearbyDriver` entities.
+3. Use Supabase Realtime (`.stream(primaryKey:['id'])`) for `watchRide`, surfaced via `rideStreamProvider`; drive tracking UI from live ride status.
+4. Integrate `google_maps_flutter` through a dedicated `RideMap` widget (markers + polyline + fitBounds) and a localized `RideTypeInfo` presenter.
+5. Rename the l10n key collision `estimatedArrival` (no-arg, commerce) by adding a distinct parameterized `arrivesInMinutes` for ride ETA.
+
+### Rationale
+- Server-authoritative fare/promo/dispatch keeps pricing and matching tamper-proof; the client only renders quotes.
+- Realtime streams give the passenger accurate, push-based trip status without polling.
+- A single `RideMap`/`RideTypeInfo` abstraction keeps booking and tracking pages consistent and reusable.
+- Distinct ARB keys avoid gen-l10n inferring conflicting placeholder signatures for a shared key.
+
+### Consequences
+- `flutter analyze` = 0 errors / 0 warnings; `flutter test` = 366/366; debug APK installed and stable on DNP NX9.
+- Driver-side acceptance is out of M3 scope: passengers stay on "searching" until a driver is assigned (Realtime flips to `matched`); built in M4/M6.
+- Dropoff currently uses a positional offset placeholder; destination search/geocoding UI is deferred.
+
+---

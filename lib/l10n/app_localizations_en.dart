@@ -1691,4 +1691,358 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get matched => 'Driver Matched';
+
+  @override
+  String get pleaseLogIn => 'Please log in';
+
+  @override
+  String errorWithMessage(Object message) {
+    return 'Error: $message';
+  }
+
+  @override
+  String get becomeADriver => 'Become a Driver';
+
+  @override
+  String get joinFleetSubtitle => 'Join our fleet and start earning';
+
+  @override
+  String get registerNow => 'Register Now';
+
+  @override
+  String get notSet => 'Not set';
+
+  @override
+  String get noDeliveriesAvailable => 'No deliveries available';
+
+  @override
+  String get enterValidAmount => 'Enter a valid amount';
+
+  @override
+  String get topUpSuccessful => 'Top-up successful';
+
+  @override
+  String topUpFailed(Object error) {
+    return 'Top-up failed: $error';
+  }
+
+  @override
+  String get applePay => 'Apple Pay';
+
+  @override
+  String get noTrackingData => 'No tracking data';
+
+  @override
+  String get trackingUpdatesHint => 'Tracking updates will appear here.';
+
+  @override
+  String get user => 'User';
+
+  @override
+  String get justNow => 'Just now';
+
+  @override
+  String get currencySymbol => 'EGP';
+
+  @override
+  String amountWithCurrency(Object amount, Object currency) {
+    return '$amount $currency';
+  }
+
+  @override
+  String get goOnline => 'Go Online';
+
+  @override
+  String get goOffline => 'Go Offline';
+
+  @override
+  String get youAreOnline => 'You are online';
+
+  @override
+  String get youAreOffline => 'You are offline';
+
+  @override
+  String get acceptRide => 'Accept';
+
+  @override
+  String get rejectRide => 'Reject';
+
+  @override
+  String get newRideRequest => 'New ride request';
+
+  @override
+  String get pickupPassenger => 'Pick up passenger';
+
+  @override
+  String get startTrip => 'Start Trip';
+
+  @override
+  String get finishTrip => 'Finish Trip';
+
+  @override
+  String get arrivedAtPickup => 'Arrived at pickup';
+
+  @override
+  String get waitingForPassenger => 'Waiting for passenger';
+
+  @override
+  String get enterPickupOtp => 'Enter pickup code';
+
+  @override
+  String get otpVerification => 'Verification code';
+
+  @override
+  String get invalidOtp => 'Invalid code';
+
+  @override
+  String get tripStarted => 'Trip started';
+
+  @override
+  String get tripCompleted => 'Trip completed';
+
+  @override
+  String get todayEarnings => 'Today';
+
+  @override
+  String get weeklyEarnings => 'This Week';
+
+  @override
+  String get monthlyEarnings => 'This Month';
+
+  @override
+  String get withdraw => 'Withdraw';
+
+  @override
+  String get withdrawRequest => 'Withdraw Request';
+
+  @override
+  String get bonuses => 'Bonuses';
+
+  @override
+  String get driverDocuments => 'Documents';
+
+  @override
+  String get drivingLicense => 'Driving License';
+
+  @override
+  String get vehicleRegistration => 'Vehicle Registration';
+
+  @override
+  String get identityDocument => 'Identity Document';
+
+  @override
+  String get uploadDocument => 'Upload Document';
+
+  @override
+  String get verificationPending => 'Verification pending';
+
+  @override
+  String get rejected => 'Rejected';
+
+  @override
+  String get vehicleManagement => 'Vehicle Management';
+
+  @override
+  String get addVehicle => 'Add Vehicle';
+
+  @override
+  String get vehicleModel => 'Vehicle Model';
+
+  @override
+  String get vehiclePlateLabel => 'Plate Number';
+
+  @override
+  String get vehicleColorLabel => 'Color';
+
+  @override
+  String get searchingForDriver => 'Searching for a nearby driver...';
+
+  @override
+  String get driverOnTheWay => 'Driver is on the way';
+
+  @override
+  String get driverArrived => 'Your driver has arrived';
+
+  @override
+  String get onTrip => 'On trip';
+
+  @override
+  String get estimatedFare => 'Estimated fare';
+
+  @override
+  String get distanceLabel => 'Distance';
+
+  @override
+  String get minutesShort => 'min';
+
+  @override
+  String get kmShort => 'km';
+
+  @override
+  String get rideEconomy => 'Economy';
+
+  @override
+  String get rideComfort => 'Comfort';
+
+  @override
+  String get ridePremium => 'Premium';
+
+  @override
+  String get rideXL => 'XL';
+
+  @override
+  String get rideMotorbike => 'Motorbike';
+
+  @override
+  String get rideTaxi => 'Taxi';
+
+  @override
+  String get savedPlaces => 'Saved Places';
+
+  @override
+  String get addHome => 'Add Home';
+
+  @override
+  String get addWork => 'Add Work';
+
+  @override
+  String get homeAddress => 'Home';
+
+  @override
+  String get workAddress => 'Work';
+
+  @override
+  String get favoritePlaces => 'Favorite Places';
+
+  @override
+  String get searchDestination => 'Where to?';
+
+  @override
+  String get confirmPickup => 'Confirm Pickup';
+
+  @override
+  String get promoCode => 'Promo code';
+
+  @override
+  String get applyPromo => 'Apply';
+
+  @override
+  String get promoApplied => 'Promo applied';
+
+  @override
+  String get promoInvalid => 'Invalid promo code';
+
+  @override
+  String get tripReceipt => 'Trip Receipt';
+
+  @override
+  String get baseFare => 'Base fare';
+
+  @override
+  String get distanceFare => 'Distance';
+
+  @override
+  String get timeFare => 'Time';
+
+  @override
+  String get surgeFare => 'Surge';
+
+  @override
+  String get totalFare => 'Total';
+
+  @override
+  String get cash => 'Cash';
+
+  @override
+  String get card => 'Card';
+
+  @override
+  String get rateYourDriver => 'Rate your driver';
+
+  @override
+  String get trustedContacts => 'Trusted Contacts';
+
+  @override
+  String get addTrustedContact => 'Add Trusted Contact';
+
+  @override
+  String get shareLiveTrip => 'Share Live Trip';
+
+  @override
+  String get emergencySos => 'Emergency SOS';
+
+  @override
+  String get sosActivated => 'SOS activated - contacting emergency services';
+
+  @override
+  String get complaint => 'Complaint';
+
+  @override
+  String get fileComplaint => 'File a Complaint';
+
+  @override
+  String get support => 'Support';
+
+  @override
+  String get favoriteDrivers => 'Favorite Drivers';
+
+  @override
+  String get cancelRideConfirm => 'Are you sure you want to cancel?';
+
+  @override
+  String get rideCancelled => 'Ride cancelled';
+
+  @override
+  String get noActiveRide => 'No active ride';
+
+  @override
+  String get requestRide => 'Request Ride';
+
+  @override
+  String get ridePlaceholder => 'Enter destination';
+
+  @override
+  String daysAgo(Object count) {
+    return '${count}d ago';
+  }
+
+  @override
+  String hoursAgo(Object count) {
+    return '${count}h ago';
+  }
+
+  @override
+  String minutesAgo(Object count) {
+    return '${count}m ago';
+  }
+
+  @override
+  String get weekdayMon => 'Mon';
+
+  @override
+  String get weekdayTue => 'Tue';
+
+  @override
+  String get weekdayWed => 'Wed';
+
+  @override
+  String get weekdayThu => 'Thu';
+
+  @override
+  String get weekdayFri => 'Fri';
+
+  @override
+  String get weekdaySat => 'Sat';
+
+  @override
+  String get weekdaySun => 'Sun';
+
+  @override
+  String get comingSoon => 'Coming soon';
+
+  @override
+  String get builtWithLove => 'Built with love by the Delwaqty team';
+
+  @override
+  String get pageNotFound => 'Page not found';
 }

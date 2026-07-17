@@ -722,3 +722,30 @@ Replace default animations with a world-class motion design system:
 - Code is significantly more complex but provides world-class UX
 
 ---
+
+## ADR-028: Arabic-Default Localization & EGP Currency
+
+**Date:** Session 4 (Transportation Platform milestone)
+**Status:** Accepted
+**Deciders:** Lead Architect
+
+### Context
+Delwaqty ("دلوقتي") targets an Arabic-first, Egypt/global audience. The app defaulted to the platform locale and several modules (driver, wallet, restaurant, core error handling) still rendered hardcoded English strings. Currency was hardcoded to `SAR`.
+
+### Decision
+1. Default the app locale to Arabic (`Locale('ar')`) when no user preference is stored.
+2. Route every user-visible string through `AppLocalizations` (l10n) with professional Arabic translations; introduce a shared `amountWithCurrency` + `currencySymbol` pattern.
+3. Switch the default currency to Egyptian Pound (`EGP` / `ج.م`).
+4. For pure-Dart, context-less strings (`error_handler.dart`), embed Arabic directly since Arabic is the guaranteed default surface language.
+
+### Rationale
+- Arabic-first matches the brand and primary market; English remains available via language toggle.
+- Centralized currency helpers avoid scattered hardcoded currency codes and ease future multi-currency support.
+- RTL is already supported through the GlobalMaterial/Widgets/Cupertino delegates.
+
+### Consequences
+- ~140 new ARB keys (EN+AR), including a complete ride-hailing vocabulary reserved for upcoming milestones.
+- Currency now originates from data (`wallets.currency`) with an `EGP` default; legacy `SAR` rows still render via the stored value.
+- error_handler holds Arabic literals (acceptable trade-off vs. a full error-code refactor; revisit if English error surfaces are required).
+
+---

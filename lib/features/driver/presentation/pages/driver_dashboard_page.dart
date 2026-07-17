@@ -20,7 +20,7 @@ class DriverDashboardPage extends ConsumerWidget {
     if (userId == null) {
       return Scaffold(
         appBar: AppBar(title: Text(l10n.driverDashboard)),
-        body: const Center(child: Text('Please log in')),
+        body: Center(child: Text(l10n.pleaseLogIn)),
       );
     }
 
@@ -47,13 +47,14 @@ class DriverDashboardPage extends ConsumerWidget {
               ShimmerCard(height: 100),
             ],
           ),
-          error: (e, _) => Center(child: Text('Error: $e')),
+          error: (e, _) => Center(child: Text(l10n.errorWithMessage(e.toString()))),
         ),
       ),
     );
   }
 
   Widget _buildRegistrationPrompt(BuildContext context, WidgetRef ref, String userId) {
+    final l10n = AppLocalizations.of(context);
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(32),
@@ -67,12 +68,12 @@ class DriverDashboardPage extends ConsumerWidget {
             ),
             const SizedBox(height: 16),
             Text(
-              'Become a Driver',
+              l10n.becomeADriver,
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
             Text(
-              'Join our delivery fleet and start earning',
+              l10n.joinFleetSubtitle,
               textAlign: TextAlign.center,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                 color: Theme.of(context).colorScheme.onSurfaceVariant,
@@ -86,7 +87,7 @@ class DriverDashboardPage extends ConsumerWidget {
                 ref.invalidate(driverProfileProvider(userId));
               },
               icon: const Icon(Icons.app_registration_rounded),
-              label: const Text('Register Now'),
+              label: Text(l10n.registerNow),
             ),
           ],
         ),
@@ -143,7 +144,7 @@ class DriverDashboardPage extends ConsumerWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
                     _StatItem(label: l10n.totalDeliveries, value: '${profile.totalDeliveries}'),
-                    _StatItem(label: l10n.earnings, value: '${profile.totalEarnings.toStringAsFixed(0)} SAR'),
+                    _StatItem(label: l10n.earnings, value: l10n.amountWithCurrency(profile.totalEarnings.toStringAsFixed(0), l10n.currencySymbol)),
                     _StatItem(label: l10n.rating, value: profile.rating.toStringAsFixed(1)),
                   ],
                 ),
@@ -176,7 +177,7 @@ class DriverDashboardPage extends ConsumerWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      profile.vehicleType ?? 'Not set',
+                      profile.vehicleType ?? l10n.notSet,
                       style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
                     ),
                     if (profile.vehiclePlate != null)
@@ -246,6 +247,7 @@ class _AvailableDeliveriesList extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final deliveriesAsync = ref.watch(availableDeliveriesProvider);
 
     return deliveriesAsync.when(
@@ -255,7 +257,7 @@ class _AvailableDeliveriesList extends ConsumerWidget {
             padding: const EdgeInsets.all(24),
             alignment: Alignment.center,
             child: Text(
-              'No deliveries available',
+              l10n.noDeliveriesAvailable,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                 color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
@@ -298,7 +300,7 @@ class _AvailableDeliveriesList extends ConsumerWidget {
                     ),
                     if (delivery.deliveryFee != null)
                       Text(
-                        '${delivery.deliveryFee!.toStringAsFixed(0)} SAR',
+                        l10n.amountWithCurrency(delivery.deliveryFee!.toStringAsFixed(0), l10n.currencySymbol),
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.bold),
                       ),
                   ],

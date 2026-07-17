@@ -28,9 +28,10 @@ class _WalletTopUpPageState extends ConsumerState<WalletTopUpPage> {
   }
 
   Future<void> _handleTopUp() async {
+    final l10n = AppLocalizations.of(context);
     final amount = double.tryParse(_amountController.text);
     if (amount == null || amount <= 0) {
-      AppSnackbar.info(context, message: 'Enter a valid amount');
+      AppSnackbar.info(context, message: l10n.enterValidAmount);
       return;
     }
 
@@ -46,12 +47,12 @@ class _WalletTopUpPageState extends ConsumerState<WalletTopUpPage> {
       ref.invalidate(walletTransactionsProvider(authState.user.id));
 
       if (mounted) {
-        AppSnackbar.success(context, message: 'Top-up successful');
+        AppSnackbar.success(context, message: l10n.topUpSuccessful);
         Navigator.of(context).pop();
       }
     } catch (e) {
       if (mounted) {
-        AppSnackbar.error(context, message: 'Top-up failed: $e');
+        AppSnackbar.error(context, message: l10n.topUpFailed(e.toString()));
       }
     } finally {
       if (mounted) setState(() => _loading = false);
@@ -79,7 +80,7 @@ class _WalletTopUpPageState extends ConsumerState<WalletTopUpPage> {
             children: _presetAmounts.map((amount) {
               final isSelected = _amountController.text == amount.toStringAsFixed(0);
               return ChoiceChip(
-                label: Text('${amount.toStringAsFixed(0)} SAR'),
+                label: Text(l10n.amountWithCurrency(amount.toStringAsFixed(0), l10n.currencySymbol)),
                 selected: isSelected,
                 onSelected: (_) {
                   setState(() => _amountController.text = amount.toStringAsFixed(0));
@@ -93,7 +94,7 @@ class _WalletTopUpPageState extends ConsumerState<WalletTopUpPage> {
             keyboardType: TextInputType.number,
             decoration: InputDecoration(
               labelText: l10n.selectAmount,
-              prefixText: 'SAR ',
+              prefixText: '${l10n.currencySymbol} ',
               border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
             ),
           ),
@@ -105,7 +106,7 @@ class _WalletTopUpPageState extends ConsumerState<WalletTopUpPage> {
           const SizedBox(height: 12),
           _PaymentMethodTile(
             icon: Icons.phone_iphone_rounded,
-            title: 'Apple Pay',
+            title: l10n.applePay,
             isSelected: _selectedMethod == 'apple_pay',
             onTap: () => setState(() => _selectedMethod = 'apple_pay'),
           ),

@@ -1685,4 +1685,358 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get matched => 'تم العثور على سائق';
+
+  @override
+  String get pleaseLogIn => 'الرجاء تسجيل الدخول';
+
+  @override
+  String errorWithMessage(Object message) {
+    return 'خطأ: $message';
+  }
+
+  @override
+  String get becomeADriver => 'كن سائقاً';
+
+  @override
+  String get joinFleetSubtitle => 'انضم إلى أسطولنا وابدأ في الكسب';
+
+  @override
+  String get registerNow => 'سجّل الآن';
+
+  @override
+  String get notSet => 'غير محدد';
+
+  @override
+  String get noDeliveriesAvailable => 'لا توجد طلبات توصيل متاحة';
+
+  @override
+  String get enterValidAmount => 'أدخل مبلغاً صحيحاً';
+
+  @override
+  String get topUpSuccessful => 'تم الشحن بنجاح';
+
+  @override
+  String topUpFailed(Object error) {
+    return 'فشل الشحن: $error';
+  }
+
+  @override
+  String get applePay => 'Apple Pay';
+
+  @override
+  String get noTrackingData => 'لا توجد بيانات تتبع';
+
+  @override
+  String get trackingUpdatesHint => 'ستظهر تحديثات التتبع هنا.';
+
+  @override
+  String get user => 'مستخدم';
+
+  @override
+  String get justNow => 'الآن';
+
+  @override
+  String get currencySymbol => 'ج.م';
+
+  @override
+  String amountWithCurrency(Object amount, Object currency) {
+    return '$amount $currency';
+  }
+
+  @override
+  String get goOnline => 'الاتصال بالخدمة';
+
+  @override
+  String get goOffline => 'قطع الاتصال';
+
+  @override
+  String get youAreOnline => 'أنت متصل الآن';
+
+  @override
+  String get youAreOffline => 'أنت غير متصل';
+
+  @override
+  String get acceptRide => 'قبول';
+
+  @override
+  String get rejectRide => 'رفض';
+
+  @override
+  String get newRideRequest => 'طلب رحلة جديد';
+
+  @override
+  String get pickupPassenger => 'استلام الراكب';
+
+  @override
+  String get startTrip => 'بدء الرحلة';
+
+  @override
+  String get finishTrip => 'إنهاء الرحلة';
+
+  @override
+  String get arrivedAtPickup => 'وصلت إلى نقطة الالتقاء';
+
+  @override
+  String get waitingForPassenger => 'في انتظار الراكب';
+
+  @override
+  String get enterPickupOtp => 'أدخل رمز الالتقاء';
+
+  @override
+  String get otpVerification => 'رمز التحقق';
+
+  @override
+  String get invalidOtp => 'رمز غير صحيح';
+
+  @override
+  String get tripStarted => 'بدأت الرحلة';
+
+  @override
+  String get tripCompleted => 'اكتملت الرحلة';
+
+  @override
+  String get todayEarnings => 'اليوم';
+
+  @override
+  String get weeklyEarnings => 'هذا الأسبوع';
+
+  @override
+  String get monthlyEarnings => 'هذا الشهر';
+
+  @override
+  String get withdraw => 'سحب';
+
+  @override
+  String get withdrawRequest => 'طلب سحب';
+
+  @override
+  String get bonuses => 'المكافآت';
+
+  @override
+  String get driverDocuments => 'المستندات';
+
+  @override
+  String get drivingLicense => 'رخصة القيادة';
+
+  @override
+  String get vehicleRegistration => 'استمارة المركبة';
+
+  @override
+  String get identityDocument => 'إثبات الهوية';
+
+  @override
+  String get uploadDocument => 'رفع مستند';
+
+  @override
+  String get verificationPending => 'قيد المراجعة';
+
+  @override
+  String get rejected => 'مرفوض';
+
+  @override
+  String get vehicleManagement => 'إدارة المركبة';
+
+  @override
+  String get addVehicle => 'إضافة مركبة';
+
+  @override
+  String get vehicleModel => 'طراز المركبة';
+
+  @override
+  String get vehiclePlateLabel => 'رقم اللوحة';
+
+  @override
+  String get vehicleColorLabel => 'اللون';
+
+  @override
+  String get searchingForDriver => 'جارٍ البحث عن سائق قريب...';
+
+  @override
+  String get driverOnTheWay => 'السائق في الطريق إليك';
+
+  @override
+  String get driverArrived => 'وصل السائق';
+
+  @override
+  String get onTrip => 'في رحلة';
+
+  @override
+  String get estimatedFare => 'التكلفة التقديرية';
+
+  @override
+  String get distanceLabel => 'المسافة';
+
+  @override
+  String get minutesShort => 'دقيقة';
+
+  @override
+  String get kmShort => 'كم';
+
+  @override
+  String get rideEconomy => 'اقتصادي';
+
+  @override
+  String get rideComfort => 'مريح';
+
+  @override
+  String get ridePremium => 'فاخر';
+
+  @override
+  String get rideXL => 'عائلي';
+
+  @override
+  String get rideMotorbike => 'دراجة نارية';
+
+  @override
+  String get rideTaxi => 'تاكسي';
+
+  @override
+  String get savedPlaces => 'الأماكن المحفوظة';
+
+  @override
+  String get addHome => 'إضافة المنزل';
+
+  @override
+  String get addWork => 'إضافة العمل';
+
+  @override
+  String get homeAddress => 'المنزل';
+
+  @override
+  String get workAddress => 'العمل';
+
+  @override
+  String get favoritePlaces => 'الأماكن المفضلة';
+
+  @override
+  String get searchDestination => 'إلى أين؟';
+
+  @override
+  String get confirmPickup => 'تأكيد نقطة الالتقاء';
+
+  @override
+  String get promoCode => 'رمز الخصم';
+
+  @override
+  String get applyPromo => 'تطبيق';
+
+  @override
+  String get promoApplied => 'تم تطبيق رمز الخصم';
+
+  @override
+  String get promoInvalid => 'رمز خصم غير صحيح';
+
+  @override
+  String get tripReceipt => 'إيصال الرحلة';
+
+  @override
+  String get baseFare => 'التعرفة الأساسية';
+
+  @override
+  String get distanceFare => 'المسافة';
+
+  @override
+  String get timeFare => 'الوقت';
+
+  @override
+  String get surgeFare => 'زيادة الطلب';
+
+  @override
+  String get totalFare => 'الإجمالي';
+
+  @override
+  String get cash => 'نقداً';
+
+  @override
+  String get card => 'بطاقة';
+
+  @override
+  String get rateYourDriver => 'قيّم سائقك';
+
+  @override
+  String get trustedContacts => 'جهات الاتصال الموثوقة';
+
+  @override
+  String get addTrustedContact => 'إضافة جهة اتصال موثوقة';
+
+  @override
+  String get shareLiveTrip => 'مشاركة الرحلة المباشرة';
+
+  @override
+  String get emergencySos => 'استغاثة طوارئ';
+
+  @override
+  String get sosActivated => 'تم تفعيل الاستغاثة - جارٍ الاتصال بخدمات الطوارئ';
+
+  @override
+  String get complaint => 'شكوى';
+
+  @override
+  String get fileComplaint => 'تقديم شكوى';
+
+  @override
+  String get support => 'الدعم';
+
+  @override
+  String get favoriteDrivers => 'السائقون المفضلون';
+
+  @override
+  String get cancelRideConfirm => 'هل أنت متأكد من رغبتك في الإلغاء؟';
+
+  @override
+  String get rideCancelled => 'تم إلغاء الرحلة';
+
+  @override
+  String get noActiveRide => 'لا توجد رحلة نشطة';
+
+  @override
+  String get requestRide => 'اطلب رحلة';
+
+  @override
+  String get ridePlaceholder => 'أدخل الوجهة';
+
+  @override
+  String daysAgo(Object count) {
+    return 'منذ $count يوم';
+  }
+
+  @override
+  String hoursAgo(Object count) {
+    return 'منذ $count ساعة';
+  }
+
+  @override
+  String minutesAgo(Object count) {
+    return 'منذ $count دقيقة';
+  }
+
+  @override
+  String get weekdayMon => 'الإثنين';
+
+  @override
+  String get weekdayTue => 'الثلاثاء';
+
+  @override
+  String get weekdayWed => 'الأربعاء';
+
+  @override
+  String get weekdayThu => 'الخميس';
+
+  @override
+  String get weekdayFri => 'الجمعة';
+
+  @override
+  String get weekdaySat => 'السبت';
+
+  @override
+  String get weekdaySun => 'الأحد';
+
+  @override
+  String get comingSoon => 'قريباً';
+
+  @override
+  String get builtWithLove => 'صُنع بحب من فريق دلوقتي';
+
+  @override
+  String get pageNotFound => 'الصفحة غير موجودة';
 }

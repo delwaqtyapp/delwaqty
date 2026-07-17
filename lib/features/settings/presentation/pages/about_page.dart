@@ -131,9 +131,9 @@ class AboutPage extends StatelessWidget {
                   subtitle: const Text('support@delwaqty.com'),
                 ),
                 const Divider(height: 1),
-                const ListTile(
-                  leading: Icon(Icons.favorite_outline_rounded),
-                  title: Text('Built with love by Delwaqty Team'),
+                ListTile(
+                  leading: const Icon(Icons.favorite_outline_rounded),
+                  title: Text(l10n.builtWithLove),
                 ),
               ],
             ),

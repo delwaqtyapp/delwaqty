@@ -26,7 +26,7 @@ class SupabaseWalletDataSource {
       id: row['id'] as String,
       userId: row['user_id'] as String,
       balance: (row['balance'] as num?)?.toDouble() ?? 0.0,
-      currency: row['currency'] as String? ?? 'SAR',
+      currency: row['currency'] as String? ?? 'EGP',
       updatedAt: DateTime.parse(row['updated_at'] as String),
     );
   }
@@ -57,7 +57,7 @@ class SupabaseWalletDataSource {
           .maybeSingle();
 
       if (data != null) {
-        return _balanceFromRow(data as Map<String, dynamic>);
+        return _balanceFromRow(data);
       }
 
       final created = await _client
@@ -65,12 +65,12 @@ class SupabaseWalletDataSource {
           .insert({
             'user_id': userId,
             'balance': 0.0,
-            'currency': 'SAR',
+            'currency': 'EGP',
           })
           .select()
           .single();
 
-      return _balanceFromRow(created as Map<String, dynamic>);
+      return _balanceFromRow(created);
     } catch (e, stack) {
       _logger.e('Failed to get wallet balance', e, stack);
       rethrow;
@@ -128,7 +128,7 @@ class SupabaseWalletDataSource {
           .select()
           .single();
 
-      return _transactionFromRow(tx as Map<String, dynamic>);
+      return _transactionFromRow(tx);
     } catch (e, stack) {
       _logger.e('Failed to top up wallet', e, stack);
       rethrow;
@@ -166,7 +166,7 @@ class SupabaseWalletDataSource {
           .select()
           .single();
 
-      return _transactionFromRow(tx as Map<String, dynamic>);
+      return _transactionFromRow(tx);
     } catch (e, stack) {
       _logger.e('Failed to pay from wallet', e, stack);
       rethrow;
@@ -182,7 +182,7 @@ class SupabaseWalletDataSource {
           .maybeSingle();
 
       if (data == null) return null;
-      return _transactionFromRow(data as Map<String, dynamic>);
+      return _transactionFromRow(data);
     } catch (e, stack) {
       _logger.e('Failed to get transaction: $transactionId', e, stack);
       rethrow;

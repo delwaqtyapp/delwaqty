@@ -322,6 +322,7 @@ class _ReviewTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context);
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 12),
@@ -344,7 +345,7 @@ class _ReviewTile extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      review.userName ?? 'User',
+                      review.userName ?? l10n.user,
                       style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
                     ),
                     Row(
@@ -363,7 +364,7 @@ class _ReviewTile extends StatelessWidget {
               ),
               if (review.createdAt != null)
                 Text(
-                  _formatDate(review.createdAt!),
+                  _formatDate(review.createdAt!, l10n),
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: theme.colorScheme.onSurfaceVariant,
                   ),
@@ -382,14 +383,14 @@ class _ReviewTile extends StatelessWidget {
     );
   }
 
-  String _formatDate(DateTime date) {
+  String _formatDate(DateTime date, AppLocalizations l10n) {
     final now = DateTime.now();
     final diff = now.difference(date);
     if (diff.inDays > 30) return '${date.day}/${date.month}/${date.year}';
-    if (diff.inDays > 0) return '${diff.inDays}d ago';
-    if (diff.inHours > 0) return '${diff.inHours}h ago';
-    if (diff.inMinutes > 0) return '${diff.inMinutes}m ago';
-    return 'Just now';
+    if (diff.inDays > 0) return l10n.daysAgo(diff.inDays);
+    if (diff.inHours > 0) return l10n.hoursAgo(diff.inHours);
+    if (diff.inMinutes > 0) return l10n.minutesAgo(diff.inMinutes);
+    return l10n.justNow;
   }
 }
 

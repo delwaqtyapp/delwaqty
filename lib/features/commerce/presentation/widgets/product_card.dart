@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:delwaqty/features/commerce/domain/entities/product.dart';
+import 'package:delwaqty/features/commerce/domain/entities/favorite.dart';
+import 'package:delwaqty/features/commerce/presentation/widgets/favorite_button.dart';
 
 class ProductCard extends StatelessWidget {
   const ProductCard({required this.product, required this.onTap, super.key});
@@ -73,6 +75,22 @@ class ProductCard extends StatelessWidget {
                         ),
                       ),
                     ),
+                  Positioned(
+                    bottom: 4,
+                    right: 4,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Colors.black.withValues(alpha: 0.3),
+                        shape: BoxShape.circle,
+                      ),
+                      padding: const EdgeInsets.all(2),
+                      child: FavoriteButton(
+                        targetId: product.id,
+                        type: FavoriteType.product,
+                        size: 20,
+                      ),
+                    ),
+                  ),
                 ],
               ),
             ),

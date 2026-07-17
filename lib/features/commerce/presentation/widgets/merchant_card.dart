@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:delwaqty/features/commerce/domain/entities/merchant.dart';
+import 'package:delwaqty/features/commerce/domain/entities/favorite.dart';
+import 'package:delwaqty/features/commerce/presentation/widgets/favorite_button.dart';
 import 'package:delwaqty/core/theme/app_colors.dart';
 
 class MerchantCard extends StatelessWidget {
@@ -122,6 +124,22 @@ class MerchantCard extends StatelessWidget {
                         ),
                       ),
                     ),
+                  Positioned(
+                    bottom: 8,
+                    right: 8,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Colors.black.withValues(alpha: 0.3),
+                        shape: BoxShape.circle,
+                      ),
+                      padding: const EdgeInsets.all(2),
+                      child: FavoriteButton(
+                        targetId: merchant.id,
+                        type: FavoriteType.merchant,
+                        size: 22,
+                      ),
+                    ),
+                  ),
                 ],
               ),
             ),

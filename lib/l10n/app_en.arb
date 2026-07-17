@@ -379,5 +379,13 @@
   "sunday": "Sunday",
   "tryDifferentDate": "Try a different date or party size.",
   "minimumOrder": "Min. order",
-  "perGuest": "per guest"
+  "perGuest": "per guest",
+  "myFavorites": "My Favorites",
+  "favoriteMerchants": "Merchants",
+  "favoriteProducts": "Products",
+  "noFavorites": "No favorites yet",
+  "noFavoritesMessage": "Tap the heart icon on any merchant or product to save it here.",
+  "addedToFavorites": "Added to favorites",
+  "removedFromFavorites": "Removed from favorites",
+  "favoritesTab": "Favorites"
 }

@@ -32,6 +32,7 @@ import 'package:delwaqty/features/commerce/presentation/pages/orders_page.dart';
 import 'package:delwaqty/features/commerce/presentation/pages/search_page.dart';
 import 'package:delwaqty/features/commerce/presentation/pages/order_tracking_page.dart';
 import 'package:delwaqty/features/commerce/presentation/pages/order_completed_page.dart';
+import 'package:delwaqty/features/commerce/presentation/pages/favorites_page.dart';
 
 // ─── Repository Providers ───
 
@@ -160,6 +161,10 @@ class CommerceModule extends FeatureModule {
           path: 'orders/:orderId/tracking',
           builder: (context, state) =>
               OrderTrackingPage(orderId: state.pathParameters['orderId']!),
+        ),
+        GoRoute(
+          path: 'favorites',
+          builder: (context, state) => const FavoritesPage(),
         ),
       ],
     ),

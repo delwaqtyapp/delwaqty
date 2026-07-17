@@ -163,8 +163,8 @@ void main() {
     });
 
     group('signUp', () {
-      test('sets authenticated on success', () async {
-        const session = AuthResult(userId: 'user-123', email: 'test@example.com');
+      test('sets authenticated on success with valid session', () async {
+        const session = AuthResult(userId: 'user-123', email: 'test@example.com', accessToken: 'valid-token');
         when(() => mockAuthRepo.signUpWithEmail(
               email: 'test@example.com',
               password: 'password123',
@@ -232,6 +232,32 @@ void main() {
 
         final state = container.read(authStateProvider);
         expect(state, isA<AuthUnauthenticated>());
+      });
+
+      test('sets emailConfirmationRequired when no session returned', () async {
+        const session = AuthResult(userId: 'user-123', email: 'test@example.com');
+        when(() => mockAuthRepo.signUpWithEmail(
+              email: 'test@example.com',
+              password: 'password123',
+              fullName: 'John Doe',
+            )).thenAnswer((_) async => session);
+
+        final container = ProviderContainer(
+          overrides: [
+            authRepositoryProvider.overrideWithValue(mockAuthRepo),
+            userRepositoryProvider.overrideWithValue(mockUserRepo),
+            loggerProvider.overrideWithValue(mockLogger),
+          ],
+        );
+
+        await container.read(authStateProvider.notifier).signUp(
+              email: 'test@example.com',
+              password: 'password123',
+              fullName: 'John Doe',
+            );
+
+        final state = container.read(authStateProvider);
+        expect(state, isA<AuthEmailConfirmationRequired>());
       });
 
       test('sets error on failure', () async {

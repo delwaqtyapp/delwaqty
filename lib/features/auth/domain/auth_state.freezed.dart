@@ -25,6 +25,7 @@ mixin _$AuthState {
     required TResult Function() guest,
     required TResult Function() unauthenticated,
     required TResult Function(String phone) phoneVerificationRequired,
+    required TResult Function(String email) emailConfirmationRequired,
     required TResult Function(String message) error,
   }) => throw _privateConstructorUsedError;
   @optionalTypeArgs
@@ -35,6 +36,7 @@ mixin _$AuthState {
     TResult? Function()? guest,
     TResult? Function()? unauthenticated,
     TResult? Function(String phone)? phoneVerificationRequired,
+    TResult? Function(String email)? emailConfirmationRequired,
     TResult? Function(String message)? error,
   }) => throw _privateConstructorUsedError;
   @optionalTypeArgs
@@ -45,6 +47,7 @@ mixin _$AuthState {
     TResult Function()? guest,
     TResult Function()? unauthenticated,
     TResult Function(String phone)? phoneVerificationRequired,
+    TResult Function(String email)? emailConfirmationRequired,
     TResult Function(String message)? error,
     required TResult orElse(),
   }) => throw _privateConstructorUsedError;
@@ -57,6 +60,8 @@ mixin _$AuthState {
     required TResult Function(AuthUnauthenticated value) unauthenticated,
     required TResult Function(AuthPhoneVerification value)
     phoneVerificationRequired,
+    required TResult Function(AuthEmailConfirmationRequired value)
+    emailConfirmationRequired,
     required TResult Function(AuthError value) error,
   }) => throw _privateConstructorUsedError;
   @optionalTypeArgs
@@ -67,6 +72,8 @@ mixin _$AuthState {
     TResult? Function(AuthGuest value)? guest,
     TResult? Function(AuthUnauthenticated value)? unauthenticated,
     TResult? Function(AuthPhoneVerification value)? phoneVerificationRequired,
+    TResult? Function(AuthEmailConfirmationRequired value)?
+    emailConfirmationRequired,
     TResult? Function(AuthError value)? error,
   }) => throw _privateConstructorUsedError;
   @optionalTypeArgs
@@ -77,6 +84,8 @@ mixin _$AuthState {
     TResult Function(AuthGuest value)? guest,
     TResult Function(AuthUnauthenticated value)? unauthenticated,
     TResult Function(AuthPhoneVerification value)? phoneVerificationRequired,
+    TResult Function(AuthEmailConfirmationRequired value)?
+    emailConfirmationRequired,
     TResult Function(AuthError value)? error,
     required TResult orElse(),
   }) => throw _privateConstructorUsedError;
@@ -151,6 +160,7 @@ class _$AuthInitialImpl implements AuthInitial {
     required TResult Function() guest,
     required TResult Function() unauthenticated,
     required TResult Function(String phone) phoneVerificationRequired,
+    required TResult Function(String email) emailConfirmationRequired,
     required TResult Function(String message) error,
   }) {
     return initial();
@@ -165,6 +175,7 @@ class _$AuthInitialImpl implements AuthInitial {
     TResult? Function()? guest,
     TResult? Function()? unauthenticated,
     TResult? Function(String phone)? phoneVerificationRequired,
+    TResult? Function(String email)? emailConfirmationRequired,
     TResult? Function(String message)? error,
   }) {
     return initial?.call();
@@ -179,6 +190,7 @@ class _$AuthInitialImpl implements AuthInitial {
     TResult Function()? guest,
     TResult Function()? unauthenticated,
     TResult Function(String phone)? phoneVerificationRequired,
+    TResult Function(String email)? emailConfirmationRequired,
     TResult Function(String message)? error,
     required TResult orElse(),
   }) {
@@ -198,6 +210,8 @@ class _$AuthInitialImpl implements AuthInitial {
     required TResult Function(AuthUnauthenticated value) unauthenticated,
     required TResult Function(AuthPhoneVerification value)
     phoneVerificationRequired,
+    required TResult Function(AuthEmailConfirmationRequired value)
+    emailConfirmationRequired,
     required TResult Function(AuthError value) error,
   }) {
     return initial(this);
@@ -212,6 +226,8 @@ class _$AuthInitialImpl implements AuthInitial {
     TResult? Function(AuthGuest value)? guest,
     TResult? Function(AuthUnauthenticated value)? unauthenticated,
     TResult? Function(AuthPhoneVerification value)? phoneVerificationRequired,
+    TResult? Function(AuthEmailConfirmationRequired value)?
+    emailConfirmationRequired,
     TResult? Function(AuthError value)? error,
   }) {
     return initial?.call(this);
@@ -226,6 +242,8 @@ class _$AuthInitialImpl implements AuthInitial {
     TResult Function(AuthGuest value)? guest,
     TResult Function(AuthUnauthenticated value)? unauthenticated,
     TResult Function(AuthPhoneVerification value)? phoneVerificationRequired,
+    TResult Function(AuthEmailConfirmationRequired value)?
+    emailConfirmationRequired,
     TResult Function(AuthError value)? error,
     required TResult orElse(),
   }) {
@@ -289,6 +307,7 @@ class _$AuthLoadingImpl implements AuthLoading {
     required TResult Function() guest,
     required TResult Function() unauthenticated,
     required TResult Function(String phone) phoneVerificationRequired,
+    required TResult Function(String email) emailConfirmationRequired,
     required TResult Function(String message) error,
   }) {
     return loading();
@@ -303,6 +322,7 @@ class _$AuthLoadingImpl implements AuthLoading {
     TResult? Function()? guest,
     TResult? Function()? unauthenticated,
     TResult? Function(String phone)? phoneVerificationRequired,
+    TResult? Function(String email)? emailConfirmationRequired,
     TResult? Function(String message)? error,
   }) {
     return loading?.call();
@@ -317,6 +337,7 @@ class _$AuthLoadingImpl implements AuthLoading {
     TResult Function()? guest,
     TResult Function()? unauthenticated,
     TResult Function(String phone)? phoneVerificationRequired,
+    TResult Function(String email)? emailConfirmationRequired,
     TResult Function(String message)? error,
     required TResult orElse(),
   }) {
@@ -336,6 +357,8 @@ class _$AuthLoadingImpl implements AuthLoading {
     required TResult Function(AuthUnauthenticated value) unauthenticated,
     required TResult Function(AuthPhoneVerification value)
     phoneVerificationRequired,
+    required TResult Function(AuthEmailConfirmationRequired value)
+    emailConfirmationRequired,
     required TResult Function(AuthError value) error,
   }) {
     return loading(this);
@@ -350,6 +373,8 @@ class _$AuthLoadingImpl implements AuthLoading {
     TResult? Function(AuthGuest value)? guest,
     TResult? Function(AuthUnauthenticated value)? unauthenticated,
     TResult? Function(AuthPhoneVerification value)? phoneVerificationRequired,
+    TResult? Function(AuthEmailConfirmationRequired value)?
+    emailConfirmationRequired,
     TResult? Function(AuthError value)? error,
   }) {
     return loading?.call(this);
@@ -364,6 +389,8 @@ class _$AuthLoadingImpl implements AuthLoading {
     TResult Function(AuthGuest value)? guest,
     TResult Function(AuthUnauthenticated value)? unauthenticated,
     TResult Function(AuthPhoneVerification value)? phoneVerificationRequired,
+    TResult Function(AuthEmailConfirmationRequired value)?
+    emailConfirmationRequired,
     TResult Function(AuthError value)? error,
     required TResult orElse(),
   }) {
@@ -469,6 +496,7 @@ class _$AuthAuthenticatedImpl implements AuthAuthenticated {
     required TResult Function() guest,
     required TResult Function() unauthenticated,
     required TResult Function(String phone) phoneVerificationRequired,
+    required TResult Function(String email) emailConfirmationRequired,
     required TResult Function(String message) error,
   }) {
     return authenticated(user);
@@ -483,6 +511,7 @@ class _$AuthAuthenticatedImpl implements AuthAuthenticated {
     TResult? Function()? guest,
     TResult? Function()? unauthenticated,
     TResult? Function(String phone)? phoneVerificationRequired,
+    TResult? Function(String email)? emailConfirmationRequired,
     TResult? Function(String message)? error,
   }) {
     return authenticated?.call(user);
@@ -497,6 +526,7 @@ class _$AuthAuthenticatedImpl implements AuthAuthenticated {
     TResult Function()? guest,
     TResult Function()? unauthenticated,
     TResult Function(String phone)? phoneVerificationRequired,
+    TResult Function(String email)? emailConfirmationRequired,
     TResult Function(String message)? error,
     required TResult orElse(),
   }) {
@@ -516,6 +546,8 @@ class _$AuthAuthenticatedImpl implements AuthAuthenticated {
     required TResult Function(AuthUnauthenticated value) unauthenticated,
     required TResult Function(AuthPhoneVerification value)
     phoneVerificationRequired,
+    required TResult Function(AuthEmailConfirmationRequired value)
+    emailConfirmationRequired,
     required TResult Function(AuthError value) error,
   }) {
     return authenticated(this);
@@ -530,6 +562,8 @@ class _$AuthAuthenticatedImpl implements AuthAuthenticated {
     TResult? Function(AuthGuest value)? guest,
     TResult? Function(AuthUnauthenticated value)? unauthenticated,
     TResult? Function(AuthPhoneVerification value)? phoneVerificationRequired,
+    TResult? Function(AuthEmailConfirmationRequired value)?
+    emailConfirmationRequired,
     TResult? Function(AuthError value)? error,
   }) {
     return authenticated?.call(this);
@@ -544,6 +578,8 @@ class _$AuthAuthenticatedImpl implements AuthAuthenticated {
     TResult Function(AuthGuest value)? guest,
     TResult Function(AuthUnauthenticated value)? unauthenticated,
     TResult Function(AuthPhoneVerification value)? phoneVerificationRequired,
+    TResult Function(AuthEmailConfirmationRequired value)?
+    emailConfirmationRequired,
     TResult Function(AuthError value)? error,
     required TResult orElse(),
   }) {
@@ -616,6 +652,7 @@ class _$AuthGuestImpl implements AuthGuest {
     required TResult Function() guest,
     required TResult Function() unauthenticated,
     required TResult Function(String phone) phoneVerificationRequired,
+    required TResult Function(String email) emailConfirmationRequired,
     required TResult Function(String message) error,
   }) {
     return guest();
@@ -630,6 +667,7 @@ class _$AuthGuestImpl implements AuthGuest {
     TResult? Function()? guest,
     TResult? Function()? unauthenticated,
     TResult? Function(String phone)? phoneVerificationRequired,
+    TResult? Function(String email)? emailConfirmationRequired,
     TResult? Function(String message)? error,
   }) {
     return guest?.call();
@@ -644,6 +682,7 @@ class _$AuthGuestImpl implements AuthGuest {
     TResult Function()? guest,
     TResult Function()? unauthenticated,
     TResult Function(String phone)? phoneVerificationRequired,
+    TResult Function(String email)? emailConfirmationRequired,
     TResult Function(String message)? error,
     required TResult orElse(),
   }) {
@@ -663,6 +702,8 @@ class _$AuthGuestImpl implements AuthGuest {
     required TResult Function(AuthUnauthenticated value) unauthenticated,
     required TResult Function(AuthPhoneVerification value)
     phoneVerificationRequired,
+    required TResult Function(AuthEmailConfirmationRequired value)
+    emailConfirmationRequired,
     required TResult Function(AuthError value) error,
   }) {
     return guest(this);
@@ -677,6 +718,8 @@ class _$AuthGuestImpl implements AuthGuest {
     TResult? Function(AuthGuest value)? guest,
     TResult? Function(AuthUnauthenticated value)? unauthenticated,
     TResult? Function(AuthPhoneVerification value)? phoneVerificationRequired,
+    TResult? Function(AuthEmailConfirmationRequired value)?
+    emailConfirmationRequired,
     TResult? Function(AuthError value)? error,
   }) {
     return guest?.call(this);
@@ -691,6 +734,8 @@ class _$AuthGuestImpl implements AuthGuest {
     TResult Function(AuthGuest value)? guest,
     TResult Function(AuthUnauthenticated value)? unauthenticated,
     TResult Function(AuthPhoneVerification value)? phoneVerificationRequired,
+    TResult Function(AuthEmailConfirmationRequired value)?
+    emailConfirmationRequired,
     TResult Function(AuthError value)? error,
     required TResult orElse(),
   }) {
@@ -755,6 +800,7 @@ class _$AuthUnauthenticatedImpl implements AuthUnauthenticated {
     required TResult Function() guest,
     required TResult Function() unauthenticated,
     required TResult Function(String phone) phoneVerificationRequired,
+    required TResult Function(String email) emailConfirmationRequired,
     required TResult Function(String message) error,
   }) {
     return unauthenticated();
@@ -769,6 +815,7 @@ class _$AuthUnauthenticatedImpl implements AuthUnauthenticated {
     TResult? Function()? guest,
     TResult? Function()? unauthenticated,
     TResult? Function(String phone)? phoneVerificationRequired,
+    TResult? Function(String email)? emailConfirmationRequired,
     TResult? Function(String message)? error,
   }) {
     return unauthenticated?.call();
@@ -783,6 +830,7 @@ class _$AuthUnauthenticatedImpl implements AuthUnauthenticated {
     TResult Function()? guest,
     TResult Function()? unauthenticated,
     TResult Function(String phone)? phoneVerificationRequired,
+    TResult Function(String email)? emailConfirmationRequired,
     TResult Function(String message)? error,
     required TResult orElse(),
   }) {
@@ -802,6 +850,8 @@ class _$AuthUnauthenticatedImpl implements AuthUnauthenticated {
     required TResult Function(AuthUnauthenticated value) unauthenticated,
     required TResult Function(AuthPhoneVerification value)
     phoneVerificationRequired,
+    required TResult Function(AuthEmailConfirmationRequired value)
+    emailConfirmationRequired,
     required TResult Function(AuthError value) error,
   }) {
     return unauthenticated(this);
@@ -816,6 +866,8 @@ class _$AuthUnauthenticatedImpl implements AuthUnauthenticated {
     TResult? Function(AuthGuest value)? guest,
     TResult? Function(AuthUnauthenticated value)? unauthenticated,
     TResult? Function(AuthPhoneVerification value)? phoneVerificationRequired,
+    TResult? Function(AuthEmailConfirmationRequired value)?
+    emailConfirmationRequired,
     TResult? Function(AuthError value)? error,
   }) {
     return unauthenticated?.call(this);
@@ -830,6 +882,8 @@ class _$AuthUnauthenticatedImpl implements AuthUnauthenticated {
     TResult Function(AuthGuest value)? guest,
     TResult Function(AuthUnauthenticated value)? unauthenticated,
     TResult Function(AuthPhoneVerification value)? phoneVerificationRequired,
+    TResult Function(AuthEmailConfirmationRequired value)?
+    emailConfirmationRequired,
     TResult Function(AuthError value)? error,
     required TResult orElse(),
   }) {
@@ -924,6 +978,7 @@ class _$AuthPhoneVerificationImpl implements AuthPhoneVerification {
     required TResult Function() guest,
     required TResult Function() unauthenticated,
     required TResult Function(String phone) phoneVerificationRequired,
+    required TResult Function(String email) emailConfirmationRequired,
     required TResult Function(String message) error,
   }) {
     return phoneVerificationRequired(phone);
@@ -938,6 +993,7 @@ class _$AuthPhoneVerificationImpl implements AuthPhoneVerification {
     TResult? Function()? guest,
     TResult? Function()? unauthenticated,
     TResult? Function(String phone)? phoneVerificationRequired,
+    TResult? Function(String email)? emailConfirmationRequired,
     TResult? Function(String message)? error,
   }) {
     return phoneVerificationRequired?.call(phone);
@@ -952,6 +1008,7 @@ class _$AuthPhoneVerificationImpl implements AuthPhoneVerification {
     TResult Function()? guest,
     TResult Function()? unauthenticated,
     TResult Function(String phone)? phoneVerificationRequired,
+    TResult Function(String email)? emailConfirmationRequired,
     TResult Function(String message)? error,
     required TResult orElse(),
   }) {
@@ -971,6 +1028,8 @@ class _$AuthPhoneVerificationImpl implements AuthPhoneVerification {
     required TResult Function(AuthUnauthenticated value) unauthenticated,
     required TResult Function(AuthPhoneVerification value)
     phoneVerificationRequired,
+    required TResult Function(AuthEmailConfirmationRequired value)
+    emailConfirmationRequired,
     required TResult Function(AuthError value) error,
   }) {
     return phoneVerificationRequired(this);
@@ -985,6 +1044,8 @@ class _$AuthPhoneVerificationImpl implements AuthPhoneVerification {
     TResult? Function(AuthGuest value)? guest,
     TResult? Function(AuthUnauthenticated value)? unauthenticated,
     TResult? Function(AuthPhoneVerification value)? phoneVerificationRequired,
+    TResult? Function(AuthEmailConfirmationRequired value)?
+    emailConfirmationRequired,
     TResult? Function(AuthError value)? error,
   }) {
     return phoneVerificationRequired?.call(this);
@@ -999,6 +1060,8 @@ class _$AuthPhoneVerificationImpl implements AuthPhoneVerification {
     TResult Function(AuthGuest value)? guest,
     TResult Function(AuthUnauthenticated value)? unauthenticated,
     TResult Function(AuthPhoneVerification value)? phoneVerificationRequired,
+    TResult Function(AuthEmailConfirmationRequired value)?
+    emailConfirmationRequired,
     TResult Function(AuthError value)? error,
     required TResult orElse(),
   }) {
@@ -1019,6 +1082,197 @@ abstract class AuthPhoneVerification implements AuthState {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   _$$AuthPhoneVerificationImplCopyWith<_$AuthPhoneVerificationImpl>
+  get copyWith => throw _privateConstructorUsedError;
+}
+
+/// @nodoc
+abstract class _$$AuthEmailConfirmationRequiredImplCopyWith<$Res> {
+  factory _$$AuthEmailConfirmationRequiredImplCopyWith(
+    _$AuthEmailConfirmationRequiredImpl value,
+    $Res Function(_$AuthEmailConfirmationRequiredImpl) then,
+  ) = __$$AuthEmailConfirmationRequiredImplCopyWithImpl<$Res>;
+  @useResult
+  $Res call({String email});
+}
+
+/// @nodoc
+class __$$AuthEmailConfirmationRequiredImplCopyWithImpl<$Res>
+    extends _$AuthStateCopyWithImpl<$Res, _$AuthEmailConfirmationRequiredImpl>
+    implements _$$AuthEmailConfirmationRequiredImplCopyWith<$Res> {
+  __$$AuthEmailConfirmationRequiredImplCopyWithImpl(
+    _$AuthEmailConfirmationRequiredImpl _value,
+    $Res Function(_$AuthEmailConfirmationRequiredImpl) _then,
+  ) : super(_value, _then);
+
+  /// Create a copy of AuthState
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({Object? email = null}) {
+    return _then(
+      _$AuthEmailConfirmationRequiredImpl(
+        email: null == email
+            ? _value.email
+            : email // ignore: cast_nullable_to_non_nullable
+                  as String,
+      ),
+    );
+  }
+}
+
+/// @nodoc
+
+class _$AuthEmailConfirmationRequiredImpl
+    implements AuthEmailConfirmationRequired {
+  const _$AuthEmailConfirmationRequiredImpl({required this.email});
+
+  @override
+  final String email;
+
+  @override
+  String toString() {
+    return 'AuthState.emailConfirmationRequired(email: $email)';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _$AuthEmailConfirmationRequiredImpl &&
+            (identical(other.email, email) || other.email == email));
+  }
+
+  @override
+  int get hashCode => Object.hash(runtimeType, email);
+
+  /// Create a copy of AuthState
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  @pragma('vm:prefer-inline')
+  _$$AuthEmailConfirmationRequiredImplCopyWith<
+    _$AuthEmailConfirmationRequiredImpl
+  >
+  get copyWith =>
+      __$$AuthEmailConfirmationRequiredImplCopyWithImpl<
+        _$AuthEmailConfirmationRequiredImpl
+      >(this, _$identity);
+
+  @override
+  @optionalTypeArgs
+  TResult when<TResult extends Object?>({
+    required TResult Function() initial,
+    required TResult Function() loading,
+    required TResult Function(User user) authenticated,
+    required TResult Function() guest,
+    required TResult Function() unauthenticated,
+    required TResult Function(String phone) phoneVerificationRequired,
+    required TResult Function(String email) emailConfirmationRequired,
+    required TResult Function(String message) error,
+  }) {
+    return emailConfirmationRequired(email);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult? whenOrNull<TResult extends Object?>({
+    TResult? Function()? initial,
+    TResult? Function()? loading,
+    TResult? Function(User user)? authenticated,
+    TResult? Function()? guest,
+    TResult? Function()? unauthenticated,
+    TResult? Function(String phone)? phoneVerificationRequired,
+    TResult? Function(String email)? emailConfirmationRequired,
+    TResult? Function(String message)? error,
+  }) {
+    return emailConfirmationRequired?.call(email);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult maybeWhen<TResult extends Object?>({
+    TResult Function()? initial,
+    TResult Function()? loading,
+    TResult Function(User user)? authenticated,
+    TResult Function()? guest,
+    TResult Function()? unauthenticated,
+    TResult Function(String phone)? phoneVerificationRequired,
+    TResult Function(String email)? emailConfirmationRequired,
+    TResult Function(String message)? error,
+    required TResult orElse(),
+  }) {
+    if (emailConfirmationRequired != null) {
+      return emailConfirmationRequired(email);
+    }
+    return orElse();
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult map<TResult extends Object?>({
+    required TResult Function(AuthInitial value) initial,
+    required TResult Function(AuthLoading value) loading,
+    required TResult Function(AuthAuthenticated value) authenticated,
+    required TResult Function(AuthGuest value) guest,
+    required TResult Function(AuthUnauthenticated value) unauthenticated,
+    required TResult Function(AuthPhoneVerification value)
+    phoneVerificationRequired,
+    required TResult Function(AuthEmailConfirmationRequired value)
+    emailConfirmationRequired,
+    required TResult Function(AuthError value) error,
+  }) {
+    return emailConfirmationRequired(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult? mapOrNull<TResult extends Object?>({
+    TResult? Function(AuthInitial value)? initial,
+    TResult? Function(AuthLoading value)? loading,
+    TResult? Function(AuthAuthenticated value)? authenticated,
+    TResult? Function(AuthGuest value)? guest,
+    TResult? Function(AuthUnauthenticated value)? unauthenticated,
+    TResult? Function(AuthPhoneVerification value)? phoneVerificationRequired,
+    TResult? Function(AuthEmailConfirmationRequired value)?
+    emailConfirmationRequired,
+    TResult? Function(AuthError value)? error,
+  }) {
+    return emailConfirmationRequired?.call(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult maybeMap<TResult extends Object?>({
+    TResult Function(AuthInitial value)? initial,
+    TResult Function(AuthLoading value)? loading,
+    TResult Function(AuthAuthenticated value)? authenticated,
+    TResult Function(AuthGuest value)? guest,
+    TResult Function(AuthUnauthenticated value)? unauthenticated,
+    TResult Function(AuthPhoneVerification value)? phoneVerificationRequired,
+    TResult Function(AuthEmailConfirmationRequired value)?
+    emailConfirmationRequired,
+    TResult Function(AuthError value)? error,
+    required TResult orElse(),
+  }) {
+    if (emailConfirmationRequired != null) {
+      return emailConfirmationRequired(this);
+    }
+    return orElse();
+  }
+}
+
+abstract class AuthEmailConfirmationRequired implements AuthState {
+  const factory AuthEmailConfirmationRequired({required final String email}) =
+      _$AuthEmailConfirmationRequiredImpl;
+
+  String get email;
+
+  /// Create a copy of AuthState
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  _$$AuthEmailConfirmationRequiredImplCopyWith<
+    _$AuthEmailConfirmationRequiredImpl
+  >
   get copyWith => throw _privateConstructorUsedError;
 }
 
@@ -1098,6 +1352,7 @@ class _$AuthErrorImpl implements AuthError {
     required TResult Function() guest,
     required TResult Function() unauthenticated,
     required TResult Function(String phone) phoneVerificationRequired,
+    required TResult Function(String email) emailConfirmationRequired,
     required TResult Function(String message) error,
   }) {
     return error(message);
@@ -1112,6 +1367,7 @@ class _$AuthErrorImpl implements AuthError {
     TResult? Function()? guest,
     TResult? Function()? unauthenticated,
     TResult? Function(String phone)? phoneVerificationRequired,
+    TResult? Function(String email)? emailConfirmationRequired,
     TResult? Function(String message)? error,
   }) {
     return error?.call(message);
@@ -1126,6 +1382,7 @@ class _$AuthErrorImpl implements AuthError {
     TResult Function()? guest,
     TResult Function()? unauthenticated,
     TResult Function(String phone)? phoneVerificationRequired,
+    TResult Function(String email)? emailConfirmationRequired,
     TResult Function(String message)? error,
     required TResult orElse(),
   }) {
@@ -1145,6 +1402,8 @@ class _$AuthErrorImpl implements AuthError {
     required TResult Function(AuthUnauthenticated value) unauthenticated,
     required TResult Function(AuthPhoneVerification value)
     phoneVerificationRequired,
+    required TResult Function(AuthEmailConfirmationRequired value)
+    emailConfirmationRequired,
     required TResult Function(AuthError value) error,
   }) {
     return error(this);
@@ -1159,6 +1418,8 @@ class _$AuthErrorImpl implements AuthError {
     TResult? Function(AuthGuest value)? guest,
     TResult? Function(AuthUnauthenticated value)? unauthenticated,
     TResult? Function(AuthPhoneVerification value)? phoneVerificationRequired,
+    TResult? Function(AuthEmailConfirmationRequired value)?
+    emailConfirmationRequired,
     TResult? Function(AuthError value)? error,
   }) {
     return error?.call(this);
@@ -1173,6 +1434,8 @@ class _$AuthErrorImpl implements AuthError {
     TResult Function(AuthGuest value)? guest,
     TResult Function(AuthUnauthenticated value)? unauthenticated,
     TResult Function(AuthPhoneVerification value)? phoneVerificationRequired,
+    TResult Function(AuthEmailConfirmationRequired value)?
+    emailConfirmationRequired,
     TResult Function(AuthError value)? error,
     required TResult orElse(),
   }) {

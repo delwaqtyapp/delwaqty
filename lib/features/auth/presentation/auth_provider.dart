@@ -102,12 +102,15 @@ class AuthStateNotifier extends Notifier<AuthState> {
   }) async {
     state = const AuthState.loading();
     try {
-      await _signUpUseCase(
+      final result = await _signUpUseCase(
         email: email,
         password: password,
         fullName: fullName,
       );
-      // Wait for trigger to create profile
+      if (result.accessToken == null) {
+        state = AuthState.emailConfirmationRequired(email: email);
+        return;
+      }
       await Future.delayed(const Duration(milliseconds: 500));
       final user = await ref.read(getCurrentUserUseCaseProvider).call();
       state = AuthState.authenticated(user: user);

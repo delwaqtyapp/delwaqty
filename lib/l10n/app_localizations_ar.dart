@@ -635,4 +635,18 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get nearbyEmptyHint =>
       'لم يتم العثور على متاجر قريبة. حاول توسيع نطاق البحث.';
+
+  @override
+  String get checkYourEmail => 'تحقق من بريدك الإلكتروني';
+
+  @override
+  String emailConfirmationSent(Object email) {
+    return 'أرسلنا رابط التأكيد إلى $email. يرجى التحقق من صندوق الوارد والنقر على الرابط لتفعيل حسابك.';
+  }
+
+  @override
+  String get goToLogin => 'الذهاب لتسجيل الدخول';
+
+  @override
+  String get admin => 'مدير';
 }

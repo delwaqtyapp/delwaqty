@@ -14,6 +14,7 @@ class UserModel with _$UserModel {
     String? avatarUrl,
     @Default('en') String language,
     @Default(false) bool isOnboarded,
+    @Default('customer') String role,
     required DateTime createdAt,
     DateTime? updatedAt,
   }) = _UserModel;
@@ -32,6 +33,7 @@ class UserModel with _$UserModel {
       avatarUrl: json['avatar_url'] as String?,
       language: json['language'] as String? ?? 'en',
       isOnboarded: json['is_onboarded'] as bool? ?? false,
+      role: json['role'] as String? ?? 'customer',
       createdAt: DateTime.parse(json['created_at'] as String),
       updatedAt: json['updated_at'] != null
           ? DateTime.parse(json['updated_at'] as String)
@@ -47,6 +49,7 @@ class UserModel with _$UserModel {
     avatarUrl: avatarUrl,
     language: language,
     isOnboarded: isOnboarded,
+    role: role,
     createdAt: createdAt,
     updatedAt: updatedAt,
   );
@@ -59,6 +62,7 @@ class UserModel with _$UserModel {
     'avatar_url': avatarUrl,
     'language': language,
     'is_onboarded': isOnboarded,
+    'role': role,
     'created_at': createdAt.toIso8601String(),
     'updated_at': updatedAt?.toIso8601String(),
   };

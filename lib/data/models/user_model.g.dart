@@ -15,6 +15,7 @@ _$UserModelImpl _$$UserModelImplFromJson(Map<String, dynamic> json) =>
       avatarUrl: json['avatarUrl'] as String?,
       language: json['language'] as String? ?? 'en',
       isOnboarded: json['isOnboarded'] as bool? ?? false,
+      role: json['role'] as String? ?? 'customer',
       createdAt: DateTime.parse(json['createdAt'] as String),
       updatedAt: json['updatedAt'] == null
           ? null
@@ -30,6 +31,7 @@ Map<String, dynamic> _$$UserModelImplToJson(_$UserModelImpl instance) =>
       'avatarUrl': instance.avatarUrl,
       'language': instance.language,
       'isOnboarded': instance.isOnboarded,
+      'role': instance.role,
       'createdAt': instance.createdAt.toIso8601String(),
       'updatedAt': instance.updatedAt?.toIso8601String(),
     };

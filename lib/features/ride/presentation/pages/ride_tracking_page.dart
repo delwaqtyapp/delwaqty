@@ -63,7 +63,6 @@ class _RideTrackingPageState extends ConsumerState<RideTrackingPage>
       estimatedMinutes: booking.estimatedMinutes ?? 18,
       driverName: 'Ahmed Mohammed',
       driverPhone: '+966501234567',
-      driverPhoto: null,
       vehicleType: 'Toyota Camry',
       vehiclePlate: 'ABC 1234',
       vehicleColor: 'White',
@@ -318,6 +317,13 @@ class _RideTrackingPageState extends ConsumerState<RideTrackingPage>
                     icon: Icons.chat_rounded,
                     color: context.colorScheme.primary,
                     onTap: () {},
+                  ),
+                  const SizedBox(height: 8),
+                  _buildActionCircle(
+                    context,
+                    icon: Icons.star_rounded,
+                    color: Colors.amber,
+                    onTap: () => _showRatingDialog(context, l10n),
                   ),
                 ],
               ),
@@ -621,7 +627,7 @@ class _RideTrackingPageState extends ConsumerState<RideTrackingPage>
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        icon: Icon(Icons.emergency_share_rounded, color: Colors.red, size: 48),
+        icon: const Icon(Icons.emergency_share_rounded, color: Colors.red, size: 48),
         title: Text(l10n.emergencyAlert),
         content: Text(l10n.emergencyConfirmation),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),

@@ -379,5 +379,13 @@
   "sunday": "الأحد",
   "tryDifferentDate": "جرّب تاريخاً أو عدد أشخاص مختلفاً.",
   "minimumOrder": "الحد الأدنى للطلب",
-  "perGuest": "للشخص"
+  "perGuest": "للشخص",
+  "myFavorites": "المفضلة عندي",
+  "favoriteMerchants": "الmerchantات",
+  "favoriteProducts": "المنتجات",
+  "noFavorites": "ما في مفضلة بعد",
+  "noFavoritesMessage": "اضغط على أيقونة القلب على أي merchant أو منتج وحفظه هنا.",
+  "addedToFavorites": "تمت الإضافة للمفضلة",
+  "removedFromFavorites": "تمت الإزالة من المفضلة",
+  "favoritesTab": "المفضلة"
 }

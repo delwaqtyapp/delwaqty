@@ -2365,6 +2365,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'per guest'**
   String get perGuest;
+
+  /// No description provided for @myFavorites.
+  ///
+  /// In en, this message translates to:
+  /// **'My Favorites'**
+  String get myFavorites;
+
+  /// No description provided for @favoriteMerchants.
+  ///
+  /// In en, this message translates to:
+  /// **'Merchants'**
+  String get favoriteMerchants;
+
+  /// No description provided for @favoriteProducts.
+  ///
+  /// In en, this message translates to:
+  /// **'Products'**
+  String get favoriteProducts;
+
+  /// No description provided for @noFavorites.
+  ///
+  /// In en, this message translates to:
+  /// **'No favorites yet'**
+  String get noFavorites;
+
+  /// No description provided for @noFavoritesMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap the heart icon on any merchant or product to save it here.'**
+  String get noFavoritesMessage;
+
+  /// No description provided for @addedToFavorites.
+  ///
+  /// In en, this message translates to:
+  /// **'Added to favorites'**
+  String get addedToFavorites;
+
+  /// No description provided for @removedFromFavorites.
+  ///
+  /// In en, this message translates to:
+  /// **'Removed from favorites'**
+  String get removedFromFavorites;
+
+  /// No description provided for @favoritesTab.
+  ///
+  /// In en, this message translates to:
+  /// **'Favorites'**
+  String get favoritesTab;
 }
 
 class _AppLocalizationsDelegate

@@ -1209,4 +1209,29 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get perGuest => 'per guest';
+
+  @override
+  String get myFavorites => 'My Favorites';
+
+  @override
+  String get favoriteMerchants => 'Merchants';
+
+  @override
+  String get favoriteProducts => 'Products';
+
+  @override
+  String get noFavorites => 'No favorites yet';
+
+  @override
+  String get noFavoritesMessage =>
+      'Tap the heart icon on any merchant or product to save it here.';
+
+  @override
+  String get addedToFavorites => 'Added to favorites';
+
+  @override
+  String get removedFromFavorites => 'Removed from favorites';
+
+  @override
+  String get favoritesTab => 'Favorites';
 }

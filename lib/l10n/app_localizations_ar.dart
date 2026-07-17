@@ -1205,4 +1205,29 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get perGuest => 'للشخص';
+
+  @override
+  String get myFavorites => 'المفضلة عندي';
+
+  @override
+  String get favoriteMerchants => 'الmerchantات';
+
+  @override
+  String get favoriteProducts => 'المنتجات';
+
+  @override
+  String get noFavorites => 'ما في مفضلة بعد';
+
+  @override
+  String get noFavoritesMessage =>
+      'اضغط على أيقونة القلب على أي merchant أو منتج وحفظه هنا.';
+
+  @override
+  String get addedToFavorites => 'تمت الإضافة للمفضلة';
+
+  @override
+  String get removedFromFavorites => 'تمت الإزالة من المفضلة';
+
+  @override
+  String get favoritesTab => 'المفضلة';
 }

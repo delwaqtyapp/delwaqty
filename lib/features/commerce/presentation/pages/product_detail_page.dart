@@ -7,6 +7,9 @@ import 'package:delwaqty/features/commerce/domain/entities/cart.dart'
     as commerce;
 import 'package:delwaqty/features/commerce/presentation/widgets/price_tag.dart';
 import 'package:delwaqty/features/commerce/presentation/widgets/cart_badge.dart';
+import 'package:delwaqty/features/restaurant/domain/entities/product_modifier.dart';
+import 'package:delwaqty/features/restaurant/restaurant_module.dart'
+    as restaurant;
 import 'package:delwaqty/l10n/app_localizations.dart';
 import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
 import 'package:delwaqty/shared/widgets/app_loader.dart';
@@ -33,11 +36,30 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage> {
   int _quantity = 1;
   String? _selectedVariantId;
   final _instructionsController = TextEditingController();
+  final Set<String> _selectedModifierIds = {};
+  List<ProductModifier> _currentModifiers = [];
+  bool _modifiersLoaded = false;
 
   @override
   void dispose() {
     _instructionsController.dispose();
     super.dispose();
+  }
+
+  Future<void> _loadModifiers() async {
+    if (_modifiersLoaded) return;
+    try {
+      final repo = ref.read(restaurant.modifierRepositoryProvider);
+      final mods = await repo.getModifiers(widget.productId);
+      if (mounted) {
+        setState(() {
+          _currentModifiers = mods;
+          _modifiersLoaded = true;
+        });
+      }
+    } catch (_) {
+      if (mounted) setState(() => _modifiersLoaded = true);
+    }
   }
 
   @override
@@ -63,13 +85,24 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage> {
           );
         }
 
+        if (!_modifiersLoaded) _loadModifiers();
+
         final selectedVariant = _selectedVariantId != null
             ? product.variants
                   .where((v) => v.id == _selectedVariantId)
                   .firstOrNull
             : null;
         final unitPrice = selectedVariant?.price ?? product.price;
-        final totalPrice = unitPrice * _quantity;
+        final modifierTotal = _selectedModifierIds.fold<double>(
+          0,
+          (sum, id) {
+            final mod = _currentModifiers
+                .where((m) => m.id == id)
+                .firstOrNull;
+            return sum + (mod?.priceAdjustment ?? 0);
+          },
+        );
+        final totalPrice = (unitPrice + modifierTotal) * _quantity;
 
         return Scaffold(
           appBar: AppBar(
@@ -186,9 +219,65 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage> {
                         ),
                       ),
                     ],
+                    if (_currentModifiers.isNotEmpty) ...[
+                      const SizedBox(height: 24),
+                      AnimatedFadeIn(
+                        delay: const Duration(milliseconds: 470),
+                        child: Text(
+                          'Add-ons',
+                          style: context.textTheme.titleSmall?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      ...List.generate(_currentModifiers.length, (i) {
+                        final mod = _currentModifiers[i];
+                        final isSelected = _selectedModifierIds.contains(mod.id);
+                        return AnimatedFadeIn(
+                          delay: Duration(milliseconds: 500 + i * 40),
+                          child: CheckboxListTile(
+                            value: isSelected,
+                            onChanged: mod.isAvailable
+                                ? (val) => setState(() {
+                                    if (val == true) {
+                                      _selectedModifierIds.add(mod.id);
+                                    } else {
+                                      _selectedModifierIds.remove(mod.id);
+                                    }
+                                  })
+                                : null,
+                            title: Text(
+                              mod.name,
+                              style: TextStyle(
+                                decoration: mod.isAvailable
+                                    ? null
+                                    : TextDecoration.lineThrough,
+                              ),
+                            ),
+                            subtitle: mod.description != null
+                                ? Text(mod.description!)
+                                : null,
+                            secondary: Text(
+                              mod.priceAdjustment >= 0
+                                  ? '+${mod.priceAdjustment.toStringAsFixed(0)} SAR'
+                                  : '-${mod.priceAdjustment.abs().toStringAsFixed(0)} SAR',
+                              style: context.textTheme.bodySmall?.copyWith(
+                                color: mod.priceAdjustment >= 0
+                                    ? context.colorScheme.primary
+                                    : context.colorScheme.error,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            dense: true,
+                            contentPadding: EdgeInsets.zero,
+                          ),
+                        );
+                      }),
+                    ],
                     const SizedBox(height: 24),
                     AnimatedFadeIn(
-                      delay: const Duration(milliseconds: 500),
+                      delay: const Duration(milliseconds: 700),
                       child: Text(
                         l10n.quantity,
                         style: context.textTheme.titleSmall?.copyWith(

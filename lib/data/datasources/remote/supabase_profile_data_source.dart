@@ -59,7 +59,7 @@ class SupabaseProfileDataSource {
     try {
       final data = await _client
           .from(_tableName)
-          .insert(model.toSupabaseJson())
+          .insert(model.toInsertJson())
           .select()
           .single();
       return UserModel.fromSupabase(data);

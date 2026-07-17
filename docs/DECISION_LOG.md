@@ -650,3 +650,75 @@ Portable toolchain under `E:\app\` with environment variables set per-session. F
 | 023 | Windows Desktop Workstation | Accepted | Portable dev environment |
 | 024 | Super App Presentation Layer | Accepted | 11 customer screens with premium UI |
 | 025 | Finance Code Removal | Accepted | Remove expenses/budgets/categories entirely |
+| 026 | RLS Security Hardening | Accepted | Replace all USING(true) with role-based policies |
+| 027 | World-Class Animation System | Accepted | Animated gradients, particles, elastic, staggered reveals |
+
+---
+
+## ADR-026: RLS Security Hardening
+
+**Date:** Sprint 20
+**Status:** Accepted
+**Deciders:** Core team
+
+### Context
+
+Security audit revealed 16 out of ~50 RLS policies used `USING(true)` — meaning any authenticated user (or anonymous) could read/write any row. 8 tables had a merchant ownership tautology bug (`WHERE merchant_id = merchant_id` — always true). Missing DELETE policies on most tables. Missing INSERT policies for drivers, order_tracking, notifications, activity_logs.
+
+### Decision
+
+Create comprehensive migration `005_rls_hardening.sql` that:
+1. Drops ALL existing policies
+2. Creates helper functions: `get_user_role()`, `get_user_merchant_id()`, `is_admin()`, `is_merchant_owner()`
+3. Applies role-based SELECT/INSERT/UPDATE/DELETE policies for all 23 tables
+4. Implements hierarchy: Guest < Customer < Driver < Merchant < Admin < Owner
+
+### Rationale
+
+- `USING(true)` is equivalent to no security at all
+- Role-based policies ensure users can only access their own data
+- Helper functions centralize role logic (DRY)
+- Dropping and recreating is safer than patching individual policies
+
+### Consequences
+
+- Migration must be applied via Supabase SQL Editor before production deployment
+- All existing RLS policies are replaced (no rollback — the old ones were broken anyway)
+- Role hierarchy is enforced at the database level (not just app level)
+
+---
+
+## ADR-027: World-Class Animation System
+
+**Date:** Sprint 20
+**Status:** Accepted
+**Deciders:** Core team
+
+### Context
+
+The app needs to feel premium and compete with Uber/Talabat/Noon. Default Flutter animations (linear, no staging) feel generic. Core entry screens (splash, onboarding, login, home) are the first impression.
+
+### Decision
+
+Replace default animations with a world-class motion design system:
+1. **Splash**: Animated gradient (rotating color angles), 30 floating particles, glow ring, elastic scale logo, pulse animation, staggered text fade-in
+2. **Onboarding**: 6 story slides with color gradient backgrounds, elastic bounce-in emoji/icon, staggered title/description fade-up, animated dot indicator
+3. **Login**: Social auth buttons (Google/Apple/Facebook/Phone), animated form shake on error, premium logo with shadow
+4. **Home**: Super App hub with gradient logo container, search bar with filter, 8-category service grid, horizontal scrollable lists, promo banner
+
+### Rationale
+
+- First 3 seconds determine user perception of quality
+- Animated gradients create depth and premium feel
+- Elastic/spring animations feel physical and satisfying
+- Staggered reveals prevent visual overwhelm
+- Particle systems add visual richness without complexity
+
+### Consequences
+
+- All 4 core screens fully rewritten with new animation system
+- 5 new reusable premium widgets (ShimmerLoading, PremiumEmptyState, GlassCard, AnimatedCounter, PremiumSuccessAnimation)
+- 19 new localization strings for expanded onboarding and social auth
+- Code is significantly more complex but provides world-class UX
+
+---

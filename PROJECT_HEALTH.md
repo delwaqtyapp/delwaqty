@@ -1,6 +1,6 @@
 # PROJECT_HEALTH.md
 
-> **Generated:** 2026-07-17 | **Sprint:** 19 | **Status:** Healthy
+> **Generated:** 2026-07-17 | **Sprint:** 20 | **Status:** Healthy
 
 ---
 
@@ -30,15 +30,15 @@
 | Test Coverage | Mock-based (no coverage report yet) |
 | Analysis Errors | 0 |
 | Analysis Warnings | 0 |
-| Analysis Info | 183 (style suggestions) |
+| Analysis Info | 209 (style suggestions) |
 | Generated Files | 36 (19 `.freezed.dart` + 17 `.g.dart`) |
 | Feature Modules | 11 registered |
-| Localization Strings | 170+ (EN + AR) |
+| Localization Strings | 192 (EN + AR) |
 | Customer Screens | 11 (Home, Search, Merchant Detail, Product Detail, Cart, Checkout, Orders, Order Tracking, Order Completed, Notifications, Profile) |
 | Repository Interfaces | 14 (6 domain + 8 commerce) |
 | Service Files | 29 |
 | Freezed Entities | 19 |
-| ADRs Documented | 23 |
+| ADRs Documented | 27 |
 | TODO/FIXME/HACK | 1 TODO |
 
 ---
@@ -103,7 +103,7 @@
 | `google-services.json` | Not present |
 | Config classes | `abstract final` |
 | Environment isolation | `.env.dev`, `.env.staging`, `.env.prod` |
-| RLS policies | 29 total, **12 overly permissive** |
+| RLS policies | 50+ role-based policies (migration 005 — replaces all 16 USING(true)) |
 | `// ignore:` suppressions | 14 (11 `avoid_print`) |
 | Deprecated API usage | 8 (`withOpacity`) |
 
@@ -135,7 +135,7 @@
 | Code Quality | 9/10 |
 | Test Coverage | 8/10 |
 | Architecture | 9/10 |
-| Security | 6/10 (RLS policies need hardening) |
+| Security | 8/10 (RLS hardened in sprint 20, migration pending deployment) |
 | Documentation | 9/10 |
 | CI/CD | 9/10 |
 | Dependencies | 5/10 (48 outdated) |
@@ -145,11 +145,13 @@
 
 ## Recommendations
 
-1. **[CRITICAL]** Harden RLS policies before production deployment
+1. **[CRITICAL]** Apply RLS migration 005 to Supabase via SQL Editor
 2. **[HIGH]** Rotate Supabase service role key if exposed
 3. **[HIGH]** Deploy database schema via Supabase Dashboard
-4. **[MEDIUM]** Upgrade major dependencies (Riverpod 3.x, GoRouter 17.x, Freezed 3.x)
-5. **[MEDIUM]** Replace `avoid_print` suppressions with `AppLogger`
-6. **[MEDIUM]** Replace deprecated `withOpacity()` with `withValues()`
-7. **[LOW]** Add coverage reporting to CI
-8. **[LOW]** Add `google-services.json` to `.gitignore` preemptively
+4. **[MEDIUM]** Performance optimization pass (const constructors, RepaintBoundary)
+5. **[MEDIUM]** Accessibility pass (semantic labels, screen reader support)
+6. **[MEDIUM]** Upgrade major dependencies (Riverpod 3.x, GoRouter 17.x, Freezed 3.x)
+7. **[MEDIUM]** Replace `avoid_print` suppressions with `AppLogger`
+8. **[MEDIUM]** Replace deprecated `withOpacity()` with `withValues()`
+9. **[LOW]** Add coverage reporting to CI
+10. **[LOW]** Add `google-services.json` to `.gitignore` preemptively

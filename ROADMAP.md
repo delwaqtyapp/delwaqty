@@ -84,7 +84,7 @@
 - [ ] Earnings Dashboard — daily/weekly/monthly
 
 ### Phase 9: Database Hardening
-- [ ] RLS per-role policies (replace USING(true) patterns)
+- [x] RLS per-role policies (replace USING(true) patterns — migration 005 created)
 - [ ] Add missing indexes (reviews.rating, orders.created_at, coupons.valid_until)
 - [ ] Add RLS to activity_logs, admin_users, drivers, notifications, platform_settings
 
@@ -113,3 +113,4 @@
 | 17 | Restaurant domain data layer (Phase 5.1) | ✅ |
 | 18 | Security audit, finance cleanup, localization (Phase 5.5) | ✅ |
 | 19 | Customer Presentation Layer — all screens (Phase 6) | ✅ |
+| 20 | Production Polish — RLS, premium UX, animations, security hardening | ✅ |

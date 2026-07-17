@@ -560,4 +560,62 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get inTransit => 'في الطريق';
+
+  @override
+  String get onboardingTitle6 => 'تسوّق أونلاين';
+
+  @override
+  String get onboardingDesc6 =>
+      'من البقالة للإلكترونيات، والموضة للأثاث — تسوّق من مئات المتاجر واستلم بسرعة.';
+
+  @override
+  String get loginWithGoogle => 'المتابعة بحساب Google';
+
+  @override
+  String get loginWithApple => 'المتابعة بحساب Apple';
+
+  @override
+  String get loginWithFacebook => 'المتابعة بحساب Facebook';
+
+  @override
+  String get loginWithPhone => 'المتابعة برقم الهاتف';
+
+  @override
+  String get orContinueWith => 'أو تابع بـ';
+
+  @override
+  String get agreementPrefix => 'بالمتابعة، أنت توافق على ';
+
+  @override
+  String get termsOfService => 'شروط الخدمة';
+
+  @override
+  String get and => ' و';
+
+  @override
+  String get privacyPolicy => 'سياسة الخصوصية';
+
+  @override
+  String get superAppTagline => 'تطبيقك اليومي الشامل';
+
+  @override
+  String get allServicesInOneApp => 'كل الخدمات في تطبيق واحد';
+
+  @override
+  String get fastDelivery => 'توصيل سريع';
+
+  @override
+  String get fastDeliveryDesc => 'استلم طلبك في دقائق';
+
+  @override
+  String get trustedMerchants => 'متاجر موثوقة';
+
+  @override
+  String get trustedMerchantsDesc => 'فقط متاجر موثّقة وبتقييم عالي';
+
+  @override
+  String get liveTracking => 'تتبع مباشر';
+
+  @override
+  String get liveTrackingDesc => 'تتبع طلباتك لحظة بلحظة';
 }

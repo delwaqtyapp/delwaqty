@@ -749,3 +749,33 @@ Delwaqty ("دلوقتي") targets an Arabic-first, Egypt/global audience. The ap
 - error_handler holds Arabic literals (acceptable trade-off vs. a full error-code refactor; revisit if English error surfaces are required).
 
 ---
+
+
+## ADR-029: Server-Side Ride-Hailing Domain (Schema + RPC Engines)
+
+**Date:** Session 4 (Milestone 2)
+**Status:** Accepted
+**Deciders:** Lead Architect
+
+### Context
+The ride module shipped with a mock-fallback data source and no real backend for the ride-hailing domain (drivers, vehicles, dispatch, pricing, earnings, safety). A complete, secure server schema was required before removing mocks.
+
+### Decision
+Introduce migration `007_transportation_platform.sql` that:
+1. Adds 15 domain tables (vehicles, driver_documents, ride_requests, trip_events, driver_earnings, withdrawal_requests, ride_ratings, complaints, driver_locations, saved_places, trusted_contacts, favorite_drivers, promo_codes, promo_redemptions, ride_pricing).
+2. Extends `rides`/`drivers` with pricing breakdown, surge, promo, OTP, payment, verification, and trip counters; expands ride categories to economy/comfort/premium/xl/motorbike/taxi.
+3. Implements pricing/dispatch/lifecycle as SECURITY-scoped Postgres RPCs: `estimate_fare`, `find_nearest_drivers`, `accept_ride`, `advance_ride`, `validate_promo`, plus a PostGIS-free `haversine_km` helper.
+4. Enforces RLS on every new table (owner/participant scope; public read only for pricing, active promos, ratings).
+
+### Rationale
+- Server-authoritative pricing and dispatch prevent client tampering with fares and driver assignment.
+- `accept_ride`/`advance_ride` use row locks (`FOR UPDATE`) for atomic, race-free trip state transitions and OTP-gated trip start.
+- `haversine_km` avoids a PostGIS dependency on the managed instance while enabling nearest-driver queries.
+- Idempotent DDL (`IF NOT EXISTS`, `DROP POLICY IF EXISTS`) keeps the migration safely re-runnable.
+
+### Consequences
+- Dart ride/driver data sources can now call real RPCs; mock fallback is scheduled for removal in M4.
+- Fare config lives in `ride_pricing` (data-driven, EGP) and is tunable without redeploys.
+- Migration comments are ASCII-only after the Management API rejected UTF-8 box-drawing characters in the JSON payload.
+
+---

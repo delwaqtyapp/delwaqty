@@ -225,6 +225,25 @@ class _MerchantDetailPageState extends ConsumerState<MerchantDetailPage> {
                       ),
                     ),
                     const SizedBox(height: 16),
+                    if (merchant.type == MerchantType.restaurant)
+                      AnimatedFadeIn(
+                        delay: const Duration(milliseconds: 580),
+                        child: SizedBox(
+                          width: double.infinity,
+                          child: FilledButton.icon(
+                            onPressed: () => context.push('/restaurant/${merchant.id}'),
+                            icon: const Icon(Icons.restaurant_outlined),
+                            label: Text(l10n.viewFullMenu),
+                            style: FilledButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(vertical: 12),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    const SizedBox(height: 16),
                     AnimatedFadeIn(
                       delay: const Duration(milliseconds: 600),
                       child: FutureBuilder<List<CatalogCategory>>(

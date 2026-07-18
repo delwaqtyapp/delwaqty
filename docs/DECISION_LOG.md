@@ -652,8 +652,48 @@ Portable toolchain under `E:\app\` with environment variables set per-session. F
 | 025 | Finance Code Removal | Accepted | Remove expenses/budgets/categories entirely |
 | 026 | RLS Security Hardening | Accepted | Replace all USING(true) with role-based policies |
 | 027 | World-Class Animation System | Accepted | Animated gradients, particles, elastic, staggered reveals |
+| 028 | Arabic-Default Localization & EGP Currency | Accepted | Arabic-first UX, EGP currency |
+| 029 | Server-Side Ride-Hailing Domain | Accepted | 15 tables, 6 RPCs, pricing/dispatch/lifecycle |
+| 030 | M3 Passenger Booking Flow | Accepted | Real backend, no mock, 6 categories, Realtime |
+| 031 | M4 Dispatch Engine & Live Trip Lifecycle | Accepted | 12 RPCs, atomic claim, OTP, driver app |
+| 032 | M5 Provider-Agnostic Destination Search | Accepted | Google Places, cache, debounce, saved places |
+| 033 | M6 Complete Driver Platform | Accepted | Onboarding, vehicles, documents, performance, wallet |
+| 034 | M7 Unified Delivery & Logistics Platform | Accepted | 9 service types, rides table reuse, delivery pricing |
 
 ---
+
+## ADR-034: M7 Unified Delivery & Logistics Platform
+
+**Date:** Sprint 34
+**Status:** Accepted
+**Deciders:** Lead Software Architect`
+
+### Context
+
+Through M6 the platform had a complete ride-hailing ecosystem but no delivery capability. M7 required supporting food, grocery, pharmacy, marketplace, courier, package, document, flower, and retail delivery — without duplicating the dispatch engine, driver platform, wallet, realtime, or tracking infrastructure already built.
+
+### Decision
+
+1. **Reuse the `rides` table as the unified dispatch table.** Add a `service_type` column (CHECK: ride + 9 delivery types) and delivery-specific columns (merchant_id, pickup/dropoff notes, delivery proof, signature/OTP flags, scheduled time, priority, items summary, weight). No new dispatch tables.
+2. **Extend `drivers`** with `service_types[]`, `accepts_deliveries`, `max_delivery_distance_km`, `max_weight_kg` so drivers self-declare which services they handle.
+3. **Add `delivery_pricing`** per service type (base_fee, per_km, per_kg, minimum_fee, priority/express multipliers) — seeded with 9 rows, one per delivery type. Queryable via RPC.
+4. **Add `merchant_profiles`** for merchant configuration (service types, prep time, delivery radius, auto-accept).
+5. **6 new RPCs:** `dispatch_delivery` (reuses nearest-driver logic), `complete_delivery` (credits driver like complete_trip), `estimate_delivery_fee` (pricing lookup), `merchant_ready_for_dispatch` (merchant confirms readiness), `get_merchant_deliveries` (merchant's orders), `update_driver_capabilities` (driver preferences).
+6. **Domain layer:** `DeliveryOrder` (unified delivery entity), `MerchantProfile`, `DriverCapability`, `DeliveryPricingModel` (with `calculateFee`), `DeliveryRequest`, `DeliveryRepository` (20-method abstract interface).
+7. **Presentation:** 4 new pages — `DriverDeliveryHubPage` (driver side), `MerchantOrdersPage` (merchant side), `DeliveryTrackingPage` (customer side), `DriverCapabilitiesPage` (service type preferences).
+
+### Rationale
+
+- The `rides` table already has pickup/dropoff coordinates, status lifecycle, driver assignment, earnings crediting, and Realtime publication. Adding delivery columns avoids a parallel dispatch system.
+- `service_type` as a CHECK constraint on `rides` is the cheapest way to multiplex 10 services through one engine.
+- `delivery_pricing` as a separate table (not embedded in ride_pricing) allows per-service-type tuning without touching the ride pricing.
+- Driver capability declaration (`service_types[]`) enables the same dispatch engine to filter candidates by service compatibility.
+
+### Consequences
+
+- `flutter analyze` = 0 errors; `flutter test` = 431/431 (18 new delivery entity tests); debug APK installed and stable on DNP NX9.
+- All existing M4 dispatch RPCs (`dispatch_ride`, `accept_ride_request`, `complete_trip`) remain ride-only; delivery uses the new `dispatch_delivery` / `complete_delivery` RPCs that operate on the same table with service-type guards.
+- Future services (laundry, pet transport, moving) are added via a new `service_type` CHECK value + `delivery_pricing` row + UI page — zero schema migration beyond the CHECK alter.
 
 ## ADR-026: RLS Security Hardening
 

@@ -1,6 +1,6 @@
 # ROADMAP.md — Delwaqty Development Roadmap
 
-> **Last updated:** 2026-07-17
+> **Last updated:** 2026-07-18
 > **Authority:** PROJECT_CONSTITUTION.md §15 (v2.0)
 
 ---
@@ -65,7 +65,7 @@
 - [x] M4: Dispatch engine + live trip lifecycle (driver offers, accept/arrive/OTP/start/complete/cancel, earnings + withdrawals, driver ride app, Realtime, no mock) (sprint 31)
 - [x] M5: Destination search & geocoding (provider-agnostic abstraction, Google Places provider, autocomplete/details/reverse/nearby, saved + recent, session tokens, debounce, caching, AR/EN) (sprint 32)
 - [x] M6: Complete driver platform (onboarding wizard, vehicle management, document management, enhanced dashboard, wallet breakdown, performance metrics, 9 new RPCs, realtime-ready) (sprint 33)
-- [ ] M7: Delivery & Courier Platform (food, grocery, pharmacy, package — built on dispatch engine)
+- [x] M7: Delivery & Courier Platform (food, grocery, pharmacy, package — built on dispatch engine) (sprint 34)
 - [ ] M8: Safety (SOS, trusted contacts, live share, OTP pickup)
 - [ ] M9: Admin monitoring dashboard
 - [ ] M10: Payments integration
@@ -138,3 +138,4 @@
 | 23 | Restaurant module full presentation layer (5 pages, 5 widgets) | ✅ |
 | 24 | Favorites, dead code cleanup, modifier integration, restaurant order tracking | ✅ |
 | 25 | Restaurant UX polish — Glass Cards, Lottie, skeletons, Hero, Gallery, L10n, deletion policy | ✅ |
+| 34 | Unified Delivery & Logistics Platform — 9 service types, dispatch engine reuse, merchant/driver/customer flow, delivery pricing | ✅ |

@@ -252,6 +252,7 @@ class RideBookingNotifier extends StateNotifier<RideBookingState> {
         discountAmount: state.promoDiscount,
         paymentMethod: state.paymentMethod,
       );
+      await repo.dispatchRide(ride.id);
       state = state.copyWith(isRequesting: false);
       _ref.invalidate(activeRideProvider);
       return ride;

@@ -4141,6 +4141,276 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Metered street taxis'**
   String get rideTaxiDesc;
+
+  /// No description provided for @documents.
+  ///
+  /// In en, this message translates to:
+  /// **'Documents'**
+  String get documents;
+
+  /// No description provided for @performance.
+  ///
+  /// In en, this message translates to:
+  /// **'Performance'**
+  String get performance;
+
+  /// No description provided for @ratings.
+  ///
+  /// In en, this message translates to:
+  /// **'Ratings'**
+  String get ratings;
+
+  /// No description provided for @navigate.
+  ///
+  /// In en, this message translates to:
+  /// **'Navigate'**
+  String get navigate;
+
+  /// No description provided for @arrive.
+  ///
+  /// In en, this message translates to:
+  /// **'Arrive'**
+  String get arrive;
+
+  /// No description provided for @ratePassenger.
+  ///
+  /// In en, this message translates to:
+  /// **'Rate passenger'**
+  String get ratePassenger;
+
+  /// No description provided for @incomingRequest.
+  ///
+  /// In en, this message translates to:
+  /// **'Incoming ride request'**
+  String get incomingRequest;
+
+  /// No description provided for @estimatedEarnings.
+  ///
+  /// In en, this message translates to:
+  /// **'Estimated earnings'**
+  String get estimatedEarnings;
+
+  /// No description provided for @driverRides.
+  ///
+  /// In en, this message translates to:
+  /// **'Ride requests'**
+  String get driverRides;
+
+  /// No description provided for @activeTrip.
+  ///
+  /// In en, this message translates to:
+  /// **'Active trip'**
+  String get activeTrip;
+
+  /// No description provided for @todayRides.
+  ///
+  /// In en, this message translates to:
+  /// **'Today\'s rides'**
+  String get todayRides;
+
+  /// No description provided for @acceptanceRate.
+  ///
+  /// In en, this message translates to:
+  /// **'Acceptance rate'**
+  String get acceptanceRate;
+
+  /// No description provided for @pendingWithdrawals.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending withdrawals'**
+  String get pendingWithdrawals;
+
+  /// No description provided for @withdrawFunds.
+  ///
+  /// In en, this message translates to:
+  /// **'Withdraw funds'**
+  String get withdrawFunds;
+
+  /// No description provided for @requestWithdrawal.
+  ///
+  /// In en, this message translates to:
+  /// **'Request withdrawal'**
+  String get requestWithdrawal;
+
+  /// No description provided for @withdrawalRequested.
+  ///
+  /// In en, this message translates to:
+  /// **'Withdrawal requested'**
+  String get withdrawalRequested;
+
+  /// No description provided for @earningsCredited.
+  ///
+  /// In en, this message translates to:
+  /// **'Earnings credited'**
+  String get earningsCredited;
+
+  /// No description provided for @waitingForRides.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for ride requests'**
+  String get waitingForRides;
+
+  /// No description provided for @goOnlineToReceive.
+  ///
+  /// In en, this message translates to:
+  /// **'Go online to receive ride requests'**
+  String get goOnlineToReceive;
+
+  /// No description provided for @arrivingAtPickup.
+  ///
+  /// In en, this message translates to:
+  /// **'Head to pickup'**
+  String get arrivingAtPickup;
+
+  /// No description provided for @enterOtpToStart.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the passenger\'s code to start the trip'**
+  String get enterOtpToStart;
+
+  /// No description provided for @confirmArrival.
+  ///
+  /// In en, this message translates to:
+  /// **'I have arrived'**
+  String get confirmArrival;
+
+  /// No description provided for @completeTrip.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete trip'**
+  String get completeTrip;
+
+  /// No description provided for @rateThePassenger.
+  ///
+  /// In en, this message translates to:
+  /// **'Rate the passenger'**
+  String get rateThePassenger;
+
+  /// No description provided for @noActiveTrip.
+  ///
+  /// In en, this message translates to:
+  /// **'No active trip'**
+  String get noActiveTrip;
+
+  /// No description provided for @away.
+  ///
+  /// In en, this message translates to:
+  /// **'away'**
+  String get away;
+
+  /// No description provided for @callPassenger.
+  ///
+  /// In en, this message translates to:
+  /// **'Call passenger'**
+  String get callPassenger;
+
+  /// No description provided for @registerAsRideDriver.
+  ///
+  /// In en, this message translates to:
+  /// **'Register as a ride driver'**
+  String get registerAsRideDriver;
+
+  /// No description provided for @plateNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Plate number'**
+  String get plateNumber;
+
+  /// No description provided for @vehicleMake.
+  ///
+  /// In en, this message translates to:
+  /// **'Make'**
+  String get vehicleMake;
+
+  /// No description provided for @phoneNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Phone number'**
+  String get phoneNumber;
+
+  /// No description provided for @seats.
+  ///
+  /// In en, this message translates to:
+  /// **'Seats'**
+  String get seats;
+
+  /// No description provided for @withdrawalMethod.
+  ///
+  /// In en, this message translates to:
+  /// **'Withdrawal method'**
+  String get withdrawalMethod;
+
+  /// No description provided for @minimumFareNotMet.
+  ///
+  /// In en, this message translates to:
+  /// **'Minimum amount not met'**
+  String get minimumFareNotMet;
+
+  /// No description provided for @amountExceedsBalance.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount exceeds balance'**
+  String get amountExceedsBalance;
+
+  /// No description provided for @enterAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter amount'**
+  String get enterAmount;
+
+  /// No description provided for @earningsHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'Earnings history'**
+  String get earningsHistory;
+
+  /// No description provided for @trip.
+  ///
+  /// In en, this message translates to:
+  /// **'Trip'**
+  String get trip;
+
+  /// No description provided for @bonus.
+  ///
+  /// In en, this message translates to:
+  /// **'Bonus'**
+  String get bonus;
+
+  /// No description provided for @tip.
+  ///
+  /// In en, this message translates to:
+  /// **'Tip'**
+  String get tip;
+
+  /// No description provided for @withdrawalType.
+  ///
+  /// In en, this message translates to:
+  /// **'Withdrawal'**
+  String get withdrawalType;
+
+  /// No description provided for @adjustment.
+  ///
+  /// In en, this message translates to:
+  /// **'Adjustment'**
+  String get adjustment;
+
+  /// No description provided for @rideNoLongerAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'This ride is no longer available'**
+  String get rideNoLongerAvailable;
+
+  /// No description provided for @driverBusy.
+  ///
+  /// In en, this message translates to:
+  /// **'You already have an active trip'**
+  String get driverBusy;
+
+  /// No description provided for @done.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get done;
 }
 
 class _AppLocalizationsDelegate

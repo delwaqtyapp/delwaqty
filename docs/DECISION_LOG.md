@@ -808,3 +808,34 @@ With the M2 transportation schema and RPCs live, the passenger ride module still
 - Dropoff currently uses a positional offset placeholder; destination search/geocoding UI is deferred.
 
 ---
+
+## ADR-031: M4 Dispatch Engine & Live Trip Lifecycle
+
+**Date:** Sprint 31
+**Status:** Accepted
+**Deciders:** Lead Software Architect
+
+### Context
+M3 delivered the passenger booking flow but left rides stuck on `searching` because no driver-side dispatch or acceptance existed. M4 required a server-authoritative dispatch engine plus a driver ride app implementing the full trip lifecycle (offer -> accept -> arrive -> OTP -> start -> complete/cancel), earnings crediting, and withdrawals, all on the real backend with no mock data.
+
+### Decision
+1. Add `008_dispatch_engine.sql` with 12 RPCs (`dispatch_ride`, `accept_ride_request`, `reject_ride_request`, `driver_arrive`, `start_trip`, `complete_trip`, `cancel_ride_lifecycle`, `driver_set_online`, `driver_update_location`, `rate_passenger`, `driver_dashboard_stats`, `request_withdrawal`). Offers expire after 20s; unaccepted rides reassign via `reassign_count`. Acceptance is atomic (single-winner claim) and generates the pickup OTP.
+2. Map the granular spec lifecycle (requested/accepted/driver_arriving/otp_verified/trip_started) onto the DB constraint states (`searching/matched/arrived/inTrip/completed/cancelled`) using `trip_events` + flag columns, avoiding a destructive constraint change.
+3. Add `009_driver_onboarding.sql` with `register_ride_driver` (creates driver + active verified vehicle) and a `drivers.status` column synced to `is_online` via trigger for legacy compatibility. Dispatch requires a verified driver with an active vehicle whose `category` matches the ride type.
+4. Encode legal transitions client-side as `RideStatusX` (`canTransitionTo`/`isTerminal`/`isActive`) mirroring the server machine, and unit-test it.
+5. Push-based driver flow via Supabase Realtime: `watchOffers` (ride_requests joined to rides) and `watchActiveDriverRide` (rides). Online location updates stream from Geolocator to `driver_update_location`.
+6. Passenger `confirmRide` now triggers `dispatch_ride` after `requestRide`; passenger cancel routes through `cancel_ride_lifecycle` (unified cancellation with `cancelled_by` attribution).
+
+### Rationale
+- Atomic server-side claim prevents double-assignment races; server-generated OTP keeps pickup verification tamper-proof.
+- Mapping onto existing DB states preserves the M2 constraint and RLS while still expressing the richer lifecycle via events/flags.
+- Mirroring the transition map in Dart lets the UI guard actions and fail fast without a round trip, while the server remains authoritative.
+- Realtime offers/active-ride streams avoid polling and give drivers immediate, cancellable offers.
+
+### Consequences
+- `flutter analyze` = 0 errors / 0 warnings; `flutter test` = 375/375 (9 new dispatch-entity tests); debug APK installed and stable on DNP NX9.
+- Driver ride app (`/driver/rides`, `/driver/trip/:id`, `/driver/earnings`) is now reachable from the driver dashboard.
+- On-device interactive lifecycle walkthrough is not automated; verification relies on state-machine unit tests + live RPCs + launch stability.
+- Destination search/geocoding remains deferred to M5.
+
+---

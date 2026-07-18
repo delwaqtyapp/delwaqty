@@ -35,6 +35,8 @@ abstract interface class RideRepository {
     required RideType rideType,
   });
 
+  Future<int> dispatchRide(String rideId);
+
   Stream<Ride> watchRide(String rideId);
 
   Future<Ride?> getRide(String rideId);

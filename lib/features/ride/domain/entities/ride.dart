@@ -5,6 +5,24 @@ part 'ride.g.dart';
 
 enum RideStatus { searching, matched, arrived, inTrip, completed, cancelled }
 
+extension RideStatusX on RideStatus {
+  static const Map<RideStatus, Set<RideStatus>> _legal = {
+    RideStatus.searching: {RideStatus.matched, RideStatus.cancelled},
+    RideStatus.matched: {RideStatus.arrived, RideStatus.cancelled},
+    RideStatus.arrived: {RideStatus.inTrip, RideStatus.cancelled},
+    RideStatus.inTrip: {RideStatus.completed, RideStatus.cancelled},
+    RideStatus.completed: {},
+    RideStatus.cancelled: {},
+  };
+
+  bool canTransitionTo(RideStatus next) => _legal[this]!.contains(next);
+
+  bool get isTerminal =>
+      this == RideStatus.completed || this == RideStatus.cancelled;
+
+  bool get isActive => !isTerminal;
+}
+
 enum RideType { economy, comfort, premium, xl, motorbike, taxi }
 
 extension RideTypeX on RideType {

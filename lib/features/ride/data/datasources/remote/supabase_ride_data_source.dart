@@ -217,6 +217,14 @@ class SupabaseRideDataSource {
     }).toList();
   }
 
+  Future<int> dispatchRide(String rideId) async {
+    final data = await _client.rpc('dispatch_ride', params: {
+      'p_ride_id': rideId,
+    });
+    final map = Map<String, dynamic>.from(data as Map);
+    return (map['offered'] as num?)?.toInt() ?? 0;
+  }
+
   Stream<Ride> watchRide(String rideId) {
     return _client
         .from(_ridesTable)
@@ -235,11 +243,11 @@ class SupabaseRideDataSource {
   }
 
   Future<void> cancelRide(String rideId, {String? reason}) async {
-    await _client.from(_ridesTable).update({
-      'status': RideStatus.cancelled.name,
-      'cancellation_reason': reason,
-      'cancelled_at': DateTime.now().toIso8601String(),
-    }).eq('id', rideId);
+    await _client.rpc('cancel_ride_lifecycle', params: {
+      'p_ride_id': rideId,
+      'p_by': 'rider',
+      'p_reason': reason,
+    });
   }
 
   Future<Ride?> getActiveRide(String riderId) async {

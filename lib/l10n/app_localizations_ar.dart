@@ -2126,4 +2126,139 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get rideTaxiDesc => 'تاكسي الشارع بالعداد';
+
+  @override
+  String get documents => 'المستندات';
+
+  @override
+  String get performance => 'الأداء';
+
+  @override
+  String get ratings => 'التقييمات';
+
+  @override
+  String get navigate => 'التنقل';
+
+  @override
+  String get arrive => 'وصلت';
+
+  @override
+  String get ratePassenger => 'قيّم الراكب';
+
+  @override
+  String get incomingRequest => 'طلب رحلة وارد';
+
+  @override
+  String get estimatedEarnings => 'الأرباح المتوقعة';
+
+  @override
+  String get driverRides => 'طلبات الرحلات';
+
+  @override
+  String get activeTrip => 'رحلة نشطة';
+
+  @override
+  String get todayRides => 'رحلات اليوم';
+
+  @override
+  String get acceptanceRate => 'معدل القبول';
+
+  @override
+  String get pendingWithdrawals => 'سحوبات معلقة';
+
+  @override
+  String get withdrawFunds => 'سحب الأموال';
+
+  @override
+  String get requestWithdrawal => 'طلب سحب';
+
+  @override
+  String get withdrawalRequested => 'تم طلب السحب';
+
+  @override
+  String get earningsCredited => 'تمت إضافة الأرباح';
+
+  @override
+  String get waitingForRides => 'بانتظار طلبات الرحلات';
+
+  @override
+  String get goOnlineToReceive => 'اتصل بالإنترنت لاستقبال طلبات الرحلات';
+
+  @override
+  String get arrivingAtPickup => 'التوجه إلى نقطة الالتقاء';
+
+  @override
+  String get enterOtpToStart => 'أدخل رمز الراكب لبدء الرحلة';
+
+  @override
+  String get confirmArrival => 'لقد وصلت';
+
+  @override
+  String get completeTrip => 'إنهاء الرحلة';
+
+  @override
+  String get rateThePassenger => 'قيّم الراكب';
+
+  @override
+  String get noActiveTrip => 'لا توجد رحلة نشطة';
+
+  @override
+  String get away => 'بعيد';
+
+  @override
+  String get callPassenger => 'اتصل بالراكب';
+
+  @override
+  String get registerAsRideDriver => 'سجّل كسائق رحلات';
+
+  @override
+  String get plateNumber => 'رقم اللوحة';
+
+  @override
+  String get vehicleMake => 'الصنع';
+
+  @override
+  String get phoneNumber => 'رقم الهاتف';
+
+  @override
+  String get seats => 'المقاعد';
+
+  @override
+  String get withdrawalMethod => 'طريقة السحب';
+
+  @override
+  String get minimumFareNotMet => 'لم يتم بلوغ الحد الأدنى';
+
+  @override
+  String get amountExceedsBalance => 'المبلغ يتجاوز الرصيد';
+
+  @override
+  String get enterAmount => 'أدخل المبلغ';
+
+  @override
+  String get earningsHistory => 'سجل الأرباح';
+
+  @override
+  String get trip => 'رحلة';
+
+  @override
+  String get bonus => 'مكافأة';
+
+  @override
+  String get tip => 'إكرامية';
+
+  @override
+  String get withdrawalType => 'سحب';
+
+  @override
+  String get adjustment => 'تسوية';
+
+  @override
+  String get rideNoLongerAvailable => 'هذه الرحلة لم تعد متاحة';
+
+  @override
+  String get driverBusy => 'لديك رحلة نشطة بالفعل';
+
+  @override
+  String get done => 'تم';
 }

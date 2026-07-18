@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:delwaqty/features/auth/presentation/auth_provider.dart';
 import 'package:delwaqty/features/auth/domain/auth_state.dart';
 import 'package:delwaqty/features/driver/driver_module.dart';
@@ -152,6 +153,29 @@ class DriverDashboardPage extends ConsumerWidget {
             ),
           ),
         ),
+        const SizedBox(height: 16),
+        AnimatedFadeIn(
+          delay: const Duration(milliseconds: 80),
+          child: Row(
+            children: [
+              Expanded(
+                child: _ActionCard(
+                  icon: Icons.local_taxi_rounded,
+                  label: l10n.driverRides,
+                  onTap: () => context.push('/driver/rides'),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _ActionCard(
+                  icon: Icons.account_balance_wallet_rounded,
+                  label: l10n.wallet,
+                  onTap: () => context.push('/driver/earnings'),
+                ),
+              ),
+            ],
+          ),
+        ),
         const SizedBox(height: 20),
         AnimatedFadeIn(
           delay: const Duration(milliseconds: 100),
@@ -207,6 +231,45 @@ class DriverDashboardPage extends ConsumerWidget {
           child: _AvailableDeliveriesList(profileId: profile.id),
         ),
       ],
+    );
+  }
+}
+
+class _ActionCard extends StatelessWidget {
+  const _ActionCard({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Material(
+      color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+      borderRadius: BorderRadius.circular(12),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(12),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 20),
+          child: Column(
+            children: [
+              Icon(icon, color: theme.colorScheme.primary, size: 28),
+              const SizedBox(height: 8),
+              Text(
+                label,
+                style: theme.textTheme.bodyMedium
+                    ?.copyWith(fontWeight: FontWeight.w600),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

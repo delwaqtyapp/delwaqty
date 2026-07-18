@@ -2133,4 +2133,139 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get rideTaxiDesc => 'Metered street taxis';
+
+  @override
+  String get documents => 'Documents';
+
+  @override
+  String get performance => 'Performance';
+
+  @override
+  String get ratings => 'Ratings';
+
+  @override
+  String get navigate => 'Navigate';
+
+  @override
+  String get arrive => 'Arrive';
+
+  @override
+  String get ratePassenger => 'Rate passenger';
+
+  @override
+  String get incomingRequest => 'Incoming ride request';
+
+  @override
+  String get estimatedEarnings => 'Estimated earnings';
+
+  @override
+  String get driverRides => 'Ride requests';
+
+  @override
+  String get activeTrip => 'Active trip';
+
+  @override
+  String get todayRides => 'Today\'s rides';
+
+  @override
+  String get acceptanceRate => 'Acceptance rate';
+
+  @override
+  String get pendingWithdrawals => 'Pending withdrawals';
+
+  @override
+  String get withdrawFunds => 'Withdraw funds';
+
+  @override
+  String get requestWithdrawal => 'Request withdrawal';
+
+  @override
+  String get withdrawalRequested => 'Withdrawal requested';
+
+  @override
+  String get earningsCredited => 'Earnings credited';
+
+  @override
+  String get waitingForRides => 'Waiting for ride requests';
+
+  @override
+  String get goOnlineToReceive => 'Go online to receive ride requests';
+
+  @override
+  String get arrivingAtPickup => 'Head to pickup';
+
+  @override
+  String get enterOtpToStart => 'Enter the passenger\'s code to start the trip';
+
+  @override
+  String get confirmArrival => 'I have arrived';
+
+  @override
+  String get completeTrip => 'Complete trip';
+
+  @override
+  String get rateThePassenger => 'Rate the passenger';
+
+  @override
+  String get noActiveTrip => 'No active trip';
+
+  @override
+  String get away => 'away';
+
+  @override
+  String get callPassenger => 'Call passenger';
+
+  @override
+  String get registerAsRideDriver => 'Register as a ride driver';
+
+  @override
+  String get plateNumber => 'Plate number';
+
+  @override
+  String get vehicleMake => 'Make';
+
+  @override
+  String get phoneNumber => 'Phone number';
+
+  @override
+  String get seats => 'Seats';
+
+  @override
+  String get withdrawalMethod => 'Withdrawal method';
+
+  @override
+  String get minimumFareNotMet => 'Minimum amount not met';
+
+  @override
+  String get amountExceedsBalance => 'Amount exceeds balance';
+
+  @override
+  String get enterAmount => 'Enter amount';
+
+  @override
+  String get earningsHistory => 'Earnings history';
+
+  @override
+  String get trip => 'Trip';
+
+  @override
+  String get bonus => 'Bonus';
+
+  @override
+  String get tip => 'Tip';
+
+  @override
+  String get withdrawalType => 'Withdrawal';
+
+  @override
+  String get adjustment => 'Adjustment';
+
+  @override
+  String get rideNoLongerAvailable => 'This ride is no longer available';
+
+  @override
+  String get driverBusy => 'You already have an active trip';
+
+  @override
+  String get done => 'Done';
 }

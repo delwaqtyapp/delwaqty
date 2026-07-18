@@ -62,7 +62,7 @@
 - [x] M1: Full Arabic-default localization + EGP currency (sprint 28)
 - [x] M2: Transportation Supabase schema + pricing/dispatch/lifecycle RPCs (sprint 29)
 - [x] M3: Passenger booking flow on real backend (6 categories, fare/promo, Maps, Realtime tracking, no mock) (sprint 30)
-- [ ] M4: Dispatch engine + trip lifecycle (remove mock fallback)
+- [x] M4: Dispatch engine + live trip lifecycle (driver offers, accept/arrive/OTP/start/complete/cancel, earnings + withdrawals, driver ride app, Realtime, no mock) (sprint 31)
 - [ ] M5: Passenger experience on real backend
 - [ ] M6: Driver experience on real backend
 - [ ] M7: Google Maps integration (live tracking)

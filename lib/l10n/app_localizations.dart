@@ -4411,6 +4411,108 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Done'**
   String get done;
+
+  /// No description provided for @recentSearches.
+  ///
+  /// In en, this message translates to:
+  /// **'Recent'**
+  String get recentSearches;
+
+  /// No description provided for @favorites.
+  ///
+  /// In en, this message translates to:
+  /// **'Favorites'**
+  String get favorites;
+
+  /// No description provided for @searchResults.
+  ///
+  /// In en, this message translates to:
+  /// **'Results'**
+  String get searchResults;
+
+  /// No description provided for @searchOnMap.
+  ///
+  /// In en, this message translates to:
+  /// **'Set on map'**
+  String get searchOnMap;
+
+  /// No description provided for @chooseOnMap.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose on map'**
+  String get chooseOnMap;
+
+  /// No description provided for @saveThisPlace.
+  ///
+  /// In en, this message translates to:
+  /// **'Save this place'**
+  String get saveThisPlace;
+
+  /// No description provided for @clearAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear all'**
+  String get clearAll;
+
+  /// No description provided for @networkError.
+  ///
+  /// In en, this message translates to:
+  /// **'Network error. Check your connection.'**
+  String get networkError;
+
+  /// No description provided for @tryAgain.
+  ///
+  /// In en, this message translates to:
+  /// **'Try again'**
+  String get tryAgain;
+
+  /// No description provided for @addFavorite.
+  ///
+  /// In en, this message translates to:
+  /// **'Add favorite'**
+  String get addFavorite;
+
+  /// No description provided for @removeFavorite.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove'**
+  String get removeFavorite;
+
+  /// No description provided for @placeSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Place saved'**
+  String get placeSaved;
+
+  /// No description provided for @locationServicesOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Location services are off'**
+  String get locationServicesOff;
+
+  /// No description provided for @rateLimitReached.
+  ///
+  /// In en, this message translates to:
+  /// **'Too many requests, please wait a moment'**
+  String get rateLimitReached;
+
+  /// No description provided for @confirmLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm location'**
+  String get confirmLocation;
+
+  /// No description provided for @setOnMap.
+  ///
+  /// In en, this message translates to:
+  /// **'Set on map'**
+  String get setOnMap;
+
+  /// No description provided for @searchPlaceholderCity.
+  ///
+  /// In en, this message translates to:
+  /// **'Search for a place or address'**
+  String get searchPlaceholderCity;
 }
 
 class _AppLocalizationsDelegate

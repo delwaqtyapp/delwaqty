@@ -2268,4 +2268,55 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get done => 'Done';
+
+  @override
+  String get recentSearches => 'Recent';
+
+  @override
+  String get favorites => 'Favorites';
+
+  @override
+  String get searchResults => 'Results';
+
+  @override
+  String get searchOnMap => 'Set on map';
+
+  @override
+  String get chooseOnMap => 'Choose on map';
+
+  @override
+  String get saveThisPlace => 'Save this place';
+
+  @override
+  String get clearAll => 'Clear all';
+
+  @override
+  String get networkError => 'Network error. Check your connection.';
+
+  @override
+  String get tryAgain => 'Try again';
+
+  @override
+  String get addFavorite => 'Add favorite';
+
+  @override
+  String get removeFavorite => 'Remove';
+
+  @override
+  String get placeSaved => 'Place saved';
+
+  @override
+  String get locationServicesOff => 'Location services are off';
+
+  @override
+  String get rateLimitReached => 'Too many requests, please wait a moment';
+
+  @override
+  String get confirmLocation => 'Confirm location';
+
+  @override
+  String get setOnMap => 'Set on map';
+
+  @override
+  String get searchPlaceholderCity => 'Search for a place or address';
 }

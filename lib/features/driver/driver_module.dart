@@ -6,14 +6,21 @@ import 'package:delwaqty/features/driver/domain/repositories/driver_repository.d
 import 'package:delwaqty/features/driver/domain/entities/driver_profile.dart';
 import 'package:delwaqty/features/driver/domain/entities/driver_delivery.dart';
 import 'package:delwaqty/features/driver/data/datasources/remote/supabase_driver_data_source.dart';
+import 'package:delwaqty/features/driver/data/datasources/remote/supabase_driver_platform_data_source.dart';
 import 'package:delwaqty/features/driver/data/repositories/driver_repository_impl.dart';
 import 'package:delwaqty/features/driver/presentation/pages/driver_dashboard_page.dart';
 import 'package:delwaqty/features/driver/presentation/pages/driver_ride_hub_page.dart';
 import 'package:delwaqty/features/driver/presentation/pages/driver_trip_page.dart';
 import 'package:delwaqty/features/driver/presentation/pages/driver_earnings_page.dart';
+import 'package:delwaqty/features/driver/presentation/pages/driver_onboarding_page.dart';
+import 'package:delwaqty/features/driver/presentation/pages/vehicle_management_page.dart';
+import 'package:delwaqty/features/driver/presentation/pages/document_management_page.dart';
 
 final supabaseDriverRepositoryImplProvider = Provider<DriverRepositoryImpl>((ref) {
-  return DriverRepositoryImpl(ref.watch(supabaseDriverDataSourceProvider));
+  return DriverRepositoryImpl(
+    ref.watch(supabaseDriverDataSourceProvider),
+    ref.watch(supabaseDriverPlatformDataSourceProvider),
+  );
 });
 
 final driverRepositoryProvider = Provider<DriverRepository>(
@@ -56,6 +63,12 @@ class DriverModule extends FeatureModule {
       builder: (context, state) => const DriverDashboardPage(),
     ),
     GoRoute(
+      path: '/driver/onboarding/:userId',
+      builder: (context, state) => DriverOnboardingPage(
+        driverId: state.pathParameters['userId']!,
+      ),
+    ),
+    GoRoute(
       path: '/driver/rides',
       builder: (context, state) => const DriverRideHubPage(),
     ),
@@ -67,6 +80,14 @@ class DriverModule extends FeatureModule {
     GoRoute(
       path: '/driver/earnings',
       builder: (context, state) => const DriverEarningsPage(),
+    ),
+    GoRoute(
+      path: '/driver/vehicles',
+      builder: (context, state) => const VehicleManagementPage(),
+    ),
+    GoRoute(
+      path: '/driver/documents',
+      builder: (context, state) => const DocumentManagementPage(),
     ),
   ];
 }

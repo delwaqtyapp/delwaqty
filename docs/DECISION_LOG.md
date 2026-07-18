@@ -869,3 +869,34 @@ Through M4 the dropoff location used a positional-offset placeholder (`pickup +/
 - "Set on map" pin-drop for saving Home/Work from search is stubbed; full map pin-drop is a follow-up.
 
 ---
+
+## ADR-033: M6 Complete Driver Platform
+
+**Date:** Sprint 33
+**Status:** Accepted
+**Deciders:** Lead Software Architect
+
+### Context
+Through M4-M5 the driver had a minimal ride hub (online toggle, offer accept/reject, trip lifecycle, basic earnings). M6 required a production-ready driver platform: complete onboarding (personal info, national ID, license, vehicle registration, insurance, photos), vehicle management for multiple vehicle types (future-proofed for cars, motorcycles, scooters, vans, pickups), document management with status tracking, a full dashboard with performance metrics (acceptance rate, cancellation rate, monthly earnings, bonuses, incentives), a wallet with detailed breakdown, and an approval workflow — all in Arabic, using real Supabase RPCs, no mocks.
+
+### Decision
+1. **Schema-first:** Migrated first (010_driver_platform.sql), extending `drivers` (onboarding fields: national_id_number, address, profile_photo_url, background_check_status, onboarding_completed, onboarding_step), `vehicles` (photo_url, is_verified, registration_expires_at, insurance_expires_at), and `driver_documents` (vehicle_photo + profile_photo doc types, file_name, file_size). Added 9 new RPCs for onboarding, document upsert, vehicle CRUD, wallet detail, and performance stats. Added realtime publications for driver_earnings, wallets, withdrawal_requests, driver_documents.
+2. **Domain expansion:** New entities `Vehicle` (Freezed, 10 category types), `DriverDocument` (Freezed, 6 doc types), `WalletDetail` (bonus/incentive/pending/withdrawn), `DriverPerformance` (15 fields: trips, ratings, acceptance/cancellation rates, today/week/month earnings, wallet breakdown). Extended `DriverProfile` with onboardingCompleted, onboardingStep, verificationStatus.
+3. **Data layer:** New `SupabaseDriverPlatformDataSource` for all 9 RPCs, keeping the existing dispatch and driver data sources separate (single-responsibility). Extended `DriverRepositoryImpl` with a second data source dependency.
+4. **Presentation:** 6-step onboarding wizard (`DriverOnboardingPage` via PageView), vehicle management list + add/edit bottom sheet, document management with status badges, rewritten dashboard with 4-section layout (online header, earnings overview, performance grid, action grid + vehicle info), enhanced earnings with wallet breakdown card. All Arabic, all real backend, no placeholder screens.
+5. **Dispatch integration unchanged:** The existing `complete_trip` RPC already credits `driver_earnings` and updates `drivers.earnings_balance` automatically; `get_driver_performance` and `get_driver_wallet_detail` aggregate across the same tables, so earnings/wallet update in realtime after trip completion without additional wiring.
+
+### Rationale
+- Schema-first avoids the N+1 migration anti-pattern; all new columns ship in a single migration.
+- Separate data sources preserve the existing code structure and prevent the dispatch data source from growing unbounded.
+- The onboarding wizard uses `PageView` with `NeverScrollableScrollPhysics` to enforce sequential completion, matching production driver apps.
+- 10 vehicle categories future-proof the schema for delivery services (M7) without additional migrations.
+- The performance RPC computes acceptance/cancellation rates server-side to avoid client-side race conditions.
+
+### Consequences
+- `flutter analyze` = 0 errors / 0 warnings; `flutter test` = 413/413 (13 new entity tests); debug APK installed and stable on DNP NX9.
+- Document upload uses placeholder SnackBar — requires Supabase Storage integration for production file upload.
+- Admin approval workflow (approve/reject drivers + documents) needs a Supabase admin dashboard — the schema supports it but no admin UI exists.
+- Background verification status is schema-ready but no external background check API is integrated.
+
+---

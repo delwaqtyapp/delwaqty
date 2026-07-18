@@ -40,6 +40,9 @@ class SupabaseDriverDataSource {
       totalDeliveries: row['total_deliveries'] as int? ?? 0,
       rating: (row['rating'] as num?)?.toDouble() ?? 4.5,
       createdAt: DateTime.parse(row['created_at'] as String),
+      onboardingCompleted: row['onboarding_completed'] as bool? ?? false,
+      onboardingStep: row['onboarding_step'] as int? ?? 0,
+      verificationStatus: row['verification_status'] as String? ?? 'pending',
     );
   }
 

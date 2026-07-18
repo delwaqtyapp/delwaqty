@@ -24,6 +24,9 @@ class DriverProfile with _$DriverProfile {
     @Default(0) int totalDeliveries,
     @Default(4.5) double rating,
     required DateTime createdAt,
+    @Default(false) bool onboardingCompleted,
+    @Default(0) int onboardingStep,
+    @Default('pending') String verificationStatus,
   }) = _DriverProfile;
 
   factory DriverProfile.fromJson(Map<String, dynamic> json) =>

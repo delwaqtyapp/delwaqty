@@ -2312,4 +2312,135 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get searchPlaceholderCity => 'ابحث عن مكان أو عنوان';
+
+  @override
+  String get onboardingTitle => 'تسجيل السائق';
+
+  @override
+  String get personalInfo => 'المعلومات الشخصية';
+
+  @override
+  String get address => 'العنوان';
+
+  @override
+  String get nationalId => 'رقم الهوية الوطنية';
+
+  @override
+  String get profilePhoto => 'صورة الملف الشخصي';
+
+  @override
+  String get uploadPhoto => 'رفع الصورة';
+
+  @override
+  String get uploadDrivingLicense => 'رفع رخصة القيادة';
+
+  @override
+  String get uploadVehicleRegistration => 'رفع سجل المركبة';
+
+  @override
+  String get insurance => 'التأمين';
+
+  @override
+  String get uploadInsurance => 'رفع وثيقة التأمين';
+
+  @override
+  String get vehicleCategory => 'فئة المركبة';
+
+  @override
+  String get vehicleYear => 'سنة الصنع';
+
+  @override
+  String get vehicleColor => 'لون المركبة';
+
+  @override
+  String get next => 'التالي';
+
+  @override
+  String get previous => 'السابق';
+
+  @override
+  String get submitRegistration => 'إرسال التسجيل';
+
+  @override
+  String get registrationSubmitted => 'تم إرسال التسجيل بنجاح';
+
+  @override
+  String get registrationPendingApproval => 'تسجيلك في انتظار موافقة الإدارة';
+
+  @override
+  String get editVehicle => 'تعديل المركبة';
+
+  @override
+  String get vehicleActive => 'نشط';
+
+  @override
+  String get vehicleInactive => 'غير نشط';
+
+  @override
+  String get vehicleVerified => 'تم التحقق';
+
+  @override
+  String get vehicleNotVerified => 'لم يتم التحقق';
+
+  @override
+  String get noVehicles => 'لم يتم تسجيل أي مركبات بعد';
+
+  @override
+  String get documentManagement => 'إدارة المستندات';
+
+  @override
+  String get vehiclePhoto => 'صورة المركبة';
+
+  @override
+  String get documentPending => 'قيد المراجعة';
+
+  @override
+  String get documentVerified => 'تم التحقق';
+
+  @override
+  String get documentRejected => 'مرفوض';
+
+  @override
+  String get noDocuments => 'لم يتم رفع أي مستندات بعد';
+
+  @override
+  String get replaceDocument => 'استبدال المستند';
+
+  @override
+  String get expiresOn => 'ينتهي في';
+
+  @override
+  String get rejectionReason => 'سبب الرفض';
+
+  @override
+  String get walletBreakdown => 'تفاصيل المحفظة';
+
+  @override
+  String get bonusBalance => 'المكافآت';
+
+  @override
+  String get incentiveBalance => 'الحوافز';
+
+  @override
+  String get totalWithdrawn => 'إجمالي المسحوب';
+
+  @override
+  String get completedTrips => 'الرحلات المكتملة';
+
+  @override
+  String get cancelledTrips => 'الرحلات الملغاة';
+
+  @override
+  String get cancellationRate => 'معدل الإلغاء';
+
+  @override
+  String stepOf(Object current, Object total) {
+    return 'الخطوة $current من $total';
+  }
+
+  @override
+  String get tapToUpload => 'اضغط للرفع';
+
+  @override
+  String get uploadComingSoon => 'وظيفة الرفع ستكون متاحة قريباً';
 }

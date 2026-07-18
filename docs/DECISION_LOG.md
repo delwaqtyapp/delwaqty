@@ -839,3 +839,33 @@ M3 delivered the passenger booking flow but left rides stuck on `searching` beca
 - Destination search/geocoding remains deferred to M5.
 
 ---
+
+## ADR-032: M5 Provider-Agnostic Destination Search & Geocoding
+
+**Date:** Sprint 32
+**Status:** Accepted
+**Deciders:** Lead Software Architect
+
+### Context
+Through M4 the dropoff location used a positional-offset placeholder (`pickup +/- ~0.01 deg`), so trips had fake destinations. M5 required a real, Uber/Careem-class destination search: autocomplete, place details, reverse geocoding, nearby search, saved places (home/work/favorites), recent searches, Arabic + English, billing session tokens, debouncing, caching, and graceful failure - without hardcoding any API key or locking the app to a single vendor.
+
+### Decision
+1. Introduce a provider-agnostic `GeocodingProvider` contract (autocomplete / details / reverseGeocode / nearbySearch) plus a normalized `GeocodingException` taxonomy. UI and business logic depend only on this interface; providers are swappable.
+2. Implement `GooglePlacesProvider` as the first provider (Autocomplete + Place Details + Geocoding reverse + Nearby Search), reading the key from the existing `AppConfig.mapsApiKey` env config - no key in source.
+3. Add a business-facing `PlacesRepository`/`PlacesRepositoryImpl` that composes the provider with a Supabase-backed `saved_places` data source and a local `RecentSearchesStore` (shared_preferences, last 8), and layers `TtlCache` (LRU+TTL) over autocomplete/details/reverse.
+4. Model the Places billing session token generically as `SearchSession` (providers that don't need it ignore it); reset it after each committed selection. Debounce the input at 350ms via a reusable `Debouncer`.
+5. Map Google response statuses to `GeocodingException` kinds (OVER_QUERY_LIMIT/429 -> rateLimited, REQUEST_DENIED -> denied, timeouts/socket -> network) and surface a retry UI.
+6. `DestinationSearchPage` returns a `PlaceDetails` to the caller; the booking page pushes it for dropoff and drives the Home/Work chips from real saved places, deleting the offset placeholder.
+
+### Rationale
+- An interface-first design future-proofs the platform: adding Mapbox/Nominatim/HERE/TomTom is a data-layer change with zero UI/business impact, satisfying the reusability and modularity rules.
+- Session tokens + debounce + caching materially cut Places billing and latency, matching production ride-hailing apps.
+- Keeping the key in env config preserves the project's secret-handling policy (no credentials in source).
+- A normalized error taxonomy lets the UI degrade gracefully under rate limits and offline conditions.
+
+### Consequences
+- `flutter analyze` = 0 errors / 0 warnings; `flutter test` = 400/400 (25 new); debug APK installed and stable on DNP NX9.
+- The Google Cloud key must have Places API + Geocoding API enabled and permit the app's requests - a console step outside the codebase.
+- "Set on map" pin-drop for saving Home/Work from search is stubbed; full map pin-drop is a follow-up.
+
+---

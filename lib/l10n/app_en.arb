@@ -731,5 +731,22 @@
   "adjustment": "Adjustment",
   "rideNoLongerAvailable": "This ride is no longer available",
   "driverBusy": "You already have an active trip",
-  "done": "Done"
+  "done": "Done",
+  "recentSearches": "Recent",
+  "favorites": "Favorites",
+  "searchResults": "Results",
+  "searchOnMap": "Set on map",
+  "chooseOnMap": "Choose on map",
+  "saveThisPlace": "Save this place",
+  "clearAll": "Clear all",
+  "networkError": "Network error. Check your connection.",
+  "tryAgain": "Try again",
+  "addFavorite": "Add favorite",
+  "removeFavorite": "Remove",
+  "placeSaved": "Place saved",
+  "locationServicesOff": "Location services are off",
+  "rateLimitReached": "Too many requests, please wait a moment",
+  "confirmLocation": "Confirm location",
+  "setOnMap": "Set on map",
+  "searchPlaceholderCity": "Search for a place or address"
 }

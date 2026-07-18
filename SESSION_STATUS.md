@@ -1,6 +1,6 @@
 # SESSION_STATUS.md
 
-> **Last updated:** 2026-07-18 Session 5 (Milestone 4)
+> **Last updated:** 2026-07-18 Session 6 (Milestone 5)
 
 ---
 
@@ -93,6 +93,32 @@ Full driver dispatch + trip state machine + driver ride app, all on the real bac
 - On-device interactive lifecycle walkthrough (register->online->offer->accept->arrive->OTP->start->complete->rate) not automated; launch + stability + state-machine tests verified.
 - Driver navigation to pickup/dropoff uses map markers, not turn-by-turn routing.
 - Destination search/geocoding still pending (M5).
+
+### MILESTONE 5 - DESTINATION SEARCH & GEOCODING (COMPLETE)
+
+Provider-agnostic geocoding/search layer with Google Places as the first provider, delivering an Uber/Careem-class destination search. Replaces the M3 dropoff positional-offset placeholder with real geocoded coordinates. **No API keys in source** - the key is read from the existing env config (`AppConfig.mapsApiKey`).
+
+**Architecture (provider-agnostic):**
+- Domain contract `GeocodingProvider` (autocomplete / details / reverseGeocode / nearbySearch) + `GeocodingException` (network/rateLimited/denied/notFound/unknown). UI and business logic depend only on this interface, so Mapbox/Nominatim/HERE/TomTom can be added later without touching the UI.
+- Business-facing `PlacesRepository` wraps the provider plus saved places + recent searches + caching.
+- Entities: `GeoPoint`, `PlaceSuggestion`, `PlaceDetails`, `SavedPlace` (home/work/favorite), `RecentSearch`, `SearchSession` (billing session token, monotonic-unique).
+
+**Google Places provider:** `GooglePlacesProvider implements GeocodingProvider` - Autocomplete (session tokens, country:eg bias, origin location bias, language), Place Details, Reverse Geocoding, Nearby Search. Maps Google statuses to `GeocodingException` (OVER_QUERY_LIMIT->rateLimited, REQUEST_DENIED->denied, 429->rateLimited, timeouts->network). 10s timeout.
+
+**Reliability:** `TtlCache` (LRU + per-entry TTL) for autocomplete (3m), details (12h), reverse (30m); `Debouncer` (350ms) on the search field; session token reset after each committed selection; graceful error UI with retry.
+
+**Saved / Recent:** `SupabaseSavedPlacesDataSource` on the `saved_places` table (owner RLS; single home/work upsert, favorites list). `RecentSearchesStore` persists last 8 searches locally via `SharedPreferencesService`.
+
+**UX:** `DestinationSearchPage` (autofocus field, live debounced suggestions, Home/Work + Favorites + Recent when empty, clear-all, error+retry) returns a `PlaceDetails` to the caller. Booking page now pushes it for dropoff and uses real saved places for the Home/Work chips. Arabic + English search (language passed from `localeProvider`).
+
+**l10n:** ~18 EN+AR search keys added; `flutter gen-l10n` clean.
+
+**Verified:** `flutter analyze` = 0 errors / 0 warnings; `flutter test` = 400/400 (25 new search tests: cache TTL/LRU, debouncer, session token uniqueness, entity JSON, Google provider parsing + error mapping via `MockClient`, repository caching); debug APK built (`--dart-define-from-file=.env.dev`), installed on DNP NX9 (`A3SQUT5A28003808`), launches without crash/fatal logcat.
+
+**Known limitations / deploy notes (M5):**
+- Google **Places API** and **Geocoding API** must be enabled for the project's key, and the key must allow the app's requests (Android app restriction or unrestricted for HTTP). This is a Google Cloud console configuration step outside the codebase.
+- "Set on map" pin-drop picker for saving Home/Work from the search screen is stubbed (prompts to search); full map pin-drop UI is a follow-up.
+- On-device interactive search walkthrough not automated; launch + stability + unit tests verified.
 
 ### Next Milestones (in order)
 - **M3:** Pricing engine integration in Dart (wire `estimate_fare` into ride booking, expand `RideType` entity to 6 categories).

@@ -2261,4 +2261,55 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get done => 'تم';
+
+  @override
+  String get recentSearches => 'الأخيرة';
+
+  @override
+  String get favorites => 'المفضلة';
+
+  @override
+  String get searchResults => 'النتائج';
+
+  @override
+  String get searchOnMap => 'تحديد على الخريطة';
+
+  @override
+  String get chooseOnMap => 'الاختيار على الخريطة';
+
+  @override
+  String get saveThisPlace => 'حفظ هذا المكان';
+
+  @override
+  String get clearAll => 'مسح الكل';
+
+  @override
+  String get networkError => 'خطأ في الشبكة. تحقق من اتصالك.';
+
+  @override
+  String get tryAgain => 'إعادة المحاولة';
+
+  @override
+  String get addFavorite => 'إضافة للمفضلة';
+
+  @override
+  String get removeFavorite => 'إزالة';
+
+  @override
+  String get placeSaved => 'تم حفظ المكان';
+
+  @override
+  String get locationServicesOff => 'خدمات الموقع متوقفة';
+
+  @override
+  String get rateLimitReached => 'طلبات كثيرة، برجاء الانتظار لحظة';
+
+  @override
+  String get confirmLocation => 'تأكيد الموقع';
+
+  @override
+  String get setOnMap => 'تحديد على الخريطة';
+
+  @override
+  String get searchPlaceholderCity => 'ابحث عن مكان أو عنوان';
 }

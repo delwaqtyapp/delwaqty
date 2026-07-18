@@ -731,5 +731,22 @@
   "adjustment": "تسوية",
   "rideNoLongerAvailable": "هذه الرحلة لم تعد متاحة",
   "driverBusy": "لديك رحلة نشطة بالفعل",
-  "done": "تم"
+  "done": "تم",
+  "recentSearches": "الأخيرة",
+  "favorites": "المفضلة",
+  "searchResults": "النتائج",
+  "searchOnMap": "تحديد على الخريطة",
+  "chooseOnMap": "الاختيار على الخريطة",
+  "saveThisPlace": "حفظ هذا المكان",
+  "clearAll": "مسح الكل",
+  "networkError": "خطأ في الشبكة. تحقق من اتصالك.",
+  "tryAgain": "إعادة المحاولة",
+  "addFavorite": "إضافة للمفضلة",
+  "removeFavorite": "إزالة",
+  "placeSaved": "تم حفظ المكان",
+  "locationServicesOff": "خدمات الموقع متوقفة",
+  "rateLimitReached": "طلبات كثيرة، برجاء الانتظار لحظة",
+  "confirmLocation": "تأكيد الموقع",
+  "setOnMap": "تحديد على الخريطة",
+  "searchPlaceholderCity": "ابحث عن مكان أو عنوان"
 }

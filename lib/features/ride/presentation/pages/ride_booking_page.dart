@@ -9,6 +9,11 @@ import 'package:delwaqty/features/ride/domain/entities/ride.dart';
 import 'package:delwaqty/features/ride/presentation/providers/ride_providers.dart';
 import 'package:delwaqty/features/ride/presentation/widgets/ride_map.dart';
 import 'package:delwaqty/features/ride/presentation/widgets/ride_type_info.dart';
+import 'package:delwaqty/features/search/domain/entities/geo_point.dart';
+import 'package:delwaqty/features/search/domain/entities/place_details.dart';
+import 'package:delwaqty/features/search/domain/entities/saved_place.dart';
+import 'package:delwaqty/features/search/presentation/pages/destination_search_page.dart';
+import 'package:delwaqty/features/search/presentation/providers/search_providers.dart';
 import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
 
 class RideBookingPage extends ConsumerStatefulWidget {
@@ -184,7 +189,7 @@ class _RideBookingPageState extends ConsumerState<RideBookingPage> {
                           text: booking.dropoffAddress,
                           hint: l10n.whereTo,
                           isCurrent: false,
-                          onTap: () => _showDropoffPicker(context, l10n),
+                          onTap: () => _openDestinationSearch(context),
                         ),
                       ],
                     ),
@@ -262,37 +267,48 @@ class _RideBookingPageState extends ConsumerState<RideBookingPage> {
     AppLocalizations l10n,
     AsyncValue<UserLocation?> locationAsync,
   ) {
+    final savedAsync = ref.watch(savedPlacesProvider);
+    final places = savedAsync.valueOrNull ?? const <SavedPlace>[];
+    SavedPlace? find(SavedPlaceType t) {
+      for (final p in places) {
+        if (p.type == t) return p;
+      }
+      return null;
+    }
+
+    final home = find(SavedPlaceType.home);
+    final work = find(SavedPlaceType.work);
+
     return Row(
       children: [
         _buildSavedPlaceChip(
           context,
           icon: Icons.home_rounded,
           label: l10n.home,
-          onTap: () {
-            final loc = locationAsync.valueOrNull;
-            if (loc == null) return;
-            _dropoffController.text = l10n.home;
-            ref
-                .read(rideBookingProvider.notifier)
-                .setDropoff(l10n.home, loc.latitude + 0.03, loc.longitude + 0.02);
-          },
+          onTap: () => home != null
+              ? _applySavedPlace(home)
+              : _openDestinationSearch(context),
         ),
         const SizedBox(width: 8),
         _buildSavedPlaceChip(
           context,
           icon: Icons.work_rounded,
           label: l10n.work,
-          onTap: () {
-            final loc = locationAsync.valueOrNull;
-            if (loc == null) return;
-            _dropoffController.text = l10n.work;
-            ref
-                .read(rideBookingProvider.notifier)
-                .setDropoff(l10n.work, loc.latitude + 0.05, loc.longitude - 0.02);
-          },
+          onTap: () => work != null
+              ? _applySavedPlace(work)
+              : _openDestinationSearch(context),
         ),
       ],
     );
+  }
+
+  void _applySavedPlace(SavedPlace place) {
+    _dropoffController.text = place.address;
+    ref.read(rideBookingProvider.notifier).setDropoff(
+          place.address,
+          place.location.latitude,
+          place.location.longitude,
+        );
   }
 
   Widget _buildSavedPlaceChip(
@@ -743,91 +759,32 @@ class _RideBookingPageState extends ConsumerState<RideBookingPage> {
     _promoController.clear();
   }
 
-  void _showDropoffPicker(BuildContext context, AppLocalizations l10n) {
-    final controller = TextEditingController(text: _dropoffController.text);
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (ctx) => Padding(
-        padding: EdgeInsets.only(bottom: MediaQuery.of(ctx).viewInsets.bottom),
-        child: Container(
-          padding: const EdgeInsets.all(20),
-          decoration: BoxDecoration(
-            color: context.colorScheme.surface,
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Center(
-                child: Container(
-                  width: 40,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: context.colorScheme.outlineVariant,
-                    borderRadius: BorderRadius.circular(2),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 20),
-              Text(l10n.whereTo,
-                  style: context.textTheme.titleLarge
-                      ?.copyWith(fontWeight: FontWeight.w800)),
-              const SizedBox(height: 16),
-              TextField(
-                controller: controller,
-                autofocus: true,
-                onSubmitted: (_) => _applyDropoff(ctx, controller.text),
-                decoration: InputDecoration(
-                  hintText: l10n.enterDestination,
-                  prefixIcon: Icon(Icons.search_rounded,
-                      color: context.colorScheme.onSurfaceVariant),
-                  border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(14),
-                      borderSide: BorderSide(
-                          color: context.colorScheme.outlineVariant
-                              .withValues(alpha: 0.3))),
-                ),
-              ),
-              const SizedBox(height: 12),
-              SizedBox(
-                width: double.infinity,
-                height: 50,
-                child: ElevatedButton(
-                  onPressed: () => _applyDropoff(ctx, controller.text),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: context.colorScheme.primary,
-                    foregroundColor: context.colorScheme.onPrimary,
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(14)),
-                    elevation: 0,
-                  ),
-                  child: Text(l10n.setDestination,
-                      style: context.textTheme.titleMedium
-                          ?.copyWith(fontWeight: FontWeight.w700)),
-                ),
-              ),
-              const SizedBox(height: 8),
-            ],
-          ),
+  GeoPoint? _searchOrigin() {
+    final booking = ref.read(rideBookingProvider);
+    if (booking.hasPickup) {
+      return GeoPoint(booking.pickupLatitude!, booking.pickupLongitude!);
+    }
+    final loc = ref.read(userLocationProvider).valueOrNull;
+    if (loc != null) return GeoPoint(loc.latitude, loc.longitude);
+    return null;
+  }
+
+  Future<void> _openDestinationSearch(BuildContext context) async {
+    final result = await Navigator.of(context).push<PlaceDetails>(
+      MaterialPageRoute(
+        builder: (_) => DestinationSearchPage(
+          args: DestinationSearchArgs(origin: _searchOrigin()),
         ),
       ),
     );
-  }
-
-  void _applyDropoff(BuildContext sheetCtx, String text) {
-    if (text.trim().isEmpty) return;
-    Navigator.pop(sheetCtx);
-    _dropoffController.text = text.trim();
-    final loc = ref.read(userLocationProvider).valueOrNull;
-    final baseLat = ref.read(rideBookingProvider).pickupLatitude ?? loc?.latitude ?? 30.0444;
-    final baseLng =
-        ref.read(rideBookingProvider).pickupLongitude ?? loc?.longitude ?? 31.2357;
-    final offset = 0.01 + (DateTime.now().millisecond % 100) * 0.0002;
-    ref
-        .read(rideBookingProvider.notifier)
-        .setDropoff(text.trim(), baseLat + offset, baseLng + offset);
+    if (result == null || !context.mounted) return;
+    final address =
+        result.formattedAddress.isNotEmpty ? result.formattedAddress : result.name;
+    _dropoffController.text = address;
+    ref.read(rideBookingProvider.notifier).setDropoff(
+          address,
+          result.location.latitude,
+          result.location.longitude,
+        );
   }
 }

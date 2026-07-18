@@ -1,12 +1,18 @@
 import 'package:delwaqty/features/driver/domain/entities/driver_profile.dart';
 import 'package:delwaqty/features/driver/domain/entities/driver_delivery.dart';
+import 'package:delwaqty/features/driver/domain/entities/vehicle.dart';
+import 'package:delwaqty/features/driver/domain/entities/driver_document.dart';
+import 'package:delwaqty/features/driver/domain/entities/wallet_detail.dart';
+import 'package:delwaqty/features/driver/domain/entities/driver_performance.dart';
 import 'package:delwaqty/features/driver/domain/repositories/driver_repository.dart';
 import 'package:delwaqty/features/driver/data/datasources/remote/supabase_driver_data_source.dart';
+import 'package:delwaqty/features/driver/data/datasources/remote/supabase_driver_platform_data_source.dart';
 
 class DriverRepositoryImpl implements DriverRepository {
-  DriverRepositoryImpl(this._dataSource);
+  DriverRepositoryImpl(this._dataSource, this._platformDataSource);
 
   final SupabaseDriverDataSource _dataSource;
+  final SupabaseDriverPlatformDataSource _platformDataSource;
 
   @override
   Future<DriverProfile?> getProfile(String userId) => _dataSource.getProfile(userId);
@@ -43,4 +49,49 @@ class DriverRepositoryImpl implements DriverRepository {
     if (profile == null) throw Exception('Driver profile not found');
     return profile;
   }
+
+  // M6: Onboarding
+  @override
+  Future<void> submitOnboardingStep(String driverId, {String? fullName, String? phone, String? nationalId, String? address, String? profilePhotoUrl, required int step}) =>
+      _platformDataSource.submitOnboardingStep(driverId, fullName: fullName, phone: phone, nationalId: nationalId, address: address, profilePhotoUrl: profilePhotoUrl, step: step);
+
+  @override
+  Future<void> completeOnboarding(String driverId) =>
+      _platformDataSource.completeOnboarding(driverId);
+
+  // M6: Vehicles
+  @override
+  Future<List<Vehicle>> getVehicles(String driverId) =>
+      _platformDataSource.getVehicles(driverId);
+
+  @override
+  Future<String> addVehicle(String driverId, {required String category, String? make, String? model, int? year, String? color, required String plateNumber, int seats = 4, String? photoUrl}) =>
+      _platformDataSource.addVehicle(driverId, category: category, make: make, model: model, year: year, color: color, plateNumber: plateNumber, seats: seats, photoUrl: photoUrl);
+
+  @override
+  Future<void> updateVehicle(String vehicleId, String driverId, {String? category, String? make, String? model, int? year, String? color, String? plateNumber, int? seats, String? photoUrl, bool? isActive}) =>
+      _platformDataSource.updateVehicle(vehicleId, driverId, category: category, make: make, model: model, year: year, color: color, plateNumber: plateNumber, seats: seats, photoUrl: photoUrl, isActive: isActive);
+
+  @override
+  Future<void> toggleVehicleActive(String vehicleId, String driverId) =>
+      _platformDataSource.toggleVehicleActive(vehicleId, driverId);
+
+  // M6: Documents
+  @override
+  Future<List<DriverDocument>> getDocuments(String driverId) =>
+      _platformDataSource.getDocuments(driverId);
+
+  @override
+  Future<String> upsertDocument(String driverId, String docType, String fileUrl, {String? fileName, int? fileSize, DateTime? expiresAt}) =>
+      _platformDataSource.upsertDocument(driverId, docType, fileUrl, fileName: fileName, fileSize: fileSize, expiresAt: expiresAt);
+
+  // M6: Wallet
+  @override
+  Future<WalletDetail> getWalletDetail(String driverId) =>
+      _platformDataSource.getWalletDetail(driverId);
+
+  // M6: Performance
+  @override
+  Future<DriverPerformance> getPerformance(String driverId) =>
+      _platformDataSource.getPerformance(driverId);
 }

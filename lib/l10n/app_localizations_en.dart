@@ -2319,4 +2319,136 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get searchPlaceholderCity => 'Search for a place or address';
+
+  @override
+  String get onboardingTitle => 'Driver Registration';
+
+  @override
+  String get personalInfo => 'Personal Information';
+
+  @override
+  String get address => 'Address';
+
+  @override
+  String get nationalId => 'National ID Number';
+
+  @override
+  String get profilePhoto => 'Profile Photo';
+
+  @override
+  String get uploadPhoto => 'Upload Photo';
+
+  @override
+  String get uploadDrivingLicense => 'Upload Driving License';
+
+  @override
+  String get uploadVehicleRegistration => 'Upload Vehicle Registration';
+
+  @override
+  String get insurance => 'Insurance';
+
+  @override
+  String get uploadInsurance => 'Upload Insurance Document';
+
+  @override
+  String get vehicleCategory => 'Vehicle Category';
+
+  @override
+  String get vehicleYear => 'Vehicle Year';
+
+  @override
+  String get vehicleColor => 'Vehicle Color';
+
+  @override
+  String get next => 'Next';
+
+  @override
+  String get previous => 'Previous';
+
+  @override
+  String get submitRegistration => 'Submit Registration';
+
+  @override
+  String get registrationSubmitted => 'Registration submitted successfully';
+
+  @override
+  String get registrationPendingApproval =>
+      'Your registration is pending admin approval';
+
+  @override
+  String get editVehicle => 'Edit Vehicle';
+
+  @override
+  String get vehicleActive => 'Active';
+
+  @override
+  String get vehicleInactive => 'Inactive';
+
+  @override
+  String get vehicleVerified => 'Verified';
+
+  @override
+  String get vehicleNotVerified => 'Not Verified';
+
+  @override
+  String get noVehicles => 'No vehicles registered yet';
+
+  @override
+  String get documentManagement => 'Document Management';
+
+  @override
+  String get vehiclePhoto => 'Vehicle Photo';
+
+  @override
+  String get documentPending => 'Pending Review';
+
+  @override
+  String get documentVerified => 'Verified';
+
+  @override
+  String get documentRejected => 'Rejected';
+
+  @override
+  String get noDocuments => 'No documents uploaded yet';
+
+  @override
+  String get replaceDocument => 'Replace Document';
+
+  @override
+  String get expiresOn => 'Expires on';
+
+  @override
+  String get rejectionReason => 'Rejection reason';
+
+  @override
+  String get walletBreakdown => 'Wallet Breakdown';
+
+  @override
+  String get bonusBalance => 'Bonuses';
+
+  @override
+  String get incentiveBalance => 'Incentives';
+
+  @override
+  String get totalWithdrawn => 'Total Withdrawn';
+
+  @override
+  String get completedTrips => 'Completed Trips';
+
+  @override
+  String get cancelledTrips => 'Cancelled Trips';
+
+  @override
+  String get cancellationRate => 'Cancellation Rate';
+
+  @override
+  String stepOf(Object current, Object total) {
+    return 'Step $current of $total';
+  }
+
+  @override
+  String get tapToUpload => 'Tap to upload';
+
+  @override
+  String get uploadComingSoon => 'Upload functionality will be available soon';
 }

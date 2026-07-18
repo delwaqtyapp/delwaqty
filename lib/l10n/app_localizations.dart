@@ -4513,6 +4513,264 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Search for a place or address'**
   String get searchPlaceholderCity;
+
+  /// No description provided for @onboardingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Driver Registration'**
+  String get onboardingTitle;
+
+  /// No description provided for @personalInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Personal Information'**
+  String get personalInfo;
+
+  /// No description provided for @address.
+  ///
+  /// In en, this message translates to:
+  /// **'Address'**
+  String get address;
+
+  /// No description provided for @nationalId.
+  ///
+  /// In en, this message translates to:
+  /// **'National ID Number'**
+  String get nationalId;
+
+  /// No description provided for @profilePhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile Photo'**
+  String get profilePhoto;
+
+  /// No description provided for @uploadPhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload Photo'**
+  String get uploadPhoto;
+
+  /// No description provided for @uploadDrivingLicense.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload Driving License'**
+  String get uploadDrivingLicense;
+
+  /// No description provided for @uploadVehicleRegistration.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload Vehicle Registration'**
+  String get uploadVehicleRegistration;
+
+  /// No description provided for @insurance.
+  ///
+  /// In en, this message translates to:
+  /// **'Insurance'**
+  String get insurance;
+
+  /// No description provided for @uploadInsurance.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload Insurance Document'**
+  String get uploadInsurance;
+
+  /// No description provided for @vehicleCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Vehicle Category'**
+  String get vehicleCategory;
+
+  /// No description provided for @vehicleYear.
+  ///
+  /// In en, this message translates to:
+  /// **'Vehicle Year'**
+  String get vehicleYear;
+
+  /// No description provided for @vehicleColor.
+  ///
+  /// In en, this message translates to:
+  /// **'Vehicle Color'**
+  String get vehicleColor;
+
+  /// No description provided for @next.
+  ///
+  /// In en, this message translates to:
+  /// **'Next'**
+  String get next;
+
+  /// No description provided for @previous.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous'**
+  String get previous;
+
+  /// No description provided for @submitRegistration.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit Registration'**
+  String get submitRegistration;
+
+  /// No description provided for @registrationSubmitted.
+  ///
+  /// In en, this message translates to:
+  /// **'Registration submitted successfully'**
+  String get registrationSubmitted;
+
+  /// No description provided for @registrationPendingApproval.
+  ///
+  /// In en, this message translates to:
+  /// **'Your registration is pending admin approval'**
+  String get registrationPendingApproval;
+
+  /// No description provided for @editVehicle.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Vehicle'**
+  String get editVehicle;
+
+  /// No description provided for @vehicleActive.
+  ///
+  /// In en, this message translates to:
+  /// **'Active'**
+  String get vehicleActive;
+
+  /// No description provided for @vehicleInactive.
+  ///
+  /// In en, this message translates to:
+  /// **'Inactive'**
+  String get vehicleInactive;
+
+  /// No description provided for @vehicleVerified.
+  ///
+  /// In en, this message translates to:
+  /// **'Verified'**
+  String get vehicleVerified;
+
+  /// No description provided for @vehicleNotVerified.
+  ///
+  /// In en, this message translates to:
+  /// **'Not Verified'**
+  String get vehicleNotVerified;
+
+  /// No description provided for @noVehicles.
+  ///
+  /// In en, this message translates to:
+  /// **'No vehicles registered yet'**
+  String get noVehicles;
+
+  /// No description provided for @documentManagement.
+  ///
+  /// In en, this message translates to:
+  /// **'Document Management'**
+  String get documentManagement;
+
+  /// No description provided for @vehiclePhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Vehicle Photo'**
+  String get vehiclePhoto;
+
+  /// No description provided for @documentPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending Review'**
+  String get documentPending;
+
+  /// No description provided for @documentVerified.
+  ///
+  /// In en, this message translates to:
+  /// **'Verified'**
+  String get documentVerified;
+
+  /// No description provided for @documentRejected.
+  ///
+  /// In en, this message translates to:
+  /// **'Rejected'**
+  String get documentRejected;
+
+  /// No description provided for @noDocuments.
+  ///
+  /// In en, this message translates to:
+  /// **'No documents uploaded yet'**
+  String get noDocuments;
+
+  /// No description provided for @replaceDocument.
+  ///
+  /// In en, this message translates to:
+  /// **'Replace Document'**
+  String get replaceDocument;
+
+  /// No description provided for @expiresOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Expires on'**
+  String get expiresOn;
+
+  /// No description provided for @rejectionReason.
+  ///
+  /// In en, this message translates to:
+  /// **'Rejection reason'**
+  String get rejectionReason;
+
+  /// No description provided for @walletBreakdown.
+  ///
+  /// In en, this message translates to:
+  /// **'Wallet Breakdown'**
+  String get walletBreakdown;
+
+  /// No description provided for @bonusBalance.
+  ///
+  /// In en, this message translates to:
+  /// **'Bonuses'**
+  String get bonusBalance;
+
+  /// No description provided for @incentiveBalance.
+  ///
+  /// In en, this message translates to:
+  /// **'Incentives'**
+  String get incentiveBalance;
+
+  /// No description provided for @totalWithdrawn.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Withdrawn'**
+  String get totalWithdrawn;
+
+  /// No description provided for @completedTrips.
+  ///
+  /// In en, this message translates to:
+  /// **'Completed Trips'**
+  String get completedTrips;
+
+  /// No description provided for @cancelledTrips.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancelled Trips'**
+  String get cancelledTrips;
+
+  /// No description provided for @cancellationRate.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancellation Rate'**
+  String get cancellationRate;
+
+  /// No description provided for @stepOf.
+  ///
+  /// In en, this message translates to:
+  /// **'Step {current} of {total}'**
+  String stepOf(Object current, Object total);
+
+  /// No description provided for @tapToUpload.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap to upload'**
+  String get tapToUpload;
+
+  /// No description provided for @uploadComingSoon.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload functionality will be available soon'**
+  String get uploadComingSoon;
 }
 
 class _AppLocalizationsDelegate

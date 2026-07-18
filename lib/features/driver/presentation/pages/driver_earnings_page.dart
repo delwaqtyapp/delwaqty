@@ -5,8 +5,15 @@ import 'package:delwaqty/features/auth/presentation/auth_provider.dart';
 import 'package:delwaqty/features/auth/domain/auth_state.dart';
 import 'package:delwaqty/features/driver/driver_module.dart';
 import 'package:delwaqty/features/driver/domain/entities/driver_stats.dart';
+import 'package:delwaqty/features/driver/domain/entities/wallet_detail.dart';
 import 'package:delwaqty/features/driver/presentation/providers/dispatch_providers.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
+
+final _walletDetailProvider =
+    FutureProvider.family<WalletDetail, String>((ref, driverId) async {
+  final repo = ref.watch(driverRepositoryProvider);
+  return repo.getWalletDetail(driverId);
+});
 
 class DriverEarningsPage extends ConsumerWidget {
   const DriverEarningsPage({super.key});
@@ -50,11 +57,13 @@ class _EarningsBody extends ConsumerWidget {
     final l10n = AppLocalizations.of(context);
     final statsAsync = ref.watch(driverStatsProvider(driverId));
     final earningsAsync = ref.watch(driverEarningsProvider(driverId));
+    final walletAsync = ref.watch(_walletDetailProvider(driverId));
 
     return RefreshIndicator(
       onRefresh: () async {
         ref.invalidate(driverStatsProvider(driverId));
         ref.invalidate(driverEarningsProvider(driverId));
+        ref.invalidate(_walletDetailProvider(driverId));
       },
       child: ListView(
         padding: const EdgeInsets.all(16),
@@ -63,6 +72,12 @@ class _EarningsBody extends ConsumerWidget {
             loading: () => const Center(child: CircularProgressIndicator()),
             error: (e, _) => const SizedBox.shrink(),
             data: (stats) => _BalanceCard(driverId: driverId, stats: stats),
+          ),
+          const SizedBox(height: 16),
+          walletAsync.when(
+            loading: () => const SizedBox.shrink(),
+            error: (e, _) => const SizedBox.shrink(),
+            data: (wallet) => _WalletBreakdownCard(wallet: wallet),
           ),
           const SizedBox(height: 24),
           Text(l10n.earningsHistory,
@@ -133,11 +148,93 @@ class _EarningsBody extends ConsumerWidget {
         return l10n.bonus;
       case 'tip':
         return l10n.tip;
+      case 'incentive':
+        return l10n.incentiveBalance;
       case 'withdrawal':
         return l10n.withdrawalType;
       default:
         return l10n.adjustment;
     }
+  }
+}
+
+class _WalletBreakdownCard extends StatelessWidget {
+  const _WalletBreakdownCard({required this.wallet});
+  final WalletDetail wallet;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surfaceContainerHighest
+            .withValues(alpha: 0.3),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(l10n.walletBreakdown,
+              style: theme.textTheme.titleMedium
+                  ?.copyWith(fontWeight: FontWeight.bold)),
+          const SizedBox(height: 12),
+          _BreakdownRow(
+            label: l10n.bonusBalance,
+            value: wallet.bonusBalance,
+            color: Colors.orange,
+          ),
+          const SizedBox(height: 8),
+          _BreakdownRow(
+            label: l10n.incentiveBalance,
+            value: wallet.incentiveBalance,
+            color: Colors.purple,
+          ),
+          const Divider(height: 24),
+          _BreakdownRow(
+            label: l10n.pendingWithdrawals,
+            value: wallet.pendingWithdrawals,
+            color: Colors.amber,
+          ),
+          const SizedBox(height: 8),
+          _BreakdownRow(
+            label: l10n.totalWithdrawn,
+            value: wallet.totalWithdrawn,
+            color: theme.colorScheme.onSurfaceVariant,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _BreakdownRow extends StatelessWidget {
+  const _BreakdownRow({
+    required this.label,
+    required this.value,
+    required this.color,
+  });
+  final String label;
+  final double value;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(label,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                )),
+        Text(
+          l10n.amountWithCurrency(value.toStringAsFixed(0), l10n.currencySymbol),
+          style: TextStyle(fontWeight: FontWeight.w600, color: color),
+        ),
+      ],
+    );
   }
 }
 

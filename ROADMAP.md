@@ -64,12 +64,11 @@
 - [x] M3: Passenger booking flow on real backend (6 categories, fare/promo, Maps, Realtime tracking, no mock) (sprint 30)
 - [x] M4: Dispatch engine + live trip lifecycle (driver offers, accept/arrive/OTP/start/complete/cancel, earnings + withdrawals, driver ride app, Realtime, no mock) (sprint 31)
 - [x] M5: Destination search & geocoding (provider-agnostic abstraction, Google Places provider, autocomplete/details/reverse/nearby, saved + recent, session tokens, debounce, caching, AR/EN) (sprint 32)
-- [ ] M5: Passenger experience on real backend
-- [ ] M6: Driver experience on real backend
-- [ ] M7: Google Maps integration (live tracking)
-- [ ] M8: Realtime sync (driver locations, ride status)
-- [ ] M9: Safety (SOS, trusted contacts, OTP-gated trips)
-- [ ] M10: Admin dashboard (drivers, complaints, promos)
+- [x] M6: Complete driver platform (onboarding wizard, vehicle management, document management, enhanced dashboard, wallet breakdown, performance metrics, 9 new RPCs, realtime-ready) (sprint 33)
+- [ ] M7: Delivery & Courier Platform (food, grocery, pharmacy, package — built on dispatch engine)
+- [ ] M8: Safety (SOS, trusted contacts, live share, OTP pickup)
+- [ ] M9: Admin monitoring dashboard
+- [ ] M10: Payments integration
 
 ### Phase 6: Presentation Layer — Customer
 - [x] Customer Home — nearby restaurants, search, categories (Premium Super App design)

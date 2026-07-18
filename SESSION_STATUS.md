@@ -1,6 +1,6 @@
 # SESSION_STATUS.md
 
-> **Last updated:** 2026-07-18 Session 6 (Milestone 5)
+> **Last updated:** 2026-07-18 Session 7 (Milestone 6)
 
 ---
 
@@ -120,17 +120,51 @@ Provider-agnostic geocoding/search layer with Google Places as the first provide
 - "Set on map" pin-drop picker for saving Home/Work from the search screen is stubbed (prompts to search); full map pin-drop UI is a follow-up.
 - On-device interactive search walkthrough not automated; launch + stability + unit tests verified.
 
+### MILESTONE 6 - COMPLETE DRIVER PLATFORM (PRODUCT-READY)
+
+Full production driver platform: multi-step onboarding, vehicle management, document management, enhanced dashboard with performance metrics, wallet with bonus/incentive breakdown, and realtime-ready architecture. Built for all future logistics services (food, grocery, pharmacy, courier, package, marketplace).
+
+**Database (Migration 010):**
+- Extended `drivers` table: `national_id_number`, `address`, `profile_photo_url`, `background_check_status` (not_started/pending/passed/failed), `onboarding_completed`, `onboarding_step`.
+- Extended `vehicles` table: `photo_url`, `is_verified`, `registration_expires_at`, `insurance_expires_at`.
+- Extended `driver_documents` CHECK: added `vehicle_photo`, `profile_photo` doc types; added `file_name`, `file_size` columns.
+- 9 new RPCs: `submit_driver_onboarding`, `complete_driver_onboarding`, `upsert_driver_document`, `get_driver_documents`, `add_driver_vehicle`, `update_driver_vehicle`, `toggle_vehicle_active`, `get_driver_wallet_detail`, `get_driver_performance`.
+- Realtime publications: `driver_earnings`, `wallets`, `withdrawal_requests`, `driver_documents`.
+
+**Domain entities (new):**
+- `Vehicle` (Freezed): id, driverId, category (10 types: economy→pickup), make, model, year, color, plateNumber, seats, isActive, isVerified, photoUrl, registrationExpiresAt, insuranceExpiresAt.
+- `DriverDocument` (Freezed): id, driverId, docType, fileUrl, fileName, fileSize, status (pending/verified/rejected), rejectionReason, expiresAt, reviewedAt.
+- `WalletDetail`: balance, bonusBalance, incentiveBalance, pendingWithdrawals, totalWithdrawn, currency.
+- `DriverPerformance`: totalTrips, completedTrips, cancelledTrips, rating, acceptanceRate, cancellationRate, todayRides, todayEarnings, weekEarnings, monthEarnings, balance, bonusBalance, incentiveBalance, pendingWithdrawals.
+- Extended `DriverProfile`: added `onboardingCompleted`, `onboardingStep`, `verificationStatus`.
+
+**Data layer (new):**
+- `SupabaseDriverPlatformDataSource`: all 9 new RPCs mapped with error handling.
+- Extended `DriverRepositoryImpl`: onboarding, vehicle CRUD, document CRUD, wallet detail, performance methods.
+
+**Presentation (new/rewritten):**
+- `DriverOnboardingPage`: 6-step PageView wizard (personal info → profile photo → driving license → vehicle registration → insurance → vehicle info). Progress indicator, back navigation, per-step validation, final step calls `completeOnboarding`.
+- `VehicleManagementPage`: vehicle list with category icons, active toggle, verified badge, add/edit bottom sheet with all fields.
+- `DocumentManagementPage`: 6 document types with status badges (green/orange/red), expiry dates, rejection reasons, upload/replace placeholder.
+- Rewritten `DriverDashboardPage`: online header, earnings overview (today/week/month), performance grid (completed trips, acceptance rate, cancellation rate), 4-action grid (rides/wallet/vehicles/documents), vehicle info card, onboarding redirect for incomplete profiles.
+- Enhanced `DriverEarningsPage`: added `_WalletBreakdownCard` with bonus/incentive/pending/withdrawn breakdown; type labels include incentive.
+
+**l10n:** ~50 new EN+AR keys for onboarding, vehicle management, documents, wallet breakdown, performance metrics.
+
+**Verified:** `flutter analyze` = 0 errors / 0 warnings; `flutter test` = 413/413 (13 new entity tests); debug APK built + installed on DNP NX9, launches stable, no crash/logcat errors.
+
+**Known limitations / deploy notes (M6):**
+- Document upload (profile photo, license, registration, insurance, vehicle photo) uses placeholder SnackBar — requires Supabase Storage integration for production file upload.
+- "Set on map" pin-drop for saving Home/Work (M5) is still stubbed.
+- Admin approval workflow (approve/reject drivers + documents) needs a Supabase admin dashboard — the backend schema supports it but no admin UI exists yet.
+- Background verification status is schema-ready (`not_started/pending/passed/failed`) but no external background check API is integrated.
+- On-device interactive walkthrough of onboarding + vehicle + documents not automated; launch + stability + unit tests verified.
+
 ### Next Milestones (in order)
-- **M3:** Pricing engine integration in Dart (wire `estimate_fare` into ride booking, expand `RideType` entity to 6 categories).
-- **M4:** Dispatch engine (nearest-driver offers, `accept_ride`/`advance_ride` trip lifecycle in Dart data source, remove mock fallback).
-- **M3:** Pricing engine (base/distance/time/surge/promo).
-- **M4:** Dispatch engine (nearest-driver RPC, trip lifecycle state machine).
-- **M5:** Passenger experience (real backend, no mock).
-- **M6:** Driver experience (registration -> earnings).
-- **M7:** Google Maps (markers, polyline, animated driver, ETA).
-- **M8:** Supabase Realtime (locations, trip status, availability).
-- **M9:** Safety (SOS, trusted contacts, live share, OTP pickup).
-- **M10:** Admin monitoring dashboard.
+- **M7:** Delivery & Courier Platform (food, grocery, pharmacy, package — built on dispatch engine).
+- **M8:** Safety (SOS, trusted contacts, live share, OTP pickup).
+- **M9:** Admin monitoring dashboard.
+- **M10:** Payments integration.
 
 ---
 

@@ -91,6 +91,9 @@ class RideRepositoryImpl implements RideRepository {
   }
 
   @override
+  Future<int> dispatchRide(String rideId) => _dataSource.dispatchRide(rideId);
+
+  @override
   Stream<Ride> watchRide(String rideId) => _dataSource.watchRide(rideId);
 
   @override

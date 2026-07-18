@@ -1,6 +1,6 @@
 # SESSION_STATUS.md
 
-> **Last updated:** 2026-07-18 Session 4 (Milestone 3)
+> **Last updated:** 2026-07-18 Session 5 (Milestone 4)
 
 ---
 
@@ -70,6 +70,29 @@ Full passenger booking journey wired end-to-end onto the M2 backend with **zero 
 - Driver-side acceptance not built - passenger stays on "searching" until a driver is assigned (Realtime flips to `matched`). Driver app flow is M4/M6.
 - Dropoff uses a positional offset placeholder (no destination geocoding/search UI yet).
 - Interactive on-device booking walkthrough (tap-through) not automated; launch + stability verified.
+
+### MILESTONE 4 - DISPATCH ENGINE & LIVE TRIP LIFECYCLE (COMPLETE)
+
+Full driver dispatch + trip state machine + driver ride app, all on the real backend with **zero mock data**.
+
+**Backend (applied via Mgmt API):**
+- `008_dispatch_engine.sql` - 12 RPCs: `driver_set_online`, `driver_update_location`, `dispatch_ride` (expires stale + offers nearest verified drivers with an active vehicle in category, 20s expiry, reassignment via `reassign_count`), `accept_ride_request` (atomic claim, OTP gen, sets `matched`), `reject_ride_request`, `driver_arrive` (matched->arrived), `start_trip` (arrived->inTrip, OTP-gated), `complete_trip` (inTrip->completed + earnings credit + driver totals), `cancel_ride_lifecycle` (rider/driver/system, tracks `cancelled_by`), `rate_passenger`, `driver_dashboard_stats`, `request_withdrawal`. Added rides columns (`cancelled_by`, `driver_rating`, `driver_feedback`, `driver_heading`, `driver_arrived_confirmed`, `reassign_count`), `ride_requests.eta_minutes`, participant-read RLS, Realtime publication for rides/ride_requests/driver_locations.
+- `009_driver_onboarding.sql` - `drivers.status` column + sync trigger; `register_ride_driver` RPC (creates driver + active verified vehicle, sets `active_vehicle_id`).
+
+**Domain:** `RideStatusX` (legal-transition map, `canTransitionTo`/`isTerminal`/`isActive`). New `RideOffer` and `DriverStats`/`DriverEarning` entities. New `DispatchRepository` interface.
+
+**Data:** `SupabaseDispatchDataSource` (all RPCs + Realtime `watchOffers` on ride_requests joined to rides, `watchActiveDriverRide` on rides) + `DispatchRepositoryImpl`. Passenger `confirmRide` now calls `dispatch_ride` after `requestRide`; `cancelRide` routes through `cancel_ride_lifecycle`.
+
+**Presentation:** `dispatch_providers.dart` (repo, `rideOffersProvider`, `activeDriverRideProvider`, `driverStatsProvider`, `driverEarningsProvider`, `driverOnlineProvider` with Geolocator position-stream -> `updateLocation`). New pages/widgets: `DriverRideHubPage` (online toggle, stats, offer sheet, active-ride redirect), `RideOfferSheet` (20s countdown accept/reject), `RegisterRideDriverSheet`, `DriverTripPage` (map + status banner + OTP + arrive/start/complete/cancel + rating), `DriverEarningsPage` (wallet/withdrawals/history). Driver dashboard now has Rides + Wallet action cards. Routes `/driver/rides`, `/driver/trip/:id`, `/driver/earnings` registered in `driver_module.dart`.
+
+**l10n:** ~50 driver/dispatch keys added to EN + AR; `flutter gen-l10n` clean.
+
+**Verified:** `flutter analyze` = 0 errors / 0 warnings; `flutter test` = 375/375 (9 new dispatch-entity tests); debug APK built (`--dart-define-from-file=.env.dev`), installed on DNP NX9 (`A3SQUT5A28003808`), launches without crash/fatal logcat. Trip state machine verified via transition unit tests + live RPCs.
+
+**Known limitations (M4):**
+- On-device interactive lifecycle walkthrough (register->online->offer->accept->arrive->OTP->start->complete->rate) not automated; launch + stability + state-machine tests verified.
+- Driver navigation to pickup/dropoff uses map markers, not turn-by-turn routing.
+- Destination search/geocoding still pending (M5).
 
 ### Next Milestones (in order)
 - **M3:** Pricing engine integration in Dart (wire `estimate_fare` into ride booking, expand `RideType` entity to 6 categories).

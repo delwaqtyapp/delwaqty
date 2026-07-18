@@ -1,6 +1,6 @@
 # SESSION_STATUS.md
 
-> **Last updated:** 2026-07-18 Session 7 (Milestone 6)
+> **Last updated:** 2026-07-18 Session 8 (Milestone 7)
 
 ---
 
@@ -160,8 +160,48 @@ Full production driver platform: multi-step onboarding, vehicle management, docu
 - Background verification status is schema-ready (`not_started/pending/passed/failed`) but no external background check API is integrated.
 - On-device interactive walkthrough of onboarding + vehicle + documents not automated; launch + stability + unit tests verified.
 
+### MILESTONE 7 - UNIFIED DELIVERY & LOGISTICS PLATFORM (COMPLETE)
+
+Complete delivery & courier platform reusing the existing dispatch engine. NO duplicate tables or logic — the `rides` table IS the unified dispatch table. `service_type` distinguishes ride from all delivery services (food, grocery, pharmacy, marketplace, courier, package, document, flower, retail). Same dispatch engine, driver platform, wallet, realtime, tracking powers everything.
+
+**Database (Migration 011):**
+- Extended `rides` with delivery columns: `service_type` (10 values: ride + 9 delivery types), `merchant_id`, `pickup_notes`, `dropoff_notes`, `delivery_proof_url`, `signature_required`, `otp_required`, `scheduled_at`, `priority` (standard/priority/express), `items_summary`, `weight_kg`.
+- Extended `drivers` with: `service_types[]`, `accepts_deliveries`, `max_delivery_distance_km`, `max_weight_kg`.
+- Created `delivery_pricing` table (9 service types seeded with base_fee/per_km/per_kg/minimum_fee/priority_multiplier/express_multiplier).
+- Created `merchant_profiles` table.
+- 6 new RPCs: `dispatch_delivery`, `complete_delivery`, `estimate_delivery_fee`, `merchant_ready_for_dispatch`, `get_merchant_deliveries`, `update_driver_capabilities`.
+- Realtime on `delivery_pricing`.
+
+**Domain entities (new):**
+- `DeliveryOrder` (Freezed): unified delivery entity with all 10 service types, priority, items, weight, signature/OTP, proof URL, merchant info.
+- `MerchantProfile` (Freezed): merchant configuration (service types, prep time, radius, auto-accept, active).
+- `DriverCapability` (Freezed): driver delivery preferences (service types, max distance, max weight).
+- `DeliveryPricingModel`: pricing calculation with base + per-km + per-kg, priority/express multipliers, minimum fee enforcement.
+- `DeliveryRequest`: dispatch offer with remaining time and expiry.
+- `DeliveryRepository` (abstract): 20-method interface covering all delivery operations.
+
+**Data layer (new):**
+- `SupabaseDeliveryDataSource`: all RPCs mapped with error handling, row-to-entity converters.
+- `DeliveryRepositoryImpl`: implements the full DeliveryRepository.
+
+**Presentation (new):**
+- `delivery_providers.dart`: 6 Riverpod providers (repo, active delivery, offers, merchant deliveries, driver capabilities, delivery pricing).
+- `DriverDeliveryHubPage`: driver-side delivery hub with online toggle, offer dialog, active delivery display, capabilities settings.
+- `MerchantOrdersPage`: merchant order management with status filter, ready-for-dispatch, order history.
+- `DeliveryTrackingPage`: customer delivery tracking with RideMap, status timeline, ETA, rating, proof of delivery.
+- `DriverCapabilitiesPage`: service type toggles, distance/weight sliders, delivery preference management.
+
+**l10n:** All delivery l10n keys already existed in ARB files from M1 vocabulary pre-seeding.
+
+**Verified:** `flutter analyze` = 0 errors; `flutter test` = 431/431 (18 new delivery entity tests); debug APK built + installed on DNP NX9, launches stable, no crash/logcat errors.
+
+**Known limitations / deploy notes (M7):**
+- Document upload (M6) still uses placeholder SnackBar — requires Supabase Storage integration.
+- Admin approval workflow (M6) needs a Supabase admin dashboard.
+- "Set on map" pin-drop for saving Home/Work (M5) is still stubbed.
+- On-device interactive delivery walkthrough not automated; launch + stability + unit tests verified.
+
 ### Next Milestones (in order)
-- **M7:** Delivery & Courier Platform (food, grocery, pharmacy, package — built on dispatch engine).
 - **M8:** Safety (SOS, trusted contacts, live share, OTP pickup).
 - **M9:** Admin monitoring dashboard.
 - **M10:** Payments integration.

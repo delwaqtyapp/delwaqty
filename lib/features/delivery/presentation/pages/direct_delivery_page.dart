@@ -14,13 +14,11 @@ class DirectDeliveryPage extends ConsumerStatefulWidget {
 }
 
 class _DirectDeliveryPageState extends ConsumerState<DirectDeliveryPage> {
-  final _pickupController = TextEditingController();
   final _dropoffController = TextEditingController();
   final _descriptionController = TextEditingController();
   final _placeDescController = TextEditingController();
   final _phoneController = TextEditingController();
   final _itemNameController = TextEditingController();
-  final _itemPriceController = TextEditingController();
   final _itemQtyController = TextEditingController(text: '1');
 
   final List<_ShoppingItem> _items = [];
@@ -41,27 +39,23 @@ class _DirectDeliveryPageState extends ConsumerState<DirectDeliveryPage> {
 
   @override
   void dispose() {
-    _pickupController.dispose();
     _dropoffController.dispose();
     _descriptionController.dispose();
     _placeDescController.dispose();
     _phoneController.dispose();
     _itemNameController.dispose();
-    _itemPriceController.dispose();
     _itemQtyController.dispose();
     super.dispose();
   }
 
   void _addItem() {
     final name = _itemNameController.text.trim();
-    final price = double.tryParse(_itemPriceController.text.trim());
     final qty = int.tryParse(_itemQtyController.text.trim()) ?? 1;
-    if (name.isEmpty || price == null) return;
+    if (name.isEmpty) return;
 
     setState(() {
-      _items.add(_ShoppingItem(name: name, price: price, quantity: qty));
+      _items.add(_ShoppingItem(name: name, quantity: qty));
       _itemNameController.clear();
-      _itemPriceController.clear();
       _itemQtyController.text = '1';
     });
   }
@@ -69,11 +63,6 @@ class _DirectDeliveryPageState extends ConsumerState<DirectDeliveryPage> {
   void _removeItem(int index) {
     setState(() => _items.removeAt(index));
   }
-
-  double get _subtotal => _items.fold(0, (sum, i) => sum + i.price * i.quantity);
-  double get _deliveryFee => 25.0;
-  double get _serviceFee => 10.0;
-  double get _grandTotal => _subtotal + _deliveryFee + _serviceFee;
 
   @override
   Widget build(BuildContext context) {
@@ -114,15 +103,6 @@ class _DirectDeliveryPageState extends ConsumerState<DirectDeliveryPage> {
                 delegate: SliverChildListDelegate([
                   _buildField(
                     context: context,
-                    controller: _pickupController,
-                    label: l10n.pickupFrom,
-                    icon: Icons.place_outlined,
-                    color: cs.primary,
-                  ),
-                  const SizedBox(height: 12),
-
-                  _buildField(
-                    context: context,
                     controller: _dropoffController,
                     label: l10n.deliverTo,
                     icon: Icons.location_on_outlined,
@@ -150,16 +130,6 @@ class _DirectDeliveryPageState extends ConsumerState<DirectDeliveryPage> {
 
                   _buildField(
                     context: context,
-                    controller: _descriptionController,
-                    label: l10n.describeYourOrder,
-                    icon: Icons.description_outlined,
-                    color: cs.tertiary,
-                    maxLines: 3,
-                  ),
-                  const SizedBox(height: 12),
-
-                  _buildField(
-                    context: context,
                     controller: _placeDescController,
                     label: l10n.placeDescription,
                     icon: Icons.info_outline_rounded,
@@ -168,77 +138,27 @@ class _DirectDeliveryPageState extends ConsumerState<DirectDeliveryPage> {
                   ),
                   const SizedBox(height: 16),
 
-                  Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: cs.surfaceContainerHighest.withValues(alpha: 0.3),
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Icon(Icons.phone_rounded, color: cs.primary, size: 20),
-                            const SizedBox(width: 8),
-                            Text(l10n.customerPhone, style: TextStyle(fontWeight: FontWeight.w600, color: cs.onSurface)),
-                          ],
-                        ),
-                        const SizedBox(height: 10),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: TextField(
-                                controller: _phoneController,
-                                keyboardType: TextInputType.phone,
-                                decoration: InputDecoration(
-                                  hintText: l10n.customerPhoneHint,
-                                  border: const OutlineInputBorder(),
-                                  isDense: true,
-                                ),
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-                            IconButton.filled(
-                              onPressed: () {
-                                if (_saveNumber) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(content: Text(l10n.numberSaved), backgroundColor: Colors.green),
-                                  );
-                                }
-                              },
-                              icon: const Icon(Icons.check_rounded, size: 20),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 6),
-                        Row(
-                          children: [
-                            Checkbox(
-                              value: _saveNumber,
-                              onChanged: (v) => setState(() => _saveNumber = v ?? true),
-                            ),
-                            Text(l10n.saveNumber, style: TextStyle(fontSize: 13, color: cs.onSurfaceVariant)),
-                          ],
-                        ),
-                      ],
-                    ),
+                  _buildShoppingListSection(context, l10n, cs),
+                  const SizedBox(height: 12),
+
+                  _buildField(
+                    context: context,
+                    controller: _descriptionController,
+                    label: l10n.describeYourOrder,
+                    icon: Icons.description_outlined,
+                    color: cs.tertiary,
+                    maxLines: 3,
                   ),
                   const SizedBox(height: 16),
 
-                  _buildShoppingListSection(context, l10n, cs),
-                  const SizedBox(height: 16),
-
-                  if (_items.isNotEmpty) ...[
-                    _buildInvoicePreview(context, l10n, cs),
-                    const SizedBox(height: 16),
-                  ],
+                  _buildPhoneSection(context, l10n, cs),
+                  const SizedBox(height: 24),
 
                   SizedBox(
                     width: double.infinity,
                     height: 56,
                     child: FilledButton(
-                      onPressed: _items.isEmpty ? null : () {},
+                      onPressed: () {},
                       style: FilledButton.styleFrom(
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(16),
@@ -290,16 +210,12 @@ class _DirectDeliveryPageState extends ConsumerState<DirectDeliveryPage> {
                 child: Row(
                   children: [
                     Expanded(
-                      flex: 3,
+                      flex: 4,
                       child: Text(item.name, style: const TextStyle(fontSize: 14)),
                     ),
                     Expanded(
                       flex: 1,
                       child: Text('x${item.quantity}', textAlign: TextAlign.center, style: TextStyle(fontSize: 13, color: cs.onSurfaceVariant)),
-                    ),
-                    Expanded(
-                      flex: 2,
-                      child: Text('${item.price.toStringAsFixed(0)} ج.م', textAlign: TextAlign.end, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500)),
                     ),
                     const SizedBox(width: 4),
                     IconButton(
@@ -318,7 +234,7 @@ class _DirectDeliveryPageState extends ConsumerState<DirectDeliveryPage> {
           Row(
             children: [
               Expanded(
-                flex: 3,
+                flex: 4,
                 child: TextField(
                   controller: _itemNameController,
                   decoration: InputDecoration(
@@ -343,20 +259,6 @@ class _DirectDeliveryPageState extends ConsumerState<DirectDeliveryPage> {
                 ),
               ),
               const SizedBox(width: 8),
-              Expanded(
-                flex: 2,
-                child: TextField(
-                  controller: _itemPriceController,
-                  keyboardType: TextInputType.number,
-                  decoration: InputDecoration(
-                    hintText: l10n.itemPrice,
-                    border: const OutlineInputBorder(),
-                    isDense: true,
-                    suffixText: 'ج.م',
-                  ),
-                ),
-              ),
-              const SizedBox(width: 4),
               IconButton.filled(
                 onPressed: _addItem,
                 icon: const Icon(Icons.add_rounded, size: 20),
@@ -369,59 +271,60 @@ class _DirectDeliveryPageState extends ConsumerState<DirectDeliveryPage> {
     );
   }
 
-  Widget _buildInvoicePreview(BuildContext context, AppLocalizations l10n, ColorScheme cs) {
+  Widget _buildPhoneSection(BuildContext context, AppLocalizations l10n, ColorScheme cs) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.green.withOpacity(0.05),
+        color: cs.surfaceContainerHighest.withValues(alpha: 0.3),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.green.withOpacity(0.2)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Icon(Icons.receipt_long_rounded, color: Colors.green[700], size: 20),
+              Icon(Icons.phone_rounded, color: cs.primary, size: 20),
               const SizedBox(width: 8),
-              Text(l10n.invoice, style: TextStyle(fontWeight: FontWeight.w600, color: Colors.green[700])),
+              Text(l10n.customerPhone, style: TextStyle(fontWeight: FontWeight.w600, color: cs.onSurface)),
             ],
           ),
-          const SizedBox(height: 12),
-          ..._items.map((item) => Padding(
-            padding: const EdgeInsets.only(bottom: 6),
-            child: Row(
-              children: [
-                Expanded(child: Text('${item.name} x${item.quantity}', style: const TextStyle(fontSize: 13))),
-                Text('${(item.price * item.quantity).toStringAsFixed(0)} ج.م', style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500)),
-              ],
-            ),
-          )),
-          const Divider(height: 16),
-          _buildInvoiceRow(l10n.subtotal, '${_subtotal.toStringAsFixed(0)} ج.م', cs),
-          _buildInvoiceRow(l10n.deliveryCostLabel, '${_deliveryFee.toStringAsFixed(0)} ج.م', cs),
-          _buildInvoiceRow(l10n.serviceFeeLabel, '${_serviceFee.toStringAsFixed(0)} ج.م', cs),
-          const Divider(height: 16),
+          const SizedBox(height: 10),
           Row(
             children: [
-              Text(l10n.grandTotal, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: cs.onSurface)),
-              const Spacer(),
-              Text('${_grandTotal.toStringAsFixed(0)} ج.م', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.green[700])),
+              Expanded(
+                child: TextField(
+                  controller: _phoneController,
+                  keyboardType: TextInputType.phone,
+                  decoration: InputDecoration(
+                    hintText: l10n.customerPhoneHint,
+                    border: const OutlineInputBorder(),
+                    isDense: true,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              IconButton.filled(
+                onPressed: () {
+                  if (_saveNumber) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text(l10n.numberSaved), backgroundColor: Colors.green),
+                    );
+                  }
+                },
+                icon: const Icon(Icons.check_rounded, size: 20),
+              ),
             ],
           ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildInvoiceRow(String label, String value, ColorScheme cs) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 4),
-      child: Row(
-        children: [
-          Text(label, style: TextStyle(fontSize: 13, color: cs.onSurfaceVariant)),
-          const Spacer(),
-          Text(value, style: const TextStyle(fontSize: 13)),
+          const SizedBox(height: 6),
+          Row(
+            children: [
+              Checkbox(
+                value: _saveNumber,
+                onChanged: (v) => setState(() => _saveNumber = v ?? true),
+              ),
+              Text(l10n.saveNumber, style: TextStyle(fontSize: 13, color: cs.onSurfaceVariant)),
+            ],
+          ),
         ],
       ),
     );
@@ -463,12 +366,10 @@ class _DirectDeliveryPageState extends ConsumerState<DirectDeliveryPage> {
 
 class _ShoppingItem {
   final String name;
-  final double price;
   final int quantity;
 
   const _ShoppingItem({
     required this.name,
-    required this.price,
     required this.quantity,
   });
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 import 'package:delwaqty/core/theme/app_colors.dart';
@@ -24,6 +25,9 @@ class _DirectDeliveryPageState extends ConsumerState<DirectDeliveryPage> {
   final List<_ShoppingItem> _items = [];
   bool _saveNumber = true;
   bool _loadingLocation = false;
+
+  String _selectedUnit = 'piece';
+  String _selectedWeight = 'none';
 
   @override
   void initState() {
@@ -55,18 +59,22 @@ class _DirectDeliveryPageState extends ConsumerState<DirectDeliveryPage> {
     if (name.isEmpty) return;
 
     setState(() {
-      _items.add(_ShoppingItem(name: name, quantity: qty, unit: _selectedUnit));
+      _items.add(_ShoppingItem(
+        name: name,
+        quantity: qty,
+        unit: _selectedUnit,
+        weight: _selectedUnit == 'kg' ? _selectedWeight : null,
+      ));
       _itemNameController.clear();
       _itemQtyController.text = '1';
       _selectedUnit = 'piece';
+      _selectedWeight = 'none';
     });
   }
 
   void _removeItem(int index) {
     setState(() => _items.removeAt(index));
   }
-
-  String _selectedUnit = 'piece';
 
   Future<void> _useCurrentLocation() async {
     setState(() => _loadingLocation = true);
@@ -90,6 +98,23 @@ class _DirectDeliveryPageState extends ConsumerState<DirectDeliveryPage> {
     } finally {
       if (mounted) setState(() => _loadingLocation = false);
     }
+  }
+
+  String _itemDisplayText(_ShoppingItem item, AppLocalizations l10n) {
+    final unitLabel = item.unit == 'kg' ? l10n.unitKg : l10n.unitPiece;
+    if (item.unit == 'kg' && item.weight != null && item.weight != 'none') {
+      final weightLabel = switch (item.weight) {
+        'quarter' => l10n.weightQuarter,
+        'half' => l10n.weightHalf,
+        'third' => l10n.weightThird,
+        'three_quarters' => l10n.weightThreeQuarters,
+        'eighth' => l10n.weightEighth,
+        'fifth' => l10n.weightFifth,
+        _ => '',
+      };
+      return '${item.quantity} $weightLabel';
+    }
+    return '${item.quantity} $unitLabel';
   }
 
   @override
@@ -244,7 +269,6 @@ class _DirectDeliveryPageState extends ConsumerState<DirectDeliveryPage> {
           if (_items.isNotEmpty) ...[
             ...List.generate(_items.length, (i) {
               final item = _items[i];
-              final unitLabel = item.unit == 'kg' ? l10n.unitKg : l10n.unitPiece;
               return Padding(
                 padding: const EdgeInsets.only(bottom: 8),
                 child: Row(
@@ -256,7 +280,7 @@ class _DirectDeliveryPageState extends ConsumerState<DirectDeliveryPage> {
                     Expanded(
                       flex: 2,
                       child: Text(
-                        '${item.quantity} $unitLabel',
+                        _itemDisplayText(item, l10n),
                         textAlign: TextAlign.center,
                         style: TextStyle(fontSize: 13, color: cs.onSurfaceVariant),
                       ),
@@ -294,6 +318,10 @@ class _DirectDeliveryPageState extends ConsumerState<DirectDeliveryPage> {
                 child: TextField(
                   controller: _itemQtyController,
                   keyboardType: TextInputType.number,
+                  inputFormatters: [
+                    FilteringTextInputFormatter.digitsOnly,
+                    LengthLimitingTextInputFormatter(4),
+                  ],
                   decoration: InputDecoration(
                     hintText: l10n.itemQuantity,
                     border: const OutlineInputBorder(),
@@ -303,27 +331,7 @@ class _DirectDeliveryPageState extends ConsumerState<DirectDeliveryPage> {
                 ),
               ),
               const SizedBox(width: 6),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8),
-                decoration: BoxDecoration(
-                  border: Border.all(color: cs.outline),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: DropdownButtonHideUnderline(
-                  child: DropdownButton<String>(
-                    value: _selectedUnit,
-                    isDense: true,
-                    style: TextStyle(fontSize: 13, color: cs.onSurface),
-                    items: [
-                      DropdownMenuItem(value: 'piece', child: Text(l10n.unitPiece)),
-                      DropdownMenuItem(value: 'kg', child: Text(l10n.unitKg)),
-                    ],
-                    onChanged: (v) {
-                      if (v != null) setState(() => _selectedUnit = v);
-                    },
-                  ),
-                ),
-              ),
+              _buildUnitSelector(l10n, cs),
               const SizedBox(width: 8),
               IconButton.filled(
                 onPressed: _addItem,
@@ -331,6 +339,83 @@ class _DirectDeliveryPageState extends ConsumerState<DirectDeliveryPage> {
                 constraints: const BoxConstraints(minWidth: 40, minHeight: 40),
               ),
             ],
+          ),
+
+          if (_selectedUnit == 'kg') ...[
+            const SizedBox(height: 8),
+            _buildWeightSelector(l10n, cs),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildUnitSelector(AppLocalizations l10n, ColorScheme cs) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8),
+      decoration: BoxDecoration(
+        border: Border.all(color: cs.outline),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<String>(
+          value: _selectedUnit,
+          isDense: true,
+          style: TextStyle(fontSize: 13, color: cs.onSurface),
+          items: [
+            DropdownMenuItem(value: 'piece', child: Text(l10n.unitPiece)),
+            DropdownMenuItem(value: 'kg', child: Text(l10n.unitKg)),
+          ],
+          onChanged: (v) {
+            if (v != null) {
+              setState(() {
+                _selectedUnit = v;
+                _selectedWeight = 'none';
+              });
+            }
+          },
+        ),
+      ),
+    );
+  }
+
+  Widget _buildWeightSelector(AppLocalizations l10n, ColorScheme cs) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+      decoration: BoxDecoration(
+        color: cs.surfaceContainerHighest.withValues(alpha: 0.3),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        children: [
+          Icon(Icons.scale_outlined, size: 16, color: cs.primary),
+          const SizedBox(width: 8),
+          Text(
+            '${l10n.unitKg}:',
+            style: TextStyle(fontSize: 12, color: cs.onSurfaceVariant, fontWeight: FontWeight.w600),
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: DropdownButtonHideUnderline(
+              child: DropdownButton<String>(
+                value: _selectedWeight,
+                isDense: true,
+                isExpanded: true,
+                style: TextStyle(fontSize: 12, color: cs.onSurface),
+                items: [
+                  DropdownMenuItem(value: 'none', child: Text(l10n.weightNone)),
+                  DropdownMenuItem(value: 'eighth', child: Text(l10n.weightEighth)),
+                  DropdownMenuItem(value: 'quarter', child: Text(l10n.weightQuarter)),
+                  DropdownMenuItem(value: 'third', child: Text(l10n.weightThird)),
+                  DropdownMenuItem(value: 'half', child: Text(l10n.weightHalf)),
+                  DropdownMenuItem(value: 'three_quarters', child: Text(l10n.weightThreeQuarters)),
+                  DropdownMenuItem(value: 'fifth', child: Text(l10n.weightFifth)),
+                ],
+                onChanged: (v) {
+                  if (v != null) setState(() => _selectedWeight = v);
+                },
+              ),
+            ),
           ),
         ],
       ),
@@ -361,6 +446,9 @@ class _DirectDeliveryPageState extends ConsumerState<DirectDeliveryPage> {
                 child: TextField(
                   controller: _phoneController,
                   keyboardType: TextInputType.phone,
+                  inputFormatters: [
+                    FilteringTextInputFormatter.allow(RegExp(r'[0-9+\-\s()]')),
+                  ],
                   decoration: InputDecoration(
                     hintText: l10n.customerPhoneHint,
                     border: const OutlineInputBorder(),
@@ -434,10 +522,12 @@ class _ShoppingItem {
   final String name;
   final int quantity;
   final String unit;
+  final String? weight;
 
   const _ShoppingItem({
     required this.name,
     required this.quantity,
     required this.unit,
+    this.weight,
   });
 }

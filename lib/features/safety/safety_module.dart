@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:delwaqty/core/module/feature_module.dart';
+import 'package:delwaqty/features/safety/presentation/pages/safety_hub_page.dart';
 import 'package:delwaqty/features/safety/presentation/pages/trusted_contacts_page.dart';
 import 'package:delwaqty/features/safety/presentation/pages/safety_settings_page.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
@@ -25,6 +26,10 @@ class SafetyModule extends FeatureModule {
   @override
   List<RouteBase> get standaloneRoutes => [
         GoRoute(
+          path: '/safety',
+          builder: (context, state) => const SafetyHubPage(),
+        ),
+        GoRoute(
           path: '/safety/contacts',
           builder: (context, state) => const TrustedContactsPage(),
         ),
@@ -37,6 +42,12 @@ class SafetyModule extends FeatureModule {
   @override
   List<DrawerEntry> get drawerEntries => [
         DrawerEntry(
+          id: 'safety-hub',
+          label: (ctx) => AppLocalizations.of(ctx).safetyHub,
+          icon: Icons.shield_rounded,
+          onTap: (ctx, ref) => ctx.push('/safety'),
+        ),
+        DrawerEntry(
           id: 'safety-contacts',
           label: (ctx) => AppLocalizations.of(ctx).trustedContacts,
           icon: Icons.contacts_rounded,
@@ -45,7 +56,7 @@ class SafetyModule extends FeatureModule {
         DrawerEntry(
           id: 'safety-settings',
           label: (ctx) => AppLocalizations.of(ctx).safetySettings,
-          icon: Icons.shield_rounded,
+          icon: Icons.settings_rounded,
           onTap: (ctx, ref) => ctx.push('/safety/settings'),
         ),
       ];

@@ -36,7 +36,7 @@ class AppShell extends ConsumerWidget {
       barrierDismissible: true,
       barrierLabel: 'drawer',
       barrierColor: Colors.black38,
-      transitionDuration: const Duration(milliseconds: 350),
+      transitionDuration: const Duration(milliseconds: 300),
       transitionBuilder: (ctx, anim, secondaryAnim, child) {
         final curved = CurvedAnimation(
           parent: anim,
@@ -262,9 +262,10 @@ class _DrawerPanel extends StatelessWidget {
     final userName = authState is AuthAuthenticated
         ? (authState as AuthAuthenticated).user.fullName ?? 'User'
         : 'User';
-    final userEmail = authState is AuthAuthenticated
-        ? (authState as AuthAuthenticated).user.email
-        : '';
+    final isAdmin = authState is AuthAuthenticated &&
+        (authState as AuthAuthenticated).user.role == 'admin' ||
+        (authState is AuthAuthenticated && (authState as AuthAuthenticated).user.role == 'owner');
+    final displayRole = isAdmin ? 'SuperAdmin' : null;
 
     final bodyEntries = drawerEntries
         .where((e) => e.position == DrawerPosition.body)
@@ -287,9 +288,9 @@ class _DrawerPanel extends StatelessWidget {
             child: BackdropFilter(
               filter: ImageFilter.blur(sigmaX: 32, sigmaY: 32),
               child: Container(
-                width: 280,
+                width: 260,
                 constraints: BoxConstraints(
-                  maxHeight: MediaQuery.of(context).size.height * 0.85,
+                  maxHeight: MediaQuery.of(context).size.height * 0.65,
                 ),
                 decoration: BoxDecoration(
                   color: isDark
@@ -317,90 +318,110 @@ class _DrawerPanel extends StatelessWidget {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      _buildHeader(context, cs, userName, userEmail),
-                      const SizedBox(height: 8),
-                      ...bodyEntries.map(
-                        (entry) => _DrawerTile(
-                          icon: entry.icon,
-                          label: entry.label(context),
-                          onTap: () => entry.onTap(context, ref),
-                          colorScheme: cs,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      _DrawerTile(
-                        icon: themeMode == ThemeMode.dark
-                            ? Icons.light_mode_outlined
-                            : Icons.dark_mode_outlined,
-                        label: l10n.darkMode,
-                        onTap: () =>
-                            ref.read(themeModeProvider.notifier).toggleTheme(),
-                        colorScheme: cs,
-                        trailing: Switch(
-                          value: themeMode == ThemeMode.dark,
-                          onChanged: (_) => ref
-                              .read(themeModeProvider.notifier)
-                              .toggleTheme(),
-                        ),
-                      ),
-                      _DrawerTile(
-                        icon: Icons.language_rounded,
-                        label: l10n.language,
-                        subtitle: locale.languageCode == 'ar'
-                            ? 'العربية'
-                            : 'English',
-                        onTap: () =>
-                            ref.read(localeProvider.notifier).toggleLocale(),
-                        colorScheme: cs,
-                      ),
-                      if (footerEntries.isNotEmpty) ...[
-                        const SizedBox(height: 8),
-                        ...footerEntries.map(
-                          (entry) => _DrawerTile(
-                            icon: entry.icon,
-                            label: entry.label(context),
-                            onTap: () => entry.onTap(context, ref),
-                            colorScheme: cs,
-                          ),
-                        ),
-                      ],
-                      const SizedBox(height: 8),
-                      _DrawerTile(
-                        icon: Icons.logout_rounded,
-                        label: l10n.logout,
-                        colorScheme: cs,
-                        isDestructive: true,
-                        onTap: () {
-                          Navigator.of(context).pop();
-                          showDialog<void>(
-                            context: context,
-                            builder: (ctx) => AlertDialog(
-                              title: Text(l10n.logout),
-                              content: Text(l10n.areYouSureYouWantToLogout),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(20),
-                              ),
-                              actions: [
-                                TextButton(
-                                  onPressed: () => Navigator.of(ctx).pop(),
-                                  child: Text(l10n.cancel),
+                      _buildHeader(context, cs, userName, displayRole),
+                      const SizedBox(height: 4),
+                      Flexible(
+                        child: SingleChildScrollView(
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              ...bodyEntries.map(
+                                (entry) => _DrawerTile(
+                                  icon: entry.icon,
+                                  label: entry.label(context),
+                                  onTap: () => entry.onTap(context, ref),
+                                  colorScheme: cs,
                                 ),
-                                TextButton(
-                                  onPressed: () {
-                                    Navigator.of(ctx).pop();
-                                    ref
-                                        .read(authStateProvider.notifier)
-                                        .signOut();
+                              ),
+                              if (isAdmin) ...[
+                                _DrawerTile(
+                                  icon: Icons.admin_panel_settings_rounded,
+                                  label: l10n.adminDashboard,
+                                  onTap: () {
+                                    Navigator.of(context).pop();
+                                    context.push('/admin');
                                   },
-                                  child: Text(
-                                    l10n.logout,
-                                    style: TextStyle(color: cs.error),
+                                  colorScheme: cs,
+                                ),
+                              ],
+                              const SizedBox(height: 4),
+                              _DrawerTile(
+                                icon: themeMode == ThemeMode.dark
+                                    ? Icons.light_mode_outlined
+                                    : Icons.dark_mode_outlined,
+                                label: l10n.darkMode,
+                                onTap: () =>
+                                    ref.read(themeModeProvider.notifier).toggleTheme(),
+                                colorScheme: cs,
+                                trailing: Switch(
+                                  value: themeMode == ThemeMode.dark,
+                                  onChanged: (_) => ref
+                                      .read(themeModeProvider.notifier)
+                                      .toggleTheme(),
+                                ),
+                              ),
+                              _DrawerTile(
+                                icon: Icons.language_rounded,
+                                label: l10n.language,
+                                subtitle: locale.languageCode == 'ar'
+                                    ? 'العربية'
+                                    : 'English',
+                                onTap: () =>
+                                    ref.read(localeProvider.notifier).toggleLocale(),
+                                colorScheme: cs,
+                              ),
+                              if (footerEntries.isNotEmpty) ...[
+                                const SizedBox(height: 4),
+                                ...footerEntries.map(
+                                  (entry) => _DrawerTile(
+                                    icon: entry.icon,
+                                    label: entry.label(context),
+                                    onTap: () => entry.onTap(context, ref),
+                                    colorScheme: cs,
                                   ),
                                 ),
                               ],
-                            ),
-                          );
-                        },
+                              _DrawerTile(
+                                icon: Icons.logout_rounded,
+                                label: l10n.logout,
+                                colorScheme: cs,
+                                isDestructive: true,
+                                onTap: () {
+                                  Navigator.of(context).pop();
+                                  showDialog<void>(
+                                    context: context,
+                                    builder: (ctx) => AlertDialog(
+                                      title: Text(l10n.logout),
+                                      content: Text(l10n.areYouSureYouWantToLogout),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(20),
+                                      ),
+                                      actions: [
+                                        TextButton(
+                                          onPressed: () => Navigator.of(ctx).pop(),
+                                          child: Text(l10n.cancel),
+                                        ),
+                                        TextButton(
+                                          onPressed: () {
+                                            Navigator.of(ctx).pop();
+                                            ref
+                                                .read(authStateProvider.notifier)
+                                                .signOut();
+                                          },
+                                          child: Text(
+                                            l10n.logout,
+                                            style: TextStyle(color: cs.error),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  );
+                                },
+                              ),
+                              const SizedBox(height: 8),
+                            ],
+                          ),
+                        ),
                       ),
                     ],
                   ),
@@ -417,16 +438,16 @@ class _DrawerPanel extends StatelessWidget {
     BuildContext context,
     ColorScheme cs,
     String userName,
-    String userEmail,
+    String? displayRole,
   ) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.fromLTRB(20, 16, 20, 12),
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
       child: Row(
         children: [
           Container(
-            width: 48,
-            height: 48,
+            width: 42,
+            height: 42,
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 colors: [cs.primary, cs.tertiary],
@@ -440,13 +461,13 @@ class _DrawerPanel extends StatelessWidget {
                 userName.isNotEmpty ? userName[0].toUpperCase() : 'U',
                 style: TextStyle(
                   color: cs.onPrimary,
-                  fontSize: 20,
+                  fontSize: 18,
                   fontWeight: FontWeight.bold,
                 ),
               ),
             ),
           ),
-          const SizedBox(width: 12),
+          const SizedBox(width: 10),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -456,22 +477,28 @@ class _DrawerPanel extends StatelessWidget {
                   userName,
                   style: TextStyle(
                     fontWeight: FontWeight.w600,
-                    fontSize: 15,
+                    fontSize: 14,
                     color: cs.onSurface,
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
-                if (userEmail.isNotEmpty) ...[
+                if (displayRole != null) ...[
                   const SizedBox(height: 2),
-                  Text(
-                    userEmail,
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: cs.onSurfaceVariant,
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: Colors.red.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(6),
                     ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
+                    child: Text(
+                      displayRole,
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.red[700],
+                      ),
+                    ),
                   ),
                 ],
               ],

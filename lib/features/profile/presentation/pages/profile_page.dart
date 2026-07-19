@@ -40,6 +40,11 @@ class ProfilePage extends ConsumerWidget {
             delay: const Duration(milliseconds: 100),
             child: _buildSettingsSection(context, ref, l10n, themeMode, locale),
           ),
+          const SizedBox(height: 12),
+          AnimatedFadeIn(
+            delay: const Duration(milliseconds: 120),
+            child: _buildOrdersAndInvoicesSection(context, l10n),
+          ),
           if (isAdmin || isDriver || isMerchant) ...[
             const SizedBox(height: 16),
             AnimatedFadeIn(
@@ -207,6 +212,38 @@ class ProfilePage extends ConsumerWidget {
             subtitle: Text(locale.languageCode == 'ar' ? 'العربية' : 'English'),
             trailing: const Icon(Icons.chevron_right_rounded),
             onTap: () => ref.read(localeProvider.notifier).toggleLocale(),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildOrdersAndInvoicesSection(BuildContext context, AppLocalizations l10n) {
+    final cs = Theme.of(context).colorScheme;
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: cs.surfaceContainerLowest,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: cs.outlineVariant.withValues(alpha: 0.5),
+        ),
+      ),
+      child: Column(
+        children: [
+          ListTile(
+            leading: Icon(Icons.receipt_long_rounded, color: Colors.green[700]),
+            title: Text(l10n.invoice),
+            subtitle: Text(l10n.invoiceDetails),
+            trailing: const Icon(Icons.chevron_right_rounded),
+            onTap: () {},
+          ),
+          const Divider(height: 1),
+          ListTile(
+            leading: Icon(Icons.history_rounded, color: cs.primary),
+            title: Text(l10n.previousOrders),
+            subtitle: Text(l10n.orderHistory),
+            trailing: const Icon(Icons.chevron_right_rounded),
+            onTap: () {},
           ),
         ],
       ),

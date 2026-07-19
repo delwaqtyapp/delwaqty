@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -11,6 +12,7 @@ class SafetySettingsPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
+    final cs = Theme.of(context).colorScheme;
     final contactsAsync = ref.watch(trustedContactsProvider);
 
     return Scaffold(
@@ -18,9 +20,9 @@ class SafetySettingsPage extends ConsumerWidget {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          _buildSectionHeader(context, l10n.sosSettings, Icons.emergency_rounded),
-          const SizedBox(height: 8),
-          _buildSettingsCard(
+          _GlassSection(
+            title: l10n.sosSettings,
+            icon: Icons.emergency_rounded,
             children: [
               SwitchListTile(
                 secondary: const Icon(Icons.notifications_active_rounded, color: Colors.red),
@@ -30,7 +32,6 @@ class SafetySettingsPage extends ConsumerWidget {
                 onChanged: null,
                 contentPadding: EdgeInsets.zero,
               ),
-              const Divider(),
               SwitchListTile(
                 secondary: const Icon(Icons.timer_rounded, color: Colors.orange),
                 title: Text(l10n.autoSosTimer),
@@ -41,10 +42,10 @@ class SafetySettingsPage extends ConsumerWidget {
               ),
             ],
           ),
-          const SizedBox(height: 24),
-          _buildSectionHeader(context, l10n.tripSharing, Icons.share_rounded),
-          const SizedBox(height: 8),
-          _buildSettingsCard(
+          const SizedBox(height: 16),
+          _GlassSection(
+            title: l10n.tripSharing,
+            icon: Icons.share_rounded,
             children: [
               SwitchListTile(
                 secondary: Icon(Icons.share_location_rounded, color: AppColors.primaryLight),
@@ -54,7 +55,6 @@ class SafetySettingsPage extends ConsumerWidget {
                 onChanged: null,
                 contentPadding: EdgeInsets.zero,
               ),
-              const Divider(),
               ListTile(
                 leading: const Icon(Icons.timer_rounded, color: Colors.blue),
                 title: Text(l10n.shareDuration),
@@ -65,17 +65,17 @@ class SafetySettingsPage extends ConsumerWidget {
               ),
             ],
           ),
-          const SizedBox(height: 24),
-          _buildSectionHeader(context, l10n.emergencyContacts, Icons.contacts_rounded),
-          const SizedBox(height: 8),
-          contactsAsync.when(
-            loading: () => const SizedBox(height: 60, child: Center(child: CircularProgressIndicator())),
-            error: (_, __) => const SizedBox.shrink(),
-            data: (contacts) {
-              final activeCount = contacts.where((c) => c.notifyOnRide).length;
-              return _buildSettingsCard(
-                children: [
-                  ListTile(
+          const SizedBox(height: 16),
+          _GlassSection(
+            title: l10n.emergencyContacts,
+            icon: Icons.contacts_rounded,
+            children: [
+              contactsAsync.when(
+                loading: () => const SizedBox(height: 60, child: Center(child: CircularProgressIndicator())),
+                error: (_, __) => const SizedBox.shrink(),
+                data: (contacts) {
+                  final activeCount = contacts.where((c) => c.notifyOnRide).length;
+                  return ListTile(
                     leading: Icon(Icons.people_rounded, color: AppColors.primaryLight),
                     title: Text(l10n.trustedContacts),
                     subtitle: Text(
@@ -86,15 +86,15 @@ class SafetySettingsPage extends ConsumerWidget {
                     trailing: const Icon(Icons.chevron_right_rounded),
                     contentPadding: EdgeInsets.zero,
                     onTap: () => context.push('/safety/contacts'),
-                  ),
-                ],
-              );
-            },
+                  );
+                },
+              ),
+            ],
           ),
-          const SizedBox(height: 24),
-          _buildSectionHeader(context, l10n.pickupVerification, Icons.pin_rounded),
-          const SizedBox(height: 8),
-          _buildSettingsCard(
+          const SizedBox(height: 16),
+          _GlassSection(
+            title: l10n.pickupVerification,
+            icon: Icons.pin_rounded,
             children: [
               SwitchListTile(
                 secondary: const Icon(Icons.pin_rounded, color: Colors.green),
@@ -110,29 +110,59 @@ class SafetySettingsPage extends ConsumerWidget {
       ),
     );
   }
+}
 
-  Widget _buildSectionHeader(BuildContext context, String title, IconData icon) {
-    return Row(
-      children: [
-        Icon(icon, size: 20, color: AppColors.primaryLight),
-        const SizedBox(width: 8),
-        Text(
-          title,
-          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: AppColors.primaryLight,
+class _GlassSection extends StatelessWidget {
+  const _GlassSection({
+    required this.title,
+    required this.icon,
+    required this.children,
+  });
+
+  final String title;
+  final IconData icon;
+  final List<Widget> children;
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(20),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: cs.surfaceContainerHighest.withOpacity(0.45),
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(
+              color: cs.outline.withOpacity(0.12),
+              width: 1,
+            ),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Icon(icon, size: 20, color: AppColors.primaryLight),
+                  const SizedBox(width: 8),
+                  Text(
+                    title,
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 15,
+                      color: AppColors.primaryLight,
+                    ),
+                  ),
+                ],
               ),
+              const SizedBox(height: 8),
+              ...children,
+            ],
+          ),
         ),
-      ],
-    );
-  }
-
-  Widget _buildSettingsCard({required List<Widget> children}) {
-    return Card(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-        child: Column(children: children),
       ),
     );
   }

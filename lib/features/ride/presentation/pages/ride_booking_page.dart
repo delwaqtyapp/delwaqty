@@ -93,7 +93,7 @@ class _RideBookingPageState extends ConsumerState<RideBookingPage> {
         child: Row(
           children: [
             IconButton(
-              onPressed: () => context.pop(),
+              onPressed: () => context.go('/'),
               icon: Container(
                 width: 40,
                 height: 40,
@@ -104,11 +104,6 @@ class _RideBookingPageState extends ConsumerState<RideBookingPage> {
                 child: Icon(Icons.arrow_back_rounded,
                     color: context.colorScheme.onSurface, size: 22),
               ),
-            ),
-            const SizedBox(width: 8),
-            Text(
-              l10n.ride,
-              style: context.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800),
             ),
           ],
         ),

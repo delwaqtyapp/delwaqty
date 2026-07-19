@@ -157,31 +157,8 @@ class _DirectDeliveryPageState extends ConsumerState<DirectDeliveryPage> {
       body: SafeArea(
         child: CustomScrollView(
           slivers: [
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(20, 24, 20, 0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      l10n.directDeliveryTitle,
-                      style: theme.textTheme.headlineSmall?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      l10n.directDeliverySubtitle,
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        color: cs.onSurfaceVariant,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
             SliverPadding(
-              padding: const EdgeInsets.all(20),
+              padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
               sliver: SliverList(
                 delegate: SliverChildListDelegate([
                   _buildShoppingListSection(context, l10n, cs),
@@ -232,7 +209,7 @@ class _DirectDeliveryPageState extends ConsumerState<DirectDeliveryPage> {
                       ),
                     ),
                   ),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 100),
                 ]),
               ),
             ),

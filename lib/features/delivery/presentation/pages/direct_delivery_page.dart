@@ -101,6 +101,19 @@ class _DirectDeliveryPageState extends ConsumerState<DirectDeliveryPage> {
               padding: const EdgeInsets.all(20),
               sliver: SliverList(
                 delegate: SliverChildListDelegate([
+                  _buildShoppingListSection(context, l10n, cs),
+                  const SizedBox(height: 12),
+
+                  _buildField(
+                    context: context,
+                    controller: _descriptionController,
+                    label: l10n.describeYourOrder,
+                    icon: Icons.description_outlined,
+                    color: cs.tertiary,
+                    maxLines: 3,
+                  ),
+                  const SizedBox(height: 16),
+
                   _buildField(
                     context: context,
                     controller: _dropoffController,
@@ -135,19 +148,6 @@ class _DirectDeliveryPageState extends ConsumerState<DirectDeliveryPage> {
                     icon: Icons.info_outline_rounded,
                     color: Colors.teal,
                     hint: l10n.placeDescriptionHint,
-                  ),
-                  const SizedBox(height: 16),
-
-                  _buildShoppingListSection(context, l10n, cs),
-                  const SizedBox(height: 12),
-
-                  _buildField(
-                    context: context,
-                    controller: _descriptionController,
-                    label: l10n.describeYourOrder,
-                    icon: Icons.description_outlined,
-                    color: cs.tertiary,
-                    maxLines: 3,
                   ),
                   const SizedBox(height: 16),
 

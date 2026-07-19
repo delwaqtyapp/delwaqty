@@ -877,5 +877,10 @@
   "addLabel": "Add",
   "editLabel": "Edit",
   "saveLabel": "Save",
-  "deleteLabel": "Delete"
+  "deleteLabel": "Delete",
+  "unitKg": "Kg",
+  "unitPiece": "Piece",
+  "selectUnit": "Unit",
+  "gettingLocation": "Getting location...",
+  "locationError": "Could not get your location"
 }

@@ -877,5 +877,10 @@
   "addLabel": "اضافة",
   "editLabel": "تعديل",
   "saveLabel": "حفظ",
-  "deleteLabel": "حذف"
+  "deleteLabel": "حذف",
+  "unitKg": "كيلو",
+  "unitPiece": "وحده",
+  "selectUnit": "الوحدة",
+  "gettingLocation": "جارٍ تحديد الموقع...",
+  "locationError": "مقدرش أحدد موقعك"
 }

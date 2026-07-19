@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 import 'package:delwaqty/core/theme/app_colors.dart';
 import 'package:delwaqty/features/auth/domain/auth_state.dart';
 import 'package:delwaqty/features/auth/presentation/auth_provider.dart';
+import 'package:delwaqty/features/location/presentation/providers/location_provider.dart';
 
 class DirectDeliveryPage extends ConsumerStatefulWidget {
   const DirectDeliveryPage({super.key});
@@ -23,6 +23,7 @@ class _DirectDeliveryPageState extends ConsumerState<DirectDeliveryPage> {
 
   final List<_ShoppingItem> _items = [];
   bool _saveNumber = true;
+  bool _loadingLocation = false;
 
   @override
   void initState() {
@@ -54,14 +55,41 @@ class _DirectDeliveryPageState extends ConsumerState<DirectDeliveryPage> {
     if (name.isEmpty) return;
 
     setState(() {
-      _items.add(_ShoppingItem(name: name, quantity: qty));
+      _items.add(_ShoppingItem(name: name, quantity: qty, unit: _selectedUnit));
       _itemNameController.clear();
       _itemQtyController.text = '1';
+      _selectedUnit = 'piece';
     });
   }
 
   void _removeItem(int index) {
     setState(() => _items.removeAt(index));
+  }
+
+  String _selectedUnit = 'piece';
+
+  Future<void> _useCurrentLocation() async {
+    setState(() => _loadingLocation = true);
+    try {
+      final loc = ref.read(userLocationProvider.notifier);
+      await loc.refresh();
+      final value = ref.read(userLocationProvider).valueOrNull;
+      if (value != null && mounted) {
+        final address = value.detailedAddress.isNotEmpty
+            ? value.detailedAddress
+            : '${value.latitude}, ${value.longitude}';
+        _dropoffController.text = address;
+      } else if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(AppLocalizations.of(context).locationError),
+            backgroundColor: Theme.of(context).colorScheme.error,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _loadingLocation = false);
+    }
   }
 
   @override
@@ -114,31 +142,7 @@ class _DirectDeliveryPageState extends ConsumerState<DirectDeliveryPage> {
                   ),
                   const SizedBox(height: 16),
 
-                  _buildField(
-                    context: context,
-                    controller: _dropoffController,
-                    label: l10n.deliverTo,
-                    icon: Icons.location_on_outlined,
-                    color: cs.error,
-                  ),
-                  const SizedBox(height: 8),
-
-                  SizedBox(
-                    width: double.infinity,
-                    child: OutlinedButton.icon(
-                      onPressed: () {},
-                      icon: const Icon(Icons.my_location_rounded, size: 18),
-                      label: Text(l10n.setMyLocation),
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: cs.primary,
-                        side: BorderSide(color: cs.primary.withOpacity(0.3)),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                      ),
-                    ),
-                  ),
+                  _buildDeliverToField(context, l10n, cs),
                   const SizedBox(height: 16),
 
                   _buildField(
@@ -183,6 +187,41 @@ class _DirectDeliveryPageState extends ConsumerState<DirectDeliveryPage> {
     );
   }
 
+  Widget _buildDeliverToField(BuildContext context, AppLocalizations l10n, ColorScheme cs) {
+    final theme = Theme.of(context);
+    return Container(
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: TextField(
+        controller: _dropoffController,
+        decoration: InputDecoration(
+          prefixIcon: Icon(Icons.location_on_outlined, color: cs.error),
+          labelText: l10n.deliverTo,
+          labelStyle: TextStyle(color: cs.error),
+          border: InputBorder.none,
+          contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+          suffixIcon: _loadingLocation
+              ? const Padding(
+                  padding: EdgeInsets.all(12),
+                  child: SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  ),
+                )
+              : IconButton(
+                  onPressed: _useCurrentLocation,
+                  icon: const Icon(Icons.my_location_rounded, size: 20),
+                  tooltip: l10n.setMyLocation,
+                  color: cs.primary,
+                ),
+        ),
+      ),
+    );
+  }
+
   Widget _buildShoppingListSection(BuildContext context, AppLocalizations l10n, ColorScheme cs) {
     return Container(
       padding: const EdgeInsets.all(16),
@@ -205,6 +244,7 @@ class _DirectDeliveryPageState extends ConsumerState<DirectDeliveryPage> {
           if (_items.isNotEmpty) ...[
             ...List.generate(_items.length, (i) {
               final item = _items[i];
+              final unitLabel = item.unit == 'kg' ? l10n.unitKg : l10n.unitPiece;
               return Padding(
                 padding: const EdgeInsets.only(bottom: 8),
                 child: Row(
@@ -214,8 +254,12 @@ class _DirectDeliveryPageState extends ConsumerState<DirectDeliveryPage> {
                       child: Text(item.name, style: const TextStyle(fontSize: 14)),
                     ),
                     Expanded(
-                      flex: 1,
-                      child: Text('x${item.quantity}', textAlign: TextAlign.center, style: TextStyle(fontSize: 13, color: cs.onSurfaceVariant)),
+                      flex: 2,
+                      child: Text(
+                        '${item.quantity} $unitLabel',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(fontSize: 13, color: cs.onSurfaceVariant),
+                      ),
                     ),
                     const SizedBox(width: 4),
                     IconButton(
@@ -256,6 +300,28 @@ class _DirectDeliveryPageState extends ConsumerState<DirectDeliveryPage> {
                     isDense: true,
                   ),
                   textAlign: TextAlign.center,
+                ),
+              ),
+              const SizedBox(width: 6),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                decoration: BoxDecoration(
+                  border: Border.all(color: cs.outline),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: DropdownButtonHideUnderline(
+                  child: DropdownButton<String>(
+                    value: _selectedUnit,
+                    isDense: true,
+                    style: TextStyle(fontSize: 13, color: cs.onSurface),
+                    items: [
+                      DropdownMenuItem(value: 'piece', child: Text(l10n.unitPiece)),
+                      DropdownMenuItem(value: 'kg', child: Text(l10n.unitKg)),
+                    ],
+                    onChanged: (v) {
+                      if (v != null) setState(() => _selectedUnit = v);
+                    },
+                  ),
                 ),
               ),
               const SizedBox(width: 8),
@@ -367,9 +433,11 @@ class _DirectDeliveryPageState extends ConsumerState<DirectDeliveryPage> {
 class _ShoppingItem {
   final String name;
   final int quantity;
+  final String unit;
 
   const _ShoppingItem({
     required this.name,
     required this.quantity,
+    required this.unit,
   });
 }

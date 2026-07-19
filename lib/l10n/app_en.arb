@@ -880,6 +880,7 @@
   "deleteLabel": "Delete",
   "unitKg": "Kg",
   "unitPiece": "Piece",
+  "unitNone": "None",
   "selectUnit": "Unit",
   "weightNone": "No fraction",
   "weightQuarter": "Quarter kg",

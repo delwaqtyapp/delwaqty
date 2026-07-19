@@ -302,7 +302,7 @@ class _DirectDeliveryPageState extends ConsumerState<DirectDeliveryPage> {
           Row(
             children: [
               Expanded(
-                flex: 4,
+                flex: 3,
                 child: TextField(
                   controller: _itemNameController,
                   decoration: InputDecoration(
@@ -312,7 +312,7 @@ class _DirectDeliveryPageState extends ConsumerState<DirectDeliveryPage> {
                   ),
                 ),
               ),
-              const SizedBox(width: 8),
+              const SizedBox(width: 6),
               Expanded(
                 flex: 1,
                 child: TextField(
@@ -332,7 +332,10 @@ class _DirectDeliveryPageState extends ConsumerState<DirectDeliveryPage> {
               ),
               const SizedBox(width: 6),
               _buildUnitSelector(l10n, cs),
-              const SizedBox(width: 8),
+              const SizedBox(width: 6),
+              if (_selectedUnit == 'kg')
+                _buildWeightSelector(l10n, cs),
+              const SizedBox(width: 4),
               IconButton.filled(
                 onPressed: _addItem,
                 icon: const Icon(Icons.add_rounded, size: 20),
@@ -340,11 +343,6 @@ class _DirectDeliveryPageState extends ConsumerState<DirectDeliveryPage> {
               ),
             ],
           ),
-
-          if (_selectedUnit == 'kg') ...[
-            const SizedBox(height: 8),
-            _buildWeightSelector(l10n, cs),
-          ],
         ],
       ),
     );
@@ -352,7 +350,7 @@ class _DirectDeliveryPageState extends ConsumerState<DirectDeliveryPage> {
 
   Widget _buildUnitSelector(AppLocalizations l10n, ColorScheme cs) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 6),
       decoration: BoxDecoration(
         border: Border.all(color: cs.outline),
         borderRadius: BorderRadius.circular(8),
@@ -361,10 +359,11 @@ class _DirectDeliveryPageState extends ConsumerState<DirectDeliveryPage> {
         child: DropdownButton<String>(
           value: _selectedUnit,
           isDense: true,
-          style: TextStyle(fontSize: 13, color: cs.onSurface),
+          style: TextStyle(fontSize: 11, color: cs.onSurface),
           items: [
             DropdownMenuItem(value: 'piece', child: Text(l10n.unitPiece)),
             DropdownMenuItem(value: 'kg', child: Text(l10n.unitKg)),
+            DropdownMenuItem(value: 'none', child: Text(l10n.unitNone)),
           ],
           onChanged: (v) {
             if (v != null) {
@@ -381,43 +380,29 @@ class _DirectDeliveryPageState extends ConsumerState<DirectDeliveryPage> {
 
   Widget _buildWeightSelector(AppLocalizations l10n, ColorScheme cs) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 6),
       decoration: BoxDecoration(
-        color: cs.surfaceContainerHighest.withValues(alpha: 0.3),
-        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: cs.outline),
+        borderRadius: BorderRadius.circular(8),
       ),
-      child: Row(
-        children: [
-          Icon(Icons.scale_outlined, size: 16, color: cs.primary),
-          const SizedBox(width: 8),
-          Text(
-            '${l10n.unitKg}:',
-            style: TextStyle(fontSize: 12, color: cs.onSurfaceVariant, fontWeight: FontWeight.w600),
-          ),
-          const SizedBox(width: 8),
-          Expanded(
-            child: DropdownButtonHideUnderline(
-              child: DropdownButton<String>(
-                value: _selectedWeight,
-                isDense: true,
-                isExpanded: true,
-                style: TextStyle(fontSize: 12, color: cs.onSurface),
-                items: [
-                  DropdownMenuItem(value: 'none', child: Text(l10n.weightNone)),
-                  DropdownMenuItem(value: 'eighth', child: Text(l10n.weightEighth)),
-                  DropdownMenuItem(value: 'quarter', child: Text(l10n.weightQuarter)),
-                  DropdownMenuItem(value: 'third', child: Text(l10n.weightThird)),
-                  DropdownMenuItem(value: 'half', child: Text(l10n.weightHalf)),
-                  DropdownMenuItem(value: 'three_quarters', child: Text(l10n.weightThreeQuarters)),
-                  DropdownMenuItem(value: 'fifth', child: Text(l10n.weightFifth)),
-                ],
-                onChanged: (v) {
-                  if (v != null) setState(() => _selectedWeight = v);
-                },
-              ),
-            ),
-          ),
-        ],
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<String>(
+          value: _selectedWeight,
+          isDense: true,
+          style: TextStyle(fontSize: 11, color: cs.onSurface),
+          items: [
+            DropdownMenuItem(value: 'eighth', child: Text(l10n.weightEighth)),
+            DropdownMenuItem(value: 'quarter', child: Text(l10n.weightQuarter)),
+            DropdownMenuItem(value: 'third', child: Text(l10n.weightThird)),
+            DropdownMenuItem(value: 'half', child: Text(l10n.weightHalf)),
+            DropdownMenuItem(value: 'three_quarters', child: Text(l10n.weightThreeQuarters)),
+            DropdownMenuItem(value: 'fifth', child: Text(l10n.weightFifth)),
+            DropdownMenuItem(value: 'none', child: Text(l10n.weightNone)),
+          ],
+          onChanged: (v) {
+            if (v != null) setState(() => _selectedWeight = v);
+          },
+        ),
       ),
     );
   }

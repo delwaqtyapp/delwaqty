@@ -892,6 +892,7 @@
   "weightThreeQuarters": "تلت اربع كيلو",
   "weightEighth": "تمن كيلو",
   "weightFifth": "خمس كيلو",
+  "weightBundle": "ربطه",
   "gettingLocation": "جارٍ تحديد الموقع...",
   "locationError": "مقدرش أحدد موقعك"
 }

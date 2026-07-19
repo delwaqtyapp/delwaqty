@@ -892,6 +892,7 @@
   "weightThreeQuarters": "Three-quarters kg",
   "weightEighth": "Eighth kg",
   "weightFifth": "Fifth kg",
+  "weightBundle": "Bundle",
   "gettingLocation": "Getting location...",
   "locationError": "Could not get your location"
 }

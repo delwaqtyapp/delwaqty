@@ -128,6 +128,7 @@ class _DirectDeliveryPageState extends ConsumerState<DirectDeliveryPage> {
         'half' => l10n.weightHalf,
         'three_quarters' => l10n.weightThreeQuarters,
         'fifth' => l10n.weightFifth,
+        'bundle' => l10n.weightBundle,
         _ => l10n.unitKg,
       };
       return '${item.quantity} $label';
@@ -433,6 +434,7 @@ class _DirectDeliveryPageState extends ConsumerState<DirectDeliveryPage> {
                   style: TextStyle(fontSize: 12, color: cs.onSurface),
                   items: [
                     DropdownMenuItem(value: 'none', child: Text(l10n.weightNone)),
+                    DropdownMenuItem(value: 'bundle', child: Text(l10n.weightBundle)),
                     DropdownMenuItem(value: 'eighth', child: Text(l10n.weightEighth)),
                     DropdownMenuItem(value: 'quarter', child: Text(l10n.weightQuarter)),
                     DropdownMenuItem(value: 'third', child: Text(l10n.weightThird)),

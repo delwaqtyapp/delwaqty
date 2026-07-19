@@ -2443,4 +2443,34 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get uploadComingSoon => 'وظيفة الرفع ستكون متاحة قريباً';
+
+  @override
+  String get tawsila => 'توصيلة';
+
+  @override
+  String get tawsilaDesc => 'احجز رحلتك في أي وقت';
+
+  @override
+  String get directDelivery => 'دليفرى';
+
+  @override
+  String get directDeliveryDesc => 'اطلب توصيل مباشر لأي طلب';
+
+  @override
+  String get directDeliveryTitle => 'توصيل مباشر';
+
+  @override
+  String get directDeliverySubtitle => 'الدليفرى هيروح يجيب طلبك من أي مكان';
+
+  @override
+  String get whereToDeliver => 'وين المطلوب توصيله؟';
+
+  @override
+  String get pickupFrom => 'يلاخد منين؟';
+
+  @override
+  String get describeYourOrder => 'وصف الطلب';
+
+  @override
+  String get requestDelivery => 'طلب توصيل';
 }

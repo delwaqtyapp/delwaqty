@@ -14,6 +14,7 @@ import 'package:delwaqty/features/merchant/merchant_module.dart';
 import 'package:delwaqty/features/wallet/wallet_module.dart';
 import 'package:delwaqty/features/driver/driver_module.dart';
 import 'package:delwaqty/features/ride/ride_module.dart';
+import 'package:delwaqty/features/delivery/delivery_module.dart';
 
 void registerAllModules() {
   final registry = FeatureRegistry.instance;
@@ -30,6 +31,7 @@ void registerAllModules() {
     WalletModule(),
     DriverModule(),
     RideModule(),
+    DirectDeliveryModule(),
     SettingsModule(),
     ProfileModule(),
     NotificationsModule(),

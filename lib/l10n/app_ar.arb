@@ -791,5 +791,15 @@
   "cancellationRate": "معدل الإلغاء",
   "stepOf": "الخطوة {current} من {total}",
   "tapToUpload": "اضغط للرفع",
-  "uploadComingSoon": "وظيفة الرفع ستكون متاحة قريباً"
+  "uploadComingSoon": "وظيفة الرفع ستكون متاحة قريباً",
+  "tawsila": "توصيلة",
+  "tawsilaDesc": "احجز رحلتك في أي وقت",
+  "directDelivery": "دليفرى",
+  "directDeliveryDesc": "اطلب توصيل مباشر لأي طلب",
+  "directDeliveryTitle": "توصيل مباشر",
+  "directDeliverySubtitle": "الدليفرى هيروح يجيب طلبك من أي مكان",
+  "whereToDeliver": "وين المطلوب توصيله؟",
+  "pickupFrom": "يلاخد منين؟",
+  "describeYourOrder": "وصف الطلب",
+  "requestDelivery": "طلب توصيل"
 }

@@ -2451,4 +2451,35 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get uploadComingSoon => 'Upload functionality will be available soon';
+
+  @override
+  String get tawsila => 'Ride';
+
+  @override
+  String get tawsilaDesc => 'Book your ride anytime';
+
+  @override
+  String get directDelivery => 'Direct Delivery';
+
+  @override
+  String get directDeliveryDesc => 'Request direct delivery for any order';
+
+  @override
+  String get directDeliveryTitle => 'Direct Delivery';
+
+  @override
+  String get directDeliverySubtitle =>
+      'A driver will fetch your order from anywhere';
+
+  @override
+  String get whereToDeliver => 'Where to deliver?';
+
+  @override
+  String get pickupFrom => 'Pick up from?';
+
+  @override
+  String get describeYourOrder => 'Describe your order';
+
+  @override
+  String get requestDelivery => 'Request Delivery';
 }

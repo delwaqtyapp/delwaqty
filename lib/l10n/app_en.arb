@@ -791,5 +791,15 @@
   "cancellationRate": "Cancellation Rate",
   "stepOf": "Step {current} of {total}",
   "tapToUpload": "Tap to upload",
-  "uploadComingSoon": "Upload functionality will be available soon"
+  "uploadComingSoon": "Upload functionality will be available soon",
+  "tawsila": "Ride",
+  "tawsilaDesc": "Book your ride anytime",
+  "directDelivery": "Direct Delivery",
+  "directDeliveryDesc": "Request direct delivery for any order",
+  "directDeliveryTitle": "Direct Delivery",
+  "directDeliverySubtitle": "A driver will fetch your order from anywhere",
+  "whereToDeliver": "Where to deliver?",
+  "pickupFrom": "Pick up from?",
+  "describeYourOrder": "Describe your order",
+  "requestDelivery": "Request Delivery"
 }

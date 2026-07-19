@@ -4771,6 +4771,66 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Upload functionality will be available soon'**
   String get uploadComingSoon;
+
+  /// No description provided for @tawsila.
+  ///
+  /// In en, this message translates to:
+  /// **'Ride'**
+  String get tawsila;
+
+  /// No description provided for @tawsilaDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Book your ride anytime'**
+  String get tawsilaDesc;
+
+  /// No description provided for @directDelivery.
+  ///
+  /// In en, this message translates to:
+  /// **'Direct Delivery'**
+  String get directDelivery;
+
+  /// No description provided for @directDeliveryDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Request direct delivery for any order'**
+  String get directDeliveryDesc;
+
+  /// No description provided for @directDeliveryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Direct Delivery'**
+  String get directDeliveryTitle;
+
+  /// No description provided for @directDeliverySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'A driver will fetch your order from anywhere'**
+  String get directDeliverySubtitle;
+
+  /// No description provided for @whereToDeliver.
+  ///
+  /// In en, this message translates to:
+  /// **'Where to deliver?'**
+  String get whereToDeliver;
+
+  /// No description provided for @pickupFrom.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick up from?'**
+  String get pickupFrom;
+
+  /// No description provided for @describeYourOrder.
+  ///
+  /// In en, this message translates to:
+  /// **'Describe your order'**
+  String get describeYourOrder;
+
+  /// No description provided for @requestDelivery.
+  ///
+  /// In en, this message translates to:
+  /// **'Request Delivery'**
+  String get requestDelivery;
 }
 
 class _AppLocalizationsDelegate

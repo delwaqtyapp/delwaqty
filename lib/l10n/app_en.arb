@@ -881,6 +881,13 @@
   "unitKg": "Kg",
   "unitPiece": "Piece",
   "selectUnit": "Unit",
+  "weightNone": "No fraction",
+  "weightQuarter": "Quarter kg",
+  "weightHalf": "Half kg",
+  "weightThird": "Third kg",
+  "weightThreeQuarters": "Three-quarters kg",
+  "weightEighth": "Eighth kg",
+  "weightFifth": "Fifth kg",
   "gettingLocation": "Getting location...",
   "locationError": "Could not get your location"
 }

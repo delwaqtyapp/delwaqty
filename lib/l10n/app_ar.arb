@@ -881,6 +881,13 @@
   "unitKg": "كيلو",
   "unitPiece": "وحده",
   "selectUnit": "الوحدة",
+  "weightNone": "لا يوجد",
+  "weightQuarter": "ربع كيلو",
+  "weightHalf": "نص كيلو",
+  "weightThird": "التلث كيلو",
+  "weightThreeQuarters": "التلت اربع كيلو",
+  "weightEighth": "التمن كيلو",
+  "weightFifth": "الخمس كيلو",
   "gettingLocation": "جارٍ تحديد الموقع...",
   "locationError": "مقدرش أحدد موقعك"
 }

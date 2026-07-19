@@ -1288,7 +1288,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noItems => 'No items';
 
   @override
-  String get addItem => 'Add Item';
+  String get addItem => 'Add item';
 
   @override
   String get removeItem => 'Remove';
@@ -2482,4 +2482,228 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get requestDelivery => 'Request Delivery';
+
+  @override
+  String get superAdmin => 'SuperAdmin';
+
+  @override
+  String get deliverTo => 'Deliver to';
+
+  @override
+  String get setMyLocation => 'Set my location';
+
+  @override
+  String get placeDescription => 'Describe the location or landmark';
+
+  @override
+  String get placeDescriptionHint =>
+      'Example: Near the pharmacy, building 5, apartment 3';
+
+  @override
+  String get customerPhone => 'Phone number';
+
+  @override
+  String get customerPhoneHint => 'Your phone number for the driver';
+
+  @override
+  String get saveNumber => 'Save number';
+
+  @override
+  String get numberSaved => 'Phone number saved';
+
+  @override
+  String get shoppingList => 'Shopping List';
+
+  @override
+  String get itemName => 'Item name';
+
+  @override
+  String get itemPrice => 'Estimated price';
+
+  @override
+  String get itemQuantity => 'Quantity';
+
+  @override
+  String get purchaseApproval => 'Purchase Approval';
+
+  @override
+  String get approvePurchase => 'Approve Purchase';
+
+  @override
+  String get rejectPurchase => 'Reject';
+
+  @override
+  String get totalCost => 'Total Cost';
+
+  @override
+  String get serviceFee => 'Service Fee';
+
+  @override
+  String get grandTotal => 'Grand Total';
+
+  @override
+  String get invoice => 'Invoice';
+
+  @override
+  String get invoiceDetails => 'Invoice Details';
+
+  @override
+  String get previousOrders => 'My Previous Orders';
+
+  @override
+  String get noPreviousOrders => 'No previous orders yet';
+
+  @override
+  String get purchaseStarted => 'Driver started purchasing';
+
+  @override
+  String get purchaseStartedDescription =>
+      'The driver has started buying your items';
+
+  @override
+  String get priceListReceived => 'Price list received';
+
+  @override
+  String get priceListDescription => 'Please review the costs and approve';
+
+  @override
+  String get approveBeforePurchase =>
+      'You must approve the purchase before the driver buys';
+
+  @override
+  String get orderItems => 'Order Items';
+
+  @override
+  String get priceBreakdown => 'Price Breakdown';
+
+  @override
+  String get deliveryCostLabel => 'Delivery';
+
+  @override
+  String get serviceFeeLabel => 'Service';
+
+  @override
+  String get safety => 'Safety';
+
+  @override
+  String get safetySettings => 'Safety Settings';
+
+  @override
+  String get sosSettings => 'SOS Settings';
+
+  @override
+  String get sosAlertEnabled => 'SOS Alert';
+
+  @override
+  String get sosAlertEnabledDescription =>
+      'Enable emergency SOS alerts during rides';
+
+  @override
+  String get autoSosTimer => 'Auto SOS Timer';
+
+  @override
+  String get autoSosTimerDescription =>
+      'Automatically trigger SOS after a timer';
+
+  @override
+  String get tripSharing => 'Trip Sharing';
+
+  @override
+  String get autoShareTrip => 'Auto Share Trip';
+
+  @override
+  String get autoShareTripDescription =>
+      'Automatically share trip with trusted contacts';
+
+  @override
+  String get shareDuration => 'Share Duration';
+
+  @override
+  String get emergencyContacts => 'Emergency Contacts';
+
+  @override
+  String get pickupVerification => 'Pickup Verification';
+
+  @override
+  String get pickupOtpRequired => 'Pickup Code Required';
+
+  @override
+  String get pickupOtpRequiredDescription =>
+      'Require a code from the driver before starting trip';
+
+  @override
+  String get errorLoadingData => 'Error loading data';
+
+  @override
+  String get noTrustedContacts => 'No trusted contacts yet';
+
+  @override
+  String get addTrustedContactsDescription =>
+      'Add trusted contacts to be notified during your trips';
+
+  @override
+  String get family => 'Family';
+
+  @override
+  String get friend => 'Friend';
+
+  @override
+  String get colleague => 'Colleague';
+
+  @override
+  String get other => 'Other';
+
+  @override
+  String get call => 'Call';
+
+  @override
+  String get pushNotification => 'Push';
+
+  @override
+  String get both => 'Both';
+
+  @override
+  String get deleteContact => 'Delete Contact';
+
+  @override
+  String deleteContactConfirmation(Object name) {
+    return 'Delete $name from your trusted contacts?';
+  }
+
+  @override
+  String get editContact => 'Edit Contact';
+
+  @override
+  String get name => 'Name';
+
+  @override
+  String get emailOptional => 'Email (optional)';
+
+  @override
+  String get relationship => 'Relationship';
+
+  @override
+  String get notifyOnRide => 'Notify on ride';
+
+  @override
+  String get notifyOnRideDescription =>
+      'Get notified when this contact is on a ride';
+
+  @override
+  String get notificationMethod => 'Notification method';
+
+  @override
+  String get notificationsDisabled => 'Disabled';
+
+  @override
+  String get addLabel => 'Add';
+
+  @override
+  String get editLabel => 'Edit';
+
+  @override
+  String get saveLabel => 'Save';
+
+  @override
+  String get deleteLabel => 'Delete';
 }

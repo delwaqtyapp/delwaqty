@@ -2531,7 +2531,7 @@ abstract class AppLocalizations {
   /// No description provided for @addItem.
   ///
   /// In en, this message translates to:
-  /// **'Add Item'**
+  /// **'Add item'**
   String get addItem;
 
   /// No description provided for @removeItem.
@@ -4831,6 +4831,432 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Request Delivery'**
   String get requestDelivery;
+
+  /// No description provided for @superAdmin.
+  ///
+  /// In en, this message translates to:
+  /// **'SuperAdmin'**
+  String get superAdmin;
+
+  /// No description provided for @deliverTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Deliver to'**
+  String get deliverTo;
+
+  /// No description provided for @setMyLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Set my location'**
+  String get setMyLocation;
+
+  /// No description provided for @placeDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Describe the location or landmark'**
+  String get placeDescription;
+
+  /// No description provided for @placeDescriptionHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Example: Near the pharmacy, building 5, apartment 3'**
+  String get placeDescriptionHint;
+
+  /// No description provided for @customerPhone.
+  ///
+  /// In en, this message translates to:
+  /// **'Phone number'**
+  String get customerPhone;
+
+  /// No description provided for @customerPhoneHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Your phone number for the driver'**
+  String get customerPhoneHint;
+
+  /// No description provided for @saveNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Save number'**
+  String get saveNumber;
+
+  /// No description provided for @numberSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Phone number saved'**
+  String get numberSaved;
+
+  /// No description provided for @shoppingList.
+  ///
+  /// In en, this message translates to:
+  /// **'Shopping List'**
+  String get shoppingList;
+
+  /// No description provided for @itemName.
+  ///
+  /// In en, this message translates to:
+  /// **'Item name'**
+  String get itemName;
+
+  /// No description provided for @itemPrice.
+  ///
+  /// In en, this message translates to:
+  /// **'Estimated price'**
+  String get itemPrice;
+
+  /// No description provided for @itemQuantity.
+  ///
+  /// In en, this message translates to:
+  /// **'Quantity'**
+  String get itemQuantity;
+
+  /// No description provided for @purchaseApproval.
+  ///
+  /// In en, this message translates to:
+  /// **'Purchase Approval'**
+  String get purchaseApproval;
+
+  /// No description provided for @approvePurchase.
+  ///
+  /// In en, this message translates to:
+  /// **'Approve Purchase'**
+  String get approvePurchase;
+
+  /// No description provided for @rejectPurchase.
+  ///
+  /// In en, this message translates to:
+  /// **'Reject'**
+  String get rejectPurchase;
+
+  /// No description provided for @totalCost.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Cost'**
+  String get totalCost;
+
+  /// No description provided for @serviceFee.
+  ///
+  /// In en, this message translates to:
+  /// **'Service Fee'**
+  String get serviceFee;
+
+  /// No description provided for @grandTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'Grand Total'**
+  String get grandTotal;
+
+  /// No description provided for @invoice.
+  ///
+  /// In en, this message translates to:
+  /// **'Invoice'**
+  String get invoice;
+
+  /// No description provided for @invoiceDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Invoice Details'**
+  String get invoiceDetails;
+
+  /// No description provided for @previousOrders.
+  ///
+  /// In en, this message translates to:
+  /// **'My Previous Orders'**
+  String get previousOrders;
+
+  /// No description provided for @noPreviousOrders.
+  ///
+  /// In en, this message translates to:
+  /// **'No previous orders yet'**
+  String get noPreviousOrders;
+
+  /// No description provided for @purchaseStarted.
+  ///
+  /// In en, this message translates to:
+  /// **'Driver started purchasing'**
+  String get purchaseStarted;
+
+  /// No description provided for @purchaseStartedDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'The driver has started buying your items'**
+  String get purchaseStartedDescription;
+
+  /// No description provided for @priceListReceived.
+  ///
+  /// In en, this message translates to:
+  /// **'Price list received'**
+  String get priceListReceived;
+
+  /// No description provided for @priceListDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Please review the costs and approve'**
+  String get priceListDescription;
+
+  /// No description provided for @approveBeforePurchase.
+  ///
+  /// In en, this message translates to:
+  /// **'You must approve the purchase before the driver buys'**
+  String get approveBeforePurchase;
+
+  /// No description provided for @orderItems.
+  ///
+  /// In en, this message translates to:
+  /// **'Order Items'**
+  String get orderItems;
+
+  /// No description provided for @priceBreakdown.
+  ///
+  /// In en, this message translates to:
+  /// **'Price Breakdown'**
+  String get priceBreakdown;
+
+  /// No description provided for @deliveryCostLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivery'**
+  String get deliveryCostLabel;
+
+  /// No description provided for @serviceFeeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Service'**
+  String get serviceFeeLabel;
+
+  /// No description provided for @safety.
+  ///
+  /// In en, this message translates to:
+  /// **'Safety'**
+  String get safety;
+
+  /// No description provided for @safetySettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Safety Settings'**
+  String get safetySettings;
+
+  /// No description provided for @sosSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'SOS Settings'**
+  String get sosSettings;
+
+  /// No description provided for @sosAlertEnabled.
+  ///
+  /// In en, this message translates to:
+  /// **'SOS Alert'**
+  String get sosAlertEnabled;
+
+  /// No description provided for @sosAlertEnabledDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Enable emergency SOS alerts during rides'**
+  String get sosAlertEnabledDescription;
+
+  /// No description provided for @autoSosTimer.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto SOS Timer'**
+  String get autoSosTimer;
+
+  /// No description provided for @autoSosTimerDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Automatically trigger SOS after a timer'**
+  String get autoSosTimerDescription;
+
+  /// No description provided for @tripSharing.
+  ///
+  /// In en, this message translates to:
+  /// **'Trip Sharing'**
+  String get tripSharing;
+
+  /// No description provided for @autoShareTrip.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto Share Trip'**
+  String get autoShareTrip;
+
+  /// No description provided for @autoShareTripDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Automatically share trip with trusted contacts'**
+  String get autoShareTripDescription;
+
+  /// No description provided for @shareDuration.
+  ///
+  /// In en, this message translates to:
+  /// **'Share Duration'**
+  String get shareDuration;
+
+  /// No description provided for @emergencyContacts.
+  ///
+  /// In en, this message translates to:
+  /// **'Emergency Contacts'**
+  String get emergencyContacts;
+
+  /// No description provided for @pickupVerification.
+  ///
+  /// In en, this message translates to:
+  /// **'Pickup Verification'**
+  String get pickupVerification;
+
+  /// No description provided for @pickupOtpRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Pickup Code Required'**
+  String get pickupOtpRequired;
+
+  /// No description provided for @pickupOtpRequiredDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Require a code from the driver before starting trip'**
+  String get pickupOtpRequiredDescription;
+
+  /// No description provided for @errorLoadingData.
+  ///
+  /// In en, this message translates to:
+  /// **'Error loading data'**
+  String get errorLoadingData;
+
+  /// No description provided for @noTrustedContacts.
+  ///
+  /// In en, this message translates to:
+  /// **'No trusted contacts yet'**
+  String get noTrustedContacts;
+
+  /// No description provided for @addTrustedContactsDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Add trusted contacts to be notified during your trips'**
+  String get addTrustedContactsDescription;
+
+  /// No description provided for @family.
+  ///
+  /// In en, this message translates to:
+  /// **'Family'**
+  String get family;
+
+  /// No description provided for @friend.
+  ///
+  /// In en, this message translates to:
+  /// **'Friend'**
+  String get friend;
+
+  /// No description provided for @colleague.
+  ///
+  /// In en, this message translates to:
+  /// **'Colleague'**
+  String get colleague;
+
+  /// No description provided for @other.
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get other;
+
+  /// No description provided for @call.
+  ///
+  /// In en, this message translates to:
+  /// **'Call'**
+  String get call;
+
+  /// No description provided for @pushNotification.
+  ///
+  /// In en, this message translates to:
+  /// **'Push'**
+  String get pushNotification;
+
+  /// No description provided for @both.
+  ///
+  /// In en, this message translates to:
+  /// **'Both'**
+  String get both;
+
+  /// No description provided for @deleteContact.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Contact'**
+  String get deleteContact;
+
+  /// No description provided for @deleteContactConfirmation.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete {name} from your trusted contacts?'**
+  String deleteContactConfirmation(Object name);
+
+  /// No description provided for @editContact.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Contact'**
+  String get editContact;
+
+  /// No description provided for @name.
+  ///
+  /// In en, this message translates to:
+  /// **'Name'**
+  String get name;
+
+  /// No description provided for @emailOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'Email (optional)'**
+  String get emailOptional;
+
+  /// No description provided for @relationship.
+  ///
+  /// In en, this message translates to:
+  /// **'Relationship'**
+  String get relationship;
+
+  /// No description provided for @notifyOnRide.
+  ///
+  /// In en, this message translates to:
+  /// **'Notify on ride'**
+  String get notifyOnRide;
+
+  /// No description provided for @notifyOnRideDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Get notified when this contact is on a ride'**
+  String get notifyOnRideDescription;
+
+  /// No description provided for @notificationMethod.
+  ///
+  /// In en, this message translates to:
+  /// **'Notification method'**
+  String get notificationMethod;
+
+  /// No description provided for @notificationsDisabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Disabled'**
+  String get notificationsDisabled;
+
+  /// No description provided for @addLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Add'**
+  String get addLabel;
+
+  /// No description provided for @editLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit'**
+  String get editLabel;
+
+  /// No description provided for @saveLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get saveLabel;
+
+  /// No description provided for @deleteLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get deleteLabel;
 }
 
 class _AppLocalizationsDelegate

@@ -1284,10 +1284,10 @@ class AppLocalizationsAr extends AppLocalizations {
   String get noItems => 'لا توجد منتجات';
 
   @override
-  String get addItem => 'إضافة منتج';
+  String get addItem => 'اضف صنف';
 
   @override
-  String get removeItem => 'إزالة';
+  String get removeItem => 'حذف';
 
   @override
   String maxQuantity(Object quantity) {
@@ -2473,4 +2473,224 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get requestDelivery => 'طلب توصيل';
+
+  @override
+  String get superAdmin => 'مدير عام';
+
+  @override
+  String get deliverTo => 'وصّل الى';
+
+  @override
+  String get setMyLocation => 'حدد موقعي';
+
+  @override
+  String get placeDescription => 'اشرح عنوان المكان';
+
+  @override
+  String get placeDescriptionHint => 'مثال: جنب الصيدلية، عماره ٥، شقه ٣';
+
+  @override
+  String get customerPhone => 'رقم التليفون';
+
+  @override
+  String get customerPhoneHint => 'رقم تليفونك للسائق';
+
+  @override
+  String get saveNumber => 'حفظ الرقم';
+
+  @override
+  String get numberSaved => 'تم حفظ الرقم';
+
+  @override
+  String get shoppingList => 'قائمة التسوق';
+
+  @override
+  String get itemName => 'اسم الصنف';
+
+  @override
+  String get itemPrice => 'السعر التقديري';
+
+  @override
+  String get itemQuantity => 'العدد';
+
+  @override
+  String get purchaseApproval => 'الموافقة على الشراء';
+
+  @override
+  String get approvePurchase => 'موافقة على الشراء';
+
+  @override
+  String get rejectPurchase => 'رفض';
+
+  @override
+  String get totalCost => 'التكلفة الإجمالية';
+
+  @override
+  String get serviceFee => 'رسوم الخدمة';
+
+  @override
+  String get grandTotal => 'الإجمالي الكلي';
+
+  @override
+  String get invoice => 'الفاتورة';
+
+  @override
+  String get invoiceDetails => 'تفاصيل الفاتورة';
+
+  @override
+  String get previousOrders => 'طلباتي السابقة';
+
+  @override
+  String get noPreviousOrders => 'لا توجد طلبات سابقة';
+
+  @override
+  String get purchaseStarted => 'بدأ السائق الشراء';
+
+  @override
+  String get purchaseStartedDescription => 'السائق بدأ يشتري الأغراض بتاعتك';
+
+  @override
+  String get priceListReceived => 'استلام قائمة الأسعار';
+
+  @override
+  String get priceListDescription => 'راجع التكاليف ووافق عليها';
+
+  @override
+  String get approveBeforePurchase =>
+      'لازم توافق على الشراء قبل ما السائق يشتري';
+
+  @override
+  String get orderItems => 'أغراض الطلب';
+
+  @override
+  String get priceBreakdown => 'تفاصيل الأسعار';
+
+  @override
+  String get deliveryCostLabel => 'التوصيل';
+
+  @override
+  String get serviceFeeLabel => 'الخدمة';
+
+  @override
+  String get safety => 'الأمان';
+
+  @override
+  String get safetySettings => 'إعدادات الأمان';
+
+  @override
+  String get sosSettings => 'إعدادات الطوارئ';
+
+  @override
+  String get sosAlertEnabled => 'تنبيه الطوارئ';
+
+  @override
+  String get sosAlertEnabledDescription =>
+      'تفعيل تنبيهات الطوارئ أثناء الرحلات';
+
+  @override
+  String get autoSosTimer => 'مؤقت الطوارئ التلقائي';
+
+  @override
+  String get autoSosTimerDescription => 'تفعيل الطوارئ تلقائياً بعد مؤقت';
+
+  @override
+  String get tripSharing => 'مشاركة الرحلة';
+
+  @override
+  String get autoShareTrip => 'مشاركة الرحلة تلقائياً';
+
+  @override
+  String get autoShareTripDescription =>
+      'مشاركة الرحلة تلقائياً مع جهات الاتصال الموثوقة';
+
+  @override
+  String get shareDuration => 'مدة المشاركة';
+
+  @override
+  String get emergencyContacts => 'جهات الاتصال للطوارئ';
+
+  @override
+  String get pickupVerification => 'التحقق من الاستلام';
+
+  @override
+  String get pickupOtpRequired => 'رمز الاستلام مطلوب';
+
+  @override
+  String get pickupOtpRequiredDescription => 'طلب رمز من السائق قبل بدء الرحلة';
+
+  @override
+  String get errorLoadingData => 'خطأ في تحميل البيانات';
+
+  @override
+  String get noTrustedContacts => 'لا توجد جهات اتصال موثوقة';
+
+  @override
+  String get addTrustedContactsDescription =>
+      'أضف جهات اتصال موثوقة لتتم إخطارها أثناء رحلاتك';
+
+  @override
+  String get family => 'عائلتي';
+
+  @override
+  String get friend => 'صديق';
+
+  @override
+  String get colleague => 'زميل';
+
+  @override
+  String get other => 'آخر';
+
+  @override
+  String get call => 'مكالمة';
+
+  @override
+  String get pushNotification => 'إشعار';
+
+  @override
+  String get both => 'الاثنين';
+
+  @override
+  String get deleteContact => 'حذف جهة الاتصال';
+
+  @override
+  String deleteContactConfirmation(Object name) {
+    return 'هل تريد حذف $name من جهات اتصالك الموثوقة؟';
+  }
+
+  @override
+  String get editContact => 'تعديل جهة الاتصال';
+
+  @override
+  String get name => 'الاسم';
+
+  @override
+  String get emailOptional => 'البريد الإلكتروني (اختياري)';
+
+  @override
+  String get relationship => 'العلاقة';
+
+  @override
+  String get notifyOnRide => 'إخطار عند الرحلة';
+
+  @override
+  String get notifyOnRideDescription =>
+      'استلام إشعار عند وجود هذا الشخص في رحلة';
+
+  @override
+  String get notificationMethod => 'طريقة الإخطار';
+
+  @override
+  String get notificationsDisabled => 'معطل';
+
+  @override
+  String get addLabel => 'اضافة';
+
+  @override
+  String get editLabel => 'تعديل';
+
+  @override
+  String get saveLabel => 'حفظ';
+
+  @override
+  String get deleteLabel => 'حذف';
 }

@@ -182,9 +182,12 @@ class _AddressRow extends StatelessWidget {
           ),
         ),
         const SizedBox(width: 8),
-        Text(trailing,
-            style: theme.textTheme.bodySmall
-                ?.copyWith(fontWeight: FontWeight.w600)),
+        Flexible(
+          child: Text(trailing,
+              style: theme.textTheme.bodySmall
+                  ?.copyWith(fontWeight: FontWeight.w600),
+              overflow: TextOverflow.ellipsis),
+        ),
       ],
     );
   }

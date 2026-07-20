@@ -148,132 +148,148 @@ class _RideHistoryPageState extends ConsumerState<RideHistoryPage> {
           color: context.colorScheme.surface,
           borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
         ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Center(
-              child: Container(
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: context.colorScheme.outlineVariant,
-                  borderRadius: BorderRadius.circular(2),
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Center(
+                child: Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: context.colorScheme.outlineVariant,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
                 ),
               ),
-            ),
-            const SizedBox(height: 20),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  l10n.rideDetails,
-                  style: context.textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: (statusColors[ride.status] ?? Colors.grey).withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Text(
-                    ride.status.name.toUpperCase(),
-                    style: context.textTheme.labelSmall?.copyWith(
-                      color: statusColors[ride.status],
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 20),
-            _buildDetailRow(
-              context,
-              icon: Icons.circle,
-              iconColor: context.colorScheme.primary,
-              label: l10n.pickup,
-              value: ride.pickupAddress,
-            ),
-            const SizedBox(height: 8),
-            _buildDetailRow(
-              context,
-              icon: Icons.circle,
-              iconColor: context.colorScheme.error,
-              label: l10n.dropoff,
-              value: ride.dropoffAddress,
-            ),
-            const SizedBox(height: 16),
-            Divider(color: context.colorScheme.outlineVariant.withValues(alpha: 0.3)),
-            const SizedBox(height: 16),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                _buildDetailStat(
-                  context,
-                  label: l10n.fare,
-                  value: '${ride.fare?.toStringAsFixed(1) ?? '—'} ${l10n.currencySymbol}',
-                ),
-                _buildDetailStat(
-                  context,
-                  label: l10n.distance,
-                  value: '${ride.distance?.toStringAsFixed(1) ?? '—'} ${l10n.kmShort}',
-                ),
-                _buildDetailStat(
-                  context,
-                  label: l10n.time,
-                  value: '${ride.estimatedMinutes ?? '—'} ${l10n.minutesShort}',
-                ),
-                _buildDetailStat(
-                  context,
-                  label: l10n.type,
-                  value: ride.rideType.name.toUpperCase(),
-                ),
-              ],
-            ),
-            if (ride.driverName != null) ...[
-              const SizedBox(height: 16),
+              const SizedBox(height: 20),
               Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Icon(Icons.person_rounded, size: 18, color: context.colorScheme.primary),
-                  const SizedBox(width: 8),
-                  Text(
-                    ride.driverName!,
-                    style: context.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
-                  ),
-                  const Spacer(),
-                  if (ride.vehiclePlate != null)
-                    Text(
-                      ride.vehiclePlate!,
-                      style: context.textTheme.bodySmall?.copyWith(
-                        color: context.colorScheme.onSurfaceVariant,
-                        fontWeight: FontWeight.w700,
-                        letterSpacing: 1,
+                  Flexible(
+                    child: Text(
+                      l10n.rideDetails,
+                      style: context.textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.w800,
                       ),
                     ),
+                  ),
+                  const SizedBox(width: 8),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: (statusColors[ride.status] ?? Colors.grey).withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      ride.status.name.toUpperCase(),
+                      style: context.textTheme.labelSmall?.copyWith(
+                        color: statusColors[ride.status],
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
                 ],
               ),
-            ],
-            const SizedBox(height: 20),
-            SizedBox(
-              width: double.infinity,
-              height: 50,
-              child: OutlinedButton(
-                onPressed: () => Navigator.pop(ctx),
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: context.colorScheme.primary,
-                  side: BorderSide(
-                    color: context.colorScheme.primary.withValues(alpha: 0.3),
-                  ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14),
-                  ),
-                ),
-                child: Text(l10n.close),
+              const SizedBox(height: 20),
+              _buildDetailRow(
+                context,
+                icon: Icons.circle,
+                iconColor: context.colorScheme.primary,
+                label: l10n.pickup,
+                value: ride.pickupAddress,
               ),
-            ),
-            const SizedBox(height: 8),
-          ],
+              const SizedBox(height: 8),
+              _buildDetailRow(
+                context,
+                icon: Icons.circle,
+                iconColor: context.colorScheme.error,
+                label: l10n.dropoff,
+                value: ride.dropoffAddress,
+              ),
+              const SizedBox(height: 16),
+              Divider(color: context.colorScheme.outlineVariant.withValues(alpha: 0.3)),
+              const SizedBox(height: 16),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  Expanded(
+                    child: _buildDetailStat(
+                      context,
+                      label: l10n.fare,
+                      value: '${ride.fare?.toStringAsFixed(1) ?? '—'} ${l10n.currencySymbol}',
+                    ),
+                  ),
+                  Expanded(
+                    child: _buildDetailStat(
+                      context,
+                      label: l10n.distance,
+                      value: '${ride.distance?.toStringAsFixed(1) ?? '—'} ${l10n.kmShort}',
+                    ),
+                  ),
+                  Expanded(
+                    child: _buildDetailStat(
+                      context,
+                      label: l10n.time,
+                      value: '${ride.estimatedMinutes ?? '—'} ${l10n.minutesShort}',
+                    ),
+                  ),
+                  Expanded(
+                    child: _buildDetailStat(
+                      context,
+                      label: l10n.type,
+                      value: ride.rideType.name.toUpperCase(),
+                    ),
+                  ),
+                ],
+              ),
+              if (ride.driverName != null) ...[
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    Icon(Icons.person_rounded, size: 18, color: context.colorScheme.primary),
+                    const SizedBox(width: 8),
+                    Flexible(
+                      child: Text(
+                        ride.driverName!,
+                        style: context.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    const Spacer(),
+                    if (ride.vehiclePlate != null)
+                      Text(
+                        ride.vehiclePlate!,
+                        style: context.textTheme.bodySmall?.copyWith(
+                          color: context.colorScheme.onSurfaceVariant,
+                          fontWeight: FontWeight.w700,
+                          letterSpacing: 1,
+                        ),
+                      ),
+                  ],
+                ),
+              ],
+              const SizedBox(height: 20),
+              SizedBox(
+                width: double.infinity,
+                height: 50,
+                child: OutlinedButton(
+                  onPressed: () => Navigator.pop(ctx),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: context.colorScheme.primary,
+                    side: BorderSide(
+                      color: context.colorScheme.primary.withValues(alpha: 0.3),
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                  ),
+                  child: Text(l10n.close),
+                ),
+              ),
+              const SizedBox(height: 8),
+            ],
+          ),
         ),
       ),
     );

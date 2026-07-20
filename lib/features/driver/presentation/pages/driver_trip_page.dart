@@ -134,9 +134,11 @@ class _ActiveTripViewState extends ConsumerState<_ActiveTripView> {
             borderRadius: BorderRadius.circular(12),
           ),
           child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(l10n.estimatedEarnings),
+              Flexible(
+                child: Text(l10n.estimatedEarnings),
+              ),
+              const SizedBox(width: 8),
               Text(
                 l10n.amountWithCurrency(
                     (ride.fare ?? 0).toStringAsFixed(0), l10n.currencySymbol),
@@ -150,9 +152,11 @@ class _ActiveTripViewState extends ConsumerState<_ActiveTripView> {
         OutlinedButton.icon(
           onPressed: () {},
           icon: const Icon(Icons.navigation_rounded),
-          label: Text('${l10n.navigate} '
-              '(${destination.latitude.toStringAsFixed(4)}, '
-              '${destination.longitude.toStringAsFixed(4)})'),
+          label: Text(
+            '${l10n.navigate}',
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
         ),
         const SizedBox(height: 12),
         if (ride.status == RideStatus.matched)

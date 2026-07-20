@@ -442,14 +442,21 @@ class _ReceiptRow extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(label,
-              style: theme.textTheme.bodyMedium?.copyWith(
-                fontWeight: bold ? FontWeight.bold : FontWeight.normal,
-              )),
-          Text(value,
-              style: theme.textTheme.bodyMedium?.copyWith(
-                fontWeight: bold ? FontWeight.bold : FontWeight.normal,
-              )),
+          Flexible(
+            child: Text(label,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  fontWeight: bold ? FontWeight.bold : FontWeight.normal,
+                ),
+                overflow: TextOverflow.ellipsis),
+          ),
+          const SizedBox(width: 8),
+          Flexible(
+            child: Text(value,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  fontWeight: bold ? FontWeight.bold : FontWeight.normal,
+                ),
+                overflow: TextOverflow.ellipsis),
+          ),
         ],
       ),
     );

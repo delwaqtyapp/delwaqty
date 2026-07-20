@@ -496,7 +496,10 @@ class _DeliveryOfferDialogState extends State<_DeliveryOfferDialog>
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('${offer.distanceKm.toStringAsFixed(1)} km'),
+              Flexible(
+                child: Text('${offer.distanceKm.toStringAsFixed(1)} km'),
+              ),
+              const SizedBox(width: 8),
               Text(
                 l10n.amountWithCurrency(
                     offer.fare.toStringAsFixed(0), offer.currency),

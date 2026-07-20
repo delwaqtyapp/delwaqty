@@ -111,17 +111,15 @@ class TrustedContactsPage extends ConsumerWidget {
             if (contact.email != null)
               Text(contact.email!, style: TextStyle(color: Colors.grey[500], fontSize: 12)),
             const SizedBox(height: 4),
-            Row(
+            Wrap(
+              spacing: 6,
+              runSpacing: 4,
               children: [
-                if (relationshipLabel.isNotEmpty) ...[
+                if (relationshipLabel.isNotEmpty)
                   _buildChip(relationshipLabel, Colors.blue),
-                  const SizedBox(width: 6),
-                ],
                 _buildChip(prefLabel, Colors.green),
-                if (!contact.notifyOnRide) ...[
-                  const SizedBox(width: 6),
+                if (!contact.notifyOnRide)
                   _buildChip(l10n.notificationsDisabled, Colors.orange),
-                ],
               ],
             ),
           ],

@@ -269,11 +269,14 @@ class _TransactionTile extends StatelessWidget {
                 ],
               ),
             ),
-            Text(
-              '${isCredit ? '+' : '-'}${l10n.amountWithCurrency(transaction.amount.toStringAsFixed(2), l10n.currencySymbol)}',
-              style: theme.textTheme.bodyMedium?.copyWith(
-                fontWeight: FontWeight.w700,
-                color: isCredit ? Colors.green.shade700 : theme.colorScheme.error,
+            Flexible(
+              child: Text(
+                '${isCredit ? '+' : '-'}${l10n.amountWithCurrency(transaction.amount.toStringAsFixed(2), l10n.currencySymbol)}',
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  fontWeight: FontWeight.w700,
+                  color: isCredit ? Colors.green.shade700 : theme.colorScheme.error,
+                ),
+                overflow: TextOverflow.ellipsis,
               ),
             ),
           ],

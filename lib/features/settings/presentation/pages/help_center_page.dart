@@ -25,51 +25,33 @@ class HelpCenterPage extends StatelessWidget {
           _buildSection(context, l10n, [
             _buildFaq(
               context,
-              question: 'How to place an order?',
-              answer:
-                  'Simply browse restaurants or stores near you, add items to your cart, '
-                  'confirm your delivery address, and tap Place Order. You can pay with '
-                  'cash, wallet, or card depending on availability.',
+              question: l10n.faqQuestion1,
+              answer: l10n.faqAnswer1,
             ),
             _buildFaq(
               context,
-              question: 'How to track my order?',
-              answer:
-                  'Once your order is confirmed, you can track it in real-time from the '
-                  'Orders tab. You will see the driver location, estimated arrival time, '
-                  'and status updates at each step of the delivery.',
+              question: l10n.faqQuestion2,
+              answer: l10n.faqAnswer2,
             ),
             _buildFaq(
               context,
-              question: 'How to become a driver?',
-              answer:
-                  'Tap on the Driver option in the app and complete the registration form. '
-                  'You will need to provide your ID, vehicle information, and driving license. '
-                  'After verification, you can start accepting ride and delivery requests.',
+              question: l10n.faqQuestion3,
+              answer: l10n.faqAnswer3,
             ),
             _buildFaq(
               context,
-              question: 'How to add money to wallet?',
-              answer:
-                  'Go to the Wallet section from the sidebar menu and tap Top Up. '
-                  'Choose your preferred payment method and enter the amount. '
-                  'Your balance will be updated instantly after successful payment.',
+              question: l10n.faqQuestion4,
+              answer: l10n.faqAnswer4,
             ),
             _buildFaq(
               context,
-              question: 'How to contact support?',
-              answer:
-                  'You can reach our support team by emailing support@delwaqty.com or '
-                  'through the Contact Us section in the app. Our team is available '
-                  '24/7 to assist you with any issues or questions.',
+              question: l10n.faqQuestion5,
+              answer: l10n.faqAnswer5,
             ),
             _buildFaq(
               context,
-              question: 'How to report a problem?',
-              answer:
-                  'Go to your order history, select the relevant order, and tap '
-                  'Report Problem. Choose the issue category, add a description, '
-                  'and our team will review and respond as quickly as possible.',
+              question: l10n.faqQuestion6,
+              answer: l10n.faqAnswer6,
             ),
           ]),
           const SizedBox(height: 32),

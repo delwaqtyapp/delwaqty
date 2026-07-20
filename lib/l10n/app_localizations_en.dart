@@ -3036,4 +3036,160 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get typeOther => 'Other';
+
+  @override
+  String get tosLastUpdated => 'Last updated: January 1, 2025';
+
+  @override
+  String get tosSection1Title => '1. Acceptance of Terms';
+
+  @override
+  String get tosSection1Body =>
+      'By accessing or using the Delwaqty application and services, you agree to be bound by these Terms of Service. If you do not agree to these terms, please do not use our services. We reserve the right to modify these terms at any time, and continued use of the service constitutes acceptance of any changes.';
+
+  @override
+  String get tosSection2Title => '2. Service Description';
+
+  @override
+  String get tosSection2Body =>
+      'Delwaqty provides an on-demand platform connecting users with local restaurants, stores, and drivers for food delivery, package delivery, and ride-hailing services. We act as an intermediary between customers and service providers and do not directly provide delivery or transportation services ourselves.';
+
+  @override
+  String get tosSection3Title => '3. User Accounts';
+
+  @override
+  String get tosSection3Body =>
+      'You must create an account to use Delwaqty services. You are responsible for maintaining the confidentiality of your account credentials and for all activities that occur under your account. You agree to provide accurate and complete information during registration and to keep your account information up to date. You must be at least 18 years old to create an account.';
+
+  @override
+  String get tosSection4Title => '4. Orders & Payments';
+
+  @override
+  String get tosSection4Body =>
+      'When you place an order through Delwaqty, you agree to pay the total amount shown at checkout, including the item price, delivery fee, service fee, and any applicable taxes. Payments can be made via cash, credit/debit card, or your Delwaqty wallet. Prices may vary based on location, demand, and promotional offers. Refunds are subject to our refund policy.';
+
+  @override
+  String get tosSection5Title => '5. Ride & Delivery';
+
+  @override
+  String get tosSection5Body =>
+      'Ride and delivery services are provided by independent drivers and merchants. Delwaqty facilitates the connection but is not responsible for the quality, safety, or legality of the services provided. Estimated delivery and arrival times are approximate and not guaranteed. Users must provide accurate pickup and drop-off locations.';
+
+  @override
+  String get tosSection6Title => '6. Privacy';
+
+  @override
+  String get tosSection6Body =>
+      'Your use of Delwaqty is also governed by our Privacy Policy. By using our services, you consent to the collection and use of your personal information as described in the Privacy Policy. We collect data necessary to provide and improve our services, including location data for delivery and ride services.';
+
+  @override
+  String get tosSection7Title => '7. Limitation of Liability';
+
+  @override
+  String get tosSection7Body =>
+      'To the maximum extent permitted by law, Delwaqty shall not be liable for any indirect, incidental, special, or consequential damages arising out of or in connection with your use of our services. Our total liability shall not exceed the amount you paid for the specific service giving rise to the claim. We are not liable for delays, cancellations, or quality issues caused by third-party providers.';
+
+  @override
+  String get ppLastUpdated => 'Last updated: January 1, 2025';
+
+  @override
+  String get ppSection1Title => '1. Information We Collect';
+
+  @override
+  String get ppSection1Body =>
+      'We collect information you provide directly, including your name, email address, phone number, payment information, and delivery addresses. We also collect device information such as your device type, operating system, and unique device identifiers. When you use our services, we automatically collect location data and usage information such as order history and preferences.';
+
+  @override
+  String get ppSection2Title => '2. How We Use Your Information';
+
+  @override
+  String get ppSection2Body =>
+      'We use your information to provide, maintain, and improve our services, process transactions, send order updates and notifications, personalize your experience, detect and prevent fraud, and communicate with you about promotions and updates. We may also use aggregated and anonymized data for analytics and service improvement.';
+
+  @override
+  String get ppSection3Title => '3. Location Data';
+
+  @override
+  String get ppSection3Body =>
+      'Delwaqty collects and uses your location data to provide delivery and ride-hailing services. We access your location in the foreground when you request a service and may collect approximate location in the background for service optimization. You can control location access through your device settings, but disabling location may limit the functionality of our services.';
+
+  @override
+  String get ppSection4Title => '4. Data Sharing';
+
+  @override
+  String get ppSection4Body =>
+      'We share your information with drivers and merchants only as necessary to fulfill your orders (e.g., your name and delivery address for delivery, pickup location for rides). We may share data with payment processors, cloud service providers, and analytics services. We do not sell your personal information to third parties for their marketing purposes.';
+
+  @override
+  String get ppSection5Title => '5. Data Security';
+
+  @override
+  String get ppSection5Body =>
+      'We implement industry-standard security measures to protect your personal information, including encryption in transit and at rest, secure servers, and regular security audits. While we strive to protect your data, no method of electronic transmission or storage is 100% secure, and we cannot guarantee absolute security.';
+
+  @override
+  String get ppSection6Title => '6. Your Rights';
+
+  @override
+  String get ppSection6Body =>
+      'You have the right to access, correct, or delete your personal information at any time through the app settings. You can also request a copy of your data, opt out of marketing communications, and control your privacy preferences. To exercise these rights, contact us at support@delwaqty.com.';
+
+  @override
+  String get ppSection7Title => '7. Children\'s Privacy';
+
+  @override
+  String get ppSection7Body =>
+      'Delwaqty services are not intended for individuals under the age of 18. We do not knowingly collect personal information from children. If we become aware that a child has provided us with personal information, we will take steps to delete such information promptly.';
+
+  @override
+  String get ppSection8Title => '8. Changes to Policy';
+
+  @override
+  String get ppSection8Body =>
+      'We may update this Privacy Policy from time to time to reflect changes in our practices or legal requirements. We will notify you of any material changes by posting the updated policy in the app and via email or push notification. Your continued use of the service after changes constitutes acceptance of the updated policy.';
+
+  @override
+  String get helpSection => 'Frequently Asked Questions';
+
+  @override
+  String get faqQuestion1 => 'How to place an order?';
+
+  @override
+  String get faqAnswer1 =>
+      'Simply browse restaurants or stores near you, add items to your cart, confirm your delivery address, and tap Place Order. You can pay with cash, wallet, or card depending on availability.';
+
+  @override
+  String get faqQuestion2 => 'How to track my order?';
+
+  @override
+  String get faqAnswer2 =>
+      'Once your order is confirmed, you can track it in real-time from the Orders tab. You will see the driver location, estimated arrival time, and status updates at each step of the delivery.';
+
+  @override
+  String get faqQuestion3 => 'How to become a driver?';
+
+  @override
+  String get faqAnswer3 =>
+      'Tap on the Driver option in the app and complete the registration form. You will need to provide your ID, vehicle information, and driving license. After verification, you can start accepting ride and delivery requests.';
+
+  @override
+  String get faqQuestion4 => 'How to add money to wallet?';
+
+  @override
+  String get faqAnswer4 =>
+      'Go to the Wallet section from the sidebar menu and tap Top Up. Choose your preferred payment method and enter the amount. Your balance will be updated instantly after successful payment.';
+
+  @override
+  String get faqQuestion5 => 'How to contact support?';
+
+  @override
+  String get faqAnswer5 =>
+      'You can reach our support team by emailing support@delwaqty.com or through the Contact Us section in the app. Our team is available 24/7 to assist you with any issues or questions.';
+
+  @override
+  String get faqQuestion6 => 'How to report a problem?';
+
+  @override
+  String get faqAnswer6 =>
+      'Go to your order history, select the relevant order, and tap Report Problem. Choose the issue category, add a description, and our team will review and respond as quickly as possible.';
 }

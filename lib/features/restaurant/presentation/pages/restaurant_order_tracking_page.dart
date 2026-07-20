@@ -154,10 +154,13 @@ class _TrackingTile extends StatelessWidget {
                               ),
                             ),
                           ),
-                          Text(
-                            _formatTime(entry.createdAt),
-                            style: textTheme.bodySmall?.copyWith(
-                              color: colorScheme.onSurfaceVariant,
+                          Flexible(
+                            child: Text(
+                              _formatTime(entry.createdAt),
+                              style: textTheme.bodySmall?.copyWith(
+                                color: colorScheme.onSurfaceVariant,
+                              ),
+                              overflow: TextOverflow.ellipsis,
                             ),
                           ),
                         ],

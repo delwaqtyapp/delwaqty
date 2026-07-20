@@ -148,12 +148,15 @@ class _GlassSection extends StatelessWidget {
                 children: [
                   Icon(icon, size: 20, color: AppColors.primaryLight),
                   const SizedBox(width: 8),
-                  Text(
-                    title,
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 15,
-                      color: AppColors.primaryLight,
+                  Flexible(
+                    child: Text(
+                      title,
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 15,
+                        color: AppColors.primaryLight,
+                      ),
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ),
                 ],

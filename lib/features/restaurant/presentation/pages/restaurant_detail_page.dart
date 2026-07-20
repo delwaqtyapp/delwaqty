@@ -292,6 +292,7 @@ class _RestaurantDetailPageState extends ConsumerState<RestaurantDetailPage> {
                   if (merchant.isVerified) ...[
                     const SizedBox(height: 4),
                     Row(
+                      mainAxisSize: MainAxisSize.min,
                       children: [
                         Icon(Icons.verified, size: 16, color: theme.colorScheme.primary),
                         const SizedBox(width: 4),
@@ -535,7 +536,9 @@ class _RestaurantDetailPageState extends ConsumerState<RestaurantDetailPage> {
             children: [
               Icon(Icons.share_outlined, size: 20, color: theme.colorScheme.primary),
               const SizedBox(width: 12),
-              Text(l10n.shareRestaurant, style: theme.textTheme.bodyMedium),
+              Flexible(
+                child: Text(l10n.shareRestaurant, style: theme.textTheme.bodyMedium),
+              ),
             ],
           ),
         ),

@@ -207,9 +207,12 @@ class SafetyHubPage extends ConsumerWidget {
       children: [
         Icon(icon, size: 20, color: AppColors.primaryLight),
         const SizedBox(width: 8),
-        Text(
-          title,
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: cs.onSurface),
+        Flexible(
+          child: Text(
+            title,
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: cs.onSurface),
+            overflow: TextOverflow.ellipsis,
+          ),
         ),
       ],
     );

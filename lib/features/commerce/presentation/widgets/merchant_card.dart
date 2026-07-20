@@ -202,18 +202,24 @@ class MerchantCard extends StatelessWidget {
                           color: Colors.grey,
                         ),
                         const SizedBox(width: 4),
-                        Text(
-                          merchant.estimatedDeliveryMinutes != null
-                              ? '${merchant.estimatedDeliveryMinutes} ${l10n.minutesShort}'
-                              : l10n.delivery,
-                          style: theme.textTheme.bodySmall,
+                        Flexible(
+                          child: Text(
+                            merchant.estimatedDeliveryMinutes != null
+                                ? '${merchant.estimatedDeliveryMinutes} ${l10n.minutesShort}'
+                                : l10n.delivery,
+                            style: theme.textTheme.bodySmall,
+                            overflow: TextOverflow.ellipsis,
+                          ),
                         ),
                         if (merchant.deliveryFee != null) ...[
                           const SizedBox(width: 8),
-                          Text(
-                            '${merchant.deliveryFee!.toStringAsFixed(0)} ${l10n.currencySymbol}',
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              color: Theme.of(context).colorScheme.primary,
+                          Flexible(
+                            child: Text(
+                              '${merchant.deliveryFee!.toStringAsFixed(0)} ${l10n.currencySymbol}',
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: Theme.of(context).colorScheme.primary,
+                              ),
+                              overflow: TextOverflow.ellipsis,
                             ),
                           ),
                         ],

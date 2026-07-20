@@ -172,9 +172,9 @@ class SettingsPage extends ConsumerWidget {
       leading: const Icon(Icons.language_rounded),
       title: Text(l10n.language),
       trailing: SegmentedButton<String>(
-        segments: const [
-          ButtonSegment(value: 'en', label: Text('EN')),
-          ButtonSegment(value: 'ar', label: Text('عر')),
+        segments: [
+          ButtonSegment(value: 'en', label: Text(l10n.englishAbbreviation)),
+          ButtonSegment(value: 'ar', label: Text(l10n.arabicAbbreviation)),
         ],
         selected: {locale.languageCode},
         onSelectionChanged: (selected) {

@@ -9,7 +9,7 @@ class WalletBalance with _$WalletBalance {
     required String id,
     required String userId,
     @Default(0.0) double balance,
-    @Default('SAR') String currency,
+    @Default('ج.م') String currency,
     required DateTime updatedAt,
   }) = _WalletBalance;
 

@@ -1097,7 +1097,7 @@ abstract class AppLocalizations {
   /// No description provided for @sar.
   ///
   /// In en, this message translates to:
-  /// **'SAR'**
+  /// **'ج.م'**
   String get sar;
 
   /// No description provided for @searchRestaurants.
@@ -1129,6 +1129,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Free Delivery'**
   String get freeDelivery;
+
+  /// No description provided for @minOrder.
+  ///
+  /// In en, this message translates to:
+  /// **'Min'**
+  String get minOrder;
 
   /// No description provided for @highestRated.
   ///
@@ -3407,7 +3413,7 @@ abstract class AppLocalizations {
   /// No description provided for @currencySymbol.
   ///
   /// In en, this message translates to:
-  /// **'EGP'**
+  /// **'ج.م'**
   String get currencySymbol;
 
   /// No description provided for @amountWithCurrency.
@@ -5545,6 +5551,348 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Trip Instructions'**
   String get tripInstructions;
+
+  /// No description provided for @yesterday.
+  ///
+  /// In en, this message translates to:
+  /// **'Yesterday'**
+  String get yesterday;
+
+  /// No description provided for @arabicLanguageName.
+  ///
+  /// In en, this message translates to:
+  /// **'العربية'**
+  String get arabicLanguageName;
+
+  /// No description provided for @englishLanguageName.
+  ///
+  /// In en, this message translates to:
+  /// **'English'**
+  String get englishLanguageName;
+
+  /// No description provided for @arabicAbbreviation.
+  ///
+  /// In en, this message translates to:
+  /// **'عر'**
+  String get arabicAbbreviation;
+
+  /// No description provided for @englishAbbreviation.
+  ///
+  /// In en, this message translates to:
+  /// **'EN'**
+  String get englishAbbreviation;
+
+  /// No description provided for @aboutDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Delwaqty is your all-in-one delivery and ride-hailing platform. We connect you with the best restaurants, stores, and drivers in your area for fast and reliable service.'**
+  String get aboutDescription;
+
+  /// No description provided for @supportEmailAddress.
+  ///
+  /// In en, this message translates to:
+  /// **'support@delwaqty.com'**
+  String get supportEmailAddress;
+
+  /// No description provided for @driverManagement.
+  ///
+  /// In en, this message translates to:
+  /// **'Driver Management'**
+  String get driverManagement;
+
+  /// No description provided for @active.
+  ///
+  /// In en, this message translates to:
+  /// **'Active'**
+  String get active;
+
+  /// No description provided for @searchDrivers.
+  ///
+  /// In en, this message translates to:
+  /// **'Search by name or phone...'**
+  String get searchDrivers;
+
+  /// No description provided for @noAdminDriversFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No drivers found'**
+  String get noAdminDriversFound;
+
+  /// No description provided for @noDriversMatch.
+  ///
+  /// In en, this message translates to:
+  /// **'No drivers match your search criteria.'**
+  String get noDriversMatch;
+
+  /// No description provided for @suspended.
+  ///
+  /// In en, this message translates to:
+  /// **'Suspended'**
+  String get suspended;
+
+  /// No description provided for @tripsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'trips'**
+  String get tripsLabel;
+
+  /// No description provided for @plateLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Plate:'**
+  String get plateLabel;
+
+  /// No description provided for @rideMonitoring.
+  ///
+  /// In en, this message translates to:
+  /// **'Ride Monitoring'**
+  String get rideMonitoring;
+
+  /// No description provided for @searching.
+  ///
+  /// In en, this message translates to:
+  /// **'Searching'**
+  String get searching;
+
+  /// No description provided for @matchedRide.
+  ///
+  /// In en, this message translates to:
+  /// **'Matched'**
+  String get matchedRide;
+
+  /// No description provided for @completed.
+  ///
+  /// In en, this message translates to:
+  /// **'Completed'**
+  String get completed;
+
+  /// No description provided for @noRidesFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No rides found'**
+  String get noRidesFound;
+
+  /// No description provided for @noRidesCreated.
+  ///
+  /// In en, this message translates to:
+  /// **'No rides have been created yet.'**
+  String get noRidesCreated;
+
+  /// No description provided for @noRidesSelectedStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'No rides with the selected status.'**
+  String get noRidesSelectedStatus;
+
+  /// No description provided for @rideNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Ride #'**
+  String get rideNumber;
+
+  /// No description provided for @assigned.
+  ///
+  /// In en, this message translates to:
+  /// **'Assigned'**
+  String get assigned;
+
+  /// No description provided for @passenger.
+  ///
+  /// In en, this message translates to:
+  /// **'Passenger'**
+  String get passenger;
+
+  /// No description provided for @deliveryManagement.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivery Management'**
+  String get deliveryManagement;
+
+  /// No description provided for @food.
+  ///
+  /// In en, this message translates to:
+  /// **'Food'**
+  String get food;
+
+  /// No description provided for @parcel.
+  ///
+  /// In en, this message translates to:
+  /// **'Parcel'**
+  String get parcel;
+
+  /// No description provided for @package.
+  ///
+  /// In en, this message translates to:
+  /// **'Package'**
+  String get package;
+
+  /// No description provided for @noDeliveriesFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No deliveries found'**
+  String get noDeliveriesFound;
+
+  /// No description provided for @noDeliveriesCreated.
+  ///
+  /// In en, this message translates to:
+  /// **'No deliveries have been created yet.'**
+  String get noDeliveriesCreated;
+
+  /// No description provided for @noDeliveriesSelectedType.
+  ///
+  /// In en, this message translates to:
+  /// **'No deliveries with the selected service type.'**
+  String get noDeliveriesSelectedType;
+
+  /// No description provided for @deliveryNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivery #'**
+  String get deliveryNumber;
+
+  /// No description provided for @from.
+  ///
+  /// In en, this message translates to:
+  /// **'From'**
+  String get from;
+
+  /// No description provided for @to.
+  ///
+  /// In en, this message translates to:
+  /// **'To'**
+  String get to;
+
+  /// No description provided for @updateStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Update Status'**
+  String get updateStatus;
+
+  /// No description provided for @markPickedUp.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark Picked Up'**
+  String get markPickedUp;
+
+  /// No description provided for @revenueOverview.
+  ///
+  /// In en, this message translates to:
+  /// **'Revenue Overview'**
+  String get revenueOverview;
+
+  /// No description provided for @revenueChart.
+  ///
+  /// In en, this message translates to:
+  /// **'Revenue Chart'**
+  String get revenueChart;
+
+  /// No description provided for @orderTrends.
+  ///
+  /// In en, this message translates to:
+  /// **'Order Trends'**
+  String get orderTrends;
+
+  /// No description provided for @zeroOrdersToday.
+  ///
+  /// In en, this message translates to:
+  /// **'0 orders today'**
+  String get zeroOrdersToday;
+
+  /// No description provided for @peakHours.
+  ///
+  /// In en, this message translates to:
+  /// **'Peak Hours'**
+  String get peakHours;
+
+  /// No description provided for @topMerchants.
+  ///
+  /// In en, this message translates to:
+  /// **'Top Merchants'**
+  String get topMerchants;
+
+  /// No description provided for @noDataYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No data yet'**
+  String get noDataYet;
+
+  /// No description provided for @merchantPerformancePlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Merchant performance data will appear here.'**
+  String get merchantPerformancePlaceholder;
+
+  /// No description provided for @driverPerformance.
+  ///
+  /// In en, this message translates to:
+  /// **'Driver Performance'**
+  String get driverPerformance;
+
+  /// No description provided for @driverPerformancePlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Driver performance metrics will appear here.'**
+  String get driverPerformancePlaceholder;
+
+  /// No description provided for @typeRestaurant.
+  ///
+  /// In en, this message translates to:
+  /// **'Restaurant'**
+  String get typeRestaurant;
+
+  /// No description provided for @typeGrocery.
+  ///
+  /// In en, this message translates to:
+  /// **'Grocery'**
+  String get typeGrocery;
+
+  /// No description provided for @typePharmacy.
+  ///
+  /// In en, this message translates to:
+  /// **'Pharmacy'**
+  String get typePharmacy;
+
+  /// No description provided for @typeFlowers.
+  ///
+  /// In en, this message translates to:
+  /// **'Flowers'**
+  String get typeFlowers;
+
+  /// No description provided for @typeBakery.
+  ///
+  /// In en, this message translates to:
+  /// **'Bakery'**
+  String get typeBakery;
+
+  /// No description provided for @typeElectronics.
+  ///
+  /// In en, this message translates to:
+  /// **'Electronics'**
+  String get typeElectronics;
+
+  /// No description provided for @typeFurniture.
+  ///
+  /// In en, this message translates to:
+  /// **'Furniture'**
+  String get typeFurniture;
+
+  /// No description provided for @typeFashion.
+  ///
+  /// In en, this message translates to:
+  /// **'Fashion'**
+  String get typeFashion;
+
+  /// No description provided for @typeHomeServices.
+  ///
+  /// In en, this message translates to:
+  /// **'Home Services'**
+  String get typeHomeServices;
+
+  /// No description provided for @typeOther.
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get typeOther;
 }
 
 class _AppLocalizationsDelegate

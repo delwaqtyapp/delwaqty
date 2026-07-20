@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:delwaqty/l10n/app_localizations.dart';
 
 class DeliveryInfo extends StatelessWidget {
   const DeliveryInfo({
@@ -15,6 +16,7 @@ class DeliveryInfo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context);
 
     return Wrap(
       spacing: 16,
@@ -26,7 +28,10 @@ class DeliveryInfo extends StatelessWidget {
             children: [
               const Icon(Icons.access_time, size: 16, color: Colors.grey),
               const SizedBox(width: 4),
-              Text('$estimatedMinutes min', style: theme.textTheme.bodySmall),
+              Text(
+                '$estimatedMinutes ${l10n.minutesShort}',
+                style: theme.textTheme.bodySmall,
+              ),
             ],
           ),
         if (deliveryFee != null)
@@ -37,8 +42,8 @@ class DeliveryInfo extends StatelessWidget {
               const SizedBox(width: 4),
               Text(
                 deliveryFee == 0
-                    ? 'Free delivery'
-                    : '${deliveryFee!.toStringAsFixed(0)} SAR',
+                    ? l10n.freeDelivery
+                    : '${deliveryFee!.toStringAsFixed(0)} ${l10n.currencySymbol}',
                 style: theme.textTheme.bodySmall,
               ),
             ],
@@ -54,7 +59,7 @@ class DeliveryInfo extends StatelessWidget {
               ),
               const SizedBox(width: 4),
               Text(
-                'Min ${minimumOrder!.toStringAsFixed(0)} SAR',
+                '${l10n.minOrder} ${minimumOrder!.toStringAsFixed(0)} ${l10n.currencySymbol}',
                 style: theme.textTheme.bodySmall,
               ),
             ],

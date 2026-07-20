@@ -527,7 +527,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get itemCountOther => 'items';
 
   @override
-  String get sar => 'SAR';
+  String get sar => 'ج.م';
 
   @override
   String get searchRestaurants => 'Search restaurants...';
@@ -543,6 +543,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get freeDelivery => 'Free Delivery';
+
+  @override
+  String get minOrder => 'Min';
 
   @override
   String get highestRated => 'Highest Rated';
@@ -1748,7 +1751,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get justNow => 'Just now';
 
   @override
-  String get currencySymbol => 'EGP';
+  String get currencySymbol => 'ج.م';
 
   @override
   String amountWithCurrency(Object amount, Object currency) {
@@ -2858,4 +2861,179 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get tripInstructions => 'Trip Instructions';
+
+  @override
+  String get yesterday => 'Yesterday';
+
+  @override
+  String get arabicLanguageName => 'العربية';
+
+  @override
+  String get englishLanguageName => 'English';
+
+  @override
+  String get arabicAbbreviation => 'عر';
+
+  @override
+  String get englishAbbreviation => 'EN';
+
+  @override
+  String get aboutDescription =>
+      'Delwaqty is your all-in-one delivery and ride-hailing platform. We connect you with the best restaurants, stores, and drivers in your area for fast and reliable service.';
+
+  @override
+  String get supportEmailAddress => 'support@delwaqty.com';
+
+  @override
+  String get driverManagement => 'Driver Management';
+
+  @override
+  String get active => 'Active';
+
+  @override
+  String get searchDrivers => 'Search by name or phone...';
+
+  @override
+  String get noAdminDriversFound => 'No drivers found';
+
+  @override
+  String get noDriversMatch => 'No drivers match your search criteria.';
+
+  @override
+  String get suspended => 'Suspended';
+
+  @override
+  String get tripsLabel => 'trips';
+
+  @override
+  String get plateLabel => 'Plate:';
+
+  @override
+  String get rideMonitoring => 'Ride Monitoring';
+
+  @override
+  String get searching => 'Searching';
+
+  @override
+  String get matchedRide => 'Matched';
+
+  @override
+  String get completed => 'Completed';
+
+  @override
+  String get noRidesFound => 'No rides found';
+
+  @override
+  String get noRidesCreated => 'No rides have been created yet.';
+
+  @override
+  String get noRidesSelectedStatus => 'No rides with the selected status.';
+
+  @override
+  String get rideNumber => 'Ride #';
+
+  @override
+  String get assigned => 'Assigned';
+
+  @override
+  String get passenger => 'Passenger';
+
+  @override
+  String get deliveryManagement => 'Delivery Management';
+
+  @override
+  String get food => 'Food';
+
+  @override
+  String get parcel => 'Parcel';
+
+  @override
+  String get package => 'Package';
+
+  @override
+  String get noDeliveriesFound => 'No deliveries found';
+
+  @override
+  String get noDeliveriesCreated => 'No deliveries have been created yet.';
+
+  @override
+  String get noDeliveriesSelectedType =>
+      'No deliveries with the selected service type.';
+
+  @override
+  String get deliveryNumber => 'Delivery #';
+
+  @override
+  String get from => 'From';
+
+  @override
+  String get to => 'To';
+
+  @override
+  String get updateStatus => 'Update Status';
+
+  @override
+  String get markPickedUp => 'Mark Picked Up';
+
+  @override
+  String get revenueOverview => 'Revenue Overview';
+
+  @override
+  String get revenueChart => 'Revenue Chart';
+
+  @override
+  String get orderTrends => 'Order Trends';
+
+  @override
+  String get zeroOrdersToday => '0 orders today';
+
+  @override
+  String get peakHours => 'Peak Hours';
+
+  @override
+  String get topMerchants => 'Top Merchants';
+
+  @override
+  String get noDataYet => 'No data yet';
+
+  @override
+  String get merchantPerformancePlaceholder =>
+      'Merchant performance data will appear here.';
+
+  @override
+  String get driverPerformance => 'Driver Performance';
+
+  @override
+  String get driverPerformancePlaceholder =>
+      'Driver performance metrics will appear here.';
+
+  @override
+  String get typeRestaurant => 'Restaurant';
+
+  @override
+  String get typeGrocery => 'Grocery';
+
+  @override
+  String get typePharmacy => 'Pharmacy';
+
+  @override
+  String get typeFlowers => 'Flowers';
+
+  @override
+  String get typeBakery => 'Bakery';
+
+  @override
+  String get typeElectronics => 'Electronics';
+
+  @override
+  String get typeFurniture => 'Furniture';
+
+  @override
+  String get typeFashion => 'Fashion';
+
+  @override
+  String get typeHomeServices => 'Home Services';
+
+  @override
+  String get typeOther => 'Other';
 }

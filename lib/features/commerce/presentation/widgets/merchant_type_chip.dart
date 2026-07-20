@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:delwaqty/features/commerce/domain/entities/merchant.dart';
 import 'package:delwaqty/core/theme/app_colors.dart';
+import 'package:delwaqty/l10n/app_localizations.dart';
 
 class MerchantTypeChip extends StatelessWidget {
   const MerchantTypeChip({required this.type, this.onTap, super.key});
@@ -8,28 +9,29 @@ class MerchantTypeChip extends StatelessWidget {
   final MerchantType type;
   final VoidCallback? onTap;
 
-  String _label() {
+  String _label(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     switch (type) {
       case MerchantType.restaurant:
-        return 'Food';
+        return l10n.typeRestaurant;
       case MerchantType.grocery:
-        return 'Grocery';
+        return l10n.typeGrocery;
       case MerchantType.pharmacy:
-        return 'Pharmacy';
+        return l10n.typePharmacy;
       case MerchantType.flowers:
-        return 'Flowers';
+        return l10n.typeFlowers;
       case MerchantType.bakery:
-        return 'Bakery';
+        return l10n.typeBakery;
       case MerchantType.electronics:
-        return 'Electronics';
+        return l10n.typeElectronics;
       case MerchantType.furniture:
-        return 'Furniture';
+        return l10n.typeFurniture;
       case MerchantType.fashion:
-        return 'Fashion';
+        return l10n.typeFashion;
       case MerchantType.home:
-        return 'Home';
+        return l10n.typeHomeServices;
       case MerchantType.other:
-        return 'Other';
+        return l10n.typeOther;
     }
   }
 
@@ -62,7 +64,7 @@ class MerchantTypeChip extends StatelessWidget {
   Widget build(BuildContext context) {
     return ActionChip(
       avatar: Icon(_icon(), size: 18),
-      label: Text(_label()),
+      label: Text(_label(context)),
       backgroundColor: AppColors.primaryLight.withValues(alpha: 0.3),
       onPressed: onTap,
     );

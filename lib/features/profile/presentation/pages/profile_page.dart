@@ -34,7 +34,7 @@ class ProfilePage extends ConsumerWidget {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          AnimatedFadeIn(child: _buildProfileHeader(context, authState)),
+          AnimatedFadeIn(child: _buildProfileHeader(context, authState, l10n)),
           const SizedBox(height: 24),
           AnimatedFadeIn(
             delay: const Duration(milliseconds: 100),
@@ -113,7 +113,7 @@ class ProfilePage extends ConsumerWidget {
     );
   }
 
-  Widget _buildProfileHeader(BuildContext context, AuthState authState) {
+  Widget _buildProfileHeader(BuildContext context, AuthState authState, AppLocalizations l10n) {
     final user = authState is AuthAuthenticated ? authState.user : null;
     return Container(
       padding: const EdgeInsets.all(24),
@@ -144,7 +144,7 @@ class ProfilePage extends ConsumerWidget {
           ),
           const SizedBox(height: 16),
           Text(
-            user?.fullName ?? 'User',
+            user?.fullName ?? l10n.user,
             style: context.textTheme.titleLarge?.copyWith(
               fontWeight: FontWeight.bold,
             ),
@@ -209,7 +209,7 @@ class ProfilePage extends ConsumerWidget {
           ListTile(
             leading: const Icon(Icons.language_rounded),
             title: Text(l10n.language),
-            subtitle: Text(locale.languageCode == 'ar' ? 'العربية' : 'English'),
+            subtitle: Text(locale.languageCode == 'ar' ? l10n.arabicLanguageName : l10n.englishLanguageName),
             trailing: const Icon(Icons.chevron_right_rounded),
             onTap: () => ref.read(localeProvider.notifier).toggleLocale(),
           ),

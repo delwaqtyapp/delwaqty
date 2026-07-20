@@ -204,7 +204,7 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage> {
                             final isSelected = v.id == _selectedVariantId;
                             return ChoiceChip(
                               label: Text(
-                                '${v.name} - ${v.price.toStringAsFixed(0)} SAR',
+                                '${v.name} - ${v.price.toStringAsFixed(0)} ${l10n.currencySymbol}',
                               ),
                               selected: isSelected,
                               selectedColor:
@@ -260,8 +260,8 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage> {
                                 : null,
                             secondary: Text(
                               mod.priceAdjustment >= 0
-                                  ? '+${mod.priceAdjustment.toStringAsFixed(0)} SAR'
-                                  : '-${mod.priceAdjustment.abs().toStringAsFixed(0)} SAR',
+                                  ? '+${mod.priceAdjustment.toStringAsFixed(0)} ${l10n.currencySymbol}'
+                                  : '-${mod.priceAdjustment.abs().toStringAsFixed(0)} ${l10n.currencySymbol}',
                               style: context.textTheme.bodySmall?.copyWith(
                                 color: mod.priceAdjustment >= 0
                                     ? context.colorScheme.primary
@@ -394,7 +394,7 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage> {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
                               content: Text(
-                                '${l10n.addToCart} - ${totalPrice.toStringAsFixed(0)} SAR',
+                                '${l10n.addToCart} - ${totalPrice.toStringAsFixed(0)} ${l10n.currencySymbol}',
                               ),
                               action: SnackBarAction(
                                 label: l10n.cart,
@@ -407,7 +407,7 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage> {
                     : null,
                 icon: const Icon(Icons.add_shopping_cart),
                 label: Text(
-                  '${l10n.addToCart} - ${totalPrice.toStringAsFixed(0)} SAR',
+                  '${l10n.addToCart} - ${totalPrice.toStringAsFixed(0)} ${l10n.currencySymbol}',
                 ),
               ),
             ),

@@ -121,7 +121,7 @@ class _MerchantTile extends StatelessWidget {
 
     final statusLabel = switch (status) {
       'verified' => l10n.verified,
-      'suspended' => l10n.suspend,
+      'suspended' => l10n.suspended,
       'pending' => l10n.pending,
       _ => status,
     };

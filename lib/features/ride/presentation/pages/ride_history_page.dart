@@ -212,17 +212,17 @@ class _RideHistoryPageState extends ConsumerState<RideHistoryPage> {
                 _buildDetailStat(
                   context,
                   label: l10n.fare,
-                  value: '${ride.fare?.toStringAsFixed(1) ?? '—'} SAR',
+                  value: '${ride.fare?.toStringAsFixed(1) ?? '—'} ${l10n.currencySymbol}',
                 ),
                 _buildDetailStat(
                   context,
                   label: l10n.distance,
-                  value: '${ride.distance?.toStringAsFixed(1) ?? '—'} km',
+                  value: '${ride.distance?.toStringAsFixed(1) ?? '—'} ${l10n.kmShort}',
                 ),
                 _buildDetailStat(
                   context,
                   label: l10n.time,
-                  value: '${ride.estimatedMinutes ?? '—'} min',
+                  value: '${ride.estimatedMinutes ?? '—'} ${l10n.minutesShort}',
                 ),
                 _buildDetailStat(
                   context,
@@ -346,6 +346,7 @@ class _RideHistoryTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final isCompleted = ride.status == RideStatus.completed;
     final statusColor = isCompleted ? Colors.green : Colors.red;
 
@@ -423,7 +424,7 @@ class _RideHistoryTile extends StatelessWidget {
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          _formatDate(ride.createdAt),
+                          _formatDate(ride.createdAt, l10n),
                           style: context.textTheme.bodySmall?.copyWith(
                             color: context.colorScheme.onSurfaceVariant,
                           ),
@@ -443,7 +444,7 @@ class _RideHistoryTile extends StatelessWidget {
                       borderRadius: BorderRadius.circular(6),
                     ),
                     child: Text(
-                      '${ride.fare?.toStringAsFixed(1) ?? '—'} SAR',
+                      '${ride.fare?.toStringAsFixed(1) ?? '—'} ${l10n.currencySymbol}',
                       style: context.textTheme.labelSmall?.copyWith(
                         fontWeight: FontWeight.w700,
                         color: context.colorScheme.primary,
@@ -482,15 +483,15 @@ class _RideHistoryTile extends StatelessWidget {
     );
   }
 
-  String _formatDate(DateTime date) {
+  String _formatDate(DateTime date, AppLocalizations l10n) {
     final now = DateTime.now();
     final diff = now.difference(date);
     if (diff.inDays == 0) {
       return '${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}';
     } else if (diff.inDays == 1) {
-      return 'Yesterday';
+      return l10n.yesterday;
     } else if (diff.inDays < 7) {
-      return '${diff.inDays} days ago';
+      return l10n.daysAgo(diff.inDays);
     } else {
       return '${date.day}/${date.month}/${date.year}';
     }

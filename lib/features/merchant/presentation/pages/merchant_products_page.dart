@@ -272,7 +272,7 @@ class _ProductCard extends StatelessWidget {
             subtitle: Row(
               children: [
                 Text(
-                  'SAR ${price.toStringAsFixed(2)}',
+                  '${AppLocalizations.of(context).currencySymbol} ${price.toStringAsFixed(2)}',
                   style: theme.textTheme.bodyMedium?.copyWith(
                     color: theme.colorScheme.primary,
                     fontWeight: FontWeight.bold,

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:delwaqty/features/commerce/domain/entities/product.dart';
 import 'package:delwaqty/features/commerce/domain/entities/favorite.dart';
 import 'package:delwaqty/features/commerce/presentation/widgets/favorite_button.dart';
+import 'package:delwaqty/l10n/app_localizations.dart';
 
 class ProductCard extends StatelessWidget {
   const ProductCard({required this.product, required this.onTap, super.key});
@@ -65,10 +66,10 @@ class ProductCard extends StatelessWidget {
                   if (!product.isAvailable)
                     Container(
                       color: Colors.black.withValues(alpha: 0.5),
-                      child: const Center(
+                      child: Center(
                         child: Text(
-                          'Unavailable',
-                          style: TextStyle(
+                          AppLocalizations.of(context).unavailable,
+                          style: const TextStyle(
                             color: Colors.white,
                             fontWeight: FontWeight.bold,
                           ),
@@ -111,7 +112,7 @@ class ProductCard extends StatelessWidget {
                   Row(
                     children: [
                       Text(
-                        '${product.price.toStringAsFixed(0)} SAR',
+                        '${product.price.toStringAsFixed(0)} ${AppLocalizations.of(context).currencySymbol}',
                         style: theme.textTheme.bodyMedium?.copyWith(
                           fontWeight: FontWeight.bold,
                           color: Theme.of(context).colorScheme.primary,

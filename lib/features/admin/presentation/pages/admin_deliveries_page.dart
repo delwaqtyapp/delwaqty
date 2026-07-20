@@ -42,7 +42,7 @@ class _AdminDeliveriesPageState extends ConsumerState<AdminDeliveriesPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Delivery Management'),
+        title: Text(l10n.deliveryManagement),
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh_rounded),
@@ -62,37 +62,37 @@ class _AdminDeliveriesPageState extends ConsumerState<AdminDeliveriesPage> {
                 child: Row(
                   children: [
                     _ServiceChip(
-                      label: 'All',
+                      label: l10n.all,
                       selected: _serviceFilter.isEmpty,
                       onTap: () => setState(() => _serviceFilter = ''),
                       cs: cs,
                     ),
                     _ServiceChip(
-                      label: 'Food',
+                      label: l10n.food,
                       selected: _serviceFilter == 'food',
                       onTap: () => setState(() => _serviceFilter = 'food'),
                       cs: cs,
                     ),
                     _ServiceChip(
-                      label: 'Grocery',
+                      label: l10n.grocery,
                       selected: _serviceFilter == 'grocery',
                       onTap: () => setState(() => _serviceFilter = 'grocery'),
                       cs: cs,
                     ),
                     _ServiceChip(
-                      label: 'Pharmacy',
+                      label: l10n.pharmacy,
                       selected: _serviceFilter == 'pharmacy',
                       onTap: () => setState(() => _serviceFilter = 'pharmacy'),
                       cs: cs,
                     ),
                     _ServiceChip(
-                      label: 'Parcel',
+                      label: l10n.parcel,
                       selected: _serviceFilter == 'parcel',
                       onTap: () => setState(() => _serviceFilter = 'parcel'),
                       cs: cs,
                     ),
                     _ServiceChip(
-                      label: 'Package',
+                      label: l10n.package,
                       selected: _serviceFilter == 'direct_delivery',
                       onTap: () => setState(() => _serviceFilter = 'direct_delivery'),
                       cs: cs,
@@ -122,10 +122,10 @@ class _AdminDeliveriesPageState extends ConsumerState<AdminDeliveriesPage> {
                 if (filtered.isEmpty) {
                   return PremiumEmptyState(
                     icon: Icons.inventory_2_outlined,
-                    title: 'No deliveries found',
+                    title: l10n.noDeliveriesFound,
                     message: _serviceFilter.isEmpty
-                        ? 'No deliveries have been created yet.'
-                        : 'No deliveries with the selected service type.',
+                        ? l10n.noDeliveriesCreated
+                        : l10n.noDeliveriesSelectedType,
                   );
                 }
 
@@ -246,8 +246,8 @@ class _DeliveryGlassTile extends StatelessWidget {
     final statusLabel = switch (status) {
       'pending' => l10n.pending,
       'confirmed' => l10n.confirmed,
-      'picked_up' => 'Picked Up',
-      'in_transit' => 'In Transit',
+      'picked_up' => l10n.pickedUp,
+      'in_transit' => l10n.inTransit,
       'delivered' => l10n.delivered,
       'cancelled' => l10n.cancelled,
       _ => status,
@@ -283,7 +283,7 @@ class _DeliveryGlassTile extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Delivery #$idShort',
+                      '${l10n.deliveryNumber}$idShort',
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                         fontWeight: FontWeight.w600,
                       ),
@@ -321,7 +321,7 @@ class _DeliveryGlassTile extends StatelessWidget {
               Icon(Icons.person_outline_rounded, size: 16, color: cs.onSurfaceVariant),
               const SizedBox(width: 6),
               Text(
-                'From: $senderName',
+                '${l10n.from}: $senderName',
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
                   color: cs.onSurfaceVariant,
                 ),
@@ -334,7 +334,7 @@ class _DeliveryGlassTile extends StatelessWidget {
               Icon(Icons.person_rounded, size: 16, color: cs.onSurfaceVariant),
               const SizedBox(width: 6),
               Text(
-                'To: $receiverName',
+                '${l10n.to}: $receiverName',
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
                   color: cs.onSurfaceVariant,
                 ),
@@ -381,7 +381,7 @@ class _DeliveryGlassTile extends StatelessWidget {
                       Icon(Icons.swap_horiz_rounded, size: 16, color: cs.primary),
                       const SizedBox(width: 4),
                       Text(
-                        'Update Status',
+                        l10n.updateStatus,
                         style: Theme.of(context).textTheme.labelSmall?.copyWith(
                           fontWeight: FontWeight.w600,
                           color: cs.primary,
@@ -391,14 +391,14 @@ class _DeliveryGlassTile extends StatelessWidget {
                   ),
                 ),
                 itemBuilder: (context) => [
-                  if (status != 'confirmed') const PopupMenuItem(value: 'confirmed', child: Text('Confirm')),
-                  if (status != 'picked_up') const PopupMenuItem(value: 'picked_up', child: Text('Mark Picked Up')),
-                  if (status != 'in_transit') const PopupMenuItem(value: 'in_transit', child: Text('Mark In Transit')),
-                  if (status != 'delivered') const PopupMenuItem(value: 'delivered', child: Text('Mark Delivered')),
+                  if (status != 'confirmed') PopupMenuItem(value: 'confirmed', child: Text(l10n.confirm)),
+                  if (status != 'picked_up') PopupMenuItem(value: 'picked_up', child: Text(l10n.markPickedUp)),
+                  if (status != 'in_transit') PopupMenuItem(value: 'in_transit', child: Text(l10n.markInTransit)),
+                  if (status != 'delivered') PopupMenuItem(value: 'delivered', child: Text(l10n.markDelivered)),
                   if (status != 'cancelled')
                     PopupMenuItem(
                       value: 'cancelled',
-                      child: Text('Cancel', style: TextStyle(color: Theme.of(context).colorScheme.error)),
+                      child: Text(l10n.cancel, style: TextStyle(color: Theme.of(context).colorScheme.error)),
                     ),
                 ],
               ),

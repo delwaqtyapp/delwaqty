@@ -162,7 +162,7 @@ class _OrderTile extends StatelessWidget {
             ),
             const Spacer(),
             Text(
-              'SAR ${totalAmount.toStringAsFixed(2)}',
+              '${l10n.currencySymbol} ${totalAmount.toStringAsFixed(2)}',
               style: theme.textTheme.bodyMedium?.copyWith(
                 fontWeight: FontWeight.bold,
                 color: theme.colorScheme.primary,

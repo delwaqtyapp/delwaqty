@@ -541,6 +541,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get freeDelivery => 'توصيل مجاني';
 
   @override
+  String get minOrder => 'الحد الأدنى';
+
+  @override
   String get highestRated => 'الأعلى تقييماً';
 
   @override
@@ -2843,4 +2846,176 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get tripInstructions => 'تعليمات الرحلة';
+
+  @override
+  String get yesterday => 'أمس';
+
+  @override
+  String get arabicLanguageName => 'العربية';
+
+  @override
+  String get englishLanguageName => 'English';
+
+  @override
+  String get arabicAbbreviation => 'عر';
+
+  @override
+  String get englishAbbreviation => 'EN';
+
+  @override
+  String get aboutDescription =>
+      'دلوقتي هو تطبيقك الشامل للتوصيل والنقل. نوصلك بأفضل المطاعم والمتاجر والسائقين في منطقتك لخدمة سريعة وموثوقة.';
+
+  @override
+  String get supportEmailAddress => 'support@delwaqty.com';
+
+  @override
+  String get driverManagement => 'إدارة السائقين';
+
+  @override
+  String get active => 'نشط';
+
+  @override
+  String get searchDrivers => 'ابحث بالاسم أو رقم الهاتف...';
+
+  @override
+  String get noAdminDriversFound => 'لم يتم العثور على سائقين';
+
+  @override
+  String get noDriversMatch => 'لا يوجد سائقين يطابقون معايير البحث.';
+
+  @override
+  String get suspended => 'موقّف';
+
+  @override
+  String get tripsLabel => 'رحلة';
+
+  @override
+  String get plateLabel => 'اللوحة:';
+
+  @override
+  String get rideMonitoring => 'مراقبة الرحلات';
+
+  @override
+  String get searching => 'جارٍ البحث';
+
+  @override
+  String get matchedRide => 'تم الربط';
+
+  @override
+  String get completed => 'مكتمل';
+
+  @override
+  String get noRidesFound => 'لم يتم العثور على رحلات';
+
+  @override
+  String get noRidesCreated => 'لم يتم إنشاء أي رحلات بعد.';
+
+  @override
+  String get noRidesSelectedStatus => 'لا توجد رحلات بالحالة المحددة.';
+
+  @override
+  String get rideNumber => 'رحلة رقم';
+
+  @override
+  String get assigned => 'مُعيّن';
+
+  @override
+  String get passenger => 'الراكب';
+
+  @override
+  String get deliveryManagement => 'إدارة التوصيلات';
+
+  @override
+  String get food => 'طعام';
+
+  @override
+  String get parcel => 'طرد';
+
+  @override
+  String get package => 'طرد';
+
+  @override
+  String get noDeliveriesFound => 'لم يتم العثور على توصيلات';
+
+  @override
+  String get noDeliveriesCreated => 'لم يتم إنشاء أي توصيلات بعد.';
+
+  @override
+  String get noDeliveriesSelectedType => 'لا توجد توصيلات بنوع الخدمة المحدد.';
+
+  @override
+  String get deliveryNumber => 'توصيلة رقم';
+
+  @override
+  String get from => 'من';
+
+  @override
+  String get to => 'إلى';
+
+  @override
+  String get updateStatus => 'تحديث الحالة';
+
+  @override
+  String get markPickedUp => 'تعيين كـتم الاستلام';
+
+  @override
+  String get revenueOverview => 'نظرة عامة على الإيرادات';
+
+  @override
+  String get revenueChart => 'رسم بياني للإيرادات';
+
+  @override
+  String get orderTrends => 'اتجاهات الطلبات';
+
+  @override
+  String get zeroOrdersToday => '0 طلبات اليوم';
+
+  @override
+  String get peakHours => 'ساعات الذروة';
+
+  @override
+  String get topMerchants => 'أفضل المتاجر';
+
+  @override
+  String get noDataYet => 'لا توجد بيانات بعد';
+
+  @override
+  String get merchantPerformancePlaceholder => 'ستظهر بيانات أداء المتاجر هنا.';
+
+  @override
+  String get driverPerformance => 'أداء السائقين';
+
+  @override
+  String get driverPerformancePlaceholder => 'ستظهر مقاييس أداء السائقين هنا.';
+
+  @override
+  String get typeRestaurant => 'مطعم';
+
+  @override
+  String get typeGrocery => 'بقالة';
+
+  @override
+  String get typePharmacy => 'صيدلية';
+
+  @override
+  String get typeFlowers => 'ورود';
+
+  @override
+  String get typeBakery => 'مخبز';
+
+  @override
+  String get typeElectronics => 'إلكترونيات';
+
+  @override
+  String get typeFurniture => 'أثاث';
+
+  @override
+  String get typeFashion => 'أزياء';
+
+  @override
+  String get typeHomeServices => 'خدمات منزلية';
+
+  @override
+  String get typeOther => 'أخرى';
 }

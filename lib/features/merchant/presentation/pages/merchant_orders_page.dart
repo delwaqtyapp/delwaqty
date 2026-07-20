@@ -226,7 +226,7 @@ class _OrderCard extends StatelessWidget {
               Row(
                 children: [
                   Text(
-                    'SAR ${order.totalAmount.toStringAsFixed(2)}',
+                    '${l10n.currencySymbol} ${order.totalAmount.toStringAsFixed(2)}',
                     style: theme.textTheme.bodyLarge?.copyWith(
                       fontWeight: FontWeight.bold,
                       color: theme.colorScheme.primary,

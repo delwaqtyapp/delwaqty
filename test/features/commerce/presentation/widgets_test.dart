@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:delwaqty/features/commerce/domain/entities/merchant.dart';
 import 'package:delwaqty/features/commerce/domain/entities/product.dart';
@@ -8,8 +9,16 @@ import 'package:delwaqty/features/commerce/presentation/widgets/rating_stars.dar
 import 'package:delwaqty/features/commerce/presentation/widgets/price_tag.dart';
 import 'package:delwaqty/features/commerce/presentation/widgets/delivery_info.dart';
 import 'package:delwaqty/features/commerce/presentation/widgets/merchant_type_chip.dart';
+import 'package:delwaqty/l10n/app_localizations.dart';
 
 Widget wrapInApp(Widget child) => MaterialApp(
+      localizationsDelegates: const [
+        AppLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: const [Locale('en')],
       home: Scaffold(
         body: SizedBox(
           width: 300,
@@ -146,7 +155,7 @@ void main() {
       )));
 
       expect(find.text('30 min'), findsOneWidget);
-      expect(find.text('10 SAR'), findsOneWidget);
+      expect(find.text('10 ج.م'), findsOneWidget);
     });
 
     testWidgets('hides delivery info when not available', (tester) async {
@@ -187,7 +196,7 @@ void main() {
         onTap: () {},
       )));
 
-      expect(find.text('35 SAR'), findsOneWidget);
+      expect(find.text('35 ج.م'), findsOneWidget);
     });
 
     testWidgets('displays discount badge when discounted', (tester) async {
@@ -286,10 +295,10 @@ void main() {
   });
 
   group('PriceTag', () {
-    testWidgets('displays price with SAR', (tester) async {
+    testWidgets('displays price with ج.م', (tester) async {
       await tester.pumpWidget(wrapInApp(const PriceTag(price: 35.0)));
 
-      expect(find.text('35 SAR'), findsOneWidget);
+      expect(find.text('35 ج.م'), findsOneWidget);
     });
 
     testWidgets('displays original price with strikethrough when discounted',
@@ -298,14 +307,14 @@ void main() {
         const PriceTag(price: 35.0, originalPrice: 50.0),
       ));
 
-      expect(find.text('35 SAR'), findsOneWidget);
+      expect(find.text('35 ج.م'), findsOneWidget);
       expect(find.text('50'), findsOneWidget);
     });
 
     testWidgets('hides original price when no discount', (tester) async {
       await tester.pumpWidget(wrapInApp(const PriceTag(price: 35.0)));
 
-      expect(find.text('35 SAR'), findsOneWidget);
+      expect(find.text('35 ج.م'), findsOneWidget);
       expect(find.byIcon(Icons.star_border), findsNothing);
     });
 
@@ -315,8 +324,7 @@ void main() {
         const PriceTag(price: 50.0, originalPrice: 50.0),
       ));
 
-      expect(find.text('50 SAR'), findsOneWidget);
-      // Original price should not be shown when equal
+      expect(find.text('50 ج.م'), findsOneWidget);
       expect(find.text('50'), findsNothing);
     });
   });
@@ -335,7 +343,7 @@ void main() {
         const DeliveryInfo(deliveryFee: 15.0),
       ));
 
-      expect(find.text('15 SAR'), findsOneWidget);
+      expect(find.text('15 ج.م'), findsOneWidget);
     });
 
     testWidgets('displays free delivery when fee is 0', (tester) async {
@@ -343,7 +351,7 @@ void main() {
         const DeliveryInfo(deliveryFee: 0),
       ));
 
-      expect(find.text('Free delivery'), findsOneWidget);
+      expect(find.text('Free Delivery'), findsOneWidget);
     });
 
     testWidgets('displays minimum order', (tester) async {
@@ -351,7 +359,7 @@ void main() {
         const DeliveryInfo(minimumOrder: 25.0),
       ));
 
-      expect(find.text('Min 25 SAR'), findsOneWidget);
+      expect(find.text('Min 25 ج.م'), findsOneWidget);
     });
 
     testWidgets('displays all info when all provided', (tester) async {
@@ -364,8 +372,8 @@ void main() {
       ));
 
       expect(find.text('30 min'), findsOneWidget);
-      expect(find.text('10 SAR'), findsOneWidget);
-      expect(find.text('Min 25 SAR'), findsOneWidget);
+      expect(find.text('10 ج.م'), findsOneWidget);
+      expect(find.text('Min 25 ج.م'), findsOneWidget);
     });
 
     testWidgets('hides sections when null', (tester) async {
@@ -383,7 +391,7 @@ void main() {
         const MerchantTypeChip(type: MerchantType.restaurant),
       ));
 
-      expect(find.text('Food'), findsOneWidget);
+      expect(find.text('Restaurant'), findsOneWidget);
     });
 
     testWidgets('displays correct label for grocery', (tester) async {
@@ -415,7 +423,7 @@ void main() {
         const MerchantTypeChip(type: MerchantType.home),
       ));
 
-      expect(find.text('Home'), findsOneWidget);
+      expect(find.text('Home Services'), findsOneWidget);
     });
 
     testWidgets('renders ActionChip', (tester) async {

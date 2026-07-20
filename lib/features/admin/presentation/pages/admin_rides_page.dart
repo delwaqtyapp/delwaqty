@@ -43,7 +43,7 @@ class _AdminRidesPageState extends ConsumerState<AdminRidesPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Ride Monitoring'),
+        title: Text(l10n.rideMonitoring),
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh_rounded),
@@ -64,37 +64,37 @@ class _AdminRidesPageState extends ConsumerState<AdminRidesPage> {
                 child: Row(
                   children: [
                     _FilterChip(
-                      label: 'All',
+                      label: l10n.all,
                       selected: _statusFilter.isEmpty,
                       onTap: () => setState(() => _statusFilter = ''),
                       cs: cs,
                     ),
                     _FilterChip(
-                      label: 'Searching',
+                      label: l10n.searching,
                       selected: _statusFilter == 'searching',
                       onTap: () => setState(() => _statusFilter = 'searching'),
                       cs: cs,
                     ),
                     _FilterChip(
-                      label: 'Matched',
+                      label: l10n.matchedRide,
                       selected: _statusFilter == 'matched',
                       onTap: () => setState(() => _statusFilter = 'matched'),
                       cs: cs,
                     ),
                     _FilterChip(
-                      label: 'In Trip',
+                      label: l10n.inTrip,
                       selected: _statusFilter == 'in_trip',
                       onTap: () => setState(() => _statusFilter = 'in_trip'),
                       cs: cs,
                     ),
                     _FilterChip(
-                      label: 'Completed',
+                      label: l10n.completed,
                       selected: _statusFilter == 'completed',
                       onTap: () => setState(() => _statusFilter = 'completed'),
                       cs: cs,
                     ),
                     _FilterChip(
-                      label: 'Cancelled',
+                      label: l10n.cancelled,
                       selected: _statusFilter == 'cancelled',
                       onTap: () => setState(() => _statusFilter = 'cancelled'),
                       cs: cs,
@@ -124,10 +124,10 @@ class _AdminRidesPageState extends ConsumerState<AdminRidesPage> {
                 if (filtered.isEmpty) {
                   return PremiumEmptyState(
                     icon: Icons.map_outlined,
-                    title: 'No rides found',
+                    title: l10n.noRidesFound,
                     message: _statusFilter.isEmpty
-                        ? 'No rides have been created yet.'
-                        : 'No rides with the selected status.',
+                        ? l10n.noRidesCreated
+                        : l10n.noRidesSelectedStatus,
                   );
                 }
 
@@ -210,12 +210,13 @@ class _RideGlassTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final status = ride['status'] as String? ?? 'searching';
-    final pickup = ride['pickup_location'] as String? ?? ride['pickup_address'] as String? ?? 'Unknown pickup';
-    final dropoff = ride['dropoff_location'] as String? ?? ride['dropoff_address'] as String? ?? 'Unknown dropoff';
+    final pickup = ride['pickup_location'] as String? ?? ride['pickup_address'] as String? ?? '';
+    final dropoff = ride['dropoff_location'] as String? ?? ride['dropoff_address'] as String? ?? '';
     final fare = (ride['fare'] as num?)?.toDouble() ?? 0;
-    final driverName = ride['driver_name'] as String? ?? ride['driver']?['name'] as String? ?? 'Not assigned';
-    final passengerName = ride['passenger_name'] as String? ?? ride['passenger']?['name'] as String? ?? 'Unknown';
+    final driverName = ride['driver_name'] as String? ?? ride['driver']?['name'] as String? ?? '';
+    final passengerName = ride['passenger_name'] as String? ?? ride['passenger']?['name'] as String? ?? '';
     final idShort = (ride['id'] as String? ?? '').length > 8
         ? (ride['id'] as String).substring(0, 8)
         : (ride['id'] as String? ?? '');
@@ -230,11 +231,11 @@ class _RideGlassTile extends StatelessWidget {
     };
 
     final statusLabel = switch (status) {
-      'searching' => 'Searching',
-      'matched' => 'Matched',
-      'in_trip' => 'In Trip',
-      'completed' => 'Completed',
-      'cancelled' => 'Cancelled',
+      'searching' => l10n.searching,
+      'matched' => l10n.matchedRide,
+      'in_trip' => l10n.inTrip,
+      'completed' => l10n.completed,
+      'cancelled' => l10n.cancelled,
       _ => status,
     };
 
@@ -264,7 +265,7 @@ class _RideGlassTile extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Ride #$idShort',
+                      '${l10n.rideNumber}$idShort',
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                         fontWeight: FontWeight.w600,
                       ),
@@ -313,7 +314,7 @@ class _RideGlassTile extends StatelessWidget {
                 ),
               ),
               Text(
-                _formatTime(ride['created_at'] as String?),
+                _formatTime(ride['created_at'] as String?, l10n),
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
                   color: cs.onSurfaceVariant,
                 ),
@@ -336,15 +337,15 @@ class _RideGlassTile extends StatelessWidget {
     };
   }
 
-  String _formatTime(String? timestamp) {
+  String _formatTime(String? timestamp, AppLocalizations l10n) {
     if (timestamp == null) return '';
     try {
       final dt = DateTime.parse(timestamp);
       final diff = DateTime.now().difference(dt);
-      if (diff.inMinutes < 1) return 'Just now';
-      if (diff.inMinutes < 60) return '${diff.inMinutes}m ago';
-      if (diff.inHours < 24) return '${diff.inHours}h ago';
-      return '${diff.inDays}d ago';
+      if (diff.inMinutes < 1) return l10n.justNow;
+      if (diff.inMinutes < 60) return l10n.minutesAgo(diff.inMinutes);
+      if (diff.inHours < 24) return l10n.hoursAgo(diff.inHours);
+      return l10n.daysAgo(diff.inDays);
     } catch (_) {
       return '';
     }

@@ -662,22 +662,24 @@ class _RideTrackingPageState extends ConsumerState<RideTrackingPage>
       context: context,
       builder: (ctx) => AlertDialog(
         title: Text(l10n.cancelRide),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: reasons.map((reason) {
-            return ListTile(
-              title: Text(reason),
-              onTap: () {
-                Navigator.pop(ctx);
-                ref
-                    .read(rideRepositoryProvider)
-                    .cancelRide(widget.rideId, reason: reason);
-              },
-              contentPadding: EdgeInsets.zero,
-              leading: Icon(Icons.cancel_outlined,
-                  color: context.colorScheme.error, size: 20),
-            );
-          }).toList(),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: reasons.map((reason) {
+              return ListTile(
+                title: Text(reason),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  ref
+                      .read(rideRepositoryProvider)
+                      .cancelRide(widget.rideId, reason: reason);
+                },
+                contentPadding: EdgeInsets.zero,
+                leading: Icon(Icons.cancel_outlined,
+                    color: context.colorScheme.error, size: 20),
+              );
+            }).toList(),
+          ),
         ),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         actions: [
@@ -703,96 +705,98 @@ class _RideTrackingPageState extends ConsumerState<RideTrackingPage>
               color: context.colorScheme.surface,
               borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
             ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Center(
-                  child: Container(
-                    width: 40,
-                    height: 4,
-                    decoration: BoxDecoration(
-                      color: context.colorScheme.outlineVariant,
-                      borderRadius: BorderRadius.circular(2),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 20),
-                Text(l10n.rateYourTrip,
-                    style: context.textTheme.headlineSmall
-                        ?.copyWith(fontWeight: FontWeight.w800)),
-                const SizedBox(height: 8),
-                Text(l10n.rateDriverPrompt,
-                    textAlign: TextAlign.center,
-                    style: context.textTheme.bodyMedium?.copyWith(
-                        color: context.colorScheme.onSurfaceVariant)),
-                const SizedBox(height: 20),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: List.generate(5, (index) {
-                    return GestureDetector(
-                      onTap: () =>
-                          setSheetState(() => _selectedRating = index + 1),
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 6),
-                        child: Icon(
-                          index < _selectedRating
-                              ? Icons.star_rounded
-                              : Icons.star_outline_rounded,
-                          size: 44,
-                          color: index < _selectedRating
-                              ? Colors.amber[600]
-                              : context.colorScheme.outlineVariant,
-                        ),
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Center(
+                    child: Container(
+                      width: 40,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: context.colorScheme.outlineVariant,
+                        borderRadius: BorderRadius.circular(2),
                       ),
-                    );
-                  }),
-                ),
-                if (_selectedRating > 0) ...[
+                    ),
+                  ),
                   const SizedBox(height: 20),
-                  TextField(
-                    controller: _feedbackController,
-                    decoration: InputDecoration(
-                      hintText: l10n.addFeedback,
-                      border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(14)),
-                    ),
-                    maxLines: 3,
+                  Text(l10n.rateYourTrip,
+                      style: context.textTheme.headlineSmall
+                          ?.copyWith(fontWeight: FontWeight.w800)),
+                  const SizedBox(height: 8),
+                  Text(l10n.rateDriverPrompt,
+                      textAlign: TextAlign.center,
+                      style: context.textTheme.bodyMedium?.copyWith(
+                          color: context.colorScheme.onSurfaceVariant)),
+                  const SizedBox(height: 20),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: List.generate(5, (index) {
+                      return GestureDetector(
+                        onTap: () =>
+                            setSheetState(() => _selectedRating = index + 1),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 6),
+                          child: Icon(
+                            index < _selectedRating
+                                ? Icons.star_rounded
+                                : Icons.star_outline_rounded,
+                            size: 44,
+                            color: index < _selectedRating
+                                ? Colors.amber[600]
+                                : context.colorScheme.outlineVariant,
+                          ),
+                        ),
+                      );
+                    }),
                   ),
+                  if (_selectedRating > 0) ...[
+                    const SizedBox(height: 20),
+                    TextField(
+                      controller: _feedbackController,
+                      decoration: InputDecoration(
+                        hintText: l10n.addFeedback,
+                        border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(14)),
+                      ),
+                      maxLines: 3,
+                    ),
+                  ],
+                  const SizedBox(height: 20),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 54,
+                    child: ElevatedButton(
+                      onPressed: _selectedRating > 0
+                          ? () {
+                              ref.read(rideRepositoryProvider).rateRide(
+                                    widget.rideId,
+                                    _selectedRating,
+                                    feedback: _feedbackController.text.isNotEmpty
+                                        ? _feedbackController.text
+                                        : null,
+                                  );
+                              Navigator.pop(ctx);
+                              if (context.canPop()) context.pop();
+                            }
+                          : null,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: context.colorScheme.primary,
+                        foregroundColor: context.colorScheme.onPrimary,
+                        disabledBackgroundColor:
+                            context.colorScheme.surfaceContainerHighest,
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16)),
+                        elevation: 0,
+                      ),
+                      child: Text(l10n.submitRating,
+                          style: context.textTheme.titleMedium
+                              ?.copyWith(fontWeight: FontWeight.w700)),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
                 ],
-                const SizedBox(height: 20),
-                SizedBox(
-                  width: double.infinity,
-                  height: 54,
-                  child: ElevatedButton(
-                    onPressed: _selectedRating > 0
-                        ? () {
-                            ref.read(rideRepositoryProvider).rateRide(
-                                  widget.rideId,
-                                  _selectedRating,
-                                  feedback: _feedbackController.text.isNotEmpty
-                                      ? _feedbackController.text
-                                      : null,
-                                );
-                            Navigator.pop(ctx);
-                            if (context.canPop()) context.pop();
-                          }
-                        : null,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: context.colorScheme.primary,
-                      foregroundColor: context.colorScheme.onPrimary,
-                      disabledBackgroundColor:
-                          context.colorScheme.surfaceContainerHighest,
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16)),
-                      elevation: 0,
-                    ),
-                    child: Text(l10n.submitRating,
-                        style: context.textTheme.titleMedium
-                            ?.copyWith(fontWeight: FontWeight.w700)),
-                  ),
-                ),
-                const SizedBox(height: 8),
-              ],
+              ),
             ),
           ),
         ),

@@ -225,10 +225,14 @@ class _BreakdownRow extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(label,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                )),
+        Flexible(
+          child: Text(label,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+              overflow: TextOverflow.ellipsis),
+        ),
+        const SizedBox(width: 8),
         Text(
           l10n.amountWithCurrency(value.toStringAsFixed(0), l10n.currencySymbol),
           style: TextStyle(fontWeight: FontWeight.w600, color: color),

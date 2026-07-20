@@ -66,7 +66,7 @@
 - [x] M5: Destination search & geocoding (provider-agnostic abstraction, Google Places provider, autocomplete/details/reverse/nearby, saved + recent, session tokens, debounce, caching, AR/EN) (sprint 32)
 - [x] M6: Complete driver platform (onboarding wizard, vehicle management, document management, enhanced dashboard, wallet breakdown, performance metrics, 9 new RPCs, realtime-ready) (sprint 33)
 - [x] M7: Delivery & Courier Platform (food, grocery, pharmacy, package — built on dispatch engine) (sprint 34)
-- [ ] M8: Safety (SOS, trusted contacts, live share, OTP pickup)
+- [x] M8: Safety (SOS, trusted contacts, live share, OTP pickup) (sprints 35-36)
 - [ ] M9: Admin monitoring dashboard
 - [ ] M10: Payments integration
 

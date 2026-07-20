@@ -54,7 +54,7 @@ class _AdminDriversPageState extends ConsumerState<AdminDriversPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Driver Management'),
+        title: Text(l10n.driverManagement),
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh_rounded),
@@ -72,10 +72,10 @@ class _AdminDriversPageState extends ConsumerState<AdminDriversPage> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
-                  _StatItem(label: 'Total', value: '--', icon: Icons.people_outline_rounded, color: cs.primary, cs: cs),
-                  _StatItem(label: 'Active', value: '--', icon: Icons.check_circle_outline_rounded, color: Colors.green, cs: cs),
-                  _StatItem(label: 'Pending', value: '--', icon: Icons.pending_outlined, color: Colors.orange, cs: cs),
-                  _StatItem(label: 'Rating', value: '--', icon: Icons.star_outline_rounded, color: Colors.amber, cs: cs),
+                  _StatItem(label: l10n.total, value: '--', icon: Icons.people_outline_rounded, color: cs.primary, cs: cs),
+                  _StatItem(label: l10n.active, value: '--', icon: Icons.check_circle_outline_rounded, color: Colors.green, cs: cs),
+                  _StatItem(label: l10n.pending, value: '--', icon: Icons.pending_outlined, color: Colors.orange, cs: cs),
+                  _StatItem(label: l10n.rating, value: '--', icon: Icons.star_outline_rounded, color: Colors.amber, cs: cs),
                 ],
               ),
             ),
@@ -85,7 +85,7 @@ class _AdminDriversPageState extends ConsumerState<AdminDriversPage> {
             child: TextField(
               controller: _searchController,
               decoration: InputDecoration(
-                hintText: 'Search by name or phone...',
+                hintText: l10n.searchDrivers,
                 prefixIcon: const Icon(Icons.search_rounded),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(16),
@@ -124,8 +124,8 @@ class _AdminDriversPageState extends ConsumerState<AdminDriversPage> {
                 if (filtered.isEmpty) {
                   return PremiumEmptyState(
                     icon: Icons.person_off_outlined,
-                    title: 'No drivers found',
-                    message: 'No drivers match your search criteria.',
+                    title: l10n.noAdminDriversFound,
+                    message: l10n.noDriversMatch,
                   );
                 }
 
@@ -243,15 +243,15 @@ class _DriverGlassTile extends StatelessWidget {
     switch (verificationStatus) {
       case 'verified':
         statusColor = Colors.green;
-        statusLabel = 'Verified';
+        statusLabel = l10n.verified;
         break;
       case 'suspended':
         statusColor = Colors.red;
-        statusLabel = 'Suspended';
+        statusLabel = l10n.suspended;
         break;
       default:
         statusColor = Colors.orange;
-        statusLabel = 'Pending';
+        statusLabel = l10n.pending;
     }
 
     return GlassCard(
@@ -338,7 +338,7 @@ class _DriverGlassTile extends StatelessWidget {
             children: [
               _DriverInfoChip(icon: Icons.star_rounded, label: rating.toStringAsFixed(1), color: Colors.amber),
               const SizedBox(width: 8),
-              _DriverInfoChip(icon: Icons.route_rounded, label: '$tripsCount trips', color: cs.primary),
+              _DriverInfoChip(icon: Icons.route_rounded, label: '$tripsCount ${l10n.tripsLabel}', color: cs.primary),
               if (vehicleModel.isNotEmpty) ...[
                 const SizedBox(width: 8),
                 _DriverInfoChip(icon: Icons.directions_car_rounded, label: vehicleModel, color: cs.secondary),
@@ -348,7 +348,7 @@ class _DriverGlassTile extends StatelessWidget {
           if (vehiclePlate.isNotEmpty) ...[
             const SizedBox(height: 6),
             Text(
-              'Plate: $vehiclePlate',
+              '${l10n.plateLabel} $vehiclePlate',
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
                 color: cs.onSurfaceVariant,
                 fontWeight: FontWeight.w500,
@@ -363,7 +363,7 @@ class _DriverGlassTile extends StatelessWidget {
                 TextButton.icon(
                   onPressed: onVerify,
                   icon: const Icon(Icons.verified_rounded, size: 18),
-                  label: const Text('Verify'),
+                  label: Text(l10n.verify),
                   style: TextButton.styleFrom(
                     foregroundColor: Colors.green,
                     padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -373,7 +373,7 @@ class _DriverGlassTile extends StatelessWidget {
                 TextButton.icon(
                   onPressed: onSuspend,
                   icon: const Icon(Icons.block_rounded, size: 18),
-                  label: const Text('Suspend'),
+                  label: Text(l10n.suspend),
                   style: TextButton.styleFrom(
                     foregroundColor: Colors.red,
                     padding: const EdgeInsets.symmetric(horizontal: 12),

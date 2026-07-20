@@ -73,7 +73,8 @@ class PrivacySecurityPage extends StatelessWidget {
   }
 
   void _showComingSoon(BuildContext context) {
-    context.showAppSnackBar('Coming soon');
+    final l10n = AppLocalizations.of(context);
+    context.showAppSnackBar(l10n.comingSoon);
   }
 
   Widget _buildSection(

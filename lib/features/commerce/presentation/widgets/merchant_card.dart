@@ -3,6 +3,7 @@ import 'package:delwaqty/features/commerce/domain/entities/merchant.dart';
 import 'package:delwaqty/features/commerce/domain/entities/favorite.dart';
 import 'package:delwaqty/features/commerce/presentation/widgets/favorite_button.dart';
 import 'package:delwaqty/core/theme/app_colors.dart';
+import 'package:delwaqty/l10n/app_localizations.dart';
 
 class MerchantCard extends StatelessWidget {
   const MerchantCard({required this.merchant, required this.onTap, super.key});
@@ -10,28 +11,29 @@ class MerchantCard extends StatelessWidget {
   final Merchant merchant;
   final VoidCallback onTap;
 
-  String _typeLabel(MerchantType type) {
+  String _typeLabel(BuildContext context, MerchantType type) {
+    final l10n = AppLocalizations.of(context);
     switch (type) {
       case MerchantType.restaurant:
-        return 'Restaurant';
+        return l10n.typeRestaurant;
       case MerchantType.grocery:
-        return 'Grocery';
+        return l10n.typeGrocery;
       case MerchantType.pharmacy:
-        return 'Pharmacy';
+        return l10n.typePharmacy;
       case MerchantType.flowers:
-        return 'Flowers';
+        return l10n.typeFlowers;
       case MerchantType.bakery:
-        return 'Bakery';
+        return l10n.typeBakery;
       case MerchantType.electronics:
-        return 'Electronics';
+        return l10n.typeElectronics;
       case MerchantType.furniture:
-        return 'Furniture';
+        return l10n.typeFurniture;
       case MerchantType.fashion:
-        return 'Fashion';
+        return l10n.typeFashion;
       case MerchantType.home:
-        return 'Home Services';
+        return l10n.typeHomeServices;
       case MerchantType.other:
-        return 'Other';
+        return l10n.typeOther;
     }
   }
 
@@ -63,6 +65,7 @@ class MerchantCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context);
 
     return Card(
       clipBehavior: Clip.antiAlias,
@@ -104,9 +107,9 @@ class MerchantCard extends StatelessWidget {
                           color: Colors.blue,
                           borderRadius: BorderRadius.circular(4),
                         ),
-                        child: const Text(
-                          'Verified',
-                          style: TextStyle(color: Colors.white, fontSize: 10),
+                        child: Text(
+                          l10n.verified,
+                          style: const TextStyle(color: Colors.white, fontSize: 10),
                         ),
                       ),
                     ),
@@ -123,9 +126,9 @@ class MerchantCard extends StatelessWidget {
                           color: Colors.green,
                           borderRadius: BorderRadius.circular(4),
                         ),
-                        child: const Text(
-                          'Open',
-                          style: TextStyle(color: Colors.white, fontSize: 10),
+                        child: Text(
+                          l10n.open,
+                          style: const TextStyle(color: Colors.white, fontSize: 10),
                         ),
                       ),
                     ),
@@ -184,7 +187,7 @@ class MerchantCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    _typeLabel(merchant.type),
+                    _typeLabel(context, merchant.type),
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: Theme.of(context).colorScheme.primary,
                     ),
@@ -201,14 +204,14 @@ class MerchantCard extends StatelessWidget {
                         const SizedBox(width: 4),
                         Text(
                           merchant.estimatedDeliveryMinutes != null
-                              ? '${merchant.estimatedDeliveryMinutes} min'
-                              : 'Delivery',
+                              ? '${merchant.estimatedDeliveryMinutes} ${l10n.minutesShort}'
+                              : l10n.delivery,
                           style: theme.textTheme.bodySmall,
                         ),
                         if (merchant.deliveryFee != null) ...[
                           const SizedBox(width: 8),
                           Text(
-                            '${merchant.deliveryFee!.toStringAsFixed(0)} SAR',
+                            '${merchant.deliveryFee!.toStringAsFixed(0)} ${l10n.currencySymbol}',
                             style: theme.textTheme.bodySmall?.copyWith(
                               color: Theme.of(context).colorScheme.primary,
                             ),

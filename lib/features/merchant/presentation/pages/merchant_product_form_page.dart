@@ -236,7 +236,7 @@ class _MerchantProductFormPageState
               decoration: InputDecoration(
                 labelText: l10n.price,
                 hintText: '0.00',
-                prefixText: 'SAR ',
+                prefixText: '${l10n.currencySymbol} ',
                 border: const OutlineInputBorder(),
               ),
               keyboardType: TextInputType.number,

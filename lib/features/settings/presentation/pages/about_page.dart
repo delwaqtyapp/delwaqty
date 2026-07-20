@@ -51,7 +51,7 @@ class AboutPage extends StatelessWidget {
           ),
           const SizedBox(height: 24),
           Text(
-            'Delwaqty',
+            l10n.appName,
             style: context.textTheme.headlineSmall?.copyWith(
               fontWeight: FontWeight.w800,
             ),
@@ -59,7 +59,7 @@ class AboutPage extends StatelessWidget {
           ),
           const SizedBox(height: 4),
           Text(
-            '\u062f\u0644\u0648\u0642\u062a\u064a',
+            l10n.appNameAr,
             style: context.textTheme.titleMedium?.copyWith(
               color: context.colorScheme.onSurfaceVariant,
             ),
@@ -67,7 +67,7 @@ class AboutPage extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            '${l10n.version} 1.0.0',
+            l10n.version,
             style: context.textTheme.bodyMedium?.copyWith(
               color: context.colorScheme.onSurfaceVariant,
             ),
@@ -101,9 +101,7 @@ class AboutPage extends StatelessWidget {
                   ),
                   const SizedBox(height: 12),
                   Text(
-                    'Delwaqty is your all-in-one delivery and ride-hailing platform. '
-                    'We connect you with the best restaurants, stores, and drivers '
-                    'in your area for fast and reliable service.',
+                    l10n.aboutDescription,
                     style: context.textTheme.bodyMedium?.copyWith(
                       color: context.colorScheme.onSurfaceVariant,
                       height: 1.5,
@@ -128,7 +126,7 @@ class AboutPage extends StatelessWidget {
                 ListTile(
                   leading: const Icon(Icons.email_outlined),
                   title: Text(l10n.helpCenter),
-                  subtitle: const Text('support@delwaqty.com'),
+                  subtitle: Text(l10n.supportEmailAddress),
                 ),
                 const Divider(height: 1),
                 ListTile(

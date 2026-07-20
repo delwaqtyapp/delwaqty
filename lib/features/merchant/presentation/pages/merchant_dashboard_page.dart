@@ -136,7 +136,7 @@ class _MerchantDashboardPageState
             ),
             _StatCard(
               title: AppLocalizations.of(context).revenue,
-              value: 'SAR ${stats.todayRevenue.toStringAsFixed(0)}',
+              value: '${AppLocalizations.of(context).currencySymbol} ${stats.todayRevenue.toStringAsFixed(0)}',
               icon: Icons.payments_outlined,
               color: Colors.green,
             ),

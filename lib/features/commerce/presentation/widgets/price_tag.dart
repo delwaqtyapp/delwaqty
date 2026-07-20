@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:delwaqty/l10n/app_localizations.dart';
 
 class PriceTag extends StatelessWidget {
   const PriceTag({
@@ -27,11 +28,15 @@ class PriceTag extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final hasDiscount = originalPrice != null && originalPrice! > price;
+    final l10n = AppLocalizations.of(context);
 
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Text('${price.toStringAsFixed(0)} SAR', style: _priceStyle(context)),
+        Text(
+          '${price.toStringAsFixed(0)} ${l10n.currencySymbol}',
+          style: _priceStyle(context),
+        ),
         if (hasDiscount) ...[
           const SizedBox(width: 6),
           Text(

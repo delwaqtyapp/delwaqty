@@ -3,17 +3,19 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
 import 'package:delwaqty/shared/widgets/glass_card.dart';
 import 'package:delwaqty/shared/widgets/premium_empty_state.dart';
+import 'package:delwaqty/l10n/app_localizations.dart';
 
 class AdminAnalyticsPage extends ConsumerWidget {
   const AdminAnalyticsPage({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final cs = Theme.of(context).colorScheme;
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Analytics'),
+        title: Text(l10n.analytics),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
@@ -22,7 +24,7 @@ class AdminAnalyticsPage extends ConsumerWidget {
           children: [
             AnimatedFadeIn(
               child: Text(
-                'Revenue Overview',
+                l10n.revenueOverview,
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.bold,
                 ),
@@ -43,24 +45,24 @@ class AdminAnalyticsPage extends ConsumerWidget {
                       end: Alignment.bottomRight,
                     ),
                   ),
-                  child: const Center(
+                  child: Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Icons.insert_chart_outlined_rounded, color: Colors.white, size: 48),
-                        SizedBox(height: 12),
+                        const Icon(Icons.insert_chart_outlined_rounded, color: Colors.white, size: 48),
+                        const SizedBox(height: 12),
                         Text(
-                          'Revenue Chart',
-                          style: TextStyle(
+                          l10n.revenueChart,
+                          style: const TextStyle(
                             color: Colors.white,
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-                        SizedBox(height: 4),
+                        const SizedBox(height: 4),
                         Text(
-                          'ج.م 0.00 total',
-                          style: TextStyle(color: Colors.white70, fontSize: 14),
+                          '${l10n.currencySymbol} 0.00 ${l10n.total}',
+                          style: const TextStyle(color: Colors.white70, fontSize: 14),
                         ),
                       ],
                     ),
@@ -72,7 +74,7 @@ class AdminAnalyticsPage extends ConsumerWidget {
             AnimatedFadeIn(
               delay: const Duration(milliseconds: 130),
               child: Text(
-                'Order Trends',
+                l10n.orderTrends,
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.bold,
                 ),
@@ -93,19 +95,19 @@ class AdminAnalyticsPage extends ConsumerWidget {
                       end: Alignment.bottomRight,
                     ),
                   ),
-                  child: const Center(
+                  child: Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Icons.show_chart_rounded, color: Colors.white, size: 40),
-                        SizedBox(height: 8),
+                        const Icon(Icons.show_chart_rounded, color: Colors.white, size: 40),
+                        const SizedBox(height: 8),
                         Text(
-                          'Order Trends',
-                          style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
+                          l10n.orderTrends,
+                          style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
                         ),
                         Text(
-                          '0 orders today',
-                          style: TextStyle(color: Colors.white70, fontSize: 13),
+                          l10n.zeroOrdersToday,
+                          style: const TextStyle(color: Colors.white70, fontSize: 13),
                         ),
                       ],
                     ),
@@ -117,7 +119,7 @@ class AdminAnalyticsPage extends ConsumerWidget {
             AnimatedFadeIn(
               delay: const Duration(milliseconds: 190),
               child: Text(
-                'Peak Hours',
+                l10n.peakHours,
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.bold,
                 ),
@@ -127,7 +129,7 @@ class AdminAnalyticsPage extends ConsumerWidget {
             AnimatedFadeIn(
               delay: const Duration(milliseconds: 220),
               child: _PeerMetricCard(
-                label: 'Peak Hours',
+                label: l10n.peakHours,
                 value: '00:00 - 00:00',
                 icon: Icons.access_time_rounded,
                 color: const Color(0xFF00C7BE),
@@ -138,21 +140,21 @@ class AdminAnalyticsPage extends ConsumerWidget {
             AnimatedFadeIn(
               delay: const Duration(milliseconds: 250),
               child: Text(
-                'Top Merchants',
+                l10n.topMerchants,
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.bold,
                 ),
               ),
             ),
             const SizedBox(height: 12),
-            const AnimatedFadeIn(
-              delay: Duration(milliseconds: 280),
+            AnimatedFadeIn(
+              delay: const Duration(milliseconds: 280),
               child: GlassCard(
                 borderRadius: 20,
                 child: PremiumEmptyState(
                   icon: Icons.store_outlined,
-                  title: 'No data yet',
-                  message: 'Merchant performance data will appear here.',
+                  title: l10n.noDataYet,
+                  message: l10n.merchantPerformancePlaceholder,
                 ),
               ),
             ),
@@ -160,21 +162,21 @@ class AdminAnalyticsPage extends ConsumerWidget {
             AnimatedFadeIn(
               delay: const Duration(milliseconds: 310),
               child: Text(
-                'Driver Performance',
+                l10n.driverPerformance,
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.bold,
                 ),
               ),
             ),
             const SizedBox(height: 12),
-            const AnimatedFadeIn(
-              delay: Duration(milliseconds: 340),
+            AnimatedFadeIn(
+              delay: const Duration(milliseconds: 340),
               child: GlassCard(
                 borderRadius: 20,
                 child: PremiumEmptyState(
                   icon: Icons.speed_rounded,
-                  title: 'No data yet',
-                  message: 'Driver performance metrics will appear here.',
+                  title: l10n.noDataYet,
+                  message: l10n.driverPerformancePlaceholder,
                 ),
               ),
             ),

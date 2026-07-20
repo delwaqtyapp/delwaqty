@@ -5893,6 +5893,276 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Other'**
   String get typeOther;
+
+  /// No description provided for @tosLastUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Last updated: January 1, 2025'**
+  String get tosLastUpdated;
+
+  /// No description provided for @tosSection1Title.
+  ///
+  /// In en, this message translates to:
+  /// **'1. Acceptance of Terms'**
+  String get tosSection1Title;
+
+  /// No description provided for @tosSection1Body.
+  ///
+  /// In en, this message translates to:
+  /// **'By accessing or using the Delwaqty application and services, you agree to be bound by these Terms of Service. If you do not agree to these terms, please do not use our services. We reserve the right to modify these terms at any time, and continued use of the service constitutes acceptance of any changes.'**
+  String get tosSection1Body;
+
+  /// No description provided for @tosSection2Title.
+  ///
+  /// In en, this message translates to:
+  /// **'2. Service Description'**
+  String get tosSection2Title;
+
+  /// No description provided for @tosSection2Body.
+  ///
+  /// In en, this message translates to:
+  /// **'Delwaqty provides an on-demand platform connecting users with local restaurants, stores, and drivers for food delivery, package delivery, and ride-hailing services. We act as an intermediary between customers and service providers and do not directly provide delivery or transportation services ourselves.'**
+  String get tosSection2Body;
+
+  /// No description provided for @tosSection3Title.
+  ///
+  /// In en, this message translates to:
+  /// **'3. User Accounts'**
+  String get tosSection3Title;
+
+  /// No description provided for @tosSection3Body.
+  ///
+  /// In en, this message translates to:
+  /// **'You must create an account to use Delwaqty services. You are responsible for maintaining the confidentiality of your account credentials and for all activities that occur under your account. You agree to provide accurate and complete information during registration and to keep your account information up to date. You must be at least 18 years old to create an account.'**
+  String get tosSection3Body;
+
+  /// No description provided for @tosSection4Title.
+  ///
+  /// In en, this message translates to:
+  /// **'4. Orders & Payments'**
+  String get tosSection4Title;
+
+  /// No description provided for @tosSection4Body.
+  ///
+  /// In en, this message translates to:
+  /// **'When you place an order through Delwaqty, you agree to pay the total amount shown at checkout, including the item price, delivery fee, service fee, and any applicable taxes. Payments can be made via cash, credit/debit card, or your Delwaqty wallet. Prices may vary based on location, demand, and promotional offers. Refunds are subject to our refund policy.'**
+  String get tosSection4Body;
+
+  /// No description provided for @tosSection5Title.
+  ///
+  /// In en, this message translates to:
+  /// **'5. Ride & Delivery'**
+  String get tosSection5Title;
+
+  /// No description provided for @tosSection5Body.
+  ///
+  /// In en, this message translates to:
+  /// **'Ride and delivery services are provided by independent drivers and merchants. Delwaqty facilitates the connection but is not responsible for the quality, safety, or legality of the services provided. Estimated delivery and arrival times are approximate and not guaranteed. Users must provide accurate pickup and drop-off locations.'**
+  String get tosSection5Body;
+
+  /// No description provided for @tosSection6Title.
+  ///
+  /// In en, this message translates to:
+  /// **'6. Privacy'**
+  String get tosSection6Title;
+
+  /// No description provided for @tosSection6Body.
+  ///
+  /// In en, this message translates to:
+  /// **'Your use of Delwaqty is also governed by our Privacy Policy. By using our services, you consent to the collection and use of your personal information as described in the Privacy Policy. We collect data necessary to provide and improve our services, including location data for delivery and ride services.'**
+  String get tosSection6Body;
+
+  /// No description provided for @tosSection7Title.
+  ///
+  /// In en, this message translates to:
+  /// **'7. Limitation of Liability'**
+  String get tosSection7Title;
+
+  /// No description provided for @tosSection7Body.
+  ///
+  /// In en, this message translates to:
+  /// **'To the maximum extent permitted by law, Delwaqty shall not be liable for any indirect, incidental, special, or consequential damages arising out of or in connection with your use of our services. Our total liability shall not exceed the amount you paid for the specific service giving rise to the claim. We are not liable for delays, cancellations, or quality issues caused by third-party providers.'**
+  String get tosSection7Body;
+
+  /// No description provided for @ppLastUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Last updated: January 1, 2025'**
+  String get ppLastUpdated;
+
+  /// No description provided for @ppSection1Title.
+  ///
+  /// In en, this message translates to:
+  /// **'1. Information We Collect'**
+  String get ppSection1Title;
+
+  /// No description provided for @ppSection1Body.
+  ///
+  /// In en, this message translates to:
+  /// **'We collect information you provide directly, including your name, email address, phone number, payment information, and delivery addresses. We also collect device information such as your device type, operating system, and unique device identifiers. When you use our services, we automatically collect location data and usage information such as order history and preferences.'**
+  String get ppSection1Body;
+
+  /// No description provided for @ppSection2Title.
+  ///
+  /// In en, this message translates to:
+  /// **'2. How We Use Your Information'**
+  String get ppSection2Title;
+
+  /// No description provided for @ppSection2Body.
+  ///
+  /// In en, this message translates to:
+  /// **'We use your information to provide, maintain, and improve our services, process transactions, send order updates and notifications, personalize your experience, detect and prevent fraud, and communicate with you about promotions and updates. We may also use aggregated and anonymized data for analytics and service improvement.'**
+  String get ppSection2Body;
+
+  /// No description provided for @ppSection3Title.
+  ///
+  /// In en, this message translates to:
+  /// **'3. Location Data'**
+  String get ppSection3Title;
+
+  /// No description provided for @ppSection3Body.
+  ///
+  /// In en, this message translates to:
+  /// **'Delwaqty collects and uses your location data to provide delivery and ride-hailing services. We access your location in the foreground when you request a service and may collect approximate location in the background for service optimization. You can control location access through your device settings, but disabling location may limit the functionality of our services.'**
+  String get ppSection3Body;
+
+  /// No description provided for @ppSection4Title.
+  ///
+  /// In en, this message translates to:
+  /// **'4. Data Sharing'**
+  String get ppSection4Title;
+
+  /// No description provided for @ppSection4Body.
+  ///
+  /// In en, this message translates to:
+  /// **'We share your information with drivers and merchants only as necessary to fulfill your orders (e.g., your name and delivery address for delivery, pickup location for rides). We may share data with payment processors, cloud service providers, and analytics services. We do not sell your personal information to third parties for their marketing purposes.'**
+  String get ppSection4Body;
+
+  /// No description provided for @ppSection5Title.
+  ///
+  /// In en, this message translates to:
+  /// **'5. Data Security'**
+  String get ppSection5Title;
+
+  /// No description provided for @ppSection5Body.
+  ///
+  /// In en, this message translates to:
+  /// **'We implement industry-standard security measures to protect your personal information, including encryption in transit and at rest, secure servers, and regular security audits. While we strive to protect your data, no method of electronic transmission or storage is 100% secure, and we cannot guarantee absolute security.'**
+  String get ppSection5Body;
+
+  /// No description provided for @ppSection6Title.
+  ///
+  /// In en, this message translates to:
+  /// **'6. Your Rights'**
+  String get ppSection6Title;
+
+  /// No description provided for @ppSection6Body.
+  ///
+  /// In en, this message translates to:
+  /// **'You have the right to access, correct, or delete your personal information at any time through the app settings. You can also request a copy of your data, opt out of marketing communications, and control your privacy preferences. To exercise these rights, contact us at support@delwaqty.com.'**
+  String get ppSection6Body;
+
+  /// No description provided for @ppSection7Title.
+  ///
+  /// In en, this message translates to:
+  /// **'7. Children\'s Privacy'**
+  String get ppSection7Title;
+
+  /// No description provided for @ppSection7Body.
+  ///
+  /// In en, this message translates to:
+  /// **'Delwaqty services are not intended for individuals under the age of 18. We do not knowingly collect personal information from children. If we become aware that a child has provided us with personal information, we will take steps to delete such information promptly.'**
+  String get ppSection7Body;
+
+  /// No description provided for @ppSection8Title.
+  ///
+  /// In en, this message translates to:
+  /// **'8. Changes to Policy'**
+  String get ppSection8Title;
+
+  /// No description provided for @ppSection8Body.
+  ///
+  /// In en, this message translates to:
+  /// **'We may update this Privacy Policy from time to time to reflect changes in our practices or legal requirements. We will notify you of any material changes by posting the updated policy in the app and via email or push notification. Your continued use of the service after changes constitutes acceptance of the updated policy.'**
+  String get ppSection8Body;
+
+  /// No description provided for @helpSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Frequently Asked Questions'**
+  String get helpSection;
+
+  /// No description provided for @faqQuestion1.
+  ///
+  /// In en, this message translates to:
+  /// **'How to place an order?'**
+  String get faqQuestion1;
+
+  /// No description provided for @faqAnswer1.
+  ///
+  /// In en, this message translates to:
+  /// **'Simply browse restaurants or stores near you, add items to your cart, confirm your delivery address, and tap Place Order. You can pay with cash, wallet, or card depending on availability.'**
+  String get faqAnswer1;
+
+  /// No description provided for @faqQuestion2.
+  ///
+  /// In en, this message translates to:
+  /// **'How to track my order?'**
+  String get faqQuestion2;
+
+  /// No description provided for @faqAnswer2.
+  ///
+  /// In en, this message translates to:
+  /// **'Once your order is confirmed, you can track it in real-time from the Orders tab. You will see the driver location, estimated arrival time, and status updates at each step of the delivery.'**
+  String get faqAnswer2;
+
+  /// No description provided for @faqQuestion3.
+  ///
+  /// In en, this message translates to:
+  /// **'How to become a driver?'**
+  String get faqQuestion3;
+
+  /// No description provided for @faqAnswer3.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap on the Driver option in the app and complete the registration form. You will need to provide your ID, vehicle information, and driving license. After verification, you can start accepting ride and delivery requests.'**
+  String get faqAnswer3;
+
+  /// No description provided for @faqQuestion4.
+  ///
+  /// In en, this message translates to:
+  /// **'How to add money to wallet?'**
+  String get faqQuestion4;
+
+  /// No description provided for @faqAnswer4.
+  ///
+  /// In en, this message translates to:
+  /// **'Go to the Wallet section from the sidebar menu and tap Top Up. Choose your preferred payment method and enter the amount. Your balance will be updated instantly after successful payment.'**
+  String get faqAnswer4;
+
+  /// No description provided for @faqQuestion5.
+  ///
+  /// In en, this message translates to:
+  /// **'How to contact support?'**
+  String get faqQuestion5;
+
+  /// No description provided for @faqAnswer5.
+  ///
+  /// In en, this message translates to:
+  /// **'You can reach our support team by emailing support@delwaqty.com or through the Contact Us section in the app. Our team is available 24/7 to assist you with any issues or questions.'**
+  String get faqAnswer5;
+
+  /// No description provided for @faqQuestion6.
+  ///
+  /// In en, this message translates to:
+  /// **'How to report a problem?'**
+  String get faqQuestion6;
+
+  /// No description provided for @faqAnswer6.
+  ///
+  /// In en, this message translates to:
+  /// **'Go to your order history, select the relevant order, and tap Report Problem. Choose the issue category, add a description, and our team will review and respond as quickly as possible.'**
+  String get faqAnswer6;
 }
 
 class _AppLocalizationsDelegate

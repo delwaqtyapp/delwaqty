@@ -5,7 +5,6 @@ import 'package:go_router/go_router.dart';
 import 'package:delwaqty/core/localization/locale_provider.dart';
 import 'package:delwaqty/core/module/feature_module.dart';
 import 'package:delwaqty/core/module/feature_registry.dart';
-import 'package:delwaqty/core/theme/app_colors.dart';
 import 'package:delwaqty/core/theme/theme_mode_provider.dart';
 import 'package:delwaqty/features/auth/domain/auth_state.dart';
 import 'package:delwaqty/features/auth/presentation/auth_provider.dart';
@@ -31,30 +30,32 @@ class AppShell extends ConsumerWidget {
     final registry = FeatureRegistry.instance;
     final drawerEntries = registry.allDrawerEntries;
 
+    final RenderBox? appBarBox =
+        context.findRenderObject() as RenderBox?;
+    final Offset buttonPosition =
+        appBarBox != null ? appBarBox.localToGlobal(Offset.zero) : Offset.zero;
+    final double statusBarHeight = MediaQuery.of(context).padding.top;
+    final double appBarHeight = kToolbarHeight;
+
     showGeneralDialog(
       context: context,
       barrierDismissible: true,
       barrierLabel: 'drawer',
-      barrierColor: Colors.black38,
-      transitionDuration: const Duration(milliseconds: 300),
+      barrierColor: Colors.black26,
+      transitionDuration: const Duration(milliseconds: 250),
       transitionBuilder: (ctx, anim, secondaryAnim, child) {
         final curved = CurvedAnimation(
           parent: anim,
-          curve: Curves.easeOutCubic,
-          reverseCurve: Curves.easeInCubic,
+          curve: Curves.easeOutQuint,
+          reverseCurve: Curves.easeInQuint,
         );
-        return SlideTransition(
-          position: Tween<Offset>(
-            begin: const Offset(-1, 0),
-            end: Offset.zero,
-          ).animate(curved),
-          child: FadeTransition(
-            opacity: curved,
-            child: child,
-          ),
+        return FadeTransition(
+          opacity: curved,
+          child: child,
         );
       },
       pageBuilder: (ctx, anim, secondaryAnim) {
+        final topOffset = statusBarHeight + appBarHeight + 4;
         return _DrawerPanel(
           authState: authState,
           l10n: l10n,
@@ -62,6 +63,7 @@ class AppShell extends ConsumerWidget {
           locale: locale,
           ref: ref,
           drawerEntries: drawerEntries,
+          topOffset: topOffset,
         );
       },
     );
@@ -245,6 +247,7 @@ class _DrawerPanel extends StatelessWidget {
     required this.locale,
     required this.ref,
     required this.drawerEntries,
+    required this.topOffset,
   });
 
   final AuthState authState;
@@ -253,6 +256,7 @@ class _DrawerPanel extends StatelessWidget {
   final Locale locale;
   final WidgetRef ref;
   final List drawerEntries;
+  final double topOffset;
 
   @override
   Widget build(BuildContext context) {
@@ -274,163 +278,192 @@ class _DrawerPanel extends StatelessWidget {
         .where((e) => e.position == DrawerPosition.footer)
         .toList();
 
-    return GestureDetector(
-      onTap: () => Navigator.of(context).pop(),
-      child: GestureDetector(
-        onTap: () {},
-        child: Align(
-          alignment: AlignmentDirectional.centerStart,
-          child: ClipRRect(
-            borderRadius: const BorderRadiusDirectional.only(
-              topEnd: Radius.circular(28),
-              bottomEnd: Radius.circular(28),
-            ),
-            child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 32, sigmaY: 32),
-              child: Container(
-                width: 260,
-                constraints: BoxConstraints(
-                  maxHeight: MediaQuery.of(context).size.height * 0.65,
+    return Stack(
+      children: [
+        GestureDetector(
+          onTap: () => Navigator.of(context).pop(),
+          behavior: HitTestBehavior.translucent,
+          child: Container(color: Colors.transparent),
+        ),
+        Positioned(
+          top: topOffset,
+          left: 12,
+          right: 12,
+          child: TweenAnimationBuilder<double>(
+            tween: Tween(begin: 0.0, end: 1.0),
+            duration: const Duration(milliseconds: 250),
+            curve: Curves.easeOutQuint,
+            builder: (context, value, child) {
+              return Transform.translate(
+                offset: Offset(0, -8 * (1 - value)),
+                child: Opacity(
+                  opacity: value,
+                  child: child,
                 ),
-                decoration: BoxDecoration(
-                  color: isDark
-                      ? Colors.white.withValues(alpha: 0.08)
-                      : Colors.white.withValues(alpha: 0.82),
-                  borderRadius: const BorderRadiusDirectional.only(
-                    topEnd: Radius.circular(28),
-                    bottomEnd: Radius.circular(28),
+              );
+            },
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(20),
+              child: BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 40, sigmaY: 40),
+                child: Container(
+                  constraints: BoxConstraints(
+                    maxHeight: MediaQuery.of(context).size.height * 0.6,
                   ),
-                  border: Border.all(
+                  decoration: BoxDecoration(
                     color: isDark
-                        ? Colors.white.withValues(alpha: 0.1)
-                        : Colors.black.withValues(alpha: 0.06),
-                    width: 0.5,
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: isDark ? 0.5 : 0.12),
-                      blurRadius: 40,
-                      offset: const Offset(8, 0),
+                        ? Colors.white.withValues(alpha: 0.07)
+                        : Colors.white.withValues(alpha: 0.78),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: isDark
+                          ? Colors.white.withValues(alpha: 0.12)
+                          : Colors.black.withValues(alpha: 0.06),
+                      width: 0.5,
                     ),
-                  ],
-                ),
-                child: SafeArea(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      _buildHeader(context, cs, userName, displayRole),
-                      const SizedBox(height: 4),
-                      Flexible(
-                        child: SingleChildScrollView(
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              ...bodyEntries.map(
-                                (entry) => _DrawerTile(
-                                  icon: entry.icon,
-                                  label: entry.label(context),
-                                  onTap: () => entry.onTap(context, ref),
-                                  colorScheme: cs,
-                                ),
-                              ),
-                              if (isAdmin) ...[
-                                _DrawerTile(
-                                  icon: Icons.admin_panel_settings_rounded,
-                                  label: l10n.adminDashboard,
-                                  onTap: () {
-                                    Navigator.of(context).pop();
-                                    context.push('/admin');
-                                  },
-                                  colorScheme: cs,
-                                ),
-                              ],
-                              const SizedBox(height: 4),
-                              _DrawerTile(
-                                icon: themeMode == ThemeMode.dark
-                                    ? Icons.light_mode_outlined
-                                    : Icons.dark_mode_outlined,
-                                label: l10n.darkMode,
-                                onTap: () =>
-                                    ref.read(themeModeProvider.notifier).toggleTheme(),
-                                colorScheme: cs,
-                                trailing: Switch(
-                                  value: themeMode == ThemeMode.dark,
-                                  onChanged: (_) => ref
-                                      .read(themeModeProvider.notifier)
-                                      .toggleTheme(),
-                                ),
-                              ),
-                              _DrawerTile(
-                                icon: Icons.language_rounded,
-                                label: l10n.language,
-                                subtitle: locale.languageCode == 'ar'
-                                    ? 'العربية'
-                                    : 'English',
-                                onTap: () =>
-                                    ref.read(localeProvider.notifier).toggleLocale(),
-                                colorScheme: cs,
-                              ),
-                              if (footerEntries.isNotEmpty) ...[
-                                const SizedBox(height: 4),
-                                ...footerEntries.map(
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: isDark ? 0.6 : 0.15),
+                        blurRadius: 48,
+                        spreadRadius: -4,
+                        offset: const Offset(0, 12),
+                      ),
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.06),
+                        blurRadius: 16,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: SafeArea(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        _buildHeader(context, cs, userName, displayRole),
+                        Divider(
+                          height: 1,
+                          thickness: 0.5,
+                          color: cs.outline.withValues(alpha: 0.12),
+                        ),
+                        const SizedBox(height: 4),
+                        Flexible(
+                          child: SingleChildScrollView(
+                            padding: const EdgeInsets.only(bottom: 8),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                ...bodyEntries.map(
                                   (entry) => _DrawerTile(
                                     icon: entry.icon,
                                     label: entry.label(context),
                                     onTap: () => entry.onTap(context, ref),
                                     colorScheme: cs,
+                                    isDark: isDark,
                                   ),
                                 ),
-                              ],
-                              _DrawerTile(
-                                icon: Icons.logout_rounded,
-                                label: l10n.logout,
-                                colorScheme: cs,
-                                isDestructive: true,
-                                onTap: () {
-                                  Navigator.of(context).pop();
-                                  showDialog<void>(
-                                    context: context,
-                                    builder: (ctx) => AlertDialog(
-                                      title: Text(l10n.logout),
-                                      content: Text(l10n.areYouSureYouWantToLogout),
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(20),
-                                      ),
-                                      actions: [
-                                        TextButton(
-                                          onPressed: () => Navigator.of(ctx).pop(),
-                                          child: Text(l10n.cancel),
-                                        ),
-                                        TextButton(
-                                          onPressed: () {
-                                            Navigator.of(ctx).pop();
-                                            ref
-                                                .read(authStateProvider.notifier)
-                                                .signOut();
-                                          },
-                                          child: Text(
-                                            l10n.logout,
-                                            style: TextStyle(color: cs.error),
-                                          ),
-                                        ),
-                                      ],
+                                if (isAdmin) ...[
+                                  _DrawerTile(
+                                    icon: Icons.admin_panel_settings_rounded,
+                                    label: l10n.adminDashboard,
+                                    onTap: () {
+                                      Navigator.of(context).pop();
+                                      context.push('/admin');
+                                    },
+                                    colorScheme: cs,
+                                    isDark: isDark,
+                                  ),
+                                ],
+                                const SizedBox(height: 2),
+                                _DrawerTile(
+                                  icon: themeMode == ThemeMode.dark
+                                      ? Icons.light_mode_outlined
+                                      : Icons.dark_mode_outlined,
+                                  label: l10n.darkMode,
+                                  onTap: () =>
+                                      ref.read(themeModeProvider.notifier).toggleTheme(),
+                                  colorScheme: cs,
+                                  isDark: isDark,
+                                  trailing: Switch(
+                                    value: themeMode == ThemeMode.dark,
+                                    onChanged: (_) => ref
+                                        .read(themeModeProvider.notifier)
+                                        .toggleTheme(),
+                                  ),
+                                ),
+                                _DrawerTile(
+                                  icon: Icons.language_rounded,
+                                  label: l10n.language,
+                                  subtitle: locale.languageCode == 'ar'
+                                      ? 'العربية'
+                                      : 'English',
+                                  onTap: () =>
+                                      ref.read(localeProvider.notifier).toggleLocale(),
+                                  colorScheme: cs,
+                                  isDark: isDark,
+                                ),
+                                if (footerEntries.isNotEmpty) ...[
+                                  const SizedBox(height: 2),
+                                  ...footerEntries.map(
+                                    (entry) => _DrawerTile(
+                                      icon: entry.icon,
+                                      label: entry.label(context),
+                                      onTap: () => entry.onTap(context, ref),
+                                      colorScheme: cs,
+                                      isDark: isDark,
                                     ),
-                                  );
-                                },
-                              ),
-                              const SizedBox(height: 8),
-                            ],
+                                  ),
+                                ],
+                                _DrawerTile(
+                                  icon: Icons.logout_rounded,
+                                  label: l10n.logout,
+                                  colorScheme: cs,
+                                  isDark: isDark,
+                                  isDestructive: true,
+                                  onTap: () {
+                                    Navigator.of(context).pop();
+                                    showDialog<void>(
+                                      context: context,
+                                      builder: (ctx) => AlertDialog(
+                                        title: Text(l10n.logout),
+                                        content: Text(l10n.areYouSureYouWantToLogout),
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(20),
+                                        ),
+                                        actions: [
+                                          TextButton(
+                                            onPressed: () => Navigator.of(ctx).pop(),
+                                            child: Text(l10n.cancel),
+                                          ),
+                                          TextButton(
+                                            onPressed: () {
+                                              Navigator.of(ctx).pop();
+                                              ref
+                                                  .read(authStateProvider.notifier)
+                                                  .signOut();
+                                            },
+                                            child: Text(
+                                              l10n.logout,
+                                              style: TextStyle(color: cs.error),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    );
+                                  },
+                                ),
+                              ],
+                            ),
                           ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               ),
             ),
           ),
         ),
-      ),
+      ],
     );
   }
 
@@ -442,12 +475,12 @@ class _DrawerPanel extends StatelessWidget {
   ) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+      padding: const EdgeInsets.fromLTRB(14, 10, 14, 8),
       child: Row(
         children: [
           Container(
-            width: 42,
-            height: 42,
+            width: 38,
+            height: 38,
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 colors: [cs.primary, cs.tertiary],
@@ -461,7 +494,7 @@ class _DrawerPanel extends StatelessWidget {
                 userName.isNotEmpty ? userName[0].toUpperCase() : 'U',
                 style: TextStyle(
                   color: cs.onPrimary,
-                  fontSize: 18,
+                  fontSize: 16,
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -477,7 +510,7 @@ class _DrawerPanel extends StatelessWidget {
                   userName,
                   style: TextStyle(
                     fontWeight: FontWeight.w600,
-                    fontSize: 14,
+                    fontSize: 13.5,
                     color: cs.onSurface,
                   ),
                   maxLines: 1,
@@ -486,15 +519,15 @@ class _DrawerPanel extends StatelessWidget {
                 if (displayRole != null) ...[
                   const SizedBox(height: 2),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                    padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 1.5),
                     decoration: BoxDecoration(
-                      color: Colors.red.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(6),
+                      color: Colors.red.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(5),
                     ),
                     child: Text(
                       displayRole,
                       style: TextStyle(
-                        fontSize: 11,
+                        fontSize: 10.5,
                         fontWeight: FontWeight.w600,
                         color: Colors.red[700],
                       ),
@@ -516,6 +549,7 @@ class _DrawerTile extends StatelessWidget {
     required this.label,
     required this.onTap,
     required this.colorScheme,
+    required this.isDark,
     this.subtitle,
     this.trailing,
     this.isDestructive = false,
@@ -525,6 +559,7 @@ class _DrawerTile extends StatelessWidget {
   final String label;
   final VoidCallback onTap;
   final ColorScheme colorScheme;
+  final bool isDark;
   final String? subtitle;
   final Widget? trailing;
   final bool isDestructive;
@@ -534,19 +569,19 @@ class _DrawerTile extends StatelessWidget {
     final color = isDestructive ? colorScheme.error : colorScheme.onSurface;
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 1),
       child: Material(
         color: Colors.transparent,
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(12),
         child: InkWell(
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: BorderRadius.circular(12),
           onTap: onTap,
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
             child: Row(
               children: [
-                Icon(icon, size: 22, color: color),
-                const SizedBox(width: 14),
+                Icon(icon, size: 20, color: color),
+                const SizedBox(width: 12),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -555,7 +590,7 @@ class _DrawerTile extends StatelessWidget {
                       Text(
                         label,
                         style: TextStyle(
-                          fontSize: 14,
+                          fontSize: 13.5,
                           fontWeight: FontWeight.w500,
                           color: color,
                         ),

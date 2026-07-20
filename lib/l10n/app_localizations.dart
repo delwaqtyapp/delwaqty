@@ -2864,6 +2864,12 @@ abstract class AppLocalizations {
   /// **'Total Deliveries'**
   String get totalDeliveries;
 
+  /// No description provided for @totalRides.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Rides'**
+  String get totalRides;
+
   /// No description provided for @earnings.
   ///
   /// In en, this message translates to:

@@ -463,6 +463,7 @@
   "online": "Online",
   "offline": "Offline",
   "totalDeliveries": "Total Deliveries",
+  "totalRides": "Total Rides",
   "earnings": "Earnings",
   "vehicleInfo": "Vehicle Info",
   "availableDeliveries": "Available Deliveries",

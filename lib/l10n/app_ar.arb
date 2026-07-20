@@ -463,6 +463,7 @@
   "online": "متصل",
   "offline": "غير متصل",
   "totalDeliveries": "إجمالي التوصيلات",
+  "totalRides": "إجمالي الرحلات",
   "earnings": "الأرباح",
   "vehicleInfo": "معلومات المركبة",
   "availableDeliveries": "التوصيلات المتاحة",

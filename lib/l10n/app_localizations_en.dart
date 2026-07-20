@@ -1466,6 +1466,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get totalDeliveries => 'Total Deliveries';
 
   @override
+  String get totalRides => 'Total Rides';
+
+  @override
   String get earnings => 'Earnings';
 
   @override

@@ -1461,6 +1461,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get totalDeliveries => 'إجمالي التوصيلات';
 
   @override
+  String get totalRides => 'إجمالي الرحلات';
+
+  @override
   String get earnings => 'الأرباح';
 
   @override

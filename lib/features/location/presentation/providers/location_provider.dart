@@ -4,6 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:delwaqty/config/app_config.dart';
+import 'package:delwaqty/core/localization/locale_provider.dart';
 import 'package:delwaqty/services/logger/app_logger.dart';
 
 class UserLocation {
@@ -73,31 +75,25 @@ class UserLocationNotifier extends AsyncNotifier<UserLocation?> {
 
   Future<String> _reverseGeocode(double lat, double lng) async {
     try {
+      final apiKey = AppConfig.mapsApiKey;
+      if (apiKey.isEmpty) return '';
+
+      final lang = ref.read(localeProvider).languageCode;
       final uri = Uri.parse(
-        'https://nominatim.openstreetmap.org/reverse'
-        '?format=json&lat=$lat&lon=$lng&zoom=18&addressdetails=1',
+        'https://maps.googleapis.com/maps/api/geocode/json'
+        '?latlng=$lat,$lng&key=$apiKey&language=$lang',
       );
-      final response = await http.get(
-        uri,
-        headers: {'User-Agent': 'Delwaqty/1.0'},
-      );
+      final response = await http.get(uri);
       if (response.statusCode == 200) {
         final data = json.decode(response.body) as Map<String, dynamic>;
-        final address = data['address'] as Map<String, dynamic>?;
-        if (address != null) {
-          final parts = <String>[];
-          final neighbourhood = address['neighbourhood'] as String? ??
-              address['suburb'] as String? ??
-              address['residential'] as String? ??
-              address['quarter'] as String?;
-          final city = address['city'] as String? ??
-              address['town'] as String? ??
-              address['village'] as String? ??
-              address['state'] as String?;
-          if (neighbourhood != null) parts.add(neighbourhood);
-          if (city != null && city != neighbourhood) parts.add(city);
-          if (parts.isNotEmpty) return parts.join(', ');
-          return address['country'] as String? ?? '';
+        final results = data['results'] as List<dynamic>?;
+        if (results != null && results.isNotEmpty) {
+          final first = results.first as Map<String, dynamic>;
+          final formattedAddress =
+              first['formatted_address'] as String?;
+          if (formattedAddress != null && formattedAddress.isNotEmpty) {
+            return formattedAddress;
+          }
         }
       }
     } catch (_) {}

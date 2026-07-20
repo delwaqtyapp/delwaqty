@@ -277,6 +277,7 @@
   "verified": "موثق",
   "riyadhSaudiArabia": "الرياض، المملكة العربية السعودية",
   "searchingForLocation": "جارٍ البحث عن الموقع...",
+  "locationUnavailable": "الموقع غير متاح",
   "dineIn": "صالة الطعام",
   "takeaway": "طلبات خارجية",
   "reserveATable": "احجز طاولة",

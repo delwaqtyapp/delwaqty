@@ -277,6 +277,7 @@
   "verified": "Verified",
   "riyadhSaudiArabia": "Riyadh, Saudi Arabia",
   "searchingForLocation": "Searching for location...",
+  "locationUnavailable": "Location unavailable",
   "dineIn": "Dine In",
   "takeaway": "Takeaway",
   "reserveATable": "Reserve a Table",

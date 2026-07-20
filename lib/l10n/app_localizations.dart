@@ -1760,6 +1760,12 @@ abstract class AppLocalizations {
   /// **'Searching for location...'**
   String get searchingForLocation;
 
+  /// No description provided for @locationUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Location unavailable'**
+  String get locationUnavailable;
+
   /// No description provided for @dineIn.
   ///
   /// In en, this message translates to:

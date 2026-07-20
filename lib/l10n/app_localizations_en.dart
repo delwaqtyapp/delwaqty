@@ -867,6 +867,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get searchingForLocation => 'Searching for location...';
 
   @override
+  String get locationUnavailable => 'Location unavailable';
+
+  @override
   String get dineIn => 'Dine In';
 
   @override

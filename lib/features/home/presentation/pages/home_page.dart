@@ -67,7 +67,7 @@ class HomePage extends ConsumerWidget {
     final locationText = locationAsync.when(
       data: (loc) => loc?.detailedAddress.isNotEmpty == true
           ? loc!.detailedAddress
-          : l10n.riyadhSaudiArabia,
+          : l10n.locationUnavailable,
       loading: () => l10n.searchingForLocation,
       error: (_, __) => l10n.searchingForLocation,
     );

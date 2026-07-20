@@ -863,6 +863,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get searchingForLocation => 'جارٍ البحث عن الموقع...';
 
   @override
+  String get locationUnavailable => 'الموقع غير متاح';
+
+  @override
   String get dineIn => 'صالة الطعام';
 
   @override

@@ -2258,6 +2258,12 @@ abstract class AppLocalizations {
   /// **'Overview'**
   String get overview;
 
+  /// No description provided for @analytics.
+  ///
+  /// In en, this message translates to:
+  /// **'Analytics'**
+  String get analytics;
+
   /// No description provided for @quickActions.
   ///
   /// In en, this message translates to:
@@ -5257,6 +5263,282 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Delete'**
   String get deleteLabel;
+
+  /// No description provided for @unitKg.
+  ///
+  /// In en, this message translates to:
+  /// **'Kg'**
+  String get unitKg;
+
+  /// No description provided for @unitPiece.
+  ///
+  /// In en, this message translates to:
+  /// **'Piece'**
+  String get unitPiece;
+
+  /// No description provided for @unitNone.
+  ///
+  /// In en, this message translates to:
+  /// **'None'**
+  String get unitNone;
+
+  /// No description provided for @pieceUnitBox.
+  ///
+  /// In en, this message translates to:
+  /// **'Box'**
+  String get pieceUnitBox;
+
+  /// No description provided for @pieceUnitCarton.
+  ///
+  /// In en, this message translates to:
+  /// **'Carton'**
+  String get pieceUnitCarton;
+
+  /// No description provided for @pieceUnitLiter.
+  ///
+  /// In en, this message translates to:
+  /// **'Liter'**
+  String get pieceUnitLiter;
+
+  /// No description provided for @selectUnit.
+  ///
+  /// In en, this message translates to:
+  /// **'Unit'**
+  String get selectUnit;
+
+  /// No description provided for @weightNone.
+  ///
+  /// In en, this message translates to:
+  /// **'No fraction'**
+  String get weightNone;
+
+  /// No description provided for @weightQuarter.
+  ///
+  /// In en, this message translates to:
+  /// **'Quarter kg'**
+  String get weightQuarter;
+
+  /// No description provided for @weightHalf.
+  ///
+  /// In en, this message translates to:
+  /// **'Half kg'**
+  String get weightHalf;
+
+  /// No description provided for @weightThird.
+  ///
+  /// In en, this message translates to:
+  /// **'Third kg'**
+  String get weightThird;
+
+  /// No description provided for @weightThreeQuarters.
+  ///
+  /// In en, this message translates to:
+  /// **'Three-quarters kg'**
+  String get weightThreeQuarters;
+
+  /// No description provided for @weightEighth.
+  ///
+  /// In en, this message translates to:
+  /// **'Eighth kg'**
+  String get weightEighth;
+
+  /// No description provided for @weightFifth.
+  ///
+  /// In en, this message translates to:
+  /// **'Fifth kg'**
+  String get weightFifth;
+
+  /// No description provided for @weightBundle.
+  ///
+  /// In en, this message translates to:
+  /// **'Bundle'**
+  String get weightBundle;
+
+  /// No description provided for @gettingLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Getting location...'**
+  String get gettingLocation;
+
+  /// No description provided for @locationError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not get your location'**
+  String get locationError;
+
+  /// No description provided for @safetyHub.
+  ///
+  /// In en, this message translates to:
+  /// **'Safety Center'**
+  String get safetyHub;
+
+  /// No description provided for @safetyHubDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'All safety tools and guidelines'**
+  String get safetyHubDesc;
+
+  /// No description provided for @tripSafetyInstructions.
+  ///
+  /// In en, this message translates to:
+  /// **'Trip Safety Instructions'**
+  String get tripSafetyInstructions;
+
+  /// No description provided for @beforeTrip.
+  ///
+  /// In en, this message translates to:
+  /// **'Before Trip'**
+  String get beforeTrip;
+
+  /// No description provided for @duringTrip.
+  ///
+  /// In en, this message translates to:
+  /// **'During Trip'**
+  String get duringTrip;
+
+  /// No description provided for @afterTrip.
+  ///
+  /// In en, this message translates to:
+  /// **'After Trip'**
+  String get afterTrip;
+
+  /// No description provided for @beforeTripInstructions.
+  ///
+  /// In en, this message translates to:
+  /// **'Verify driver name, photo, vehicle plate, and car color before getting in.'**
+  String get beforeTripInstructions;
+
+  /// No description provided for @duringTripInstructions.
+  ///
+  /// In en, this message translates to:
+  /// **'Share your trip with trusted contacts. Keep your phone charged. If you feel unsafe, use the SOS button immediately.'**
+  String get duringTripInstructions;
+
+  /// No description provided for @afterTripInstructions.
+  ///
+  /// In en, this message translates to:
+  /// **'Rate your trip. Report any issues. Check your belongings before leaving the vehicle.'**
+  String get afterTripInstructions;
+
+  /// No description provided for @driverInstructions.
+  ///
+  /// In en, this message translates to:
+  /// **'Driver Guidelines'**
+  String get driverInstructions;
+
+  /// No description provided for @driverBeforeTrip.
+  ///
+  /// In en, this message translates to:
+  /// **'Verify passenger identity. Check the OTP code. Confirm the destination.'**
+  String get driverBeforeTrip;
+
+  /// No description provided for @driverDuringTrip.
+  ///
+  /// In en, this message translates to:
+  /// **'Follow the GPS route. Drive safely. Do not make unauthorized stops.'**
+  String get driverDuringTrip;
+
+  /// No description provided for @driverAfterTrip.
+  ///
+  /// In en, this message translates to:
+  /// **'Wait for passenger to exit safely. Check for left items. End trip in the app.'**
+  String get driverAfterTrip;
+
+  /// No description provided for @safetyTools.
+  ///
+  /// In en, this message translates to:
+  /// **'Safety Tools'**
+  String get safetyTools;
+
+  /// No description provided for @sosAlertTool.
+  ///
+  /// In en, this message translates to:
+  /// **'Emergency SOS'**
+  String get sosAlertTool;
+
+  /// No description provided for @sosAlertDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Send immediate alert to emergency contacts and authorities'**
+  String get sosAlertDesc;
+
+  /// No description provided for @tripSharingTool.
+  ///
+  /// In en, this message translates to:
+  /// **'Trip Sharing'**
+  String get tripSharingTool;
+
+  /// No description provided for @tripSharingDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Share your live location with trusted contacts'**
+  String get tripSharingDesc;
+
+  /// No description provided for @trustedContactsTool.
+  ///
+  /// In en, this message translates to:
+  /// **'Trusted Contacts'**
+  String get trustedContactsTool;
+
+  /// No description provided for @trustedContactsDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage your emergency contact list'**
+  String get trustedContactsDesc;
+
+  /// No description provided for @pickupOtpTool.
+  ///
+  /// In en, this message translates to:
+  /// **'Pickup Verification'**
+  String get pickupOtpTool;
+
+  /// No description provided for @pickupOtpDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Verify driver with OTP before starting trip'**
+  String get pickupOtpDesc;
+
+  /// No description provided for @safetyTips.
+  ///
+  /// In en, this message translates to:
+  /// **'Safety Tips'**
+  String get safetyTips;
+
+  /// No description provided for @tip1.
+  ///
+  /// In en, this message translates to:
+  /// **'Always share your trip with someone you trust'**
+  String get tip1;
+
+  /// No description provided for @tip2.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep your phone charged during the trip'**
+  String get tip2;
+
+  /// No description provided for @tip3.
+  ///
+  /// In en, this message translates to:
+  /// **'Verify the driver and vehicle before getting in'**
+  String get tip3;
+
+  /// No description provided for @tip4.
+  ///
+  /// In en, this message translates to:
+  /// **'Trust your instincts — if something feels wrong, use SOS'**
+  String get tip4;
+
+  /// No description provided for @tip5.
+  ///
+  /// In en, this message translates to:
+  /// **'Sit in the back seat when riding alone'**
+  String get tip5;
+
+  /// No description provided for @tripInstructions.
+  ///
+  /// In en, this message translates to:
+  /// **'Trip Instructions'**
+  String get tripInstructions;
 }
 
 class _AppLocalizationsDelegate

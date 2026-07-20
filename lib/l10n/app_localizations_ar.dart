@@ -1141,6 +1141,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get overview => 'نظرة عامة';
 
   @override
+  String get analytics => 'التحليلات';
+
+  @override
   String get quickActions => 'إجراءات سريعة';
 
   @override
@@ -2693,4 +2696,148 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get deleteLabel => 'حذف';
+
+  @override
+  String get unitKg => 'كيلو';
+
+  @override
+  String get unitPiece => 'وحده';
+
+  @override
+  String get unitNone => 'لا يوجد';
+
+  @override
+  String get pieceUnitBox => 'علبة';
+
+  @override
+  String get pieceUnitCarton => 'كرتونة';
+
+  @override
+  String get pieceUnitLiter => 'لتر';
+
+  @override
+  String get selectUnit => 'الوحدة';
+
+  @override
+  String get weightNone => 'لا يوجد';
+
+  @override
+  String get weightQuarter => 'ربع كيلو';
+
+  @override
+  String get weightHalf => 'نص كيلو';
+
+  @override
+  String get weightThird => 'تلت كيلو';
+
+  @override
+  String get weightThreeQuarters => 'تلت اربع كيلو';
+
+  @override
+  String get weightEighth => 'تمن كيلو';
+
+  @override
+  String get weightFifth => 'خمس كيلو';
+
+  @override
+  String get weightBundle => 'ربطه';
+
+  @override
+  String get gettingLocation => 'جارٍ تحديد الموقع...';
+
+  @override
+  String get locationError => 'مقدرش أحدد موقعك';
+
+  @override
+  String get safetyHub => 'مركز الأمان';
+
+  @override
+  String get safetyHubDesc => 'كل أدوات الأمان والإرشادات';
+
+  @override
+  String get tripSafetyInstructions => 'تعليمات أمان الرحلة';
+
+  @override
+  String get beforeTrip => 'قبل الرحلة';
+
+  @override
+  String get duringTrip => 'أثناء الرحلة';
+
+  @override
+  String get afterTrip => 'بعد الرحلة';
+
+  @override
+  String get beforeTripInstructions =>
+      'تأكد من اسم السائق وصورته ورقم اللوحة ولون العربية قبل ما تركب.';
+
+  @override
+  String get duringTripInstructions =>
+      'شارك رحلتك مع جهات اتصال موثوقة. شحن تليفونك. لو حسيت بخطر، استخدم زر الطوارئ فوراً.';
+
+  @override
+  String get afterTripInstructions =>
+      'قيّم رحلتك. بلّغ عن أي مشكلة. تأكد من أغراضك قبل ما تنزل من العربية.';
+
+  @override
+  String get driverInstructions => 'إرشادات السائق';
+
+  @override
+  String get driverBeforeTrip =>
+      'تأكد من هوية الراكب. تحقق من رمز OTP. أكّد وجهة الرحلة.';
+
+  @override
+  String get driverDuringTrip =>
+      'اتبع خارطة GPS. قيّد بأمان. لا تتوقف في أماكن غير مصرح بها.';
+
+  @override
+  String get driverAfterTrip =>
+      'انتظر خروج الراكب بأمان. تحقق من أغراض متبقية. أنهِ الرحلة في التطبيق.';
+
+  @override
+  String get safetyTools => 'أدوات الأمان';
+
+  @override
+  String get sosAlertTool => 'طوارئ SOS';
+
+  @override
+  String get sosAlertDesc => 'إرسال تنبيه فوري لجهات الاتصال والسلطات';
+
+  @override
+  String get tripSharingTool => 'مشاركة الرحلة';
+
+  @override
+  String get tripSharingDesc => 'مشاركة موقعك المباشر مع جهات اتصال موثوقة';
+
+  @override
+  String get trustedContactsTool => 'جهات اتصال موثوقة';
+
+  @override
+  String get trustedContactsDesc => 'إدارة قائمة جهات الاتصال للطوارئ';
+
+  @override
+  String get pickupOtpTool => 'التحقق من الاستلام';
+
+  @override
+  String get pickupOtpDesc => 'تحقق من السائق برمز OTP قبل بدء الرحلة';
+
+  @override
+  String get safetyTips => 'نصائح الأمان';
+
+  @override
+  String get tip1 => 'شارك رحلتك دايماً مع حد تثق فيه';
+
+  @override
+  String get tip2 => 'شحن تليفونك أثناء الرحلة';
+
+  @override
+  String get tip3 => 'تأكد من السائق والعربيه قبل ما تركب';
+
+  @override
+  String get tip4 => 'ثوق في إحساسك — لو حسيت بخطر، استخدم زر الطوارئ';
+
+  @override
+  String get tip5 => 'ابعت في الخلف لوحدك';
+
+  @override
+  String get tripInstructions => 'تعليمات الرحلة';
 }

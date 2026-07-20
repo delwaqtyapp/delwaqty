@@ -1145,6 +1145,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get overview => 'Overview';
 
   @override
+  String get analytics => 'Analytics';
+
+  @override
   String get quickActions => 'Quick Actions';
 
   @override
@@ -2706,4 +2709,150 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get deleteLabel => 'Delete';
+
+  @override
+  String get unitKg => 'Kg';
+
+  @override
+  String get unitPiece => 'Piece';
+
+  @override
+  String get unitNone => 'None';
+
+  @override
+  String get pieceUnitBox => 'Box';
+
+  @override
+  String get pieceUnitCarton => 'Carton';
+
+  @override
+  String get pieceUnitLiter => 'Liter';
+
+  @override
+  String get selectUnit => 'Unit';
+
+  @override
+  String get weightNone => 'No fraction';
+
+  @override
+  String get weightQuarter => 'Quarter kg';
+
+  @override
+  String get weightHalf => 'Half kg';
+
+  @override
+  String get weightThird => 'Third kg';
+
+  @override
+  String get weightThreeQuarters => 'Three-quarters kg';
+
+  @override
+  String get weightEighth => 'Eighth kg';
+
+  @override
+  String get weightFifth => 'Fifth kg';
+
+  @override
+  String get weightBundle => 'Bundle';
+
+  @override
+  String get gettingLocation => 'Getting location...';
+
+  @override
+  String get locationError => 'Could not get your location';
+
+  @override
+  String get safetyHub => 'Safety Center';
+
+  @override
+  String get safetyHubDesc => 'All safety tools and guidelines';
+
+  @override
+  String get tripSafetyInstructions => 'Trip Safety Instructions';
+
+  @override
+  String get beforeTrip => 'Before Trip';
+
+  @override
+  String get duringTrip => 'During Trip';
+
+  @override
+  String get afterTrip => 'After Trip';
+
+  @override
+  String get beforeTripInstructions =>
+      'Verify driver name, photo, vehicle plate, and car color before getting in.';
+
+  @override
+  String get duringTripInstructions =>
+      'Share your trip with trusted contacts. Keep your phone charged. If you feel unsafe, use the SOS button immediately.';
+
+  @override
+  String get afterTripInstructions =>
+      'Rate your trip. Report any issues. Check your belongings before leaving the vehicle.';
+
+  @override
+  String get driverInstructions => 'Driver Guidelines';
+
+  @override
+  String get driverBeforeTrip =>
+      'Verify passenger identity. Check the OTP code. Confirm the destination.';
+
+  @override
+  String get driverDuringTrip =>
+      'Follow the GPS route. Drive safely. Do not make unauthorized stops.';
+
+  @override
+  String get driverAfterTrip =>
+      'Wait for passenger to exit safely. Check for left items. End trip in the app.';
+
+  @override
+  String get safetyTools => 'Safety Tools';
+
+  @override
+  String get sosAlertTool => 'Emergency SOS';
+
+  @override
+  String get sosAlertDesc =>
+      'Send immediate alert to emergency contacts and authorities';
+
+  @override
+  String get tripSharingTool => 'Trip Sharing';
+
+  @override
+  String get tripSharingDesc =>
+      'Share your live location with trusted contacts';
+
+  @override
+  String get trustedContactsTool => 'Trusted Contacts';
+
+  @override
+  String get trustedContactsDesc => 'Manage your emergency contact list';
+
+  @override
+  String get pickupOtpTool => 'Pickup Verification';
+
+  @override
+  String get pickupOtpDesc => 'Verify driver with OTP before starting trip';
+
+  @override
+  String get safetyTips => 'Safety Tips';
+
+  @override
+  String get tip1 => 'Always share your trip with someone you trust';
+
+  @override
+  String get tip2 => 'Keep your phone charged during the trip';
+
+  @override
+  String get tip3 => 'Verify the driver and vehicle before getting in';
+
+  @override
+  String get tip4 => 'Trust your instincts — if something feels wrong, use SOS';
+
+  @override
+  String get tip5 => 'Sit in the back seat when riding alone';
+
+  @override
+  String get tripInstructions => 'Trip Instructions';
 }

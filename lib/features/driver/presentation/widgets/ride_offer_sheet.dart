@@ -50,94 +50,103 @@ class _RideOfferSheetState extends State<RideOfferSheet> {
 
     return SafeArea(
       child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(l10n.incomingRequest,
-                    style: theme.textTheme.titleLarge
-                        ?.copyWith(fontWeight: FontWeight.bold)),
-                Container(
-                  width: 44,
-                  height: 44,
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: theme.colorScheme.primaryContainer,
+        padding: EdgeInsets.fromLTRB(20, 20, 20, MediaQuery.of(context).viewInsets.bottom + 20),
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Flexible(
+                    child: Text(l10n.incomingRequest,
+                        style: theme.textTheme.titleLarge
+                            ?.copyWith(fontWeight: FontWeight.bold)),
                   ),
-                  child: Text('$_seconds',
-                      style: theme.textTheme.titleMedium
-                          ?.copyWith(fontWeight: FontWeight.bold)),
-                ),
-              ],
-            ),
-            const SizedBox(height: 4),
-            LinearProgressIndicator(value: total / 20),
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                Icon(info.icon, color: theme.colorScheme.primary),
-                const SizedBox(width: 8),
-                Text(info.name, style: theme.textTheme.titleMedium),
-                const Spacer(),
-                Text(
-                  l10n.amountWithCurrency(
-                      offer.fare.toStringAsFixed(0), l10n.currencySymbol),
-                  style: theme.textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: theme.colorScheme.primary),
-                ),
-              ],
-            ),
-            const SizedBox(height: 4),
-            Text(l10n.estimatedEarnings,
-                style: theme.textTheme.bodySmall?.copyWith(
-                    color: theme.colorScheme.onSurfaceVariant)),
-            const SizedBox(height: 16),
-            _AddressRow(
-              icon: Icons.my_location_rounded,
-              color: Colors.green,
-              label: l10n.pickup,
-              address: offer.pickupAddress,
-              trailing:
-                  '${offer.pickupDistanceKm.toStringAsFixed(1)} km ${l10n.away}',
-            ),
-            const SizedBox(height: 12),
-            _AddressRow(
-              icon: Icons.location_on_rounded,
-              color: Colors.red,
-              label: l10n.destination,
-              address: offer.dropoffAddress,
-              trailing: '${offer.distanceKm.toStringAsFixed(1)} km',
-            ),
-            const SizedBox(height: 20),
-            Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton(
-                    onPressed: () => Navigator.of(context).pop(false),
-                    style: OutlinedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 14)),
-                    child: Text(l10n.reject),
+                  Container(
+                    width: 44,
+                    height: 44,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: theme.colorScheme.primaryContainer,
+                    ),
+                    child: Text('$_seconds',
+                        style: theme.textTheme.titleMedium
+                            ?.copyWith(fontWeight: FontWeight.bold)),
                   ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  flex: 2,
-                  child: FilledButton(
-                    onPressed: () => Navigator.of(context).pop(true),
-                    style: FilledButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 14)),
-                    child: Text(l10n.accept),
+                ],
+              ),
+              const SizedBox(height: 4),
+              LinearProgressIndicator(value: total / 20),
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  Icon(info.icon, color: theme.colorScheme.primary),
+                  const SizedBox(width: 8),
+                  Flexible(
+                    child: Text(info.name, style: theme.textTheme.titleMedium),
                   ),
-                ),
-              ],
-            ),
-          ],
+                  const Spacer(),
+                  Flexible(
+                    child: Text(
+                      l10n.amountWithCurrency(
+                          offer.fare.toStringAsFixed(0), l10n.currencySymbol),
+                      style: theme.textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: theme.colorScheme.primary),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 4),
+              Text(l10n.estimatedEarnings,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant)),
+              const SizedBox(height: 16),
+              _AddressRow(
+                icon: Icons.my_location_rounded,
+                color: Colors.green,
+                label: l10n.pickup,
+                address: offer.pickupAddress,
+                trailing:
+                    '${offer.pickupDistanceKm.toStringAsFixed(1)} km ${l10n.away}',
+              ),
+              const SizedBox(height: 12),
+              _AddressRow(
+                icon: Icons.location_on_rounded,
+                color: Colors.red,
+                label: l10n.destination,
+                address: offer.dropoffAddress,
+                trailing: '${offer.distanceKm.toStringAsFixed(1)} km',
+              ),
+              const SizedBox(height: 20),
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: () => Navigator.of(context).pop(false),
+                      style: OutlinedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 14)),
+                      child: Text(l10n.reject),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    flex: 2,
+                    child: FilledButton(
+                      onPressed: () => Navigator.of(context).pop(true),
+                      style: FilledButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 14)),
+                      child: Text(l10n.accept),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );

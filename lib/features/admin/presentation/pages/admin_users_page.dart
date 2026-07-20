@@ -118,7 +118,8 @@ class AdminUsersPage extends ConsumerWidget {
       context: context,
       builder: (context) => AlertDialog(
         title: Text(l10n.addUser),
-        content: Column(
+        content: SingleChildScrollView(
+        child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             TextField(
@@ -155,6 +156,7 @@ class AdminUsersPage extends ConsumerWidget {
             ),
           ],
         ),
+      ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),

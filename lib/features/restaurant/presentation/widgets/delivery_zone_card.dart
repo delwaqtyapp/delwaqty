@@ -95,12 +95,14 @@ class DeliveryZoneCard extends ConsumerWidget {
                             color: zone.deliveryFee == 0 ? Colors.green.shade700 : null,
                             fontWeight: FontWeight.w600,
                           ),
+                          overflow: TextOverflow.ellipsis,
                         ),
                         Text(
                           l10n.estimatedDeliveryTime(zone.estimatedMinutes),
                           style: theme.textTheme.bodySmall?.copyWith(
                             color: theme.colorScheme.onSurfaceVariant,
                           ),
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ],
                     ),

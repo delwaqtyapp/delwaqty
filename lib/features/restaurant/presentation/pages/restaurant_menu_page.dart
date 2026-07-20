@@ -433,20 +433,26 @@ class _ProductListTile extends StatelessWidget {
                       const SizedBox(height: 4),
                       Row(
                         children: [
-                          Text(
-                            '${product.price.toStringAsFixed(0)} ${l10n.sar}',
-                            style: theme.textTheme.bodyMedium?.copyWith(
-                              fontWeight: FontWeight.bold,
-                              color: theme.colorScheme.primary,
+                          Flexible(
+                            child: Text(
+                              '${product.price.toStringAsFixed(0)} ${l10n.sar}',
+                              style: theme.textTheme.bodyMedium?.copyWith(
+                                fontWeight: FontWeight.bold,
+                                color: theme.colorScheme.primary,
+                              ),
+                              overflow: TextOverflow.ellipsis,
                             ),
                           ),
                           if (product.originalPrice != null && product.originalPrice! > product.price) ...[
                             const SizedBox(width: 8),
-                            Text(
-                              '${product.originalPrice!.toStringAsFixed(0)} ${l10n.sar}',
-                              style: theme.textTheme.bodySmall?.copyWith(
-                                decoration: TextDecoration.lineThrough,
-                                color: theme.colorScheme.onSurfaceVariant,
+                            Flexible(
+                              child: Text(
+                                '${product.originalPrice!.toStringAsFixed(0)} ${l10n.sar}',
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                  decoration: TextDecoration.lineThrough,
+                                  color: theme.colorScheme.onSurfaceVariant,
+                                ),
+                                overflow: TextOverflow.ellipsis,
                               ),
                             ),
                           ],

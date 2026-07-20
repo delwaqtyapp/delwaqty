@@ -463,52 +463,57 @@ class _DeliveryOfferDialogState extends State<_DeliveryOfferDialog>
     final offer = widget.offer;
     return AlertDialog(
       title: Text(l10n.delivery),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          AnimatedBuilder(
-            animation: _timerController,
-            builder: (context, _) {
-              final remaining = _timerController.isCompleted
-                  ? Duration.zero
-                  : Duration(
-                      milliseconds: (_timerController.upperBound -
-                              _timerController.value *
-                                  _timerController.upperBound)
-                          .toInt());
-              return LinearProgressIndicator(
-                value: _timerController.value,
-                backgroundColor: theme.colorScheme.surfaceContainerHighest,
-              );
-            },
-          ),
-          const SizedBox(height: 16),
-          Text('${offer.pickupAddress}',
-              style: theme.textTheme.bodyMedium),
-          const SizedBox(height: 4),
-          Icon(Icons.arrow_downward_rounded,
-              size: 20, color: theme.colorScheme.onSurfaceVariant),
-          const SizedBox(height: 4),
-          Text('${offer.dropoffAddress}',
-              style: theme.textTheme.bodyMedium),
-          const SizedBox(height: 12),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Flexible(
-                child: Text('${offer.distanceKm.toStringAsFixed(1)} km'),
-              ),
-              const SizedBox(width: 8),
-              Text(
-                l10n.amountWithCurrency(
-                    offer.fare.toStringAsFixed(0), offer.currency),
-                style: theme.textTheme.titleMedium
-                    ?.copyWith(fontWeight: FontWeight.bold),
-              ),
-            ],
-          ),
-        ],
+      content: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            AnimatedBuilder(
+              animation: _timerController,
+              builder: (context, _) {
+                final remaining = _timerController.isCompleted
+                    ? Duration.zero
+                    : Duration(
+                        milliseconds: (_timerController.upperBound -
+                                _timerController.value *
+                                    _timerController.upperBound)
+                            .toInt());
+                return LinearProgressIndicator(
+                  value: _timerController.value,
+                  backgroundColor: theme.colorScheme.surfaceContainerHighest,
+                );
+              },
+            ),
+            const SizedBox(height: 16),
+            Text('${offer.pickupAddress}',
+                style: theme.textTheme.bodyMedium),
+            const SizedBox(height: 4),
+            Icon(Icons.arrow_downward_rounded,
+                size: 20, color: theme.colorScheme.onSurfaceVariant),
+            const SizedBox(height: 4),
+            Text('${offer.dropoffAddress}',
+                style: theme.textTheme.bodyMedium),
+            const SizedBox(height: 12),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Flexible(
+                  child: Text('${offer.distanceKm.toStringAsFixed(1)} km'),
+                ),
+                const SizedBox(width: 8),
+                Flexible(
+                  child: Text(
+                    l10n.amountWithCurrency(
+                        offer.fare.toStringAsFixed(0), offer.currency),
+                    style: theme.textTheme.titleMedium
+                        ?.copyWith(fontWeight: FontWeight.bold),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
       actions: [
         TextButton(

@@ -111,20 +111,26 @@ class ProductCard extends StatelessWidget {
                   const SizedBox(height: 4),
                   Row(
                     children: [
-                      Text(
-                        '${product.price.toStringAsFixed(0)} ${AppLocalizations.of(context).currencySymbol}',
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: Theme.of(context).colorScheme.primary,
+                      Flexible(
+                        child: Text(
+                          '${product.price.toStringAsFixed(0)} ${AppLocalizations.of(context).currencySymbol}',
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: Theme.of(context).colorScheme.primary,
+                          ),
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
                       if (hasDiscount) ...[
                         const SizedBox(width: 4),
-                        Text(
-                          '${product.originalPrice!.toStringAsFixed(0)}',
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            decoration: TextDecoration.lineThrough,
-                            color: Colors.grey,
+                        Flexible(
+                          child: Text(
+                            '${product.originalPrice!.toStringAsFixed(0)}',
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              decoration: TextDecoration.lineThrough,
+                              color: Colors.grey,
+                            ),
+                            overflow: TextOverflow.ellipsis,
                           ),
                         ),
                       ],

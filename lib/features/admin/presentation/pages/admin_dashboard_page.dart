@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:delwaqty/services/admin/admin_providers.dart';
+import 'package:delwaqty/features/admin/domain/entities/admin_models.dart';
 import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
 import 'package:delwaqty/shared/widgets/glass_card.dart';
 import 'package:delwaqty/shared/widgets/premium_empty_state.dart';
@@ -169,7 +170,7 @@ class _AdminDashboardPageState extends ConsumerState<AdminDashboardPage> {
   }
 
   Widget _buildStatsGrid(
-    dynamic dashboard,
+    AdminDashboardMetrics dashboard,
     AppLocalizations l10n,
     ColorScheme cs,
   ) {
@@ -200,7 +201,7 @@ class _AdminDashboardPageState extends ConsumerState<AdminDashboardPage> {
             ),
             _StatGlassCard(
               title: l10n.totalOrders,
-              value: dashboard.totalOrders.toString(),
+              value: dashboard.pendingOrders.toString(),
               icon: Icons.receipt_long_rounded,
               color: const Color(0xFFFF9500),
               cs: cs,
@@ -227,15 +228,15 @@ class _AdminDashboardPageState extends ConsumerState<AdminDashboardPage> {
               cs: cs,
             ),
             _StatGlassCard(
-              title: l10n.activeDrivers,
-              value: '${dashboard.activeDrivers + 2}',
+              title: l10n.totalRides,
+              value: dashboard.totalRides.toString(),
               icon: Icons.directions_car_rounded,
               color: const Color(0xFF00C7BE),
               cs: cs,
             ),
             _StatGlassCard(
               title: l10n.totalDeliveries,
-              value: (dashboard.totalOrders + dashboard.activeDrivers).toString(),
+              value: dashboard.totalDeliveries.toString(),
               icon: Icons.inventory_2_rounded,
               color: const Color(0xFFFF6482),
               cs: cs,

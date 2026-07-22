@@ -264,12 +264,12 @@ class _DrawerPanel extends StatelessWidget {
     final cs = theme.colorScheme;
     final isDark = theme.brightness == Brightness.dark;
     final userName = authState is AuthAuthenticated
-        ? (authState as AuthAuthenticated).user.fullName ?? 'User'
-        : 'User';
+        ? (authState as AuthAuthenticated).user.fullName ?? l10n.user
+        : l10n.user;
     final isAdmin = authState is AuthAuthenticated &&
         (authState as AuthAuthenticated).user.role == 'admin' ||
         (authState is AuthAuthenticated && (authState as AuthAuthenticated).user.role == 'owner');
-    final displayRole = isAdmin ? 'SuperAdmin' : null;
+    final displayRole = isAdmin ? l10n.superAdmin : null;
 
     final bodyEntries = drawerEntries
         .where((e) => e.position == DrawerPosition.body)

@@ -17,10 +17,10 @@ final _adminRidesProvider = FutureProvider<List<Map<String, dynamic>>>((
     'id': r.id,
     'status': r.status,
     'fare': r.fare ?? 0,
-    'pickup_address': 'Pickup',
-    'dropoff_address': 'Dropoff',
-    'driver_name': 'Assigned',
-    'passenger_name': 'Passenger',
+    'pickup_address': '',
+    'dropoff_address': '',
+    'driver_name': '',
+    'passenger_name': '',
     'created_at': r.createdAt.toIso8601String(),
   }).toList();
 });
@@ -215,11 +215,16 @@ class _RideGlassTile extends StatelessWidget {
     final pickup = ride['pickup_location'] as String? ?? ride['pickup_address'] as String? ?? '';
     final dropoff = ride['dropoff_location'] as String? ?? ride['dropoff_address'] as String? ?? '';
     final fare = (ride['fare'] as num?)?.toDouble() ?? 0;
-    final driverName = ride['driver_name'] as String? ?? ride['driver']?['name'] as String? ?? '';
-    final passengerName = ride['passenger_name'] as String? ?? ride['passenger']?['name'] as String? ?? '';
     final idShort = (ride['id'] as String? ?? '').length > 8
         ? (ride['id'] as String).substring(0, 8)
         : (ride['id'] as String? ?? '');
+
+    final passenger = (ride['passenger_name'] as String? ?? '').isNotEmpty
+        ? ride['passenger_name'] as String
+        : l10n.passenger;
+    final driver = (ride['driver_name'] as String? ?? '').isNotEmpty
+        ? ride['driver_name'] as String
+        : l10n.assigned;
 
     final statusColor = switch (status) {
       'searching' => const Color(0xFFFF9500),
@@ -271,7 +276,7 @@ class _RideGlassTile extends StatelessWidget {
                       ),
                     ),
                     Text(
-                      '$passengerName · $driverName',
+                      '$passenger · $driver',
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         color: cs.onSurfaceVariant,
                       ),
@@ -299,9 +304,19 @@ class _RideGlassTile extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 12),
-          _RideLocationRow(icon: Icons.trip_origin_rounded, address: pickup, color: Colors.green, cs: cs),
+          _RideLocationRow(
+            icon: Icons.trip_origin_rounded,
+            address: pickup.isNotEmpty ? pickup : l10n.pickup,
+            color: Colors.green,
+            cs: cs,
+          ),
           const SizedBox(height: 6),
-          _RideLocationRow(icon: Icons.location_on_rounded, address: dropoff, color: Colors.red, cs: cs),
+          _RideLocationRow(
+            icon: Icons.location_on_rounded,
+            address: dropoff.isNotEmpty ? dropoff : l10n.dropoff,
+            color: Colors.red,
+            cs: cs,
+          ),
           const SizedBox(height: 10),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,

@@ -586,7 +586,7 @@ class _RideBookingPageState extends ConsumerState<RideBookingPage> {
                       style: context.textTheme.titleSmall
                           ?.copyWith(fontWeight: FontWeight.w700)),
                   Text(
-                    '${quote.distanceKm.toStringAsFixed(1)} km · ${quote.durationMinutes.ceil()} ${l10n.minutesShort}',
+                    '${quote.distanceKm.toStringAsFixed(1)} ${l10n.kmUnit} · ${quote.durationMinutes.ceil()} ${l10n.minutesShort}',
                     style: context.textTheme.bodySmall
                         ?.copyWith(color: context.colorScheme.onSurfaceVariant),
                   ),

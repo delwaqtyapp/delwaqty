@@ -498,7 +498,7 @@ class _DeliveryOfferDialogState extends State<_DeliveryOfferDialog>
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Flexible(
-                  child: Text('${offer.distanceKm.toStringAsFixed(1)} km'),
+                  child: Text('${offer.distanceKm.toStringAsFixed(1)} ${l10n.kmUnit}'),
                 ),
                 const SizedBox(width: 8),
                 Flexible(
@@ -622,7 +622,7 @@ class _CapabilitiesBottomSheetState
               }).toList(),
             ),
             const SizedBox(height: 16),
-            Text('${l10n.deliveryAddress} (${_maxDistance.toStringAsFixed(0)} km)',
+            Text('${l10n.deliveryAddress} (${_maxDistance.toStringAsFixed(0)} ${l10n.kmUnit})',
                 style: theme.textTheme.titleSmall
                     ?.copyWith(fontWeight: FontWeight.bold)),
             Slider(
@@ -630,10 +630,10 @@ class _CapabilitiesBottomSheetState
               min: 1,
               max: 50,
               divisions: 49,
-              label: '${_maxDistance.toStringAsFixed(0)} km',
+              label: '${_maxDistance.toStringAsFixed(0)} ${l10n.kmUnit}',
               onChanged: (v) => setState(() => _maxDistance = v),
             ),
-            Text('${l10n.orderSummary} (${_maxWeight.toStringAsFixed(0)} kg)',
+            Text('${l10n.orderSummary} (${_maxWeight.toStringAsFixed(0)} ${l10n.kgUnit})',
                 style: theme.textTheme.titleSmall
                     ?.copyWith(fontWeight: FontWeight.bold)),
             Slider(
@@ -641,7 +641,7 @@ class _CapabilitiesBottomSheetState
               min: 1,
               max: 50,
               divisions: 49,
-              label: '${_maxWeight.toStringAsFixed(0)} kg',
+              label: '${_maxWeight.toStringAsFixed(0)} ${l10n.kgUnit}',
               onChanged: (v) => setState(() => _maxWeight = v),
             ),
             const SizedBox(height: 16),

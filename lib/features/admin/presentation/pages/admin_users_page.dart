@@ -3,9 +3,17 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:delwaqty/features/admin/domain/entities/admin_models.dart';
 import 'package:delwaqty/services/admin/admin_providers.dart';
 import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
+import 'package:delwaqty/l10n/app_localizations.dart';
 import 'package:delwaqty/shared/widgets/premium_empty_state.dart';
 import 'package:delwaqty/shared/widgets/app_loader.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
+
+String _roleLabel(AdminRole role, AppLocalizations l10n) => switch (role) {
+  AdminRole.superAdmin => l10n.roleSuperAdmin,
+  AdminRole.admin => l10n.roleAdmin,
+  AdminRole.moderator => l10n.roleModerator,
+  AdminRole.support => l10n.roleSupport,
+};
 
 class AdminUsersPage extends ConsumerWidget {
   const AdminUsersPage({super.key});
@@ -147,7 +155,7 @@ class AdminUsersPage extends ConsumerWidget {
               items: AdminRole.values.map((role) {
                 return DropdownMenuItem(
                   value: role,
-                  child: Text(role.name.toUpperCase()),
+                  child: Text(_roleLabel(role, AppLocalizations.of(context))),
                 );
               }).toList(),
               onChanged: (value) {
@@ -267,7 +275,7 @@ class _RoleChip extends StatelessWidget {
 
     return Chip(
       label: Text(
-        role.name.toUpperCase(),
+        _roleLabel(role, AppLocalizations.of(context)),
         style: TextStyle(
           color: color,
           fontSize: 10,

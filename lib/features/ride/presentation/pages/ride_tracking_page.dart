@@ -490,7 +490,7 @@ class _RideTrackingPageState extends ConsumerState<RideTrackingPage>
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
                   _tripStat(context, Icons.straighten_rounded,
-                      '${ride.distance?.toStringAsFixed(1) ?? '—'} km'),
+                      '${ride.distance?.toStringAsFixed(1) ?? '—'} ${l10n.kmUnit}'),
                   _tripStat(context, Icons.schedule_rounded,
                       '${ride.estimatedMinutes ?? '—'} ${l10n.minutesShort}'),
                   _tripStat(context, Icons.payments_rounded,

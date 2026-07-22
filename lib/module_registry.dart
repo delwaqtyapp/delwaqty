@@ -16,6 +16,7 @@ import 'package:delwaqty/features/driver/driver_module.dart';
 import 'package:delwaqty/features/ride/ride_module.dart';
 import 'package:delwaqty/features/delivery/delivery_module.dart';
 import 'package:delwaqty/features/safety/safety_module.dart';
+import 'package:delwaqty/features/search/search_module.dart';
 
 void registerAllModules() {
   final registry = FeatureRegistry.instance;
@@ -37,6 +38,8 @@ void registerAllModules() {
     ProfileModule(),
     NotificationsModule(),
     AdminModule(),
+    SafetyModule(),
+    SearchModule(),
   ]);
 
   registry.freeze();

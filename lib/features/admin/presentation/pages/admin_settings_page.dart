@@ -5,6 +5,7 @@ import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
 import 'package:delwaqty/shared/widgets/premium_empty_state.dart';
 import 'package:delwaqty/shared/widgets/app_loader.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
+import 'package:delwaqty/core/constants/app_constants.dart';
 
 class AdminSettingsPage extends ConsumerStatefulWidget {
   const AdminSettingsPage({super.key});
@@ -34,7 +35,7 @@ class _AdminSettingsPageState extends ConsumerState<AdminSettingsPage> {
     settings.whenData((data) {
       if (data.isNotEmpty) {
         setState(() {
-          _appNameController.text = data['app_name'] as String? ?? 'Delwaqty';
+          _appNameController.text = data['app_name'] as String? ?? AppConstants.appName;
           _supportEmailController.text = data['support_email'] as String? ?? '';
           _maxDriversPerZoneController.text =
               (data['max_drivers_per_zone'] as int?)?.toString() ?? '10';

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:delwaqty/l10n/app_localizations.dart';
 
 class ErrorState extends StatelessWidget {
   const ErrorState({
@@ -17,6 +18,7 @@ class ErrorState extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context);
 
     return Center(
       child: Padding(
@@ -59,7 +61,7 @@ class ErrorState extends StatelessWidget {
               const SizedBox(height: 24),
               FilledButton.tonal(
                 onPressed: onRetry,
-                child: Text(retryLabel ?? 'Retry'),
+                child: Text(retryLabel ?? l10n.retry),
               ),
             ],
           ],

@@ -112,7 +112,7 @@ class _RideOfferSheetState extends State<RideOfferSheet> {
                 label: l10n.pickup,
                 address: offer.pickupAddress,
                 trailing:
-                    '${offer.pickupDistanceKm.toStringAsFixed(1)} km ${l10n.away}',
+                    '${offer.pickupDistanceKm.toStringAsFixed(1)} ${l10n.kmUnit} ${l10n.away}',
               ),
               const SizedBox(height: 12),
               _AddressRow(
@@ -120,7 +120,7 @@ class _RideOfferSheetState extends State<RideOfferSheet> {
                 color: Colors.red,
                 label: l10n.destination,
                 address: offer.dropoffAddress,
-                trailing: '${offer.distanceKm.toStringAsFixed(1)} km',
+                trailing: '${offer.distanceKm.toStringAsFixed(1)} ${l10n.kmUnit}',
               ),
               const SizedBox(height: 20),
               Row(

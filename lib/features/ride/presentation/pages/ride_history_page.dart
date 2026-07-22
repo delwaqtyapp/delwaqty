@@ -8,6 +8,24 @@ import 'package:delwaqty/features/ride/presentation/providers/ride_providers.dar
 import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
 import 'package:delwaqty/shared/widgets/premium_empty_state.dart';
 
+String _statusLabel(RideStatus status, AppLocalizations l10n) => switch (status) {
+  RideStatus.searching => l10n.rideStatusSearching,
+  RideStatus.matched => l10n.rideStatusMatched,
+  RideStatus.arrived => l10n.rideStatusArrived,
+  RideStatus.inTrip => l10n.rideStatusInTrip,
+  RideStatus.completed => l10n.rideStatusCompleted,
+  RideStatus.cancelled => l10n.rideStatusCancelled,
+};
+
+String _typeLabel(RideType type, AppLocalizations l10n) => switch (type) {
+  RideType.economy => l10n.rideTypeEconomy,
+  RideType.comfort => l10n.rideTypeComfort,
+  RideType.premium => l10n.rideTypePremium,
+  RideType.xl => l10n.rideTypeXl,
+  RideType.motorbike => l10n.rideTypeMotorbike,
+  RideType.taxi => l10n.rideTypeTaxi,
+};
+
 class RideHistoryPage extends ConsumerStatefulWidget {
   const RideHistoryPage({super.key});
 
@@ -182,7 +200,7 @@ class _RideHistoryPageState extends ConsumerState<RideHistoryPage> {
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Text(
-                      ride.status.name.toUpperCase(),
+                      _statusLabel(ride.status, l10n),
                       style: context.textTheme.labelSmall?.copyWith(
                         color: statusColors[ride.status],
                         fontWeight: FontWeight.w700,
@@ -238,7 +256,7 @@ class _RideHistoryPageState extends ConsumerState<RideHistoryPage> {
                     child: _buildDetailStat(
                       context,
                       label: l10n.type,
-                      value: ride.rideType.name.toUpperCase(),
+                      value: _typeLabel(ride.rideType, l10n),
                     ),
                   ),
                 ],
@@ -475,7 +493,7 @@ class _RideHistoryTile extends StatelessWidget {
                       borderRadius: BorderRadius.circular(6),
                     ),
                     child: Text(
-                      ride.status.name.toUpperCase(),
+                      _statusLabel(ride.status, l10n),
                       style: context.textTheme.labelSmall?.copyWith(
                         fontWeight: FontWeight.w700,
                         color: statusColor,
@@ -484,7 +502,7 @@ class _RideHistoryTile extends StatelessWidget {
                   ),
                   const Spacer(),
                   Text(
-                    ride.rideType.name.toUpperCase(),
+                    _typeLabel(ride.rideType, l10n),
                     style: context.textTheme.labelSmall?.copyWith(
                       color: context.colorScheme.onSurfaceVariant,
                       fontWeight: FontWeight.w500,

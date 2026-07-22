@@ -4,7 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 import 'package:delwaqty/core/theme/app_colors.dart';
-import 'package:delwaqty/features/safety/presentation/safety_providers.dart';
 
 class SafetyHubPage extends ConsumerWidget {
   const SafetyHubPage({super.key});

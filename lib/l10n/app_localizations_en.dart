@@ -220,7 +220,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get search => 'Search';
 
   @override
-  String get searchHint => 'Search restaurants, shops, services...';
+  String get searchHint => 'Search...';
 
   @override
   String get searchNoResults => 'No results found';
@@ -1595,10 +1595,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get rideDetails => 'Ride Details';
 
   @override
-  String get pickup => 'Pickup Location';
+  String get pickup => 'Pickup';
 
   @override
-  String get dropoff => 'Dropoff Location';
+  String get dropoff => 'Dropoff';
 
   @override
   String get fare => 'Fare';
@@ -3195,4 +3195,271 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get faqAnswer6 =>
       'Go to your order history, select the relevant order, and tap Report Problem. Choose the issue category, add a description, and our team will review and respond as quickly as possible.';
+
+  @override
+  String get unknown => 'Unknown';
+
+  @override
+  String get sms => 'SMS';
+
+  @override
+  String get dispatching => 'Dispatching';
+
+  @override
+  String get delivering => 'Delivering';
+
+  @override
+  String get kmUnit => 'km';
+
+  @override
+  String get kgUnit => 'kg';
+
+  @override
+  String get mockOrderConfirmed => 'Order Confirmed';
+
+  @override
+  String get mockOrderConfirmedBody =>
+      'Your order from Al Baik has been confirmed and is being prepared.';
+
+  @override
+  String get mockDeliveryOnWay => 'Delivery on the Way';
+
+  @override
+  String get mockDeliveryOnWayBody =>
+      'Your order from Panda Grocery is on the way. ETA: 15 min.';
+
+  @override
+  String get mockNewOffer => 'New Offer Available';
+
+  @override
+  String get mockNewOfferBody =>
+      'Get 20% off your next order from selected restaurants!';
+
+  @override
+  String get mockServiceReminder => 'Service Reminder';
+
+  @override
+  String get mockServiceReminderBody =>
+      'Your AC maintenance appointment is tomorrow at 10 AM.';
+
+  @override
+  String get mockWelcomeTitle => 'Welcome to Delwaqty';
+
+  @override
+  String get mockWelcomeBody =>
+      'Explore restaurants, shops, and services all in one app.';
+
+  @override
+  String get driver => 'Driver';
+
+  @override
+  String get adminPanel => 'Admin Panel';
+
+  @override
+  String get restaurant => 'Restaurant';
+
+  @override
+  String get market => 'Market';
+
+  @override
+  String get onboarding => 'Onboarding';
+
+  @override
+  String get splash => 'Splash';
+
+  @override
+  String get auth => 'Auth';
+
+  @override
+  String get rideStatusSearching => 'Searching';
+
+  @override
+  String get rideStatusMatched => 'Matched';
+
+  @override
+  String get rideStatusArrived => 'Arrived';
+
+  @override
+  String get rideStatusInTrip => 'In Trip';
+
+  @override
+  String get rideStatusCompleted => 'Completed';
+
+  @override
+  String get rideStatusCancelled => 'Cancelled';
+
+  @override
+  String get rideTypeEconomy => 'Economy';
+
+  @override
+  String get rideTypeComfort => 'Comfort';
+
+  @override
+  String get rideTypePremium => 'Premium';
+
+  @override
+  String get rideTypeXl => 'XL';
+
+  @override
+  String get rideTypeMotorbike => 'Motorbike';
+
+  @override
+  String get rideTypeTaxi => 'Taxi';
+
+  @override
+  String get roleSuperAdmin => 'SuperAdmin';
+
+  @override
+  String get roleAdmin => 'Admin';
+
+  @override
+  String get roleModerator => 'Moderator';
+
+  @override
+  String get roleSupport => 'Support';
+
+  @override
+  String get typeMarket => 'Market';
+
+  @override
+  String get typeHome => 'Home';
+
+  @override
+  String get passwordUpdated => 'Password updated successfully';
+
+  @override
+  String get changePasswordDescription => 'Update your account password';
+
+  @override
+  String get newPassword => 'New Password';
+
+  @override
+  String get updatePassword => 'Update Password';
+
+  @override
+  String get enableTwoFactor => 'Enable Two-Factor Authentication';
+
+  @override
+  String get twoFactorDescription =>
+      'Add an extra layer of security to your account';
+
+  @override
+  String get twoFactorEnabled => 'Two-factor authentication enabled';
+
+  @override
+  String get twoFactorDisabled => 'Two-factor authentication disabled';
+
+  @override
+  String get backupCodes => 'Backup Codes';
+
+  @override
+  String get backupCodesInfo => 'Generate backup codes for account recovery';
+
+  @override
+  String get authenticatorApp => 'Authenticator App';
+
+  @override
+  String get authenticatorSetup => 'Set up an authenticator app';
+
+  @override
+  String get currentTime => 'Now';
+
+  @override
+  String get currentSession => 'Current';
+
+  @override
+  String get exportMyData => 'Export My Data';
+
+  @override
+  String get exportDataDescription => 'Download a copy of your personal data';
+
+  @override
+  String get exportRequestSubmitted => 'Data export request submitted';
+
+  @override
+  String get deleteAccount => 'Delete Account';
+
+  @override
+  String get deleteAccountDescription =>
+      'Permanently delete your account and data';
+
+  @override
+  String get deleteAccountConfirm =>
+      'This action cannot be undone. All your data will be permanently deleted.';
+
+  @override
+  String get accountDeleted => 'Account deleted successfully';
+
+  @override
+  String get dataSharing => 'Data Sharing';
+
+  @override
+  String get dataSharingDescription => 'Control how your data is shared';
+
+  @override
+  String get dataSharingInfo =>
+      'Your data is only shared with service providers as needed';
+
+  @override
+  String get shareWithDriver => 'Share with Driver';
+
+  @override
+  String get shareWithDriverDescription =>
+      'Allow drivers to see your location during trips';
+
+  @override
+  String get shareWithMerchant => 'Share with Merchant';
+
+  @override
+  String get shareWithMerchantDescription =>
+      'Allow merchants to see your location for delivery';
+
+  @override
+  String get backgroundLocation => 'Background Location';
+
+  @override
+  String get backgroundLocationDescription =>
+      'Allow location access when app is in background';
+
+  @override
+  String get backgroundLocationEnabled =>
+      'Background location enabled for better service';
+
+  @override
+  String get locationPrivacyNote =>
+      'Your location data is encrypted and only used to provide delivery and ride services.';
+
+  @override
+  String get rideUpdates => 'Ride Updates';
+
+  @override
+  String get rideUpdatesDescription => 'Get notified about ride status changes';
+
+  @override
+  String get deliveryUpdates => 'Delivery Updates';
+
+  @override
+  String get deliveryUpdatesDescription =>
+      'Get notified about delivery status changes';
+
+  @override
+  String get chatMessages => 'Chat Messages';
+
+  @override
+  String get chatMessagesDescription =>
+      'Get notified when you receive a message';
+
+  @override
+  String get promotions => 'Promotions';
+
+  @override
+  String get promotionsDescription =>
+      'Receive promotional offers and discounts';
+
+  @override
+  String get securityAlerts => 'Security Alerts';
+
+  @override
+  String get securityAlertsDescription =>
+      'Get notified about suspicious activity';
 }

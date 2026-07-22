@@ -228,7 +228,7 @@ class _DriverGlassTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final name = driver['name'] as String? ?? 'Unknown';
+    final name = driver['name'] as String? ?? '';
     final phone = driver['phone'] as String? ?? '';
     final isActive = driver['is_active'] as bool? ?? false;
     final verificationStatus = driver['verification_status'] as String? ?? 'pending';

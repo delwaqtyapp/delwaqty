@@ -12,7 +12,6 @@ class SafetySettingsPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
-    final cs = Theme.of(context).colorScheme;
     final contactsAsync = ref.watch(trustedContactsProvider);
 
     return Scaffold(

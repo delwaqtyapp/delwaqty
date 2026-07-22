@@ -317,7 +317,7 @@ class _StatusChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final (color, label) = _style(status);
+    final (color, label) = _style(status, AppLocalizations.of(context));
     return Chip(
       label: Text(label, style: theme.textTheme.labelSmall),
       backgroundColor: color.withValues(alpha: 0.1),
@@ -327,22 +327,22 @@ class _StatusChip extends StatelessWidget {
     );
   }
 
-  (Color, String) _style(String status) {
+  (Color, String) _style(String status, AppLocalizations l10n) {
     switch (status) {
       case 'pending':
-        return (Colors.orange, 'Pending');
+        return (Colors.orange, l10n.pending);
       case 'preparing':
-        return (Colors.blue, 'Preparing');
+        return (Colors.blue, l10n.preparing);
       case 'ready':
-        return (Colors.green, 'Ready');
+        return (Colors.green, l10n.ready);
       case 'dispatching':
-        return (Colors.purple, 'Dispatching');
+        return (Colors.purple, l10n.dispatching);
       case 'delivering':
-        return (Colors.teal, 'Delivering');
+        return (Colors.teal, l10n.delivering);
       case 'delivered':
-        return (Colors.green, 'Delivered');
+        return (Colors.green, l10n.delivered);
       case 'cancelled':
-        return (Colors.red, 'Cancelled');
+        return (Colors.red, l10n.cancelled);
       default:
         return (Colors.grey, status);
     }

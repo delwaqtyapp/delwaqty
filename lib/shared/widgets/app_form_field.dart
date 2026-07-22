@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:delwaqty/core/theme/app_spacing.dart';
 import 'package:delwaqty/core/theme/app_icons.dart';
+import 'package:delwaqty/l10n/app_localizations.dart';
 
 /// A comprehensive form-field component for the Delwaqty platform.
 ///
@@ -340,7 +341,7 @@ class _AppSearchField extends StatelessWidget {
         onSubmitted: onSubmitted,
         style: Theme.of(context).textTheme.bodyLarge,
         decoration: InputDecoration(
-          hintText: hint ?? 'Search...',
+          hintText: hint ?? AppLocalizations.of(context).searchHint,
           hintStyle: TextStyle(color: colors.onSurfaceVariant),
           prefixIcon:
               prefixIcon ??

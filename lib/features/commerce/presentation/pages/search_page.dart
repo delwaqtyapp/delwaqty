@@ -367,6 +367,7 @@ class _SearchMerchantCard extends StatelessWidget {
     final colorScheme = context.colorScheme;
     final textTheme = context.textTheme;
     final typeColor = merchantTypeColor(merchant.type);
+    final l10n = AppLocalizations.of(context);
 
     return Card(
       clipBehavior: Clip.antiAlias,
@@ -421,7 +422,7 @@ class _SearchMerchantCard extends StatelessWidget {
                               ),
                               const SizedBox(width: 2),
                               Text(
-                                'Verified',
+                                l10n.verified,
                                 style: textTheme.labelSmall?.copyWith(
                                   color: colorScheme.primary,
                                   fontWeight: FontWeight.w600,
@@ -444,8 +445,8 @@ class _SearchMerchantCard extends StatelessWidget {
                             color: AppColors.successLight,
                             borderRadius: BorderRadius.circular(4),
                           ),
-                          child: Text(
-                            'Open',
+                            child: Text(
+                              l10n.open,
                             style: textTheme.labelSmall?.copyWith(
                               color: Colors.white,
                               fontWeight: FontWeight.w600,

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:delwaqty/l10n/app_localizations.dart';
 
 class AppSearchBar extends StatelessWidget {
   const AppSearchBar({
@@ -33,7 +34,7 @@ class AppSearchBar extends StatelessWidget {
         onSubmitted: onSubmitted,
         style: Theme.of(context).textTheme.bodyLarge,
         decoration: InputDecoration(
-          hintText: hint ?? 'Search...',
+          hintText: hint ?? AppLocalizations.of(context).searchHint,
           hintStyle: TextStyle(color: colorScheme.onSurfaceVariant),
           prefixIcon: Icon(
             Icons.search_rounded,

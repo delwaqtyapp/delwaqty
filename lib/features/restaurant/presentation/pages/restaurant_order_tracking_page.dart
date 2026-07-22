@@ -9,6 +9,19 @@ import 'package:delwaqty/shared/widgets/error_state.dart';
 import 'package:delwaqty/shared/widgets/app_loader.dart';
 import 'package:delwaqty/core/extensions/context_extensions.dart';
 
+String _orderStatusLabel(String status, AppLocalizations l10n) => switch (status) {
+  'pending' => l10n.pending,
+  'confirmed' => l10n.confirmed,
+  'preparing' => l10n.preparing,
+  'ready' => l10n.ready,
+  'picked_up' => l10n.pickedUp,
+  'in_transit' => l10n.inTransit,
+  'delivering' => l10n.delivering,
+  'delivered' => l10n.delivered,
+  'cancelled' => l10n.cancelled,
+  _ => status,
+};
+
 final _trackingProvider =
     FutureProvider.family<List<OrderTracking>, String>((ref, orderId) async {
   final repo = ref.watch(orderTrackingRepositoryProvider);
@@ -147,7 +160,7 @@ class _TrackingTile extends StatelessWidget {
                           const SizedBox(width: 8),
                           Expanded(
                             child: Text(
-                              entry.status.toUpperCase(),
+                              _orderStatusLabel(entry.status, l10n),
                               style: textTheme.labelLarge?.copyWith(
                                 fontWeight: FontWeight.bold,
                                 color: statusColor,

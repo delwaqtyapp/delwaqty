@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:delwaqty/core/extensions/context_extensions.dart';
 import 'package:delwaqty/features/commerce/domain/entities/merchant.dart';
-import 'package:delwaqty/features/commerce/commerce_module.dart';
 import 'package:delwaqty/features/auth/domain/auth_state.dart';
 import 'package:delwaqty/features/auth/presentation/auth_provider.dart';
 import 'package:delwaqty/features/location/presentation/providers/location_provider.dart';
@@ -11,11 +10,20 @@ import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
 import 'package:delwaqty/shared/widgets/premium_empty_state.dart';
 import 'package:delwaqty/shared/widgets/shimmer_loading.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
+import 'package:delwaqty/features/home/domain/home_domain.dart';
 
-final _merchantsFutureProvider = FutureProvider<List<Merchant>>((ref) async {
-  final repo = ref.watch(merchantRepositoryProvider);
-  return repo.getMerchants(limit: 20);
-});
+String _merchantTypeLabel(MerchantType type, AppLocalizations l10n) => switch (type) {
+  MerchantType.restaurant => l10n.typeRestaurant,
+  MerchantType.grocery => l10n.typeGrocery,
+  MerchantType.pharmacy => l10n.typePharmacy,
+  MerchantType.flowers => l10n.typeFlowers,
+  MerchantType.bakery => l10n.typeBakery,
+  MerchantType.electronics => l10n.typeElectronics,
+  MerchantType.furniture => l10n.typeFurniture,
+  MerchantType.fashion => l10n.typeFashion,
+  MerchantType.home => l10n.typeHome,
+  MerchantType.other => l10n.typeOther,
+};
 
 class HomePage extends ConsumerWidget {
   const HomePage({super.key});
@@ -31,7 +39,7 @@ class HomePage extends ConsumerWidget {
       body: SafeArea(
         child: RefreshIndicator(
           onRefresh: () async {
-            ref.invalidate(_merchantsFutureProvider);
+            ref.invalidate(nearbyMerchantsProvider);
             ref.read(userLocationProvider.notifier).refresh();
           },
           child: CustomScrollView(
@@ -340,7 +348,7 @@ class HomePage extends ConsumerWidget {
     WidgetRef ref,
     AppLocalizations l10n,
   ) {
-    final merchantsAsync = ref.watch(_merchantsFutureProvider);
+    final merchantsAsync = ref.watch(nearbyMerchantsProvider);
 
     return merchantsAsync.when(
       loading: () => SliverToBoxAdapter(
@@ -651,7 +659,7 @@ class _MerchantCard extends StatelessWidget {
                       ),
                       const Spacer(),
                       Text(
-                        merchant.type.name.toUpperCase(),
+                        _merchantTypeLabel(merchant.type, AppLocalizations.of(context)),
                         style: context.textTheme.bodySmall?.copyWith(
                           color: context.colorScheme.onSurfaceVariant,
                         ),

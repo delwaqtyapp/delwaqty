@@ -220,7 +220,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get search => 'بحث';
 
   @override
-  String get searchHint => 'ابحث عن مطاعم، متاجر، خدمات...';
+  String get searchHint => 'بحث...';
 
   @override
   String get searchNoResults => 'لم يتم العثور على نتائج';
@@ -415,7 +415,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get orderConfirmedMessage => 'تم تأكيد طلبك وبدأ المطعم بتحضيره.';
 
   @override
-  String get preparing => 'قيد التحضير';
+  String get preparing => 'جاري التحضير';
 
   @override
   String get ready => 'جاهز';
@@ -1141,7 +1141,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get reportRestaurant => 'إبلاغ';
 
   @override
-  String get merchantDashboard => 'لوحة تحكم التاجر';
+  String get merchantDashboard => 'لوحة التاجر';
 
   @override
   String get overview => 'نظرة عامة';
@@ -1590,10 +1590,10 @@ class AppLocalizationsAr extends AppLocalizations {
   String get rideDetails => 'تفاصيل الرحلة';
 
   @override
-  String get pickup => 'موقع الالتقاء';
+  String get pickup => 'نقطة الانطلاق';
 
   @override
-  String get dropoff => 'موقع النزول';
+  String get dropoff => 'الوجهة';
 
   @override
   String get fare => 'الأجرة';
@@ -2921,10 +2921,10 @@ class AppLocalizationsAr extends AppLocalizations {
   String get rideNumber => 'رحلة رقم';
 
   @override
-  String get assigned => 'مُعيّن';
+  String get assigned => 'معين';
 
   @override
-  String get passenger => 'الراكب';
+  String get passenger => 'ركاب';
 
   @override
   String get deliveryManagement => 'إدارة التوصيلات';
@@ -3002,7 +3002,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get typePharmacy => 'صيدلية';
 
   @override
-  String get typeFlowers => 'ورود';
+  String get typeFlowers => 'زهور';
 
   @override
   String get typeBakery => 'مخبز';
@@ -3177,4 +3177,265 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get faqAnswer6 =>
       'اذهب إلى سجل طلباتك، حدد الطلب ذي الصلة، واضغط على الإبلاغ عن مشكلة. اختر فئة المشكلة، أضف وصفاً، وسيقوم فريقنا بمراجعة والرد في أسرع وقت ممكن.';
+
+  @override
+  String get unknown => 'غير معروف';
+
+  @override
+  String get sms => 'SMS';
+
+  @override
+  String get dispatching => 'جاري التوصيل';
+
+  @override
+  String get delivering => 'جاري التوصيل للعميل';
+
+  @override
+  String get kmUnit => 'كم';
+
+  @override
+  String get kgUnit => 'كجم';
+
+  @override
+  String get mockOrderConfirmed => 'تم تأكيد الطلب';
+
+  @override
+  String get mockOrderConfirmedBody => 'تم تأكيد طلبك من البيك وجاري تحضيره.';
+
+  @override
+  String get mockDeliveryOnWay => 'التوصيل في الطريق';
+
+  @override
+  String get mockDeliveryOnWayBody =>
+      'طلبك من بنده في الطريق. الوصول خلال 15 دقيقة.';
+
+  @override
+  String get mockNewOffer => 'عرض جديد متاح';
+
+  @override
+  String get mockNewOfferBody =>
+      'احصل على خصم 20% على طلبك القادم من المطاعم المختارة!';
+
+  @override
+  String get mockServiceReminder => 'تذكير بالخدمة';
+
+  @override
+  String get mockServiceReminderBody =>
+      'موعد صيانة التكييف الخاص بك غداً الساعة 10 صباحاً.';
+
+  @override
+  String get mockWelcomeTitle => 'مرحباً بك في دلوقتي';
+
+  @override
+  String get mockWelcomeBody =>
+      'استكشف المطاعم والمتاجر والخدمات كلها في تطبيق واحد.';
+
+  @override
+  String get driver => 'السائق';
+
+  @override
+  String get adminPanel => 'لوحة الإدارة';
+
+  @override
+  String get restaurant => 'مطعم';
+
+  @override
+  String get market => 'السوق';
+
+  @override
+  String get onboarding => 'التوعية';
+
+  @override
+  String get splash => 'شاشة البداية';
+
+  @override
+  String get auth => 'تسجيل الدخول';
+
+  @override
+  String get rideStatusSearching => 'بحث';
+
+  @override
+  String get rideStatusMatched => 'تم الإقران';
+
+  @override
+  String get rideStatusArrived => 'وصل';
+
+  @override
+  String get rideStatusInTrip => 'في الطريق';
+
+  @override
+  String get rideStatusCompleted => 'مكتمل';
+
+  @override
+  String get rideStatusCancelled => 'ملغي';
+
+  @override
+  String get rideTypeEconomy => 'اقتصادي';
+
+  @override
+  String get rideTypeComfort => 'مريح';
+
+  @override
+  String get rideTypePremium => 'بريميوم';
+
+  @override
+  String get rideTypeXl => 'كبير';
+
+  @override
+  String get rideTypeMotorbike => 'دراجة نارية';
+
+  @override
+  String get rideTypeTaxi => 'تاكسي';
+
+  @override
+  String get roleSuperAdmin => 'مدير عام';
+
+  @override
+  String get roleAdmin => 'مدير';
+
+  @override
+  String get roleModerator => 'مشرف';
+
+  @override
+  String get roleSupport => 'دعم';
+
+  @override
+  String get typeMarket => 'سوق';
+
+  @override
+  String get typeHome => 'منزل';
+
+  @override
+  String get passwordUpdated => 'تم تحديث كلمة المرور بنجاح';
+
+  @override
+  String get changePasswordDescription => 'تحديث كلمة المرور الخاصة بحسابك';
+
+  @override
+  String get newPassword => 'كلمة المرور الجديدة';
+
+  @override
+  String get updatePassword => 'تحديث كلمة المرور';
+
+  @override
+  String get enableTwoFactor => 'تفعيل المصادقة الثنائية';
+
+  @override
+  String get twoFactorDescription => 'إضافة طبقة أمان إضافية لحسابك';
+
+  @override
+  String get twoFactorEnabled => 'تم تفعيل المصادقة الثنائية';
+
+  @override
+  String get twoFactorDisabled => 'تم تعطيل المصادقة الثنائية';
+
+  @override
+  String get backupCodes => 'أكواد الاحتياطي';
+
+  @override
+  String get backupCodesInfo => 'توليد أكواد احتياطية لاسترداد الحساب';
+
+  @override
+  String get authenticatorApp => 'تطبيق المصادقة';
+
+  @override
+  String get authenticatorSetup => 'إعداد تطبيق المصادقة';
+
+  @override
+  String get currentTime => 'الآن';
+
+  @override
+  String get currentSession => 'الحالية';
+
+  @override
+  String get exportMyData => 'تصدير بياناتي';
+
+  @override
+  String get exportDataDescription => 'تحميل نسخة من بياناتك الشخصية';
+
+  @override
+  String get exportRequestSubmitted => 'تم إرسال طلب تصدير البيانات';
+
+  @override
+  String get deleteAccount => 'حذف الحساب';
+
+  @override
+  String get deleteAccountDescription => 'حذف حسابك وبياناتك نهائياً';
+
+  @override
+  String get deleteAccountConfirm =>
+      'لا يمكن التراجع عن هذا الإجراء. سيتم حذف جميع بياناتك نهائياً.';
+
+  @override
+  String get accountDeleted => 'تم حذف الحساب بنجاح';
+
+  @override
+  String get dataSharing => 'مشاركة البيانات';
+
+  @override
+  String get dataSharingDescription => 'التحكم في كيفية مشاركة بياناتك';
+
+  @override
+  String get dataSharingInfo =>
+      'يتم مشاركة بياناتك فقط مع مزودي الخدمات عند الضرورة';
+
+  @override
+  String get shareWithDriver => 'المشاركة مع السائق';
+
+  @override
+  String get shareWithDriverDescription =>
+      'السماح للسائرين برؤية موقعك أثناء الرحلات';
+
+  @override
+  String get shareWithMerchant => 'المشاركة مع التاجر';
+
+  @override
+  String get shareWithMerchantDescription =>
+      'السماح للمتاجر برؤية موقعك للتوصيل';
+
+  @override
+  String get backgroundLocation => 'الموقع في الخلفية';
+
+  @override
+  String get backgroundLocationDescription =>
+      'السماح بالوصول للموقع عند تشغيل التطبيق في الخلفية';
+
+  @override
+  String get backgroundLocationEnabled =>
+      'تم تفعيل الموقع في الخلفية لخدمة أفضل';
+
+  @override
+  String get locationPrivacyNote =>
+      'بيانات موقعك مشفرة وتُستخدم فقط لتوفير خدمات التوصيل والنقل.';
+
+  @override
+  String get rideUpdates => 'تحديثات الرحلات';
+
+  @override
+  String get rideUpdatesDescription => 'استلام إشعارات عن تغييرات حالة الرحلة';
+
+  @override
+  String get deliveryUpdates => 'تحديثات التوصيل';
+
+  @override
+  String get deliveryUpdatesDescription =>
+      'استلام إشعارات عن تغييرات حالة التوصيل';
+
+  @override
+  String get chatMessages => 'رسائل المحادثة';
+
+  @override
+  String get chatMessagesDescription => 'استلام إشعار عند تلقي رسالة';
+
+  @override
+  String get promotions => 'العروض الترويجية';
+
+  @override
+  String get promotionsDescription => 'استلام عروض وخصومات ترويجية';
+
+  @override
+  String get securityAlerts => 'تنبيهات الأمان';
+
+  @override
+  String get securityAlertsDescription => 'استلام إشعارات عن أنشطة مشبوهة';
 }

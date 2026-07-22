@@ -2,6 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:delwaqty/core/extensions/context_extensions.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
+import 'package:delwaqty/features/settings/presentation/pages/privacy/change_password_page.dart';
+import 'package:delwaqty/features/settings/presentation/pages/privacy/two_factor_auth_page.dart';
+import 'package:delwaqty/features/settings/presentation/pages/privacy/login_activity_page.dart';
+import 'package:delwaqty/features/settings/presentation/pages/privacy/data_privacy_page.dart';
+import 'package:delwaqty/features/settings/presentation/pages/privacy/location_sharing_page.dart';
+import 'package:delwaqty/features/settings/presentation/pages/privacy/notification_preferences_page.dart';
 
 class PrivacySecurityPage extends StatelessWidget {
   const PrivacySecurityPage({super.key});
@@ -26,21 +32,30 @@ class PrivacySecurityPage extends StatelessWidget {
               leading: const Icon(Icons.lock_outline_rounded),
               title: Text(l10n.changePassword),
               trailing: const Icon(Icons.chevron_right_rounded),
-              onTap: () => _showComingSoon(context),
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const ChangePasswordPage()),
+              ),
             ),
             const Divider(height: 1),
             ListTile(
               leading: const Icon(Icons.shield_outlined),
               title: Text(l10n.twoFactorAuth),
               trailing: const Icon(Icons.chevron_right_rounded),
-              onTap: () => _showComingSoon(context),
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const TwoFactorAuthPage()),
+              ),
             ),
             const Divider(height: 1),
             ListTile(
               leading: const Icon(Icons.history_rounded),
               title: Text(l10n.loginActivity),
               trailing: const Icon(Icons.chevron_right_rounded),
-              onTap: () => _showComingSoon(context),
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const LoginActivityPage()),
+              ),
             ),
           ]),
           const SizedBox(height: 16),
@@ -49,32 +64,36 @@ class PrivacySecurityPage extends StatelessWidget {
               leading: const Icon(Icons.storage_outlined),
               title: Text(l10n.dataPrivacy),
               trailing: const Icon(Icons.chevron_right_rounded),
-              onTap: () => _showComingSoon(context),
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const DataPrivacyPage()),
+              ),
             ),
             const Divider(height: 1),
             ListTile(
               leading: const Icon(Icons.location_on_outlined),
               title: Text(l10n.locationSharing),
               trailing: const Icon(Icons.chevron_right_rounded),
-              onTap: () => _showComingSoon(context),
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const LocationSharingPage()),
+              ),
             ),
             const Divider(height: 1),
             ListTile(
               leading: const Icon(Icons.notifications_outlined),
               title: Text(l10n.notificationPreferences),
               trailing: const Icon(Icons.chevron_right_rounded),
-              onTap: () => _showComingSoon(context),
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const NotificationPreferencesPage()),
+              ),
             ),
           ]),
           const SizedBox(height: 32),
         ],
       ),
     );
-  }
-
-  void _showComingSoon(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-    context.showAppSnackBar(l10n.comingSoon);
   }
 
   Widget _buildSection(

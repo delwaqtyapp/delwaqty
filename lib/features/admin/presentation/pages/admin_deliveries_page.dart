@@ -17,8 +17,8 @@ final _adminDeliveriesProvider = FutureProvider<List<Map<String, dynamic>>>((
     'id': d.id,
     'service_type': d.serviceType,
     'status': d.status,
-    'sender_name': d.senderName ?? 'Unknown',
-    'receiver_name': d.receiverName ?? 'Unknown',
+    'sender_name': d.senderName ?? '',
+    'receiver_name': d.receiverName ?? '',
     'items_description': d.itemDescription ?? '',
     'created_at': d.createdAt.toIso8601String(),
   }).toList();
@@ -226,8 +226,8 @@ class _DeliveryGlassTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final serviceType = delivery['service_type'] as String? ?? 'delivery';
     final status = delivery['status'] as String? ?? 'pending';
-    final senderName = delivery['sender_name'] as String? ?? delivery['sender']?['name'] as String? ?? 'Unknown';
-    final receiverName = delivery['receiver_name'] as String? ?? delivery['receiver']?['name'] as String? ?? 'Unknown';
+    final senderName = delivery['sender_name'] as String? ?? delivery['sender']?['name'] as String? ?? '';
+    final receiverName = delivery['receiver_name'] as String? ?? delivery['receiver']?['name'] as String? ?? '';
     final items = delivery['items_description'] as String? ?? delivery['description'] as String? ?? '';
     final idShort = (delivery['id'] as String? ?? '').length > 8
         ? (delivery['id'] as String).substring(0, 8)

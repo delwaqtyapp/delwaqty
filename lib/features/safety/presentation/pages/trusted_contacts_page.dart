@@ -321,7 +321,7 @@ class TrustedContactsPage extends ConsumerWidget {
                     const SizedBox(height: 8),
                     SegmentedButton<NotificationPreference>(
                       segments: [
-                        ButtonSegment(value: NotificationPreference.sms, label: Text('SMS')),
+                        ButtonSegment(value: NotificationPreference.sms, label: Text(l10n.sms)),
                         ButtonSegment(value: NotificationPreference.call, label: Text(l10n.call)),
                         ButtonSegment(value: NotificationPreference.push, label: Text(l10n.pushNotification)),
                         ButtonSegment(value: NotificationPreference.both, label: Text(l10n.both)),

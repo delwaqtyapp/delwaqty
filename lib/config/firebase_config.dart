@@ -15,8 +15,8 @@ abstract final class FirebaseConfig {
 
   // ─── Package Names ─────────────────────────────────────────
 
-  static const String androidPackageName = 'com.example.delwaqty';
-  static const String iosBundleId = 'com.example.delwaqty';
+  static const String androidPackageName = 'com.delwaqty.app';
+  static const String iosBundleId = 'com.delwaqty.app';
 
   // ─── Service Toggles ──────────────────────────────────────
 

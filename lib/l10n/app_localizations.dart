@@ -509,7 +509,7 @@ abstract class AppLocalizations {
   /// No description provided for @searchHint.
   ///
   /// In en, this message translates to:
-  /// **'Search restaurants, shops, services...'**
+  /// **'Search...'**
   String get searchHint;
 
   /// No description provided for @searchNoResults.
@@ -3113,13 +3113,13 @@ abstract class AppLocalizations {
   /// No description provided for @pickup.
   ///
   /// In en, this message translates to:
-  /// **'Pickup Location'**
+  /// **'Pickup'**
   String get pickup;
 
   /// No description provided for @dropoff.
   ///
   /// In en, this message translates to:
-  /// **'Dropoff Location'**
+  /// **'Dropoff'**
   String get dropoff;
 
   /// No description provided for @fare.
@@ -6169,6 +6169,504 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Go to your order history, select the relevant order, and tap Report Problem. Choose the issue category, add a description, and our team will review and respond as quickly as possible.'**
   String get faqAnswer6;
+
+  /// No description provided for @unknown.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown'**
+  String get unknown;
+
+  /// No description provided for @sms.
+  ///
+  /// In en, this message translates to:
+  /// **'SMS'**
+  String get sms;
+
+  /// No description provided for @dispatching.
+  ///
+  /// In en, this message translates to:
+  /// **'Dispatching'**
+  String get dispatching;
+
+  /// No description provided for @delivering.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivering'**
+  String get delivering;
+
+  /// No description provided for @kmUnit.
+  ///
+  /// In en, this message translates to:
+  /// **'km'**
+  String get kmUnit;
+
+  /// No description provided for @kgUnit.
+  ///
+  /// In en, this message translates to:
+  /// **'kg'**
+  String get kgUnit;
+
+  /// No description provided for @mockOrderConfirmed.
+  ///
+  /// In en, this message translates to:
+  /// **'Order Confirmed'**
+  String get mockOrderConfirmed;
+
+  /// No description provided for @mockOrderConfirmedBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Your order from Al Baik has been confirmed and is being prepared.'**
+  String get mockOrderConfirmedBody;
+
+  /// No description provided for @mockDeliveryOnWay.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivery on the Way'**
+  String get mockDeliveryOnWay;
+
+  /// No description provided for @mockDeliveryOnWayBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Your order from Panda Grocery is on the way. ETA: 15 min.'**
+  String get mockDeliveryOnWayBody;
+
+  /// No description provided for @mockNewOffer.
+  ///
+  /// In en, this message translates to:
+  /// **'New Offer Available'**
+  String get mockNewOffer;
+
+  /// No description provided for @mockNewOfferBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Get 20% off your next order from selected restaurants!'**
+  String get mockNewOfferBody;
+
+  /// No description provided for @mockServiceReminder.
+  ///
+  /// In en, this message translates to:
+  /// **'Service Reminder'**
+  String get mockServiceReminder;
+
+  /// No description provided for @mockServiceReminderBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Your AC maintenance appointment is tomorrow at 10 AM.'**
+  String get mockServiceReminderBody;
+
+  /// No description provided for @mockWelcomeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Welcome to Delwaqty'**
+  String get mockWelcomeTitle;
+
+  /// No description provided for @mockWelcomeBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Explore restaurants, shops, and services all in one app.'**
+  String get mockWelcomeBody;
+
+  /// No description provided for @driver.
+  ///
+  /// In en, this message translates to:
+  /// **'Driver'**
+  String get driver;
+
+  /// No description provided for @adminPanel.
+  ///
+  /// In en, this message translates to:
+  /// **'Admin Panel'**
+  String get adminPanel;
+
+  /// No description provided for @restaurant.
+  ///
+  /// In en, this message translates to:
+  /// **'Restaurant'**
+  String get restaurant;
+
+  /// No description provided for @market.
+  ///
+  /// In en, this message translates to:
+  /// **'Market'**
+  String get market;
+
+  /// No description provided for @onboarding.
+  ///
+  /// In en, this message translates to:
+  /// **'Onboarding'**
+  String get onboarding;
+
+  /// No description provided for @splash.
+  ///
+  /// In en, this message translates to:
+  /// **'Splash'**
+  String get splash;
+
+  /// No description provided for @auth.
+  ///
+  /// In en, this message translates to:
+  /// **'Auth'**
+  String get auth;
+
+  /// No description provided for @rideStatusSearching.
+  ///
+  /// In en, this message translates to:
+  /// **'Searching'**
+  String get rideStatusSearching;
+
+  /// No description provided for @rideStatusMatched.
+  ///
+  /// In en, this message translates to:
+  /// **'Matched'**
+  String get rideStatusMatched;
+
+  /// No description provided for @rideStatusArrived.
+  ///
+  /// In en, this message translates to:
+  /// **'Arrived'**
+  String get rideStatusArrived;
+
+  /// No description provided for @rideStatusInTrip.
+  ///
+  /// In en, this message translates to:
+  /// **'In Trip'**
+  String get rideStatusInTrip;
+
+  /// No description provided for @rideStatusCompleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Completed'**
+  String get rideStatusCompleted;
+
+  /// No description provided for @rideStatusCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancelled'**
+  String get rideStatusCancelled;
+
+  /// No description provided for @rideTypeEconomy.
+  ///
+  /// In en, this message translates to:
+  /// **'Economy'**
+  String get rideTypeEconomy;
+
+  /// No description provided for @rideTypeComfort.
+  ///
+  /// In en, this message translates to:
+  /// **'Comfort'**
+  String get rideTypeComfort;
+
+  /// No description provided for @rideTypePremium.
+  ///
+  /// In en, this message translates to:
+  /// **'Premium'**
+  String get rideTypePremium;
+
+  /// No description provided for @rideTypeXl.
+  ///
+  /// In en, this message translates to:
+  /// **'XL'**
+  String get rideTypeXl;
+
+  /// No description provided for @rideTypeMotorbike.
+  ///
+  /// In en, this message translates to:
+  /// **'Motorbike'**
+  String get rideTypeMotorbike;
+
+  /// No description provided for @rideTypeTaxi.
+  ///
+  /// In en, this message translates to:
+  /// **'Taxi'**
+  String get rideTypeTaxi;
+
+  /// No description provided for @roleSuperAdmin.
+  ///
+  /// In en, this message translates to:
+  /// **'SuperAdmin'**
+  String get roleSuperAdmin;
+
+  /// No description provided for @roleAdmin.
+  ///
+  /// In en, this message translates to:
+  /// **'Admin'**
+  String get roleAdmin;
+
+  /// No description provided for @roleModerator.
+  ///
+  /// In en, this message translates to:
+  /// **'Moderator'**
+  String get roleModerator;
+
+  /// No description provided for @roleSupport.
+  ///
+  /// In en, this message translates to:
+  /// **'Support'**
+  String get roleSupport;
+
+  /// No description provided for @typeMarket.
+  ///
+  /// In en, this message translates to:
+  /// **'Market'**
+  String get typeMarket;
+
+  /// No description provided for @typeHome.
+  ///
+  /// In en, this message translates to:
+  /// **'Home'**
+  String get typeHome;
+
+  /// No description provided for @passwordUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Password updated successfully'**
+  String get passwordUpdated;
+
+  /// No description provided for @changePasswordDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Update your account password'**
+  String get changePasswordDescription;
+
+  /// No description provided for @newPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'New Password'**
+  String get newPassword;
+
+  /// No description provided for @updatePassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Update Password'**
+  String get updatePassword;
+
+  /// No description provided for @enableTwoFactor.
+  ///
+  /// In en, this message translates to:
+  /// **'Enable Two-Factor Authentication'**
+  String get enableTwoFactor;
+
+  /// No description provided for @twoFactorDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Add an extra layer of security to your account'**
+  String get twoFactorDescription;
+
+  /// No description provided for @twoFactorEnabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Two-factor authentication enabled'**
+  String get twoFactorEnabled;
+
+  /// No description provided for @twoFactorDisabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Two-factor authentication disabled'**
+  String get twoFactorDisabled;
+
+  /// No description provided for @backupCodes.
+  ///
+  /// In en, this message translates to:
+  /// **'Backup Codes'**
+  String get backupCodes;
+
+  /// No description provided for @backupCodesInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Generate backup codes for account recovery'**
+  String get backupCodesInfo;
+
+  /// No description provided for @authenticatorApp.
+  ///
+  /// In en, this message translates to:
+  /// **'Authenticator App'**
+  String get authenticatorApp;
+
+  /// No description provided for @authenticatorSetup.
+  ///
+  /// In en, this message translates to:
+  /// **'Set up an authenticator app'**
+  String get authenticatorSetup;
+
+  /// No description provided for @currentTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Now'**
+  String get currentTime;
+
+  /// No description provided for @currentSession.
+  ///
+  /// In en, this message translates to:
+  /// **'Current'**
+  String get currentSession;
+
+  /// No description provided for @exportMyData.
+  ///
+  /// In en, this message translates to:
+  /// **'Export My Data'**
+  String get exportMyData;
+
+  /// No description provided for @exportDataDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Download a copy of your personal data'**
+  String get exportDataDescription;
+
+  /// No description provided for @exportRequestSubmitted.
+  ///
+  /// In en, this message translates to:
+  /// **'Data export request submitted'**
+  String get exportRequestSubmitted;
+
+  /// No description provided for @deleteAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Account'**
+  String get deleteAccount;
+
+  /// No description provided for @deleteAccountDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Permanently delete your account and data'**
+  String get deleteAccountDescription;
+
+  /// No description provided for @deleteAccountConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'This action cannot be undone. All your data will be permanently deleted.'**
+  String get deleteAccountConfirm;
+
+  /// No description provided for @accountDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Account deleted successfully'**
+  String get accountDeleted;
+
+  /// No description provided for @dataSharing.
+  ///
+  /// In en, this message translates to:
+  /// **'Data Sharing'**
+  String get dataSharing;
+
+  /// No description provided for @dataSharingDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Control how your data is shared'**
+  String get dataSharingDescription;
+
+  /// No description provided for @dataSharingInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Your data is only shared with service providers as needed'**
+  String get dataSharingInfo;
+
+  /// No description provided for @shareWithDriver.
+  ///
+  /// In en, this message translates to:
+  /// **'Share with Driver'**
+  String get shareWithDriver;
+
+  /// No description provided for @shareWithDriverDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow drivers to see your location during trips'**
+  String get shareWithDriverDescription;
+
+  /// No description provided for @shareWithMerchant.
+  ///
+  /// In en, this message translates to:
+  /// **'Share with Merchant'**
+  String get shareWithMerchant;
+
+  /// No description provided for @shareWithMerchantDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow merchants to see your location for delivery'**
+  String get shareWithMerchantDescription;
+
+  /// No description provided for @backgroundLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Background Location'**
+  String get backgroundLocation;
+
+  /// No description provided for @backgroundLocationDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow location access when app is in background'**
+  String get backgroundLocationDescription;
+
+  /// No description provided for @backgroundLocationEnabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Background location enabled for better service'**
+  String get backgroundLocationEnabled;
+
+  /// No description provided for @locationPrivacyNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Your location data is encrypted and only used to provide delivery and ride services.'**
+  String get locationPrivacyNote;
+
+  /// No description provided for @rideUpdates.
+  ///
+  /// In en, this message translates to:
+  /// **'Ride Updates'**
+  String get rideUpdates;
+
+  /// No description provided for @rideUpdatesDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Get notified about ride status changes'**
+  String get rideUpdatesDescription;
+
+  /// No description provided for @deliveryUpdates.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivery Updates'**
+  String get deliveryUpdates;
+
+  /// No description provided for @deliveryUpdatesDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Get notified about delivery status changes'**
+  String get deliveryUpdatesDescription;
+
+  /// No description provided for @chatMessages.
+  ///
+  /// In en, this message translates to:
+  /// **'Chat Messages'**
+  String get chatMessages;
+
+  /// No description provided for @chatMessagesDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Get notified when you receive a message'**
+  String get chatMessagesDescription;
+
+  /// No description provided for @promotions.
+  ///
+  /// In en, this message translates to:
+  /// **'Promotions'**
+  String get promotions;
+
+  /// No description provided for @promotionsDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Receive promotional offers and discounts'**
+  String get promotionsDescription;
+
+  /// No description provided for @securityAlerts.
+  ///
+  /// In en, this message translates to:
+  /// **'Security Alerts'**
+  String get securityAlerts;
+
+  /// No description provided for @securityAlertsDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Get notified about suspicious activity'**
+  String get securityAlertsDescription;
 }
 
 class _AppLocalizationsDelegate

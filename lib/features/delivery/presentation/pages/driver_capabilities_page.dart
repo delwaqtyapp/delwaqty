@@ -163,7 +163,7 @@ class _CapabilitiesBody extends ConsumerWidget {
         AnimatedFadeIn(
           delay: const Duration(milliseconds: 150),
           child: Text(
-            '${l10n.deliveryAddress} (${maxDistance.toStringAsFixed(0)} km)',
+            '${l10n.deliveryAddress} (${maxDistance.toStringAsFixed(0)} ${l10n.kmUnit})',
             style: theme.textTheme.titleMedium
                 ?.copyWith(fontWeight: FontWeight.bold),
           ),
@@ -173,14 +173,14 @@ class _CapabilitiesBody extends ConsumerWidget {
           min: 1,
           max: 50,
           divisions: 49,
-          label: '${maxDistance.toStringAsFixed(0)} km',
+          label: '${maxDistance.toStringAsFixed(0)} ${l10n.kmUnit}',
           onChanged: onDistanceChanged,
         ),
         const SizedBox(height: 8),
         AnimatedFadeIn(
           delay: const Duration(milliseconds: 200),
           child: Text(
-            '${l10n.orderSummary} (${maxWeight.toStringAsFixed(0)} kg)',
+            '${l10n.orderSummary} (${maxWeight.toStringAsFixed(0)} ${l10n.kgUnit})',
             style: theme.textTheme.titleMedium
                 ?.copyWith(fontWeight: FontWeight.bold),
           ),
@@ -190,7 +190,7 @@ class _CapabilitiesBody extends ConsumerWidget {
           min: 1,
           max: 50,
           divisions: 49,
-          label: '${maxWeight.toStringAsFixed(0)} kg',
+          label: '${maxWeight.toStringAsFixed(0)} ${l10n.kgUnit}',
           onChanged: onWeightChanged,
         ),
         const SizedBox(height: 24),

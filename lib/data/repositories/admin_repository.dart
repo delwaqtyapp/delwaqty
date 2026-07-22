@@ -1,7 +1,8 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:delwaqty/features/admin/domain/entities/admin_models.dart';
+import 'package:delwaqty/features/admin/domain/repositories/admin_repository.dart' as admin;
 
-class AdminRepository {
+class AdminRepository implements admin.AdminRepository {
   AdminRepository({SupabaseClient? client})
       : _supabase = client ?? Supabase.instance.client;
 

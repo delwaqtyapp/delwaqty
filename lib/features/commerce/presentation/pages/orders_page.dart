@@ -6,9 +6,11 @@ import 'package:delwaqty/features/commerce/domain/entities/order.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 import 'package:delwaqty/core/extensions/context_extensions.dart';
 import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
-import 'package:delwaqty/shared/widgets/empty_state.dart';
+import 'package:delwaqty/shared/widgets/premium_empty_state.dart';
 import 'package:delwaqty/shared/widgets/app_loader.dart';
 import 'package:delwaqty/shared/widgets/error_state.dart';
+import 'package:delwaqty/core/theme/app_colors.dart';
+import 'package:delwaqty/core/theme/app_text_styles.dart';
 
 final _ordersFutureProvider = FutureProvider<List<Order>>((ref) async {
   final repo = ref.watch(orderRepositoryProvider);
@@ -36,7 +38,7 @@ class OrdersPage extends ConsumerWidget {
                 children: [
                   SizedBox(
                     height: MediaQuery.sizeOf(context).height * 0.7,
-                    child: EmptyState(
+                    child: PremiumEmptyState(
                       icon: Icons.receipt_long_outlined,
                       title: l10n.noOrders,
                       message: l10n.noOrdersMessage,
@@ -171,14 +173,14 @@ class _StatusChip extends StatelessWidget {
     final l10n = AppLocalizations.of(context);
 
     final (labelKey, color) = switch (status) {
-      OrderStatus.pending => (l10n.pending, Colors.orange),
-      OrderStatus.confirmed => (l10n.confirmed, Colors.blue),
-      OrderStatus.preparing => (l10n.preparing, Colors.purple),
-      OrderStatus.ready => (l10n.ready, Colors.teal),
-      OrderStatus.pickedUp => (l10n.pickedUp, Colors.indigo),
-      OrderStatus.inTransit => (l10n.inTransit, Colors.cyan),
-      OrderStatus.delivered => (l10n.delivered, Colors.green),
-      OrderStatus.cancelled => (l10n.cancelled, Colors.red),
+      OrderStatus.pending => (l10n.pending, AppColors.warningLight),
+      OrderStatus.confirmed => (l10n.confirmed, AppColors.orderConfirmed),
+      OrderStatus.preparing => (l10n.preparing, AppColors.orderPreparing),
+      OrderStatus.ready => (l10n.ready, AppColors.orderReady),
+      OrderStatus.pickedUp => (l10n.pickedUp, AppColors.orderInTransit),
+      OrderStatus.inTransit => (l10n.inTransit, AppColors.infoLight),
+      OrderStatus.delivered => (l10n.delivered, AppColors.successLight),
+      OrderStatus.cancelled => (l10n.cancelled, AppColors.errorLight),
     };
 
     return Container(
@@ -190,10 +192,9 @@ class _StatusChip extends StatelessWidget {
       ),
       child: Text(
         labelKey,
-        style: TextStyle(
-          fontSize: 11,
-          color: color,
+        style: AppTextStyles.labelSmall.copyWith(
           fontWeight: FontWeight.bold,
+          color: color,
         ),
       ),
     );

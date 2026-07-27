@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
+import 'package:delwaqty/core/theme/app_colors.dart';
 
 class LoginActivityPage extends StatelessWidget {
   const LoginActivityPage({super.key});
@@ -35,7 +36,7 @@ class LoginActivityPage extends StatelessWidget {
           return ListTile(
             leading: Icon(
               a.current ? Icons.check_circle : Icons.history_rounded,
-              color: a.current ? Colors.green : cs.onSurfaceVariant,
+              color: a.current ? AppColors.successLight : cs.onSurfaceVariant,
             ),
             title: Text(a.device),
             subtitle: Text('${a.ip} • ${a.time}'),
@@ -43,12 +44,12 @@ class LoginActivityPage extends StatelessWidget {
                 ? Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(
-                      color: Colors.green.withValues(alpha: 0.1),
+                      color: AppColors.successLight.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Text(
                       l10n.currentSession,
-                      style: TextStyle(color: Colors.green, fontSize: 12),
+                      style: TextStyle(color: AppColors.successLight, fontSize: 12),
                     ),
                   )
                 : null,

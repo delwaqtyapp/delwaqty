@@ -8,6 +8,7 @@ import 'package:delwaqty/features/auth/domain/auth_state.dart';
 import 'package:delwaqty/features/auth/presentation/auth_provider.dart';
 import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
+import 'package:delwaqty/core/theme/app_colors.dart';
 
 class ProfilePage extends ConsumerWidget {
   const ProfilePage({super.key});
@@ -231,11 +232,11 @@ class ProfilePage extends ConsumerWidget {
       child: Column(
         children: [
           ListTile(
-            leading: Icon(Icons.receipt_long_rounded, color: Colors.green[700]),
+            leading: Icon(Icons.receipt_long_rounded, color: AppColors.successLight),
             title: Text(l10n.invoice),
             subtitle: Text(l10n.invoiceDetails),
             trailing: const Icon(Icons.chevron_right_rounded),
-            onTap: () {},
+            onTap: () => context.showAppSnackBar(l10n.invoice),
           ),
           const Divider(height: 1),
           ListTile(
@@ -243,7 +244,7 @@ class ProfilePage extends ConsumerWidget {
             title: Text(l10n.previousOrders),
             subtitle: Text(l10n.orderHistory),
             trailing: const Icon(Icons.chevron_right_rounded),
-            onTap: () {},
+            onTap: () => context.push('/market/orders'),
           ),
         ],
       ),

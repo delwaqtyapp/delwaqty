@@ -11,6 +11,8 @@ import 'package:delwaqty/shared/widgets/premium_empty_state.dart';
 import 'package:delwaqty/shared/widgets/shimmer_loading.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 import 'package:delwaqty/features/home/domain/home_domain.dart';
+import 'package:delwaqty/core/theme/app_colors.dart';
+import 'package:delwaqty/core/theme/app_text_styles.dart';
 
 String _merchantTypeLabel(MerchantType type, AppLocalizations l10n) => switch (type) {
   MerchantType.restaurant => l10n.typeRestaurant,
@@ -110,7 +112,7 @@ class HomePage extends ConsumerWidget {
               child: Center(
                 child: Text(
                   l10n.appNameAr,
-                  style: TextStyle(
+                  style: AppTextStyles.titleMedium.copyWith(
                     color: context.colorScheme.onPrimary,
                     fontWeight: FontWeight.w900,
                     fontSize: 18,
@@ -442,7 +444,7 @@ class HomePage extends ConsumerWidget {
                   height: 120,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: Colors.white.withValues(alpha: 0.1),
+                    color: context.colorScheme.onPrimary.withValues(alpha: 0.1),
                   ),
                 ),
               ),
@@ -454,7 +456,7 @@ class HomePage extends ConsumerWidget {
                   height: 80,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: Colors.white.withValues(alpha: 0.08),
+                    color: context.colorScheme.onPrimary.withValues(alpha: 0.08),
                   ),
                 ),
               ),
@@ -468,15 +470,15 @@ class HomePage extends ConsumerWidget {
                     Text(
                       '30% OFF',
                       style: context.textTheme.headlineSmall?.copyWith(
-                        color: Colors.white,
+                        color: context.colorScheme.onPrimary,
                         fontWeight: FontWeight.w900,
                       ),
                     ),
                     const SizedBox(height: 4),
                     Text(
                       l10n.onboardingDesc2,
-                      style: TextStyle(
-                        color: Colors.white.withValues(alpha: 0.85),
+                      style: AppTextStyles.bodyMedium.copyWith(
+                        color: context.colorScheme.onPrimary.withValues(alpha: 0.85),
                         fontSize: 13,
                       ),
                       maxLines: 1,
@@ -489,15 +491,14 @@ class HomePage extends ConsumerWidget {
                         vertical: 6,
                       ),
                       decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.2),
+                        color: context.colorScheme.onPrimary.withValues(alpha: 0.2),
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      child: const Text(
+                      child: Text(
                         'DELWAQTY30',
-                        style: TextStyle(
-                          color: Colors.white,
+                        style: AppTextStyles.labelMedium.copyWith(
+                          color: context.colorScheme.onPrimary,
                           fontWeight: FontWeight.w700,
-                          fontSize: 12,
                           letterSpacing: 1,
                         ),
                       ),
@@ -566,10 +567,7 @@ class _ServiceTile extends StatelessWidget {
             const SizedBox(height: 6),
             Text(
               label,
-              style: context.textTheme.bodySmall?.copyWith(
-                fontWeight: FontWeight.w500,
-                fontSize: 11,
-              ),
+              style: AppTextStyles.labelSmall,
               textAlign: TextAlign.center,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
@@ -603,7 +601,7 @@ class _MerchantCard extends StatelessWidget {
           ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.04),
+              color: context.colorScheme.onSurface.withValues(alpha: 0.04),
               blurRadius: 10,
               offset: const Offset(0, 2),
             ),
@@ -628,7 +626,7 @@ class _MerchantCard extends StatelessWidget {
                 ),
               ),
               child: Center(
-                child: Text(emoji, style: const TextStyle(fontSize: 40)),
+                child: Text(emoji, style: AppTextStyles.displaySmall.copyWith(fontSize: 40)),
               ),
             ),
             Padding(
@@ -650,7 +648,7 @@ class _MerchantCard extends StatelessWidget {
                       Icon(
                         Icons.star_rounded,
                         size: 14,
-                        color: Colors.amber[600],
+                        color: AppColors.rating,
                       ),
                       const SizedBox(width: 2),
                       Text(

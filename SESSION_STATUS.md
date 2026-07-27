@@ -1,12 +1,22 @@
 # SESSION_STATUS.md
 
-> **Last updated:** 2026-07-19 Session 9 (Sprints 35-36 + refinements)
+> **Last updated:** 2026-07-27 Session 12 (Empty/Loading state standardization)
 
 ---
 
-## Current Task — TRANSPORTATION PLATFORM
+## Current Task — STANDARDIZE EMPTY & LOADING STATES
 
-Building a complete ride-hailing ecosystem (Uber/Careem/DiDi/inDrive-class). **M1–M8 delivered.** Next: M9 (Admin Dashboard).
+Replaced all custom empty states and bare `CircularProgressIndicator()` across 7 feature pages with `PremiumEmptyState` and `SkeletonListTile`/`SkeletonCard` from shared widgets.
+
+| Change | Files |
+|--------|-------|
+| `_buildEmptyState()` → `PremiumEmptyState` | `trusted_contacts_page.dart` |
+| `_RegisterPrompt` → `PremiumEmptyState` | `driver_ride_hub_page.dart` |
+| `EmptyState` → `PremiumEmptyState` | `orders_page.dart`, `merchant_detail_page.dart` |
+| `const SizedBox()` empty categories → `PremiumEmptyState` | `merchant_detail_page.dart` |
+| `CircularProgressIndicator()` → `SkeletonListTile()` | `trusted_contacts_page.dart`, `safety_settings_page.dart`, `restaurant_reviews_page.dart` |
+| `CircularProgressIndicator()` → `SkeletonListTile()` | `driver_ride_hub_page.dart` |
+| `AppLoaderCircular()` → `SkeletonCard()` | `product_detail_page.dart` |
 
 ---
 
@@ -22,10 +32,26 @@ Building a complete ride-hailing ecosystem (Uber/Careem/DiDi/inDrive-class). **M
 | M6 | 33 | Complete driver platform (onboarding, vehicles, documents, dashboard, wallet) | ✅ |
 | M7 | 34 | Unified delivery & courier platform (9 service types, merchant, driver capabilities) | ✅ |
 | M8 | 35-36 | Safety platform + navigation redesign + delivery page overhaul | ✅ |
+| M9 | 37 | Theme hardening — Colors.* → theme-aware tokens | ✅ |
+| M10 | 38 | Error handling hardening — raw e.toString() + silent swallows fixed | ✅ |
+| M11 | 39 | Empty/Loading state standardization | ✅ |
 
 ---
 
-## Sprint 35-36 Summary (Latest Work)
+## Sprint 39 Summary (Current)
+
+### Empty & Loading State Standardization
+- **trusted_contacts_page.dart**: Replaced custom `_buildEmptyState()` with `PremiumEmptyState`; replaced bare `CircularProgressIndicator()` with `SkeletonListTile()`
+- **driver_ride_hub_page.dart**: Replaced `_RegisterPrompt` widget with `PremiumEmptyState` (icon, title, message, action); replaced bare `CircularProgressIndicator()` with `SkeletonListTile()`
+- **merchant_detail_page.dart**: Replaced `EmptyState` with `PremiumEmptyState` for products; replaced empty categories `const SizedBox()` with `PremiumEmptyState`
+- **orders_page.dart**: Replaced `EmptyState` with `PremiumEmptyState`
+- **product_detail_page.dart**: Replaced `AppLoaderCircular()` with `SkeletonCard()` during FutureBuilder loading
+- **safety_settings_page.dart**: Replaced bare `CircularProgressIndicator()` with `SkeletonListTile()`
+- **restaurant_reviews_page.dart**: Replaced bare `CircularProgressIndicator()` with `SkeletonListTile()`
+- Updated imports: removed `empty_state.dart`, added `premium_empty_state.dart` and `app_loader.dart` where needed
+- Removed unused custom empty state methods/classes (`_buildEmptyState`, `_RegisterPrompt`)
+
+## Sprint 35-36 Summary (Previous Work)
 
 ### Navigation Redesign (Sprint 35 — `a82e652`)
 - **Bottom nav:** transparent glassmorphism bar with BackdropFilter, BorderRadius.circular(28), floating margin, animated pill selection. 4 items: الرئيسية, توصيلة, دليفرى, الإعدادات.

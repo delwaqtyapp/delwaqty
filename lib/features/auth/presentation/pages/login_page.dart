@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:delwaqty/core/extensions/context_extensions.dart';
 import 'package:delwaqty/core/theme/app_spacing.dart';
+import 'package:delwaqty/core/theme/app_text_styles.dart';
 import 'package:delwaqty/core/utils/validators.dart';
 import 'package:delwaqty/features/auth/domain/auth_state.dart';
 import 'package:delwaqty/features/auth/presentation/auth_provider.dart';
@@ -125,7 +126,7 @@ class _LoginPageState extends ConsumerState<LoginPage>
                               children: [
                                 TextSpan(
                                   text: l10n.register,
-                                  style: TextStyle(
+                                  style: AppTextStyles.bodyMedium.copyWith(
                                     color: context.colorScheme.primary,
                                     fontWeight: FontWeight.bold,
                                   ),
@@ -154,7 +155,7 @@ class _LoginPageState extends ConsumerState<LoginPage>
         width: 80,
         height: 80,
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: context.colorScheme.surface,
           borderRadius: BorderRadius.circular(24),
           boxShadow: [
             BoxShadow(
@@ -167,8 +168,7 @@ class _LoginPageState extends ConsumerState<LoginPage>
         child: Center(
           child: Text(
             l10n.appNameAr,
-            style: TextStyle(
-              fontSize: 28,
+            style: AppTextStyles.headlineMedium.copyWith(
               fontWeight: FontWeight.w900,
               color: context.colorScheme.primary,
             ),
@@ -197,8 +197,8 @@ class _LoginPageState extends ConsumerState<LoginPage>
             onPressed: showComingSoon,
             icon: Icons.g_mobiledata_rounded,
             label: l10n.loginWithGoogle,
-            backgroundColor: Colors.white,
-            foregroundColor: Colors.black87,
+            backgroundColor: context.colorScheme.surface,
+            foregroundColor: context.colorScheme.onSurface.withValues(alpha: 0.87),
           ),
         ),
         const SizedBox(height: 12),
@@ -209,8 +209,8 @@ class _LoginPageState extends ConsumerState<LoginPage>
             onPressed: showComingSoon,
             icon: Icons.apple_rounded,
             label: l10n.loginWithApple,
-            backgroundColor: Colors.black,
-            foregroundColor: Colors.white,
+            backgroundColor: context.colorScheme.onSurface,
+            foregroundColor: context.colorScheme.surface,
           ),
         ),
         const SizedBox(height: 12),
@@ -222,7 +222,7 @@ class _LoginPageState extends ConsumerState<LoginPage>
             icon: Icons.facebook_rounded,
             label: l10n.loginWithFacebook,
             backgroundColor: const Color(0xFF1877F2),
-            foregroundColor: Colors.white,
+            foregroundColor: context.colorScheme.surface,
           ),
         ),
         const SizedBox(height: 12),
@@ -349,17 +349,15 @@ class _LoginPageState extends ConsumerState<LoginPage>
           children: [
             TextSpan(
               text: l10n.termsOfService,
-              style: TextStyle(
+              style: AppTextStyles.labelLarge.copyWith(
                 color: context.colorScheme.primary,
-                fontWeight: FontWeight.w500,
               ),
             ),
             TextSpan(text: l10n.and),
             TextSpan(
               text: l10n.privacyPolicy,
-              style: TextStyle(
+              style: AppTextStyles.labelLarge.copyWith(
                 color: context.colorScheme.primary,
-                fontWeight: FontWeight.w500,
               ),
             ),
           ],
@@ -410,9 +408,8 @@ class _SocialButton extends StatelessWidget {
             const SizedBox(width: 12),
             Text(
               label,
-              style: const TextStyle(
+              style: AppTextStyles.titleMedium.copyWith(
                 fontSize: 15,
-                fontWeight: FontWeight.w600,
               ),
             ),
           ],

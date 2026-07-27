@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:delwaqty/data/repositories/admin_repository.dart';
 import 'package:delwaqty/features/admin/domain/entities/admin_models.dart';
 
@@ -12,6 +13,7 @@ class AdminService {
     try {
       return await _repository.getDashboardMetrics();
     } catch (e) {
+      debugPrint('AdminService.getDashboardMetrics error: $e');
       return const AdminDashboardMetrics();
     }
   }
@@ -28,6 +30,7 @@ class AdminService {
         pendingOrders: metrics.pendingOrders,
       );
     } catch (e) {
+      debugPrint('AdminService.getDashboardLegacy error: $e');
       return null;
     }
   }
@@ -36,6 +39,7 @@ class AdminService {
     try {
       return await _repository.getRecentActivity(limit: limit);
     } catch (e) {
+      debugPrint('AdminService.getRecentActivity error: $e');
       return [];
     }
   }
@@ -46,6 +50,7 @@ class AdminService {
     try {
       return await _repository.getUsers(search: search);
     } catch (e) {
+      debugPrint('AdminService.getUsers error: $e');
       return [];
     }
   }
@@ -54,6 +59,7 @@ class AdminService {
     try {
       return await _repository.createUser(user);
     } catch (e) {
+      debugPrint('AdminService.createUser error: $e');
       return null;
     }
   }
@@ -62,6 +68,7 @@ class AdminService {
     try {
       return await _repository.updateUser(user);
     } catch (e) {
+      debugPrint('AdminService.updateUser error: $e');
       return null;
     }
   }
@@ -71,6 +78,7 @@ class AdminService {
       await _repository.deleteUser(userId);
       return true;
     } catch (e) {
+      debugPrint('AdminService.deleteUser error: $e');
       return false;
     }
   }
@@ -84,6 +92,7 @@ class AdminService {
     try {
       return await _repository.getMerchants(search: search, status: status);
     } catch (e) {
+      debugPrint('AdminService.getMerchants error: $e');
       return [];
     }
   }
@@ -93,6 +102,7 @@ class AdminService {
       await _repository.updateMerchantStatus(merchantId, status);
       return true;
     } catch (e) {
+      debugPrint('AdminService.updateMerchantStatus error: $e');
       return false;
     }
   }
@@ -113,6 +123,7 @@ class AdminService {
         offset: offset,
       );
     } catch (e) {
+      debugPrint('AdminService.getOrders error: $e');
       return [];
     }
   }
@@ -122,6 +133,7 @@ class AdminService {
       await _repository.updateOrderStatus(orderId, status);
       return true;
     } catch (e) {
+      debugPrint('AdminService.updateOrderStatus error: $e');
       return false;
     }
   }
@@ -132,6 +144,7 @@ class AdminService {
     try {
       return await _repository.getSettings();
     } catch (e) {
+      debugPrint('AdminService.getSettings error: $e');
       return {};
     }
   }
@@ -141,6 +154,7 @@ class AdminService {
       await _repository.updateSettings(settings);
       return true;
     } catch (e) {
+      debugPrint('AdminService.updateSettings error: $e');
       return false;
     }
   }
@@ -151,6 +165,7 @@ class AdminService {
     try {
       return await _repository.getActiveDrivers();
     } catch (e) {
+      debugPrint('AdminService.getActiveDrivers error: $e');
       return [];
     }
   }
@@ -159,6 +174,7 @@ class AdminService {
     try {
       return await _repository.getAllDrivers(search: search, status: status);
     } catch (e) {
+      debugPrint('AdminService.getAllDrivers error: $e');
       return [];
     }
   }
@@ -174,6 +190,7 @@ class AdminService {
       );
       return true;
     } catch (e) {
+      debugPrint('AdminService.verifyDriver error: $e');
       return false;
     }
   }
@@ -189,6 +206,7 @@ class AdminService {
       );
       return true;
     } catch (e) {
+      debugPrint('AdminService.updateDriverOnlineStatus error: $e');
       return false;
     }
   }
@@ -199,6 +217,7 @@ class AdminService {
     try {
       return await _repository.getRecentRides(status: status);
     } catch (e) {
+      debugPrint('AdminService.getRecentRides error: $e');
       return [];
     }
   }
@@ -209,6 +228,7 @@ class AdminService {
     try {
       return await _repository.getRecentDeliveries(serviceType: serviceType);
     } catch (e) {
+      debugPrint('AdminService.getRecentDeliveries error: $e');
       return [];
     }
   }
@@ -218,6 +238,7 @@ class AdminService {
       await _repository.updateDeliveryStatus(deliveryId, status);
       return true;
     } catch (e) {
+      debugPrint('AdminService.updateDeliveryStatus error: $e');
       return false;
     }
   }
@@ -228,6 +249,7 @@ class AdminService {
     try {
       return await _repository.getRevenueChart(days: days);
     } catch (e) {
+      debugPrint('AdminService.getRevenueChart error: $e');
       return [];
     }
   }
@@ -236,6 +258,7 @@ class AdminService {
     try {
       return await _repository.getPeakHours();
     } catch (e) {
+      debugPrint('AdminService.getPeakHours error: $e');
       return [];
     }
   }
@@ -244,6 +267,7 @@ class AdminService {
     try {
       return await _repository.getTopMerchants(limit: limit);
     } catch (e) {
+      debugPrint('AdminService.getTopMerchants error: $e');
       return [];
     }
   }
@@ -252,6 +276,7 @@ class AdminService {
     try {
       return await _repository.getDriverPerformance(limit: limit);
     } catch (e) {
+      debugPrint('AdminService.getDriverPerformance error: $e');
       return [];
     }
   }
@@ -263,6 +288,7 @@ class AdminService {
     try {
       return await _repository.getAnalytics(from: from, to: to);
     } catch (e) {
+      debugPrint('AdminService.getAnalytics error: $e');
       return {};
     }
   }

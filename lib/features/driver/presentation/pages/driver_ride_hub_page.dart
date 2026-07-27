@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:delwaqty/core/theme/app_colors.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -14,6 +15,8 @@ import 'package:delwaqty/features/driver/presentation/widgets/ride_offer_sheet.d
 import 'package:delwaqty/features/driver/presentation/widgets/register_ride_driver_sheet.dart';
 import 'package:delwaqty/features/ride/domain/entities/ride.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
+import 'package:delwaqty/shared/widgets/premium_empty_state.dart';
+import 'package:delwaqty/shared/widgets/app_loader.dart';
 
 class DriverRideHubPage extends ConsumerWidget {
   const DriverRideHubPage({super.key});
@@ -36,55 +39,24 @@ class DriverRideHubPage extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(title: Text(l10n.driverRides)),
       body: profileAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const SkeletonListTile(),
         error: (e, _) => Center(child: Text(l10n.errorWithMessage(e.toString()))),
         data: (profile) {
           if (profile == null || profile.vehicleType == null) {
-            return _RegisterPrompt(userId: userId);
-          }
-          return _DriverRideBody(profile: profile);
-        },
-      ),
-    );
-  }
-}
-
-class _RegisterPrompt extends ConsumerWidget {
-  const _RegisterPrompt({required this.userId});
-  final String userId;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final l10n = AppLocalizations.of(context);
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(32),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.local_taxi_rounded,
-                size: 80,
-                color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.5)),
-            const SizedBox(height: 16),
-            Text(l10n.becomeADriver,
-                style: Theme.of(context)
-                    .textTheme
-                    .headlineSmall
-                    ?.copyWith(fontWeight: FontWeight.bold)),
-            const SizedBox(height: 8),
-            Text(l10n.joinFleetSubtitle, textAlign: TextAlign.center),
-            const SizedBox(height: 24),
-            FilledButton.icon(
-              onPressed: () => showModalBottomSheet<void>(
+            return PremiumEmptyState(
+              icon: Icons.local_taxi_rounded,
+              title: l10n.becomeADriver,
+              message: l10n.joinFleetSubtitle,
+              actionLabel: l10n.registerAsRideDriver,
+              onAction: () => showModalBottomSheet<void>(
                 context: context,
                 isScrollControlled: true,
                 builder: (_) => RegisterRideDriverSheet(userId: userId),
               ),
-              icon: const Icon(Icons.app_registration_rounded),
-              label: Text(l10n.registerAsRideDriver),
-            ),
-          ],
-        ),
+            );
+          }
+          return _DriverRideBody(profile: profile);
+        },
       ),
     );
   }
@@ -246,7 +218,9 @@ class _DriverRideBodyState extends ConsumerState<_DriverRideBody> {
         await ref
             .read(dispatchRepositoryProvider)
             .rejectOffer(offer.rideId, offer.driverId);
-      } catch (_) {}
+      } catch (e) {
+        debugPrint('Failed to reject ride offer: $e');
+      }
     }
   }
 
@@ -256,7 +230,7 @@ class _DriverRideBodyState extends ConsumerState<_DriverRideBody> {
       return l10n.rideNoLongerAvailable;
     }
     if (s.contains('driver_busy')) return l10n.driverBusy;
-    return l10n.errorWithMessage(s);
+    return l10n.somethingWentWrong;
   }
 }
 
@@ -280,7 +254,7 @@ class _OnlineCard extends StatelessWidget {
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: online
-              ? [Colors.green.shade600, Colors.green.shade400]
+              ? [AppColors.successLight, AppColors.successDark]
               : [theme.colorScheme.surfaceContainerHighest, theme.colorScheme.surfaceContainerHigh],
         ),
         borderRadius: BorderRadius.circular(16),
@@ -292,7 +266,7 @@ class _OnlineCard extends StatelessWidget {
             online ? l10n.online : l10n.offline,
             style: theme.textTheme.titleMedium?.copyWith(
               fontWeight: FontWeight.bold,
-              color: online ? Colors.white : theme.colorScheme.onSurface,
+              color: online ? theme.colorScheme.onPrimary : theme.colorScheme.onSurface,
             ),
           ),
           loading

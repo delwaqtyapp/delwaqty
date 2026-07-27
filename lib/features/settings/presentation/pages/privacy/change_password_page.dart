@@ -39,7 +39,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
     } catch (e) {
       if (!mounted) return;
       final l10n = AppLocalizations.of(context);
-      context.showAppSnackBar('${l10n.error}: $e');
+      context.showAppSnackBar(l10n.somethingWentWrong, isError: true);
     } finally {
       if (mounted) setState(() => _loading = false);
     }

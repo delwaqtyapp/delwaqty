@@ -9,6 +9,8 @@ import 'package:delwaqty/core/theme/theme_mode_provider.dart';
 import 'package:delwaqty/features/auth/domain/auth_state.dart';
 import 'package:delwaqty/features/auth/presentation/auth_provider.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
+import 'package:delwaqty/core/theme/app_colors.dart';
+import 'package:delwaqty/core/theme/app_text_styles.dart';
 
 class AppShell extends ConsumerWidget {
   const AppShell({super.key, required this.navigationShell});
@@ -41,7 +43,7 @@ class AppShell extends ConsumerWidget {
       context: context,
       barrierDismissible: true,
       barrierLabel: 'drawer',
-      barrierColor: Colors.black26,
+      barrierColor: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.26),
       transitionDuration: const Duration(milliseconds: 250),
       transitionBuilder: (ctx, anim, secondaryAnim, child) {
         final curved = CurvedAnimation(
@@ -82,7 +84,7 @@ class AppShell extends ConsumerWidget {
       appBar: AppBar(
         title: Text(
           l10n.appTitle,
-          style: const TextStyle(fontWeight: FontWeight.bold),
+          style: AppTextStyles.titleMedium.copyWith(fontWeight: FontWeight.bold),
         ),
         leading: IconButton(
           icon: const Icon(Icons.menu_rounded),
@@ -129,7 +131,7 @@ class _TransparentBottomNav extends StatelessWidget {
         borderRadius: BorderRadius.circular(28),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: isDark ? 0.4 : 0.08),
+            color: colorScheme.onSurface.withValues(alpha: isDark ? 0.4 : 0.08),
             blurRadius: 24,
             offset: const Offset(0, 8),
           ),
@@ -142,13 +144,13 @@ class _TransparentBottomNav extends StatelessWidget {
           child: Container(
             decoration: BoxDecoration(
               color: isDark
-                  ? Colors.white.withValues(alpha: 0.1)
-                  : Colors.white.withValues(alpha: 0.85),
+                  ? colorScheme.surface.withValues(alpha: 0.1)
+                  : colorScheme.surface.withValues(alpha: 0.85),
               borderRadius: BorderRadius.circular(28),
               border: Border.all(
                 color: isDark
-                    ? Colors.white.withValues(alpha: 0.1)
-                    : Colors.black.withValues(alpha: 0.06),
+                    ? colorScheme.onSurface.withValues(alpha: 0.1)
+                    : colorScheme.onSurface.withValues(alpha: 0.06),
                 width: 0.5,
               ),
             ),
@@ -225,11 +227,7 @@ class _NavIconButton extends StatelessWidget {
               const SizedBox(width: 8),
               Text(
                 label,
-                style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
-                  color: colorScheme.primary,
-                ),
+                style: AppTextStyles.titleSmall.copyWith(fontSize: 13, color: colorScheme.primary),
               ),
             ],
           ],
@@ -312,24 +310,24 @@ class _DrawerPanel extends StatelessWidget {
                   ),
                   decoration: BoxDecoration(
                     color: isDark
-                        ? Colors.white.withValues(alpha: 0.07)
-                        : Colors.white.withValues(alpha: 0.78),
+                        ? Theme.of(context).colorScheme.surface.withValues(alpha: 0.07)
+                        : Theme.of(context).colorScheme.surface.withValues(alpha: 0.78),
                     borderRadius: BorderRadius.circular(20),
                     border: Border.all(
                       color: isDark
-                          ? Colors.white.withValues(alpha: 0.12)
-                          : Colors.black.withValues(alpha: 0.06),
+                        ? Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.12)
+                        : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.06),
                       width: 0.5,
                     ),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withValues(alpha: isDark ? 0.6 : 0.15),
+                        color: Theme.of(context).colorScheme.onSurface.withValues(alpha: isDark ? 0.6 : 0.15),
                         blurRadius: 48,
                         spreadRadius: -4,
                         offset: const Offset(0, 12),
                       ),
                       BoxShadow(
-                        color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.06),
+                        color: Theme.of(context).colorScheme.onSurface.withValues(alpha: isDark ? 0.3 : 0.06),
                         blurRadius: 16,
                         offset: const Offset(0, 4),
                       ),
@@ -443,7 +441,7 @@ class _DrawerPanel extends StatelessWidget {
                                             },
                                             child: Text(
                                               l10n.logout,
-                                              style: TextStyle(color: cs.error),
+                                              style: AppTextStyles.bodyMedium.copyWith(color: cs.error),
                                             ),
                                           ),
                                         ],
@@ -492,9 +490,8 @@ class _DrawerPanel extends StatelessWidget {
             child: Center(
               child: Text(
                 userName.isNotEmpty ? userName[0].toUpperCase() : 'U',
-                style: TextStyle(
+                style: AppTextStyles.titleMedium.copyWith(
                   color: cs.onPrimary,
-                  fontSize: 16,
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -508,8 +505,7 @@ class _DrawerPanel extends StatelessWidget {
               children: [
                 Text(
                   userName,
-                  style: TextStyle(
-                    fontWeight: FontWeight.w600,
+                  style: AppTextStyles.titleSmall.copyWith(
                     fontSize: 13.5,
                     color: cs.onSurface,
                   ),
@@ -521,15 +517,15 @@ class _DrawerPanel extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 1.5),
                     decoration: BoxDecoration(
-                      color: Colors.red.withValues(alpha: 0.1),
+                      color: AppColors.errorLight.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(5),
                     ),
                     child: Text(
                       displayRole,
-                      style: TextStyle(
+                      style: AppTextStyles.labelSmall.copyWith(
                         fontSize: 10.5,
                         fontWeight: FontWeight.w600,
-                        color: Colors.red[700],
+                        color: AppColors.errorLight,
                       ),
                     ),
                   ),
@@ -589,9 +585,8 @@ class _DrawerTile extends StatelessWidget {
                     children: [
                       Text(
                         label,
-                        style: TextStyle(
+                        style: AppTextStyles.labelLarge.copyWith(
                           fontSize: 13.5,
-                          fontWeight: FontWeight.w500,
                           color: color,
                         ),
                       ),
@@ -599,8 +594,7 @@ class _DrawerTile extends StatelessWidget {
                         const SizedBox(height: 1),
                         Text(
                           subtitle!,
-                          style: TextStyle(
-                            fontSize: 11,
+                          style: AppTextStyles.labelSmall.copyWith(
                             color: colorScheme.onSurfaceVariant,
                           ),
                         ),

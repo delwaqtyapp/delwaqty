@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:delwaqty/core/theme/app_colors.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:delwaqty/features/auth/presentation/auth_provider.dart';
 import 'package:delwaqty/features/auth/domain/auth_state.dart';
@@ -239,8 +240,8 @@ class _StatusBadge extends StatelessWidget {
 
     switch (status) {
       case 'verified':
-        backgroundColor = Colors.green.withValues(alpha: 0.15);
-        foregroundColor = Colors.green;
+        backgroundColor = AppColors.successLight.withValues(alpha: 0.15);
+        foregroundColor = AppColors.successLight;
         label = l10n.documentVerified;
         icon = Icons.check_circle_rounded;
       case 'rejected':
@@ -249,8 +250,8 @@ class _StatusBadge extends StatelessWidget {
         label = l10n.documentRejected;
         icon = Icons.cancel_rounded;
       default:
-        backgroundColor = Colors.orange.withValues(alpha: 0.15);
-        foregroundColor = Colors.orange;
+        backgroundColor = AppColors.warningLight.withValues(alpha: 0.15);
+        foregroundColor = AppColors.warningLight;
         label = l10n.documentPending;
         icon = Icons.schedule_rounded;
     }

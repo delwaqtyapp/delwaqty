@@ -9,6 +9,7 @@ import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
 import 'package:delwaqty/shared/widgets/premium_empty_state.dart';
 import 'package:delwaqty/shared/widgets/shimmer_loading.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
+import 'package:delwaqty/core/theme/app_colors.dart';
 
 class WalletPage extends ConsumerWidget {
   const WalletPage({super.key});
@@ -74,14 +75,14 @@ class WalletPage extends ConsumerWidget {
                       Text(
                         l10n.availableBalance,
                         style: theme.textTheme.bodyMedium?.copyWith(
-                          color: Colors.white.withValues(alpha: 0.8),
+                          color: theme.colorScheme.onPrimary.withValues(alpha: 0.8),
                         ),
                       ),
                       const SizedBox(height: 8),
                       Text(
                         '${balance.balance.toStringAsFixed(2)} ${balance.currency}',
                         style: theme.textTheme.headlineLarge?.copyWith(
-                          color: Colors.white,
+                          color: theme.colorScheme.onPrimary,
                           fontWeight: FontWeight.w900,
                         ),
                       ),
@@ -236,13 +237,13 @@ class _TransactionTile extends StatelessWidget {
               height: 40,
               decoration: BoxDecoration(
                 color: isCredit
-                    ? Colors.green.withValues(alpha: 0.1)
+                    ? AppColors.successLight.withValues(alpha: 0.1)
                     : theme.colorScheme.error.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Icon(
                 _getIcon(transaction.type),
-                color: isCredit ? Colors.green.shade700 : theme.colorScheme.error,
+                color: isCredit ? AppColors.successLight : theme.colorScheme.error,
                 size: 20,
               ),
             ),
@@ -274,7 +275,7 @@ class _TransactionTile extends StatelessWidget {
                 '${isCredit ? '+' : '-'}${l10n.amountWithCurrency(transaction.amount.toStringAsFixed(2), l10n.currencySymbol)}',
                 style: theme.textTheme.bodyMedium?.copyWith(
                   fontWeight: FontWeight.w700,
-                  color: isCredit ? Colors.green.shade700 : theme.colorScheme.error,
+                  color: isCredit ? AppColors.successLight : theme.colorScheme.error,
                 ),
                 overflow: TextOverflow.ellipsis,
               ),

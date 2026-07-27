@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:delwaqty/core/theme/app_colors.dart';
 
 import 'package:delwaqty/features/driver/domain/entities/ride_offer.dart';
 import 'package:delwaqty/features/ride/presentation/widgets/ride_type_info.dart';
@@ -108,7 +109,7 @@ class _RideOfferSheetState extends State<RideOfferSheet> {
               const SizedBox(height: 16),
               _AddressRow(
                 icon: Icons.my_location_rounded,
-                color: Colors.green,
+                color: AppColors.successLight,
                 label: l10n.pickup,
                 address: offer.pickupAddress,
                 trailing:
@@ -117,7 +118,7 @@ class _RideOfferSheetState extends State<RideOfferSheet> {
               const SizedBox(height: 12),
               _AddressRow(
                 icon: Icons.location_on_rounded,
-                color: Colors.red,
+                color: AppColors.errorLight,
                 label: l10n.destination,
                 address: offer.dropoffAddress,
                 trailing: '${offer.distanceKm.toStringAsFixed(1)} ${l10n.kmUnit}',

@@ -5,6 +5,8 @@ import 'package:go_router/go_router.dart';
 import 'package:delwaqty/features/safety/presentation/safety_providers.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 import 'package:delwaqty/core/theme/app_colors.dart';
+import 'package:delwaqty/core/theme/app_text_styles.dart';
+import 'package:delwaqty/shared/widgets/app_loader.dart';
 
 class SafetySettingsPage extends ConsumerWidget {
   const SafetySettingsPage({super.key});
@@ -24,7 +26,7 @@ class SafetySettingsPage extends ConsumerWidget {
             icon: Icons.emergency_rounded,
             children: [
               SwitchListTile(
-                secondary: const Icon(Icons.notifications_active_rounded, color: Colors.red),
+                secondary: const Icon(Icons.notifications_active_rounded, color: AppColors.errorLight),
                 title: Text(l10n.sosAlertEnabled),
                 subtitle: Text(l10n.sosAlertEnabledDescription),
                 value: true,
@@ -32,7 +34,7 @@ class SafetySettingsPage extends ConsumerWidget {
                 contentPadding: EdgeInsets.zero,
               ),
               SwitchListTile(
-                secondary: const Icon(Icons.timer_rounded, color: Colors.orange),
+                secondary: const Icon(Icons.timer_rounded, color: AppColors.warningLight),
                 title: Text(l10n.autoSosTimer),
                 subtitle: Text(l10n.autoSosTimerDescription),
                 value: false,
@@ -55,7 +57,7 @@ class SafetySettingsPage extends ConsumerWidget {
                 contentPadding: EdgeInsets.zero,
               ),
               ListTile(
-                leading: const Icon(Icons.timer_rounded, color: Colors.blue),
+                leading: const Icon(Icons.timer_rounded, color: AppColors.infoLight),
                 title: Text(l10n.shareDuration),
                 subtitle: Text('60 ${l10n.minutes}'),
                 trailing: const Icon(Icons.chevron_right_rounded),
@@ -70,8 +72,8 @@ class SafetySettingsPage extends ConsumerWidget {
             icon: Icons.contacts_rounded,
             children: [
               contactsAsync.when(
-                loading: () => const SizedBox(height: 60, child: Center(child: CircularProgressIndicator())),
-                error: (_, __) => const SizedBox.shrink(),
+                loading: () => const SkeletonListTile(),
+                error: (_, __) => Text(l10n.somethingWentWrong),
                 data: (contacts) {
                   final activeCount = contacts.where((c) => c.notifyOnRide).length;
                   return ListTile(
@@ -96,7 +98,7 @@ class SafetySettingsPage extends ConsumerWidget {
             icon: Icons.pin_rounded,
             children: [
               SwitchListTile(
-                secondary: const Icon(Icons.pin_rounded, color: Colors.green),
+                secondary: const Icon(Icons.pin_rounded, color: AppColors.successLight),
                 title: Text(l10n.pickupOtpRequired),
                 subtitle: Text(l10n.pickupOtpRequiredDescription),
                 value: true,
@@ -150,9 +152,9 @@ class _GlassSection extends StatelessWidget {
                   Flexible(
                     child: Text(
                       title,
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
+                      style: AppTextStyles.titleMedium.copyWith(
                         fontSize: 15,
+                        fontWeight: FontWeight.bold,
                         color: AppColors.primaryLight,
                       ),
                       overflow: TextOverflow.ellipsis,

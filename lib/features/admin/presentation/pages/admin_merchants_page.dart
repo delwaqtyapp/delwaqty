@@ -5,6 +5,7 @@ import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
 import 'package:delwaqty/shared/widgets/premium_empty_state.dart';
 import 'package:delwaqty/shared/widgets/app_loader.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
+import 'package:delwaqty/core/theme/app_colors.dart';
 
 class AdminMerchantsPage extends ConsumerWidget {
   const AdminMerchantsPage({super.key});
@@ -20,7 +21,33 @@ class AdminMerchantsPage extends ConsumerWidget {
         actions: [
           IconButton(
             icon: const Icon(Icons.filter_list_outlined),
-            onPressed: () {},
+            onPressed: () {
+              showModalBottomSheet(
+                context: context,
+                builder: (ctx) => SafeArea(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      ListTile(
+                        leading: const Icon(Icons.check_circle_outline),
+                        title: Text(l10n.verified),
+                        onTap: () => Navigator.pop(ctx),
+                      ),
+                      ListTile(
+                        leading: const Icon(Icons.pending_outlined),
+                        title: Text(l10n.pending),
+                        onTap: () => Navigator.pop(ctx),
+                      ),
+                      ListTile(
+                        leading: const Icon(Icons.block),
+                        title: Text(l10n.suspended),
+                        onTap: () => Navigator.pop(ctx),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
             tooltip: l10n.filter,
           ),
           IconButton(
@@ -131,11 +158,11 @@ class _MerchantTile extends StatelessWidget {
       child: ListTile(
         leading: CircleAvatar(
           backgroundColor: isVerified
-              ? Colors.green.withValues(alpha: 0.1)
-              : Colors.orange.withValues(alpha: 0.1),
+              ? AppColors.successLight.withValues(alpha: 0.1)
+              : AppColors.warningLight.withValues(alpha: 0.1),
           child: Icon(
             Icons.store_outlined,
-            color: isVerified ? Colors.green : Colors.orange,
+            color: isVerified ? AppColors.successLight : AppColors.warningLight,
           ),
         ),
         title: Text(name),
@@ -147,14 +174,14 @@ class _MerchantTile extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
               decoration: BoxDecoration(
                 color: isVerified
-                    ? Colors.green.withValues(alpha: 0.1)
-                    : Colors.orange.withValues(alpha: 0.1),
+                    ? AppColors.successLight.withValues(alpha: 0.1)
+                    : AppColors.warningLight.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Text(
                 statusLabel,
                 style: theme.textTheme.labelSmall?.copyWith(
-                  color: isVerified ? Colors.green : Colors.orange,
+                  color: isVerified ? AppColors.successLight : AppColors.warningLight,
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -181,7 +208,29 @@ class _MerchantTile extends StatelessWidget {
             ),
           ],
         ),
-        onTap: () {},
+        onTap: () {
+          showDialog(
+            context: context,
+            builder: (ctx) => AlertDialog(
+              title: Text(name),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Type: $type'),
+                  const SizedBox(height: 4),
+                  Text('Status: $statusLabel'),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(ctx),
+                  child: Text(l10n.cancel),
+                ),
+              ],
+            ),
+          );
+        },
       ),
     );
   }

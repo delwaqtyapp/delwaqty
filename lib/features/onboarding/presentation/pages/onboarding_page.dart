@@ -5,6 +5,8 @@ import 'package:delwaqty/core/constants/storage_keys.dart';
 import 'package:delwaqty/core/theme/app_spacing.dart';
 import 'package:delwaqty/data/datasources/local/shared_preferences_service.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
+import 'package:delwaqty/core/theme/app_colors.dart';
+import 'package:delwaqty/core/theme/app_text_styles.dart';
 
 class OnboardingPage extends ConsumerStatefulWidget {
   const OnboardingPage({super.key});
@@ -112,9 +114,8 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage>
                     onPressed: _completeOnboarding,
                     child: Text(
                       l10n.onboardingSkip,
-                      style: TextStyle(
-                        color: Colors.white.withValues(alpha: 0.8),
-                        fontWeight: FontWeight.w500,
+                      style: AppTextStyles.labelLarge.copyWith(
+                        color: Theme.of(context).colorScheme.onPrimary.withValues(alpha: 0.8),
                       ),
                     ),
                   ),
@@ -180,7 +181,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage>
             child: FilledButton(
               onPressed: _nextPage,
               style: FilledButton.styleFrom(
-                backgroundColor: Colors.white,
+                backgroundColor: Theme.of(context).colorScheme.surface,
                 foregroundColor: _getColor(_currentPage),
                 shape: const RoundedRectangleBorder(
                   borderRadius: AppSpacing.borderRadiusLg,
@@ -191,8 +192,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage>
                 _currentPage == _totalPages - 1
                     ? l10n.onboardingDone
                     : l10n.onboardingNext,
-                style: const TextStyle(
-                  fontSize: 16,
+                style: AppTextStyles.titleMedium.copyWith(
                   fontWeight: FontWeight.w700,
                 ),
               ),
@@ -213,8 +213,8 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage>
       height: 8,
       decoration: BoxDecoration(
         color: isActive
-            ? Colors.white
-            : Colors.white.withValues(alpha: 0.4),
+            ? Theme.of(context).colorScheme.onPrimary
+            : Theme.of(context).colorScheme.onPrimary.withValues(alpha: 0.4),
         borderRadius: BorderRadius.circular(4),
       ),
     );
@@ -306,7 +306,7 @@ class _OnboardingSlideWidget extends StatelessWidget {
             },
             child: Text(
               slide.illustration,
-              style: const TextStyle(fontSize: 80),
+              style: AppTextStyles.displayLarge.copyWith(fontSize: 80),
             ),
           ),
           const SizedBox(height: 24),
@@ -325,14 +325,14 @@ class _OnboardingSlideWidget extends StatelessWidget {
               width: 80,
               height: 80,
               decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.15),
+                color: Theme.of(context).colorScheme.onPrimary.withValues(alpha: 0.15),
                 shape: BoxShape.circle,
                 border: Border.all(
-                  color: Colors.white.withValues(alpha: 0.25),
+                  color: Theme.of(context).colorScheme.onPrimary.withValues(alpha: 0.25),
                   width: 2,
                 ),
               ),
-              child: Icon(slide.icon, size: 40, color: Colors.white),
+              child: Icon(slide.icon, size: 40, color: Theme.of(context).colorScheme.onPrimary),
             ),
           ),
           const SizedBox(height: 40),
@@ -351,7 +351,7 @@ class _OnboardingSlideWidget extends StatelessWidget {
               slide.title,
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                 fontWeight: FontWeight.w800,
-                color: Colors.white,
+                color: Theme.of(context).colorScheme.onPrimary,
                 height: 1.2,
               ),
               textAlign: TextAlign.center,
@@ -371,11 +371,9 @@ class _OnboardingSlideWidget extends StatelessWidget {
             },
             child: Text(
               slide.description,
-              style: TextStyle(
-                fontSize: 16,
-                color: Colors.white.withValues(alpha: 0.85),
+              style: AppTextStyles.bodyLarge.copyWith(
+                color: Theme.of(context).colorScheme.onPrimary.withValues(alpha: 0.85),
                 height: 1.6,
-                fontWeight: FontWeight.w400,
               ),
               textAlign: TextAlign.center,
             ),

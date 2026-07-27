@@ -1138,5 +1138,6 @@
   "promotions": "Promotions",
   "promotionsDescription": "Receive promotional offers and discounts",
   "securityAlerts": "Security Alerts",
-  "securityAlertsDescription": "Get notified about suspicious activity"
+  "securityAlertsDescription": "Get notified about suspicious activity",
+  "somethingWentWrong": "Something went wrong. Please try again."
 }

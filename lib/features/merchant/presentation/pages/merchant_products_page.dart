@@ -7,6 +7,7 @@ import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
 import 'package:delwaqty/shared/widgets/premium_empty_state.dart';
 import 'package:delwaqty/shared/widgets/shimmer_loading.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
+import 'package:delwaqty/core/theme/app_colors.dart';
 
 final _merchantIdProvider = Provider<String>((_) => 'current-merchant-id');
 
@@ -285,7 +286,7 @@ class _ProductCard extends StatelessWidget {
                     vertical: 2,
                   ),
                   decoration: BoxDecoration(
-                    color: (isAvailable ? Colors.green : Colors.red)
+                    color: (isAvailable ? AppColors.successLight : AppColors.errorLight)
                         .withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(4),
                   ),
@@ -294,7 +295,7 @@ class _ProductCard extends StatelessWidget {
                         ? AppLocalizations.of(context).available
                         : AppLocalizations.of(context).unavailable,
                     style: theme.textTheme.labelSmall?.copyWith(
-                      color: isAvailable ? Colors.green : Colors.red,
+                      color: isAvailable ? AppColors.successLight : AppColors.errorLight,
                       fontWeight: FontWeight.bold,
                     ),
                   ),

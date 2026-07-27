@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:delwaqty/core/theme/app_colors.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:delwaqty/core/extensions/context_extensions.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 import 'package:delwaqty/features/ride/domain/entities/ride.dart';
@@ -367,7 +369,9 @@ class _RideTrackingPageState extends ConsumerState<RideTrackingPage>
               ),
               if (ride.driverPhone != null)
                 _buildActionCircle(context,
-                    icon: Icons.call_rounded, color: Colors.green, onTap: () {}),
+                    icon: Icons.call_rounded,
+                    color: AppColors.successLight,
+                    onTap: () => launchUrl(Uri.parse('tel:${ride.driverPhone}')),),
             ],
           ),
         ),
@@ -572,8 +576,8 @@ class _RideTrackingPageState extends ConsumerState<RideTrackingPage>
                 icon: const Icon(Icons.emergency_share_rounded, size: 18),
                 label: Text(l10n.sos),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.red,
-                  foregroundColor: Colors.white,
+                  backgroundColor: AppColors.errorLight,
+                  foregroundColor: Theme.of(context).colorScheme.onPrimary,
                   elevation: 0,
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(14)),
@@ -610,7 +614,7 @@ class _RideTrackingPageState extends ConsumerState<RideTrackingPage>
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(l10n.tripShared),
-        backgroundColor: Colors.green,
+        backgroundColor: AppColors.successLight,
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
@@ -621,7 +625,7 @@ class _RideTrackingPageState extends ConsumerState<RideTrackingPage>
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        icon: const Icon(Icons.emergency_share_rounded, color: Colors.red, size: 48),
+        icon: const Icon(Icons.emergency_share_rounded, color: AppColors.errorLight, size: 48),
         title: Text(l10n.emergencyAlert),
         content: Text(l10n.emergencyConfirmation),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
@@ -635,7 +639,7 @@ class _RideTrackingPageState extends ConsumerState<RideTrackingPage>
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text(l10n.emergencyServicesNotified),
-                  backgroundColor: Colors.red,
+                  backgroundColor: AppColors.errorLight,
                   behavior: SnackBarBehavior.floating,
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12)),
@@ -643,7 +647,7 @@ class _RideTrackingPageState extends ConsumerState<RideTrackingPage>
               );
             },
             style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.red, foregroundColor: Colors.white),
+                backgroundColor: AppColors.errorLight, foregroundColor: Theme.of(context).colorScheme.onPrimary),
             child: Text(l10n.confirmSOS),
           ),
         ],
@@ -743,7 +747,7 @@ class _RideTrackingPageState extends ConsumerState<RideTrackingPage>
                                 : Icons.star_outline_rounded,
                             size: 44,
                             color: index < _selectedRating
-                                ? Colors.amber[600]
+                                ? AppColors.rating
                                 : context.colorScheme.outlineVariant,
                           ),
                         ),

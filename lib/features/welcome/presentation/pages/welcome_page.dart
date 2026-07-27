@@ -2,12 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:delwaqty/core/extensions/context_extensions.dart';
+import 'package:delwaqty/core/theme/app_text_styles.dart';
 import 'package:delwaqty/features/auth/presentation/auth_provider.dart';
 import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
 import 'package:delwaqty/shared/widgets/animated_slide_in.dart';
 import 'package:delwaqty/shared/widgets/app_button.dart';
 import 'package:delwaqty/shared/widgets/gradient_background.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
+import 'package:delwaqty/core/theme/app_colors.dart';
 
 class WelcomePage extends ConsumerWidget {
   const WelcomePage({super.key});
@@ -30,7 +32,7 @@ class WelcomePage extends ConsumerWidget {
                     width: 120,
                     height: 120,
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: context.colorScheme.surface,
                       borderRadius: BorderRadius.circular(30),
                       boxShadow: [
                         BoxShadow(
@@ -45,8 +47,7 @@ class WelcomePage extends ConsumerWidget {
                     child: Center(
                       child: Text(
                         l10n.appNameAr,
-                        style: TextStyle(
-                          fontSize: 32,
+                        style: AppTextStyles.headlineLarge.copyWith(
                           fontWeight: FontWeight.bold,
                           color: context.colorScheme.primary,
                         ),
@@ -61,7 +62,7 @@ class WelcomePage extends ConsumerWidget {
                     l10n.welcomeTitle,
                     style: context.textTheme.headlineSmall?.copyWith(
                       fontWeight: FontWeight.bold,
-                      color: Colors.white,
+                      color: context.colorScheme.onPrimary,
                     ),
                     textAlign: TextAlign.center,
                   ),
@@ -72,7 +73,7 @@ class WelcomePage extends ConsumerWidget {
                   child: Text(
                     l10n.welcomeSubtitle,
                     style: context.textTheme.bodyLarge?.copyWith(
-                      color: Colors.white.withValues(alpha: 0.85),
+                      color: context.colorScheme.onPrimary.withValues(alpha: 0.85),
                     ),
                     textAlign: TextAlign.center,
                   ),
@@ -106,8 +107,8 @@ class WelcomePage extends ConsumerWidget {
                     },
                     child: Text(
                       l10n.welcomeGuestButton,
-                      style: TextStyle(
-                        color: Colors.white.withValues(alpha: 0.7),
+                      style: AppTextStyles.labelLarge.copyWith(
+                        color: context.colorScheme.onPrimary.withValues(alpha: 0.7),
                       ),
                     ),
                   ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:delwaqty/core/theme/app_colors.dart';
 
 class StatCard extends StatelessWidget {
   const StatCard({
@@ -86,15 +87,15 @@ class StatCard extends StatelessWidget {
                         ? Icons.trending_up_rounded
                         : Icons.trending_down_rounded,
                     size: 16,
-                    color: trendIsPositive == true ? Colors.green : Colors.red,
+                    color: trendIsPositive == true ? AppColors.successLight : AppColors.errorLight,
                   ),
                   const SizedBox(width: 4),
                   Text(
                     trend!,
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
                       color: trendIsPositive == true
-                          ? Colors.green
-                          : Colors.red,
+                          ? AppColors.successLight
+                          : AppColors.errorLight,
                       fontWeight: FontWeight.w500,
                     ),
                   ),

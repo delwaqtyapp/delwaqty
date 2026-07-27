@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:delwaqty/core/theme/app_colors.dart';
+import 'package:delwaqty/core/theme/app_text_styles.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import 'package:delwaqty/features/auth/presentation/auth_provider.dart';
 import 'package:delwaqty/features/auth/domain/auth_state.dart';
@@ -30,7 +33,7 @@ class DriverTripPage extends ConsumerWidget {
       body: rideAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) =>
-            Center(child: Text(l10n.errorWithMessage(e.toString()))),
+            Center(child: Text(l10n.somethingWentWrong)),
         data: (ride) {
           final driverId = profileAsync?.valueOrNull?.id;
           if (driverId == null) {
@@ -87,7 +90,7 @@ class _ActiveTripViewState extends ConsumerState<_ActiveTripView> {
     final s = e.toString();
     if (s.contains('invalid_otp')) return l10n.invalidOtp;
     if (s.contains('invalid_transition')) return l10n.errorLoading;
-    return l10n.errorWithMessage(s);
+    return l10n.somethingWentWrong;
   }
 
   @override
@@ -115,14 +118,14 @@ class _ActiveTripViewState extends ConsumerState<_ActiveTripView> {
         const SizedBox(height: 16),
         _AddressCard(
           icon: Icons.my_location_rounded,
-          color: Colors.green,
+          color: AppColors.successLight,
           label: l10n.pickup,
           address: ride.pickupAddress,
         ),
         const SizedBox(height: 8),
         _AddressCard(
           icon: Icons.location_on_rounded,
-          color: Colors.red,
+          color: AppColors.errorLight,
           label: l10n.destination,
           address: ride.dropoffAddress,
         ),
@@ -150,7 +153,9 @@ class _ActiveTripViewState extends ConsumerState<_ActiveTripView> {
         ),
         const SizedBox(height: 24),
         OutlinedButton.icon(
-          onPressed: () {},
+          onPressed: () => launchUrl(Uri.parse(
+            'https://www.google.com/maps/dir/?api=1&destination=${destination.latitude},${destination.longitude}',
+          )),
           icon: const Icon(Icons.navigation_rounded),
           label: Text(
             '${l10n.navigate}',
@@ -177,7 +182,7 @@ class _ActiveTripViewState extends ConsumerState<_ActiveTripView> {
             keyboardType: TextInputType.number,
             maxLength: 4,
             textAlign: TextAlign.center,
-            style: const TextStyle(fontSize: 24, letterSpacing: 8),
+            style: AppTextStyles.headlineSmall.copyWith(letterSpacing: 8),
             decoration: const InputDecoration(border: OutlineInputBorder()),
           ),
           const SizedBox(height: 8),
@@ -210,7 +215,7 @@ class _ActiveTripViewState extends ConsumerState<_ActiveTripView> {
                     if (mounted) context.pop();
                   }),
           child: Text(l10n.cancelRide,
-              style: TextStyle(color: theme.colorScheme.error)),
+              style: AppTextStyles.bodyMedium.copyWith(color: theme.colorScheme.error)),
         ),
       ],
     );
@@ -317,7 +322,7 @@ class _CompletedViewState extends ConsumerState<_CompletedView> {
       setState(() => _done = true);
     } catch (e) {
       messenger.showSnackBar(
-          SnackBar(content: Text(l10n.errorWithMessage(e.toString()))));
+          SnackBar(content: Text(l10n.somethingWentWrong)));
     } finally {
       if (mounted) setState(() => _submitting = false);
     }
@@ -333,7 +338,7 @@ class _CompletedViewState extends ConsumerState<_CompletedView> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(Icons.check_circle_rounded,
-              size: 72, color: Colors.green.shade500),
+              size: 72, color: AppColors.successLight),
           const SizedBox(height: 16),
           Text(l10n.tripCompleted,
               style: theme.textTheme.headlineSmall
@@ -355,7 +360,7 @@ class _CompletedViewState extends ConsumerState<_CompletedView> {
                 return IconButton(
                   icon: Icon(
                     i < _stars ? Icons.star_rounded : Icons.star_border_rounded,
-                    color: Colors.amber,
+                    color: AppColors.rating,
                     size: 36,
                   ),
                   onPressed: () => setState(() => _stars = i + 1),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:delwaqty/core/theme/app_colors.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:delwaqty/core/extensions/context_extensions.dart';
@@ -149,12 +150,12 @@ class _RideHistoryPageState extends ConsumerState<RideHistoryPage> {
 
   void _showRideDetails(BuildContext context, AppLocalizations l10n, Ride ride) {
     final statusColors = {
-      RideStatus.completed: Colors.green,
-      RideStatus.cancelled: Colors.red,
+      RideStatus.completed: AppColors.successLight,
+      RideStatus.cancelled: AppColors.errorLight,
       RideStatus.inTrip: context.colorScheme.primary,
-      RideStatus.searching: Colors.orange,
-      RideStatus.matched: Colors.blue,
-      RideStatus.arrived: Colors.teal,
+      RideStatus.searching: AppColors.warningLight,
+      RideStatus.matched: AppColors.infoLight,
+      RideStatus.arrived: AppColors.orderReady,
     };
 
     showModalBottomSheet(
@@ -196,7 +197,7 @@ class _RideHistoryPageState extends ConsumerState<RideHistoryPage> {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                     decoration: BoxDecoration(
-                      color: (statusColors[ride.status] ?? Colors.grey).withValues(alpha: 0.1),
+                      color: (statusColors[ride.status] ?? Theme.of(context).colorScheme.onSurfaceVariant).withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Text(
@@ -382,7 +383,7 @@ class _RideHistoryTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final isCompleted = ride.status == RideStatus.completed;
-    final statusColor = isCompleted ? Colors.green : Colors.red;
+    final statusColor = isCompleted ? AppColors.successLight : AppColors.errorLight;
 
     return GestureDetector(
       onTap: onTap,
@@ -395,9 +396,9 @@ class _RideHistoryTile extends StatelessWidget {
             border: Border.all(
               color: context.colorScheme.outlineVariant.withValues(alpha: 0.2),
             ),
-            boxShadow: [
+              boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.03),
+                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.03),
                 blurRadius: 8,
                 offset: const Offset(0, 2),
               ),

@@ -3438,4 +3438,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get securityAlertsDescription => 'استلام إشعارات عن أنشطة مشبوهة';
+
+  @override
+  String get somethingWentWrong => 'حدث خطأ ما. يرجى المحاولة مرة أخرى.';
 }

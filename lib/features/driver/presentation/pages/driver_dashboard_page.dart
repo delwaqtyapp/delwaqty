@@ -249,12 +249,12 @@ class _OnlineHeader extends StatelessWidget {
                     ? l10n.online
                     : l10n.offline,
                 style: theme.textTheme.bodyMedium?.copyWith(
-                  color: Colors.white.withValues(alpha: 0.8),
+                  color: theme.colorScheme.onPrimary.withValues(alpha: 0.8),
                 ),
               ),
               Switch(
                 value: profile.status == DriverStatus.online,
-                activeColor: Colors.white,
+                activeColor: theme.colorScheme.onPrimary,
                 onChanged: (value) async {
                   final repo = ref.read(driverRepositoryProvider);
                   await repo.updateStatus(
@@ -592,7 +592,7 @@ class _StatItem extends StatelessWidget {
         Text(
           value,
           style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                color: Colors.white,
+                color: Theme.of(context).colorScheme.onPrimary,
                 fontWeight: FontWeight.bold,
               ),
         ),
@@ -600,7 +600,7 @@ class _StatItem extends StatelessWidget {
         Text(
           label,
           style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: Colors.white.withValues(alpha: 0.8),
+                color: Theme.of(context).colorScheme.onPrimary.withValues(alpha: 0.8),
               ),
         ),
       ],

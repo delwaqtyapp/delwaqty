@@ -6667,6 +6667,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Get notified about suspicious activity'**
   String get securityAlertsDescription;
+
+  /// No description provided for @somethingWentWrong.
+  ///
+  /// In en, this message translates to:
+  /// **'Something went wrong. Please try again.'**
+  String get somethingWentWrong;
 }
 
 class _AppLocalizationsDelegate

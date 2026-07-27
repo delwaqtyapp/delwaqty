@@ -52,7 +52,7 @@ class _WalletTopUpPageState extends ConsumerState<WalletTopUpPage> {
       }
     } catch (e) {
       if (mounted) {
-        AppSnackbar.error(context, message: l10n.topUpFailed(e.toString()));
+        AppSnackbar.error(context, message: l10n.somethingWentWrong);
       }
     } finally {
       if (mounted) setState(() => _loading = false);

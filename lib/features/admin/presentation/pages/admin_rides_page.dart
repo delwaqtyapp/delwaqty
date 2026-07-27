@@ -7,6 +7,7 @@ import 'package:delwaqty/shared/widgets/glass_card.dart';
 import 'package:delwaqty/shared/widgets/premium_empty_state.dart';
 import 'package:delwaqty/shared/widgets/app_loader.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
+import 'package:delwaqty/core/theme/app_colors.dart';
 
 final _adminRidesProvider = FutureProvider<List<Map<String, dynamic>>>((
   ref,
@@ -307,14 +308,14 @@ class _RideGlassTile extends StatelessWidget {
           _RideLocationRow(
             icon: Icons.trip_origin_rounded,
             address: pickup.isNotEmpty ? pickup : l10n.pickup,
-            color: Colors.green,
+            color: AppColors.successLight,
             cs: cs,
           ),
           const SizedBox(height: 6),
           _RideLocationRow(
             icon: Icons.location_on_rounded,
             address: dropoff.isNotEmpty ? dropoff : l10n.dropoff,
-            color: Colors.red,
+            color: AppColors.errorLight,
             cs: cs,
           ),
           const SizedBox(height: 10),

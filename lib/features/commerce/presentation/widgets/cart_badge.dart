@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:delwaqty/core/theme/app_colors.dart';
+import 'package:delwaqty/core/theme/app_text_styles.dart';
 import 'package:delwaqty/features/commerce/commerce_module.dart';
 import 'package:delwaqty/features/commerce/domain/entities/cart.dart';
 
@@ -33,15 +35,15 @@ class CartBadge extends ConsumerWidget {
             child: Container(
               padding: const EdgeInsets.all(4),
               decoration: const BoxDecoration(
-                color: Colors.red,
+                color: AppColors.errorLight,
                 shape: BoxShape.circle,
               ),
               child: Text(
                 count.toString(),
-                style: const TextStyle(
-                  color: Colors.white,
+                style: AppTextStyles.labelSmall.copyWith(
                   fontSize: 10,
                   fontWeight: FontWeight.bold,
+                  color: Theme.of(context).colorScheme.onPrimary,
                 ),
               ),
             ),

@@ -4,6 +4,9 @@ import 'package:delwaqty/features/safety/presentation/safety_providers.dart';
 import 'package:delwaqty/features/safety/domain/entities/trusted_contact.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 import 'package:delwaqty/core/theme/app_colors.dart';
+import 'package:delwaqty/core/theme/app_text_styles.dart';
+import 'package:delwaqty/shared/widgets/premium_empty_state.dart';
+import 'package:delwaqty/shared/widgets/app_loader.dart';
 
 class TrustedContactsPage extends ConsumerWidget {
   const TrustedContactsPage({super.key});
@@ -24,11 +27,15 @@ class TrustedContactsPage extends ConsumerWidget {
         ],
       ),
       body: contactsAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const SkeletonListTile(),
         error: (e, _) => Center(child: Text(l10n.errorLoadingData)),
         data: (contacts) {
           if (contacts.isEmpty) {
-            return _buildEmptyState(context, l10n);
+            return PremiumEmptyState(
+              icon: Icons.contacts_rounded,
+              title: l10n.noTrustedContacts,
+              message: l10n.addTrustedContactsDescription,
+            );
           }
           return ListView.builder(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -46,32 +53,6 @@ class TrustedContactsPage extends ConsumerWidget {
         onPressed: () => _showAddContactSheet(context, ref),
         icon: const Icon(Icons.person_add_rounded),
         label: Text(l10n.addTrustedContact),
-      ),
-    );
-  }
-
-  Widget _buildEmptyState(BuildContext context, AppLocalizations l10n) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.contacts_rounded, size: 80, color: Colors.grey[300]),
-          const SizedBox(height: 16),
-          Text(
-            l10n.noTrustedContacts,
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  color: Colors.grey[600],
-                ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            l10n.addTrustedContactsDescription,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Colors.grey[500],
-                ),
-            textAlign: TextAlign.center,
-          ),
-        ],
       ),
     );
   }
@@ -96,30 +77,30 @@ class TrustedContactsPage extends ConsumerWidget {
           backgroundColor: AppColors.primaryLight.withOpacity(0.2),
           child: Text(
             contact.name.isNotEmpty ? contact.name[0].toUpperCase() : '?',
-            style: TextStyle(
-              color: AppColors.primaryLight,
+            style: AppTextStyles.titleSmall.copyWith(
               fontWeight: FontWeight.bold,
+              color: AppColors.primaryLight,
             ),
           ),
         ),
-        title: Text(contact.name, style: const TextStyle(fontWeight: FontWeight.w600)),
+        title: Text(contact.name, style: AppTextStyles.titleMedium.copyWith(fontWeight: FontWeight.w600)),
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const SizedBox(height: 4),
-            Text(contact.phone, style: TextStyle(color: Colors.grey[600])),
+            Text(contact.phone, style: AppTextStyles.bodyMedium.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
             if (contact.email != null)
-              Text(contact.email!, style: TextStyle(color: Colors.grey[500], fontSize: 12)),
+              Text(contact.email!, style: AppTextStyles.bodySmall.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
             const SizedBox(height: 4),
             Wrap(
               spacing: 6,
               runSpacing: 4,
               children: [
                 if (relationshipLabel.isNotEmpty)
-                  _buildChip(relationshipLabel, Colors.blue),
-                _buildChip(prefLabel, Colors.green),
+                  _buildChip(relationshipLabel, AppColors.infoLight),
+                _buildChip(prefLabel, AppColors.successLight),
                 if (!contact.notifyOnRide)
-                  _buildChip(l10n.notificationsDisabled, Colors.orange),
+                  _buildChip(l10n.notificationsDisabled, AppColors.warningLight),
               ],
             ),
           ],
@@ -140,9 +121,9 @@ class TrustedContactsPage extends ConsumerWidget {
               value: 'delete',
               child: Row(
                 children: [
-                  const Icon(Icons.delete_rounded, size: 18, color: Colors.red),
+                  Icon(Icons.delete_rounded, size: 18, color: AppColors.errorLight),
                   const SizedBox(width: 8),
-                  Text(l10n.delete, style: const TextStyle(color: Colors.red)),
+                  Text(l10n.delete, style: AppTextStyles.bodyMedium.copyWith(color: AppColors.errorLight)),
                 ],
               ),
             ),
@@ -168,7 +149,7 @@ class TrustedContactsPage extends ConsumerWidget {
       ),
       child: Text(
         label,
-        style: TextStyle(fontSize: 11, color: color, fontWeight: FontWeight.w500),
+        style: AppTextStyles.labelSmall.copyWith(color: color),
       ),
     );
   }
@@ -215,9 +196,13 @@ class TrustedContactsPage extends ConsumerWidget {
           ElevatedButton(
             onPressed: () {
               Navigator.pop(ctx);
-              ref.read(safetyRepositoryProvider).deleteTrustedContact(contact.id);
+              try {
+                ref.read(safetyRepositoryProvider).deleteTrustedContact(contact.id);
+              } catch (e) {
+                debugPrint('Failed to delete trusted contact: $e');
+              }
             },
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            style: ElevatedButton.styleFrom(backgroundColor: AppColors.errorLight),
             child: Text(l10n.delete),
           ),
         ],
@@ -259,7 +244,7 @@ class TrustedContactsPage extends ConsumerWidget {
                       width: 40,
                       height: 4,
                       decoration: BoxDecoration(
-                        color: Colors.grey[300],
+                        color: Theme.of(ctx).colorScheme.onSurfaceVariant,
                         borderRadius: BorderRadius.circular(2),
                       ),
                     ),
@@ -336,18 +321,26 @@ class TrustedContactsPage extends ConsumerWidget {
                     child: ElevatedButton(
                       onPressed: () async {
                         if (nameController.text.isEmpty || phoneController.text.isEmpty) return;
-                        await ref.read(safetyRepositoryProvider).upsertTrustedContact(
-                              nameController.text.trim(),
-                              phoneController.text.trim(),
-                              id: contact?.id,
-                              email: emailController.text.trim().isEmpty
-                                  ? null
-                                  : emailController.text.trim(),
-                              relationship: selectedRelationship,
-                              notifyOnRide: notifyOnRide,
-                              notificationPreference: selectedPref,
+                        try {
+                          await ref.read(safetyRepositoryProvider).upsertTrustedContact(
+                                nameController.text.trim(),
+                                phoneController.text.trim(),
+                                id: contact?.id,
+                                email: emailController.text.trim().isEmpty
+                                    ? null
+                                    : emailController.text.trim(),
+                                relationship: selectedRelationship,
+                                notifyOnRide: notifyOnRide,
+                                notificationPreference: selectedPref,
+                              );
+                          if (ctx.mounted) Navigator.pop(ctx);
+                        } catch (e) {
+                          if (ctx.mounted) {
+                            ScaffoldMessenger.of(ctx).showSnackBar(
+                              SnackBar(content: Text(AppLocalizations.of(ctx).somethingWentWrong)),
                             );
-                        if (ctx.mounted) Navigator.pop(ctx);
+                          }
+                        }
                       },
                       child: Text(contact != null ? l10n.saveLabel : l10n.addLabel),
                     ),

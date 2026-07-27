@@ -4,6 +4,8 @@ import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
 import 'package:delwaqty/shared/widgets/glass_card.dart';
 import 'package:delwaqty/shared/widgets/premium_empty_state.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
+import 'package:delwaqty/core/theme/app_colors.dart';
+import 'package:delwaqty/core/theme/app_text_styles.dart';
 
 class AdminAnalyticsPage extends ConsumerWidget {
   const AdminAnalyticsPage({super.key});
@@ -49,20 +51,20 @@ class AdminAnalyticsPage extends ConsumerWidget {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const Icon(Icons.insert_chart_outlined_rounded, color: Colors.white, size: 48),
+                        Icon(Icons.insert_chart_outlined_rounded, color: Theme.of(context).colorScheme.onPrimary, size: 48),
                         const SizedBox(height: 12),
                         Text(
                           l10n.revenueChart,
-                          style: const TextStyle(
-                            color: Colors.white,
+                          style: AppTextStyles.titleMedium.copyWith(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
+                            color: Theme.of(context).colorScheme.onPrimary,
                           ),
                         ),
                         const SizedBox(height: 4),
                         Text(
                           '${l10n.currencySymbol} 0.00 ${l10n.total}',
-                          style: const TextStyle(color: Colors.white70, fontSize: 14),
+                          style: AppTextStyles.bodyMedium.copyWith(color: Theme.of(context).colorScheme.onPrimary.withValues(alpha: 0.7)),
                         ),
                       ],
                     ),
@@ -99,15 +101,15 @@ class AdminAnalyticsPage extends ConsumerWidget {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const Icon(Icons.show_chart_rounded, color: Colors.white, size: 40),
+                        Icon(Icons.show_chart_rounded, color: Theme.of(context).colorScheme.onPrimary, size: 40),
                         const SizedBox(height: 8),
                         Text(
                           l10n.orderTrends,
-                          style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
+                          style: AppTextStyles.titleMedium.copyWith(fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onPrimary),
                         ),
                         Text(
                           l10n.zeroOrdersToday,
-                          style: const TextStyle(color: Colors.white70, fontSize: 13),
+                          style: AppTextStyles.bodySmall.copyWith(fontSize: 13, color: Theme.of(context).colorScheme.onPrimary.withValues(alpha: 0.7)),
                         ),
                       ],
                     ),

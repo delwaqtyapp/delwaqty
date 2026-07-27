@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:delwaqty/core/theme/app_colors.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -474,19 +475,19 @@ class _RideBookingPageState extends ConsumerState<RideBookingPage> {
             ? Container(
                 padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
                 decoration: BoxDecoration(
-                  color: Colors.green.withValues(alpha: 0.08),
+                  color: AppColors.successLight.withValues(alpha: 0.08),
                   borderRadius: BorderRadius.circular(14),
-                  border: Border.all(color: Colors.green.withValues(alpha: 0.3)),
+                  border: Border.all(color: AppColors.successLight.withValues(alpha: 0.3)),
                 ),
                 child: Row(
                   children: [
-                    Icon(Icons.local_offer_rounded, color: Colors.green[700], size: 18),
+                    Icon(Icons.local_offer_rounded, color: AppColors.successLight, size: 18),
                     const SizedBox(width: 10),
                     Expanded(
                       child: Text(
                         '${booking.promoCode}  -${_money(context, booking.promoDiscount)}',
                         style: context.textTheme.bodyMedium?.copyWith(
-                            fontWeight: FontWeight.w600, color: Colors.green[800]),
+                            fontWeight: FontWeight.w600, color: AppColors.successDark),
                       ),
                     ),
                     GestureDetector(
@@ -633,7 +634,7 @@ class _RideBookingPageState extends ConsumerState<RideBookingPage> {
           Text(value,
               style: context.textTheme.bodyMedium?.copyWith(
                   fontWeight: FontWeight.w600,
-                  color: highlight ? Colors.green[700] : context.colorScheme.onSurface)),
+                  color: highlight ? AppColors.successLight : context.colorScheme.onSurface)),
         ],
       ),
     );
@@ -647,19 +648,19 @@ class _RideBookingPageState extends ConsumerState<RideBookingPage> {
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           decoration: BoxDecoration(
-            color: Colors.green.withValues(alpha: 0.08),
+            color: AppColors.successLight.withValues(alpha: 0.08),
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: Colors.green.withValues(alpha: 0.2)),
+            border: Border.all(color: AppColors.successLight.withValues(alpha: 0.2)),
           ),
           child: Row(
             children: [
-              Icon(Icons.shield_rounded, color: Colors.green[600], size: 20),
+              Icon(Icons.shield_rounded, color: AppColors.successLight, size: 20),
               const SizedBox(width: 10),
               Expanded(
                 child: Text(
                   l10n.tripProtected,
                   style: context.textTheme.bodySmall
-                      ?.copyWith(color: Colors.green[800], fontWeight: FontWeight.w600),
+                      ?.copyWith(color: AppColors.successDark, fontWeight: FontWeight.w600),
                 ),
               ),
             ],

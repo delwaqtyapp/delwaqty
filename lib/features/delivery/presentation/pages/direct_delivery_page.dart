@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:delwaqty/core/extensions/context_extensions.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 import 'package:delwaqty/core/theme/app_colors.dart';
+import 'package:delwaqty/core/theme/app_text_styles.dart';
 import 'package:delwaqty/features/auth/domain/auth_state.dart';
 import 'package:delwaqty/features/auth/presentation/auth_provider.dart';
 import 'package:delwaqty/features/location/presentation/providers/location_provider.dart';
@@ -182,7 +184,7 @@ class _DirectDeliveryPageState extends ConsumerState<DirectDeliveryPage> {
                     controller: _placeDescController,
                     label: l10n.placeDescription,
                     icon: Icons.info_outline_rounded,
-                    color: Colors.teal,
+                    color: AppColors.orderReady,
                     hint: l10n.placeDescriptionHint,
                   ),
                   const SizedBox(height: 16),
@@ -194,7 +196,17 @@ class _DirectDeliveryPageState extends ConsumerState<DirectDeliveryPage> {
                     width: double.infinity,
                     height: 56,
                     child: FilledButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        if (_dropoffController.text.trim().isEmpty) {
+                          context.showAppSnackBar(l10n.deliverTo, isError: true);
+                          return;
+                        }
+                        if (_phoneController.text.trim().isEmpty) {
+                          context.showAppSnackBar(l10n.customerPhone, isError: true);
+                          return;
+                        }
+                        context.showAppSnackBar(l10n.success);
+                      },
                       style: FilledButton.styleFrom(
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(16),
@@ -202,10 +214,7 @@ class _DirectDeliveryPageState extends ConsumerState<DirectDeliveryPage> {
                       ),
                       child: Text(
                         l10n.requestDelivery,
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                        ),
+                        style: AppTextStyles.titleMedium,
                       ),
                     ),
                   ),
@@ -231,7 +240,7 @@ class _DirectDeliveryPageState extends ConsumerState<DirectDeliveryPage> {
         decoration: InputDecoration(
           prefixIcon: Icon(Icons.location_on_outlined, color: cs.error),
           labelText: l10n.deliverTo,
-          labelStyle: TextStyle(color: cs.error),
+          labelStyle: AppTextStyles.bodyMedium.copyWith(color: cs.error),
           border: InputBorder.none,
           contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
           suffixIcon: _loadingLocation
@@ -269,7 +278,7 @@ class _DirectDeliveryPageState extends ConsumerState<DirectDeliveryPage> {
             children: [
               Icon(Icons.shopping_cart_outlined, color: cs.primary, size: 20),
               const SizedBox(width: 8),
-              Text(l10n.shoppingList, style: TextStyle(fontWeight: FontWeight.w600, color: cs.onSurface)),
+              Text(l10n.shoppingList, style: AppTextStyles.titleMedium.copyWith(color: cs.onSurface)),
             ],
           ),
           const SizedBox(height: 12),
@@ -283,14 +292,14 @@ class _DirectDeliveryPageState extends ConsumerState<DirectDeliveryPage> {
                   children: [
                     Expanded(
                       flex: 4,
-                      child: Text(item.name, style: const TextStyle(fontSize: 14)),
+                      child: Text(item.name, style: AppTextStyles.bodyMedium),
                     ),
                     Expanded(
                       flex: 2,
                       child: Text(
                         _itemDisplayText(item, l10n),
                         textAlign: TextAlign.center,
-                        style: TextStyle(fontSize: 13, color: cs.onSurfaceVariant),
+                        style: AppTextStyles.bodyMedium.copyWith(fontSize: 13, color: cs.onSurfaceVariant),
                       ),
                     ),
                     const SizedBox(width: 4),
@@ -370,7 +379,7 @@ class _DirectDeliveryPageState extends ConsumerState<DirectDeliveryPage> {
         child: DropdownButton<String>(
           value: _selectedUnit,
           isDense: true,
-          style: TextStyle(fontSize: 11, color: cs.onSurface),
+          style: AppTextStyles.labelSmall.copyWith(color: cs.onSurface),
           items: [
             DropdownMenuItem(value: 'none', child: Text(l10n.unitNone)),
             DropdownMenuItem(value: 'piece', child: Text(l10n.unitPiece)),
@@ -408,7 +417,7 @@ class _DirectDeliveryPageState extends ConsumerState<DirectDeliveryPage> {
                   value: _selectedWeight,
                   isDense: true,
                   isExpanded: true,
-                  style: TextStyle(fontSize: 12, color: cs.onSurface),
+                  style: AppTextStyles.bodySmall.copyWith(color: cs.onSurface),
                   items: [
                     DropdownMenuItem(value: 'none', child: Text(l10n.weightNone)),
                     DropdownMenuItem(value: 'bundle', child: Text(l10n.weightBundle)),
@@ -446,7 +455,7 @@ class _DirectDeliveryPageState extends ConsumerState<DirectDeliveryPage> {
                 value: _selectedPieceUnit,
                 isDense: true,
                 isExpanded: true,
-                style: TextStyle(fontSize: 12, color: cs.onSurface),
+                style: AppTextStyles.bodySmall.copyWith(color: cs.onSurface),
                 items: [
                   DropdownMenuItem(value: 'none', child: Text(l10n.unitNone)),
                   DropdownMenuItem(value: 'box', child: Text(l10n.pieceUnitBox)),
@@ -478,7 +487,7 @@ class _DirectDeliveryPageState extends ConsumerState<DirectDeliveryPage> {
             children: [
               Icon(Icons.phone_rounded, color: cs.primary, size: 20),
               const SizedBox(width: 8),
-              Text(l10n.customerPhone, style: TextStyle(fontWeight: FontWeight.w600, color: cs.onSurface)),
+              Text(l10n.customerPhone, style: AppTextStyles.titleMedium.copyWith(color: cs.onSurface)),
             ],
           ),
           const SizedBox(height: 10),
@@ -503,7 +512,7 @@ class _DirectDeliveryPageState extends ConsumerState<DirectDeliveryPage> {
                 onPressed: () {
                   if (_saveNumber) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text(l10n.numberSaved), backgroundColor: Colors.green),
+                      SnackBar(content: Text(l10n.numberSaved), backgroundColor: AppColors.successLight),
                     );
                   }
                 },
@@ -518,7 +527,7 @@ class _DirectDeliveryPageState extends ConsumerState<DirectDeliveryPage> {
                 value: _saveNumber,
                 onChanged: (v) => setState(() => _saveNumber = v ?? true),
               ),
-              Text(l10n.saveNumber, style: TextStyle(fontSize: 13, color: cs.onSurfaceVariant)),
+              Text(l10n.saveNumber, style: AppTextStyles.bodyMedium.copyWith(fontSize: 13, color: cs.onSurfaceVariant)),
             ],
           ),
         ],
@@ -548,7 +557,7 @@ class _DirectDeliveryPageState extends ConsumerState<DirectDeliveryPage> {
           prefixIcon: Icon(icon, color: color),
           labelText: label,
           hintText: hint,
-          labelStyle: TextStyle(color: color),
+          labelStyle: AppTextStyles.bodyMedium.copyWith(color: color),
           border: InputBorder.none,
           contentPadding: const EdgeInsets.symmetric(
             horizontal: 20,

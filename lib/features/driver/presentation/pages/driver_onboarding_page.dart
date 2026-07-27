@@ -5,6 +5,7 @@ import 'package:delwaqty/features/driver/domain/repositories/driver_repository.d
 import 'package:delwaqty/features/driver/driver_module.dart';
 import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
+import 'package:delwaqty/core/theme/app_colors.dart';
 
 class DriverOnboardingPage extends ConsumerStatefulWidget {
   const DriverOnboardingPage({super.key, required this.driverId});
@@ -604,12 +605,12 @@ class _DriverOnboardingPageState extends ConsumerState<DriverOnboardingPage> {
           child: FilledButton(
             onPressed: _isSubmitting ? null : _submitCurrentStep,
             child: _isSubmitting
-                ? const SizedBox(
+                ? SizedBox(
                     width: 20,
                     height: 20,
                     child: CircularProgressIndicator(
                       strokeWidth: 2,
-                      color: Colors.white,
+                      color: Theme.of(context).colorScheme.onPrimary,
                     ),
                   )
                 : Text(

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:delwaqty/core/theme/app_colors.dart';
 
 class RatingStars extends StatelessWidget {
   const RatingStars({
@@ -21,11 +22,11 @@ class RatingStars extends StatelessWidget {
       children: [
         ...List.generate(5, (i) {
           if (i < rating.floor()) {
-            return Icon(Icons.star, size: size, color: Colors.amber);
+            return Icon(Icons.star, size: size, color: AppColors.rating);
           } else if (i < rating) {
-            return Icon(Icons.star_half, size: size, color: Colors.amber);
+            return Icon(Icons.star_half, size: size, color: AppColors.rating);
           }
-          return Icon(Icons.star_border, size: size, color: Colors.amber);
+          return Icon(Icons.star_border, size: size, color: AppColors.rating);
         }),
         if (showCount) ...[
           const SizedBox(width: 4),

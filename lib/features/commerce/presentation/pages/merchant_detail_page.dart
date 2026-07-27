@@ -13,8 +13,9 @@ import 'package:delwaqty/l10n/app_localizations.dart';
 import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
 import 'package:delwaqty/shared/widgets/app_loader.dart';
 import 'package:delwaqty/shared/widgets/error_state.dart';
-import 'package:delwaqty/shared/widgets/empty_state.dart';
+import 'package:delwaqty/shared/widgets/premium_empty_state.dart';
 import 'package:delwaqty/core/extensions/context_extensions.dart';
+import 'package:delwaqty/core/theme/app_colors.dart';
 
 class MerchantDetailPage extends ConsumerStatefulWidget {
   const MerchantDetailPage({required this.merchantId, super.key});
@@ -28,6 +29,7 @@ class MerchantDetailPage extends ConsumerStatefulWidget {
 
 class _MerchantDetailPageState extends ConsumerState<MerchantDetailPage> {
   Key _refreshKey = UniqueKey();
+  String? _selectedCategoryId;
 
   Future<void> _onRefresh() async {
     setState(() => _refreshKey = UniqueKey());
@@ -208,7 +210,7 @@ class _MerchantDetailPageState extends ConsumerState<MerchantDetailPage> {
                                 : Icons.cancel_outlined,
                             size: 18,
                             color: merchant.isOpenNow
-                                ? Colors.green
+                                ? AppColors.successLight
                                 : context.colorScheme.error,
                           ),
                           const SizedBox(width: 4),
@@ -217,7 +219,7 @@ class _MerchantDetailPageState extends ConsumerState<MerchantDetailPage> {
                             style: context.textTheme.bodySmall?.copyWith(
                               fontWeight: FontWeight.w600,
                               color: merchant.isOpenNow
-                                  ? Colors.green
+                                  ? AppColors.successLight
                                   : context.colorScheme.error,
                             ),
                           ),
@@ -250,7 +252,11 @@ class _MerchantDetailPageState extends ConsumerState<MerchantDetailPage> {
                         future: categoryRepo.getCategories(widget.merchantId),
                         builder: (context, catSnap) {
                           final categories = catSnap.data ?? [];
-                          if (categories.isEmpty) return const SizedBox();
+                          if (categories.isEmpty) return const PremiumEmptyState(
+                            icon: Icons.category_outlined,
+                            title: 'No Categories',
+                            message: 'This merchant has no categories yet.',
+                          );
                           return SizedBox(
                             height: 40,
                             child: ListView.separated(
@@ -262,7 +268,14 @@ class _MerchantDetailPageState extends ConsumerState<MerchantDetailPage> {
                                 final cat = categories[index];
                                 return ActionChip(
                                   label: Text(cat.name),
-                                  onPressed: () {},
+                                  onPressed: () {
+                                    setState(() {
+                                      _selectedCategoryId =
+                                          _selectedCategoryId == cat.id
+                                              ? null
+                                              : cat.id;
+                                    });
+                                  },
                                 );
                               },
                             ),
@@ -286,7 +299,10 @@ class _MerchantDetailPageState extends ConsumerState<MerchantDetailPage> {
               ),
               FutureBuilder<List<Product>>(
                 key: _refreshKey,
-                future: productRepo.getProducts(merchantId: widget.merchantId),
+                future: productRepo.getProducts(
+                  merchantId: widget.merchantId,
+                  categoryId: _selectedCategoryId,
+                ),
                 builder: (context, prodSnap) {
                   if (prodSnap.connectionState == ConnectionState.waiting) {
                     return const Center(
@@ -301,7 +317,7 @@ class _MerchantDetailPageState extends ConsumerState<MerchantDetailPage> {
                   if (products.isEmpty) {
                     return Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: EmptyState(
+                      child: PremiumEmptyState(
                         icon: Icons.shopping_bag_outlined,
                         title: l10n.menu,
                         message: l10n.noData,

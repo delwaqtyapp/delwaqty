@@ -44,7 +44,7 @@ class PriceTag extends StatelessWidget {
             style: TextStyle(
               fontSize: size == 'small' ? 10 : 12,
               decoration: TextDecoration.lineThrough,
-              color: Colors.grey,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
           ),
         ],

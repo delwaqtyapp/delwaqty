@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import 'package:delwaqty/features/delivery/presentation/providers/delivery_providers.dart';
 import 'package:delwaqty/features/delivery/domain/entities/delivery_order.dart';
@@ -11,6 +12,7 @@ import 'package:delwaqty/features/ride/domain/entities/ride.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
 import 'package:delwaqty/shared/widgets/shimmer_loading.dart';
+import 'package:delwaqty/core/theme/app_colors.dart';
 
 class DeliveryTrackingPage extends ConsumerStatefulWidget {
   const DeliveryTrackingPage({required this.deliveryId, super.key});
@@ -256,7 +258,7 @@ class _DriverInfoCard extends StatelessWidget {
             if (ride.driverPhone != null)
               IconButton(
                 icon: const Icon(Icons.phone_rounded),
-                onPressed: () {},
+                onPressed: () => launchUrl(Uri.parse('tel:${ride.driverPhone}')),
               ),
           ],
         ),
@@ -488,7 +490,7 @@ class _RatingBar extends StatelessWidget {
         color: Theme.of(context).colorScheme.surface,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
+            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, -2),
           ),
@@ -507,7 +509,7 @@ class _RatingBar extends StatelessWidget {
                     star <= rating
                         ? Icons.star_rounded
                         : Icons.star_outline_rounded,
-                    color: star <= rating ? Colors.amber : null,
+                    color: star <= rating ? AppColors.rating : null,
                     size: 36,
                   ),
                   onPressed: () => onRatingChanged(star),

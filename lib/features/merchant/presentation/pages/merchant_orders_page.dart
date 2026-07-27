@@ -6,6 +6,8 @@ import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
 import 'package:delwaqty/shared/widgets/premium_empty_state.dart';
 import 'package:delwaqty/shared/widgets/shimmer_loading.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
+import 'package:delwaqty/core/theme/app_colors.dart';
+import 'package:delwaqty/core/theme/app_text_styles.dart';
 
 final _merchantIdProvider = Provider<String>((_) => 'current-merchant-id');
 
@@ -154,12 +156,12 @@ class _OrderCard extends StatelessWidget {
     final l10n = AppLocalizations.of(context);
 
     final statusColor = switch (order.status) {
-      'delivered' => Colors.green,
-      'ready' => Colors.teal,
-      'preparing' => Colors.blue,
-      'pending' => Colors.orange,
-      'cancelled' => Colors.red,
-      _ => Colors.grey,
+      'delivered' => AppColors.successLight,
+      'ready' => AppColors.orderReady,
+      'preparing' => AppColors.infoLight,
+      'pending' => AppColors.warningLight,
+      'cancelled' => AppColors.errorLight,
+      _ => theme.colorScheme.onSurfaceVariant,
     };
 
     final statusLabel = switch (order.status) {
@@ -236,7 +238,7 @@ class _OrderCard extends StatelessWidget {
                   if (order.status == 'pending') ...[
                     _ActionButton(
                       label: l10n.accept,
-                      color: Colors.green,
+                      color: AppColors.successLight,
                       onPressed: () => onStatusChanged('preparing'),
                     ),
                     const SizedBox(width: 8),
@@ -248,13 +250,13 @@ class _OrderCard extends StatelessWidget {
                   ] else if (order.status == 'preparing') ...[
                     _ActionButton(
                       label: l10n.markReady,
-                      color: Colors.teal,
+                      color: AppColors.orderReady,
                       onPressed: () => onStatusChanged('ready'),
                     ),
                   ] else if (order.status == 'ready') ...[
                     _ActionButton(
                       label: l10n.markDelivered,
-                      color: Colors.green,
+                      color: AppColors.successLight,
                       onPressed: () => onStatusChanged('delivered'),
                     ),
                   ],
@@ -295,7 +297,7 @@ class _ActionButton extends StatelessWidget {
       ),
       child: Text(
         label,
-        style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+        style: AppTextStyles.labelMedium.copyWith(fontWeight: FontWeight.bold),
       ),
     );
   }

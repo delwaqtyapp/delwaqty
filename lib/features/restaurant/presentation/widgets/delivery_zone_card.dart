@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 import 'package:delwaqty/features/restaurant/restaurant_module.dart';
 import 'package:delwaqty/features/restaurant/domain/entities/delivery_zone.dart';
+import 'package:delwaqty/core/theme/app_colors.dart';
 
 
 final _zonesProvider = FutureProvider.family<List<DeliveryZone>, String>((ref, merchantId) async {
@@ -92,7 +93,7 @@ class DeliveryZoneCard extends ConsumerWidget {
                               ? l10n.freeDelivery
                               : '${zone.deliveryFee.toStringAsFixed(0)} ${l10n.sar}',
                           style: theme.textTheme.labelMedium?.copyWith(
-                            color: zone.deliveryFee == 0 ? Colors.green.shade700 : null,
+                            color: zone.deliveryFee == 0 ? AppColors.successLight : null,
                             fontWeight: FontWeight.w600,
                           ),
                           overflow: TextOverflow.ellipsis,

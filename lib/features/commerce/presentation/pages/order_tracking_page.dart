@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:delwaqty/features/commerce/commerce_module.dart';
 import 'package:delwaqty/features/commerce/domain/entities/order.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
@@ -580,7 +581,7 @@ class _DriverSection extends StatelessWidget {
                 children: [
                   Expanded(
                     child: OutlinedButton.icon(
-                      onPressed: () {},
+                      onPressed: () => launchUrl(Uri.parse('tel:+966500000000')),
                       icon: const Icon(Icons.call, size: 18),
                       label: Text(l10n.callDriver),
                     ),
@@ -588,7 +589,9 @@ class _DriverSection extends StatelessWidget {
                   const SizedBox(width: 12),
                   Expanded(
                     child: FilledButton.tonalIcon(
-                      onPressed: () {},
+                      onPressed: () => ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text(l10n.chatDriver)),
+                      ),
                       icon: const Icon(Icons.chat_bubble_outline, size: 18),
                       label: Text(l10n.chatDriver),
                     ),

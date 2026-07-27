@@ -8,6 +8,7 @@ import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
 import 'package:delwaqty/shared/widgets/premium_empty_state.dart';
 import 'package:delwaqty/shared/widgets/shimmer_loading.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
+import 'package:delwaqty/core/theme/app_colors.dart';
 
 final _merchantIdProvider = Provider<String>((_) => 'current-merchant-id');
 
@@ -132,25 +133,25 @@ class _MerchantDashboardPageState
               title: AppLocalizations.of(context).todayOrders,
               value: stats.todayOrders.toString(),
               icon: Icons.shopping_cart_outlined,
-              color: Colors.blue,
+              color: AppColors.infoLight,
             ),
             _StatCard(
               title: AppLocalizations.of(context).revenue,
               value: '${AppLocalizations.of(context).currencySymbol} ${stats.todayRevenue.toStringAsFixed(0)}',
               icon: Icons.payments_outlined,
-              color: Colors.green,
+              color: AppColors.successLight,
             ),
             _StatCard(
               title: AppLocalizations.of(context).pending,
               value: stats.pendingOrders.toString(),
               icon: Icons.pending_outlined,
-              color: Colors.orange,
+              color: AppColors.warningLight,
             ),
             _StatCard(
               title: AppLocalizations.of(context).rating,
               value: stats.averageRating.toStringAsFixed(1),
               icon: Icons.star_outline_rounded,
-              color: Colors.amber,
+              color: AppColors.rating,
             ),
           ],
         );
@@ -180,7 +181,10 @@ class _MerchantDashboardPageState
             leading: const Icon(Icons.local_offer_outlined),
             title: Text(AppLocalizations.of(context).createOffer),
             trailing: const Icon(Icons.chevron_right_rounded),
-            onTap: () {},
+            onTap: () {
+              final l10n = AppLocalizations.of(context);
+              context.showAppSnackBar(l10n.createOffer);
+            },
           ),
         ],
       ),

@@ -6,6 +6,7 @@ import 'package:delwaqty/shared/widgets/app_loader.dart';
 import 'package:delwaqty/shared/widgets/premium_empty_state.dart';
 import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
+import 'package:delwaqty/core/theme/app_colors.dart';
 
 class NotificationCenterPage extends ConsumerWidget {
   const NotificationCenterPage({super.key});
@@ -176,11 +177,11 @@ class _NotificationCard extends StatelessWidget {
       case NotificationType.info:
         return colorScheme.primary;
       case NotificationType.warning:
-        return Colors.orange;
+        return AppColors.warningLight;
       case NotificationType.success:
-        return Colors.green;
+        return AppColors.successLight;
       case NotificationType.reminder:
-        return Colors.purple;
+        return AppColors.orderPreparing;
     }
   }
 

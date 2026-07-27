@@ -46,7 +46,8 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
     } catch (e) {
       if (mounted) {
         setState(() => _isLoading = false);
-        context.showAppSnackBar(e.toString(), isError: true);
+        final l10n = AppLocalizations.of(context);
+        context.showAppSnackBar(l10n.somethingWentWrong, isError: true);
       }
     }
   }

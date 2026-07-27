@@ -26,7 +26,7 @@ class DeliveryInfo extends StatelessWidget {
           Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(Icons.access_time, size: 16, color: Colors.grey),
+              Icon(Icons.access_time, size: 16, color: theme.colorScheme.onSurfaceVariant),
               const SizedBox(width: 4),
               Text(
                 '$estimatedMinutes ${l10n.minutesShort}',
@@ -38,7 +38,7 @@ class DeliveryInfo extends StatelessWidget {
           Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(Icons.delivery_dining, size: 16, color: Colors.grey),
+              Icon(Icons.delivery_dining, size: 16, color: theme.colorScheme.onSurfaceVariant),
               const SizedBox(width: 4),
               Text(
                 deliveryFee == 0
@@ -52,10 +52,10 @@ class DeliveryInfo extends StatelessWidget {
           Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(
+              Icon(
                 Icons.shopping_bag_outlined,
                 size: 16,
-                color: Colors.grey,
+                color: theme.colorScheme.onSurfaceVariant,
               ),
               const SizedBox(width: 4),
               Text(

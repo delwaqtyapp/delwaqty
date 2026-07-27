@@ -5,6 +5,7 @@ import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
 import 'package:delwaqty/shared/widgets/premium_empty_state.dart';
 import 'package:delwaqty/shared/widgets/app_loader.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
+import 'package:delwaqty/core/theme/app_colors.dart';
 
 class AdminOrdersPage extends ConsumerWidget {
   const AdminOrdersPage({super.key});
@@ -47,7 +48,33 @@ class AdminOrdersPage extends ConsumerWidget {
                 const SizedBox(width: 8),
                 IconButton(
                   icon: const Icon(Icons.filter_list_outlined),
-                  onPressed: () {},
+                  onPressed: () {
+                    showModalBottomSheet(
+                      context: context,
+                      builder: (ctx) => SafeArea(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            ListTile(
+                              leading: const Icon(Icons.pending_outlined),
+                              title: Text(l10n.pending),
+                              onTap: () => Navigator.pop(ctx),
+                            ),
+                            ListTile(
+                              leading: const Icon(Icons.local_shipping_outlined),
+                              title: Text(l10n.inTransit),
+                              onTap: () => Navigator.pop(ctx),
+                            ),
+                            ListTile(
+                              leading: const Icon(Icons.check_circle_outline),
+                              title: Text(l10n.delivered),
+                              onTap: () => Navigator.pop(ctx),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
                   tooltip: l10n.filterOrders,
                 ),
               ],
@@ -130,11 +157,11 @@ class _OrderTile extends StatelessWidget {
     final merchantName = merchants?['name'] as String? ?? '';
 
     final statusColor = switch (status) {
-      'delivered' => Colors.green,
-      'in_transit' => Colors.blue,
-      'pending' => Colors.orange,
-      'cancelled' => Colors.red,
-      _ => Colors.grey,
+      'delivered' => AppColors.successLight,
+      'in_transit' => AppColors.infoLight,
+      'pending' => AppColors.warningLight,
+      'cancelled' => AppColors.errorLight,
+      _ => Theme.of(context).colorScheme.onSurfaceVariant,
     };
 
     final statusLabel = switch (status) {
@@ -213,7 +240,29 @@ class _OrderTile extends StatelessWidget {
               ),
           ],
         ),
-        onTap: () {},
+        onTap: () {
+          showDialog(
+            context: context,
+            builder: (ctx) => AlertDialog(
+              title: Text(orderId.length > 8 ? orderId.substring(0, 8) : orderId),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('${l10n.subtotal}: ${totalAmount.toStringAsFixed(2)}'),
+                  const SizedBox(height: 4),
+                  Text(statusLabel),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(ctx),
+                  child: Text(l10n.cancel),
+                ),
+              ],
+            ),
+          );
+        },
       ),
     );
   }

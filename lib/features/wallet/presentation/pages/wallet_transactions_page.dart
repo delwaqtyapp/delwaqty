@@ -8,6 +8,7 @@ import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
 import 'package:delwaqty/shared/widgets/premium_empty_state.dart';
 import 'package:delwaqty/shared/widgets/shimmer_loading.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
+import 'package:delwaqty/core/theme/app_colors.dart';
 
 class WalletTransactionsPage extends ConsumerWidget {
   const WalletTransactionsPage({super.key});
@@ -103,13 +104,13 @@ class _TransactionTile extends StatelessWidget {
               height: 40,
               decoration: BoxDecoration(
                 color: isCredit
-                    ? Colors.green.withValues(alpha: 0.1)
+                    ? AppColors.successLight.withValues(alpha: 0.1)
                     : theme.colorScheme.error.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Icon(
                 _getIcon(transaction.type),
-                color: isCredit ? Colors.green.shade700 : theme.colorScheme.error,
+                color: isCredit ? AppColors.successLight : theme.colorScheme.error,
                 size: 20,
               ),
             ),
@@ -141,7 +142,7 @@ class _TransactionTile extends StatelessWidget {
                 '${isCredit ? '+' : '-'}${l10n.amountWithCurrency(transaction.amount.toStringAsFixed(2), l10n.currencySymbol)}',
                 style: theme.textTheme.bodyMedium?.copyWith(
                   fontWeight: FontWeight.w700,
-                  color: isCredit ? Colors.green.shade700 : theme.colorScheme.error,
+                  color: isCredit ? AppColors.successLight : theme.colorScheme.error,
                 ),
                 overflow: TextOverflow.ellipsis,
               ),

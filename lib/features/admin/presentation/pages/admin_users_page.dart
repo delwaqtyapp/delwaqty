@@ -6,7 +6,7 @@ import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 import 'package:delwaqty/shared/widgets/premium_empty_state.dart';
 import 'package:delwaqty/shared/widgets/app_loader.dart';
-import 'package:delwaqty/l10n/app_localizations.dart';
+import 'package:delwaqty/core/theme/app_colors.dart';
 
 String _roleLabel(AdminRole role, AppLocalizations l10n) => switch (role) {
   AdminRole.superAdmin => l10n.roleSuperAdmin,
@@ -255,7 +255,29 @@ class _UserTile extends StatelessWidget {
           ),
         ],
       ),
-      onTap: () {},
+      onTap: () {
+        showDialog(
+          context: context,
+          builder: (ctx) => AlertDialog(
+            title: Text(user.name),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('${l10n.email}: ${user.email}'),
+                const SizedBox(height: 4),
+                Text('${l10n.role}: ${_roleLabel(user.role, l10n)}'),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(ctx),
+                child: Text(l10n.cancel),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 }
@@ -267,10 +289,10 @@ class _RoleChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final color = switch (role) {
-      AdminRole.superAdmin => Colors.red,
-      AdminRole.admin => Colors.blue,
-      AdminRole.moderator => Colors.orange,
-      AdminRole.support => Colors.green,
+      AdminRole.superAdmin => AppColors.errorLight,
+      AdminRole.admin => AppColors.infoLight,
+      AdminRole.moderator => AppColors.warningLight,
+      AdminRole.support => AppColors.successLight,
     };
 
     return Chip(
@@ -296,10 +318,10 @@ class _StatusDot extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final color = switch (status) {
-      AdminUserStatus.active => Colors.green,
-      AdminUserStatus.pending => Colors.orange,
-      AdminUserStatus.suspended => Colors.red,
-      AdminUserStatus.deactivated => Colors.grey,
+      AdminUserStatus.active => AppColors.successLight,
+      AdminUserStatus.pending => AppColors.warningLight,
+      AdminUserStatus.suspended => AppColors.errorLight,
+      AdminUserStatus.deactivated => Theme.of(context).colorScheme.onSurfaceVariant,
     };
 
     return Tooltip(

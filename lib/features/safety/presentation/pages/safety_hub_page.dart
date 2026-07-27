@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 import 'package:delwaqty/core/theme/app_colors.dart';
+import 'package:delwaqty/core/theme/app_text_styles.dart';
 
 class SafetyHubPage extends ConsumerWidget {
   const SafetyHubPage({super.key});
@@ -33,7 +34,7 @@ class SafetyHubPage extends ConsumerWidget {
                             ),
                             borderRadius: BorderRadius.circular(16),
                           ),
-                          child: const Icon(Icons.shield_rounded, color: Colors.white, size: 28),
+                          child: Icon(Icons.shield_rounded, color: Theme.of(context).colorScheme.onPrimary, size: 28),
                         ),
                         const SizedBox(width: 14),
                         Expanded(
@@ -78,7 +79,7 @@ class SafetyHubPage extends ConsumerWidget {
                           icon: Icons.play_circle_outline_rounded,
                           title: l10n.beforeTrip,
                           subtitle: l10n.beforeTripInstructions,
-                          color: Colors.blue,
+                          color: AppColors.infoLight,
                           cs: cs,
                         ),
                         _buildInstructionTile(
@@ -86,7 +87,7 @@ class SafetyHubPage extends ConsumerWidget {
                           icon: Icons.directions_car_rounded,
                           title: l10n.duringTrip,
                           subtitle: l10n.duringTripInstructions,
-                          color: Colors.orange,
+                          color: AppColors.warningLight,
                           cs: cs,
                         ),
                         _buildInstructionTile(
@@ -94,7 +95,7 @@ class SafetyHubPage extends ConsumerWidget {
                           icon: Icons.flag_outlined,
                           title: l10n.afterTrip,
                           subtitle: l10n.afterTripInstructions,
-                          color: Colors.green,
+                          color: AppColors.successLight,
                           cs: cs,
                         ),
                       ],
@@ -112,7 +113,7 @@ class SafetyHubPage extends ConsumerWidget {
                           icon: Icons.person_search_rounded,
                           title: l10n.beforeTrip,
                           subtitle: l10n.driverBeforeTrip,
-                          color: Colors.blue,
+                          color: AppColors.infoLight,
                           cs: cs,
                         ),
                         _buildInstructionTile(
@@ -120,7 +121,7 @@ class SafetyHubPage extends ConsumerWidget {
                           icon: Icons.route_rounded,
                           title: l10n.duringTrip,
                           subtitle: l10n.driverDuringTrip,
-                          color: Colors.orange,
+                          color: AppColors.warningLight,
                           cs: cs,
                         ),
                         _buildInstructionTile(
@@ -128,7 +129,7 @@ class SafetyHubPage extends ConsumerWidget {
                           icon: Icons.check_circle_outline_rounded,
                           title: l10n.afterTrip,
                           subtitle: l10n.driverAfterTrip,
-                          color: Colors.green,
+                          color: AppColors.successLight,
                           cs: cs,
                         ),
                       ],
@@ -146,7 +147,7 @@ class SafetyHubPage extends ConsumerWidget {
                           icon: Icons.emergency_rounded,
                           title: l10n.sosAlertTool,
                           subtitle: l10n.sosAlertDesc,
-                          color: Colors.red,
+                          color: AppColors.errorLight,
                           onTap: () => context.push('/safety/settings'),
                         ),
                         _buildToolTile(
@@ -162,7 +163,7 @@ class SafetyHubPage extends ConsumerWidget {
                           icon: Icons.contacts_rounded,
                           title: l10n.trustedContactsTool,
                           subtitle: l10n.trustedContactsDesc,
-                          color: Colors.teal,
+                          color: AppColors.orderReady,
                           onTap: () => context.push('/safety/contacts'),
                         ),
                         _buildToolTile(
@@ -170,7 +171,7 @@ class SafetyHubPage extends ConsumerWidget {
                           icon: Icons.pin_rounded,
                           title: l10n.pickupOtpTool,
                           subtitle: l10n.pickupOtpDesc,
-                          color: Colors.green,
+                          color: AppColors.successLight,
                           onTap: () => context.push('/safety/settings'),
                         ),
                       ],
@@ -209,7 +210,7 @@ class SafetyHubPage extends ConsumerWidget {
         Flexible(
           child: Text(
             title,
-            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: cs.onSurface),
+            style: AppTextStyles.titleMedium.copyWith(color: cs.onSurface),
             overflow: TextOverflow.ellipsis,
           ),
         ),
@@ -244,9 +245,9 @@ class SafetyHubPage extends ConsumerWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title, style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14, color: cs.onSurface)),
+                Text(title, style: AppTextStyles.titleSmall.copyWith(color: cs.onSurface)),
                 const SizedBox(height: 2),
-                Text(subtitle, style: TextStyle(fontSize: 12.5, color: cs.onSurfaceVariant, height: 1.4)),
+                Text(subtitle, style: AppTextStyles.bodySmall.copyWith(fontSize: 12.5, color: cs.onSurfaceVariant, height: 1.4)),
               ],
             ),
           ),
@@ -289,9 +290,9 @@ class SafetyHubPage extends ConsumerWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(title, style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14, color: cs.onSurface)),
+                      Text(title, style: AppTextStyles.titleSmall.copyWith(color: cs.onSurface)),
                       const SizedBox(height: 2),
-                      Text(subtitle, style: TextStyle(fontSize: 12, color: cs.onSurfaceVariant)),
+                      Text(subtitle, style: AppTextStyles.bodySmall.copyWith(color: cs.onSurfaceVariant)),
                     ],
                   ),
                 ),
@@ -322,7 +323,7 @@ class SafetyHubPage extends ConsumerWidget {
           Expanded(
             child: Text(
               text,
-              style: TextStyle(fontSize: 13, color: cs.onSurface, height: 1.4),
+              style: AppTextStyles.bodyMedium.copyWith(fontSize: 13, color: cs.onSurface, height: 1.4),
             ),
           ),
         ],

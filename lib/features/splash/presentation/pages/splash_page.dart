@@ -7,6 +7,8 @@ import 'package:delwaqty/data/datasources/local/shared_preferences_service.dart'
 import 'package:delwaqty/features/auth/domain/auth_state.dart';
 import 'package:delwaqty/features/auth/presentation/auth_provider.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
+import 'package:delwaqty/core/theme/app_colors.dart';
+import 'package:delwaqty/core/theme/app_text_styles.dart';
 
 class SplashPage extends ConsumerStatefulWidget {
   const SplashPage({super.key});
@@ -188,7 +190,7 @@ class _SplashPageState extends ConsumerState<SplashPage>
             shape: BoxShape.circle,
             boxShadow: [
               BoxShadow(
-                color: Colors.white.withValues(alpha: 0.12 * _glowAnimation.value),
+                color: Theme.of(context).colorScheme.onPrimary.withValues(alpha: 0.12 * _glowAnimation.value),
                 blurRadius: 80 * _glowAnimation.value,
                 spreadRadius: 25 * _glowAnimation.value,
               ),
@@ -219,11 +221,11 @@ class _SplashPageState extends ConsumerState<SplashPage>
         width: 140,
         height: 140,
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: Theme.of(context).colorScheme.surface,
           borderRadius: BorderRadius.circular(40),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.15),
+              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.15),
               blurRadius: 40,
               offset: const Offset(0, 15),
             ),
@@ -237,7 +239,7 @@ class _SplashPageState extends ConsumerState<SplashPage>
         child: Center(
           child: Text(
             l10n.appNameAr,
-            style: const TextStyle(
+            style: AppTextStyles.displaySmall.copyWith(
               fontSize: 38,
               fontWeight: FontWeight.w900,
               color: Color(0xFF6750A4),
@@ -263,10 +265,9 @@ class _SplashPageState extends ConsumerState<SplashPage>
       },
       child: Text(
         l10n.appTitle,
-        style: const TextStyle(
-          fontSize: 36,
+        style: AppTextStyles.displaySmall.copyWith(
           fontWeight: FontWeight.w800,
-          color: Colors.white,
+          color: Theme.of(context).colorScheme.onPrimary,
           letterSpacing: 1,
         ),
       ),
@@ -287,11 +288,9 @@ class _SplashPageState extends ConsumerState<SplashPage>
       },
       child: Text(
         l10n.splashTagline,
-        style: TextStyle(
-          fontSize: 16,
-          color: Colors.white.withValues(alpha: 0.8),
+        style: AppTextStyles.bodyLarge.copyWith(
+          color: Theme.of(context).colorScheme.onPrimary.withValues(alpha: 0.8),
           letterSpacing: 1.5,
-          fontWeight: FontWeight.w400,
         ),
       ),
     );
@@ -311,7 +310,7 @@ class _SplashPageState extends ConsumerState<SplashPage>
         height: 24,
         child: CircularProgressIndicator(
           strokeWidth: 2,
-          color: Colors.white.withValues(alpha: 0.7),
+          color: Theme.of(context).colorScheme.onPrimary.withValues(alpha: 0.7),
         ),
       ),
     );
@@ -341,11 +340,11 @@ class _SplashPageState extends ConsumerState<SplashPage>
               width: particleSize,
               height: particleSize,
               decoration: BoxDecoration(
-                color: Colors.white,
+          color: Theme.of(context).colorScheme.surface,
                 shape: BoxShape.circle,
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.white.withValues(alpha: opacity * 0.5),
+                    color: Theme.of(context).colorScheme.onPrimary.withValues(alpha: opacity * 0.5),
                     blurRadius: particleSize * 2,
                   ),
                 ],

@@ -3,6 +3,7 @@ import 'package:delwaqty/features/commerce/domain/entities/merchant.dart';
 import 'package:delwaqty/features/commerce/domain/entities/favorite.dart';
 import 'package:delwaqty/features/commerce/presentation/widgets/favorite_button.dart';
 import 'package:delwaqty/core/theme/app_colors.dart';
+import 'package:delwaqty/core/theme/app_text_styles.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 
 class MerchantCard extends StatelessWidget {
@@ -104,12 +105,12 @@ class MerchantCard extends StatelessWidget {
                           vertical: 2,
                         ),
                         decoration: BoxDecoration(
-                          color: Colors.blue,
+                          color: AppColors.infoLight,
                           borderRadius: BorderRadius.circular(4),
                         ),
                         child: Text(
                           l10n.verified,
-                          style: const TextStyle(color: Colors.white, fontSize: 10),
+                          style: AppTextStyles.labelSmall.copyWith(fontSize: 10, color: theme.colorScheme.onPrimary),
                         ),
                       ),
                     ),
@@ -123,12 +124,12 @@ class MerchantCard extends StatelessWidget {
                           vertical: 2,
                         ),
                         decoration: BoxDecoration(
-                          color: Colors.green,
+                          color: AppColors.successLight,
                           borderRadius: BorderRadius.circular(4),
                         ),
                         child: Text(
                           l10n.open,
-                          style: const TextStyle(color: Colors.white, fontSize: 10),
+                          style: AppTextStyles.labelSmall.copyWith(fontSize: 10, color: theme.colorScheme.onPrimary),
                         ),
                       ),
                     ),
@@ -137,7 +138,7 @@ class MerchantCard extends StatelessWidget {
                     right: 8,
                     child: Container(
                       decoration: BoxDecoration(
-                        color: Colors.black.withValues(alpha: 0.3),
+                        color: theme.colorScheme.onSurface.withValues(alpha: 0.3),
                         shape: BoxShape.circle,
                       ),
                       padding: const EdgeInsets.all(2),
@@ -173,7 +174,7 @@ class MerchantCard extends StatelessWidget {
                       Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          const Icon(Icons.star, size: 14, color: Colors.amber),
+                          const Icon(Icons.star, size: 14, color: AppColors.rating),
                           const SizedBox(width: 2),
                           Text(
                             merchant.rating.toStringAsFixed(1),
@@ -196,10 +197,10 @@ class MerchantCard extends StatelessWidget {
                   if (merchant.deliveryAvailable)
                     Row(
                       children: [
-                        const Icon(
+                        Icon(
                           Icons.delivery_dining,
                           size: 14,
-                          color: Colors.grey,
+                          color: theme.colorScheme.onSurfaceVariant,
                         ),
                         const SizedBox(width: 4),
                         Flexible(

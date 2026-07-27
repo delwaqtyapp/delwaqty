@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:delwaqty/core/extensions/context_extensions.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 import 'package:delwaqty/shared/widgets/confirm_dialog.dart';
+import 'package:delwaqty/core/theme/app_colors.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class DataPrivacyPage extends StatelessWidget {
@@ -31,8 +32,8 @@ class DataPrivacyPage extends StatelessWidget {
           ),
           const Divider(height: 1),
           ListTile(
-            leading: const Icon(Icons.delete_outline_rounded, color: Colors.red),
-            title: Text(l10n.deleteAccount, style: const TextStyle(color: Colors.red)),
+            leading: const Icon(Icons.delete_outline_rounded, color: AppColors.errorLight),
+            title: Text(l10n.deleteAccount, style: const TextStyle(color: AppColors.errorLight)),
             subtitle: Text(l10n.deleteAccountDescription),
             trailing: const Icon(Icons.chevron_right_rounded),
             onTap: () => _confirmDelete(context, l10n),
@@ -66,7 +67,7 @@ class DataPrivacyPage extends StatelessWidget {
         }
       } catch (e) {
         if (context.mounted) {
-          context.showAppSnackBar('${l10n.error}: $e');
+          context.showAppSnackBar(l10n.somethingWentWrong, isError: true);
         }
       }
     }

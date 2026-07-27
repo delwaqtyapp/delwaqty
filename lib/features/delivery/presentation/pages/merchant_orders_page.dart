@@ -8,6 +8,7 @@ import 'package:delwaqty/features/delivery/domain/entities/delivery_order.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
 import 'package:delwaqty/shared/widgets/shimmer_loading.dart';
+import 'package:delwaqty/core/theme/app_colors.dart';
 
 enum _OrderFilter { all, active, completed }
 
@@ -317,7 +318,7 @@ class _StatusChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final (color, label) = _style(status, AppLocalizations.of(context));
+    final (color, label) = _style(status, AppLocalizations.of(context), Theme.of(context).colorScheme);
     return Chip(
       label: Text(label, style: theme.textTheme.labelSmall),
       backgroundColor: color.withValues(alpha: 0.1),
@@ -327,24 +328,24 @@ class _StatusChip extends StatelessWidget {
     );
   }
 
-  (Color, String) _style(String status, AppLocalizations l10n) {
+  (Color, String) _style(String status, AppLocalizations l10n, ColorScheme colorScheme) {
     switch (status) {
       case 'pending':
-        return (Colors.orange, l10n.pending);
+        return (AppColors.warningLight, l10n.pending);
       case 'preparing':
-        return (Colors.blue, l10n.preparing);
+        return (AppColors.infoLight, l10n.preparing);
       case 'ready':
-        return (Colors.green, l10n.ready);
+        return (AppColors.successLight, l10n.ready);
       case 'dispatching':
-        return (Colors.purple, l10n.dispatching);
+        return (AppColors.orderPreparing, l10n.dispatching);
       case 'delivering':
-        return (Colors.teal, l10n.delivering);
+        return (AppColors.orderReady, l10n.delivering);
       case 'delivered':
-        return (Colors.green, l10n.delivered);
+        return (AppColors.successLight, l10n.delivered);
       case 'cancelled':
-        return (Colors.red, l10n.cancelled);
+        return (AppColors.errorLight, l10n.cancelled);
       default:
-        return (Colors.grey, status);
+        return (colorScheme.onSurfaceVariant, status);
     }
   }
 }

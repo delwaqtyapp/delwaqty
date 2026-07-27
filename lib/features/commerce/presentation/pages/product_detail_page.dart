@@ -57,7 +57,8 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage> {
           _modifiersLoaded = true;
         });
       }
-    } catch (_) {
+    } catch (e) {
+      debugPrint('Failed to load product modifiers: $e');
       if (mounted) setState(() => _modifiersLoaded = true);
     }
   }
@@ -73,7 +74,7 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage> {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return Scaffold(
             appBar: AppBar(title: Text(l10n.loading)),
-            body: const Center(child: AppLoaderCircular()),
+            body: const SkeletonCard(),
           );
         }
 

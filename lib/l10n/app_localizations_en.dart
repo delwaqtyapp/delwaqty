@@ -3462,4 +3462,7 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get securityAlertsDescription =>
       'Get notified about suspicious activity';
+
+  @override
+  String get somethingWentWrong => 'Something went wrong. Please try again.';
 }

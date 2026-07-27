@@ -1138,5 +1138,6 @@
   "promotions": "العروض الترويجية",
   "promotionsDescription": "استلام عروض وخصومات ترويجية",
   "securityAlerts": "تنبيهات الأمان",
-  "securityAlertsDescription": "استلام إشعارات عن أنشطة مشبوهة"
+  "securityAlertsDescription": "استلام إشعارات عن أنشطة مشبوهة",
+  "somethingWentWrong": "حدث خطأ ما. يرجى المحاولة مرة أخرى."
 }

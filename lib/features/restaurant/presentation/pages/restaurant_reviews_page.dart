@@ -9,6 +9,8 @@ import 'package:delwaqty/shared/widgets/premium_empty_state.dart';
 import 'package:delwaqty/shared/widgets/error_state.dart';
 import 'package:delwaqty/shared/widgets/app_snackbar.dart';
 import 'package:delwaqty/shared/widgets/skeleton_loader.dart';
+import 'package:delwaqty/shared/widgets/app_loader.dart';
+import 'package:delwaqty/core/theme/app_colors.dart';
 
 class ReviewsState {
   final List<Review> reviews;
@@ -134,7 +136,7 @@ class _RestaurantReviewsPageState extends ConsumerState<RestaurantReviewsPage> {
         children: [
           summaryAsync.when(
             data: (summary) => _RatingSummary(summary: summary),
-            loading: () => const SizedBox(height: 120, child: Center(child: CircularProgressIndicator())),
+            loading: () => const SkeletonListTile(),
             error: (_, __) => const SizedBox.shrink(),
           ),
           const Divider(),
@@ -232,7 +234,7 @@ class _RatingSummary extends StatelessWidget {
                   return Icon(
                     filled ? Icons.star_rounded : Icons.star_border_rounded,
                     size: 18,
-                    color: Colors.amber,
+                    color: AppColors.rating,
                   );
                 }),
               ),
@@ -292,7 +294,7 @@ class _RatingBar extends StatelessWidget {
                 minHeight: 6,
                 backgroundColor: theme.colorScheme.surfaceContainerHighest,
                 valueColor: AlwaysStoppedAnimation<Color>(
-                  count > 0 ? Colors.amber : theme.colorScheme.surfaceContainerHighest,
+                  count > 0 ? AppColors.rating : theme.colorScheme.surfaceContainerHighest,
                 ),
               ),
             ),
@@ -355,7 +357,7 @@ class _ReviewTile extends StatelessWidget {
                               ? Icons.star_rounded
                               : Icons.star_border_rounded,
                           size: 14,
-                          color: Colors.amber,
+                          color: AppColors.rating,
                         );
                       }),
                     ),
@@ -456,7 +458,7 @@ class _WriteReviewSheetState extends ConsumerState<_WriteReviewSheet> {
                     child: Icon(
                       i < _rating.round() ? Icons.star_rounded : Icons.star_border_rounded,
                       size: 36,
-                      color: Colors.amber,
+                      color: AppColors.rating,
                     ),
                   ),
                 );
@@ -482,10 +484,10 @@ class _WriteReviewSheetState extends ConsumerState<_WriteReviewSheet> {
               child: FilledButton(
                 onPressed: _isSubmitting ? null : _submitReview,
                 child: _isSubmitting
-                    ? const SizedBox(
+                    ? SizedBox(
                         width: 18,
                         height: 18,
-                        child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                        child: CircularProgressIndicator(strokeWidth: 2, color: theme.colorScheme.onPrimary),
                       )
                     : Text(l10n.submitReview),
               ),

@@ -82,7 +82,7 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
               Align(
                 alignment: Alignment.centerRight,
                 child: TextButton(
-                  onPressed: () {},
+                  onPressed: () => context.showAppSnackBar(l10n.addNewAddress),
                   child: Text(l10n.addNewAddress),
                 ),
               ),
@@ -308,7 +308,7 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.error), backgroundColor: cs.error),
+        SnackBar(content: Text(l10n.somethingWentWrong), backgroundColor: cs.error),
       );
     } finally {
       if (mounted) {

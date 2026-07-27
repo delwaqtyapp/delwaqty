@@ -24,6 +24,8 @@ import 'package:delwaqty/shared/widgets/section_header.dart';
 import 'package:delwaqty/shared/widgets/shimmer_loading.dart';
 import 'package:delwaqty/shared/widgets/glass_card.dart';
 import 'package:delwaqty/shared/widgets/skeleton_loader.dart';
+import 'package:delwaqty/core/theme/app_colors.dart';
+import 'package:delwaqty/core/theme/app_text_styles.dart';
 
 final _merchantProvider = FutureProvider.family<Merchant?, String>((ref, id) async {
   final repo = ref.watch(merchantRepositoryProvider);
@@ -263,15 +265,15 @@ class _RestaurantDetailPageState extends ConsumerState<RestaurantDetailPage> {
                 child: Icon(
                   Icons.restaurant_rounded,
                   size: 80,
-                  color: Colors.white.withOpacity(0.3),
+                  color: theme.colorScheme.onPrimary.withOpacity(0.3),
                 ),
               ),
-            const DecoratedBox(
+            DecoratedBox(
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
-                  colors: [Colors.transparent, Colors.black54],
+                  colors: [Colors.transparent, theme.colorScheme.onSurface.withValues(alpha: 0.54)],
                 ),
               ),
             ),
@@ -285,7 +287,7 @@ class _RestaurantDetailPageState extends ConsumerState<RestaurantDetailPage> {
                   Text(
                     merchant.name,
                     style: theme.textTheme.headlineSmall?.copyWith(
-                      color: Colors.white,
+                      color: theme.colorScheme.onPrimary,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -328,14 +330,14 @@ class _RestaurantDetailPageState extends ConsumerState<RestaurantDetailPage> {
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
               decoration: BoxDecoration(
                 color: merchant.isOpenNow
-                    ? Colors.green.withOpacity(0.1)
-                    : Colors.red.withOpacity(0.1),
+                    ? AppColors.successLight.withOpacity(0.1)
+                    : AppColors.errorLight.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(20),
               ),
               child: Text(
                 merchant.isOpenNow ? l10n.open : l10n.closed,
                 style: theme.textTheme.labelMedium?.copyWith(
-                  color: merchant.isOpenNow ? Colors.green.shade700 : Colors.red.shade700,
+                  color: merchant.isOpenNow ? AppColors.successLight : AppColors.errorLight,
                   fontWeight: FontWeight.w600,
                 ),
               ),
@@ -480,7 +482,7 @@ class _RestaurantDetailPageState extends ConsumerState<RestaurantDetailPage> {
                     const SizedBox(height: 6),
                     Text(
                       label,
-                      style: theme.textTheme.labelSmall?.copyWith(fontSize: 11),
+                      style: AppTextStyles.labelSmall,
                       textAlign: TextAlign.center,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,

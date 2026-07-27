@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:delwaqty/core/theme/app_colors.dart';
+import 'package:delwaqty/core/theme/app_text_styles.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:delwaqty/features/auth/presentation/auth_provider.dart';
@@ -36,7 +38,7 @@ class DriverEarningsPage extends ConsumerWidget {
       body: profileAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) =>
-            Center(child: Text(l10n.errorWithMessage(e.toString()))),
+            Center(child: Text(l10n.somethingWentWrong)),
         data: (profile) {
           if (profile == null) {
             return Center(child: Text(l10n.noActiveTrip));
@@ -103,7 +105,7 @@ class _EarningsBody extends ConsumerWidget {
                     contentPadding: EdgeInsets.zero,
                     leading: CircleAvatar(
                       backgroundColor: positive
-                          ? Colors.green.withValues(alpha: 0.15)
+                          ? AppColors.successLight.withValues(alpha: 0.15)
                           : Theme.of(context)
                               .colorScheme
                               .error
@@ -113,7 +115,7 @@ class _EarningsBody extends ConsumerWidget {
                             ? Icons.arrow_downward_rounded
                             : Icons.arrow_upward_rounded,
                         color: positive
-                            ? Colors.green
+                            ? AppColors.successLight
                             : Theme.of(context).colorScheme.error,
                       ),
                     ),
@@ -123,10 +125,10 @@ class _EarningsBody extends ConsumerWidget {
                     ),
                     trailing: Text(
                       '${positive ? '+' : ''}${l10n.amountWithCurrency(e.amount.toStringAsFixed(0), l10n.currencySymbol)}',
-                      style: TextStyle(
+                      style: AppTextStyles.bodyMedium.copyWith(
                         fontWeight: FontWeight.bold,
                         color: positive
-                            ? Colors.green
+                            ? AppColors.successLight
                             : Theme.of(context).colorScheme.error,
                       ),
                     ),
@@ -183,7 +185,7 @@ class _WalletBreakdownCard extends StatelessWidget {
           _BreakdownRow(
             label: l10n.bonusBalance,
             value: wallet.bonusBalance,
-            color: Colors.orange,
+            color: AppColors.warningLight,
           ),
           const SizedBox(height: 8),
           _BreakdownRow(
@@ -195,7 +197,7 @@ class _WalletBreakdownCard extends StatelessWidget {
           _BreakdownRow(
             label: l10n.pendingWithdrawals,
             value: wallet.pendingWithdrawals,
-            color: Colors.amber,
+            color: AppColors.rating,
           ),
           const SizedBox(height: 8),
           _BreakdownRow(
@@ -235,7 +237,7 @@ class _BreakdownRow extends StatelessWidget {
         const SizedBox(width: 8),
         Text(
           l10n.amountWithCurrency(value.toStringAsFixed(0), l10n.currencySymbol),
-          style: TextStyle(fontWeight: FontWeight.w600, color: color),
+          style: AppTextStyles.bodyMedium.copyWith(fontWeight: FontWeight.w600, color: color),
         ),
       ],
     );
@@ -265,13 +267,13 @@ class _BalanceCard extends ConsumerWidget {
         children: [
           Text(l10n.wallet,
               style: theme.textTheme.bodyMedium
-                  ?.copyWith(color: Colors.white.withValues(alpha: 0.85))),
+                  ?.copyWith(color: theme.colorScheme.onPrimary.withValues(alpha: 0.85))),
           const SizedBox(height: 4),
           Text(
             l10n.amountWithCurrency(
                 stats.balance.toStringAsFixed(2), l10n.currencySymbol),
             style: theme.textTheme.headlineMedium?.copyWith(
-                color: Colors.white, fontWeight: FontWeight.bold),
+                color: theme.colorScheme.onPrimary, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 16),
           Row(
@@ -308,11 +310,11 @@ class _BalanceCard extends ConsumerWidget {
       children: [
         Text(label,
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: Colors.white.withValues(alpha: 0.85))),
+                color: Theme.of(context).colorScheme.onPrimary.withValues(alpha: 0.85))),
         Text(
           l10n.amountWithCurrency(value.toStringAsFixed(0), l10n.currencySymbol),
-          style: const TextStyle(
-              color: Colors.white, fontWeight: FontWeight.bold),
+          style: AppTextStyles.bodyMedium.copyWith(
+              color: Theme.of(context).colorScheme.onPrimary, fontWeight: FontWeight.bold),
         ),
       ],
     );
@@ -371,7 +373,7 @@ class _BalanceCard extends ConsumerWidget {
       messenger.showSnackBar(SnackBar(content: Text(l10n.withdrawalRequested)));
     } catch (e) {
       messenger
-          .showSnackBar(SnackBar(content: Text(l10n.errorWithMessage(e.toString()))));
+          .showSnackBar(SnackBar(content: Text(l10n.somethingWentWrong)));
     }
   }
 }

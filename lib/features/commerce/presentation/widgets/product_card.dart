@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:delwaqty/core/theme/app_colors.dart';
+import 'package:delwaqty/core/theme/app_text_styles.dart';
 import 'package:delwaqty/features/commerce/domain/entities/product.dart';
 import 'package:delwaqty/features/commerce/domain/entities/favorite.dart';
 import 'package:delwaqty/features/commerce/presentation/widgets/favorite_button.dart';
@@ -50,28 +52,28 @@ class ProductCard extends StatelessWidget {
                           vertical: 2,
                         ),
                         decoration: BoxDecoration(
-                          color: Colors.red,
+                          color: AppColors.errorLight,
                           borderRadius: BorderRadius.circular(4),
                         ),
                         child: Text(
                           '-${((1 - product.price / product.originalPrice!) * 100).round()}%',
-                          style: const TextStyle(
-                            color: Colors.white,
+                          style: AppTextStyles.labelSmall.copyWith(
                             fontSize: 10,
                             fontWeight: FontWeight.bold,
+                            color: theme.colorScheme.onPrimary,
                           ),
                         ),
                       ),
                     ),
                   if (!product.isAvailable)
                     Container(
-                      color: Colors.black.withValues(alpha: 0.5),
+                      color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
                       child: Center(
                         child: Text(
                           AppLocalizations.of(context).unavailable,
-                          style: const TextStyle(
-                            color: Colors.white,
+                          style: AppTextStyles.bodyMedium.copyWith(
                             fontWeight: FontWeight.bold,
+                            color: theme.colorScheme.surface,
                           ),
                         ),
                       ),
@@ -81,7 +83,7 @@ class ProductCard extends StatelessWidget {
                     right: 4,
                     child: Container(
                       decoration: BoxDecoration(
-                        color: Colors.black.withValues(alpha: 0.3),
+                        color: theme.colorScheme.onSurface.withValues(alpha: 0.3),
                         shape: BoxShape.circle,
                       ),
                       padding: const EdgeInsets.all(2),
@@ -128,7 +130,7 @@ class ProductCard extends StatelessWidget {
                             '${product.originalPrice!.toStringAsFixed(0)}',
                             style: theme.textTheme.bodySmall?.copyWith(
                               decoration: TextDecoration.lineThrough,
-                              color: Colors.grey,
+                              color: theme.colorScheme.onSurfaceVariant,
                             ),
                             overflow: TextOverflow.ellipsis,
                           ),

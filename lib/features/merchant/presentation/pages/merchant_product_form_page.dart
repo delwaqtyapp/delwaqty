@@ -348,7 +348,7 @@ class _MerchantProductFormPageState
       }
     } catch (e) {
       if (mounted) {
-        context.showAppSnackBar(e.toString(), isError: true);
+        context.showAppSnackBar(l10n.somethingWentWrong, isError: true);
       }
     } finally {
       if (mounted) setState(() => _isSaving = false);

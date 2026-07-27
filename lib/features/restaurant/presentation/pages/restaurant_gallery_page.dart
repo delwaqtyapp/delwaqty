@@ -7,6 +7,8 @@ import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
 import 'package:delwaqty/shared/widgets/premium_empty_state.dart';
 import 'package:delwaqty/shared/widgets/error_state.dart';
 import 'package:delwaqty/shared/widgets/app_loader.dart';
+import 'package:delwaqty/core/theme/app_colors.dart';
+import 'package:delwaqty/core/theme/app_text_styles.dart';
 
 final _merchantProvider = FutureProvider.family<Merchant?, String>((ref, id) async {
   final repo = ref.watch(merchantRepositoryProvider);
@@ -141,13 +143,13 @@ class _FullScreenGalleryState extends State<_FullScreenGallery> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: Theme.of(context).colorScheme.onSurface,
       appBar: AppBar(
-        backgroundColor: Colors.black,
-        foregroundColor: Colors.white,
+        backgroundColor: Theme.of(context).colorScheme.onSurface,
+        foregroundColor: Theme.of(context).colorScheme.surface,
         title: Text(
           '${_currentIndex + 1} / ${widget.images.length}',
-          style: const TextStyle(color: Colors.white),
+          style: AppTextStyles.titleMedium.copyWith(color: Theme.of(context).colorScheme.surface),
         ),
       ),
       body: PageView.builder(
@@ -164,9 +166,9 @@ class _FullScreenGalleryState extends State<_FullScreenGallery> {
                 child: Image.network(
                   widget.images[index],
                   fit: BoxFit.contain,
-                  errorBuilder: (_, __, ___) => const Icon(
+                  errorBuilder: (_, __, ___) => Icon(
                     Icons.broken_image,
-                    color: Colors.white54,
+                    color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.54),
                     size: 64,
                   ),
                 ),

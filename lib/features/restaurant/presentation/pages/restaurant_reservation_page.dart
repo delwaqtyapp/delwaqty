@@ -8,6 +8,7 @@ import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
 import 'package:delwaqty/shared/widgets/premium_empty_state.dart';
 import 'package:delwaqty/shared/widgets/app_loader.dart';
 import 'package:delwaqty/shared/widgets/app_snackbar.dart';
+import 'package:delwaqty/core/theme/app_colors.dart';
 
 final _branchesProvider = FutureProvider.family<List<Branch>, String>((ref, merchantId) async {
   final repo = ref.watch(branchRepositoryProvider);
@@ -169,10 +170,10 @@ class _RestaurantReservationPageState extends ConsumerState<RestaurantReservatio
                 child: FilledButton.icon(
                   onPressed: _selectedSlot == null || _isSubmitting ? null : _submitReservation,
                   icon: _isSubmitting
-                      ? const SizedBox(
+                      ? SizedBox(
                           width: 18,
                           height: 18,
-                          child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                          child: CircularProgressIndicator(strokeWidth: 2, color: theme.colorScheme.onPrimary),
                         )
                       : const Icon(Icons.check_circle_outline),
                   label: Text(l10n.confirmReservation),

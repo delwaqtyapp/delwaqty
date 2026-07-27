@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
+import 'package:delwaqty/core/theme/app_colors.dart';
 import 'package:delwaqty/features/restaurant/domain/entities/working_hours.dart';
 
 class WorkingHoursCard extends StatelessWidget {
@@ -70,7 +71,7 @@ class WorkingHoursCard extends StatelessWidget {
                         ? Text(
                             l10n.closed,
                             style: theme.textTheme.bodySmall?.copyWith(
-                              color: Colors.red.shade700,
+                              color: AppColors.errorLight,
                               fontWeight: isToday ? FontWeight.bold : FontWeight.normal,
                             ),
                           )

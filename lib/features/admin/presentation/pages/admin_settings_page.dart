@@ -6,6 +6,7 @@ import 'package:delwaqty/shared/widgets/premium_empty_state.dart';
 import 'package:delwaqty/shared/widgets/app_loader.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 import 'package:delwaqty/core/constants/app_constants.dart';
+import 'package:delwaqty/core/theme/app_colors.dart';
 
 class AdminSettingsPage extends ConsumerStatefulWidget {
   const AdminSettingsPage({super.key});
@@ -235,7 +236,7 @@ class _AdminSettingsPageState extends ConsumerState<AdminSettingsPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(success ? l10n.settingsSaved : l10n.settingsFailed),
-          backgroundColor: success ? Colors.green : Colors.red,
+          backgroundColor: success ? AppColors.successLight : AppColors.errorLight,
         ),
       );
     }

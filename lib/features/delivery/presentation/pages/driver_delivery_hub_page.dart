@@ -15,6 +15,7 @@ import 'package:delwaqty/features/driver/presentation/providers/dispatch_provide
 import 'package:delwaqty/l10n/app_localizations.dart';
 import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
 import 'package:delwaqty/shared/widgets/shimmer_loading.dart';
+import 'package:delwaqty/core/theme/app_colors.dart';
 
 class DriverDeliveryHubPage extends ConsumerWidget {
   const DriverDeliveryHubPage({super.key});
@@ -236,7 +237,7 @@ class _DeliveryHubBodyState extends ConsumerState<_DeliveryHubBody> {
         if (mounted) context.push('/driver/delivery/${offer.rideId}');
       } catch (e) {
         messenger.showSnackBar(
-          SnackBar(content: Text(l10n.errorWithMessage(e.toString()))),
+          SnackBar(content: Text(l10n.somethingWentWrong)),
         );
       }
     } else if (accepted == false) {
@@ -244,7 +245,9 @@ class _DeliveryHubBodyState extends ConsumerState<_DeliveryHubBody> {
         await ref
             .read(deliveryRepositoryProvider)
             .rejectDeliveryRequest(offer.rideId, offer.driverId);
-      } catch (_) {}
+      } catch (e) {
+        debugPrint('Failed to reject delivery request: $e');
+      }
     }
   }
 
@@ -277,7 +280,7 @@ class _OnlineCard extends StatelessWidget {
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: online
-              ? [Colors.green.shade600, Colors.green.shade400]
+              ? [AppColors.successLight, AppColors.successLight]
               : [theme.colorScheme.surfaceContainerHighest, theme.colorScheme.surfaceContainerHigh],
         ),
         borderRadius: BorderRadius.circular(16),
@@ -289,7 +292,7 @@ class _OnlineCard extends StatelessWidget {
             online ? l10n.online : l10n.offline,
             style: theme.textTheme.titleMedium?.copyWith(
               fontWeight: FontWeight.bold,
-              color: online ? Colors.white : theme.colorScheme.onSurface,
+              color: online ? theme.colorScheme.onPrimary : theme.colorScheme.onSurface,
             ),
           ),
           loading
@@ -674,7 +677,7 @@ class _CapabilitiesBottomSheetState
       navigator.pop();
     } catch (e) {
       messenger.showSnackBar(
-        SnackBar(content: Text(l10n.errorWithMessage(e.toString()))),
+        SnackBar(content: Text(l10n.somethingWentWrong)),
       );
     }
   }

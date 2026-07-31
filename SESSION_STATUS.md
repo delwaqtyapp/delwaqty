@@ -1,22 +1,20 @@
 # SESSION_STATUS.md
 
-> **Last updated:** 2026-07-27 Session 12 (Empty/Loading state standardization)
+> **Last updated:** 2026-07-31 Session 15 (Build Fix + GitHub Sync)
 
 ---
 
-## Current Task — STANDARDIZE EMPTY & LOADING STATES
+## Current Task — BUILD FIX + GITHUB SYNC (Post-Sprint 40)
 
-Replaced all custom empty states and bare `CircularProgressIndicator()` across 7 feature pages with `PremiumEmptyState` and `SkeletonListTile`/`SkeletonCard` from shared widgets.
+Fixed the two-APK build issue and synced all Sprint 39-40 work to GitHub.
 
-| Change | Files |
-|--------|-------|
-| `_buildEmptyState()` → `PremiumEmptyState` | `trusted_contacts_page.dart` |
-| `_RegisterPrompt` → `PremiumEmptyState` | `driver_ride_hub_page.dart` |
-| `EmptyState` → `PremiumEmptyState` | `orders_page.dart`, `merchant_detail_page.dart` |
-| `const SizedBox()` empty categories → `PremiumEmptyState` | `merchant_detail_page.dart` |
-| `CircularProgressIndicator()` → `SkeletonListTile()` | `trusted_contacts_page.dart`, `safety_settings_page.dart`, `restaurant_reviews_page.dart` |
-| `CircularProgressIndicator()` → `SkeletonListTile()` | `driver_ride_hub_page.dart` |
-| `AppLoaderCircular()` → `SkeletonCard()` | `product_detail_page.dart` |
+| Change | Details |
+|--------|---------|
+| Cleaned stale `app-release.apk` (built 17 Jul) | Only `app-debug.apk` is produced now |
+| Fixed cross-drive Kotlin cache crash | Added `kotlin.incremental=false` to `android/gradle.properties`; isolated Gradle home at `.gradle_home/` (gitignored) |
+| Clean build | `flutter clean` → `flutter pub get` → `flutter build apk --debug --dart-define-from-file=.env.dev` ✅ |
+| Installed on DNP NX9 | `adb install -r app-debug.apk` ✅ (165 MB) |
+| Git sync | Staged all Sprint 39-40 changes (modules, migrations 013/014, l10n) for commit + push |
 
 ---
 
@@ -24,53 +22,47 @@ Replaced all custom empty states and bare `CircularProgressIndicator()` across 7
 
 | Milestone | Sprint | Description | Status |
 |-----------|--------|-------------|--------|
-| M1 | 28 | Full Arabic-default localization + EGP currency | ✅ |
-| M2 | 29 | Transportation Supabase schema + pricing/dispatch/lifecycle RPCs | ✅ |
-| M3 | 30 | Passenger booking flow on real backend (6 categories, fare/promo, Maps, Realtime) | ✅ |
-| M4 | 31 | Dispatch engine + live trip lifecycle (driver offers, accept/arrive/OTP/start/complete) | ✅ |
-| M5 | 32 | Destination search & geocoding (Google Places, autocomplete, saved/recent) | ✅ |
-| M6 | 33 | Complete driver platform (onboarding, vehicles, documents, dashboard, wallet) | ✅ |
-| M7 | 34 | Unified delivery & courier platform (9 service types, merchant, driver capabilities) | ✅ |
-| M8 | 35-36 | Safety platform + navigation redesign + delivery page overhaul | ✅ |
-| M9 | 37 | Theme hardening — Colors.* → theme-aware tokens | ✅ |
-| M10 | 38 | Error handling hardening — raw e.toString() + silent swallows fixed | ✅ |
-| M11 | 39 | Empty/Loading state standardization | ✅ |
+| M1-M11 | 28-39 | Previous milestones (localization, transportation, booking, dispatch, search, driver platform, delivery, safety, theme, errors, empty states) | ✅ |
+| M12 | 40 | Management Platform — Complaints, Sanctions, Live Tracking, Support Chat | ✅ |
 
 ---
 
-## Sprint 39 Summary (Current)
+## Previous Work (Sprint 40 — Management Platform)
 
-### Empty & Loading State Standardization
-- **trusted_contacts_page.dart**: Replaced custom `_buildEmptyState()` with `PremiumEmptyState`; replaced bare `CircularProgressIndicator()` with `SkeletonListTile()`
-- **driver_ride_hub_page.dart**: Replaced `_RegisterPrompt` widget with `PremiumEmptyState` (icon, title, message, action); replaced bare `CircularProgressIndicator()` with `SkeletonListTile()`
-- **merchant_detail_page.dart**: Replaced `EmptyState` with `PremiumEmptyState` for products; replaced empty categories `const SizedBox()` with `PremiumEmptyState`
-- **orders_page.dart**: Replaced `EmptyState` with `PremiumEmptyState`
-- **product_detail_page.dart**: Replaced `AppLoaderCircular()` with `SkeletonCard()` during FutureBuilder loading
-- **safety_settings_page.dart**: Replaced bare `CircularProgressIndicator()` with `SkeletonListTile()`
-- **restaurant_reviews_page.dart**: Replaced bare `CircularProgressIndicator()` with `SkeletonListTile()`
-- Updated imports: removed `empty_state.dart`, added `premium_empty_state.dart` and `app_loader.dart` where needed
-- Removed unused custom empty state methods/classes (`_buildEmptyState`, `_RegisterPrompt`)
+Built the full management system: complaints, sanctions, live tracking, and support chat modules.
 
-## Sprint 35-36 Summary (Previous Work)
+| Change | Files |
+|--------|-------|
+| Supabase migration `014_management_platform.sql` | 5 tables (complaints, sanctions, location_updates, chat_rooms, chat_messages) + RLS + Storage buckets |
+| **ComplaintsModule** | Entity, repository, data source, impl, providers, admin page, client pages (list + new) |
+| **SanctionsModule** | Entity, repository, data source, impl, providers, admin page |
+| **LocationTrackingModule** | Entity, repository, data source, impl, providers, admin map/list page |
+| **SupportChatModule** | Entity (room + message), repository, data source, impl, providers, admin room list + chat page, client support page + chat |
+| AdminModule updated | 5 new nested routes: `/admin/complaints`, `/admin/sanctions`, `/admin/live-tracking`, `/admin/support-chat`, `/admin/support-chat/room/:roomId` |
+| Module registry | 4 new modules registered |
+| l10n | 33 new EN+AR keys |
 
-### Navigation Redesign (Sprint 35 — `a82e652`)
-- **Bottom nav:** transparent glassmorphism bar with BackdropFilter, BorderRadius.circular(28), floating margin, animated pill selection. 4 items: الرئيسية, توصيلة, دليفرى, الإعدادات.
-- **Drawer:** showGeneralDialog + SlideTransition/FadeTransition. Glass panel 260px wide, 65% max height. Gradient avatar, SuperAdmin badge for admin users, admin dashboard link.
-- **Modules:** RideModule (isNavModule=true, navPriority=30), DirectDeliveryModule (isNavModule=true, navPriority=60).
+---
 
-### Safety Platform — M8 (Sprint 36 — `7b57edc`)
-- **Domain:** SosAlert, TrustedContact, LiveShareSession, SosResult, LiveShareResult, ContactResult (all Freezed).
-- **Data:** SupabaseSafetyDataSource (all RPCs wired), SafetyRepositoryImpl.
-- **Presentation:** TrustedContactsPage (full CRUD, add/edit sheet, relationship/notification preferences), SafetySettingsPage (SOS, sharing, pickup verification).
-- **DB:** Migration 012 — sos_alerts, live_share_sessions, extended trusted_contacts, 7 RPCs, 7 indexes, Realtime.
-- **l10n:** 45+ new EN+AR keys (safety, delivery, admin, contacts, invoice).
+## Completed Milestones
 
-### Delivery Page Overhaul (Sprint 36a-36b — `eeefd22`, `ee50882`)
-- Removed "يلا خد منين" (pickupFrom) field.
-- Removed price column from shopping list (driver sets prices).
-- Shopping list: item name + quantity only.
-- Reordered fields: Shopping list → Describe order → وصّل الى → Set location → Place description → Phone → Request delivery.
-- Profile page: added Invoices + Previous Orders sections.
+| Milestone | Sprint | Description | Status |
+|-----------|--------|-------------|--------|
+| M1-M11 | 28-39 | Previous milestones (localization, transportation, booking, dispatch, search, driver platform, delivery, safety, theme, errors, empty states) | ✅ |
+| M12 | 40 | Management Platform — Complaints, Sanctions, Live Tracking, Support Chat | ✅ |
+
+---
+
+## Sprint 40 Summary
+
+### Management Platform
+- **Migration `014_management_platform.sql`**: 5 tables with RLS policies, indexes, storage buckets for attachments
+- **complaints/**: Full CRUD, status management (`pending`/`investigating`/`resolved`/`rejected`/`escalated`), admin notes, filters by type and status
+- **sanctions/**: Warning, fine, temporary_ban, permanent_ban, suspension types; active/inactive filtering
+- **location_tracking/**: Real-time location upsert, active driver query, Supabase Realtime stream, driver list view + map placeholder
+- **support_chat/**: Bidirectional chat between users and admins, Supabase Realtime message streaming, room management, read receipts
+- **Admin panel integration**: Dashboard quick actions sidebar entries, nested routes under `/admin`
+- **Client pages**: `/my-complaints`, `/new-complaint`, `/support`, `/support/room/:roomId`
 
 ---
 
@@ -79,9 +71,9 @@ Replaced all custom empty states and bare `CircularProgressIndicator()` across 7
 | Check | Result |
 |-------|--------|
 | `flutter analyze` | 0 errors |
-| `flutter test` | 431/431 passing |
-| APK build | ✅ Built + installed on DNP NX9 |
-| Commits pushed | `a82e652`, `7b57edc`, `eeefd22`, `ee50882` |
+| `flutter test` | 517/517 passing |
+| APK build | ✅ `app-debug.apk` rebuilt clean (single APK) + installed on DNP NX9 |
+| Gradle | `kotlin.incremental=false` fix committed in `android/gradle.properties` |
 
 ---
 
@@ -89,8 +81,8 @@ Replaced all custom empty states and bare `CircularProgressIndicator()` across 7
 
 | Milestone | Description | Status |
 |-----------|-------------|--------|
-| M9 | Admin monitoring dashboard | **Next** |
-| M10 | Payments integration | Pending |
+| M13 | Payments integration | Pending |
+| M14 | AI-powered features | Pending |
 
 ---
 
@@ -104,7 +96,7 @@ Replaced all custom empty states and bare `CircularProgressIndicator()` across 7
 | Supabase Project | `bttnlkmwhorjamzemwda` |
 | Google Maps Key | `AIzaSyA9v-pk50aB3G45zIb_RQKxD5qo_CVX8GY` |
 | Pub Cache | `E:\app\pub-cache` |
-| Gradle Home | `E:\app\.gradle` |
+| Gradle Home | `E:\app\delwaqty\.gradle_home` (isolated, gitignored) |
 | Git Remote | `https://github.com/delwaqtyapp/delwaqty` |
 
 ---
@@ -113,9 +105,8 @@ Replaced all custom empty states and bare `CircularProgressIndicator()` across 7
 
 | Decision | Rationale |
 |----------|-----------|
-| Unified rides table for all dispatch | No duplicate tables. service_type distinguishes ride from 9 delivery types |
-| Provider-agnostic geocoding | GeocodingProvider interface allows swapping Google/Mapbox/Nominatim |
-| Navigation module system | FeatureModule.isNavModule + navPriority drives StatefulShellRoute |
-| Safety RPCs (not client logic) | Server-side alerting for reliability even if app is killed |
-| Shopping list without prices | Customer specifies items; driver/app calculates pricing |
-| Glassmorphism UI | Modern glass-panel aesthetic across drawer and bottom nav |
+| Separate feature modules for each management domain | Follows existing Clean Architecture; independently testable |
+| Admin pages as nested routes in AdminModule | Consistent with existing `/admin/*` pattern |
+| Supabase Realtime for chat and location | No polling needed; instant updates |
+| GIN index on participant_ids | Efficient `@>` containment queries for chat rooms |
+| RLS per table (not blanket) | Fine-grained access control per domain |

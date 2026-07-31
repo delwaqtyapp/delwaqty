@@ -67,7 +67,7 @@
 - [x] M6: Complete driver platform (onboarding wizard, vehicle management, document management, enhanced dashboard, wallet breakdown, performance metrics, 9 new RPCs, realtime-ready) (sprint 33)
 - [x] M7: Delivery & Courier Platform (food, grocery, pharmacy, package — built on dispatch engine) (sprint 34)
 - [x] M8: Safety (SOS, trusted contacts, live share, OTP pickup) (sprints 35-36)
-- [ ] M9: Admin monitoring dashboard
+- [x] M9: Admin monitoring dashboard → **expanded to Management Platform** (complaints, sanctions, live tracking, support chat) (sprint 40)
 - [ ] M10: Payments integration
 
 ### Phase 6: Presentation Layer — Customer
@@ -139,3 +139,4 @@
 | 24 | Favorites, dead code cleanup, modifier integration, restaurant order tracking | ✅ |
 | 25 | Restaurant UX polish — Glass Cards, Lottie, skeletons, Hero, Gallery, L10n, deletion policy | ✅ |
 | 34 | Unified Delivery & Logistics Platform — 9 service types, dispatch engine reuse, merchant/driver/customer flow, delivery pricing | ✅ |
+| 40 | Management Platform — Complaints, Sanctions, Live Tracking, Support Chat | ✅ |

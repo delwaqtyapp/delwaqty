@@ -13,10 +13,15 @@ import 'package:delwaqty/features/restaurant/restaurant_module.dart';
 import 'package:delwaqty/features/merchant/merchant_module.dart';
 import 'package:delwaqty/features/wallet/wallet_module.dart';
 import 'package:delwaqty/features/driver/driver_module.dart';
-import 'package:delwaqty/features/ride/ride_module.dart';
+// import 'package:delwaqty/features/ride/ride_module.dart';
 import 'package:delwaqty/features/delivery/delivery_module.dart';
 import 'package:delwaqty/features/safety/safety_module.dart';
 import 'package:delwaqty/features/search/search_module.dart';
+import 'package:delwaqty/features/service_audio_logs/service_audio_logs_module.dart';
+import 'package:delwaqty/features/complaints/complaints_module.dart';
+import 'package:delwaqty/features/sanctions/sanctions_module.dart';
+import 'package:delwaqty/features/location_tracking/location_tracking_module.dart';
+import 'package:delwaqty/features/support_chat/support_chat_module.dart';
 
 void registerAllModules() {
   final registry = FeatureRegistry.instance;
@@ -32,13 +37,18 @@ void registerAllModules() {
     MerchantModule(),
     WalletModule(),
     DriverModule(),
-    RideModule(),
+    // RideModule(),
     DirectDeliveryModule(),
     SettingsModule(),
     ProfileModule(),
     NotificationsModule(),
     AdminModule(),
     SafetyModule(),
+    ServiceAudioLogsModule(),
+    ComplaintsModule(),
+    SanctionsModule(),
+    LocationTrackingModule(),
+    SupportChatModule(),
     SearchModule(),
   ]);
 

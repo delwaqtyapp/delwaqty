@@ -940,3 +940,32 @@ Through M4-M5 the driver had a minimal ride hub (online toggle, offer accept/rej
 - Background verification status is schema-ready but no external background check API is integrated.
 
 ---
+
+## ADR-017: Management Platform — Complaints, Sanctions, Live Tracking, Support Chat
+
+**Date:** Sprint 40
+**Status:** Accepted
+**Deciders:** Lead Software Architect
+
+### Context
+The platform needed admin tools for handling user complaints, issuing sanctions, tracking drivers in real-time, and providing support chat between users and admins.
+
+### Decision
+Create 4 new Clean Architecture feature modules (`complaints`, `sanctions`, `location_tracking`, `support_chat`), a single Supabase migration with 5 new tables + RLS + Storage buckets, and integrate admin pages as nested routes under the existing AdminModule.
+
+### Rationale
+- **4 separate modules** — independently testable, follow existing architecture, modular.
+- **5 tables in one migration** — co-designed schema prevents future N+1 migrations.
+- **AdminModule nested routes** — consistent with existing `/admin/users`, `/admin/orders` pattern.
+- **Supabase Realtime** — used for chat messages and location updates (no polling).
+- **GIN index on participant_ids** — efficient `@>` containment queries for chat room lookup.
+
+### Consequences
+- Complaints → Sanctions connection: complaints can escalate to sanctions via `complaint_id` FK.
+- Support Chat → Complaints connection: chat rooms can be linked to complaints via `complaint_id`.
+- Location tracking: map view placeholder requires a Google Maps/Mapbox API key for production.
+- Client-side pages (`/my-complaints`, `/support`, `/new-complaint`) added as standalone routes.
+- `flutter analyze` = 0 errors; `flutter test` = 517/517 passing.
+- Admin dashboard quick actions and sidebar entries added for all 4 new domains.
+
+---

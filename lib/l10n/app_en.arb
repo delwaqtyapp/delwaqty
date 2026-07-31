@@ -628,6 +628,8 @@
   "applyPromo": "Apply",
   "promoApplied": "Promo applied",
   "promoInvalid": "Invalid promo code",
+  "copyCode": "Copy code",
+  "codeCopied": "Code copied!",
   "tripReceipt": "Trip Receipt",
   "baseFare": "Base fare",
   "distanceFare": "Distance",

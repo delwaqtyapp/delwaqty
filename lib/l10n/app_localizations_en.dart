@@ -1948,6 +1948,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get promoInvalid => 'Invalid promo code';
 
   @override
+  String get copyCode => 'Copy code';
+
+  @override
+  String get codeCopied => 'Code copied!';
+
+  @override
   String get tripReceipt => 'Trip Receipt';
 
   @override

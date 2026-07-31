@@ -67,11 +67,18 @@ class MerchantCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final l10n = AppLocalizations.of(context);
+    final colorScheme = theme.colorScheme;
 
     return Card(
       clipBehavior: Clip.antiAlias,
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      elevation: 0,
+      shadowColor: colorScheme.onSurface.withValues(alpha: 0.35),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+        side: BorderSide(
+          color: colorScheme.outlineVariant.withValues(alpha: 0.25),
+        ),
+      ),
       child: InkWell(
         onTap: onTap,
         child: Column(
@@ -87,74 +94,95 @@ class MerchantCard extends StatelessWidget {
                     if (merchant.imageUrl != null)
                       Image.network(merchant.imageUrl!, fit: BoxFit.cover)
                     else
-                      Container(
-                        color: AppColors.primaryLight.withValues(alpha: 0.3),
+                      DecoratedBox(
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            colors: [
+                              colorScheme.primaryContainer.withValues(
+                                alpha: 0.55,
+                              ),
+                              colorScheme.primaryContainer.withValues(
+                                alpha: 0.15,
+                              ),
+                            ],
+                          ),
+                        ),
                         child: Icon(
                           _typeIcon(merchant.type),
                           size: 48,
-                          color: Theme.of(context).colorScheme.primary,
+                          color: colorScheme.primary,
                         ),
                       ),
-                  if (merchant.isVerified)
+                    if (merchant.isVerified)
+                      Positioned(
+                        top: 8,
+                        right: 8,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 3,
+                          ),
+                          decoration: BoxDecoration(
+                            color: AppColors.infoLight,
+                            borderRadius: BorderRadius.circular(999),
+                          ),
+                          child: Text(
+                            l10n.verified,
+                            style: AppTextStyles.labelSmall.copyWith(
+                              fontSize: 10,
+                              color: theme.colorScheme.onPrimary,
+                            ),
+                          ),
+                        ),
+                      ),
+                    if (merchant.isOpenNow)
+                      Positioned(
+                        top: 8,
+                        left: 8,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 3,
+                          ),
+                          decoration: BoxDecoration(
+                            color: AppColors.successLight,
+                            borderRadius: BorderRadius.circular(999),
+                          ),
+                          child: Text(
+                            l10n.open,
+                            style: AppTextStyles.labelSmall.copyWith(
+                              fontSize: 10,
+                              color: theme.colorScheme.onPrimary,
+                            ),
+                          ),
+                        ),
+                      ),
                     Positioned(
-                      top: 8,
+                      bottom: 8,
                       right: 8,
                       child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 6,
-                          vertical: 2,
-                        ),
                         decoration: BoxDecoration(
-                          color: AppColors.infoLight,
-                          borderRadius: BorderRadius.circular(4),
+                          color: theme.colorScheme.onSurface.withValues(
+                            alpha: 0.3,
+                          ),
+                          shape: BoxShape.circle,
                         ),
-                        child: Text(
-                          l10n.verified,
-                          style: AppTextStyles.labelSmall.copyWith(fontSize: 10, color: theme.colorScheme.onPrimary),
-                        ),
-                      ),
-                    ),
-                  if (merchant.isOpenNow)
-                    Positioned(
-                      top: 8,
-                      left: 8,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 6,
-                          vertical: 2,
-                        ),
-                        decoration: BoxDecoration(
-                          color: AppColors.successLight,
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                        child: Text(
-                          l10n.open,
-                          style: AppTextStyles.labelSmall.copyWith(fontSize: 10, color: theme.colorScheme.onPrimary),
+                        padding: const EdgeInsets.all(2),
+                        child: FavoriteButton(
+                          targetId: merchant.id,
+                          type: FavoriteType.merchant,
+                          size: 22,
                         ),
                       ),
                     ),
-                  Positioned(
-                    bottom: 8,
-                    right: 8,
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: theme.colorScheme.onSurface.withValues(alpha: 0.3),
-                        shape: BoxShape.circle,
-                      ),
-                      padding: const EdgeInsets.all(2),
-                      child: FavoriteButton(
-                        targetId: merchant.id,
-                        type: FavoriteType.merchant,
-                        size: 22,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
+                  ],
+                ),
               ),
             ),
             Padding(
-              padding: const EdgeInsets.all(12),
+              padding: const EdgeInsets.all(14),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -174,7 +202,11 @@ class MerchantCard extends StatelessWidget {
                       Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          const Icon(Icons.star, size: 14, color: AppColors.rating),
+                          const Icon(
+                            Icons.star,
+                            size: 14,
+                            color: AppColors.rating,
+                          ),
                           const SizedBox(width: 2),
                           Text(
                             merchant.rating.toStringAsFixed(1),

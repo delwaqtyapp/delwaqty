@@ -969,3 +969,35 @@ Create 4 new Clean Architecture feature modules (`complaints`, `sanctions`, `loc
 - Admin dashboard quick actions and sidebar entries added for all 4 new domains.
 
 ---
+
+## ADR-034: UI Polish — Cairo Typography, Card System & Micro-Interactions
+
+**Date:** Sprint 55
+**Status:** Accepted
+**Deciders:** Lead Software Architect
+
+### Context
+The app rendered Arabic with the default Roboto typeface and used inconsistent card radii, flat image placeholders, and hardcoded category colors. The home screen needed professional delivery-app quality (Uber Eats / Talabat reference).
+
+### Decision
+1. **Typography:** Add `google_fonts` and render **Cairo** (native Arabic + Latin) by wrapping `AppTextStyles.toTextTheme()` with `GoogleFonts.cairoTextTheme()` in `AppTheme._buildTheme`; expose `AppFontFamily.cairo` token.
+2. **Colors:** Centralize the home service-grid palette into 8 `service*` tokens in `AppColors` and reference them instead of inline hex.
+3. **Cards:** Standardize radius (merchant 20, product 16), replace flat elevation with soft shadows + subtle borders, use gradient image placeholders, and switch badges to pills.
+4. **Micro-interactions:** Add reusable `shared/widgets/pressable_scale.dart` (press-scale tactile feedback) wired into service tiles and home merchant cards.
+5. **Home:** Pill-shaped search bar; promo banner radius 24 with tap-to-copy coupon (`DELWAQTY30`) + `copyCode`/`codeCopied` l10n keys.
+
+### Rationale
+- Cairo is purpose-built for Arabic UI and matches the app's bilingual scope.
+- A single `google_fonts` integration avoids bundling/managing font files while keeping offline caching after first fetch.
+- Centralizing category colors prevents drift between the home grid and merchant-type colors.
+- Soft shadows + gradient placeholders read as modern and improve placeholder states for merchants without images.
+- Press-scale feedback requires no gesture-controller boilerplate and is reusable app-wide.
+
+### Consequences
+- `google_fonts` added to `pubspec.yaml`; first frame may briefly fall back before the font asset loads (cached thereafter).
+- Letter-spacing tokens tuned for Latin remain unchanged; Arabic renders acceptably with Cairo.
+- `flutter analyze` = 0 errors; `flutter test` = 517/517 passing; debug APK rebuilt and installed on DNP NX9.
+- **Deferred decision:** the bottom-nav tab set remains Home / Direct Delivery / Ride / Settings. Promoting Search + Profile to nav modules and adding an Orders branch is a functional routing change requiring a product decision.
+
+
+---

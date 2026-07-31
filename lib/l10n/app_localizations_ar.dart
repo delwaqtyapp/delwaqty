@@ -2912,9 +2912,6 @@ class AppLocalizationsAr extends AppLocalizations {
   String get plateLabel => 'اللوحة:';
 
   @override
-  String get rideMonitoring => 'مراقبة الرحلات';
-
-  @override
   String get searching => 'جارٍ البحث';
 
   @override
@@ -2922,15 +2919,6 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get completed => 'مكتمل';
-
-  @override
-  String get noRidesFound => 'لم يتم العثور على رحلات';
-
-  @override
-  String get noRidesCreated => 'لم يتم إنشاء أي رحلات بعد.';
-
-  @override
-  String get noRidesSelectedStatus => 'لا توجد رحلات بالحالة المحددة.';
 
   @override
   String get rideNumber => 'رحلة رقم';

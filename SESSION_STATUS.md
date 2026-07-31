@@ -1,20 +1,22 @@
 # SESSION_STATUS.md
 
-> **Last updated:** 2026-07-31 Session 15 (Build Fix + GitHub Sync)
+> **Last updated:** 2026-07-31 Session 16 (Admin Panel Wiring + Legacy Rides Removal)
 
 ---
 
-## Current Task — BUILD FIX + GITHUB SYNC (Post-Sprint 40)
+## Current Task — ADMIN PANEL WIRING (Post-Sprint 51)
 
-Fixed the two-APK build issue and synced all Sprint 39-40 work to GitHub.
+Made the Sprint 40 management features (complaints, sanctions, live tracking, support chat) reachable from the UI and removed all legacy ride-page references from the admin panel.
 
 | Change | Details |
 |--------|---------|
-| Cleaned stale `app-release.apk` (built 17 Jul) | Only `app-debug.apk` is produced now |
-| Fixed cross-drive Kotlin cache crash | Added `kotlin.incremental=false` to `android/gradle.properties`; isolated Gradle home at `.gradle_home/` (gitignored) |
-| Clean build | `flutter clean` → `flutter pub get` → `flutter build apk --debug --dart-define-from-file=.env.dev` ✅ |
-| Installed on DNP NX9 | `adb install -r app-debug.apk` ✅ (165 MB) |
-| Git sync | Staged all Sprint 39-40 changes (modules, migrations 013/014, l10n) for commit + push |
+| Deleted `admin_rides_page.dart` | Old transport/ride page removed |
+| Removed `/admin/rides` route | Removed from `admin_module.dart` |
+| Dashboard quick actions updated | Removed `rideHistory`; added **Complaints**, **Sanctions**, **Live Tracking**, **Support Chat** (4 new actions) |
+| Floating sidebar | New admin-only **Admin Panel** section (idx 8–12: admin panel, complaints, sanctions, live tracking, support chat); support section reindexed 13–18 |
+| l10n cleanup | Removed 4 unused ride keys (`rideMonitoring`, `noRidesFound`, `noRidesCreated`, `noRidesSelectedStatus`) + `gen-l10n` |
+| Analyzer cleanup | Removed unused imports in `floating_sidebar_overlay.dart`, `floating_sidebar_controller.dart`, `app_shell.dart` |
+| Build + install | `flutter build apk --debug --dart-define-from-file=.env.dev` ✅ installed on DNP NX9 ✅ |
 
 ---
 
@@ -24,32 +26,7 @@ Fixed the two-APK build issue and synced all Sprint 39-40 work to GitHub.
 |-----------|--------|-------------|--------|
 | M1-M11 | 28-39 | Previous milestones (localization, transportation, booking, dispatch, search, driver platform, delivery, safety, theme, errors, empty states) | ✅ |
 | M12 | 40 | Management Platform — Complaints, Sanctions, Live Tracking, Support Chat | ✅ |
-
----
-
-## Previous Work (Sprint 40 — Management Platform)
-
-Built the full management system: complaints, sanctions, live tracking, and support chat modules.
-
-| Change | Files |
-|--------|-------|
-| Supabase migration `014_management_platform.sql` | 5 tables (complaints, sanctions, location_updates, chat_rooms, chat_messages) + RLS + Storage buckets |
-| **ComplaintsModule** | Entity, repository, data source, impl, providers, admin page, client pages (list + new) |
-| **SanctionsModule** | Entity, repository, data source, impl, providers, admin page |
-| **LocationTrackingModule** | Entity, repository, data source, impl, providers, admin map/list page |
-| **SupportChatModule** | Entity (room + message), repository, data source, impl, providers, admin room list + chat page, client support page + chat |
-| AdminModule updated | 5 new nested routes: `/admin/complaints`, `/admin/sanctions`, `/admin/live-tracking`, `/admin/support-chat`, `/admin/support-chat/room/:roomId` |
-| Module registry | 4 new modules registered |
-| l10n | 33 new EN+AR keys |
-
----
-
-## Completed Milestones
-
-| Milestone | Sprint | Description | Status |
-|-----------|--------|-------------|--------|
-| M1-M11 | 28-39 | Previous milestones (localization, transportation, booking, dispatch, search, driver platform, delivery, safety, theme, errors, empty states) | ✅ |
-| M12 | 40 | Management Platform — Complaints, Sanctions, Live Tracking, Support Chat | ✅ |
+| M13 | 51+ | Admin Panel Wiring — features exposed in dashboard + sidebar; legacy rides page removed | ✅ |
 
 ---
 
@@ -81,8 +58,8 @@ Built the full management system: complaints, sanctions, live tracking, and supp
 
 | Milestone | Description | Status |
 |-----------|-------------|--------|
-| M13 | Payments integration | Pending |
-| M14 | AI-powered features | Pending |
+| M14 | Payments integration | Pending |
+| M15 | AI-powered features | Pending |
 
 ---
 

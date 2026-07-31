@@ -5,8 +5,6 @@ import 'package:go_router/go_router.dart';
 import 'package:delwaqty/features/auth/domain/auth_state.dart';
 import 'package:delwaqty/features/auth/presentation/auth_provider.dart';
 import 'package:delwaqty/core/theme/app_text_styles.dart';
-import 'package:delwaqty/core/theme/theme_mode_provider.dart';
-import 'package:delwaqty/core/localization/locale_provider.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 import 'sidebar_theme.dart';
 import 'animations.dart';
@@ -246,7 +244,7 @@ class _FloatingSidebarOverlayState extends State<FloatingSidebarOverlay>
                               ),
                               SidebarDivider(),
                               SidebarSection(
-                                title: 'SERVICES',
+                                title: widget.l10n.servicesSection,
                                 controller: _animation,
                                 startIndex: 5,
                                 items: [
@@ -289,45 +287,118 @@ class _FloatingSidebarOverlayState extends State<FloatingSidebarOverlay>
                                   ),
                                 ],
                               ),
+                              if (isAdmin) ...[
+                                SidebarDivider(),
+                                SidebarSection(
+                                  title: widget.l10n.adminPanel,
+                                  controller: _animation,
+                                  startIndex: 8,
+                                  items: [
+                                    SidebarItem(
+                                      icon: Icons.admin_panel_settings_outlined,
+                                      label: widget.l10n.adminPanel,
+                                      isSelected: _selectedIndex == 8,
+                                      onTap: () {
+                                        setState(() => _selectedIndex = 8);
+                                        _navigate('/admin');
+                                      },
+                                    ),
+                                    SidebarItem(
+                                      icon: Icons.warning_amber_rounded,
+                                      label: widget.l10n.complaints,
+                                      isSelected: _selectedIndex == 9,
+                                      onTap: () {
+                                        setState(() => _selectedIndex = 9);
+                                        _navigate('/admin/complaints');
+                                      },
+                                    ),
+                                    SidebarItem(
+                                      icon: Icons.gavel_rounded,
+                                      label: widget.l10n.sanctions,
+                                      isSelected: _selectedIndex == 10,
+                                      onTap: () {
+                                        setState(() => _selectedIndex = 10);
+                                        _navigate('/admin/sanctions');
+                                      },
+                                    ),
+                                    SidebarItem(
+                                      icon: Icons.map_rounded,
+                                      label: widget.l10n.liveTracking,
+                                      isSelected: _selectedIndex == 11,
+                                      onTap: () {
+                                        setState(() => _selectedIndex = 11);
+                                        _navigate('/admin/live-tracking');
+                                      },
+                                    ),
+                                    SidebarItem(
+                                      icon: Icons.chat_bubble_rounded,
+                                      label: widget.l10n.supportChat,
+                                      isSelected: _selectedIndex == 12,
+                                      onTap: () {
+                                        setState(() => _selectedIndex = 12);
+                                        _navigate('/admin/support-chat');
+                                      },
+                                    ),
+                                  ],
+                                ),
+                              ],
                               SidebarDivider(),
                               SidebarSection(
-                                title: 'SUPPORT',
+                                title: widget.l10n.supportSection,
                                 controller: _animation,
-                                startIndex: 10,
+                                startIndex: 13,
                                 items: [
+                                  SidebarItem(
+                                    icon: Icons.feedback_outlined,
+                                    label: widget.l10n.myComplaints,
+                                    isSelected: _selectedIndex == 13,
+                                    onTap: () {
+                                      setState(() => _selectedIndex = 13);
+                                      _navigate('/my-complaints');
+                                    },
+                                  ),
+                                  SidebarItem(
+                                    icon: Icons.support_agent_rounded,
+                                    label: widget.l10n.support,
+                                    isSelected: _selectedIndex == 14,
+                                    onTap: () {
+                                      setState(() => _selectedIndex = 14);
+                                      _navigate('/support');
+                                    },
+                                  ),
                                   SidebarItem(
                                     icon: Icons.help_outline_rounded,
                                     label: widget.l10n.helpCenter,
-                                    isSelected: _selectedIndex == 8,
+                                    isSelected: _selectedIndex == 15,
                                     onTap: () {
-                                      setState(() => _selectedIndex = 8);
+                                      setState(() => _selectedIndex = 15);
                                       _navigate('/settings/help-center');
                                     },
                                   ),
                                   SidebarItem(
                                     icon: Icons.info_outline_rounded,
                                     label: widget.l10n.about,
-                                    isSelected: _selectedIndex == 9,
+                                    isSelected: _selectedIndex == 16,
                                     onTap: () {
-                                      setState(() => _selectedIndex = 9);
+                                      setState(() => _selectedIndex = 16);
                                       _navigate('/settings/about');
                                     },
                                   ),
                                   SidebarItem(
                                     icon: Icons.privacy_tip_outlined,
                                     label: widget.l10n.privacyPolicy,
-                                    isSelected: _selectedIndex == 10,
+                                    isSelected: _selectedIndex == 17,
                                     onTap: () {
-                                      setState(() => _selectedIndex = 10);
+                                      setState(() => _selectedIndex = 17);
                                       _navigate('/settings/privacy-policy');
                                     },
                                   ),
                                   SidebarItem(
                                     icon: Icons.description_outlined,
                                     label: widget.l10n.termsOfService,
-                                    isSelected: _selectedIndex == 11,
+                                    isSelected: _selectedIndex == 18,
                                     onTap: () {
-                                      setState(() => _selectedIndex = 11);
+                                      setState(() => _selectedIndex = 18);
                                       _navigate('/settings/terms-of-service');
                                     },
                                   ),

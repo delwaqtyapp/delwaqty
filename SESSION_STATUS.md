@@ -1,6 +1,25 @@
 # SESSION_STATUS.md
 
-> **Last updated:** 2026-07-31 Session 16 (Admin Panel Wiring + Legacy Rides Removal)
+> **Last updated:** 2026-07-31 Session 17 (Management Tables DB Fix)
+
+---
+
+## Current Task — MANAGEMENT TABLES DB FIX (Root Cause: migration 014)
+
+The new features (complaints, sanctions, live tracking, support chat) failed with `Could not find the table`. Root cause found and fixed.
+
+**Root cause:** `supabase/migrations/014_management_platform.sql` used `CREATE TYPE IF NOT EXISTS`, which **PostgreSQL does not support** (syntax error) → the migration aborted mid-way → `sanctions`, `location_updates`, `chat_rooms`, `chat_messages` were never created, and `complaints` kept the legacy 007 ride schema (missing management columns).
+
+| Fix | Details |
+|-----|---------|
+| New migration `015_create_management_tables.sql` | Creates all 5 tables (merged `complaints` schema + `sanctions` + `location_updates` + `chat_rooms` + `chat_messages`) with TEXT+CHECK instead of enums; RLS policies (participant OR admin); 2 storage buckets; `add_complaint_admin_note` RPC; adds tables to `supabase_realtime` publication |
+| 014 bug fixed | Replaced `CREATE TYPE IF NOT EXISTS` with guarded `DO` blocks |
+| `complaints` conflict resolved | Old 007 ride table auto-detected + replaced with merged schema so ride module (`reportIssue`) keeps working |
+| Dart fixes | `createComplaint`/`createRoom`/`sendMessage`/`createSanction` no longer send `id: ''` into UUID columns; use `.select().single()` to return real rows; `Complaint.fromJson` tolerates legacy ride rows |
+| `supabase_service.dart` | **No change needed** — it only exposes the Supabase client; table names live in each data source |
+| Verify | `flutter analyze` 0 errors · `flutter test` 517/517 · APK built + installed on DNP NX9 |
+
+> **ACTION REQUIRED:** Run `015_create_management_tables.sql` (and re-run `014` for the type fix) in the Supabase SQL Editor — see instructions below.
 
 ---
 
@@ -27,6 +46,7 @@ Made the Sprint 40 management features (complaints, sanctions, live tracking, su
 | M1-M11 | 28-39 | Previous milestones (localization, transportation, booking, dispatch, search, driver platform, delivery, safety, theme, errors, empty states) | ✅ |
 | M12 | 40 | Management Platform — Complaints, Sanctions, Live Tracking, Support Chat | ✅ |
 | M13 | 51+ | Admin Panel Wiring — features exposed in dashboard + sidebar; legacy rides page removed | ✅ |
+| M13b | 53 | Management Tables DB Fix — migration 015, 014 type bug, UUID insert + RLS fixes | ✅ |
 
 ---
 

@@ -29,8 +29,12 @@ class SupabaseComplaintsDataSource {
   }
 
   Future<Complaint> createComplaint(Complaint complaint) async {
-    await _client.from('complaints').insert(complaint.toJson());
-    return complaint;
+    final payload = Map<String, dynamic>.from(complaint.toJson());
+    if (payload['id'] == null || (payload['id'] as String).isEmpty) {
+      payload.remove('id');
+    }
+    final row = await _client.from('complaints').insert(payload).select().single();
+    return Complaint.fromJson(row);
   }
 
   Future<Complaint> updateComplaintStatus(String id, String status, {String? resolutionNote}) async {

@@ -37,10 +37,10 @@ class Complaint {
     return Complaint(
       id: json['id'] as String,
       orderId: json['order_id'] as String?,
-      complainantId: json['complainant_id'] as String,
+      complainantId: (json['complainant_id'] as String?) ?? (json['reporter_id'] as String?) ?? '',
       respondentId: json['respondent_id'] as String?,
-      complaintType: json['complaint_type'] as String,
-      subject: json['subject'] as String,
+      complaintType: (json['complaint_type'] as String?) ?? 'other',
+      subject: (json['subject'] as String?) ?? (json['category'] as String?) ?? '',
       description: json['description'] as String,
       attachments: (json['attachments'] as List<dynamic>?)?.cast<String>() ?? [],
       status: json['status'] as String? ?? 'pending',

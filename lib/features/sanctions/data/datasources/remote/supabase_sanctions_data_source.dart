@@ -28,8 +28,12 @@ class SupabaseSanctionsDataSource {
   }
 
   Future<Sanction> createSanction(Sanction sanction) async {
-    await _client.from('sanctions').insert(sanction.toJson());
-    return sanction;
+    final payload = Map<String, dynamic>.from(sanction.toJson());
+    if (payload['id'] == null || (payload['id'] as String).isEmpty) {
+      payload.remove('id');
+    }
+    final row = await _client.from('sanctions').insert(payload).select().single();
+    return Sanction.fromJson(row);
   }
 
   Future<Sanction> updateSanction(String id, Map<String, dynamic> updates) async {

@@ -1,6 +1,24 @@
 # SESSION_STATUS.md
 
-> **Last updated:** 2026-07-31 Session 17 (Management Tables DB Fix)
+> **Last updated:** 2026-07-31 Session 18 (RLS Policy Rebuild — migration 016)
+
+---
+
+## Current Task — RLS POLICY REBUILD (migration 016)
+
+After 015 was applied, features still misbehaved due to RLS policies: policies from 007/014/015 overlapped or were incomplete for admin + participant flows. Fixed with a deterministic rebuild.
+
+| Fix | Details |
+|-----|---------|
+| New migration `016_fix_rls_policies.sql` | Drops ALL known policy names on the 5 tables (from 007/014/015), re-enables RLS, and recreates explicit SELECT/INSERT/UPDATE/DELETE policies for admin + users |
+| `is_admin()` helper | `SECURITY DEFINER` SQL function checking `users.role IN ('admin','owner')` (matches app logic; `admin_users.id` is a separate UUID and is intentionally not used) |
+| `add_admin_note()` + `add_complaint_admin_note()` | Admin-only note functions; legacy RPC name preserved for the app |
+| Admin full control | SELECT/INSERT/UPDATE/DELETE on complaints, sanctions, location_updates, chat_rooms, chat_messages |
+| User policies | Own complaints (+legacy reporter), own sanctions, own locations, rooms they participate in, messages in their rooms (with `sender_id = auth.uid()` on insert) |
+| Grants | `GRANT SELECT,INSERT,UPDATE,DELETE ... TO authenticated` on all 5 tables |
+| Verify | `flutter analyze` 0 errors · `flutter test` 517/517 |
+
+> **ACTION REQUIRED:** Run `016_fix_rls_policies.sql` in the Supabase SQL Editor (instructions in session report).
 
 ---
 
@@ -47,6 +65,7 @@ Made the Sprint 40 management features (complaints, sanctions, live tracking, su
 | M12 | 40 | Management Platform — Complaints, Sanctions, Live Tracking, Support Chat | ✅ |
 | M13 | 51+ | Admin Panel Wiring — features exposed in dashboard + sidebar; legacy rides page removed | ✅ |
 | M13b | 53 | Management Tables DB Fix — migration 015, 014 type bug, UUID insert + RLS fixes | ✅ |
+| M13c | 54 | RLS Policy Rebuild — migration 016: is_admin helper, explicit per-command policies, grants | ✅ |
 
 ---
 

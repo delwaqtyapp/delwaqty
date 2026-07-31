@@ -83,6 +83,7 @@ dependencies:
   flutter_localizations:
     sdk: flutter
   intl: ^0.20.2
+  google_fonts: ^8.2.0
 
 dev_dependencies:
   flutter_test:

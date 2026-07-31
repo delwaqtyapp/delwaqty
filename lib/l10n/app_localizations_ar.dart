@@ -1942,6 +1942,12 @@ class AppLocalizationsAr extends AppLocalizations {
   String get promoInvalid => 'رمز خصم غير صحيح';
 
   @override
+  String get copyCode => 'انسخ الكود';
+
+  @override
+  String get codeCopied => 'تم نسخ الكود!';
+
+  @override
   String get tripReceipt => 'إيصال الرحلة';
 
   @override

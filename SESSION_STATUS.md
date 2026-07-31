@@ -1,6 +1,26 @@
 # SESSION_STATUS.md
 
-> **Last updated:** 2026-07-31 Session 18b (Migrations APPLIED to Supabase via Management API)
+> **Last updated:** 2026-08-01 Session 19 (UI Polish — typography, cards, home polish)
+
+---
+
+## Current Task — UI POLISH (Session 19)
+
+Full visual-refinement pass toward professional delivery-app quality (Uber Eats / Talabat reference), covering identity, cards, home screen, and micro-interactions.
+
+| Area | Change |
+|------|--------|
+| Typography | Added `google_fonts` dependency; theme now renders **Cairo** (native Arabic + Latin) via `GoogleFonts.cairoTextTheme()` wrapping `AppTextStyles`; `AppFontFamily.cairo` token added |
+| Colors | Added 8 `service*` category tokens to `AppColors`; home service grid now references them (removed hardcoded hex) |
+| Merchant card | Radius 12→20, elevation→soft shadow + subtle border, gradient image placeholder (was flat), pill badges (verified/open) |
+| Product card | Radius 10→16, soft shadow + border, gradient placeholder, pill discount badge |
+| Home merchant card | Radius 16→20, softer shadow, gradient placeholder |
+| Pill search | Home search bar now fully pill-shaped (radius 999) with primary icon tint + soft shadow |
+| Promo banner | Radius 20→24, adds "Copy code" pill + tap-to-copy (`DELWAQTY30`) with snackbar feedback via new `copyCode`/`codeCopied` l10n keys |
+| Micro-interactions | New `shared/widgets/pressable_scale.dart` — press-scale tactile feedback wired into service tiles + home merchant cards |
+| Verify | `flutter analyze` 0 errors · `flutter test` 517/517 · APK built + installed on DNP NX9 |
+
+> **Deferred (decision required):** bottom-nav **tab set** change to Home / Search / Orders / Profile. Current tabs are Home, Direct Delivery, Ride, Settings. Restructuring requires promoting Search + Profile to nav modules and building an Orders branch (functional/routing change, not polish) — needs a product decision on which tabs and where Delivery/Ride/Settings move.
 
 ---
 
@@ -89,6 +109,7 @@ Made the Sprint 40 management features (complaints, sanctions, live tracking, su
 | M13 | 51+ | Admin Panel Wiring — features exposed in dashboard + sidebar; legacy rides page removed | ✅ |
 | M13b | 53 | Management Tables DB Fix — migration 015, 014 type bug, UUID insert + RLS fixes | ✅ |
 | M13c | 54 | RLS Policy Rebuild — migration 016: is_admin helper, explicit per-command policies, grants | ✅ |
+| M13d | 55 | UI Polish — Cairo typography (google_fonts), card system (radius/shadow/gradients), pill search, banner copy, micro-interactions | ✅ |
 
 ---
 

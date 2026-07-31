@@ -628,6 +628,8 @@
   "applyPromo": "تطبيق",
   "promoApplied": "تم تطبيق رمز الخصم",
   "promoInvalid": "رمز خصم غير صحيح",
+  "copyCode": "انسخ الكود",
+  "codeCopied": "تم نسخ الكود!",
   "tripReceipt": "إيصال الرحلة",
   "baseFare": "التعرفة الأساسية",
   "distanceFare": "المسافة",

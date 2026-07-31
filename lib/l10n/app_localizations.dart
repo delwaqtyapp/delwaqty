@@ -3800,6 +3800,18 @@ abstract class AppLocalizations {
   /// **'Invalid promo code'**
   String get promoInvalid;
 
+  /// No description provided for @copyCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy code'**
+  String get copyCode;
+
+  /// No description provided for @codeCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'Code copied!'**
+  String get codeCopied;
+
   /// No description provided for @tripReceipt.
   ///
   /// In en, this message translates to:

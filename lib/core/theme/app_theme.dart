@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'app_colors.dart';
 import 'app_spacing.dart';
 import 'app_text_styles.dart';
@@ -39,14 +40,19 @@ abstract final class AppTheme {
   }
 
   static ThemeData _buildTheme(ColorScheme colorScheme, String? fontFamily) {
+    final resolvedFamily = fontFamily ?? _defaultFontFamily;
+    final baseTextTheme = AppTextStyles.toTextTheme().apply(
+      bodyColor: colorScheme.onSurface,
+      displayColor: colorScheme.onSurface,
+    );
+
     return ThemeData(
       useMaterial3: true,
       colorScheme: colorScheme,
-      fontFamily: fontFamily,
-      textTheme: AppTextStyles.toTextTheme().apply(
-        bodyColor: colorScheme.onSurface,
-        displayColor: colorScheme.onSurface,
-      ),
+      fontFamily: resolvedFamily,
+      textTheme: fontFamily == null
+          ? GoogleFonts.cairoTextTheme(baseTextTheme)
+          : baseTextTheme,
       appBarTheme: AppBarTheme(
         centerTitle: true,
         elevation: AppElevationValues.none,
@@ -141,3 +147,13 @@ abstract final class AppElevationValues {
   static const double xs = 1;
   static const double lg = 8;
 }
+
+/// The primary brand font family used across the app.
+///
+/// Cairo is loaded through `google_fonts` and provides a native Arabic
+/// typeface with Latin support, improving legibility for both locales.
+abstract final class AppFontFamily {
+  static const String cairo = 'Cairo';
+}
+
+const String _defaultFontFamily = AppFontFamily.cairo;

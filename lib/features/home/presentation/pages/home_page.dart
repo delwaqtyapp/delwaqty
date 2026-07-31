@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:delwaqty/core/extensions/context_extensions.dart';
@@ -7,6 +8,7 @@ import 'package:delwaqty/features/auth/domain/auth_state.dart';
 import 'package:delwaqty/features/auth/presentation/auth_provider.dart';
 import 'package:delwaqty/features/location/presentation/providers/location_provider.dart';
 import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
+import 'package:delwaqty/shared/widgets/pressable_scale.dart';
 import 'package:delwaqty/shared/widgets/premium_empty_state.dart';
 import 'package:delwaqty/shared/widgets/shimmer_loading.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
@@ -14,18 +16,19 @@ import 'package:delwaqty/features/home/domain/home_domain.dart';
 import 'package:delwaqty/core/theme/app_colors.dart';
 import 'package:delwaqty/core/theme/app_text_styles.dart';
 
-String _merchantTypeLabel(MerchantType type, AppLocalizations l10n) => switch (type) {
-  MerchantType.restaurant => l10n.typeRestaurant,
-  MerchantType.grocery => l10n.typeGrocery,
-  MerchantType.pharmacy => l10n.typePharmacy,
-  MerchantType.flowers => l10n.typeFlowers,
-  MerchantType.bakery => l10n.typeBakery,
-  MerchantType.electronics => l10n.typeElectronics,
-  MerchantType.furniture => l10n.typeFurniture,
-  MerchantType.fashion => l10n.typeFashion,
-  MerchantType.home => l10n.typeHome,
-  MerchantType.other => l10n.typeOther,
-};
+String _merchantTypeLabel(MerchantType type, AppLocalizations l10n) =>
+    switch (type) {
+      MerchantType.restaurant => l10n.typeRestaurant,
+      MerchantType.grocery => l10n.typeGrocery,
+      MerchantType.pharmacy => l10n.typePharmacy,
+      MerchantType.flowers => l10n.typeFlowers,
+      MerchantType.bakery => l10n.typeBakery,
+      MerchantType.electronics => l10n.typeElectronics,
+      MerchantType.furniture => l10n.typeFurniture,
+      MerchantType.fashion => l10n.typeFashion,
+      MerchantType.home => l10n.typeHome,
+      MerchantType.other => l10n.typeOther,
+    };
 
 class HomePage extends ConsumerWidget {
   const HomePage({super.key});
@@ -208,23 +211,29 @@ class HomePage extends ConsumerWidget {
         child: GestureDetector(
           onTap: () => context.push('/market/search'),
           child: Container(
-            height: 52,
+            height: 54,
             decoration: BoxDecoration(
               color: context.colorScheme.surfaceContainerHighest.withValues(
-                alpha: 0.4,
+                alpha: 0.5,
               ),
-              borderRadius: BorderRadius.circular(16),
+              borderRadius: BorderRadius.circular(999),
               border: Border.all(
-                color: context.colorScheme.outlineVariant.withValues(alpha: 0.2),
+                color: context.colorScheme.outlineVariant.withValues(
+                  alpha: 0.25,
+                ),
               ),
+              boxShadow: [
+                BoxShadow(
+                  color: context.colorScheme.onSurface.withValues(alpha: 0.04),
+                  blurRadius: 12,
+                  offset: const Offset(0, 4),
+                ),
+              ],
             ),
             child: Row(
               children: [
-                const SizedBox(width: 16),
-                Icon(
-                  Icons.search_rounded,
-                  color: context.colorScheme.onSurfaceVariant,
-                ),
+                const SizedBox(width: 20),
+                Icon(Icons.search_rounded, color: context.colorScheme.primary),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(
@@ -258,14 +267,42 @@ class HomePage extends ConsumerWidget {
 
   Widget _buildServiceGrid(BuildContext context, AppLocalizations l10n) {
     final services = [
-      _ServiceData(Icons.restaurant_rounded, l10n.restaurants, const Color(0xFFE65100)),
-      _ServiceData(Icons.local_grocery_store_rounded, l10n.grocery, const Color(0xFF2E7D32)),
-      _ServiceData(Icons.local_pharmacy_rounded, l10n.pharmacy, const Color(0xFF0277BD)),
-      _ServiceData(Icons.local_taxi_rounded, l10n.ride, const Color(0xFF512DA8)),
-      _ServiceData(Icons.home_repair_service_rounded, l10n.homeServices, const Color(0xFF4E342E)),
-      _ServiceData(Icons.local_shipping_rounded, l10n.delivery, const Color(0xFF00897B)),
-      _ServiceData(Icons.local_offer_rounded, l10n.offers, const Color(0xFFAD1457)),
-      _ServiceData(Icons.more_horiz_rounded, l10n.settings, const Color(0xFF616161)),
+      _ServiceData(
+        Icons.restaurant_rounded,
+        l10n.restaurants,
+        AppColors.serviceRestaurant,
+      ),
+      _ServiceData(
+        Icons.local_grocery_store_rounded,
+        l10n.grocery,
+        AppColors.serviceGrocery,
+      ),
+      _ServiceData(
+        Icons.local_pharmacy_rounded,
+        l10n.pharmacy,
+        AppColors.servicePharmacy,
+      ),
+      _ServiceData(Icons.local_taxi_rounded, l10n.ride, AppColors.serviceRide),
+      _ServiceData(
+        Icons.home_repair_service_rounded,
+        l10n.homeServices,
+        AppColors.serviceHome,
+      ),
+      _ServiceData(
+        Icons.local_shipping_rounded,
+        l10n.delivery,
+        AppColors.serviceDelivery,
+      ),
+      _ServiceData(
+        Icons.local_offer_rounded,
+        l10n.offers,
+        AppColors.serviceOffers,
+      ),
+      _ServiceData(
+        Icons.more_horiz_rounded,
+        l10n.settings,
+        AppColors.serviceMore,
+      ),
     ];
 
     return AnimatedFadeIn(
@@ -400,9 +437,7 @@ class HomePage extends ConsumerWidget {
                 final merchant = merchants[index];
                 return _MerchantCard(
                   merchant: merchant,
-                  onTap: () => context.push(
-                    '/market/merchant/${merchant.id}',
-                  ),
+                  onTap: () => context.push('/market/merchant/${merchant.id}'),
                 );
               },
             ),
@@ -413,100 +448,150 @@ class HomePage extends ConsumerWidget {
   }
 
   Widget _buildPromoBanner(BuildContext context, AppLocalizations l10n) {
+    const couponCode = 'DELWAQTY30';
     return AnimatedFadeIn(
       delay: const Duration(milliseconds: 450),
       child: Padding(
         padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
-        child: Container(
-          height: 140,
-          decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [Color(0xFF6750A4), Color(0xFF9A82DB)],
+        child: GestureDetector(
+          onTap: () async {
+            await Clipboard.setData(const ClipboardData(text: couponCode));
+            if (!context.mounted) return;
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(l10n.codeCopied),
+                duration: const Duration(milliseconds: 1500),
+                behavior: SnackBarBehavior.floating,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+            );
+          },
+          child: Container(
+            height: 140,
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [Color(0xFF6750A4), Color(0xFF9A82DB)],
+              ),
+              borderRadius: BorderRadius.circular(24),
+              boxShadow: [
+                BoxShadow(
+                  color: const Color(0xFF6750A4).withValues(alpha: 0.3),
+                  blurRadius: 24,
+                  offset: const Offset(0, 10),
+                ),
+              ],
             ),
-            borderRadius: BorderRadius.circular(20),
-            boxShadow: [
-              BoxShadow(
-                color: const Color(0xFF6750A4).withValues(alpha: 0.3),
-                blurRadius: 20,
-                offset: const Offset(0, 8),
-              ),
-            ],
-          ),
-          child: Stack(
-            children: [
-              Positioned(
-                right: -20,
-                top: -20,
-                child: Container(
-                  width: 120,
-                  height: 120,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: context.colorScheme.onPrimary.withValues(alpha: 0.1),
-                  ),
-                ),
-              ),
-              Positioned(
-                right: 10,
-                bottom: -30,
-                child: Container(
-                  width: 80,
-                  height: 80,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: context.colorScheme.onPrimary.withValues(alpha: 0.08),
-                  ),
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(20),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      '30% OFF',
-                      style: context.textTheme.headlineSmall?.copyWith(
-                        color: context.colorScheme.onPrimary,
-                        fontWeight: FontWeight.w900,
+            child: Stack(
+              children: [
+                Positioned(
+                  right: -20,
+                  top: -20,
+                  child: Container(
+                    width: 120,
+                    height: 120,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: context.colorScheme.onPrimary.withValues(
+                        alpha: 0.1,
                       ),
                     ),
-                    const SizedBox(height: 4),
-                    Text(
-                      l10n.onboardingDesc2,
-                      style: AppTextStyles.bodyMedium.copyWith(
-                        color: context.colorScheme.onPrimary.withValues(alpha: 0.85),
-                        fontSize: 13,
+                  ),
+                ),
+                Positioned(
+                  right: 10,
+                  bottom: -30,
+                  child: Container(
+                    width: 80,
+                    height: 80,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: context.colorScheme.onPrimary.withValues(
+                        alpha: 0.08,
                       ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
                     ),
-                    const SizedBox(height: 10),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 6,
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              '30% OFF',
+                              style: context.textTheme.headlineSmall?.copyWith(
+                                color: context.colorScheme.onPrimary,
+                                fontWeight: FontWeight.w900,
+                              ),
+                            ),
+                          ),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 5,
+                            ),
+                            decoration: BoxDecoration(
+                              color: context.colorScheme.onPrimary.withValues(
+                                alpha: 0.2,
+                              ),
+                              borderRadius: BorderRadius.circular(999),
+                            ),
+                            child: Text(
+                              l10n.copyCode,
+                              style: AppTextStyles.labelMedium.copyWith(
+                                color: context.colorScheme.onPrimary,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
-                      decoration: BoxDecoration(
-                        color: context.colorScheme.onPrimary.withValues(alpha: 0.2),
-                        borderRadius: BorderRadius.circular(8),
+                      const SizedBox(height: 4),
+                      Text(
+                        l10n.onboardingDesc2,
+                        style: AppTextStyles.bodyMedium.copyWith(
+                          color: context.colorScheme.onPrimary.withValues(
+                            alpha: 0.85,
+                          ),
+                          fontSize: 13,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
-                      child: Text(
-                        'DELWAQTY30',
-                        style: AppTextStyles.labelMedium.copyWith(
-                          color: context.colorScheme.onPrimary,
-                          fontWeight: FontWeight.w700,
-                          letterSpacing: 1,
+                      const SizedBox(height: 10),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 6,
+                        ),
+                        decoration: BoxDecoration(
+                          color: context.colorScheme.onPrimary.withValues(
+                            alpha: 0.2,
+                          ),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Text(
+                          couponCode,
+                          style: AppTextStyles.labelMedium.copyWith(
+                            color: context.colorScheme.onPrimary,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: 1,
+                          ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
@@ -540,7 +625,7 @@ class _ServiceTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return AnimatedFadeIn(
       delay: delay,
-      child: GestureDetector(
+      child: PressableScale(
         onTap: onTap,
         child: Column(
           children: [
@@ -589,21 +674,21 @@ class _MerchantCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final emoji = _getMerchantEmoji(merchant.type);
 
-    return GestureDetector(
+    return PressableScale(
       onTap: onTap,
       child: Container(
         width: 160,
         decoration: BoxDecoration(
           color: context.colorScheme.surfaceContainerLowest,
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(20),
           border: Border.all(
             color: context.colorScheme.outlineVariant.withValues(alpha: 0.2),
           ),
           boxShadow: [
             BoxShadow(
-              color: context.colorScheme.onSurface.withValues(alpha: 0.04),
-              blurRadius: 10,
-              offset: const Offset(0, 2),
+              color: context.colorScheme.onSurface.withValues(alpha: 0.06),
+              blurRadius: 16,
+              offset: const Offset(0, 4),
             ),
           ],
         ),
@@ -617,16 +702,19 @@ class _MerchantCard extends StatelessWidget {
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                   colors: [
-                    context.colorScheme.primaryContainer.withValues(alpha: 0.4),
+                    context.colorScheme.primaryContainer.withValues(alpha: 0.5),
                     context.colorScheme.primaryContainer.withValues(alpha: 0.1),
                   ],
                 ),
                 borderRadius: const BorderRadius.vertical(
-                  top: Radius.circular(16),
+                  top: Radius.circular(20),
                 ),
               ),
               child: Center(
-                child: Text(emoji, style: AppTextStyles.displaySmall.copyWith(fontSize: 40)),
+                child: Text(
+                  emoji,
+                  style: AppTextStyles.displaySmall.copyWith(fontSize: 40),
+                ),
               ),
             ),
             Padding(
@@ -657,7 +745,10 @@ class _MerchantCard extends StatelessWidget {
                       ),
                       const Spacer(),
                       Text(
-                        _merchantTypeLabel(merchant.type, AppLocalizations.of(context)),
+                        _merchantTypeLabel(
+                          merchant.type,
+                          AppLocalizations.of(context),
+                        ),
                         style: context.textTheme.bodySmall?.copyWith(
                           color: context.colorScheme.onSurfaceVariant,
                         ),

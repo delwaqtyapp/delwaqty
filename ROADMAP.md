@@ -140,3 +140,6 @@
 | 25 | Restaurant UX polish — Glass Cards, Lottie, skeletons, Hero, Gallery, L10n, deletion policy | ✅ |
 | 34 | Unified Delivery & Logistics Platform — 9 service types, dispatch engine reuse, merchant/driver/customer flow, delivery pricing | ✅ |
 | 40 | Management Platform — Complaints, Sanctions, Live Tracking, Support Chat | ✅ |
+| 51+ | Admin Panel Wiring — dashboard + sidebar entries; legacy rides page removed | ✅ |
+| 53-54 | Management Tables DB Fix + RLS Rebuild — migrations 015/016 applied to Supabase | ✅ |
+| 55 | UI Polish — Cairo typography, card system, pill search, banner copy, micro-interactions | ✅ |

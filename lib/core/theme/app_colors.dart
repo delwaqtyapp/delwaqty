@@ -136,6 +136,34 @@ abstract final class AppColors {
   static const Color merchantFurniture = Color(0xFF4E342E);
 
   // ---------------------------------------------------------------------------
+  // Service Category Colors
+  // ---------------------------------------------------------------------------
+
+  /// Color representing the restaurants service.
+  static const Color serviceRestaurant = Color(0xFFE65100);
+
+  /// Color representing the grocery service.
+  static const Color serviceGrocery = Color(0xFF2E7D32);
+
+  /// Color representing the pharmacy service.
+  static const Color servicePharmacy = Color(0xFF0277BD);
+
+  /// Color representing the ride / tawsila service.
+  static const Color serviceRide = Color(0xFF512DA8);
+
+  /// Color representing home services.
+  static const Color serviceHome = Color(0xFF4E342E);
+
+  /// Color representing the delivery service.
+  static const Color serviceDelivery = Color(0xFF00897B);
+
+  /// Color representing the offers service.
+  static const Color serviceOffers = Color(0xFFAD1457);
+
+  /// Color representing the more / settings service.
+  static const Color serviceMore = Color(0xFF616161);
+
+  // ---------------------------------------------------------------------------
   // Order Status Colors
   // ---------------------------------------------------------------------------
 

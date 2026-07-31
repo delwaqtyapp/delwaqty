@@ -5678,12 +5678,6 @@ abstract class AppLocalizations {
   /// **'Plate:'**
   String get plateLabel;
 
-  /// No description provided for @rideMonitoring.
-  ///
-  /// In en, this message translates to:
-  /// **'Ride Monitoring'**
-  String get rideMonitoring;
-
   /// No description provided for @searching.
   ///
   /// In en, this message translates to:
@@ -5701,24 +5695,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Completed'**
   String get completed;
-
-  /// No description provided for @noRidesFound.
-  ///
-  /// In en, this message translates to:
-  /// **'No rides found'**
-  String get noRidesFound;
-
-  /// No description provided for @noRidesCreated.
-  ///
-  /// In en, this message translates to:
-  /// **'No rides have been created yet.'**
-  String get noRidesCreated;
-
-  /// No description provided for @noRidesSelectedStatus.
-  ///
-  /// In en, this message translates to:
-  /// **'No rides with the selected status.'**
-  String get noRidesSelectedStatus;
 
   /// No description provided for @rideNumber.
   ///

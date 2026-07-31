@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:delwaqty/core/module/feature_registry.dart';
-import 'package:delwaqty/features/auth/domain/auth_state.dart';
 import 'package:delwaqty/features/auth/presentation/auth_provider.dart';
 import 'package:delwaqty/core/theme/theme_mode_provider.dart';
 import 'package:delwaqty/core/localization/locale_provider.dart';

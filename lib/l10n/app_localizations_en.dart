@@ -2927,9 +2927,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get plateLabel => 'Plate:';
 
   @override
-  String get rideMonitoring => 'Ride Monitoring';
-
-  @override
   String get searching => 'Searching';
 
   @override
@@ -2937,15 +2934,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get completed => 'Completed';
-
-  @override
-  String get noRidesFound => 'No rides found';
-
-  @override
-  String get noRidesCreated => 'No rides have been created yet.';
-
-  @override
-  String get noRidesSelectedStatus => 'No rides with the selected status.';
 
   @override
   String get rideNumber => 'Ride #';

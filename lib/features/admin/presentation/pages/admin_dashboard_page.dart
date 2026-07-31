@@ -253,8 +253,11 @@ class _AdminDashboardPageState extends ConsumerState<AdminDashboardPage> {
       _QuickActionData(l10n.merchantManagement, Icons.store_outlined, const Color(0xFF34C759), '/admin/merchants'),
       _QuickActionData(l10n.orderManagement, Icons.receipt_long_rounded, const Color(0xFFFF9500), '/admin/orders'),
       _QuickActionData(l10n.admin, Icons.directions_car_rounded, const Color(0xFF007AFF), '/admin/drivers'),
-      _QuickActionData(l10n.rideHistory, Icons.map_rounded, const Color(0xFF00C7BE), '/admin/rides'),
       _QuickActionData(l10n.delivery, Icons.inventory_2_rounded, const Color(0xFFFF6482), '/admin/deliveries'),
+      _QuickActionData(l10n.complaintsManagement, Icons.warning_amber_rounded, const Color(0xFFFF3B30), '/admin/complaints'),
+      _QuickActionData(l10n.sanctionsManagement, Icons.gavel_rounded, const Color(0xFFFF9500), '/admin/sanctions'),
+      _QuickActionData(l10n.liveTracking, Icons.map_rounded, const Color(0xFF00C7BE), '/admin/live-tracking'),
+      _QuickActionData(l10n.supportChat, Icons.chat_bubble_rounded, const Color(0xFF34C759), '/admin/support-chat'),
       _QuickActionData(l10n.settings, Icons.settings_rounded, const Color(0xFFAF52DE), '/admin/settings'),
       _QuickActionData(l10n.analytics, Icons.analytics_rounded, const Color(0xFF5856D6), '/admin/analytics'),
     ];

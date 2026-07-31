@@ -20,7 +20,7 @@ class SettingsModule extends FeatureModule {
   IconData get icon => Icons.settings_outlined;
 
   @override
-  bool get isNavModule => true;
+  bool get isNavModule => false;
 
   @override
   int get navPriority => 90;
@@ -55,15 +55,14 @@ class SettingsModule extends FeatureModule {
   ];
 
   @override
-  StatefulShellBranch? buildBranch() {
-    return StatefulShellBranch(
-      routes: [
+  List<RouteBase> get shellSubRoutes => [
         GoRoute(
           path: '/settings',
           name: 'settings',
-          builder: (context, state) => const SettingsPage(),
+          builder: (context, state) => Scaffold(
+            appBar: AppBar(title: Text(AppLocalizations.of(context).settings)),
+            body: const SettingsPage(),
+          ),
         ),
-      ],
-    );
-  }
+      ];
 }

@@ -15,6 +15,7 @@ import 'package:delwaqty/l10n/app_localizations.dart';
 import 'package:delwaqty/features/home/domain/home_domain.dart';
 import 'package:delwaqty/core/theme/app_colors.dart';
 import 'package:delwaqty/core/theme/app_text_styles.dart';
+import 'package:delwaqty/features/floating_sidebar/floating_sidebar.dart';
 
 String _merchantTypeLabel(MerchantType type, AppLocalizations l10n) =>
     switch (type) {
@@ -50,7 +51,7 @@ class HomePage extends ConsumerWidget {
           child: CustomScrollView(
             slivers: [
               SliverToBoxAdapter(
-                child: _buildHeader(context, l10n, isGuest, locationAsync),
+                child: _buildHeader(context, ref, l10n, isGuest, locationAsync),
               ),
               SliverToBoxAdapter(child: _buildSearchBar(context, l10n)),
               SliverToBoxAdapter(child: _buildServiceGrid(context, l10n)),
@@ -63,7 +64,7 @@ class HomePage extends ConsumerWidget {
                 child: _buildSectionTitle(context, l10n.popular, l10n),
               ),
               _buildMerchantList(context, ref, l10n),
-              SliverToBoxAdapter(child: const SizedBox(height: 100)),
+              SliverToBoxAdapter(child: const SizedBox(height: 24)),
             ],
           ),
         ),
@@ -73,6 +74,7 @@ class HomePage extends ConsumerWidget {
 
   Widget _buildHeader(
     BuildContext context,
+    WidgetRef ref,
     AppLocalizations l10n,
     bool isGuest,
     AsyncValue<UserLocation?> locationAsync,
@@ -91,6 +93,10 @@ class HomePage extends ConsumerWidget {
         padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
         child: Row(
           children: [
+            IconButton(
+              icon: const Icon(Icons.menu_rounded),
+              onPressed: () => FloatingSidebarController.open(context, ref),
+            ),
             Container(
               width: 48,
               height: 48,
@@ -209,7 +215,7 @@ class HomePage extends ConsumerWidget {
       child: Padding(
         padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
         child: GestureDetector(
-          onTap: () => context.push('/market/search'),
+          onTap: () => context.go('/search'),
           child: Container(
             height: 54,
             decoration: BoxDecoration(
@@ -337,7 +343,7 @@ class HomePage extends ConsumerWidget {
                 } else if (index == 4) {
                   context.push('/market?type=home');
                 } else if (index == 5) {
-                  context.push('/ride/book');
+                  context.push('/direct-delivery');
                 } else if (index == 6) {
                   context.push('/market');
                 } else if (index == 7) {

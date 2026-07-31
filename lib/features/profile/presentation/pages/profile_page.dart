@@ -31,7 +31,15 @@ class ProfilePage extends ConsumerWidget {
     final isMerchant = authState is AuthAuthenticated && authState.user.role == 'merchant';
 
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.profile)),
+      appBar: AppBar(
+        title: Text(l10n.profile),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.settings_outlined),
+            onPressed: () => context.push('/settings'),
+          ),
+        ],
+      ),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [

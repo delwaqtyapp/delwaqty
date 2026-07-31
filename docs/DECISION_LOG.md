@@ -1001,3 +1001,37 @@ The app rendered Arabic with the default Roboto typeface and used inconsistent c
 
 
 ---
+
+## ADR-035: Functional Bottom-Nav Restructure — 4-Tab Layout
+
+**Date:** Sprint 56
+**Status:** Accepted
+**Deciders:** Lead Software Architect
+
+### Context
+The bottom navigation was built from every `isNavModule` module, producing tabs Home / Direct Delivery / Ride / Settings. As a super-app, the primary consumer flows are discover (Home), search (Search), track purchases (Orders), and identity (Profile). Settings/Delivery/Ride are secondary actions that belong inside screens, not permanent tabs. The product decision was approved: a professional 4-tab layout Home / Search / Orders / Profile.
+
+### Decision
+1. **Tabs** are still derived from `FeatureRegistry.navModules` (sorted by `navPriority`): Home (10), Search (20), Orders (30), Profile (40) — the tab set is a module-registration concern, not hardcoded in the shell.
+2. **SearchModule** promoted to nav module with branch `/search` rendering the existing commerce `SearchPage`; the home search bar now switches tabs via `context.go('/search')` instead of pushing `/market/search`.
+3. **New OrdersModule** (`lib/features/orders/`) with nav branch `/orders` → existing commerce `OrdersPage`; `/orders` added to `restrictedRoutes` so guests are redirected to login; declares `dependsOn: ['commerce']`.
+4. **ProfileModule** promoted to nav module with branch `/profile`; a gear action in its AppBar opens `/settings`; drawer/sidebar `/profile` targets use `go` to switch the tab.
+5. **SettingsModule / DirectDeliveryModule / RideModule** demoted to non-nav. `/settings` becomes a `shellSubRoute` wrapped in `Scaffold` + `AppBar`; `/direct-delivery` and `/ride/book` become `standaloneRoutes`. RideModule was re-enabled (was commented out) so the home ride tile's `/ride/book` push resolves.
+6. **AppShell** drops its global AppBar; the menu button moved into the Home header (floating sidebar still opens there). `extendBody` changed to `false` so branch pages with their own Scaffold/AppBar are never overlapped by the floating pill.
+7. **DirectDeliveryPage** gained its own `AppBar` (previously relied on the shell AppBar).
+
+### Rationale
+- Keeps navigation fully module-driven: adding/removing a tab is a one-line registry change.
+- Reuses existing pages (SearchPage, OrdersPage) instead of creating placeholder scaffolds — no duplicated UI.
+- Secondary services stay reachable (Home grid tiles, Profile gear) without consuming permanent tab space.
+- Removing the shell AppBar avoids double AppBars now that Search/Orders/Profile own their headers, and lets each tab carry its own header affordances (menu on Home, gear on Profile).
+- Re-enabling RideModule restores the intended ride entry point; the previous `ModuleCapability.requiresMap`/`hasLocation` design is preserved.
+
+### Consequences
+- Guest flow: Search tab is open, Orders tab redirects to login (`restrictedRoutes`), Profile shows the existing guest CTA.
+- `module_registry.dart` now registers `OrdersModule` and `RideModule`; `/market/search` and `/market/orders` remain registered (deep-link/legacy pushes), `/orders` and `/search` are the tab roots.
+- Home header gained a menu button; the global notifications button is unchanged (Home header badge).
+- `flutter analyze` = 0 errors; `flutter test` = 517/517; debug APK built, installed, and 4 tabs smoke-tested on DNP NX9 with no crashes.
+
+
+---

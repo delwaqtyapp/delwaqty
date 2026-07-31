@@ -41,7 +41,7 @@ final goRouterProvider = Provider<GoRouter>((ref) {
           state.matchedLocation == '/register' ||
           state.matchedLocation == '/forgot-password';
 
-      final restrictedRoutes = ['/market/checkout', '/market/orders', '/market/favorites'];
+      final restrictedRoutes = ['/market/checkout', '/market/orders', '/market/favorites', '/orders'];
       final isRestricted = restrictedRoutes.any(
         (r) => state.matchedLocation.startsWith(r),
       );

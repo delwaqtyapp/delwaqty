@@ -18,7 +18,7 @@ class RideModule extends FeatureModule {
   IconData? get icon => Icons.local_taxi_rounded;
 
   @override
-  bool get isNavModule => true;
+  bool get isNavModule => false;
 
   @override
   int get navPriority => 30;
@@ -33,20 +33,11 @@ class RideModule extends FeatureModule {
   List<String> get dependsOn => [];
 
   @override
-  StatefulShellBranch? buildBranch() {
-    return StatefulShellBranch(
-      routes: [
+  List<RouteBase> get standaloneRoutes => [
         GoRoute(
-          path: '/ride',
-          name: 'ride',
+          path: '/ride/book',
           builder: (context, state) => const RideBookingPage(),
         ),
-      ],
-    );
-  }
-
-  @override
-  List<RouteBase> get standaloneRoutes => [
         GoRoute(
           path: '/ride/tracking/:id',
           builder: (context, state) => RideTrackingPage(

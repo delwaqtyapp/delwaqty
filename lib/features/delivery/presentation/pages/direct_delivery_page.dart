@@ -156,6 +156,7 @@ class _DirectDeliveryPageState extends ConsumerState<DirectDeliveryPage> {
     final cs = theme.colorScheme;
 
     return Scaffold(
+      appBar: AppBar(title: Text(l10n.directDelivery)),
       body: SafeArea(
         child: CustomScrollView(
           slivers: [

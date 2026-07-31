@@ -1,26 +1,27 @@
 # SESSION_STATUS.md
 
-> **Last updated:** 2026-08-01 Session 19 (UI Polish — typography, cards, home polish)
+> **Last updated:** 2026-08-01 Session 20 (Functional Bottom-Nav Restructure — 4 tabs)
 
 ---
 
-## Current Task — UI POLISH (Session 19)
+## Current Task — FUNCTIONAL BOTTOM-NAV RESTRUCTURE (Session 20)
 
-Full visual-refinement pass toward professional delivery-app quality (Uber Eats / Talabat reference), covering identity, cards, home screen, and micro-interactions.
+Redesigned the bottom navigation from the module-driven Home / Direct Delivery / Ride / Settings tab set into a professional 4-tab layout: **Home / Search / Orders / Profile** — the product decision deferred in Session 19.
 
 | Area | Change |
 |------|--------|
-| Typography | Added `google_fonts` dependency; theme now renders **Cairo** (native Arabic + Latin) via `GoogleFonts.cairoTextTheme()` wrapping `AppTextStyles`; `AppFontFamily.cairo` token added |
-| Colors | Added 8 `service*` category tokens to `AppColors`; home service grid now references them (removed hardcoded hex) |
-| Merchant card | Radius 12→20, elevation→soft shadow + subtle border, gradient image placeholder (was flat), pill badges (verified/open) |
-| Product card | Radius 10→16, soft shadow + border, gradient placeholder, pill discount badge |
-| Home merchant card | Radius 16→20, softer shadow, gradient placeholder |
-| Pill search | Home search bar now fully pill-shaped (radius 999) with primary icon tint + soft shadow |
-| Promo banner | Radius 20→24, adds "Copy code" pill + tap-to-copy (`DELWAQTY30`) with snackbar feedback via new `copyCode`/`codeCopied` l10n keys |
-| Micro-interactions | New `shared/widgets/pressable_scale.dart` — press-scale tactile feedback wired into service tiles + home merchant cards |
-| Verify | `flutter analyze` 0 errors · `flutter test` 517/517 · APK built + installed on DNP NX9 |
+| Nav tabs | New order by `navPriority`: **Home (10) → Search (20) → Orders (30) → Profile (40)**; the shell builds branches from `FeatureRegistry.navModules` so tabs stay module-driven |
+| SearchModule | Promoted to nav module: branch `/search` → existing commerce `SearchPage`; home search bar now `context.go('/search')` (switches tab instead of pushing a duplicate) |
+| OrdersModule (new) | `lib/features/orders/orders_module.dart` — nav branch `/orders` → existing commerce `OrdersPage`; `/orders` added to `restrictedRoutes` (guests → login); depends on `commerce` |
+| ProfileModule | Promoted to nav module: branch `/profile` → `ProfilePage`; drawer/sidebar `/profile` uses `go` (tab switch); **gear icon** added to Profile AppBar → `push('/settings')` |
+| SettingsModule | Demoted to non-nav; `/settings` kept as `shellSubRoute` wrapped in a `Scaffold` + `AppBar` (page itself remains a bare `ListView`) |
+| DirectDeliveryModule | Demoted to non-nav; `/direct-delivery` kept as a `standaloneRoute`; page gained its own `AppBar` (title + back) since it is no longer rendered under the shell AppBar |
+| RideModule | Re-enabled (was commented out in `module_registry.dart`); demoted to non-nav with `/ride/book` as a `standaloneRoute` (RideBookingPage has its own back button); home ride tile's `/ride/book` push now resolves; delivery tile fixed to push `/direct-delivery` |
+| AppShell | Global AppBar removed (menu + notifications moved into Home header); **menu button** added to Home header (opens floating sidebar); `extendBody: true` → `false` so branch pages with their own Scaffolds are not overlapped by the floating pill; Home bottom spacer 100 → 24 |
+| Routes | `app_router.dart` restricted list now includes `/orders`; `module_registry.dart` registers `OrdersModule` and re-registers `RideModule` |
+| Verify | `flutter analyze` 0 errors · `flutter test` 517/517 · debug APK built + installed on DNP NX9 · all 4 tabs tapped on device with no crashes |
 
-> **Deferred (decision required):** bottom-nav **tab set** change to Home / Search / Orders / Profile. Current tabs are Home, Direct Delivery, Ride, Settings. Restructuring requires promoting Search + Profile to nav modules and building an Orders branch (functional/routing change, not polish) — needs a product decision on which tabs and where Delivery/Ride/Settings move.
+> The old tab set (Direct Delivery, Ride, Settings) remains reachable: Delivery via Home grid tile, Ride via Home grid tile (`/ride/book`), Settings via Home "More" tile + Profile gear.
 
 ---
 
@@ -110,6 +111,7 @@ Made the Sprint 40 management features (complaints, sanctions, live tracking, su
 | M13b | 53 | Management Tables DB Fix — migration 015, 014 type bug, UUID insert + RLS fixes | ✅ |
 | M13c | 54 | RLS Policy Rebuild — migration 016: is_admin helper, explicit per-command policies, grants | ✅ |
 | M13d | 55 | UI Polish — Cairo typography (google_fonts), card system (radius/shadow/gradients), pill search, banner copy, micro-interactions | ✅ |
+| M13e | 56 | Functional Bottom-Nav Restructure — 4-tab layout (Home/Search/Orders/Profile), Settings behind Profile gear, Delivery/Ride into Home grid | ✅ |
 
 ---
 

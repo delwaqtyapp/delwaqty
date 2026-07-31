@@ -41,13 +41,27 @@ CREATE POLICY "Users insert complaints" ON complaints
 
 -- ============================================================
 -- 2. SANCTIONS (العقوبات)
+-- NOTE: PostgreSQL does NOT support "CREATE TYPE IF NOT EXISTS".
+-- Use DO blocks so this migration never aborts mid-way.
 -- ============================================================
-CREATE TYPE IF NOT EXISTS sanction_type AS ENUM (
-  'warning','fine','temporary_ban','permanent_ban','suspension'
-);
-CREATE TYPE IF NOT EXISTS sanction_target AS ENUM (
-  'customer','driver','merchant','provider','admin'
-);
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'sanction_type') THEN
+    CREATE TYPE sanction_type AS ENUM (
+      'warning','fine','temporary_ban','permanent_ban','suspension'
+    );
+  END IF;
+END
+$$;
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'sanction_target') THEN
+    CREATE TYPE sanction_target AS ENUM (
+      'customer','driver','merchant','provider','admin'
+    );
+  END IF;
+END
+$$;
 
 CREATE TABLE IF NOT EXISTS sanctions (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),

@@ -25,8 +25,12 @@ class SupabaseChatDataSource {
   }
 
   Future<ChatRoom> createRoom(ChatRoom room) async {
-    await _client.from('chat_rooms').insert(room.toJson());
-    return room;
+    final payload = Map<String, dynamic>.from(room.toJson());
+    if (payload['id'] == null || (payload['id'] as String).isEmpty) {
+      payload.remove('id');
+    }
+    final row = await _client.from('chat_rooms').insert(payload).select().single();
+    return ChatRoom.fromJson(row);
   }
 
   Future<ChatRoom> getRoomById(String id) async {
@@ -52,12 +56,20 @@ class SupabaseChatDataSource {
   }
 
   Future<ChatMessage> sendMessage(ChatMessage message) async {
-    await _client.from('chat_messages').insert(message.toJson());
+    final payload = Map<String, dynamic>.from(message.toJson());
+    if (payload['id'] == null || (payload['id'] as String).isEmpty) {
+      payload.remove('id');
+    }
+    final row = await _client
+        .from('chat_messages')
+        .insert(payload)
+        .select()
+        .single();
     await _client.from('chat_rooms').update({
       'last_message_at': message.createdAt.toIso8601String(),
       'updated_at': message.createdAt.toIso8601String(),
     }).eq('id', message.roomId);
-    return message;
+    return ChatMessage.fromJson(row);
   }
 
   Future<void> markAsRead(String messageId) async {

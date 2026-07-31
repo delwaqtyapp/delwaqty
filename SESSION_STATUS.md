@@ -1,6 +1,29 @@
 # SESSION_STATUS.md
 
-> **Last updated:** 2026-07-31 Session 18 (RLS Policy Rebuild — migration 016)
+> **Last updated:** 2026-07-31 Session 18b (Migrations APPLIED to Supabase via Management API)
+
+---
+
+## Current Task — MIGRATIONS EXECUTED ON SUPABASE (015 + 016)
+
+Both migrations were executed directly against `bttnlkmwhorjamzemwda` via the Supabase Management API (`database/query` endpoint) using the user's Personal Access Token.
+
+**Important finding:** before execution, all 5 tables returned **404 via REST** — 015 had NOT been applied (despite the report). Executed 015 then 016.
+
+| Verification | Result |
+|--------------|--------|
+| `pg_tables` (public schema) | ✅ 5/5 tables exist (`complaints`, `sanctions`, `location_updates`, `chat_rooms`, `chat_messages`) |
+| `relrowsecurity` | ✅ RLS enabled on 5/5 |
+| `pg_policies` | ✅ 31 policies (admin SELECT/INSERT/UPDATE/DELETE + user policies per table) |
+| Helper functions | ✅ `is_admin`, `add_admin_note`, `add_complaint_admin_note` |
+| Realtime publication | ✅ 5/5 tables added to `supabase_realtime` |
+| Storage buckets | ✅ `complaints` + `chat_attachments` |
+| Grants to `authenticated` | ✅ SELECT/INSERT/UPDATE/DELETE on 5/5 |
+| REST end-to-end | ✅ Table reachable (200, RLS returns filtered rows); temporary `anon` grant was revoked after the test |
+| PostgREST reload | ✅ `NOTIFY pgrst, 'reload schema'` triggered |
+| `flutter analyze` / `test` | ✅ 0 errors / 517 passing (unchanged) |
+
+> **Note:** The Personal Access Token was used in the session only (never saved to files or committed). User should revoke/rotate it in Supabase → Account → Access Tokens.
 
 ---
 

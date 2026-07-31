@@ -196,7 +196,7 @@ class _FloatingSidebarOverlayState extends State<FloatingSidebarOverlay>
                                     ? (widget.authState as AuthAuthenticated).user.email
                                     : null,
                                 roleBadge: displayRole,
-                                onEditProfile: () => _navigate('/profile'),
+                                onEditProfile: () => _navigateReplace('/profile'),
                               ),
                               SidebarDivider(),
                               SidebarSection(
@@ -219,7 +219,7 @@ class _FloatingSidebarOverlayState extends State<FloatingSidebarOverlay>
                                     isSelected: _selectedIndex == 1,
                                     onTap: () {
                                       setState(() => _selectedIndex = 1);
-                                      _navigate('/profile');
+                                      _navigateReplace('/profile');
                                     },
                                   ),
                                   SidebarItem(

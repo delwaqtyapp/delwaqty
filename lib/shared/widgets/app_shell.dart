@@ -5,8 +5,6 @@ import 'package:go_router/go_router.dart';
 import 'package:delwaqty/core/module/feature_module.dart';
 import 'package:delwaqty/core/module/feature_registry.dart';
 import 'package:delwaqty/core/theme/app_text_styles.dart';
-import 'package:delwaqty/l10n/app_localizations.dart';
-import 'package:delwaqty/features/floating_sidebar/floating_sidebar.dart';
 
 class AppShell extends ConsumerWidget {
   const AppShell({super.key, required this.navigationShell});
@@ -22,30 +20,12 @@ class AppShell extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
     final registry = FeatureRegistry.instance;
     final navModules = registry.navModules;
 
     return Scaffold(
-      extendBody: true,
-      appBar: AppBar(
-        title: Text(
-          l10n.appTitle,
-          style: AppTextStyles.titleMedium.copyWith(fontWeight: FontWeight.bold),
-        ),
-        leading: IconButton(
-          icon: const Icon(Icons.menu_rounded),
-          onPressed: () => FloatingSidebarController.open(context, ref),
-        ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.notifications_outlined),
-            onPressed: () => context.push('/notifications'),
-          ),
-        ],
-      ),
       body: navigationShell,
       bottomNavigationBar: _TransparentBottomNav(
         selectedIndex: navigationShell.currentIndex,

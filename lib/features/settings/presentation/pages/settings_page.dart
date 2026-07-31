@@ -33,7 +33,7 @@ class SettingsPage extends ConsumerWidget {
               leading: const Icon(Icons.person_outline_rounded),
               title: Text(l10n.profile),
               trailing: const Icon(Icons.chevron_right_rounded),
-              onTap: () => context.push('/profile'),
+              onTap: () => context.go('/profile'),
             ),
             const Divider(height: 1),
             ListTile(

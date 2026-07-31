@@ -16,7 +16,7 @@ class DirectDeliveryModule extends FeatureModule {
   IconData? get icon => Icons.delivery_dining_rounded;
 
   @override
-  bool get isNavModule => true;
+  bool get isNavModule => false;
 
   @override
   int get navPriority => 60;
@@ -31,17 +31,13 @@ class DirectDeliveryModule extends FeatureModule {
   List<String> get dependsOn => [];
 
   @override
-  StatefulShellBranch? buildBranch() {
-    return StatefulShellBranch(
-      routes: [
+  List<RouteBase> get standaloneRoutes => [
         GoRoute(
           path: '/direct-delivery',
           name: 'direct_delivery',
           builder: (context, state) => const DirectDeliveryPage(),
         ),
-      ],
-    );
-  }
+      ];
 
   @override
   List<Override> providerOverrides(Ref ref) => [];

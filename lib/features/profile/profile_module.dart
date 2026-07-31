@@ -15,19 +15,23 @@ class ProfileModule extends FeatureModule {
   IconData? get icon => Icons.person_outline_rounded;
 
   @override
-  bool get isNavModule => false;
+  bool get isNavModule => true;
 
   @override
-  int get navPriority => 50;
+  int get navPriority => 40;
 
   @override
-  List<RouteBase> get shellSubRoutes => [
-    GoRoute(
-      path: '/profile',
-      name: 'profile',
-      builder: (context, state) => const ProfilePage(),
-    ),
-  ];
+  StatefulShellBranch? buildBranch() {
+    return StatefulShellBranch(
+      routes: [
+        GoRoute(
+          path: '/profile',
+          name: 'profile',
+          builder: (context, state) => const ProfilePage(),
+        ),
+      ],
+    );
+  }
 
   @override
   List<DrawerEntry> get drawerEntries => [
@@ -37,7 +41,7 @@ class ProfileModule extends FeatureModule {
       icon: Icons.person_outline_rounded,
       onTap: (ctx, ref) {
         Navigator.of(ctx).pop();
-        ctx.push('/profile');
+        ctx.go('/profile');
       },
     ),
   ];

@@ -1147,6 +1147,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get overview => 'نظرة عامة';
 
   @override
+  String get days => 'أيام';
+
+  @override
   String get analytics => 'التحليلات';
 
   @override
@@ -2279,6 +2282,18 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get favorites => 'المفضلة';
+
+  @override
+  String get airport => 'المطار';
+
+  @override
+  String get hospital => 'المستشفى';
+
+  @override
+  String get shopping => 'تسوق';
+
+  @override
+  String get more => 'المزيد';
 
   @override
   String get searchResults => 'النتائج';
@@ -3441,4 +3456,150 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get somethingWentWrong => 'حدث خطأ ما. يرجى المحاولة مرة أخرى.';
+
+  @override
+  String get securityCenter => 'مركز الأمان';
+
+  @override
+  String get trustedDevices => 'الأجهزة الموثوقة';
+
+  @override
+  String get serviceAudioLogs => 'سجل الأمان';
+
+  @override
+  String get startAudioRecording => 'بدء التسجيل';
+
+  @override
+  String get stopAudioRecording => 'إيقاف التسجيل';
+
+  @override
+  String get recordingConsent =>
+      'هذا التسجيل لأغراض أمنية فقط، ولن يُستخدم إلا في حالات النزاع. خصوصيتك محمية.';
+
+  @override
+  String get noAudioRecordings => 'لا توجد تسجيلات صوتية بعد';
+
+  @override
+  String get audioLogsForOrder => 'التسجيلات الصوتية';
+
+  @override
+  String get mainSection => 'الرئيسية';
+
+  @override
+  String get servicesSection => 'الخدمات';
+
+  @override
+  String get supportSection => 'الدعم';
+
+  @override
+  String get complaints => 'الشكاوى';
+
+  @override
+  String get complaintsManagement => 'إدارة الشكاوى';
+
+  @override
+  String get noComplaints => 'لا توجد شكاوى بعد';
+
+  @override
+  String get noComplaintsDescription => 'ستظهر الشكاوى هنا بعد تقديمها.';
+
+  @override
+  String get submitComplaint => 'تقديم شكوى';
+
+  @override
+  String get myComplaints => 'شكاوي';
+
+  @override
+  String get complaintType => 'نوع الشكوى';
+
+  @override
+  String get complaintSubmitted => 'تم تقديم الشكوى بنجاح';
+
+  @override
+  String get subject => 'الموضوع';
+
+  @override
+  String get priority => 'الأولوية';
+
+  @override
+  String get addAdminNote => 'إضافة ملاحظة إدارية';
+
+  @override
+  String get addNote => 'إضافة ملاحظة';
+
+  @override
+  String get sanctions => 'العقوبات';
+
+  @override
+  String get sanctionsManagement => 'إدارة العقوبات';
+
+  @override
+  String get noSanctions => 'لا توجد عقوبات بعد';
+
+  @override
+  String get noSanctionsDescription => 'ستظهر العقوبات هنا بعد إصدارها.';
+
+  @override
+  String get activeOnly => 'النشطة فقط';
+
+  @override
+  String get fineAmount => 'قيمة الغرامة';
+
+  @override
+  String get startDate => 'تاريخ البداية';
+
+  @override
+  String get endDate => 'تاريخ النهاية';
+
+  @override
+  String get inactive => 'غير نشط';
+
+  @override
+  String get notes => 'ملاحظات';
+
+  @override
+  String get noActiveDrivers => 'لا يوجد سائقون نشطون';
+
+  @override
+  String get noActiveDriversDescription =>
+      'لا يوجد سائقون مع تحديثات موقع حديثة.';
+
+  @override
+  String get mapView => 'عرض الخريطة';
+
+  @override
+  String get mapApiKeyRequired => 'مطلوب مفتاح API للخريطة';
+
+  @override
+  String get activeDriversList => 'السائقون النشطون';
+
+  @override
+  String get supportChat => 'الدردشة';
+
+  @override
+  String get noChatRooms => 'لا توجد غرف دردشة';
+
+  @override
+  String get noChatRoomsDescription => 'لا توجد غرف دعم متاحة.';
+
+  @override
+  String get chatRoom => 'غرفة دردشة';
+
+  @override
+  String get participants => 'مشارك';
+
+  @override
+  String get noMessages => 'لا توجد رسائل بعد';
+
+  @override
+  String get typeMessage => 'اكتب رسالة...';
+
+  @override
+  String get startChat => 'بدء محادثة';
+
+  @override
+  String get noSupportRooms => 'لا توجد محادثات دعم';
+
+  @override
+  String get startSupportChatDescription => 'ابدأ محادثة مع فريق الدعم.';
 }

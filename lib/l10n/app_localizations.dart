@@ -2270,6 +2270,12 @@ abstract class AppLocalizations {
   /// **'Overview'**
   String get overview;
 
+  /// No description provided for @days.
+  ///
+  /// In en, this message translates to:
+  /// **'days'**
+  String get days;
+
   /// No description provided for @analytics.
   ///
   /// In en, this message translates to:
@@ -4447,6 +4453,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Favorites'**
   String get favorites;
+
+  /// No description provided for @airport.
+  ///
+  /// In en, this message translates to:
+  /// **'Airport'**
+  String get airport;
+
+  /// No description provided for @hospital.
+  ///
+  /// In en, this message translates to:
+  /// **'Hospital'**
+  String get hospital;
+
+  /// No description provided for @shopping.
+  ///
+  /// In en, this message translates to:
+  /// **'Shopping'**
+  String get shopping;
+
+  /// No description provided for @more.
+  ///
+  /// In en, this message translates to:
+  /// **'More'**
+  String get more;
 
   /// No description provided for @searchResults.
   ///
@@ -6673,6 +6703,294 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Something went wrong. Please try again.'**
   String get somethingWentWrong;
+
+  /// No description provided for @securityCenter.
+  ///
+  /// In en, this message translates to:
+  /// **'Security Center'**
+  String get securityCenter;
+
+  /// No description provided for @trustedDevices.
+  ///
+  /// In en, this message translates to:
+  /// **'Trusted Devices'**
+  String get trustedDevices;
+
+  /// No description provided for @serviceAudioLogs.
+  ///
+  /// In en, this message translates to:
+  /// **'Service Audio Logs'**
+  String get serviceAudioLogs;
+
+  /// No description provided for @startAudioRecording.
+  ///
+  /// In en, this message translates to:
+  /// **'Start Recording'**
+  String get startAudioRecording;
+
+  /// No description provided for @stopAudioRecording.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop Recording'**
+  String get stopAudioRecording;
+
+  /// No description provided for @recordingConsent.
+  ///
+  /// In en, this message translates to:
+  /// **'This recording is for security purposes only and will only be used in case of disputes. Your privacy is protected.'**
+  String get recordingConsent;
+
+  /// No description provided for @noAudioRecordings.
+  ///
+  /// In en, this message translates to:
+  /// **'No audio recordings yet'**
+  String get noAudioRecordings;
+
+  /// No description provided for @audioLogsForOrder.
+  ///
+  /// In en, this message translates to:
+  /// **'Audio Logs'**
+  String get audioLogsForOrder;
+
+  /// No description provided for @mainSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Main'**
+  String get mainSection;
+
+  /// No description provided for @servicesSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Services'**
+  String get servicesSection;
+
+  /// No description provided for @supportSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Support'**
+  String get supportSection;
+
+  /// No description provided for @complaints.
+  ///
+  /// In en, this message translates to:
+  /// **'Complaints'**
+  String get complaints;
+
+  /// No description provided for @complaintsManagement.
+  ///
+  /// In en, this message translates to:
+  /// **'Complaints Management'**
+  String get complaintsManagement;
+
+  /// No description provided for @noComplaints.
+  ///
+  /// In en, this message translates to:
+  /// **'No complaints yet'**
+  String get noComplaints;
+
+  /// No description provided for @noComplaintsDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Complaints will appear here once submitted.'**
+  String get noComplaintsDescription;
+
+  /// No description provided for @submitComplaint.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit a Complaint'**
+  String get submitComplaint;
+
+  /// No description provided for @myComplaints.
+  ///
+  /// In en, this message translates to:
+  /// **'My Complaints'**
+  String get myComplaints;
+
+  /// No description provided for @complaintType.
+  ///
+  /// In en, this message translates to:
+  /// **'Complaint Type'**
+  String get complaintType;
+
+  /// No description provided for @complaintSubmitted.
+  ///
+  /// In en, this message translates to:
+  /// **'Complaint submitted successfully'**
+  String get complaintSubmitted;
+
+  /// No description provided for @subject.
+  ///
+  /// In en, this message translates to:
+  /// **'Subject'**
+  String get subject;
+
+  /// No description provided for @priority.
+  ///
+  /// In en, this message translates to:
+  /// **'Priority'**
+  String get priority;
+
+  /// No description provided for @addAdminNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Admin Note'**
+  String get addAdminNote;
+
+  /// No description provided for @addNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Note'**
+  String get addNote;
+
+  /// No description provided for @sanctions.
+  ///
+  /// In en, this message translates to:
+  /// **'Sanctions'**
+  String get sanctions;
+
+  /// No description provided for @sanctionsManagement.
+  ///
+  /// In en, this message translates to:
+  /// **'Sanctions Management'**
+  String get sanctionsManagement;
+
+  /// No description provided for @noSanctions.
+  ///
+  /// In en, this message translates to:
+  /// **'No sanctions yet'**
+  String get noSanctions;
+
+  /// No description provided for @noSanctionsDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Sanctions will appear here once issued.'**
+  String get noSanctionsDescription;
+
+  /// No description provided for @activeOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'Active only'**
+  String get activeOnly;
+
+  /// No description provided for @fineAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Fine Amount'**
+  String get fineAmount;
+
+  /// No description provided for @startDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Start Date'**
+  String get startDate;
+
+  /// No description provided for @endDate.
+  ///
+  /// In en, this message translates to:
+  /// **'End Date'**
+  String get endDate;
+
+  /// No description provided for @inactive.
+  ///
+  /// In en, this message translates to:
+  /// **'Inactive'**
+  String get inactive;
+
+  /// No description provided for @notes.
+  ///
+  /// In en, this message translates to:
+  /// **'Notes'**
+  String get notes;
+
+  /// No description provided for @noActiveDrivers.
+  ///
+  /// In en, this message translates to:
+  /// **'No active drivers'**
+  String get noActiveDrivers;
+
+  /// No description provided for @noActiveDriversDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'No drivers with recent location updates.'**
+  String get noActiveDriversDescription;
+
+  /// No description provided for @mapView.
+  ///
+  /// In en, this message translates to:
+  /// **'Map View'**
+  String get mapView;
+
+  /// No description provided for @mapApiKeyRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Map API key required'**
+  String get mapApiKeyRequired;
+
+  /// No description provided for @activeDriversList.
+  ///
+  /// In en, this message translates to:
+  /// **'Active Drivers'**
+  String get activeDriversList;
+
+  /// No description provided for @supportChat.
+  ///
+  /// In en, this message translates to:
+  /// **'Support Chat'**
+  String get supportChat;
+
+  /// No description provided for @noChatRooms.
+  ///
+  /// In en, this message translates to:
+  /// **'No chat rooms'**
+  String get noChatRooms;
+
+  /// No description provided for @noChatRoomsDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'No support chat rooms available.'**
+  String get noChatRoomsDescription;
+
+  /// No description provided for @chatRoom.
+  ///
+  /// In en, this message translates to:
+  /// **'Chat Room'**
+  String get chatRoom;
+
+  /// No description provided for @participants.
+  ///
+  /// In en, this message translates to:
+  /// **'participants'**
+  String get participants;
+
+  /// No description provided for @noMessages.
+  ///
+  /// In en, this message translates to:
+  /// **'No messages yet'**
+  String get noMessages;
+
+  /// No description provided for @typeMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Type a message...'**
+  String get typeMessage;
+
+  /// No description provided for @startChat.
+  ///
+  /// In en, this message translates to:
+  /// **'Start Chat'**
+  String get startChat;
+
+  /// No description provided for @noSupportRooms.
+  ///
+  /// In en, this message translates to:
+  /// **'No support chats'**
+  String get noSupportRooms;
+
+  /// No description provided for @startSupportChatDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Start a conversation with the support team.'**
+  String get startSupportChatDescription;
 }
 
 class _AppLocalizationsDelegate

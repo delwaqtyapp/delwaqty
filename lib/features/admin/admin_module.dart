@@ -10,6 +10,11 @@ import 'package:delwaqty/features/admin/presentation/pages/admin_drivers_page.da
 import 'package:delwaqty/features/admin/presentation/pages/admin_rides_page.dart';
 import 'package:delwaqty/features/admin/presentation/pages/admin_analytics_page.dart';
 import 'package:delwaqty/features/admin/presentation/pages/admin_deliveries_page.dart';
+import 'package:delwaqty/features/complaints/presentation/pages/admin_complaints_page.dart';
+import 'package:delwaqty/features/sanctions/presentation/pages/admin_sanctions_page.dart';
+import 'package:delwaqty/features/location_tracking/presentation/pages/admin_live_tracking_page.dart';
+import 'package:delwaqty/features/support_chat/presentation/pages/admin_support_chat_page.dart';
+import 'package:delwaqty/features/support_chat/presentation/pages/support_chat_room_page.dart';
 
 class AdminModule extends FeatureModule {
   @override
@@ -70,6 +75,31 @@ class AdminModule extends FeatureModule {
         GoRoute(
           path: 'deliveries',
           builder: (context, state) => const AdminDeliveriesPage(),
+        ),
+        GoRoute(
+          path: 'complaints',
+          builder: (context, state) => const AdminComplaintsPage(),
+        ),
+        GoRoute(
+          path: 'sanctions',
+          builder: (context, state) => const AdminSanctionsPage(),
+        ),
+        GoRoute(
+          path: 'live-tracking',
+          builder: (context, state) => const AdminLiveTrackingPage(),
+        ),
+        GoRoute(
+          path: 'support-chat',
+          builder: (context, state) => const AdminSupportChatPage(),
+          routes: [
+            GoRoute(
+              path: 'room/:roomId',
+              builder: (context, state) {
+                final roomId = state.pathParameters['roomId']!;
+                return SupportChatRoomPage(roomId: roomId);
+              },
+            ),
+          ],
         ),
       ],
     ),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'app_colors.dart';
 import 'app_spacing.dart';
 import 'app_text_styles.dart';
+import '../../features/floating_sidebar/sidebar_theme.dart';
 
 /// Builds the complete [ThemeData] for both light and dark modes.
 ///
@@ -123,6 +124,11 @@ abstract final class AppTheme {
         type: BottomNavigationBarType.fixed,
         elevation: AppElevationValues.lg,
       ),
+      extensions: [
+        colorScheme.brightness == Brightness.dark
+            ? SidebarTheme.dark
+            : SidebarTheme.light,
+      ],
     );
   }
 }

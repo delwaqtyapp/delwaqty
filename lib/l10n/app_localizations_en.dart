@@ -1151,6 +1151,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get overview => 'Overview';
 
   @override
+  String get days => 'days';
+
+  @override
   String get analytics => 'Analytics';
 
   @override
@@ -2286,6 +2289,18 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get favorites => 'Favorites';
+
+  @override
+  String get airport => 'Airport';
+
+  @override
+  String get hospital => 'Hospital';
+
+  @override
+  String get shopping => 'Shopping';
+
+  @override
+  String get more => 'More';
 
   @override
   String get searchResults => 'Results';
@@ -3465,4 +3480,153 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get somethingWentWrong => 'Something went wrong. Please try again.';
+
+  @override
+  String get securityCenter => 'Security Center';
+
+  @override
+  String get trustedDevices => 'Trusted Devices';
+
+  @override
+  String get serviceAudioLogs => 'Service Audio Logs';
+
+  @override
+  String get startAudioRecording => 'Start Recording';
+
+  @override
+  String get stopAudioRecording => 'Stop Recording';
+
+  @override
+  String get recordingConsent =>
+      'This recording is for security purposes only and will only be used in case of disputes. Your privacy is protected.';
+
+  @override
+  String get noAudioRecordings => 'No audio recordings yet';
+
+  @override
+  String get audioLogsForOrder => 'Audio Logs';
+
+  @override
+  String get mainSection => 'Main';
+
+  @override
+  String get servicesSection => 'Services';
+
+  @override
+  String get supportSection => 'Support';
+
+  @override
+  String get complaints => 'Complaints';
+
+  @override
+  String get complaintsManagement => 'Complaints Management';
+
+  @override
+  String get noComplaints => 'No complaints yet';
+
+  @override
+  String get noComplaintsDescription =>
+      'Complaints will appear here once submitted.';
+
+  @override
+  String get submitComplaint => 'Submit a Complaint';
+
+  @override
+  String get myComplaints => 'My Complaints';
+
+  @override
+  String get complaintType => 'Complaint Type';
+
+  @override
+  String get complaintSubmitted => 'Complaint submitted successfully';
+
+  @override
+  String get subject => 'Subject';
+
+  @override
+  String get priority => 'Priority';
+
+  @override
+  String get addAdminNote => 'Add Admin Note';
+
+  @override
+  String get addNote => 'Add Note';
+
+  @override
+  String get sanctions => 'Sanctions';
+
+  @override
+  String get sanctionsManagement => 'Sanctions Management';
+
+  @override
+  String get noSanctions => 'No sanctions yet';
+
+  @override
+  String get noSanctionsDescription =>
+      'Sanctions will appear here once issued.';
+
+  @override
+  String get activeOnly => 'Active only';
+
+  @override
+  String get fineAmount => 'Fine Amount';
+
+  @override
+  String get startDate => 'Start Date';
+
+  @override
+  String get endDate => 'End Date';
+
+  @override
+  String get inactive => 'Inactive';
+
+  @override
+  String get notes => 'Notes';
+
+  @override
+  String get noActiveDrivers => 'No active drivers';
+
+  @override
+  String get noActiveDriversDescription =>
+      'No drivers with recent location updates.';
+
+  @override
+  String get mapView => 'Map View';
+
+  @override
+  String get mapApiKeyRequired => 'Map API key required';
+
+  @override
+  String get activeDriversList => 'Active Drivers';
+
+  @override
+  String get supportChat => 'Support Chat';
+
+  @override
+  String get noChatRooms => 'No chat rooms';
+
+  @override
+  String get noChatRoomsDescription => 'No support chat rooms available.';
+
+  @override
+  String get chatRoom => 'Chat Room';
+
+  @override
+  String get participants => 'participants';
+
+  @override
+  String get noMessages => 'No messages yet';
+
+  @override
+  String get typeMessage => 'Type a message...';
+
+  @override
+  String get startChat => 'Start Chat';
+
+  @override
+  String get noSupportRooms => 'No support chats';
+
+  @override
+  String get startSupportChatDescription =>
+      'Start a conversation with the support team.';
 }

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:delwaqty/core/module/feature_module.dart';
-import 'package:delwaqty/features/ride/presentation/pages/ride_booking_page.dart';
+import 'package:delwaqty/features/ride_booking/ride_booking_screen.dart';
 import 'package:delwaqty/features/ride/presentation/pages/ride_tracking_page.dart';
 import 'package:delwaqty/features/ride/presentation/pages/ride_history_page.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';

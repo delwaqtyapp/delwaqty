@@ -53,6 +53,7 @@ app.*.map.json
 # Build artifacts
 /build/
 /android/app/build/
+/.gradle_home/
 /ios/Pods/
 /ios/.symlinks/
 /macos/Pods/

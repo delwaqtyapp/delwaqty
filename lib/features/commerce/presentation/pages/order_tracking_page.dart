@@ -3,6 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:delwaqty/features/commerce/commerce_module.dart';
 import 'package:delwaqty/features/commerce/domain/entities/order.dart';
+import 'package:delwaqty/features/auth/presentation/auth_provider.dart';
+import 'package:delwaqty/features/auth/domain/auth_state.dart';
+import 'package:delwaqty/features/service_audio_logs/presentation/pages/audio_recording_dialog.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
 
@@ -59,6 +62,11 @@ class _OrderTrackingPageState extends ConsumerState<OrderTrackingPage>
           if (order == null) {
             return Center(child: Text(l10n.noData));
           }
+          final isActive = order.status != OrderStatus.delivered && order.status != OrderStatus.cancelled && order.status != OrderStatus.pending;
+
+          final authState = ref.watch(authStateProvider);
+          final userId = authState is AuthAuthenticated ? authState.user.id : '';
+
           return RefreshIndicator(
             onRefresh: () async {
               ref.invalidate(_orderFutureProvider(widget.orderId));
@@ -71,6 +79,13 @@ class _OrderTrackingPageState extends ConsumerState<OrderTrackingPage>
                 _OrderDetailsCard(order: order),
                 const SizedBox(height: 24),
                 _EstimatedArrivalSection(order: order),
+                if (isActive) ...[
+                  const SizedBox(height: 24),
+                  _AudioRecordingCard(
+                    orderId: widget.orderId,
+                    userId: userId,
+                  ),
+                ],
                 const SizedBox(height: 24),
                 _DriverSection(),
               ],
@@ -340,6 +355,92 @@ class _TimelineStep extends StatelessWidget {
     final hour = dt.hour.toString().padLeft(2, '0');
     final minute = dt.minute.toString().padLeft(2, '0');
     return '${dt.day}/${dt.month}/${dt.year} $hour:$minute';
+  }
+}
+
+class _AudioRecordingCard extends StatelessWidget {
+  final String orderId;
+  final String userId;
+
+  const _AudioRecordingCard({required this.orderId, required this.userId});
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+
+    return AnimatedFadeIn(
+      delay: const Duration(milliseconds: 250),
+      child: Card(
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    width: 48,
+                    height: 48,
+                    decoration: BoxDecoration(
+                      color: colorScheme.errorContainer,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Icon(Icons.mic_rounded, color: colorScheme.error),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          l10n.serviceAudioLogs,
+                          style: textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          l10n.recordingConsent,
+                          style: textTheme.bodySmall?.copyWith(
+                            color: colorScheme.onSurfaceVariant,
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              SizedBox(
+                width: double.infinity,
+                child: FilledButton.tonalIcon(
+                  onPressed: userId.isEmpty
+                      ? null
+                      : () async {
+                          final result = await showDialog<bool>(
+                            context: context,
+                            builder: (_) => AudioRecordingDialog(
+                              orderId: orderId,
+                              userId: userId,
+                            ),
+                          );
+                          if (result == true && context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text(l10n.stopAudioRecording)),
+                            );
+                          }
+                        },
+                  icon: Icon(Icons.fiber_manual_record, color: colorScheme.error),
+                  label: Text(l10n.startAudioRecording),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }
 

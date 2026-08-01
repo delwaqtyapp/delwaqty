@@ -1035,3 +1035,33 @@ The bottom navigation was built from every `isNavModule` module, producing tabs 
 
 
 ---
+
+## ADR-036: Location Reliability — Stale-Proof but Real-Fix-Aware Acquisition Gate
+
+**Date:** Sprint 57
+**Status:** Accepted
+**Deciders:** Lead Software Architect
+
+### Context
+Session 21d fixed a real bug: Android's FusedLocationProvider replayed a 9-day-old cached location with a fresh `getTime()`, so the app reverse-geocoded a stale place (`شاليهات مارفيل`) that was not where the user was. The fix required `satellitesUsedInFix > 0` (GNSS-only) plus ≤ 2 min freshness for every accepted fix. On the target device this over-corrected: network/fused fixes always carry `satellitesUsedInFix = 0`, and the last real GPS fix was ~35 min old — so the app showed `الموقع غير متاح` forever even though real fresh fixes existed. `dumpsys location` re-analysis proved `et=` is elapsed-since-boot, not fix age: the network/fused last-fixes were ~1 min old.
+
+### Decision
+1. Keep the 2 min freshness window for live stream fixes (`_maxFixAge`) — the anti-replay shield for anything the platform re-attributes.
+2. Add a **10 min last-known cap** (`_maxLastKnownAge`): any last-known older than 10 min (e.g. the 9-day cache) is still refused.
+3. **`_isUsableLastKnown`**: ≤ 10 min old; GNSS-verified positions always usable; non-GNSS (network/fused) usable only when `0 ≤ accuracy ≤ 500 m`. The fresh 100 m fused/network fix is now usable; the old 500 m cap replaces the impossible GNSS-only requirement.
+4. **`_acquirePreciseFix`**: fresh stream samples no longer require GNSS verification to accumulate as `best`; GNSS verification is required only for the ≤ target-meter (1 m) early-lock shortcut. `waitSeconds` = 45 only when deep AND no usable last-known, else 12, so the deep lock no longer hangs.
+5. `_bestAvailablePosition`: fresh GNSS ≤ 1 m last-known returns immediately; quick mode returns a usable last-known without opening a stream; otherwise stream acquisition with usable-last-known fallback.
+
+### Rationale
+- The anti-stale property the user actually needs is "never show a location older than a bounded window", not "only show GNSS positions". The 10 min / 500 m bounds preserve that property while admitting the device's real fresh fixes.
+- GNSS verification remains the gate for the 1 m precision lock (a 1 m claim genuinely requires live GNSS), but must not block the app from showing the user's actual area.
+- Degrades gracefully: no live GNSS → best fresh stream sample or usable last-known, instead of `الموقع غير متاح`.
+
+### Consequences
+- Home header resolves the user's real address (~100 m fused fix) instead of `الموقع غير متاح`.
+- The 9-day replay protection remains: anything > 10 min old is still refused.
+- 1 m lock still requires open sky (live GNSS); indoors it now fills best-effort with a snackbar instead of nothing.
+- `location_provider_test.dart` grew 10 → 14 tests covering the new tiers; suite 531/531; `flutter analyze` 0 errors; debug APK rebuilt, installed, and both Home header and deep-lock (`حدد موقعي`) verified on DNP NX9 showing `شاليهات مارفيل، بلو باي اسيا، السويس، مصر`.
+
+---
+

@@ -145,7 +145,6 @@ class _SearchPageState extends ConsumerState<SearchPage> {
             child: AppSearchBar(
               controller: _searchController,
               hint: l10n.searchHint,
-              autofocus: true,
               onChanged: _onSearchChanged,
               onSubmitted: (value) {
                 _debounceTimer?.cancel();

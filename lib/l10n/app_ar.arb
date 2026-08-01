@@ -1211,5 +1211,29 @@
   "targetTopic": "الموضوع المستهدف",
   "sendPushGuide": "اكتب رسالتك ثم أرسلها من Firebase Console أو بالأمر المنسوخ.",
   "copyCommand": "نسخ أمر FCM",
-  "copiedToClipboard": "تم نسخ الأمر إلى الحافظة"
+  "copiedToClipboard": "تم نسخ الأمر إلى الحافظة",
+  "sendNotification": "إرسال الإشعار",
+  "audience": "الجمهور المستهدف",
+  "audienceAll": "جميع المستخدمين",
+  "audienceCustomer": "العملاء",
+  "audienceDriver": "السائقون",
+  "audienceMerchant": "التجار",
+  "audienceAdmin": "المسؤولون",
+  "notificationType": "نوع الإشعار",
+  "typeInfo": "معلومة",
+  "typeWarning": "تحذير",
+  "typeSuccess": "نجاح",
+  "typeReminder": "تذكير",
+  "deepLink": "الرابط (اختياري)",
+  "sentToRecipients": "تم الإرسال إلى {count} مستلم",
+  "@sentToRecipients": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "sendFailed": "فشل إرسال الإشعار",
+  "loadDevicesFailed": "تعذر تحميل الأجهزة المتصلة",
+  "broadcastNote": "إشعار فوري داخل التطبيق يُسلَّم لحظياً للأجهزة المتصلة عبر Supabase Realtime"
 }

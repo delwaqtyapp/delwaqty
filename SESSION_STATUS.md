@@ -1,10 +1,30 @@
 # SESSION_STATUS.md
 
-> **Last updated:** 2026-08-01 Session 21e (Over-Strict Location Gate Fixed + Bundled Sprint 57 Features Verified)
+> **Last updated:** 2026-08-01 Session 21f (Instant Push Notifications Fixed — Realtime Broadcast + Working Send)
 
 ---
 
-## Current Task — "الموقع غير متاح" BUG FIXED (Over-Strict Gate Was Rejecting Real Fixes)
+## Current Task — PUSH NOTIFICATION SYSTEM FIXED (Admin Can Now Broadcast Instantly)
+
+User asked to fix the instant notifications system in the admin dashboard. Root cause: the system was **non-functional end-to-end** — a schema mismatch, broken upsert, missing RLS/real-time wiring, and no actual send path.
+
+| Area | Change |
+|------|--------|
+| **Root cause #1 — schema mismatch** | `notification_tokens` (migration 002) has only `created_at`, but the service + dashboard persist/read `updated_at` → every token query threw → `_saveToken` silently failed (no tokens ever stored) and the admin "connected devices" card showed the generic `خطأ` |
+| **Root cause #2 — broken upsert** | `_saveToken` used `onConflict: 'token'` but no unique index exists on `token` alone (table has `UNIQUE(user_id, token)`) → the upsert itself failed |
+| **Root cause #3 — RLS** | `notification_tokens` policy (`auth.uid() = user_id`) blocked admins from listing devices; the legacy `notifications` "Service role can insert" policy was `WITH CHECK (true)` with **no role restriction** — any user could insert a notification for any user |
+| **Root cause #4 — no send path** | Admin page only copied an FCM payload for manual pasting into Firebase console. Real FCM v1 needs a service-account credential (external blocker). Meanwhile the app already had a full in-app notification center (`notifications` table) that was not wired to realtime |
+| **Fix — migration `018_push_notification_platform.sql`** | Adds `updated_at` + auto-update trigger + `user_id` index to `notification_tokens`; admin SELECT-all-tokens policy; admin INSERT/SELECT/DELETE on `notifications`; restricts the legacy insert policy to `service_role`; adds `notifications` to `supabase_realtime`; adds admin-only `SECURITY DEFINER` RPC `admin_broadcast_notification(p_title, p_body, p_type, p_deep_link, p_target_role, p_target_user_id)` → inserts one row per matching user, returns recipient count |
+| **Fix — `push_notification_service.dart`** | Upsert conflict → `user_id,token`; `platform` normalized to `android`/`ios` (CHECK constraint); **Supabase Realtime subscription** on `notifications` INSERT (RLS-scoped) → shows local notification + invalidates `notificationsProvider`/`unreadCountProvider` → instant in-app push with **no external credentials**; runs regardless of FCM permission |
+| **Fix — admin page** | Real **إرسال الإشعار (Send)** button calling the RPC; audience selector (all / customer / driver / merchant / admin); type selector (`info`/`warning`/`success`/`reminder`); optional deep link; recipient-count snackbar; tokens refresh after send; connected-devices card has retry + specific failure message; Firebase console copy remains as secondary; logic extracted to testable `buildBroadcastParams` |
+| **Tests** | New `admin_push_notifications_page_test.dart` (4 tests: default all-audience params, role mapping, deep-link trim, blank-link). Full suite **535/535** · `flutter analyze` 0 errors |
+| **Verify on device (DNP NX9)** | Debug APK rebuilt + installed. Rewritten admin Push Notifications page renders: connected-devices card with retry, send form (title/body/type/audience/deep link), `إرسال الإشعار` button, Firebase card — **no crashes**, logcat clean. Send path + connected-devices list are functional **once migration 018 is applied to Supabase** (needs management token / SQL editor — manual credential, pending) |
+
+> **Remaining:** apply `supabase/migrations/018_push_notification_platform.sql` to project `bttnlkmwhorjamzemwda` (SQL editor or Management API) — after that, admin broadcast delivers instantly in-app on every connected device (realtime banner + notification-center row + badge), and the connected-devices list shows real tokens. Background/terminated FCM push activates once a Firebase service account is configured.
+
+---
+
+## Previous Task — "الموقع غير متاح" BUG FIXED (Over-Strict Gate Was Rejecting Real Fixes)
 
 User reported the app **always** showed `الموقع غير متاح` on the Home header even though the phone has real, fresh location fixes. Root cause was the previous session's anti-stale fix being **over-corrected**. Fixed, tested, and proven on device.
 

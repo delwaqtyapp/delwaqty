@@ -1,6 +1,6 @@
 # SESSION_STATUS.md
 
-> **Last updated:** 2026-08-01 Session 21e (Over-Strict Location Gate Fixed — App Now Uses Real Fresh Fixes)
+> **Last updated:** 2026-08-01 Session 21e (Over-Strict Location Gate Fixed + Bundled Sprint 57 Features Verified)
 
 ---
 
@@ -17,6 +17,7 @@ User reported the app **always** showed `الموقع غير متاح` on the Ho
 | `_bestAvailablePosition` | Returns fresh GNSS ≤ 1 m last-known immediately; quick mode returns a usable last-known without waiting; otherwise acquires a stream fix; falls back to usable last-known |
 | Unit tests | `location_provider_test.dart` now **14 tests** (+4): satellite-less network/fused stream sample accepted as fallback; fresh non-GNSS last-known accepted in quick mode; poor-accuracy (> 500 m) non-GNSS last-known rejected; GNSS last-known up to 10 min old accepted; non-GNSS last-known older than 10 min rejected. Full suite **531/531** |
 | Verify on device | `flutter analyze` 0 errors · `flutter test` 531/531 · debug APK rebuilt + installed · **Home header now shows `شاليهات مارفيل، بلو باي اسيا، السويس، مصر` (NOT `الموقع غير متاح`)** · deep-lock (`حدد موقعي` on Direct Delivery) filled the deliver-to field with the same resolved address · Termux terminal overlay briefly covered the app — brought back with `am start`, state confirmed |
+| **Bundled sprint 57 features verified on device (DNP NX9)** | **Floating sidebar** opens via header menu (RTL → button is top-right): user card (`U` / `User` / `said.3pkarino@gmail.com` / `مدير عام` badge) + all sections incl. لوحة الإدارة, الشكاوى, العقوبات, تتبع مباشر · **Notifications page** renders (`الإشعارات` title, `تعيين الكل كمقروء`, empty state `لا توجد إشعارات`); unread badge is hidden by design at `unreadCount=0` · **Profile tab** + **Edit Profile dialog** show the new `اسم المستخدم` field · **Admin Dashboard → Push Notifications page** renders; `الأجهزة المتصلة` shows a graceful `خطأ` state (no FCM tokens exist yet); message field + `نسخ أمر FCM` + Firebase console link present · **logcat clean** — no `FATAL` / `AndroidRuntime` / `E/flutter` during the whole session |
 
 > **Remaining reality check:** the ≤ 1 m deep-lock still requires a live GNSS fix (indoor `avgBasebandCn0=18.7 dB-Hz`, no fresh fix). It now degrades gracefully: if no GNSS fix arrives it uses the best fresh stream sample or a usable ≤ 10 min / ≤ 500 m last-known instead of returning nothing.
 

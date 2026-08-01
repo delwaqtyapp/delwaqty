@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -93,6 +94,9 @@ class PushNotificationService {
   final AppLogger _logger;
   final FirebaseMessaging _messaging = FirebaseMessaging.instance;
 
+  String? _lastToken;
+  Timer? _heartbeat;
+
   /// Called whenever a realtime broadcast notification arrives for the
   /// current user so the notification center + unread badge refresh instantly.
   void Function(Map<String, dynamic> record)? onRealtimeNotification;
@@ -120,10 +124,16 @@ class PushNotificationService {
 
       final token = await _messaging.getToken();
       if (token != null) {
+        _lastToken = token;
         await _saveToken(token);
       }
 
-      _messaging.onTokenRefresh.listen(_saveToken);
+      _messaging.onTokenRefresh.listen((token) {
+        _lastToken = token;
+        _saveToken(token);
+      });
+
+      _startHeartbeat();
 
       FirebaseMessaging.onMessage.listen(_handleForegroundMessage);
       FirebaseMessaging.onMessageOpenedApp.listen(_handleBackgroundMessage);
@@ -185,6 +195,18 @@ class PushNotificationService {
     } catch (e) {
       _logger.e('Failed to save push token', e);
     }
+  }
+
+  /// Keeps the token row fresh so the admin dashboard can distinguish
+  /// online (app running) from offline devices. Runs while the app is
+  /// alive; a token not seen for over 15 minutes counts as offline.
+  void _startHeartbeat() {
+    _heartbeat?.cancel();
+    _heartbeat = Timer.periodic(const Duration(minutes: 5), (_) async {
+      final token = _lastToken;
+      if (token == null) return;
+      await _saveToken(token);
+    });
   }
 
   String _platformName() {

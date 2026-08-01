@@ -3,6 +3,49 @@ import 'package:delwaqty/features/admin/presentation/pages/admin_push_notificati
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  group('computeDeviceStats', () {
+    final now = DateTime.now();
+
+    test('counts recently seen tokens as online', () {
+      final tokens = [
+        {'updated_at': now.subtract(const Duration(minutes: 2)).toIso8601String()},
+        {'updated_at': now.subtract(const Duration(hours: 1)).toIso8601String()},
+      ];
+
+      final stats = computeDeviceStats(tokens, now);
+
+      expect(stats.online, 1);
+      expect(stats.offline, 1);
+    });
+
+    test('treats missing updated_at as offline', () {
+      final stats = computeDeviceStats([
+        {'token': 'abc'},
+      ], now);
+
+      expect(stats.online, 0);
+      expect(stats.offline, 1);
+    });
+
+    test('token seen exactly at the window boundary is online', () {
+      final tokens = [
+        {'updated_at': now.subtract(onlineWindow).toIso8601String()},
+      ];
+
+      final stats = computeDeviceStats(tokens, now);
+
+      expect(stats.online, 1);
+      expect(stats.offline, 0);
+    });
+
+    test('empty token list yields zero counters', () {
+      final stats = computeDeviceStats(const [], now);
+
+      expect(stats.online, 0);
+      expect(stats.offline, 0);
+    });
+  });
+
   group('buildBroadcastParams', () {
     test('broadcasts to all users by default', () {
       final params = buildBroadcastParams(

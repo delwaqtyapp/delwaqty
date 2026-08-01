@@ -1,12 +1,34 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:delwaqty/config/firebase_config.dart';
 import 'package:delwaqty/core/extensions/context_extensions.dart';
 import 'package:delwaqty/domain/entities/app_notification.dart';
 import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
+
+/// How long a token is considered "online" since its last update.
+/// The app refreshes its token every 5 minutes (heartbeat), so a token
+/// not seen for over 15 minutes is treated as offline.
+@visibleForTesting
+const onlineWindow = Duration(minutes: 15);
+
+/// Splits the registered devices into online / offline counters based on
+/// the last time each token was seen (`updated_at`).
+@visibleForTesting
+({int online, int offline}) computeDeviceStats(
+  List<Map<String, dynamic>> tokens,
+  DateTime now,
+) {
+  var online = 0;
+  for (final token in tokens) {
+    final updated = DateTime.tryParse(token['updated_at'] as String? ?? '');
+    if (updated != null &&
+        now.difference(updated).inMinutes <= onlineWindow.inMinutes) {
+      online++;
+    }
+  }
+  return (online: online, offline: tokens.length - online);
+}
 
 @visibleForTesting
 Map<String, dynamic> buildBroadcastParams({
@@ -33,8 +55,7 @@ final adminNotificationTokensProvider =
       final data = await client
           .from('notification_tokens')
           .select('token, platform, updated_at')
-          .order('updated_at', ascending: false)
-          .limit(50);
+          .order('updated_at', ascending: false);
       return List<Map<String, dynamic>>.from(data as List);
     });
 
@@ -54,6 +75,7 @@ class _AdminPushNotificationsPageState
   NotificationType _type = NotificationType.info;
   String _audience = 'all';
   bool _sending = false;
+  int _lastSentDeviceCount = 0;
 
   @override
   void dispose() {
@@ -85,8 +107,9 @@ class _AdminPushNotificationsPageState
         ),
       );
       final sent = result is num ? result.toInt() : 0;
+      setState(() => _lastSentDeviceCount = sent);
       if (context.mounted) {
-        context.showAppSnackBar(l10n.sentToRecipients(sent));
+        context.showAppSnackBar(l10n.sentToDevices(sent));
       }
       ref.invalidate(adminNotificationTokensProvider);
     } catch (e) {
@@ -95,47 +118,6 @@ class _AdminPushNotificationsPageState
       }
     } finally {
       if (mounted) setState(() => _sending = false);
-    }
-  }
-
-  String _buildPayload(AppLocalizations l10n) {
-    final title = _titleController.text.trim();
-    final body = _bodyController.text.trim();
-    final topic = _audience == 'all' ? 'all' : 'role_$_audience';
-    return '''
-{
-  "message": {
-    "topic": "$topic",
-    "notification": {
-      "title": "$title",
-      "body": "$body"
-    },
-    "data": {
-      "type": "${_type.name}",
-      "click_action": "FLUTTER_NOTIFICATION_CLICK"
-    }
-  }
-}''';
-  }
-
-  Future<void> _copyPayload(AppLocalizations l10n) async {
-    if (_titleController.text.trim().isEmpty ||
-        _bodyController.text.trim().isEmpty) {
-      context.showAppSnackBar(l10n.requiredField, isError: true);
-      return;
-    }
-    await Clipboard.setData(ClipboardData(text: _buildPayload(l10n)));
-    if (context.mounted) {
-      context.showAppSnackBar(l10n.copiedToClipboard);
-    }
-  }
-
-  Future<void> _openConsoleGuide(AppLocalizations l10n) async {
-    final url =
-        'https://console.firebase.google.com/project/${FirebaseConfig.projectId}/messaging';
-    await Clipboard.setData(ClipboardData(text: url));
-    if (context.mounted) {
-      context.showAppSnackBar(l10n.copiedToClipboard);
     }
   }
 
@@ -204,50 +186,45 @@ class _AdminPushNotificationsPageState
                         ),
                       ),
                       data: (tokens) {
-                        if (tokens.isEmpty) {
-                          return Text(
-                            l10n.noData,
-                            style: Theme.of(context).textTheme.bodyMedium,
-                          );
-                        }
+                        final stats = computeDeviceStats(
+                          tokens,
+                          DateTime.now(),
+                        );
                         return Column(
                           children: [
-                            Text(
-                              '${tokens.length} ${l10n.connectedDevices}',
-                              style: Theme.of(context).textTheme.bodyMedium
-                                  ?.copyWith(
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: _DeviceStatTile(
+                                    icon: Icons.cloud_done_rounded,
+                                    label: l10n.devicesOnline,
+                                    value: stats.online,
                                     color: cs.primary,
-                                    fontWeight: FontWeight.w600,
                                   ),
+                                ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: _DeviceStatTile(
+                                    icon: Icons.cloud_off_rounded,
+                                    label: l10n.devicesOffline,
+                                    value: stats.offline,
+                                    color: cs.onSurfaceVariant,
+                                  ),
+                                ),
+                              ],
                             ),
-                            const SizedBox(height: 8),
-                            for (final token in tokens.take(10))
-                              ListTile(
-                                dense: true,
-                                contentPadding: EdgeInsets.zero,
-                                leading: Icon(
-                                  token['platform'] == 'android'
-                                      ? Icons.phone_android_rounded
-                                      : Icons.devices_rounded,
-                                  color: cs.primary,
-                                ),
-                                title: Text(
-                                  _maskToken(token['token'] as String? ?? ''),
-                                  style: const TextStyle(
-                                    fontFamily: 'monospace',
-                                  ),
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                                trailing: Text(
-                                  _formatTime(
-                                    DateTime.tryParse(
-                                      token['updated_at'] as String? ?? '',
-                                    ),
-                                  ),
-                                  style: Theme.of(context).textTheme.bodySmall
-                                      ?.copyWith(color: cs.onSurfaceVariant),
-                                ),
+                            const SizedBox(height: 12),
+                            FilledButton.tonalIcon(
+                              onPressed: () => context.showAppSnackBar(
+                                l10n.sentToDevices(_lastSentDeviceCount),
                               ),
+                              icon: const Icon(
+                                Icons.check_circle_outline_rounded,
+                              ),
+                              label: Text(
+                                '${l10n.devicesReceived}: $_lastSentDeviceCount',
+                              ),
+                            ),
                           ],
                         );
                       },
@@ -391,55 +368,9 @@ class _AdminPushNotificationsPageState
               ),
             ),
           ),
-          const SizedBox(height: 16),
-          AnimatedFadeIn(
-            delay: const Duration(milliseconds: 150),
-            child: Card(
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Firebase',
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      l10n.sendPushGuide,
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: cs.onSurfaceVariant,
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    FilledButton.tonalIcon(
-                      onPressed: () => _copyPayload(l10n),
-                      icon: const Icon(Icons.copy_rounded),
-                      label: Text(l10n.copyCommand),
-                    ),
-                    const SizedBox(height: 8),
-                    OutlinedButton.icon(
-                      onPressed: () => _openConsoleGuide(l10n),
-                      icon: const Icon(Icons.open_in_new_rounded),
-                      label: Text(
-                        'console.firebase.google.com/project/${FirebaseConfig.projectId}/messaging',
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
         ],
       ),
     );
-  }
-
-  String _maskToken(String token) {
-    if (token.length <= 16) return token;
-    return '${token.substring(0, 8)}...${token.substring(token.length - 8)}';
   }
 
   IconData _typeIcon(NotificationType type) {
@@ -454,13 +385,55 @@ class _AdminPushNotificationsPageState
         return Icons.alarm_rounded;
     }
   }
+}
 
-  String _formatTime(DateTime? time) {
-    if (time == null) return '';
-    final diff = DateTime.now().difference(time);
-    if (diff.inMinutes < 1) return 'now';
-    if (diff.inMinutes < 60) return '${diff.inMinutes}m';
-    if (diff.inHours < 24) return '${diff.inHours}h';
-    return '${diff.inDays}d';
+class _DeviceStatTile extends StatelessWidget {
+  const _DeviceStatTile({
+    required this.icon,
+    required this.label,
+    required this.value,
+    required this.color,
+  });
+
+  final IconData icon;
+  final String label;
+  final int value;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        children: [
+          Icon(icon, color: color),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  '$value',
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    color: color,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                Text(
+                  label,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }

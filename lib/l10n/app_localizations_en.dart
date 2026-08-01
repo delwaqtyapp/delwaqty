@@ -3717,8 +3717,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get deepLink => 'Deep Link (optional)';
 
   @override
-  String sentToRecipients(int count) {
-    return 'Sent to $count recipients';
+  String sentToDevices(int count) {
+    return 'Sent to $count devices';
   }
 
   @override
@@ -3730,4 +3730,22 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get broadcastNote =>
       'Instant in-app notification delivered in realtime to connected devices via Supabase Realtime';
+
+  @override
+  String get devicesOnline => 'Online';
+
+  @override
+  String get devicesOffline => 'Offline';
+
+  @override
+  String get devicesReceived => 'Devices received';
+
+  @override
+  String get deleteAllNotifications => 'Delete all';
+
+  @override
+  String get deleteAllNotificationsConfirm => 'Delete all notifications?';
+
+  @override
+  String get deleteNotification => 'Delete notification';
 }

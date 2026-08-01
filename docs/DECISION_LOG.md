@@ -1096,3 +1096,30 @@ The admin push-notification page rendered but the system was non-functional end-
 
 ---
 
+## ADR-038: Device-Status Counters + Notification Management (admin broadcast UX + delete)
+
+**Date:** Sprint 57
+**Status:** Accepted
+**Deciders:** Lead Software Architect
+
+### Context
+After ADR-037 verified the broadcast path, the admin dashboard still listed individual masked tokens, had no online/offline visibility, no "how many devices received" metric, and left the Firebase copy card under the send button. The notification center also lacked deletion (only mark-all-read) even though `deleteNotification(id)`/`clearAll()` already existed in the data layer.
+
+### Decision
+1. **Migration `019_push_broadcast_device_count.sql`:** replace `admin_broadcast_notification` so it returns the **device count** — the number of `notification_tokens` rows belonging to the matched recipients — instead of the recipient-user count. It still inserts one `notifications` row per matching user (realtime delivery unchanged).
+2. **Admin page: counters + received button + remove Firebase card.** Connected devices render as compact stat tiles — `متصل` (online) / `غير متصل` (offline) counters plus an `الأجهزة المستلمة` (devices received) button showing the last broadcast's device count (updates after every send). The Firebase Console copy card (and its now-dead `_copyPayload`/`_openConsoleGuide` code) is removed entirely; the broadcast RPC is the single send path. Online/offline classification extracted to a testable `computeDeviceStats(tokens, now)` (15-minute window).
+3. **Notification center: deletion.** `حذف الجميع` (delete-all) action with a confirmation dialog calls `clearAll()`; every notification card gains a per-item delete button calling `deleteNotification(id)`. Both invalidate `notificationsProvider`/`unreadCountProvider`.
+4. **Token heartbeat.** `PushNotificationService` re-upserts the FCM token every 5 minutes while the app is alive so `updated_at` becomes a real liveness signal — making the online/offline counters meaningful (a device with the app closed drops to offline after 15 min).
+
+### Rationale
+- A "devices received" number is only honest if it counts devices; counting `notification_tokens` of the recipients is the closest true metric available without per-device delivery receipts, and matches the realtime delivery model (each token receives the row).
+- Hiding the Firebase card removes a dead/manual path now that the RPC send works; keeping it would only confuse admins.
+- The heartbeat turns static `updated_at` timestamps into a live presence signal so the counters reflect reality rather than "app launched sometime this week".
+
+### Consequences
+- The admin page shows compact, actionable numbers (online / offline / last-broadcast received devices) with no token-list noise and no Firebase copy path.
+- RPC return semantics changed from recipient-user count to device count; the snackbar and received button now say "جهاز" (device). `flutter analyze` 0 errors; suite grew 535 → 542 (4 `computeDeviceStats` tests + 3 notification-center widget tests).
+- Verified live on DNP NX9: stats card shows `1 متصل / 0 غير متصل`; a test broadcast returned 1 device and the received button updated to 1; per-item delete removed a row (DB confirmed) and delete-all emptied the table (0 rows); empty state renders. Migration `019` applied to `bttnlkmwhorjamzemwda`.
+
+---
+

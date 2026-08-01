@@ -1,12 +1,28 @@
 # SESSION_STATUS.md
 
-> **Last updated:** 2026-08-01 Session 21f (Instant Push Notifications Fixed + Verified End-to-End on Device + Live Supabase)
+> **Last updated:** 2026-08-01 Session 21g (Admin Push UX: Device Counters + Received Metric + Notification Deletion — Verified Live)
 
 ---
 
-## Current Task — PUSH NOTIFICATION SYSTEM FIXED + VERIFIED LIVE (Admin Broadcasts Instantly)
+## Current Task — ADMIN PUSH UX + NOTIFICATION DELETION (Session 21g)
 
-User asked to fix the instant notifications system in the admin dashboard. Root cause: the system was **non-functional end-to-end** — a schema mismatch, broken upsert, missing RLS/real-time wiring, and no actual send path. All fixed, migration 018 **applied to the live project**, and the full send → realtime delivery loop **verified on device**.
+Follow-up to 21f. User asked for: connected devices as pure counters, an offline counter, a button showing how many devices received a broadcast, hiding the Firebase/database card, a delete-all button, and per-notification delete.
+
+| Area | Change |
+|------|--------|
+| **Migration `019_push_broadcast_device_count.sql`** | Replaces `admin_broadcast_notification` to return the **device count** (number of `notification_tokens` belonging to the matched recipients) instead of the recipient-user count. Still inserts one `notifications` row per matching user. **Applied + verified live** via Management API (pg_proc shows the new body with `matched_ids uuid[]` + `device_count`) |
+| **Admin page — counters** | Connected-devices card → compact stat tiles: **متصل (online)** and **غير متصل (offline)** counters (15-min window), plus an **الأجهزة المستلمة (devices received)** button showing the last broadcast's device count (updates after each send). Token list removed. Classification extracted to testable `computeDeviceStats(tokens, now)` |
+| **Admin page — Firebase card removed** | The Firebase Console copy card + dead `_copyPayload`/`_openConsoleGuide`/`_buildPayload` code deleted; the RPC send is the single path |
+| **Notification center — delete** | **حذف الجميع** (delete all) action with confirmation dialog (`clearAll()`); every card gains a per-item **حذف الإشعار** delete button (`deleteNotification(id)`); both invalidate `notificationsProvider`/`unreadCountProvider` |
+| **Token heartbeat** | `PushNotificationService` re-upserts the token every **5 min** while the app is alive → `updated_at` is a real liveness signal, so online/offline counters are meaningful |
+| **Tests** | 4 new `computeDeviceStats` tests + 3 notification-center widget tests (per-item delete, delete-all with cancel/confirm, empty state). Suite **535 → 542** · `flutter analyze` 0 errors |
+| **Verify on device (DNP NX9)** | Stats card renders `1 متصل / 0 غير متصل / الأجهزة المستلمة: 0`; a test broadcast returned **1 device** and the received button updated to **1** (DB row created, RPC live); Firebase card gone (page ends at send button); notification center shows delete-all + per-item buttons; per-item delete removed the `تست/تست١` row (DB confirmed), delete-all emptied the table (**0 rows**), empty state renders. Test notification data cleaned up in the process |
+
+> **Remaining:** background/terminated FCM push still requires a Firebase service account (external). In-app realtime broadcast + admin counters/deletion are verified working live.
+
+---
+
+## Previous Task — PUSH NOTIFICATION SYSTEM FIXED + VERIFIED LIVE (Session 21f)
 
 | Area | Change |
 |------|--------|
@@ -228,6 +244,7 @@ Made the Sprint 40 management features (complaints, sanctions, live tracking, su
 | M13e | 56 | Functional Bottom-Nav Restructure — 4-tab layout (Home/Search/Orders/Profile), Settings behind Profile gear, Delivery/Ride into Home grid | ✅ |
 | M13f | 57 | Location Reliability — real place names via Photon/Nominatim/Overpass, 1 m deep lock, stale/9-day replay rejected, then over-strict gate relaxed so real fresh fixes (network/fused 100 m) are used again | ✅ |
 | M13g | 57 | Push Notifications — token pipeline fixed (updated_at, upsert, platform CHECK), migration 018 applied live, admin broadcast via SECURITY DEFINER RPC, realtime in-app delivery verified end-to-end on device | ✅ |
+| M13h | 57 | Admin Push UX — device counters (online/offline/received), migration 019 (RPC returns device count), Firebase card removed, notification-center delete-all + per-item delete, token heartbeat | ✅ |
 
 ---
 
@@ -249,11 +266,12 @@ Made the Sprint 40 management features (complaints, sanctions, live tracking, su
 | Check | Result |
 |-------|--------|
 | `flutter analyze` | 0 errors |
-| `flutter test` | 535/535 passing |
+| `flutter test` | 542/542 passing |
 | APK build | ✅ `app-debug.apk` rebuilt clean (single APK) + installed on DNP NX9 |
 | Gradle | `kotlin.incremental=false` fix committed in `android/gradle.properties` |
 | Migration 018 | ✅ Applied to `bttnlkmwhorjamzemwda` via Management API + verified (columns, trigger, RPC, realtime publication) |
-| Live E2E | ✅ Admin send → RPC rows → notification center + unread badge 3 on device |
+| Migration 019 | ✅ Applied to `bttnlkmwhorjamzemwda` via Management API + verified (RPC body returns device count) |
+| Live E2E | ✅ Admin send → RPC returns 1 device → received counter updates; notification center per-item delete + delete-all verified (DB 0 rows) |
 
 ---
 

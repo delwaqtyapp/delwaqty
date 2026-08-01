@@ -7160,11 +7160,11 @@ abstract class AppLocalizations {
   /// **'Deep Link (optional)'**
   String get deepLink;
 
-  /// No description provided for @sentToRecipients.
+  /// No description provided for @sentToDevices.
   ///
   /// In en, this message translates to:
-  /// **'Sent to {count} recipients'**
-  String sentToRecipients(int count);
+  /// **'Sent to {count} devices'**
+  String sentToDevices(int count);
 
   /// No description provided for @sendFailed.
   ///
@@ -7183,6 +7183,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Instant in-app notification delivered in realtime to connected devices via Supabase Realtime'**
   String get broadcastNote;
+
+  /// No description provided for @devicesOnline.
+  ///
+  /// In en, this message translates to:
+  /// **'Online'**
+  String get devicesOnline;
+
+  /// No description provided for @devicesOffline.
+  ///
+  /// In en, this message translates to:
+  /// **'Offline'**
+  String get devicesOffline;
+
+  /// No description provided for @devicesReceived.
+  ///
+  /// In en, this message translates to:
+  /// **'Devices received'**
+  String get devicesReceived;
+
+  /// No description provided for @deleteAllNotifications.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete all'**
+  String get deleteAllNotifications;
+
+  /// No description provided for @deleteAllNotificationsConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete all notifications?'**
+  String get deleteAllNotificationsConfirm;
+
+  /// No description provided for @deleteNotification.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete notification'**
+  String get deleteNotification;
 }
 
 class _AppLocalizationsDelegate

@@ -1225,8 +1225,8 @@
   "typeSuccess": "نجاح",
   "typeReminder": "تذكير",
   "deepLink": "الرابط (اختياري)",
-  "sentToRecipients": "تم الإرسال إلى {count} مستلم",
-  "@sentToRecipients": {
+  "sentToDevices": "تم الإرسال إلى {count} جهاز",
+  "@sentToDevices": {
     "placeholders": {
       "count": {
         "type": "int"
@@ -1235,5 +1235,11 @@
   },
   "sendFailed": "فشل إرسال الإشعار",
   "loadDevicesFailed": "تعذر تحميل الأجهزة المتصلة",
-  "broadcastNote": "إشعار فوري داخل التطبيق يُسلَّم لحظياً للأجهزة المتصلة عبر Supabase Realtime"
+  "broadcastNote": "إشعار فوري داخل التطبيق يُسلَّم لحظياً للأجهزة المتصلة عبر Supabase Realtime",
+  "devicesOnline": "متصل",
+  "devicesOffline": "غير متصل",
+  "devicesReceived": "الأجهزة المستلمة",
+  "deleteAllNotifications": "حذف الجميع",
+  "deleteAllNotificationsConfirm": "حذف جميع الإشعارات؟",
+  "deleteNotification": "حذف الإشعار"
 }

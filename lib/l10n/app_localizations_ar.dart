@@ -3690,8 +3690,8 @@ class AppLocalizationsAr extends AppLocalizations {
   String get deepLink => 'الرابط (اختياري)';
 
   @override
-  String sentToRecipients(int count) {
-    return 'تم الإرسال إلى $count مستلم';
+  String sentToDevices(int count) {
+    return 'تم الإرسال إلى $count جهاز';
   }
 
   @override
@@ -3703,4 +3703,22 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get broadcastNote =>
       'إشعار فوري داخل التطبيق يُسلَّم لحظياً للأجهزة المتصلة عبر Supabase Realtime';
+
+  @override
+  String get devicesOnline => 'متصل';
+
+  @override
+  String get devicesOffline => 'غير متصل';
+
+  @override
+  String get devicesReceived => 'الأجهزة المستلمة';
+
+  @override
+  String get deleteAllNotifications => 'حذف الجميع';
+
+  @override
+  String get deleteAllNotificationsConfirm => 'حذف جميع الإشعارات؟';
+
+  @override
+  String get deleteNotification => 'حذف الإشعار';
 }

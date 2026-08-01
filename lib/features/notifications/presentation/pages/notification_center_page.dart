@@ -29,6 +29,11 @@ class NotificationCenterPage extends ConsumerWidget {
             },
             child: Text(l10n.markAllRead),
           ),
+          IconButton(
+            tooltip: l10n.deleteAllNotifications,
+            icon: const Icon(Icons.delete_sweep_rounded),
+            onPressed: () => _confirmDeleteAll(context, ref),
+          ),
         ],
       ),
       body: notificationsAsync.when(
@@ -56,6 +61,12 @@ class NotificationCenterPage extends ConsumerWidget {
                     ref.invalidate(notificationsProvider);
                     ref.invalidate(unreadCountProvider);
                   },
+                  onDelete: () async {
+                    final repo = ref.read(notificationRepositoryProvider);
+                    await repo.deleteNotification(notification.id);
+                    ref.invalidate(notificationsProvider);
+                    ref.invalidate(unreadCountProvider);
+                  },
                 ),
               );
             },
@@ -78,11 +89,39 @@ class NotificationCenterPage extends ConsumerWidget {
   }
 }
 
+Future<void> _confirmDeleteAll(BuildContext context, WidgetRef ref) async {
+  final l10n = AppLocalizations.of(context);
+  final confirmed = await showDialog<bool>(
+    context: context,
+    builder: (context) => AlertDialog(
+      title: Text(l10n.deleteAllNotifications),
+      content: Text(l10n.deleteAllNotificationsConfirm),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(false),
+          child: Text(l10n.cancel),
+        ),
+        FilledButton(
+          onPressed: () => Navigator.of(context).pop(true),
+          child: Text(l10n.delete),
+        ),
+      ],
+    ),
+  );
+  if (confirmed != true || !context.mounted) return;
+
+  final repo = ref.read(notificationRepositoryProvider);
+  await repo.clearAll();
+  ref.invalidate(notificationsProvider);
+  ref.invalidate(unreadCountProvider);
+}
+
 class _NotificationCard extends StatelessWidget {
-  const _NotificationCard({required this.notification, this.onTap});
+  const _NotificationCard({required this.notification, this.onTap, this.onDelete});
 
   final AppNotification notification;
   final VoidCallback? onTap;
+  final VoidCallback? onDelete;
 
   @override
   Widget build(BuildContext context) {
@@ -165,6 +204,16 @@ class _NotificationCard extends StatelessWidget {
                   ],
                 ),
               ),
+              if (onDelete != null)
+                IconButton(
+                  tooltip: AppLocalizations.of(
+                    context,
+                  ).deleteNotification,
+                  visualDensity: VisualDensity.compact,
+                  icon: const Icon(Icons.delete_outline_rounded, size: 20),
+                  color: colorScheme.onSurfaceVariant,
+                  onPressed: onDelete,
+                ),
             ],
           ),
         ),

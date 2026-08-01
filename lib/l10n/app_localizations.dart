@@ -7081,6 +7081,108 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Command copied to clipboard'**
   String get copiedToClipboard;
+
+  /// No description provided for @sendNotification.
+  ///
+  /// In en, this message translates to:
+  /// **'Send Notification'**
+  String get sendNotification;
+
+  /// No description provided for @audience.
+  ///
+  /// In en, this message translates to:
+  /// **'Target Audience'**
+  String get audience;
+
+  /// No description provided for @audienceAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All Users'**
+  String get audienceAll;
+
+  /// No description provided for @audienceCustomer.
+  ///
+  /// In en, this message translates to:
+  /// **'Customers'**
+  String get audienceCustomer;
+
+  /// No description provided for @audienceDriver.
+  ///
+  /// In en, this message translates to:
+  /// **'Drivers'**
+  String get audienceDriver;
+
+  /// No description provided for @audienceMerchant.
+  ///
+  /// In en, this message translates to:
+  /// **'Merchants'**
+  String get audienceMerchant;
+
+  /// No description provided for @audienceAdmin.
+  ///
+  /// In en, this message translates to:
+  /// **'Admins'**
+  String get audienceAdmin;
+
+  /// No description provided for @notificationType.
+  ///
+  /// In en, this message translates to:
+  /// **'Notification Type'**
+  String get notificationType;
+
+  /// No description provided for @typeInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Info'**
+  String get typeInfo;
+
+  /// No description provided for @typeWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'Warning'**
+  String get typeWarning;
+
+  /// No description provided for @typeSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Success'**
+  String get typeSuccess;
+
+  /// No description provided for @typeReminder.
+  ///
+  /// In en, this message translates to:
+  /// **'Reminder'**
+  String get typeReminder;
+
+  /// No description provided for @deepLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Deep Link (optional)'**
+  String get deepLink;
+
+  /// No description provided for @sentToRecipients.
+  ///
+  /// In en, this message translates to:
+  /// **'Sent to {count} recipients'**
+  String sentToRecipients(int count);
+
+  /// No description provided for @sendFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to send notification'**
+  String get sendFailed;
+
+  /// No description provided for @loadDevicesFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load connected devices'**
+  String get loadDevicesFailed;
+
+  /// No description provided for @broadcastNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Instant in-app notification delivered in realtime to connected devices via Supabase Realtime'**
+  String get broadcastNote;
 }
 
 class _AppLocalizationsDelegate

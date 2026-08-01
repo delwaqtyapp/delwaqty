@@ -1065,3 +1065,34 @@ Session 21d fixed a real bug: Android's FusedLocationProvider replayed a 9-day-o
 
 ---
 
+## ADR-037: Functional Instant Push Notifications — Realtime Broadcast + Fixed Token Pipeline
+
+**Date:** Sprint 57
+**Status:** Accepted
+**Deciders:** Lead Software Architect
+
+### Context
+The admin push-notification page rendered but the system was non-functional end-to-end:
+1. **Schema mismatch:** `notification_tokens` (migration 002) only had `created_at`, but the service and the admin dashboard already persisted/read `updated_at`. Every query against the deployed table threw, so `_saveToken` silently failed (tokens never stored) and the dashboard's "connected devices" card showed a generic error.
+2. **RLS:** `notification_tokens` policy only allowed `auth.uid() = user_id`, so admins could never list devices. Additionally, the legacy `notifications` "Service role can insert" policy was `WITH CHECK (true)` with no role restriction — any authenticated user could insert a notification for any user.
+3. **No send path:** the admin page could only copy an FCM payload for manual pasting into the Firebase console. Real FCM HTTP v1 sending needs a service-account credential (external, not available at the time).
+4. **Upsert bug:** `_saveToken` used `onConflict: 'token'`, but no unique index exists on `token` alone (the table has `UNIQUE(user_id, token)`) — so even the upsert failed.
+5. `platform` was written as `defaultTargetPlatform.name`, which violates the column's `CHECK (platform IN ('android','ios'))` on desktop/fuchsia builds.
+
+### Decision
+1. **Migration `018_push_notification_platform.sql`:** add `updated_at` (with auto-update trigger) + `user_id` index to `notification_tokens`; admin SELECT-all-tokens policy (`public.is_admin()`); admin INSERT/SELECT/DELETE policies on `notifications`; restrict the legacy "Service role can insert" policy to `service_role`; add `notifications` to the `supabase_realtime` publication; add an admin-only `SECURITY DEFINER` RPC `admin_broadcast_notification(p_title, p_body, p_type, p_deep_link, p_target_role, p_target_user_id)` that inserts one `notifications` row per matching user and returns the recipient count.
+2. **PushNotificationService:** fix the upsert conflict target to `user_id,token`; normalize `platform` to `android`/`ios`; set up a Supabase Realtime channel on `notifications` INSERT (RLS-scoped to the current user) that shows a local notification and invalidates `notificationsProvider`/`unreadCountProvider` — instant in-app push that works today with no external credentials. Realtime setup runs regardless of FCM permission so the in-app center/badge always receive broadcasts.
+3. **Admin page:** real "send" button that calls the RPC with an audience selector (all / customer / driver / merchant / admin), a notification-type selector (`info`/`warning`/`success`/`reminder`), optional deep link, and a recipient-count result; the Firebase console copy path remains as a secondary option; connected-devices card gained a retry button and a specific failure message instead of a generic error; tokens refresh after send. Pure logic extracted into `buildBroadcastParams` for testing.
+
+### Rationale
+- The in-app `notifications` table + Realtime already delivered the whole user experience (center, unread badge, tap-to-open); wiring the admin broadcast into that path makes instant notifications work end-to-end without waiting on FCM service-account credentials, which remain an external blocker.
+- The schema/RLS/upsert fixes remove every verified failure point in the token pipeline so the connected-devices list becomes real data.
+- FCM background/terminated push stays available: the copied payload targets `all` or `role_<role>` topics and becomes active once a service account is configured.
+
+### Consequences
+- Admin can broadcast instantly; every logged-in device receives the notification in realtime (local banner + notification-center row + unread badge increment).
+- Migration `018` must be applied to the Supabase project (SQL editor or Management API) for the send path and connected-devices list to work; until then the UI degrades gracefully with clear error messages.
+- `flutter analyze` 0 errors; suite grew 531 → 535 (new `buildBroadcastParams` tests); debug APK rebuilt, installed, and the rewritten admin page verified on DNP NX9 (renders send form, audience/type selectors, retry, no crashes).
+
+---
+

@@ -3649,4 +3649,58 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get copiedToClipboard => 'تم نسخ الأمر إلى الحافظة';
+
+  @override
+  String get sendNotification => 'إرسال الإشعار';
+
+  @override
+  String get audience => 'الجمهور المستهدف';
+
+  @override
+  String get audienceAll => 'جميع المستخدمين';
+
+  @override
+  String get audienceCustomer => 'العملاء';
+
+  @override
+  String get audienceDriver => 'السائقون';
+
+  @override
+  String get audienceMerchant => 'التجار';
+
+  @override
+  String get audienceAdmin => 'المسؤولون';
+
+  @override
+  String get notificationType => 'نوع الإشعار';
+
+  @override
+  String get typeInfo => 'معلومة';
+
+  @override
+  String get typeWarning => 'تحذير';
+
+  @override
+  String get typeSuccess => 'نجاح';
+
+  @override
+  String get typeReminder => 'تذكير';
+
+  @override
+  String get deepLink => 'الرابط (اختياري)';
+
+  @override
+  String sentToRecipients(int count) {
+    return 'تم الإرسال إلى $count مستلم';
+  }
+
+  @override
+  String get sendFailed => 'فشل إرسال الإشعار';
+
+  @override
+  String get loadDevicesFailed => 'تعذر تحميل الأجهزة المتصلة';
+
+  @override
+  String get broadcastNote =>
+      'إشعار فوري داخل التطبيق يُسلَّم لحظياً للأجهزة المتصلة عبر Supabase Realtime';
 }

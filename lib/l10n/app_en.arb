@@ -1211,5 +1211,29 @@
   "targetTopic": "Target Topic",
   "sendPushGuide": "Compose your message, then send it from the Firebase Console or with the copied command.",
   "copyCommand": "Copy FCM Command",
-  "copiedToClipboard": "Command copied to clipboard"
+  "copiedToClipboard": "Command copied to clipboard",
+  "sendNotification": "Send Notification",
+  "audience": "Target Audience",
+  "audienceAll": "All Users",
+  "audienceCustomer": "Customers",
+  "audienceDriver": "Drivers",
+  "audienceMerchant": "Merchants",
+  "audienceAdmin": "Admins",
+  "notificationType": "Notification Type",
+  "typeInfo": "Info",
+  "typeWarning": "Warning",
+  "typeSuccess": "Success",
+  "typeReminder": "Reminder",
+  "deepLink": "Deep Link (optional)",
+  "sentToRecipients": "Sent to {count} recipients",
+  "@sentToRecipients": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "sendFailed": "Failed to send notification",
+  "loadDevicesFailed": "Failed to load connected devices",
+  "broadcastNote": "Instant in-app notification delivered in realtime to connected devices via Supabase Realtime"
 }

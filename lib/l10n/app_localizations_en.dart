@@ -3676,4 +3676,58 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get copiedToClipboard => 'Command copied to clipboard';
+
+  @override
+  String get sendNotification => 'Send Notification';
+
+  @override
+  String get audience => 'Target Audience';
+
+  @override
+  String get audienceAll => 'All Users';
+
+  @override
+  String get audienceCustomer => 'Customers';
+
+  @override
+  String get audienceDriver => 'Drivers';
+
+  @override
+  String get audienceMerchant => 'Merchants';
+
+  @override
+  String get audienceAdmin => 'Admins';
+
+  @override
+  String get notificationType => 'Notification Type';
+
+  @override
+  String get typeInfo => 'Info';
+
+  @override
+  String get typeWarning => 'Warning';
+
+  @override
+  String get typeSuccess => 'Success';
+
+  @override
+  String get typeReminder => 'Reminder';
+
+  @override
+  String get deepLink => 'Deep Link (optional)';
+
+  @override
+  String sentToRecipients(int count) {
+    return 'Sent to $count recipients';
+  }
+
+  @override
+  String get sendFailed => 'Failed to send notification';
+
+  @override
+  String get loadDevicesFailed => 'Failed to load connected devices';
+
+  @override
+  String get broadcastNote =>
+      'Instant in-app notification delivered in realtime to connected devices via Supabase Realtime';
 }

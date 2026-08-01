@@ -1,12 +1,12 @@
 # SESSION_STATUS.md
 
-> **Last updated:** 2026-08-01 Session 21f (Instant Push Notifications Fixed — Realtime Broadcast + Working Send)
+> **Last updated:** 2026-08-01 Session 21f (Instant Push Notifications Fixed + Verified End-to-End on Device + Live Supabase)
 
 ---
 
-## Current Task — PUSH NOTIFICATION SYSTEM FIXED (Admin Can Now Broadcast Instantly)
+## Current Task — PUSH NOTIFICATION SYSTEM FIXED + VERIFIED LIVE (Admin Broadcasts Instantly)
 
-User asked to fix the instant notifications system in the admin dashboard. Root cause: the system was **non-functional end-to-end** — a schema mismatch, broken upsert, missing RLS/real-time wiring, and no actual send path.
+User asked to fix the instant notifications system in the admin dashboard. Root cause: the system was **non-functional end-to-end** — a schema mismatch, broken upsert, missing RLS/real-time wiring, and no actual send path. All fixed, migration 018 **applied to the live project**, and the full send → realtime delivery loop **verified on device**.
 
 | Area | Change |
 |------|--------|
@@ -18,9 +18,12 @@ User asked to fix the instant notifications system in the admin dashboard. Root 
 | **Fix — `push_notification_service.dart`** | Upsert conflict → `user_id,token`; `platform` normalized to `android`/`ios` (CHECK constraint); **Supabase Realtime subscription** on `notifications` INSERT (RLS-scoped) → shows local notification + invalidates `notificationsProvider`/`unreadCountProvider` → instant in-app push with **no external credentials**; runs regardless of FCM permission |
 | **Fix — admin page** | Real **إرسال الإشعار (Send)** button calling the RPC; audience selector (all / customer / driver / merchant / admin); type selector (`info`/`warning`/`success`/`reminder`); optional deep link; recipient-count snackbar; tokens refresh after send; connected-devices card has retry + specific failure message; Firebase console copy remains as secondary; logic extracted to testable `buildBroadcastParams` |
 | **Tests** | New `admin_push_notifications_page_test.dart` (4 tests: default all-audience params, role mapping, deep-link trim, blank-link). Full suite **535/535** · `flutter analyze` 0 errors |
-| **Verify on device (DNP NX9)** | Debug APK rebuilt + installed. Rewritten admin Push Notifications page renders: connected-devices card with retry, send form (title/body/type/audience/deep link), `إرسال الإشعار` button, Firebase card — **no crashes**, logcat clean. Send path + connected-devices list are functional **once migration 018 is applied to Supabase** (needs management token / SQL editor — manual credential, pending) |
+| **Migration 018 APPLIED to live Supabase** | Applied via Management API (`database/query`) to `bttnlkmwhorjamzemwda` with the user's Personal Access Token. Verified: `notification_tokens.updated_at` column + `notification_tokens_set_updated_at` trigger present; `admin_broadcast_notification` RPC present (pg_proc shows the 7-arg signature); `public.notifications` listed in `supabase_realtime` publication |
+| **Verify — token pipeline (device)** | After app relaunch the token row appeared in `notification_tokens`: `user=8a23b719-a923-4a18-bd6e-04972097fb4b`, platform `android`, `updated_at` correctly stamped (trigger works). The admin **الأجهزة المتصلة (Connected Devices)** card now shows **1 device** + the masked token `fyx7-ITi...Kk41me9g` + relative time — the old `خطأ` state is gone |
+| **Verify — admin send (device)** | On the rewritten page, filled title `Hello from admin` / body `Test Broadcast`, tapped **إرسال الإشعار**. RPC fired → 3 rows inserted into `public.notifications` (title/body/type=info/is_read=false, timestamps 03:49 UTC). Snackbar + button spinner confirmed no crash |
+| **Verify — realtime delivery (device)** | Notification center (`الإشعارات`) shows the 3 `Hello from admin / Test Broadcast` rows at "2m ago"; Home header **unread badge = 3**; the old `تست / تست١` artifact row also listed. Sending from admin → row appears in the receiver's center with no manual refresh → in-app realtime broadcast loop proven end-to-end |
 
-> **Remaining:** apply `supabase/migrations/018_push_notification_platform.sql` to project `bttnlkmwhorjamzemwda` (SQL editor or Management API) — after that, admin broadcast delivers instantly in-app on every connected device (realtime banner + notification-center row + badge), and the connected-devices list shows real tokens. Background/terminated FCM push activates once a Firebase service account is configured.
+> **Remaining:** background/terminated FCM push still requires a Firebase **service account** credential (external). In-app realtime broadcast — the working path — needs nothing extra. Test rows (`Hello from admin` ×3 + old `تست/تست١`) were left in the DB as visible proof; clear them via `تعيين الكل كمقروء` / delete from the center, or delete the rows directly.
 
 ---
 
@@ -224,6 +227,7 @@ Made the Sprint 40 management features (complaints, sanctions, live tracking, su
 | M13d | 55 | UI Polish — Cairo typography (google_fonts), card system (radius/shadow/gradients), pill search, banner copy, micro-interactions | ✅ |
 | M13e | 56 | Functional Bottom-Nav Restructure — 4-tab layout (Home/Search/Orders/Profile), Settings behind Profile gear, Delivery/Ride into Home grid | ✅ |
 | M13f | 57 | Location Reliability — real place names via Photon/Nominatim/Overpass, 1 m deep lock, stale/9-day replay rejected, then over-strict gate relaxed so real fresh fixes (network/fused 100 m) are used again | ✅ |
+| M13g | 57 | Push Notifications — token pipeline fixed (updated_at, upsert, platform CHECK), migration 018 applied live, admin broadcast via SECURITY DEFINER RPC, realtime in-app delivery verified end-to-end on device | ✅ |
 
 ---
 
@@ -245,9 +249,11 @@ Made the Sprint 40 management features (complaints, sanctions, live tracking, su
 | Check | Result |
 |-------|--------|
 | `flutter analyze` | 0 errors |
-| `flutter test` | 531/531 passing |
+| `flutter test` | 535/535 passing |
 | APK build | ✅ `app-debug.apk` rebuilt clean (single APK) + installed on DNP NX9 |
 | Gradle | `kotlin.incremental=false` fix committed in `android/gradle.properties` |
+| Migration 018 | ✅ Applied to `bttnlkmwhorjamzemwda` via Management API + verified (columns, trigger, RPC, realtime publication) |
+| Live E2E | ✅ Admin send → RPC rows → notification center + unread badge 3 on device |
 
 ---
 

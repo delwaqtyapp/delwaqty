@@ -11,6 +11,7 @@ void main() {
       'id': 'user-123',
       'email': 'test@example.com',
       'fullName': 'John Doe',
+      'username': 'john_doe',
       'phone': '+1234567890',
       'avatarUrl': 'https://example.com/avatar.jpg',
       'language': 'ar',
@@ -25,6 +26,7 @@ void main() {
         expect(model.id, 'user-123');
         expect(model.email, 'test@example.com');
         expect(model.fullName, 'John Doe');
+        expect(model.username, 'john_doe');
         expect(model.phone, '+1234567890');
         expect(model.avatarUrl, 'https://example.com/avatar.jpg');
         expect(model.language, 'ar');
@@ -38,6 +40,7 @@ void main() {
           'id': 'user-123',
           'email': 'test@example.com',
           'fullName': null,
+          'username': null,
           'phone': null,
           'avatarUrl': null,
           'language': null,
@@ -47,6 +50,7 @@ void main() {
         };
         final model = UserModel.fromJson(json);
         expect(model.fullName, isNull);
+        expect(model.username, isNull);
         expect(model.phone, isNull);
         expect(model.avatarUrl, isNull);
         expect(model.language, 'en');
@@ -61,6 +65,7 @@ void main() {
           'id': 'user-123',
           'email': 'test@example.com',
           'full_name': 'John Doe',
+          'username': 'john_doe',
           'phone': '+1234567890',
           'avatar_url': 'https://example.com/avatar.jpg',
           'language': 'ar',
@@ -71,6 +76,7 @@ void main() {
         final model = UserModel.fromSupabase(supabaseJson);
         expect(model.id, 'user-123');
         expect(model.fullName, 'John Doe');
+        expect(model.username, 'john_doe');
         expect(model.language, 'ar');
       });
 
@@ -79,6 +85,7 @@ void main() {
           'id': 'user-123',
           'email': 'test@example.com',
           'full_name': null,
+          'username': null,
           'phone': null,
           'avatar_url': null,
           'language': null,
@@ -109,6 +116,7 @@ void main() {
         final json = model.toSupabaseJson();
         expect(json['id'], 'user-123');
         expect(json['full_name'], 'John Doe');
+        expect(json['username'], 'john_doe');
         expect(json['avatar_url'], 'https://example.com/avatar.jpg');
         expect(json.containsKey('created_at'), isFalse);
       });
@@ -122,6 +130,7 @@ void main() {
         expect(entity.id, model.id);
         expect(entity.email, model.email);
         expect(entity.fullName, model.fullName);
+        expect(entity.username, model.username);
         expect(entity.phone, model.phone);
         expect(entity.avatarUrl, model.avatarUrl);
         expect(entity.language, model.language);

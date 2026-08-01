@@ -2779,6 +2779,16 @@ class AppLocalizationsAr extends AppLocalizations {
   String get locationError => 'مقدرش أحدد موقعك';
 
   @override
+  String get accuracyInsufficient =>
+      'الدقة الحالية غير كافية (مطلوب دقة 1 متر). اقترب من النافذة أو توجه لمكان مفتوح ثم أعد المحاولة.';
+
+  @override
+  String get improvingAccuracy => 'جاري تحسين دقة الموقع...';
+
+  @override
+  String get retryLocation => 'إعادة المحاولة';
+
+  @override
   String get safetyHub => 'مركز الأمان';
 
   @override
@@ -3596,4 +3606,47 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get startSupportChatDescription => 'ابدأ محادثة مع فريق الدعم.';
+
+  @override
+  String get orderDirectly => 'اطلب طلبك مباشرة';
+
+  @override
+  String get editProfile => 'تعديل الملف الشخصي';
+
+  @override
+  String get username => 'اسم المستخدم';
+
+  @override
+  String get changePhoto => 'تغيير الصورة';
+
+  @override
+  String get chooseFromGallery => 'الاختيار من المعرض';
+
+  @override
+  String get takePhoto => 'التقاط صورة';
+
+  @override
+  String get pushNotificationsTitle => 'الإشعارات الفورية';
+
+  @override
+  String get connectedDevices => 'الأجهزة المتصلة';
+
+  @override
+  String get notificationTitle => 'عنوان الإشعار';
+
+  @override
+  String get notificationBody => 'نص الإشعار';
+
+  @override
+  String get targetTopic => 'الموضوع المستهدف';
+
+  @override
+  String get sendPushGuide =>
+      'اكتب رسالتك ثم أرسلها من Firebase Console أو بالأمر المنسوخ.';
+
+  @override
+  String get copyCommand => 'نسخ أمر FCM';
+
+  @override
+  String get copiedToClipboard => 'تم نسخ الأمر إلى الحافظة';
 }

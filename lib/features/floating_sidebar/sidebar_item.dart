@@ -24,16 +24,16 @@ class SidebarItem extends StatelessWidget {
     final cs = Theme.of(context).colorScheme;
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 1),
       child: GestureDetector(
         onTap: onTap,
         behavior: HitTestBehavior.opaque,
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 250),
           curve: Curves.easeOutCubic,
-          height: 54,
+          height: 42,
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(14),
+            borderRadius: BorderRadius.circular(12),
             gradient: isSelected
                 ? LinearGradient(
                     colors: [st.selectedGradientStart, st.selectedGradientEnd],
@@ -60,23 +60,25 @@ class SidebarItem extends StatelessWidget {
                 ),
               Row(
                 children: [
-                  const SizedBox(width: 14),
+                  const SizedBox(width: 12),
                   SizedBox(
-                    width: 22,
+                    width: 20,
                     child: Icon(
                       icon,
-                      size: 20,
+                      size: 18,
                       color: isSelected ? cs.onPrimary : st.iconColor,
                     ),
                   ),
-                  const SizedBox(width: 14),
+                  const SizedBox(width: 12),
                   Expanded(
                     child: Text(
                       label,
                       style: AppTextStyles.labelLarge.copyWith(
                         color: isSelected ? cs.onPrimary : st.textPrimary,
-                        fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-                        fontSize: 14,
+                        fontWeight: isSelected
+                            ? FontWeight.w600
+                            : FontWeight.w500,
+                        fontSize: 13,
                       ),
                     ),
                   ),
@@ -84,10 +86,10 @@ class SidebarItem extends StatelessWidget {
                     trailing!
                   else
                     Padding(
-                      padding: const EdgeInsets.only(right: 12),
+                      padding: const EdgeInsets.only(right: 10),
                       child: Icon(
                         Icons.chevron_right_rounded,
-                        size: 18,
+                        size: 16,
                         color: isSelected
                             ? cs.onPrimary.withValues(alpha: 0.6)
                             : st.iconColor.withValues(alpha: 0.4),

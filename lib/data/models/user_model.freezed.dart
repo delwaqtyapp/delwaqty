@@ -24,6 +24,7 @@ mixin _$UserModel {
   String get id => throw _privateConstructorUsedError;
   String get email => throw _privateConstructorUsedError;
   String? get fullName => throw _privateConstructorUsedError;
+  String? get username => throw _privateConstructorUsedError;
   String? get phone => throw _privateConstructorUsedError;
   String? get avatarUrl => throw _privateConstructorUsedError;
   String get language => throw _privateConstructorUsedError;
@@ -51,6 +52,7 @@ abstract class $UserModelCopyWith<$Res> {
     String id,
     String email,
     String? fullName,
+    String? username,
     String? phone,
     String? avatarUrl,
     String language,
@@ -79,6 +81,7 @@ class _$UserModelCopyWithImpl<$Res, $Val extends UserModel>
     Object? id = null,
     Object? email = null,
     Object? fullName = freezed,
+    Object? username = freezed,
     Object? phone = freezed,
     Object? avatarUrl = freezed,
     Object? language = null,
@@ -100,6 +103,10 @@ class _$UserModelCopyWithImpl<$Res, $Val extends UserModel>
             fullName: freezed == fullName
                 ? _value.fullName
                 : fullName // ignore: cast_nullable_to_non_nullable
+                      as String?,
+            username: freezed == username
+                ? _value.username
+                : username // ignore: cast_nullable_to_non_nullable
                       as String?,
             phone: freezed == phone
                 ? _value.phone
@@ -148,6 +155,7 @@ abstract class _$$UserModelImplCopyWith<$Res>
     String id,
     String email,
     String? fullName,
+    String? username,
     String? phone,
     String? avatarUrl,
     String language,
@@ -175,6 +183,7 @@ class __$$UserModelImplCopyWithImpl<$Res>
     Object? id = null,
     Object? email = null,
     Object? fullName = freezed,
+    Object? username = freezed,
     Object? phone = freezed,
     Object? avatarUrl = freezed,
     Object? language = null,
@@ -196,6 +205,10 @@ class __$$UserModelImplCopyWithImpl<$Res>
         fullName: freezed == fullName
             ? _value.fullName
             : fullName // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        username: freezed == username
+            ? _value.username
+            : username // ignore: cast_nullable_to_non_nullable
                   as String?,
         phone: freezed == phone
             ? _value.phone
@@ -237,6 +250,7 @@ class _$UserModelImpl extends _UserModel {
     required this.id,
     required this.email,
     this.fullName,
+    this.username,
     this.phone,
     this.avatarUrl,
     this.language = 'en',
@@ -255,6 +269,8 @@ class _$UserModelImpl extends _UserModel {
   final String email;
   @override
   final String? fullName;
+  @override
+  final String? username;
   @override
   final String? phone;
   @override
@@ -275,7 +291,7 @@ class _$UserModelImpl extends _UserModel {
 
   @override
   String toString() {
-    return 'UserModel(id: $id, email: $email, fullName: $fullName, phone: $phone, avatarUrl: $avatarUrl, language: $language, isOnboarded: $isOnboarded, role: $role, createdAt: $createdAt, updatedAt: $updatedAt)';
+    return 'UserModel(id: $id, email: $email, fullName: $fullName, username: $username, phone: $phone, avatarUrl: $avatarUrl, language: $language, isOnboarded: $isOnboarded, role: $role, createdAt: $createdAt, updatedAt: $updatedAt)';
   }
 
   @override
@@ -287,6 +303,8 @@ class _$UserModelImpl extends _UserModel {
             (identical(other.email, email) || other.email == email) &&
             (identical(other.fullName, fullName) ||
                 other.fullName == fullName) &&
+            (identical(other.username, username) ||
+                other.username == username) &&
             (identical(other.phone, phone) || other.phone == phone) &&
             (identical(other.avatarUrl, avatarUrl) ||
                 other.avatarUrl == avatarUrl) &&
@@ -308,6 +326,7 @@ class _$UserModelImpl extends _UserModel {
     id,
     email,
     fullName,
+    username,
     phone,
     avatarUrl,
     language,
@@ -336,6 +355,7 @@ abstract class _UserModel extends UserModel {
     required final String id,
     required final String email,
     final String? fullName,
+    final String? username,
     final String? phone,
     final String? avatarUrl,
     final String language,
@@ -355,6 +375,8 @@ abstract class _UserModel extends UserModel {
   String get email;
   @override
   String? get fullName;
+  @override
+  String? get username;
   @override
   String? get phone;
   @override

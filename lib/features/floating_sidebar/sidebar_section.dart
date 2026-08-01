@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:delwaqty/core/theme/app_text_styles.dart';
 import 'sidebar_theme.dart';
 import 'animations.dart';
-import 'sidebar_item.dart';
 
 class SidebarSection extends StatelessWidget {
   const SidebarSection({
@@ -27,7 +26,7 @@ class SidebarSection extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         Padding(
-          padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
+          padding: const EdgeInsets.fromLTRB(14, 8, 14, 2),
           child: StaggerAnimation(
             controller: controller,
             index: startIndex,
@@ -35,9 +34,9 @@ class SidebarSection extends StatelessWidget {
               title.toUpperCase(),
               style: AppTextStyles.labelSmall.copyWith(
                 color: st.sectionTitleColor,
-                fontSize: 11,
+                fontSize: 10,
                 fontWeight: FontWeight.w700,
-                letterSpacing: 1.2,
+                letterSpacing: 1,
               ),
             ),
           ),
@@ -71,10 +70,7 @@ class SidebarDivider extends StatelessWidget {
         height: 0.5,
         decoration: BoxDecoration(
           gradient: LinearGradient(
-            colors: [
-              st.dividerColor,
-              st.dividerColor.withValues(alpha: 0.0),
-            ],
+            colors: [st.dividerColor, st.dividerColor.withValues(alpha: 0.0)],
             begin: Alignment.centerLeft,
             end: Alignment.centerRight,
           ),

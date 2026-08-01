@@ -6,6 +6,7 @@ import 'package:delwaqty/core/extensions/context_extensions.dart';
 import 'package:delwaqty/features/commerce/domain/entities/merchant.dart';
 import 'package:delwaqty/features/auth/domain/auth_state.dart';
 import 'package:delwaqty/features/auth/presentation/auth_provider.dart';
+import 'package:delwaqty/features/notifications/notifications_module.dart';
 import 'package:delwaqty/features/location/presentation/providers/location_provider.dart';
 import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
 import 'package:delwaqty/shared/widgets/pressable_scale.dart';
@@ -40,20 +41,31 @@ class HomePage extends ConsumerWidget {
     final authState = ref.watch(authStateProvider);
     final isGuest = authState is AuthGuest;
     final locationAsync = ref.watch(userLocationProvider);
+    final unreadCount = isGuest
+        ? 0
+        : ref.watch(unreadCountProvider).valueOrNull ?? 0;
 
     return Scaffold(
       body: SafeArea(
         child: RefreshIndicator(
           onRefresh: () async {
             ref.invalidate(nearbyMerchantsProvider);
-            ref.read(userLocationProvider.notifier).refresh();
+            ref.read(userLocationProvider.notifier).refreshQuick();
           },
           child: CustomScrollView(
             slivers: [
               SliverToBoxAdapter(
-                child: _buildHeader(context, ref, l10n, isGuest, locationAsync),
+                child: _buildHeader(
+                  context,
+                  ref,
+                  l10n,
+                  isGuest,
+                  locationAsync,
+                  unreadCount,
+                ),
               ),
               SliverToBoxAdapter(child: _buildSearchBar(context, l10n)),
+              SliverToBoxAdapter(child: _buildOrderDirectlyCta(context, l10n)),
               SliverToBoxAdapter(child: _buildServiceGrid(context, l10n)),
               SliverToBoxAdapter(
                 child: _buildSectionTitle(context, l10n.nearby, l10n),
@@ -78,6 +90,7 @@ class HomePage extends ConsumerWidget {
     AppLocalizations l10n,
     bool isGuest,
     AsyncValue<UserLocation?> locationAsync,
+    int unreadCount,
   ) {
     final locationText = locationAsync.when(
       data: (loc) => loc?.detailedAddress.isNotEmpty == true
@@ -172,14 +185,18 @@ class HomePage extends ConsumerWidget {
                 ],
               ),
             ),
-            _buildNotificationBadge(context, isGuest),
+            _buildNotificationBadge(context, isGuest, unreadCount),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildNotificationBadge(BuildContext context, bool isGuest) {
+  Widget _buildNotificationBadge(
+    BuildContext context,
+    bool isGuest,
+    int unreadCount,
+  ) {
     return AnimatedFadeIn(
       delay: const Duration(milliseconds: 100),
       child: IconButton(
@@ -187,7 +204,9 @@ class HomePage extends ConsumerWidget {
             ? () => context.push('/login')
             : () => context.push('/notifications'),
         icon: Badge(
+          isLabelVisible: unreadCount > 0,
           backgroundColor: context.colorScheme.error,
+          label: unreadCount > 99 ? Text('99+') : Text('$unreadCount'),
           smallSize: 8,
           child: Container(
             width: 44,
@@ -264,6 +283,67 @@ class HomePage extends ConsumerWidget {
                 ),
                 const SizedBox(width: 16),
               ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildOrderDirectlyCta(BuildContext context, AppLocalizations l10n) {
+    return AnimatedFadeIn(
+      delay: const Duration(milliseconds: 150),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: () => context.push('/direct-delivery'),
+            borderRadius: BorderRadius.circular(18),
+            child: Ink(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    context.colorScheme.primary,
+                    context.colorScheme.primary.withValues(alpha: 0.85),
+                  ],
+                ),
+                borderRadius: BorderRadius.circular(18),
+                boxShadow: [
+                  BoxShadow(
+                    color: context.colorScheme.primary.withValues(alpha: 0.3),
+                    blurRadius: 16,
+                    offset: const Offset(0, 6),
+                  ),
+                ],
+              ),
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.rocket_launch_rounded,
+                    color: context.colorScheme.onPrimary,
+                  ),
+                  const SizedBox(width: 10),
+                  Flexible(
+                    child: Text(
+                      l10n.orderDirectly,
+                      style: AppTextStyles.titleMedium.copyWith(
+                        color: context.colorScheme.onPrimary,
+                        fontWeight: FontWeight.w800,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  const SizedBox(width: 6),
+                  Icon(
+                    Icons.arrow_forward_rounded,
+                    color: context.colorScheme.onPrimary,
+                    size: 20,
+                  ),
+                ],
+              ),
             ),
           ),
         ),

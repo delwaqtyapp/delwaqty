@@ -5426,6 +5426,24 @@ abstract class AppLocalizations {
   /// **'Could not get your location'**
   String get locationError;
 
+  /// No description provided for @accuracyInsufficient.
+  ///
+  /// In en, this message translates to:
+  /// **'Current accuracy is insufficient (1 m required). Move near a window or go to an open area and try again.'**
+  String get accuracyInsufficient;
+
+  /// No description provided for @improvingAccuracy.
+  ///
+  /// In en, this message translates to:
+  /// **'Improving location accuracy...'**
+  String get improvingAccuracy;
+
+  /// No description provided for @retryLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get retryLocation;
+
   /// No description provided for @safetyHub.
   ///
   /// In en, this message translates to:
@@ -6979,6 +6997,90 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Start a conversation with the support team.'**
   String get startSupportChatDescription;
+
+  /// No description provided for @orderDirectly.
+  ///
+  /// In en, this message translates to:
+  /// **'Order Directly'**
+  String get orderDirectly;
+
+  /// No description provided for @editProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Profile'**
+  String get editProfile;
+
+  /// No description provided for @username.
+  ///
+  /// In en, this message translates to:
+  /// **'Username'**
+  String get username;
+
+  /// No description provided for @changePhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Change Photo'**
+  String get changePhoto;
+
+  /// No description provided for @chooseFromGallery.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose from Gallery'**
+  String get chooseFromGallery;
+
+  /// No description provided for @takePhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Take Photo'**
+  String get takePhoto;
+
+  /// No description provided for @pushNotificationsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Push Notifications'**
+  String get pushNotificationsTitle;
+
+  /// No description provided for @connectedDevices.
+  ///
+  /// In en, this message translates to:
+  /// **'Connected Devices'**
+  String get connectedDevices;
+
+  /// No description provided for @notificationTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Notification Title'**
+  String get notificationTitle;
+
+  /// No description provided for @notificationBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Notification Message'**
+  String get notificationBody;
+
+  /// No description provided for @targetTopic.
+  ///
+  /// In en, this message translates to:
+  /// **'Target Topic'**
+  String get targetTopic;
+
+  /// No description provided for @sendPushGuide.
+  ///
+  /// In en, this message translates to:
+  /// **'Compose your message, then send it from the Firebase Console or with the copied command.'**
+  String get sendPushGuide;
+
+  /// No description provided for @copyCommand.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy FCM Command'**
+  String get copyCommand;
+
+  /// No description provided for @copiedToClipboard.
+  ///
+  /// In en, this message translates to:
+  /// **'Command copied to clipboard'**
+  String get copiedToClipboard;
 }
 
 class _AppLocalizationsDelegate

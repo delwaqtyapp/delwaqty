@@ -28,7 +28,7 @@ class SidebarHeader extends StatelessWidget {
     final cs = Theme.of(context).colorScheme;
 
     return Container(
-      padding: const EdgeInsets.fromLTRB(16, 20, 16, 12),
+      padding: const EdgeInsets.fromLTRB(14, 14, 14, 10),
       decoration: BoxDecoration(
         borderRadius: const BorderRadius.only(
           topLeft: Radius.circular(24),
@@ -43,30 +43,33 @@ class SidebarHeader extends StatelessWidget {
               Stack(
                 children: [
                   Container(
-                    width: 52,
-                    height: 52,
+                    width: 42,
+                    height: 42,
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
                         colors: [cs.primary, cs.tertiary],
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
                       ),
-                      borderRadius: BorderRadius.circular(18),
+                      borderRadius: BorderRadius.circular(14),
                       boxShadow: [
                         BoxShadow(
                           color: cs.primary.withValues(alpha: 0.3),
-                          blurRadius: 12,
-                          offset: const Offset(0, 4),
+                          blurRadius: 10,
+                          offset: const Offset(0, 3),
                         ),
                       ],
                     ),
                     child: Center(
                       child: Text(
-                        avatarInitial ?? (userName.isNotEmpty ? userName[0].toUpperCase() : 'U'),
+                        avatarInitial ??
+                            (userName.isNotEmpty
+                                ? userName[0].toUpperCase()
+                                : 'U'),
                         style: AppTextStyles.titleLarge.copyWith(
                           color: cs.onPrimary,
                           fontWeight: FontWeight.bold,
-                          fontSize: 20,
+                          fontSize: 16,
                         ),
                       ),
                     ),
@@ -75,8 +78,8 @@ class SidebarHeader extends StatelessWidget {
                     right: 2,
                     bottom: 2,
                     child: Container(
-                      width: 14,
-                      height: 14,
+                      width: 12,
+                      height: 12,
                       decoration: BoxDecoration(
                         color: const Color(0xFF34D399),
                         shape: BoxShape.circle,
@@ -89,7 +92,7 @@ class SidebarHeader extends StatelessWidget {
                   ),
                 ],
               ),
-              const SizedBox(width: 14),
+              const SizedBox(width: 12),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -99,18 +102,18 @@ class SidebarHeader extends StatelessWidget {
                       style: AppTextStyles.titleMedium.copyWith(
                         color: st.textPrimary,
                         fontWeight: FontWeight.w600,
-                        fontSize: 16,
+                        fontSize: 14,
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
                     if (userEmail != null) ...[
-                      const SizedBox(height: 2),
+                      const SizedBox(height: 1),
                       Text(
                         userEmail!,
                         style: AppTextStyles.labelSmall.copyWith(
                           color: st.textSecondary,
-                          fontSize: 12,
+                          fontSize: 11,
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -124,15 +127,15 @@ class SidebarHeader extends StatelessWidget {
                   onTap: onEditProfile,
                   behavior: HitTestBehavior.opaque,
                   child: Container(
-                    width: 34,
-                    height: 34,
+                    width: 30,
+                    height: 30,
                     decoration: BoxDecoration(
                       color: st.quickSettingsBackground,
-                      borderRadius: BorderRadius.circular(10),
+                      borderRadius: BorderRadius.circular(9),
                     ),
                     child: Icon(
                       Icons.edit_rounded,
-                      size: 16,
+                      size: 14,
                       color: st.textSecondary,
                     ),
                   ),
@@ -140,9 +143,9 @@ class SidebarHeader extends StatelessWidget {
             ],
           ),
           if (roleBadge != null) ...[
-            const SizedBox(height: 10),
+            const SizedBox(height: 8),
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+              padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 3),
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   colors: [
@@ -161,18 +164,14 @@ class SidebarHeader extends StatelessWidget {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(
-                    Icons.verified_rounded,
-                    size: 12,
-                    color: cs.primary,
-                  ),
-                  const SizedBox(width: 5),
+                  Icon(Icons.verified_rounded, size: 11, color: cs.primary),
+                  const SizedBox(width: 4),
                   Text(
                     roleBadge!,
                     style: AppTextStyles.labelSmall.copyWith(
                       color: cs.primary,
                       fontWeight: FontWeight.w600,
-                      fontSize: 11,
+                      fontSize: 10,
                     ),
                   ),
                 ],
@@ -180,7 +179,7 @@ class SidebarHeader extends StatelessWidget {
             ),
           ],
           if (walletBalance != null || membershipLevel != null) ...[
-            const SizedBox(height: 12),
+            const SizedBox(height: 10),
             Row(
               children: [
                 if (walletBalance != null)
@@ -207,11 +206,7 @@ class SidebarHeader extends StatelessWidget {
 }
 
 class _InfoChip extends StatelessWidget {
-  const _InfoChip({
-    required this.icon,
-    required this.label,
-    required this.st,
-  });
+  const _InfoChip({required this.icon, required this.label, required this.st});
 
   final IconData icon;
   final String label;

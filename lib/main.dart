@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:delwaqty/app/app.dart';
@@ -19,6 +20,7 @@ import 'package:delwaqty/domain/usecases/profile/profile_usecases.dart';
 import 'package:delwaqty/module_registry.dart';
 import 'package:delwaqty/services/connectivity/connectivity_service.dart';
 import 'package:delwaqty/services/supabase/supabase_initializer.dart';
+import 'package:delwaqty/services/push_notification/push_notification_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -45,6 +47,10 @@ void main() async {
 
   final connectivityService = ConnectivityService();
   await connectivityService.initialize();
+
+  if (FirebaseConfig.isConfigured) {
+    FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
+  }
 
   registerAllModules();
 

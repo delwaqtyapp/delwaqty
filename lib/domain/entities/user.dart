@@ -9,6 +9,7 @@ class User with _$User {
     required String id,
     required String email,
     String? fullName,
+    String? username,
     String? phone,
     String? avatarUrl,
     @Default('en') String language,

@@ -10,6 +10,7 @@ class UserModel with _$UserModel {
     required String id,
     required String email,
     String? fullName,
+    String? username,
     String? phone,
     String? avatarUrl,
     @Default('en') String language,
@@ -29,6 +30,7 @@ class UserModel with _$UserModel {
       id: json['id'] as String,
       email: json['email'] as String,
       fullName: (json['full_name'] ?? json['name']) as String?,
+      username: json['username'] as String?,
       phone: json['phone'] as String?,
       avatarUrl: json['avatar_url'] as String?,
       language: json['language'] as String? ?? 'en',
@@ -45,6 +47,7 @@ class UserModel with _$UserModel {
     id: id,
     email: email,
     fullName: fullName,
+    username: username,
     phone: phone,
     avatarUrl: avatarUrl,
     language: language,
@@ -63,6 +66,7 @@ class UserModel with _$UserModel {
       'is_onboarded': isOnboarded,
       'role': role,
     };
+    if (username != null) json['username'] = username;
     if (phone != null) json['phone'] = phone;
     if (avatarUrl != null) json['avatar_url'] = avatarUrl;
     return json;
@@ -75,6 +79,7 @@ class UserModel with _$UserModel {
       'is_onboarded': isOnboarded,
       'role': role,
     };
+    if (username != null) json['username'] = username;
     if (phone != null) json['phone'] = phone;
     if (avatarUrl != null) json['avatar_url'] = avatarUrl;
     return json;

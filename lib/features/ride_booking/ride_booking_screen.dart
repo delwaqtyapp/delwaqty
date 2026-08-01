@@ -45,7 +45,9 @@ class _RideBookingPageState extends ConsumerState<RideBookingPage>
   String _money(BuildContext context, double amount) {
     final l10n = AppLocalizations.of(context);
     return l10n.amountWithCurrency(
-        amount.toStringAsFixed(0), l10n.currencySymbol);
+      amount.toStringAsFixed(0),
+      l10n.currencySymbol,
+    );
   }
 
   GeoPoint? _searchOrigin() {
@@ -58,9 +60,12 @@ class _RideBookingPageState extends ConsumerState<RideBookingPage>
     return null;
   }
 
-  void _useCurrentLocation() {
+  Future<void> _useCurrentLocation() async {
     final l10n = AppLocalizations.of(context);
-    final value = ref.read(userLocationProvider).valueOrNull;
+    final value = await ref
+        .read(userLocationProvider.notifier)
+        .refreshDeepLocked();
+    if (!context.mounted) return;
     if (value != null) {
       final address = value.detailedAddress.isNotEmpty
           ? value.detailedAddress
@@ -69,6 +74,15 @@ class _RideBookingPageState extends ConsumerState<RideBookingPage>
       ref
           .read(rideBookingProvider.notifier)
           .setPickup(address, value.latitude, value.longitude);
+      final accuracy = value.accuracyMeters;
+      if (accuracy != null && accuracy > precisionTargetMeters) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(l10n.accuracyInsufficient),
+            backgroundColor: Theme.of(context).colorScheme.error,
+          ),
+        );
+      }
     }
   }
 
@@ -81,10 +95,13 @@ class _RideBookingPageState extends ConsumerState<RideBookingPage>
       ),
     );
     if (result == null || !context.mounted) return;
-    final address =
-        result.formattedAddress.isNotEmpty ? result.formattedAddress : result.name;
+    final address = result.formattedAddress.isNotEmpty
+        ? result.formattedAddress
+        : result.name;
     _dropoffController.text = address;
-    ref.read(rideBookingProvider.notifier).setDropoff(
+    ref
+        .read(rideBookingProvider.notifier)
+        .setDropoff(
           address,
           result.location.latitude,
           result.location.longitude,
@@ -93,7 +110,9 @@ class _RideBookingPageState extends ConsumerState<RideBookingPage>
 
   void _applySavedPlace(SavedPlace place) {
     _dropoffController.text = place.address;
-    ref.read(rideBookingProvider.notifier).setDropoff(
+    ref
+        .read(rideBookingProvider.notifier)
+        .setDropoff(
           place.address,
           place.location.latitude,
           place.location.longitude,
@@ -107,7 +126,9 @@ class _RideBookingPageState extends ConsumerState<RideBookingPage>
     if (ride == null || !context.mounted) return;
 
     final booking = ref.read(rideBookingProvider);
-    final drivers = await ref.read(rideRepositoryProvider).findNearbyDrivers(
+    final drivers = await ref
+        .read(rideRepositoryProvider)
+        .findNearbyDrivers(
           latitude: booking.pickupLatitude!,
           longitude: booking.pickupLongitude!,
           rideType: ride.rideType,
@@ -119,7 +140,9 @@ class _RideBookingPageState extends ConsumerState<RideBookingPage>
         SnackBar(
           content: Text(l10n.noDriversFound),
           behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
         ),
       );
     }
@@ -199,66 +222,85 @@ class _RideBookingPageState extends ConsumerState<RideBookingPage>
                           ],
                         ),
                       ),
-                  if (booking.hasPickup)
-                    SliverToBoxAdapter(
-                      child: Padding(
-                        padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
-                        child: ClipRRect(
-                          borderRadius:
-                              BorderRadius.circular(RideBookingTheme.cardRadius),
-                          child: RideMap(
-                            pickup: LatLng(booking.pickupLatitude!,
-                                booking.pickupLongitude!),
-                            dropoff: booking.hasDropoff
-                                ? LatLng(booking.dropoffLatitude!,
-                                    booking.dropoffLongitude!)
-                                : null,
-                            height: 180,
-                          ),
-                        ),
-                      ),
-                    ),
-                  const SliverToBoxAdapter(
-                      child: SizedBox(height: RideBookingTheme.sectionSpacing)),
-                  SliverToBoxAdapter(
-                    child: _buildQuickDestinations(l10n, locationAsync),
-                  ),
-                  if (booking.step == BookingStep.review) ...[
-                    const SliverToBoxAdapter(
-                        child:
-                            SizedBox(height: RideBookingTheme.sectionSpacing)),
-                    if (booking.isEstimating)
-                      const SliverToBoxAdapter(
-                        child: Padding(
-                          padding: EdgeInsets.all(24),
-                          child: Center(
-                            child: CircularProgressIndicator(
-                              color: RideBookingTheme.primaryPurple,
+                      if (booking.hasPickup)
+                        SliverToBoxAdapter(
+                          child: Padding(
+                            padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(
+                                RideBookingTheme.cardRadius,
+                              ),
+                              child: RideMap(
+                                pickup: LatLng(
+                                  booking.pickupLatitude!,
+                                  booking.pickupLongitude!,
+                                ),
+                                dropoff: booking.hasDropoff
+                                    ? LatLng(
+                                        booking.dropoffLatitude!,
+                                        booking.dropoffLongitude!,
+                                      )
+                                    : null,
+                                height: 180,
+                              ),
                             ),
                           ),
                         ),
-                      )
-                    else if (booking.quotes.isNotEmpty)
+                      const SliverToBoxAdapter(
+                        child: SizedBox(
+                          height: RideBookingTheme.sectionSpacing,
+                        ),
+                      ),
                       SliverToBoxAdapter(
-                          child: _buildReviewSection(l10n, booking)),
-                  ],
-                  const SliverToBoxAdapter(
-                      child: SizedBox(height: RideBookingTheme.sectionSpacing)),
-                  SliverToBoxAdapter(child: _buildRecentSection(l10n)),
-                  const SliverToBoxAdapter(
-                      child: SizedBox(height: RideBookingTheme.sectionSpacing)),
-                  const SliverToBoxAdapter(
-                    child:
-                        Padding(padding: EdgeInsets.symmetric(horizontal: 20), child: SafetyCard()),
+                        child: _buildQuickDestinations(l10n, locationAsync),
+                      ),
+                      if (booking.step == BookingStep.review) ...[
+                        const SliverToBoxAdapter(
+                          child: SizedBox(
+                            height: RideBookingTheme.sectionSpacing,
+                          ),
+                        ),
+                        if (booking.isEstimating)
+                          const SliverToBoxAdapter(
+                            child: Padding(
+                              padding: EdgeInsets.all(24),
+                              child: Center(
+                                child: CircularProgressIndicator(
+                                  color: RideBookingTheme.primaryPurple,
+                                ),
+                              ),
+                            ),
+                          )
+                        else if (booking.quotes.isNotEmpty)
+                          SliverToBoxAdapter(
+                            child: _buildReviewSection(l10n, booking),
+                          ),
+                      ],
+                      const SliverToBoxAdapter(
+                        child: SizedBox(
+                          height: RideBookingTheme.sectionSpacing,
+                        ),
+                      ),
+                      SliverToBoxAdapter(child: _buildRecentSection(l10n)),
+                      const SliverToBoxAdapter(
+                        child: SizedBox(
+                          height: RideBookingTheme.sectionSpacing,
+                        ),
+                      ),
+                      const SliverToBoxAdapter(
+                        child: Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 20),
+                          child: SafetyCard(),
+                        ),
+                      ),
+                      const SliverToBoxAdapter(child: SizedBox(height: 24)),
+                    ],
                   ),
-                  const SliverToBoxAdapter(child: SizedBox(height: 24)),
-                ],
-              ),
+                ),
+                _buildBottomBar(l10n, booking),
+              ],
             ),
-            _buildBottomBar(l10n, booking),
-          ],
-        ),
-      ),
+          ),
         ],
       ),
     );
@@ -287,7 +329,9 @@ class _RideBookingPageState extends ConsumerState<RideBookingPage>
   }
 
   Widget _buildQuickDestinations(
-      AppLocalizations l10n, AsyncValue<UserLocation?> locationAsync) {
+    AppLocalizations l10n,
+    AsyncValue<UserLocation?> locationAsync,
+  ) {
     final savedAsync = ref.watch(savedPlacesProvider);
     final places = savedAsync.valueOrNull ?? const <SavedPlace>[];
     SavedPlace? find(SavedPlaceType t) {
@@ -449,8 +493,9 @@ class _RideBookingPageState extends ConsumerState<RideBookingPage>
             boxShadow: isSelected
                 ? [
                     BoxShadow(
-                      color:
-                          RideBookingTheme.primaryPurple.withValues(alpha: 0.15),
+                      color: RideBookingTheme.primaryPurple.withValues(
+                        alpha: 0.15,
+                      ),
                       blurRadius: 12,
                       offset: const Offset(0, 4),
                     ),
@@ -494,8 +539,11 @@ class _RideBookingPageState extends ConsumerState<RideBookingPage>
                           ),
                         ),
                         const SizedBox(width: 8),
-                        Icon(Icons.person_rounded,
-                            size: 13, color: RideBookingTheme.whiteAlpha40),
+                        Icon(
+                          Icons.person_rounded,
+                          size: 13,
+                          color: RideBookingTheme.whiteAlpha40,
+                        ),
                         Text(
                           '${quote.rideType.passengerCapacity}',
                           style: const TextStyle(
@@ -505,8 +553,11 @@ class _RideBookingPageState extends ConsumerState<RideBookingPage>
                         ),
                         if (quote.rideType.luggageCapacity > 0) ...[
                           const SizedBox(width: 6),
-                          Icon(Icons.luggage_rounded,
-                              size: 13, color: RideBookingTheme.whiteAlpha40),
+                          Icon(
+                            Icons.luggage_rounded,
+                            size: 13,
+                            color: RideBookingTheme.whiteAlpha40,
+                          ),
                           Text(
                             '${quote.rideType.luggageCapacity}',
                             style: const TextStyle(
@@ -559,20 +610,23 @@ class _RideBookingPageState extends ConsumerState<RideBookingPage>
       padding: RideBookingTheme.screenPadding,
       child: hasPromo
           ? Container(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
               decoration: BoxDecoration(
                 color: const Color(0xFF34C759).withValues(alpha: 0.08),
-                borderRadius:
-                    BorderRadius.circular(RideBookingTheme.chipRadius),
+                borderRadius: BorderRadius.circular(
+                  RideBookingTheme.chipRadius,
+                ),
                 border: Border.all(
                   color: const Color(0xFF34C759).withValues(alpha: 0.3),
                 ),
               ),
               child: Row(
                 children: [
-                  const Icon(Icons.local_offer_rounded,
-                      color: Color(0xFF34C759), size: 18),
+                  const Icon(
+                    Icons.local_offer_rounded,
+                    color: Color(0xFF34C759),
+                    size: 18,
+                  ),
                   const SizedBox(width: 10),
                   Expanded(
                     child: Text(
@@ -589,8 +643,11 @@ class _RideBookingPageState extends ConsumerState<RideBookingPage>
                       _promoController.clear();
                       ref.read(rideBookingProvider.notifier).clearPromo();
                     },
-                    child: const Icon(Icons.close_rounded,
-                        size: 18, color: RideBookingTheme.whiteAlpha40),
+                    child: const Icon(
+                      Icons.close_rounded,
+                      size: 18,
+                      color: RideBookingTheme.whiteAlpha40,
+                    ),
                   ),
                 ],
               ),
@@ -610,23 +667,30 @@ class _RideBookingPageState extends ConsumerState<RideBookingPage>
                       hintStyle: const TextStyle(
                         color: RideBookingTheme.whiteAlpha40,
                       ),
-                      prefixIcon: const Icon(Icons.local_offer_outlined,
-                          size: 20, color: RideBookingTheme.whiteAlpha40),
+                      prefixIcon: const Icon(
+                        Icons.local_offer_outlined,
+                        size: 20,
+                        color: RideBookingTheme.whiteAlpha40,
+                      ),
                       isDense: true,
                       filled: true,
                       fillColor: RideBookingTheme.cardBg,
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(
-                            RideBookingTheme.chipRadius),
+                          RideBookingTheme.chipRadius,
+                        ),
                         borderSide: BorderSide.none,
                       ),
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(
-                            RideBookingTheme.chipRadius),
+                          RideBookingTheme.chipRadius,
+                        ),
                         borderSide: BorderSide.none,
                       ),
                       contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 14, vertical: 12),
+                        horizontal: 14,
+                        vertical: 12,
+                      ),
                     ),
                   ),
                 ),
@@ -637,11 +701,14 @@ class _RideBookingPageState extends ConsumerState<RideBookingPage>
                       .applyPromo(_promoController.text),
                   child: Container(
                     padding: const EdgeInsets.symmetric(
-                        horizontal: 16, vertical: 12),
+                      horizontal: 16,
+                      vertical: 12,
+                    ),
                     decoration: BoxDecoration(
                       gradient: RideBookingTheme.primaryGradient,
                       borderRadius: BorderRadius.circular(
-                          RideBookingTheme.chipRadius),
+                        RideBookingTheme.chipRadius,
+                      ),
                     ),
                     child: Text(
                       l10n.applyPromo,
@@ -658,8 +725,7 @@ class _RideBookingPageState extends ConsumerState<RideBookingPage>
     );
   }
 
-  Widget _buildFareBreakdown(
-      AppLocalizations l10n, RideBookingState booking) {
+  Widget _buildFareBreakdown(AppLocalizations l10n, RideBookingState booking) {
     final quote = booking.selectedQuote;
     if (quote == null) return const SizedBox.shrink();
 
@@ -669,10 +735,8 @@ class _RideBookingPageState extends ConsumerState<RideBookingPage>
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: RideBookingTheme.cardBg,
-          borderRadius:
-              BorderRadius.circular(RideBookingTheme.innerRadius),
-          border: Border.all(
-              color: RideBookingTheme.whiteAlpha08, width: 1),
+          borderRadius: BorderRadius.circular(RideBookingTheme.innerRadius),
+          border: Border.all(color: RideBookingTheme.whiteAlpha08, width: 1),
         ),
         child: Column(
           children: [
@@ -698,18 +762,17 @@ class _RideBookingPageState extends ConsumerState<RideBookingPage>
             ),
             const SizedBox(height: 12),
             _fareRow(l10n.baseFare, _money(context, quote.baseFare)),
-            _fareRow(
-                l10n.distanceFare, _money(context, quote.distanceFare)),
+            _fareRow(l10n.distanceFare, _money(context, quote.distanceFare)),
             _fareRow(l10n.timeFare, _money(context, quote.timeFare)),
             if (booking.promoDiscount > 0)
               _fareRow(
-                  l10n.discount,
-                  '-${_money(context, booking.promoDiscount)}',
-                  highlight: true),
+                l10n.discount,
+                '-${_money(context, booking.promoDiscount)}',
+                highlight: true,
+              ),
             const Padding(
               padding: EdgeInsets.symmetric(vertical: 8),
-              child: Divider(
-                  color: RideBookingTheme.whiteAlpha08, height: 1),
+              child: Divider(color: RideBookingTheme.whiteAlpha08, height: 1),
             ),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -778,7 +841,9 @@ class _RideBookingPageState extends ConsumerState<RideBookingPage>
             icon: Icons.history_rounded,
             onTap: () {
               _dropoffController.text = r.secondaryText;
-              ref.read(rideBookingProvider.notifier).setDropoff(
+              ref
+                  .read(rideBookingProvider.notifier)
+                  .setDropoff(
                     r.secondaryText,
                     r.location.latitude,
                     r.location.longitude,
@@ -794,8 +859,8 @@ class _RideBookingPageState extends ConsumerState<RideBookingPage>
   }
 
   Widget _buildBottomBar(AppLocalizations l10n, RideBookingState booking) {
-    final bool isReview = booking.step == BookingStep.review &&
-        booking.selectedQuote != null;
+    final bool isReview =
+        booking.step == BookingStep.review && booking.selectedQuote != null;
 
     final String ctaText;
     final VoidCallback? ctaAction;
@@ -812,8 +877,9 @@ class _RideBookingPageState extends ConsumerState<RideBookingPage>
     }
 
     return Container(
-      padding: RideBookingTheme.screenPadding
-          .add(const EdgeInsets.only(top: 10, bottom: 12)),
+      padding: RideBookingTheme.screenPadding.add(
+        const EdgeInsets.only(top: 10, bottom: 12),
+      ),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topCenter,

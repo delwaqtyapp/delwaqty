@@ -43,9 +43,8 @@ class _AdminDashboardPageState extends ConsumerState<AdminDashboardPage> {
                   AnimatedFadeIn(
                     child: Text(
                       l10n.adminDashboard,
-                      style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
+                      style: Theme.of(context).textTheme.headlineMedium
+                          ?.copyWith(fontWeight: FontWeight.bold),
                     ),
                   ),
                   IconButton(
@@ -62,9 +61,9 @@ class _AdminDashboardPageState extends ConsumerState<AdminDashboardPage> {
                 delay: const Duration(milliseconds: 80),
                 child: Text(
                   l10n.platformOverview,
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: cs.onSurfaceVariant,
-                  ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodyMedium?.copyWith(color: cs.onSurfaceVariant),
                 ),
               ),
               const SizedBox(height: 20),
@@ -176,7 +175,11 @@ class _AdminDashboardPageState extends ConsumerState<AdminDashboardPage> {
   ) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        final crossAxisCount = constraints.maxWidth > 900 ? 4 : constraints.maxWidth > 600 ? 3 : 2;
+        final crossAxisCount = constraints.maxWidth > 900
+            ? 4
+            : constraints.maxWidth > 600
+            ? 3
+            : 2;
         return GridView.count(
           crossAxisCount: crossAxisCount,
           shrinkWrap: true,
@@ -247,24 +250,93 @@ class _AdminDashboardPageState extends ConsumerState<AdminDashboardPage> {
     );
   }
 
-  Widget _buildQuickActionsGrid(BuildContext context, AppLocalizations l10n, ColorScheme cs) {
+  Widget _buildQuickActionsGrid(
+    BuildContext context,
+    AppLocalizations l10n,
+    ColorScheme cs,
+  ) {
     final actions = [
-      _QuickActionData(l10n.userManagement, Icons.people_outline_rounded, const Color(0xFF4A90D9), '/admin/users'),
-      _QuickActionData(l10n.merchantManagement, Icons.store_outlined, const Color(0xFF34C759), '/admin/merchants'),
-      _QuickActionData(l10n.orderManagement, Icons.receipt_long_rounded, const Color(0xFFFF9500), '/admin/orders'),
-      _QuickActionData(l10n.admin, Icons.directions_car_rounded, const Color(0xFF007AFF), '/admin/drivers'),
-      _QuickActionData(l10n.delivery, Icons.inventory_2_rounded, const Color(0xFFFF6482), '/admin/deliveries'),
-      _QuickActionData(l10n.complaintsManagement, Icons.warning_amber_rounded, const Color(0xFFFF3B30), '/admin/complaints'),
-      _QuickActionData(l10n.sanctionsManagement, Icons.gavel_rounded, const Color(0xFFFF9500), '/admin/sanctions'),
-      _QuickActionData(l10n.liveTracking, Icons.map_rounded, const Color(0xFF00C7BE), '/admin/live-tracking'),
-      _QuickActionData(l10n.supportChat, Icons.chat_bubble_rounded, const Color(0xFF34C759), '/admin/support-chat'),
-      _QuickActionData(l10n.settings, Icons.settings_rounded, const Color(0xFFAF52DE), '/admin/settings'),
-      _QuickActionData(l10n.analytics, Icons.analytics_rounded, const Color(0xFF5856D6), '/admin/analytics'),
+      _QuickActionData(
+        l10n.userManagement,
+        Icons.people_outline_rounded,
+        const Color(0xFF4A90D9),
+        '/admin/users',
+      ),
+      _QuickActionData(
+        l10n.merchantManagement,
+        Icons.store_outlined,
+        const Color(0xFF34C759),
+        '/admin/merchants',
+      ),
+      _QuickActionData(
+        l10n.orderManagement,
+        Icons.receipt_long_rounded,
+        const Color(0xFFFF9500),
+        '/admin/orders',
+      ),
+      _QuickActionData(
+        l10n.admin,
+        Icons.directions_car_rounded,
+        const Color(0xFF007AFF),
+        '/admin/drivers',
+      ),
+      _QuickActionData(
+        l10n.delivery,
+        Icons.inventory_2_rounded,
+        const Color(0xFFFF6482),
+        '/admin/deliveries',
+      ),
+      _QuickActionData(
+        l10n.complaintsManagement,
+        Icons.warning_amber_rounded,
+        const Color(0xFFFF3B30),
+        '/admin/complaints',
+      ),
+      _QuickActionData(
+        l10n.sanctionsManagement,
+        Icons.gavel_rounded,
+        const Color(0xFFFF9500),
+        '/admin/sanctions',
+      ),
+      _QuickActionData(
+        l10n.liveTracking,
+        Icons.map_rounded,
+        const Color(0xFF00C7BE),
+        '/admin/live-tracking',
+      ),
+      _QuickActionData(
+        l10n.supportChat,
+        Icons.chat_bubble_rounded,
+        const Color(0xFF34C759),
+        '/admin/support-chat',
+      ),
+      _QuickActionData(
+        l10n.settings,
+        Icons.settings_rounded,
+        const Color(0xFFAF52DE),
+        '/admin/settings',
+      ),
+      _QuickActionData(
+        l10n.analytics,
+        Icons.analytics_rounded,
+        const Color(0xFF5856D6),
+        '/admin/analytics',
+      ),
+      _QuickActionData(
+        l10n.pushNotificationsTitle,
+        Icons.notifications_active_rounded,
+        const Color(0xFF34C759),
+        '/admin/push-notifications',
+      ),
     ];
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        final crossAxisCount = constraints.maxWidth > 900 ? 4 : constraints.maxWidth > 600 ? 4 : 3;
+        final crossAxisCount = constraints.maxWidth > 900
+            ? 4
+            : constraints.maxWidth > 600
+            ? 4
+            : 3;
         return GridView.builder(
           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: crossAxisCount,
@@ -339,17 +411,17 @@ class _StatGlassCard extends StatelessWidget {
                 fit: BoxFit.scaleDown,
                 child: Text(
                   value,
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
                 ),
               ),
               const SizedBox(height: 2),
               Text(
                 title,
-                style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                  color: cs.onSurfaceVariant,
-                ),
+                style: Theme.of(
+                  context,
+                ).textTheme.labelSmall?.copyWith(color: cs.onSurfaceVariant),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
@@ -393,9 +465,9 @@ class _QuickActionCard extends StatelessWidget {
             const SizedBox(height: 6),
             Text(
               data.label,
-              style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.labelSmall?.copyWith(fontWeight: FontWeight.w600),
               textAlign: TextAlign.center,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
@@ -444,18 +516,18 @@ class _ActivityGlassTile extends StatelessWidget {
               children: [
                 Text(
                   activity.action,
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
                 const SizedBox(height: 2),
                 Text(
                   '${activity.resource} · $timeText',
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: cs.onSurfaceVariant,
-                  ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodySmall?.copyWith(color: cs.onSurfaceVariant),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -470,11 +542,15 @@ class _ActivityGlassTile extends StatelessWidget {
 
   IconData _getActivityIcon(String action) {
     final a = action.toLowerCase();
-    if (a.contains('create') || a.contains('register')) return Icons.person_add_rounded;
+    if (a.contains('create') || a.contains('register'))
+      return Icons.person_add_rounded;
     if (a.contains('order')) return Icons.shopping_cart_rounded;
-    if (a.contains('dispute') || a.contains('report')) return Icons.warning_amber_rounded;
-    if (a.contains('payout') || a.contains('payment')) return Icons.payments_rounded;
-    if (a.contains('ride') || a.contains('trip')) return Icons.directions_car_rounded;
+    if (a.contains('dispute') || a.contains('report'))
+      return Icons.warning_amber_rounded;
+    if (a.contains('payout') || a.contains('payment'))
+      return Icons.payments_rounded;
+    if (a.contains('ride') || a.contains('trip'))
+      return Icons.directions_car_rounded;
     if (a.contains('delivery')) return Icons.inventory_2_rounded;
     if (a.contains('driver')) return Icons.person_rounded;
     return Icons.info_outline_rounded;
@@ -482,11 +558,15 @@ class _ActivityGlassTile extends StatelessWidget {
 
   Color _getActivityColor(String action) {
     final a = action.toLowerCase();
-    if (a.contains('create') || a.contains('register')) return const Color(0xFF4A90D9);
+    if (a.contains('create') || a.contains('register'))
+      return const Color(0xFF4A90D9);
     if (a.contains('order')) return const Color(0xFFFF9500);
-    if (a.contains('dispute') || a.contains('report')) return const Color(0xFFFF3B30);
-    if (a.contains('payout') || a.contains('payment')) return const Color(0xFF34C759);
-    if (a.contains('ride') || a.contains('trip')) return const Color(0xFF00C7BE);
+    if (a.contains('dispute') || a.contains('report'))
+      return const Color(0xFFFF3B30);
+    if (a.contains('payout') || a.contains('payment'))
+      return const Color(0xFF34C759);
+    if (a.contains('ride') || a.contains('trip'))
+      return const Color(0xFF00C7BE);
     if (a.contains('delivery')) return const Color(0xFFFF6482);
     if (a.contains('driver')) return const Color(0xFF007AFF);
     return cs.onSurfaceVariant;

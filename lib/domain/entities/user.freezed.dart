@@ -24,6 +24,7 @@ mixin _$User {
   String get id => throw _privateConstructorUsedError;
   String get email => throw _privateConstructorUsedError;
   String? get fullName => throw _privateConstructorUsedError;
+  String? get username => throw _privateConstructorUsedError;
   String? get phone => throw _privateConstructorUsedError;
   String? get avatarUrl => throw _privateConstructorUsedError;
   String get language => throw _privateConstructorUsedError;
@@ -50,6 +51,7 @@ abstract class $UserCopyWith<$Res> {
     String id,
     String email,
     String? fullName,
+    String? username,
     String? phone,
     String? avatarUrl,
     String language,
@@ -78,6 +80,7 @@ class _$UserCopyWithImpl<$Res, $Val extends User>
     Object? id = null,
     Object? email = null,
     Object? fullName = freezed,
+    Object? username = freezed,
     Object? phone = freezed,
     Object? avatarUrl = freezed,
     Object? language = null,
@@ -99,6 +102,10 @@ class _$UserCopyWithImpl<$Res, $Val extends User>
             fullName: freezed == fullName
                 ? _value.fullName
                 : fullName // ignore: cast_nullable_to_non_nullable
+                      as String?,
+            username: freezed == username
+                ? _value.username
+                : username // ignore: cast_nullable_to_non_nullable
                       as String?,
             phone: freezed == phone
                 ? _value.phone
@@ -146,6 +153,7 @@ abstract class _$$UserImplCopyWith<$Res> implements $UserCopyWith<$Res> {
     String id,
     String email,
     String? fullName,
+    String? username,
     String? phone,
     String? avatarUrl,
     String language,
@@ -171,6 +179,7 @@ class __$$UserImplCopyWithImpl<$Res>
     Object? id = null,
     Object? email = null,
     Object? fullName = freezed,
+    Object? username = freezed,
     Object? phone = freezed,
     Object? avatarUrl = freezed,
     Object? language = null,
@@ -192,6 +201,10 @@ class __$$UserImplCopyWithImpl<$Res>
         fullName: freezed == fullName
             ? _value.fullName
             : fullName // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        username: freezed == username
+            ? _value.username
+            : username // ignore: cast_nullable_to_non_nullable
                   as String?,
         phone: freezed == phone
             ? _value.phone
@@ -233,6 +246,7 @@ class _$UserImpl implements _User {
     required this.id,
     required this.email,
     this.fullName,
+    this.username,
     this.phone,
     this.avatarUrl,
     this.language = 'en',
@@ -251,6 +265,8 @@ class _$UserImpl implements _User {
   final String email;
   @override
   final String? fullName;
+  @override
+  final String? username;
   @override
   final String? phone;
   @override
@@ -271,7 +287,7 @@ class _$UserImpl implements _User {
 
   @override
   String toString() {
-    return 'User(id: $id, email: $email, fullName: $fullName, phone: $phone, avatarUrl: $avatarUrl, language: $language, isOnboarded: $isOnboarded, role: $role, createdAt: $createdAt, updatedAt: $updatedAt)';
+    return 'User(id: $id, email: $email, fullName: $fullName, username: $username, phone: $phone, avatarUrl: $avatarUrl, language: $language, isOnboarded: $isOnboarded, role: $role, createdAt: $createdAt, updatedAt: $updatedAt)';
   }
 
   @override
@@ -283,6 +299,8 @@ class _$UserImpl implements _User {
             (identical(other.email, email) || other.email == email) &&
             (identical(other.fullName, fullName) ||
                 other.fullName == fullName) &&
+            (identical(other.username, username) ||
+                other.username == username) &&
             (identical(other.phone, phone) || other.phone == phone) &&
             (identical(other.avatarUrl, avatarUrl) ||
                 other.avatarUrl == avatarUrl) &&
@@ -304,6 +322,7 @@ class _$UserImpl implements _User {
     id,
     email,
     fullName,
+    username,
     phone,
     avatarUrl,
     language,
@@ -332,6 +351,7 @@ abstract class _User implements User {
     required final String id,
     required final String email,
     final String? fullName,
+    final String? username,
     final String? phone,
     final String? avatarUrl,
     final String language,
@@ -349,6 +369,8 @@ abstract class _User implements User {
   String get email;
   @override
   String? get fullName;
+  @override
+  String? get username;
   @override
   String? get phone;
   @override

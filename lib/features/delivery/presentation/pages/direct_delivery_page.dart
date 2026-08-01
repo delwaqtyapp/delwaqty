@@ -79,12 +79,14 @@ class _DirectDeliveryPageState extends ConsumerState<DirectDeliveryPage> {
     }
 
     setState(() {
-      _items.add(_ShoppingItem(
-        name: name,
-        quantity: qty,
-        unit: _selectedUnit,
-        subUnit: subUnit,
-      ));
+      _items.add(
+        _ShoppingItem(
+          name: name,
+          quantity: qty,
+          unit: _selectedUnit,
+          subUnit: subUnit,
+        ),
+      );
       _itemNameController.clear();
       _itemQtyController.text = '1';
       _selectedUnit = 'none';
@@ -98,20 +100,29 @@ class _DirectDeliveryPageState extends ConsumerState<DirectDeliveryPage> {
   }
 
   Future<void> _useCurrentLocation() async {
+    final l10n = AppLocalizations.of(context);
     setState(() => _loadingLocation = true);
     try {
       final loc = ref.read(userLocationProvider.notifier);
-      await loc.refresh();
-      final value = ref.read(userLocationProvider).valueOrNull;
+      final value = await loc.refreshDeepLocked();
       if (value != null && mounted) {
         final address = value.detailedAddress.isNotEmpty
             ? value.detailedAddress
             : '${value.latitude}, ${value.longitude}';
         _dropoffController.text = address;
+        final accuracy = value.accuracyMeters;
+        if (accuracy != null && accuracy > precisionTargetMeters) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(l10n.accuracyInsufficient),
+              backgroundColor: Theme.of(context).colorScheme.error,
+            ),
+          );
+        }
       } else if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(AppLocalizations.of(context).locationError),
+            content: Text(l10n.locationError),
             backgroundColor: Theme.of(context).colorScheme.error,
           ),
         );
@@ -135,7 +146,9 @@ class _DirectDeliveryPageState extends ConsumerState<DirectDeliveryPage> {
       };
       return '${item.quantity} $label';
     }
-    if (item.unit == 'piece' && item.subUnit != null && item.subUnit != 'none') {
+    if (item.unit == 'piece' &&
+        item.subUnit != null &&
+        item.subUnit != 'none') {
       final label = switch (item.subUnit) {
         'box' => l10n.pieceUnitBox,
         'carton' => l10n.pieceUnitCarton,
@@ -199,11 +212,17 @@ class _DirectDeliveryPageState extends ConsumerState<DirectDeliveryPage> {
                     child: FilledButton(
                       onPressed: () {
                         if (_dropoffController.text.trim().isEmpty) {
-                          context.showAppSnackBar(l10n.deliverTo, isError: true);
+                          context.showAppSnackBar(
+                            l10n.deliverTo,
+                            isError: true,
+                          );
                           return;
                         }
                         if (_phoneController.text.trim().isEmpty) {
-                          context.showAppSnackBar(l10n.customerPhone, isError: true);
+                          context.showAppSnackBar(
+                            l10n.customerPhone,
+                            isError: true,
+                          );
                           return;
                         }
                         context.showAppSnackBar(l10n.success);
@@ -229,7 +248,11 @@ class _DirectDeliveryPageState extends ConsumerState<DirectDeliveryPage> {
     );
   }
 
-  Widget _buildDeliverToField(BuildContext context, AppLocalizations l10n, ColorScheme cs) {
+  Widget _buildDeliverToField(
+    BuildContext context,
+    AppLocalizations l10n,
+    ColorScheme cs,
+  ) {
     final theme = Theme.of(context);
     return Container(
       decoration: BoxDecoration(
@@ -243,7 +266,10 @@ class _DirectDeliveryPageState extends ConsumerState<DirectDeliveryPage> {
           labelText: l10n.deliverTo,
           labelStyle: AppTextStyles.bodyMedium.copyWith(color: cs.error),
           border: InputBorder.none,
-          contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 20,
+            vertical: 16,
+          ),
           suffixIcon: _loadingLocation
               ? const Padding(
                   padding: EdgeInsets.all(12),
@@ -264,7 +290,11 @@ class _DirectDeliveryPageState extends ConsumerState<DirectDeliveryPage> {
     );
   }
 
-  Widget _buildShoppingListSection(BuildContext context, AppLocalizations l10n, ColorScheme cs) {
+  Widget _buildShoppingListSection(
+    BuildContext context,
+    AppLocalizations l10n,
+    ColorScheme cs,
+  ) {
     final showSubUnits = _selectedUnit == 'kg' || _selectedUnit == 'piece';
     return Container(
       padding: const EdgeInsets.all(16),
@@ -279,7 +309,10 @@ class _DirectDeliveryPageState extends ConsumerState<DirectDeliveryPage> {
             children: [
               Icon(Icons.shopping_cart_outlined, color: cs.primary, size: 20),
               const SizedBox(width: 8),
-              Text(l10n.shoppingList, style: AppTextStyles.titleMedium.copyWith(color: cs.onSurface)),
+              Text(
+                l10n.shoppingList,
+                style: AppTextStyles.titleMedium.copyWith(color: cs.onSurface),
+              ),
             ],
           ),
           const SizedBox(height: 12),
@@ -300,14 +333,24 @@ class _DirectDeliveryPageState extends ConsumerState<DirectDeliveryPage> {
                       child: Text(
                         _itemDisplayText(item, l10n),
                         textAlign: TextAlign.center,
-                        style: AppTextStyles.bodyMedium.copyWith(fontSize: 13, color: cs.onSurfaceVariant),
+                        style: AppTextStyles.bodyMedium.copyWith(
+                          fontSize: 13,
+                          color: cs.onSurfaceVariant,
+                        ),
                       ),
                     ),
                     const SizedBox(width: 4),
                     IconButton(
                       onPressed: () => _removeItem(i),
-                      icon: Icon(Icons.close_rounded, size: 18, color: cs.error),
-                      constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                      icon: Icon(
+                        Icons.close_rounded,
+                        size: 18,
+                        color: cs.error,
+                      ),
+                      constraints: const BoxConstraints(
+                        minWidth: 32,
+                        minHeight: 32,
+                      ),
                     ),
                   ],
                 ),
@@ -336,7 +379,10 @@ class _DirectDeliveryPageState extends ConsumerState<DirectDeliveryPage> {
                 child: TextField(
                   controller: _itemQtyController,
                   focusNode: _qtyFocusNode,
-                  keyboardType: const TextInputType.numberWithOptions(signed: false, decimal: false),
+                  keyboardType: const TextInputType.numberWithOptions(
+                    signed: false,
+                    decimal: false,
+                  ),
                   inputFormatters: [
                     FilteringTextInputFormatter.digitsOnly,
                     LengthLimitingTextInputFormatter(4),
@@ -420,14 +466,38 @@ class _DirectDeliveryPageState extends ConsumerState<DirectDeliveryPage> {
                   isExpanded: true,
                   style: AppTextStyles.bodySmall.copyWith(color: cs.onSurface),
                   items: [
-                    DropdownMenuItem(value: 'none', child: Text(l10n.weightNone)),
-                    DropdownMenuItem(value: 'bundle', child: Text(l10n.weightBundle)),
-                    DropdownMenuItem(value: 'eighth', child: Text(l10n.weightEighth)),
-                    DropdownMenuItem(value: 'quarter', child: Text(l10n.weightQuarter)),
-                    DropdownMenuItem(value: 'third', child: Text(l10n.weightThird)),
-                    DropdownMenuItem(value: 'half', child: Text(l10n.weightHalf)),
-                    DropdownMenuItem(value: 'three_quarters', child: Text(l10n.weightThreeQuarters)),
-                    DropdownMenuItem(value: 'fifth', child: Text(l10n.weightFifth)),
+                    DropdownMenuItem(
+                      value: 'none',
+                      child: Text(l10n.weightNone),
+                    ),
+                    DropdownMenuItem(
+                      value: 'bundle',
+                      child: Text(l10n.weightBundle),
+                    ),
+                    DropdownMenuItem(
+                      value: 'eighth',
+                      child: Text(l10n.weightEighth),
+                    ),
+                    DropdownMenuItem(
+                      value: 'quarter',
+                      child: Text(l10n.weightQuarter),
+                    ),
+                    DropdownMenuItem(
+                      value: 'third',
+                      child: Text(l10n.weightThird),
+                    ),
+                    DropdownMenuItem(
+                      value: 'half',
+                      child: Text(l10n.weightHalf),
+                    ),
+                    DropdownMenuItem(
+                      value: 'three_quarters',
+                      child: Text(l10n.weightThreeQuarters),
+                    ),
+                    DropdownMenuItem(
+                      value: 'fifth',
+                      child: Text(l10n.weightFifth),
+                    ),
                   ],
                   onChanged: (v) {
                     if (v != null) setState(() => _selectedWeight = v);
@@ -459,9 +529,18 @@ class _DirectDeliveryPageState extends ConsumerState<DirectDeliveryPage> {
                 style: AppTextStyles.bodySmall.copyWith(color: cs.onSurface),
                 items: [
                   DropdownMenuItem(value: 'none', child: Text(l10n.unitNone)),
-                  DropdownMenuItem(value: 'box', child: Text(l10n.pieceUnitBox)),
-                  DropdownMenuItem(value: 'carton', child: Text(l10n.pieceUnitCarton)),
-                  DropdownMenuItem(value: 'liter', child: Text(l10n.pieceUnitLiter)),
+                  DropdownMenuItem(
+                    value: 'box',
+                    child: Text(l10n.pieceUnitBox),
+                  ),
+                  DropdownMenuItem(
+                    value: 'carton',
+                    child: Text(l10n.pieceUnitCarton),
+                  ),
+                  DropdownMenuItem(
+                    value: 'liter',
+                    child: Text(l10n.pieceUnitLiter),
+                  ),
                 ],
                 onChanged: (v) {
                   if (v != null) setState(() => _selectedPieceUnit = v);
@@ -474,7 +553,11 @@ class _DirectDeliveryPageState extends ConsumerState<DirectDeliveryPage> {
     );
   }
 
-  Widget _buildPhoneSection(BuildContext context, AppLocalizations l10n, ColorScheme cs) {
+  Widget _buildPhoneSection(
+    BuildContext context,
+    AppLocalizations l10n,
+    ColorScheme cs,
+  ) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -488,7 +571,10 @@ class _DirectDeliveryPageState extends ConsumerState<DirectDeliveryPage> {
             children: [
               Icon(Icons.phone_rounded, color: cs.primary, size: 20),
               const SizedBox(width: 8),
-              Text(l10n.customerPhone, style: AppTextStyles.titleMedium.copyWith(color: cs.onSurface)),
+              Text(
+                l10n.customerPhone,
+                style: AppTextStyles.titleMedium.copyWith(color: cs.onSurface),
+              ),
             ],
           ),
           const SizedBox(height: 10),
@@ -513,7 +599,10 @@ class _DirectDeliveryPageState extends ConsumerState<DirectDeliveryPage> {
                 onPressed: () {
                   if (_saveNumber) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text(l10n.numberSaved), backgroundColor: AppColors.successLight),
+                      SnackBar(
+                        content: Text(l10n.numberSaved),
+                        backgroundColor: AppColors.successLight,
+                      ),
                     );
                   }
                 },
@@ -528,7 +617,13 @@ class _DirectDeliveryPageState extends ConsumerState<DirectDeliveryPage> {
                 value: _saveNumber,
                 onChanged: (v) => setState(() => _saveNumber = v ?? true),
               ),
-              Text(l10n.saveNumber, style: AppTextStyles.bodyMedium.copyWith(fontSize: 13, color: cs.onSurfaceVariant)),
+              Text(
+                l10n.saveNumber,
+                style: AppTextStyles.bodyMedium.copyWith(
+                  fontSize: 13,
+                  color: cs.onSurfaceVariant,
+                ),
+              ),
             ],
           ),
         ],

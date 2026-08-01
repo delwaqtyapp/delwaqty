@@ -1,14 +1,72 @@
+import 'dart:convert';
+
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:delwaqty/services/logger/app_logger.dart';
 
-final pushNotificationServiceProvider = Provider<PushNotificationService>((ref) {
-  return PushNotificationService(
-    ref.watch(loggerProvider),
-  );
+final pushNotificationServiceProvider = Provider<PushNotificationService>((
+  ref,
+) {
+  return PushNotificationService(ref.watch(loggerProvider));
 });
+
+const _notificationChannelId = 'delwaqty_notifications';
+const _notificationChannelName = 'Delwaqty Notifications';
+const _notificationChannelDescription =
+    'Order updates, delivery tracking and service alerts';
+
+final FlutterLocalNotificationsPlugin _localNotifications =
+    FlutterLocalNotificationsPlugin();
+
+@pragma('vm:entry-point')
+Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  debugPrint('Background message: ${message.notification?.title}');
+  await _initLocalNotifications();
+  await _showNotification(message);
+}
+
+Future<void> _initLocalNotifications() async {
+  const initSettings = InitializationSettings(
+    android: AndroidInitializationSettings('@mipmap/ic_launcher'),
+    iOS: DarwinInitializationSettings(),
+  );
+  await _localNotifications.initialize(settings: initSettings);
+  await _localNotifications
+      .resolvePlatformSpecificImplementation<
+        AndroidFlutterLocalNotificationsPlugin
+      >()
+      ?.createNotificationChannel(
+        const AndroidNotificationChannel(
+          _notificationChannelId,
+          _notificationChannelName,
+          description: _notificationChannelDescription,
+          importance: Importance.high,
+        ),
+      );
+}
+
+Future<void> _showNotification(RemoteMessage message) async {
+  final notification = message.notification;
+  if (notification == null) return;
+  await _localNotifications.show(
+    id: notification.hashCode,
+    title: notification.title,
+    body: notification.body,
+    notificationDetails: const NotificationDetails(
+      android: AndroidNotificationDetails(
+        _notificationChannelId,
+        _notificationChannelName,
+        channelDescription: _notificationChannelDescription,
+        importance: Importance.high,
+        priority: Priority.high,
+      ),
+    ),
+    payload: jsonEncode(message.data),
+  );
+}
 
 class PushNotificationService {
   PushNotificationService(this._logger);
@@ -18,6 +76,8 @@ class PushNotificationService {
 
   Future<void> initialize() async {
     try {
+      await _initLocalNotifications();
+
       final settings = await _messaging.requestPermission(
         alert: true,
         badge: true,
@@ -72,18 +132,12 @@ class PushNotificationService {
 
   void _handleForegroundMessage(RemoteMessage message) {
     _logger.i('Foreground message: ${message.notification?.title}');
-    _showInAppNotification(message);
+    _showNotification(message);
   }
 
   void _handleBackgroundMessage(RemoteMessage message) {
-    _logger.i('Background message: ${message.notification?.title}');
+    _logger.i('Opened message: ${message.notification?.title}');
     _navigateFromPayload(message.data);
-  }
-
-  void _showInAppNotification(RemoteMessage message) {
-    final notification = message.notification;
-    if (notification == null) return;
-    debugPrint('In-app notification: ${notification.title} - ${notification.body}');
   }
 
   void _navigateFromPayload(Map<String, dynamic> data) {

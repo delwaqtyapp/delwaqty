@@ -7,6 +7,7 @@ import 'package:delwaqty/core/theme/app_theme.dart';
 import 'package:delwaqty/core/theme/theme_mode_provider.dart';
 import 'package:delwaqty/features/auth/presentation/auth_provider.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
+import 'package:delwaqty/services/push_notification/push_notification_service.dart';
 
 class App extends ConsumerStatefulWidget {
   const App({super.key});
@@ -23,6 +24,7 @@ class _AppState extends ConsumerState<App> {
       final authNotifier = ref.read(authStateProvider.notifier);
       authNotifier.checkAuthStatus();
       authNotifier.startAuthListener();
+      ref.read(pushNotificationServiceProvider).initialize();
     });
   }
 

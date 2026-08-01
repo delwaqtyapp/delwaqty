@@ -111,7 +111,7 @@ class _FloatingSidebarOverlayState extends State<FloatingSidebarOverlay>
     final st = Theme.of(context).extension<SidebarTheme>()!;
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
-    final sidebarWidth = screenWidth > 380 ? 330.0 : screenWidth - 40;
+    final sidebarWidth = (screenWidth * 0.72).clamp(260.0, 300.0);
     final bool isRtl = Directionality.of(context) == TextDirection.rtl;
 
     final userName = widget.authState is AuthAuthenticated
@@ -147,7 +147,7 @@ class _FloatingSidebarOverlayState extends State<FloatingSidebarOverlay>
             ),
           ),
           Positioned(
-            top: 70,
+            top: 56,
             right: isRtl ? 16 : null,
             left: isRtl ? null : 16,
             child: ScaleFadeAnimation(
@@ -157,7 +157,7 @@ class _FloatingSidebarOverlayState extends State<FloatingSidebarOverlay>
                 controller: _animation,
                 beginOffset: Offset(isRtl ? 20 : -20, -10),
                 child: SizedBox(
-                  width: sidebarWidth.clamp(290, 340),
+                  width: sidebarWidth.clamp(250, 300),
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(30),
                     child: BackdropFilter(
@@ -183,7 +183,7 @@ class _FloatingSidebarOverlayState extends State<FloatingSidebarOverlay>
                           ],
                         ),
                         constraints: BoxConstraints(
-                          maxHeight: screenHeight * 0.82,
+                          maxHeight: screenHeight * 0.78,
                         ),
                         child: SingleChildScrollView(
                           physics: const ClampingScrollPhysics(),

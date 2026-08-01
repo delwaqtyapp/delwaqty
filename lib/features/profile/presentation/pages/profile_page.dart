@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:delwaqty/core/extensions/context_extensions.dart';
 import 'package:delwaqty/core/localization/locale_provider.dart';
 import 'package:delwaqty/core/theme/theme_mode_provider.dart';
+import 'package:delwaqty/domain/entities/user.dart';
+import 'package:delwaqty/domain/usecases/profile/profile_usecases.dart';
 import 'package:delwaqty/features/auth/domain/auth_state.dart';
 import 'package:delwaqty/features/auth/presentation/auth_provider.dart';
 import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
@@ -25,10 +28,13 @@ class ProfilePage extends ConsumerWidget {
       return _buildGuestProfile(context, ref, l10n);
     }
 
-    final isAdmin = authState is AuthAuthenticated &&
+    final isAdmin =
+        authState is AuthAuthenticated &&
         (authState.user.role == 'admin' || authState.user.role == 'owner');
-    final isDriver = authState is AuthAuthenticated && authState.user.role == 'driver';
-    final isMerchant = authState is AuthAuthenticated && authState.user.role == 'merchant';
+    final isDriver =
+        authState is AuthAuthenticated && authState.user.role == 'driver';
+    final isMerchant =
+        authState is AuthAuthenticated && authState.user.role == 'merchant';
 
     return Scaffold(
       appBar: AppBar(
@@ -43,7 +49,9 @@ class ProfilePage extends ConsumerWidget {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          AnimatedFadeIn(child: _buildProfileHeader(context, authState, l10n)),
+          AnimatedFadeIn(
+            child: _buildProfileHeader(context, ref, authState, l10n),
+          ),
           const SizedBox(height: 24),
           AnimatedFadeIn(
             delay: const Duration(milliseconds: 100),
@@ -58,7 +66,13 @@ class ProfilePage extends ConsumerWidget {
             const SizedBox(height: 16),
             AnimatedFadeIn(
               delay: const Duration(milliseconds: 150),
-              child: _buildRolePortals(context, l10n, isAdmin, isDriver, isMerchant),
+              child: _buildRolePortals(
+                context,
+                l10n,
+                isAdmin,
+                isDriver,
+                isMerchant,
+              ),
             ),
           ],
           const SizedBox(height: 24),
@@ -122,8 +136,27 @@ class ProfilePage extends ConsumerWidget {
     );
   }
 
-  Widget _buildProfileHeader(BuildContext context, AuthState authState, AppLocalizations l10n) {
-    final user = authState is AuthAuthenticated ? authState.user : null;
+  Widget _buildProfileHeader(
+    BuildContext context,
+    WidgetRef ref,
+    AuthState authState,
+    AppLocalizations l10n,
+  ) {
+    final authUser = authState is AuthAuthenticated ? authState.user : null;
+    final userId = authUser?.id;
+    if (userId == null) {
+      return const SizedBox.shrink();
+    }
+    final profileAsync = ref.watch(watchProfileUseCaseProvider(userId));
+    final user = profileAsync.valueOrNull ?? authUser;
+    if (user == null) {
+      return const SizedBox.shrink();
+    }
+    final initial = (user.fullName?.isNotEmpty ?? false)
+        ? user.fullName![0].toUpperCase()
+        : (user.username?.isNotEmpty ?? false)
+        ? user.username![0].toUpperCase()
+        : 'U';
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
@@ -132,42 +165,253 @@ class ProfilePage extends ConsumerWidget {
       ),
       child: Column(
         children: [
-          Container(
-            width: 80,
-            height: 80,
-            decoration: BoxDecoration(
-              color: context.colorScheme.primary,
-              shape: BoxShape.circle,
-            ),
-            child: Center(
-              child: Text(
-                (user?.fullName?.isNotEmpty == true)
-                    ? user!.fullName![0].toUpperCase()
-                    : 'U',
-                style: context.textTheme.headlineMedium?.copyWith(
-                  color: context.colorScheme.onPrimary,
-                  fontWeight: FontWeight.bold,
+          Stack(
+            clipBehavior: Clip.none,
+            children: [
+              Container(
+                width: 96,
+                height: 96,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: context.colorScheme.primary,
+                  border: Border.all(
+                    color: context.colorScheme.onPrimary,
+                    width: 3,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: context.colorScheme.primary.withValues(alpha: 0.3),
+                      blurRadius: 16,
+                      offset: const Offset(0, 6),
+                    ),
+                  ],
+                ),
+                child: ClipOval(
+                  child: user.avatarUrl?.isNotEmpty == true
+                      ? Image.network(
+                          user.avatarUrl!,
+                          width: 96,
+                          height: 96,
+                          fit: BoxFit.cover,
+                          errorBuilder: (_, __, ___) =>
+                              _buildAvatarFallback(context, initial),
+                        )
+                      : _buildAvatarFallback(context, initial),
                 ),
               ),
-            ),
+              Positioned(
+                bottom: 0,
+                right: 0,
+                child: GestureDetector(
+                  onTap: () => _onChangePhoto(context, ref, userId, l10n),
+                  child: Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: context.colorScheme.primary,
+                      border: Border.all(
+                        color: context.colorScheme.surface,
+                        width: 2,
+                      ),
+                    ),
+                    child: Icon(
+                      Icons.camera_alt_rounded,
+                      size: 18,
+                      color: context.colorScheme.onPrimary,
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
           const SizedBox(height: 16),
           Text(
-            user?.fullName ?? l10n.user,
+            user.fullName ?? user.username ?? l10n.user,
             style: context.textTheme.titleLarge?.copyWith(
               fontWeight: FontWeight.bold,
             ),
+            textAlign: TextAlign.center,
           ),
+          if (user.username?.isNotEmpty == true) ...[
+            const SizedBox(height: 4),
+            Text(
+              '@${user.username}',
+              style: context.textTheme.bodyMedium?.copyWith(
+                color: context.colorScheme.primary,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
           const SizedBox(height: 4),
           Text(
-            user?.email ?? '',
+            user.email,
             style: context.textTheme.bodyMedium?.copyWith(
               color: context.colorScheme.onSurfaceVariant,
             ),
           ),
+          const SizedBox(height: 16),
+          OutlinedButton.icon(
+            onPressed: () => _showEditProfileDialog(context, ref, user, l10n),
+            icon: const Icon(Icons.edit_outlined, size: 18),
+            label: Text(l10n.editProfile),
+          ),
         ],
       ),
     );
+  }
+
+  Widget _buildAvatarFallback(BuildContext context, String initial) {
+    return Center(
+      child: Text(
+        initial,
+        style: context.textTheme.headlineMedium?.copyWith(
+          color: context.colorScheme.onPrimary,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+    );
+  }
+
+  Future<void> _onChangePhoto(
+    BuildContext context,
+    WidgetRef ref,
+    String userId,
+    AppLocalizations l10n,
+  ) async {
+    final source = await showModalBottomSheet<ImageSource>(
+      context: context,
+      builder: (context) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.photo_library_outlined),
+              title: Text(l10n.chooseFromGallery),
+              onTap: () => Navigator.of(context).pop(ImageSource.gallery),
+            ),
+            ListTile(
+              leading: const Icon(Icons.photo_camera_outlined),
+              title: Text(l10n.takePhoto),
+              onTap: () => Navigator.of(context).pop(ImageSource.camera),
+            ),
+          ],
+        ),
+      ),
+    );
+    if (source == null) return;
+
+    try {
+      final file = await ImagePicker().pickImage(
+        source: source,
+        imageQuality: 85,
+        maxWidth: 1024,
+      );
+      if (file == null) return;
+
+      final bytes = await file.readAsBytes();
+      final url = await ref
+          .read(uploadAvatarUseCaseProvider)
+          .call(
+            userId: userId,
+            bytes: bytes,
+            fileName: 'avatar_${DateTime.now().millisecondsSinceEpoch}.jpg',
+          );
+      await ref
+          .read(updateProfileUseCaseProvider)
+          .call(userId: userId, data: {'avatar_url': url});
+      ref.invalidate(watchProfileUseCaseProvider(userId));
+      if (context.mounted) {
+        context.showAppSnackBar(l10n.success);
+      }
+    } catch (e) {
+      if (context.mounted) {
+        context.showAppSnackBar(l10n.error);
+      }
+    }
+  }
+
+  Future<void> _showEditProfileDialog(
+    BuildContext context,
+    WidgetRef ref,
+    User user,
+    AppLocalizations l10n,
+  ) async {
+    final nameController = TextEditingController(text: user.fullName ?? '');
+    final usernameController = TextEditingController(text: user.username ?? '');
+    final phoneController = TextEditingController(text: user.phone ?? '');
+
+    final saved = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(l10n.editProfile),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: nameController,
+                decoration: InputDecoration(labelText: l10n.fullName),
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: usernameController,
+                decoration: InputDecoration(
+                  labelText: l10n.username,
+                  prefixText: '@',
+                ),
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: phoneController,
+                decoration: InputDecoration(labelText: l10n.phone),
+                keyboardType: TextInputType.phone,
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: Text(l10n.cancel),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: Text(l10n.saveChanges),
+          ),
+        ],
+      ),
+    );
+
+    nameController.dispose();
+    usernameController.dispose();
+    phoneController.dispose();
+
+    if (saved != true) return;
+
+    final data = <String, dynamic>{};
+    if (nameController.text.trim().isNotEmpty) {
+      data['full_name'] = nameController.text.trim();
+    }
+    data['username'] = usernameController.text.trim().isEmpty
+        ? null
+        : usernameController.text.trim();
+    data['phone'] = phoneController.text.trim().isEmpty
+        ? null
+        : phoneController.text.trim();
+
+    try {
+      await ref
+          .read(updateProfileUseCaseProvider)
+          .call(userId: user.id, data: data);
+      ref.invalidate(watchProfileUseCaseProvider(user.id));
+      if (context.mounted) {
+        context.showAppSnackBar(l10n.success);
+      }
+    } catch (e) {
+      if (context.mounted) {
+        context.showAppSnackBar(l10n.error);
+      }
+    }
   }
 
   Widget _buildSettingsSection(
@@ -218,7 +462,11 @@ class ProfilePage extends ConsumerWidget {
           ListTile(
             leading: const Icon(Icons.language_rounded),
             title: Text(l10n.language),
-            subtitle: Text(locale.languageCode == 'ar' ? l10n.arabicLanguageName : l10n.englishLanguageName),
+            subtitle: Text(
+              locale.languageCode == 'ar'
+                  ? l10n.arabicLanguageName
+                  : l10n.englishLanguageName,
+            ),
             trailing: const Icon(Icons.chevron_right_rounded),
             onTap: () => ref.read(localeProvider.notifier).toggleLocale(),
           ),
@@ -227,20 +475,24 @@ class ProfilePage extends ConsumerWidget {
     );
   }
 
-  Widget _buildOrdersAndInvoicesSection(BuildContext context, AppLocalizations l10n) {
+  Widget _buildOrdersAndInvoicesSection(
+    BuildContext context,
+    AppLocalizations l10n,
+  ) {
     final cs = Theme.of(context).colorScheme;
     return DecoratedBox(
       decoration: BoxDecoration(
         color: cs.surfaceContainerLowest,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: cs.outlineVariant.withValues(alpha: 0.5),
-        ),
+        border: Border.all(color: cs.outlineVariant.withValues(alpha: 0.5)),
       ),
       child: Column(
         children: [
           ListTile(
-            leading: Icon(Icons.receipt_long_rounded, color: AppColors.successLight),
+            leading: Icon(
+              Icons.receipt_long_rounded,
+              color: AppColors.successLight,
+            ),
             title: Text(l10n.invoice),
             subtitle: Text(l10n.invoiceDetails),
             trailing: const Icon(Icons.chevron_right_rounded),
@@ -276,7 +528,9 @@ class ProfilePage extends ConsumerWidget {
             label: Text(l10n.admin),
             style: FilledButton.styleFrom(
               padding: const EdgeInsets.symmetric(vertical: 16),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
             ),
           ),
           const SizedBox(height: 12),
@@ -288,7 +542,9 @@ class ProfilePage extends ConsumerWidget {
             label: Text(l10n.driverDashboard),
             style: FilledButton.styleFrom(
               padding: const EdgeInsets.symmetric(vertical: 16),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
             ),
           ),
           const SizedBox(height: 12),
@@ -300,7 +556,9 @@ class ProfilePage extends ConsumerWidget {
             label: Text(l10n.merchantDashboard),
             style: FilledButton.styleFrom(
               padding: const EdgeInsets.symmetric(vertical: 16),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
             ),
           ),
         ],
@@ -319,9 +577,7 @@ class ProfilePage extends ConsumerWidget {
           context: context,
           builder: (context) => AlertDialog(
             title: Text(l10n.logout),
-            content: Text(
-              l10n.areYouSureYouWantToLogout,
-            ),
+            content: Text(l10n.areYouSureYouWantToLogout),
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(context).pop(),

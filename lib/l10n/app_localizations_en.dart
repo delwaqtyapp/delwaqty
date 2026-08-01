@@ -2792,6 +2792,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get locationError => 'Could not get your location';
 
   @override
+  String get accuracyInsufficient =>
+      'Current accuracy is insufficient (1 m required). Move near a window or go to an open area and try again.';
+
+  @override
+  String get improvingAccuracy => 'Improving location accuracy...';
+
+  @override
+  String get retryLocation => 'Retry';
+
+  @override
   String get safetyHub => 'Safety Center';
 
   @override
@@ -3623,4 +3633,47 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get startSupportChatDescription =>
       'Start a conversation with the support team.';
+
+  @override
+  String get orderDirectly => 'Order Directly';
+
+  @override
+  String get editProfile => 'Edit Profile';
+
+  @override
+  String get username => 'Username';
+
+  @override
+  String get changePhoto => 'Change Photo';
+
+  @override
+  String get chooseFromGallery => 'Choose from Gallery';
+
+  @override
+  String get takePhoto => 'Take Photo';
+
+  @override
+  String get pushNotificationsTitle => 'Push Notifications';
+
+  @override
+  String get connectedDevices => 'Connected Devices';
+
+  @override
+  String get notificationTitle => 'Notification Title';
+
+  @override
+  String get notificationBody => 'Notification Message';
+
+  @override
+  String get targetTopic => 'Target Topic';
+
+  @override
+  String get sendPushGuide =>
+      'Compose your message, then send it from the Firebase Console or with the copied command.';
+
+  @override
+  String get copyCommand => 'Copy FCM Command';
+
+  @override
+  String get copiedToClipboard => 'Command copied to clipboard';
 }

@@ -105,12 +105,19 @@ class _SplashPageState extends ConsumerState<SplashPage>
         ),
         child: Stack(
           children: [
+            const Positioned.fill(
+              child: RepaintBoundary(
+                child: CustomPaint(
+                  painter: _GlowPainter(),
+                ),
+              ),
+            ),
             Positioned.fill(
               child: RepaintBoundary(
                 child: ValueListenableBuilder<double>(
                   valueListenable: _ambientTick,
                   builder: (context, progress, _) => CustomPaint(
-                    painter: _AmbientPainter(progress: progress),
+                    painter: _ParticlePainter(progress: progress),
                   ),
                 ),
               ),
@@ -323,13 +330,8 @@ class _SplashPageState extends ConsumerState<SplashPage>
 
 }
 
-class _AmbientPainter extends CustomPainter {
-  _AmbientPainter({required this.progress});
-
-  final double progress;
-
-  static final _particleCache = <_ParticleData>[];
-  static int _cacheSeed = -1;
+class _GlowPainter extends CustomPainter {
+  const _GlowPainter();
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -378,7 +380,22 @@ class _AmbientPainter extends CustomPainter {
           ],
         ),
     );
+  }
 
+  @override
+  bool shouldRepaint(covariant _GlowPainter oldDelegate) => false;
+}
+
+class _ParticlePainter extends CustomPainter {
+  _ParticlePainter({required this.progress});
+
+  final double progress;
+
+  static final _particleCache = <_ParticleData>[];
+  static int _cacheSeed = -1;
+
+  @override
+  void paint(Canvas canvas, Size size) {
     if (_cacheSeed != 7) {
       _particleCache.clear();
       final rng = math.Random(7);
@@ -413,7 +430,7 @@ class _AmbientPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant _AmbientPainter old) =>
+  bool shouldRepaint(covariant _ParticlePainter old) =>
       old.progress != progress;
 }
 

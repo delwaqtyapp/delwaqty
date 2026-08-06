@@ -559,11 +559,7 @@ class _LogoMark extends StatelessWidget {
       width: 46,
       height: 46,
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [AppColors.brandPurpleDeep, AppColors.brandViolet],
-        ),
+        color: Colors.white,
         borderRadius: BorderRadius.circular(14),
         boxShadow: const [
           BoxShadow(
@@ -573,13 +569,29 @@ class _LogoMark extends StatelessWidget {
           ),
         ],
       ),
-      child: Center(
-        child: Text(
-          AppLocalizations.of(context).appNameAr,
-          style: AppTextStyles.titleMedium.copyWith(
-            color: Colors.white,
-            fontWeight: FontWeight.w900,
-            fontSize: 17,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(14),
+        child: Image.asset(
+          'assets/logo app/logo.png',
+          fit: BoxFit.contain,
+          errorBuilder: (_, __, ___) => DecoratedBox(
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [AppColors.brandPurpleDeep, AppColors.brandViolet],
+              ),
+            ),
+            child: Center(
+              child: Text(
+                AppLocalizations.of(context).appNameAr,
+                style: AppTextStyles.titleMedium.copyWith(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w900,
+                  fontSize: 17,
+                ),
+              ),
+            ),
           ),
         ),
       ),

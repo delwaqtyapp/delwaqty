@@ -1,6 +1,8 @@
 import 'dart:async';
+import 'dart:typed_data';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:delwaqty/domain/enums/user_type.dart';
+import 'package:delwaqty/domain/entities/user.dart';
 import 'package:delwaqty/features/auth/domain/auth_state.dart';
 import 'package:delwaqty/domain/repositories/auth_repository.dart';
 import 'package:delwaqty/domain/usecases/auth/auth_usecases.dart';
@@ -82,7 +84,7 @@ class AuthStateNotifier extends Notifier<AuthState> {
       final session = await authRepo.getCurrentSession();
       if (session != null) {
         final user = await ref.read(getCurrentUserUseCaseProvider).call();
-        state = AuthState.authenticated(user: user);
+        state = _resolveAuthenticated(user);
       } else {
         state = const AuthState.unauthenticated();
       }
@@ -98,7 +100,7 @@ class AuthStateNotifier extends Notifier<AuthState> {
     try {
       await _signInUseCase(email: email, password: password);
       final user = await ref.read(getCurrentUserUseCaseProvider).call();
-      state = AuthState.authenticated(user: user);
+      state = _resolveAuthenticated(user);
     } catch (e) {
       _logger.e('Sign in failed', e);
       final failure = handleException(e);
@@ -112,6 +114,11 @@ class AuthStateNotifier extends Notifier<AuthState> {
     required String email,
     required String password,
     String? fullName,
+    UserType userType = UserType.customer,
+    Uint8List? idCardBytes,
+    String? idCardFileName,
+    Uint8List? profilePhotoBytes,
+    String? profilePhotoFileName,
   }) async {
     _isSignUpInProgress = true;
     state = const AuthState.loading();
@@ -120,6 +127,11 @@ class AuthStateNotifier extends Notifier<AuthState> {
         email: email,
         password: password,
         fullName: fullName,
+        userType: userType,
+        idCardBytes: idCardBytes,
+        idCardFileName: idCardFileName,
+        profilePhotoBytes: profilePhotoBytes,
+        profilePhotoFileName: profilePhotoFileName,
       );
       if (result.accessToken == null) {
         state = AuthState.emailConfirmationRequired(email: email);
@@ -127,7 +139,7 @@ class AuthStateNotifier extends Notifier<AuthState> {
         return;
       }
       final user = await ref.read(getCurrentUserUseCaseProvider).call();
-      state = AuthState.authenticated(user: user);
+      state = _resolveAuthenticated(user);
     } catch (e) {
       _logger.e('Sign up failed', e);
       final failure = handleException(e);
@@ -154,7 +166,7 @@ class AuthStateNotifier extends Notifier<AuthState> {
     try {
       await _verifyOTPUseCase(phone: phone, otp: otp);
       final user = await ref.read(getCurrentUserUseCaseProvider).call();
-      state = AuthState.authenticated(user: user);
+      state = _resolveAuthenticated(user);
     } catch (e) {
       _logger.e('OTP verification failed', e);
       final failure = handleException(e);
@@ -167,7 +179,7 @@ class AuthStateNotifier extends Notifier<AuthState> {
     try {
       await _signInWithGoogleUseCase();
       final user = await ref.read(getCurrentUserUseCaseProvider).call();
-      state = AuthState.authenticated(user: user);
+      state = _resolveAuthenticated(user);
     } catch (e) {
       _logger.e('Google sign in failed', e);
       final failure = handleException(e);
@@ -180,7 +192,7 @@ class AuthStateNotifier extends Notifier<AuthState> {
     try {
       await _signInWithAppleUseCase();
       final user = await ref.read(getCurrentUserUseCaseProvider).call();
-      state = AuthState.authenticated(user: user);
+      state = _resolveAuthenticated(user);
     } catch (e) {
       _logger.e('Apple sign in failed', e);
       final failure = handleException(e);
@@ -193,7 +205,7 @@ class AuthStateNotifier extends Notifier<AuthState> {
     try {
       await _signInWithFacebookUseCase();
       final user = await ref.read(getCurrentUserUseCaseProvider).call();
-      state = AuthState.authenticated(user: user);
+      state = _resolveAuthenticated(user);
     } catch (e) {
       _logger.e('Facebook sign in failed', e);
       final failure = handleException(e);
@@ -206,7 +218,7 @@ class AuthStateNotifier extends Notifier<AuthState> {
     try {
       await _signInAnonymouslyUseCase();
       final user = await ref.read(getCurrentUserUseCaseProvider).call();
-      state = AuthState.authenticated(user: user);
+      state = _resolveAuthenticated(user);
     } catch (e) {
       _logger.e('Anonymous sign in failed', e);
       final failure = handleException(e);
@@ -253,5 +265,13 @@ class AuthStateNotifier extends Notifier<AuthState> {
 
   void enterGuestMode() {
     state = const AuthState.guest();
+  }
+
+  AuthState _resolveAuthenticated(User user) {
+    if (user.userType.requiresVerification &&
+        !user.verificationStatus.isApproved) {
+      return const AuthState.pendingVerification();
+    }
+    return AuthState.authenticated(user: user);
   }
 }

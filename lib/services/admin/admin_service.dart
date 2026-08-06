@@ -292,4 +292,35 @@ class AdminService {
       return {};
     }
   }
+
+  // ─── Account Verification ────────────────────────────────
+
+  Future<List<VerificationRequest>> getVerificationRequests() async {
+    try {
+      return await _repository.getVerificationRequests();
+    } catch (e) {
+      debugPrint('AdminService.getVerificationRequests error: $e');
+      return [];
+    }
+  }
+
+  Future<bool> approveVerification(String userId) async {
+    try {
+      await _repository.approveVerification(userId);
+      return true;
+    } catch (e) {
+      debugPrint('AdminService.approveVerification error: $e');
+      return false;
+    }
+  }
+
+  Future<bool> rejectVerification(String userId) async {
+    try {
+      await _repository.rejectVerification(userId);
+      return true;
+    } catch (e) {
+      debugPrint('AdminService.rejectVerification error: $e');
+      return false;
+    }
+  }
 }

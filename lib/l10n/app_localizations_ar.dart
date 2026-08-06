@@ -3988,4 +3988,114 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get enterPasswordForFingerprint =>
       'أدخل كلمة المرور مرة واحدة لتفعيل تسجيل الدخول بالبصمة';
+
+  @override
+  String get selectAccountType => 'اختر نوع الحساب';
+
+  @override
+  String get accountTypeDescription => 'حدد كيف ستستخدم دلوقتي';
+
+  @override
+  String get userTypeCustomer => 'عميل';
+
+  @override
+  String get userTypeCustomerDesc => 'اطلب من المتاجر والمطاعم والخدمات';
+
+  @override
+  String get userTypeProvider => 'مقدم خدمة';
+
+  @override
+  String get userTypeProviderDesc => 'قدّم خدماتك للعملاء';
+
+  @override
+  String get userTypeDelivery => 'سائق توصيل';
+
+  @override
+  String get userTypeDeliveryDesc => 'وصّل الطلبات للعملاء';
+
+  @override
+  String get uploadIdCard => 'رفع البطاقة الشخصية';
+
+  @override
+  String get uploadIdCardHint => 'صورة واضحة لبطاقتك الشخصية';
+
+  @override
+  String get uploadProfilePhoto => 'رفع صورة شخصية';
+
+  @override
+  String get uploadProfilePhotoHint => 'صورة شخصية حديثة';
+
+  @override
+  String get camera => 'الكاميرا';
+
+  @override
+  String get documentsRequired =>
+      'البطاقة والصورة الشخصية مطلوبتان لهذا النوع من الحسابات';
+
+  @override
+  String get verificationPendingTitle => 'الحساب قيد المراجعة';
+
+  @override
+  String get verificationPendingMessage =>
+      'حسابك قيد المراجعة من قبل الإدارة، يرجى الانتظار';
+
+  @override
+  String get verificationApproved => 'موافَق';
+
+  @override
+  String get verificationRejected => 'مرفوض';
+
+  @override
+  String get adminVerifications => 'طلبات التوثيق';
+
+  @override
+  String get verificationRequests => 'طلبات التوثيق';
+
+  @override
+  String get approve => 'موافقة';
+
+  @override
+  String get noVerificationRequests => 'لا توجد طلبات توثيق معلقة';
+
+  @override
+  String get viewDocument => 'عرض المستند';
+
+  @override
+  String get confirmApproveVerification => 'هل تريد الموافقة على طلب التوثيق؟';
+
+  @override
+  String get confirmRejectVerification => 'هل تريد رفض طلب التوثيق؟';
+
+  @override
+  String get approvalSuccessful => 'تمت الموافقة على الحساب';
+
+  @override
+  String get rejectionSuccessful => 'تم رفض الحساب';
+
+  @override
+  String get verificationDecisionFailed =>
+      'حدث خطأ ما. يرجى المحاولة مرة أخرى.';
+
+  @override
+  String get idCard => 'بطاقة الرقم القومي';
+
+  @override
+  String get emailConfirmationTitle => 'تحقق من بريدك الإلكتروني';
+
+  @override
+  String get documentsSectionTitle => 'أكمل توثيق حسابك';
+
+  @override
+  String get documentsSectionMessage =>
+      'ارفع مستنداتك ليتم إرسال حسابك للمراجعة.';
+
+  @override
+  String get submitDocuments => 'إرسال المستندات';
+
+  @override
+  String get documentsUploaded => 'تم رفع المستندات بنجاح';
+
+  @override
+  String get documentsUploadFailed =>
+      'فشل رفع المستندات. يرجى المحاولة مرة أخرى.';
 }

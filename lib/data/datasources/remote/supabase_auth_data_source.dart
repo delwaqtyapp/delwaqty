@@ -42,12 +42,18 @@ class SupabaseAuthDataSource {
     required String email,
     required String password,
     String? fullName,
+    String? userType = 'customer',
   }) async {
     try {
       final response = await _auth.signUp(
         email: email,
         password: password,
-        data: {'full_name': fullName},
+        data: {
+          'full_name': fullName,
+          'user_type': userType,
+          'verification_status':
+              userType == 'customer' ? 'approved' : 'pending',
+        },
       );
       _logger.i('Email sign up successful for ${response.user?.email}');
       return response;

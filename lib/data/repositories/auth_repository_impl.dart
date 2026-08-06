@@ -1,21 +1,28 @@
+import 'dart:typed_data';
 import 'package:supabase_flutter/supabase_flutter.dart' as sb;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:delwaqty/domain/enums/user_type.dart';
+import 'package:delwaqty/domain/enums/verification_status.dart';
 import 'package:delwaqty/domain/repositories/auth_repository.dart';
 import 'package:delwaqty/data/datasources/remote/supabase_auth_data_source.dart';
+import 'package:delwaqty/data/datasources/remote/supabase_profile_data_source.dart';
+import 'package:delwaqty/data/models/user_model.dart';
 import 'package:delwaqty/core/errors/exceptions.dart';
 import 'package:delwaqty/services/logger/app_logger.dart';
 
 final authRepositoryImplProvider = Provider<AuthRepositoryImpl>((ref) {
   return AuthRepositoryImpl(
     ref.watch(supabaseAuthDataSourceProvider),
+    ref.watch(supabaseProfileDataSourceProvider),
     ref.watch(loggerProvider),
   );
 });
 
 class AuthRepositoryImpl implements AuthRepository {
-  AuthRepositoryImpl(this._dataSource, this._logger);
+  AuthRepositoryImpl(this._dataSource, this._profileDataSource, this._logger);
 
   final SupabaseAuthDataSource _dataSource;
+  final SupabaseProfileDataSource _profileDataSource;
   final AppLogger _logger;
 
   @override
@@ -43,13 +50,31 @@ class AuthRepositoryImpl implements AuthRepository {
     required String email,
     required String password,
     String? fullName,
+    UserType userType = UserType.customer,
+    Uint8List? idCardBytes,
+    String? idCardFileName,
+    Uint8List? profilePhotoBytes,
+    String? profilePhotoFileName,
   }) async {
     try {
       final response = await _dataSource.signUpWithEmail(
         email: email,
         password: password,
         fullName: fullName,
+        userType: userType.code,
       );
+      if (response.session != null && response.user != null) {
+        await _persistSignUpProfile(
+          userId: response.user!.id,
+          email: email,
+          fullName: fullName,
+          userType: userType,
+          idCardBytes: idCardBytes,
+          idCardFileName: idCardFileName,
+          profilePhotoBytes: profilePhotoBytes,
+          profilePhotoFileName: profilePhotoFileName,
+        );
+      }
       return _mapAuthResponse(response);
     } on sb.AuthException catch (e) {
       _logger.e('Auth sign up error', e);
@@ -58,6 +83,54 @@ class AuthRepositoryImpl implements AuthRepository {
       _logger.e('Unexpected sign up error', e);
       throw ServerException(message: e.toString());
     }
+  }
+
+  Future<void> _persistSignUpProfile({
+    required String userId,
+    required String email,
+    String? fullName,
+    required UserType userType,
+    Uint8List? idCardBytes,
+    String? idCardFileName,
+    Uint8List? profilePhotoBytes,
+    String? profilePhotoFileName,
+  }) async {
+    String? idCardUrl;
+    String? profilePhotoUrl;
+
+    if (idCardBytes != null && idCardFileName != null) {
+      idCardUrl = await _profileDataSource.uploadFile(
+        userId: userId,
+        folder: 'id_cards',
+        bytes: idCardBytes,
+        fileName: idCardFileName,
+      );
+    }
+    if (profilePhotoBytes != null && profilePhotoFileName != null) {
+      profilePhotoUrl = await _profileDataSource.uploadFile(
+        userId: userId,
+        folder: 'profile_photos',
+        bytes: profilePhotoBytes,
+        fileName: profilePhotoFileName,
+      );
+    }
+
+    final model = UserModel(
+      id: userId,
+      email: email,
+      fullName: fullName,
+      language: 'en',
+      isOnboarded: false,
+      role: userType.code,
+      userType: userType,
+      verificationStatus: userType.requiresVerification
+          ? VerificationStatus.pending
+          : VerificationStatus.approved,
+      idCardUrl: idCardUrl,
+      profilePhotoUrl: profilePhotoUrl,
+      createdAt: DateTime.now(),
+    );
+    await _profileDataSource.upsertProfile(model);
   }
 
   @override

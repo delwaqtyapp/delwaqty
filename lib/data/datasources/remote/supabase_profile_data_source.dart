@@ -69,6 +69,36 @@ class SupabaseProfileDataSource {
     }
   }
 
+  Future<UserModel> upsertProfile(UserModel model) async {
+    try {
+      final data = await _client
+          .from(_tableName)
+          .upsert(model.toInsertJson(), onConflict: 'id')
+          .select()
+          .single();
+      return UserModel.fromSupabase(data);
+    } catch (e, stack) {
+      _logger.e('Failed to upsert profile for ${model.id}', e, stack);
+      rethrow;
+    }
+  }
+
+  Future<String> uploadFile({
+    required String userId,
+    required String folder,
+    required Uint8List bytes,
+    required String fileName,
+  }) async {
+    try {
+      final path = '$folder/$userId/$fileName';
+      await _client.storage.from('profiles').uploadBinary(path, bytes);
+      return _client.storage.from('profiles').getPublicUrl(path);
+    } catch (e, stack) {
+      _logger.e('Failed to upload file to $folder for $userId', e, stack);
+      rethrow;
+    }
+  }
+
   Future<void> deleteProfile(String userId) async {
     try {
       await _client.from(_tableName).delete().eq('id', userId);

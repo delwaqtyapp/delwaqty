@@ -15,5 +15,6 @@ class AuthState with _$AuthState {
       AuthPhoneVerification;
   const factory AuthState.emailConfirmationRequired({required String email}) =
       AuthEmailConfirmationRequired;
+  const factory AuthState.pendingVerification() = AuthPendingVerification;
   const factory AuthState.error({required String message}) = AuthError;
 }

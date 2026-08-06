@@ -17,6 +17,17 @@ _$UserModelImpl _$$UserModelImplFromJson(Map<String, dynamic> json) =>
       language: json['language'] as String? ?? 'en',
       isOnboarded: json['isOnboarded'] as bool? ?? false,
       role: json['role'] as String? ?? 'customer',
+      userType:
+          $enumDecodeNullable(_$UserTypeEnumMap, json['userType']) ??
+          UserType.customer,
+      verificationStatus:
+          $enumDecodeNullable(
+            _$VerificationStatusEnumMap,
+            json['verificationStatus'],
+          ) ??
+          VerificationStatus.pending,
+      idCardUrl: json['idCardUrl'] as String?,
+      profilePhotoUrl: json['profilePhotoUrl'] as String?,
       createdAt: DateTime.parse(json['createdAt'] as String),
       updatedAt: json['updatedAt'] == null
           ? null
@@ -34,6 +45,23 @@ Map<String, dynamic> _$$UserModelImplToJson(_$UserModelImpl instance) =>
       'language': instance.language,
       'isOnboarded': instance.isOnboarded,
       'role': instance.role,
+      'userType': _$UserTypeEnumMap[instance.userType]!,
+      'verificationStatus':
+          _$VerificationStatusEnumMap[instance.verificationStatus]!,
+      'idCardUrl': instance.idCardUrl,
+      'profilePhotoUrl': instance.profilePhotoUrl,
       'createdAt': instance.createdAt.toIso8601String(),
       'updatedAt': instance.updatedAt?.toIso8601String(),
     };
+
+const _$UserTypeEnumMap = {
+  UserType.customer: 'customer',
+  UserType.provider: 'provider',
+  UserType.delivery: 'delivery',
+};
+
+const _$VerificationStatusEnumMap = {
+  VerificationStatus.pending: 'pending',
+  VerificationStatus.approved: 'approved',
+  VerificationStatus.rejected: 'rejected',
+};

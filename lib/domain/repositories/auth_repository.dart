@@ -1,3 +1,7 @@
+import 'dart:typed_data';
+
+import 'package:delwaqty/domain/enums/user_type.dart';
+
 enum AuthProviderType { email, phone, google, apple, facebook, anonymous }
 
 abstract class AuthRepository {
@@ -9,6 +13,11 @@ abstract class AuthRepository {
     required String email,
     required String password,
     String? fullName,
+    UserType userType = UserType.customer,
+    Uint8List? idCardBytes,
+    String? idCardFileName,
+    Uint8List? profilePhotoBytes,
+    String? profilePhotoFileName,
   });
   Future<void> signInWithPhone({required String phone});
   Future<AuthResult> verifyOTP({required String phone, required String otp});

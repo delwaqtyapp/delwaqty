@@ -28,8 +28,9 @@ void main() {
     });
 
     test('calls getProfile on repository with correct userId', () async {
-      when(() => mockRepository.getProfile('user-123'))
-          .thenAnswer((_) async => testUser);
+      when(
+        () => mockRepository.getProfile('user-123'),
+      ).thenAnswer((_) async => testUser);
 
       final result = await useCase('user-123');
 
@@ -38,8 +39,9 @@ void main() {
     });
 
     test('propagates exceptions from repository', () async {
-      when(() => mockRepository.getProfile(any()))
-          .thenThrow(Exception('Profile not found'));
+      when(
+        () => mockRepository.getProfile(any()),
+      ).thenThrow(Exception('Profile not found'));
 
       expect(() => useCase('user-123'), throwsA(isA<Exception>()));
     });
@@ -56,18 +58,16 @@ void main() {
       final data = {'full_name': 'Jane Doe'};
       final updatedUser = testUser.copyWith(fullName: 'Jane Doe');
 
-      when(() => mockRepository.updateProfile(
-            userId: 'user-123',
-            data: data,
-          )).thenAnswer((_) async => updatedUser);
+      when(
+        () => mockRepository.updateProfile(userId: 'user-123', data: data),
+      ).thenAnswer((_) async => updatedUser);
 
       final result = await useCase(userId: 'user-123', data: data);
 
       expect(result.fullName, 'Jane Doe');
-      verify(() => mockRepository.updateProfile(
-            userId: 'user-123',
-            data: data,
-          )).called(1);
+      verify(
+        () => mockRepository.updateProfile(userId: 'user-123', data: data),
+      ).called(1);
     });
   });
 
@@ -80,11 +80,13 @@ void main() {
 
     test('calls uploadAvatar on repository', () async {
       const avatarUrl = 'https://example.com/avatar.jpg';
-      when(() => mockRepository.uploadAvatar(
-            userId: 'user-123',
-            bytes: any(named: 'bytes'),
-            fileName: 'avatar.jpg',
-          )).thenAnswer((_) async => avatarUrl);
+      when(
+        () => mockRepository.uploadAvatar(
+          userId: 'user-123',
+          bytes: any(named: 'bytes'),
+          fileName: 'avatar.jpg',
+        ),
+      ).thenAnswer((_) async => avatarUrl);
 
       final result = await useCase(
         userId: 'user-123',
@@ -93,11 +95,47 @@ void main() {
       );
 
       expect(result, avatarUrl);
-      verify(() => mockRepository.uploadAvatar(
-            userId: 'user-123',
-            bytes: [1, 2, 3],
-            fileName: 'avatar.jpg',
-          )).called(1);
+      verify(
+        () => mockRepository.uploadAvatar(
+          userId: 'user-123',
+          bytes: [1, 2, 3],
+          fileName: 'avatar.jpg',
+        ),
+      ).called(1);
+    });
+  });
+
+  group('UploadDocumentUseCase', () {
+    late UploadDocumentUseCase useCase;
+
+    setUp(() {
+      useCase = UploadDocumentUseCase(mockRepository);
+    });
+
+    test('calls uploadDocument on repository', () async {
+      const documentUrl = 'https://example.com/id-card.jpg';
+      when(
+        () => mockRepository.uploadDocument(
+          userId: 'user-123',
+          bytes: any(named: 'bytes'),
+          fileName: 'id-card.jpg',
+        ),
+      ).thenAnswer((_) async => documentUrl);
+
+      final result = await useCase(
+        userId: 'user-123',
+        bytes: [1, 2, 3],
+        fileName: 'id-card.jpg',
+      );
+
+      expect(result, documentUrl);
+      verify(
+        () => mockRepository.uploadDocument(
+          userId: 'user-123',
+          bytes: [1, 2, 3],
+          fileName: 'id-card.jpg',
+        ),
+      ).called(1);
     });
   });
 }

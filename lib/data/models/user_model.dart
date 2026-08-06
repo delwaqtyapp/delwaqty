@@ -1,5 +1,7 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:delwaqty/domain/entities/user.dart';
+import 'package:delwaqty/domain/enums/user_type.dart';
+import 'package:delwaqty/domain/enums/verification_status.dart';
 
 part 'user_model.freezed.dart';
 part 'user_model.g.dart';
@@ -16,6 +18,10 @@ class UserModel with _$UserModel {
     @Default('en') String language,
     @Default(false) bool isOnboarded,
     @Default('customer') String role,
+    @Default(UserType.customer) UserType userType,
+    @Default(VerificationStatus.pending) VerificationStatus verificationStatus,
+    String? idCardUrl,
+    String? profilePhotoUrl,
     required DateTime createdAt,
     DateTime? updatedAt,
   }) = _UserModel;
@@ -26,6 +32,7 @@ class UserModel with _$UserModel {
       _$UserModelFromJson(json);
 
   factory UserModel.fromSupabase(Map<String, dynamic> json) {
+    final role = json['role'] as String? ?? 'customer';
     return UserModel(
       id: json['id'] as String,
       email: json['email'] as String,
@@ -35,12 +42,29 @@ class UserModel with _$UserModel {
       avatarUrl: json['avatar_url'] as String?,
       language: json['language'] as String? ?? 'en',
       isOnboarded: json['is_onboarded'] as bool? ?? false,
-      role: json['role'] as String? ?? 'customer',
+      role: role,
+      userType: UserType.fromCode(
+        (json['user_type'] ?? json['role']) as String?,
+      ),
+      verificationStatus: VerificationStatus.fromCode(
+        _verificationCode(json, role),
+      ),
+      idCardUrl: json['id_card_url'] as String?,
+      profilePhotoUrl: json['profile_photo_url'] as String?,
       createdAt: DateTime.parse(json['created_at'] as String),
       updatedAt: json['updated_at'] != null
           ? DateTime.parse(json['updated_at'] as String)
           : null,
     );
+  }
+
+  static String _verificationCode(Map<String, dynamic> json, String role) {
+    final value = json['verification_status'] as String?;
+    if (value != null && value.isNotEmpty) return value;
+    final userType = UserType.fromCode(
+      (json['user_type'] ?? role) as String?,
+    );
+    return userType == UserType.customer ? 'approved' : 'pending';
   }
 
   User toEntity() => User(
@@ -53,6 +77,10 @@ class UserModel with _$UserModel {
     language: language,
     isOnboarded: isOnboarded,
     role: role,
+    userType: userType,
+    verificationStatus: verificationStatus,
+    idCardUrl: idCardUrl,
+    profilePhotoUrl: profilePhotoUrl,
     createdAt: createdAt,
     updatedAt: updatedAt,
   );
@@ -65,10 +93,14 @@ class UserModel with _$UserModel {
       'language': language,
       'is_onboarded': isOnboarded,
       'role': role,
+      'user_type': userType.code,
+      'verification_status': verificationStatus.code,
     };
     if (username != null) json['username'] = username;
     if (phone != null) json['phone'] = phone;
     if (avatarUrl != null) json['avatar_url'] = avatarUrl;
+    if (idCardUrl != null) json['id_card_url'] = idCardUrl;
+    if (profilePhotoUrl != null) json['profile_photo_url'] = profilePhotoUrl;
     return json;
   }
 
@@ -78,10 +110,14 @@ class UserModel with _$UserModel {
       'language': language,
       'is_onboarded': isOnboarded,
       'role': role,
+      'user_type': userType.code,
+      'verification_status': verificationStatus.code,
     };
     if (username != null) json['username'] = username;
     if (phone != null) json['phone'] = phone;
     if (avatarUrl != null) json['avatar_url'] = avatarUrl;
+    if (idCardUrl != null) json['id_card_url'] = idCardUrl;
+    if (profilePhotoUrl != null) json['profile_photo_url'] = profilePhotoUrl;
     return json;
   }
 

@@ -31,6 +31,7 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       final isPendingVerification =
           authState is AuthEmailConfirmationRequired ||
           authState is AuthPhoneVerification;
+      final isVerificationPending = authState is AuthPendingVerification;
       final canAccess = isAuth || isGuest || isPendingVerification;
 
       final isSplash = state.matchedLocation == '/splash';
@@ -40,6 +41,8 @@ final goRouterProvider = Provider<GoRouter>((ref) {
           state.matchedLocation == '/login' ||
           state.matchedLocation == '/register' ||
           state.matchedLocation == '/forgot-password';
+      final isVerificationPendingRoute =
+          state.matchedLocation == '/pending-verification';
 
       final restrictedRoutes = ['/market/checkout', '/market/orders', '/market/favorites', '/orders'];
       final isRestricted = restrictedRoutes.any(
@@ -54,6 +57,12 @@ final goRouterProvider = Provider<GoRouter>((ref) {
               true;
 
       if (isSplash || isOnboarding) return null;
+
+      if (isVerificationPending &&
+          !isVerificationPendingRoute &&
+          !isAuthRoute) {
+        return '/pending-verification';
+      }
 
       if (isPendingVerification && !isAuthRoute) {
         return '/register';

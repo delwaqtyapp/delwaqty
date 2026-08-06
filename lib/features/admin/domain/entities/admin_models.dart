@@ -1,4 +1,5 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:delwaqty/domain/enums/user_type.dart';
 
 part 'admin_models.freezed.dart';
 part 'admin_models.g.dart';
@@ -214,6 +215,25 @@ class RevenueData with _$RevenueData {
 
   factory RevenueData.fromJson(Map<String, dynamic> json) =>
       _$RevenueDataFromJson(json);
+}
+
+// ─── Verification Request ──────────────────────────────────
+
+@freezed
+class VerificationRequest with _$VerificationRequest {
+  const factory VerificationRequest({
+    required String userId,
+    required String email,
+    String? fullName,
+    String? phone,
+    required UserType userType,
+    String? idCardUrl,
+    String? profilePhotoUrl,
+    required DateTime createdAt,
+  }) = _VerificationRequest;
+
+  factory VerificationRequest.fromJson(Map<String, dynamic> json) =>
+      _$VerificationRequestFromJson(json);
 }
 
 // ─── Exception ─────────────────────────────────────────────

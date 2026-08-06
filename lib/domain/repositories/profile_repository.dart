@@ -12,5 +12,10 @@ abstract class ProfileRepository {
     required List<int> bytes,
     required String fileName,
   });
+  Future<String> uploadDocument({
+    required String userId,
+    required List<int> bytes,
+    required String fileName,
+  });
   Stream<User> watchProfile(String userId);
 }

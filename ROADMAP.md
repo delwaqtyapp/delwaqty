@@ -1,6 +1,6 @@
 # ROADMAP.md — Delwaqty Development Roadmap
 
-> **Last updated:** 2026-07-18
+> **Last updated:** 2026-08-06
 > **Authority:** PROJECT_CONSTITUTION.md §15 (v2.0)
 
 ---
@@ -54,6 +54,7 @@
 | Reservations | ✅ Real (8 methods, slot management) |
 | Order Tracking | ✅ Real (4 methods) |
 | Product Inventory | ✅ Real (9 methods, stock + reservation) |
+| Account Verification | ✅ Code + live DB (migrations 020+021 applied; user_type/verification_status + admin approve/reject); email confirmation enabled + deep-link `site_url`/`uri_allow_list` configured; on-device E2E pending |
 | **Mocks remaining in codepath** | **0** |
 
 ## Next Steps (Constitution v2.0 §15)
@@ -144,3 +145,4 @@
 | 53-54 | Management Tables DB Fix + RLS Rebuild — migrations 015/016 applied to Supabase | ✅ |
 | 55 | UI Polish — Cairo typography, card system, pill search, banner copy, micro-interactions | ✅ |
 | 56 | Functional Bottom-Nav Restructure — 4-tab layout (Home/Search/Orders/Profile), Settings via Profile gear, Delivery/Ride in Home grid | ✅ |
+| 60 | Account Verification — user type (customer/provider/delivery) + verification status, document upload, pending-verification gate, admin approve/reject page, migration 020 | ✅ |

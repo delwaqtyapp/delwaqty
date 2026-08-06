@@ -1,5 +1,7 @@
+import 'dart:typed_data';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:delwaqty/domain/enums/user_type.dart';
 import 'package:delwaqty/domain/repositories/auth_repository.dart';
 import 'package:delwaqty/domain/usecases/auth/auth_usecases.dart';
 
@@ -17,6 +19,8 @@ void main() {
       userId: '',
       email: '',
     ));
+    registerFallbackValue(UserType.customer);
+    registerFallbackValue(Uint8List(0));
   });
 
   group('SignInUseCase', () {
@@ -75,12 +79,22 @@ void main() {
             email: email,
             password: password,
             fullName: fullName,
+            userType: any(named: 'userType'),
+            idCardBytes: any(named: 'idCardBytes'),
+            idCardFileName: any(named: 'idCardFileName'),
+            profilePhotoBytes: any(named: 'profilePhotoBytes'),
+            profilePhotoFileName: any(named: 'profilePhotoFileName'),
           )).thenAnswer((_) async => expectedResult);
 
       final result = await useCase(
         email: email,
         password: password,
         fullName: fullName,
+        userType: UserType.delivery,
+        idCardBytes: Uint8List.fromList([1, 2, 3]),
+        idCardFileName: 'id.jpg',
+        profilePhotoBytes: Uint8List.fromList([4, 5, 6]),
+        profilePhotoFileName: 'photo.jpg',
       );
 
       expect(result, expectedResult);
@@ -88,6 +102,11 @@ void main() {
             email: email,
             password: password,
             fullName: fullName,
+            userType: UserType.delivery,
+            idCardBytes: any(named: 'idCardBytes'),
+            idCardFileName: 'id.jpg',
+            profilePhotoBytes: any(named: 'profilePhotoBytes'),
+            profilePhotoFileName: 'photo.jpg',
           )).called(1);
     });
   });

@@ -1,10 +1,12 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:delwaqty/features/admin/domain/entities/admin_models.dart';
-import 'package:delwaqty/features/admin/domain/repositories/admin_repository.dart' as admin;
+import 'package:delwaqty/features/admin/domain/repositories/admin_repository.dart'
+    as admin;
+import 'package:delwaqty/domain/enums/user_type.dart';
 
 class AdminRepository implements admin.AdminRepository {
   AdminRepository({SupabaseClient? client})
-      : _supabase = client ?? Supabase.instance.client;
+    : _supabase = client ?? Supabase.instance.client;
 
   final SupabaseClient _supabase;
 
@@ -13,17 +15,15 @@ class AdminRepository implements admin.AdminRepository {
   Future<AdminDashboardMetrics> getDashboardMetrics() async {
     try {
       final now = DateTime.now();
-      final todayStart = DateTime(now.year, now.month, now.day).toIso8601String();
+      final todayStart = DateTime(
+        now.year,
+        now.month,
+        now.day,
+      ).toIso8601String();
       final monthStart = DateTime(now.year, now.month).toIso8601String();
 
-      final usersCount = await _supabase
-          .from('users')
-          .select('id')
-          .count();
-      final driversCount = await _supabase
-          .from('drivers')
-          .select('id')
-          .count();
+      final usersCount = await _supabase.from('users').select('id').count();
+      final driversCount = await _supabase.from('drivers').select('id').count();
       final merchantsCount = await _supabase
           .from('merchants')
           .select('id')
@@ -167,8 +167,11 @@ class AdminRepository implements admin.AdminRepository {
       final results = <RevenueData>[];
 
       for (int i = days - 1; i >= 0; i--) {
-        final day = DateTime(now.year, now.month, now.day)
-            .subtract(Duration(days: i));
+        final day = DateTime(
+          now.year,
+          now.month,
+          now.day,
+        ).subtract(Duration(days: i));
         final nextDay = day.add(const Duration(days: 1));
         final dayStr = day.toIso8601String();
         final nextDayStr = nextDay.toIso8601String();
@@ -258,11 +261,14 @@ class AdminRepository implements admin.AdminRepository {
     required bool isVerified,
   }) async {
     try {
-      await _supabase.from('drivers').update({
-        'is_verified': isVerified,
-        'verification_status': isVerified ? 'verified' : 'rejected',
-        'updated_at': DateTime.now().toIso8601String(),
-      }).eq('id', driverId);
+      await _supabase
+          .from('drivers')
+          .update({
+            'is_verified': isVerified,
+            'verification_status': isVerified ? 'verified' : 'rejected',
+            'updated_at': DateTime.now().toIso8601String(),
+          })
+          .eq('id', driverId);
     } catch (e) {
       throw AdminException('Failed to verify driver: $e');
     }
@@ -275,11 +281,14 @@ class AdminRepository implements admin.AdminRepository {
     required bool isActive,
   }) async {
     try {
-      await _supabase.from('drivers').update({
-        'is_online': isActive,
-        'status': isActive ? 'online' : 'offline',
-        'updated_at': DateTime.now().toIso8601String(),
-      }).eq('id', driverId);
+      await _supabase
+          .from('drivers')
+          .update({
+            'is_online': isActive,
+            'status': isActive ? 'online' : 'offline',
+            'updated_at': DateTime.now().toIso8601String(),
+          })
+          .eq('id', driverId);
     } catch (e) {
       throw AdminException('Failed to update driver status: $e');
     }
@@ -292,10 +301,7 @@ class AdminRepository implements admin.AdminRepository {
     String? status,
   }) async {
     try {
-      var query = _supabase
-          .from('rides')
-          .select()
-          .eq('service_type', 'ride');
+      var query = _supabase.from('rides').select().eq('service_type', 'ride');
 
       if (status != null && status.isNotEmpty) {
         query = query.eq('status', status);
@@ -320,10 +326,7 @@ class AdminRepository implements admin.AdminRepository {
     String? serviceType,
   }) async {
     try {
-      var query = _supabase
-          .from('rides')
-          .select()
-          .neq('service_type', 'ride');
+      var query = _supabase.from('rides').select().neq('service_type', 'ride');
 
       if (serviceType != null && serviceType.isNotEmpty) {
         query = query.eq('service_type', serviceType);
@@ -368,11 +371,11 @@ class AdminRepository implements admin.AdminRepository {
       hourCounts[hour] = (hourCounts[hour] ?? 0) + 1;
     }
 
-    final peakHours = hourCounts.entries.map((e) => {
-      'hour': e.key,
-      'count': e.value,
-    }).toList()
-      ..sort((a, b) => (b['count'] as int).compareTo(a['count'] as int));
+    final peakHours =
+        hourCounts.entries
+            .map((e) => {'hour': e.key, 'count': e.value})
+            .toList()
+          ..sort((a, b) => (b['count'] as int).compareTo(a['count'] as int));
 
     return peakHours;
   }
@@ -393,8 +396,7 @@ class AdminRepository implements admin.AdminRepository {
       for (final ride in rides as List) {
         final merchantId = ride['merchant_id'] as String;
         final fare = (ride['fare'] as num?)?.toDouble() ?? 0;
-        merchantRevenue[merchantId] =
-            (merchantRevenue[merchantId] ?? 0) + fare;
+        merchantRevenue[merchantId] = (merchantRevenue[merchantId] ?? 0) + fare;
         merchantTrips[merchantId] = (merchantTrips[merchantId] ?? 0) + 1;
       }
 
@@ -473,9 +475,11 @@ class AdminRepository implements admin.AdminRepository {
       }
 
       final sortedDrivers = driverStats.entries.toList()
-        ..sort((a, b) =>
-            (b.value['total_revenue'] as double)
-                .compareTo(a.value['total_revenue'] as double));
+        ..sort(
+          (a, b) => (b.value['total_revenue'] as double).compareTo(
+            a.value['total_revenue'] as double,
+          ),
+        );
 
       final results = <Map<String, dynamic>>[];
       for (final entry in sortedDrivers.take(limit)) {
@@ -786,10 +790,7 @@ class AdminRepository implements admin.AdminRepository {
     int offset = 0,
   }) async {
     try {
-      var query = _supabase
-          .from('rides')
-          .select()
-          .neq('service_type', 'ride');
+      var query = _supabase.from('rides').select().neq('service_type', 'ride');
 
       if (status != null && status.isNotEmpty) {
         query = query.eq('status', status);
@@ -809,9 +810,7 @@ class AdminRepository implements admin.AdminRepository {
     try {
       await _supabase
           .from('rides')
-          .update({
-            'status': status,
-          })
+          .update({'status': status})
           .eq('id', deliveryId);
     } catch (e) {
       throw AdminException('Failed to update delivery status: $e');
@@ -844,6 +843,67 @@ class AdminRepository implements admin.AdminRepository {
     }
   }
 
+  // ─── Account Verification ────────────────────────────────
+
+  @override
+  Future<List<VerificationRequest>> getVerificationRequests() async {
+    try {
+      final response = await _supabase
+          .from('users')
+          .select()
+          .eq('verification_status', 'pending')
+          .inFilter('user_type', ['provider', 'delivery'])
+          .order('created_at', ascending: false);
+
+      return (response as List).map((json) {
+        return VerificationRequest(
+          userId: json['id'] as String,
+          email: json['email'] as String,
+          fullName: (json['full_name'] ?? json['name']) as String?,
+          phone: json['phone'] as String?,
+          userType: UserType.fromCode(
+            (json['user_type'] ?? json['role']) as String?,
+          ),
+          idCardUrl: json['id_card_url'] as String?,
+          profilePhotoUrl: json['profile_photo_url'] as String?,
+          createdAt: DateTime.parse(json['created_at'] as String),
+        );
+      }).toList();
+    } catch (e) {
+      throw AdminException('Failed to fetch verification requests: $e');
+    }
+  }
+
+  @override
+  Future<void> approveVerification(String userId) async {
+    try {
+      await _supabase
+          .from('users')
+          .update({
+            'verification_status': 'approved',
+            'updated_at': DateTime.now().toIso8601String(),
+          })
+          .eq('id', userId);
+    } catch (e) {
+      throw AdminException('Failed to approve verification: $e');
+    }
+  }
+
+  @override
+  Future<void> rejectVerification(String userId) async {
+    try {
+      await _supabase
+          .from('users')
+          .update({
+            'verification_status': 'rejected',
+            'updated_at': DateTime.now().toIso8601String(),
+          })
+          .eq('id', userId);
+    } catch (e) {
+      throw AdminException('Failed to reject verification: $e');
+    }
+  }
+
   // ─── Private Mappers ──────────────────────────────────────
 
   DriverModel _mapToDriverModel(Map<String, dynamic> json) {
@@ -858,8 +918,10 @@ class AdminRepository implements admin.AdminRepository {
       isActive: (json['status'] as String?) == 'online',
       isVerified: (json['is_verified'] as bool?) ?? false,
       rating: (json['rating'] as num?)?.toDouble() ?? 0,
-      totalTrips: (json['total_trips'] as int?) ??
-          (json['total_deliveries'] as int?) ?? 0,
+      totalTrips:
+          (json['total_trips'] as int?) ??
+          (json['total_deliveries'] as int?) ??
+          0,
       lastLocationLat: (json['current_latitude'] as num?)?.toDouble(),
       lastLocationLng: (json['current_longitude'] as num?)?.toDouble(),
       createdAt: DateTime.parse(json['created_at'] as String),
@@ -901,7 +963,8 @@ class AdminRepository implements admin.AdminRepository {
       status: json['status'] as String,
       senderName: json['pickup_notes'] as String?,
       receiverName: json['dropoff_notes'] as String?,
-      itemDescription: (json['items_summary'] as String?) ??
+      itemDescription:
+          (json['items_summary'] as String?) ??
           (json['pickup_notes'] as String?),
       itemWeight: (json['weight_kg'] as num?)?.toDouble(),
       itemUnit: json['weight_kg'] != null ? 'kg' : null,

@@ -1,10 +1,25 @@
 # SESSION_STATUS.md
 
-> **Last updated:** 2026-08-06 Session 21n (Splash Intro Crash Fix + Login Logo)
+> **Last updated:** 2026-08-06 Session 21o (Home Logo + Intro Flash Root-Cause Fix)
 
 ---
 
-## Current Task — SPLASH INTRO CRASH FIX + LOGIN LOGO (Session 21n)
+## Current Task — HOME PAGE LOGO + INTRO WORDMARK FLASH FIX (Session 21o)
+
+User reported two issues after 21n: (1) the home page header still showed the gradient square with the Arabic "دلوقتي" text instead of the actual app logo next to the sidebar button, and (2) a visible "crash"/flash during the intro while the English "Delwaqty" wordmark animates. Both fixed, verified programmatically on device (I cannot view images — verified via per-frame luma analysis + logcat).
+
+| Area | Change |
+|------|--------|
+| **Root cause — wordmark flash** | Logcat proved NO Dart exception (process stays alive through the whole splash); the visible flash is a rendering artifact. The `_AmbientPainter` recreated **3 radial gradient shaders on every frame** (`ui.Gradient.radial`) inside a `RepaintBoundary`; on Impeller/Vulkan this shader churn during the wordmark phase produced a frame where the background dropped out. Confirmed by `[ERROR platform_configuration.cc(448)] Reported frame time is older than the last one; clamping` during the wordmark window (1.5–2.5 s) |
+| **Fix — painter split** | `_AmbientPainter` split into two: **`_GlowPainter`** (const, paints the 3 static radial-gradient glows ONCE — `shouldRepaint => false`, raster-cached, never repaints) and **`_ParticlePainter(progress)`** (animated, draws only 30 tiny white circles — no shaders at all, still in its own `RepaintBoundary`). Per-frame work is now 30 cheap circles; zero per-frame shader creation |
+| **Fix — home logo** | `_LogoMark` in `home_page.dart` now renders the official `assets/logo app/logo.png` (white 46×46 tile, radius 14, purple shadow, `ClipRRect`, `DecoratedBox` gradient "دلوقتي" fallback via `errorBuilder`) next to the `_GlassCircleButton` in the header Row |
+| **Verification — wordmark flash** | Installed build → screenrecord + ffmpeg `signalstats` luma per frame: **splash window (frames 70–320) max frame-to-frame luma diff < 1.0** — the background never disappears during the wordmark. The only dips (frames 28–68, luma →17.6) are the native Android 12+ launch crossfade BEFORE Flutter's first frame — normal cold-start, not the wordmark. Splash→login transition = the single 72-luma jump at frame 323 |
+| **Verification — home logo** | Asset bundled in APK (`assets/flutter_assets/assets/logo%20app/logo.png`, 1.27 MB); identical asset path already renders on splash/login; logcat has **no** `Unable to load asset` |
+| **Quality gates** | `flutter analyze` 0 errors (my files contribute no new lints) · `flutter test` 542/542 passing · debug APK built + installed on DNP NX9 |
+
+---
+
+## Previous Task — SPLASH INTRO CRASH FIX + LOGIN LOGO (Session 21n)
 
 Fixed the hidden "brown flash" crash during the intro wordmark animation, restored the natural splash design, made the Arabic tagline "دلوقتي" colorful like the English wordmark, and enlarged the login page logo.
 
@@ -342,7 +357,8 @@ Made the Sprint 40 management features (complaints, sanctions, live tracking, su
 | M13f | 57 | Location Reliability — real place names via Photon/Nominatim/Overpass, 1 m deep lock, stale/9-day replay rejected, then over-strict gate relaxed so real fresh fixes (network/fused 100 m) are used again | ✅ |
 | M13g | 57 | Push Notifications — token pipeline fixed (updated_at, upsert, platform CHECK), migration 018 applied live, admin broadcast via SECURITY DEFINER RPC, realtime in-app delivery verified end-to-end on device | ✅ |
 | M13h | 57 | Admin Push UX — device counters (online/offline/received), migration 019 (RPC returns device count), Firebase card removed, notification-center delete-all + per-item delete, token heartbeat | ✅ |
-| M13i | 58 | Redesign V2 — Premium UI (Apple/Airbnb/Stripe aesthetic, deep-purple brand): design tokens (colors/spacing/elevation/theme), floating glass bottom nav, shared design widgets (`PremiumCard`/`PremiumSearchField`/`GlassSurface`/`GradientBackground`), Home page redesign, then Search/Orders/Profile tab redesigns | ✅ (uncommitted milestone) |
+| M13i | 58 | Redesign V2 — Premium UI (Apple/Airbnb/Stripe aesthetic, deep-purple brand): design tokens (colors/spacing/elevation/theme), floating glass bottom nav, shared design widgets (`PremiumCard`/`PremiumSearchField`/`GlassSurface`/`GradientBackground`), Home page redesign, then Search/Orders/Profile tab redesigns | ✅ (commit c7122b2) |
+| M13j | 59 | Intro rendering — splash painter split into static glows + cheap particles (kills the wordmark-phase flash on Impeller); home header shows the real logo image next to the sidebar | ✅ |
 
 ---
 

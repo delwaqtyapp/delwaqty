@@ -3,6 +3,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:delwaqty/data/datasources/local/shared_preferences_service.dart';
 import 'package:delwaqty/domain/entities/user.dart';
+import 'package:delwaqty/domain/enums/user_type.dart';
+import 'package:delwaqty/domain/enums/verification_status.dart';
 import 'package:delwaqty/domain/repositories/auth_repository.dart';
 import 'package:delwaqty/domain/repositories/user_repository.dart';
 import 'package:delwaqty/domain/usecases/auth/auth_usecases.dart';
@@ -91,6 +93,25 @@ void main() {
         expect(state, isA<AuthAuthenticated>());
       });
 
+      test('sets pendingVerification when user requires verification', () async {
+        const session = AuthResult(userId: 'user-123', email: 'test@example.com');
+        final pendingUser = testUser.copyWith(
+          userType: UserType.provider,
+          verificationStatus: VerificationStatus.pending,
+        );
+        when(() => mockAuthRepo.getCurrentSession())
+            .thenAnswer((_) async => session);
+        when(() => mockUserRepo.getCurrentUser())
+            .thenAnswer((_) async => pendingUser);
+
+        final container = buildTestContainer();
+
+        await container.read(authStateProvider.notifier).checkAuthStatus();
+
+        final state = container.read(authStateProvider);
+        expect(state, isA<AuthPendingVerification>());
+      });
+
       test('sets unauthenticated on error', () async {
         when(() => mockAuthRepo.getCurrentSession())
             .thenThrow(Exception('Failed'));
@@ -164,6 +185,36 @@ void main() {
 
         final state = container.read(authStateProvider);
         expect(state, isA<AuthAuthenticated>());
+      });
+
+      test('sets pendingVerification when user requires verification', () async {
+        const session = AuthResult(
+          userId: 'user-123',
+          email: 'test@example.com',
+          accessToken: 'valid-token',
+        );
+        final pendingUser = testUser.copyWith(
+          userType: UserType.delivery,
+          verificationStatus: VerificationStatus.pending,
+        );
+        when(() => mockAuthRepo.signUpWithEmail(
+              email: 'test@example.com',
+              password: 'password123',
+              fullName: 'John Doe',
+            )).thenAnswer((_) async => session);
+        when(() => mockUserRepo.getCurrentUser())
+            .thenAnswer((_) async => pendingUser);
+
+        final container = buildTestContainer();
+
+        await container.read(authStateProvider.notifier).signUp(
+              email: 'test@example.com',
+              password: 'password123',
+              fullName: 'John Doe',
+            );
+
+        final state = container.read(authStateProvider);
+        expect(state, isA<AuthPendingVerification>());
       });
 
       test('sets error on failure', () async {

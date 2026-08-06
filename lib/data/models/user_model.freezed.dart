@@ -30,6 +30,11 @@ mixin _$UserModel {
   String get language => throw _privateConstructorUsedError;
   bool get isOnboarded => throw _privateConstructorUsedError;
   String get role => throw _privateConstructorUsedError;
+  UserType get userType => throw _privateConstructorUsedError;
+  VerificationStatus get verificationStatus =>
+      throw _privateConstructorUsedError;
+  String? get idCardUrl => throw _privateConstructorUsedError;
+  String? get profilePhotoUrl => throw _privateConstructorUsedError;
   DateTime get createdAt => throw _privateConstructorUsedError;
   DateTime? get updatedAt => throw _privateConstructorUsedError;
 
@@ -58,6 +63,10 @@ abstract class $UserModelCopyWith<$Res> {
     String language,
     bool isOnboarded,
     String role,
+    UserType userType,
+    VerificationStatus verificationStatus,
+    String? idCardUrl,
+    String? profilePhotoUrl,
     DateTime createdAt,
     DateTime? updatedAt,
   });
@@ -87,6 +96,10 @@ class _$UserModelCopyWithImpl<$Res, $Val extends UserModel>
     Object? language = null,
     Object? isOnboarded = null,
     Object? role = null,
+    Object? userType = null,
+    Object? verificationStatus = null,
+    Object? idCardUrl = freezed,
+    Object? profilePhotoUrl = freezed,
     Object? createdAt = null,
     Object? updatedAt = freezed,
   }) {
@@ -128,6 +141,22 @@ class _$UserModelCopyWithImpl<$Res, $Val extends UserModel>
                 ? _value.role
                 : role // ignore: cast_nullable_to_non_nullable
                       as String,
+            userType: null == userType
+                ? _value.userType
+                : userType // ignore: cast_nullable_to_non_nullable
+                      as UserType,
+            verificationStatus: null == verificationStatus
+                ? _value.verificationStatus
+                : verificationStatus // ignore: cast_nullable_to_non_nullable
+                      as VerificationStatus,
+            idCardUrl: freezed == idCardUrl
+                ? _value.idCardUrl
+                : idCardUrl // ignore: cast_nullable_to_non_nullable
+                      as String?,
+            profilePhotoUrl: freezed == profilePhotoUrl
+                ? _value.profilePhotoUrl
+                : profilePhotoUrl // ignore: cast_nullable_to_non_nullable
+                      as String?,
             createdAt: null == createdAt
                 ? _value.createdAt
                 : createdAt // ignore: cast_nullable_to_non_nullable
@@ -161,6 +190,10 @@ abstract class _$$UserModelImplCopyWith<$Res>
     String language,
     bool isOnboarded,
     String role,
+    UserType userType,
+    VerificationStatus verificationStatus,
+    String? idCardUrl,
+    String? profilePhotoUrl,
     DateTime createdAt,
     DateTime? updatedAt,
   });
@@ -189,6 +222,10 @@ class __$$UserModelImplCopyWithImpl<$Res>
     Object? language = null,
     Object? isOnboarded = null,
     Object? role = null,
+    Object? userType = null,
+    Object? verificationStatus = null,
+    Object? idCardUrl = freezed,
+    Object? profilePhotoUrl = freezed,
     Object? createdAt = null,
     Object? updatedAt = freezed,
   }) {
@@ -230,6 +267,22 @@ class __$$UserModelImplCopyWithImpl<$Res>
             ? _value.role
             : role // ignore: cast_nullable_to_non_nullable
                   as String,
+        userType: null == userType
+            ? _value.userType
+            : userType // ignore: cast_nullable_to_non_nullable
+                  as UserType,
+        verificationStatus: null == verificationStatus
+            ? _value.verificationStatus
+            : verificationStatus // ignore: cast_nullable_to_non_nullable
+                  as VerificationStatus,
+        idCardUrl: freezed == idCardUrl
+            ? _value.idCardUrl
+            : idCardUrl // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        profilePhotoUrl: freezed == profilePhotoUrl
+            ? _value.profilePhotoUrl
+            : profilePhotoUrl // ignore: cast_nullable_to_non_nullable
+                  as String?,
         createdAt: null == createdAt
             ? _value.createdAt
             : createdAt // ignore: cast_nullable_to_non_nullable
@@ -256,6 +309,10 @@ class _$UserModelImpl extends _UserModel {
     this.language = 'en',
     this.isOnboarded = false,
     this.role = 'customer',
+    this.userType = UserType.customer,
+    this.verificationStatus = VerificationStatus.pending,
+    this.idCardUrl,
+    this.profilePhotoUrl,
     required this.createdAt,
     this.updatedAt,
   }) : super._();
@@ -285,13 +342,23 @@ class _$UserModelImpl extends _UserModel {
   @JsonKey()
   final String role;
   @override
+  @JsonKey()
+  final UserType userType;
+  @override
+  @JsonKey()
+  final VerificationStatus verificationStatus;
+  @override
+  final String? idCardUrl;
+  @override
+  final String? profilePhotoUrl;
+  @override
   final DateTime createdAt;
   @override
   final DateTime? updatedAt;
 
   @override
   String toString() {
-    return 'UserModel(id: $id, email: $email, fullName: $fullName, username: $username, phone: $phone, avatarUrl: $avatarUrl, language: $language, isOnboarded: $isOnboarded, role: $role, createdAt: $createdAt, updatedAt: $updatedAt)';
+    return 'UserModel(id: $id, email: $email, fullName: $fullName, username: $username, phone: $phone, avatarUrl: $avatarUrl, language: $language, isOnboarded: $isOnboarded, role: $role, userType: $userType, verificationStatus: $verificationStatus, idCardUrl: $idCardUrl, profilePhotoUrl: $profilePhotoUrl, createdAt: $createdAt, updatedAt: $updatedAt)';
   }
 
   @override
@@ -313,6 +380,14 @@ class _$UserModelImpl extends _UserModel {
             (identical(other.isOnboarded, isOnboarded) ||
                 other.isOnboarded == isOnboarded) &&
             (identical(other.role, role) || other.role == role) &&
+            (identical(other.userType, userType) ||
+                other.userType == userType) &&
+            (identical(other.verificationStatus, verificationStatus) ||
+                other.verificationStatus == verificationStatus) &&
+            (identical(other.idCardUrl, idCardUrl) ||
+                other.idCardUrl == idCardUrl) &&
+            (identical(other.profilePhotoUrl, profilePhotoUrl) ||
+                other.profilePhotoUrl == profilePhotoUrl) &&
             (identical(other.createdAt, createdAt) ||
                 other.createdAt == createdAt) &&
             (identical(other.updatedAt, updatedAt) ||
@@ -332,6 +407,10 @@ class _$UserModelImpl extends _UserModel {
     language,
     isOnboarded,
     role,
+    userType,
+    verificationStatus,
+    idCardUrl,
+    profilePhotoUrl,
     createdAt,
     updatedAt,
   );
@@ -361,6 +440,10 @@ abstract class _UserModel extends UserModel {
     final String language,
     final bool isOnboarded,
     final String role,
+    final UserType userType,
+    final VerificationStatus verificationStatus,
+    final String? idCardUrl,
+    final String? profilePhotoUrl,
     required final DateTime createdAt,
     final DateTime? updatedAt,
   }) = _$UserModelImpl;
@@ -387,6 +470,14 @@ abstract class _UserModel extends UserModel {
   bool get isOnboarded;
   @override
   String get role;
+  @override
+  UserType get userType;
+  @override
+  VerificationStatus get verificationStatus;
+  @override
+  String? get idCardUrl;
+  @override
+  String? get profilePhotoUrl;
   @override
   DateTime get createdAt;
   @override

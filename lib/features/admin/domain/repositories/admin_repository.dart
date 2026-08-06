@@ -27,4 +27,7 @@ abstract class AdminRepository {
   Future<List<Map<String, dynamic>>> getDeliveries({String? status, int limit = 50, int offset = 0});
   Future<void> updateDeliveryStatus(String deliveryId, String status);
   Future<Map<String, dynamic>> getAnalytics({DateTime? from, DateTime? to});
+  Future<List<VerificationRequest>> getVerificationRequests();
+  Future<void> approveVerification(String userId);
+  Future<void> rejectVerification(String userId);
 }

@@ -1,4 +1,6 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:delwaqty/domain/enums/user_type.dart';
+import 'package:delwaqty/domain/enums/verification_status.dart';
 
 part 'user.freezed.dart';
 part 'user.g.dart';
@@ -15,6 +17,10 @@ class User with _$User {
     @Default('en') String language,
     @Default(false) bool isOnboarded,
     @Default('customer') String role,
+    @Default(UserType.customer) UserType userType,
+    @Default(VerificationStatus.pending) VerificationStatus verificationStatus,
+    String? idCardUrl,
+    String? profilePhotoUrl,
     required DateTime createdAt,
     DateTime? updatedAt,
   }) = _User;

@@ -259,6 +259,12 @@ class _AdminDashboardPageState extends ConsumerState<AdminDashboardPage> {
   ) {
     final actions = [
       _QuickActionData(
+        l10n.verificationRequests,
+        Icons.verified_user_outlined,
+        const Color(0xFF34C759),
+        '/admin/verifications',
+      ),
+      _QuickActionData(
         l10n.userManagement,
         Icons.people_outline_rounded,
         const Color(0xFF4A90D9),

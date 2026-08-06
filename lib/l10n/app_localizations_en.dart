@@ -1975,7 +1975,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get uploadDocument => 'Upload Document';
 
   @override
-  String get verificationPending => 'Verification pending';
+  String get verificationPending => 'Pending';
 
   @override
   String get rejected => 'Rejected';
@@ -4018,4 +4018,115 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get enterPasswordForFingerprint =>
       'Enter your password once to enable fingerprint login';
+
+  @override
+  String get selectAccountType => 'Choose your account type';
+
+  @override
+  String get accountTypeDescription => 'Select how you will use Delwaqty';
+
+  @override
+  String get userTypeCustomer => 'Customer';
+
+  @override
+  String get userTypeCustomerDesc =>
+      'Order from stores, restaurants and services';
+
+  @override
+  String get userTypeProvider => 'Service Provider';
+
+  @override
+  String get userTypeProviderDesc => 'Offer your services to customers';
+
+  @override
+  String get userTypeDelivery => 'Delivery Driver';
+
+  @override
+  String get userTypeDeliveryDesc => 'Deliver orders to customers';
+
+  @override
+  String get uploadIdCard => 'Upload National ID';
+
+  @override
+  String get uploadIdCardHint => 'A clear photo of your national ID';
+
+  @override
+  String get uploadProfilePhoto => 'Upload Personal Photo';
+
+  @override
+  String get uploadProfilePhotoHint => 'A recent personal photo';
+
+  @override
+  String get camera => 'Camera';
+
+  @override
+  String get documentsRequired =>
+      'ID and personal photo are required for this account type';
+
+  @override
+  String get verificationPendingTitle => 'Account Under Review';
+
+  @override
+  String get verificationPendingMessage =>
+      'Your account is under review by the administration, please wait.';
+
+  @override
+  String get verificationApproved => 'Approved';
+
+  @override
+  String get verificationRejected => 'Rejected';
+
+  @override
+  String get adminVerifications => 'Verifications';
+
+  @override
+  String get verificationRequests => 'Verification Requests';
+
+  @override
+  String get approve => 'Approve';
+
+  @override
+  String get noVerificationRequests => 'No pending verification requests';
+
+  @override
+  String get viewDocument => 'View Document';
+
+  @override
+  String get confirmApproveVerification => 'Approve this verification request?';
+
+  @override
+  String get confirmRejectVerification => 'Reject this verification request?';
+
+  @override
+  String get approvalSuccessful => 'Account approved';
+
+  @override
+  String get rejectionSuccessful => 'Account rejected';
+
+  @override
+  String get verificationDecisionFailed =>
+      'Something went wrong. Please try again.';
+
+  @override
+  String get idCard => 'National ID';
+
+  @override
+  String get emailConfirmationTitle => 'Check your email';
+
+  @override
+  String get documentsSectionTitle => 'Complete your verification';
+
+  @override
+  String get documentsSectionMessage =>
+      'Upload your documents to submit your account for review.';
+
+  @override
+  String get submitDocuments => 'Submit Documents';
+
+  @override
+  String get documentsUploaded => 'Documents uploaded successfully';
+
+  @override
+  String get documentsUploadFailed =>
+      'Failed to upload documents. Please try again.';
 }

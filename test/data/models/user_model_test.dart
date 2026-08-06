@@ -1,5 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:delwaqty/data/models/user_model.dart';
+import 'package:delwaqty/domain/enums/user_type.dart';
+import 'package:delwaqty/domain/enums/verification_status.dart';
 import 'package:delwaqty/domain/entities/user.dart';
 
 void main() {
@@ -16,6 +18,10 @@ void main() {
       'avatarUrl': 'https://example.com/avatar.jpg',
       'language': 'ar',
       'isOnboarded': true,
+      'userType': 'provider',
+      'verificationStatus': 'pending',
+      'idCardUrl': 'https://example.com/id.jpg',
+      'profilePhotoUrl': 'https://example.com/photo.jpg',
       'createdAt': testDateIso,
       'updatedAt': testDateIso,
     };
@@ -31,6 +37,10 @@ void main() {
         expect(model.avatarUrl, 'https://example.com/avatar.jpg');
         expect(model.language, 'ar');
         expect(model.isOnboarded, isTrue);
+        expect(model.userType, UserType.provider);
+        expect(model.verificationStatus, VerificationStatus.pending);
+        expect(model.idCardUrl, 'https://example.com/id.jpg');
+        expect(model.profilePhotoUrl, 'https://example.com/photo.jpg');
         expect(model.createdAt, testDate);
         expect(model.updatedAt, testDate);
       });
@@ -70,6 +80,10 @@ void main() {
           'avatar_url': 'https://example.com/avatar.jpg',
           'language': 'ar',
           'is_onboarded': true,
+          'user_type': 'delivery',
+          'verification_status': 'rejected',
+          'id_card_url': 'https://example.com/id.jpg',
+          'profile_photo_url': 'https://example.com/photo.jpg',
           'created_at': testDateIso,
           'updated_at': testDateIso,
         };
@@ -78,6 +92,45 @@ void main() {
         expect(model.fullName, 'John Doe');
         expect(model.username, 'john_doe');
         expect(model.language, 'ar');
+        expect(model.userType, UserType.delivery);
+        expect(model.verificationStatus, VerificationStatus.rejected);
+        expect(model.idCardUrl, 'https://example.com/id.jpg');
+        expect(model.profilePhotoUrl, 'https://example.com/photo.jpg');
+      });
+
+      test('defaults customer verification status to approved', () {
+        final supabaseJson = <String, dynamic>{
+          'id': 'user-123',
+          'email': 'test@example.com',
+          'user_type': 'customer',
+          'created_at': testDateIso,
+        };
+        final model = UserModel.fromSupabase(supabaseJson);
+        expect(model.userType, UserType.customer);
+        expect(model.verificationStatus, VerificationStatus.approved);
+      });
+
+      test('defaults provider verification status to pending', () {
+        final supabaseJson = <String, dynamic>{
+          'id': 'user-123',
+          'email': 'test@example.com',
+          'user_type': 'provider',
+          'created_at': testDateIso,
+        };
+        final model = UserModel.fromSupabase(supabaseJson);
+        expect(model.userType, UserType.provider);
+        expect(model.verificationStatus, VerificationStatus.pending);
+      });
+
+      test('falls back to role when user_type is missing', () {
+        final supabaseJson = <String, dynamic>{
+          'id': 'user-123',
+          'email': 'test@example.com',
+          'role': 'delivery',
+          'created_at': testDateIso,
+        };
+        final model = UserModel.fromSupabase(supabaseJson);
+        expect(model.userType, UserType.delivery);
       });
 
       test('defaults language to en when null', () {
@@ -118,6 +171,10 @@ void main() {
         expect(json['full_name'], 'John Doe');
         expect(json['username'], 'john_doe');
         expect(json['avatar_url'], 'https://example.com/avatar.jpg');
+        expect(json['user_type'], 'provider');
+        expect(json['verification_status'], 'pending');
+        expect(json['id_card_url'], 'https://example.com/id.jpg');
+        expect(json['profile_photo_url'], 'https://example.com/photo.jpg');
         expect(json.containsKey('created_at'), isFalse);
       });
     });
@@ -135,6 +192,10 @@ void main() {
         expect(entity.avatarUrl, model.avatarUrl);
         expect(entity.language, model.language);
         expect(entity.isOnboarded, model.isOnboarded);
+        expect(entity.userType, model.userType);
+        expect(entity.verificationStatus, model.verificationStatus);
+        expect(entity.idCardUrl, model.idCardUrl);
+        expect(entity.profilePhotoUrl, model.profilePhotoUrl);
         expect(entity.createdAt, model.createdAt);
         expect(entity.updatedAt, model.updatedAt);
       });

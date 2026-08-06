@@ -1,10 +1,32 @@
 # SESSION_STATUS.md
 
-> **Last updated:** 2026-08-06 Session 21o (Home Logo + Intro Flash Root-Cause Fix)
+> **Last updated:** 2026-08-06 Session 21p (Account Verification Workflow — Sprint 60)
 
 ---
 
-## Current Task — HOME PAGE LOGO + INTRO WORDMARK FLASH FIX (Session 21o)
+## Current Task — ACCOUNT VERIFICATION WORKFLOW (Session 21p)
+
+New provider/delivery sign-ups must verify their identity before using the platform: register step 1 selects an account type, providers/delivery users upload an ID card + profile photo, then an admin approves or rejects them from a new dashboard page. Customers skip verification entirely. Code was already written (uncommitted); this session finished it: lint cleanup, the missing Supabase migration, live-DB application, email-confirmation activation, and docs.
+
+| Area | Change |
+|------|--------|
+| **Domain enums** | `lib/domain/enums/user_type.dart` (`customer` / `provider` / `delivery`, `requiresVerification`) + `lib/domain/enums/verification_status.dart` (`pending` / `approved` / `rejected`) — new `lib/domain/enums/` + `test/domain/enums/auth_enums_test.dart` |
+| **User model** | `UserModel`/`User` gain `userType`, `verificationStatus`, `idCardUrl`, `profilePhotoUrl`; `fromSupabase` falls back: missing `user_type`/`verification_status` → treated as customer/approved |
+| **Registration** | `register_page.dart` → 4-step flow: (0) account type picker, (1) info, (2) preferences, (3) confirmation. Role + documents required for provider/delivery (`selectAccountType`, `documentsRequired`). `image_picker` bottom sheet (gallery/camera), uploads via `AuthRepositoryImpl._persistSignUpProfile` |
+| **Auth state** | New `AuthState.pendingVerification`; `_resolveAuthenticated` routes non-approved provider/delivery users there; router forces `/pending-verification` (unless on an auth route); `PendingVerificationPage` shows hourglass + sign-out |
+| **Admin** | `AdminVerificationsPage` at `/admin/verifications` (dashboard quick action): pending requests, ID card + profile photo preview (`InteractiveViewer` zoom), approve/reject with confirm dialog; `admin_service`/`admin_repository` `getVerificationRequests` / `approveVerification` / `rejectVerification`; `verificationRequestsProvider` |
+| **Storage/permissions** | AndroidManifest + Info.plist: CAMERA + media permissions with usage descriptions; uploads to the public `profiles` bucket under `id_cards/` and `profile_photos/` |
+| **Home grid** | Ride tile removed from Home grid (indexes re-mapped); Home Services now index 3 |
+| **Migration `020_user_verification.sql`** | Adds `user_type`, `verification_status`, `id_card_url`, `profile_photo_url` to `users` (+ CHECKs); extends `users_role_check` with `provider`/`delivery`/`owner`; admin SELECT/UPDATE policies via `is_admin()`; ensures public `profiles` bucket + upload policy. **APPLIED live** to `bttnlkmwhorjamzemwda` |
+| **Migration `021_signup_type_flow.sql`** | Rewrites `handle_new_user()` so role/user_type/verification_status come from `raw_user_meta_data` (defaults: customer/approved, provider|delivery/pending) instead of hardcoding customer — otherwise email confirmation strips the session before the client-side upsert and every sign-up collapses into a customer row; backfills orphaned auth users + reconciles previously-broken provider/delivery rows; preserves owner role. **APPLIED live** |
+| **Email confirmation** | Live GoTrue already `mailer_autoconfirm: false` (verified); `site_url` + `uri_allow_list` set to `io.delwaqty://login-callback` so confirmation links open the app (PKCE flow completes the session via deep link) |
+| **Quality gates** | `flutter analyze` **0 errors / 0 warnings** · `flutter test` **556/556 passing** (was 542 → +14) · debug APK built + installed on DNP NX9 |
+
+> **REMAINING (not blocking the milestone):** (1) on-device E2E of register→confirm-email-link→pending→admin-approve→home on DNP NX9 — needs the user to tap the confirmation link (Supabase built-in mailer; free-tier `rate_limit_email_sent=2`/hr); (2) commit + push the Sprint 60 milestone. **SECURITY:** the Supabase Personal Access Token used in this session must be revoked after use.
+
+---
+
+## Previous Task — HOME PAGE LOGO + INTRO WORDMARK FLASH FIX (Session 21o)
 
 User reported two issues after 21n: (1) the home page header still showed the gradient square with the Arabic "دلوقتي" text instead of the actual app logo next to the sidebar button, and (2) a visible "crash"/flash during the intro while the English "Delwaqty" wordmark animates. Both fixed, verified programmatically on device (I cannot view images — verified via per-frame luma analysis + logcat).
 
@@ -359,6 +381,7 @@ Made the Sprint 40 management features (complaints, sanctions, live tracking, su
 | M13h | 57 | Admin Push UX — device counters (online/offline/received), migration 019 (RPC returns device count), Firebase card removed, notification-center delete-all + per-item delete, token heartbeat | ✅ |
 | M13i | 58 | Redesign V2 — Premium UI (Apple/Airbnb/Stripe aesthetic, deep-purple brand): design tokens (colors/spacing/elevation/theme), floating glass bottom nav, shared design widgets (`PremiumCard`/`PremiumSearchField`/`GlassSurface`/`GradientBackground`), Home page redesign, then Search/Orders/Profile tab redesigns | ✅ (commit c7122b2) |
 | M13j | 59 | Intro rendering — splash painter split into static glows + cheap particles (kills the wordmark-phase flash on Impeller); home header shows the real logo image next to the sidebar | ✅ |
+| M13k | 60 | Account Verification — user type (customer/provider/delivery) + verification status on registration, document upload, pending-verification gate, admin approve/reject page, migrations 020+021 applied live, email confirmation + deep-link auth config | ✅ (device E2E tap-confirmation-link pending) |
 
 ---
 
@@ -380,13 +403,14 @@ Made the Sprint 40 management features (complaints, sanctions, live tracking, su
 | Check | Result |
 |-------|--------|
 | `flutter analyze` | 0 errors |
-| `flutter test` | 542/542 passing |
+| `flutter test` | 555/555 passing |
 | APK build | ✅ `app-debug.apk` rebuilt clean (single APK) + installed on DNP NX9 |
 | Gradle | `kotlin.incremental=false` fix committed in `android/gradle.properties` |
 | Migration 018 | ✅ Applied to `bttnlkmwhorjamzemwda` via Management API + verified (columns, trigger, RPC, realtime publication) |
 | Migration 019 | ✅ Applied to `bttnlkmwhorjamzemwda` via Management API + verified (RPC body returns device count) |
+| Migration 020 | ⏳ **Not applied yet** — needs user PAT / SQL Editor (external blocker) |
 | Live E2E | ✅ Admin send → RPC returns 1 device → received counter updates; notification center per-item delete + delete-all verified (DB 0 rows) |
-| Redesign V2 | ✅ Home (21h) + Search/Orders/Profile (21i) premium UI, 0 analyze errors, 542/542 tests, APK installed |
+| Redesign V2 | ✅ Home (21h) + Search/Orders/Profile (21i) premium UI, 0 analyze errors, 555/555 tests, APK installed |
 
 ---
 

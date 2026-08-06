@@ -1123,3 +1123,66 @@ After ADR-037 verified the broadcast path, the admin dashboard still listed indi
 
 ---
 
+## ADR-039: Account Verification / Approval Workflow (Providers + Delivery)
+
+**Date:** Sprint 60
+**Status:** Accepted
+**Deciders:** Lead Software Architect
+
+### Context
+Any sign-up could immediately use the platform regardless of who they claimed to be. Drivers/merchants previously existed only through dedicated onboarding flows (driver platform, merchant registration), but the generic `users.role` column still only allowed `customer/merchant/driver/admin`, and there was no way for an admin to review and approve an identity before granting platform access. The product required a simple two-tier gate: **customers are approved instantly; providers and delivery users must be verified by an admin** using uploaded identity documents.
+
+### Decision
+1. **Two new domain enums** — `UserType` (`customer`/`provider`/`delivery`, `requiresVerification`) and `VerificationStatus` (`pending`/`approved`/`rejected`) — living in a new `lib/domain/enums/`, so the concept is shared by auth, admin, and future modules without feature-to-feature imports.
+2. **Persist on the `users` row** — new columns `user_type`, `verification_status`, `id_card_url`, `profile_photo_url`; the existing `role` CHECK is extended to include `provider`, `delivery`, and `owner`. A provider/delivery sign-up writes `verification_status = 'pending'`; customers are `'approved'`. This keeps verification at the profile row rather than a parallel table, so `UserModel.fromSupabase` needs no join.
+3. **Gate at the auth state, not the screen** — `AuthStateNotifier._resolveAuthenticated` maps a non-approved provider/delivery user to `AuthState.pendingVerification`; the router redirect forces `/pending-verification` for every location except auth routes. The gate cannot be bypassed by navigation.
+4. **Document upload at registration** — the register flow gains an account-type step; providers/delivery must attach an ID card + profile photo (gallery/camera via `image_picker`), uploaded to the public `profiles` bucket under `id_cards/` and `profile_photos/` before the profile upsert.
+5. **Admin review page** — `AdminVerificationsPage` at `/admin/verifications` (dashboard quick action) lists pending requests with name/email/phone/user type and zoomable document previews, with approve/reject actions (confirm dialog, per-row processing state) backed by `getVerificationRequests` / `approveVerification` / `rejectVerification`.
+6. **Migration `020_user_verification.sql`** — adds the four columns (+ CHECK constraints, defaults `customer`/`approved` so existing rows never appear in the pending list), extends `users_role_check`, grants admins SELECT/UPDATE on `users` via `is_admin()`, and guarantees the public `profiles` bucket + authenticated upload policy.
+
+### Rationale
+- Gating at the auth-state level makes the rule apply everywhere (splash, deep links, guest flows) instead of per-screen checks.
+- Storing `user_type`/`verification_status` on the existing `users` row (with safe defaults) avoids a migration of historical rows and keeps the domain model flat.
+- Admin RLS via the existing `is_admin()` helper follows the ADR-026 role-based policy pattern (no `USING(true)`).
+- The migration is idempotent and guarded (`ADD COLUMN IF NOT EXISTS`, drop/recreate constraint checks) because the live schema has drifted from the migration files.
+
+### Consequences
+- Customers are unaffected: their rows default to `customer`/`approved` and they never see the verification gate.
+- Providers/delivery sign-ups are blocked from the main app until an admin approves them; rejection keeps them on the pending page until they sign out.
+- `flutter analyze` 0 errors; suite grew 542 → **556/556** (new enum/model/auth-provider/usecase tests); debug APK not yet rebuilt this session.
+- **External blockers:** `020_user_verification.sql` must be applied to `bttnlkmwhorjamzemwda` (user PAT / SQL Editor); until then provider/delivery upserts fail on missing columns. On-device E2E (register → pending → admin approve → home) and the Sprint 60 commit/push remain.
+
+---
+
+## ADR-040: Signup Trigger Sources Identity from Metadata + Email-Confirmation Deep-Link Config
+
+**Date:** Sprint 60 (live-DB session)
+**Status:** Accepted
+**Deciders:** Lead Software Architect
+
+### Context
+
+With email confirmation already enabled live (`mailer_autoconfirm: false`), a sign-up that selects `provider` or `delivery` would **not** receive the client-side profile upsert: GoTrue strips the session until the email is confirmed, so `AuthRepositoryImpl._persistSignUpProfile` never runs and the trigger `handle_new_user()` ran instead — but it hardcoded `role='customer'` and did `ON CONFLICT (id) DO NOTHING`. Result: provider/delivery sign-ups silently collapsed into customer rows, defeating the ADR-039 verification gate. Additionally, the confirmation email pointed at `http://localhost:3000`, so even when the app did complete the flow the link never returned to the phone.
+
+### Decision
+
+1. **Migration `021_signup_type_flow.sql`** rewrites `handle_new_user()` to read `user_type`, `verification_status`, and `full_name` from `NEW.raw_user_meta_data` (defaults: customer/approved; provider or delivery → pending). It also backfills orphaned `auth.users` rows that never got a `public.users` row, reconciles previously-broken provider/delivery rows, and preserves the owner account. The DB trigger — not the client — is now authoritative for identity at signup.
+2. **Auth config (Management API `PATCH .../config/auth`):** `site_url` and `uri_allow_list` set to `io.delwaqty://login-callback` (the Android deep link already declared in the manifest). Confirmation links therefore open the app; supabase_flutter's default PKCE flow exchanges the code and completes the session.
+3. **No custom SMTP:** the Supabase built-in mailer remains (functional, rate-limited). Free-tier `rate_limit_email_sent=2`/hour was observed (429s beyond that).
+
+### Rationale
+
+- The trigger is the only code guaranteed to run on every signup regardless of email-confirmation state, so identity derivation must live there, not in a client callback.
+- Reading role/user_type/verification_status from `raw_user_meta_data` is the GoTrue-idiomatic way to pass signup-form data into the database without a second RPC.
+- Setting `site_url` to the deep link makes the entire confirm → app-open → session → router gate chain automatic; no custom deep-link handling code needed (PKCE handled by the SDK).
+- `uri_allow_list` is a **comma-separated string** in the Management API (an array body returns HTTP 400) — recorded here so future redirect/allow-list edits don't repeat the dead-end.
+
+### Consequences
+
+- Migrations 020 + 021 are **applied live**; verified rows: `cyfyfuf@gmail.com` → role/provider, user_type/provider, verification_status/pending; customers stay customer/approved; owner preserved with role='owner'.
+- Registration now completes end-to-end at the DB level: signup → email confirm link opens the app → session → auth gate routes provider/delivery to `/pending-verification`.
+- The rate limit constrains bulk testing; 2 signups/hour. A custom SMTP provider is the eventual production fix.
+- Remaining manual verification: tap a real confirmation link on DNP NX9 and walk register → pending → admin approve → home.
+
+---
+

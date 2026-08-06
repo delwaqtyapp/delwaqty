@@ -63,6 +63,25 @@ class ProfileRepositoryImpl implements ProfileRepository {
   }
 
   @override
+  Future<String> uploadDocument({
+    required String userId,
+    required List<int> bytes,
+    required String fileName,
+  }) async {
+    try {
+      return _dataSource.uploadFile(
+        userId: userId,
+        folder: 'documents',
+        bytes: Uint8List.fromList(bytes),
+        fileName: fileName,
+      );
+    } catch (e) {
+      _logger.e('Failed to upload document: $userId', e);
+      throw ServerException(message: e.toString());
+    }
+  }
+
+  @override
   Stream<User> watchProfile(String userId) {
     return _dataSource.watchProfile(userId).map((model) => model.toEntity());
   }

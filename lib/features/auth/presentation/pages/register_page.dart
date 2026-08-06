@@ -1,9 +1,13 @@
+import 'dart:io';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:delwaqty/core/extensions/context_extensions.dart';
 import 'package:delwaqty/core/theme/app_colors.dart';
 import 'package:delwaqty/core/utils/validators.dart';
+import 'package:delwaqty/domain/enums/user_type.dart';
 import 'package:delwaqty/features/auth/domain/auth_state.dart';
 import 'package:delwaqty/features/auth/presentation/auth_provider.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
@@ -29,6 +33,10 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
   bool _locationEnabled = true;
   String _selectedLanguage = 'ar';
 
+  UserType? _selectedRole;
+  XFile? _idCardFile;
+  XFile? _profilePhotoFile;
+
   @override
   void dispose() {
     _nameController.dispose();
@@ -41,6 +49,20 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
 
   void _nextStep() {
     if (_currentStep == 0) {
+      final role = _selectedRole;
+      if (role == null) {
+        context.showAppSnackBar(AppLocalizations.of(context).selectAccountType);
+        return;
+      }
+      if (role.requiresVerification &&
+          (_idCardFile == null || _profilePhotoFile == null)) {
+        context.showAppSnackBar(AppLocalizations.of(context).documentsRequired);
+        return;
+      }
+      setState(() => _currentStep++);
+      return;
+    }
+    if (_currentStep == 1) {
       if (!_formKey.currentState!.validate()) return;
     }
     setState(() => _currentStep++);
@@ -52,11 +74,97 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
     }
   }
 
-  void _onRegister() {
-    ref.read(authStateProvider.notifier).signUp(
+  Future<void> _pickDocument({required bool isIdCard}) async {
+    final l10n = AppLocalizations.of(context);
+    final source = await showModalBottomSheet<ImageSource>(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (context) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: const Color(0xFF1A1035).withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(999),
+                ),
+              ),
+              const SizedBox(height: 20),
+              Row(
+                children: [
+                  Expanded(
+                    child: _SourceOption(
+                      icon: Icons.photo_library_outlined,
+                      label: l10n.gallery,
+                      onTap: () => Navigator.pop(context, ImageSource.gallery),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: _SourceOption(
+                      icon: Icons.photo_camera_outlined,
+                      label: l10n.camera,
+                      onTap: () => Navigator.pop(context, ImageSource.camera),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+            ],
+          ),
+        ),
+      ),
+    );
+    if (source == null) return;
+
+    final file = await ImagePicker().pickImage(
+      source: source,
+      maxWidth: 1280,
+      imageQuality: 80,
+    );
+    if (file == null || !mounted) return;
+    setState(() {
+      if (isIdCard) {
+        _idCardFile = file;
+      } else {
+        _profilePhotoFile = file;
+      }
+    });
+  }
+
+  Future<void> _onRegister() async {
+    final role = _selectedRole!;
+    Uint8List? idCardBytes;
+    String? idCardFileName;
+    Uint8List? profilePhotoBytes;
+    String? profilePhotoFileName;
+
+    if (_idCardFile != null) {
+      idCardBytes = await _idCardFile!.readAsBytes();
+      idCardFileName = _idCardFile!.name;
+    }
+    if (_profilePhotoFile != null) {
+      profilePhotoBytes = await _profilePhotoFile!.readAsBytes();
+      profilePhotoFileName = _profilePhotoFile!.name;
+    }
+
+    await ref
+        .read(authStateProvider.notifier)
+        .signUp(
           email: _emailController.text.trim(),
           password: _passwordController.text,
           fullName: _nameController.text.trim(),
+          userType: role,
+          idCardBytes: idCardBytes,
+          idCardFileName: idCardFileName,
+          profilePhotoBytes: profilePhotoBytes,
+          profilePhotoFileName: profilePhotoFileName,
         );
   }
 
@@ -68,24 +176,23 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
     ref.listen<AuthState>(authStateProvider, (prev, next) {
       next.whenOrNull(
         authenticated: (_) => context.go('/home'),
-        emailConfirmationRequired: (_) {
+        pendingVerification: () => context.go('/pending-verification'),
+        emailConfirmationRequired: (email) {
           showDialog(
             context: context,
             builder: (_) => AlertDialog(
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(20),
               ),
-              title: const Text('Check your email'),
-              content: const Text(
-                'We sent a confirmation link. Please verify your email.',
-              ),
+              title: Text(l10n.emailConfirmationTitle),
+              content: Text(l10n.emailConfirmationSent(email)),
               actions: [
                 TextButton(
                   onPressed: () {
                     Navigator.pop(context);
                     context.go('/login');
                   },
-                  child: const Text('OK'),
+                  child: Text(l10n.ok),
                 ),
               ],
             ),
@@ -126,11 +233,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
         gradient: LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
-          colors: [
-            Color(0xFFF8F6FF),
-            Color(0xFFEFEBFF),
-            Color(0xFFF5F3FF),
-          ],
+          colors: [Color(0xFFF8F6FF), Color(0xFFEFEBFF), Color(0xFFF5F3FF)],
         ),
       ),
     );
@@ -203,25 +306,24 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
     return Padding(
       padding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
       child: Row(
-        children: List.generate(3, (i) {
+        children: List.generate(4, (i) {
           final isActive = i <= _currentStep;
           final isCurrent = i == _currentStep;
           return Expanded(
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 300),
               height: 3,
-              margin: i < 2 ? const EdgeInsets.only(left: 8) : EdgeInsets.zero,
+              margin: i < 3 ? const EdgeInsets.only(left: 8) : EdgeInsets.zero,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(2),
                 gradient: isActive
                     ? const LinearGradient(
-                        colors: [
-                          AppColors.brandPurple,
-                          AppColors.brandCyan,
-                        ],
+                        colors: [AppColors.brandPurple, AppColors.brandCyan],
                       )
                     : null,
-                color: isActive ? null : const Color(0xFF1A1035).withValues(alpha: 0.08),
+                color: isActive
+                    ? null
+                    : const Color(0xFF1A1035).withValues(alpha: 0.08),
                 boxShadow: isCurrent
                     ? [
                         BoxShadow(
@@ -242,15 +344,99 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
     return AnimatedSwitcher(
       duration: const Duration(milliseconds: 300),
       child: switch (_currentStep) {
-        0 => _buildStep1(l10n),
-        1 => _buildStep2(l10n),
-        2 => _buildStep3(l10n, authState),
+        0 => _buildStepRole(l10n),
+        1 => _buildStepInfo(l10n),
+        2 => _buildStepPreferences(l10n),
+        3 => _buildStepConfirmation(l10n, authState),
         _ => const SizedBox(),
       },
     );
   }
 
-  Widget _buildStep1(AppLocalizations l10n) {
+  Widget _buildStepRole(AppLocalizations l10n) {
+    final roles = [
+      (
+        UserType.customer,
+        Icons.person_outline_rounded,
+        l10n.userTypeCustomer,
+        l10n.userTypeCustomerDesc,
+        const Color(0xFF4A90D9),
+      ),
+      (
+        UserType.provider,
+        Icons.handyman_outlined,
+        l10n.userTypeProvider,
+        l10n.userTypeProviderDesc,
+        const Color(0xFF34C759),
+      ),
+      (
+        UserType.delivery,
+        Icons.local_shipping_outlined,
+        l10n.userTypeDelivery,
+        l10n.userTypeDeliveryDesc,
+        const Color(0xFFFF9500),
+      ),
+    ];
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SizedBox(height: 16),
+        Text(
+          l10n.selectAccountType,
+          style: const TextStyle(
+            fontSize: 24,
+            fontWeight: FontWeight.w700,
+            color: Color(0xFF1A1035),
+          ),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          l10n.accountTypeDescription,
+          style: TextStyle(
+            fontSize: 14,
+            color: const Color(0xFF1A1035).withValues(alpha: 0.5),
+          ),
+        ),
+        const SizedBox(height: 24),
+        for (final role in roles) ...[
+          _RoleOption(
+            userType: role.$1,
+            icon: role.$2,
+            title: role.$3,
+            subtitle: role.$4,
+            color: role.$5,
+            isSelected: _selectedRole == role.$1,
+            onTap: () => setState(() => _selectedRole = role.$1),
+          ),
+          const SizedBox(height: 14),
+        ],
+        if (_selectedRole != null && _selectedRole!.requiresVerification) ...[
+          const SizedBox(height: 6),
+          _UploadTile(
+            icon: Icons.badge_outlined,
+            title: l10n.uploadIdCard,
+            hint: l10n.uploadIdCardHint,
+            filePath: _idCardFile?.path,
+            color: const Color(0xFF007AFF),
+            onTap: () => _pickDocument(isIdCard: true),
+          ),
+          const SizedBox(height: 14),
+          _UploadTile(
+            icon: Icons.person_outline_rounded,
+            title: l10n.uploadProfilePhoto,
+            hint: l10n.uploadProfilePhotoHint,
+            filePath: _profilePhotoFile?.path,
+            color: const Color(0xFFAF52DE),
+            onTap: () => _pickDocument(isIdCard: false),
+          ),
+        ],
+        const SizedBox(height: 40),
+      ],
+    );
+  }
+
+  Widget _buildStepInfo(AppLocalizations l10n) {
     return Form(
       key: _formKey,
       child: Column(
@@ -303,8 +489,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
             obscure: _obscurePassword,
             validator: (v) => AppValidators.password(v),
             suffix: GestureDetector(
-              onTap: () =>
-                  setState(() => _obscurePassword = !_obscurePassword),
+              onTap: () => setState(() => _obscurePassword = !_obscurePassword),
               child: Icon(
                 _obscurePassword
                     ? Icons.visibility_off_rounded
@@ -320,13 +505,10 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
             hint: l10n.confirmPassword,
             icon: Icons.lock_outline_rounded,
             obscure: _obscureConfirm,
-            validator: (v) => AppValidators.confirmPassword(
-              v,
-              _passwordController.text,
-            ),
+            validator: (v) =>
+                AppValidators.confirmPassword(v, _passwordController.text),
             suffix: GestureDetector(
-              onTap: () =>
-                  setState(() => _obscureConfirm = !_obscureConfirm),
+              onTap: () => setState(() => _obscureConfirm = !_obscureConfirm),
               child: Icon(
                 _obscureConfirm
                     ? Icons.visibility_off_rounded
@@ -342,7 +524,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
     );
   }
 
-  Widget _buildStep2(AppLocalizations l10n) {
+  Widget _buildStepPreferences(AppLocalizations l10n) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -441,11 +623,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
               color: AppColors.brandPurple.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(12),
             ),
-            child: Icon(
-              icon,
-              color: AppColors.brandPurple,
-              size: 20,
-            ),
+            child: Icon(icon, color: AppColors.brandPurple, size: 20),
           ),
           const SizedBox(width: 14),
           Expanded(
@@ -474,7 +652,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
           Switch(
             value: value,
             onChanged: onChanged,
-            activeColor: AppColors.brandPurple,
+            activeThumbColor: AppColors.brandPurple,
             activeTrackColor: AppColors.brandPurple.withValues(alpha: 0.3),
             inactiveTrackColor: const Color(0xFF1A1035).withValues(alpha: 0.1),
           ),
@@ -483,8 +661,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
     );
   }
 
-  Widget _buildStep3(AppLocalizations l10n, AuthState authState) {
-    final isLoading = authState is AuthLoading;
+  Widget _buildStepConfirmation(AppLocalizations l10n, AuthState authState) {
     return Column(
       children: [
         const SizedBox(height: 60),
@@ -560,10 +737,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
           duration: const Duration(milliseconds: 200),
           decoration: BoxDecoration(
             gradient: const LinearGradient(
-              colors: [
-                AppColors.brandPurple,
-                Color(0xFF6B5CE7),
-              ],
+              colors: [AppColors.brandPurple, Color(0xFF6B5CE7)],
             ),
             borderRadius: BorderRadius.circular(22),
             boxShadow: [
@@ -579,9 +753,9 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
             child: InkWell(
               onTap: isLoading
                   ? null
-                  : _currentStep < 2
-                      ? _nextStep
-                      : _onRegister,
+                  : _currentStep < 3
+                  ? _nextStep
+                  : _onRegister,
               borderRadius: BorderRadius.circular(22),
               splashColor: Colors.white.withValues(alpha: 0.1),
               child: Center(
@@ -595,7 +769,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                         ),
                       )
                     : Text(
-                        _currentStep < 2 ? l10n.next : l10n.register,
+                        _currentStep < 3 ? l10n.next : l10n.register,
                         style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
@@ -606,6 +780,250 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
               ),
             ),
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class _RoleOption extends StatelessWidget {
+  const _RoleOption({
+    required this.userType,
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    required this.color,
+    required this.isSelected,
+    required this.onTap,
+  });
+
+  final UserType userType;
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final Color color;
+  final bool isSelected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(
+            color: isSelected
+                ? color
+                : const Color(0xFF1A1035).withValues(alpha: 0.08),
+            width: isSelected ? 2 : 1,
+          ),
+          boxShadow: isSelected
+              ? [
+                  BoxShadow(
+                    color: color.withValues(alpha: 0.2),
+                    blurRadius: 16,
+                    offset: const Offset(0, 6),
+                  ),
+                ]
+              : null,
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 48,
+              height: 48,
+              decoration: BoxDecoration(
+                color: color.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: Icon(icon, color: color, size: 24),
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                      color: Color(0xFF1A1035),
+                    ),
+                  ),
+                  const SizedBox(height: 3),
+                  Text(
+                    subtitle,
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: const Color(0xFF1A1035).withValues(alpha: 0.5),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 8),
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              width: 24,
+              height: 24,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: isSelected ? color : Colors.transparent,
+                border: Border.all(
+                  color: isSelected
+                      ? color
+                      : const Color(0xFF1A1035).withValues(alpha: 0.2),
+                  width: 2,
+                ),
+              ),
+              child: isSelected
+                  ? const Icon(
+                      Icons.check_rounded,
+                      color: Colors.white,
+                      size: 16,
+                    )
+                  : null,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _UploadTile extends StatelessWidget {
+  const _UploadTile({
+    required this.icon,
+    required this.title,
+    required this.hint,
+    required this.filePath,
+    required this.color,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final String title;
+  final String hint;
+  final String? filePath;
+  final Color color;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final hasFile = filePath != null;
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(
+            color: hasFile
+                ? color.withValues(alpha: 0.6)
+                : const Color(0xFF1A1035).withValues(alpha: 0.08),
+            width: hasFile ? 2 : 1,
+          ),
+        ),
+        child: Row(
+          children: [
+            if (hasFile)
+              ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: Image.file(
+                  File(filePath!),
+                  width: 56,
+                  height: 56,
+                  fit: BoxFit.cover,
+                ),
+              )
+            else
+              Container(
+                width: 56,
+                height: 56,
+                decoration: BoxDecoration(
+                  color: color.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(icon, color: color, size: 26),
+              ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w700,
+                      color: Color(0xFF1A1035),
+                    ),
+                  ),
+                  const SizedBox(height: 3),
+                  Text(
+                    hint,
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: const Color(0xFF1A1035).withValues(alpha: 0.5),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 8),
+            Icon(
+              hasFile ? Icons.check_circle_rounded : Icons.add_circle_outline,
+              color: hasFile
+                  ? color
+                  : const Color(0xFF1A1035).withValues(alpha: 0.3),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _SourceOption extends StatelessWidget {
+  const _SourceOption({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 18),
+        decoration: BoxDecoration(
+          color: const Color(0xFFF5F3FF),
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Column(
+          children: [
+            Icon(icon, color: const Color(0xFF1A1035), size: 28),
+            const SizedBox(height: 10),
+            Text(
+              label,
+              style: const TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: Color(0xFF1A1035),
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -674,9 +1092,7 @@ class _LightRegField extends StatelessWidget {
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(18),
-          borderSide: BorderSide(
-            color: Theme.of(context).colorScheme.error,
-          ),
+          borderSide: BorderSide(color: Theme.of(context).colorScheme.error),
         ),
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 18,

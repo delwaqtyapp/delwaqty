@@ -1,3 +1,6 @@
+import 'dart:typed_data';
+
+import 'package:delwaqty/domain/enums/user_type.dart';
 import 'package:delwaqty/domain/repositories/auth_repository.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -34,11 +37,21 @@ class SignUpUseCase {
     required String email,
     required String password,
     String? fullName,
+    UserType userType = UserType.customer,
+    Uint8List? idCardBytes,
+    String? idCardFileName,
+    Uint8List? profilePhotoBytes,
+    String? profilePhotoFileName,
   }) {
     return _repository.signUpWithEmail(
       email: email,
       password: password,
       fullName: fullName,
+      userType: userType,
+      idCardBytes: idCardBytes,
+      idCardFileName: idCardFileName,
+      profilePhotoBytes: profilePhotoBytes,
+      profilePhotoFileName: profilePhotoFileName,
     );
   }
 }

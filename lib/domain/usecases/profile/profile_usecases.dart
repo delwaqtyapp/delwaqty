@@ -59,6 +59,28 @@ class UploadAvatarUseCase {
   }
 }
 
+final uploadDocumentUseCaseProvider = Provider<UploadDocumentUseCase>((ref) {
+  return UploadDocumentUseCase(ref.watch(profileRepositoryProvider));
+});
+
+class UploadDocumentUseCase {
+  UploadDocumentUseCase(this._repository);
+
+  final ProfileRepository _repository;
+
+  Future<String> call({
+    required String userId,
+    required List<int> bytes,
+    required String fileName,
+  }) {
+    return _repository.uploadDocument(
+      userId: userId,
+      bytes: bytes,
+      fileName: fileName,
+    );
+  }
+}
+
 final watchProfileUseCaseProvider = StreamProvider.autoDispose
     .family<User, String>((ref, userId) {
       final repository = ref.watch(profileRepositoryProvider);

@@ -132,3 +132,12 @@ final driverPerformanceProvider =
   final adminService = ref.watch(adminServiceProvider);
   return adminService.getDriverPerformance();
 });
+
+// ─── Verification Requests ─────────────────────────────────
+
+final verificationRequestsProvider = FutureProvider<List<VerificationRequest>>((
+  ref,
+) async {
+  final adminService = ref.watch(adminServiceProvider);
+  return adminService.getVerificationRequests();
+});

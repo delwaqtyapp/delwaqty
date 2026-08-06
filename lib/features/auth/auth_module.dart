@@ -4,6 +4,7 @@ import 'package:delwaqty/core/module/feature_module.dart';
 import 'package:delwaqty/features/auth/presentation/pages/login_page.dart';
 import 'package:delwaqty/features/auth/presentation/pages/register_page.dart';
 import 'package:delwaqty/features/auth/presentation/pages/forgot_password_page.dart';
+import 'package:delwaqty/features/auth/presentation/pages/pending_verification_page.dart';
 
 class AuthModule extends FeatureModule {
   @override
@@ -37,6 +38,11 @@ class AuthModule extends FeatureModule {
       path: '/forgot-password',
       name: 'forgot-password',
       builder: (context, state) => const ForgotPasswordPage(),
+    ),
+    GoRoute(
+      path: '/pending-verification',
+      name: 'pending-verification',
+      builder: (context, state) => const PendingVerificationPage(),
     ),
   ];
 }

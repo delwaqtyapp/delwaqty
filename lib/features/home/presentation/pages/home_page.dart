@@ -254,12 +254,6 @@ class HomePage extends ConsumerWidget {
         countOf(MerchantType.pharmacy),
       ),
       _ServiceData(
-        Icons.local_taxi_rounded,
-        l10n.ride,
-        AppColors.serviceRide,
-        null,
-      ),
-      _ServiceData(
         Icons.home_repair_service_rounded,
         l10n.homeServices,
         AppColors.serviceHome,
@@ -316,14 +310,12 @@ class HomePage extends ConsumerWidget {
                   case 2:
                     context.push('/market?type=pharmacy');
                   case 3:
-                    context.push('/ride/book');
-                  case 4:
                     context.push('/market?type=home');
-                  case 5:
+                  case 4:
                     context.push('/direct-delivery');
-                  case 6:
+                  case 5:
                     context.push('/market');
-                  case 7:
+                  case 6:
                     context.push('/settings');
                 }
               },

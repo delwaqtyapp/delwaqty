@@ -1,7 +1,10 @@
+import 'package:supabase_flutter/supabase_flutter.dart' as sb;
 import 'package:delwaqty/data/models/user_model.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:delwaqty/domain/repositories/user_repository.dart';
 import 'package:delwaqty/domain/entities/user.dart';
+import 'package:delwaqty/domain/enums/user_type.dart';
+import 'package:delwaqty/domain/enums/verification_status.dart';
 import 'package:delwaqty/data/datasources/remote/supabase_auth_data_source.dart';
 import 'package:delwaqty/data/datasources/remote/supabase_profile_data_source.dart';
 import 'package:delwaqty/core/errors/exceptions.dart';
@@ -38,17 +41,7 @@ class UserRepositoryImpl implements UserRepository {
         return model.toEntity();
       } catch (e) {
         _logger.w('Profile not found in users table for authenticated user: ${supabaseUser.id}. Creating default profile...');
-        final defaultModel = UserModel(
-          id: supabaseUser.id,
-          email: supabaseUser.email ?? '',
-          fullName: supabaseUser.userMetadata?['full_name'] as String? ?? 'User',
-          phone: supabaseUser.phone,
-          avatarUrl: supabaseUser.userMetadata?['avatar_url'] as String?,
-          language: 'en',
-          isOnboarded: false,
-          role: 'customer',
-          createdAt: DateTime.now(),
-        );
+        final defaultModel = _buildDefaultModel(supabaseUser);
         final created = await _profileDataSource.createProfile(defaultModel);
         return created.toEntity();
       }
@@ -70,17 +63,7 @@ class UserRepositoryImpl implements UserRepository {
         final supabaseUser = _authDataSource.currentSupabaseUser;
         if (supabaseUser != null && supabaseUser.id == id) {
           _logger.w('Profile not found in users table for user by ID: $id (matches current user). Creating default profile...');
-          final defaultModel = UserModel(
-            id: supabaseUser.id,
-            email: supabaseUser.email ?? '',
-            fullName: supabaseUser.userMetadata?['full_name'] as String? ?? 'User',
-            phone: supabaseUser.phone,
-            avatarUrl: supabaseUser.userMetadata?['avatar_url'] as String?,
-            language: 'en',
-            isOnboarded: false,
-            role: 'customer',
-            createdAt: DateTime.now(),
-          );
+          final defaultModel = _buildDefaultModel(supabaseUser);
           final created = await _profileDataSource.createProfile(defaultModel);
           return created.toEntity();
         }
@@ -134,5 +117,32 @@ class UserRepositoryImpl implements UserRepository {
       _logger.e('Failed to update language for: $userId', e);
       throw ServerException(message: e.toString());
     }
+  }
+
+  UserModel _buildDefaultModel(sb.User supabaseUser) {
+    final metaType = supabaseUser.userMetadata?['user_type'] as String?;
+    final userType = UserType.fromCode(metaType);
+    final metaVerification =
+        supabaseUser.userMetadata?['verification_status'] as String?;
+    final verificationStatus = metaVerification != null &&
+            VerificationStatus.fromCode(metaVerification) !=
+                VerificationStatus.pending
+        ? VerificationStatus.fromCode(metaVerification)
+        : userType.requiresVerification
+        ? VerificationStatus.pending
+        : VerificationStatus.approved;
+    return UserModel(
+      id: supabaseUser.id,
+      email: supabaseUser.email ?? '',
+      fullName: supabaseUser.userMetadata?['full_name'] as String? ?? 'User',
+      phone: supabaseUser.phone,
+      avatarUrl: supabaseUser.userMetadata?['avatar_url'] as String?,
+      language: 'en',
+      isOnboarded: false,
+      role: userType.code,
+      userType: userType,
+      verificationStatus: verificationStatus,
+      createdAt: DateTime.now(),
+    );
   }
 }

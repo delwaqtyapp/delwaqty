@@ -3851,7 +3851,7 @@ abstract class AppLocalizations {
   /// No description provided for @verificationPending.
   ///
   /// In en, this message translates to:
-  /// **'Verification pending'**
+  /// **'Pending'**
   String get verificationPending;
 
   /// No description provided for @rejected.
@@ -7729,6 +7729,216 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Enter your password once to enable fingerprint login'**
   String get enterPasswordForFingerprint;
+
+  /// No description provided for @selectAccountType.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose your account type'**
+  String get selectAccountType;
+
+  /// No description provided for @accountTypeDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Select how you will use Delwaqty'**
+  String get accountTypeDescription;
+
+  /// No description provided for @userTypeCustomer.
+  ///
+  /// In en, this message translates to:
+  /// **'Customer'**
+  String get userTypeCustomer;
+
+  /// No description provided for @userTypeCustomerDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Order from stores, restaurants and services'**
+  String get userTypeCustomerDesc;
+
+  /// No description provided for @userTypeProvider.
+  ///
+  /// In en, this message translates to:
+  /// **'Service Provider'**
+  String get userTypeProvider;
+
+  /// No description provided for @userTypeProviderDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Offer your services to customers'**
+  String get userTypeProviderDesc;
+
+  /// No description provided for @userTypeDelivery.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivery Driver'**
+  String get userTypeDelivery;
+
+  /// No description provided for @userTypeDeliveryDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Deliver orders to customers'**
+  String get userTypeDeliveryDesc;
+
+  /// No description provided for @uploadIdCard.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload National ID'**
+  String get uploadIdCard;
+
+  /// No description provided for @uploadIdCardHint.
+  ///
+  /// In en, this message translates to:
+  /// **'A clear photo of your national ID'**
+  String get uploadIdCardHint;
+
+  /// No description provided for @uploadProfilePhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload Personal Photo'**
+  String get uploadProfilePhoto;
+
+  /// No description provided for @uploadProfilePhotoHint.
+  ///
+  /// In en, this message translates to:
+  /// **'A recent personal photo'**
+  String get uploadProfilePhotoHint;
+
+  /// No description provided for @camera.
+  ///
+  /// In en, this message translates to:
+  /// **'Camera'**
+  String get camera;
+
+  /// No description provided for @documentsRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'ID and personal photo are required for this account type'**
+  String get documentsRequired;
+
+  /// No description provided for @verificationPendingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Account Under Review'**
+  String get verificationPendingTitle;
+
+  /// No description provided for @verificationPendingMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Your account is under review by the administration, please wait.'**
+  String get verificationPendingMessage;
+
+  /// No description provided for @verificationApproved.
+  ///
+  /// In en, this message translates to:
+  /// **'Approved'**
+  String get verificationApproved;
+
+  /// No description provided for @verificationRejected.
+  ///
+  /// In en, this message translates to:
+  /// **'Rejected'**
+  String get verificationRejected;
+
+  /// No description provided for @adminVerifications.
+  ///
+  /// In en, this message translates to:
+  /// **'Verifications'**
+  String get adminVerifications;
+
+  /// No description provided for @verificationRequests.
+  ///
+  /// In en, this message translates to:
+  /// **'Verification Requests'**
+  String get verificationRequests;
+
+  /// No description provided for @approve.
+  ///
+  /// In en, this message translates to:
+  /// **'Approve'**
+  String get approve;
+
+  /// No description provided for @noVerificationRequests.
+  ///
+  /// In en, this message translates to:
+  /// **'No pending verification requests'**
+  String get noVerificationRequests;
+
+  /// No description provided for @viewDocument.
+  ///
+  /// In en, this message translates to:
+  /// **'View Document'**
+  String get viewDocument;
+
+  /// No description provided for @confirmApproveVerification.
+  ///
+  /// In en, this message translates to:
+  /// **'Approve this verification request?'**
+  String get confirmApproveVerification;
+
+  /// No description provided for @confirmRejectVerification.
+  ///
+  /// In en, this message translates to:
+  /// **'Reject this verification request?'**
+  String get confirmRejectVerification;
+
+  /// No description provided for @approvalSuccessful.
+  ///
+  /// In en, this message translates to:
+  /// **'Account approved'**
+  String get approvalSuccessful;
+
+  /// No description provided for @rejectionSuccessful.
+  ///
+  /// In en, this message translates to:
+  /// **'Account rejected'**
+  String get rejectionSuccessful;
+
+  /// No description provided for @verificationDecisionFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Something went wrong. Please try again.'**
+  String get verificationDecisionFailed;
+
+  /// No description provided for @idCard.
+  ///
+  /// In en, this message translates to:
+  /// **'National ID'**
+  String get idCard;
+
+  /// No description provided for @emailConfirmationTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Check your email'**
+  String get emailConfirmationTitle;
+
+  /// No description provided for @documentsSectionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete your verification'**
+  String get documentsSectionTitle;
+
+  /// No description provided for @documentsSectionMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload your documents to submit your account for review.'**
+  String get documentsSectionMessage;
+
+  /// No description provided for @submitDocuments.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit Documents'**
+  String get submitDocuments;
+
+  /// No description provided for @documentsUploaded.
+  ///
+  /// In en, this message translates to:
+  /// **'Documents uploaded successfully'**
+  String get documentsUploaded;
+
+  /// No description provided for @documentsUploadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to upload documents. Please try again.'**
+  String get documentsUploadFailed;
 }
 
 class _AppLocalizationsDelegate

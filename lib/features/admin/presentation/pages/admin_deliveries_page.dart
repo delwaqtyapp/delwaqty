@@ -3,10 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:delwaqty/services/admin/admin_providers.dart';
 import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
-import 'package:delwaqty/shared/widgets/glass_card.dart';
 import 'package:delwaqty/shared/widgets/premium_empty_state.dart';
 import 'package:delwaqty/shared/widgets/app_loader.dart';
+import 'package:delwaqty/shared/widgets/design/premium_card.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
+import 'package:delwaqty/core/theme/app_colors.dart';
+import 'package:delwaqty/core/theme/app_spacing.dart';
 
 final _adminDeliveriesProvider = FutureProvider<List<Map<String, dynamic>>>((
   ref,
@@ -54,7 +56,7 @@ class _AdminDeliveriesPageState extends ConsumerState<AdminDeliveriesPage> {
         children: [
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
-            child: GlassCard(
+            child: PremiumCard(
               padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
               child: SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
@@ -180,31 +182,38 @@ class _ServiceChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 4),
-      child: GestureDetector(
-        onTap: onTap,
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-          decoration: BoxDecoration(
-            color: selected
-                ? cs.secondary.withValues(alpha: 0.2)
-                : cs.surfaceContainerHighest.withValues(alpha: 0.3),
-            borderRadius: BorderRadius.circular(14),
-            border: Border.all(
-              color: selected
-                  ? cs.secondary.withValues(alpha: 0.5)
-                  : cs.outline.withValues(alpha: 0.1),
+          padding: const EdgeInsets.symmetric(horizontal: 4),
+          child: GestureDetector(
+            onTap: onTap,
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+              decoration: BoxDecoration(
+                gradient: selected
+                    ? LinearGradient(
+                        colors: [
+                          AppColors.brandPurple,
+                          AppColors.brandPurple.withValues(alpha: 0.8),
+                        ],
+                      )
+                    : null,
+                color: selected ? null : cs.surfaceContainerHighest.withValues(alpha: 0.3),
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(
+                  color: selected
+                      ? AppColors.brandPurple.withValues(alpha: 0.5)
+                      : cs.outline.withValues(alpha: 0.1),
+                ),
+              ),
+              child: Text(
+                label,
+                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                  fontWeight: selected ? FontWeight.bold : FontWeight.normal,
+                  color: selected ? Colors.white : cs.onSurfaceVariant,
+                ),
+              ),
             ),
           ),
-          child: Text(
-            label,
-            style: Theme.of(context).textTheme.labelSmall?.copyWith(
-              fontWeight: selected ? FontWeight.bold : FontWeight.normal,
-              color: selected ? cs.secondary : cs.onSurfaceVariant,
-            ),
-          ),
-        ),
-      ),
     );
   }
 }
@@ -261,9 +270,9 @@ class _DeliveryGlassTile extends StatelessWidget {
       _ => Icons.local_shipping_rounded,
     };
 
-    return GlassCard(
+    return PremiumCard(
       padding: const EdgeInsets.all(12),
-      borderRadius: 20,
+      radius: AppSpacing.radiusCard,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

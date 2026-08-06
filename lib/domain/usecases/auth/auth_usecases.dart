@@ -97,6 +97,20 @@ class SignInWithAppleUseCase {
   Future<AuthResult> call() => _repository.signInWithApple();
 }
 
+final signInWithFacebookUseCaseProvider = Provider<SignInWithFacebookUseCase>((
+  ref,
+) {
+  return SignInWithFacebookUseCase(ref.watch(authRepositoryProvider));
+});
+
+class SignInWithFacebookUseCase {
+  SignInWithFacebookUseCase(this._repository);
+
+  final AuthRepository _repository;
+
+  Future<AuthResult> call() => _repository.signInWithFacebook();
+}
+
 final signInAnonymouslyUseCaseProvider = Provider<SignInAnonymouslyUseCase>((
   ref,
 ) {

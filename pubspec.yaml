@@ -43,6 +43,7 @@ dependencies:
 
   # Local Storage
   shared_preferences: ^2.2.3
+  local_auth: ^2.3.0
 
 
   # Logging
@@ -116,6 +117,7 @@ flutter:
 
   assets:
     - assets/lottie/
+    - assets/logo app/logo.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

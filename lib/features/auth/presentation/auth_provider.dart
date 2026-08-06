@@ -1,10 +1,13 @@
 import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:delwaqty/features/auth/domain/auth_state.dart';
 import 'package:delwaqty/domain/repositories/auth_repository.dart';
 import 'package:delwaqty/domain/usecases/auth/auth_usecases.dart';
 import 'package:delwaqty/domain/usecases/user/get_user.dart';
 import 'package:delwaqty/core/errors/error_handler.dart';
+import 'package:delwaqty/core/constants/storage_keys.dart';
+import 'package:delwaqty/data/datasources/local/shared_preferences_service.dart';
 import 'package:delwaqty/services/logger/app_logger.dart';
 
 final authStateProvider = NotifierProvider<AuthStateNotifier, AuthState>(
@@ -33,6 +36,8 @@ class AuthStateNotifier extends Notifier<AuthState> {
       ref.read(signInWithGoogleUseCaseProvider);
   SignInWithAppleUseCase get _signInWithAppleUseCase =>
       ref.read(signInWithAppleUseCaseProvider);
+  SignInWithFacebookUseCase get _signInWithFacebookUseCase =>
+      ref.read(signInWithFacebookUseCaseProvider);
   SignInAnonymouslyUseCase get _signInAnonymouslyUseCase =>
       ref.read(signInAnonymouslyUseCaseProvider);
   SignOutUseCase get _signOutUseCase => ref.read(signOutUseCaseProvider);
@@ -183,6 +188,19 @@ class AuthStateNotifier extends Notifier<AuthState> {
     }
   }
 
+  Future<void> signInWithFacebook() async {
+    state = const AuthState.loading();
+    try {
+      await _signInWithFacebookUseCase();
+      final user = await ref.read(getCurrentUserUseCaseProvider).call();
+      state = AuthState.authenticated(user: user);
+    } catch (e) {
+      _logger.e('Facebook sign in failed', e);
+      final failure = handleException(e);
+      state = AuthState.error(message: failure.message);
+    }
+  }
+
   Future<void> signInAnonymously() async {
     state = const AuthState.loading();
     try {
@@ -200,6 +218,10 @@ class AuthStateNotifier extends Notifier<AuthState> {
     state = const AuthState.loading();
     try {
       await _signOutUseCase();
+      final prefs = ref.read(sharedPreferencesProvider);
+      await prefs.remove(key: StorageKeys.biometricEnabled);
+      await prefs.remove(key: StorageKeys.biometricEmail);
+      await prefs.remove(key: StorageKeys.biometricPassword);
       state = const AuthState.unauthenticated();
     } catch (e) {
       _logger.e('Sign out failed', e);

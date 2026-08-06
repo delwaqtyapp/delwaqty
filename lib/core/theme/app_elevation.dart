@@ -64,6 +64,55 @@ abstract final class AppElevation {
   ];
 
   // ---------------------------------------------------------------------------
+  // Premium Soft Shadows (V2)
+  // ---------------------------------------------------------------------------
+
+  /// Premium card shadow — `0 10 35 rgba(98,65,200,.10)`.
+  static const List<BoxShadow> shadowCard = [
+    BoxShadow(
+      color: Color(0x1A6241C8),
+      blurRadius: 35,
+      spreadRadius: -4,
+      offset: Offset(0, 10),
+    ),
+    BoxShadow(
+      color: Color(0x0D6241C8),
+      blurRadius: 10,
+      offset: Offset(0, 4),
+    ),
+  ];
+
+  /// Floating surface shadow (bottom nav, sheets) — soft purple halo.
+  static const List<BoxShadow> shadowFloat = [
+    BoxShadow(
+      color: Color(0x246241C8),
+      blurRadius: 40,
+      spreadRadius: -6,
+      offset: Offset(0, 12),
+    ),
+    BoxShadow(
+      color: Color(0x143B1DB0),
+      blurRadius: 12,
+      offset: Offset(0, 6),
+    ),
+  ];
+
+  /// Hero / primary-action glow shadow.
+  static const List<BoxShadow> shadowGlow = [
+    BoxShadow(
+      color: Color(0x335B3DF0),
+      blurRadius: 32,
+      spreadRadius: -2,
+      offset: Offset(0, 12),
+    ),
+    BoxShadow(
+      color: Color(0x1A5B3DF0),
+      blurRadius: 12,
+      offset: Offset(0, 4),
+    ),
+  ];
+
+  // ---------------------------------------------------------------------------
   // Helpers
   // ---------------------------------------------------------------------------
 

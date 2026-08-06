@@ -82,8 +82,10 @@ flutter test
 If an Android device is connected:
 
 ```bash
-flutter run
+flutter run --dart-define-from-file=.env.dev
 ```
+
+**NEVER build APK without `--dart-define-from-file=.env.dev`** — the `ConfigValidator` will crash the app before Flutter renders.
 
 **Never commit failing code.**
 

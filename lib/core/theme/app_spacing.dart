@@ -93,7 +93,7 @@ abstract final class AppSpacing {
   // ---------------------------------------------------------------------------
 
   /// Standard horizontal padding used inside screen-level containers.
-  static const double screenHorizontalPadding = d16;
+  static const double screenHorizontalPadding = d20;
 
   /// Standard vertical padding used inside screen-level containers.
   static const double screenVerticalPadding = d16;
@@ -200,5 +200,57 @@ abstract final class AppSpacing {
   /// Convenience [BorderRadius] for fully rounded corners.
   static const BorderRadius borderRadiusFull = BorderRadius.all(
     Radius.circular(radiusFull),
+  );
+
+  // ---------------------------------------------------------------------------
+  // Premium Radii (V2)
+  // ---------------------------------------------------------------------------
+
+  /// Card corner radius — 24px.
+  static const double radiusCard = 24;
+
+  /// Button corner radius — 18px.
+  static const double radiusButton = 18;
+
+  /// Bottom sheet corner radius — 28px.
+  static const double radiusSheet = 28;
+
+  /// Search field corner radius — 22px.
+  static const double radiusSearch = 22;
+
+  /// Store / business card corner radius — 24px.
+  static const double radiusStoreCard = 24;
+
+  /// Dialog corner radius — 26px.
+  static const double radiusDialog = 26;
+
+  /// Convenience [BorderRadius] for premium cards.
+  static const BorderRadius borderRadiusCard = BorderRadius.all(
+    Radius.circular(radiusCard),
+  );
+
+  /// Convenience [BorderRadius] for premium buttons.
+  static const BorderRadius borderRadiusButton = BorderRadius.all(
+    Radius.circular(radiusButton),
+  );
+
+  /// Convenience [BorderRadius] for bottom sheets.
+  static const BorderRadius borderRadiusSheet = BorderRadius.all(
+    Radius.circular(radiusSheet),
+  );
+
+  /// Convenience [BorderRadius] for search fields.
+  static const BorderRadius borderRadiusSearch = BorderRadius.all(
+    Radius.circular(radiusSearch),
+  );
+
+  /// Convenience [BorderRadius] for store cards.
+  static const BorderRadius borderRadiusStoreCard = BorderRadius.all(
+    Radius.circular(radiusStoreCard),
+  );
+
+  /// Convenience [BorderRadius] for dialogs.
+  static const BorderRadius borderRadiusDialog = BorderRadius.all(
+    Radius.circular(radiusDialog),
   );
 }

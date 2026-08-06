@@ -21,9 +21,10 @@ class _AppState extends ConsumerState<App> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
       final authNotifier = ref.read(authStateProvider.notifier);
-      authNotifier.checkAuthStatus();
       authNotifier.startAuthListener();
+      authNotifier.checkAuthStatus();
       ref.read(pushNotificationServiceProvider).initialize();
     });
   }

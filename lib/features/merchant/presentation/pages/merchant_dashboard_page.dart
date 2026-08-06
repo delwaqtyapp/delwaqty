@@ -181,10 +181,7 @@ class _MerchantDashboardPageState
             leading: const Icon(Icons.local_offer_outlined),
             title: Text(AppLocalizations.of(context).createOffer),
             trailing: const Icon(Icons.chevron_right_rounded),
-            onTap: () {
-              final l10n = AppLocalizations.of(context);
-              context.showAppSnackBar(l10n.createOffer);
-            },
+            onTap: () => context.push('/merchant-dashboard/offers'),
           ),
         ],
       ),

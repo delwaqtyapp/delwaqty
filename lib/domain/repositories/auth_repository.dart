@@ -1,4 +1,4 @@
-enum AuthProviderType { email, phone, google, apple, anonymous }
+enum AuthProviderType { email, phone, google, apple, facebook, anonymous }
 
 abstract class AuthRepository {
   Future<AuthResult> signInWithEmail({
@@ -14,6 +14,7 @@ abstract class AuthRepository {
   Future<AuthResult> verifyOTP({required String phone, required String otp});
   Future<AuthResult> signInWithGoogle();
   Future<AuthResult> signInWithApple();
+  Future<AuthResult> signInWithFacebook();
   Future<AuthResult> signInAnonymously();
   Future<void> signOut();
   Future<void> resetPassword({required String email});

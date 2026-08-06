@@ -4,14 +4,17 @@ import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:delwaqty/core/extensions/context_extensions.dart';
 import 'package:delwaqty/core/localization/locale_provider.dart';
+import 'package:delwaqty/core/theme/app_colors.dart';
+import 'package:delwaqty/core/theme/app_spacing.dart';
 import 'package:delwaqty/core/theme/theme_mode_provider.dart';
 import 'package:delwaqty/domain/entities/user.dart';
 import 'package:delwaqty/domain/usecases/profile/profile_usecases.dart';
 import 'package:delwaqty/features/auth/domain/auth_state.dart';
 import 'package:delwaqty/features/auth/presentation/auth_provider.dart';
 import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
+import 'package:delwaqty/shared/widgets/gradient_background.dart';
+import 'package:delwaqty/shared/widgets/design/premium_card.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
-import 'package:delwaqty/core/theme/app_colors.dart';
 
 class ProfilePage extends ConsumerWidget {
   const ProfilePage({super.key});
@@ -46,41 +49,43 @@ class ProfilePage extends ConsumerWidget {
           ),
         ],
       ),
-      body: ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
-          AnimatedFadeIn(
-            child: _buildProfileHeader(context, ref, authState, l10n),
-          ),
-          const SizedBox(height: 24),
-          AnimatedFadeIn(
-            delay: const Duration(milliseconds: 100),
-            child: _buildSettingsSection(context, ref, l10n, themeMode, locale),
-          ),
-          const SizedBox(height: 12),
-          AnimatedFadeIn(
-            delay: const Duration(milliseconds: 120),
-            child: _buildOrdersAndInvoicesSection(context, l10n),
-          ),
-          if (isAdmin || isDriver || isMerchant) ...[
+      body: GradientBackground(
+        child: ListView(
+          padding: const EdgeInsets.all(16),
+          children: [
+            AnimatedFadeIn(
+              child: _buildProfileHeader(context, ref, authState, l10n),
+            ),
             const SizedBox(height: 16),
             AnimatedFadeIn(
-              delay: const Duration(milliseconds: 150),
-              child: _buildRolePortals(
-                context,
-                l10n,
-                isAdmin,
-                isDriver,
-                isMerchant,
+              delay: const Duration(milliseconds: 100),
+              child: _buildSettingsSection(context, ref, l10n, themeMode, locale),
+            ),
+            const SizedBox(height: 16),
+            AnimatedFadeIn(
+              delay: const Duration(milliseconds: 120),
+              child: _buildOrdersAndInvoicesSection(context, l10n),
+            ),
+            if (isAdmin || isDriver || isMerchant) ...[
+              const SizedBox(height: 16),
+              AnimatedFadeIn(
+                delay: const Duration(milliseconds: 150),
+                child: _buildRolePortals(
+                  context,
+                  l10n,
+                  isAdmin,
+                  isDriver,
+                  isMerchant,
+                ),
               ),
+            ],
+            const SizedBox(height: 24),
+            AnimatedFadeIn(
+              delay: const Duration(milliseconds: 200),
+              child: _buildLogoutButton(context, ref, l10n),
             ),
           ],
-          const SizedBox(height: 24),
-          AnimatedFadeIn(
-            delay: const Duration(milliseconds: 200),
-            child: _buildLogoutButton(context, ref, l10n),
-          ),
-        ],
+        ),
       ),
     );
   }
@@ -92,44 +97,61 @@ class ProfilePage extends ConsumerWidget {
   ) {
     return Scaffold(
       appBar: AppBar(title: Text(l10n.profile)),
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(32),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                Icons.person_outline_rounded,
-                size: 80,
-                color: context.colorScheme.primary.withValues(alpha: 0.3),
-              ),
-              const SizedBox(height: 24),
-              Text(
-                l10n.guestMode,
-                style: context.textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
+      body: GradientBackground(
+        child: Center(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const _GuestAvatar(),
+                const SizedBox(height: 24),
+                Text(
+                  l10n.guestMode,
+                  style: context.textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.w800,
+                  ),
+                  textAlign: TextAlign.center,
                 ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 12),
-              Text(
-                l10n.guestModeHint,
-                style: context.textTheme.bodyMedium?.copyWith(
-                  color: context.colorScheme.onSurfaceVariant,
+                const SizedBox(height: 12),
+                Text(
+                  l10n.guestModeHint,
+                  style: context.textTheme.bodyMedium?.copyWith(
+                    color: context.colorScheme.onSurfaceVariant,
+                    height: 1.5,
+                  ),
+                  textAlign: TextAlign.center,
                 ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 32),
-              FilledButton(
-                onPressed: () => context.pushNamed('login'),
-                child: Text(l10n.login),
-              ),
-              const SizedBox(height: 12),
-              OutlinedButton(
-                onPressed: () => context.pushNamed('register'),
-                child: Text(l10n.register),
-              ),
-            ],
+                const SizedBox(height: 32),
+                SizedBox(
+                  width: double.infinity,
+                  child: FilledButton(
+                    onPressed: () => context.pushNamed('login'),
+                    style: FilledButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(AppSpacing.radiusButton),
+                      ),
+                    ),
+                    child: Text(l10n.login),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                SizedBox(
+                  width: double.infinity,
+                  child: OutlinedButton(
+                    onPressed: () => context.pushNamed('register'),
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(AppSpacing.radiusButton),
+                      ),
+                    ),
+                    child: Text(l10n.register),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -157,46 +179,39 @@ class ProfilePage extends ConsumerWidget {
         : (user.username?.isNotEmpty ?? false)
         ? user.username![0].toUpperCase()
         : 'U';
-    return Container(
+
+    final roleLabel = _roleLabel(user.role, l10n);
+
+    return PremiumCard(
       padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        color: context.colorScheme.primaryContainer.withValues(alpha: 0.3),
-        borderRadius: BorderRadius.circular(20),
+      gradient: LinearGradient(
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+        colors: [
+          context.colorScheme.primaryContainer.withValues(alpha: 0.35),
+          context.colorScheme.surfaceContainerLowest,
+        ],
       ),
+      borderColor: context.colorScheme.outlineVariant.withValues(alpha: 0.15),
       child: Column(
         children: [
           Stack(
             clipBehavior: Clip.none,
             children: [
-              Container(
-                width: 96,
-                height: 96,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: context.colorScheme.primary,
-                  border: Border.all(
-                    color: context.colorScheme.onPrimary,
-                    width: 3,
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: context.colorScheme.primary.withValues(alpha: 0.3),
-                      blurRadius: 16,
-                      offset: const Offset(0, 6),
-                    ),
-                  ],
-                ),
+              _GradientAvatarRing(
                 child: ClipOval(
-                  child: user.avatarUrl?.isNotEmpty == true
-                      ? Image.network(
-                          user.avatarUrl!,
-                          width: 96,
-                          height: 96,
-                          fit: BoxFit.cover,
-                          errorBuilder: (_, __, ___) =>
-                              _buildAvatarFallback(context, initial),
-                        )
-                      : _buildAvatarFallback(context, initial),
+                  child: SizedBox(
+                    width: 96,
+                    height: 96,
+                    child: user.avatarUrl?.isNotEmpty == true
+                        ? Image.network(
+                            user.avatarUrl!,
+                            fit: BoxFit.cover,
+                            errorBuilder: (_, __, ___) =>
+                                _buildAvatarFallback(context, initial),
+                          )
+                        : _buildAvatarFallback(context, initial),
+                  ),
                 ),
               ),
               Positioned(
@@ -208,11 +223,22 @@ class ProfilePage extends ConsumerWidget {
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color: context.colorScheme.primary,
+                      gradient: const LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [AppColors.brandPurple, AppColors.brandViolet],
+                      ),
                       border: Border.all(
                         color: context.colorScheme.surface,
                         width: 2,
                       ),
+                      boxShadow: const [
+                        BoxShadow(
+                          color: Color(0x3D5B3DF0),
+                          blurRadius: 14,
+                          offset: Offset(0, 4),
+                        ),
+                      ],
                     ),
                     child: Icon(
                       Icons.camera_alt_rounded,
@@ -228,7 +254,7 @@ class ProfilePage extends ConsumerWidget {
           Text(
             user.fullName ?? user.username ?? l10n.user,
             style: context.textTheme.titleLarge?.copyWith(
-              fontWeight: FontWeight.bold,
+              fontWeight: FontWeight.w800,
             ),
             textAlign: TextAlign.center,
           ),
@@ -237,8 +263,8 @@ class ProfilePage extends ConsumerWidget {
             Text(
               '@${user.username}',
               style: context.textTheme.bodyMedium?.copyWith(
-                color: context.colorScheme.primary,
-                fontWeight: FontWeight.w600,
+                color: AppColors.brandPurple,
+                fontWeight: FontWeight.w700,
               ),
             ),
           ],
@@ -249,9 +275,25 @@ class ProfilePage extends ConsumerWidget {
               color: context.colorScheme.onSurfaceVariant,
             ),
           ),
+          if (roleLabel != null) ...[
+            const SizedBox(height: 10),
+            _RoleChip(label: roleLabel),
+          ],
           const SizedBox(height: 16),
           OutlinedButton.icon(
             onPressed: () => _showEditProfileDialog(context, ref, user, l10n),
+            style: OutlinedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 20,
+                vertical: 12,
+              ),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(AppSpacing.radiusButton),
+              ),
+              side: BorderSide(
+                color: AppColors.brandPurple.withValues(alpha: 0.5),
+              ),
+            ),
             icon: const Icon(Icons.edit_outlined, size: 18),
             label: Text(l10n.editProfile),
           ),
@@ -260,8 +302,25 @@ class ProfilePage extends ConsumerWidget {
     );
   }
 
+  String? _roleLabel(String role, AppLocalizations l10n) {
+    switch (role) {
+      case 'admin':
+        return l10n.admin;
+      case 'driver':
+        return l10n.driver;
+      case 'merchant':
+        return l10n.merchant;
+      case 'owner':
+        return l10n.owner;
+      default:
+        return null;
+    }
+  }
+
   Widget _buildAvatarFallback(BuildContext context, String initial) {
-    return Center(
+    return Container(
+      color: context.colorScheme.primary,
+      alignment: Alignment.center,
       child: Text(
         initial,
         style: context.textTheme.headlineMedium?.copyWith(
@@ -280,6 +339,9 @@ class ProfilePage extends ConsumerWidget {
   ) async {
     final source = await showModalBottomSheet<ImageSource>(
       context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(AppSpacing.radiusSheet)),
+      ),
       builder: (context) => SafeArea(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -306,7 +368,7 @@ class ProfilePage extends ConsumerWidget {
         imageQuality: 85,
         maxWidth: 1024,
       );
-      if (file == null) return;
+      if (file == null || !context.mounted) return;
 
       final bytes = await file.readAsBytes();
       final url = await ref
@@ -316,10 +378,10 @@ class ProfilePage extends ConsumerWidget {
             bytes: bytes,
             fileName: 'avatar_${DateTime.now().millisecondsSinceEpoch}.jpg',
           );
+      if (!context.mounted) return;
       await ref
           .read(updateProfileUseCaseProvider)
           .call(userId: userId, data: {'avatar_url': url});
-      ref.invalidate(watchProfileUseCaseProvider(userId));
       if (context.mounted) {
         context.showAppSnackBar(l10n.success);
       }
@@ -343,6 +405,9 @@ class ProfilePage extends ConsumerWidget {
     final saved = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppSpacing.radiusDialog),
+        ),
         title: Text(l10n.editProfile),
         content: SingleChildScrollView(
           child: Column(
@@ -386,7 +451,7 @@ class ProfilePage extends ConsumerWidget {
     usernameController.dispose();
     phoneController.dispose();
 
-    if (saved != true) return;
+    if (saved != true || !context.mounted) return;
 
     final data = <String, dynamic>{};
     if (nameController.text.trim().isNotEmpty) {
@@ -403,7 +468,6 @@ class ProfilePage extends ConsumerWidget {
       await ref
           .read(updateProfileUseCaseProvider)
           .call(userId: user.id, data: data);
-      ref.invalidate(watchProfileUseCaseProvider(user.id));
       if (context.mounted) {
         context.showAppSnackBar(l10n.success);
       }
@@ -421,57 +485,43 @@ class ProfilePage extends ConsumerWidget {
     ThemeMode themeMode,
     Locale locale,
   ) {
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: context.colorScheme.surfaceContainerLowest,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: context.colorScheme.outlineVariant.withValues(alpha: 0.5),
+    return _SectionCard(
+      title: l10n.settings,
+      children: [
+        _SectionTile(
+          icon: Icons.account_balance_wallet_outlined,
+          color: AppColors.orderReady,
+          title: l10n.wallet,
+          onTap: () => context.push('/wallet'),
         ),
-      ),
-      child: Column(
-        children: [
-          ListTile(
-            leading: const Icon(Icons.account_balance_wallet_outlined),
-            title: Text(l10n.wallet),
-            trailing: const Icon(Icons.chevron_right_rounded),
-            onTap: () => context.push('/wallet'),
+        _SectionTile(
+          icon: Icons.notifications_outlined,
+          color: AppColors.infoLight,
+          title: l10n.notifications,
+          onTap: () => context.push('/notifications'),
+        ),
+        _SectionTile(
+          icon: themeMode == ThemeMode.dark
+              ? Icons.light_mode_outlined
+              : Icons.dark_mode_outlined,
+          color: AppColors.brandViolet,
+          title: l10n.darkMode,
+          trailing: Switch(
+            value: themeMode == ThemeMode.dark,
+            onChanged: (_) =>
+                ref.read(themeModeProvider.notifier).toggleTheme(),
           ),
-          const Divider(height: 1),
-          ListTile(
-            leading: const Icon(Icons.notifications_outlined),
-            title: Text(l10n.notifications),
-            trailing: const Icon(Icons.chevron_right_rounded),
-            onTap: () => context.push('/notifications'),
-          ),
-          const Divider(height: 1),
-          ListTile(
-            leading: Icon(
-              themeMode == ThemeMode.dark
-                  ? Icons.light_mode_outlined
-                  : Icons.dark_mode_outlined,
-            ),
-            title: Text(l10n.darkMode),
-            trailing: Switch(
-              value: themeMode == ThemeMode.dark,
-              onChanged: (_) =>
-                  ref.read(themeModeProvider.notifier).toggleTheme(),
-            ),
-          ),
-          const Divider(height: 1),
-          ListTile(
-            leading: const Icon(Icons.language_rounded),
-            title: Text(l10n.language),
-            subtitle: Text(
-              locale.languageCode == 'ar'
-                  ? l10n.arabicLanguageName
-                  : l10n.englishLanguageName,
-            ),
-            trailing: const Icon(Icons.chevron_right_rounded),
-            onTap: () => ref.read(localeProvider.notifier).toggleLocale(),
-          ),
-        ],
-      ),
+        ),
+        _SectionTile(
+          icon: Icons.language_rounded,
+          color: AppColors.brandPurple,
+          title: l10n.language,
+          subtitle: locale.languageCode == 'ar'
+              ? l10n.arabicLanguageName
+              : l10n.englishLanguageName,
+          onTap: () => ref.read(localeProvider.notifier).toggleLocale(),
+        ),
+      ],
     );
   }
 
@@ -479,35 +529,24 @@ class ProfilePage extends ConsumerWidget {
     BuildContext context,
     AppLocalizations l10n,
   ) {
-    final cs = Theme.of(context).colorScheme;
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: cs.surfaceContainerLowest,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: cs.outlineVariant.withValues(alpha: 0.5)),
-      ),
-      child: Column(
-        children: [
-          ListTile(
-            leading: Icon(
-              Icons.receipt_long_rounded,
-              color: AppColors.successLight,
-            ),
-            title: Text(l10n.invoice),
-            subtitle: Text(l10n.invoiceDetails),
-            trailing: const Icon(Icons.chevron_right_rounded),
-            onTap: () => context.showAppSnackBar(l10n.invoice),
-          ),
-          const Divider(height: 1),
-          ListTile(
-            leading: Icon(Icons.history_rounded, color: cs.primary),
-            title: Text(l10n.previousOrders),
-            subtitle: Text(l10n.orderHistory),
-            trailing: const Icon(Icons.chevron_right_rounded),
-            onTap: () => context.push('/market/orders'),
-          ),
-        ],
-      ),
+    return _SectionCard(
+      title: l10n.orders,
+      children: [
+        _SectionTile(
+          icon: Icons.receipt_long_rounded,
+          color: AppColors.successLight,
+          title: l10n.invoice,
+          subtitle: l10n.invoiceDetails,
+          onTap: () => context.showAppSnackBar(l10n.invoice),
+        ),
+        _SectionTile(
+          icon: Icons.history_rounded,
+          color: AppColors.brandPurple,
+          title: l10n.previousOrders,
+          subtitle: l10n.orderHistory,
+          onTap: () => context.push('/market/orders'),
+        ),
+      ],
     );
   }
 
@@ -518,50 +557,30 @@ class ProfilePage extends ConsumerWidget {
     bool isDriver,
     bool isMerchant,
   ) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
+    return _SectionCard(
+      title: l10n.rolePortals,
       children: [
-        if (isAdmin) ...[
-          FilledButton.tonalIcon(
-            onPressed: () => context.push('/admin'),
-            icon: const Icon(Icons.admin_panel_settings_outlined),
-            label: Text(l10n.admin),
-            style: FilledButton.styleFrom(
-              padding: const EdgeInsets.symmetric(vertical: 16),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-            ),
+        if (isAdmin)
+          _PortalTile(
+            icon: Icons.admin_panel_settings_outlined,
+            gradient: const [AppColors.brandPurple, AppColors.brandViolet],
+            label: l10n.admin,
+            onTap: () => context.push('/admin'),
           ),
-          const SizedBox(height: 12),
-        ],
-        if (isDriver || isAdmin) ...[
-          FilledButton.tonalIcon(
-            onPressed: () => context.push('/driver'),
-            icon: const Icon(Icons.delivery_dining_outlined),
-            label: Text(l10n.driverDashboard),
-            style: FilledButton.styleFrom(
-              padding: const EdgeInsets.symmetric(vertical: 16),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-            ),
+        if (isDriver || isAdmin)
+          _PortalTile(
+            icon: Icons.delivery_dining_outlined,
+            gradient: const [AppColors.brandViolet, AppColors.infoLight],
+            label: l10n.driverDashboard,
+            onTap: () => context.push('/driver'),
           ),
-          const SizedBox(height: 12),
-        ],
-        if (isMerchant || isAdmin) ...[
-          FilledButton.tonalIcon(
-            onPressed: () => context.push('/merchant-dashboard'),
-            icon: const Icon(Icons.store_outlined),
-            label: Text(l10n.merchantDashboard),
-            style: FilledButton.styleFrom(
-              padding: const EdgeInsets.symmetric(vertical: 16),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-            ),
+        if (isMerchant || isAdmin)
+          _PortalTile(
+            icon: Icons.store_outlined,
+            gradient: const [AppColors.orderReady, AppColors.successLight],
+            label: l10n.merchantDashboard,
+            onTap: () => context.push('/merchant-dashboard'),
           ),
-        ],
       ],
     );
   }
@@ -576,6 +595,9 @@ class ProfilePage extends ConsumerWidget {
         showDialog<void>(
           context: context,
           builder: (context) => AlertDialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(AppSpacing.radiusDialog),
+            ),
             title: Text(l10n.logout),
             content: Text(l10n.areYouSureYouWantToLogout),
             actions: [
@@ -607,7 +629,263 @@ class ProfilePage extends ConsumerWidget {
           color: context.colorScheme.error.withValues(alpha: 0.5),
         ),
         padding: const EdgeInsets.symmetric(vertical: 16),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppSpacing.radiusButton),
+        ),
+      ),
+    );
+  }
+}
+
+class _SectionCard extends StatelessWidget {
+  const _SectionCard({required this.title, required this.children});
+
+  final String title;
+  final List<Widget> children;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(left: 4, bottom: 10),
+          child: Text(
+            title,
+            style: context.textTheme.titleSmall?.copyWith(
+              fontWeight: FontWeight.w700,
+              color: context.colorScheme.onSurfaceVariant,
+            ),
+          ),
+        ),
+        PremiumCard(
+          padding: const EdgeInsets.symmetric(vertical: 6),
+          color: context.colorScheme.surfaceContainerLowest,
+          borderColor: context.colorScheme.outlineVariant.withValues(alpha: 0.15),
+          child: Column(
+            children: List.generate(children.length, (index) {
+              final tile = children[index];
+              return Column(
+                children: [
+                  if (index > 0)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                      ),
+                      child: Divider(
+                        height: 1,
+                        color: context.colorScheme.outlineVariant.withValues(
+                          alpha: 0.25,
+                        ),
+                      ),
+                    ),
+                  tile,
+                ],
+              );
+            }),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _SectionTile extends StatelessWidget {
+  const _SectionTile({
+    required this.icon,
+    required this.color,
+    required this.title,
+    this.subtitle,
+    this.trailing,
+    this.onTap,
+  });
+
+  final IconData icon;
+  final Color color;
+  final String title;
+  final String? subtitle;
+  final Widget? trailing;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      leading: _IconTile(icon: icon, color: color),
+      title: Text(
+        title,
+        style: context.textTheme.bodyLarge?.copyWith(
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+      subtitle: subtitle == null
+          ? null
+          : Text(subtitle!, style: context.textTheme.bodySmall),
+      trailing: trailing ?? const Icon(Icons.chevron_right_rounded),
+      onTap: onTap,
+    );
+  }
+}
+
+class _PortalTile extends StatelessWidget {
+  const _PortalTile({
+    required this.icon,
+    required this.gradient,
+    required this.label,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final List<Color> gradient;
+  final String label;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 6, 16, 6),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: gradient,
+            ),
+            borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
+          ),
+          child: Row(
+            children: [
+              Icon(icon, color: Colors.white, size: 22),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  label,
+                  style: context.textTheme.bodyLarge?.copyWith(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+              const Icon(Icons.chevron_right_rounded, color: Colors.white),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _IconTile extends StatelessWidget {
+  const _IconTile({required this.icon, required this.color});
+
+  final IconData icon;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 44,
+      height: 44,
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [color.withValues(alpha: 0.22), color.withValues(alpha: 0.08)],
+        ),
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: Icon(icon, size: 22, color: color),
+    );
+  }
+}
+
+class _RoleChip extends StatelessWidget {
+  const _RoleChip({required this.label});
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [AppColors.brandPurple, AppColors.brandViolet],
+        ),
+        borderRadius: AppSpacing.borderRadiusFull,
+      ),
+      child: Text(
+        label,
+        style: context.textTheme.labelSmall?.copyWith(
+          color: Colors.white,
+          fontWeight: FontWeight.w700,
+        ),
+      ),
+    );
+  }
+}
+
+class _GradientAvatarRing extends StatelessWidget {
+  const _GradientAvatarRing({required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(3),
+      decoration: const BoxDecoration(
+        shape: BoxShape.circle,
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [AppColors.brandPurple, AppColors.brandViolet],
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Color(0x3D5B3DF0),
+            blurRadius: 18,
+            offset: Offset(0, 6),
+          ),
+        ],
+      ),
+      child: child,
+    );
+  }
+}
+
+class _GuestAvatar extends StatelessWidget {
+  const _GuestAvatar();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 120,
+      height: 120,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            AppColors.brandPurple.withValues(alpha: 0.25),
+            AppColors.brandViolet.withValues(alpha: 0.12),
+          ],
+        ),
+        border: Border.all(
+          color: AppColors.brandPurple.withValues(alpha: 0.3),
+          width: 2,
+        ),
+      ),
+      child: Icon(
+        Icons.person_outline_rounded,
+        size: 64,
+        color: AppColors.brandPurple.withValues(alpha: 0.6),
       ),
     );
   }

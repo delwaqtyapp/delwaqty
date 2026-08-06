@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'app_colors.dart';
@@ -13,12 +14,21 @@ abstract final class AppTheme {
   /// Creates the light [ThemeData].
   static ThemeData lightTheme({String? fontFamily}) {
     final colorScheme = ColorScheme.fromSeed(
-      seedColor: AppColors.primaryLight,
-      primary: AppColors.primaryLight,
-      secondary: AppColors.secondaryLight,
-      tertiary: AppColors.tertiaryLight,
+      seedColor: AppColors.brandPurple,
+      primary: AppColors.brandPurple,
+      secondary: AppColors.brandViolet,
+      tertiary: AppColors.primaryLight,
       error: AppColors.errorLight,
-      surface: AppColors.surfaceLight,
+      surface: Colors.white,
+      onSurface: const Color(0xFF17161C),
+      primaryContainer: AppColors.brandLavender,
+      onPrimaryContainer: AppColors.brandPurpleDeep,
+      secondaryContainer: AppColors.brandLavenderSoft,
+      onSecondaryContainer: AppColors.brandPurpleDeep,
+      surfaceContainerLowest: Colors.white,
+      surfaceContainerLow: AppColors.brandLavenderSoft,
+      surfaceContainerHighest: const Color(0xFFEFEFF3),
+      outlineVariant: const Color(0xFFE4E4EC),
     );
 
     return _buildTheme(colorScheme, fontFamily);
@@ -27,10 +37,10 @@ abstract final class AppTheme {
   /// Creates the dark [ThemeData].
   static ThemeData darkTheme({String? fontFamily}) {
     final colorScheme = ColorScheme.fromSeed(
-      seedColor: AppColors.primaryDark,
+      seedColor: AppColors.brandViolet,
       brightness: Brightness.dark,
-      primary: AppColors.primaryDark,
-      secondary: AppColors.secondaryDark,
+      primary: AppColors.brandViolet,
+      secondary: AppColors.brandGradientEndSoft,
       tertiary: AppColors.tertiaryDark,
       error: AppColors.errorDark,
       surface: AppColors.surfaceDark,
@@ -56,17 +66,37 @@ abstract final class AppTheme {
       appBarTheme: AppBarTheme(
         centerTitle: true,
         elevation: AppElevationValues.none,
-        scrolledUnderElevation: AppElevationValues.xs,
+        scrolledUnderElevation: AppElevationValues.none,
         backgroundColor: colorScheme.surface,
         foregroundColor: colorScheme.onSurface,
+        titleTextStyle: AppTextStyles.titleLarge.copyWith(
+          color: colorScheme.onSurface,
+          fontWeight: FontWeight.w800,
+        ),
       ),
       scaffoldBackgroundColor: colorScheme.surface,
       cardTheme: CardThemeData(
         elevation: AppElevationValues.none,
         shape: const RoundedRectangleBorder(
-          borderRadius: AppSpacing.borderRadiusLg,
+          borderRadius: AppSpacing.borderRadiusCard,
         ),
         color: colorScheme.surfaceContainerLowest,
+        margin: EdgeInsets.zero,
+      ),
+      filledButtonTheme: FilledButtonThemeData(
+        style: FilledButton.styleFrom(
+          elevation: AppElevationValues.none,
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.d24,
+            vertical: AppSpacing.d12,
+          ),
+          shape: const RoundedRectangleBorder(
+            borderRadius: AppSpacing.borderRadiusButton,
+          ),
+          textStyle: AppTextStyles.labelLarge.copyWith(
+            fontWeight: FontWeight.w700,
+          ),
+        ),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
@@ -76,7 +106,7 @@ abstract final class AppTheme {
             vertical: AppSpacing.buttonPaddingVertical,
           ),
           shape: const RoundedRectangleBorder(
-            borderRadius: AppSpacing.borderRadiusLg,
+            borderRadius: AppSpacing.borderRadiusButton,
           ),
         ),
       ),
@@ -87,27 +117,35 @@ abstract final class AppTheme {
             vertical: AppSpacing.buttonPaddingVertical,
           ),
           shape: const RoundedRectangleBorder(
-            borderRadius: AppSpacing.borderRadiusLg,
+            borderRadius: AppSpacing.borderRadiusButton,
+          ),
+          side: BorderSide(color: colorScheme.outlineVariant, width: 1.2),
+        ),
+      ),
+      textButtonTheme: TextButtonThemeData(
+        style: TextButton.styleFrom(
+          shape: const RoundedRectangleBorder(
+            borderRadius: AppSpacing.borderRadiusButton,
           ),
         ),
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+        fillColor: colorScheme.surfaceContainerHighest.withValues(alpha: 0.35),
         border: OutlineInputBorder(
-          borderRadius: AppSpacing.borderRadiusLg,
-          borderSide: BorderSide(color: colorScheme.outline),
+          borderRadius: AppSpacing.borderRadiusSearch,
+          borderSide: BorderSide.none,
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: AppSpacing.borderRadiusLg,
-          borderSide: BorderSide(color: colorScheme.outline),
+          borderRadius: AppSpacing.borderRadiusSearch,
+          borderSide: BorderSide.none,
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: AppSpacing.borderRadiusLg,
-          borderSide: BorderSide(color: colorScheme.primary, width: 2),
+          borderRadius: AppSpacing.borderRadiusSearch,
+          borderSide: BorderSide(color: colorScheme.primary, width: 1.5),
         ),
         errorBorder: OutlineInputBorder(
-          borderRadius: AppSpacing.borderRadiusLg,
+          borderRadius: AppSpacing.borderRadiusSearch,
           borderSide: BorderSide(color: colorScheme.error),
         ),
         contentPadding: const EdgeInsets.symmetric(
@@ -115,12 +153,40 @@ abstract final class AppTheme {
           vertical: AppSpacing.fieldPaddingVertical,
         ),
       ),
-      snackBarTheme: const SnackBarThemeData(
+      dialogTheme: DialogThemeData(
+        backgroundColor: colorScheme.surface,
+        shape: const RoundedRectangleBorder(
+          borderRadius: AppSpacing.borderRadiusDialog,
+        ),
+      ),
+      bottomSheetTheme: BottomSheetThemeData(
+        backgroundColor: colorScheme.surface,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(
+            top: Radius.circular(AppSpacing.radiusSheet),
+          ),
+        ),
+        showDragHandle: true,
+        dragHandleColor: colorScheme.outlineVariant,
+      ),
+      snackBarTheme: SnackBarThemeData(
         behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: AppSpacing.borderRadiusMd),
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(Radius.circular(14)),
+        ),
+      ),
+      chipTheme: ChipThemeData(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
+          side: BorderSide(color: colorScheme.outlineVariant),
+        ),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+        labelStyle: AppTextStyles.labelLarge.copyWith(
+          fontWeight: FontWeight.w600,
+        ),
       ),
       dividerTheme: DividerThemeData(
-        color: colorScheme.outlineVariant,
+        color: colorScheme.outlineVariant.withValues(alpha: 0.5),
         thickness: 1,
       ),
       bottomNavigationBarTheme: BottomNavigationBarThemeData(
@@ -128,7 +194,13 @@ abstract final class AppTheme {
         selectedItemColor: colorScheme.primary,
         unselectedItemColor: colorScheme.onSurfaceVariant,
         type: BottomNavigationBarType.fixed,
-        elevation: AppElevationValues.lg,
+        elevation: AppElevationValues.none,
+      ),
+      pageTransitionsTheme: const PageTransitionsTheme(
+        builders: {
+          TargetPlatform.android: FadeForwardsPageTransitionsBuilder(),
+          TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
+        },
       ),
       extensions: [
         colorScheme.brightness == Brightness.dark

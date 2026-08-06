@@ -25,6 +25,26 @@ import 'package:delwaqty/services/push_notification/push_notification_service.da
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
+  FlutterError.onError = (details) {
+    debugPrint('FlutterError: ${details.exception}');
+    debugPrint(details.stack.toString());
+  };
+
+  ErrorWidget.builder = (details) {
+    return Material(
+      color: const Color(0xFF241E44),
+      child: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Text(
+            '',
+            style: TextStyle(color: Colors.white.withValues(alpha: 0.5)),
+          ),
+        ),
+      ),
+    );
+  };
+
   await SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,

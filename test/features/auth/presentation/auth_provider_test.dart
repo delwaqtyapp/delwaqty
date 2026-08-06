@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:delwaqty/data/datasources/local/shared_preferences_service.dart';
 import 'package:delwaqty/domain/entities/user.dart';
 import 'package:delwaqty/domain/repositories/auth_repository.dart';
 import 'package:delwaqty/domain/repositories/user_repository.dart';
@@ -16,10 +17,14 @@ class MockUserRepository extends Mock implements UserRepository {}
 
 class MockAppLogger extends Mock implements AppLogger {}
 
+class MockSharedPreferencesService extends Mock
+    implements SharedPreferencesService {}
+
 void main() {
   late MockAuthRepository mockAuthRepo;
   late MockUserRepository mockUserRepo;
   late MockAppLogger mockLogger;
+  late MockSharedPreferencesService mockPrefs;
 
   final testUser = User(
     id: 'user-123',
@@ -28,10 +33,22 @@ void main() {
     createdAt: DateTime(2024, 1, 15),
   );
 
+  ProviderContainer buildTestContainer() => ProviderContainer(
+        overrides: [
+          authRepositoryProvider.overrideWithValue(mockAuthRepo),
+          userRepositoryProvider.overrideWithValue(mockUserRepo),
+          loggerProvider.overrideWithValue(mockLogger),
+          sharedPreferencesProvider.overrideWithValue(mockPrefs),
+        ],
+      );
+
   setUp(() {
     mockAuthRepo = MockAuthRepository();
     mockUserRepo = MockUserRepository();
     mockLogger = MockAppLogger();
+    mockPrefs = MockSharedPreferencesService();
+    when(() => mockPrefs.remove(key: any(named: 'key')))
+        .thenAnswer((_) async => true);
   });
 
   setUpAll(() {
@@ -40,13 +57,7 @@ void main() {
 
   group('AuthStateNotifier', () {
     test('has initial state', () {
-      final container = ProviderContainer(
-        overrides: [
-          authRepositoryProvider.overrideWithValue(mockAuthRepo),
-          userRepositoryProvider.overrideWithValue(mockUserRepo),
-          loggerProvider.overrideWithValue(mockLogger),
-        ],
-      );
+      final container = buildTestContainer();
 
       final state = container.read(authStateProvider);
       expect(state, isA<AuthInitial>());
@@ -57,13 +68,7 @@ void main() {
         when(() => mockAuthRepo.getCurrentSession())
             .thenAnswer((_) async => null);
 
-        final container = ProviderContainer(
-          overrides: [
-            authRepositoryProvider.overrideWithValue(mockAuthRepo),
-            userRepositoryProvider.overrideWithValue(mockUserRepo),
-            loggerProvider.overrideWithValue(mockLogger),
-          ],
-        );
+        final container = buildTestContainer();
 
         await container.read(authStateProvider.notifier).checkAuthStatus();
 
@@ -78,13 +83,7 @@ void main() {
         when(() => mockUserRepo.getCurrentUser())
             .thenAnswer((_) async => testUser);
 
-        final container = ProviderContainer(
-          overrides: [
-            authRepositoryProvider.overrideWithValue(mockAuthRepo),
-            userRepositoryProvider.overrideWithValue(mockUserRepo),
-            loggerProvider.overrideWithValue(mockLogger),
-          ],
-        );
+        final container = buildTestContainer();
 
         await container.read(authStateProvider.notifier).checkAuthStatus();
 
@@ -96,13 +95,7 @@ void main() {
         when(() => mockAuthRepo.getCurrentSession())
             .thenThrow(Exception('Failed'));
 
-        final container = ProviderContainer(
-          overrides: [
-            authRepositoryProvider.overrideWithValue(mockAuthRepo),
-            userRepositoryProvider.overrideWithValue(mockUserRepo),
-            loggerProvider.overrideWithValue(mockLogger),
-          ],
-        );
+        final container = buildTestContainer();
 
         await container.read(authStateProvider.notifier).checkAuthStatus();
 
@@ -121,13 +114,7 @@ void main() {
         when(() => mockUserRepo.getCurrentUser())
             .thenAnswer((_) async => testUser);
 
-        final container = ProviderContainer(
-          overrides: [
-            authRepositoryProvider.overrideWithValue(mockAuthRepo),
-            userRepositoryProvider.overrideWithValue(mockUserRepo),
-            loggerProvider.overrideWithValue(mockLogger),
-          ],
-        );
+        final container = buildTestContainer();
 
         await container.read(authStateProvider.notifier).signIn(
               email: 'test@example.com',
@@ -144,13 +131,7 @@ void main() {
               password: any(named: 'password'),
             )).thenThrow(Exception('Invalid credentials'));
 
-        final container = ProviderContainer(
-          overrides: [
-            authRepositoryProvider.overrideWithValue(mockAuthRepo),
-            userRepositoryProvider.overrideWithValue(mockUserRepo),
-            loggerProvider.overrideWithValue(mockLogger),
-          ],
-        );
+        final container = buildTestContainer();
 
         await container.read(authStateProvider.notifier).signIn(
               email: 'test@example.com',
@@ -173,13 +154,7 @@ void main() {
         when(() => mockUserRepo.getCurrentUser())
             .thenAnswer((_) async => testUser);
 
-        final container = ProviderContainer(
-          overrides: [
-            authRepositoryProvider.overrideWithValue(mockAuthRepo),
-            userRepositoryProvider.overrideWithValue(mockUserRepo),
-            loggerProvider.overrideWithValue(mockLogger),
-          ],
-        );
+        final container = buildTestContainer();
 
         await container.read(authStateProvider.notifier).signUp(
               email: 'test@example.com',
@@ -198,13 +173,7 @@ void main() {
               fullName: any(named: 'fullName'),
             )).thenThrow(Exception('Sign up failed'));
 
-        final container = ProviderContainer(
-          overrides: [
-            authRepositoryProvider.overrideWithValue(mockAuthRepo),
-            userRepositoryProvider.overrideWithValue(mockUserRepo),
-            loggerProvider.overrideWithValue(mockLogger),
-          ],
-        );
+        final container = buildTestContainer();
 
         await container.read(authStateProvider.notifier).signUp(
               email: 'test@example.com',
@@ -220,13 +189,7 @@ void main() {
       test('sets unauthenticated on success', () async {
         when(() => mockAuthRepo.signOut()).thenAnswer((_) async {});
 
-        final container = ProviderContainer(
-          overrides: [
-            authRepositoryProvider.overrideWithValue(mockAuthRepo),
-            userRepositoryProvider.overrideWithValue(mockUserRepo),
-            loggerProvider.overrideWithValue(mockLogger),
-          ],
-        );
+        final container = buildTestContainer();
 
         await container.read(authStateProvider.notifier).signOut();
 
@@ -242,13 +205,7 @@ void main() {
               fullName: 'John Doe',
             )).thenAnswer((_) async => session);
 
-        final container = ProviderContainer(
-          overrides: [
-            authRepositoryProvider.overrideWithValue(mockAuthRepo),
-            userRepositoryProvider.overrideWithValue(mockUserRepo),
-            loggerProvider.overrideWithValue(mockLogger),
-          ],
-        );
+        final container = buildTestContainer();
 
         await container.read(authStateProvider.notifier).signUp(
               email: 'test@example.com',
@@ -264,13 +221,7 @@ void main() {
         when(() => mockAuthRepo.signOut())
             .thenThrow(Exception('Sign out failed'));
 
-        final container = ProviderContainer(
-          overrides: [
-            authRepositoryProvider.overrideWithValue(mockAuthRepo),
-            userRepositoryProvider.overrideWithValue(mockUserRepo),
-            loggerProvider.overrideWithValue(mockLogger),
-          ],
-        );
+        final container = buildTestContainer();
 
         await container.read(authStateProvider.notifier).signOut();
 
@@ -284,13 +235,7 @@ void main() {
         when(() => mockAuthRepo.resetPassword(email: 'test@example.com'))
             .thenAnswer((_) async {});
 
-        final container = ProviderContainer(
-          overrides: [
-            authRepositoryProvider.overrideWithValue(mockAuthRepo),
-            userRepositoryProvider.overrideWithValue(mockUserRepo),
-            loggerProvider.overrideWithValue(mockLogger),
-          ],
-        );
+        final container = buildTestContainer();
 
         await container.read(authStateProvider.notifier).resetPassword(
               email: 'test@example.com',

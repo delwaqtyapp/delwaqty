@@ -1,14 +1,11 @@
+import 'dart:async';
 import 'dart:math' as math;
+import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:delwaqty/core/constants/storage_keys.dart';
-import 'package:delwaqty/data/datasources/local/shared_preferences_service.dart';
-import 'package:delwaqty/features/auth/domain/auth_state.dart';
-import 'package:delwaqty/features/auth/presentation/auth_provider.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
-import 'package:delwaqty/core/theme/app_colors.dart';
-import 'package:delwaqty/core/theme/app_text_styles.dart';
 
 class SplashPage extends ConsumerStatefulWidget {
   const SplashPage({super.key});
@@ -19,188 +16,193 @@ class SplashPage extends ConsumerStatefulWidget {
 class _SplashPageState extends ConsumerState<SplashPage>
     with TickerProviderStateMixin {
   late final AnimationController _logoController;
-  late final AnimationController _glowController;
-  late final AnimationController _textController;
-  late final AnimationController _pulseController;
-  late final AnimationController _particleController;
-  late final AnimationController _gradientController;
+  late final AnimationController _wordController;
+  late final AnimationController _taglineController;
 
-  late final Animation<double> _scaleAnimation;
-  late final Animation<double> _glowAnimation;
-  late final Animation<double> _fadeAnimation;
-  late final Animation<double> _pulseAnimation;
-  late final Animation<double> _gradientAngle;
+  Timer? _navTimer;
+  bool _navigated = false;
+
+  final ValueNotifier<double> _ambientTick = ValueNotifier<double>(0);
+  Ticker? _ambientTicker;
 
   @override
   void initState() {
     super.initState();
-
     _logoController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 1200),
     );
-    _glowController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 1800),
-    );
-    _textController = AnimationController(
+    _wordController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 1000),
     );
-    _pulseController = AnimationController(
+    _taglineController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 2000),
-    )..repeat(reverse: true);
-    _particleController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 4000),
-    )..repeat();
-    _gradientController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 3000),
-    )..repeat();
-
-    _scaleAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(parent: _logoController, curve: Curves.elasticOut),
-    );
-    _glowAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(parent: _glowController, curve: Curves.easeInOut),
-    );
-    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(parent: _textController, curve: Curves.easeOut),
-    );
-    _pulseAnimation = Tween<double>(begin: 0.95, end: 1.05).animate(
-      CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut),
-    );
-    _gradientAngle = Tween<double>(begin: 0, end: 2 * math.pi).animate(
-      CurvedAnimation(parent: _gradientController, curve: Curves.linear),
+      duration: const Duration(milliseconds: 800),
     );
 
-    _logoController.forward();
-    Future.delayed(const Duration(milliseconds: 400), () {
-      if (mounted) _glowController.forward();
+    _ambientTicker = createTicker((elapsed) {
+      _ambientTick.value = elapsed.inMilliseconds / 3000.0;
     });
-    Future.delayed(const Duration(milliseconds: 800), () {
-      if (mounted) _textController.forward();
-    });
+    _ambientTicker!.start();
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _initializeApp();
-    });
+    _startSequence();
   }
 
-  Future<void> _initializeApp() async {
-    await Future.delayed(const Duration(milliseconds: 3000));
+  void _startSequence() async {
+    await Future.delayed(const Duration(milliseconds: 300));
     if (!mounted) return;
-    final sharedPrefs = ref.read(sharedPreferencesProvider);
-    final onboardingComplete = sharedPrefs.getBool(
-      key: StorageKeys.onboardingComplete,
-    );
+
+    _logoController.forward();
+
+    await Future.delayed(const Duration(milliseconds: 1200));
     if (!mounted) return;
-    if (onboardingComplete != true) {
-      context.go('/onboarding');
-      return;
-    }
-    final authState = ref.read(authStateProvider);
-    if (authState is AuthAuthenticated) {
-      context.go('/home');
-    } else {
-      context.go('/welcome');
-    }
+    _wordController.forward();
+
+    await Future.delayed(const Duration(milliseconds: 1100));
+    if (!mounted) return;
+    _taglineController.forward();
+
+    _navTimer = Timer(const Duration(milliseconds: 2000), _navigate);
+  }
+
+  void _navigate() {
+    if (!mounted || _navigated) return;
+    _navigated = true;
+    context.go('/login');
   }
 
   @override
   void dispose() {
+    _navTimer?.cancel();
+    _ambientTicker?.stop();
+    _ambientTicker?.dispose();
+    _ambientTick.dispose();
     _logoController.dispose();
-    _glowController.dispose();
-    _textController.dispose();
-    _pulseController.dispose();
-    _particleController.dispose();
-    _gradientController.dispose();
+    _wordController.dispose();
+    _taglineController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-    final size = MediaQuery.sizeOf(context);
-
     return Scaffold(
-      body: AnimatedBuilder(
-        animation: _gradientAngle,
-        builder: (context, child) {
-          final angle = _gradientAngle.value;
-          return Container(
-            width: double.infinity,
-            height: double.infinity,
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment(
-                  math.cos(angle),
-                  math.sin(angle),
-                ),
-                end: Alignment(
-                  -math.cos(angle),
-                  -math.sin(angle),
-                ),
-                colors: const [
-                  Color(0xFF6750A4),
-                  Color(0xFF9A82DB),
-                  Color(0xFF6750A4),
-                  Color(0xFFD0BCFF),
-                ],
-                stops: const [0.0, 0.3, 0.7, 1.0],
-              ),
-            ),
-            child: Stack(
-              children: [
-                ...List.generate(30, (i) => _buildParticle(i, size)),
-                Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      _buildGlowRing(),
-                      const SizedBox(height: 40),
-                      _buildLogo(l10n),
-                      const SizedBox(height: 32),
-                      _buildTitle(l10n),
-                      const SizedBox(height: 8),
-                      _buildTagline(l10n),
-                      const SizedBox(height: 60),
-                      _buildLoader(),
-                    ],
+      backgroundColor: const Color(0xFF241E44),
+      body: Container(
+        width: double.infinity,
+        height: double.infinity,
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              Color(0xFF241E44),
+              Color(0xFF2C2558),
+              Color(0xFF1E1940),
+            ],
+            stops: [0.0, 0.5, 1.0],
+          ),
+        ),
+        child: Stack(
+          children: [
+            Positioned.fill(
+              child: RepaintBoundary(
+                child: ValueListenableBuilder<double>(
+                  valueListenable: _ambientTick,
+                  builder: (context, progress, _) => CustomPaint(
+                    painter: _AmbientPainter(progress: progress),
                   ),
                 ),
-              ],
+              ),
             ),
-          );
-        },
+            Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  _buildLogo(),
+                  const SizedBox(height: 36),
+                  _buildWordmark(),
+                  const SizedBox(height: 16),
+                  _buildTagline(),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 
-  Widget _buildGlowRing() {
+  Widget _buildLogo() {
     return AnimatedBuilder(
-      animation: _glowAnimation,
-      builder: (context, child) {
-        return Container(
-          width: 220 + (_glowAnimation.value * 30),
-          height: 220 + (_glowAnimation.value * 30),
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            boxShadow: [
-              BoxShadow(
-                color: Theme.of(context).colorScheme.onPrimary.withValues(alpha: 0.12 * _glowAnimation.value),
-                blurRadius: 80 * _glowAnimation.value,
-                spreadRadius: 25 * _glowAnimation.value,
+      animation: _logoController,
+      builder: (context, _) {
+        final p = _logoController.value;
+        final eased = Curves.easeOutBack.transform(p);
+        final scale = 0.7 + eased * 0.3;
+
+        return Transform.scale(
+          scale: scale,
+          child: Opacity(
+            opacity: p,
+            child: Container(
+              width: 140,
+              height: 140,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(32),
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFF7A5CFF).withValues(alpha: 0.3),
+                    blurRadius: 40,
+                    spreadRadius: 8,
+                  ),
+                ],
               ),
-              BoxShadow(
-                color: const Color(0xFFD0BCFF).withValues(
-                  alpha: 0.08 * _glowAnimation.value,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(32),
+                child: Image.asset(
+                  'assets/logo app/logo.png',
+                  fit: BoxFit.contain,
+                  errorBuilder: (_, __, ___) => Container(
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                        colors: [Color(0xFF7A5CFF), Color(0xFF2DD4BF)],
+                      ),
+                      borderRadius: BorderRadius.circular(32),
+                    ),
+                    child: const Icon(
+                      Icons.location_on_rounded,
+                      color: Colors.white,
+                      size: 60,
+                    ),
+                  ),
                 ),
-                blurRadius: 120 * _glowAnimation.value,
-                spreadRadius: 40 * _glowAnimation.value,
               ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildWordmark() {
+    return AnimatedBuilder(
+      animation: _wordController,
+      builder: (context, _) {
+        final p = _wordController.value;
+        return Directionality(
+          textDirection: TextDirection.ltr,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              _buildLetter('D', 0.0, 0.2, p, Colors.white, 38),
+              _buildLetter('e', 0.08, 0.28, p, Colors.white, 38),
+              _buildLetter('l', 0.16, 0.36, p, Colors.white, 38),
+              _buildLetter('w', 0.24, 0.44, p, Colors.white, 38),
+              _buildLetter('a', 0.32, 0.52, p, Colors.white, 38),
+              _buildRotatingLetter('Q', 0.4, 0.6, p, Color(0xFF7A5CFF), 42),
+              _buildLetter('t', 0.55, 0.75, p, Color(0xFF4E8DFF), 38),
+              _buildLetter('y', 0.65, 0.85, p, Color(0xFF2DD4BF), 38),
             ],
           ),
         );
@@ -208,42 +210,58 @@ class _SplashPageState extends ConsumerState<SplashPage>
     );
   }
 
-  Widget _buildLogo(AppLocalizations l10n) {
-    return AnimatedBuilder(
-      animation: Listenable.merge([_scaleAnimation, _pulseAnimation]),
-      builder: (context, child) {
-        return Transform.scale(
-          scale: _scaleAnimation.value * _pulseAnimation.value,
-          child: child,
-        );
-      },
-      child: Container(
-        width: 140,
-        height: 140,
-        decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.surface,
-          borderRadius: BorderRadius.circular(40),
-          boxShadow: [
-            BoxShadow(
-              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.15),
-              blurRadius: 40,
-              offset: const Offset(0, 15),
-            ),
-            BoxShadow(
-              color: const Color(0xFFD0BCFF).withValues(alpha: 0.4),
-              blurRadius: 60,
-              offset: const Offset(0, 5),
-            ),
-          ],
+  Widget _buildLetter(
+    String char,
+    double start,
+    double end,
+    double progress,
+    Color color,
+    double fontSize,
+  ) {
+    final t = ((progress - start) / (end - start)).clamp(0.0, 1.0);
+    final eased = Curves.easeOutCubic.transform(t);
+    return Opacity(
+      opacity: eased,
+      child: Transform.translate(
+        offset: Offset(8 * (1 - eased), 0),
+        child: Text(
+          char,
+          style: TextStyle(
+            fontSize: fontSize,
+            fontWeight: FontWeight.w800,
+            color: color,
+            letterSpacing: 1,
+          ),
         ),
-        child: Center(
+      ),
+    );
+  }
+
+  Widget _buildRotatingLetter(
+    String char,
+    double start,
+    double end,
+    double progress,
+    Color color,
+    double fontSize,
+  ) {
+    final t = ((progress - start) / (end - start)).clamp(0.0, 1.0);
+    final eased = Curves.easeOutBack.transform(t);
+    final rotation = (1 - t) * 15 * (math.pi / 180);
+    final scale = t < 0.5 ? 0.8 + t * 0.6 : 1.1 - (t - 0.5) * 0.2;
+    return Opacity(
+      opacity: eased,
+      child: Transform.rotate(
+        angle: rotation,
+        child: Transform.scale(
+          scale: scale.clamp(0.8, 1.15),
           child: Text(
-            l10n.appNameAr,
-            style: AppTextStyles.displaySmall.copyWith(
-              fontSize: 38,
-              fontWeight: FontWeight.w900,
-              color: Color(0xFF6750A4),
-              letterSpacing: -1,
+            char,
+            style: TextStyle(
+              fontSize: fontSize,
+              fontWeight: FontWeight.w800,
+              color: color,
+              letterSpacing: 1,
             ),
           ),
         ),
@@ -251,108 +269,165 @@ class _SplashPageState extends ConsumerState<SplashPage>
     );
   }
 
-  Widget _buildTitle(AppLocalizations l10n) {
+  Widget _buildTagline() {
+    final l10n = AppLocalizations.of(context);
     return AnimatedBuilder(
-      animation: _fadeAnimation,
-      builder: (context, child) {
-        return Opacity(
-          opacity: _fadeAnimation.value,
-          child: Transform.translate(
-            offset: Offset(0, 20 * (1 - _fadeAnimation.value)),
-            child: child,
-          ),
-        );
-      },
-      child: Text(
-        l10n.appTitle,
-        style: AppTextStyles.displaySmall.copyWith(
-          fontWeight: FontWeight.w800,
-          color: Theme.of(context).colorScheme.onPrimary,
-          letterSpacing: 1,
-        ),
-      ),
-    );
-  }
+      animation: _taglineController,
+      builder: (context, _) {
+        final p = _taglineController.value;
+        final part1Opacity = (p * 3).clamp(0.0, 1.0);
+        final part2Opacity = ((p - 0.5) * 2).clamp(0.0, 1.0);
 
-  Widget _buildTagline(AppLocalizations l10n) {
-    return AnimatedBuilder(
-      animation: _fadeAnimation,
-      builder: (context, child) {
-        return Opacity(
-          opacity: _fadeAnimation.value * 0.85,
-          child: Transform.translate(
-            offset: Offset(0, 15 * (1 - _fadeAnimation.value)),
-            child: child,
-          ),
-        );
-      },
-      child: Text(
-        l10n.splashTagline,
-        style: AppTextStyles.bodyLarge.copyWith(
-          color: Theme.of(context).colorScheme.onPrimary.withValues(alpha: 0.8),
-          letterSpacing: 1.5,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildLoader() {
-    return AnimatedBuilder(
-      animation: _fadeAnimation,
-      builder: (context, child) {
-        return Opacity(
-          opacity: _fadeAnimation.value,
-          child: child,
-        );
-      },
-      child: SizedBox(
-        width: 24,
-        height: 24,
-        child: CircularProgressIndicator(
-          strokeWidth: 2,
-          color: Theme.of(context).colorScheme.onPrimary.withValues(alpha: 0.7),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildParticle(int index, Size size) {
-    final rng = math.Random(index);
-    final particleSize = 2.0 + rng.nextDouble() * 4;
-    final x = rng.nextDouble() * size.width;
-    final y = rng.nextDouble() * size.height;
-    final speed = 2000 + rng.nextInt(3000);
-    final delay = rng.nextInt(3000);
-
-    return AnimatedBuilder(
-      animation: _particleController,
-      builder: (context, child) {
-        final t = ((_particleController.value * speed + delay) % speed) / speed;
-        final opacity = (math.sin(t * math.pi) * 0.4).clamp(0.0, 0.4);
-        final yOffset = t * -60;
-
-        return Positioned(
-          left: x,
-          top: y + yOffset,
-          child: Opacity(
-            opacity: opacity,
-            child: Container(
-              width: particleSize,
-              height: particleSize,
-              decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.surface,
-                shape: BoxShape.circle,
-                boxShadow: [
-                  BoxShadow(
-                    color: Theme.of(context).colorScheme.onPrimary.withValues(alpha: opacity * 0.5),
-                    blurRadius: particleSize * 2,
-                  ),
-                ],
+        return Column(
+          children: [
+            Opacity(
+              opacity: part1Opacity,
+              child: Text(
+                l10n.splashTagline,
+                style: TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w400,
+                  color: Colors.white.withValues(alpha: 0.6 * part1Opacity),
+                  letterSpacing: 0.5,
+                ),
+                textAlign: TextAlign.center,
               ),
             ),
-          ),
+            const SizedBox(height: 4),
+            Opacity(
+              opacity: part2Opacity,
+              child: RichText(
+                textDirection: TextDirection.rtl,
+                text: TextSpan(
+                  style: const TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 0.5,
+                  ),
+                  children: [
+                    TextSpan(text: 'د', style: TextStyle(color: Colors.white)),
+                    TextSpan(text: 'ل', style: TextStyle(color: Colors.white)),
+                    TextSpan(text: 'و', style: TextStyle(color: Colors.white)),
+                    TextSpan(text: 'ق', style: TextStyle(color: Color(0xFF7A5CFF))),
+                    TextSpan(text: 'ت', style: TextStyle(color: Color(0xFF4E8DFF))),
+                    TextSpan(text: 'ي', style: TextStyle(color: Color(0xFF2DD4BF))),
+                  ],
+                ),
+              ),
+            ),
+          ],
         );
       },
     );
   }
+
+}
+
+class _AmbientPainter extends CustomPainter {
+  _AmbientPainter({required this.progress});
+
+  final double progress;
+
+  static final _particleCache = <_ParticleData>[];
+  static int _cacheSeed = -1;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final center = Offset(size.width / 2, size.height * 0.38);
+
+    canvas.drawCircle(
+      center,
+      220,
+      Paint()
+        ..shader = ui.Gradient.radial(
+          center,
+          220,
+          [
+            const Color(0xFF7A5CFF).withValues(alpha: 0.08),
+            Colors.transparent,
+          ],
+        ),
+    );
+
+    final p2 = Offset(size.width * 0.2, size.height * 0.6);
+    canvas.drawCircle(
+      p2,
+      160,
+      Paint()
+        ..shader = ui.Gradient.radial(
+          p2,
+          160,
+          [
+            const Color(0xFF2DD4BF).withValues(alpha: 0.04),
+            Colors.transparent,
+          ],
+        ),
+    );
+
+    final p3 = Offset(size.width * 0.85, size.height * 0.55);
+    canvas.drawCircle(
+      p3,
+      120,
+      Paint()
+        ..shader = ui.Gradient.radial(
+          p3,
+          120,
+          [
+            const Color(0xFF4E8DFF).withValues(alpha: 0.03),
+            Colors.transparent,
+          ],
+        ),
+    );
+
+    if (_cacheSeed != 7) {
+      _particleCache.clear();
+      final rng = math.Random(7);
+      for (var i = 0; i < 30; i++) {
+        _particleCache.add(_ParticleData(
+          baseX: rng.nextDouble(),
+          baseY: rng.nextDouble(),
+          speed: 0.2 + rng.nextDouble() * 0.5,
+          phase: rng.nextDouble() * 2 * math.pi,
+          radius: 1.0 + rng.nextDouble() * 1.5,
+        ));
+      }
+      _cacheSeed = 7;
+    }
+
+    for (var i = 0; i < _particleCache.length; i++) {
+      final p = _particleCache[i];
+      final baseX = p.baseX * size.width;
+      final baseY = p.baseY * size.height;
+      final t = (progress * p.speed * 3 + p.phase) % 1.0;
+      final yOff = math.sin(t * 2 * math.pi) * 20;
+      final opacity = math.sin(t * math.pi) * 0.18;
+
+      if (opacity > 0.01) {
+        canvas.drawCircle(
+          Offset(baseX, baseY + yOff),
+          p.radius,
+          Paint()..color = Colors.white.withValues(alpha: opacity),
+        );
+      }
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _AmbientPainter old) =>
+      old.progress != progress;
+}
+
+class _ParticleData {
+  const _ParticleData({
+    required this.baseX,
+    required this.baseY,
+    required this.speed,
+    required this.phase,
+    required this.radius,
+  });
+  final double baseX;
+  final double baseY;
+  final double speed;
+  final double phase;
+  final double radius;
 }

@@ -113,6 +113,20 @@ class SupabaseAuthDataSource {
     }
   }
 
+  Future<bool> signInWithFacebook() async {
+    try {
+      final response = await _auth.signInWithOAuth(
+        OAuthProvider.facebook,
+        redirectTo: 'io.delwaqty://login-callback',
+      );
+      _logger.i('Facebook sign in initiated');
+      return response;
+    } catch (e, stack) {
+      _logger.e('Facebook sign in failed', e, stack);
+      rethrow;
+    }
+  }
+
   Future<AuthResponse> signInAnonymously() async {
     try {
       final response = await _auth.signInAnonymously();

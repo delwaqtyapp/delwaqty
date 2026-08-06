@@ -1,10 +1,107 @@
 # SESSION_STATUS.md
 
-> **Last updated:** 2026-08-01 Session 21g (Admin Push UX: Device Counters + Received Metric + Notification Deletion — Verified Live)
+> **Last updated:** 2026-08-06 Session 21n (Splash Intro Crash Fix + Login Logo)
 
 ---
 
-## Current Task — ADMIN PUSH UX + NOTIFICATION DELETION (Session 21g)
+## Current Task — SPLASH INTRO CRASH FIX + LOGIN LOGO (Session 21n)
+
+Fixed the hidden "brown flash" crash during the intro wordmark animation, restored the natural splash design, made the Arabic tagline "دلوقتي" colorful like the English wordmark, and enlarged the login page logo.
+
+| Area | Change |
+|------|--------|
+| **Root cause — brown flash** | `_ambientController.repeat()` (3000ms) wrapped the entire `CustomPaint` in an `AnimatedBuilder`, forcing full-widget rebuilds every frame AND recreating `RadialGradient.createShader()` on every paint. When `_wordController` started simultaneously, the combined rebuilds caused a single-frame artifact where the gradient briefly disappeared (looked like a brown/dark flash). The `Scaffold.backgroundColor` (light theme surface) showed through momentarily |
+| **Fix — ambient animation** | Replaced `AnimationController.repeat()` with a raw `Ticker` feeding a `ValueNotifier<double>` (`_ambientTick`). The `CustomPaint` is now wrapped in `RepaintBoundary` + `ValueListenableBuilder` — it repaints in isolation without rebuilding the Stack/wordmark |
+| **Fix — painter cost** | `_AmbientPainter` now uses `ui.Gradient.radial` (const-created) instead of `RadialGradient().createShader()` per frame; particles cached once as static `_ParticleData`; `shouldRepaint` only returns `true` when `progress` actually changed (was always `true`) |
+| **Arabic tagline fix** | Split-letter `Row` (letters were disconnected/choppy in RTL) replaced with a single `RichText` + `TextSpan` — natural flowing word, each letter colored: د/ل/و white, ق purple `#7A5CFF`, ت blue `#4E8DFF`, ي teal `#2DD4BF`, fontSize 24 |
+| **Login page logo** | `_buildLogo()` enlarged from 80×80 → **120×120**, border radius 22→28, stronger purple shadow (`spreadRadius 4`, blur 30) — the actual `assets/logo app/logo.png` renders prominently above "مرحبا" |
+| **Verification** | `flutter analyze` 0 errors · `flutter test` 542/542 passing · debug APK built + installed on DNP NX9 · logcat **clean** (no `I/flutter` errors, no `FATAL`, no `AndroidRuntime`) · app restarts cleanly (PID 22497→23202) · splash → login flow reaches login page |
+
+---
+
+## Previous Task — CINEMATIC INTRO + PREMIUM AUTH (Session 21m)
+
+Built a world-class cinematic brand introduction and redesigned the entire authentication flow. The experience follows the reference design with 10 animated scenes, premium login, and 3-step registration.
+
+| Area | Change |
+|------|--------|
+| **Logo asset** | Created `assets/logo app/logo.png` from user's icon logo. Registered in `pubspec.yaml` |
+| **Brand colors** | Added `brandCyan` (#06B6D4) and `brandTeal` (#14B8A6) to `AppColors` |
+| **Cinematic Intro** (`cinematic_intro_page.dart`) | 10-scene experience: (1) Black intro with haptic, (2) Purple+cyan light beams, (3) Energy ring build-up, (4) Logo reveal with elastic scale+opacity, (5) Motion lines (purple→blue→cyan), (6) Wordmark "Delwa" (white) + "Qty" (gradient), (7) Arabic tagline with decorative lines, (8) 8 service icons with glass morphism, (9) Brand message "كل احتياجاتك... دلوقتي", (10) Smooth fade transition to login. Custom particle painter, light streaks, all at 60fps |
+| **Premium Login** (`login_page.dart`) | Complete rewrite: deep gradient background, logo reveal animation, glass-morphism text fields (radius 18), gradient primary button (purple→blue→cyan, radius 22), social login (Google/Apple/Facebook), "Remember Me" checkbox, "Forgot Password" link, guest mode, shake animation on validation. No `GradientBackground` — custom dark luxury background |
+| **Step Registration** (`register_page.dart`) | 3-step flow with animated progress bar: Step 1 (name, email, phone, password, confirm), Step 2 (language selector, notifications toggle, location toggle), Step 3 (success animation with checkmark + welcome). Glass text fields, gradient button, step transitions |
+| **Navigation** | Splash → `/intro` (cinematic) → `/login` → `/register` → `/home`. Router updated to allow `/intro` route. Added `/intro` route in `splash_module.dart` |
+| **l10n additions** | New keys (en+ar): `signIn`, `emailOrPhone`, `rememberMe`, `or`, `createAccount`, `location` |
+| **Quality gates** | `flutter analyze` **0 errors** · `flutter test` **542/542 passing** · APK built + installed on DNP NX9 ✅ |
+
+---
+
+## Current Task — APP ICON + DYNAMIC APP NAME (Session 21l)
+
+Replaced the app's launcher icon with the user's new design and set up locale-based dynamic app name so it shows "دلوقتي" on Arabic devices and "Delwaqty" on English devices.
+
+| Area | Change |
+|------|--------|
+| **New launcher icon** | User-provided icon (`icon logo.png`, 1254x1254) resized to all Android density buckets: mdpi (48), hdpi (72), xhdpi (96), xxhdpi (144), xxxhdpi (192). Both `ic_launcher.png` and `ic_launcher_round.png` created in all mipmap directories |
+| **Adaptive icon** | Created `mipmap-anydpi-v26/ic_launcher.xml` and `ic_launcher_round.xml` with foreground drawable + dark purple background (`#1A0536`). Android 8.0+ devices get the adaptive icon |
+| **Dynamic app name** | Created `values/strings.xml` (`app_name` = "Delwaqty") and `values-ar/strings.xml` (`app_name` = "دلوقتي"). AndroidManifest.xml updated from hardcoded `"delwaqty"` to `@string/app_name`. System automatically picks the correct name based on device locale |
+| **Web icons** | favicon.png, Icon-192.png, Icon-512.png, Icon-maskable-192.png, Icon-maskable-512.png all updated |
+| **iOS icon** | Icon-App-1024x1024@1x.png updated |
+| **Windows icon** | app_icon.ico updated |
+| **Device verification** | APK built + installed on DNP NX9. Device locale is `en-EG` → app shows "Delwaqty" on home screen. Switching device to Arabic locale → shows "دلوقتي" |
+| **Quality gates** | `flutter analyze` **0 errors** · `flutter test` **542/542 passing** · APK built + installed ✅ |
+
+---
+
+## Current Task — MOST REQUESTED + LANGUAGE FIX + CART ICON + ADMIN/DELIVERY V2 THEME (Session 21k)
+
+Five changes in one session: animated Most Requested carousel on the commerce discovery page, broken Arabic language fix on the favorites page, cart icon in the sidebar, and Premium V2 theme upgrade for the admin panel and delivery list.
+
+| Area | Change |
+|------|--------|
+| **Favorites language bug** | `app_ar.arb`: `"favoriteMerchants": "الmerchantات"` → `"المتاجر"`; `"noFavoritesMessage"` — replaced untranslated "merchant" with "متجر". Re-generated l10n |
+| **Most Requested section** | New animated `PageView` carousel in `commerce_discovery_page.dart` between Featured and All Merchants — shows top 10 merchants sorted by rating in `_MostRequestedCard` (gradient accent, star rating, type badge, auto-scroll every 4s with dot indicators). New l10n key `mostRequested` (en: "Most Requested", ar: "الأكثر طلباً") |
+| **Cart icon in sidebar** | New `SidebarItem` with `Icons.shopping_cart_outlined` under Favorites in `floating_sidebar_overlay.dart`, navigating to `/market/cart` |
+| **Admin panel V2 theme** | `admin_dashboard_page.dart`: replaced all `GlassCard` → `PremiumCard` (radius `AppSpacing.radiusCard`); renamed `_StatGlassCard` → `_StatPremiumCard`; stat cards, quick actions, activity tiles all use `PremiumCard` |
+| **Delivery list V2 theme** | `admin_deliveries_page.dart`: replaced `GlassCard` → `PremiumCard`; service filter chips now use `AppColors.brandPurple` gradient when selected (animated `Container`); delivery tiles use `PremiumCard` with proper radius |
+| **Quality gates** | `flutter analyze` **0 errors** · `flutter test` **542/542 passing** · APK built + installed on DNP NX9 ✅ |
+
+---
+
+## Current Task — OFFER BANNER FIX + MERCHANT OFFERS MANAGEMENT (Session 21j)
+
+Follow-up to the Redesign V2 milestone. Fixed the home page offer banner overflow and built a full merchant-side offers management page so merchants can create, edit, delete, and toggle offers from the dashboard.
+
+| Area | Change |
+|------|--------|
+| **Offer banner overflow** | `_PromoCarousel` container height increased from 120 → 140px to accommodate padding + title + subtitle + coupon chip without bottom overflow (was overflowing 13px) |
+| **Merchant Offers Page** | New `merchant_offers_page.dart` — full CRUD: list all offers with search, edit/delete/toggle-active per card, `FloatingActionButton` for creating new offers, form sheet with title, description, discount type (percentage/fixed), discount value, minimum order, max discount, start/end dates, active toggle |
+| **Dashboard wiring** | "Create Offer" `ListTile` in `merchant_dashboard_page.dart` now navigates to `/merchant-dashboard/offers` (was a dead SnackBar placeholder) |
+| **Route registration** | `/merchant-dashboard/offers` route registered in `merchant_module.dart` |
+| **l10n additions** | 30 new keys (en+ar): `manageOffers`, `yourOffers`, `addOffer`, `editOffer`, `deleteOffer`, `offerTitle`, `enterOfferTitle`, `offerDescription`, `enterOfferDescription`, `discountType`, `percentage`, `fixedAmount`, `discountValue`, `enterDiscountValue`, `minimumOrder`, `enterMinimumOrder`, `maximumDiscount`, `enterMaximumDiscount`, `startDate`, `endDate`, `activateOffer`, `deactivateOffer`, `confirmDeleteOffer`, `offerCreated`, `offerUpdated`, `offerDeleted`, `noOffersYet`, `noOffersMessage`, `searchOffers` |
+| **Quality gates** | `flutter analyze` **0 errors** · `flutter test` **542/542 passing** · APK built + installed on DNP NX9 ✅ |
+
+---
+
+## Current Task — REDESIGN V2: SEARCH / ORDERS / PROFILE PAGES (Session 21i)
+
+Part of the platform-wide Premium V2 redesign (Apple/Airbnb/Stripe aesthetic, deep-purple brand). This session redesigned the remaining three bottom-nav tabs to match the Session 21h Home redesign — reusing the same V2 tokens and shared design widgets. All business logic and routes are unchanged; only presentation was upgraded.
+
+| Area | Change |
+|------|--------|
+| **Search page** (`search_page.dart`) | Replaced `AppSearchBar` with the shared `PremiumSearchField` (22px frosted-glass capsule, animated focus). Filter chips + sort `ChoiceChip`s → custom `_PremiumPill` (brand gradient when selected with `shadowGlow`, glass pill when unselected; compact variant for sort bar). Grid cards → premium `_SearchMerchantCard` (24px `PremiumCard`, gradient/emoji header with image fallback, Open/Closed `_OpenBadge`, persisted `FavoriteButton`, type-color category chip, rating + count, delivery time + fee with `currencySymbol`). `EmptyState` → `PremiumEmptyState` (no-results + error with retry). Loading → shimmer `ShimmerLoading` grid. Debounce/search/sort logic untouched |
+| **Orders page** (`orders_page.dart`) | Cards → 24px `PremiumCard` with colored `_StatusTile` (gradient icon per status), status `_StatusChip` with dot, items count via `l10n.itemCount(count)`, total with `currencySymbol`, schedule icon + formatted date, **Track Order** affordance (`l10n.trackYourOrder` + chevron) when trackable. Empty + error → `PremiumEmptyState` (error has retry). Loading → `_OrderSkeletonCard` shimmer. Business logic (`_ordersFutureProvider`, statuses, routes) untouched |
+| **Profile page** (`profile_page.dart`) | Authed: gradient-ring avatar (`_GradientAvatarRing`) + gradient camera button, role `_RoleChip` (admin/driver/merchant/owner), `PremiumCard` header. Settings + Orders/Invoices → `_SectionCard` (title + premium card with tinted `_IconTile` leading icons, dividers). Role portals → gradient `_PortalTile` rows. Guest profile → `_GuestAvatar` gradient circle + full-width premium buttons. Logout + edit dialogs radius 26 (`radiusDialog`). Locale/theme/sign-out/edit-photo logic untouched |
+| **Page backdrop** | `GradientBackground` brand wash behind all three tab bodies for a cohesive premium feel (dark-aware) |
+| **l10n additions** | New keys (en+ar): `merchant`, `owner`, `rolePortals`; `gen-l10n` re-run; orders page now uses existing `itemCount`/`trackYourOrder` instead of inline strings |
+| **Code deletion classification** | `AppSearchBar` + `EmptyState` widgets remain — still used by favorites/cart/restaurant-tracking pages and their tests (not deleted) |
+| **Quality gates** | `flutter analyze` **0 errors** (issue count dropped 481 → 474, all pre-existing info lints) · `flutter test` **542/542 passing** · `flutter build apk --debug --dart-define-from-file=.env.dev` ✅ · APK installed on DNP NX9 ✅ |
+
+> **Remaining (next in V2 plan):** commit/push the full Redesign V2 milestone (Sessions 21g–21i: tokens, theme, shell, Home, Search, Orders, Profile) + sprint report in `docs/HANDOFF/`, then run the device check across all four tabs.
+
+---
+
+## Previous Task — ADMIN PUSH UX + NOTIFICATION DELETION (Session 21g)
 
 Follow-up to 21f. User asked for: connected devices as pure counters, an offline counter, a button showing how many devices received a broadcast, hiding the Firebase/database card, a delete-all button, and per-notification delete.
 
@@ -245,6 +342,7 @@ Made the Sprint 40 management features (complaints, sanctions, live tracking, su
 | M13f | 57 | Location Reliability — real place names via Photon/Nominatim/Overpass, 1 m deep lock, stale/9-day replay rejected, then over-strict gate relaxed so real fresh fixes (network/fused 100 m) are used again | ✅ |
 | M13g | 57 | Push Notifications — token pipeline fixed (updated_at, upsert, platform CHECK), migration 018 applied live, admin broadcast via SECURITY DEFINER RPC, realtime in-app delivery verified end-to-end on device | ✅ |
 | M13h | 57 | Admin Push UX — device counters (online/offline/received), migration 019 (RPC returns device count), Firebase card removed, notification-center delete-all + per-item delete, token heartbeat | ✅ |
+| M13i | 58 | Redesign V2 — Premium UI (Apple/Airbnb/Stripe aesthetic, deep-purple brand): design tokens (colors/spacing/elevation/theme), floating glass bottom nav, shared design widgets (`PremiumCard`/`PremiumSearchField`/`GlassSurface`/`GradientBackground`), Home page redesign, then Search/Orders/Profile tab redesigns | ✅ (uncommitted milestone) |
 
 ---
 
@@ -272,6 +370,7 @@ Made the Sprint 40 management features (complaints, sanctions, live tracking, su
 | Migration 018 | ✅ Applied to `bttnlkmwhorjamzemwda` via Management API + verified (columns, trigger, RPC, realtime publication) |
 | Migration 019 | ✅ Applied to `bttnlkmwhorjamzemwda` via Management API + verified (RPC body returns device count) |
 | Live E2E | ✅ Admin send → RPC returns 1 device → received counter updates; notification center per-item delete + delete-all verified (DB 0 rows) |
+| Redesign V2 | ✅ Home (21h) + Search/Orders/Profile (21i) premium UI, 0 analyze errors, 542/542 tests, APK installed |
 
 ---
 

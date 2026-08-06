@@ -15,10 +15,42 @@ class AppLocalizationsEn extends AppLocalizations {
   String get hello => 'Hello';
 
   @override
+  String helloName(String name) {
+    return 'Hello, $name 👋';
+  }
+
+  @override
+  String get goodEvening => 'Good evening';
+
+  @override
+  String get fastestWayToOrder => 'Fastest way to order';
+
+  @override
+  String get places => 'places';
+
+  @override
+  String get freeDeliveryPromoSub => 'On orders over 200 EGP';
+
+  @override
+  String get offersPromoSub => 'Exclusive deals on selected stores';
+
+  @override
   String get welcome => 'Welcome';
 
   @override
   String get login => 'Login';
+
+  @override
+  String get signIn => 'Sign In';
+
+  @override
+  String get emailOrPhone => 'Email or Phone';
+
+  @override
+  String get rememberMe => 'Remember Me';
+
+  @override
+  String get or => 'or';
 
   @override
   String get logout => 'Logout';
@@ -27,7 +59,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get register => 'Register';
 
   @override
+  String get createAccount => 'Create Account';
+
+  @override
   String get email => 'Email';
+
+  @override
+  String get location => 'Location';
 
   @override
   String get password => 'Password';
@@ -1071,6 +1109,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get popularItems => 'Popular Items';
 
   @override
+  String get mostRequested => 'Most Requested';
+
+  @override
   String get allCategories => 'All Categories';
 
   @override
@@ -1170,6 +1211,94 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get createOffer => 'Create Offer';
+
+  @override
+  String get manageOffers => 'Manage Offers';
+
+  @override
+  String get yourOffers => 'Your Offers';
+
+  @override
+  String get addOffer => 'Add Offer';
+
+  @override
+  String get editOffer => 'Edit Offer';
+
+  @override
+  String get deleteOffer => 'Delete Offer';
+
+  @override
+  String get offerTitle => 'Offer Title';
+
+  @override
+  String get enterOfferTitle => 'Enter offer title';
+
+  @override
+  String get offerDescription => 'Description (optional)';
+
+  @override
+  String get enterOfferDescription => 'Enter offer description';
+
+  @override
+  String get discountType => 'Discount Type';
+
+  @override
+  String get percentage => 'Percentage';
+
+  @override
+  String get fixedAmount => 'Fixed Amount';
+
+  @override
+  String get discountValue => 'Discount Value';
+
+  @override
+  String get enterDiscountValue => 'Enter discount value';
+
+  @override
+  String get minimumOrder => 'Min. order';
+
+  @override
+  String get enterMinimumOrder => 'Enter minimum order amount';
+
+  @override
+  String get maximumDiscount => 'Maximum Discount (optional)';
+
+  @override
+  String get enterMaximumDiscount => 'Enter maximum discount';
+
+  @override
+  String get startDate => 'Start Date';
+
+  @override
+  String get endDate => 'End Date';
+
+  @override
+  String get activateOffer => 'Activate Offer';
+
+  @override
+  String get deactivateOffer => 'Deactivate Offer';
+
+  @override
+  String get confirmDeleteOffer =>
+      'Are you sure you want to delete this offer?';
+
+  @override
+  String get offerCreated => 'Offer created successfully';
+
+  @override
+  String get offerUpdated => 'Offer updated successfully';
+
+  @override
+  String get offerDeleted => 'Offer deleted successfully';
+
+  @override
+  String get noOffersYet => 'No offers yet';
+
+  @override
+  String get noOffersMessage => 'Create your first offer to attract customers';
+
+  @override
+  String get searchOffers => 'Search offers...';
 
   @override
   String get orders => 'Orders';
@@ -1338,9 +1467,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get tryDifferentDate => 'Try a different date or party size.';
-
-  @override
-  String get minimumOrder => 'Min. order';
 
   @override
   String get perGuest => 'per guest';
@@ -3272,6 +3398,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get driver => 'Driver';
 
   @override
+  String get merchant => 'Merchant';
+
+  @override
+  String get owner => 'Owner';
+
+  @override
+  String get rolePortals => 'Role Portals';
+
+  @override
   String get adminPanel => 'Admin Panel';
 
   @override
@@ -3576,12 +3711,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get fineAmount => 'Fine Amount';
 
   @override
-  String get startDate => 'Start Date';
-
-  @override
-  String get endDate => 'End Date';
-
-  @override
   String get inactive => 'Inactive';
 
   @override
@@ -3748,4 +3877,145 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get deleteNotification => 'Delete notification';
+
+  @override
+  String get chat => 'Chat';
+
+  @override
+  String get shareMerchant => 'Share';
+
+  @override
+  String get deliveryFeeLabel => 'Delivery fee';
+
+  @override
+  String get minimumOrderLabel => 'Minimum order';
+
+  @override
+  String get estimatedDelivery => 'Estimated delivery';
+
+  @override
+  String get knowMore => 'Know More';
+
+  @override
+  String get callNow => 'Call Now';
+
+  @override
+  String get getDirections => 'Get Directions';
+
+  @override
+  String get similarMerchants => 'Similar Providers';
+
+  @override
+  String get noSimilarMerchants => 'No similar providers found';
+
+  @override
+  String get businessInfo => 'Business Info';
+
+  @override
+  String get reviewPlaceholder => 'Share your experience...';
+
+  @override
+  String searchInMerchant(Object name) {
+    return 'Search in $name...';
+  }
+
+  @override
+  String showingNProducts(Object count) {
+    return 'Showing $count items';
+  }
+
+  @override
+  String get noResultsInMerchant => 'No results found';
+
+  @override
+  String discountPercent(Object percent) {
+    return '$percent% off';
+  }
+
+  @override
+  String get mostOrdered => 'Most Ordered';
+
+  @override
+  String get addedToCart => 'Added to cart';
+
+  @override
+  String get options => 'Options';
+
+  @override
+  String get calories => 'Calories';
+
+  @override
+  String get ingredients => 'Ingredients';
+
+  @override
+  String get preparationTime => 'Preparation Time';
+
+  @override
+  String get dosageForm => 'Dosage Form';
+
+  @override
+  String get activeIngredient => 'Active Ingredient';
+
+  @override
+  String get prescriptionRequired => 'Prescription Required';
+
+  @override
+  String get warnings => 'Warnings';
+
+  @override
+  String get weight => 'Weight';
+
+  @override
+  String get expiryDate => 'Expiry Date';
+
+  @override
+  String get storageInstructions => 'Storage Instructions';
+
+  @override
+  String get allergens => 'Allergens';
+
+  @override
+  String get serviceDuration => 'Service Duration';
+
+  @override
+  String get whatsIncluded => 'What\'s Included';
+
+  @override
+  String get biometricReason =>
+      'Authenticate with your fingerprint to continue';
+
+  @override
+  String get biometricFailed =>
+      'Biometric authentication failed. Please try again.';
+
+  @override
+  String get biometricNotAvailable =>
+      'Biometric authentication is not available on this device';
+
+  @override
+  String get biometricLogin => 'Login with Fingerprint';
+
+  @override
+  String get biometricLoginDescription =>
+      'Use your fingerprint to quickly sign in';
+
+  @override
+  String get fingerprintLogin => 'Login with Fingerprint';
+
+  @override
+  String get fingerprintLoginDescription =>
+      'Use your fingerprint to quickly sign in';
+
+  @override
+  String get enableFingerprint => 'Enable Fingerprint Login';
+
+  @override
+  String get fingerprintEnabled => 'Fingerprint login enabled';
+
+  @override
+  String get fingerprintDisabled => 'Fingerprint login disabled';
+
+  @override
+  String get enterPasswordForFingerprint =>
+      'Enter your password once to enable fingerprint login';
 }

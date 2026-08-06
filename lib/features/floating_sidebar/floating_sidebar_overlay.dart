@@ -240,6 +240,15 @@ class _FloatingSidebarOverlayState extends State<FloatingSidebarOverlay>
                                       _navigate('/market/favorites');
                                     },
                                   ),
+                                  SidebarItem(
+                                    icon: Icons.shopping_cart_outlined,
+                                    label: widget.l10n.cart,
+                                    isSelected: _selectedIndex == 10,
+                                    onTap: () {
+                                      setState(() => _selectedIndex = 10);
+                                      _navigate('/market/cart');
+                                    },
+                                  ),
                                 ],
                               ),
                               SidebarDivider(),

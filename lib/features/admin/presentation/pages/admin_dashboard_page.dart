@@ -5,10 +5,12 @@ import 'package:go_router/go_router.dart';
 import 'package:delwaqty/services/admin/admin_providers.dart';
 import 'package:delwaqty/features/admin/domain/entities/admin_models.dart';
 import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
-import 'package:delwaqty/shared/widgets/glass_card.dart';
 import 'package:delwaqty/shared/widgets/premium_empty_state.dart';
 import 'package:delwaqty/shared/widgets/app_loader.dart';
+import 'package:delwaqty/shared/widgets/design/premium_card.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
+import 'package:delwaqty/core/theme/app_colors.dart';
+import 'package:delwaqty/core/theme/app_spacing.dart';
 
 class AdminDashboardPage extends ConsumerStatefulWidget {
   const AdminDashboardPage({super.key});
@@ -75,7 +77,7 @@ class _AdminDashboardPageState extends ConsumerState<AdminDashboardPage> {
                   ),
                 ),
                 error: (e, _) => AnimatedFadeIn(
-                  child: GlassCard(
+                  child: PremiumCard(
                     child: PremiumEmptyState(
                       icon: Icons.error_outline_rounded,
                       title: l10n.error,
@@ -120,7 +122,7 @@ class _AdminDashboardPageState extends ConsumerState<AdminDashboardPage> {
                   ),
                 ),
                 error: (e, _) => AnimatedFadeIn(
-                  child: GlassCard(
+                  child: PremiumCard(
                     child: PremiumEmptyState(
                       icon: Icons.error_outline_rounded,
                       title: l10n.error,
@@ -134,7 +136,7 @@ class _AdminDashboardPageState extends ConsumerState<AdminDashboardPage> {
                   if (activities.isEmpty) {
                     return AnimatedFadeIn(
                       delay: const Duration(milliseconds: 250),
-                      child: GlassCard(
+                      child: PremiumCard(
                         child: PremiumEmptyState(
                           icon: Icons.history_rounded,
                           title: l10n.noRecentActivity,
@@ -188,56 +190,56 @@ class _AdminDashboardPageState extends ConsumerState<AdminDashboardPage> {
           crossAxisSpacing: 10,
           childAspectRatio: 1.4,
           children: [
-            _StatGlassCard(
+            _StatPremiumCard(
               title: l10n.totalUsers,
               value: dashboard.totalUsers.toString(),
               icon: Icons.people_outline_rounded,
               color: const Color(0xFF4A90D9),
               cs: cs,
             ),
-            _StatGlassCard(
+            _StatPremiumCard(
               title: l10n.totalMerchants,
               value: dashboard.totalMerchants.toString(),
               icon: Icons.store_outlined,
               color: const Color(0xFF34C759),
               cs: cs,
             ),
-            _StatGlassCard(
+            _StatPremiumCard(
               title: l10n.totalOrders,
               value: dashboard.pendingOrders.toString(),
               icon: Icons.receipt_long_rounded,
               color: const Color(0xFFFF9500),
               cs: cs,
             ),
-            _StatGlassCard(
+            _StatPremiumCard(
               title: l10n.revenue,
               value: 'ج.م ${dashboard.totalRevenue.toStringAsFixed(0)}',
               icon: Icons.payments_outlined,
               color: const Color(0xFFAF52DE),
               cs: cs,
             ),
-            _StatGlassCard(
+            _StatPremiumCard(
               title: l10n.activeDrivers,
               value: dashboard.activeDrivers.toString(),
               icon: Icons.local_shipping_rounded,
               color: const Color(0xFF007AFF),
               cs: cs,
             ),
-            _StatGlassCard(
+            _StatPremiumCard(
               title: l10n.pendingOrdersStat,
               value: dashboard.pendingOrders.toString(),
               icon: Icons.pending_outlined,
               color: const Color(0xFFFF3B30),
               cs: cs,
             ),
-            _StatGlassCard(
+            _StatPremiumCard(
               title: l10n.totalRides,
               value: dashboard.totalRides.toString(),
               icon: Icons.directions_car_rounded,
               color: const Color(0xFF00C7BE),
               cs: cs,
             ),
-            _StatGlassCard(
+            _StatPremiumCard(
               title: l10n.totalDeliveries,
               value: dashboard.totalDeliveries.toString(),
               icon: Icons.inventory_2_rounded,
@@ -372,8 +374,8 @@ class _QuickActionData {
   final String route;
 }
 
-class _StatGlassCard extends StatelessWidget {
-  const _StatGlassCard({
+class _StatPremiumCard extends StatelessWidget {
+  const _StatPremiumCard({
     required this.title,
     required this.value,
     required this.icon,
@@ -389,9 +391,9 @@ class _StatGlassCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GlassCard(
+    return PremiumCard(
       padding: const EdgeInsets.all(12),
-      borderRadius: 20,
+      radius: AppSpacing.radiusCard,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -448,9 +450,9 @@ class _QuickActionCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: onTap,
-      child: GlassCard(
+      child: PremiumCard(
         padding: const EdgeInsets.all(8),
-        borderRadius: 20,
+        radius: AppSpacing.radiusCard,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -496,9 +498,9 @@ class _ActivityGlassTile extends StatelessWidget {
     final iconColor = _getActivityColor(activity.action);
     final timeText = _formatTime(activity.timestamp);
 
-    return GlassCard(
+    return PremiumCard(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-      borderRadius: 20,
+      radius: AppSpacing.radiusCard,
       child: Row(
         children: [
           Container(

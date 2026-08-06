@@ -135,6 +135,28 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
+  Future<AuthResult> signInWithFacebook() async {
+    try {
+      final initiated = await _dataSource.signInWithFacebook();
+      if (!initiated) {
+        throw const AuthException(message: 'Facebook sign in was cancelled');
+      }
+      final session = _dataSource.currentSession;
+      final user = _dataSource.currentSupabaseUser;
+      if (session != null && user != null) {
+        return _mapSessionToResult(session, user);
+      }
+      return const AuthResult(userId: '', isNewUser: false);
+    } on sb.AuthException catch (e) {
+      _logger.e('Facebook sign in error', e);
+      throw AuthException(message: e.message);
+    } catch (e) {
+      _logger.e('Unexpected Facebook sign in error', e);
+      throw ServerException(message: e.toString());
+    }
+  }
+
+  @override
   Future<AuthResult> signInAnonymously() async {
     try {
       final response = await _dataSource.signInAnonymously();
@@ -262,6 +284,7 @@ class AuthRepositoryImpl implements AuthRepository {
     return switch (provider) {
       'google' => AuthProviderType.google,
       'apple' => AuthProviderType.apple,
+      'facebook' => AuthProviderType.facebook,
       'phone' => AuthProviderType.phone,
       'email' => AuthProviderType.email,
       _ =>

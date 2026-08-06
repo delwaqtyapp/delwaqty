@@ -15,10 +15,42 @@ class AppLocalizationsAr extends AppLocalizations {
   String get hello => 'مرحباً';
 
   @override
+  String helloName(String name) {
+    return 'مرحباً $name 👋';
+  }
+
+  @override
+  String get goodEvening => 'مساء الخير';
+
+  @override
+  String get fastestWayToOrder => 'أسرع طريقة للطلب';
+
+  @override
+  String get places => 'مكان';
+
+  @override
+  String get freeDeliveryPromoSub => 'على الطلبات فوق 200 ج.م';
+
+  @override
+  String get offersPromoSub => 'خصومات حصرية على متاجر مختارة';
+
+  @override
   String get welcome => 'أهلاً';
 
   @override
   String get login => 'تسجيل الدخول';
+
+  @override
+  String get signIn => 'تسجيل الدخول';
+
+  @override
+  String get emailOrPhone => 'البريد الإلكتروني أو الهاتف';
+
+  @override
+  String get rememberMe => 'تذكرني';
+
+  @override
+  String get or => 'أو';
 
   @override
   String get logout => 'تسجيل الخروج';
@@ -27,7 +59,13 @@ class AppLocalizationsAr extends AppLocalizations {
   String get register => 'إنشاء حساب';
 
   @override
+  String get createAccount => 'إنشاء حساب جديد';
+
+  @override
   String get email => 'البريد الإلكتروني';
+
+  @override
+  String get location => 'الموقع';
 
   @override
   String get password => 'كلمة المرور';
@@ -1067,7 +1105,10 @@ class AppLocalizationsAr extends AppLocalizations {
   String get popularItems => 'الأكثر طلباً';
 
   @override
-  String get allCategories => 'جميع التصنيفات';
+  String get mostRequested => 'الأكثر طلباً';
+
+  @override
+  String get allCategories => 'جميع الفئات';
 
   @override
   String get outOfStock => 'نفذ من المخزون';
@@ -1166,6 +1207,93 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get createOffer => 'إنشاء عرض';
+
+  @override
+  String get manageOffers => 'إدارة العروض';
+
+  @override
+  String get yourOffers => 'عروضك';
+
+  @override
+  String get addOffer => 'إضافة عرض';
+
+  @override
+  String get editOffer => 'تعديل العرض';
+
+  @override
+  String get deleteOffer => 'حذف العرض';
+
+  @override
+  String get offerTitle => 'عنوان العرض';
+
+  @override
+  String get enterOfferTitle => 'أدخل عنوان العرض';
+
+  @override
+  String get offerDescription => 'الوصف (اختياري)';
+
+  @override
+  String get enterOfferDescription => 'أدخل وصف العرض';
+
+  @override
+  String get discountType => 'نوع الخصم';
+
+  @override
+  String get percentage => 'نسبة مئوية';
+
+  @override
+  String get fixedAmount => 'مبلغ ثابت';
+
+  @override
+  String get discountValue => 'قيمة الخصم';
+
+  @override
+  String get enterDiscountValue => 'أدخل قيمة الخصم';
+
+  @override
+  String get minimumOrder => 'الحد الأدنى للطلب';
+
+  @override
+  String get enterMinimumOrder => 'أدخل الحد الأدنى لمبلغ الطلب';
+
+  @override
+  String get maximumDiscount => 'الحد الأقصى للخصم (اختياري)';
+
+  @override
+  String get enterMaximumDiscount => 'أدخل الحد الأقصى للخصم';
+
+  @override
+  String get startDate => 'تاريخ البداية';
+
+  @override
+  String get endDate => 'تاريخ النهاية';
+
+  @override
+  String get activateOffer => 'تفعيل العرض';
+
+  @override
+  String get deactivateOffer => 'إلغاء تفعيل العرض';
+
+  @override
+  String get confirmDeleteOffer => 'هل أنت متأكد من حذف هذا العرض؟';
+
+  @override
+  String get offerCreated => 'تم إنشاء العرض بنجاح';
+
+  @override
+  String get offerUpdated => 'تم تحديث العرض بنجاح';
+
+  @override
+  String get offerDeleted => 'تم حذف العرض بنجاح';
+
+  @override
+  String get noOffersYet => 'لا توجد عروض بعد';
+
+  @override
+  String get noOffersMessage => 'أنشئ عرضك الأول لجذب العملاء';
+
+  @override
+  String get searchOffers => 'بحث في العروض...';
 
   @override
   String get orders => 'الطلبات';
@@ -1336,16 +1464,13 @@ class AppLocalizationsAr extends AppLocalizations {
   String get tryDifferentDate => 'جرّب تاريخاً أو عدد أشخاص مختلفاً.';
 
   @override
-  String get minimumOrder => 'الحد الأدنى للطلب';
-
-  @override
   String get perGuest => 'للشخص';
 
   @override
   String get myFavorites => 'المفضلة عندي';
 
   @override
-  String get favoriteMerchants => 'الmerchantات';
+  String get favoriteMerchants => 'المتاجر';
 
   @override
   String get favoriteProducts => 'المنتجات';
@@ -1355,7 +1480,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get noFavoritesMessage =>
-      'اضغط على أيقونة القلب على أي merchant أو منتج وحفظه هنا.';
+      'اضغط على أيقونة القلب على أي متجر أو منتج وحفظه هنا.';
 
   @override
   String get addedToFavorites => 'تمت الإضافة للمفضلة';
@@ -3253,6 +3378,15 @@ class AppLocalizationsAr extends AppLocalizations {
   String get driver => 'السائق';
 
   @override
+  String get merchant => 'تاجر';
+
+  @override
+  String get owner => 'مالك';
+
+  @override
+  String get rolePortals => 'بوابات الأدوار';
+
+  @override
   String get adminPanel => 'لوحة الإدارة';
 
   @override
@@ -3550,12 +3684,6 @@ class AppLocalizationsAr extends AppLocalizations {
   String get fineAmount => 'قيمة الغرامة';
 
   @override
-  String get startDate => 'تاريخ البداية';
-
-  @override
-  String get endDate => 'تاريخ النهاية';
-
-  @override
   String get inactive => 'غير نشط';
 
   @override
@@ -3721,4 +3849,143 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get deleteNotification => 'حذف الإشعار';
+
+  @override
+  String get chat => 'محادثة';
+
+  @override
+  String get shareMerchant => 'مشاركة';
+
+  @override
+  String get deliveryFeeLabel => 'رسوم التوصيل';
+
+  @override
+  String get minimumOrderLabel => 'الحد الأدنى للطلب';
+
+  @override
+  String get estimatedDelivery => 'وقت التوصيل المقدر';
+
+  @override
+  String get knowMore => 'اعرف أكثر';
+
+  @override
+  String get callNow => 'اتصل الآن';
+
+  @override
+  String get getDirections => 'الاتجاهات';
+
+  @override
+  String get similarMerchants => 'محلات مشابهة';
+
+  @override
+  String get noSimilarMerchants => 'لا توجد محلات مشابهة';
+
+  @override
+  String get businessInfo => 'معلومات النشاط التجاري';
+
+  @override
+  String get reviewPlaceholder => 'شارك تجربتك...';
+
+  @override
+  String searchInMerchant(Object name) {
+    return 'ابحث في $name...';
+  }
+
+  @override
+  String showingNProducts(Object count) {
+    return 'عرض $count منتج';
+  }
+
+  @override
+  String get noResultsInMerchant => 'لا توجد نتائج';
+
+  @override
+  String discountPercent(Object percent) {
+    return 'خصم $percent%';
+  }
+
+  @override
+  String get mostOrdered => 'الأكثر مبيعاً';
+
+  @override
+  String get addedToCart => 'تمت الإضافة إلى السلة';
+
+  @override
+  String get options => 'الخيارات';
+
+  @override
+  String get calories => 'السعرات الحرارية';
+
+  @override
+  String get ingredients => 'المكونات';
+
+  @override
+  String get preparationTime => 'وقت التحضير';
+
+  @override
+  String get dosageForm => 'شكل الجرعة';
+
+  @override
+  String get activeIngredient => 'المادة الفعالة';
+
+  @override
+  String get prescriptionRequired => 'يتطلب وصفة طبية';
+
+  @override
+  String get warnings => 'تحذيرات';
+
+  @override
+  String get weight => 'الوزن';
+
+  @override
+  String get expiryDate => 'تاريخ انتهاء الصلاحية';
+
+  @override
+  String get storageInstructions => 'تعليمات التخزين';
+
+  @override
+  String get allergens => 'المواد المسببة للحساسية';
+
+  @override
+  String get serviceDuration => 'مدة الخدمة';
+
+  @override
+  String get whatsIncluded => 'ما هو مشمول';
+
+  @override
+  String get biometricReason => 'سجّل الدخول ببصمة الإصبع للمتابعة';
+
+  @override
+  String get biometricFailed =>
+      'فشلت المصادقة بالبصمة. يرجى المحاولة مرة أخرى.';
+
+  @override
+  String get biometricNotAvailable => 'مصادقة البصمة غير متوفرة على هذا الجهاز';
+
+  @override
+  String get biometricLogin => 'تسجيل الدخول بالبصمة';
+
+  @override
+  String get biometricLoginDescription =>
+      'استخدم بصمة إصبعك لتسجيل الدخول بسرعة';
+
+  @override
+  String get fingerprintLogin => 'تسجيل الدخول بالبصمة';
+
+  @override
+  String get fingerprintLoginDescription =>
+      'استخدم بصمة إصبعك لتسجيل الدخول بسرعة';
+
+  @override
+  String get enableFingerprint => 'تفعيل تسجيل الدخول بالبصمة';
+
+  @override
+  String get fingerprintEnabled => 'تم تفعيل تسجيل الدخول بالبصمة';
+
+  @override
+  String get fingerprintDisabled => 'تم تعطيل تسجيل الدخول بالبصمة';
+
+  @override
+  String get enterPasswordForFingerprint =>
+      'أدخل كلمة المرور مرة واحدة لتفعيل تسجيل الدخول بالبصمة';
 }

@@ -110,6 +110,42 @@ abstract class AppLocalizations {
   /// **'Hello'**
   String get hello;
 
+  /// No description provided for @helloName.
+  ///
+  /// In en, this message translates to:
+  /// **'Hello, {name} 👋'**
+  String helloName(String name);
+
+  /// No description provided for @goodEvening.
+  ///
+  /// In en, this message translates to:
+  /// **'Good evening'**
+  String get goodEvening;
+
+  /// No description provided for @fastestWayToOrder.
+  ///
+  /// In en, this message translates to:
+  /// **'Fastest way to order'**
+  String get fastestWayToOrder;
+
+  /// No description provided for @places.
+  ///
+  /// In en, this message translates to:
+  /// **'places'**
+  String get places;
+
+  /// No description provided for @freeDeliveryPromoSub.
+  ///
+  /// In en, this message translates to:
+  /// **'On orders over 200 EGP'**
+  String get freeDeliveryPromoSub;
+
+  /// No description provided for @offersPromoSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Exclusive deals on selected stores'**
+  String get offersPromoSub;
+
   /// No description provided for @welcome.
   ///
   /// In en, this message translates to:
@@ -121,6 +157,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Login'**
   String get login;
+
+  /// No description provided for @signIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign In'**
+  String get signIn;
+
+  /// No description provided for @emailOrPhone.
+  ///
+  /// In en, this message translates to:
+  /// **'Email or Phone'**
+  String get emailOrPhone;
+
+  /// No description provided for @rememberMe.
+  ///
+  /// In en, this message translates to:
+  /// **'Remember Me'**
+  String get rememberMe;
+
+  /// No description provided for @or.
+  ///
+  /// In en, this message translates to:
+  /// **'or'**
+  String get or;
 
   /// No description provided for @logout.
   ///
@@ -134,11 +194,23 @@ abstract class AppLocalizations {
   /// **'Register'**
   String get register;
 
+  /// No description provided for @createAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Create Account'**
+  String get createAccount;
+
   /// No description provided for @email.
   ///
   /// In en, this message translates to:
   /// **'Email'**
   String get email;
+
+  /// No description provided for @location.
+  ///
+  /// In en, this message translates to:
+  /// **'Location'**
+  String get location;
 
   /// No description provided for @password.
   ///
@@ -2114,6 +2186,12 @@ abstract class AppLocalizations {
   /// **'Popular Items'**
   String get popularItems;
 
+  /// No description provided for @mostRequested.
+  ///
+  /// In en, this message translates to:
+  /// **'Most Requested'**
+  String get mostRequested;
+
   /// No description provided for @allCategories.
   ///
   /// In en, this message translates to:
@@ -2311,6 +2389,180 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Create Offer'**
   String get createOffer;
+
+  /// No description provided for @manageOffers.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage Offers'**
+  String get manageOffers;
+
+  /// No description provided for @yourOffers.
+  ///
+  /// In en, this message translates to:
+  /// **'Your Offers'**
+  String get yourOffers;
+
+  /// No description provided for @addOffer.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Offer'**
+  String get addOffer;
+
+  /// No description provided for @editOffer.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Offer'**
+  String get editOffer;
+
+  /// No description provided for @deleteOffer.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Offer'**
+  String get deleteOffer;
+
+  /// No description provided for @offerTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Offer Title'**
+  String get offerTitle;
+
+  /// No description provided for @enterOfferTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter offer title'**
+  String get enterOfferTitle;
+
+  /// No description provided for @offerDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Description (optional)'**
+  String get offerDescription;
+
+  /// No description provided for @enterOfferDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter offer description'**
+  String get enterOfferDescription;
+
+  /// No description provided for @discountType.
+  ///
+  /// In en, this message translates to:
+  /// **'Discount Type'**
+  String get discountType;
+
+  /// No description provided for @percentage.
+  ///
+  /// In en, this message translates to:
+  /// **'Percentage'**
+  String get percentage;
+
+  /// No description provided for @fixedAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Fixed Amount'**
+  String get fixedAmount;
+
+  /// No description provided for @discountValue.
+  ///
+  /// In en, this message translates to:
+  /// **'Discount Value'**
+  String get discountValue;
+
+  /// No description provided for @enterDiscountValue.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter discount value'**
+  String get enterDiscountValue;
+
+  /// No description provided for @minimumOrder.
+  ///
+  /// In en, this message translates to:
+  /// **'Min. order'**
+  String get minimumOrder;
+
+  /// No description provided for @enterMinimumOrder.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter minimum order amount'**
+  String get enterMinimumOrder;
+
+  /// No description provided for @maximumDiscount.
+  ///
+  /// In en, this message translates to:
+  /// **'Maximum Discount (optional)'**
+  String get maximumDiscount;
+
+  /// No description provided for @enterMaximumDiscount.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter maximum discount'**
+  String get enterMaximumDiscount;
+
+  /// No description provided for @startDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Start Date'**
+  String get startDate;
+
+  /// No description provided for @endDate.
+  ///
+  /// In en, this message translates to:
+  /// **'End Date'**
+  String get endDate;
+
+  /// No description provided for @activateOffer.
+  ///
+  /// In en, this message translates to:
+  /// **'Activate Offer'**
+  String get activateOffer;
+
+  /// No description provided for @deactivateOffer.
+  ///
+  /// In en, this message translates to:
+  /// **'Deactivate Offer'**
+  String get deactivateOffer;
+
+  /// No description provided for @confirmDeleteOffer.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete this offer?'**
+  String get confirmDeleteOffer;
+
+  /// No description provided for @offerCreated.
+  ///
+  /// In en, this message translates to:
+  /// **'Offer created successfully'**
+  String get offerCreated;
+
+  /// No description provided for @offerUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Offer updated successfully'**
+  String get offerUpdated;
+
+  /// No description provided for @offerDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Offer deleted successfully'**
+  String get offerDeleted;
+
+  /// No description provided for @noOffersYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No offers yet'**
+  String get noOffersYet;
+
+  /// No description provided for @noOffersMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Create your first offer to attract customers'**
+  String get noOffersMessage;
+
+  /// No description provided for @searchOffers.
+  ///
+  /// In en, this message translates to:
+  /// **'Search offers...'**
+  String get searchOffers;
 
   /// No description provided for @orders.
   ///
@@ -2623,12 +2875,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Try a different date or party size.'**
   String get tryDifferentDate;
-
-  /// No description provided for @minimumOrder.
-  ///
-  /// In en, this message translates to:
-  /// **'Min. order'**
-  String get minimumOrder;
 
   /// No description provided for @perGuest.
   ///
@@ -6308,6 +6554,24 @@ abstract class AppLocalizations {
   /// **'Driver'**
   String get driver;
 
+  /// No description provided for @merchant.
+  ///
+  /// In en, this message translates to:
+  /// **'Merchant'**
+  String get merchant;
+
+  /// No description provided for @owner.
+  ///
+  /// In en, this message translates to:
+  /// **'Owner'**
+  String get owner;
+
+  /// No description provided for @rolePortals.
+  ///
+  /// In en, this message translates to:
+  /// **'Role Portals'**
+  String get rolePortals;
+
   /// No description provided for @adminPanel.
   ///
   /// In en, this message translates to:
@@ -6884,18 +7148,6 @@ abstract class AppLocalizations {
   /// **'Fine Amount'**
   String get fineAmount;
 
-  /// No description provided for @startDate.
-  ///
-  /// In en, this message translates to:
-  /// **'Start Date'**
-  String get startDate;
-
-  /// No description provided for @endDate.
-  ///
-  /// In en, this message translates to:
-  /// **'End Date'**
-  String get endDate;
-
   /// No description provided for @inactive.
   ///
   /// In en, this message translates to:
@@ -7219,6 +7471,264 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Delete notification'**
   String get deleteNotification;
+
+  /// No description provided for @chat.
+  ///
+  /// In en, this message translates to:
+  /// **'Chat'**
+  String get chat;
+
+  /// No description provided for @shareMerchant.
+  ///
+  /// In en, this message translates to:
+  /// **'Share'**
+  String get shareMerchant;
+
+  /// No description provided for @deliveryFeeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivery fee'**
+  String get deliveryFeeLabel;
+
+  /// No description provided for @minimumOrderLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Minimum order'**
+  String get minimumOrderLabel;
+
+  /// No description provided for @estimatedDelivery.
+  ///
+  /// In en, this message translates to:
+  /// **'Estimated delivery'**
+  String get estimatedDelivery;
+
+  /// No description provided for @knowMore.
+  ///
+  /// In en, this message translates to:
+  /// **'Know More'**
+  String get knowMore;
+
+  /// No description provided for @callNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Call Now'**
+  String get callNow;
+
+  /// No description provided for @getDirections.
+  ///
+  /// In en, this message translates to:
+  /// **'Get Directions'**
+  String get getDirections;
+
+  /// No description provided for @similarMerchants.
+  ///
+  /// In en, this message translates to:
+  /// **'Similar Providers'**
+  String get similarMerchants;
+
+  /// No description provided for @noSimilarMerchants.
+  ///
+  /// In en, this message translates to:
+  /// **'No similar providers found'**
+  String get noSimilarMerchants;
+
+  /// No description provided for @businessInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Business Info'**
+  String get businessInfo;
+
+  /// No description provided for @reviewPlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Share your experience...'**
+  String get reviewPlaceholder;
+
+  /// No description provided for @searchInMerchant.
+  ///
+  /// In en, this message translates to:
+  /// **'Search in {name}...'**
+  String searchInMerchant(Object name);
+
+  /// No description provided for @showingNProducts.
+  ///
+  /// In en, this message translates to:
+  /// **'Showing {count} items'**
+  String showingNProducts(Object count);
+
+  /// No description provided for @noResultsInMerchant.
+  ///
+  /// In en, this message translates to:
+  /// **'No results found'**
+  String get noResultsInMerchant;
+
+  /// No description provided for @discountPercent.
+  ///
+  /// In en, this message translates to:
+  /// **'{percent}% off'**
+  String discountPercent(Object percent);
+
+  /// No description provided for @mostOrdered.
+  ///
+  /// In en, this message translates to:
+  /// **'Most Ordered'**
+  String get mostOrdered;
+
+  /// No description provided for @addedToCart.
+  ///
+  /// In en, this message translates to:
+  /// **'Added to cart'**
+  String get addedToCart;
+
+  /// No description provided for @options.
+  ///
+  /// In en, this message translates to:
+  /// **'Options'**
+  String get options;
+
+  /// No description provided for @calories.
+  ///
+  /// In en, this message translates to:
+  /// **'Calories'**
+  String get calories;
+
+  /// No description provided for @ingredients.
+  ///
+  /// In en, this message translates to:
+  /// **'Ingredients'**
+  String get ingredients;
+
+  /// No description provided for @preparationTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Preparation Time'**
+  String get preparationTime;
+
+  /// No description provided for @dosageForm.
+  ///
+  /// In en, this message translates to:
+  /// **'Dosage Form'**
+  String get dosageForm;
+
+  /// No description provided for @activeIngredient.
+  ///
+  /// In en, this message translates to:
+  /// **'Active Ingredient'**
+  String get activeIngredient;
+
+  /// No description provided for @prescriptionRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Prescription Required'**
+  String get prescriptionRequired;
+
+  /// No description provided for @warnings.
+  ///
+  /// In en, this message translates to:
+  /// **'Warnings'**
+  String get warnings;
+
+  /// No description provided for @weight.
+  ///
+  /// In en, this message translates to:
+  /// **'Weight'**
+  String get weight;
+
+  /// No description provided for @expiryDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Expiry Date'**
+  String get expiryDate;
+
+  /// No description provided for @storageInstructions.
+  ///
+  /// In en, this message translates to:
+  /// **'Storage Instructions'**
+  String get storageInstructions;
+
+  /// No description provided for @allergens.
+  ///
+  /// In en, this message translates to:
+  /// **'Allergens'**
+  String get allergens;
+
+  /// No description provided for @serviceDuration.
+  ///
+  /// In en, this message translates to:
+  /// **'Service Duration'**
+  String get serviceDuration;
+
+  /// No description provided for @whatsIncluded.
+  ///
+  /// In en, this message translates to:
+  /// **'What\'s Included'**
+  String get whatsIncluded;
+
+  /// No description provided for @biometricReason.
+  ///
+  /// In en, this message translates to:
+  /// **'Authenticate with your fingerprint to continue'**
+  String get biometricReason;
+
+  /// No description provided for @biometricFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Biometric authentication failed. Please try again.'**
+  String get biometricFailed;
+
+  /// No description provided for @biometricNotAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Biometric authentication is not available on this device'**
+  String get biometricNotAvailable;
+
+  /// No description provided for @biometricLogin.
+  ///
+  /// In en, this message translates to:
+  /// **'Login with Fingerprint'**
+  String get biometricLogin;
+
+  /// No description provided for @biometricLoginDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Use your fingerprint to quickly sign in'**
+  String get biometricLoginDescription;
+
+  /// No description provided for @fingerprintLogin.
+  ///
+  /// In en, this message translates to:
+  /// **'Login with Fingerprint'**
+  String get fingerprintLogin;
+
+  /// No description provided for @fingerprintLoginDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Use your fingerprint to quickly sign in'**
+  String get fingerprintLoginDescription;
+
+  /// No description provided for @enableFingerprint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enable Fingerprint Login'**
+  String get enableFingerprint;
+
+  /// No description provided for @fingerprintEnabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Fingerprint login enabled'**
+  String get fingerprintEnabled;
+
+  /// No description provided for @fingerprintDisabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Fingerprint login disabled'**
+  String get fingerprintDisabled;
+
+  /// No description provided for @enterPasswordForFingerprint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your password once to enable fingerprint login'**
+  String get enterPasswordForFingerprint;
 }
 
 class _AppLocalizationsDelegate

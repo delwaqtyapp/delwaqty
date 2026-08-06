@@ -6,6 +6,49 @@ import 'package:flutter/material.dart';
 /// order status colors, and core brand colors used throughout the app.
 abstract final class AppColors {
   // ---------------------------------------------------------------------------
+  // Premium Brand Palette (V2)
+  // ---------------------------------------------------------------------------
+
+  /// Deep purple — the signature primary brand color.
+  static const Color brandPurple = Color(0xFF5B3DF0);
+
+  /// Even deeper purple used for gradient anchors / dark surfaces.
+  static const Color brandPurpleDeep = Color(0xFF3B1DB0);
+
+  /// Vibrant violet used at the light end of brand gradients.
+  static const Color brandViolet = Color(0xFF8B5CF6);
+
+  /// Soft lavender tint used for subtle brand backgrounds.
+  static const Color brandLavender = Color(0xFFEDE9FE);
+
+  /// Very light lavender for hover / tinted fills.
+  static const Color brandLavenderSoft = Color(0xFFF5F3FF);
+
+  /// Apple-style soft gray background for light mode.
+  static const Color brandSoftGray = Color(0xFFF5F6F8);
+
+  /// Start color of the primary brand gradient.
+  static const Color brandGradientStart = Color(0xFF5B3DF0);
+
+  /// End color of the primary brand gradient.
+  static const Color brandGradientEnd = Color(0xFF8B5CF6);
+
+  /// End color for softer / larger brand gradients.
+  static const Color brandGradientEndSoft = Color(0xFFA78BFA);
+
+  /// Premium soft shadow tint — `0 10 35 rgba(98,65,200,.10)`.
+  static const Color shadowBrand = Color(0x1A6241C8);
+
+  /// Dark premium shadow tint for floating surfaces.
+  static const Color shadowFloat = Color(0x1F3B1DB0);
+
+  /// Cyan accent for gradients and highlights.
+  static const Color brandCyan = Color(0xFF06B6D4);
+
+  /// Teal accent for secondary gradient endpoints.
+  static const Color brandTeal = Color(0xFF14B8A6);
+
+  // ---------------------------------------------------------------------------
   // Core Brand Colors
   // ---------------------------------------------------------------------------
 

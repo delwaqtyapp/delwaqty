@@ -1220,3 +1220,42 @@ The login screen carried three legacy problems. First, the "fingerprint" (Ø§Ù„Ø¨
 
 ---
 
+
+## ADR-042: Treat Missing Location Accuracy (0.0) as Unknown, Never "0 m"
+
+**Date:** Session 21r (Sprint 61)
+**Status:** Accepted
+**Deciders:** Lead Software Architect
+
+### Context
+
+The app claimed the user's location was accurate to **0 meters** when it was actually off by hundreds of meters. Root cause: `geolocator` (Android) reports `accuracy = 0.0` when the platform provides **no accuracy estimate** (`hasAccuracy == false`, typical of network/fused cell-tower fixes). The location engine's gates treated `0` as a perfect sub-metre fix:
+
+- `_isFreshAndPrecise` accepted `accuracy >= 0 && accuracy <= 1` ? a fresh-but-unmeasured fix short-circuited the whole acquisition as "= 1 m".
+- `_isUsableLastKnown` accepted `accuracy >= 0 && accuracy <= 500` ? quick mode used unmeasured fixes as usable.
+- `refreshDeepLocked()`'s early-return treated `accuracy <= precisionTargetMeters` as success ? returned "0 m" instantly.
+- `UserLocation.accuracyMeters` surfaced the raw `0.0`, so callers never warned (their guard was `accuracy > 1 m`).
+
+`dumpsys location` on DNP NX9 confirmed the real-world case: the last fused/network fix was `hAcc=100.0` (˜2 days old) while GNSS was ~8 m; an unmeasured fix with no accuracy would have been reported as "0 m".
+
+### Decision
+
+1. **`accuracy <= 0` is invalid everywhere.** `_isFreshAndPrecise` requires `accuracy > 0 && accuracy <= 1`; `_isUsableLastKnown` requires `accuracy > 0 && accuracy <= 500` (GNSS-verified last-known still passes on satellite count alone).
+2. **`UserLocation.accuracyMeters` becomes `null` when unknown** (`position.accuracy > 0 ? position.accuracy : null`), so no caller can display or rely on a fabricated "0 m".
+3. **`refreshDeepLocked()` best-fix tracking now prefers known accuracy**: an unknown-accuracy fix is kept only as a last-resort fallback and can never displace a known-accuracy fix, and never triggers the sub-metre early return.
+4. **`_acquirePreciseFix()`** similarly only replaces `best` with a strictly-known-accuracy sample and only early-completes on a live-GNSS fix with `accuracy > 0 && <= targetMeters`.
+5. **Google Geocoding now sends `X-Android-Package: com.delwaqty.app` and `X-Android-Cert: 5337185A52F0B615A3388ECC03B6576D61F34EEF`** (debug SHA-1, colons removed) — the standard mechanism that makes an Android-app-restricted Maps key authorize raw HTTP Geocoding calls (the Maps SDK does this automatically; the raw `http.get` did not, which is why geocoding returned `REQUEST_DENIED`).
+
+### Rationale
+
+- geolocator documents `accuracy == 0` as "accuracy not available"; interpreting it as "perfect" inverted a genuinely dangerous case (false confidence) into the UI's best case.
+- Nullable `accuracyMeters` moves the ambiguity to the type system: consumers must decide how to handle "unknown" instead of trusting a fake `0`.
+- Best-fix tracking should always prefer a measured fix; an unmeasured sample is only a coordinates fallback.
+- The header pair is the only way a console-restricted Android key can authorize direct REST geocoding; without it the key is unusable from raw HTTP regardless of enablement.
+
+### Consequences
+
+- Unknown-accuracy fixes now flow as `accuracyMeters == null`; delivery/ride flows fill best-effort coordinates but no longer claim sub-metre precision and never show "0 m".
+- Quick mode refuses fresh unmeasured network last-knowns and falls through to a stream acquisition; deep lock keeps hunting for a measured/GNSS fix.
+- Geocoding from the app is now eligible to work with the existing key **if** the Geocoding API is enabled in Google Cloud Console (still an external action the user must take) — until then the Photon/Nominatim fallback chain remains.
+- 3 new unit tests pin the regression; suite grew to **570/570**; `flutter analyze` adds **no new issues**; debug APK built + installed on DNP NX9.

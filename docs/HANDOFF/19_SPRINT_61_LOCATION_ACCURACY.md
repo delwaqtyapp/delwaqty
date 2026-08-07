@@ -42,8 +42,10 @@ The app used to report the user's location as accurate to **0 meters** when the 
 - `flutter build apk --debug --dart-define-from-file=.env.dev` — built.
 - `flutter install --debug` on DNP NX9 (`A3SQUT5A28003808`) — installed; app launches clean (Map SurfaceView active, no FATAL, no ConfigValidator crash).
 
-## Remaining — external blocker (user action in Google Cloud Console)
+## Remaining — external blocker (RESOLVED)
 
-The Geocoding API itself still needs to be **enabled** for the API key's project: **APIs & Services → Library → Geocoding API → Enable** (billing active). If the key is Application-restricted to Android, confirm the allowed app is package `com.delwaqty.app` with debug SHA-1 `53:37:18:5A:52:F0:B6:15:A3:38:8E:CC:03:B6:57:6D:61:F3:4E:EF` (colon-delimited in the Console UI; the app sends it colons-removed). Until enabled, the Photon/Nominatim fallback chain continues to produce Arabic addresses without Google-level POI depth.
+**RESOLVED 2026-08-07:** the user enabled the key in Google Cloud Console. Verified live: Geocoding returns **`status=OK`** with the app's exact headers; the server-IP call still correctly `REQUEST_DENIED` (Android-restricted). No re-deploy needed — the installed APK already sends the headers.
+
+**Plus-code safety (verified):** in the sparse Zafarana area Google returns a plus-code-only result. The app's `_googleStructuredAddress` skips `plus_code` components, so `parts` stays empty → `_reverseGeocode` falls through to the Photon chain and keeps producing `طريق العين السخنه، الزعفرانه، السويس، مصر` (no regression). Cairo-level areas now return full Arabic street addresses. Mid-density areas return area+region (e.g., `قسم الأربعين، محافظة السويس، مصر`).
 
 On-device E2E of the fixed accuracy behavior needs a login + delivery-flow walk (fingerprint is enrolled from Session 21q); unit tests + clean install already cover the logic.

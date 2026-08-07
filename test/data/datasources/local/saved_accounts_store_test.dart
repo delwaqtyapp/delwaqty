@@ -1,4 +1,3 @@
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:delwaqty/data/datasources/local/saved_accounts_store.dart';
@@ -12,8 +11,7 @@ void main() {
     SharedPreferences.setMockInitialValues({});
     final instance = await SharedPreferences.getInstance();
     prefs = SharedPreferencesService(instance);
-    store = SavedAccountsStore(prefs, const FlutterSecureStorage());
-    FlutterSecureStorage.setMockInitialValues(<String, String>{});
+    store = SavedAccountsStore(prefs);
   });
 
   group('SavedAccountsStore', () {
@@ -34,7 +32,6 @@ void main() {
       expect(accounts, hasLength(1));
       expect(accounts.single.email, 'user@example.com');
       expect(accounts.single.displayName, 'User');
-      expect(accounts.single.hasBiometric, isFalse);
     });
 
     test('saveAccount updates an existing account without duplicating', () async {
@@ -57,87 +54,14 @@ void main() {
       expect(accounts.single.email, 'a@b.com');
     });
 
-    test('setBiometric writes password to secure storage', () async {
-      await store.setBiometric(
-        email: 'A@B.com',
-        password: 'secret',
-        enabled: true,
-      );
-
-      expect(await store.biometricPassword('a@b.com'), 'secret');
-
-      final accounts = await store.loadAccounts();
-      expect(accounts.single.hasBiometric, isTrue);
-    });
-
-    test('setBiometric disabling removes the stored password', () async {
-      await store.setBiometric(
-        email: 'a@b.com',
-        password: 'secret',
-        enabled: true,
-      );
-      await store.setBiometric(
-        email: 'a@b.com',
-        password: 'secret',
-        enabled: false,
-      );
-
-      expect(await store.biometricPassword('a@b.com'), isNull);
-      final accounts = await store.loadAccounts();
-      expect(accounts.single.hasBiometric, isFalse);
-    });
-
-    test('removeAccount deletes account and its biometric password', () async {
-      await store.saveAccount(email: 'a@b.com');
-      await store.setBiometric(
-        email: 'a@b.com',
-        password: 'secret',
-        enabled: true,
-      );
-
-      await store.removeAccount('A@B.com');
-
-      expect(await store.biometricPassword('a@b.com'), isNull);
-      final accounts = await store.loadAccounts();
-      expect(accounts, isEmpty);
-    });
-
-    test('biometricAccount returns null when no account has biometric',
-        () async {
+    test('removeAccount removes the account', () async {
       await store.saveAccount(email: 'a@b.com');
       await store.saveAccount(email: 'c@d.com');
 
-      expect(await store.biometricAccount(), isNull);
-    });
+      final accounts = await store.removeAccount('A@B.com');
 
-    test('biometricAccount returns the first account with biometric enabled',
-        () async {
-      await store.saveAccount(email: 'a@b.com');
-      await store.setBiometric(
-        email: 'c@d.com',
-        password: 'secret',
-        enabled: true,
-      );
-
-      final account = await store.biometricAccount();
-
-      expect(account, isNotNull);
-      expect(account!.email, 'c@d.com');
-      expect(account.hasBiometric, isTrue);
-    });
-
-    test('biometricAccount prefers biometric account over plain saved accounts',
-        () async {
-      await store.setBiometric(
-        email: 'a@b.com',
-        password: 'secret',
-        enabled: true,
-      );
-      await store.saveAccount(email: 'c@d.com');
-
-      final account = await store.biometricAccount();
-
-      expect(account!.email, 'a@b.com');
+      expect(accounts, hasLength(1));
+      expect(accounts.single.email, 'c@d.com');
     });
   });
 }

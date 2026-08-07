@@ -2,10 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:delwaqty/data/datasources/local/saved_accounts_store.dart';
-import 'package:delwaqty/data/datasources/local/shared_preferences_service.dart';
+import 'package:mocktail/mocktail.dart';
+import 'package:delwaqty/data/datasources/local/biometric_auth_store.dart';
 import 'package:delwaqty/domain/entities/user.dart';
+import 'package:delwaqty/domain/repositories/auth_repository.dart';
+import 'package:delwaqty/domain/repositories/user_repository.dart';
+import 'package:delwaqty/domain/usecases/auth/auth_usecases.dart';
+import 'package:delwaqty/domain/usecases/user/get_user.dart';
 import 'package:delwaqty/features/auth/domain/auth_state.dart';
 import 'package:delwaqty/features/auth/presentation/auth_provider.dart';
 import 'package:delwaqty/features/settings/presentation/pages/privacy/fingerprint_login_page.dart';
@@ -13,20 +16,31 @@ import 'package:delwaqty/l10n/app_localizations.dart';
 
 class _FakeAuthNotifier extends AuthStateNotifier {
   @override
-  AuthState build() => AuthState.authenticated(user: testUser);
+  AuthState build() => AuthState.authenticated(user: authUser);
 }
 
-final testUser = User(
+class MockAuthRepository extends Mock implements AuthRepository {}
+
+class MockUserRepository extends Mock implements UserRepository {}
+
+late User authUser;
+late MockAuthRepository mockAuthRepo;
+late MockUserRepository mockUserRepo;
+late BiometricAuthStore store;
+
+final baseUser = User(
   id: 'user-123',
   email: 'user@example.com',
   createdAt: DateTime(2024, 1, 15),
 );
 
-Widget _buildTestApp(SavedAccountsStore store) {
+Widget _buildTestApp() {
   return ProviderScope(
     overrides: [
-      savedAccountsStoreProvider.overrideWithValue(store),
+      biometricAuthStoreProvider.overrideWithValue(store),
       authStateProvider.overrideWith(_FakeAuthNotifier.new),
+      authRepositoryProvider.overrideWithValue(mockAuthRepo),
+      userRepositoryProvider.overrideWithValue(mockUserRepo),
     ],
     child: const MaterialApp(
       localizationsDelegates: AppLocalizations.localizationsDelegates,
@@ -37,22 +51,26 @@ Widget _buildTestApp(SavedAccountsStore store) {
   );
 }
 
-Future<SavedAccountsStore> _buildStore() async {
-  SharedPreferences.setMockInitialValues({});
-  final instance = await SharedPreferences.getInstance();
-  FlutterSecureStorage.setMockInitialValues(<String, String>{});
-  return SavedAccountsStore(
-    SharedPreferencesService(instance),
-    const FlutterSecureStorage(),
-  );
-}
-
 void main() {
+  setUp(() {
+    authUser = baseUser;
+    mockAuthRepo = MockAuthRepository();
+    mockUserRepo = MockUserRepository();
+    store = BiometricAuthStore(const FlutterSecureStorage());
+    FlutterSecureStorage.setMockInitialValues(<String, String>{});
+    when(
+      () => mockAuthRepo.updateBiometricEnabled(
+        userId: any(named: 'userId'),
+        enabled: any(named: 'enabled'),
+      ),
+    ).thenAnswer((_) async {});
+    when(() => mockUserRepo.getCurrentUser()).thenAnswer((_) async => authUser);
+  });
+
   testWidgets('shows fingerprint switch disabled when not saved', (
     tester,
   ) async {
-    final store = await _buildStore();
-    await tester.pumpWidget(_buildTestApp(store));
+    await tester.pumpWidget(_buildTestApp());
     await tester.pumpAndSettle();
 
     final switchTile = tester.widget<SwitchListTile>(
@@ -64,18 +82,14 @@ void main() {
   testWidgets('shows fingerprint switch enabled when biometric saved', (
     tester,
   ) async {
-    final store = await _buildStore();
-    await store.saveAccount(email: 'user@example.com');
-    await store.setBiometric(
+    authUser = baseUser.copyWith(isBiometricEnabled: true);
+    await store.saveCredentials(
+      userId: 'user-123',
       email: 'user@example.com',
       password: 'secret123',
-      enabled: true,
     );
-    final saved = await store.loadAccounts();
-    expect(saved.single.hasBiometric, isTrue);
-    await tester.pumpWidget(_buildTestApp(store));
+    await tester.pumpWidget(_buildTestApp());
     await tester.pumpAndSettle();
-    await tester.pump(const Duration(milliseconds: 100));
 
     final switchTile = tester.widget<SwitchListTile>(
       find.byType(SwitchListTile),
@@ -84,14 +98,13 @@ void main() {
   });
 
   testWidgets('toggling off disables fingerprint login', (tester) async {
-    final store = await _buildStore();
-    await store.saveAccount(email: 'user@example.com');
-    await store.setBiometric(
+    authUser = baseUser.copyWith(isBiometricEnabled: true);
+    await store.saveCredentials(
+      userId: 'user-123',
       email: 'user@example.com',
       password: 'secret123',
-      enabled: true,
     );
-    await tester.pumpWidget(_buildTestApp(store));
+    await tester.pumpWidget(_buildTestApp());
     await tester.pumpAndSettle();
 
     await tester.tap(find.byType(SwitchListTile));
@@ -101,18 +114,14 @@ void main() {
       find.byType(SwitchListTile),
     );
     expect(switchTile.value, isFalse);
-    final accounts = await store.loadAccounts();
-    expect(accounts.single.hasBiometric, isFalse);
-    expect(await store.biometricPassword('user@example.com'), isNull);
+    expect(await store.activeCredentials(), isNull);
     expect(find.text('Fingerprint login disabled'), findsOneWidget);
   });
 
   testWidgets('toggling on when biometric unavailable shows message', (
     tester,
   ) async {
-    final store = await _buildStore();
-    await store.saveAccount(email: 'user@example.com');
-    await tester.pumpWidget(_buildTestApp(store));
+    await tester.pumpWidget(_buildTestApp());
     await tester.pumpAndSettle();
 
     await tester.tap(find.byType(SwitchListTile));

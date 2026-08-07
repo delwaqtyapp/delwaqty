@@ -3,7 +3,6 @@ import 'dart:math' as math;
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:local_auth/local_auth.dart';
@@ -90,10 +89,8 @@ class _SplashPageState extends ConsumerState<SplashPage>
     try {
       final didAuth = await LocalAuthentication().authenticate(
         localizedReason: l10n.biometricReason,
-        options: const AuthenticationOptions(
-          stickyAuth: true,
-          biometricOnly: true,
-        ),
+        persistAcrossBackgrounding: true,
+        biometricOnly: true,
       );
       if (!didAuth || !mounted) return;
       await ref.read(authStateProvider.notifier).signIn(
@@ -104,7 +101,7 @@ class _SplashPageState extends ConsumerState<SplashPage>
       if (next is AuthError || next is AuthUnauthenticated) {
         await store.clearActive();
       }
-    } on PlatformException {
+    } on Exception {
       // Scan cancelled or failed on-device; fall through to the login page.
     } catch (_) {
       await store.clearActive();

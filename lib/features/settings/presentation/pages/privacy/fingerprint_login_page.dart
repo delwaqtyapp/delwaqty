@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:local_auth/local_auth.dart';
 import 'package:delwaqty/core/extensions/context_extensions.dart';
 import 'package:delwaqty/core/utils/validators.dart';
-import 'package:delwaqty/data/datasources/local/saved_accounts_store.dart';
+import 'package:delwaqty/data/datasources/local/biometric_auth_store.dart';
 import 'package:delwaqty/features/auth/presentation/auth_provider.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 
@@ -20,6 +20,7 @@ class _FingerprintLoginPageState extends ConsumerState<FingerprintLoginPage> {
   bool _biometricAvailable = false;
   bool _enabled = false;
   String? _email;
+  String? _userId;
 
   @override
   void initState() {
@@ -29,9 +30,14 @@ class _FingerprintLoginPageState extends ConsumerState<FingerprintLoginPage> {
 
   Future<void> _init() async {
     final authState = ref.read(authStateProvider);
-    final email = authState.whenOrNull(authenticated: (user) => user.email);
-    if (mounted) setState(() => _email = email);
-    await _loadStatus();
+    final user = authState.whenOrNull(authenticated: (user) => user);
+    if (user != null && mounted) {
+      setState(() {
+        _userId = user.id;
+        _email = user.email;
+      });
+    }
+    _loadStatus();
     try {
       final canCheck = await _localAuth.canCheckBiometrics;
       if (mounted) setState(() => _biometricAvailable = canCheck);
@@ -39,18 +45,18 @@ class _FingerprintLoginPageState extends ConsumerState<FingerprintLoginPage> {
   }
 
   Future<void> _loadStatus() async {
-    final email = _email;
-    if (email == null) return;
-    final accounts = await ref.read(savedAccountsStoreProvider).loadAccounts();
-    final enabled = accounts.any((a) => a.key == email && a.hasBiometric);
+    final authState = ref.read(authStateProvider);
+    final enabled =
+        authState.whenOrNull(authenticated: (user) => user.isBiometricEnabled) ??
+            false;
     if (mounted) setState(() => _enabled = enabled);
   }
 
   Future<void> _toggle(bool value) async {
     final l10n = AppLocalizations.of(context);
     final messenger = ScaffoldMessenger.of(context);
-    final email = _email;
-    if (email == null || email.trim().isEmpty) return;
+    final userId = _userId;
+    if (userId == null || userId.isEmpty) return;
     if (value) {
       if (!_biometricAvailable) {
         messenger.showSnackBar(
@@ -61,18 +67,20 @@ class _FingerprintLoginPageState extends ConsumerState<FingerprintLoginPage> {
         );
         return;
       }
-      final store = ref.read(savedAccountsStoreProvider);
-      final existingPassword = await store.biometricPassword(email);
-      if (existingPassword == null || existingPassword.isEmpty) {
+      final store = ref.read(biometricAuthStoreProvider);
+      final existing = await store.credentialsFor(userId);
+      if (existing == null) {
         final password = await _promptPassword();
         if (password == null) return;
-        await store.saveAccount(email: email);
-        await store.setBiometric(
-          email: email,
+        await store.saveCredentials(
+          userId: userId,
+          email: _email ?? '',
           password: password,
-          enabled: true,
         );
       }
+      await ref
+          .read(authStateProvider.notifier)
+          .updateBiometricEnabled(enabled: true);
       if (mounted) {
         setState(() => _enabled = true);
         messenger.showSnackBar(
@@ -83,8 +91,10 @@ class _FingerprintLoginPageState extends ConsumerState<FingerprintLoginPage> {
         );
       }
     } else {
-      final store = ref.read(savedAccountsStoreProvider);
-      await store.setBiometric(email: email, password: '', enabled: false);
+      await ref.read(biometricAuthStoreProvider).clearActive();
+      await ref
+          .read(authStateProvider.notifier)
+          .updateBiometricEnabled(enabled: false);
       if (mounted) {
         setState(() => _enabled = false);
         messenger.showSnackBar(

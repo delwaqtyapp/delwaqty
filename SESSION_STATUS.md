@@ -1,10 +1,23 @@
 # SESSION_STATUS.md
 
-> **Last updated:** 2026-08-08 Session 22 (Real biometric login (DB-backed) + village-centric Arabic geocoding — Sprint 61)
+> **Last updated:** 2026-08-08 Session 23 (Fingerprint auto-login unified + local_auth 3.0.0 Android 16 fix — Sprint 61)
 
 ---
 
-## Current Task — REAL BIOMETRIC LOGIN (DB-BACKED) + VILLAGE-CENTRIC ARABIC GEOCODING (Session 22)
+## Current Task — FINGERPRINT LOGIN-PAGE BUTTON UNIFIED ON THE DB-BACKED STORE + ANDROID 16 FIX (Session 23)
+
+User reported the login-page fingerprint button still did not auto-login ("زر البصمة لا يسجل الدخول تلقائياً"). Root cause: enrollment (post-login dialog) and startup auto-login had moved to the new DB-backed `BiometricAuthStore` (`auth_biometric_<userId>` + `auth_biometric_active_user`), but the login-page button, saved-account chip badges, and the Settings fingerprint toggle still read the **legacy** `SavedAccountsStore` (`biometric_password_<email>` + `SavedAccount.hasBiometric`). The two systems were split, so a newly enrolled user's button reported "no biometric account". The legacy fingerprint paths were removed and every biometric concern now flows through the new store + the `users.is_biometric_enabled` flag.
+
+| Area | Change |
+|------|--------|
+| **Login button fix** | `login_page.dart` `_authenticateWithBiometric` now reads `biometricAuthStoreProvider.activeCredentials()` (single active biometric user), prompts with the real sensor, fills the email/password fields, and calls `signIn`. The legacy email→`biometricPassword` lookup and the `_promptEnableFingerprint` password re-entry dialog are deleted |
+| **Legacy UI removed** | `_enableBiometric` checkbox (login form) and the per-chip fingerprint badge on `_SavedAccountChip` removed — enrollment is the post-login dialog only, and the new store holds exactly one active user. `_BiometricButton` shows `fingerprintLogin` (no saved-email label) |
+| **Model** | `SavedAccount.hasBiometric` removed from `SavedAccount` (Freezed + json regenerated) — the account list is again purely email/displayName prefill |
+| **Store** | `SavedAccountsStore` stripped to SharedPreferences only (drop `FlutterSecureStorage`, `setBiometric`, `biometricPassword`, `biometricAccount`, `biometric_password_<email>` keys) |
+| **Settings toggle** | `fingerprint_login_page.dart` reads `user.isBiometricEnabled` (DB, source of truth) instead of scanning accounts; toggle-on stores credentials via `saveCredentials(userId, …)` + `updateBiometricEnabled(true)`, toggle-off runs `clearActive()` + `updateBiometricEnabled(false)` |
+| **Enrollment prompt** | Unchanged path (post-password-login dialog) — still saves via the new store + `updateBiometricEnabled(true)`; `skipEnrollmentPrompt` plumbing removed since the checkbox no longer exists |
+| **Device sensor (re-check)** | `dumpsys fingerprint` now shows **healthy**: `Fps state: 0`, 4 enrolled prints, `authEndedFor(…, wasSuccessful: true)` events — the earlier "state 4 (bad)" blocker is resolved; end-to-end auto-login verification can run on DNP NX9 |
+| **Tests** | `saved_accounts_store_test.dart`, `saved_account_test.dart`, `fingerprint_login_page_test.dart` rewritten for the new model/store (settings page now mocks `authRepositoryProvider`/`userRepositoryProvider`). Full suite **594/594** passing · `flutter analyze` **0 errors / 0 warnings** (514 pre-existing info lints, unchanged baseline) |
 
 User requests: (1) refine Arabic reverse geocoding so villages/tourist areas show the hierarchical Markaz→village chain (e.g. "مركز السويس - قرية الزعفرانة") instead of a flat string, staying localized on language switch; (2) replace the fingerprint "auto-detect" with a real DB-linked biometric system: `users.is_biometric_enabled`, enable-after-password-login prompt, per-user encrypted credentials, and biometric auto-login at app start. Both implemented, tested, built, and installed on DNP NX9.
 
@@ -23,7 +36,7 @@ User requests: (1) refine Arabic reverse geocoding so villages/tourist areas sho
 | **Quality gates** | `flutter analyze` 0 errors / 0 warnings from touched files · `flutter test` 599/599 · debug APK built + installed on DNP NX9 · app launches clean (session restored, header `Zafarana offices، عتاقة، محافظة السويس، مصر`, logcat clean) |
 | **Release signing (resolved)** | `android/keystore/release.jks` password recovered locally (project-naming pattern; alias `delwaqty`; not stored in the repo) → `flutter build apk --release` succeeds → signed `app-release.apk` (68.7 MB, `CN=Delwaqty`) **installed on DNP NX9** in place of the debug build; launches clean, no FATAL |
 
-> **REMAINING (blockers, not code):** (1) DNP NX9's biometric sensor reports state 4 (bad) → a real scan throws `PlatformException`; pre-scan logic (store, enable chain, auto-login gating) is unit-tested but the success gesture needs a healthy device. (2) Village-chain end-to-end needs a Google Geocoding call at a real open-sky village coordinate on-device (app-restricted key can't be exercised from shell).
+> **REMAINING (blockers, not code):** (1) Village-chain end-to-end needs a Google Geocoding call at a real open-sky village coordinate on-device (app-restricted key can't be exercised from shell).
 
 > **RESOLVED 2026-08-08 — Migration applied live:** Migration `022_user_biometric_enabled.sql` **APPLIED live** to `bttnlkmwhorjamzemwda` via Management API (user-supplied PAT). Verified: `users.is_biometric_enabled boolean NOT NULL DEFAULT false` present in `information_schema.columns`. The app's `fromSupabase` fallback is no longer exercised for this field.
 

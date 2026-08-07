@@ -101,5 +101,43 @@ void main() {
       final accounts = await store.loadAccounts();
       expect(accounts, isEmpty);
     });
+
+    test('biometricAccount returns null when no account has biometric',
+        () async {
+      await store.saveAccount(email: 'a@b.com');
+      await store.saveAccount(email: 'c@d.com');
+
+      expect(await store.biometricAccount(), isNull);
+    });
+
+    test('biometricAccount returns the first account with biometric enabled',
+        () async {
+      await store.saveAccount(email: 'a@b.com');
+      await store.setBiometric(
+        email: 'c@d.com',
+        password: 'secret',
+        enabled: true,
+      );
+
+      final account = await store.biometricAccount();
+
+      expect(account, isNotNull);
+      expect(account!.email, 'c@d.com');
+      expect(account.hasBiometric, isTrue);
+    });
+
+    test('biometricAccount prefers biometric account over plain saved accounts',
+        () async {
+      await store.setBiometric(
+        email: 'a@b.com',
+        password: 'secret',
+        enabled: true,
+      );
+      await store.saveAccount(email: 'c@d.com');
+
+      final account = await store.biometricAccount();
+
+      expect(account!.email, 'a@b.com');
+    });
   });
 }

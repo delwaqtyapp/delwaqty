@@ -1236,7 +1236,7 @@ The app claimed the user's location was accurate to **0 meters** when it was act
 - `refreshDeepLocked()`'s early-return treated `accuracy <= precisionTargetMeters` as success ? returned "0 m" instantly.
 - `UserLocation.accuracyMeters` surfaced the raw `0.0`, so callers never warned (their guard was `accuracy > 1 m`).
 
-`dumpsys location` on DNP NX9 confirmed the real-world case: the last fused/network fix was `hAcc=100.0` (�2 days old) while GNSS was ~8 m; an unmeasured fix with no accuracy would have been reported as "0 m".
+`dumpsys location` on DNP NX9 confirmed the real-world case: the last fused/network fix was `hAcc=100.0` (�2 days old) while GNSS was ~8 m; an unmeasured fix with no accuracy would have been reported as "0 m".
 
 ### Decision
 
@@ -1244,7 +1244,7 @@ The app claimed the user's location was accurate to **0 meters** when it was act
 2. **`UserLocation.accuracyMeters` becomes `null` when unknown** (`position.accuracy > 0 ? position.accuracy : null`), so no caller can display or rely on a fabricated "0 m".
 3. **`refreshDeepLocked()` best-fix tracking now prefers known accuracy**: an unknown-accuracy fix is kept only as a last-resort fallback and can never displace a known-accuracy fix, and never triggers the sub-metre early return.
 4. **`_acquirePreciseFix()`** similarly only replaces `best` with a strictly-known-accuracy sample and only early-completes on a live-GNSS fix with `accuracy > 0 && <= targetMeters`.
-5. **Google Geocoding now sends `X-Android-Package: com.delwaqty.app` and `X-Android-Cert: 5337185A52F0B615A3388ECC03B6576D61F34EEF`** (debug SHA-1, colons removed) � the standard mechanism that makes an Android-app-restricted Maps key authorize raw HTTP Geocoding calls (the Maps SDK does this automatically; the raw `http.get` did not, which is why geocoding returned `REQUEST_DENIED`).
+5. **Google Geocoding now sends `X-Android-Package: com.delwaqty.app` and `X-Android-Cert: 5337185A52F0B615A3388ECC03B6576D61F34EEF`** (debug SHA-1, colons removed) � the standard mechanism that makes an Android-app-restricted Maps key authorize raw HTTP Geocoding calls (the Maps SDK does this automatically; the raw `http.get` did not, which is why geocoding returned `REQUEST_DENIED`).
 
 ### Rationale
 
@@ -1257,5 +1257,39 @@ The app claimed the user's location was accurate to **0 meters** when it was act
 
 - Unknown-accuracy fixes now flow as `accuracyMeters == null`; delivery/ride flows fill best-effort coordinates but no longer claim sub-metre precision and never show "0 m".
 - Quick mode refuses fresh unmeasured network last-knowns and falls through to a stream acquisition; deep lock keeps hunting for a measured/GNSS fix.
-- Geocoding from the app is now eligible to work with the existing key **if** the Geocoding API is enabled in Google Cloud Console (still an external action the user must take) � until then the Photon/Nominatim fallback chain remains.
+- Geocoding from the app is now eligible to work with the existing key **if** the Geocoding API is enabled in Google Cloud Console (still an external action the user must take) � until then the Photon/Nominatim fallback chain remains.
 - 3 new unit tests pin the regression; suite grew to **570/570**; `flutter analyze` adds **no new issues**; debug APK built + installed on DNP NX9.
+
+---
+
+## ADR-043: Locale-Aware Precise Reverse Geocoding + Fingerprint Auto-Login
+
+**Date:** Session 21s (Sprint 61)
+**Status:** Accepted
+**Deciders:** Lead Software Architect
+
+### Context
+
+Two user-reported bugs remained after ADR-042. (1) The home-location header showed a **generic** address that never changed when the UI language changed: `_cleanArabicAddress` stripped **all digits** (destroying street numbers), the Google/Photon/Nominatim calls were issued without a language, and the geocode cache was language-agnostic, so switching Arabic → English kept rendering the Arabic string. (2) The fingerprint button on login required the user to first tap the saved-account chip: `_authenticateWithBiometric` demanded a non-empty email and otherwise showed "enter your email first". The product expectation was that tapping the fingerprint button alone auto-detects the account that has biometric enabled (from the store) and signs in with its stored password.
+
+### Decision
+
+1. **Locale-aware reverse geocoding** (`location_provider.dart`): a new `_appLanguage()` reads `localeProvider`. Google Geocoding sends `language=$language`, Photon `lang=$language`, Nominatim `accept-language=$language`. Street precision preserved: Google now parses `street_number` + `route` and builds a `"number route"` street part; `_cleanAddress(input, language)` no longer strips digits and only normalizes separators (`،` for `ar`, `,` for `en`).
+2. **Language-scoped geocode cache**: the cache key becomes `lat,lng@language` (store `location_geocode_cache_v2`, TTL 24 h, cap 200) so each language resolves independently and instantly.
+3. **Reactive re-geocode on language switch**: `UserLocationNotifier.build()` now `ref.watch(localeProvider)`, so toggling the app language re-runs position + reverse geocoding in the new language immediately (previously the provider state was frozen forever).
+4. **Fingerprint auto-login** (`SavedAccountsStore` + `login_page.dart`): new `biometricAccount()` returns the first saved account with `hasBiometric == true`. `_authenticateWithBiometric` now, when no email is selected, loads `biometricAccount()`; if found it authenticates and signs in with that account's Keystore password automatically. Falls back to the enable-dialog only when the account has no stored password. Two new l10n keys (`noBiometricAccountSaved`, `biometricNotEnrolled`) in en + ar.
+
+### Rationale
+
+- Passing `language`/`accept-language`/`lang` is the provider-documented way to localize results; stripping digits was the direct cause of the "generic" street addresses the user complained about.
+- `ref.watch(localeProvider)` makes the provider state a function of the locale, the correct Riverpod reactive pattern — a language change must be observable by the location engine, not require a manual refresh.
+- Auto-detecting the biometric account from the store matches the user's stated expectation ("the app should understand the saved biometric account and its password and log in automatically") and removes a pointless manual step.
+- Reading `ref.read(localeProvider)` inside `_appLanguage()` with an `ar` fallback keeps the engine resilient before the locale provider is ready.
+
+### Consequences
+
+- Home header on DNP NX9 (Arabic) now shows `Zafarana offices، عتاقة، محافظة السويس، مصر` (governorate added). At that in-building coordinate Google returns premise-only components, so no street number exists from any provider — a data limitation, not a code bug.
+- The English regression was reproduced (Arabic string kept after switching to English) and fixed by the locale watch; the English geocode resolves independently via the `@en` cache key.
+- Fingerprint button now works standalone: no saved biometric account → informative `noBiometricAccountSaved` snackbar; account found → auto sign-in; device lacking enrolled prints → `biometricNotEnrolled` message.
+- `flutter analyze` 0 errors / 0 warnings from touched files; suite grew to **577/577** (3 new `biometricAccount()` store tests); debug APK rebuilt + installed on DNP NX9.
+- **On-device blocker:** DNP NX9's biometric sensor reports state 4 (bad) despite 4 enrolled fingerprints, so a real scan always throws `PlatformException`; the auto-detection + password retrieval path is unit-tested, but the success gesture requires a healthy device.

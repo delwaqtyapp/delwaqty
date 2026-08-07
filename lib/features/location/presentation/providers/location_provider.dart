@@ -7,6 +7,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:delwaqty/config/app_config.dart';
+import 'package:delwaqty/core/localization/locale_provider.dart';
 import 'package:delwaqty/services/logger/app_logger.dart';
 
 class UserLocation {
@@ -36,6 +37,7 @@ const String _androidCertSha1 =
 class UserLocationNotifier extends AsyncNotifier<UserLocation?> {
   @override
   Future<UserLocation?> build() async {
+    ref.watch(localeProvider);
     return _determinePosition(deepPrecision: false);
   }
 
@@ -97,6 +99,7 @@ class UserLocationNotifier extends AsyncNotifier<UserLocation?> {
       final detailedAddress = await _reverseGeocode(
         position.latitude,
         position.longitude,
+        _appLanguage(),
       );
 
       return UserLocation(
@@ -227,9 +230,17 @@ class UserLocationNotifier extends AsyncNotifier<UserLocation?> {
     }
   }
 
-  static const _geocodeCacheKey = 'location_geocode_cache_v1';
+  static const _geocodeCacheKey = 'location_geocode_cache_v2';
   static const _geocodeCacheTtl = Duration(hours: 24);
   static const _geocodeCacheMaxEntries = 200;
+
+  String _appLanguage() {
+    try {
+      return ref.read(localeProvider).languageCode;
+    } catch (_) {
+      return 'ar';
+    }
+  }
 
   Future<Map<String, String>> _readGeocodeCache() async {
     try {
@@ -271,18 +282,19 @@ class UserLocationNotifier extends AsyncNotifier<UserLocation?> {
     } catch (_) {}
   }
 
-  Future<String> _reverseGeocode(double lat, double lng) async {
+  Future<String> _reverseGeocode(double lat, double lng, String language) async {
     final logger = ref.read(loggerProvider);
-
-    final cacheKey = '${lat.toStringAsFixed(4)},${lng.toStringAsFixed(4)}';
+    final separator = language == 'ar' ? '،' : ',';
+    final cacheKey =
+        '${lat.toStringAsFixed(4)},${lng.toStringAsFixed(4)}@$language';
     final cache = await _readGeocodeCache();
     final cached = cache[cacheKey];
     if (cached != null && cached.isNotEmpty) return cached;
 
     final results = await Future.wait([
-      _googleStructuredAddress(lat, lng, logger),
-      _photonStructuredAddress(lat, lng, logger),
-      _nominatimStructuredAddress(lat, lng, logger),
+      _googleStructuredAddress(lat, lng, language, logger),
+      _photonStructuredAddress(lat, lng, language, logger),
+      _nominatimStructuredAddress(lat, lng, language, logger),
       _nearestNamedPlace(lat, lng, logger),
     ]);
 
@@ -309,11 +321,11 @@ class UserLocationNotifier extends AsyncNotifier<UserLocation?> {
     if (!hasNamed && nearestName != null) {
       final firstPart = address.split(RegExp('[،,]')).first.trim();
       if (nearestName != firstPart) {
-        address = '$nearestName، $address';
+        address = '$nearestName$separator $address';
       }
     }
 
-    final result = _cleanArabicAddress(address);
+    final result = _cleanAddress(address, language);
     if (result.isNotEmpty) {
       cache[cacheKey] = result;
       await _writeGeocodeCache(cache);
@@ -324,6 +336,7 @@ class UserLocationNotifier extends AsyncNotifier<UserLocation?> {
   Future<({String address, bool hasNamed})?> _googleStructuredAddress(
     double lat,
     double lng,
+    String language,
     dynamic logger,
   ) async {
     try {
@@ -332,7 +345,7 @@ class UserLocationNotifier extends AsyncNotifier<UserLocation?> {
 
       final uri = Uri.parse(
         'https://maps.googleapis.com/maps/api/geocode/json'
-        '?latlng=$lat,$lng&key=$apiKey&language=ar',
+        '?latlng=$lat,$lng&key=$apiKey&language=$language',
       );
       final headers = <String, String>{};
       if (defaultTargetPlatform == TargetPlatform.android) {
@@ -355,6 +368,7 @@ class UserLocationNotifier extends AsyncNotifier<UserLocation?> {
       if (components == null || components.isEmpty) return null;
 
       String? named;
+      String? streetNumber;
       String? street;
       String? area;
       String? city;
@@ -370,27 +384,30 @@ class UserLocationNotifier extends AsyncNotifier<UserLocation?> {
                 .toList() ??
             <String>[];
         if (name == null || name.trim().isEmpty) continue;
-        final isNumeric = RegExp(r'\d').hasMatch(name);
 
         if (_typesContain(types, const [
           'establishment',
           'point_of_interest',
           'premise',
         ])) {
-          if (!isNumeric && named == null) named = name;
+          named ??= name;
+        } else if (types.contains('street_number')) {
+          streetNumber ??= name;
         } else if (types.contains('route')) {
           street ??= name;
         } else if (_typesContain(types, const [
           'neighborhood',
           'sublocality_level_1',
           'sublocality_level_2',
+          'sublocality_level_3',
+          'administrative_area_level_2',
+          'administrative_area_level_3',
         ])) {
           area ??= name;
         } else if (_typesContain(types, const ['locality', 'postal_town'])) {
           city ??= name;
         } else if (_typesContain(types, const [
           'administrative_area_level_1',
-          'administrative_area_level_2',
         ])) {
           region ??= name;
         } else if (types.contains('country')) {
@@ -398,16 +415,30 @@ class UserLocationNotifier extends AsyncNotifier<UserLocation?> {
         }
       }
 
+      final streetPart = <String>[
+        if (streetNumber != null && streetNumber.trim().isNotEmpty)
+          streetNumber,
+        if (street != null && street.trim().isNotEmpty) street,
+      ].join(' ');
+
+      final separator = language == 'ar' ? '،' : ',';
       final parts = <String>[
-        if (named != null) named,
-        if (street != null) street,
-        if (area != null && area != street) area,
+        if (named != null && named.trim().isNotEmpty) named,
+        if (streetPart.isNotEmpty) streetPart,
+        if (area != null && area != streetPart && area != named) area,
         if (city != null && city != area) city,
         if (region != null && region != city) region,
         if (country != null && country != region) country,
       ];
+      final unique = <String>[];
+      for (final part in parts) {
+        if (!unique.contains(part)) unique.add(part);
+      }
 
-      return (address: parts.join('، '), hasNamed: named != null);
+      return (
+        address: unique.join('$separator '),
+        hasNamed: named != null,
+      );
     } catch (e) {
       logger.d('Google structured geocoding error: $e');
       return null;
@@ -417,13 +448,14 @@ class UserLocationNotifier extends AsyncNotifier<UserLocation?> {
   Future<({String address, bool hasNamed})?> _nominatimStructuredAddress(
     double lat,
     double lng,
+    String language,
     dynamic logger,
   ) async {
     try {
       final uri = Uri.parse(
         'https://nominatim.openstreetmap.org/reverse'
         '?format=json&lat=$lat&lon=$lng&zoom=18&addressdetails=1'
-        '&accept-language=ar',
+        '&accept-language=$language',
       );
       final response = await http
           .get(uri, headers: {'User-Agent': 'Delwaqty/1.0'})
@@ -486,7 +518,7 @@ class UserLocationNotifier extends AsyncNotifier<UserLocation?> {
 
       if (parts.isEmpty) return null;
 
-      return (address: parts.join('، '), hasNamed: named != null);
+      return (address: parts.join(language == 'ar' ? '، ' : ', '), hasNamed: named != null);
     } catch (e) {
       logger.d('Nominatim structured geocoding error: $e');
       return null;
@@ -496,11 +528,12 @@ class UserLocationNotifier extends AsyncNotifier<UserLocation?> {
   Future<({String address, bool hasNamed})?> _photonStructuredAddress(
     double lat,
     double lng,
+    String language,
     dynamic logger,
   ) async {
     try {
       final uri = Uri.parse(
-        'https://photon.komoot.io/reverse?lon=$lng&lat=$lat',
+        'https://photon.komoot.io/reverse?lon=$lng&lat=$lat&lang=$language',
       );
       final response = await http
           .get(uri, headers: {'User-Agent': 'Delwaqty/1.0'})
@@ -544,7 +577,7 @@ class UserLocationNotifier extends AsyncNotifier<UserLocation?> {
       }
       if (parts.isEmpty) return null;
 
-      return (address: parts.join('، '), hasNamed: hasNamed);
+      return (address: parts.join(language == 'ar' ? '، ' : ', '), hasNamed: hasNamed);
     } catch (e) {
       logger.d('Photon reverse geocoding error: $e');
       return null;
@@ -651,14 +684,17 @@ class UserLocationNotifier extends AsyncNotifier<UserLocation?> {
   bool _typesContain(List<String> types, List<String> wanted) =>
       types.any(wanted.contains);
 
-  String _cleanArabicAddress(String input) {
-    var cleaned = input.replaceAll(RegExp(r'\d'), ' ');
+  String _cleanAddress(String input, String language) {
+    final separator = language == 'ar' ? '،' : ',';
+    var cleaned = input.replaceAll(RegExp(r'\s+'), ' ');
     cleaned = cleaned.replaceAll(RegExp(r'[()\[\]]'), ' ');
-    cleaned = cleaned.replaceAll(RegExp(r'\s+'), ' ');
-    cleaned = cleaned.replaceAll(RegExp(r'\s*([,.])\s*'), '، ');
-    cleaned = cleaned.replaceAll(RegExp(r'(،\s*)+'), '، ');
-    cleaned = cleaned.replaceAll(RegExp(r'^[،,\s]+|[،,\s]+$'), '');
-    return cleaned;
+    cleaned = cleaned.replaceAll(RegExp(r'[،,]'), separator);
+    final parts = cleaned
+        .split(separator)
+        .map((e) => e.trim())
+        .where((e) => e.isNotEmpty)
+        .toList();
+    return parts.join('$separator ');
   }
 
   Future<void> refresh() async {

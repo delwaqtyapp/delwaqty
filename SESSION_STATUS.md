@@ -1,10 +1,29 @@
 # SESSION_STATUS.md
 
-> **Last updated:** 2026-08-06 Session 21p (Account Verification Workflow — Sprint 60)
+> **Last updated:** 2026-08-07 Session 21q (Login UX: Fingerprint + Saved Accounts — Sprint 60 follow-up)
 
 ---
 
-## Current Task — ACCOUNT VERIFICATION WORKFLOW (Session 21p)
+## Current Task — FINGERPRINT LOGIN + SAVED ACCOUNTS + SOCIAL LOGIN REMOVAL (Session 21q)
+
+User request (Arabic): "في تسجيل الدخول فعل زر البصمة بشكل صحيح، وشيل التسجيل من أي منصة سوشيال في الوقت الحالي، وزر حفظ تسجيل الحساب شغّله بشكل صحيح، ويبقى فيه خانة للحسابات المحفوظة في تسجيل الدخول" — make the fingerprint button actually work, remove social login for now, make save-account work correctly, and add a saved-accounts section on the login page. This session shipped all four on top of the Sprint 60 verification milestone (commit `87aadc3`).
+
+| Area | Change |
+|------|--------|
+| **Root cause — fingerprint** | Old flow stored email/password in **plaintext SharedPreferences** (`biometricEnabled/biometricEmail/biometricPassword`), required a password re-entry bypass, and `AndroidManifest.xml` was **missing `USE_BIOMETRIC`/`USE_FINGERPRINT`** so `LocalAuthentication` could never succeed. Added both permissions |
+| **Secure store** | New `lib/data/datasources/local/saved_accounts_store.dart`: account list (email/displayName/hasBiometric) in SharedPreferences JSON under `StorageKeys.savedAccounts`; **biometric password only in Keystore/Keychain** via `flutter_secure_storage` (`biometric_password_<email>`); emails normalized at the boundary. Old plaintext keys deleted from `StorageKeys` |
+| **Model** | New Freezed `SavedAccount` (`lib/features/auth/domain/saved_account.dart`) with normalized `key` getter; generated files gitignored (build artifacts) |
+| **Login page** | `login_page.dart` rewritten: social buttons (Google/Apple/Facebook) removed; "حفظ الحساب" checkbox persists the account on successful login (`_handlePostLoginSave` off the `authenticated` listener) with optional "تفعيل البصمة"; horizontal **Saved Accounts** chip row — tap fills email + selects text + focuses password, fingerprint badge = one-tap biometric sign-in, × = remove with confirm dialog; fingerprint button (biometricOnly + stickyAuth) reads the secure password then calls `signIn`; shown only when `hasBiometric` for the filled email AND `canCheckBiometrics` |
+| **Auth provider** | `signInWithGoogle/Apple/Facebook` getters + methods removed from `AuthStateNotifier`; `signOut` no longer wipes biometric/saved-account storage (accounts survive logout by design). Phone/password + guest remain |
+| **Dependencies** | `flutter_secure_storage` pinned **`^11.0.0`** (only line using `win32 ^6`, compatible with `geolocator ^14`); **`compileSdk` 36 → 37** (v11 AAR requires API 37); plugin registrants regenerated for linux/macos/windows |
+| **l10n** | New keys en+ar: `saveAccount`, `savedAccounts`, `savedAccountsHint`, `removeAccount`, `removeSavedAccountConfirm`, `accountSaved`, `accountRemoved`; regenerated |
+| **Quality gates** | `flutter analyze` **0 errors / 0 warnings from touched files** (untouched-module lints are pre-existing) · `flutter test` **567/567 passing** (was 556 → +11) · debug APK built (`compileSdk 37`) + installed on DNP NX9 · app launches clean (PID 11858, no FATAL / no ConfigValidator crash) |
+
+> **REMAINING (not blocking):** (1) on-device E2E of the Sprint 60 register → confirm-email-link → pending → admin-approve → home walk on DNP NX9 (user must tap the confirmation link; free-tier mailer 2/hr); (2) **SECURITY:** revoke the Supabase PAT used in the Sprint 60 session. Saved-account flow verified by unit tests + clean install; full fingerprint tap needs a real fingerprint-enrolled device gesture.
+
+---
+
+## Previous Task — ACCOUNT VERIFICATION WORKFLOW (Session 21p)
 
 New provider/delivery sign-ups must verify their identity before using the platform: register step 1 selects an account type, providers/delivery users upload an ID card + profile photo, then an admin approves or rejects them from a new dashboard page. Customers skip verification entirely. Code was already written (uncommitted); this session finished it: lint cleanup, the missing Supabase migration, live-DB application, email-confirmation activation, and docs.
 

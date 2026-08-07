@@ -44,6 +44,7 @@ dependencies:
   # Local Storage
   shared_preferences: ^2.2.3
   local_auth: ^2.3.0
+  flutter_secure_storage: ^11.0.0
 
 
   # Logging

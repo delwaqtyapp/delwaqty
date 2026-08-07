@@ -6,12 +6,12 @@ import 'package:go_router/go_router.dart';
 import 'package:local_auth/local_auth.dart';
 import 'package:delwaqty/core/extensions/context_extensions.dart';
 import 'package:delwaqty/core/theme/app_colors.dart';
-import 'package:delwaqty/core/constants/storage_keys.dart';
 import 'package:delwaqty/core/utils/validators.dart';
+import 'package:delwaqty/data/datasources/local/saved_accounts_store.dart';
 import 'package:delwaqty/features/auth/domain/auth_state.dart';
+import 'package:delwaqty/features/auth/domain/saved_account.dart';
 import 'package:delwaqty/features/auth/presentation/auth_provider.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginPage extends ConsumerStatefulWidget {
   const LoginPage({super.key});
@@ -25,20 +25,30 @@ class _LoginPageState extends ConsumerState<LoginPage>
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _passwordFocusNode = FocusNode();
   bool _obscurePassword = true;
   bool _rememberMe = false;
+  bool _enableBiometric = false;
   bool _biometricAvailable = false;
-  bool _biometricEnabled = false;
-  String _savedEmail = '';
+  List<SavedAccount> _savedAccounts = const [];
+  bool _pendingSaveAccount = false;
+  bool _pendingEnableBiometric = false;
   final LocalAuthentication _localAuth = LocalAuthentication();
   late final AnimationController _shakeController;
   late final Animation<double> _shakeAnimation;
   late final AnimationController _fadeController;
 
+  bool get _biometricEnabledForEmail {
+    final email = _emailController.text.trim().toLowerCase();
+    if (email.isEmpty) return false;
+    return _savedAccounts.any((a) => a.key == email && a.hasBiometric);
+  }
+
   @override
   void initState() {
     super.initState();
     _checkBiometric();
+    _loadSavedAccounts();
     _shakeController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 500),
@@ -56,9 +66,25 @@ class _LoginPageState extends ConsumerState<LoginPage>
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
+    _passwordFocusNode.dispose();
     _shakeController.dispose();
     _fadeController.dispose();
     super.dispose();
+  }
+
+  Future<void> _loadSavedAccounts() async {
+    try {
+      final accounts =
+          await ref.read(savedAccountsStoreProvider).loadAccounts();
+      if (mounted) setState(() => _savedAccounts = accounts);
+    } catch (_) {}
+  }
+
+  Future<void> _checkBiometric() async {
+    try {
+      final canCheck = await _localAuth.canCheckBiometrics;
+      if (mounted) setState(() => _biometricAvailable = canCheck);
+    } catch (_) {}
   }
 
   void _onLogin() async {
@@ -66,42 +92,47 @@ class _LoginPageState extends ConsumerState<LoginPage>
       _shakeController.forward(from: 0);
       return;
     }
-    final email = _emailController.text.trim();
-    final password = _passwordController.text;
-
+    _pendingSaveAccount = _rememberMe;
+    _pendingEnableBiometric = _enableBiometric;
     ref.read(authStateProvider.notifier).signIn(
-          email: email,
-          password: password,
+          email: _emailController.text.trim(),
+          password: _passwordController.text,
         );
-
-    if (_rememberMe) {
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setString(StorageKeys.biometricEmail, email);
-      await prefs.setString(StorageKeys.biometricPassword, password);
-      if (_biometricAvailable) {
-        await prefs.setBool(StorageKeys.biometricEnabled, true);
-        if (mounted) setState(() => _biometricEnabled = true);
-      }
-    }
   }
 
-  Future<void> _checkBiometric() async {
+  Future<void> _handlePostLoginSave() async {
+    if (!_pendingSaveAccount) return;
+    _pendingSaveAccount = false;
+    final l10n = AppLocalizations.of(context);
+    final messenger = ScaffoldMessenger.of(context);
+    final email = _emailController.text.trim();
+    final store = ref.read(savedAccountsStoreProvider);
     try {
-      final canCheck = await _localAuth.canCheckBiometrics;
-      final prefs = await SharedPreferences.getInstance();
-      final enabled = prefs.getBool(StorageKeys.biometricEnabled) ?? false;
-      final email = prefs.getString(StorageKeys.biometricEmail) ?? '';
+      var accounts = await store.saveAccount(email: email);
+      if (_pendingEnableBiometric && _biometricAvailable) {
+        _pendingEnableBiometric = false;
+        await store.setBiometric(
+          email: email,
+          password: _passwordController.text,
+          enabled: true,
+        );
+        accounts = await store.loadAccounts();
+      }
       if (mounted) {
-        setState(() {
-          _biometricAvailable = canCheck;
-          _biometricEnabled = enabled && email.isNotEmpty;
-          _savedEmail = email;
-        });
+        setState(() => _savedAccounts = accounts);
+        messenger.showSnackBar(
+          SnackBar(
+            content: Text(l10n.accountSaved),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
       }
     } catch (_) {}
   }
 
-  Future<void> _authenticateWithBiometric() async {
+  Future<void> _authenticateWithBiometric({String? forEmail}) async {
+    final email = forEmail ?? _emailController.text.trim();
+    if (email.isEmpty) return;
     try {
       final didAuth = await _localAuth.authenticate(
         localizedReason: AppLocalizations.of(context).biometricReason,
@@ -110,26 +141,54 @@ class _LoginPageState extends ConsumerState<LoginPage>
           biometricOnly: true,
         ),
       );
-      if (didAuth && mounted) {
-        final prefs = await SharedPreferences.getInstance();
-        final email = prefs.getString(StorageKeys.biometricEmail) ?? '';
-        final password = prefs.getString(StorageKeys.biometricPassword) ?? '';
-        if (email.isNotEmpty && password.isNotEmpty) {
-          ref.read(authStateProvider.notifier).signIn(
-                email: email,
-                password: password,
-              );
-        } else if (email.isNotEmpty) {
-          _emailController.text = email;
-          context.showAppSnackBar(
-            AppLocalizations.of(context).enterPasswordForFingerprint,
-          );
-        }
+      if (!didAuth || !mounted) return;
+      final password =
+          await ref.read(savedAccountsStoreProvider).biometricPassword(email);
+      if (password != null && password.isNotEmpty) {
+        ref.read(authStateProvider.notifier).signIn(
+              email: email,
+              password: password,
+            );
+      } else if (mounted) {
+        context.showAppSnackBar(
+          AppLocalizations.of(context).enterPasswordForFingerprint,
+        );
       }
     } on PlatformException catch (_) {
       if (mounted) {
-        context.showAppSnackBar(AppLocalizations.of(context).biometricFailed);
+        context.showAppSnackBar(
+          AppLocalizations.of(context).biometricFailed,
+        );
       }
+    }
+  }
+
+  Future<void> _confirmRemoveAccount(SavedAccount account) async {
+    final l10n = AppLocalizations.of(context);
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Text(l10n.removeAccount),
+        content: Text(l10n.removeSavedAccountConfirm(account.email)),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text(l10n.cancel),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: Text(l10n.delete),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) return;
+    final accounts =
+        await ref.read(savedAccountsStoreProvider).removeAccount(account.email);
+    if (mounted) {
+      setState(() => _savedAccounts = accounts);
+      context.showAppSnackBar(l10n.accountRemoved);
     }
   }
 
@@ -140,9 +199,16 @@ class _LoginPageState extends ConsumerState<LoginPage>
 
     ref.listen<AuthState>(authStateProvider, (prev, next) {
       next.whenOrNull(
-        authenticated: (_) => context.go('/home'),
+        authenticated: (_) {
+          _handlePostLoginSave();
+          context.go('/home');
+        },
         guest: () => context.go('/home'),
-        error: (msg) => context.showAppSnackBar(msg),
+        error: (msg) {
+          _pendingSaveAccount = false;
+          _pendingEnableBiometric = false;
+          context.showAppSnackBar(msg);
+        },
       );
     });
 
@@ -177,7 +243,6 @@ class _LoginPageState extends ConsumerState<LoginPage>
                     ),
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         const SizedBox(height: 40),
                         _buildLogo(),
@@ -185,13 +250,10 @@ class _LoginPageState extends ConsumerState<LoginPage>
                         _buildWelcome(l10n),
                         const SizedBox(height: 8),
                         _buildSubtitle(l10n),
-                        const SizedBox(height: 40),
+                        const SizedBox(height: 32),
+                        _buildSavedAccountsSection(l10n),
                         _buildForm(l10n, authState),
-                        const SizedBox(height: 28),
-                        _buildDivider(l10n),
-                        const SizedBox(height: 20),
-                        _buildSocialButtons(l10n),
-                        const SizedBox(height: 20),
+                        const SizedBox(height: 24),
                         _buildGuestButton(l10n),
                         const SizedBox(height: 20),
                         _buildRegisterLink(l10n),
@@ -209,7 +271,7 @@ class _LoginPageState extends ConsumerState<LoginPage>
   }
 
   Widget _buildBackground() {
-    return Container(
+    return DecoratedBox(
       decoration: const BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topCenter,
@@ -285,7 +347,7 @@ class _LoginPageState extends ConsumerState<LoginPage>
                   child: Image.asset(
                     'assets/logo app/logo.png',
                     fit: BoxFit.contain,
-                    errorBuilder: (_, __, ___) => Container(
+                    errorBuilder: (_, __, ___) => DecoratedBox(
                       decoration: BoxDecoration(
                         gradient: const LinearGradient(
                           colors: [AppColors.brandPurple, AppColors.brandCyan],
@@ -332,6 +394,63 @@ class _LoginPageState extends ConsumerState<LoginPage>
     );
   }
 
+  Widget _buildSavedAccountsSection(AppLocalizations l10n) {
+    if (_savedAccounts.isEmpty) return const SizedBox.shrink();
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 24),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            l10n.savedAccounts,
+            style: const TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.w600,
+              color: Color(0xFF1A1035),
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            l10n.savedAccountsHint,
+            style: TextStyle(
+              fontSize: 12,
+              color: const Color(0xFF1A1035).withValues(alpha: 0.45),
+            ),
+          ),
+          const SizedBox(height: 12),
+          SizedBox(
+            height: 108,
+            child: ListView.separated(
+              scrollDirection: Axis.horizontal,
+              itemCount: _savedAccounts.length,
+              separatorBuilder: (_, __) => const SizedBox(width: 10),
+              itemBuilder: (context, index) {
+                final account = _savedAccounts[index];
+                return _SavedAccountChip(
+                  account: account,
+                  selected: account.key ==
+                      _emailController.text.trim().toLowerCase(),
+                  onTap: () {
+                    setState(() => _emailController.text = account.email);
+                    _emailController.selection = TextSelection(
+                      baseOffset: 0,
+                      extentOffset: account.email.length,
+                    );
+                    _passwordFocusNode.requestFocus();
+                  },
+                  onFingerprint: account.hasBiometric
+                      ? () => _authenticateWithBiometric(forEmail: account.email)
+                      : null,
+                  onRemove: () => _confirmRemoveAccount(account),
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildForm(AppLocalizations l10n, AuthState authState) {
     final isLoading = authState is AuthLoading;
     return Form(
@@ -351,6 +470,7 @@ class _LoginPageState extends ConsumerState<LoginPage>
             hint: l10n.password,
             icon: Icons.lock_outline_rounded,
             obscure: _obscurePassword,
+            focusNode: _passwordFocusNode,
             validator: (v) => AppValidators.password(v),
             suffix: GestureDetector(
               onTap: () =>
@@ -389,7 +509,7 @@ class _LoginPageState extends ConsumerState<LoginPage>
                   ),
                   const SizedBox(width: 8),
                   Text(
-                    l10n.rememberMe,
+                    l10n.saveAccount,
                     style: TextStyle(
                       fontSize: 13,
                       color:
@@ -411,83 +531,55 @@ class _LoginPageState extends ConsumerState<LoginPage>
               ),
             ],
           ),
+          if (_biometricAvailable && _rememberMe) ...[
+            const SizedBox(height: 4),
+            Row(
+              children: [
+                SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: Checkbox(
+                    value: _enableBiometric,
+                    onChanged: (v) =>
+                        setState(() => _enableBiometric = v ?? false),
+                    activeColor: AppColors.brandPurple,
+                    side: BorderSide(
+                      color: const Color(0xFF1A1035).withValues(alpha: 0.2),
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    l10n.enableFingerprint,
+                    style: TextStyle(
+                      fontSize: 13,
+                      color:
+                          const Color(0xFF1A1035).withValues(alpha: 0.5),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
           const SizedBox(height: 24),
           _LoginButton(
             onPressed: isLoading ? null : _onLogin,
             isLoading: isLoading,
             label: l10n.signIn,
           ),
-          if (_biometricAvailable && _biometricEnabled) ...[
+          if (_biometricAvailable && _biometricEnabledForEmail) ...[
             const SizedBox(height: 16),
             _BiometricButton(
               onPressed: _authenticateWithBiometric,
-              savedEmail: _savedEmail,
+              savedEmail: _emailController.text.trim(),
             ),
           ],
         ],
       ),
-    );
-  }
-
-  Widget _buildDivider(AppLocalizations l10n) {
-    return Row(
-      children: [
-        Expanded(
-          child: Container(
-            height: 1,
-            color: const Color(0xFF1A1035).withValues(alpha: 0.08),
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: Text(
-            l10n.or,
-            style: TextStyle(
-              fontSize: 13,
-              color: const Color(0xFF1A1035).withValues(alpha: 0.35),
-            ),
-          ),
-        ),
-        Expanded(
-          child: Container(
-            height: 1,
-            color: const Color(0xFF1A1035).withValues(alpha: 0.08),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildSocialButtons(AppLocalizations l10n) {
-    return Row(
-      children: [
-        Expanded(
-          child: _SocialButtonLight(
-            icon: Icons.g_mobiledata_rounded,
-            label: 'Google',
-            onTap: () =>
-                ref.read(authStateProvider.notifier).signInWithGoogle(),
-          ),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: _SocialButtonLight(
-            icon: Icons.apple_rounded,
-            label: 'Apple',
-            onTap: () =>
-                ref.read(authStateProvider.notifier).signInWithApple(),
-          ),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: _SocialButtonLight(
-            icon: Icons.facebook_rounded,
-            label: 'Facebook',
-            onTap: () =>
-                ref.read(authStateProvider.notifier).signInWithFacebook(),
-          ),
-        ),
-      ],
     );
   }
 
@@ -542,9 +634,9 @@ class _LoginPageState extends ConsumerState<LoginPage>
         const SizedBox(width: 4),
         GestureDetector(
           onTap: () => context.push('/register'),
-          child: const Text(
-            'Register',
-            style: TextStyle(
+          child: Text(
+            l10n.register,
+            style: const TextStyle(
               fontSize: 14,
               color: AppColors.brandPurple,
               fontWeight: FontWeight.w600,
@@ -565,6 +657,7 @@ class _LightTextField extends StatelessWidget {
     this.keyboardType,
     this.validator,
     this.suffix,
+    this.focusNode,
   });
 
   final TextEditingController controller;
@@ -574,6 +667,7 @@ class _LightTextField extends StatelessWidget {
   final TextInputType? keyboardType;
   final String? Function(String?)? validator;
   final Widget? suffix;
+  final FocusNode? focusNode;
 
   @override
   Widget build(BuildContext context) {
@@ -582,6 +676,7 @@ class _LightTextField extends StatelessWidget {
       obscureText: obscure,
       keyboardType: keyboardType,
       validator: validator,
+      focusNode: focusNode,
       style: const TextStyle(color: Color(0xFF1A1035), fontSize: 15),
       decoration: InputDecoration(
         hintText: hint,
@@ -705,56 +800,117 @@ class _LoginButton extends StatelessWidget {
   }
 }
 
-class _SocialButtonLight extends StatelessWidget {
-  const _SocialButtonLight({
-    required this.icon,
-    required this.label,
+class _SavedAccountChip extends StatelessWidget {
+  const _SavedAccountChip({
+    required this.account,
+    required this.selected,
     required this.onTap,
+    this.onFingerprint,
+    required this.onRemove,
   });
 
-  final IconData icon;
-  final String label;
+  final SavedAccount account;
+  final bool selected;
   final VoidCallback onTap;
+  final VoidCallback? onFingerprint;
+  final VoidCallback onRemove;
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: 52,
-      child: Material(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        elevation: 0,
-        child: InkWell(
-          onTap: onTap,
+    final email = account.email.trim();
+    final initial =
+        email.isEmpty ? '?' : email.substring(0, 1).toUpperCase();
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 138,
+        padding: const EdgeInsets.all(10),
+        decoration: BoxDecoration(
+          color: selected
+              ? AppColors.brandPurple.withValues(alpha: 0.06)
+              : Colors.white,
           borderRadius: BorderRadius.circular(16),
-          splashColor: AppColors.brandPurple.withValues(alpha: 0.05),
-          child: Container(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(
-                color: const Color(0xFF1A1035).withValues(alpha: 0.08),
-              ),
-            ),
-            child: Row(
+          border: Border.all(
+            color: selected
+                ? AppColors.brandPurple
+                : const Color(0xFF1A1035).withValues(alpha: 0.08),
+            width: selected ? 1.5 : 1,
+          ),
+        ),
+        child: Stack(
+          children: [
+            Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(
-                  icon,
-                  color: const Color(0xFF1A1035).withValues(alpha: 0.6),
-                  size: 20,
+                Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    CircleAvatar(
+                      radius: 18,
+                      backgroundColor:
+                          AppColors.brandPurple.withValues(alpha: 0.12),
+                      child: Text(
+                        initial,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 16,
+                          color: Color(0xFF1A1035),
+                        ),
+                      ),
+                    ),
+                    if (onFingerprint != null)
+                      Positioned(
+                        right: -6,
+                        bottom: -6,
+                        child: GestureDetector(
+                          onTap: onFingerprint,
+                          child: Container(
+                            width: 20,
+                            height: 20,
+                            decoration: const BoxDecoration(
+                              color: AppColors.brandPurple,
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(
+                              Icons.fingerprint_rounded,
+                              size: 13,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                      ),
+                  ],
                 ),
-                const SizedBox(width: 6),
+                const SizedBox(height: 8),
                 Text(
-                  label,
+                  account.email,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.center,
                   style: TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w500,
+                    fontSize: 11,
                     color: const Color(0xFF1A1035).withValues(alpha: 0.6),
                   ),
                 ),
               ],
             ),
-          ),
+            Positioned(
+              top: 2,
+              right: 2,
+              child: GestureDetector(
+                onTap: onRemove,
+                behavior: HitTestBehavior.opaque,
+                child: Padding(
+                  padding: const EdgeInsets.all(2),
+                  child: Icon(
+                    Icons.close_rounded,
+                    size: 14,
+                    color: const Color(0xFF1A1035).withValues(alpha: 0.3),
+                  ),
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -804,7 +960,9 @@ class _BiometricButton extends StatelessWidget {
             ),
             const SizedBox(height: 6),
             Text(
-              savedEmail.isNotEmpty ? savedEmail : AppLocalizations.of(context).fingerprintLogin,
+              savedEmail.isNotEmpty
+                  ? savedEmail
+                  : AppLocalizations.of(context).fingerprintLogin,
               style: TextStyle(
                 fontSize: 12,
                 color: const Color(0xFF1A1035).withValues(alpha: 0.4),

@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
@@ -29,6 +30,9 @@ final userLocationProvider =
 
 const double precisionTargetMeters = 1.0;
 
+const String _androidCertSha1 =
+    '5337185A52F0B615A3388ECC03B6576D61F34EEF';
+
 class UserLocationNotifier extends AsyncNotifier<UserLocation?> {
   @override
   Future<UserLocation?> build() async {
@@ -51,10 +55,13 @@ class UserLocationNotifier extends AsyncNotifier<UserLocation?> {
       final accuracy = value.accuracyMeters;
       if (best == null ||
           (accuracy != null &&
-              accuracy < (best.accuracyMeters ?? double.infinity))) {
+              accuracy > 0 &&
+              (best.accuracyMeters == null ||
+                  best.accuracyMeters! <= 0 ||
+                  accuracy < best.accuracyMeters!))) {
         best = value;
       }
-      if (accuracy != null && accuracy <= precisionTargetMeters) {
+      if (accuracy != null && accuracy > 0 && accuracy <= precisionTargetMeters) {
         return value;
       }
     }
@@ -96,7 +103,7 @@ class UserLocationNotifier extends AsyncNotifier<UserLocation?> {
         latitude: position.latitude,
         longitude: position.longitude,
         detailedAddress: detailedAddress,
-        accuracyMeters: position.accuracy,
+        accuracyMeters: position.accuracy > 0 ? position.accuracy : null,
       );
     } catch (e) {
       ref.read(loggerProvider).e('Failed to get location', e);
@@ -145,7 +152,7 @@ class UserLocationNotifier extends AsyncNotifier<UserLocation?> {
   bool _isFreshAndPrecise(Position? position) {
     if (!_isFreshAndVerified(position)) return false;
     final accuracy = position!.accuracy;
-    return accuracy >= 0 && accuracy <= 1;
+    return accuracy > 0 && accuracy <= 1;
   }
 
   bool _isUsableLastKnown(Position? position) {
@@ -153,7 +160,7 @@ class UserLocationNotifier extends AsyncNotifier<UserLocation?> {
     final age = DateTime.now().difference(position.timestamp).inMilliseconds;
     if (age < -30000 || age > _maxLastKnownAge.inMilliseconds) return false;
     if (_hasLiveGnss(position)) return true;
-    return position.accuracy >= 0 && position.accuracy <= 500;
+    return position.accuracy > 0 && position.accuracy <= 500;
   }
 
   Future<Position?> _acquirePreciseFix({
@@ -183,12 +190,12 @@ class UserLocationNotifier extends AsyncNotifier<UserLocation?> {
               if (!_isFreshTimestamp(position.timestamp)) return;
               final accuracy = position.accuracy;
               if (best == null ||
-                  (accuracy >= 0 &&
-                      (best!.accuracy < 0 || accuracy < best!.accuracy))) {
+                  (accuracy > 0 &&
+                      (best!.accuracy <= 0 || accuracy < best!.accuracy))) {
                 best = position;
               }
               if (_hasLiveGnss(position) &&
-                  accuracy >= 0 &&
+                  accuracy > 0 &&
                   accuracy <= targetMeters) {
                 timer.cancel();
                 subscription?.cancel();
@@ -327,7 +334,14 @@ class UserLocationNotifier extends AsyncNotifier<UserLocation?> {
         'https://maps.googleapis.com/maps/api/geocode/json'
         '?latlng=$lat,$lng&key=$apiKey&language=ar',
       );
-      final response = await http.get(uri).timeout(const Duration(seconds: 8));
+      final headers = <String, String>{};
+      if (defaultTargetPlatform == TargetPlatform.android) {
+        headers['X-Android-Package'] = 'com.delwaqty.app';
+        headers['X-Android-Cert'] = _androidCertSha1;
+      }
+      final response = await http
+          .get(uri, headers: headers)
+          .timeout(const Duration(seconds: 8));
       if (response.statusCode != 200) return null;
 
       final data = json.decode(response.body) as Map<String, dynamic>;

@@ -536,5 +536,111 @@ void main() {
 
       expect(result, isNull);
     });
+    test('rejects a non-GNSS last-known with unknown (0.0) accuracy', () async {
+      when(
+        () => mockPlatform.isLocationServiceEnabled(),
+      ).thenAnswer((_) async => true);
+      when(
+        () => mockPlatform.checkPermission(),
+      ).thenAnswer((_) async => LocationPermission.whileInUse);
+      when(
+        () => mockPlatform.getLastKnownPosition(
+          forceLocationManager: any(named: 'forceLocationManager'),
+        ),
+      ).thenAnswer(
+        (_) async => androidPositionWith(
+          29.2,
+          32.63,
+          0.0,
+        ),
+      );
+      when(
+        () => mockPlatform.getPositionStream(
+          locationSettings: any(named: 'locationSettings'),
+        ),
+      ).thenAnswer((_) => const Stream<Position>.empty());
+
+      final container = ProviderContainer(
+        overrides: [loggerProvider.overrideWithValue(mockLogger)],
+      );
+      addTearDown(container.dispose);
+
+      final result = await container
+          .read(userLocationProvider.notifier)
+          .refreshQuick();
+
+      expect(result, isNull);
+    });
+
+    test('does not report 0 m for a GNSS last-known with unknown (0.0) accuracy',
+        () async {
+      when(
+        () => mockPlatform.isLocationServiceEnabled(),
+      ).thenAnswer((_) async => true);
+      when(
+        () => mockPlatform.checkPermission(),
+      ).thenAnswer((_) async => LocationPermission.whileInUse);
+      when(
+        () => mockPlatform.getLastKnownPosition(
+          forceLocationManager: any(named: 'forceLocationManager'),
+        ),
+      ).thenAnswer(
+        (_) async => androidPositionWith(
+          29.2,
+          32.63,
+          0.0,
+          satellitesUsedInFix: 4,
+        ),
+      );
+
+      final container = ProviderContainer(
+        overrides: [loggerProvider.overrideWithValue(mockLogger)],
+      );
+      addTearDown(container.dispose);
+
+      final result = await container
+          .read(userLocationProvider.notifier)
+          .refreshDeepLocked();
+
+      expect(result, isNotNull);
+      expect(result!.accuracyMeters, isNull);
+      verifyNever(() => mockPlatform.getPositionStream());
+    });
+
+    test('does not report 0 m for a stream sample with unknown (0.0) accuracy',
+        () async {
+      when(
+        () => mockPlatform.isLocationServiceEnabled(),
+      ).thenAnswer((_) async => true);
+      when(
+        () => mockPlatform.checkPermission(),
+      ).thenAnswer((_) async => LocationPermission.whileInUse);
+      when(
+        () => mockPlatform.getLastKnownPosition(
+          forceLocationManager: any(named: 'forceLocationManager'),
+        ),
+      ).thenAnswer((_) async => null);
+      when(
+        () => mockPlatform.getPositionStream(
+          locationSettings: any(named: 'locationSettings'),
+        ),
+      ).thenAnswer(
+        (_) => Stream.fromIterable([
+          androidPositionWith(29.2, 32.63, 0.0),
+        ]),
+      );
+
+      final container = ProviderContainer(
+        overrides: [loggerProvider.overrideWithValue(mockLogger)],
+      );
+      addTearDown(container.dispose);
+
+      final result = await container
+          .read(userLocationProvider.notifier)
+          .refreshDeepLocked();
+
+      expect(result, isNotNull);
+      expect(result!.accuracyMeters, isNull);
+    });
   });
 }

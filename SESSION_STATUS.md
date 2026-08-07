@@ -1,10 +1,28 @@
 # SESSION_STATUS.md
 
-> **Last updated:** 2026-08-07 Session 21q (Login UX: Fingerprint + Saved Accounts — Sprint 60 follow-up)
+> **Last updated:** 2026-08-07 Session 21r (Location: "0 m" accuracy bug fixed — Sprint 61)
 
 ---
 
-## Current Task — FINGERPRINT LOGIN + SAVED ACCOUNTS + SOCIAL LOGIN REMOVAL (Session 21q)
+## Current Task — LOCATION FIX: "0 m" CLAIMED WHEN ACCURACY WAS UNKNOWN (Session 21r)
+
+User request (Arabic): "اصلح اللوكيشن في التطبيق بمقدار 0 متر" — fix the app showing the location as 0 meters. Root cause found, fixed, tested, built, and installed on DNP NX9. The remaining piece — Google Geocoding API activation — is an external Google Cloud Console action the user must take (detailed below).
+
+| Area | Change |
+|------|--------|
+| **Root cause — the "0 m" bug** | `geolocator` reports `accuracy = 0.0` when the platform provides **no accuracy estimate** (`hasAccuracy == false`, typical of network/fused cell fixes). The engine treated `0` as a perfect sub-metre fix: `_isFreshAndPrecise` accepted `>= 0 && <= 1` (short-circuited acquisition as "≤ 1 m"), `_isUsableLastKnown` accepted `>= 0 && <= 500`, `refreshDeepLocked()` early-returned on `accuracy <= 1`, and `UserLocation.accuracyMeters` surfaced raw `0.0` — so an unmeasured fix was delivered as "0 m" with no warning while being potentially hundreds of meters off |
+| **Fix — accuracy must be > 0** | `_isFreshAndPrecise` → `accuracy > 0 && <= 1`; `_isUsableLastKnown` → `accuracy > 0 && <= 500` (GNSS-verified last-known still passes on satellite count); `_acquirePreciseFix` best/early-complete now require `accuracy > 0` + live GNSS for the sub-metre shortcut |
+| **Fix — null = unknown** | `UserLocation.accuracyMeters` is now `position.accuracy > 0 ? position.accuracy : null` — unknown accuracy is typed as `null`, so callers (delivery `_useCurrentLocation`, ride booking) can never display or trust a fabricated "0 m" |
+| **Fix — deep-lock best tracking** | `refreshDeepLocked()` now prefers known-accuracy fixes across attempts; an unknown-accuracy fix is kept only as last-resort fallback and never triggers the ≤ 1 m early return |
+| **Fix — geocoding key headers** | Google Geocoding HTTP call now sends `X-Android-Package: com.delwaqty.app` + `X-Android-Cert: 5337185A52F0B615A3388ECC03B6576D61F34EEF` (debug SHA-1, colons removed) — the standard way an Android-app-restricted Maps key authorizes raw REST geocoding (the Maps SDK sends these automatically; the raw `http.get` did not → `REQUEST_DENIED`) |
+| **Tests** | 3 new regression tests in `location_provider_test.dart`: quick mode rejects a fresh non-GNSS last-known with unknown (0.0) accuracy; deep mode reports `null` (not 0 m) for a GNSS last-known with unknown accuracy; deep mode reports `null` for a 0.0-accuracy stream sample. Suite **570/570 passing** (was 567) |
+| **Quality gates** | `flutter analyze` 0 errors, **0 new issues** from touched files (repo-wide info lints pre-existing) · `flutter test` 570/570 · debug APK built (`--dart-define-from-file=.env.dev`) + installed on DNP NX9 · app launches clean (Map SurfaceView active, no crash) |
+
+> **REMAINING — ACTION REQUIRED FROM USER (external blocker):** enable the **Geocoding API** in Google Cloud Console for the API key's project (APIs & Services → Library → Geocoding API → Enable; billing active). The key is currently restricted to the Android app, so also confirm Application restrictions include package `com.delwaqty.app` + debug SHA-1 `53:37:18:5A:52:F0:B6:15:A3:38:8E:CC:03:B6:57:6D:61:F3:4E:EF` (colon format for the Console UI; the app sends it colons-removed). Until then the Photon/Nominatim fallback keeps producing Arabic addresses, but without Google-level POI depth. On-device E2E of the fixed accuracy flow needs a login + delivery-flow walk; fingerprint is enrolled from 21q.
+
+---
+
+## Previous Task — FINGERPRINT LOGIN + SAVED ACCOUNTS + SOCIAL LOGIN REMOVAL (Session 21q)
 
 User request (Arabic): "في تسجيل الدخول فعل زر البصمة بشكل صحيح، وشيل التسجيل من أي منصة سوشيال في الوقت الحالي، وزر حفظ تسجيل الحساب شغّله بشكل صحيح، ويبقى فيه خانة للحسابات المحفوظة في تسجيل الدخول" — make the fingerprint button actually work, remove social login for now, make save-account work correctly, and add a saved-accounts section on the login page. This session shipped all four on top of the Sprint 60 verification milestone (commit `87aadc3`).
 

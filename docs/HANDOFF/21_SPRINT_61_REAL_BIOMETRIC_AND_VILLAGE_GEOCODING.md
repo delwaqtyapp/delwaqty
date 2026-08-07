@@ -53,6 +53,20 @@ The `release.jks` signing password (unknown at build time) was recovered locally
 - Debug APK uninstalled, release installed on DNP NX9; app launches clean (MainActivity focused, full Home + session restored, **no FATAL** — the only FATAL logcat entries are from 08-06/08-07).
 - **Known pre-existing release-only log noise:** "Crashlytics build ID is missing" — `com.google.firebase.crashlytics` Gradle plugin is not applied in `android/app/build.gradle.kts`; the app degrades gracefully (`App running without Firebase`). Recommended follow-up: apply the plugin (requires the `com.google.gms.google-services` plugin too) when crash reporting is wanted. Not required for store publication.
 
+## Follow-up: Crashlytics wired correctly (2026-08-08)
+
+The recommended follow-up above was executed:
+
+- `android/settings.gradle.kts`: added `com.google.gms.google-services` **4.5.0** and `com.google.firebase.crashlytics` **3.0.7** (`apply false`) — selected for AGP 9.0.1 / Gradle 9.1.0 compatibility.
+- `android/app/build.gradle.kts`: both plugins applied (they use the existing `google-services.json`, package `com.delwaqty.app`).
+- Release APK rebuilt (68.7 MB) + reinstalled on DNP NX9. Cold-start logcat (buffer cleared first):
+  - "Crashlytics build ID is missing" → **0**
+  - "Firebase initialization failed" → **0**
+  - FATAL exceptions → **0**
+  - `FirebaseSessions` initializes and `firebaselogging-pa.googleapis.com` batched requests flow → crash reporting is live.
+- Note: the earlier `no-app` logcat hits were a **regex false-positive** (matched `Adreno-AppProfiles` lines), not a real `[core/no-app]` error — literal search confirms zero.
+- `flutter analyze` unchanged (514 pre-existing info lints); `flutter test` **599/599**.
+
 ## Files touched
 
 - `lib/features/location/presentation/providers/location_provider.dart` (+ tests `location_provider_test.dart`)

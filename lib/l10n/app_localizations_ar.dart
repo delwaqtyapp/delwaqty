@@ -3990,6 +3990,29 @@ class AppLocalizationsAr extends AppLocalizations {
       'أدخل كلمة المرور مرة واحدة لتفعيل تسجيل الدخول بالبصمة';
 
   @override
+  String get saveAccount => 'حفظ الحساب';
+
+  @override
+  String get savedAccounts => 'الحسابات المحفوظة';
+
+  @override
+  String get savedAccountsHint => 'اضغط على حساب محفوظ لتسجيل الدخول بسرعة';
+
+  @override
+  String get removeAccount => 'حذف الحساب';
+
+  @override
+  String removeSavedAccountConfirm(Object email) {
+    return 'حذف $email؟ سيتم أيضًا تعطيل تسجيل الدخول بالبصمة لهذا الحساب.';
+  }
+
+  @override
+  String get accountSaved => 'تم حفظ الحساب';
+
+  @override
+  String get accountRemoved => 'تم حذف الحساب';
+
+  @override
   String get selectAccountType => 'اختر نوع الحساب';
 
   @override

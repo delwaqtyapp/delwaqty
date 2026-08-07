@@ -1186,3 +1186,37 @@ With email confirmation already enabled live (`mailer_autoconfirm: false`), a si
 
 ---
 
+## ADR-041: Fingerprint Login, Saved Accounts, and Social-Login Removal (Login UX)
+
+**Date:** Session 21q (Sprint 60 follow-up)
+**Status:** Accepted
+**Deciders:** Lead Software Architect
+
+### Context
+
+The login screen carried three legacy problems. First, the "fingerprint" (البصمة) button never worked on-device: it stored email/password in **plaintext SharedPreferences** under `biometricEnabled/biometricEmail/biometricPassword`, required a one-off password re-entry bypass, and the `AndroidManifest.xml` was **missing `USE_BIOMETRIC`/`USE_FINGERPRINT`** so `LocalAuthentication` could never succeed. Second, the Google/Apple/Facebook buttons were non-functional decoration (no OAuth providers configured). Third, the "save account" (حفظ) checkbox did nothing persistent, and there was no way to see or quickly re-sign-in with previously saved accounts.
+
+### Decision
+
+1. **New secure store — `SavedAccountsStore`** (`lib/data/datasources/local/saved_accounts_store.dart`): the account list lives in SharedPreferences (`StorageKeys.savedAccounts`) as a JSON list of `SavedAccount` (email/displayName/hasBiometric), while the biometric **password is written only to Keystore/Keychain via `flutter_secure_storage`** under `biometric_password_<email>`. Emails are normalized (`trim().toLowerCase()`) at the store boundary; the old plaintext `biometricPassword` key is deleted from `StorageKeys`.
+2. **`SavedAccount` Freezed model** (`lib/features/auth/domain/saved_account.dart`) with a `key` getter (normalized email) used for identity across the store and the login page.
+3. **Login page rewrite** (`login_page.dart`): social buttons removed; "حفظ الحساب" (save account) + "تفعيل البصمة" (enable fingerprint) checkboxes gate post-login persistence (`_handlePostLoginSave` runs off the `authenticated` listener); a horizontal **Saved Accounts** section lists chips (avatar initial, fingerprint badge when enabled, remove × with confirm dialog) — tapping a chip fills the email field, selects the text, and focuses the password field; the fingerprint button authenticates via `LocalAuthentication` (`biometricOnly` + `stickyAuth`) then reads the secure password and calls `signIn`. Fingerprint UI appears only when `hasBiometric` for the filled email **and** `canCheckBiometrics`.
+4. **`flutter_secure_storage` pinned to `^11.0.0`** and **`compileSdk` bumped 36 → 37**: v11 is the only line whose Windows package uses `win32 ^6` (matching `geolocator ^14`); v11's AAR requires Android API 37. Platform package registrants regenerated for linux/macos/windows.
+5. **Social methods removed from `AuthStateNotifier`** (`signInWithGoogle/Apple/Facebook` getters + methods). `signOut` no longer wipes any biometric/saved-account storage — accounts survive logout by design.
+
+### Rationale
+
+- Passwords must never touch SharedPreferences (Constitution §10 / secure-storage discipline); the secure storage holds only the password, the prefs list holds only metadata.
+- Keystore-backed biometric auth is the correct primitive; the previous flow conflated "remember the password" with "authenticate by fingerprint" and had no biometric-only enforcement.
+- Removing dead social buttons eliminates misleading UI until real OAuth providers exist; phone/password + guest remain the supported entries.
+- Accounts surviving sign-out is what makes the saved-account section useful (fast re-login), so `signOut` intentionally no longer clears storage.
+
+### Consequences
+
+- Existing plaintext `biometric_*` prefs from older builds are simply never read again; the secure store starts empty and repopulates via the save-account flow.
+- `flutter analyze` 0 errors/warnings from touched files; suite grew to **567/567** (new `SavedAccount` + `SavedAccountsStore` tests; store tests exposed and fixed a real unmodifiable-list bug and email-normalization bug).
+- Debug APK built (`compileSdk 37`) + installed on DNP NX9; app launches clean (no FATAL, no ConfigValidator crash).
+- Leftover pre-existing lints in untouched modules are unchanged and out of scope for this session.
+
+---
+

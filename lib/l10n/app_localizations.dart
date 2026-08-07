@@ -7730,6 +7730,48 @@ abstract class AppLocalizations {
   /// **'Enter your password once to enable fingerprint login'**
   String get enterPasswordForFingerprint;
 
+  /// No description provided for @saveAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Save account'**
+  String get saveAccount;
+
+  /// No description provided for @savedAccounts.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved accounts'**
+  String get savedAccounts;
+
+  /// No description provided for @savedAccountsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap a saved account to sign in quickly'**
+  String get savedAccountsHint;
+
+  /// No description provided for @removeAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove account'**
+  String get removeAccount;
+
+  /// No description provided for @removeSavedAccountConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove {email}? Fingerprint login for this account will also be disabled.'**
+  String removeSavedAccountConfirm(Object email);
+
+  /// No description provided for @accountSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Account saved'**
+  String get accountSaved;
+
+  /// No description provided for @accountRemoved.
+  ///
+  /// In en, this message translates to:
+  /// **'Account removed'**
+  String get accountRemoved;
+
   /// No description provided for @selectAccountType.
   ///
   /// In en, this message translates to:

@@ -4020,6 +4020,29 @@ class AppLocalizationsEn extends AppLocalizations {
       'Enter your password once to enable fingerprint login';
 
   @override
+  String get saveAccount => 'Save account';
+
+  @override
+  String get savedAccounts => 'Saved accounts';
+
+  @override
+  String get savedAccountsHint => 'Tap a saved account to sign in quickly';
+
+  @override
+  String get removeAccount => 'Remove account';
+
+  @override
+  String removeSavedAccountConfirm(Object email) {
+    return 'Remove $email? Fingerprint login for this account will also be disabled.';
+  }
+
+  @override
+  String get accountSaved => 'Account saved';
+
+  @override
+  String get accountRemoved => 'Account removed';
+
+  @override
   String get selectAccountType => 'Choose your account type';
 
   @override

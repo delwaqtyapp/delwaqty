@@ -1,6 +1,6 @@
 # ROADMAP.md — Delwaqty Development Roadmap
 
-> **Last updated:** 2026-08-06
+> **Last updated:** 2026-08-07
 > **Authority:** PROJECT_CONSTITUTION.md §15 (v2.0)
 
 ---
@@ -55,6 +55,7 @@
 | Order Tracking | ✅ Real (4 methods) |
 | Product Inventory | ✅ Real (9 methods, stock + reservation) |
 | Account Verification | ✅ Code + live DB (migrations 020+021 applied; user_type/verification_status + admin approve/reject); email confirmation enabled + deep-link `site_url`/`uri_allow_list` configured; on-device E2E pending |
+| Login UX (fingerprint + saved accounts) | ✅ Fingerprint login fixed (biometric permissions, Keystore-backed password via flutter_secure_storage v11), saved-accounts section with quick re-login, social login removed, save-account checkbox wired end-to-end |
 | **Mocks remaining in codepath** | **0** |
 
 ## Next Steps (Constitution v2.0 §15)

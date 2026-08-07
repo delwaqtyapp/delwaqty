@@ -29,6 +29,7 @@ mixin _$UserModel {
   String? get avatarUrl => throw _privateConstructorUsedError;
   String get language => throw _privateConstructorUsedError;
   bool get isOnboarded => throw _privateConstructorUsedError;
+  bool get isBiometricEnabled => throw _privateConstructorUsedError;
   String get role => throw _privateConstructorUsedError;
   UserType get userType => throw _privateConstructorUsedError;
   VerificationStatus get verificationStatus =>
@@ -62,6 +63,7 @@ abstract class $UserModelCopyWith<$Res> {
     String? avatarUrl,
     String language,
     bool isOnboarded,
+    bool isBiometricEnabled,
     String role,
     UserType userType,
     VerificationStatus verificationStatus,
@@ -95,6 +97,7 @@ class _$UserModelCopyWithImpl<$Res, $Val extends UserModel>
     Object? avatarUrl = freezed,
     Object? language = null,
     Object? isOnboarded = null,
+    Object? isBiometricEnabled = null,
     Object? role = null,
     Object? userType = null,
     Object? verificationStatus = null,
@@ -136,6 +139,10 @@ class _$UserModelCopyWithImpl<$Res, $Val extends UserModel>
             isOnboarded: null == isOnboarded
                 ? _value.isOnboarded
                 : isOnboarded // ignore: cast_nullable_to_non_nullable
+                      as bool,
+            isBiometricEnabled: null == isBiometricEnabled
+                ? _value.isBiometricEnabled
+                : isBiometricEnabled // ignore: cast_nullable_to_non_nullable
                       as bool,
             role: null == role
                 ? _value.role
@@ -189,6 +196,7 @@ abstract class _$$UserModelImplCopyWith<$Res>
     String? avatarUrl,
     String language,
     bool isOnboarded,
+    bool isBiometricEnabled,
     String role,
     UserType userType,
     VerificationStatus verificationStatus,
@@ -221,6 +229,7 @@ class __$$UserModelImplCopyWithImpl<$Res>
     Object? avatarUrl = freezed,
     Object? language = null,
     Object? isOnboarded = null,
+    Object? isBiometricEnabled = null,
     Object? role = null,
     Object? userType = null,
     Object? verificationStatus = null,
@@ -262,6 +271,10 @@ class __$$UserModelImplCopyWithImpl<$Res>
         isOnboarded: null == isOnboarded
             ? _value.isOnboarded
             : isOnboarded // ignore: cast_nullable_to_non_nullable
+                  as bool,
+        isBiometricEnabled: null == isBiometricEnabled
+            ? _value.isBiometricEnabled
+            : isBiometricEnabled // ignore: cast_nullable_to_non_nullable
                   as bool,
         role: null == role
             ? _value.role
@@ -308,6 +321,7 @@ class _$UserModelImpl extends _UserModel {
     this.avatarUrl,
     this.language = 'en',
     this.isOnboarded = false,
+    this.isBiometricEnabled = false,
     this.role = 'customer',
     this.userType = UserType.customer,
     this.verificationStatus = VerificationStatus.pending,
@@ -340,6 +354,9 @@ class _$UserModelImpl extends _UserModel {
   final bool isOnboarded;
   @override
   @JsonKey()
+  final bool isBiometricEnabled;
+  @override
+  @JsonKey()
   final String role;
   @override
   @JsonKey()
@@ -358,7 +375,7 @@ class _$UserModelImpl extends _UserModel {
 
   @override
   String toString() {
-    return 'UserModel(id: $id, email: $email, fullName: $fullName, username: $username, phone: $phone, avatarUrl: $avatarUrl, language: $language, isOnboarded: $isOnboarded, role: $role, userType: $userType, verificationStatus: $verificationStatus, idCardUrl: $idCardUrl, profilePhotoUrl: $profilePhotoUrl, createdAt: $createdAt, updatedAt: $updatedAt)';
+    return 'UserModel(id: $id, email: $email, fullName: $fullName, username: $username, phone: $phone, avatarUrl: $avatarUrl, language: $language, isOnboarded: $isOnboarded, isBiometricEnabled: $isBiometricEnabled, role: $role, userType: $userType, verificationStatus: $verificationStatus, idCardUrl: $idCardUrl, profilePhotoUrl: $profilePhotoUrl, createdAt: $createdAt, updatedAt: $updatedAt)';
   }
 
   @override
@@ -379,6 +396,8 @@ class _$UserModelImpl extends _UserModel {
                 other.language == language) &&
             (identical(other.isOnboarded, isOnboarded) ||
                 other.isOnboarded == isOnboarded) &&
+            (identical(other.isBiometricEnabled, isBiometricEnabled) ||
+                other.isBiometricEnabled == isBiometricEnabled) &&
             (identical(other.role, role) || other.role == role) &&
             (identical(other.userType, userType) ||
                 other.userType == userType) &&
@@ -406,6 +425,7 @@ class _$UserModelImpl extends _UserModel {
     avatarUrl,
     language,
     isOnboarded,
+    isBiometricEnabled,
     role,
     userType,
     verificationStatus,
@@ -439,6 +459,7 @@ abstract class _UserModel extends UserModel {
     final String? avatarUrl,
     final String language,
     final bool isOnboarded,
+    final bool isBiometricEnabled,
     final String role,
     final UserType userType,
     final VerificationStatus verificationStatus,
@@ -468,6 +489,8 @@ abstract class _UserModel extends UserModel {
   String get language;
   @override
   bool get isOnboarded;
+  @override
+  bool get isBiometricEnabled;
   @override
   String get role;
   @override

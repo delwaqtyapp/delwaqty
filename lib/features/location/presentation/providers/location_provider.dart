@@ -367,82 +367,111 @@ class UserLocationNotifier extends AsyncNotifier<UserLocation?> {
       final components = first['address_components'] as List<dynamic>?;
       if (components == null || components.isEmpty) return null;
 
-      String? named;
-      String? streetNumber;
-      String? street;
-      String? area;
-      String? city;
-      String? region;
-      String? country;
-
-      for (final raw in components) {
-        final component = raw as Map<String, dynamic>;
-        final name = component['long_name'] as String?;
-        final types =
-            (component['types'] as List<dynamic>?)
-                ?.map((e) => e.toString())
-                .toList() ??
-            <String>[];
-        if (name == null || name.trim().isEmpty) continue;
-
-        if (_typesContain(types, const [
-          'establishment',
-          'point_of_interest',
-          'premise',
-        ])) {
-          named ??= name;
-        } else if (types.contains('street_number')) {
-          streetNumber ??= name;
-        } else if (types.contains('route')) {
-          street ??= name;
-        } else if (_typesContain(types, const [
-          'neighborhood',
-          'sublocality_level_1',
-          'sublocality_level_2',
-          'sublocality_level_3',
-          'administrative_area_level_2',
-          'administrative_area_level_3',
-        ])) {
-          area ??= name;
-        } else if (_typesContain(types, const ['locality', 'postal_town'])) {
-          city ??= name;
-        } else if (_typesContain(types, const [
-          'administrative_area_level_1',
-        ])) {
-          region ??= name;
-        } else if (types.contains('country')) {
-          country ??= name;
-        }
-      }
-
-      final streetPart = <String>[
-        if (streetNumber != null && streetNumber.trim().isNotEmpty)
-          streetNumber,
-        if (street != null && street.trim().isNotEmpty) street,
-      ].join(' ');
-
-      final separator = language == 'ar' ? '،' : ',';
-      final parts = <String>[
-        if (named != null && named.trim().isNotEmpty) named,
-        if (streetPart.isNotEmpty) streetPart,
-        if (area != null && area != streetPart && area != named) area,
-        if (city != null && city != area) city,
-        if (region != null && region != city) region,
-        if (country != null && country != region) country,
-      ];
-      final unique = <String>[];
-      for (final part in parts) {
-        if (!unique.contains(part)) unique.add(part);
-      }
-
-      return (
-        address: unique.join('$separator '),
-        hasNamed: named != null,
-      );
+      return composeGoogleAddress(components, language);
     } catch (e) {
       logger.d('Google structured geocoding error: $e');
       return null;
     }
+  }
+
+  @visibleForTesting
+  static ({String address, bool hasNamed})? composeGoogleAddress(
+    List<dynamic> rawComponents,
+    String language,
+  ) {
+    if (rawComponents.isEmpty) return null;
+
+    const hierarchyRank = <String, int>{
+      'administrative_area_level_2': 0,
+      'administrative_area_level_3': 1,
+      'sublocality_level_3': 2,
+      'sublocality_level_2': 3,
+      'sublocality_level_1': 4,
+      'neighborhood': 5,
+    };
+
+    String? named;
+    String? streetNumber;
+    String? street;
+    final hierarchy = <MapEntry<int, String>>[];
+    String? city;
+    String? region;
+    String? country;
+
+    for (final raw in rawComponents) {
+      final component = raw as Map<String, dynamic>;
+      final name = component['long_name'] as String?;
+      final types =
+          (component['types'] as List<dynamic>?)
+              ?.map((e) => e.toString())
+              .toList() ??
+          <String>[];
+      if (name == null || name.trim().isEmpty) continue;
+
+      if (_typesContain(types, const [
+        'establishment',
+        'point_of_interest',
+        'premise',
+      ])) {
+        named ??= name;
+      } else if (types.contains('street_number')) {
+        streetNumber ??= name;
+      } else if (types.contains('route')) {
+        street ??= name;
+      } else if (_typesContain(types, const ['locality', 'postal_town'])) {
+        city ??= name;
+      } else if (_typesContain(types, const [
+        'administrative_area_level_1',
+      ])) {
+        region ??= name;
+      } else if (types.contains('country')) {
+        country ??= name;
+      } else {
+        for (final entry in hierarchyRank.entries) {
+          if (types.contains(entry.key)) {
+            hierarchy.add(MapEntry(entry.value, name));
+            break;
+          }
+        }
+      }
+    }
+
+    hierarchy.sort((a, b) => a.key.compareTo(b.key));
+    final hierarchyNames = <String>[];
+    for (final entry in hierarchy) {
+      if (!hierarchyNames.contains(entry.value)) {
+        hierarchyNames.add(entry.value);
+      }
+    }
+    final hierarchyPart = hierarchyNames.isEmpty
+        ? null
+        : hierarchyNames.join(' - ');
+
+    final streetPart = <String>[
+      if (streetNumber != null && streetNumber.trim().isNotEmpty)
+        streetNumber,
+      if (street != null && street.trim().isNotEmpty) street,
+    ].join(' ');
+
+    final parts = <String>[
+      if (named != null && named.trim().isNotEmpty) named,
+      if (streetPart.isNotEmpty) streetPart,
+      if (hierarchyPart != null && hierarchyPart.isNotEmpty) hierarchyPart,
+      if (city != null && city.trim().isNotEmpty) city,
+      if (region != null && region.trim().isNotEmpty) region,
+      if (country != null && country.trim().isNotEmpty) country,
+    ];
+    final unique = <String>[];
+    for (final part in parts) {
+      if (!unique.contains(part)) unique.add(part);
+    }
+    if (unique.isEmpty) return null;
+
+    final separator = language == 'ar' ? '،' : ',';
+    return (
+      address: unique.join('$separator '),
+      hasNamed: named != null,
+    );
   }
 
   Future<({String address, bool hasNamed})?> _nominatimStructuredAddress(
@@ -466,63 +495,79 @@ class UserLocationNotifier extends AsyncNotifier<UserLocation?> {
       final address = data['address'] as Map<String, dynamic>?;
       if (address == null) return null;
 
-      const namedKeys = [
-        'amenity',
-        'shop',
-        'tourism',
-        'leisure',
-        'office',
-        'craft',
-        'building',
-        'man_made',
-        'house_name',
-      ];
-      String? named;
-      for (final key in namedKeys) {
-        final value = address[key] as String?;
-        if (value != null &&
-            value.trim().isNotEmpty &&
-            !RegExp(r'\d').hasMatch(value)) {
-          named = value;
-          break;
-        }
-      }
-
-      final road = address['road'] as String?;
-      final area =
-          address['neighbourhood'] as String? ??
-          address['suburb'] as String? ??
-          address['quarter'] as String? ??
-          address['residential'] as String? ??
-          address['city_district'] as String?;
-      final city =
-          address['city'] as String? ??
-          address['town'] as String? ??
-          address['village'] as String? ??
-          address['hamlet'] as String? ??
-          address['municipality'] as String?;
-      final region =
-          address['state'] as String? ??
-          address['region'] as String? ??
-          address['county'] as String?;
-      final country = address['country'] as String?;
-
-      final parts = <String>[
-        if (named != null) named,
-        if (road != null) road,
-        if (area != null && area != road) area,
-        if (city != null && city != area) city,
-        if (region != null && region != city) region,
-        if (country != null && country != region) country,
-      ];
-
-      if (parts.isEmpty) return null;
-
-      return (address: parts.join(language == 'ar' ? '، ' : ', '), hasNamed: named != null);
+      return composeNominatimAddress(address, language);
     } catch (e) {
       logger.d('Nominatim structured geocoding error: $e');
       return null;
     }
+  }
+
+  @visibleForTesting
+  static ({String address, bool hasNamed})? composeNominatimAddress(
+    Map<String, dynamic> address,
+    String language,
+  ) {
+    if (address.isEmpty) return null;
+
+    const namedKeys = [
+      'amenity',
+      'shop',
+      'tourism',
+      'leisure',
+      'office',
+      'craft',
+      'building',
+      'man_made',
+      'house_name',
+    ];
+    String? named;
+    for (final key in namedKeys) {
+      final value = address[key] as String?;
+      if (value != null &&
+          value.trim().isNotEmpty &&
+          !RegExp(r'\d').hasMatch(value)) {
+        named = value;
+        break;
+      }
+    }
+
+    final road = address['road'] as String?;
+
+    final hierarchy = <String>[];
+    void add(String? value) {
+      if (value == null || value.trim().isEmpty) return;
+      if (!hierarchy.contains(value)) hierarchy.add(value);
+    }
+
+    add(address['county']);
+    add(address['municipality']);
+    add(address['city']);
+    add(address['town']);
+    add(address['village']);
+    add(address['hamlet']);
+    add(address['city_district']);
+    add(address['suburb']);
+    add(address['quarter']);
+    add(address['neighbourhood']);
+    add(address['residential']);
+    final hierarchyPart = hierarchy.isEmpty ? null : hierarchy.join(' - ');
+
+    final region = address['state'] as String? ?? address['region'] as String?;
+    final country = address['country'] as String?;
+
+    final parts = <String>[
+      if (named != null) named,
+      if (road != null) road,
+      if (hierarchyPart != null) hierarchyPart,
+      if (region != null) region,
+      if (country != null) country,
+    ];
+    if (parts.isEmpty) return null;
+
+    return (
+      address: parts.join(language == 'ar' ? '، ' : ', '),
+      hasNamed: named != null,
+    );
   }
 
   Future<({String address, bool hasNamed})?> _photonStructuredAddress(
@@ -681,7 +726,7 @@ class UserLocationNotifier extends AsyncNotifier<UserLocation?> {
     return null;
   }
 
-  bool _typesContain(List<String> types, List<String> wanted) =>
+  static bool _typesContain(List<String> types, List<String> wanted) =>
       types.any(wanted.contains);
 
   String _cleanAddress(String input, String language) {

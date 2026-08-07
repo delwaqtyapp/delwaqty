@@ -7,7 +7,9 @@ import 'package:local_auth/local_auth.dart';
 import 'package:delwaqty/core/extensions/context_extensions.dart';
 import 'package:delwaqty/core/theme/app_colors.dart';
 import 'package:delwaqty/core/utils/validators.dart';
+import 'package:delwaqty/data/datasources/local/biometric_auth_store.dart';
 import 'package:delwaqty/data/datasources/local/saved_accounts_store.dart';
+import 'package:delwaqty/domain/entities/user.dart';
 import 'package:delwaqty/features/auth/domain/auth_state.dart';
 import 'package:delwaqty/features/auth/domain/saved_account.dart';
 import 'package:delwaqty/features/auth/presentation/auth_provider.dart';
@@ -33,6 +35,7 @@ class _LoginPageState extends ConsumerState<LoginPage>
   List<SavedAccount> _savedAccounts = const [];
   bool _pendingSaveAccount = false;
   bool _pendingEnableBiometric = false;
+  bool _postLoginHandled = false;
   final LocalAuthentication _localAuth = LocalAuthentication();
   late final AnimationController _shakeController;
   late final Animation<double> _shakeAnimation;
@@ -86,6 +89,7 @@ class _LoginPageState extends ConsumerState<LoginPage>
       _shakeController.forward(from: 0);
       return;
     }
+    _postLoginHandled = false;
     _pendingSaveAccount = _rememberMe || _enableBiometric;
     _pendingEnableBiometric = _enableBiometric;
     ref.read(authStateProvider.notifier).signIn(
@@ -124,6 +128,77 @@ class _LoginPageState extends ConsumerState<LoginPage>
     } catch (_) {}
   }
 
+  Future<void> _handlePostLoginNavigation(
+    User user, {
+    required bool skipEnrollmentPrompt,
+  }) async {
+    if (_biometricAvailable &&
+        !user.isBiometricEnabled &&
+        !skipEnrollmentPrompt) {
+      await _offerBiometricEnrollment(user);
+    }
+    if (mounted) context.go('/home');
+  }
+
+  Future<void> _offerBiometricEnrollment(User user) async {
+    final l10n = AppLocalizations.of(context);
+    final messenger = ScaffoldMessenger.of(context);
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Text(l10n.enableBiometricPromptTitle),
+        content: Text(l10n.enableBiometricPromptMessage),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text(l10n.enableBiometricLater),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: Text(l10n.enableBiometricConfirm),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) return;
+    try {
+      final didAuth = await _localAuth.authenticate(
+        localizedReason: l10n.biometricReason,
+        options: const AuthenticationOptions(
+          stickyAuth: true,
+          biometricOnly: true,
+        ),
+      );
+      if (!didAuth || !mounted) return;
+      await ref.read(biometricAuthStoreProvider).saveCredentials(
+        userId: user.id,
+        email: user.email,
+        password: _passwordController.text,
+      );
+      await ref
+          .read(authStateProvider.notifier)
+          .updateBiometricEnabled(enabled: true);
+      if (mounted) {
+        messenger.showSnackBar(
+          SnackBar(
+            content: Text(l10n.fingerprintEnabled),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    } on PlatformException {
+      if (mounted) {
+        messenger.showSnackBar(
+          SnackBar(
+            content: Text(l10n.biometricEnableFailed),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    }
+  }
+
   Future<void> _authenticateWithBiometric({String? forEmail}) async {
     final l10n = AppLocalizations.of(context);
     final store = ref.read(savedAccountsStoreProvider);
@@ -154,6 +229,7 @@ class _LoginPageState extends ConsumerState<LoginPage>
       );
       if (!didAuth || !mounted) return;
       _emailController.text = email;
+      _postLoginHandled = false;
       ref.read(authStateProvider.notifier).signIn(
             email: email,
             password: password,
@@ -261,12 +337,19 @@ class _LoginPageState extends ConsumerState<LoginPage>
 
     ref.listen<AuthState>(authStateProvider, (prev, next) {
       next.whenOrNull(
-        authenticated: (_) {
+        authenticated: (user) {
+          if (_postLoginHandled) return;
+          _postLoginHandled = true;
+          final skipEnrollmentPrompt = _pendingEnableBiometric;
           _handlePostLoginSave();
-          context.go('/home');
+          _handlePostLoginNavigation(
+            user,
+            skipEnrollmentPrompt: skipEnrollmentPrompt,
+          );
         },
         guest: () => context.go('/home'),
         error: (msg) {
+          _postLoginHandled = false;
           _pendingSaveAccount = false;
           _pendingEnableBiometric = false;
           context.showAppSnackBar(msg);

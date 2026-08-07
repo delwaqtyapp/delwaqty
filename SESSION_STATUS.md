@@ -1,10 +1,33 @@
 # SESSION_STATUS.md
 
-> **Last updated:** 2026-08-08 Session 21s (Precise localized location + fingerprint auto-login — Sprint 61)
+> **Last updated:** 2026-08-08 Session 22 (Real biometric login (DB-backed) + village-centric Arabic geocoding — Sprint 61)
 
 ---
 
-## Current Task — PRECISE LOCALIZED LOCATION + FINGERPRINT AUTO-LOGIN (Session 21s)
+## Current Task — REAL BIOMETRIC LOGIN (DB-BACKED) + VILLAGE-CENTRIC ARABIC GEOCODING (Session 22)
+
+User requests: (1) refine Arabic reverse geocoding so villages/tourist areas show the hierarchical Markaz→village chain (e.g. "مركز السويس - قرية الزعفرانة") instead of a flat string, staying localized on language switch; (2) replace the fingerprint "auto-detect" with a real DB-linked biometric system: `users.is_biometric_enabled`, enable-after-password-login prompt, per-user encrypted credentials, and biometric auto-login at app start. Both implemented, tested, built, and installed on DNP NX9.
+
+| Area | Change |
+|------|--------|
+| **Geocoding — Google chain** | Static `@visibleForTesting composeGoogleAddress` (in `location_provider.dart`): `administrative_area_level_2 → level_3 → sublocality_level_3 → level_2 → level_1 → neighborhood` joined by `' - '` (Arabic `'، '`, English `', '`), dedup across + within the chain |
+| **Geocoding — Nominatim chain** | Static `composeNominatimAddress`: county, municipality, city, town, village, hamlet, city_district, suburb, quarter, neighbourhood, residential; named-place keys exempt when they contain digits; region = state/region; country deduped; `_typesContain` made static |
+| **Geocoding — tests** | 11 new tests in `location_provider_test.dart` (Google AR chain `Zafarana offices، مركز السويس - قرية الزعفرانة، محافظة السويس، مصر`, EN chain, cross-field dedup, within-chain collapse, street number+route, empty→null, hasNamed false; Nominatim county+village, city+suburb, named-place, dedup, empty→null) — all 29 location tests pass |
+| **Migration `022_user_biometric_enabled.sql`** | `ALTER TABLE users ADD COLUMN IF NOT EXISTS is_biometric_enabled BOOLEAN NOT NULL DEFAULT false;` |
+| **Model** | `@Default(false) bool isBiometricEnabled` on `User`/`UserModel`; `fromSupabase` maps `is_biometric_enabled` (missing → false); `toSupabaseMap`/`toUpdateMap` export it; Freezed/json regenerated |
+| **Backend chain** | `AuthRepository.updateBiometricEnabled(userId, enabled)` → `AuthRepositoryImpl` via `_profileDataSource.updateProfile` → `updateBiometricEnabledUseCase` + provider → `AuthStateNotifier.updateBiometricEnabled` (re-fetches user, re-applies `_resolveAuthenticated`) |
+| **Secure store** | New `lib/data/datasources/local/biometric_auth_store.dart`: per-user JSON credentials in `flutter_secure_storage` under `auth_biometric_<userId>` + active-user marker `auth_biometric_active_user`; corrupt payload → null; `saveCredentials`/`credentialsFor`/`activeCredentials`/`clearActive` |
+| **Enrollment prompt** | `login_page.dart`: after successful password login, when biometrics available and not yet enabled → AlertDialog "هل ترغب في تفعيل الدخول بالبصمة للمرة القادمة؟"; confirm → local authenticate (biometricOnly + stickyAuth) → save credentials + `updateBiometricEnabled(true)` + `fingerprintEnabled` snackbar; `PlatformException` → `biometricEnableFailed`; suppressed after a biometric auto-login. New l10n keys en+ar: `enableBiometricPromptTitle/Message/Confirm/Later`, `biometricEnableFailed` |
+| **Startup auto-login** | `splash_page.dart` `_navigate()` async: when not authenticated → `_tryBiometricAutoLogin()` reads active credentials, local biometric prompt, then `signIn(email, password)`; `AuthError`/`AuthUnauthenticated`/failure → `clearActive()`; `PlatformException` → `/login` |
+| **Tests** | New `biometric_auth_store_test.dart` (8 tests, `FlutterSecureStorage.setMockInitialValues`); `user_model_test.dart` updated for the new field. Full suite **599/599** (was 577 → +22 net) |
+| **Quality gates** | `flutter analyze` 0 errors / 0 warnings from touched files · `flutter test` 599/599 · debug APK built + installed on DNP NX9 · app launches clean (session restored, header `Zafarana offices، عتاقة، محافظة السويس، مصر`, logcat clean) |
+| **Release signing note** | `android/keystore/release.jks` exists but `KEYSTORE_PASSWORD` env is missing → `flutter build apk --release` fails (`KeytoolException: keystore password was incorrect`). Per pre-approved fallback, the **debug APK** was installed (works 100% for testing). A signed release build needs the keystore password from the user |
+
+> **REMAINING (blockers, not code):** (1) DNP NX9's biometric sensor reports state 4 (bad) → a real scan throws `PlatformException`; pre-scan logic (store, enable chain, auto-login gating) is unit-tested but the success gesture needs a healthy device. (2) Release signing requires the user to supply `KEYSTORE_PASSWORD` (the keystore file exists). (3) Village-chain end-to-end needs a Google Geocoding call at a real open-sky village coordinate on-device (app-restricted key can't be exercised from shell). (4) The migration `022_user_biometric_enabled.sql` is **not yet applied live** to Supabase — apply when convenient (it is additive/idempotent; the app already tolerates a missing column via `fromSupabase` fallback).
+
+---
+
+## Previous Task — PRECISE LOCALIZED LOCATION + FINGERPRINT AUTO-LOGIN (Session 21s)
 
 User request (Arabic): "الموقع مش دقيق... عايز الموقع بشكل دقيق وبالعربي مع اللغة العربية وانجليزي مع اللغة الانجليزية... والبصمة: بدون اختيار الحساب واختيار التسجيل بالبصمة البرنامج يفهم الحساب المسجل ليه البصمة على الداتا بيز والباسورد الخاص به ويسجل تلقائي" — make the location precise and localized (Arabic with Arabic UI, English with English UI), and make the fingerprint button auto-detect the saved biometric account + its stored password and log in without selecting the account first. Fixed, tested, built, and installed on DNP NX9.
 

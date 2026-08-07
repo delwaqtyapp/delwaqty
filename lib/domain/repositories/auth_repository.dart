@@ -28,6 +28,10 @@ abstract class AuthRepository {
   Future<void> signOut();
   Future<void> resetPassword({required String email});
   Future<void> deleteAccount();
+  Future<void> updateBiometricEnabled({
+    required String userId,
+    required bool enabled,
+  });
   Future<AuthResult?> getCurrentSession();
   Future<void> refreshSession();
   Stream<AuthEvent> get onAuthStateChange;

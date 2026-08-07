@@ -1293,3 +1293,38 @@ Two user-reported bugs remained after ADR-042. (1) The home-location header show
 - Fingerprint button now works standalone: no saved biometric account â†’ informative `noBiometricAccountSaved` snackbar; account found â†’ auto sign-in; device lacking enrolled prints â†’ `biometricNotEnrolled` message.
 - `flutter analyze` 0 errors / 0 warnings from touched files; suite grew to **577/577** (3 new `biometricAccount()` store tests); debug APK rebuilt + installed on DNP NX9.
 - **On-device blocker:** DNP NX9's biometric sensor reports state 4 (bad) despite 4 enrolled fingerprints, so a real scan always throws `PlatformException`; the auto-detection + password retrieval path is unit-tested, but the success gesture requires a healthy device.
+
+---
+
+## ADR-044: Database-Backed Biometric Login + Hierarchical Village Geocoding
+
+**Date:** Session 22 (Sprint 61)
+**Status:** Accepted
+**Deciders:** Lead Software Architect
+
+### Context
+
+Two gaps surfaced after ADR-043. (1) The Arabic home-location chip flattened Google/Nominatim components into a fixed column set, so a village/tourist area like Zafarana rendered without its Markaz (dministrative_area_level_2) and village locality — the user wanted the administrative **hierarchy chain** (e.g. `???? ?????? - ???? ?????????`) so the location reads naturally in Arabic. (2) The fingerprint auto-login from ADR-043 was still an "auto-detect" heuristic over SavedAccountsStore; there was no durable, per-user, database-backed biometric flag, no enrollment prompt, and no startup auto-login. The product expectation was a **real biometric system**: users.is_biometric_enabled, enable-after-password-login prompt, per-user encrypted credentials, and biometric auto-login at app start.
+
+### Decision
+
+1. **Hierarchy-chain geocoding** (location_provider.dart): extract static @visibleForTesting composeGoogleAddress (chain dministrative_area_level_2 ? level_3 ? sublocality_level_3 ? level_2 ? level_1 ? neighborhood, joined by ' - '; Arabic separator '? ', English ', '; dedup across and within the chain) and composeNominatimAddress (county, municipality, city, town, village, hamlet, city_district, suburb, quarter, neighbourhood, residential; named-place keys exempt when they contain digits; region = state/region; country deduped).
+2. **DB-backed biometric flag**: migration  22_user_biometric_enabled.sql adds is_biometric_enabled BOOLEAN NOT NULL DEFAULT false to users; User/UserModel carry @Default(false) bool isBiometricEnabled mapped in romSupabase (missing ? false) and exported by 	oSupabaseMap/	oUpdateMap.
+3. **Enable path**: AuthRepository.updateBiometricEnabled(userId, enabled) ? updateProfile ? updateBiometricEnabledUseCase ? AuthStateNotifier.updateBiometricEnabled (re-fetches the user, re-applies _resolveAuthenticated).
+4. **Per-user credential store**: new BiometricAuthStore keeps BiometricCredentials{email, password} JSON in lutter_secure_storage under uth_biometric_<userId> plus an uth_biometric_active_user marker; corrupt payloads decode to null. The DB flag is informational only — credentials live exclusively in secure storage.
+5. **Enrollment prompt** (login_page.dart): after a successful password login, if biometrics are available and the user has not enabled them, an AlertDialog offers enrollment (Arabic: `?? ???? ?? ????? ?????? ??????? ????? ????????`); confirm runs a local biometric prompt then persists credentials + sets the DB flag; suppressed after a biometric auto-login.
+6. **Startup auto-login** (splash_page.dart): when the session is not authenticated, _tryBiometricAutoLogin() reads the active credentials, prompts for the local biometric, then signs in with email + stored password. AuthError/AuthUnauthenticated/general failures clear the active marker; PlatformException falls through to the login page.
+
+### Rationale
+
+- A single chained component string (rather than fixed columns) lets the same formatter render a village's full administrative lineage and collapse duplicates — closer to how Egyptians describe locations.
+- A real DB column turns "biometric enabled" into user state visible server-side (and to future multi-device sync), while secure storage keeps the secret material off the DB by design.
+- Persisting the password in the Keystore-backed secure storage is the only way to auto-sign-in without a second password entry; the DB flag is intentionally not the credential holder.
+- Gating auto-login behind an explicit enrollment dialog matches the earlier "enable via checkbox on login" UX but is now durable and reversible per user.
+
+### Consequences
+
+- Arabic village addresses render with the Markaz?village chain when Google provides the components; the device test coordinate (building interior) still yields premise-only components, so the chip text there is unchanged — hierarchy output appears at open-sky village coordinates (verified by unit tests).
+- Login now persists credentials only when the user opts in; the active-user marker lets startup auto-login know exactly whose credentials to use, without the ADR-043 "first account with hasBiometric" heuristic.
+- Full suite grew to **599/599** (+8 store tests, +11 geocoding tests, +3 model delta); lutter analyze 0 errors / 0 warnings from touched files.
+- **On-device blockers**: DNP NX9's sensor reports state 4 (bad), so the real scan path throws PlatformException (pre-scan logic unit-tested); and the release APK cannot be signed until the user provides KEYSTORE_PASSWORD (debug signing used for the tested install).

@@ -3,8 +3,13 @@ import 'dart:math' as math;
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:local_auth/local_auth.dart';
+import 'package:delwaqty/data/datasources/local/biometric_auth_store.dart';
+import 'package:delwaqty/features/auth/domain/auth_state.dart';
+import 'package:delwaqty/features/auth/presentation/auth_provider.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 
 class SplashPage extends ConsumerStatefulWidget {
@@ -66,10 +71,44 @@ class _SplashPageState extends ConsumerState<SplashPage>
     _navTimer = Timer(const Duration(milliseconds: 2000), _navigate);
   }
 
-  void _navigate() {
+  void _navigate() async {
     if (!mounted || _navigated) return;
     _navigated = true;
+    final authState = ref.read(authStateProvider);
+    if (authState is! AuthAuthenticated) {
+      await _tryBiometricAutoLogin();
+    }
+    if (!mounted) return;
     context.go('/login');
+  }
+
+  Future<void> _tryBiometricAutoLogin() async {
+    final store = ref.read(biometricAuthStoreProvider);
+    final credentials = await store.activeCredentials();
+    if (credentials == null || !mounted) return;
+    final l10n = AppLocalizations.of(context);
+    try {
+      final didAuth = await LocalAuthentication().authenticate(
+        localizedReason: l10n.biometricReason,
+        options: const AuthenticationOptions(
+          stickyAuth: true,
+          biometricOnly: true,
+        ),
+      );
+      if (!didAuth || !mounted) return;
+      await ref.read(authStateProvider.notifier).signIn(
+            email: credentials.email,
+            password: credentials.password,
+          );
+      final next = ref.read(authStateProvider);
+      if (next is AuthError || next is AuthUnauthenticated) {
+        await store.clearActive();
+      }
+    } on PlatformException {
+      // Scan cancelled or failed on-device; fall through to the login page.
+    } catch (_) {
+      await store.clearActive();
+    }
   }
 
   @override

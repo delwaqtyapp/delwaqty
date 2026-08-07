@@ -274,6 +274,22 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
+  Future<void> updateBiometricEnabled({
+    required String userId,
+    required bool enabled,
+  }) async {
+    try {
+      await _profileDataSource.updateProfile(
+        userId: userId,
+        data: {'is_biometric_enabled': enabled},
+      );
+    } catch (e) {
+      _logger.e('Update biometric flag error', e);
+      throw ServerException(message: e.toString());
+    }
+  }
+
+  @override
   Future<AuthResult?> getCurrentSession() async {
     final session = _dataSource.currentSession;
     if (session == null) return null;

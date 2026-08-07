@@ -98,6 +98,27 @@ void main() {
         expect(model.profilePhotoUrl, 'https://example.com/photo.jpg');
       });
 
+      test('maps is_biometric_enabled from Supabase JSON', () {
+        final supabaseJson = <String, dynamic>{
+          'id': 'user-123',
+          'email': 'test@example.com',
+          'is_biometric_enabled': true,
+          'created_at': testDateIso,
+        };
+        final model = UserModel.fromSupabase(supabaseJson);
+        expect(model.isBiometricEnabled, isTrue);
+      });
+
+      test('defaults is_biometric_enabled to false when missing', () {
+        final supabaseJson = <String, dynamic>{
+          'id': 'user-123',
+          'email': 'test@example.com',
+          'created_at': testDateIso,
+        };
+        final model = UserModel.fromSupabase(supabaseJson);
+        expect(model.isBiometricEnabled, isFalse);
+      });
+
       test('defaults customer verification status to approved', () {
         final supabaseJson = <String, dynamic>{
           'id': 'user-123',
@@ -173,6 +194,7 @@ void main() {
         expect(json['avatar_url'], 'https://example.com/avatar.jpg');
         expect(json['user_type'], 'provider');
         expect(json['verification_status'], 'pending');
+        expect(json['is_biometric_enabled'], isFalse);
         expect(json['id_card_url'], 'https://example.com/id.jpg');
         expect(json['profile_photo_url'], 'https://example.com/photo.jpg');
         expect(json.containsKey('created_at'), isFalse);
@@ -192,6 +214,7 @@ void main() {
         expect(entity.avatarUrl, model.avatarUrl);
         expect(entity.language, model.language);
         expect(entity.isOnboarded, model.isOnboarded);
+        expect(entity.isBiometricEnabled, model.isBiometricEnabled);
         expect(entity.userType, model.userType);
         expect(entity.verificationStatus, model.verificationStatus);
         expect(entity.idCardUrl, model.idCardUrl);

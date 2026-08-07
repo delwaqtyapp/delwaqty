@@ -16,6 +16,7 @@ _$UserModelImpl _$$UserModelImplFromJson(Map<String, dynamic> json) =>
       avatarUrl: json['avatarUrl'] as String?,
       language: json['language'] as String? ?? 'en',
       isOnboarded: json['isOnboarded'] as bool? ?? false,
+      isBiometricEnabled: json['isBiometricEnabled'] as bool? ?? false,
       role: json['role'] as String? ?? 'customer',
       userType:
           $enumDecodeNullable(_$UserTypeEnumMap, json['userType']) ??
@@ -44,6 +45,7 @@ Map<String, dynamic> _$$UserModelImplToJson(_$UserModelImpl instance) =>
       'avatarUrl': instance.avatarUrl,
       'language': instance.language,
       'isOnboarded': instance.isOnboarded,
+      'isBiometricEnabled': instance.isBiometricEnabled,
       'role': instance.role,
       'userType': _$UserTypeEnumMap[instance.userType]!,
       'verificationStatus':

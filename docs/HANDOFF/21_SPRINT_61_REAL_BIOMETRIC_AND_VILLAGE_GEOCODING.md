@@ -41,6 +41,10 @@
 - **Release signing**: `KEYSTORE_PASSWORD` env is required to sign a release APK (the keystore file exists). Debug signing is the tested fallback.
 - **Village-chain end-to-end** needs a Google Geocoding call at a real open-sky village coordinate on-device (the app-restricted key cannot be exercised from the shell).
 
+## Follow-up: Migration 022 applied live (2026-08-08)
+
+`ALTER TABLE users ADD COLUMN IF NOT EXISTS is_biometric_enabled BOOLEAN NOT NULL DEFAULT false;` was executed against `bttnlkmwhorjamzemwda` through the Supabase Management API using the user-supplied PAT. Verified in `information_schema.columns`: `is_biometric_enabled boolean NOT NULL default=false`. The PAT should be revoked after use per project policy.
+
 ## Files touched
 
 - `lib/features/location/presentation/providers/location_provider.dart` (+ tests `location_provider_test.dart`)

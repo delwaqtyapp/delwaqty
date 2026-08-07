@@ -3990,6 +3990,18 @@ class AppLocalizationsAr extends AppLocalizations {
       'أدخل كلمة المرور مرة واحدة لتفعيل تسجيل الدخول بالبصمة';
 
   @override
+  String get enterEmailForFingerprint =>
+      'أدخل بريدك الإلكتروني أولاً لاستخدام البصمة';
+
+  @override
+  String get noBiometricAccountSaved =>
+      'لا يوجد حساب محفوظ مفعّل له البصمة. سجّل الدخول وفعّل البصمة من الإعدادات.';
+
+  @override
+  String get biometricNotEnrolled =>
+      'لا توجد بصمة مسجّلة على هذا الجهاز. أضف بصمة من إعدادات الجهاز لاستخدام تسجيل الدخول بالبصمة.';
+
+  @override
   String get saveAccount => 'حفظ الحساب';
 
   @override

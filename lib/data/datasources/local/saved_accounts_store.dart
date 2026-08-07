@@ -96,6 +96,14 @@ class SavedAccountsStore {
     return _secureStorage.read(key: _biometricKey(email));
   }
 
+  Future<SavedAccount?> biometricAccount() async {
+    final accounts = await loadAccounts();
+    for (final account in accounts) {
+      if (account.hasBiometric) return account;
+    }
+    return null;
+  }
+
   String _biometricKey(String email) =>
       '$_biometricKeyPrefix${email.trim().toLowerCase()}';
 

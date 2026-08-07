@@ -38,12 +38,6 @@ class _LoginPageState extends ConsumerState<LoginPage>
   late final Animation<double> _shakeAnimation;
   late final AnimationController _fadeController;
 
-  bool get _biometricEnabledForEmail {
-    final email = _emailController.text.trim().toLowerCase();
-    if (email.isEmpty) return false;
-    return _savedAccounts.any((a) => a.key == email && a.hasBiometric);
-  }
-
   @override
   void initState() {
     super.initState();
@@ -92,7 +86,7 @@ class _LoginPageState extends ConsumerState<LoginPage>
       _shakeController.forward(from: 0);
       return;
     }
-    _pendingSaveAccount = _rememberMe;
+    _pendingSaveAccount = _rememberMe || _enableBiometric;
     _pendingEnableBiometric = _enableBiometric;
     ref.read(authStateProvider.notifier).signIn(
           email: _emailController.text.trim(),
@@ -131,36 +125,104 @@ class _LoginPageState extends ConsumerState<LoginPage>
   }
 
   Future<void> _authenticateWithBiometric({String? forEmail}) async {
-    final email = forEmail ?? _emailController.text.trim();
-    if (email.isEmpty) return;
+    final l10n = AppLocalizations.of(context);
+    final store = ref.read(savedAccountsStoreProvider);
+    var email = forEmail ?? _emailController.text.trim();
+    if (email.isEmpty) {
+      final biometricAccount = await store.biometricAccount();
+      if (biometricAccount == null) {
+        if (mounted) {
+          context.showAppSnackBar(l10n.noBiometricAccountSaved);
+        }
+        return;
+      }
+      email = biometricAccount.email;
+      if (mounted) _emailController.text = email;
+    }
+    final password = await store.biometricPassword(email);
+    if (password == null || password.isEmpty) {
+      if (mounted) await _promptEnableFingerprint(email);
+      return;
+    }
     try {
       final didAuth = await _localAuth.authenticate(
-        localizedReason: AppLocalizations.of(context).biometricReason,
+        localizedReason: l10n.biometricReason,
         options: const AuthenticationOptions(
           stickyAuth: true,
           biometricOnly: true,
         ),
       );
       if (!didAuth || !mounted) return;
-      final password =
-          await ref.read(savedAccountsStoreProvider).biometricPassword(email);
-      if (password != null && password.isNotEmpty) {
-        ref.read(authStateProvider.notifier).signIn(
-              email: email,
-              password: password,
-            );
-      } else if (mounted) {
-        context.showAppSnackBar(
-          AppLocalizations.of(context).enterPasswordForFingerprint,
-        );
-      }
-    } on PlatformException catch (_) {
-      if (mounted) {
-        context.showAppSnackBar(
-          AppLocalizations.of(context).biometricFailed,
-        );
-      }
+      _emailController.text = email;
+      ref.read(authStateProvider.notifier).signIn(
+            email: email,
+            password: password,
+          );
+    } on PlatformException catch (e) {
+      if (!mounted) return;
+      final message = e.code == 'NotEnrolled'
+          ? l10n.biometricNotEnrolled
+          : l10n.biometricFailed;
+      context.showAppSnackBar(message);
     }
+  }
+
+  Future<void> _promptEnableFingerprint(String email) async {
+    final l10n = AppLocalizations.of(context);
+    final passwordController = TextEditingController();
+    final formKey = GlobalKey<FormState>();
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Text(l10n.enableFingerprint),
+        content: Form(
+          key: formKey,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(l10n.enterPasswordForFingerprint),
+              const SizedBox(height: 12),
+              TextFormField(
+                controller: passwordController,
+                obscureText: true,
+                decoration: InputDecoration(
+                  labelText: l10n.password,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                validator: (v) => AppValidators.password(v),
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text(l10n.cancel),
+          ),
+          FilledButton(
+            onPressed: () {
+              if (formKey.currentState!.validate()) {
+                Navigator.pop(context, true);
+              }
+            },
+            child: Text(l10n.confirm),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) return;
+    setState(() {
+      _emailController.text = email;
+      _passwordController.text = passwordController.text;
+      _rememberMe = true;
+      _enableBiometric = true;
+    });
+    passwordController.dispose();
+    _onLogin();
   }
 
   Future<void> _confirmRemoveAccount(SavedAccount account) async {
@@ -540,8 +602,12 @@ class _LoginPageState extends ConsumerState<LoginPage>
                   height: 20,
                   child: Checkbox(
                     value: _enableBiometric,
-                    onChanged: (v) =>
-                        setState(() => _enableBiometric = v ?? false),
+                    onChanged: (v) {
+                      setState(() {
+                        _enableBiometric = v ?? false;
+                        if (_enableBiometric) _rememberMe = true;
+                      });
+                    },
                     activeColor: AppColors.brandPurple,
                     side: BorderSide(
                       color: const Color(0xFF1A1035).withValues(alpha: 0.2),
@@ -571,7 +637,7 @@ class _LoginPageState extends ConsumerState<LoginPage>
             isLoading: isLoading,
             label: l10n.signIn,
           ),
-          if (_biometricAvailable && _biometricEnabledForEmail) ...[
+          if (_biometricAvailable) ...[
             const SizedBox(height: 16),
             _BiometricButton(
               onPressed: _authenticateWithBiometric,

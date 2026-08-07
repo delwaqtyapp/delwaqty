@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:delwaqty/core/extensions/context_extensions.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 import 'package:delwaqty/features/settings/presentation/pages/privacy/change_password_page.dart';
+import 'package:delwaqty/features/settings/presentation/pages/privacy/fingerprint_login_page.dart';
 import 'package:delwaqty/features/settings/presentation/pages/privacy/two_factor_auth_page.dart';
 import 'package:delwaqty/features/settings/presentation/pages/privacy/login_activity_page.dart';
 import 'package:delwaqty/features/settings/presentation/pages/privacy/data_privacy_page.dart';
@@ -45,6 +46,19 @@ class PrivacySecurityPage extends StatelessWidget {
               onTap: () => Navigator.push(
                 context,
                 MaterialPageRoute(builder: (_) => const TwoFactorAuthPage()),
+              ),
+            ),
+            const Divider(height: 1),
+            ListTile(
+              leading: const Icon(Icons.fingerprint_rounded),
+              title: Text(l10n.fingerprintLogin),
+              subtitle: Text(l10n.fingerprintLoginDescription),
+              trailing: const Icon(Icons.chevron_right_rounded),
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const FingerprintLoginPage(),
+                ),
               ),
             ),
             const Divider(height: 1),

@@ -7730,6 +7730,24 @@ abstract class AppLocalizations {
   /// **'Enter your password once to enable fingerprint login'**
   String get enterPasswordForFingerprint;
 
+  /// No description provided for @enterEmailForFingerprint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your email first to use fingerprint login'**
+  String get enterEmailForFingerprint;
+
+  /// No description provided for @noBiometricAccountSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'No saved account has fingerprint login enabled. Sign in and enable it in Settings.'**
+  String get noBiometricAccountSaved;
+
+  /// No description provided for @biometricNotEnrolled.
+  ///
+  /// In en, this message translates to:
+  /// **'No fingerprint is enrolled on this device. Add one in device Settings to use fingerprint login.'**
+  String get biometricNotEnrolled;
+
   /// No description provided for @saveAccount.
   ///
   /// In en, this message translates to:

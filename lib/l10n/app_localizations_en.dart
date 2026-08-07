@@ -4020,6 +4020,18 @@ class AppLocalizationsEn extends AppLocalizations {
       'Enter your password once to enable fingerprint login';
 
   @override
+  String get enterEmailForFingerprint =>
+      'Enter your email first to use fingerprint login';
+
+  @override
+  String get noBiometricAccountSaved =>
+      'No saved account has fingerprint login enabled. Sign in and enable it in Settings.';
+
+  @override
+  String get biometricNotEnrolled =>
+      'No fingerprint is enrolled on this device. Add one in device Settings to use fingerprint login.';
+
+  @override
   String get saveAccount => 'Save account';
 
   @override

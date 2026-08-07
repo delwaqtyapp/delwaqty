@@ -1,6 +1,26 @@
 # SESSION_STATUS.md
 
-> **Last updated:** 2026-08-07 Session 21r (Location: "0 m" accuracy bug fixed — Sprint 61)
+> **Last updated:** 2026-08-08 Session 21s (Precise localized location + fingerprint auto-login — Sprint 61)
+
+---
+
+## Current Task — PRECISE LOCALIZED LOCATION + FINGERPRINT AUTO-LOGIN (Session 21s)
+
+User request (Arabic): "الموقع مش دقيق... عايز الموقع بشكل دقيق وبالعربي مع اللغة العربية وانجليزي مع اللغة الانجليزية... والبصمة: بدون اختيار الحساب واختيار التسجيل بالبصمة البرنامج يفهم الحساب المسجل ليه البصمة على الداتا بيز والباسورد الخاص به ويسجل تلقائي" — make the location precise and localized (Arabic with Arabic UI, English with English UI), and make the fingerprint button auto-detect the saved biometric account + its stored password and log in without selecting the account first. Fixed, tested, built, and installed on DNP NX9.
+
+| Area | Change |
+|------|--------|
+| **Root cause — generic address** | `_cleanArabicAddress` stripped **all digits** (destroying street numbers); geocoders called without a language; the geocode cache was language-agnostic so switching languages kept the old-language string |
+| **Fix — precision** | Google now parses `street_number` + `route` → `"number route"` street part (digits preserved); `_cleanAddress(input, language)` no longer strips digits, only normalizes separators (`،` ar / `,` en) |
+| **Fix — localization** | Google sends `language=$language`, Photon `lang=$language`, Nominatim `accept-language=$language` via new `_appLanguage()` (reads `localeProvider`); cache key now `lat,lng@language` (`location_geocode_cache_v2`, TTL 24 h, cap 200) |
+| **Fix — reactive language switch** | `UserLocationNotifier.build()` now `ref.watch(localeProvider)` — toggling the UI language re-runs geocoding in the new language immediately (reproduced the bug on device: Arabic string persisted after switching to English; fixed) |
+| **Root cause — fingerprint** | `_authenticateWithBiometric` required a non-empty email and never looked up which saved account has biometric enabled |
+| **Fix — fingerprint auto-login** | New `SavedAccountsStore.biometricAccount()` (first account with `hasBiometric`); `_authenticateWithBiometric` now auto-detects that account + its Keystore password and signs in when no email is selected; falls back to enable-dialog only when no stored password. New l10n keys `noBiometricAccountSaved` + `biometricNotEnrolled` (en + ar) |
+| **On-device verification** | Home header now shows **`Zafarana offices، عتاقة، محافظة السويس، مصر`** (governorate added; the in-building coordinate only yields premise-level components — no street number exists at that point from any provider). English regression confirmed and fixed via locale watch |
+| **Tests** | 3 new `biometricAccount()` tests in `saved_accounts_store_test.dart`. Suite **577/577 passing** (was 575) |
+| **Quality gates** | `flutter analyze` 0 errors / 0 warnings from touched files (repo-wide info lints pre-existing) · `flutter test` 577/577 · debug APK built (`--dart-define-from-file=.env.dev`) + installed on DNP NX9 · app launches clean |
+
+> **REMAINING (device blockers, not code):** (1) DNP NX9's biometric sensor reports state 4 (bad) despite 4 enrolled fingerprints → a real fingerprint scan always throws `PlatformException`; the auto-detection + password-retrieval logic is unit-tested but the success gesture needs a healthy device. (2) At the test coordinate Google returns premise-only components (building interior) — a street number appears only at street-level coordinates (data limitation).
 
 ---
 

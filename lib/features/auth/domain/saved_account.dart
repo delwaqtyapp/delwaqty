@@ -8,7 +8,6 @@ class SavedAccount with _$SavedAccount {
   const factory SavedAccount({
     @Default('') String email,
     @Default('') String displayName,
-    @Default(false) bool hasBiometric,
   }) = _SavedAccount;
 
   const SavedAccount._();

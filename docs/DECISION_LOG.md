@@ -1304,27 +1304,61 @@ Two user-reported bugs remained after ADR-042. (1) The home-location header show
 
 ### Context
 
-Two gaps surfaced after ADR-043. (1) The Arabic home-location chip flattened Google/Nominatim components into a fixed column set, so a village/tourist area like Zafarana rendered without its Markaz (dministrative_area_level_2) and village locality — the user wanted the administrative **hierarchy chain** (e.g. `???? ?????? - ???? ?????????`) so the location reads naturally in Arabic. (2) The fingerprint auto-login from ADR-043 was still an "auto-detect" heuristic over SavedAccountsStore; there was no durable, per-user, database-backed biometric flag, no enrollment prompt, and no startup auto-login. The product expectation was a **real biometric system**: users.is_biometric_enabled, enable-after-password-login prompt, per-user encrypted credentials, and biometric auto-login at app start.
+Two gaps surfaced after ADR-043. (1) The Arabic home-location chip flattened Google/Nominatim components into a fixed column set, so a village/tourist area like Zafarana rendered without its Markaz (dministrative_area_level_2) and village locality ï¿½ the user wanted the administrative **hierarchy chain** (e.g. `???? ?????? - ???? ?????????`) so the location reads naturally in Arabic. (2) The fingerprint auto-login from ADR-043 was still an "auto-detect" heuristic over SavedAccountsStore; there was no durable, per-user, database-backed biometric flag, no enrollment prompt, and no startup auto-login. The product expectation was a **real biometric system**: users.is_biometric_enabled, enable-after-password-login prompt, per-user encrypted credentials, and biometric auto-login at app start.
 
 ### Decision
 
 1. **Hierarchy-chain geocoding** (location_provider.dart): extract static @visibleForTesting composeGoogleAddress (chain dministrative_area_level_2 ? level_3 ? sublocality_level_3 ? level_2 ? level_1 ? neighborhood, joined by ' - '; Arabic separator '? ', English ', '; dedup across and within the chain) and composeNominatimAddress (county, municipality, city, town, village, hamlet, city_district, suburb, quarter, neighbourhood, residential; named-place keys exempt when they contain digits; region = state/region; country deduped).
 2. **DB-backed biometric flag**: migration  22_user_biometric_enabled.sql adds is_biometric_enabled BOOLEAN NOT NULL DEFAULT false to users; User/UserModel carry @Default(false) bool isBiometricEnabled mapped in romSupabase (missing ? false) and exported by 	oSupabaseMap/	oUpdateMap.
 3. **Enable path**: AuthRepository.updateBiometricEnabled(userId, enabled) ? updateProfile ? updateBiometricEnabledUseCase ? AuthStateNotifier.updateBiometricEnabled (re-fetches the user, re-applies _resolveAuthenticated).
-4. **Per-user credential store**: new BiometricAuthStore keeps BiometricCredentials{email, password} JSON in lutter_secure_storage under uth_biometric_<userId> plus an uth_biometric_active_user marker; corrupt payloads decode to null. The DB flag is informational only — credentials live exclusively in secure storage.
+4. **Per-user credential store**: new BiometricAuthStore keeps BiometricCredentials{email, password} JSON in lutter_secure_storage under uth_biometric_<userId> plus an uth_biometric_active_user marker; corrupt payloads decode to null. The DB flag is informational only ï¿½ credentials live exclusively in secure storage.
 5. **Enrollment prompt** (login_page.dart): after a successful password login, if biometrics are available and the user has not enabled them, an AlertDialog offers enrollment (Arabic: `?? ???? ?? ????? ?????? ??????? ????? ????????`); confirm runs a local biometric prompt then persists credentials + sets the DB flag; suppressed after a biometric auto-login.
 6. **Startup auto-login** (splash_page.dart): when the session is not authenticated, _tryBiometricAutoLogin() reads the active credentials, prompts for the local biometric, then signs in with email + stored password. AuthError/AuthUnauthenticated/general failures clear the active marker; PlatformException falls through to the login page.
 
 ### Rationale
 
-- A single chained component string (rather than fixed columns) lets the same formatter render a village's full administrative lineage and collapse duplicates — closer to how Egyptians describe locations.
+- A single chained component string (rather than fixed columns) lets the same formatter render a village's full administrative lineage and collapse duplicates ï¿½ closer to how Egyptians describe locations.
 - A real DB column turns "biometric enabled" into user state visible server-side (and to future multi-device sync), while secure storage keeps the secret material off the DB by design.
 - Persisting the password in the Keystore-backed secure storage is the only way to auto-sign-in without a second password entry; the DB flag is intentionally not the credential holder.
 - Gating auto-login behind an explicit enrollment dialog matches the earlier "enable via checkbox on login" UX but is now durable and reversible per user.
 
 ### Consequences
 
-- Arabic village addresses render with the Markaz?village chain when Google provides the components; the device test coordinate (building interior) still yields premise-only components, so the chip text there is unchanged — hierarchy output appears at open-sky village coordinates (verified by unit tests).
+- Arabic village addresses render with the Markaz?village chain when Google provides the components; the device test coordinate (building interior) still yields premise-only components, so the chip text there is unchanged ï¿½ hierarchy output appears at open-sky village coordinates (verified by unit tests).
 - Login now persists credentials only when the user opts in; the active-user marker lets startup auto-login know exactly whose credentials to use, without the ADR-043 "first account with hasBiometric" heuristic.
 - Full suite grew to **599/599** (+8 store tests, +11 geocoding tests, +3 model delta); lutter analyze 0 errors / 0 warnings from touched files.
 - **On-device blockers**: DNP NX9's sensor reports state 4 (bad), so the real scan path throws PlatformException (pre-scan logic unit-tested); and the release APK cannot be signed until the user provides KEYSTORE_PASSWORD (debug signing used for the tested install).
+
+---
+
+## ADR-045: Unify All Fingerprint Entry Points on the DB-Backed Biometric Store
+
+**Date:** Session 23 (Sprint 61 fix)
+**Status:** Accepted
+**Deciders:** Lead Software Architect
+
+### Context
+
+ADR-044 introduced the DB-backed biometric system: `users.is_biometric_enabled`, a per-user `BiometricAuthStore` (`auth_biometric_<userId>` + `auth_biometric_active_user`), the enable-after-password-login dialog, and startup auto-login. But the migration was incomplete: the login-page fingerprint button, the saved-account chip badges, and the Settings fingerprint toggle still read the **legacy** ADR-041/043 path (`SavedAccountsStore.biometric_password_<email>` + `SavedAccount.hasBiometric`). A user who enrolled via the new dialog (which wrote only to `BiometricAuthStore`) then tapped the login fingerprint button and got `noBiometricAccountSaved` â€” the button never auto-logged-in. The device fingerprint sensor is healthy again (`Fps state: 0`, 4 prints, successful auth events), so the split was now the sole cause of the reported bug.
+
+### Decision
+
+1. **Single source of truth = `BiometricAuthStore` + `users.is_biometric_enabled`.** Every fingerprint entry point reads/writes these two; the legacy `biometric_password_<email>` secure-storage keys and `SavedAccount.hasBiometric` are removed.
+2. **Login-page button** (`login_page.dart`): `_authenticateWithBiometric` reads `biometricAuthStoreProvider.activeCredentials()` (the single active user), prompts with the real sensor, fills the email/password fields, then calls `signIn`. The email-keyed password lookup and the `_promptEnableFingerprint` password re-entry dialog are deleted.
+3. **Legacy UI removed**: the `_enableBiometric` checkbox and the per-chip fingerprint badge on `_SavedAccountChip` are gone â€” enrollment happens only through the post-login dialog, and the new store holds exactly one active user (no per-account badges). `_BiometricButton` always shows the `fingerprintLogin` label.
+4. **Settings toggle** (`fingerprint_login_page.dart`): `_loadStatus` reads `user.isBiometricEnabled` (DB, the source of truth) instead of scanning accounts; toggle-on persists credentials via `saveCredentials(userId, ...)` then `updateBiometricEnabled(true)`; toggle-off runs `clearActive()` + `updateBiometricEnabled(false)`.
+5. **Model + store cleanup**: `SavedAccount` loses `hasBiometric` (Freezed/json regenerated); `SavedAccountsStore` returns to a pure SharedPreferences account-prefill store (no `FlutterSecureStorage`, no `setBiometric`/`biometricPassword`/`biometricAccount`).
+
+### Rationale
+
+- Two parallel biometric systems holding different data is exactly why enrollment succeeded while the login button reported "no account". A single store removes the divergence class entirely.
+- The new store is already keyed per-user with an active-user marker, so `activeCredentials()` answers "whose biometric session is this?" unambiguously â€” strictly better than the ADR-043 "first account with hasBiometric" heuristic.
+- The DB flag is the authoritative "enabled" state for UI (survives reinstall, visible server-side); secure storage holds only the secret material.
+- Removing the checkbox/chip badge simplifies the login surface to one enrollment prompt + one fingerprint button, matching the single-active-user model.
+
+### Consequences
+
+- The login-page fingerprint button now signs in the active biometric user automatically; the settings toggle and startup auto-login all read/write the same store and flag.
+- Users enrolled under the legacy pre-ADR-044 path must re-enroll once via the post-login dialog (their old `biometric_password_<email>` entries are no longer read) â€” acceptable for the pre-release stage, no migration code added.
+- `flutter analyze` 0 errors / 0 warnings (514 pre-existing info lints, baseline unchanged); full suite **594/594** (saved-account store/model tests trimmed to the non-biometric scope, settings page tests rewritten with mocked repositories); debug-verified on DNP NX9.
+- Docs updated: `SESSION_STATUS.md`, this log, and handoff `22_SPRINT_61_FINGERPRINT_UNIFICATION.md`.

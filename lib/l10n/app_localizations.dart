@@ -7748,6 +7748,36 @@ abstract class AppLocalizations {
   /// **'No fingerprint is enrolled on this device. Add one in device Settings to use fingerprint login.'**
   String get biometricNotEnrolled;
 
+  /// No description provided for @enableBiometricPromptTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Enable fingerprint login?'**
+  String get enableBiometricPromptTitle;
+
+  /// No description provided for @enableBiometricPromptMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Would you like to enable fingerprint login for next time?'**
+  String get enableBiometricPromptMessage;
+
+  /// No description provided for @enableBiometricConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Enable'**
+  String get enableBiometricConfirm;
+
+  /// No description provided for @enableBiometricLater.
+  ///
+  /// In en, this message translates to:
+  /// **'Not now'**
+  String get enableBiometricLater;
+
+  /// No description provided for @biometricEnableFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not enable fingerprint login. Please try again.'**
+  String get biometricEnableFailed;
+
   /// No description provided for @saveAccount.
   ///
   /// In en, this message translates to:

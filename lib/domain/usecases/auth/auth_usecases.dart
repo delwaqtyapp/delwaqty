@@ -175,3 +175,18 @@ class DeleteAccountUseCase {
 
   Future<void> call() => _repository.deleteAccount();
 }
+
+final updateBiometricEnabledUseCaseProvider =
+    Provider<UpdateBiometricEnabledUseCase>((ref) {
+  return UpdateBiometricEnabledUseCase(ref.watch(authRepositoryProvider));
+});
+
+class UpdateBiometricEnabledUseCase {
+  UpdateBiometricEnabledUseCase(this._repository);
+
+  final AuthRepository _repository;
+
+  Future<void> call({required String userId, required bool enabled}) {
+    return _repository.updateBiometricEnabled(userId: userId, enabled: enabled);
+  }
+}

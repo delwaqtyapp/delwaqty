@@ -4032,6 +4032,23 @@ class AppLocalizationsEn extends AppLocalizations {
       'No fingerprint is enrolled on this device. Add one in device Settings to use fingerprint login.';
 
   @override
+  String get enableBiometricPromptTitle => 'Enable fingerprint login?';
+
+  @override
+  String get enableBiometricPromptMessage =>
+      'Would you like to enable fingerprint login for next time?';
+
+  @override
+  String get enableBiometricConfirm => 'Enable';
+
+  @override
+  String get enableBiometricLater => 'Not now';
+
+  @override
+  String get biometricEnableFailed =>
+      'Could not enable fingerprint login. Please try again.';
+
+  @override
   String get saveAccount => 'Save account';
 
   @override

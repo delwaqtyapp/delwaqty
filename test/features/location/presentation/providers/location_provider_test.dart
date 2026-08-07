@@ -643,4 +643,194 @@ void main() {
       expect(result!.accuracyMeters, isNull);
     });
   });
+
+  group('composeGoogleAddress', () {
+    List<dynamic> component(String name, List<String> types) => [
+      {
+        'long_name': name,
+        'short_name': name,
+        'types': types,
+      },
+    ];
+
+    test('joins markaz and village hierarchy largest first in Arabic',
+        () async {
+      final components = <dynamic>[
+        ...component('Zafarana offices', ['premise']),
+        ...component('قرية الزعفرانة', ['sublocality_level_1']),
+        ...component('مركز السويس', ['administrative_area_level_2']),
+        ...component('محافظة السويس', ['administrative_area_level_1']),
+        ...component('مصر', ['country']),
+      ];
+
+      final result = UserLocationNotifier.composeGoogleAddress(
+        components,
+        'ar',
+      );
+
+      expect(result, isNotNull);
+      expect(
+        result!.address,
+        'Zafarana offices، مركز السويس - قرية الزعفرانة، محافظة السويس، مصر',
+      );
+      expect(result.hasNamed, isTrue);
+    });
+
+    test('keeps hierarchy chain and comma separators in English', () async {
+      final components = <dynamic>[
+        ...component('Suez Center', ['administrative_area_level_2']),
+        ...component('Zafarana Village', ['sublocality_level_1']),
+        ...component('Suez Governorate', ['administrative_area_level_1']),
+        ...component('Egypt', ['country']),
+      ];
+
+      final result = UserLocationNotifier.composeGoogleAddress(
+        components,
+        'en',
+      );
+
+      expect(result, isNotNull);
+      expect(
+        result!.address,
+        'Suez Center - Zafarana Village, Suez Governorate, Egypt',
+      );
+    });
+
+    test('deduplicates names that repeat across hierarchy levels', () async {
+      final components = <dynamic>[
+        ...component('قرية الزعفرانة', ['sublocality_level_1']),
+        ...component('السويس', ['administrative_area_level_2']),
+        ...component('السويس', ['locality']),
+        ...component('مصر', ['country']),
+      ];
+
+      final result = UserLocationNotifier.composeGoogleAddress(
+        components,
+        'ar',
+      );
+
+      expect(result, isNotNull);
+      expect(result!.address, 'السويس - قرية الزعفرانة، السويس، مصر');
+    });
+
+    test('collapses identical names repeated within the hierarchy chain',
+        () async {
+      final components = <dynamic>[
+        ...component('السويس', ['sublocality_level_1']),
+        ...component('السويس', ['administrative_area_level_2']),
+        ...component('مصر', ['country']),
+      ];
+
+      final result = UserLocationNotifier.composeGoogleAddress(
+        components,
+        'ar',
+      );
+
+      expect(result, isNotNull);
+      expect(result!.address, 'السويس، مصر');
+    });
+
+    test('includes street number and route', () async {
+      final components = <dynamic>[
+        ...component('Zafarana offices', ['premise']),
+        ...component('12', ['street_number']),
+        ...component('طريق السويس', ['route']),
+        ...component('عتاقة', ['sublocality_level_1']),
+        ...component('مصر', ['country']),
+      ];
+
+      final result = UserLocationNotifier.composeGoogleAddress(
+        components,
+        'ar',
+      );
+
+      expect(result, isNotNull);
+      expect(result!.address, 'Zafarana offices، 12 طريق السويس، عتاقة، مصر');
+    });
+
+    test('returns null for an empty component list', () async {
+      final result = UserLocationNotifier.composeGoogleAddress([], 'ar');
+      expect(result, isNull);
+    });
+
+    test('marks address without named place', () async {
+      final components = <dynamic>[
+        ...component('مصر', ['country']),
+      ];
+
+      final result = UserLocationNotifier.composeGoogleAddress(
+        components,
+        'ar',
+      );
+
+      expect(result, isNotNull);
+      expect(result!.hasNamed, isFalse);
+      expect(result.address, 'مصر');
+    });
+  });
+
+  group('composeNominatimAddress', () {
+    test('joins county (markaz) and village hierarchy largest first', () async {
+      final address = <String, dynamic>{
+        'county': 'مركز السويس',
+        'village': 'قرية الزعفرانة',
+        'state': 'محافظة السويس',
+        'country': 'مصر',
+      };
+
+      final result = UserLocationNotifier.composeNominatimAddress(address, 'ar');
+
+      expect(result, isNotNull);
+      expect(
+        result!.address,
+        'مركز السويس - قرية الزعفرانة، محافظة السويس، مصر',
+      );
+    });
+
+    test('joins city and suburb for urban addresses', () async {
+      final address = <String, dynamic>{
+        'city': 'القاهرة',
+        'suburb': 'مدينة نصر',
+        'country': 'مصر',
+      };
+
+      final result = UserLocationNotifier.composeNominatimAddress(address, 'ar');
+
+      expect(result, isNotNull);
+      expect(result!.address, 'القاهرة - مدينة نصر، مصر');
+    });
+
+    test('prepends a named place before the hierarchy chain', () async {
+      final address = <String, dynamic>{
+        'amenity': 'مستشفى السلام',
+        'road': 'شارع الجيش',
+        'city': 'القاهرة',
+        'country': 'مصر',
+      };
+
+      final result = UserLocationNotifier.composeNominatimAddress(address, 'ar');
+
+      expect(result, isNotNull);
+      expect(result!.address, 'مستشفى السلام، شارع الجيش، القاهرة، مصر');
+      expect(result.hasNamed, isTrue);
+    });
+
+    test('deduplicates county and city sharing the same name', () async {
+      final address = <String, dynamic>{
+        'county': 'السويس',
+        'city': 'السويس',
+        'country': 'مصر',
+      };
+
+      final result = UserLocationNotifier.composeNominatimAddress(address, 'ar');
+
+      expect(result, isNotNull);
+      expect(result!.address, 'السويس، مصر');
+    });
+
+    test('returns null for an empty address map', () async {
+      final result = UserLocationNotifier.composeNominatimAddress({}, 'ar');
+      expect(result, isNull);
+    });
+  });
 }

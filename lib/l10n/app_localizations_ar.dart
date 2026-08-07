@@ -4002,6 +4002,23 @@ class AppLocalizationsAr extends AppLocalizations {
       'لا توجد بصمة مسجّلة على هذا الجهاز. أضف بصمة من إعدادات الجهاز لاستخدام تسجيل الدخول بالبصمة.';
 
   @override
+  String get enableBiometricPromptTitle => 'تفعيل تسجيل الدخول بالبصمة؟';
+
+  @override
+  String get enableBiometricPromptMessage =>
+      'هل ترغب في تفعيل الدخول بالبصمة للمرة القادمة؟';
+
+  @override
+  String get enableBiometricConfirm => 'تفعيل';
+
+  @override
+  String get enableBiometricLater => 'ليس الآن';
+
+  @override
+  String get biometricEnableFailed =>
+      'تعذر تفعيل تسجيل الدخول بالبصمة. يرجى المحاولة مرة أخرى.';
+
+  @override
   String get saveAccount => 'حفظ الحساب';
 
   @override

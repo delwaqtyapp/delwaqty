@@ -212,6 +212,21 @@ class AuthStateNotifier extends Notifier<AuthState> {
     }
   }
 
+  Future<void> updateBiometricEnabled({required bool enabled}) async {
+    final current = state;
+    if (current is! AuthAuthenticated) return;
+    try {
+      await ref.read(updateBiometricEnabledUseCaseProvider).call(
+        userId: current.user.id,
+        enabled: enabled,
+      );
+      final user = await ref.read(getCurrentUserUseCaseProvider).call();
+      state = _resolveAuthenticated(user);
+    } catch (e) {
+      _logger.e('Failed to update biometric flag', e);
+    }
+  }
+
   void enterGuestMode() {
     state = const AuthState.guest();
   }

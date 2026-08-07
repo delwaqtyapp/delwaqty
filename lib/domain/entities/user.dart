@@ -16,6 +16,7 @@ class User with _$User {
     String? avatarUrl,
     @Default('en') String language,
     @Default(false) bool isOnboarded,
+    @Default(false) bool isBiometricEnabled,
     @Default('customer') String role,
     @Default(UserType.customer) UserType userType,
     @Default(VerificationStatus.pending) VerificationStatus verificationStatus,

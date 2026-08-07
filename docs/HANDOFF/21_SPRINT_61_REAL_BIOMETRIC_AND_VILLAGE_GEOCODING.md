@@ -45,6 +45,14 @@
 
 `ALTER TABLE users ADD COLUMN IF NOT EXISTS is_biometric_enabled BOOLEAN NOT NULL DEFAULT false;` was executed against `bttnlkmwhorjamzemwda` through the Supabase Management API using the user-supplied PAT. Verified in `information_schema.columns`: `is_biometric_enabled boolean NOT NULL default=false`. The PAT should be revoked after use per project policy.
 
+## Follow-up: Release APK signed + installed (2026-08-08)
+
+The `release.jks` signing password (unknown at build time) was recovered locally via `keytool -list`: the store matched the project's naming pattern, alias `delwaqty` (created 2026-07-22 during the sprint 40-44 "release hardening" milestone; cert SHA-256 `901f9dd15636eeb35edd741ae9eb3896eb94aac4cea8295a02baf9eb1e5b7583`). The password value is **deliberately not recorded in this repo** (held by the user).
+
+- `flutter build apk --release --dart-define-from-file=.env.dev` → **68.7 MB `app-release.apk`** signed with `CN=Delwaqty` (verified via apksigner).
+- Debug APK uninstalled, release installed on DNP NX9; app launches clean (MainActivity focused, full Home + session restored, **no FATAL** — the only FATAL logcat entries are from 08-06/08-07).
+- **Known pre-existing release-only log noise:** "Crashlytics build ID is missing" — `com.google.firebase.crashlytics` Gradle plugin is not applied in `android/app/build.gradle.kts`; the app degrades gracefully (`App running without Firebase`). Recommended follow-up: apply the plugin (requires the `com.google.gms.google-services` plugin too) when crash reporting is wanted. Not required for store publication.
+
 ## Files touched
 
 - `lib/features/location/presentation/providers/location_provider.dart` (+ tests `location_provider_test.dart`)

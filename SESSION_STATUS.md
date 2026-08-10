@@ -1,12 +1,35 @@
 # SESSION_STATUS.md
 
-> **Last updated:** 2026-08-10 Session 27 (Sprint 68 — Home UX restructure, scroll-aware nav, discovery tabs, admin category management)
+> **Last updated:** 2026-08-10 Session 28 (Sprint 69 — Production Notification System)
 
 ---
 
-## Current Task — SPRINT 68: HOME UX RESTRUCTURE (Session 27)
+## Current Task — SPRINT 69: PRODUCTION NOTIFICATION SYSTEM (Session 28)
 
-Restructure home screen with scroll-aware bottom navigation, compact DB-driven categories, combined discovery section with tabs, and admin dashboard category image management.
+Complete production-grade notification architecture: FCM lifecycle, persistent Supabase records, deep linking, idempotency, token cleanup on logout, reactive badge, enhanced Notification Center.
+
+### Sprint 69 (commit dc23cc0)
+| Area | Change |
+|------|--------|
+| **Notification entity** | Enhanced `AppNotification` with `idempotencyKey`, `readAt` fields. New `NotificationType` enum: system, order, payment, promotion, service, account, security, message + legacy info/warning/success/reminder (12 total) |
+| **NotificationPayload** | Centralized payload parser with `fromMap()`, `toMap()`, `resolveDeepLink()`. Maps entityType to deep link routes: order→/market/orders, merchant→/market/merchant, service→/service-booking, ride→/ride |
+| **DB migration 026** | Added `idempotency_key` (unique), `read_at`, `deep_link`, `image_url` to notifications. Enhanced `notification_tokens` with `device_id`, `app_version`, `is_active`, `last_seen_at`. New indexes for performance. RLS hardened. `get_unread_notification_count()` RPC. `deactivate_stale_tokens()` function |
+| **Token cleanup** | `PushNotificationService.deactivateTokensOnLogout()` called from `AuthStateNotifier.signOut()` before Supabase sign-out. Deactivates all user tokens, cancels heartbeat, resets state |
+| **Deep linking** | `_handleNotificationTap()` resolves `NotificationPayload` from FCM data, navigates via GoRouter. Cold-start: `getInitialMessage()` → resolve → navigate. Background: `onMessageOpenedApp` → resolve → navigate. Local notification tap: `onDidReceiveNotificationResponse` callback |
+| **Navigator key** | Exported `rootNavigatorKey` from `app_router.dart` for push notification service access |
+| **Badge reactivity** | New `unreadCountStreamProvider` with periodic refresh (1 min). `badgeStream()` now returns reactive stream. Fixed sidebar badge wiring |
+| **Android manifest** | Added `default_notification_channel_id` (delwaqty_notifications), `default_notification_icon` (@mipmap/ic_launcher), `default_notification_color` (#6C41C8) |
+| **Notification Center** | Date-grouped sections: اليوم / أمس / أقدم. Tap navigates to deepLink. Enhanced type icons/colors for all 12 notification types |
+| **Data source** | `_fromRow()` extracts `deep_link` from both row-level and JSONB `data`. `getUnreadCount()` uses RPC. `markAsRead()` sets `read_at`. Idempotency key lookup. Token deactivation methods |
+| **Admin push page** | Updated `_typeIcon()` switch for all 12 notification types |
+
+### Quality
+| Metric | Value |
+|--------|-------|
+| **Tests** | 594/594 passing |
+| **Analyzer** | 0 errors |
+| **APK** | Built + installed on DNP NX9 |
+| **Git** | Committed + pushed (dc23cc0) |
 
 ### Sprint 68 (commit 4cab1c9)
 | Area | Change |

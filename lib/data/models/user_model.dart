@@ -23,6 +23,8 @@ class UserModel with _$UserModel {
     @Default(VerificationStatus.pending) VerificationStatus verificationStatus,
     String? idCardUrl,
     String? profilePhotoUrl,
+    String? tradeLicenseUrl,
+    String? drivingLicenseUrl,
     required DateTime createdAt,
     DateTime? updatedAt,
   }) = _UserModel;
@@ -53,6 +55,8 @@ class UserModel with _$UserModel {
       ),
       idCardUrl: json['id_card_url'] as String?,
       profilePhotoUrl: json['profile_photo_url'] as String?,
+      tradeLicenseUrl: json['trade_license_url'] as String?,
+      drivingLicenseUrl: json['driving_license_url'] as String?,
       createdAt: DateTime.parse(json['created_at'] as String),
       updatedAt: json['updated_at'] != null
           ? DateTime.parse(json['updated_at'] as String)
@@ -84,6 +88,8 @@ class UserModel with _$UserModel {
     verificationStatus: verificationStatus,
     idCardUrl: idCardUrl,
     profilePhotoUrl: profilePhotoUrl,
+    tradeLicenseUrl: tradeLicenseUrl,
+    drivingLicenseUrl: drivingLicenseUrl,
     createdAt: createdAt,
     updatedAt: updatedAt,
   );
@@ -105,6 +111,8 @@ class UserModel with _$UserModel {
     if (avatarUrl != null) json['avatar_url'] = avatarUrl;
     if (idCardUrl != null) json['id_card_url'] = idCardUrl;
     if (profilePhotoUrl != null) json['profile_photo_url'] = profilePhotoUrl;
+    if (tradeLicenseUrl != null) json['trade_license_url'] = tradeLicenseUrl;
+    if (drivingLicenseUrl != null) json['driving_license_url'] = drivingLicenseUrl;
     return json;
   }
 
@@ -123,6 +131,8 @@ class UserModel with _$UserModel {
     if (avatarUrl != null) json['avatar_url'] = avatarUrl;
     if (idCardUrl != null) json['id_card_url'] = idCardUrl;
     if (profilePhotoUrl != null) json['profile_photo_url'] = profilePhotoUrl;
+    if (tradeLicenseUrl != null) json['trade_license_url'] = tradeLicenseUrl;
+    if (drivingLicenseUrl != null) json['driving_license_url'] = drivingLicenseUrl;
     return json;
   }
 

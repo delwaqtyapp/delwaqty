@@ -42,6 +42,10 @@ class SignUpUseCase {
     String? idCardFileName,
     Uint8List? profilePhotoBytes,
     String? profilePhotoFileName,
+    Uint8List? tradeLicenseBytes,
+    String? tradeLicenseFileName,
+    Uint8List? drivingLicenseBytes,
+    String? drivingLicenseFileName,
   }) {
     return _repository.signUpWithEmail(
       email: email,
@@ -52,6 +56,10 @@ class SignUpUseCase {
       idCardFileName: idCardFileName,
       profilePhotoBytes: profilePhotoBytes,
       profilePhotoFileName: profilePhotoFileName,
+      tradeLicenseBytes: tradeLicenseBytes,
+      tradeLicenseFileName: tradeLicenseFileName,
+      drivingLicenseBytes: drivingLicenseBytes,
+      drivingLicenseFileName: drivingLicenseFileName,
     );
   }
 }

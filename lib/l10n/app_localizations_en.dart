@@ -4181,22 +4181,38 @@ class AppLocalizationsEn extends AppLocalizations {
       'Order from stores, restaurants and services';
 
   @override
+  String get userTypeMerchant => 'Merchant';
+
+  @override
+  String get userTypeMerchantDesc => 'Sell your products on the platform';
+
+  @override
+  String get userTypeDriver => 'Delivery Driver';
+
+  @override
+  String get userTypeDriverDesc => 'Deliver orders to customers';
+
+  @override
   String get userTypeProvider => 'Service Provider';
 
   @override
   String get userTypeProviderDesc => 'Offer your services to customers';
 
   @override
-  String get userTypeDelivery => 'Delivery Driver';
-
-  @override
-  String get userTypeDeliveryDesc => 'Deliver orders to customers';
-
-  @override
   String get uploadIdCard => 'Upload National ID';
 
   @override
   String get uploadIdCardHint => 'A clear photo of your national ID';
+
+  @override
+  String get uploadTradeLicense => 'Upload Trade License';
+
+  @override
+  String get uploadTradeLicenseHint => 'A clear photo of your trade license';
+
+  @override
+  String get uploadDrivingLicenseHint =>
+      'A clear photo of your driving license';
 
   @override
   String get uploadProfilePhoto => 'Upload Personal Photo';

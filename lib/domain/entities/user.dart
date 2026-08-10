@@ -22,6 +22,8 @@ class User with _$User {
     @Default(VerificationStatus.pending) VerificationStatus verificationStatus,
     String? idCardUrl,
     String? profilePhotoUrl,
+    String? tradeLicenseUrl,
+    String? drivingLicenseUrl,
     required DateTime createdAt,
     DateTime? updatedAt,
   }) = _User;

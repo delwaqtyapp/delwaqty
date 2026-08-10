@@ -55,6 +55,10 @@ class AuthRepositoryImpl implements AuthRepository {
     String? idCardFileName,
     Uint8List? profilePhotoBytes,
     String? profilePhotoFileName,
+    Uint8List? tradeLicenseBytes,
+    String? tradeLicenseFileName,
+    Uint8List? drivingLicenseBytes,
+    String? drivingLicenseFileName,
   }) async {
     try {
       final response = await _dataSource.signUpWithEmail(
@@ -73,6 +77,10 @@ class AuthRepositoryImpl implements AuthRepository {
           idCardFileName: idCardFileName,
           profilePhotoBytes: profilePhotoBytes,
           profilePhotoFileName: profilePhotoFileName,
+          tradeLicenseBytes: tradeLicenseBytes,
+          tradeLicenseFileName: tradeLicenseFileName,
+          drivingLicenseBytes: drivingLicenseBytes,
+          drivingLicenseFileName: drivingLicenseFileName,
         );
       }
       return _mapAuthResponse(response);
@@ -94,9 +102,15 @@ class AuthRepositoryImpl implements AuthRepository {
     String? idCardFileName,
     Uint8List? profilePhotoBytes,
     String? profilePhotoFileName,
+    Uint8List? tradeLicenseBytes,
+    String? tradeLicenseFileName,
+    Uint8List? drivingLicenseBytes,
+    String? drivingLicenseFileName,
   }) async {
     String? idCardUrl;
     String? profilePhotoUrl;
+    String? tradeLicenseUrl;
+    String? drivingLicenseUrl;
 
     if (idCardBytes != null && idCardFileName != null) {
       idCardUrl = await _profileDataSource.uploadFile(
@@ -114,6 +128,22 @@ class AuthRepositoryImpl implements AuthRepository {
         fileName: profilePhotoFileName,
       );
     }
+    if (tradeLicenseBytes != null && tradeLicenseFileName != null) {
+      tradeLicenseUrl = await _profileDataSource.uploadFile(
+        userId: userId,
+        folder: 'trade_licenses',
+        bytes: tradeLicenseBytes,
+        fileName: tradeLicenseFileName,
+      );
+    }
+    if (drivingLicenseBytes != null && drivingLicenseFileName != null) {
+      drivingLicenseUrl = await _profileDataSource.uploadFile(
+        userId: userId,
+        folder: 'driving_licenses',
+        bytes: drivingLicenseBytes,
+        fileName: drivingLicenseFileName,
+      );
+    }
 
     final model = UserModel(
       id: userId,
@@ -128,6 +158,8 @@ class AuthRepositoryImpl implements AuthRepository {
           : VerificationStatus.approved,
       idCardUrl: idCardUrl,
       profilePhotoUrl: profilePhotoUrl,
+      tradeLicenseUrl: tradeLicenseUrl,
+      drivingLicenseUrl: drivingLicenseUrl,
       createdAt: DateTime.now(),
     );
     await _profileDataSource.upsertProfile(model);

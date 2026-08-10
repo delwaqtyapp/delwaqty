@@ -8036,6 +8036,30 @@ abstract class AppLocalizations {
   /// **'Order from stores, restaurants and services'**
   String get userTypeCustomerDesc;
 
+  /// No description provided for @userTypeMerchant.
+  ///
+  /// In en, this message translates to:
+  /// **'Merchant'**
+  String get userTypeMerchant;
+
+  /// No description provided for @userTypeMerchantDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Sell your products on the platform'**
+  String get userTypeMerchantDesc;
+
+  /// No description provided for @userTypeDriver.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivery Driver'**
+  String get userTypeDriver;
+
+  /// No description provided for @userTypeDriverDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Deliver orders to customers'**
+  String get userTypeDriverDesc;
+
   /// No description provided for @userTypeProvider.
   ///
   /// In en, this message translates to:
@@ -8048,18 +8072,6 @@ abstract class AppLocalizations {
   /// **'Offer your services to customers'**
   String get userTypeProviderDesc;
 
-  /// No description provided for @userTypeDelivery.
-  ///
-  /// In en, this message translates to:
-  /// **'Delivery Driver'**
-  String get userTypeDelivery;
-
-  /// No description provided for @userTypeDeliveryDesc.
-  ///
-  /// In en, this message translates to:
-  /// **'Deliver orders to customers'**
-  String get userTypeDeliveryDesc;
-
   /// No description provided for @uploadIdCard.
   ///
   /// In en, this message translates to:
@@ -8071,6 +8083,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'A clear photo of your national ID'**
   String get uploadIdCardHint;
+
+  /// No description provided for @uploadTradeLicense.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload Trade License'**
+  String get uploadTradeLicense;
+
+  /// No description provided for @uploadTradeLicenseHint.
+  ///
+  /// In en, this message translates to:
+  /// **'A clear photo of your trade license'**
+  String get uploadTradeLicenseHint;
+
+  /// No description provided for @uploadDrivingLicenseHint.
+  ///
+  /// In en, this message translates to:
+  /// **'A clear photo of your driving license'**
+  String get uploadDrivingLicenseHint;
 
   /// No description provided for @uploadProfilePhoto.
   ///

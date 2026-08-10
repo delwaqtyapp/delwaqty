@@ -36,6 +36,8 @@ mixin _$User {
       throw _privateConstructorUsedError;
   String? get idCardUrl => throw _privateConstructorUsedError;
   String? get profilePhotoUrl => throw _privateConstructorUsedError;
+  String? get tradeLicenseUrl => throw _privateConstructorUsedError;
+  String? get drivingLicenseUrl => throw _privateConstructorUsedError;
   DateTime get createdAt => throw _privateConstructorUsedError;
   DateTime? get updatedAt => throw _privateConstructorUsedError;
 
@@ -68,6 +70,8 @@ abstract class $UserCopyWith<$Res> {
     VerificationStatus verificationStatus,
     String? idCardUrl,
     String? profilePhotoUrl,
+    String? tradeLicenseUrl,
+    String? drivingLicenseUrl,
     DateTime createdAt,
     DateTime? updatedAt,
   });
@@ -102,6 +106,8 @@ class _$UserCopyWithImpl<$Res, $Val extends User>
     Object? verificationStatus = null,
     Object? idCardUrl = freezed,
     Object? profilePhotoUrl = freezed,
+    Object? tradeLicenseUrl = freezed,
+    Object? drivingLicenseUrl = freezed,
     Object? createdAt = null,
     Object? updatedAt = freezed,
   }) {
@@ -163,6 +169,14 @@ class _$UserCopyWithImpl<$Res, $Val extends User>
                 ? _value.profilePhotoUrl
                 : profilePhotoUrl // ignore: cast_nullable_to_non_nullable
                       as String?,
+            tradeLicenseUrl: freezed == tradeLicenseUrl
+                ? _value.tradeLicenseUrl
+                : tradeLicenseUrl // ignore: cast_nullable_to_non_nullable
+                      as String?,
+            drivingLicenseUrl: freezed == drivingLicenseUrl
+                ? _value.drivingLicenseUrl
+                : drivingLicenseUrl // ignore: cast_nullable_to_non_nullable
+                      as String?,
             createdAt: null == createdAt
                 ? _value.createdAt
                 : createdAt // ignore: cast_nullable_to_non_nullable
@@ -200,6 +214,8 @@ abstract class _$$UserImplCopyWith<$Res> implements $UserCopyWith<$Res> {
     VerificationStatus verificationStatus,
     String? idCardUrl,
     String? profilePhotoUrl,
+    String? tradeLicenseUrl,
+    String? drivingLicenseUrl,
     DateTime createdAt,
     DateTime? updatedAt,
   });
@@ -231,6 +247,8 @@ class __$$UserImplCopyWithImpl<$Res>
     Object? verificationStatus = null,
     Object? idCardUrl = freezed,
     Object? profilePhotoUrl = freezed,
+    Object? tradeLicenseUrl = freezed,
+    Object? drivingLicenseUrl = freezed,
     Object? createdAt = null,
     Object? updatedAt = freezed,
   }) {
@@ -292,6 +310,14 @@ class __$$UserImplCopyWithImpl<$Res>
             ? _value.profilePhotoUrl
             : profilePhotoUrl // ignore: cast_nullable_to_non_nullable
                   as String?,
+        tradeLicenseUrl: freezed == tradeLicenseUrl
+            ? _value.tradeLicenseUrl
+            : tradeLicenseUrl // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        drivingLicenseUrl: freezed == drivingLicenseUrl
+            ? _value.drivingLicenseUrl
+            : drivingLicenseUrl // ignore: cast_nullable_to_non_nullable
+                  as String?,
         createdAt: null == createdAt
             ? _value.createdAt
             : createdAt // ignore: cast_nullable_to_non_nullable
@@ -323,6 +349,8 @@ class _$UserImpl implements _User {
     this.verificationStatus = VerificationStatus.pending,
     this.idCardUrl,
     this.profilePhotoUrl,
+    this.tradeLicenseUrl,
+    this.drivingLicenseUrl,
     required this.createdAt,
     this.updatedAt,
   });
@@ -365,13 +393,17 @@ class _$UserImpl implements _User {
   @override
   final String? profilePhotoUrl;
   @override
+  final String? tradeLicenseUrl;
+  @override
+  final String? drivingLicenseUrl;
+  @override
   final DateTime createdAt;
   @override
   final DateTime? updatedAt;
 
   @override
   String toString() {
-    return 'User(id: $id, email: $email, fullName: $fullName, username: $username, phone: $phone, avatarUrl: $avatarUrl, language: $language, isOnboarded: $isOnboarded, isBiometricEnabled: $isBiometricEnabled, role: $role, userType: $userType, verificationStatus: $verificationStatus, idCardUrl: $idCardUrl, profilePhotoUrl: $profilePhotoUrl, createdAt: $createdAt, updatedAt: $updatedAt)';
+    return 'User(id: $id, email: $email, fullName: $fullName, username: $username, phone: $phone, avatarUrl: $avatarUrl, language: $language, isOnboarded: $isOnboarded, isBiometricEnabled: $isBiometricEnabled, role: $role, userType: $userType, verificationStatus: $verificationStatus, idCardUrl: $idCardUrl, profilePhotoUrl: $profilePhotoUrl, tradeLicenseUrl: $tradeLicenseUrl, drivingLicenseUrl: $drivingLicenseUrl, createdAt: $createdAt, updatedAt: $updatedAt)';
   }
 
   @override
@@ -403,6 +435,10 @@ class _$UserImpl implements _User {
                 other.idCardUrl == idCardUrl) &&
             (identical(other.profilePhotoUrl, profilePhotoUrl) ||
                 other.profilePhotoUrl == profilePhotoUrl) &&
+            (identical(other.tradeLicenseUrl, tradeLicenseUrl) ||
+                other.tradeLicenseUrl == tradeLicenseUrl) &&
+            (identical(other.drivingLicenseUrl, drivingLicenseUrl) ||
+                other.drivingLicenseUrl == drivingLicenseUrl) &&
             (identical(other.createdAt, createdAt) ||
                 other.createdAt == createdAt) &&
             (identical(other.updatedAt, updatedAt) ||
@@ -427,6 +463,8 @@ class _$UserImpl implements _User {
     verificationStatus,
     idCardUrl,
     profilePhotoUrl,
+    tradeLicenseUrl,
+    drivingLicenseUrl,
     createdAt,
     updatedAt,
   );
@@ -461,6 +499,8 @@ abstract class _User implements User {
     final VerificationStatus verificationStatus,
     final String? idCardUrl,
     final String? profilePhotoUrl,
+    final String? tradeLicenseUrl,
+    final String? drivingLicenseUrl,
     required final DateTime createdAt,
     final DateTime? updatedAt,
   }) = _$UserImpl;
@@ -495,6 +535,10 @@ abstract class _User implements User {
   String? get idCardUrl;
   @override
   String? get profilePhotoUrl;
+  @override
+  String? get tradeLicenseUrl;
+  @override
+  String? get drivingLicenseUrl;
   @override
   DateTime get createdAt;
   @override

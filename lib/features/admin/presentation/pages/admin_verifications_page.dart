@@ -255,7 +255,7 @@ class _VerificationCard extends StatelessWidget {
                   borderRadius: BorderRadius.circular(999),
                 ),
                 child: Text(
-                  isProvider ? l10n.userTypeProvider : l10n.userTypeDelivery,
+                  request.userType.code.toUpperCase(),
                   style: TextStyle(
                     color: typeColor,
                     fontSize: 12,

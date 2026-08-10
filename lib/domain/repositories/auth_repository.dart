@@ -18,6 +18,10 @@ abstract class AuthRepository {
     String? idCardFileName,
     Uint8List? profilePhotoBytes,
     String? profilePhotoFileName,
+    Uint8List? tradeLicenseBytes,
+    String? tradeLicenseFileName,
+    Uint8List? drivingLicenseBytes,
+    String? drivingLicenseFileName,
   });
   Future<void> signInWithPhone({required String phone});
   Future<AuthResult> verifyOTP({required String phone, required String otp});

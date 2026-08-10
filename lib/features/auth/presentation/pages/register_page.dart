@@ -36,6 +36,8 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
   UserType? _selectedRole;
   XFile? _idCardFile;
   XFile? _profilePhotoFile;
+  XFile? _tradeLicenseFile;
+  XFile? _drivingLicenseFile;
 
   @override
   void dispose() {
@@ -59,6 +61,14 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
         context.showAppSnackBar(AppLocalizations.of(context).documentsRequired);
         return;
       }
+      if (role.requiresTradeLicense && _tradeLicenseFile == null) {
+        context.showAppSnackBar(AppLocalizations.of(context).documentsRequired);
+        return;
+      }
+      if (role.requiresDrivingLicense && _drivingLicenseFile == null) {
+        context.showAppSnackBar(AppLocalizations.of(context).documentsRequired);
+        return;
+      }
       setState(() => _currentStep++);
       return;
     }
@@ -74,7 +84,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
     }
   }
 
-  Future<void> _pickDocument({required bool isIdCard}) async {
+  Future<void> _pickDocument({required String documentType}) async {
     final l10n = AppLocalizations.of(context);
     final source = await showModalBottomSheet<ImageSource>(
       context: context,
@@ -130,10 +140,19 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
     );
     if (file == null || !mounted) return;
     setState(() {
-      if (isIdCard) {
-        _idCardFile = file;
-      } else {
-        _profilePhotoFile = file;
+      switch (documentType) {
+        case 'idCard':
+          _idCardFile = file;
+          break;
+        case 'profilePhoto':
+          _profilePhotoFile = file;
+          break;
+        case 'tradeLicense':
+          _tradeLicenseFile = file;
+          break;
+        case 'drivingLicense':
+          _drivingLicenseFile = file;
+          break;
       }
     });
   }
@@ -144,6 +163,10 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
     String? idCardFileName;
     Uint8List? profilePhotoBytes;
     String? profilePhotoFileName;
+    Uint8List? tradeLicenseBytes;
+    String? tradeLicenseFileName;
+    Uint8List? drivingLicenseBytes;
+    String? drivingLicenseFileName;
 
     if (_idCardFile != null) {
       idCardBytes = await _idCardFile!.readAsBytes();
@@ -152,6 +175,14 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
     if (_profilePhotoFile != null) {
       profilePhotoBytes = await _profilePhotoFile!.readAsBytes();
       profilePhotoFileName = _profilePhotoFile!.name;
+    }
+    if (_tradeLicenseFile != null) {
+      tradeLicenseBytes = await _tradeLicenseFile!.readAsBytes();
+      tradeLicenseFileName = _tradeLicenseFile!.name;
+    }
+    if (_drivingLicenseFile != null) {
+      drivingLicenseBytes = await _drivingLicenseFile!.readAsBytes();
+      drivingLicenseFileName = _drivingLicenseFile!.name;
     }
 
     await ref
@@ -165,6 +196,10 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
           idCardFileName: idCardFileName,
           profilePhotoBytes: profilePhotoBytes,
           profilePhotoFileName: profilePhotoFileName,
+          tradeLicenseBytes: tradeLicenseBytes,
+          tradeLicenseFileName: tradeLicenseFileName,
+          drivingLicenseBytes: drivingLicenseBytes,
+          drivingLicenseFileName: drivingLicenseFileName,
         );
   }
 
@@ -363,18 +398,25 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
         const Color(0xFF4A90D9),
       ),
       (
+        UserType.merchant,
+        Icons.store_outlined,
+        l10n.userTypeMerchant,
+        l10n.userTypeMerchantDesc,
+        const Color(0xFF8B5CF6),
+      ),
+      (
+        UserType.driver,
+        Icons.delivery_dining_outlined,
+        l10n.userTypeDriver,
+        l10n.userTypeDriverDesc,
+        const Color(0xFFFF9500),
+      ),
+      (
         UserType.provider,
         Icons.handyman_outlined,
         l10n.userTypeProvider,
         l10n.userTypeProviderDesc,
         const Color(0xFF34C759),
-      ),
-      (
-        UserType.delivery,
-        Icons.local_shipping_outlined,
-        l10n.userTypeDelivery,
-        l10n.userTypeDeliveryDesc,
-        const Color(0xFFFF9500),
       ),
     ];
 
@@ -419,7 +461,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
             hint: l10n.uploadIdCardHint,
             filePath: _idCardFile?.path,
             color: const Color(0xFF007AFF),
-            onTap: () => _pickDocument(isIdCard: true),
+            onTap: () => _pickDocument(documentType: 'idCard'),
           ),
           const SizedBox(height: 14),
           _UploadTile(
@@ -428,8 +470,30 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
             hint: l10n.uploadProfilePhotoHint,
             filePath: _profilePhotoFile?.path,
             color: const Color(0xFFAF52DE),
-            onTap: () => _pickDocument(isIdCard: false),
+            onTap: () => _pickDocument(documentType: 'profilePhoto'),
           ),
+          if (_selectedRole!.requiresTradeLicense) ...[
+            const SizedBox(height: 14),
+            _UploadTile(
+              icon: Icons.description_outlined,
+              title: l10n.uploadTradeLicense,
+              hint: l10n.uploadTradeLicenseHint,
+              filePath: _tradeLicenseFile?.path,
+              color: const Color(0xFF34C759),
+              onTap: () => _pickDocument(documentType: 'tradeLicense'),
+            ),
+          ],
+          if (_selectedRole!.requiresDrivingLicense) ...[
+            const SizedBox(height: 14),
+            _UploadTile(
+              icon: Icons.local_shipping_outlined,
+              title: l10n.uploadDrivingLicense,
+              hint: l10n.uploadDrivingLicenseHint,
+              filePath: _drivingLicenseFile?.path,
+              color: const Color(0xFFFF9500),
+              onTap: () => _pickDocument(documentType: 'drivingLicense'),
+            ),
+          ],
         ],
         const SizedBox(height: 40),
       ],

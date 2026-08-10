@@ -111,6 +111,10 @@ class AuthStateNotifier extends Notifier<AuthState> {
     String? idCardFileName,
     Uint8List? profilePhotoBytes,
     String? profilePhotoFileName,
+    Uint8List? tradeLicenseBytes,
+    String? tradeLicenseFileName,
+    Uint8List? drivingLicenseBytes,
+    String? drivingLicenseFileName,
   }) async {
     _isSignUpInProgress = true;
     state = const AuthState.loading();
@@ -124,6 +128,10 @@ class AuthStateNotifier extends Notifier<AuthState> {
         idCardFileName: idCardFileName,
         profilePhotoBytes: profilePhotoBytes,
         profilePhotoFileName: profilePhotoFileName,
+        tradeLicenseBytes: tradeLicenseBytes,
+        tradeLicenseFileName: tradeLicenseFileName,
+        drivingLicenseBytes: drivingLicenseBytes,
+        drivingLicenseFileName: drivingLicenseFileName,
       );
       if (result.accessToken == null) {
         state = AuthState.emailConfirmationRequired(email: email);

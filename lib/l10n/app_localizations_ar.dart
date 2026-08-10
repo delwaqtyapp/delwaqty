@@ -4150,22 +4150,37 @@ class AppLocalizationsAr extends AppLocalizations {
   String get userTypeCustomerDesc => 'اطلب من المتاجر والمطاعم والخدمات';
 
   @override
+  String get userTypeMerchant => 'تاجر';
+
+  @override
+  String get userTypeMerchantDesc => 'بع منتجاتك على المنصة';
+
+  @override
+  String get userTypeDriver => 'مندوب توصيل';
+
+  @override
+  String get userTypeDriverDesc => 'وصّل الطلبات للعملاء';
+
+  @override
   String get userTypeProvider => 'مقدم خدمة';
 
   @override
-  String get userTypeProviderDesc => 'قدّم خدماتك للعملاء';
-
-  @override
-  String get userTypeDelivery => 'سائق توصيل';
-
-  @override
-  String get userTypeDeliveryDesc => 'وصّل الطلبات للعملاء';
+  String get userTypeProviderDesc => 'قدم خدماتك للعملاء';
 
   @override
   String get uploadIdCard => 'رفع البطاقة الشخصية';
 
   @override
-  String get uploadIdCardHint => 'صورة واضحة لبطاقتك الشخصية';
+  String get uploadIdCardHint => 'صورة واضحة للبطاقة الشخصية';
+
+  @override
+  String get uploadTradeLicense => 'رفع الرخصة التجارية';
+
+  @override
+  String get uploadTradeLicenseHint => 'صورة واضحة للرخصة التجارية';
+
+  @override
+  String get uploadDrivingLicenseHint => 'صورة واضحة لرخصة القيادة';
 
   @override
   String get uploadProfilePhoto => 'رفع صورة شخصية';

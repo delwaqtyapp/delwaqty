@@ -1,25 +1,49 @@
 # SESSION_STATUS.md
 
-> **Last updated:** 2026-08-10 Session 24 (Phase 1 MVP — Super App categories + Home Services booking + Search filters — Sprint 62)
+> **Last updated:** 2026-08-10 Session 24 (Sprint 62+63+65 — Super App categories, 4-role registration, auth guard, Flutter Web admin — commit `94322d4`)
 
 ---
 
-## Current Task — PHASE 1 MVP: SUPER APP CATEGORIES + HOME SERVICES BOOKING (Session 24)
+## Current Task — SPRINT 62+63+65: PHASE 1 MVP (Session 24)
 
-Massive expansion of the platform from 10 to 24 merchant types, new Home Services booking module, and enhanced search with auto-complete and category filters.
+Massive Phase 1 MVP expansion: 24 service categories, Home Services booking, 4-role registration, auth guard, and Flutter Web admin dashboard.
 
+### Sprint 62 (commit `1530247`)
 | Area | Change |
 |------|--------|
 | **MerchantType enum** | Expanded from 10 → 24 values: added supermarket, fruits, meat, seafood, sweets, clothing, shoes, mobile, appliances, cafe, petShop, fitness, gas, carwash |
-| **AppColors** | 14 new service category colors: serviceSupermarket, serviceFruits, serviceMeat, serviceSeafood, serviceBakery, serviceSweets, serviceFlowers, serviceClothing, serviceShoes, serviceElectronics, serviceMobile, serviceFurniture, serviceFashion, serviceAppliances, serviceCafe, servicePetShop, serviceFitness, serviceGas, serviceCarwash |
-| **l10n** | 28 new keys (EN + AR): supermarket, fruits, meat, seafood, bakery, sweets, flowers, clothing, shoes, electronics, mobile, furniture, fashion, appliances, cafe, petShop, fitness, gas, carwash + corresponding type* keys |
-| **Home page grid** | Expanded from 7 → 23 service tiles (4-column grid, scrollable). Each tile links to `/market?type=<type>` or `/home-services` or `/direct-delivery` |
-| **Home Services module** | New `home_services` feature module with Clean Architecture: ServiceCategory, ServiceProvider, ServiceBooking entities; ServiceBookingRepository; Supabase implementation; HomeServicesPage (category grid) + ServiceBookingPage (provider selection, date/time picker, description, submit) |
-| **DB migration 023** | `service_categories`, `service_providers`, `service_bookings` tables with RLS, indexes, seed data for 8 service types |
-| **Search enhancements** | Filter pills expanded to 12 categories (All, Restaurants, Grocery, Supermarket, Pharmacy, Bakery, Electronics, Fashion, Clothing, Home Services, Café, Flowers). Added "Open Now" toggle filter. Auto-complete suggestions from merchant search results. Recent searches tracking |
-| **Commerce widget fixes** | All non-exhaustive MerchantType switch statements fixed in merchant_detail_page, search_page, merchant_card, merchant_type_chip (14 new enum values added to every switch) |
-| **Tests** | 594/594 passing. MerchantType enum test updated (10 → 24). MerchantTypeChip test fixed |
-| **Quality gates** | `flutter analyze` 0 errors / 0 warnings from touched files. `flutter test` 594/594 |
+| **AppColors** | 14 new service category colors |
+| **l10n** | 28 new keys (EN + AR) for all new categories |
+| **Home page grid** | Expanded from 7 → 23 service tiles |
+| **Home Services module** | New Clean Architecture module: ServiceCategory, ServiceProvider, ServiceBooking entities; ServiceBookingRepository; Supabase implementation; HomeServicesPage + ServiceBookingPage |
+| **DB migration 023** | `service_categories`, `service_providers`, `service_bookings` tables with RLS, indexes, seed data |
+| **Search enhancements** | 12 filter pills, "Open Now" toggle, auto-complete suggestions |
+
+### Sprint 63 (commit `94322d4`)
+| Area | Change |
+|------|--------|
+| **UserType enum** | Expanded to 5 values: customer, merchant, driver, provider, delivery. Added `requiresTradeLicense`, `requiresDrivingLicense`, `requiresIdCard`, `requiresProfilePhoto` getters |
+| **Registration wizard** | 4-role selection (Customer, Merchant, Driver, Provider) with role-specific document uploads: ID card + profile photo (all non-customer), trade license (merchant), driving license (driver) |
+| **Document uploads** | New Supabase Storage folders: `trade_licenses/`, `driving_licenses/` |
+| **User model** | Added `tradeLicenseUrl`, `drivingLicenseUrl` fields |
+| **Auth guard** | Pending verification redirect already works via `_resolveAuthenticated` → `AuthPendingVerification` state → router redirects to `/pending-verification` |
+
+### Sprint 65 (commit `94322d4`)
+| Area | Change |
+|------|--------|
+| **Flutter Web admin** | New `lib/main_web.dart` entry point + `admin_web` feature module |
+| **Admin shell** | Sidebar navigation with Dashboard, Users, Verifications sections |
+| **Dashboard overview** | 5 stat cards: Total Users, Merchants, Orders, Drivers, Service Bookings (live from Supabase) |
+| **User management** | Table view with search, role badges, status badges |
+| **Verification management** | Pending requests list with approve/reject buttons, document preview |
+
+### Quality
+| Metric | Value |
+|--------|-------|
+| **Tests** | 594/594 passing |
+| **Analyzer** | 0 errors, 0 warnings (398 pre-existing info lints) |
+| **APK** | Debug APK built + installed on DNP NX9 |
+| **Git** | Commits `1530247` + `94322d4` pushed to `origin master` |
 
 ---
 

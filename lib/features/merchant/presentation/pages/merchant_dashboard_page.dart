@@ -183,6 +183,27 @@ class _MerchantDashboardPageState
             trailing: const Icon(Icons.chevron_right_rounded),
             onTap: () => context.push('/merchant-dashboard/offers'),
           ),
+          const Divider(height: 1),
+          ListTile(
+            leading: const Icon(Icons.store_outlined),
+            title: const Text('Branches'),
+            trailing: const Icon(Icons.chevron_right_rounded),
+            onTap: () => context.push('/merchant-dashboard/branches'),
+          ),
+          const Divider(height: 1),
+          ListTile(
+            leading: const Icon(Icons.calendar_month_outlined),
+            title: const Text('Reservations'),
+            trailing: const Icon(Icons.chevron_right_rounded),
+            onTap: () => context.push('/merchant-dashboard/reservations'),
+          ),
+          const Divider(height: 1),
+          ListTile(
+            leading: const Icon(Icons.rate_review_outlined),
+            title: const Text('Reviews'),
+            trailing: const Icon(Icons.chevron_right_rounded),
+            onTap: () => context.push('/merchant-dashboard/reviews'),
+          ),
         ],
       ),
     );

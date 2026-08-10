@@ -80,6 +80,23 @@ abstract final class AppConfig {
     defaultValue: 'cdn.delwaqty.com',
   );
 
+  // ─── Paymob (Payment Gateway) ─────────────────────────────
+
+  static const String paymobApiKey = String.fromEnvironment(
+    'PAYMOB_API_KEY',
+    defaultValue: '',
+  );
+
+  static const String paymobIntegrationId = String.fromEnvironment(
+    'PAYMOB_INTEGRATION_ID',
+    defaultValue: '',
+  );
+
+  static const String paymobIframeId = String.fromEnvironment(
+    'PAYMOB_IFRAME_ID',
+    defaultValue: '',
+  );
+
   // ─── Derived Values ────────────────────────────────────────
 
   static String get cloudflareR2BaseUrl =>

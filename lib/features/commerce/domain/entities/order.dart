@@ -22,6 +22,19 @@ enum OrderStatus {
   cancelled,
 }
 
+enum PaymentStatus {
+  @JsonValue('unpaid')
+  unpaid,
+  @JsonValue('pending')
+  pending,
+  @JsonValue('paid')
+  paid,
+  @JsonValue('failed')
+  failed,
+  @JsonValue('refunded')
+  refunded,
+}
+
 @freezed
 class Order with _$Order {
   const factory Order({
@@ -36,6 +49,9 @@ class Order with _$Order {
     required OrderStatus status,
     String? deliveryAddress,
     String? paymentMethod,
+    @Default(PaymentStatus.unpaid) PaymentStatus paymentStatus,
+    String? paymentId,
+    String? transactionId,
     String? specialInstructions,
     DateTime? confirmedAt,
     DateTime? preparingAt,

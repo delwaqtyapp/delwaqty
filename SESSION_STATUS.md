@@ -1,34 +1,33 @@
 # SESSION_STATUS.md
 
-> **Last updated:** 2026-08-10 Session 26 (Sprint 67 — Merchant dashboard, Paymob payment, DB hardening)
+> **Last updated:** 2026-08-10 Session 27 (Sprint 68 — Home UX restructure, scroll-aware nav, discovery tabs, admin category management)
 
 ---
 
-## Current Task — SPRINT 67: MERCHANT OPERATIONS & PAYMENTS (Session 26)
+## Current Task — SPRINT 68: HOME UX RESTRUCTURE (Session 27)
 
-Complete merchant capabilities with branch/reservation/reviews management, integrate Paymob payment gateway, and harden the database with missing indexes.
+Restructure home screen with scroll-aware bottom navigation, compact DB-driven categories, combined discovery section with tabs, and admin dashboard category image management.
 
-### Sprint 67 (commit pending)
+### Sprint 68 (commit 4cab1c9)
 | Area | Change |
 |------|--------|
-| **Merchant branches** | New `MerchantBranchesPage` in merchant module: list/add/edit/delete branches with name, address, phone, lat/lng, primary toggle, active toggle. Swipe-to-delete |
-| **Merchant reservations** | New `MerchantReservationsPage`: filter chips (All/Pending/Confirmed/Seated/Completed/Cancelled), confirm/cancel actions, pull-to-refresh |
-| **Merchant reviews** | New `MerchantReviewsPage`: rating summary card with star distribution bar chart, inline reply field per review, saves via `reviewRepository.updateReview` |
-| **Merchant dashboard** | Updated quick actions: added Branches, Reservations, Reviews navigation links |
-| **Paymob service** | New `PaymobService` in `lib/services/payment/`: REST API integration for auth tokens, order creation, payment key generation, iframe URL construction |
-| **Payment config** | Added `PAYMOB_API_KEY`, `PAYMOB_INTEGRATION_ID`, `PAYMOB_IFRAME_ID` to `AppConfig` |
-| **Order model** | Added `PaymentStatus` enum (unpaid/pending/paid/failed/refunded), `paymentStatus`, `paymentId`, `transactionId` fields to `Order` |
-| **Checkout integration** | Updated `_placeOrder()` to call Paymob REST API for card/wallet payments, opens Paymob iframe via `url_launcher` |
-| **DB migration 024** | `payment_transactions` table, payment columns on `orders`, indexes on `orders(user_id, merchant_id, status, created_at)`, `products(merchant_id, category_id, is_available)`, `reviews(merchant_id, user_id, rating)`, `favorites(user_id, merchant_id)`, `service_bookings(user_id, provider_id)` |
-| **RLS** | Payment transactions: users see own, service_role manages all |
+| **Scroll-aware bottom nav** | New `ScrollAwareNavObserver` in `scroll_aware_nav.dart`: 50px threshold, 10px hysteresis. `bottomNavVisibleProvider` drives AnimatedSlide + AnimatedOpacity on bottom nav in `app_shell.dart` |
+| **PlatformCategory entity** | New Freezed entity with `id, name, nameAr, nameEn, icon, imageUrl, sortOrder, isActive, createdAt`. Extension `PlatformCategoryX.displayName(isArabic)` |
+| **Category repository** | New `PlatformCategoryRepository` interface + `CategoryRepositoryImpl` with CRUD + image upload/delete via Supabase Storage `category-images` bucket |
+| **Category data source** | New `SupabaseCategoryDataSource` with full CRUD + `uploadCategoryImage()`, `deleteCategoryImage()`, `replaceCategoryImage()` |
+| **DB migration 025** | Adds `name_en` column to categories, `category-images` storage bucket with RLS policies (public read, authenticated write) |
+| **Home domain** | New `activeCategoriesProvider` (reads non-empty categories), `discoveryModeProvider` (nearby/recommended/popular), `discoveryMerchantsProvider` (queries based on mode) |
+| **Home page restructure** | New section order: Header → Search → CTA → Offers → Compact Categories (horizontal scroll, 72px items with image/icon + name) → Discovery Section with tabs (القريبة/موصى لك/الأشهر, AnimatedSwitcher transitions) |
+| **Admin categories page** | New `AdminCategoriesPage`: DataTable with columns (Image, Name AR, Name EN, Order, Active, Actions). Add/edit/delete categories, upload/replace/delete image previews, toggle active, sort order control |
+| **Admin web shell** | Added Categories nav item (Icons.category_rounded) as 4th navigation option |
 
 ### Quality
 | Metric | Value |
 |--------|-------|
 | **Tests** | 594/594 passing |
-| **Analyzer** | 0 errors (421 pre-existing info lints) |
+| **Analyzer** | 0 errors (428 pre-existing info lints) |
 | **APK** | Built + installed on DNP NX9 |
-| **Git** | Pending commit |
+| **Git** | Committed + pushed (4cab1c9) |
 
 ---
 

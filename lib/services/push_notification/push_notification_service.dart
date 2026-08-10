@@ -5,7 +5,10 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:delwaqty/core/router/app_router.dart';
+import 'package:delwaqty/domain/entities/app_notification.dart';
 import 'package:delwaqty/features/notifications/notifications_module.dart';
 import 'package:delwaqty/services/logger/app_logger.dart';
 
@@ -40,7 +43,16 @@ Future<void> _initLocalNotifications() async {
     android: AndroidInitializationSettings('@mipmap/ic_launcher'),
     iOS: DarwinInitializationSettings(),
   );
-  await _localNotifications.initialize(settings: initSettings);
+  await _localNotifications.initialize(
+    settings: initSettings,
+    onDidReceiveNotificationResponse: (details) {
+      if (details.payload == null) return;
+      try {
+        final data = jsonDecode(details.payload!) as Map<String, dynamic>;
+        _handleNotificationTap(data);
+      } catch (_) {}
+    },
+  );
   await _localNotifications
       .resolvePlatformSpecificImplementation<
         AndroidFlutterLocalNotificationsPlugin
@@ -88,6 +100,32 @@ Future<void> _showLocalNotification({
   );
 }
 
+void _handleNotificationTap(Map<String, dynamic> data) {
+  final payload = NotificationPayload.fromMap(data);
+  final deepLink = payload.resolveDeepLink();
+  if (deepLink == null || rootNavigatorKey.currentContext == null) return;
+
+  final context = rootNavigatorKey.currentContext!;
+  final router = GoRouter.of(context);
+  router.push(deepLink);
+
+  if (payload.notificationId != null) {
+    _markNotificationRead(payload.notificationId!);
+  }
+}
+
+Future<void> _markNotificationRead(String notificationId) async {
+  try {
+    final client = Supabase.instance.client;
+    await client.from('notifications').update({
+      'is_read': true,
+      'read_at': DateTime.now().toIso8601String(),
+    }).eq('id', notificationId);
+  } catch (e) {
+    debugPrint('Failed to mark notification read: $e');
+  }
+}
+
 class PushNotificationService {
   PushNotificationService(this._logger);
 
@@ -96,26 +134,20 @@ class PushNotificationService {
 
   String? _lastToken;
   Timer? _heartbeat;
+  bool _initialized = false;
 
-  /// Called whenever a realtime broadcast notification arrives for the
-  /// current user so the notification center + unread badge refresh instantly.
   void Function(Map<String, dynamic> record)? onRealtimeNotification;
 
   Future<void> initialize() async {
+    if (_initialized) return;
+    _initialized = true;
+
     try {
       await _initLocalNotifications();
 
-      // In-app realtime push works regardless of FCM permission: the admin
-      // broadcast lands in `notifications` and Supabase Realtime delivers it
-      // instantly while the app is running (foreground banner + badge).
       _setupRealtimeNotifications();
 
-      final settings = await _messaging.requestPermission(
-        alert: true,
-        badge: true,
-        sound: true,
-        provisional: false,
-      );
+      final settings = await _messaging.requestPermission();
 
       if (settings.authorizationStatus != AuthorizationStatus.authorized) {
         _logger.i('Push notification permission denied');
@@ -167,6 +199,10 @@ class PushNotificationService {
               final body = record['body'] as String?;
               if (title == null && body == null) return;
 
+              final recordUserId = record['user_id'] as String?;
+              final isOwn = recordUserId == userId;
+              if (!isOwn) return;
+
               _logger.i('Realtime notification: $title');
               _showLocalNotification(title: title, body: body);
               onRealtimeNotification?.call(record);
@@ -188,6 +224,8 @@ class PushNotificationService {
         'user_id': userId,
         'token': token,
         'platform': _platformName(),
+        'is_active': true,
+        'last_seen_at': DateTime.now().toIso8601String(),
         'updated_at': DateTime.now().toIso8601String(),
       }, onConflict: 'user_id,token');
 
@@ -197,9 +235,6 @@ class PushNotificationService {
     }
   }
 
-  /// Keeps the token row fresh so the admin dashboard can distinguish
-  /// online (app running) from offline devices. Runs while the app is
-  /// alive; a token not seen for over 15 minutes counts as offline.
   void _startHeartbeat() {
     _heartbeat?.cancel();
     _heartbeat = Timer.periodic(const Duration(minutes: 5), (_) async {
@@ -210,7 +245,6 @@ class PushNotificationService {
   }
 
   String _platformName() {
-    // notification_tokens.platform CHECK (platform IN ('android', 'ios'))
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
         return 'android';
@@ -228,13 +262,38 @@ class PushNotificationService {
 
   void _handleBackgroundMessage(RemoteMessage message) {
     _logger.i('Opened message: ${message.notification?.title}');
-    _navigateFromPayload(message.data);
+    final payload = NotificationPayload.fromMap(message.data);
+    final deepLink = payload.resolveDeepLink();
+
+    if (deepLink != null && rootNavigatorKey.currentContext != null) {
+      final context = rootNavigatorKey.currentContext!;
+      GoRouter.of(context).push(deepLink);
+    }
+
+    if (payload.notificationId != null) {
+      _markNotificationRead(payload.notificationId!);
+    }
   }
 
-  void _navigateFromPayload(Map<String, dynamic> data) {
-    final type = data['type'] as String?;
-    final id = data['id'] as String?;
-    debugPrint('Navigate from payload: type=$type, id=$id');
+  Future<void> deactivateTokensOnLogout() async {
+    try {
+      final client = Supabase.instance.client;
+      final userId = client.auth.currentUser?.id;
+      if (userId == null) return;
+
+      await client
+          .from('notification_tokens')
+          .update({'is_active': false})
+          .eq('user_id', userId);
+
+      _heartbeat?.cancel();
+      _lastToken = null;
+      _initialized = false;
+
+      _logger.i('Tokens deactivated on logout');
+    } catch (e) {
+      _logger.e('Failed to deactivate tokens on logout', e);
+    }
   }
 
   Future<void> subscribeToTopic(String topic) async {
@@ -251,5 +310,9 @@ class PushNotificationService {
     } catch (e) {
       _logger.e('Failed to unsubscribe from topic: $topic', e);
     }
+  }
+
+  void dispose() {
+    _heartbeat?.cancel();
   }
 }

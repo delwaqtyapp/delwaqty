@@ -7,14 +7,14 @@ class MockNotificationRepository implements NotificationRepository {
       id: '1',
       title: 'Order Confirmed',
       body: 'Your order from Al Baik has been confirmed and is being prepared.',
-      type: NotificationType.success,
+      type: NotificationType.order,
       createdAt: DateTime.now().subtract(const Duration(hours: 2)),
     ),
     AppNotification(
       id: '2',
       title: 'Delivery on the Way',
       body: 'Your order from Panda Grocery is on the way. ETA: 15 min.',
-      type: NotificationType.info,
+      type: NotificationType.order,
       isRead: true,
       createdAt: DateTime.now().subtract(const Duration(hours: 5)),
     ),
@@ -22,7 +22,7 @@ class MockNotificationRepository implements NotificationRepository {
       id: '3',
       title: 'New Offer Available',
       body: 'Get 20% off your next order from selected restaurants!',
-      type: NotificationType.info,
+      type: NotificationType.promotion,
       deepLink: '/market',
       createdAt: DateTime.now().subtract(const Duration(days: 1)),
     ),
@@ -30,14 +30,14 @@ class MockNotificationRepository implements NotificationRepository {
       id: '4',
       title: 'Service Reminder',
       body: 'Your AC maintenance appointment is tomorrow at 10 AM.',
-      type: NotificationType.reminder,
+      type: NotificationType.service,
       createdAt: DateTime.now().subtract(const Duration(days: 2)),
     ),
     AppNotification(
       id: '5',
       title: 'Welcome to Delwaqty',
       body: 'Explore restaurants, shops, and services all in one app.',
-      type: NotificationType.info,
+      type: NotificationType.system,
       isRead: true,
       createdAt: DateTime.now().subtract(const Duration(days: 7)),
     ),
@@ -91,4 +91,12 @@ class MockNotificationRepository implements NotificationRepository {
   Future<void> clearAll() async {
     _notifications.clear();
   }
+
+  @override
+  Future<bool> existsByIdempotencyKey(String key) async {
+    return _notifications.any((n) => n.idempotencyKey == key);
+  }
+
+  @override
+  Future<void> deactivateAllTokens() async {}
 }

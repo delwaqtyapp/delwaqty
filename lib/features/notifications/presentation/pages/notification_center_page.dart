@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:delwaqty/domain/entities/app_notification.dart';
 import 'package:delwaqty/features/notifications/notifications_module.dart';
 import 'package:delwaqty/shared/widgets/app_loader.dart';
@@ -45,29 +46,59 @@ class NotificationCenterPage extends ConsumerWidget {
               message: l10n.noNotificationsMessage,
             );
           }
-          return ListView.separated(
-            padding: const EdgeInsets.all(16),
-            itemCount: notifications.length,
-            separatorBuilder: (_, __) => const SizedBox(height: 8),
-            itemBuilder: (context, index) {
-              final notification = notifications[index];
-              return AnimatedFadeIn(
-                delay: Duration(milliseconds: index * 50),
-                child: _NotificationCard(
-                  notification: notification,
-                  onTap: () async {
-                    final repo = ref.read(notificationRepositoryProvider);
-                    await repo.markAsRead(notification.id);
-                    ref.invalidate(notificationsProvider);
-                    ref.invalidate(unreadCountProvider);
-                  },
-                  onDelete: () async {
-                    final repo = ref.read(notificationRepositoryProvider);
-                    await repo.deleteNotification(notification.id);
-                    ref.invalidate(notificationsProvider);
-                    ref.invalidate(unreadCountProvider);
-                  },
-                ),
+
+          final grouped = _groupByDate(notifications);
+          final sections = grouped.entries.toList();
+
+          return ListView.builder(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            itemCount: sections.length,
+            itemBuilder: (context, sectionIndex) {
+              final section = sections[sectionIndex];
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(top: 16, bottom: 8),
+                    child: Text(
+                      section.key,
+                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                            fontWeight: FontWeight.w700,
+                            color: Theme.of(context).colorScheme.onSurfaceVariant,
+                          ),
+                    ),
+                  ),
+                  ...List.generate(section.value.length, (index) {
+                    final notification = section.value[index];
+                    return AnimatedFadeIn(
+                      delay: Duration(milliseconds: index * 30),
+                      child: Padding(
+                        padding: const EdgeInsets.only(bottom: 8),
+                        child: _NotificationCard(
+                          notification: notification,
+                          onTap: () async {
+                            final repo =
+                                ref.read(notificationRepositoryProvider);
+                            await repo.markAsRead(notification.id);
+                            ref.invalidate(notificationsProvider);
+                            ref.invalidate(unreadCountProvider);
+                            if (notification.deepLink != null &&
+                                context.mounted) {
+                              context.push(notification.deepLink!);
+                            }
+                          },
+                          onDelete: () async {
+                            final repo =
+                                ref.read(notificationRepositoryProvider);
+                            await repo.deleteNotification(notification.id);
+                            ref.invalidate(notificationsProvider);
+                            ref.invalidate(unreadCountProvider);
+                          },
+                        ),
+                      ),
+                    );
+                  }),
+                ],
               );
             },
           );
@@ -86,6 +117,31 @@ class NotificationCenterPage extends ConsumerWidget {
         ),
       ),
     );
+  }
+
+  Map<String, List<AppNotification>> _groupByDate(
+    List<AppNotification> notifications,
+  ) {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final yesterday = today.subtract(const Duration(days: 1));
+
+    final Map<String, List<AppNotification>> grouped = {};
+
+    for (final n in notifications) {
+      final date = DateTime(n.createdAt.year, n.createdAt.month, n.createdAt.day);
+      String label;
+      if (!date.isBefore(today)) {
+        label = 'اليوم';
+      } else if (!date.isBefore(yesterday)) {
+        label = 'أمس';
+      } else {
+        label = 'أقدم';
+      }
+      grouped.putIfAbsent(label, () => []).add(n);
+    }
+
+    return grouped;
   }
 }
 
@@ -223,6 +279,22 @@ class _NotificationCard extends StatelessWidget {
 
   Color _getTypeColor(NotificationType type, ColorScheme colorScheme) {
     switch (type) {
+      case NotificationType.system:
+        return colorScheme.primary;
+      case NotificationType.order:
+        return AppColors.brandPurple;
+      case NotificationType.payment:
+        return AppColors.successLight;
+      case NotificationType.promotion:
+        return AppColors.warningLight;
+      case NotificationType.service:
+        return AppColors.serviceRestaurant;
+      case NotificationType.account:
+        return colorScheme.tertiary;
+      case NotificationType.security:
+        return AppColors.errorLight;
+      case NotificationType.message:
+        return colorScheme.secondary;
       case NotificationType.info:
         return colorScheme.primary;
       case NotificationType.warning:
@@ -236,6 +308,22 @@ class _NotificationCard extends StatelessWidget {
 
   IconData _getTypeIcon(NotificationType type) {
     switch (type) {
+      case NotificationType.system:
+        return Icons.info_outline_rounded;
+      case NotificationType.order:
+        return Icons.shopping_bag_outlined;
+      case NotificationType.payment:
+        return Icons.payment_rounded;
+      case NotificationType.promotion:
+        return Icons.local_offer_outlined;
+      case NotificationType.service:
+        return Icons.home_repair_service_outlined;
+      case NotificationType.account:
+        return Icons.person_outline_rounded;
+      case NotificationType.security:
+        return Icons.shield_outlined;
+      case NotificationType.message:
+        return Icons.chat_bubble_outline_rounded;
       case NotificationType.info:
         return Icons.info_outline_rounded;
       case NotificationType.warning:

@@ -41,7 +41,7 @@ void main() {
     });
 
     test('NotificationType enum has correct values', () {
-      expect(NotificationType.values.length, 4);
+      expect(NotificationType.values.length, 12);
     });
 
     test('getNotifications with unreadOnly filters', () async {

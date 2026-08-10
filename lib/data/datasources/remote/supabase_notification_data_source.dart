@@ -13,14 +13,14 @@ class SupabaseNotificationDataSource {
   final SupabaseClient _client;
 
   AppNotification _fromRow(Map<String, dynamic> row) {
-    final dataType = row['type'] as String? ?? 'info';
+    final dataType = row['type'] as String? ?? 'system';
     final type = NotificationType.values.firstWhere(
       (t) => t.name == dataType,
-      orElse: () => NotificationType.info,
+      orElse: () => NotificationType.system,
     );
 
     final data = row['data'] as Map<String, dynamic>?;
-    final deepLink = data?['deep_link'] as String?;
+    final deepLink = row['deep_link'] as String? ?? data?['deep_link'] as String?;
 
     return AppNotification(
       id: row['id'] as String,
@@ -29,6 +29,10 @@ class SupabaseNotificationDataSource {
       type: type,
       isRead: row['is_read'] as bool? ?? false,
       deepLink: deepLink,
+      idempotencyKey: row['idempotency_key'] as String?,
+      readAt: row['read_at'] != null
+          ? DateTime.tryParse(row['read_at'] as String)
+          : null,
       createdAt: DateTime.parse(row['created_at'] as String),
     );
   }
@@ -58,16 +62,16 @@ class SupabaseNotificationDataSource {
     if (userId == null) return 0;
 
     final data = await _client
-        .from('notifications')
-        .select('id')
-        .eq('is_read', false)
-        .eq('user_id', userId);
+        .rpc('get_unread_notification_count', params: {'p_user_id': userId});
 
-    return (data as List).length;
+    return (data as int?) ?? 0;
   }
 
   Future<void> markAsRead(String id) async {
-    await _client.from('notifications').update({'is_read': true}).eq('id', id);
+    await _client.from('notifications').update({
+      'is_read': true,
+      'read_at': DateTime.now().toIso8601String(),
+    }).eq('id', id);
   }
 
   Future<void> markAllAsRead() async {
@@ -76,7 +80,10 @@ class SupabaseNotificationDataSource {
 
     await _client
         .from('notifications')
-        .update({'is_read': true})
+        .update({
+          'is_read': true,
+          'read_at': DateTime.now().toIso8601String(),
+        })
         .eq('user_id', userId)
         .eq('is_read', false);
   }
@@ -90,5 +97,27 @@ class SupabaseNotificationDataSource {
     if (userId == null) return;
 
     await _client.from('notifications').delete().eq('user_id', userId);
+  }
+
+  Future<bool> existsByIdempotencyKey(String key) async {
+    final data = await _client
+        .from('notifications')
+        .select('id')
+        .eq('idempotency_key', key)
+        .maybeSingle();
+    return data != null;
+  }
+
+  Future<void> deactivateTokensForUser(String userId) async {
+    await _client
+        .from('notification_tokens')
+        .update({'is_active': false})
+        .eq('user_id', userId);
+  }
+
+  Future<void> deactivateAllTokens() async {
+    final userId = _client.auth.currentUser?.id;
+    if (userId == null) return;
+    await deactivateTokensForUser(userId);
   }
 }

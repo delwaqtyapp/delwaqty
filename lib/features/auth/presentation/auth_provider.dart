@@ -9,6 +9,7 @@ import 'package:delwaqty/domain/usecases/auth/auth_usecases.dart';
 import 'package:delwaqty/domain/usecases/user/get_user.dart';
 import 'package:delwaqty/core/errors/error_handler.dart';
 import 'package:delwaqty/services/logger/app_logger.dart';
+import 'package:delwaqty/services/push_notification/push_notification_service.dart';
 
 final authStateProvider = NotifierProvider<AuthStateNotifier, AuthState>(
   AuthStateNotifier.new,
@@ -190,6 +191,10 @@ class AuthStateNotifier extends Notifier<AuthState> {
   Future<void> signOut() async {
     state = const AuthState.loading();
     try {
+      try {
+        final pushService = ref.read(pushNotificationServiceProvider);
+        await pushService.deactivateTokensOnLogout();
+      } catch (_) {}
       await _signOutUseCase();
       state = const AuthState.unauthenticated();
     } catch (e) {

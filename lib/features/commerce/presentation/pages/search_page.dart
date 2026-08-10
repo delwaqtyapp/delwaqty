@@ -27,18 +27,46 @@ IconData merchantTypeIcon(MerchantType type) {
       return Icons.restaurant;
     case MerchantType.grocery:
       return Icons.local_grocery_store;
+    case MerchantType.supermarket:
+      return Icons.shopping_cart;
+    case MerchantType.fruits:
+      return Icons.eco;
+    case MerchantType.meat:
+      return Icons.set_meal;
+    case MerchantType.seafood:
+      return Icons.phishing;
     case MerchantType.pharmacy:
       return Icons.local_pharmacy;
-    case MerchantType.flowers:
-      return Icons.local_florist;
     case MerchantType.bakery:
       return Icons.bakery_dining;
+    case MerchantType.sweets:
+      return Icons.cake;
+    case MerchantType.flowers:
+      return Icons.local_florist;
+    case MerchantType.clothing:
+      return Icons.dry_cleaning;
+    case MerchantType.shoes:
+      return Icons.pedal_bike;
     case MerchantType.electronics:
       return Icons.devices;
+    case MerchantType.mobile:
+      return Icons.phone_iphone;
     case MerchantType.furniture:
       return Icons.chair;
+    case MerchantType.appliances:
+      return Icons.kitchen;
     case MerchantType.fashion:
       return Icons.checkroom;
+    case MerchantType.cafe:
+      return Icons.coffee;
+    case MerchantType.petShop:
+      return Icons.pets;
+    case MerchantType.fitness:
+      return Icons.fitness_center;
+    case MerchantType.gas:
+      return Icons.local_gas_station;
+    case MerchantType.carwash:
+      return Icons.local_car_wash;
     case MerchantType.home:
       return Icons.home_repair_service;
     case MerchantType.other:
@@ -49,25 +77,53 @@ IconData merchantTypeIcon(MerchantType type) {
 Color merchantTypeColor(MerchantType type) {
   switch (type) {
     case MerchantType.restaurant:
-      return AppColors.merchantFood;
+      return AppColors.serviceRestaurant;
     case MerchantType.grocery:
-      return AppColors.merchantGrocery;
+      return AppColors.serviceGrocery;
+    case MerchantType.supermarket:
+      return AppColors.serviceSupermarket;
+    case MerchantType.fruits:
+      return AppColors.serviceFruits;
+    case MerchantType.meat:
+      return AppColors.serviceMeat;
+    case MerchantType.seafood:
+      return AppColors.serviceSeafood;
     case MerchantType.pharmacy:
-      return AppColors.merchantPharmacy;
-    case MerchantType.flowers:
-      return const Color(0xFFC2185B);
+      return AppColors.servicePharmacy;
     case MerchantType.bakery:
-      return const Color(0xFFE65100);
+      return AppColors.serviceBakery;
+    case MerchantType.sweets:
+      return AppColors.serviceSweets;
+    case MerchantType.flowers:
+      return AppColors.serviceFlowers;
+    case MerchantType.clothing:
+      return AppColors.serviceClothing;
+    case MerchantType.shoes:
+      return AppColors.serviceShoes;
     case MerchantType.electronics:
-      return AppColors.merchantElectronics;
+      return AppColors.serviceElectronics;
+    case MerchantType.mobile:
+      return AppColors.serviceMobile;
     case MerchantType.furniture:
-      return AppColors.merchantFurniture;
+      return AppColors.serviceFurniture;
     case MerchantType.fashion:
-      return AppColors.merchantFashion;
+      return AppColors.serviceFashion;
+    case MerchantType.appliances:
+      return AppColors.serviceAppliances;
     case MerchantType.home:
-      return const Color(0xFF1565C0);
+      return AppColors.serviceHome;
+    case MerchantType.cafe:
+      return AppColors.serviceCafe;
+    case MerchantType.petShop:
+      return AppColors.servicePetShop;
+    case MerchantType.fitness:
+      return AppColors.serviceFitness;
+    case MerchantType.gas:
+      return AppColors.serviceGas;
+    case MerchantType.carwash:
+      return AppColors.serviceCarwash;
     case MerchantType.other:
-      return const Color(0xFF546E7A);
+      return AppColors.serviceMore;
   }
 }
 
@@ -75,26 +131,54 @@ String _merchantTypeLabel(MerchantType type, AppLocalizations l10n) =>
     switch (type) {
       MerchantType.restaurant => l10n.typeRestaurant,
       MerchantType.grocery => l10n.typeGrocery,
+      MerchantType.supermarket => l10n.typeSupermarket,
+      MerchantType.fruits => l10n.typeFruits,
+      MerchantType.meat => l10n.typeMeat,
+      MerchantType.seafood => l10n.typeSeafood,
       MerchantType.pharmacy => l10n.typePharmacy,
-      MerchantType.flowers => l10n.typeFlowers,
       MerchantType.bakery => l10n.typeBakery,
+      MerchantType.sweets => l10n.typeSweets,
+      MerchantType.flowers => l10n.typeFlowers,
+      MerchantType.clothing => l10n.typeClothing,
+      MerchantType.shoes => l10n.typeShoes,
       MerchantType.electronics => l10n.typeElectronics,
+      MerchantType.mobile => l10n.typeMobile,
       MerchantType.furniture => l10n.typeFurniture,
       MerchantType.fashion => l10n.typeFashion,
+      MerchantType.appliances => l10n.typeAppliances,
       MerchantType.home => l10n.typeHome,
+      MerchantType.cafe => l10n.typeCafe,
+      MerchantType.petShop => l10n.typePetShop,
+      MerchantType.fitness => l10n.typeFitness,
+      MerchantType.gas => l10n.typeGas,
+      MerchantType.carwash => l10n.typeCarwash,
       MerchantType.other => l10n.typeOther,
     };
 
 String _merchantEmoji(MerchantType type) => switch (type) {
   MerchantType.restaurant => '🍽️',
   MerchantType.grocery => '🛒',
+  MerchantType.supermarket => '🏪',
+  MerchantType.fruits => '🥬',
+  MerchantType.meat => '🥩',
+  MerchantType.seafood => '🐟',
   MerchantType.pharmacy => '💊',
-  MerchantType.flowers => '💐',
   MerchantType.bakery => '🥐',
+  MerchantType.sweets => '🍰',
+  MerchantType.flowers => '💐',
+  MerchantType.clothing => '👔',
+  MerchantType.shoes => '👟',
   MerchantType.electronics => '📱',
+  MerchantType.mobile => '📞',
   MerchantType.furniture => '🛋️',
   MerchantType.fashion => '👗',
+  MerchantType.appliances => '🔌',
   MerchantType.home => '🔧',
+  MerchantType.cafe => '☕',
+  MerchantType.petShop => '🐾',
+  MerchantType.fitness => '💪',
+  MerchantType.gas => '⛽',
+  MerchantType.carwash => '🚿',
   MerchantType.other => '🏪',
 };
 
@@ -104,29 +188,48 @@ final _selectedTypeProvider = StateProvider<MerchantType?>((_) => null);
 
 final _selectedSortProvider = StateProvider<SortBy>((_) => SortBy.distance);
 
+final _openNowFilterProvider = StateProvider<bool>((_) => false);
+
+final _recentSearchesProvider = StateProvider<List<String>>((_) => []);
+
 final _searchResultsProvider = FutureProvider<List<Merchant>>((ref) async {
   final query = ref.watch(_queryProvider);
   final type = ref.watch(_selectedTypeProvider);
   final sortBy = ref.watch(_selectedSortProvider);
+  final openNow = ref.watch(_openNowFilterProvider);
   final repo = ref.watch(merchantRepositoryProvider);
 
   if (query.trim().isEmpty && type == null) {
     return repo.getMerchants(filter: SearchFilter(sortBy: sortBy), limit: 50);
   }
 
+  List<Merchant> results;
   if (query.trim().isNotEmpty) {
-    final results = await repo.searchMerchants(query.trim());
-    if (type != null) {
-      return results.where((m) => m.type == type).toList();
-    }
-    return results;
+    results = await repo.searchMerchants(query.trim());
+  } else {
+    results = await repo.getMerchants(
+      type: type,
+      filter: SearchFilter(sortBy: sortBy),
+      limit: 50,
+    );
   }
 
-  return repo.getMerchants(
-    type: type,
-    filter: SearchFilter(sortBy: sortBy),
-    limit: 50,
-  );
+  if (type != null) {
+    results = results.where((m) => m.type == type).toList();
+  }
+  if (openNow) {
+    results = results.where((m) => m.isOpenNow).toList();
+  }
+
+  return results;
+});
+
+final _autocompleteProvider = FutureProvider<List<String>>((ref) async {
+  final query = ref.watch(_queryProvider);
+  if (query.trim().length < 2) return [];
+  final repo = ref.watch(merchantRepositoryProvider);
+  final results = await repo.searchMerchants(query.trim());
+  return results.take(5).map((m) => m.name).toList();
 });
 
 class SearchPage extends ConsumerStatefulWidget {
@@ -162,6 +265,62 @@ class _SearchPageState extends ConsumerState<SearchPage> {
     ref.read(_selectedSortProvider.notifier).state = sort;
   }
 
+  void _addRecentSearch(String query) {
+    if (query.trim().isEmpty) return;
+    final current = ref.read(_recentSearchesProvider);
+    final updated = [query, ...current.where((s) => s != query)].take(5).toList();
+    ref.read(_recentSearchesProvider.notifier).state = updated;
+  }
+
+  Widget _buildAutocompleteSuggestions(AppLocalizations l10n) {
+    final query = ref.watch(_queryProvider);
+    if (query.trim().length < 2) return const SizedBox.shrink();
+
+    final autocompleteAsync = ref.watch(_autocompleteProvider);
+    return autocompleteAsync.when(
+      data: (suggestions) {
+        if (suggestions.isEmpty) return const SizedBox.shrink();
+        return Container(
+          margin: const EdgeInsets.only(top: 8),
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.6),
+            borderRadius: BorderRadius.circular(14),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: suggestions.map((name) => InkWell(
+              onTap: () {
+                _searchController.text = name;
+                ref.read(_queryProvider.notifier).state = name;
+                _addRecentSearch(name);
+              },
+              borderRadius: BorderRadius.circular(14),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                child: Row(
+                  children: [
+                    const Icon(Icons.search_rounded, size: 18, color: AppColors.brandPurple),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        name,
+                        style: AppTextStyles.bodyMedium.copyWith(fontWeight: FontWeight.w500),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            )).toList(),
+          ),
+        );
+      },
+      loading: () => const SizedBox.shrink(),
+      error: (_, __) => const SizedBox.shrink(),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
@@ -176,14 +335,20 @@ class _SearchPageState extends ConsumerState<SearchPage> {
           children: [
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-              child: PremiumSearchField(
-                controller: _searchController,
-                hint: l10n.searchHint,
-                onChanged: _onSearchChanged,
-                onSubmitted: (value) {
-                  _debounceTimer?.cancel();
-                  ref.read(_queryProvider.notifier).state = value;
-                },
+              child: Column(
+                children: [
+                  PremiumSearchField(
+                    controller: _searchController,
+                    hint: l10n.searchHint,
+                    onChanged: _onSearchChanged,
+                    onSubmitted: (value) {
+                      _debounceTimer?.cancel();
+                      ref.read(_queryProvider.notifier).state = value;
+                      _addRecentSearch(value);
+                    },
+                  ),
+                  _buildAutocompleteSuggestions(l10n),
+                ],
               ),
             ),
             const SizedBox(height: 14),
@@ -258,11 +423,18 @@ class _SearchPageState extends ConsumerState<SearchPage> {
 
   Widget _buildFilterPills(AppLocalizations l10n, MerchantType? selectedType) {
     final filters = <(String label, IconData? icon, MerchantType? type)>[
-      (l10n.popular, null, null),
+      (l10n.all, null, null),
       (l10n.restaurants, merchantTypeIcon(MerchantType.restaurant), MerchantType.restaurant),
       (l10n.grocery, merchantTypeIcon(MerchantType.grocery), MerchantType.grocery),
+      (l10n.supermarket, merchantTypeIcon(MerchantType.supermarket), MerchantType.supermarket),
       (l10n.pharmacy, merchantTypeIcon(MerchantType.pharmacy), MerchantType.pharmacy),
+      (l10n.bakery, merchantTypeIcon(MerchantType.bakery), MerchantType.bakery),
+      (l10n.electronics, merchantTypeIcon(MerchantType.electronics), MerchantType.electronics),
+      (l10n.fashion, merchantTypeIcon(MerchantType.fashion), MerchantType.fashion),
+      (l10n.clothing, merchantTypeIcon(MerchantType.clothing), MerchantType.clothing),
       (l10n.homeServices, merchantTypeIcon(MerchantType.home), MerchantType.home),
+      (l10n.cafe, merchantTypeIcon(MerchantType.cafe), MerchantType.cafe),
+      (l10n.flowers, merchantTypeIcon(MerchantType.flowers), MerchantType.flowers),
     ];
 
     return SizedBox(
@@ -286,6 +458,7 @@ class _SearchPageState extends ConsumerState<SearchPage> {
   }
 
   Widget _buildSortBar(AppLocalizations l10n, SortBy selectedSort) {
+    final openNow = ref.watch(_openNowFilterProvider);
     final sortOptions = <(String label, SortBy sort)>[
       (l10n.sortByDistance, SortBy.distance),
       (l10n.sortByRating, SortBy.rating),
@@ -294,21 +467,31 @@ class _SearchPageState extends ConsumerState<SearchPage> {
 
     return SizedBox(
       height: 34,
-      child: ListView.separated(
+      child: ListView(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 16),
-        itemCount: sortOptions.length,
-        separatorBuilder: (_, __) => const SizedBox(width: 8),
-        itemBuilder: (context, index) {
-          final (label, sort) = sortOptions[index];
-          return _PremiumPill(
-            label: label,
-            icon: Icons.sort_rounded,
+        children: [
+          _PremiumPill(
+            label: l10n.openNow,
+            icon: Icons.access_time_rounded,
             compact: true,
-            selected: selectedSort == sort,
-            onTap: () => _onSortSelected(sort),
-          );
-        },
+            selected: openNow,
+            onTap: () {
+              ref.read(_openNowFilterProvider.notifier).state = !openNow;
+            },
+          ),
+          const SizedBox(width: 8),
+          for (final (label, sort) in sortOptions) ...[
+            _PremiumPill(
+              label: label,
+              icon: Icons.sort_rounded,
+              compact: true,
+              selected: selectedSort == sort,
+              onTap: () => _onSortSelected(sort),
+            ),
+            const SizedBox(width: 8),
+          ],
+        ],
       ),
     );
   }

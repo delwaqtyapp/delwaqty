@@ -32,39 +32,81 @@ String _merchantTypeLabel(MerchantType type, AppLocalizations l10n) =>
     switch (type) {
       MerchantType.restaurant => l10n.typeRestaurant,
       MerchantType.grocery => l10n.typeGrocery,
+      MerchantType.supermarket => l10n.typeSupermarket,
+      MerchantType.fruits => l10n.typeFruits,
+      MerchantType.meat => l10n.typeMeat,
+      MerchantType.seafood => l10n.typeSeafood,
       MerchantType.pharmacy => l10n.typePharmacy,
-      MerchantType.flowers => l10n.typeFlowers,
       MerchantType.bakery => l10n.typeBakery,
+      MerchantType.sweets => l10n.typeSweets,
+      MerchantType.flowers => l10n.typeFlowers,
+      MerchantType.clothing => l10n.typeClothing,
+      MerchantType.shoes => l10n.typeShoes,
       MerchantType.electronics => l10n.typeElectronics,
+      MerchantType.mobile => l10n.typeMobile,
       MerchantType.furniture => l10n.typeFurniture,
       MerchantType.fashion => l10n.typeFashion,
+      MerchantType.appliances => l10n.typeAppliances,
       MerchantType.home => l10n.typeHome,
+      MerchantType.cafe => l10n.typeCafe,
+      MerchantType.petShop => l10n.typePetShop,
+      MerchantType.fitness => l10n.typeFitness,
+      MerchantType.gas => l10n.typeGas,
+      MerchantType.carwash => l10n.typeCarwash,
       MerchantType.other => l10n.typeOther,
     };
 
 Color _merchantTypeColor(MerchantType type) => switch (type) {
   MerchantType.restaurant => AppColors.serviceRestaurant,
   MerchantType.grocery => AppColors.serviceGrocery,
+  MerchantType.supermarket => AppColors.serviceSupermarket,
+  MerchantType.fruits => AppColors.serviceFruits,
+  MerchantType.meat => AppColors.serviceMeat,
+  MerchantType.seafood => AppColors.serviceSeafood,
   MerchantType.pharmacy => AppColors.servicePharmacy,
-  MerchantType.flowers => AppColors.merchantFashion,
-  MerchantType.bakery => AppColors.orderPending,
-  MerchantType.electronics => AppColors.serviceRide,
-  MerchantType.furniture => AppColors.serviceHome,
-  MerchantType.fashion => AppColors.merchantFashion,
+  MerchantType.bakery => AppColors.serviceBakery,
+  MerchantType.sweets => AppColors.serviceSweets,
+  MerchantType.flowers => AppColors.serviceFlowers,
+  MerchantType.clothing => AppColors.serviceClothing,
+  MerchantType.shoes => AppColors.serviceShoes,
+  MerchantType.electronics => AppColors.serviceElectronics,
+  MerchantType.mobile => AppColors.serviceMobile,
+  MerchantType.furniture => AppColors.serviceFurniture,
+  MerchantType.fashion => AppColors.serviceFashion,
+  MerchantType.appliances => AppColors.serviceAppliances,
   MerchantType.home => AppColors.serviceHome,
+  MerchantType.cafe => AppColors.serviceCafe,
+  MerchantType.petShop => AppColors.servicePetShop,
+  MerchantType.fitness => AppColors.serviceFitness,
+  MerchantType.gas => AppColors.serviceGas,
+  MerchantType.carwash => AppColors.serviceCarwash,
   MerchantType.other => AppColors.serviceMore,
 };
 
 String _merchantEmoji(MerchantType type) => switch (type) {
   MerchantType.restaurant => '🍽️',
   MerchantType.grocery => '🛒',
+  MerchantType.supermarket => '🏪',
+  MerchantType.fruits => '🥬',
+  MerchantType.meat => '🥩',
+  MerchantType.seafood => '🐟',
   MerchantType.pharmacy => '💊',
-  MerchantType.flowers => '💐',
   MerchantType.bakery => '🥐',
+  MerchantType.sweets => '🍰',
+  MerchantType.flowers => '💐',
+  MerchantType.clothing => '👔',
+  MerchantType.shoes => '👟',
   MerchantType.electronics => '📱',
+  MerchantType.mobile => '📞',
   MerchantType.furniture => '🛋️',
   MerchantType.fashion => '👗',
+  MerchantType.appliances => '🔌',
   MerchantType.home => '🔧',
+  MerchantType.cafe => '☕',
+  MerchantType.petShop => '🐾',
+  MerchantType.fitness => '💪',
+  MerchantType.gas => '⛽',
+  MerchantType.carwash => '🚿',
   MerchantType.other => '🏪',
 };
 
@@ -235,48 +277,29 @@ class HomePage extends ConsumerWidget {
         merchants?.where((m) => m.type == type).length ?? 0;
 
     final services = [
-      _ServiceData(
-        Icons.restaurant_rounded,
-        l10n.restaurants,
-        AppColors.serviceRestaurant,
-        countOf(MerchantType.restaurant),
-      ),
-      _ServiceData(
-        Icons.local_grocery_store_rounded,
-        l10n.grocery,
-        AppColors.serviceGrocery,
-        countOf(MerchantType.grocery),
-      ),
-      _ServiceData(
-        Icons.local_pharmacy_rounded,
-        l10n.pharmacy,
-        AppColors.servicePharmacy,
-        countOf(MerchantType.pharmacy),
-      ),
-      _ServiceData(
-        Icons.home_repair_service_rounded,
-        l10n.homeServices,
-        AppColors.serviceHome,
-        countOf(MerchantType.home),
-      ),
-      _ServiceData(
-        Icons.local_shipping_rounded,
-        l10n.delivery,
-        AppColors.serviceDelivery,
-        null,
-      ),
-      _ServiceData(
-        Icons.local_offer_rounded,
-        l10n.offers,
-        AppColors.serviceOffers,
-        null,
-      ),
-      _ServiceData(
-        Icons.more_horiz_rounded,
-        l10n.settings,
-        AppColors.serviceMore,
-        null,
-      ),
+      _ServiceData(Icons.restaurant_rounded, l10n.restaurants, AppColors.serviceRestaurant, countOf(MerchantType.restaurant), '/market'),
+      _ServiceData(Icons.local_grocery_store_rounded, l10n.grocery, AppColors.serviceGrocery, countOf(MerchantType.grocery), '/market?type=grocery'),
+      _ServiceData(Icons.store_rounded, l10n.supermarket, AppColors.serviceSupermarket, countOf(MerchantType.supermarket), '/market?type=supermarket'),
+      _ServiceData(Icons.eco_rounded, l10n.fruits, AppColors.serviceFruits, countOf(MerchantType.fruits), '/market?type=fruits'),
+      _ServiceData(Icons.set_meal_rounded, l10n.meat, AppColors.serviceMeat, countOf(MerchantType.meat), '/market?type=meat'),
+      _ServiceData(Icons.phishing_rounded, l10n.seafood, AppColors.serviceSeafood, countOf(MerchantType.seafood), '/market?type=seafood'),
+      _ServiceData(Icons.local_pharmacy_rounded, l10n.pharmacy, AppColors.servicePharmacy, countOf(MerchantType.pharmacy), '/market?type=pharmacy'),
+      _ServiceData(Icons.bakery_dining_rounded, l10n.bakery, AppColors.serviceBakery, countOf(MerchantType.bakery), '/market?type=bakery'),
+      _ServiceData(Icons.cake_rounded, l10n.sweets, AppColors.serviceSweets, countOf(MerchantType.sweets), '/market?type=sweets'),
+      _ServiceData(Icons.local_florist_rounded, l10n.flowers, AppColors.serviceFlowers, countOf(MerchantType.flowers), '/market?type=flowers'),
+      _ServiceData(Icons.checkroom_rounded, l10n.clothing, AppColors.serviceClothing, countOf(MerchantType.clothing), '/market?type=clothing'),
+      _ServiceData(Icons.snowboarding_rounded, l10n.shoes, AppColors.serviceShoes, countOf(MerchantType.shoes), '/market?type=shoes'),
+      _ServiceData(Icons.devices_rounded, l10n.electronics, AppColors.serviceElectronics, countOf(MerchantType.electronics), '/market?type=electronics'),
+      _ServiceData(Icons.phone_android_rounded, l10n.mobile, AppColors.serviceMobile, countOf(MerchantType.mobile), '/market?type=mobile'),
+      _ServiceData(Icons.chair_rounded, l10n.furniture, AppColors.serviceFurniture, countOf(MerchantType.furniture), '/market?type=furniture'),
+      _ServiceData(Icons.home_repair_service_rounded, l10n.homeServices, AppColors.serviceHome, countOf(MerchantType.home), '/home-services'),
+      _ServiceData(Icons.coffee_rounded, l10n.cafe, AppColors.serviceCafe, countOf(MerchantType.cafe), '/market?type=cafe'),
+      _ServiceData(Icons.pets_rounded, l10n.petShop, AppColors.servicePetShop, countOf(MerchantType.petShop), '/market?type=petShop'),
+      _ServiceData(Icons.fitness_center_rounded, l10n.fitness, AppColors.serviceFitness, countOf(MerchantType.fitness), '/market?type=fitness'),
+      _ServiceData(Icons.local_gas_station_rounded, l10n.gas, AppColors.serviceGas, countOf(MerchantType.gas), '/market?type=gas'),
+      _ServiceData(Icons.local_car_wash_rounded, l10n.carwash, AppColors.serviceCarwash, countOf(MerchantType.carwash), '/market?type=carwash'),
+      _ServiceData(Icons.local_shipping_rounded, l10n.delivery, AppColors.serviceDelivery, null, '/direct-delivery'),
+      _ServiceData(Icons.local_offer_rounded, l10n.offers, AppColors.serviceOffers, null, '/market'),
     ];
 
     return AnimatedFadeIn(
@@ -300,25 +323,8 @@ class HomePage extends ConsumerWidget {
               label: service.label,
               color: service.color,
               count: service.count,
-              delay: Duration(milliseconds: 250 + index * 50),
-              onTap: () {
-                switch (index) {
-                  case 0:
-                    context.push('/market');
-                  case 1:
-                    context.push('/market?type=grocery');
-                  case 2:
-                    context.push('/market?type=pharmacy');
-                  case 3:
-                    context.push('/market?type=home');
-                  case 4:
-                    context.push('/direct-delivery');
-                  case 5:
-                    context.push('/market');
-                  case 6:
-                    context.push('/settings');
-                }
-              },
+              delay: Duration(milliseconds: 250 + index * 30),
+              onTap: () => context.push(service.route),
             );
           },
         ),
@@ -441,11 +447,12 @@ class HomePage extends ConsumerWidget {
 }
 
 class _ServiceData {
-  const _ServiceData(this.icon, this.label, this.color, this.count);
+  const _ServiceData(this.icon, this.label, this.color, this.count, this.route);
   final IconData icon;
   final String label;
   final Color color;
   final int? count;
+  final String route;
 }
 
 class _ServiceTile extends StatelessWidget {

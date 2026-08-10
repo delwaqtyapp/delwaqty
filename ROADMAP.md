@@ -147,3 +147,39 @@
 | 55 | UI Polish — Cairo typography, card system, pill search, banner copy, micro-interactions | ✅ |
 | 56 | Functional Bottom-Nav Restructure — 4-tab layout (Home/Search/Orders/Profile), Settings via Profile gear, Delivery/Ride in Home grid | ✅ |
 | 60 | Account Verification — user type (customer/provider/delivery) + verification status, document upload, pending-verification gate, admin approve/reject page, migration 020 | ✅ |
+| 61 | Fingerprint Unification — DB-backed BiometricAuthStore, local_auth 3.0.0 for Android 16, Splash biometric gate | ✅ |
+
+---
+
+## Phase 11: Super App MVP — Multi-Category Services Platform
+
+### Sprint 62: Home Grid + New Categories
+- [ ] Expand `MerchantType` enum (16 new types: supermarket, fruits, meat, seafood, sweets, clothing, shoes, mobile, appliances, cafe, petShop, fitness, gas, carwash)
+- [ ] Expand home page grid from 7 to 20+ tiles (scrollable 4-column)
+- [ ] Add new service category colors + icons + l10n (EN + AR)
+- [ ] Database migration 023: `ALTER TABLE merchants ADD COLUMN category_tags TEXT[]`
+
+### Sprint 63: Home Services Booking Module
+- [ ] New `home_services` feature module (data/domain/presentation)
+- [ ] Service categories: Plumbing, Electrical, Carpentry, AC Maintenance, Painting
+- [ ] Booking flow: select service → pick date/time → confirm
+- [ ] Service provider listing with ratings/availability
+- [ ] DB schema: `service_bookings`, `service_providers`, `service_categories` tables
+
+### Sprint 64: Enhanced Search + Filters
+- [ ] Auto-complete search with recent + suggested results
+- [ ] Filter chips: Price range, Distance, Rating, Open Now
+- [ ] Sort: Relevance, Distance, Rating, Price (low/high)
+- [ ] Category quick-filter on search results
+
+### Sprint 65: Admin Dashboard (Flutter Web)
+- [ ] Flutter Web admin shell with sidebar navigation
+- [ ] Dashboard overview: revenue, orders, users, merchants KPIs
+- [ ] User management: list, search, activate/deactivate
+- [ ] Category/Service management: add/edit/remove categories
+
+### Sprint 66: Multi-Role Registration + Offline
+- [ ] Dynamic registration fields per role (Customer/Merchant/Driver/Provider)
+- [ ] Document upload for merchant/provider verification
+- [ ] Offline caching with Hive for categories/products
+- [ ] Push notification admin tool

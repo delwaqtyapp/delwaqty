@@ -188,14 +188,71 @@ abstract final class AppColors {
   /// Color representing the grocery service.
   static const Color serviceGrocery = Color(0xFF2E7D32);
 
+  /// Color representing the supermarket service.
+  static const Color serviceSupermarket = Color(0xFF1565C0);
+
+  /// Color representing the fruits & vegetables service.
+  static const Color serviceFruits = Color(0xFF558B2F);
+
+  /// Color representing the meat & poultry service.
+  static const Color serviceMeat = Color(0xFFC62828);
+
+  /// Color representing the seafood service.
+  static const Color serviceSeafood = Color(0xFF00838F);
+
   /// Color representing the pharmacy service.
   static const Color servicePharmacy = Color(0xFF0277BD);
 
-  /// Color representing the ride / tawsila service.
-  static const Color serviceRide = Color(0xFF512DA8);
+  /// Color representing the bakery service.
+  static const Color serviceBakery = Color(0xFFEF6C00);
+
+  /// Color representing the sweets & desserts service.
+  static const Color serviceSweets = Color(0xFFD81B60);
+
+  /// Color representing the flowers & gifts service.
+  static const Color serviceFlowers = Color(0xFF7B1FA2);
+
+  /// Color representing the clothing service.
+  static const Color serviceClothing = Color(0xFFAD1457);
+
+  /// Color representing the shoes service.
+  static const Color serviceShoes = Color(0xFF4E342E);
+
+  /// Color representing the electronics service.
+  static const Color serviceElectronics = Color(0xFF512DA8);
+
+  /// Color representing the mobile phones service.
+  static const Color serviceMobile = Color(0xFF0277BD);
+
+  /// Color representing the furniture service.
+  static const Color serviceFurniture = Color(0xFF4E342E);
+
+  /// Color representing the fashion service.
+  static const Color serviceFashion = Color(0xFFAD1457);
+
+  /// Color representing the home appliances service.
+  static const Color serviceAppliances = Color(0xFF455A64);
 
   /// Color representing home services.
   static const Color serviceHome = Color(0xFF4E342E);
+
+  /// Color representing the cafés & drinks service.
+  static const Color serviceCafe = Color(0xFF6D4C41);
+
+  /// Color representing the pet shops service.
+  static const Color servicePetShop = Color(0xFF827717);
+
+  /// Color representing the fitness & gyms service.
+  static const Color serviceFitness = Color(0xFFE53935);
+
+  /// Color representing the gas stations service.
+  static const Color serviceGas = Color(0xFF37474F);
+
+  /// Color representing the car wash service.
+  static const Color serviceCarwash = Color(0xFF0097A7);
+
+  /// Color representing the ride / tawsila service.
+  static const Color serviceRide = Color(0xFF512DA8);
 
   /// Color representing the delivery service.
   static const Color serviceDelivery = Color(0xFF00897B);

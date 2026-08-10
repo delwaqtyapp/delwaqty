@@ -1049,18 +1049,46 @@ class _MerchantDetailPageState extends ConsumerState<MerchantDetailPage> {
         return Icons.restaurant;
       case MerchantType.grocery:
         return Icons.local_grocery_store;
+      case MerchantType.supermarket:
+        return Icons.shopping_cart;
+      case MerchantType.fruits:
+        return Icons.eco;
+      case MerchantType.meat:
+        return Icons.set_meal;
+      case MerchantType.seafood:
+        return Icons.phishing;
       case MerchantType.pharmacy:
         return Icons.local_pharmacy;
-      case MerchantType.flowers:
-        return Icons.local_florist;
       case MerchantType.bakery:
         return Icons.bakery_dining;
+      case MerchantType.sweets:
+        return Icons.cake;
+      case MerchantType.flowers:
+        return Icons.local_florist;
+      case MerchantType.clothing:
+        return Icons.dry_cleaning;
+      case MerchantType.shoes:
+        return Icons.pedal_bike;
       case MerchantType.electronics:
         return Icons.devices;
+      case MerchantType.mobile:
+        return Icons.phone_iphone;
       case MerchantType.furniture:
         return Icons.chair;
+      case MerchantType.appliances:
+        return Icons.kitchen;
       case MerchantType.fashion:
         return Icons.checkroom;
+      case MerchantType.cafe:
+        return Icons.coffee;
+      case MerchantType.petShop:
+        return Icons.pets;
+      case MerchantType.fitness:
+        return Icons.fitness_center;
+      case MerchantType.gas:
+        return Icons.local_gas_station;
+      case MerchantType.carwash:
+        return Icons.local_car_wash;
       case MerchantType.home:
         return Icons.home_repair_service;
       case MerchantType.other:
@@ -1074,6 +1102,14 @@ class _MerchantDetailPageState extends ConsumerState<MerchantDetailPage> {
         return AppColors.merchantFood;
       case MerchantType.grocery:
         return AppColors.merchantGrocery;
+      case MerchantType.supermarket:
+        return AppColors.serviceSupermarket;
+      case MerchantType.fruits:
+        return AppColors.serviceFruits;
+      case MerchantType.meat:
+        return AppColors.serviceMeat;
+      case MerchantType.seafood:
+        return AppColors.serviceSeafood;
       case MerchantType.pharmacy:
         return AppColors.merchantPharmacy;
       case MerchantType.electronics:
@@ -1086,6 +1122,26 @@ class _MerchantDetailPageState extends ConsumerState<MerchantDetailPage> {
         return AppColors.brandViolet;
       case MerchantType.bakery:
         return AppColors.warningLight;
+      case MerchantType.sweets:
+        return AppColors.serviceSweets;
+      case MerchantType.clothing:
+        return AppColors.serviceClothing;
+      case MerchantType.shoes:
+        return AppColors.serviceShoes;
+      case MerchantType.mobile:
+        return AppColors.serviceMobile;
+      case MerchantType.appliances:
+        return AppColors.serviceAppliances;
+      case MerchantType.cafe:
+        return AppColors.serviceCafe;
+      case MerchantType.petShop:
+        return AppColors.servicePetShop;
+      case MerchantType.fitness:
+        return AppColors.serviceFitness;
+      case MerchantType.gas:
+        return AppColors.serviceGas;
+      case MerchantType.carwash:
+        return AppColors.serviceCarwash;
       case MerchantType.home:
         return AppColors.serviceHome;
       case MerchantType.other:
@@ -1099,18 +1155,46 @@ class _MerchantDetailPageState extends ConsumerState<MerchantDetailPage> {
         return l10n.typeRestaurant;
       case MerchantType.grocery:
         return l10n.typeGrocery;
+      case MerchantType.supermarket:
+        return l10n.typeSupermarket;
+      case MerchantType.fruits:
+        return l10n.typeFruits;
+      case MerchantType.meat:
+        return l10n.typeMeat;
+      case MerchantType.seafood:
+        return l10n.typeSeafood;
       case MerchantType.pharmacy:
         return l10n.typePharmacy;
       case MerchantType.flowers:
         return l10n.typeFlowers;
       case MerchantType.bakery:
         return l10n.typeBakery;
+      case MerchantType.sweets:
+        return l10n.typeSweets;
+      case MerchantType.clothing:
+        return l10n.typeClothing;
+      case MerchantType.shoes:
+        return l10n.typeShoes;
       case MerchantType.electronics:
         return l10n.typeElectronics;
+      case MerchantType.mobile:
+        return l10n.typeMobile;
       case MerchantType.furniture:
         return l10n.typeFurniture;
+      case MerchantType.appliances:
+        return l10n.typeAppliances;
       case MerchantType.fashion:
         return l10n.typeFashion;
+      case MerchantType.cafe:
+        return l10n.typeCafe;
+      case MerchantType.petShop:
+        return l10n.typePetShop;
+      case MerchantType.fitness:
+        return l10n.typeFitness;
+      case MerchantType.gas:
+        return l10n.typeGas;
+      case MerchantType.carwash:
+        return l10n.typeCarwash;
       case MerchantType.home:
         return l10n.typeHome;
       case MerchantType.other:
@@ -1459,18 +1543,46 @@ class _SimilarMerchantCard extends StatelessWidget {
         return Icons.restaurant;
       case MerchantType.grocery:
         return Icons.local_grocery_store;
+      case MerchantType.supermarket:
+        return Icons.shopping_cart;
+      case MerchantType.fruits:
+        return Icons.eco;
+      case MerchantType.meat:
+        return Icons.set_meal;
+      case MerchantType.seafood:
+        return Icons.phishing;
       case MerchantType.pharmacy:
         return Icons.local_pharmacy;
-      case MerchantType.flowers:
-        return Icons.local_florist;
       case MerchantType.bakery:
         return Icons.bakery_dining;
+      case MerchantType.sweets:
+        return Icons.cake;
+      case MerchantType.flowers:
+        return Icons.local_florist;
+      case MerchantType.clothing:
+        return Icons.dry_cleaning;
+      case MerchantType.shoes:
+        return Icons.pedal_bike;
       case MerchantType.electronics:
         return Icons.devices;
+      case MerchantType.mobile:
+        return Icons.phone_iphone;
       case MerchantType.furniture:
         return Icons.chair;
+      case MerchantType.appliances:
+        return Icons.kitchen;
       case MerchantType.fashion:
         return Icons.checkroom;
+      case MerchantType.cafe:
+        return Icons.coffee;
+      case MerchantType.petShop:
+        return Icons.pets;
+      case MerchantType.fitness:
+        return Icons.fitness_center;
+      case MerchantType.gas:
+        return Icons.local_gas_station;
+      case MerchantType.carwash:
+        return Icons.local_car_wash;
       case MerchantType.home:
         return Icons.home_repair_service;
       case MerchantType.other:

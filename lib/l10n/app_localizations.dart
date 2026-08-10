@@ -638,23 +638,137 @@ abstract class AppLocalizations {
   /// **'Grocery'**
   String get grocery;
 
+  /// No description provided for @supermarket.
+  ///
+  /// In en, this message translates to:
+  /// **'Supermarket'**
+  String get supermarket;
+
+  /// No description provided for @fruits.
+  ///
+  /// In en, this message translates to:
+  /// **'Fruits & Veggies'**
+  String get fruits;
+
+  /// No description provided for @meat.
+  ///
+  /// In en, this message translates to:
+  /// **'Meat & Poultry'**
+  String get meat;
+
+  /// No description provided for @seafood.
+  ///
+  /// In en, this message translates to:
+  /// **'Seafood'**
+  String get seafood;
+
   /// No description provided for @pharmacy.
   ///
   /// In en, this message translates to:
   /// **'Pharmacy'**
   String get pharmacy;
 
-  /// No description provided for @ride.
+  /// No description provided for @bakery.
   ///
   /// In en, this message translates to:
-  /// **'Ride'**
-  String get ride;
+  /// **'Bakery'**
+  String get bakery;
+
+  /// No description provided for @sweets.
+  ///
+  /// In en, this message translates to:
+  /// **'Sweets & Desserts'**
+  String get sweets;
+
+  /// No description provided for @flowers.
+  ///
+  /// In en, this message translates to:
+  /// **'Flowers & Gifts'**
+  String get flowers;
+
+  /// No description provided for @clothing.
+  ///
+  /// In en, this message translates to:
+  /// **'Clothing'**
+  String get clothing;
+
+  /// No description provided for @shoes.
+  ///
+  /// In en, this message translates to:
+  /// **'Shoes'**
+  String get shoes;
+
+  /// No description provided for @electronics.
+  ///
+  /// In en, this message translates to:
+  /// **'Electronics'**
+  String get electronics;
+
+  /// No description provided for @mobile.
+  ///
+  /// In en, this message translates to:
+  /// **'Mobile Phones'**
+  String get mobile;
+
+  /// No description provided for @furniture.
+  ///
+  /// In en, this message translates to:
+  /// **'Furniture'**
+  String get furniture;
+
+  /// No description provided for @fashion.
+  ///
+  /// In en, this message translates to:
+  /// **'Fashion'**
+  String get fashion;
+
+  /// No description provided for @appliances.
+  ///
+  /// In en, this message translates to:
+  /// **'Home Appliances'**
+  String get appliances;
 
   /// No description provided for @homeServices.
   ///
   /// In en, this message translates to:
   /// **'Home Services'**
   String get homeServices;
+
+  /// No description provided for @cafe.
+  ///
+  /// In en, this message translates to:
+  /// **'Cafés & Drinks'**
+  String get cafe;
+
+  /// No description provided for @petShop.
+  ///
+  /// In en, this message translates to:
+  /// **'Pet Shops'**
+  String get petShop;
+
+  /// No description provided for @fitness.
+  ///
+  /// In en, this message translates to:
+  /// **'Fitness & Gyms'**
+  String get fitness;
+
+  /// No description provided for @gas.
+  ///
+  /// In en, this message translates to:
+  /// **'Gas Stations'**
+  String get gas;
+
+  /// No description provided for @carwash.
+  ///
+  /// In en, this message translates to:
+  /// **'Car Wash'**
+  String get carwash;
+
+  /// No description provided for @ride.
+  ///
+  /// In en, this message translates to:
+  /// **'Ride'**
+  String get ride;
 
   /// No description provided for @delivery.
   ///
@@ -6122,65 +6236,89 @@ abstract class AppLocalizations {
   /// **'Driver performance metrics will appear here.'**
   String get driverPerformancePlaceholder;
 
-  /// No description provided for @typeRestaurant.
+  /// No description provided for @typeSupermarket.
   ///
   /// In en, this message translates to:
-  /// **'Restaurant'**
-  String get typeRestaurant;
+  /// **'Supermarket'**
+  String get typeSupermarket;
 
-  /// No description provided for @typeGrocery.
+  /// No description provided for @typeFruits.
   ///
   /// In en, this message translates to:
-  /// **'Grocery'**
-  String get typeGrocery;
+  /// **'Fruits & Veggies'**
+  String get typeFruits;
 
-  /// No description provided for @typePharmacy.
+  /// No description provided for @typeMeat.
   ///
   /// In en, this message translates to:
-  /// **'Pharmacy'**
-  String get typePharmacy;
+  /// **'Meat & Poultry'**
+  String get typeMeat;
 
-  /// No description provided for @typeFlowers.
+  /// No description provided for @typeSeafood.
   ///
   /// In en, this message translates to:
-  /// **'Flowers'**
-  String get typeFlowers;
+  /// **'Seafood'**
+  String get typeSeafood;
 
-  /// No description provided for @typeBakery.
+  /// No description provided for @typeSweets.
   ///
   /// In en, this message translates to:
-  /// **'Bakery'**
-  String get typeBakery;
+  /// **'Sweets'**
+  String get typeSweets;
 
-  /// No description provided for @typeElectronics.
+  /// No description provided for @typeClothing.
   ///
   /// In en, this message translates to:
-  /// **'Electronics'**
-  String get typeElectronics;
+  /// **'Clothing'**
+  String get typeClothing;
 
-  /// No description provided for @typeFurniture.
+  /// No description provided for @typeShoes.
   ///
   /// In en, this message translates to:
-  /// **'Furniture'**
-  String get typeFurniture;
+  /// **'Shoes'**
+  String get typeShoes;
 
-  /// No description provided for @typeFashion.
+  /// No description provided for @typeMobile.
   ///
   /// In en, this message translates to:
-  /// **'Fashion'**
-  String get typeFashion;
+  /// **'Mobile'**
+  String get typeMobile;
 
-  /// No description provided for @typeHomeServices.
+  /// No description provided for @typeAppliances.
   ///
   /// In en, this message translates to:
-  /// **'Home Services'**
-  String get typeHomeServices;
+  /// **'Appliances'**
+  String get typeAppliances;
 
-  /// No description provided for @typeOther.
+  /// No description provided for @typeCafe.
   ///
   /// In en, this message translates to:
-  /// **'Other'**
-  String get typeOther;
+  /// **'Café'**
+  String get typeCafe;
+
+  /// No description provided for @typePetShop.
+  ///
+  /// In en, this message translates to:
+  /// **'Pet Shop'**
+  String get typePetShop;
+
+  /// No description provided for @typeFitness.
+  ///
+  /// In en, this message translates to:
+  /// **'Fitness'**
+  String get typeFitness;
+
+  /// No description provided for @typeGas.
+  ///
+  /// In en, this message translates to:
+  /// **'Gas'**
+  String get typeGas;
+
+  /// No description provided for @typeCarwash.
+  ///
+  /// In en, this message translates to:
+  /// **'Car Wash'**
+  String get typeCarwash;
 
   /// No description provided for @tosLastUpdated.
   ///
@@ -6704,17 +6842,71 @@ abstract class AppLocalizations {
   /// **'Support'**
   String get roleSupport;
 
+  /// No description provided for @typeRestaurant.
+  ///
+  /// In en, this message translates to:
+  /// **'Restaurant'**
+  String get typeRestaurant;
+
+  /// No description provided for @typeGrocery.
+  ///
+  /// In en, this message translates to:
+  /// **'Grocery'**
+  String get typeGrocery;
+
+  /// No description provided for @typePharmacy.
+  ///
+  /// In en, this message translates to:
+  /// **'Pharmacy'**
+  String get typePharmacy;
+
+  /// No description provided for @typeFlowers.
+  ///
+  /// In en, this message translates to:
+  /// **'Flowers'**
+  String get typeFlowers;
+
+  /// No description provided for @typeBakery.
+  ///
+  /// In en, this message translates to:
+  /// **'Bakery'**
+  String get typeBakery;
+
+  /// No description provided for @typeElectronics.
+  ///
+  /// In en, this message translates to:
+  /// **'Electronics'**
+  String get typeElectronics;
+
+  /// No description provided for @typeFurniture.
+  ///
+  /// In en, this message translates to:
+  /// **'Furniture'**
+  String get typeFurniture;
+
   /// No description provided for @typeMarket.
   ///
   /// In en, this message translates to:
   /// **'Market'**
   String get typeMarket;
 
+  /// No description provided for @typeFashion.
+  ///
+  /// In en, this message translates to:
+  /// **'Fashion'**
+  String get typeFashion;
+
   /// No description provided for @typeHome.
   ///
   /// In en, this message translates to:
   /// **'Home'**
   String get typeHome;
+
+  /// No description provided for @typeOther.
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get typeOther;
 
   /// No description provided for @passwordUpdated.
   ///

@@ -23,6 +23,7 @@ import 'package:delwaqty/features/complaints/complaints_module.dart';
 import 'package:delwaqty/features/sanctions/sanctions_module.dart';
 import 'package:delwaqty/features/location_tracking/location_tracking_module.dart';
 import 'package:delwaqty/features/support_chat/support_chat_module.dart';
+import 'package:delwaqty/features/home_services/home_services_module.dart';
 
 void registerAllModules() {
   final registry = FeatureRegistry.instance;
@@ -52,6 +53,7 @@ void registerAllModules() {
     SupportChatModule(),
     SearchModule(),
     OrdersModule(),
+    HomeServicesModule(),
   ]);
 
   registry.freeze();

@@ -26,6 +26,33 @@ final unreadCountProvider = FutureProvider.autoDispose<int>((ref) async {
   return repo.getUnreadCount();
 });
 
+final unreadCountStreamProvider = StreamProvider<int>((ref) {
+  final controller = StreamController<int>();
+
+  Future<void> check() async {
+    try {
+      final repo = ref.read(notificationRepositoryProvider);
+      final count = await repo.getUnreadCount();
+      if (!controller.isClosed) controller.add(count);
+    } catch (_) {
+      if (!controller.isClosed) controller.add(0);
+    }
+  }
+
+  check();
+
+  final sub = Stream.periodic(const Duration(minutes: 1), (_) => null).listen(
+    (_) => check(),
+  );
+
+  ref.onDispose(() {
+    sub.cancel();
+    controller.close();
+  });
+
+  return controller.stream;
+});
+
 class NotificationsModule extends FeatureModule {
   @override
   String get id => 'notifications';
@@ -57,16 +84,9 @@ class NotificationsModule extends FeatureModule {
 
   @override
   Stream<int>? badgeStream(Ref ref) {
-    final controller = StreamController<int>();
-
-    void check() async {
-      final repo = ref.read(notificationRepositoryProvider);
-      final count = await repo.getUnreadCount();
-      controller.add(count);
-    }
-
-    check();
-    return controller.stream;
+    return ref.watch(unreadCountStreamProvider).whenOrNull(
+          data: (count) => Stream.value(count),
+        );
   }
 
   @override
@@ -77,13 +97,29 @@ class NotificationsModule extends FeatureModule {
       icon: Icons.notifications_outlined,
       badgeStream: (ref) {
         final controller = StreamController<int>();
-        void check() async {
-          final repo = ref.read(notificationRepositoryProvider);
-          final count = await repo.getUnreadCount();
-          controller.add(count);
+
+        Future<void> check() async {
+          try {
+            final repo = ref.read(notificationRepositoryProvider);
+            final count = await repo.getUnreadCount();
+            if (!controller.isClosed) controller.add(count);
+          } catch (_) {
+            if (!controller.isClosed) controller.add(0);
+          }
         }
 
         check();
+
+        final sub =
+            Stream.periodic(const Duration(minutes: 1), (_) => null).listen(
+          (_) => check(),
+        );
+
+        ref.onDispose(() {
+          sub.cancel();
+          controller.close();
+        });
+
         return controller.stream;
       },
       onTap: (ctx, ref) {

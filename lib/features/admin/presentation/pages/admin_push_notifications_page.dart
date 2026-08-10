@@ -383,6 +383,22 @@ class _AdminPushNotificationsPageState
         return Icons.check_circle_outline_rounded;
       case NotificationType.reminder:
         return Icons.alarm_rounded;
+      case NotificationType.system:
+        return Icons.info_outline_rounded;
+      case NotificationType.order:
+        return Icons.shopping_bag_outlined;
+      case NotificationType.payment:
+        return Icons.payment_rounded;
+      case NotificationType.promotion:
+        return Icons.local_offer_outlined;
+      case NotificationType.service:
+        return Icons.home_repair_service_outlined;
+      case NotificationType.account:
+        return Icons.person_outline_rounded;
+      case NotificationType.security:
+        return Icons.shield_outlined;
+      case NotificationType.message:
+        return Icons.chat_bubble_outline_rounded;
     }
   }
 }

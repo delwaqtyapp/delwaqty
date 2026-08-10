@@ -27,6 +27,8 @@ mixin _$AppNotification {
   NotificationType get type => throw _privateConstructorUsedError;
   bool get isRead => throw _privateConstructorUsedError;
   String? get deepLink => throw _privateConstructorUsedError;
+  String? get idempotencyKey => throw _privateConstructorUsedError;
+  DateTime? get readAt => throw _privateConstructorUsedError;
   DateTime get createdAt => throw _privateConstructorUsedError;
 
   /// Serializes this AppNotification to a JSON map.
@@ -53,6 +55,8 @@ abstract class $AppNotificationCopyWith<$Res> {
     NotificationType type,
     bool isRead,
     String? deepLink,
+    String? idempotencyKey,
+    DateTime? readAt,
     DateTime createdAt,
   });
 }
@@ -78,6 +82,8 @@ class _$AppNotificationCopyWithImpl<$Res, $Val extends AppNotification>
     Object? type = null,
     Object? isRead = null,
     Object? deepLink = freezed,
+    Object? idempotencyKey = freezed,
+    Object? readAt = freezed,
     Object? createdAt = null,
   }) {
     return _then(
@@ -106,6 +112,14 @@ class _$AppNotificationCopyWithImpl<$Res, $Val extends AppNotification>
                 ? _value.deepLink
                 : deepLink // ignore: cast_nullable_to_non_nullable
                       as String?,
+            idempotencyKey: freezed == idempotencyKey
+                ? _value.idempotencyKey
+                : idempotencyKey // ignore: cast_nullable_to_non_nullable
+                      as String?,
+            readAt: freezed == readAt
+                ? _value.readAt
+                : readAt // ignore: cast_nullable_to_non_nullable
+                      as DateTime?,
             createdAt: null == createdAt
                 ? _value.createdAt
                 : createdAt // ignore: cast_nullable_to_non_nullable
@@ -132,6 +146,8 @@ abstract class _$$AppNotificationImplCopyWith<$Res>
     NotificationType type,
     bool isRead,
     String? deepLink,
+    String? idempotencyKey,
+    DateTime? readAt,
     DateTime createdAt,
   });
 }
@@ -156,6 +172,8 @@ class __$$AppNotificationImplCopyWithImpl<$Res>
     Object? type = null,
     Object? isRead = null,
     Object? deepLink = freezed,
+    Object? idempotencyKey = freezed,
+    Object? readAt = freezed,
     Object? createdAt = null,
   }) {
     return _then(
@@ -184,6 +202,14 @@ class __$$AppNotificationImplCopyWithImpl<$Res>
             ? _value.deepLink
             : deepLink // ignore: cast_nullable_to_non_nullable
                   as String?,
+        idempotencyKey: freezed == idempotencyKey
+            ? _value.idempotencyKey
+            : idempotencyKey // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        readAt: freezed == readAt
+            ? _value.readAt
+            : readAt // ignore: cast_nullable_to_non_nullable
+                  as DateTime?,
         createdAt: null == createdAt
             ? _value.createdAt
             : createdAt // ignore: cast_nullable_to_non_nullable
@@ -203,6 +229,8 @@ class _$AppNotificationImpl implements _AppNotification {
     required this.type,
     this.isRead = false,
     this.deepLink,
+    this.idempotencyKey,
+    this.readAt,
     required this.createdAt,
   });
 
@@ -223,11 +251,15 @@ class _$AppNotificationImpl implements _AppNotification {
   @override
   final String? deepLink;
   @override
+  final String? idempotencyKey;
+  @override
+  final DateTime? readAt;
+  @override
   final DateTime createdAt;
 
   @override
   String toString() {
-    return 'AppNotification(id: $id, title: $title, body: $body, type: $type, isRead: $isRead, deepLink: $deepLink, createdAt: $createdAt)';
+    return 'AppNotification(id: $id, title: $title, body: $body, type: $type, isRead: $isRead, deepLink: $deepLink, idempotencyKey: $idempotencyKey, readAt: $readAt, createdAt: $createdAt)';
   }
 
   @override
@@ -242,6 +274,9 @@ class _$AppNotificationImpl implements _AppNotification {
             (identical(other.isRead, isRead) || other.isRead == isRead) &&
             (identical(other.deepLink, deepLink) ||
                 other.deepLink == deepLink) &&
+            (identical(other.idempotencyKey, idempotencyKey) ||
+                other.idempotencyKey == idempotencyKey) &&
+            (identical(other.readAt, readAt) || other.readAt == readAt) &&
             (identical(other.createdAt, createdAt) ||
                 other.createdAt == createdAt));
   }
@@ -256,6 +291,8 @@ class _$AppNotificationImpl implements _AppNotification {
     type,
     isRead,
     deepLink,
+    idempotencyKey,
+    readAt,
     createdAt,
   );
 
@@ -284,6 +321,8 @@ abstract class _AppNotification implements AppNotification {
     required final NotificationType type,
     final bool isRead,
     final String? deepLink,
+    final String? idempotencyKey,
+    final DateTime? readAt,
     required final DateTime createdAt,
   }) = _$AppNotificationImpl;
 
@@ -302,6 +341,10 @@ abstract class _AppNotification implements AppNotification {
   bool get isRead;
   @override
   String? get deepLink;
+  @override
+  String? get idempotencyKey;
+  @override
+  DateTime? get readAt;
   @override
   DateTime get createdAt;
 

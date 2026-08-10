@@ -51,4 +51,14 @@ class SupabaseNotificationRepositoryImpl implements NotificationRepository {
   Future<void> clearAll() async {
     await _dataSource.clearAll();
   }
+
+  @override
+  Future<bool> existsByIdempotencyKey(String key) async {
+    return _dataSource.existsByIdempotencyKey(key);
+  }
+
+  @override
+  Future<void> deactivateAllTokens() async {
+    await _dataSource.deactivateAllTokens();
+  }
 }

@@ -12,6 +12,8 @@ class AppNotification with _$AppNotification {
     required NotificationType type,
     @Default(false) bool isRead,
     String? deepLink,
+    String? idempotencyKey,
+    DateTime? readAt,
     required DateTime createdAt,
   }) = _AppNotification;
 
@@ -20,6 +22,22 @@ class AppNotification with _$AppNotification {
 }
 
 enum NotificationType {
+  @JsonValue('system')
+  system,
+  @JsonValue('order')
+  order,
+  @JsonValue('payment')
+  payment,
+  @JsonValue('promotion')
+  promotion,
+  @JsonValue('service')
+  service,
+  @JsonValue('account')
+  account,
+  @JsonValue('security')
+  security,
+  @JsonValue('message')
+  message,
   @JsonValue('info')
   info,
   @JsonValue('warning')
@@ -28,4 +46,65 @@ enum NotificationType {
   success,
   @JsonValue('reminder')
   reminder,
+}
+
+class NotificationPayload {
+  const NotificationPayload({
+    this.notificationId,
+    this.type,
+    this.deepLink,
+    this.entityId,
+    this.entityType,
+    this.action,
+  });
+
+  final String? notificationId;
+  final String? type;
+  final String? deepLink;
+  final String? entityId;
+  final String? entityType;
+  final String? action;
+
+  factory NotificationPayload.fromMap(Map<String, dynamic> data) {
+    return NotificationPayload(
+      notificationId: data['notification_id'] as String?,
+      type: data['type'] as String?,
+      deepLink: data['deep_link'] as String?,
+      entityId: data['entity_id'] as String?,
+      entityType: data['entity_type'] as String?,
+      action: data['action'] as String?,
+    );
+  }
+
+  Map<String, dynamic> toMap() => {
+        if (notificationId != null) 'notification_id': notificationId,
+        if (type != null) 'type': type,
+        if (deepLink != null) 'deep_link': deepLink,
+        if (entityId != null) 'entity_id': entityId,
+        if (entityType != null) 'entity_type': entityType,
+        if (action != null) 'action': action,
+      };
+
+  String? resolveDeepLink() {
+    if (deepLink != null && deepLink!.isNotEmpty) return deepLink;
+    if (entityType == null || entityId == null) return null;
+    return _defaultDeepLink(entityType!, entityId!);
+  }
+
+  String _defaultDeepLink(String entityType, String entityId) {
+    switch (entityType) {
+      case 'order':
+        return '/market/orders/$entityId';
+      case 'merchant':
+        return '/market/merchant/$entityId';
+      case 'service':
+        return '/service-booking/$entityId';
+      case 'ride':
+        return '/ride/$entityId';
+      case 'delivery':
+        return '/ride/$entityId';
+      default:
+        return '/notifications';
+    }
+  }
 }

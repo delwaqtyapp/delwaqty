@@ -29,6 +29,8 @@ _$UserModelImpl _$$UserModelImplFromJson(Map<String, dynamic> json) =>
           VerificationStatus.pending,
       idCardUrl: json['idCardUrl'] as String?,
       profilePhotoUrl: json['profilePhotoUrl'] as String?,
+      tradeLicenseUrl: json['tradeLicenseUrl'] as String?,
+      drivingLicenseUrl: json['drivingLicenseUrl'] as String?,
       createdAt: DateTime.parse(json['createdAt'] as String),
       updatedAt: json['updatedAt'] == null
           ? null
@@ -52,12 +54,16 @@ Map<String, dynamic> _$$UserModelImplToJson(_$UserModelImpl instance) =>
           _$VerificationStatusEnumMap[instance.verificationStatus]!,
       'idCardUrl': instance.idCardUrl,
       'profilePhotoUrl': instance.profilePhotoUrl,
+      'tradeLicenseUrl': instance.tradeLicenseUrl,
+      'drivingLicenseUrl': instance.drivingLicenseUrl,
       'createdAt': instance.createdAt.toIso8601String(),
       'updatedAt': instance.updatedAt?.toIso8601String(),
     };
 
 const _$UserTypeEnumMap = {
   UserType.customer: 'customer',
+  UserType.merchant: 'merchant',
+  UserType.driver: 'driver',
   UserType.provider: 'provider',
   UserType.delivery: 'delivery',
 };

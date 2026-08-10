@@ -190,6 +190,8 @@ final _selectedSortProvider = StateProvider<SortBy>((_) => SortBy.distance);
 
 final _openNowFilterProvider = StateProvider<bool>((_) => false);
 
+final _priceRangeProvider = StateProvider<RangeValues>((_) => const RangeValues(0, 10000));
+
 final _recentSearchesProvider = StateProvider<List<String>>((_) => []);
 
 final _searchResultsProvider = FutureProvider<List<Merchant>>((ref) async {
@@ -197,9 +199,12 @@ final _searchResultsProvider = FutureProvider<List<Merchant>>((ref) async {
   final type = ref.watch(_selectedTypeProvider);
   final sortBy = ref.watch(_selectedSortProvider);
   final openNow = ref.watch(_openNowFilterProvider);
+  final priceRange = ref.watch(_priceRangeProvider);
   final repo = ref.watch(merchantRepositoryProvider);
 
-  if (query.trim().isEmpty && type == null) {
+  final hasPriceFilter = priceRange.start > 0 || priceRange.end < 10000;
+
+  if (query.trim().isEmpty && type == null && !hasPriceFilter) {
     return repo.getMerchants(filter: SearchFilter(sortBy: sortBy), limit: 50);
   }
 
@@ -219,6 +224,12 @@ final _searchResultsProvider = FutureProvider<List<Merchant>>((ref) async {
   }
   if (openNow) {
     results = results.where((m) => m.isOpenNow).toList();
+  }
+  if (hasPriceFilter) {
+    results = results.where((m) {
+      final price = m.minimumOrder ?? m.deliveryFee ?? 0;
+      return price >= priceRange.start && price <= priceRange.end;
+    }).toList();
   }
 
   return results;
@@ -459,6 +470,8 @@ class _SearchPageState extends ConsumerState<SearchPage> {
 
   Widget _buildSortBar(AppLocalizations l10n, SortBy selectedSort) {
     final openNow = ref.watch(_openNowFilterProvider);
+    final priceRange = ref.watch(_priceRangeProvider);
+    final hasPriceFilter = priceRange.start > 0 || priceRange.end < 10000;
     final sortOptions = <(String label, SortBy sort)>[
       (l10n.sortByDistance, SortBy.distance),
       (l10n.sortByRating, SortBy.rating),
@@ -481,6 +494,14 @@ class _SearchPageState extends ConsumerState<SearchPage> {
             },
           ),
           const SizedBox(width: 8),
+          _PremiumPill(
+            label: hasPriceFilter ? '${l10n.priceRange}' : l10n.priceRange,
+            icon: Icons.attach_money_rounded,
+            compact: true,
+            selected: hasPriceFilter,
+            onTap: () => _showPriceFilterSheet(l10n),
+          ),
+          const SizedBox(width: 8),
           for (final (label, sort) in sortOptions) ...[
             _PremiumPill(
               label: label,
@@ -492,6 +513,25 @@ class _SearchPageState extends ConsumerState<SearchPage> {
             const SizedBox(width: 8),
           ],
         ],
+      ),
+    );
+  }
+
+  void _showPriceFilterSheet(AppLocalizations l10n) {
+    final currentRange = ref.read(_priceRangeProvider);
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (context) => _PriceFilterSheet(
+        initialRange: currentRange,
+        onApply: (range) {
+          ref.read(_priceRangeProvider.notifier).state = range;
+          Navigator.of(context).pop();
+        },
+        onReset: () {
+          ref.read(_priceRangeProvider.notifier).state = const RangeValues(0, 10000);
+          Navigator.of(context).pop();
+        },
       ),
     );
   }
@@ -883,6 +923,154 @@ class _OpenBadge extends StatelessWidget {
           fontSize: 10,
           color: Colors.white,
           fontWeight: FontWeight.w700,
+        ),
+      ),
+    );
+  }
+}
+
+class _PriceFilterSheet extends StatefulWidget {
+  const _PriceFilterSheet({
+    required this.initialRange,
+    required this.onApply,
+    required this.onReset,
+  });
+
+  final RangeValues initialRange;
+  final ValueChanged<RangeValues> onApply;
+  final VoidCallback onReset;
+
+  @override
+  State<_PriceFilterSheet> createState() => _PriceFilterSheetState();
+}
+
+class _PriceFilterSheetState extends State<_PriceFilterSheet> {
+  late RangeValues _currentRange;
+
+  @override
+  void initState() {
+    super.initState();
+    _currentRange = widget.initialRange;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return Container(
+      decoration: BoxDecoration(
+        color: cs.surface,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Center(
+            child: Container(
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: cs.onSurfaceVariant.withValues(alpha: 0.3),
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'Price Range',
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              _PriceChip(
+                label: '${_currentRange.start.toInt()}',
+                color: cs.primaryContainer,
+              ),
+              Icon(Icons.arrow_forward_rounded, color: cs.onSurfaceVariant, size: 18),
+              _PriceChip(
+                label: _currentRange.end >= 10000 ? '10000+' : '${_currentRange.end.toInt()}',
+                color: cs.primaryContainer,
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          RangeSlider(
+            values: _currentRange,
+            min: 0,
+            max: 10000,
+            divisions: 100,
+            activeColor: AppColors.brandPurple,
+            inactiveColor: cs.surfaceContainerHighest,
+            labels: RangeLabels(
+              '${_currentRange.start.toInt()}',
+              _currentRange.end >= 10000 ? '10000+' : '${_currentRange.end.toInt()}',
+            ),
+            onChanged: (values) {
+              setState(() => _currentRange = values);
+            },
+          ),
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              Expanded(
+                child: OutlinedButton(
+                  onPressed: widget.onReset,
+                  style: OutlinedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                  ),
+                  child: const Text('Reset'),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: FilledButton(
+                  onPressed: () => widget.onApply(_currentRange),
+                  style: FilledButton.styleFrom(
+                    backgroundColor: AppColors.brandPurple,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                  ),
+                  child: const Text('Apply', style: TextStyle(color: Colors.white)),
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: MediaQuery.of(context).viewInsets.bottom),
+        ],
+      ),
+    );
+  }
+}
+
+class _PriceChip extends StatelessWidget {
+  const _PriceChip({required this.label, required this.color});
+
+  final String label;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.15),
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Text(
+        '$label EGP',
+        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+          fontWeight: FontWeight.w600,
+          color: AppColors.brandPurple,
         ),
       ),
     );

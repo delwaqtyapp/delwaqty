@@ -1310,6 +1310,12 @@ abstract class AppLocalizations {
   /// **'Open Now'**
   String get openNow;
 
+  /// No description provided for @priceRange.
+  ///
+  /// In en, this message translates to:
+  /// **'Price Range'**
+  String get priceRange;
+
   /// No description provided for @freeDelivery.
   ///
   /// In en, this message translates to:

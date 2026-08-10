@@ -633,6 +633,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get openNow => 'مفتوح الآن';
 
   @override
+  String get priceRange => 'نطاق السعر';
+
+  @override
   String get freeDelivery => 'توصيل مجاني';
 
   @override

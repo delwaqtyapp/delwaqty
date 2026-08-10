@@ -200,7 +200,7 @@ class HomePage extends ConsumerWidget {
                   SliverToBoxAdapter(
                     child: _buildDiscoverySection(context, ref, l10n),
                   ),
-                  const SliverToBoxAdapter(child: SizedBox(height: 12)),
+                  const SliverToBoxAdapter(child: SizedBox(height: 90)),
                 ],
               ),
             ),
@@ -396,7 +396,7 @@ class _CompactCategories extends StatelessWidget {
                       context.push('/market?type=$typeParam');
                     },
                     child: SizedBox(
-                      width: 72,
+                      width: 80,
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
@@ -550,7 +550,19 @@ class _DiscoveryContent extends ConsumerWidget {
     final merchantsAsync = ref.watch(discoveryMerchantsProvider);
 
     return AnimatedSwitcher(
-      duration: const Duration(milliseconds: 200),
+      duration: const Duration(milliseconds: 300),
+      switchInCurve: Curves.easeOutCubic,
+      switchOutCurve: Curves.easeInCubic,
+      transitionBuilder: (child, animation) => FadeTransition(
+        opacity: animation,
+        child: SlideTransition(
+          position: Tween<Offset>(
+            begin: const Offset(0.03, 0),
+            end: Offset.zero,
+          ).animate(animation),
+          child: child,
+        ),
+      ),
       child: merchantsAsync.when(
         loading: () => SizedBox(
           key: const ValueKey('shimmer'),

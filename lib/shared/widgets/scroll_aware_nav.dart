@@ -7,9 +7,11 @@ class ScrollAwareNavObserver {
   ScrollAwareNavObserver._();
 
   static double _lastOffset = 0;
-  static double _threshold = 50;
-  static bool _accumulating = false;
+  static bool _isVisible = true;
   static double _accumulated = 0;
+
+  static const double _showThreshold = 40;
+  static const double _hideThreshold = 50;
 
   static bool handleScrollNotification(ScrollNotification notification) {
     if (notification is! ScrollUpdateNotification) return false;
@@ -26,21 +28,34 @@ class ScrollAwareNavObserver {
 
     _accumulated += delta;
 
-    if (_accumulated.abs() < _threshold) return false;
+    if (_isVisible && _accumulated > _hideThreshold) {
+      _isVisible = false;
+      _accumulated = 0;
+      return true;
+    }
 
-    final scrollingDown = _accumulated > 0;
-    _accumulated = 0;
+    if (!_isVisible && _accumulated < -_showThreshold) {
+      _isVisible = true;
+      _accumulated = 0;
+      return false;
+    }
 
-    return scrollingDown;
+    if (_accumulated.abs() > _hideThreshold) {
+      _accumulated = 0;
+    }
+
+    return !_isVisible;
   }
 
   static void resetOnTop() {
     _lastOffset = 0;
     _accumulated = 0;
+    _isVisible = true;
   }
 
   static void _reset() {
     _lastOffset = 0;
     _accumulated = 0;
+    _isVisible = true;
   }
 }

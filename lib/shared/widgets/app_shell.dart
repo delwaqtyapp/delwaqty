@@ -34,11 +34,12 @@ class _AppShellState extends ConsumerState<AppShell> {
     return Scaffold(
       body: widget.navigationShell,
       bottomNavigationBar: AnimatedSlide(
-        duration: const Duration(milliseconds: 280),
+        duration: const Duration(milliseconds: 300),
         curve: Curves.easeOutCubic,
         offset: isVisible ? Offset.zero : const Offset(0, 1.5),
         child: AnimatedOpacity(
-          duration: const Duration(milliseconds: 200),
+          duration: const Duration(milliseconds: 250),
+          curve: Curves.easeOut,
           opacity: isVisible ? 1.0 : 0.0,
           child: _FloatingGlassNav(
             selectedIndex: widget.navigationShell.currentIndex,

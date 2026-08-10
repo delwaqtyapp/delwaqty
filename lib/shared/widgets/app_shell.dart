@@ -6,30 +6,46 @@ import 'package:delwaqty/core/module/feature_module.dart';
 import 'package:delwaqty/core/module/feature_registry.dart';
 import 'package:delwaqty/core/theme/app_colors.dart';
 import 'package:delwaqty/core/theme/app_text_styles.dart';
+import 'package:delwaqty/shared/widgets/scroll_aware_nav.dart';
 
-class AppShell extends ConsumerWidget {
+class AppShell extends ConsumerStatefulWidget {
   const AppShell({super.key, required this.navigationShell});
 
   final StatefulNavigationShell navigationShell;
 
+  @override
+  ConsumerState<AppShell> createState() => _AppShellState();
+}
+
+class _AppShellState extends ConsumerState<AppShell> {
   void _onTap(int index) {
-    navigationShell.goBranch(
+    widget.navigationShell.goBranch(
       index,
-      initialLocation: index == navigationShell.currentIndex,
+      initialLocation: index == widget.navigationShell.currentIndex,
     );
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final registry = FeatureRegistry.instance;
     final navModules = registry.navModules;
+    final isVisible = ref.watch(bottomNavVisibleProvider);
 
     return Scaffold(
-      body: navigationShell,
-      bottomNavigationBar: _FloatingGlassNav(
-        selectedIndex: navigationShell.currentIndex,
-        onDestinationSelected: _onTap,
-        navModules: navModules,
+      body: widget.navigationShell,
+      bottomNavigationBar: AnimatedSlide(
+        duration: const Duration(milliseconds: 280),
+        curve: Curves.easeOutCubic,
+        offset: isVisible ? Offset.zero : const Offset(0, 1.5),
+        child: AnimatedOpacity(
+          duration: const Duration(milliseconds: 200),
+          opacity: isVisible ? 1.0 : 0.0,
+          child: _FloatingGlassNav(
+            selectedIndex: widget.navigationShell.currentIndex,
+            onDestinationSelected: _onTap,
+            navModules: navModules,
+          ),
+        ),
       ),
     );
   }

@@ -479,6 +479,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get branches => 'Branches';
 
   @override
+  String get addBranch => 'Add Branch';
+
+  @override
+  String get branchName => 'Branch Name';
+
+  @override
+  String get phone => 'Phone';
+
+  @override
+  String get address => 'Address';
+
+  @override
   String get selectBranch => 'Select Branch';
 
   @override
@@ -1232,9 +1244,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get contactInfo => 'Contact Info';
-
-  @override
-  String get phone => 'Phone';
 
   @override
   String get directions => 'Directions';
@@ -2544,9 +2553,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get personalInfo => 'Personal Information';
-
-  @override
-  String get address => 'Address';
 
   @override
   String get nationalId => 'National ID Number';

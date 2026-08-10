@@ -477,6 +477,18 @@ class AppLocalizationsAr extends AppLocalizations {
   String get branches => 'الفروع';
 
   @override
+  String get addBranch => 'Add Branch';
+
+  @override
+  String get branchName => 'Branch Name';
+
+  @override
+  String get phone => 'الهاتف';
+
+  @override
+  String get address => 'العنوان';
+
+  @override
   String get selectBranch => 'اختر الفرع';
 
   @override
@@ -1228,9 +1240,6 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get contactInfo => 'معلومات الاتصال';
-
-  @override
-  String get phone => 'الهاتف';
 
   @override
   String get directions => 'الاتجاهات';
@@ -2536,9 +2545,6 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get personalInfo => 'المعلومات الشخصية';
-
-  @override
-  String get address => 'العنوان';
 
   @override
   String get nationalId => 'رقم الهوية الوطنية';

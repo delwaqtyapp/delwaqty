@@ -1,10 +1,38 @@
 # SESSION_STATUS.md
 
-> **Last updated:** 2026-08-10 Session 25 (Sprint 66 — Hive offline caching + Search price range filter)
+> **Last updated:** 2026-08-10 Session 26 (Sprint 67 — Merchant dashboard, Paymob payment, DB hardening)
 
 ---
 
-## Current Task — SPRINT 66: OFFLINE CACHING + PRICE RANGE FILTER (Session 25)
+## Current Task — SPRINT 67: MERCHANT OPERATIONS & PAYMENTS (Session 26)
+
+Complete merchant capabilities with branch/reservation/reviews management, integrate Paymob payment gateway, and harden the database with missing indexes.
+
+### Sprint 67 (commit pending)
+| Area | Change |
+|------|--------|
+| **Merchant branches** | New `MerchantBranchesPage` in merchant module: list/add/edit/delete branches with name, address, phone, lat/lng, primary toggle, active toggle. Swipe-to-delete |
+| **Merchant reservations** | New `MerchantReservationsPage`: filter chips (All/Pending/Confirmed/Seated/Completed/Cancelled), confirm/cancel actions, pull-to-refresh |
+| **Merchant reviews** | New `MerchantReviewsPage`: rating summary card with star distribution bar chart, inline reply field per review, saves via `reviewRepository.updateReview` |
+| **Merchant dashboard** | Updated quick actions: added Branches, Reservations, Reviews navigation links |
+| **Paymob service** | New `PaymobService` in `lib/services/payment/`: REST API integration for auth tokens, order creation, payment key generation, iframe URL construction |
+| **Payment config** | Added `PAYMOB_API_KEY`, `PAYMOB_INTEGRATION_ID`, `PAYMOB_IFRAME_ID` to `AppConfig` |
+| **Order model** | Added `PaymentStatus` enum (unpaid/pending/paid/failed/refunded), `paymentStatus`, `paymentId`, `transactionId` fields to `Order` |
+| **Checkout integration** | Updated `_placeOrder()` to call Paymob REST API for card/wallet payments, opens Paymob iframe via `url_launcher` |
+| **DB migration 024** | `payment_transactions` table, payment columns on `orders`, indexes on `orders(user_id, merchant_id, status, created_at)`, `products(merchant_id, category_id, is_available)`, `reviews(merchant_id, user_id, rating)`, `favorites(user_id, merchant_id)`, `service_bookings(user_id, provider_id)` |
+| **RLS** | Payment transactions: users see own, service_role manages all |
+
+### Quality
+| Metric | Value |
+|--------|-------|
+| **Tests** | 594/594 passing |
+| **Analyzer** | 0 errors (421 pre-existing info lints) |
+| **APK** | Built + installed on DNP NX9 |
+| **Git** | Pending commit |
+
+---
+
+## Previous Task — SPRINT 66: OFFLINE CACHING + PRICE RANGE FILTER (Session 25)
 
 Added Hive offline caching with stale-while-revalidate strategy and a search price range filter for merchant minimum order/delivery fee.
 

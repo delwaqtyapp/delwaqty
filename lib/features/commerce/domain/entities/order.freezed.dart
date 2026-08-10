@@ -32,6 +32,9 @@ mixin _$Order {
   OrderStatus get status => throw _privateConstructorUsedError;
   String? get deliveryAddress => throw _privateConstructorUsedError;
   String? get paymentMethod => throw _privateConstructorUsedError;
+  PaymentStatus get paymentStatus => throw _privateConstructorUsedError;
+  String? get paymentId => throw _privateConstructorUsedError;
+  String? get transactionId => throw _privateConstructorUsedError;
   String? get specialInstructions => throw _privateConstructorUsedError;
   DateTime? get confirmedAt => throw _privateConstructorUsedError;
   DateTime? get preparingAt => throw _privateConstructorUsedError;
@@ -68,6 +71,9 @@ abstract class $OrderCopyWith<$Res> {
     OrderStatus status,
     String? deliveryAddress,
     String? paymentMethod,
+    PaymentStatus paymentStatus,
+    String? paymentId,
+    String? transactionId,
     String? specialInstructions,
     DateTime? confirmedAt,
     DateTime? preparingAt,
@@ -106,6 +112,9 @@ class _$OrderCopyWithImpl<$Res, $Val extends Order>
     Object? status = null,
     Object? deliveryAddress = freezed,
     Object? paymentMethod = freezed,
+    Object? paymentStatus = null,
+    Object? paymentId = freezed,
+    Object? transactionId = freezed,
     Object? specialInstructions = freezed,
     Object? confirmedAt = freezed,
     Object? preparingAt = freezed,
@@ -161,6 +170,18 @@ class _$OrderCopyWithImpl<$Res, $Val extends Order>
             paymentMethod: freezed == paymentMethod
                 ? _value.paymentMethod
                 : paymentMethod // ignore: cast_nullable_to_non_nullable
+                      as String?,
+            paymentStatus: null == paymentStatus
+                ? _value.paymentStatus
+                : paymentStatus // ignore: cast_nullable_to_non_nullable
+                      as PaymentStatus,
+            paymentId: freezed == paymentId
+                ? _value.paymentId
+                : paymentId // ignore: cast_nullable_to_non_nullable
+                      as String?,
+            transactionId: freezed == transactionId
+                ? _value.transactionId
+                : transactionId // ignore: cast_nullable_to_non_nullable
                       as String?,
             specialInstructions: freezed == specialInstructions
                 ? _value.specialInstructions
@@ -224,6 +245,9 @@ abstract class _$$OrderImplCopyWith<$Res> implements $OrderCopyWith<$Res> {
     OrderStatus status,
     String? deliveryAddress,
     String? paymentMethod,
+    PaymentStatus paymentStatus,
+    String? paymentId,
+    String? transactionId,
     String? specialInstructions,
     DateTime? confirmedAt,
     DateTime? preparingAt,
@@ -261,6 +285,9 @@ class __$$OrderImplCopyWithImpl<$Res>
     Object? status = null,
     Object? deliveryAddress = freezed,
     Object? paymentMethod = freezed,
+    Object? paymentStatus = null,
+    Object? paymentId = freezed,
+    Object? transactionId = freezed,
     Object? specialInstructions = freezed,
     Object? confirmedAt = freezed,
     Object? preparingAt = freezed,
@@ -316,6 +343,18 @@ class __$$OrderImplCopyWithImpl<$Res>
         paymentMethod: freezed == paymentMethod
             ? _value.paymentMethod
             : paymentMethod // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        paymentStatus: null == paymentStatus
+            ? _value.paymentStatus
+            : paymentStatus // ignore: cast_nullable_to_non_nullable
+                  as PaymentStatus,
+        paymentId: freezed == paymentId
+            ? _value.paymentId
+            : paymentId // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        transactionId: freezed == transactionId
+            ? _value.transactionId
+            : transactionId // ignore: cast_nullable_to_non_nullable
                   as String?,
         specialInstructions: freezed == specialInstructions
             ? _value.specialInstructions
@@ -373,6 +412,9 @@ class _$OrderImpl implements _Order {
     required this.status,
     this.deliveryAddress,
     this.paymentMethod,
+    this.paymentStatus = PaymentStatus.unpaid,
+    this.paymentId,
+    this.transactionId,
     this.specialInstructions,
     this.confirmedAt,
     this.preparingAt,
@@ -420,6 +462,13 @@ class _$OrderImpl implements _Order {
   @override
   final String? paymentMethod;
   @override
+  @JsonKey()
+  final PaymentStatus paymentStatus;
+  @override
+  final String? paymentId;
+  @override
+  final String? transactionId;
+  @override
   final String? specialInstructions;
   @override
   final DateTime? confirmedAt;
@@ -440,7 +489,7 @@ class _$OrderImpl implements _Order {
 
   @override
   String toString() {
-    return 'Order(id: $id, merchantId: $merchantId, merchantName: $merchantName, items: $items, subtotal: $subtotal, deliveryFee: $deliveryFee, discount: $discount, total: $total, status: $status, deliveryAddress: $deliveryAddress, paymentMethod: $paymentMethod, specialInstructions: $specialInstructions, confirmedAt: $confirmedAt, preparingAt: $preparingAt, readyAt: $readyAt, deliveredAt: $deliveredAt, cancelledAt: $cancelledAt, cancellationReason: $cancellationReason, createdAt: $createdAt, updatedAt: $updatedAt)';
+    return 'Order(id: $id, merchantId: $merchantId, merchantName: $merchantName, items: $items, subtotal: $subtotal, deliveryFee: $deliveryFee, discount: $discount, total: $total, status: $status, deliveryAddress: $deliveryAddress, paymentMethod: $paymentMethod, paymentStatus: $paymentStatus, paymentId: $paymentId, transactionId: $transactionId, specialInstructions: $specialInstructions, confirmedAt: $confirmedAt, preparingAt: $preparingAt, readyAt: $readyAt, deliveredAt: $deliveredAt, cancelledAt: $cancelledAt, cancellationReason: $cancellationReason, createdAt: $createdAt, updatedAt: $updatedAt)';
   }
 
   @override
@@ -466,6 +515,12 @@ class _$OrderImpl implements _Order {
                 other.deliveryAddress == deliveryAddress) &&
             (identical(other.paymentMethod, paymentMethod) ||
                 other.paymentMethod == paymentMethod) &&
+            (identical(other.paymentStatus, paymentStatus) ||
+                other.paymentStatus == paymentStatus) &&
+            (identical(other.paymentId, paymentId) ||
+                other.paymentId == paymentId) &&
+            (identical(other.transactionId, transactionId) ||
+                other.transactionId == transactionId) &&
             (identical(other.specialInstructions, specialInstructions) ||
                 other.specialInstructions == specialInstructions) &&
             (identical(other.confirmedAt, confirmedAt) ||
@@ -500,6 +555,9 @@ class _$OrderImpl implements _Order {
     status,
     deliveryAddress,
     paymentMethod,
+    paymentStatus,
+    paymentId,
+    transactionId,
     specialInstructions,
     confirmedAt,
     preparingAt,
@@ -538,6 +596,9 @@ abstract class _Order implements Order {
     required final OrderStatus status,
     final String? deliveryAddress,
     final String? paymentMethod,
+    final PaymentStatus paymentStatus,
+    final String? paymentId,
+    final String? transactionId,
     final String? specialInstructions,
     final DateTime? confirmedAt,
     final DateTime? preparingAt,
@@ -573,6 +634,12 @@ abstract class _Order implements Order {
   String? get deliveryAddress;
   @override
   String? get paymentMethod;
+  @override
+  PaymentStatus get paymentStatus;
+  @override
+  String? get paymentId;
+  @override
+  String? get transactionId;
   @override
   String? get specialInstructions;
   @override

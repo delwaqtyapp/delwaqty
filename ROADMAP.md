@@ -90,13 +90,13 @@
 - [x] Reviews & Ratings — submit, view, filter
 
 ### Phase 7: Presentation Layer — Merchant
-- [ ] Merchant Dashboard — overview, analytics, quick actions
-- [ ] Branch Management — CRUD, working hours, delivery zones
-- [ ] Product Management — CRUD, modifiers, inventory, pricing
-- [ ] Order Management — incoming, in-progress, completed, rejected
-- [ ] Offer Management — create, schedule, discount types
-- [ ] Reservation Management — upcoming, availability, capacity
-- [ ] Reviews Management — respond, moderate
+- [x] Merchant Dashboard — overview, analytics, quick actions
+- [x] Branch Management — CRUD, working hours, delivery zones
+- [x] Product Management — CRUD, modifiers, inventory, pricing
+- [x] Order Management — incoming, in-progress, completed, rejected
+- [x] Offer Management — create, schedule, discount types
+- [x] Reservation Management — upcoming, availability, capacity
+- [x] Reviews Management — respond, moderate
 
 ### Phase 8: Presentation Layer — Driver
 - [ ] Driver Assignment — accept/decline orders
@@ -106,7 +106,7 @@
 
 ### Phase 9: Database Hardening
 - [x] RLS per-role policies (replace USING(true) patterns — migration 005 created)
-- [ ] Add missing indexes (reviews.rating, orders.created_at, coupons.valid_until)
+- [x] Add missing indexes (reviews.rating, orders.created_at, coupons.valid_until)
 - [ ] Add RLS to activity_logs, admin_users, drivers, notifications, platform_settings
 
 ### Phase 10: Restaurant Plugin Polish
@@ -114,6 +114,14 @@
 - [ ] Integration tests for full order flow
 - [ ] Real-time subscriptions (order tracking, inventory changes)
 - [ ] Push notifications for order status
+
+### Phase 11: Super App MVP — Multi-Category Services Platform
+- [x] Sprint 62: Home Grid + New Categories
+- [x] Sprint 63: Home Services Booking Module
+- [x] Sprint 64: Enhanced Search + Filters
+- [x] Sprint 65: Admin Dashboard (Flutter Web)
+- [x] Sprint 66: Multi-Role Registration + Offline Caching
+- [x] Sprint 67: Merchant Operations & Payments Integration
 
 ---
 

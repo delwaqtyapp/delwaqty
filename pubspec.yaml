@@ -60,7 +60,7 @@ dependencies:
   google_maps_flutter: ^2.10.0
 
   # HTTP client
-  http: ^1.2.0
+  http: ^1.6.0
 
 
   # Firebase

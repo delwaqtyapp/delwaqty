@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:delwaqty/features/commerce/commerce_module.dart';
 import 'package:delwaqty/features/commerce/domain/entities/cart.dart'
     as commerce;
 import 'package:delwaqty/features/commerce/domain/entities/coupon.dart';
+import 'package:delwaqty/features/commerce/domain/entities/order.dart';
+import 'package:delwaqty/services/payment/paymob_service.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 import 'package:delwaqty/core/extensions/context_extensions.dart';
 import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
@@ -300,6 +304,20 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
         paymentMethod: _paymentMethod,
       );
 
+      if (_paymentMethod != 'cash') {
+        final paymentSuccess = await _processPayment(order, cart.total);
+        if (!paymentSuccess && mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(l10n.somethingWentWrong),
+              backgroundColor: cs.error,
+            ),
+          );
+          setState(() => _isPlacing = false);
+          return;
+        }
+      }
+
       await ref.read(cartRepositoryProvider).clearCart();
       ref.invalidate(_cartFutureProvider);
 
@@ -314,6 +332,41 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
       if (mounted) {
         setState(() => _isPlacing = false);
       }
+    }
+  }
+
+  Future<bool> _processPayment(Order order, double amount) async {
+    try {
+      final paymobService = ref.read(paymobServiceProvider);
+      final auth = await Supabase.instance.client.auth.currentUser;
+
+      final authToken = await paymobService.authenticate();
+      if (authToken == null) return false;
+
+      final paymobOrderId = await paymobService.createOrder(
+        authToken: authToken,
+        amountCents: amount,
+        merchantOrderId: order.id,
+      );
+      if (paymobOrderId == null) return false;
+
+      final paymentKey = await paymobService.getPaymentKey(
+        authToken: authToken,
+        orderId: paymobOrderId,
+        amountCents: amount,
+        email: auth?.email ?? 'customer@delwaqty.com',
+      );
+      if (paymentKey == null) return false;
+
+      final paymentUrl = paymobService.getPaymentUrl(paymentKey);
+      if (await canLaunchUrl(Uri.parse(paymentUrl))) {
+        await launchUrl(Uri.parse(paymentUrl), mode: LaunchMode.inAppWebView);
+      }
+
+      return true;
+    } catch (e) {
+      debugPrint('Payment processing error: $e');
+      return false;
     }
   }
 }

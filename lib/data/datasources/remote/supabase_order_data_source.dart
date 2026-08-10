@@ -60,6 +60,9 @@ class SupabaseOrderDataSource {
       status: _parseStatus(row['status'] as String),
       deliveryAddress: row['delivery_address'] as String?,
       paymentMethod: row['payment_method'] as String?,
+      paymentStatus: _parsePaymentStatus(row['payment_status'] as String? ?? 'unpaid'),
+      paymentId: row['payment_id'] as String?,
+      transactionId: row['transaction_id'] as String?,
       specialInstructions:
           row['special_instructions'] as String? ?? row['notes'] as String?,
       confirmedAt: row['confirmed_at'] != null
@@ -89,6 +92,13 @@ class SupabaseOrderDataSource {
     return OrderStatus.values.firstWhere(
       (s) => s.name == status,
       orElse: () => OrderStatus.pending,
+    );
+  }
+
+  PaymentStatus _parsePaymentStatus(String status) {
+    return PaymentStatus.values.firstWhere(
+      (s) => s.name == status,
+      orElse: () => PaymentStatus.unpaid,
     );
   }
 

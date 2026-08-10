@@ -1016,6 +1016,30 @@ abstract class AppLocalizations {
   /// **'Branches'**
   String get branches;
 
+  /// No description provided for @addBranch.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Branch'**
+  String get addBranch;
+
+  /// No description provided for @branchName.
+  ///
+  /// In en, this message translates to:
+  /// **'Branch Name'**
+  String get branchName;
+
+  /// No description provided for @phone.
+  ///
+  /// In en, this message translates to:
+  /// **'Phone'**
+  String get phone;
+
+  /// No description provided for @address.
+  ///
+  /// In en, this message translates to:
+  /// **'Address'**
+  String get address;
+
   /// No description provided for @selectBranch.
   ///
   /// In en, this message translates to:
@@ -2431,12 +2455,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Contact Info'**
   String get contactInfo;
-
-  /// No description provided for @phone.
-  ///
-  /// In en, this message translates to:
-  /// **'Phone'**
-  String get phone;
 
   /// No description provided for @directions.
   ///
@@ -4957,12 +4975,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Personal Information'**
   String get personalInfo;
-
-  /// No description provided for @address.
-  ///
-  /// In en, this message translates to:
-  /// **'Address'**
-  String get address;
 
   /// No description provided for @nationalId.
   ///

@@ -10,6 +10,9 @@ import 'package:delwaqty/features/merchant/presentation/pages/merchant_orders_pa
 import 'package:delwaqty/features/merchant/presentation/pages/merchant_products_page.dart';
 import 'package:delwaqty/features/merchant/presentation/pages/merchant_product_form_page.dart';
 import 'package:delwaqty/features/merchant/presentation/pages/merchant_offers_page.dart';
+import 'package:delwaqty/features/merchant/presentation/pages/merchant_branches_page.dart';
+import 'package:delwaqty/features/merchant/presentation/pages/merchant_reservations_page.dart';
+import 'package:delwaqty/features/merchant/presentation/pages/merchant_reviews_page.dart';
 
 final merchantDashboardRepositoryImplProvider =
     Provider<MerchantDashboardRepositoryImpl>(
@@ -73,6 +76,18 @@ class MerchantModule extends FeatureModule {
         GoRoute(
           path: 'offers',
           builder: (context, state) => const MerchantOffersPage(),
+        ),
+        GoRoute(
+          path: 'branches',
+          builder: (context, state) => const MerchantBranchesPage(),
+        ),
+        GoRoute(
+          path: 'reservations',
+          builder: (context, state) => const MerchantReservationsPage(),
+        ),
+        GoRoute(
+          path: 'reviews',
+          builder: (context, state) => const MerchantReviewsPage(),
         ),
       ],
     ),

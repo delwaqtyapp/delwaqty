@@ -22,6 +22,11 @@ _$OrderImpl _$$OrderImplFromJson(Map<String, dynamic> json) => _$OrderImpl(
   status: $enumDecode(_$OrderStatusEnumMap, json['status']),
   deliveryAddress: json['deliveryAddress'] as String?,
   paymentMethod: json['paymentMethod'] as String?,
+  paymentStatus:
+      $enumDecodeNullable(_$PaymentStatusEnumMap, json['paymentStatus']) ??
+      PaymentStatus.unpaid,
+  paymentId: json['paymentId'] as String?,
+  transactionId: json['transactionId'] as String?,
   specialInstructions: json['specialInstructions'] as String?,
   confirmedAt: json['confirmedAt'] == null
       ? null
@@ -58,6 +63,9 @@ Map<String, dynamic> _$$OrderImplToJson(_$OrderImpl instance) =>
       'status': _$OrderStatusEnumMap[instance.status]!,
       'deliveryAddress': instance.deliveryAddress,
       'paymentMethod': instance.paymentMethod,
+      'paymentStatus': _$PaymentStatusEnumMap[instance.paymentStatus]!,
+      'paymentId': instance.paymentId,
+      'transactionId': instance.transactionId,
       'specialInstructions': instance.specialInstructions,
       'confirmedAt': instance.confirmedAt?.toIso8601String(),
       'preparingAt': instance.preparingAt?.toIso8601String(),
@@ -78,6 +86,14 @@ const _$OrderStatusEnumMap = {
   OrderStatus.inTransit: 'in_transit',
   OrderStatus.delivered: 'delivered',
   OrderStatus.cancelled: 'cancelled',
+};
+
+const _$PaymentStatusEnumMap = {
+  PaymentStatus.unpaid: 'unpaid',
+  PaymentStatus.pending: 'pending',
+  PaymentStatus.paid: 'paid',
+  PaymentStatus.failed: 'failed',
+  PaymentStatus.refunded: 'refunded',
 };
 
 _$OrderItemImpl _$$OrderItemImplFromJson(Map<String, dynamic> json) =>

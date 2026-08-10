@@ -637,6 +637,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get openNow => 'Open Now';
 
   @override
+  String get priceRange => 'Price Range';
+
+  @override
   String get freeDelivery => 'Free Delivery';
 
   @override

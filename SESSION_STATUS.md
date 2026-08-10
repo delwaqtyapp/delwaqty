@@ -1,10 +1,34 @@
 # SESSION_STATUS.md
 
-> **Last updated:** 2026-08-10 Session 24 (Sprint 62+63+65 — Super App categories, 4-role registration, auth guard, Flutter Web admin — commit `94322d4`)
+> **Last updated:** 2026-08-10 Session 25 (Sprint 66 — Hive offline caching + Search price range filter)
 
 ---
 
-## Current Task — SPRINT 62+63+65: PHASE 1 MVP (Session 24)
+## Current Task — SPRINT 66: OFFLINE CACHING + PRICE RANGE FILTER (Session 25)
+
+Added Hive offline caching with stale-while-revalidate strategy and a search price range filter for merchant minimum order/delivery fee.
+
+### Sprint 66 (commit pending)
+| Area | Change |
+|------|--------|
+| **Hive cache service** | New `HiveCacheService` in `lib/data/datasources/local/`: stores merchants, products, service categories in Hive boxes with 15-min TTL. `cacheMerchants()`, `getCachedMerchants()`, `cacheProducts()`, `getCachedProducts()`, `cacheServiceCategories()`, `getCachedServiceCategories()` |
+| **Cached merchant repository** | New `CachedMerchantRepository` wrapping `MerchantRepository`: online-first with fallback to Hive cache on network failure; offline reads from cache directly. Implements stale-while-revalidate pattern |
+| **Cached service booking repository** | New `CachedServiceBookingRepository` wrapping `ServiceBookingRepository`: caches service categories for offline access |
+| **Hive initialization** | `Hive.initFlutter()` + box opening in `main.dart` during startup parallel init |
+| **Search price range filter** | New `_priceRangeProvider` (RangeValues 0–10000), filter button in sort bar, `_PriceFilterSheet` bottom sheet with RangeSlider, Apply/Reset buttons. Filters merchants by `minimumOrder` or `deliveryFee` |
+| **l10n** | New key `priceRange` (EN: "Price Range", AR: "نطاق السعر") |
+
+### Quality
+| Metric | Value |
+|--------|-------|
+| **Tests** | 594/594 passing |
+| **Analyzer** | 0 errors (401 pre-existing info lints) |
+| **APK** | Pending build |
+| **Git** | Pending commit |
+
+---
+
+## Previous Task — SPRINT 62+63+65: PHASE 1 MVP (Session 24)
 
 Massive Phase 1 MVP expansion: 24 service categories, Home Services booking, 4-role registration, auth guard, and Flutter Web admin dashboard.
 

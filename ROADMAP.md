@@ -154,32 +154,32 @@
 ## Phase 11: Super App MVP — Multi-Category Services Platform
 
 ### Sprint 62: Home Grid + New Categories
-- [ ] Expand `MerchantType` enum (16 new types: supermarket, fruits, meat, seafood, sweets, clothing, shoes, mobile, appliances, cafe, petShop, fitness, gas, carwash)
-- [ ] Expand home page grid from 7 to 20+ tiles (scrollable 4-column)
-- [ ] Add new service category colors + icons + l10n (EN + AR)
-- [ ] Database migration 023: `ALTER TABLE merchants ADD COLUMN category_tags TEXT[]`
+- [x] Expand `MerchantType` enum (16 new types: supermarket, fruits, meat, seafood, sweets, clothing, shoes, mobile, appliances, cafe, petShop, fitness, gas, carwash)
+- [x] Expand home page grid from 7 to 20+ tiles (scrollable 4-column)
+- [x] Add new service category colors + icons + l10n (EN + AR)
+- [x] Database migration 023: `ALTER TABLE merchants ADD COLUMN category_tags TEXT[]`
 
 ### Sprint 63: Home Services Booking Module
-- [ ] New `home_services` feature module (data/domain/presentation)
-- [ ] Service categories: Plumbing, Electrical, Carpentry, AC Maintenance, Painting
-- [ ] Booking flow: select service → pick date/time → confirm
-- [ ] Service provider listing with ratings/availability
-- [ ] DB schema: `service_bookings`, `service_providers`, `service_categories` tables
+- [x] New `home_services` feature module (data/domain/presentation)
+- [x] Service categories: Plumbing, Electrical, Carpentry, AC Maintenance, Painting
+- [x] Booking flow: select service → pick date/time → confirm
+- [x] Service provider listing with ratings/availability
+- [x] DB schema: `service_bookings`, `service_providers`, `service_categories` tables
 
 ### Sprint 64: Enhanced Search + Filters
-- [ ] Auto-complete search with recent + suggested results
-- [ ] Filter chips: Price range, Distance, Rating, Open Now
-- [ ] Sort: Relevance, Distance, Rating, Price (low/high)
+- [x] Auto-complete search with recent + suggested results
+- [x] Filter chips: Price range, Distance, Rating, Open Now
+- [x] Sort: Relevance, Distance, Rating, Price (low/high)
 - [ ] Category quick-filter on search results
 
 ### Sprint 65: Admin Dashboard (Flutter Web)
-- [ ] Flutter Web admin shell with sidebar navigation
-- [ ] Dashboard overview: revenue, orders, users, merchants KPIs
-- [ ] User management: list, search, activate/deactivate
+- [x] Flutter Web admin shell with sidebar navigation
+- [x] Dashboard overview: revenue, orders, users, merchants KPIs
+- [x] User management: list, search, activate/deactivate
 - [ ] Category/Service management: add/edit/remove categories
 
 ### Sprint 66: Multi-Role Registration + Offline
-- [ ] Dynamic registration fields per role (Customer/Merchant/Driver/Provider)
-- [ ] Document upload for merchant/provider verification
-- [ ] Offline caching with Hive for categories/products
+- [x] Dynamic registration fields per role (Customer/Merchant/Driver/Provider)
+- [x] Document upload for merchant/provider verification
+- [x] Offline caching with Hive for categories/products
 - [ ] Push notification admin tool

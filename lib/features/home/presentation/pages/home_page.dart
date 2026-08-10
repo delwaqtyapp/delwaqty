@@ -22,6 +22,8 @@ import 'package:delwaqty/shared/widgets/design/premium_search_field.dart';
 import 'package:delwaqty/shared/widgets/design/glass_surface.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 import 'package:delwaqty/features/home/domain/home_domain.dart';
+import 'package:delwaqty/features/home/domain/entities/platform_category.dart';
+import 'package:delwaqty/shared/widgets/scroll_aware_nav.dart';
 import 'package:delwaqty/core/theme/app_colors.dart';
 import 'package:delwaqty/core/theme/app_text_styles.dart';
 import 'package:delwaqty/core/theme/app_spacing.dart';
@@ -110,6 +112,34 @@ String _merchantEmoji(MerchantType type) => switch (type) {
   MerchantType.other => '🏪',
 };
 
+MerchantType? _categoryNameToMerchantType(String name) {
+  final lower = name.toLowerCase();
+  if (lower.contains('مطعم') || lower.contains('restaurant')) return MerchantType.restaurant;
+  if (lower.contains('بقال') || lower.contains('grocery')) return MerchantType.grocery;
+  if (lower.contains('سوبرماركت') || lower.contains('supermarket')) return MerchantType.supermarket;
+  if (lower.contains('فاكهة') || lower.contains('fruit')) return MerchantType.fruits;
+  if (lower.contains('لحوم') || lower.contains('meat')) return MerchantType.meat;
+  if (lower.contains('سمك') || lower.contains('seafood')) return MerchantType.seafood;
+  if (lower.contains('صيدل') || lower.contains('pharmacy')) return MerchantType.pharmacy;
+  if (lower.contains('مخب') || lower.contains('bakery')) return MerchantType.bakery;
+  if (lower.contains('حلوي') || lower.contains('sweet')) return MerchantType.sweets;
+  if (lower.contains('ورود') || lower.contains('flower')) return MerchantType.flowers;
+  if (lower.contains('ملابس') || lower.contains('clothing')) return MerchantType.clothing;
+  if (lower.contains('احذي') || lower.contains('shoe')) return MerchantType.shoes;
+  if (lower.contains('electronic') || lower.contains('إلكتروني')) return MerchantType.electronics;
+  if (lower.contains('جوال') || lower.contains('mobile') || lower.contains('هاتف')) return MerchantType.mobile;
+  if (lower.contains('اثاث') || lower.contains('furniture')) return MerchantType.furniture;
+  if (lower.contains('أزياء') || lower.contains('fashion') || lower.contains('mode')) return MerchantType.fashion;
+  if (lower.contains('أجهزة') || lower.contains('appliance')) return MerchantType.appliances;
+  if (lower.contains('منزل') || lower.contains('home')) return MerchantType.home;
+  if (lower.contains('كافيه') || lower.contains('قهوة') || lower.contains('cafe')) return MerchantType.cafe;
+  if (lower.contains('حيوان') || lower.contains('pet')) return MerchantType.petShop;
+  if (lower.contains('لياقة') || lower.contains('fitness')) return MerchantType.fitness;
+  if (lower.contains('بنزين') || lower.contains('gas')) return MerchantType.gas;
+  if (lower.contains('غسيل') || lower.contains('carwash')) return MerchantType.carwash;
+  return null;
+}
+
 class HomePage extends ConsumerWidget {
   const HomePage({super.key});
 
@@ -124,6 +154,7 @@ class HomePage extends ConsumerWidget {
     final unreadCount = isGuest
         ? 0
         : ref.watch(unreadCountProvider).valueOrNull ?? 0;
+    final bottomNavVisible = ref.watch(bottomNavVisibleProvider);
 
     return Scaffold(
       body: SafeArea(
@@ -131,47 +162,47 @@ class HomePage extends ConsumerWidget {
           child: RefreshIndicator(
             onRefresh: () async {
               ref.invalidate(nearbyMerchantsProvider);
+              ref.invalidate(activeCategoriesProvider);
+              ref.invalidate(discoveryMerchantsProvider);
               ref.read(userLocationProvider.notifier).refreshQuick();
             },
-            child: CustomScrollView(
-              slivers: [
-                SliverToBoxAdapter(
-                  child: _buildHeader(
-                    context,
-                    ref,
-                    l10n,
-                    authState,
-                    isGuest,
-                    locationAsync,
-                    unreadCount,
+            child: NotificationListener<ScrollNotification>(
+              onNotification: (notification) {
+                final scrollingDown =
+                    ScrollAwareNavObserver.handleScrollNotification(notification);
+                ref.read(bottomNavVisibleProvider.notifier).state =
+                    !scrollingDown;
+                return false;
+              },
+              child: CustomScrollView(
+                slivers: [
+                  SliverToBoxAdapter(
+                    child: _buildHeader(
+                      context,
+                      ref,
+                      l10n,
+                      authState,
+                      isGuest,
+                      locationAsync,
+                      unreadCount,
+                    ),
                   ),
-                ),
-                SliverToBoxAdapter(child: _buildSearchBar(context, l10n)),
-                SliverToBoxAdapter(
-                  child: _HeroOrderCard(
-                    onTap: () => context.push('/direct-delivery'),
+                  SliverToBoxAdapter(child: _buildSearchBar(context, l10n)),
+                  SliverToBoxAdapter(
+                    child: _HeroOrderCard(
+                      onTap: () => context.push('/direct-delivery'),
+                    ),
                   ),
-                ),
-                SliverToBoxAdapter(child: _buildServiceGrid(context, ref, l10n)),
-                SliverToBoxAdapter(
-                  child: _buildSectionTitle(
-                    context,
-                    l10n.nearby,
-                    () => context.push('/market'),
+                  const SliverToBoxAdapter(child: _PromoCarousel()),
+                  SliverToBoxAdapter(
+                    child: _CompactCategories(ref: ref),
                   ),
-                ),
-                _buildMerchantList(context, ref, l10n, featured: false),
-                const SliverToBoxAdapter(child: _PromoCarousel()),
-                SliverToBoxAdapter(
-                  child: _buildSectionTitle(
-                    context,
-                    l10n.popular,
-                    () => context.push('/market'),
+                  SliverToBoxAdapter(
+                    child: _buildDiscoverySection(context, ref, l10n),
                   ),
-                ),
-                _buildMerchantList(context, ref, l10n, featured: true),
-                const SliverToBoxAdapter(child: SizedBox(height: 12)),
-              ],
+                  const SliverToBoxAdapter(child: SizedBox(height: 12)),
+                ],
+              ),
             ),
           ),
         ),
@@ -267,164 +298,294 @@ class HomePage extends ConsumerWidget {
     );
   }
 
-  Widget _buildServiceGrid(
+  Widget _buildDiscoverySection(
     BuildContext context,
     WidgetRef ref,
     AppLocalizations l10n,
   ) {
-    final merchants = ref.watch(nearbyMerchantsProvider).valueOrNull;
-    int countOf(MerchantType type) =>
-        merchants?.where((m) => m.type == type).length ?? 0;
+    return AnimatedFadeIn(
+      delay: const Duration(milliseconds: 350),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 18, 20, 0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Flexible(
+                  child: Text(
+                    'اكتشف بالقرب منك',
+                    style: context.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w800,
+                      fontSize: 18,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                TextButton(
+                  onPressed: () => context.push('/market'),
+                  child: Text(
+                    AppLocalizations.of(context).viewAll,
+                    style: AppTextStyles.labelLarge.copyWith(
+                      color: Theme.of(context).colorScheme.primary,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 10),
+          const _DiscoveryTabs(),
+          const SizedBox(height: 4),
+          const _DiscoveryContent(),
+        ],
+      ),
+    );
+  }
+}
 
-    final services = [
-      _ServiceData(Icons.restaurant_rounded, l10n.restaurants, AppColors.serviceRestaurant, countOf(MerchantType.restaurant), '/market'),
-      _ServiceData(Icons.local_grocery_store_rounded, l10n.grocery, AppColors.serviceGrocery, countOf(MerchantType.grocery), '/market?type=grocery'),
-      _ServiceData(Icons.store_rounded, l10n.supermarket, AppColors.serviceSupermarket, countOf(MerchantType.supermarket), '/market?type=supermarket'),
-      _ServiceData(Icons.eco_rounded, l10n.fruits, AppColors.serviceFruits, countOf(MerchantType.fruits), '/market?type=fruits'),
-      _ServiceData(Icons.set_meal_rounded, l10n.meat, AppColors.serviceMeat, countOf(MerchantType.meat), '/market?type=meat'),
-      _ServiceData(Icons.phishing_rounded, l10n.seafood, AppColors.serviceSeafood, countOf(MerchantType.seafood), '/market?type=seafood'),
-      _ServiceData(Icons.local_pharmacy_rounded, l10n.pharmacy, AppColors.servicePharmacy, countOf(MerchantType.pharmacy), '/market?type=pharmacy'),
-      _ServiceData(Icons.bakery_dining_rounded, l10n.bakery, AppColors.serviceBakery, countOf(MerchantType.bakery), '/market?type=bakery'),
-      _ServiceData(Icons.cake_rounded, l10n.sweets, AppColors.serviceSweets, countOf(MerchantType.sweets), '/market?type=sweets'),
-      _ServiceData(Icons.local_florist_rounded, l10n.flowers, AppColors.serviceFlowers, countOf(MerchantType.flowers), '/market?type=flowers'),
-      _ServiceData(Icons.checkroom_rounded, l10n.clothing, AppColors.serviceClothing, countOf(MerchantType.clothing), '/market?type=clothing'),
-      _ServiceData(Icons.snowboarding_rounded, l10n.shoes, AppColors.serviceShoes, countOf(MerchantType.shoes), '/market?type=shoes'),
-      _ServiceData(Icons.devices_rounded, l10n.electronics, AppColors.serviceElectronics, countOf(MerchantType.electronics), '/market?type=electronics'),
-      _ServiceData(Icons.phone_android_rounded, l10n.mobile, AppColors.serviceMobile, countOf(MerchantType.mobile), '/market?type=mobile'),
-      _ServiceData(Icons.chair_rounded, l10n.furniture, AppColors.serviceFurniture, countOf(MerchantType.furniture), '/market?type=furniture'),
-      _ServiceData(Icons.home_repair_service_rounded, l10n.homeServices, AppColors.serviceHome, countOf(MerchantType.home), '/home-services'),
-      _ServiceData(Icons.coffee_rounded, l10n.cafe, AppColors.serviceCafe, countOf(MerchantType.cafe), '/market?type=cafe'),
-      _ServiceData(Icons.pets_rounded, l10n.petShop, AppColors.servicePetShop, countOf(MerchantType.petShop), '/market?type=petShop'),
-      _ServiceData(Icons.fitness_center_rounded, l10n.fitness, AppColors.serviceFitness, countOf(MerchantType.fitness), '/market?type=fitness'),
-      _ServiceData(Icons.local_gas_station_rounded, l10n.gas, AppColors.serviceGas, countOf(MerchantType.gas), '/market?type=gas'),
-      _ServiceData(Icons.local_car_wash_rounded, l10n.carwash, AppColors.serviceCarwash, countOf(MerchantType.carwash), '/market?type=carwash'),
-      _ServiceData(Icons.local_shipping_rounded, l10n.delivery, AppColors.serviceDelivery, null, '/direct-delivery'),
-      _ServiceData(Icons.local_offer_rounded, l10n.offers, AppColors.serviceOffers, null, '/market'),
-    ];
+class _CompactCategories extends StatelessWidget {
+  const _CompactCategories({required this.ref});
+
+  final WidgetRef ref;
+
+  @override
+  Widget build(BuildContext context) {
+    final categoriesAsync = ref.watch(activeCategoriesProvider);
 
     return AnimatedFadeIn(
-      delay: const Duration(milliseconds: 200),
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(20, 14, 20, 0),
-        child: GridView.builder(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 4,
-            mainAxisSpacing: 8,
-            crossAxisSpacing: 8,
-            childAspectRatio: 0.85,
+      delay: const Duration(milliseconds: 250),
+      child: categoriesAsync.when(
+        loading: () => SizedBox(
+          height: 100,
+          child: ListView.separated(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.fromLTRB(20, 14, 20, 0),
+            itemCount: 8,
+            separatorBuilder: (_, __) => const SizedBox(width: 12),
+            itemBuilder: (_, __) => const ShimmerCard(height: 100),
           ),
-          itemCount: services.length,
-          itemBuilder: (context, index) {
-            final service = services[index];
-            return _ServiceTile(
-              icon: service.icon,
-              label: service.label,
-              color: service.color,
-              count: service.count,
-              delay: Duration(milliseconds: 250 + index * 30),
-              onTap: () => context.push(service.route),
-            );
-          },
         ),
+        error: (_, __) => const SizedBox.shrink(),
+        data: (categories) {
+          if (categories.isEmpty) return const SizedBox.shrink();
+          return SizedBox(
+            height: 100,
+            child: ListView.separated(
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.fromLTRB(20, 14, 20, 0),
+              itemCount: categories.length,
+              separatorBuilder: (_, __) => const SizedBox(width: 12),
+              itemBuilder: (context, index) {
+                final category = categories[index];
+                final merchantType = _categoryNameToMerchantType(category.name);
+                final typeColor = merchantType != null
+                    ? _merchantTypeColor(merchantType)
+                    : AppColors.brandPurple;
+                final emoji = merchantType != null
+                    ? _merchantEmoji(merchantType)
+                    : '🏪';
+
+                return AnimatedFadeIn(
+                  delay: Duration(milliseconds: 280 + index * 40),
+                  child: PressableScale(
+                    onTap: () {
+                      final typeParam = merchantType?.name ?? 'other';
+                      context.push('/market?type=$typeParam');
+                    },
+                    child: SizedBox(
+                      width: 72,
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Container(
+                            width: 44,
+                            height: 44,
+                            clipBehavior: Clip.antiAlias,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(14),
+                            ),
+                            child: category.imageUrl != null
+                                ? Image.network(
+                                    category.imageUrl!,
+                                    fit: BoxFit.cover,
+                                    errorBuilder: (_, __, ___) =>
+                                        _categoryFallback(
+                                            typeColor, emoji),
+                                  )
+                                : _categoryFallback(typeColor, emoji),
+                          ),
+                          const SizedBox(height: 6),
+                          Text(
+                            category.displayName(
+                              Directionality.of(context) == TextDirection.rtl,
+                            ),
+                            style: AppTextStyles.labelSmall.copyWith(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600,
+                            ),
+                            textAlign: TextAlign.center,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
+          );
+        },
       ),
     );
   }
 
-  Widget _buildSectionTitle(
-    BuildContext context,
-    String title,
-    VoidCallback onViewAll,
-  ) {
-    return AnimatedFadeIn(
-      delay: const Duration(milliseconds: 350),
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(20, 18, 20, 0),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Flexible(
-              child: Text(
-                title,
-                style: context.textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w800,
-                  fontSize: 18,
-                ),
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-            TextButton(
-              onPressed: onViewAll,
-              child: Text(
-                AppLocalizations.of(context).viewAll,
-                style: AppTextStyles.labelLarge.copyWith(
-                  color: Theme.of(context).colorScheme.primary,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-            ),
+  Widget _categoryFallback(Color color, String emoji) {
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            color.withValues(alpha: 0.38),
+            color.withValues(alpha: 0.15),
           ],
         ),
       ),
+      child: Center(
+        child: Text(
+          emoji,
+          style: const TextStyle(fontSize: 22),
+        ),
+      ),
     );
   }
+}
 
-  Widget _buildMerchantList(
-    BuildContext context,
-    WidgetRef ref,
-    AppLocalizations l10n, {
-    required bool featured,
-  }) {
-    final merchantsAsync = ref.watch(nearbyMerchantsProvider);
+class _DiscoveryTabs extends ConsumerStatefulWidget {
+  const _DiscoveryTabs();
 
-    return merchantsAsync.when(
-      loading: () => SliverToBoxAdapter(
-        child: SizedBox(
-          height: 200,
+  @override
+  ConsumerState<_DiscoveryTabs> createState() => _DiscoveryTabsState();
+}
+
+class _DiscoveryTabsState extends ConsumerState<_DiscoveryTabs> {
+  int _selectedIndex = 0;
+
+  static const _labels = ['القريبة', 'موصى لك', 'الأشهر'];
+  static const _modes = [
+    DiscoveryMode.nearby,
+    DiscoveryMode.recommended,
+    DiscoveryMode.popular,
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 36,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(horizontal: 20),
+        itemCount: _labels.length,
+        separatorBuilder: (_, __) => const SizedBox(width: 8),
+        itemBuilder: (context, index) {
+          final selected = _selectedIndex == index;
+          return PressableScale(
+            onTap: () {
+              if (_selectedIndex == index) return;
+              setState(() => _selectedIndex = index);
+              ref.read(discoveryModeProvider.notifier).state = _modes[index];
+            },
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              decoration: BoxDecoration(
+                gradient: selected
+                    ? const LinearGradient(
+                        colors: [AppColors.brandPurpleDeep, AppColors.brandViolet],
+                      )
+                    : null,
+                color: selected
+                    ? null
+                    : Theme.of(context)
+                        .colorScheme
+                        .surfaceContainerHighest
+                        .withValues(alpha: 0.35),
+                borderRadius: BorderRadius.circular(999),
+                border: Border.all(
+                  color: selected
+                      ? Colors.transparent
+                      : Theme.of(context)
+                          .colorScheme
+                          .outlineVariant
+                          .withValues(alpha: 0.15),
+                ),
+              ),
+              child: Text(
+                _labels[index],
+                style: AppTextStyles.labelLarge.copyWith(
+                  color: selected
+                      ? Colors.white
+                      : Theme.of(context).colorScheme.onSurfaceVariant,
+                  fontWeight: selected ? FontWeight.w700 : FontWeight.w600,
+                  fontSize: 13,
+                ),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
+
+class _DiscoveryContent extends ConsumerWidget {
+  const _DiscoveryContent();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final merchantsAsync = ref.watch(discoveryMerchantsProvider);
+
+    return AnimatedSwitcher(
+      duration: const Duration(milliseconds: 200),
+      child: merchantsAsync.when(
+        loading: () => SizedBox(
+          key: const ValueKey('shimmer'),
+          height: 224,
           child: ListView.separated(
             scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
+            padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
             itemCount: 4,
             separatorBuilder: (_, __) => const SizedBox(width: 14),
             itemBuilder: (_, __) => const ShimmerCard(height: 212),
           ),
         ),
-      ),
-      error: (_, __) => SliverToBoxAdapter(
-        child: Padding(
+        error: (_, __) => Padding(
+          key: const ValueKey('error'),
           padding: const EdgeInsets.all(20),
           child: PremiumEmptyState(
             icon: Icons.store_outlined,
-            title: l10n.noResults,
-            message: l10n.errorLoading,
+            title: AppLocalizations.of(context).noResults,
+            message: AppLocalizations.of(context).errorLoading,
           ),
         ),
-      ),
-      data: (all) {
-        var merchants = all;
-        if (featured) {
-          final featuredMerchants = all.where((m) => m.isFeatured).toList();
-          if (featuredMerchants.isNotEmpty) {
-            merchants = featuredMerchants.take(6).toList();
-          } else {
-            merchants = all.take(6).toList();
-          }
-        }
-        if (merchants.isEmpty) {
-          return SliverToBoxAdapter(
-            child: Padding(
+        data: (merchants) {
+          if (merchants.isEmpty) {
+            return Padding(
+              key: const ValueKey('empty'),
               padding: const EdgeInsets.all(20),
               child: PremiumEmptyState(
                 icon: Icons.store_outlined,
-                title: l10n.noResults,
-                message: l10n.nearbyEmptyHint,
+                title: AppLocalizations.of(context).noResults,
+                message: AppLocalizations.of(context).nearbyEmptyHint,
               ),
-            ),
-          );
-        }
-        return SliverToBoxAdapter(
-          child: SizedBox(
+            );
+          }
+          return SizedBox(
+            key: ValueKey('merchants_${merchants.length}'),
             height: 224,
             child: ListView.separated(
               scrollDirection: Axis.horizontal,
@@ -435,92 +596,13 @@ class HomePage extends ConsumerWidget {
                 final merchant = merchants[index];
                 return _HomeMerchantCard(
                   merchant: merchant,
-                  onTap: () => context.push('/market/merchant/${merchant.id}'),
+                  onTap: () =>
+                      context.push('/market/merchant/${merchant.id}'),
                 );
               },
             ),
-          ),
-        );
-      },
-    );
-  }
-}
-
-class _ServiceData {
-  const _ServiceData(this.icon, this.label, this.color, this.count, this.route);
-  final IconData icon;
-  final String label;
-  final Color color;
-  final int? count;
-  final String route;
-}
-
-class _ServiceTile extends StatelessWidget {
-  const _ServiceTile({
-    required this.icon,
-    required this.label,
-    required this.color,
-    required this.count,
-    required this.delay,
-    required this.onTap,
-  });
-
-  final IconData icon;
-  final String label;
-  final Color color;
-  final int? count;
-  final Duration delay;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return AnimatedFadeIn(
-      delay: delay,
-      child: PressableScale(
-        onTap: onTap,
-        child: Container(
-          decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.35),
-            borderRadius: BorderRadius.circular(18),
-            border: Border.all(
-              color: context.colorScheme.outlineVariant.withValues(alpha: 0.1),
-            ),
-          ),
-          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 2),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                width: 46,
-                height: 46,
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [
-                      color.withValues(alpha: 0.38),
-                      color.withValues(alpha: 0.15),
-                    ],
-                  ),
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: color.withValues(alpha: 0.25)),
-                ),
-                child: Icon(icon, color: color, size: 24),
-              ),
-              const SizedBox(height: 6),
-              Text(
-                label,
-                style: AppTextStyles.labelSmall.copyWith(
-                  fontWeight: FontWeight.w600,
-                ),
-                textAlign: TextAlign.center,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ],
-          ),
-        ),
+          );
+        },
       ),
     );
   }

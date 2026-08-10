@@ -175,10 +175,30 @@ void main() {
     });
 
     test('MerchantType enum has all values', () {
-      expect(MerchantType.values.length, 10);
+      expect(MerchantType.values.length, 24);
       expect(MerchantType.restaurant.name, 'restaurant');
       expect(MerchantType.grocery.name, 'grocery');
+      expect(MerchantType.supermarket.name, 'supermarket');
+      expect(MerchantType.fruits.name, 'fruits');
+      expect(MerchantType.meat.name, 'meat');
+      expect(MerchantType.seafood.name, 'seafood');
       expect(MerchantType.pharmacy.name, 'pharmacy');
+      expect(MerchantType.bakery.name, 'bakery');
+      expect(MerchantType.sweets.name, 'sweets');
+      expect(MerchantType.flowers.name, 'flowers');
+      expect(MerchantType.clothing.name, 'clothing');
+      expect(MerchantType.shoes.name, 'shoes');
+      expect(MerchantType.electronics.name, 'electronics');
+      expect(MerchantType.mobile.name, 'mobile');
+      expect(MerchantType.furniture.name, 'furniture');
+      expect(MerchantType.fashion.name, 'fashion');
+      expect(MerchantType.appliances.name, 'appliances');
+      expect(MerchantType.home.name, 'home');
+      expect(MerchantType.cafe.name, 'cafe');
+      expect(MerchantType.petShop.name, 'petShop');
+      expect(MerchantType.fitness.name, 'fitness');
+      expect(MerchantType.gas.name, 'gas');
+      expect(MerchantType.carwash.name, 'carwash');
       expect(MerchantType.other.name, 'other');
     });
   });

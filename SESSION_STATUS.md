@@ -1,6 +1,25 @@
 # SESSION_STATUS.md
 
-> **Last updated:** 2026-08-08 Session 23 (Fingerprint auto-login unified + local_auth 3.0.0 Android 16 fix — Sprint 61)
+> **Last updated:** 2026-08-10 Session 24 (Phase 1 MVP — Super App categories + Home Services booking + Search filters — Sprint 62)
+
+---
+
+## Current Task — PHASE 1 MVP: SUPER APP CATEGORIES + HOME SERVICES BOOKING (Session 24)
+
+Massive expansion of the platform from 10 to 24 merchant types, new Home Services booking module, and enhanced search with auto-complete and category filters.
+
+| Area | Change |
+|------|--------|
+| **MerchantType enum** | Expanded from 10 → 24 values: added supermarket, fruits, meat, seafood, sweets, clothing, shoes, mobile, appliances, cafe, petShop, fitness, gas, carwash |
+| **AppColors** | 14 new service category colors: serviceSupermarket, serviceFruits, serviceMeat, serviceSeafood, serviceBakery, serviceSweets, serviceFlowers, serviceClothing, serviceShoes, serviceElectronics, serviceMobile, serviceFurniture, serviceFashion, serviceAppliances, serviceCafe, servicePetShop, serviceFitness, serviceGas, serviceCarwash |
+| **l10n** | 28 new keys (EN + AR): supermarket, fruits, meat, seafood, bakery, sweets, flowers, clothing, shoes, electronics, mobile, furniture, fashion, appliances, cafe, petShop, fitness, gas, carwash + corresponding type* keys |
+| **Home page grid** | Expanded from 7 → 23 service tiles (4-column grid, scrollable). Each tile links to `/market?type=<type>` or `/home-services` or `/direct-delivery` |
+| **Home Services module** | New `home_services` feature module with Clean Architecture: ServiceCategory, ServiceProvider, ServiceBooking entities; ServiceBookingRepository; Supabase implementation; HomeServicesPage (category grid) + ServiceBookingPage (provider selection, date/time picker, description, submit) |
+| **DB migration 023** | `service_categories`, `service_providers`, `service_bookings` tables with RLS, indexes, seed data for 8 service types |
+| **Search enhancements** | Filter pills expanded to 12 categories (All, Restaurants, Grocery, Supermarket, Pharmacy, Bakery, Electronics, Fashion, Clothing, Home Services, Café, Flowers). Added "Open Now" toggle filter. Auto-complete suggestions from merchant search results. Recent searches tracking |
+| **Commerce widget fixes** | All non-exhaustive MerchantType switch statements fixed in merchant_detail_page, search_page, merchant_card, merchant_type_chip (14 new enum values added to every switch) |
+| **Tests** | 594/594 passing. MerchantType enum test updated (10 → 24). MerchantTypeChip test fixed |
+| **Quality gates** | `flutter analyze` 0 errors / 0 warnings from touched files. `flutter test` 594/594 |
 
 ---
 

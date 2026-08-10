@@ -288,13 +288,70 @@ class AppLocalizationsAr extends AppLocalizations {
   String get grocery => 'البقالة';
 
   @override
+  String get supermarket => 'السوبرماركت';
+
+  @override
+  String get fruits => 'فواكه وخضروات';
+
+  @override
+  String get meat => 'لحوم ودواجن';
+
+  @override
+  String get seafood => 'مأكولات بحرية';
+
+  @override
   String get pharmacy => 'الصيدلية';
 
   @override
-  String get ride => 'النقل';
+  String get bakery => 'المخبوزات';
+
+  @override
+  String get sweets => 'حلويات ومشروبات';
+
+  @override
+  String get flowers => 'ورود وهدايا';
+
+  @override
+  String get clothing => 'ملابس';
+
+  @override
+  String get shoes => 'أحذية';
+
+  @override
+  String get electronics => 'إلكترونيات';
+
+  @override
+  String get mobile => 'هواتف محمولة';
+
+  @override
+  String get furniture => 'أثاث';
+
+  @override
+  String get fashion => 'أزياء';
+
+  @override
+  String get appliances => 'أجهزة منزلية';
 
   @override
   String get homeServices => 'خدمات المنزل';
+
+  @override
+  String get cafe => 'مقاهي ومشروبات';
+
+  @override
+  String get petShop => 'محل حيوانات أليفة';
+
+  @override
+  String get fitness => 'لياقة ونوادي رياضية';
+
+  @override
+  String get gas => 'محطات وقود';
+
+  @override
+  String get carwash => 'غسيل سيارات';
+
+  @override
+  String get ride => 'النقل';
 
   @override
   String get delivery => 'التوصيل';
@@ -3137,34 +3194,46 @@ class AppLocalizationsAr extends AppLocalizations {
   String get driverPerformancePlaceholder => 'ستظهر مقاييس أداء السائقين هنا.';
 
   @override
-  String get typeRestaurant => 'مطعم';
+  String get typeSupermarket => 'سوبرماركت';
 
   @override
-  String get typeGrocery => 'بقالة';
+  String get typeFruits => 'فواكه وخضروات';
 
   @override
-  String get typePharmacy => 'صيدلية';
+  String get typeMeat => 'لحوم';
 
   @override
-  String get typeFlowers => 'زهور';
+  String get typeSeafood => 'مأكولات بحرية';
 
   @override
-  String get typeBakery => 'مخبز';
+  String get typeSweets => 'حلويات';
 
   @override
-  String get typeElectronics => 'إلكترونيات';
+  String get typeClothing => 'ملابس';
 
   @override
-  String get typeFurniture => 'أثاث';
+  String get typeShoes => 'أحذية';
 
   @override
-  String get typeFashion => 'أزياء';
+  String get typeMobile => 'هواتف';
 
   @override
-  String get typeHomeServices => 'خدمات منزلية';
+  String get typeAppliances => 'أجهزة';
 
   @override
-  String get typeOther => 'أخرى';
+  String get typeCafe => 'مقهى';
+
+  @override
+  String get typePetShop => 'حيوانات أليفة';
+
+  @override
+  String get typeFitness => 'لياقة';
+
+  @override
+  String get typeGas => 'وقود';
+
+  @override
+  String get typeCarwash => 'غسيل سيارات';
 
   @override
   String get tosLastUpdated => 'آخر تحديث: 1 يناير 2025';
@@ -3453,10 +3522,37 @@ class AppLocalizationsAr extends AppLocalizations {
   String get roleSupport => 'دعم';
 
   @override
+  String get typeRestaurant => 'مطعم';
+
+  @override
+  String get typeGrocery => 'بقالة';
+
+  @override
+  String get typePharmacy => 'صيدلية';
+
+  @override
+  String get typeFlowers => 'زهور';
+
+  @override
+  String get typeBakery => 'مخبز';
+
+  @override
+  String get typeElectronics => 'إلكترونيات';
+
+  @override
+  String get typeFurniture => 'أثاث';
+
+  @override
   String get typeMarket => 'سوق';
 
   @override
+  String get typeFashion => 'أزياء';
+
+  @override
   String get typeHome => 'منزل';
+
+  @override
+  String get typeOther => 'أخرى';
 
   @override
   String get passwordUpdated => 'تم تحديث كلمة المرور بنجاح';

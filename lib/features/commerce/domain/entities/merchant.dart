@@ -8,20 +8,48 @@ enum MerchantType {
   restaurant,
   @JsonValue('grocery')
   grocery,
+  @JsonValue('supermarket')
+  supermarket,
+  @JsonValue('fruits')
+  fruits,
+  @JsonValue('meat')
+  meat,
+  @JsonValue('seafood')
+  seafood,
   @JsonValue('pharmacy')
   pharmacy,
-  @JsonValue('flowers')
-  flowers,
   @JsonValue('bakery')
   bakery,
+  @JsonValue('sweets')
+  sweets,
+  @JsonValue('flowers')
+  flowers,
+  @JsonValue('clothing')
+  clothing,
+  @JsonValue('shoes')
+  shoes,
   @JsonValue('electronics')
   electronics,
+  @JsonValue('mobile')
+  mobile,
   @JsonValue('furniture')
   furniture,
   @JsonValue('fashion')
   fashion,
+  @JsonValue('appliances')
+  appliances,
   @JsonValue('home')
   home,
+  @JsonValue('cafe')
+  cafe,
+  @JsonValue('petShop')
+  petShop,
+  @JsonValue('fitness')
+  fitness,
+  @JsonValue('gas')
+  gas,
+  @JsonValue('carwash')
+  carwash,
   @JsonValue('other')
   other,
 }

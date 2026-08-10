@@ -289,13 +289,70 @@ class AppLocalizationsEn extends AppLocalizations {
   String get grocery => 'Grocery';
 
   @override
+  String get supermarket => 'Supermarket';
+
+  @override
+  String get fruits => 'Fruits & Veggies';
+
+  @override
+  String get meat => 'Meat & Poultry';
+
+  @override
+  String get seafood => 'Seafood';
+
+  @override
   String get pharmacy => 'Pharmacy';
 
   @override
-  String get ride => 'Ride';
+  String get bakery => 'Bakery';
+
+  @override
+  String get sweets => 'Sweets & Desserts';
+
+  @override
+  String get flowers => 'Flowers & Gifts';
+
+  @override
+  String get clothing => 'Clothing';
+
+  @override
+  String get shoes => 'Shoes';
+
+  @override
+  String get electronics => 'Electronics';
+
+  @override
+  String get mobile => 'Mobile Phones';
+
+  @override
+  String get furniture => 'Furniture';
+
+  @override
+  String get fashion => 'Fashion';
+
+  @override
+  String get appliances => 'Home Appliances';
 
   @override
   String get homeServices => 'Home Services';
+
+  @override
+  String get cafe => 'Cafés & Drinks';
+
+  @override
+  String get petShop => 'Pet Shops';
+
+  @override
+  String get fitness => 'Fitness & Gyms';
+
+  @override
+  String get gas => 'Gas Stations';
+
+  @override
+  String get carwash => 'Car Wash';
+
+  @override
+  String get ride => 'Ride';
 
   @override
   String get delivery => 'Delivery';
@@ -3156,34 +3213,46 @@ class AppLocalizationsEn extends AppLocalizations {
       'Driver performance metrics will appear here.';
 
   @override
-  String get typeRestaurant => 'Restaurant';
+  String get typeSupermarket => 'Supermarket';
 
   @override
-  String get typeGrocery => 'Grocery';
+  String get typeFruits => 'Fruits & Veggies';
 
   @override
-  String get typePharmacy => 'Pharmacy';
+  String get typeMeat => 'Meat & Poultry';
 
   @override
-  String get typeFlowers => 'Flowers';
+  String get typeSeafood => 'Seafood';
 
   @override
-  String get typeBakery => 'Bakery';
+  String get typeSweets => 'Sweets';
 
   @override
-  String get typeElectronics => 'Electronics';
+  String get typeClothing => 'Clothing';
 
   @override
-  String get typeFurniture => 'Furniture';
+  String get typeShoes => 'Shoes';
 
   @override
-  String get typeFashion => 'Fashion';
+  String get typeMobile => 'Mobile';
 
   @override
-  String get typeHomeServices => 'Home Services';
+  String get typeAppliances => 'Appliances';
 
   @override
-  String get typeOther => 'Other';
+  String get typeCafe => 'Café';
+
+  @override
+  String get typePetShop => 'Pet Shop';
+
+  @override
+  String get typeFitness => 'Fitness';
+
+  @override
+  String get typeGas => 'Gas';
+
+  @override
+  String get typeCarwash => 'Car Wash';
 
   @override
   String get tosLastUpdated => 'Last updated: January 1, 2025';
@@ -3473,10 +3542,37 @@ class AppLocalizationsEn extends AppLocalizations {
   String get roleSupport => 'Support';
 
   @override
+  String get typeRestaurant => 'Restaurant';
+
+  @override
+  String get typeGrocery => 'Grocery';
+
+  @override
+  String get typePharmacy => 'Pharmacy';
+
+  @override
+  String get typeFlowers => 'Flowers';
+
+  @override
+  String get typeBakery => 'Bakery';
+
+  @override
+  String get typeElectronics => 'Electronics';
+
+  @override
+  String get typeFurniture => 'Furniture';
+
+  @override
   String get typeMarket => 'Market';
 
   @override
+  String get typeFashion => 'Fashion';
+
+  @override
   String get typeHome => 'Home';
+
+  @override
+  String get typeOther => 'Other';
 
   @override
   String get passwordUpdated => 'Password updated successfully';

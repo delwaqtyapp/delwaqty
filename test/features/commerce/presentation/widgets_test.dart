@@ -423,7 +423,7 @@ void main() {
         const MerchantTypeChip(type: MerchantType.home),
       ));
 
-      expect(find.text('Home Services'), findsOneWidget);
+      expect(find.text('Home'), findsOneWidget);
     });
 
     testWidgets('renders ActionChip', (tester) async {

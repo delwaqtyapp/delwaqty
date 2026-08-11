@@ -37,7 +37,7 @@ CREATE INDEX IF NOT EXISTS idx_payment_transactions_status ON payment_transactio
 
 -- 5. Add indexes for products (common queries)
 CREATE INDEX IF NOT EXISTS idx_products_merchant_id ON products(merchant_id);
-CREATE INDEX IF NOT EXISTS idx_products_category_id ON products(category_id);
+CREATE INDEX IF NOT EXISTS idx_products_category_id ON products(category);
 CREATE INDEX IF NOT EXISTS idx_products_is_available ON products(is_available);
 
 -- 6. Add indexes for reviews

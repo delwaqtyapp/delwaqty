@@ -1,6 +1,41 @@
 # SESSION_STATUS.md
 
-> **Last updated:** 2026-08-11 Session 29 (Remote sync + verification of sprints 61–69)
+> **Last updated:** 2026-08-11 Session 29 (Remote sync + ARM64 build bring-up + live migrations)
+
+---
+
+## Current Task — ARM64 BUILD BRING-UP: FIRST SUCCESSFUL APK ON DNP NX9 (Session 29 cont.)
+
+The Android SDK on this machine is **x86-64-only** (aapt2, cmake, ninja, NDK toolchain) but the host is **aarch64** (PRoot on DNP NX9). The native binaries SIGILL under emulation — so every x86 tool was wrapped or replaced with a native-arm64 equivalent. Result: **`app-debug.apk` built successfully** on this device for the first time.
+
+| Tool | Problem | Fix |
+|------|---------|-----|
+| **android-37 platform** | Missing → "Unable to locate Android SDK" | Symlink `android-37 → android-37.0` in `/usr/lib/android-sdk/platforms/` |
+| **assets/lottie/** | Missing → pubspec assets entry failed | Created 6 valid Lottie JSON placeholders (`order_success.json` real, 5 dummies: loading/empty_cart/empty_favorites/no_connection/search_empty) |
+| **aapt2** | x86-64 binary, SIGILL on arm64 | QEMU wrapper (`/opt/aapt2-qemu/aapt2`) + replaced gradle-cache and build-tools 36.0.0 aapt2 (verified `aapt2 version` + resource compile) |
+| **cmake/ninja** | x86 binaries, exit 132 | Replaced with native arm64 symlinks (`/usr/bin/cmake` 4.2.3, `/usr/bin/ninja` 1.13.2) |
+| **NDK clang** | `linux-x86_64/bin/clang` exit 132 → later code=1 | Wrapped all 38 ELF x86-64 binaries with qemu scripts; fixed **argv[0] dispatch** (details below) |
+| **lld multi-call** | `ld.lld` symlink → wrapper forcing argv[0]=`llvm-objcopy` → "generic driver" / `unknown argument -o` | Wrappers now preserve invoked name via `-0 "$0"` |
+
+### NDK wrapper design (the tricky part)
+The NDK has **multi-call binaries** that branch on `argv[0]` basename: `ld.lld`/`ld64.lld`/`lld-link`/`wasm-ld` all point to `lld`, and `llvm-strip` → `llvm-objcopy`. Naive wrappers break this. The working wrapper preserves the **invoked** name:
+
+```bash
+#!/bin/bash
+exec qemu-x86_64 -0 "$0" -L /lib/x86_64-linux-gnu "$NDK_BIN/<tool>.real" "$@"
+```
+
+- `-0 "$0"` → guest sees the exact argv[0] the caller used → correct mode dispatch (GNU-compatible linker, strip vs objcopy)
+- clang derives its resource dir (`lib/clang/19`) from argv[0]'s directory — a bare basename broke `-latomic`/`libclang_rt` resolution, full path fixed it
+- Verified end-to-end: `clang --target=aarch64-linux-android24` compile → correct **ARM aarch64** relocatable; full link → **ARM aarch64 PIE executable**
+
+### State
+- **APK**: `build/app/outputs/flutter-apk/app-debug.apk` (1.4 GB debug) — **BUILT ✓**
+- **Install**: BLOCKED — device not rooted (`ro.build.type=user`); `pm install` runs as Termux uid `u0_a526` → `SecurityException` (needs `INTERACT_ACROSS_USERS_FULL`). Wireless adb (was on port 42017) is currently closed/refused. **Need user: enable Wireless debugging + pairing code, or adb over USB from a PC, or copy APK to phone storage and install from file manager.**
+- **Failed-build logs**: `/tmp/opencode/build*.log` (5 → 9; build9.log = SUCCESS)
+- **Git**: `d9e7269` pushed (migration fixes); working tree has `assets/lottie/` (new) + `.gitignore` (`/android/build`) + `SESSION_STATUS.md`
+
+> **Next:** get the APK onto DNP NX9 (user action), then run `flutter analyze` / `flutter test` gate before committing the build-bring-up changes.
 
 ---
 

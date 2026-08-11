@@ -1,6 +1,52 @@
 # SESSION_STATUS.md
 
-> **Last updated:** 2026-08-10 Session 28 (Sprint 69 — Production Notification System)
+> **Last updated:** 2026-08-11 Session 29 (Remote sync + verification of sprints 61–69)
+
+---
+
+## Current Task — REPO SYNC + POST-PULL VERIFICATION (Session 29)
+
+Pulled 108 commits (sprints 61–69) from `origin/master` and re-verified the project. Local HEAD now `0053f90` (sprint 69), `0 0` ahead/behind, working tree clean.
+
+| Step | Result |
+|------|--------|
+| **Pull** | `git pull origin master` applied 108 commits / 765 files (was 108 behind at `280aa37`) |
+| **Codegen** | `dart run build_runner build --delete-conflicting-outputs` → 297 outputs (Freezed/json generated files are gitignored, absent after clone) |
+| **Analyzer** | `flutter analyze` → **0 errors**, 28 warnings, 519 info (pre-existing baseline) |
+| **Tests** | `flutter test` → **594/594 passing** (grew from 443 at the pre-pull HEAD) |
+| **Git** | `git status` clean · synced with `origin/master` (`0 0`) |
+
+> **Note:** The 1,345 analyzer errors right after the pull were all missing codegen artifacts (`.freezed.dart` / `.g.dart` are gitignored), resolved by `build_runner` — not a code regression.
+
+---
+
+## Completed — LIVE DB MIGRATIONS APPLIED + VERIFIED (Session 29 cont.)
+
+Audited the live Supabase schema via REST + OpenAPI introspection against the repo's migrations and found several NEVER applied. Applied all of them via the Management API (user-supplied PAT) and verified live.
+
+### Pending migrations detected (before)
+- **023** home-services tables (service_categories / service_providers / service_bookings) — MISSING
+- **024** payment_transactions + orders.payment_id/transaction_id — MISSING
+- **025** categories.name_en + category-images bucket — MISSING
+- **026** notifications.idempotency_key/read_at/deep_link/image_url + notification_tokens.device_id/app_version/is_active/last_seen_at — MISSING
+- **017** users.username — MISSING
+- **002_favorites_merchant_support** favorites.merchant_id — MISSING (app reads favorites.merchant_id in supabase_favorite_data_source)
+
+### Fixes required to apply (migration bugs, not code)
+| File | Bug | Fix |
+|------|-----|-----|
+| `023_home_services.sql` | Admin policies referenced a nonexistent `profiles` table | Rewrote to `public.is_admin()` (from migration 018) |
+| `024_payment_infrastructure.sql` | Index used `products.category_id` (live column is `category`) | `ON products(category)` |
+
+### Applied + verified
+- 56 tables total (was 52). All columns above present. `get_unread_notification_count()` RPC → `0` (HTTP 200), `deactivate_stale_tokens()` → `0` (HTTP 200). Storage bucket `category-images` exists (public, 5 MB, png/jpeg/webp). `service_categories` seeded with 8 rows (plumbing…applianceRepair).
+- Consolidated one-shot file kept at `supabase/migrations/027_apply_pending_migrations.sql`.
+
+> **Next:** revoke the PAT after this session. Credentials still needed: Firebase, Google Maps key, Cloudflare.
+
+---
+
+## Current Task — SPRINT 69: PRODUCTION NOTIFICATION SYSTEM (Session 28)
 
 ---
 

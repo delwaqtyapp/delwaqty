@@ -98,33 +98,18 @@ CREATE POLICY "Users can update own bookings"
   ON service_bookings FOR UPDATE
   USING (auth.uid() = user_id);
 
--- Admin can manage all tables
+-- Admin can manage all tables (uses public.is_admin() from migration 018)
 CREATE POLICY "Admins can manage categories"
   ON service_categories FOR ALL
-  USING (
-    EXISTS (
-      SELECT 1 FROM profiles
-      WHERE profiles.id = auth.uid() AND profiles.role = 'admin'
-    )
-  );
+  USING (public.is_admin());
 
 CREATE POLICY "Admins can manage providers"
   ON service_providers FOR ALL
-  USING (
-    EXISTS (
-      SELECT 1 FROM profiles
-      WHERE profiles.id = auth.uid() AND profiles.role = 'admin'
-    )
-  );
+  USING (public.is_admin());
 
 CREATE POLICY "Admins can manage bookings"
   ON service_bookings FOR ALL
-  USING (
-    EXISTS (
-      SELECT 1 FROM profiles
-      WHERE profiles.id = auth.uid() AND profiles.role = 'admin'
-    )
-  );
+  USING (public.is_admin());
 
 -- Seed default categories
 INSERT INTO service_categories (name_ar, name_en, type, description_ar, description_en) VALUES

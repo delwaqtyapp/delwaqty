@@ -22,137 +22,135 @@ class AdminRepository implements admin.AdminRepository {
       ).toIso8601String();
       final monthStart = DateTime(now.year, now.month).toIso8601String();
 
-      final usersCount = await _supabase.from('users').select('id').count();
-      final driversCount = await _supabase.from('drivers').select('id').count();
-      final merchantsCount = await _supabase
-          .from('merchants')
-          .select('id')
-          .count();
-      final activeDriversCount = await _supabase
-          .from('drivers')
-          .select('id')
-          .eq('is_online', true)
-          .count();
-      final pendingVerificationsCount = await _supabase
-          .from('drivers')
-          .select('id')
-          .eq('verification_status', 'pending')
-          .count();
-      final totalRidesCount = await _supabase
-          .from('rides')
-          .select('id')
-          .eq('service_type', 'ride')
-          .count();
-      final activeRidesCount = await _supabase
-          .from('rides')
-          .select('id')
-          .inFilter('status', ['searching', 'matched', 'arrived', 'inTrip'])
-          .count();
-      final totalDeliveriesCount = await _supabase
-          .from('rides')
-          .select('id')
-          .neq('service_type', 'ride')
-          .count();
-      final pendingOrdersCount = await _supabase
-          .from('orders')
-          .select('id')
-          .eq('status', 'pending')
-          .count();
-      final completedDeliveriesCount = await _supabase
-          .from('rides')
-          .select('id')
-          .neq('service_type', 'ride')
-          .eq('status', 'completed')
-          .count();
+      final countResults = await Future.wait([
+        _supabase.rpc<int>('count_table_rows', params: {'table_name': 'users'}),
+        _supabase.rpc<int>('count_table_rows', params: {'table_name': 'drivers'}),
+        _supabase.rpc<int>('count_table_rows', params: {'table_name': 'merchants'}),
+      ]);
 
-      final completedRides = await _supabase
-          .from('rides')
-          .select('fare')
-          .eq('status', 'completed');
-      final completedDeliveries = await _supabase
-          .from('rides')
-          .select('fare')
-          .neq('service_type', 'ride')
-          .eq('status', 'completed');
+      final metrics = await Future.wait([
+        _supabase
+            .from('drivers')
+            .select('id')
+            .eq('is_online', true)
+            .count(),
+        _supabase
+            .from('drivers')
+            .select('id')
+            .eq('verification_status', 'pending')
+            .count(),
+        _supabase
+            .from('rides')
+            .select('id')
+            .eq('service_type', 'ride')
+            .count(),
+        _supabase
+            .from('rides')
+            .select('id')
+            .inFilter('status', ['searching', 'matched', 'arrived', 'inTrip'])
+            .count(),
+        _supabase
+            .from('rides')
+            .select('id')
+            .neq('service_type', 'ride')
+            .count(),
+        _supabase
+            .from('orders')
+            .select('id')
+            .eq('status', 'pending')
+            .count(),
+        _supabase
+            .from('rides')
+            .select('id')
+            .neq('service_type', 'ride')
+            .eq('status', 'completed')
+            .count(),
+        _supabase
+            .from('users')
+            .select('id')
+            .gte('created_at', todayStart)
+            .count(),
+        _supabase
+            .from('users')
+            .select('id')
+            .gte('created_at', monthStart)
+            .count(),
+      ]);
+
+      final revenueResults = await Future.wait([
+        _supabase
+            .from('rides')
+            .select('fare')
+            .eq('status', 'completed'),
+        _supabase
+            .from('rides')
+            .select('fare')
+            .neq('service_type', 'ride')
+            .eq('status', 'completed'),
+        _supabase
+            .from('rides')
+            .select('fare')
+            .eq('status', 'completed')
+            .gte('completed_at', todayStart),
+        _supabase
+            .from('rides')
+            .select('fare')
+            .neq('service_type', 'ride')
+            .eq('status', 'completed')
+            .gte('completed_at', todayStart),
+        _supabase
+            .from('rides')
+            .select('fare')
+            .eq('status', 'completed')
+            .gte('completed_at', monthStart),
+        _supabase
+            .from('rides')
+            .select('fare')
+            .neq('service_type', 'ride')
+            .eq('status', 'completed')
+            .gte('completed_at', monthStart),
+      ]);
 
       double totalRevenue = 0;
+      for (final ride in revenueResults[0] as List) {
+        totalRevenue += (ride['fare'] as num?)?.toDouble() ?? 0;
+      }
+      for (final delivery in revenueResults[1] as List) {
+        totalRevenue += (delivery['fare'] as num?)?.toDouble() ?? 0;
+      }
+
       double revenueToday = 0;
-      double revenueThisMonth = 0;
-
-      for (final ride in completedRides as List) {
-        final fare = (ride['fare'] as num?)?.toDouble() ?? 0;
-        totalRevenue += fare;
-      }
-      for (final delivery in completedDeliveries as List) {
-        final fare = (delivery['fare'] as num?)?.toDouble() ?? 0;
-        totalRevenue += fare;
-      }
-
-      final todayRidesRevenue = await _supabase
-          .from('rides')
-          .select('fare')
-          .eq('status', 'completed')
-          .gte('completed_at', todayStart);
-      final todayDeliveriesRevenue = await _supabase
-          .from('rides')
-          .select('fare')
-          .neq('service_type', 'ride')
-          .eq('status', 'completed')
-          .gte('completed_at', todayStart);
-
-      for (final ride in todayRidesRevenue as List) {
+      for (final ride in revenueResults[2] as List) {
         revenueToday += (ride['fare'] as num?)?.toDouble() ?? 0;
       }
-      for (final delivery in todayDeliveriesRevenue as List) {
+      for (final delivery in revenueResults[3] as List) {
         revenueToday += (delivery['fare'] as num?)?.toDouble() ?? 0;
       }
 
-      final monthRidesRevenue = await _supabase
-          .from('rides')
-          .select('fare')
-          .eq('status', 'completed')
-          .gte('completed_at', monthStart);
-      final monthDeliveriesRevenue = await _supabase
-          .from('rides')
-          .select('fare')
-          .neq('service_type', 'ride')
-          .eq('status', 'completed')
-          .gte('completed_at', monthStart);
-
-      for (final ride in monthRidesRevenue as List) {
+      double revenueThisMonth = 0;
+      for (final ride in revenueResults[4] as List) {
         revenueThisMonth += (ride['fare'] as num?)?.toDouble() ?? 0;
       }
-      for (final delivery in monthDeliveriesRevenue as List) {
+      for (final delivery in revenueResults[5] as List) {
         revenueThisMonth += (delivery['fare'] as num?)?.toDouble() ?? 0;
       }
 
-      final newUsersTodayCount = await _supabase
-          .from('users')
-          .select('id')
-          .gte('created_at', todayStart)
-          .count();
-      final newUsersThisMonthCount = await _supabase
-          .from('users')
-          .select('id')
-          .gte('created_at', monthStart)
-          .count();
-
       return AdminDashboardMetrics(
-        totalUsers: usersCount.count,
-        totalDrivers: driversCount.count,
-        totalMerchants: merchantsCount.count,
-        activeDrivers: activeDriversCount.count,
-        pendingVerifications: pendingVerificationsCount.count,
-        totalRides: totalRidesCount.count,
-        activeRides: activeRidesCount.count,
-        totalDeliveries: totalDeliveriesCount.count,
-        pendingOrders: pendingOrdersCount.count,
-        completedDeliveries: completedDeliveriesCount.count,
+        totalUsers: countResults[0],
+        totalDrivers: countResults[1],
+        totalMerchants: countResults[2],
+        activeDrivers: metrics[0].count,
+        pendingVerifications: metrics[1].count,
+        totalRides: metrics[2].count,
+        activeRides: metrics[3].count,
+        totalDeliveries: metrics[4].count,
+        pendingOrders: metrics[5].count,
+        completedDeliveries: metrics[6].count,
         totalRevenue: totalRevenue,
         revenueToday: revenueToday,
         revenueThisMonth: revenueThisMonth,
-        newUsersToday: newUsersTodayCount.count,
-        newUsersThisMonth: newUsersThisMonthCount.count,
+        newUsersToday: metrics[7].count,
+        newUsersThisMonth: metrics[8].count,
       );
     } catch (e) {
       throw AdminException('Failed to fetch dashboard metrics: $e');

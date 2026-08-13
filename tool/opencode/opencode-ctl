@@ -1,0 +1,203 @@
+#!/data/data/com.termux/files/usr/bin/bash
+# opencode-ctl - manage the OpenCode server running inside Ubuntu PRoot.
+#
+#   opencode-ctl start     start exactly one server on 127.0.0.1:4096 (idempotent)
+#   opencode-ctl status    show health, PIDs, port, project, tmux state
+#   opencode-ctl stop      safely stop the server and its PRoot parent
+#   opencode-ctl restart   stop, then start one clean instance
+#   opencode-ctl log       show recent server logs
+#
+# Canonical chain: Termux -> tmux -> opencode-launch -> proot-distro (Ubuntu) -> opencode.
+set -u
+: "${PREFIX:=/data/data/com.termux/files/usr}"
+: "${TERMUX_HOME:=/data/data/com.termux/files/home}"
+: "${HOME:=$TERMUX_HOME}"
+export HOME
+export PATH="$PREFIX/bin:$PATH"
+
+PORT=4096
+HOST=127.0.0.1
+USER=opencode
+PASS=test-local-only
+STATE_DIR="${OPCODE_CTL_DIR:-$HOME/.opencode-ctl}"
+LOGFILE="$STATE_DIR/opencode.log"
+LAUNCH="$STATE_DIR/opencode-launch"
+TMUX_SESSION=opencode
+OC_APP_LOG=/data/data/com.termux/files/usr/var/lib/proot-distro/containers/ubuntu/rootfs/root/.local/share/opencode/log/opencode.log
+
+mkdir -p "$STATE_DIR"
+
+_probe() { curl -s -o /dev/null -m 2 -w '%{http_code}' "$@" "http://$HOST:$PORT/global/health" 2>/dev/null; }
+_ht()    { local c; c="$(_probe "$@")"; [ -n "$c" ] && [ "$c" != "000" ]; }
+probe()      { _ht; }
+probe_auth() { _ht -u "$USER:$PASS"; }
+is_up()      { _ht; }
+auth_ok()    { [ "$(_probe -u "$USER:$PASS")" = "200" ]; }
+
+proot_pids()    { pgrep -f 'proot .*ubuntu/rootfs' 2>/dev/null; }
+opencode_pids() { pgrep -f 'opencode .*serve .*4096' 2>/dev/null; }
+
+tmux_has() { tmux has-session -t "$TMUX_SESSION" 2>/dev/null; }
+
+log_msg() { echo "$(date '+%F %T') [opencode-ctl] $*" >> "$LOGFILE"; }
+
+status() {
+  local p oc
+  p=$(proot_pids | head -1)
+  oc=$(opencode_pids | head -1)
+
+  echo "=== OpenCode server status ==="
+  echo "tmux session '$TMUX_SESSION': $(if tmux_has; then echo running; else echo absent; fi)"
+  echo "PRoot PID:            ${p:-none}"
+  echo "OpenCode PID:         ${oc:-none}"
+  if [ -n "$oc" ]; then
+    echo "Project (cwd):        $(readlink "/proc/$oc/cwd" 2>/dev/null || echo unknown)"
+  fi
+  echo "HTTP $HOST:$PORT:  $(probe && echo up || echo down)"
+  if is_up; then
+    echo "Health:               $(curl -s -m 2 -u "$USER:$PASS" "http://$HOST:$PORT/global/health" 2>/dev/null)"
+    if auth_ok; then
+      echo "Authentication:       OK (HTTP 200 with credentials)"
+    else
+      echo "Authentication:       RESPONDING but auth check failed"
+    fi
+  else
+    echo "Authentication:       n/a (server down)"
+  fi
+}
+
+start() {
+  if is_up; then
+    echo "OpenCode already running on $HOST:$PORT."
+    status
+    return 0
+  fi
+  if tmux_has; then
+    echo "Cleaning leftover tmux session '$TMUX_SESSION'..."
+    tmux kill-session -t "$TMUX_SESSION" 2>/dev/null
+    sleep 1
+  fi
+  rm -f "$STATE_DIR/.stop"
+  termux-wake-lock 2>/dev/null || true
+
+  echo "Starting OpenCode in tmux session '$TMUX_SESSION'..."
+  tmux new-session -d -s "$TMUX_SESSION" "$LAUNCH"
+  local trc=$?
+  if [ "$trc" -ne 0 ]; then
+    echo "ERROR: tmux new-session failed (rc=$trc)."
+    log_msg "start FAILED: tmux new-session rc=$trc"
+    return 1
+  fi
+  tmux set-option -g -t "$TMUX_SESSION" exit-empty off 2>/dev/null
+  log_msg "started tmux session '$TMUX_SESSION' (rc=$trc)"
+
+  echo "Waiting for $HOST:$PORT (up to 90s)..."
+  local i ok=1
+  for i in $(seq 1 30); do
+    if is_up && auth_ok; then ok=0; break; fi
+    sleep 3
+  done
+  if [ "$ok" -eq 0 ]; then
+    echo "OpenCode is UP on $HOST:$PORT (auth OK)."
+    log_msg "OpenCode became healthy on $HOST:$PORT"
+    status
+    return 0
+  fi
+  if is_up; then
+    echo "OpenCode is UP but auth check failed."
+    log_msg "OpenCode UP but auth failed"
+    status
+    return 0
+  fi
+
+  echo "ERROR: server did not answer within 90s. tmux still up: $(tmux_has && echo yes || echo no). Last log lines:"
+  tail -n 25 "$LOGFILE" 2>/dev/null
+  log_msg "start FAILED: no health within 90s"
+  return 1
+}
+
+stop() {
+  local p oc
+  p=$(proot_pids | head -1)
+  oc=$(opencode_pids | head -1)
+
+  if [ -z "$p" ] && [ -z "$oc" ] && ! is_up; then
+    if tmux_has; then tmux kill-session -t "$TMUX_SESSION" 2>/dev/null; fi
+    rm -f "$STATE_DIR/.stop"
+    echo "OpenCode is not running."
+    return 0
+  fi
+
+  touch "$STATE_DIR/.stop"
+  log_msg "stop requested (proot=$p opencode=$oc)"
+  if [ -n "$p" ]; then
+    echo "Stopping PRoot PID $p (kills OpenCode inside it)..."
+    kill "$p" 2>/dev/null
+    sleep 2
+    kill -0 "$p" 2>/dev/null && { kill -9 "$p" 2>/dev/null; sleep 1; }
+  fi
+
+  echo "Waiting for $HOST:$PORT to close (up to 30s)..."
+  local i
+  for i in $(seq 1 15); do
+    if ! is_up; then break; fi
+    sleep 2
+  done
+
+  if is_up; then
+    oc=$(opencode_pids | head -1)
+    if [ -n "$oc" ]; then
+      echo "Force killing OpenCode PID $oc..."
+      kill -9 "$oc" 2>/dev/null
+      sleep 1
+    fi
+  fi
+
+  if tmux_has; then
+    echo "Killing tmux session '$TMUX_SESSION'..."
+    tmux kill-session -t "$TMUX_SESSION" 2>/dev/null
+  fi
+  termux-wake-unlock 2>/dev/null || true
+  rm -f "$STATE_DIR/.stop"
+
+  if is_up; then
+    echo "ERROR: $HOST:$PORT is still listening."
+    log_msg "stop FAILED: port still listening"
+    return 1
+  fi
+  log_msg "OpenCode stopped"
+  echo "OpenCode stopped. No process remains on $HOST:$PORT."
+}
+
+restart() {
+  stop
+  local rc=$?
+  [ $rc -ne 0 ] && return $rc
+  start
+}
+
+log() {
+  echo "=== launch/serve log: $LOGFILE ==="
+  tail -n 80 "$LOGFILE" 2>/dev/null || echo "(no launch log yet)"
+  echo
+  echo "=== opencode app log ==="
+  tail -n 60 "$OC_APP_LOG" 2>/dev/null || echo "(no app log found)"
+}
+
+case "${1:-}" in
+  start)   start ;;
+  status|ps) status ;;
+  stop)    stop ;;
+  restart) restart ;;
+  log)     log ;;
+  *)
+    echo "usage: opencode-ctl {start|status|stop|restart|log}"
+    echo
+    echo "  start     start exactly one OpenCode server on $HOST:$PORT (idempotent)"
+    echo "  status    show health, PIDs, port, project, tmux state"
+    echo "  stop      safely stop the server and its PRoot parent"
+    echo "  restart   stop then start one clean instance"
+    echo "  log       show recent server logs"
+    exit 1
+    ;;
+esac

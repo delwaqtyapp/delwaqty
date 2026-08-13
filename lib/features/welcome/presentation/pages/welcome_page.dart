@@ -9,7 +9,6 @@ import 'package:delwaqty/shared/widgets/animated_slide_in.dart';
 import 'package:delwaqty/shared/widgets/app_button.dart';
 import 'package:delwaqty/shared/widgets/gradient_background.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
-import 'package:delwaqty/core/theme/app_colors.dart';
 
 class WelcomePage extends ConsumerWidget {
   const WelcomePage({super.key});

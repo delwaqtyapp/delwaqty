@@ -115,6 +115,54 @@ $env:PUB_CACHE = "E:\app\pub-cache"; $env:GRADLE_USER_HOME = "E:\app\.gradle"; $
 
 ---
 
+## 8.5 السيرفر شغال دايماً (Always-On Server)
+
+> **خلي السيرفر ميفصلش نهائي حتى لو قفلت شاشة الهاتف.**
+
+| Command | الوصف |
+|---------|--------|
+| `opencode-ctl status` | حالة السيرفر (PIDs / port / tmux / auth) |
+| `opencode-ctl restart` | إعادة تشغيل السيرفر بشكل مُدار ومفصول عن الطرفية |
+| `opencode-ctl log` | آخر سجلات السيرفر |
+| `bash ~/delwaqty/tool/opencode/install.sh` | إعادة تثبيت/إصلاح الإعدادات الكاملة |
+
+**ضمانات عدم الانقطاع:**
+1. **Wake lock** — السيرفر مسك `termux-wake-lock` + `wake-lock = true` في
+   `~/.termux/termux.properties`، فالـ CPU يفضل شغال والهاتف قافل.
+2. **مفصول تماماً** — الشجرة كلها داخل جلسة tmux (`opencode`) بـ `setsid`،
+   قفل الشاشة أو إغلاق الطرفية مش بيموتها.
+3. **Auto-heal** — لو السيرفر انهار لأي سبب، `opencode-launch` يرجّع يشتغله تلقائياً.
+4. **تشغيل تلقائي بعد الريستارت** — `~/.termux/boot/opencode-boot.sh` (بعد إعادة
+   الإقلاع: الهاتف → Termux:Boot → `opencode-boot.sh` → tmux → proot → opencode على
+   `127.0.0.1:4096`). Termux:Boot + Termux:API **مثبتان بالفعل**؛ لو أعدت تثبيت
+   النظام استخدم: `pkg install termux-boot termux-api` ثم **افتح تطبيق Termux:Boot
+   مرة واحدة** (Android لا يرسل `BOOT_COMPLETED` للتطبيقات المثبتة ولم تُفتح بعد).
+
+**خطوة يدوية مرة واحدة (مهم):** امنع أندرويد من قتل Termux في الخلفية:
+**الإعدادات → التطبيقات → Termux → البطارية → غير مقيد**
+(أو من PC: `adb shell dumpsys deviceidle whitelist +com.termux`).
+
+**أمر الاتصال الصحيح (مهم جداً):** عشان تتصل بالسيرفر الشغال — **ممنوع** تعيد تشغيل
+السيرفر بأمر `proot-distro login ... serve` (ده أمر تشغيل جديد مربوط بالطرفية =
+سبب الانقطاع، وأيضاً بيفشل بـ `ServeError` لو المنفذ مفتوح). الاتصال الصح من داخل
+الـ app (نفس بيئة ubuntu):
+
+```bash
+export OPENCODE_SERVER_PASSWORD=test-local-only
+opencode attach http://127.0.0.1:4096
+```
+
+لو الباش بيعملك alias `oc`، يكفي تكتب:
+
+```bash
+oc
+```
+
+الملفات الأصلية في الريبو: `tool/opencode/` (هي المصدر — `opencode-ctl`,
+`opencode-launch`, `opencode-boot.sh`, `install.sh`, `README.md`).
+
+---
+
 ## 9. Milestones المكتملة
 
 | Milestone | Sprint | Commit |

@@ -83,29 +83,57 @@ class _SplashPageState extends ConsumerState<SplashPage>
 
   Future<void> _tryBiometricAutoLogin() async {
     final store = ref.read(biometricAuthStoreProvider);
-    final credentials = await store.activeCredentials();
-    if (credentials == null || !mounted) return;
+    final hasCreds = await store.hasAnyCredentials();
+    if (!hasCreds || !mounted) return;
+
     final l10n = AppLocalizations.of(context);
     try {
-      final didAuth = await LocalAuthentication().authenticate(
-        localizedReason: l10n.biometricReason,
-        persistAcrossBackgrounding: true,
-        biometricOnly: true,
-      );
+      final localAuth = LocalAuthentication();
+      var didAuth = false;
+      try {
+        didAuth = await localAuth.authenticate(
+          localizedReason: l10n.biometricReason,
+          biometricOnly: true,
+        );
+      } on Exception {
+        didAuth = await localAuth.authenticate(
+          localizedReason: l10n.biometricReason,
+          biometricOnly: false,
+        );
+      }
       if (!didAuth || !mounted) return;
+
+      final credentials = await store.activeCredentials();
+      final fallback = credentials ?? await _pickFirstCredential(store);
+      if (fallback == null) {
+        await store.clearAll();
+        return;
+      }
+
       await ref.read(authStateProvider.notifier).signIn(
-            email: credentials.email,
-            password: credentials.password,
+            email: fallback.email,
+            password: fallback.password,
           );
       final next = ref.read(authStateProvider);
       if (next is AuthError || next is AuthUnauthenticated) {
-        await store.clearActive();
+        await store.clearForUser(fallback.userId);
       }
     } on Exception {
-      // Scan cancelled or failed on-device; fall through to the login page.
+      await store.clearAll();
     } catch (_) {
-      await store.clearActive();
+      await store.clearAll();
     }
+  }
+
+  Future<BiometricCredentials?> _pickFirstCredential(
+    BiometricAuthStore store,
+  ) async {
+    final userIds = await store.allUserIds();
+    for (final uid in userIds) {
+      final creds = await store.credentialsFor(uid);
+      if (creds != null) return creds;
+    }
+    return null;
   }
 
   @override

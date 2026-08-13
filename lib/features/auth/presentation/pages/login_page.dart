@@ -77,7 +77,9 @@ class _LoginPageState extends ConsumerState<LoginPage>
   Future<void> _checkBiometric() async {
     try {
       final canCheck = await _localAuth.canCheckBiometrics;
-      if (mounted) setState(() => _biometricAvailable = canCheck);
+      final hasCreds =
+          await ref.read(biometricAuthStoreProvider).hasAnyCredentials();
+      if (mounted) setState(() => _biometricAvailable = canCheck && hasCreds);
     } catch (_) {}
   }
 
@@ -95,22 +97,39 @@ class _LoginPageState extends ConsumerState<LoginPage>
   }
 
   Future<void> _handlePostLoginSave() async {
-    if (!_pendingSaveAccount) return;
-    _pendingSaveAccount = false;
     final l10n = AppLocalizations.of(context);
     final messenger = ScaffoldMessenger.of(context);
     final email = _emailController.text.trim();
     final store = ref.read(savedAccountsStoreProvider);
+    final biometricStore = ref.read(biometricAuthStoreProvider);
+
     try {
       final accounts = await store.saveAccount(email: email);
       if (mounted) {
         setState(() => _savedAccounts = accounts);
-        messenger.showSnackBar(
-          SnackBar(
-            content: Text(l10n.accountSaved),
-            behavior: SnackBarBehavior.floating,
-          ),
+        if (_pendingSaveAccount) {
+          messenger.showSnackBar(
+            SnackBar(
+              content: Text(l10n.accountSaved),
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+        }
+      }
+    } catch (_) {}
+
+    _pendingSaveAccount = false;
+
+    try {
+      final authState = ref.read(authStateProvider);
+      final user = authState.whenOrNull(authenticated: (u) => u);
+      if (user != null) {
+        await biometricStore.saveCredentials(
+          userId: user.id,
+          email: email,
+          password: _passwordController.text,
         );
+        if (mounted) setState(() => _biometricAvailable = true);
       }
     } catch (_) {}
   }
@@ -144,55 +163,49 @@ class _LoginPageState extends ConsumerState<LoginPage>
       ),
     );
     if (confirmed != true || !mounted) return;
-    try {
-      final didAuth = await _localAuth.authenticate(
-        localizedReason: l10n.biometricReason,
-        persistAcrossBackgrounding: true,
-        biometricOnly: true,
+    ref
+        .read(authStateProvider.notifier)
+        .updateBiometricEnabled(enabled: true)
+        .catchError((_) {});
+    if (mounted) {
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text(l10n.fingerprintEnabled),
+          behavior: SnackBarBehavior.floating,
+        ),
       );
-      if (!didAuth || !mounted) return;
-      await ref.read(biometricAuthStoreProvider).saveCredentials(
-        userId: user.id,
-        email: user.email,
-        password: _passwordController.text,
-      );
-      await ref
-          .read(authStateProvider.notifier)
-          .updateBiometricEnabled(enabled: true);
-      if (mounted) {
-        messenger.showSnackBar(
-          SnackBar(
-            content: Text(l10n.fingerprintEnabled),
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
-      }
-    } on Exception {
-      if (mounted) {
-        messenger.showSnackBar(
-          SnackBar(
-            content: Text(l10n.biometricEnableFailed),
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
-      }
     }
   }
 
   Future<void> _authenticateWithBiometric() async {
     final l10n = AppLocalizations.of(context);
-    final credentials =
-        await ref.read(biometricAuthStoreProvider).activeCredentials();
+    final store = ref.read(biometricAuthStoreProvider);
+
+    final email = _emailController.text.trim();
+    BiometricCredentials? credentials;
+    if (email.isNotEmpty) {
+      credentials = await store.credentialsForEmail(email);
+    }
+    credentials ??= await store.activeCredentials();
+    credentials ??= await _pickCredentialsFromAll();
+
     if (credentials == null) {
       if (mounted) context.showAppSnackBar(l10n.noBiometricAccountSaved);
       return;
     }
     try {
-      final didAuth = await _localAuth.authenticate(
-        localizedReason: l10n.biometricReason,
-        persistAcrossBackgrounding: true,
-        biometricOnly: true,
-      );
+      var didAuth = false;
+      try {
+        didAuth = await _localAuth.authenticate(
+          localizedReason: l10n.biometricReason,
+          biometricOnly: true,
+        );
+      } on Exception {
+        didAuth = await _localAuth.authenticate(
+          localizedReason: l10n.biometricReason,
+          biometricOnly: false,
+        );
+      }
       if (!didAuth || !mounted) return;
       _emailController.text = credentials.email;
       _passwordController.text = credentials.password;
@@ -210,6 +223,16 @@ class _LoginPageState extends ConsumerState<LoginPage>
           : l10n.biometricFailed;
       context.showAppSnackBar(message);
     }
+  }
+
+  Future<BiometricCredentials?> _pickCredentialsFromAll() async {
+    final store = ref.read(biometricAuthStoreProvider);
+    final userIds = await store.allUserIds();
+    for (final uid in userIds) {
+      final creds = await store.credentialsFor(uid);
+      if (creds != null) return creds;
+    }
+    return null;
   }
 
   Future<void> _confirmRemoveAccount(SavedAccount account) async {
@@ -248,11 +271,11 @@ class _LoginPageState extends ConsumerState<LoginPage>
 
     ref.listen<AuthState>(authStateProvider, (prev, next) {
       next.whenOrNull(
-        authenticated: (user) {
+        authenticated: (user) async {
           if (_postLoginHandled) return;
           _postLoginHandled = true;
-          _handlePostLoginSave();
-          _handlePostLoginNavigation(user);
+          await _handlePostLoginSave();
+          await _handlePostLoginNavigation(user);
         },
         guest: () => context.go('/home'),
         error: (msg) {

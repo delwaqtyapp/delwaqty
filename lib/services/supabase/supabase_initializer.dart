@@ -14,8 +14,8 @@ abstract final class SupabaseInitializer {
     if (_initialized) return;
 
     await Supabase.initialize(
-      url: SupabaseConfig.url,
-      anonKey: SupabaseConfig.anonKey,
+       url: SupabaseConfig.url,
+      publishableKey: SupabaseConfig.anonKey,
       debug: kDebugMode,
     );
 

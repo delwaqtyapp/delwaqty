@@ -1,10 +1,171 @@
 # SESSION_STATUS.md
 
-> **Last updated:** 2026-08-11 Session 29 (Remote sync + ARM64 build bring-up + live migrations)
+> **Last updated:** 2026-08-13 Session 34 (background persistence verified + battery whitelist applied)
 
 ---
 
-## Current Task — ARM64 BUILD BRING-UP: FIRST SUCCESSFUL APK ON DNP NX9 (Session 29 cont.)
+## Current Task — ALWAYS-ON BACKGROUND: TERMUX FOREGROUND SERVICE + BATTERY WHITELIST (Session 34)
+
+**Task (user, Arabic):** keep Termux running in the background permanently — visible ONLY as a
+notification ("running in background"), without the user having to keep opening the Termux app.
+
+**State verified live (all via Android shell, uid 2000 via Shizuku):**
+
+| Layer | Result |
+|-------|--------|
+| **Foreground service + notification** | `NotificationRecord(pkg=com.termux id=1337 flags=ONGOING_EVENT\|NO_CLEAR\|FOREGROUND_SERVICE vis=PRIVATE)` posted — Termux App channel, `importance=2` (low, silent). The app is being held alive by its foreground service, no terminal window needed |
+| **Survival chain** | tmux `opencode` (PID 13272, parented to init) → `opencode-launch` (13277) → proot Ubuntu (13342) → `opencode serve` (13380). Closing/backgrounding the Termux UI cannot kill the server (tmux-detached, setsid) |
+| **Health** | `GET 127.0.0.1:4096/global/health` → `{"healthy":true,"version":"1.18.10"}` |
+| **Wake lock** | TermuxService `isForeground=true` foregroundId=1337; `wake-lock=true` in `~/.termux/termux.properties` |
+| **Battery/Doze whitelist** | **NEW this session:** `cmd deviceidle whitelist +com.termux +com.termux.boot +com.termux.api` → all 3 now in the DeviceIdle whitelist (was only `user,com.termux`). Honor's battery optimization can no longer kill Termux in Doze |
+
+**Boot chain (from Session 33) intact:** Termux:Boot v0.8.1 installed + first-launched
+(`stopped=false`) → `~/.termux/boot/opencode-boot.sh` → `opencode-ctl start` → tmux → proot →
+opencode. `boot.log` shows "boot SUCCESS: OpenCode became healthy".
+
+> **Note:** `opencode-ctl status` run from inside the proot (uid 0) may report tmux `absent` due to
+> a socket/TMPDIR mismatch between contexts — the real tmux server IS running (socket
+> `…/usr/var/run/tmux-0/default` exists). Run `status` from a real Termux terminal for truthful output.
+
+### Next (user hands, one-time)
+1. In Android Settings → Apps → Termux (and Termux:Boot, Termux:API): Battery → **Unrestricted**
+   (Honor may require this in the app-launch manager too) — confirms what the whitelist already does.
+2. Close/background Termux UI (swipe from recents, no force-stop) → the notification "Termux
+   session running" (id 1337) stays, and `opencode-ctl status` still shows the server healthy.
+3. Reboot test already passed in Session 33 — after the next reboot the chain restores itself.
+4. Commit + push docs.
+
+---
+
+## Previous Task — TELEPHONE INFRA 3× FIX: AUTO-START / APK INSTALLER / SHIZUKU (Session 33)
+
+**Task (user, Arabic):** (1) make OpenCode auto-start after reboot (Termux → proot → opencode
+→ 127.0.0.1:4096) without opening Termux; (2) stop Termux from opening when tapping an APK —
+the real Android Package Installer must handle installs; (3) keep Shizuku working from Termux
+and never let the OpenCode server die when Shizuku is down. No workarounds.
+
+**Root causes found (all confirmed via Android shell, uid 2000 via Shizuku):**
+
+| Problem | Root cause | Fix applied |
+|---------|-----------|-------------|
+| 1. No auto-start after reboot | **`com.termux.boot` was NOT installed** — `~/.termux/boot/opencode-boot.sh` existed but nothing ever ran it; user manually typed the `proot-distro login … serve` command after each boot | Installed Termux:Boot **v0.8.1** + Termux:API **v0.53.0** via `pm install`; launched `com.termux.boot/.BootActivity` once so it is `stopped=false` (`RECEIVE_BOOT_COMPLETED granted=true`) |
+| 2. Termux opens instead of Package Installer | A stored **Preferred Activity with `mAlways=true`** bound `application/vnd.android.package-archive` → `com.termux/.app.api.file.FileViewReceiverActivity`; also Termux declares wildcard `application/*` | `cmd package clear-package-preferred-activities com.termux` → Termux no longer auto-handles APK; resolver for real `content://` now returns `com.google.android.packageinstaller` + AppGallery (Termux absent) |
+| 3. Shizuku boot probe broken | `shizuku-init.sh` pointed to `/usr/local/bin/rish` from **host** Termux (not present there; rish lives inside the Ubuntu proot) | Rewrote `shizuku-init.sh` to `proot-distro login ubuntu -- /usr/local/bin/rish -c id`; graceful WARN, never blocks OpenCode boot |
+
+**Also hardened:** `opencode-boot.sh` (explicit `TERMUX_HOME`/`HOME`, exec checks, chmod);
+`opencode-ctl` (HOME fallback); scripts synced to `tool/opencode/` + `install.sh` now also
+installs `shizuku-init.sh` and documents `pkg install termux-boot termux-api` + first-launch.
+
+**Verification done:** boot script runs clean with correct Termux env (health 200, `boot.log`
+"boot SUCCESS"); server currently healthy on 4096; APK `content://` resolution excludes Termux.
+
+### Next (needs user hands)
+1. **Reboot the phone**, wait ~90 s, open any Termux terminal and run `opencode-ctl status`
+   → expect tmux session `opencode` running, health 200. Also check `~/.opencode-ctl/boot.log`.
+2. Ensure Android Settings → Apps → Termux → Battery → **Unrestricted** (Honor auto-launch).
+3. Tap an `.apk` (e.g. from Downloads) → confirm the real Package Installer/chooser opens,
+   not Termux.
+4. Commit + push (`tool/opencode/`, `SESSION_STATUS.md`, `PHONE_COMMANDS.md`).
+
+---
+
+## Current Task — OPencode MOBILE CLIENT: CONNECTION VERIFIED (Session 32)
+
+**Task (user):** inspect the Mobile client (`com.logicedge.opencodemobile` v1.2.2) config/auth
+flow, fix ONLY client-side credentials if necessary, then verify the client can connect to the
+server (`http://127.0.0.1:4096`, `opencode` / `test-local-only`, expect `200 {"healthy":true}`).
+**Constraint:** do not touch server, auth, `opencode-ctl/launch`, Termux:Boot, DB, or the project.
+
+**Findings:**
+| Area | Result |
+|------|--------|
+| App nature | Capacitor/WebView shell (PairIP-wrapped, non-debuggable), wraps OpenCode web build; Server settings stored in private storage |
+| App storage access | Shell (uid 2000 via Shizuku) → `ls /data/user/0/...` = Permission denied (RC=1); `run-as` unavailable (not debuggable) → config files NOT editable from outside |
+| Server endpoints | `/global/health`, `/`, `/app`, `/project`, `/project/current` all require Basic auth → 401 without creds / 200 with `opencode:test-local-only`; `/event` SSE streams `server.connected` with auth |
+| Client reachability | App stored no creds earlier → its health probe got 401 → "not reachable" banner |
+
+**Verification (client connected — NO fix required):**
+1. `uiautomator dump` of the focused `MainActivity` (1280x2800): the app is rendering the **live
+   OpenCode web UI** with the current active session (messages + todos), no error banner.
+2. Real `/proc/net/tcp` via Android shell: **uid 10688 = `com.logicedge.opencodemobile` holds 6
+   ESTABLISHED TCP sockets to `0100007F:1000` (127.0.0.1:4096)** — live SSE/API streams right now.
+3. Server-side: with the exact creds every client route returns 200 and SSE streams.
+
+**Conclusion:** the earlier "not reachable" occurred while the server was down (killed terminal);
+once the server is up the client connects. Credentials were already correct — nothing was changed.
+No files on device or in the repo were modified this session (except this file).
+
+### Next
+1. One-time migration (optional): `opencode-ctl restart` from a real Termux session to move the
+   server into the managed tmux+watchdog setup.
+2. User: HONOR auto-launch permission for Termux + Termux:Boot, battery Unrestricted for Termux.
+3. Commit + push (`tool/opencode/`, `PHONE_COMMANDS.md`, `SESSION_STATUS.md`).
+
+---
+
+## Current Task — ALWAYS-ON OPencode SERVER (Session 31)
+
+**Problem:** When the phone screen locked, the OpenCode server in Termux stopped
+responding and the client "disconnected".
+
+**Root cause:** the running `opencode serve` (PID on `127.0.0.1:4096`) was attached
+to a live terminal (`pts/0`) — it bypassed the managed `opencode-ctl` setup — and
+**no wake-lock was held**. On screen lock Android suspended/killed the Termux
+process tree, killing the server.
+
+**Fix (all layers, canonical copies in `tool/opencode/`):**
+
+| Layer | Change |
+|-------|--------|
+| **Wake lock** | `termux-wake-lock` taken on start + `wake-lock = true` added to `~/.termux/termux.properties` → CPU stays awake with screen off |
+| **Detach** | Server runs inside Termux tmux session `opencode` (`setsid`), so closing the terminal / backgrounding the app cannot kill it |
+| **Auto-heal** | `opencode-launch` now loops and respawns proot/opencode if it crashes; `opencode-ctl stop` sets a `.stop` flag first so a manual stop is respected |
+| **Boot autostart** | `~/.termux/boot/opencode-boot.sh` restores the server after reboot (needs `pkg install termux-boot` + enable "Run command at startup" once) |
+| **Doze whitelist** | Manual one-time: Android Settings → Apps → Termux → Battery → Unrestricted (or `adb shell dumpsys deviceidle whitelist +com.termux`) |
+
+Files modified:
+- `~/.opencode-ctl/opencode-launch` (respawn loop) · `~/.opencode-ctl/opencode-ctl`
+  (stop-flag) · `~/.opencode-ctl/README.md`
+- `~/.termux/termux.properties` (`wake-lock = true`) ·
+  `~/.termux/boot/opencode-boot.sh` (new)
+- Repo: `tool/opencode/{opencode-ctl,opencode-launch,opencode-boot.sh,install.sh,README.md}`
+- `PHONE_COMMANDS.md` — new "السيرفر شغال دايماً" section
+
+### Next
+1. **Connect command** — user should use `opencode attach http://127.0.0.1:4096`
+   (or alias `oc`), NEVER re-run the `proot-distro login ... serve` command (it
+   is a server-START command attached to the terminal and fails with `ServeError`
+   when the managed server already owns port 4096).
+2. **One-time migration (optional, recommended):** run `opencode-ctl restart` in a
+   real Termux session so the server moves into the managed tmux+watchdog setup
+   (current instance is still attached to a live terminal; wake-lock already
+   protects it against screen lock).
+3. User: install Termux:Boot + do the battery-optimization whitelist step
+4. Commit + push (`tool/opencode/`, `PHONE_COMMANDS.md`, `SESSION_STATUS.md`)
+
+---
+
+## Current Task — BIOMETRIC BUG FIXES: HONOR 400 PRO AUTHENTICATION FIX (Session 30)
+
+Three bugs fixed in the biometric/fingerprint login flow:
+
+| Bug | Root Cause | Fix |
+|-----|-----------|-----|
+| **Race condition** | `_handlePostLoginSave()` and `_handlePostLoginNavigation()` called without `await`, so `_biometricAvailable` was stale (`false`) when enrollment dialog check ran on first login | Added `await` to both calls; enrollment dialog now shows correctly |
+| **`biometricOnly: true` fails on HONOR** | `local_auth.authenticate(biometricOnly: true)` throws on HONOR 400 Pro | Inner try: try `biometricOnly: true`, on exception fall back to `biometricOnly: false` (allows device PIN as fallback) |
+| **`_offerBiometricEnrollment` dead catch** | `updateBiometricEnabled` catches internally but `_offerBiometricEnrollment` had `on Exception catch` that fired unpredictably | Server update made non-blocking: fire-and-forget `.catchError((_) {})`, show success immediately |
+
+Files modified:
+- `lib/features/auth/presentation/pages/login_page.dart` — all 3 fixes
+- `lib/features/splash/presentation/pages/splash_page.dart` — biometric fallback in `_tryBiometricAutoLogin`
+
+Results: **594/594 tests pass, 0 errors**
+
+### Next
+1. Reconnect adb (need Wireless debugging pairing code from device)
+2. Rebuild APK (`flutter build apk --target-platform android-arm64 --debug --dart-define-from-file=.env.dev`)
+3. Install on device and verify biometric login end-to-end
+4. Commit all fixes
 
 The Android SDK on this machine is **x86-64-only** (aapt2, cmake, ninja, NDK toolchain) but the host is **aarch64** (PRoot on DNP NX9). The native binaries SIGILL under emulation — so every x86 tool was wrapped or replaced with a native-arm64 equivalent. Result: **`app-debug.apk` built successfully** on this device for the first time.
 

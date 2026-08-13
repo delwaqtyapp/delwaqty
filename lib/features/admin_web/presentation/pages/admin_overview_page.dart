@@ -23,7 +23,7 @@ class _AdminOverviewPageState extends State<AdminOverviewPage> {
   Future<void> _loadStats() async {
     try {
       final results = await Future.wait([
-        _client.from('profiles').select().count(),
+        _client.from('users').select().count(),
         _client.from('merchants').select().count(),
         _client.from('orders').select().count(),
         _client.from('drivers').select().count(),

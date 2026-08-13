@@ -24,7 +24,7 @@ class _AdminUsersPageState extends State<AdminUsersPage> {
   Future<void> _loadUsers() async {
     try {
       final response = await _client
-          .from('profiles')
+          .from('users')
           .select()
           .order('created_at', ascending: false);
       if (mounted) {

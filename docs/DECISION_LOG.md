@@ -1362,3 +1362,51 @@ ADR-044 introduced the DB-backed biometric system: `users.is_biometric_enabled`,
 - Users enrolled under the legacy pre-ADR-044 path must re-enroll once via the post-login dialog (their old `biometric_password_<email>` entries are no longer read) — acceptable for the pre-release stage, no migration code added.
 - `flutter analyze` 0 errors / 0 warnings (514 pre-existing info lints, baseline unchanged); full suite **594/594** (saved-account store/model tests trimmed to the non-biometric scope, settings page tests rewritten with mocked repositories); debug-verified on DNP NX9.
 - Docs updated: `SESSION_STATUS.md`, this log, and handoff `22_SPRINT_61_FINGERPRINT_UNIFICATION.md`.
+
+---
+
+## ADR-046: Phone always-on OpenCode infra — Termux:Boot install, APK default, Shizuku probe
+
+**Date:** Session 33 (2026-08-13)
+**Status:** Accepted
+**Deciders:** Lead Architect (remote, via OpenCode on device)
+
+### Context
+Three phone-side infrastructure failures blocked a reboot-proof workflow:
+1. OpenCode never auto-started after reboot — `com.termux.boot` was never installed,
+   so `~/.termux/boot/opencode-boot.sh` was never executed; the user re-ran the manual
+   `proot-distro login ubuntu … opencode serve` command after every boot.
+2. Tapping an `.apk` opened Termux instead of the Android Package Installer — a stored
+   Preferred Activity with `mAlways=true` bound `application/vnd.android.package-archive`
+   to `com.termux/.app.api.file.FileViewReceiverActivity`, so Android never showed a chooser.
+3. `shizuku-init.sh` pointed `/usr/local/bin/rish` at the **host** Termux where it does not
+   exist (rish lives inside the Ubuntu proot), so its boot probe always failed.
+
+### Decision
+- Install **Termux:Boot v0.8.1** and **Termux:API v0.53.0** via `pm install` (shell uid 2000
+  through Shizuku `rish`), then launch `com.termux.boot/.BootActivity` once so Android marks
+  it `stopped=false` (a freshly installed, never-launched app never receives `BOOT_COMPLETED`).
+- Remove the stale default: `cmd package clear-package-preferred-activities com.termux`.
+- Rewrite `shizuku-init.sh` to probe via `proot-distro login ubuntu -- /usr/local/bin/rish -c id`,
+  degrade to a WARN when Shizuku is down, and never block the OpenCode boot chain.
+- Harden `opencode-boot.sh` (explicit `TERMUX_HOME`, exec checks) and `opencode-ctl`
+  (HOME fallback); keep canonical copies in `tool/opencode/`.
+
+### Rationale
+- Android deliberately never delivers `BOOT_COMPLETED` to apps in the `stopped` state; the
+  first Activity launch is the documented "activation" step. All other layers (tmux + `setsid`
+  + `wake-lock`) were already correct — only Termux:Boot was missing.
+- The `mAlways=true` preference overrode the chooser entirely; clearing preferred activities for
+  `com.termux` restores normal resolution (real installers win for real `content://` URIs).
+- Termux:Boot executes boot scripts on the **host**, so any path to rish must be reachable
+  from the host — entering the proot is the only correct route.
+
+### Consequences
+- After the next reboot the server should come up via Termux:Boot → tmux → proot → opencode on
+  `127.0.0.1:4096` with no manual command; the user must still run the one-time battery
+  **Unrestricted** whitelist for Termux on Honor.
+- APK taps now resolve to the real installer/chooser; Termux still declares a `application/*`
+  wildcard so it *can* appear in a chooser for scheme-less VIEW intents, but it no longer
+  auto-opens for APK installs.
+- Shizuku remains optional for the server: its probe is best-effort and non-blocking.
+- Requires one real reboot to fully prove the Termux:Boot chain (pending user).

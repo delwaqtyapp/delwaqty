@@ -21,6 +21,7 @@ class _FingerprintLoginPageState extends ConsumerState<FingerprintLoginPage> {
   bool _enabled = false;
   String? _email;
   String? _userId;
+  List<BiometricCredentials> _allCredentials = [];
 
   @override
   void initState() {
@@ -37,7 +38,8 @@ class _FingerprintLoginPageState extends ConsumerState<FingerprintLoginPage> {
         _email = user.email;
       });
     }
-    _loadStatus();
+    await _loadStatus();
+    await _loadAllCredentials();
     try {
       final canCheck = await _localAuth.canCheckBiometrics;
       if (mounted) setState(() => _biometricAvailable = canCheck);
@@ -50,6 +52,17 @@ class _FingerprintLoginPageState extends ConsumerState<FingerprintLoginPage> {
         authState.whenOrNull(authenticated: (user) => user.isBiometricEnabled) ??
             false;
     if (mounted) setState(() => _enabled = enabled);
+  }
+
+  Future<void> _loadAllCredentials() async {
+    final store = ref.read(biometricAuthStoreProvider);
+    final userIds = await store.allUserIds();
+    final creds = <BiometricCredentials>[];
+    for (final uid in userIds) {
+      final c = await store.credentialsFor(uid);
+      if (c != null) creds.add(c);
+    }
+    if (mounted) setState(() => _allCredentials = creds);
   }
 
   Future<void> _toggle(bool value) async {
@@ -90,8 +103,10 @@ class _FingerprintLoginPageState extends ConsumerState<FingerprintLoginPage> {
           ),
         );
       }
+      await _loadAllCredentials();
     } else {
-      await ref.read(biometricAuthStoreProvider).clearActive();
+      final store = ref.read(biometricAuthStoreProvider);
+      await store.clearForUser(userId);
       await ref
           .read(authStateProvider.notifier)
           .updateBiometricEnabled(enabled: false);
@@ -104,6 +119,7 @@ class _FingerprintLoginPageState extends ConsumerState<FingerprintLoginPage> {
           ),
         );
       }
+      await _loadAllCredentials();
     }
   }
 
@@ -159,6 +175,28 @@ class _FingerprintLoginPageState extends ConsumerState<FingerprintLoginPage> {
     return confirmed == true && password.isNotEmpty ? password : null;
   }
 
+  Future<void> _removeCredential(BiometricCredentials cred) async {
+    final l10n = AppLocalizations.of(context);
+    final messenger = ScaffoldMessenger.of(context);
+    final store = ref.read(biometricAuthStoreProvider);
+    await store.clearForUser(cred.userId);
+    if (cred.userId == _userId) {
+      await ref
+          .read(authStateProvider.notifier)
+          .updateBiometricEnabled(enabled: false);
+      if (mounted) setState(() => _enabled = false);
+    }
+    await _loadAllCredentials();
+    if (mounted) {
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text(l10n.fingerprintDisabled),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
@@ -192,6 +230,24 @@ class _FingerprintLoginPageState extends ConsumerState<FingerprintLoginPage> {
                 ),
               ),
             ),
+          ],
+          if (_allCredentials.length > 1) ...[
+            const SizedBox(height: 24),
+            _buildSection(context, l10n.savedAccounts, [
+              for (final cred in _allCredentials)
+                ListTile(
+                  leading: CircleAvatar(
+                    child: Text(
+                      cred.email.substring(0, 1).toUpperCase(),
+                    ),
+                  ),
+                  title: Text(cred.email),
+                  trailing: IconButton(
+                    icon: const Icon(Icons.delete_outline),
+                    onPressed: () => _removeCredential(cred),
+                  ),
+                ),
+            ]),
           ],
         ],
       ),

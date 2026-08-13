@@ -25,7 +25,7 @@ class _AdminVerificationsWebPageState extends State<AdminVerificationsWebPage> {
   Future<void> _loadRequests() async {
     try {
       final response = await _client
-          .from('profiles')
+          .from('users')
           .select()
           .eq('verification_status', 'pending')
           .order('created_at', ascending: false);
@@ -44,7 +44,7 @@ class _AdminVerificationsWebPageState extends State<AdminVerificationsWebPage> {
     setState(() => _processingId = userId);
     try {
       await _client
-          .from('profiles')
+          .from('users')
           .update({'verification_status': 'approved'}).eq('id', userId);
       setState(() => _requests.removeWhere((r) => r['id'] == userId));
       if (mounted) {
@@ -73,7 +73,7 @@ class _AdminVerificationsWebPageState extends State<AdminVerificationsWebPage> {
     setState(() => _processingId = userId);
     try {
       await _client
-          .from('profiles')
+          .from('users')
           .update({'verification_status': 'rejected'}).eq('id', userId);
       setState(() => _requests.removeWhere((r) => r['id'] == userId));
       if (mounted) {

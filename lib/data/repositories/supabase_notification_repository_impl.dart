@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:delwaqty/core/errors/exceptions.dart';
 import 'package:delwaqty/domain/entities/app_notification.dart';
 import 'package:delwaqty/domain/repositories/notification_repository.dart';
 import 'package:delwaqty/data/datasources/remote/supabase_notification_data_source.dart';
@@ -20,45 +21,77 @@ class SupabaseNotificationRepositoryImpl implements NotificationRepository {
     int limit = 20,
     int offset = 0,
   }) async {
-    return _dataSource.getNotifications(
-      unreadOnly: unreadOnly,
-      limit: limit,
-      offset: offset,
-    );
+    try {
+      return await _dataSource.getNotifications(
+        unreadOnly: unreadOnly,
+        limit: limit,
+        offset: offset,
+      );
+    } catch (e) {
+      throw ServerException(message: e.toString());
+    }
   }
 
   @override
   Future<int> getUnreadCount() async {
-    return _dataSource.getUnreadCount();
+    try {
+      return await _dataSource.getUnreadCount();
+    } catch (e) {
+      throw ServerException(message: e.toString());
+    }
   }
 
   @override
   Future<void> markAsRead(String id) async {
-    await _dataSource.markAsRead(id);
+    try {
+      await _dataSource.markAsRead(id);
+    } catch (e) {
+      throw ServerException(message: e.toString());
+    }
   }
 
   @override
   Future<void> markAllAsRead() async {
-    await _dataSource.markAllAsRead();
+    try {
+      await _dataSource.markAllAsRead();
+    } catch (e) {
+      throw ServerException(message: e.toString());
+    }
   }
 
   @override
   Future<void> deleteNotification(String id) async {
-    await _dataSource.deleteNotification(id);
+    try {
+      await _dataSource.deleteNotification(id);
+    } catch (e) {
+      throw ServerException(message: e.toString());
+    }
   }
 
   @override
   Future<void> clearAll() async {
-    await _dataSource.clearAll();
+    try {
+      await _dataSource.clearAll();
+    } catch (e) {
+      throw ServerException(message: e.toString());
+    }
   }
 
   @override
   Future<bool> existsByIdempotencyKey(String key) async {
-    return _dataSource.existsByIdempotencyKey(key);
+    try {
+      return await _dataSource.existsByIdempotencyKey(key);
+    } catch (e) {
+      throw ServerException(message: e.toString());
+    }
   }
 
   @override
   Future<void> deactivateAllTokens() async {
-    await _dataSource.deactivateAllTokens();
+    try {
+      await _dataSource.deactivateAllTokens();
+    } catch (e) {
+      throw ServerException(message: e.toString());
+    }
   }
 }

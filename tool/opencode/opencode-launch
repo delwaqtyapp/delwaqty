@@ -1,0 +1,112 @@
+#!/data/data/com.termux/files/usr/bin/bash
+# opencode-launch - runs INSIDE the Termux tmux session "opencode".
+#
+# Canonical chain:
+#   Termux -> tmux -> opencode-launch -> proot-distro (Ubuntu) -> opencode -> 127.0.0.1:4096
+#
+# PERSISTENCE DESIGN (verified on HONOR / Termux tmux 3.7b):
+#   * The LAUNCH process (this script) is the tmux PANE OWNER and MUST keep its
+#     own stdin/stdout/stderr attached to the tmux pty. Termux's tmux build kills
+#     the pane/server within seconds if the pane process detaches its tty fds
+#     (e.g. `exec < /dev/null >> log 2>&1`). So this script's own stdio stays on
+#     the pane (visible via `tmux attach`) and milestones are ALSO appended to
+#     $STATE_DIR/opencode.log.
+#   * Only the proot/opencode SUBTREE is detached: spawned in a subshell with
+#     stdin=/dev/null and stdout/stderr -> opencode.log, then `setsid` so it
+#     lives in its own process group/session and cannot wedge proot on a dead
+#     terminal pipe.
+#   * tmux owns the lifecycle: closing the Termux UI / the interactive shell
+#     leaves the tmux server + this pane running.
+#   * `exit-empty off` is enforced so the tmux server never silently destroys
+#     itself when a pane's process ends.
+#   * Auto-heal respawn loop: if the proot subtree crashes, start it again.
+#     The loop exits only when $STATE_DIR/.stop exists (set by `opencode-ctl stop`).
+set -u
+: "${PREFIX:=/data/data/com.termux/files/usr}"
+export PATH="$PREFIX/bin:$PATH"
+
+STATE_DIR="${OPCODE_CTL_DIR:-$HOME/.opencode-ctl}"
+LOG="$STATE_DIR/opencode.log"
+PORT=4096
+HOST=127.0.0.1
+USER=opencode
+PASS=test-local-only
+
+mkdir -p "$STATE_DIR"
+if [ ! -w "$STATE_DIR" ]; then
+  echo "[opencode-launch] $(date '+%F %T') FATAL: $STATE_DIR not writable by uid $(id -u)."
+  echo "[opencode-launch] fix: chown -R \$(stat -c %u \"\$HOME\") \"$STATE_DIR\""
+  sleep 30
+  exit 1
+fi
+
+pane()    { echo "[opencode-launch] $(date '+%F %T') $*"; }
+logfile() { echo "[opencode-launch] $(date '+%F %T') $*" >> "$LOG"; }
+both()    { pane "$@"; logfile "$@"; }
+
+command -v tmux >/dev/null 2>&1 && tmux set -g exit-empty off >/dev/null 2>&1 || true
+
+rm -f "$STATE_DIR/.stop"
+both "launch entered tmux pane (bash pid $$)"
+
+while true; do
+  if [ -f "$STATE_DIR/.stop" ]; then
+    both "stop flag present; exiting launch loop"
+    break
+  fi
+
+  if curl -s -o /dev/null -m 1 "http://$HOST:$PORT/health" 2>/dev/null; then
+    both "port $PORT already responding; waiting for it to close"
+    for _ in 1 2 3 4 5 6; do
+      sleep 5
+      if ! curl -s -o /dev/null -m 1 "http://$HOST:$PORT/health" 2>/dev/null; then
+        break
+      fi
+    done
+    if curl -s -o /dev/null -m 1 "http://$HOST:$PORT/health" 2>/dev/null; then
+      both "ERROR: port $PORT still occupied after 30s; retrying in 10s"
+      sleep 10
+      continue
+    fi
+  fi
+
+  both "starting proot-distro -> opencode (attempt)"
+  (
+    exec < /dev/null >> "$LOG" 2>&1
+    export OPENCODE_SERVER_PASSWORD="$PASS"
+    export OPENCODE_SERVER_HOSTNAME="$HOST"
+    exec setsid "$PREFIX/bin/proot-distro" login ubuntu -- \
+      /bin/bash -c "exec opencode --print-logs --log-level INFO serve --hostname $HOST --port $PORT"
+  ) &
+  child=$!
+  both "launched proot subtree (child pid $child)"
+
+  healthy=0
+  for _ in $(seq 1 60); do
+    if ! kill -0 "$child" 2>/dev/null && [ -z "$(pgrep -f 'proot .*ubuntu/rootfs' 2>/dev/null)" ]; then
+      break
+    fi
+    if curl -s -u "$USER:$PASS" -o /dev/null -m 1 "http://$HOST:$PORT/global/health" 2>/dev/null; then
+      healthy=1
+      break
+    fi
+    sleep 3
+  done
+  if [ "$healthy" = 1 ]; then
+    both "OpenCode is healthy on $HOST:$PORT (auth OK)"
+  else
+    both "health wait ended without success for this attempt"
+  fi
+
+  wait "$child" 2>/dev/null
+  rc=$?
+  both "proot subtree exited rc=$rc"
+
+  if [ -f "$STATE_DIR/.stop" ]; then
+    both "stop flag set; exiting launch loop"
+    break
+  fi
+  sleep 2
+done
+
+both "launch loop exited"

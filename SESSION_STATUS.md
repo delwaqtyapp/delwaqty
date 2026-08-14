@@ -1,10 +1,43 @@
 # SESSION_STATUS.md
 
-> **Last updated:** 2026-08-14 Session 37 (final toolchain standardization, documentation + Android compatibility audit)
+> **Last updated:** 2026-08-14 Session 38 (schema alignment migration 028 applied live + verified)
 
 ---
 
-## Current Task — FINAL TOOLCHAIN STANDARDIZATION + ANDROID COMPATIBILITY AUDIT (Session 37)
+## Current Task — MIGRATION 028 APPLIED LIVE + VERIFIED (Session 38)
+
+**Task (user, Arabic):** continue the deep-repair steps; try all keys I have; ask when a key is
+missing; don't skip any step.
+
+**Found:** migration `028_schema_alignment.sql` was already committed (in sprint 69 with the
+admin-repository RPC refactor) but **never applied** to the live `bttnlkmwhorjamzemwda` project.
+Live checks via REST: `count_table_rows` RPC → PGRST202 (missing), `users.trade_license_url` →
+42703 (missing column). The committed `AdminRepository.getDashboardMetrics()` depends on the RPC,
+so the admin dashboard would crash in production.
+
+**Fix:** rewrote the migration to fix a PL/pgSQL syntax bug and harden security, then applied via
+Management API with the user's PAT (project linked in `~/.supabase/config.toml`).
+
+| File | Change |
+|------|--------|
+| `supabase/migrations/028_schema_alignment.sql` | Fixed syntax `RETURN (EXECUTE …)` → `EXECUTE … INTO row_count; RETURN row_count;`; `SECURITY DEFINER` → **`SECURITY INVOKER`** (page counts reflect the caller's RLS visibility, never worse than the `.select().count()` calls it replaces); added `REVOKE EXECUTE FROM PUBLIC` + `GRANT EXECUTE TO authenticated` |
+
+**Applied (HTTP 201) + verified live:**
+- `count_table_rows(text)` → present: `prosecdef=false`, ACL `{postgres=X, anon=X, authenticated=X, service_role=X}`; anonymous call returns `0` (RLS hides rows), admin sees real totals
+- `users.trade_license_url` + `users.driving_license_url` → **text** columns present
+- `admin_users_role_check` → now `CHECK (role IN ('super_admin','admin','moderator','support','finance'))` (includes `moderator`)
+- Full public-RPC inventory checked: 40+ RPCs (dispatch/accept/advance/cancel/estimate/RPCs) all present; 56 tables present
+
+**Gate:** `flutter analyze` → 0 errors (543 issues: 24 warning + 519 info — unchanged baseline) ·
+`flutter test --concurrency=2` → **02:28 +594: All tests passed!** (exit 0). Note: on this PRoot
+host a full `flutter test` without `--concurrency` can exit 1 with no output; `--concurrency=2`
+is the reliable invocation.
+
+**Next (user hands):** revoke the PAT after this session.
+
+---
+
+## Previous Task — FINAL TOOLCHAIN STANDARDIZATION + ANDROID COMPATIBILITY AUDIT (Session 37)
 
 **Task (user):** finalize the verified development environment, document the canonical toolchain,
 verify Android compatibility (minimum Android 7.0 / API 24), and prepare the repository for a clean commit.

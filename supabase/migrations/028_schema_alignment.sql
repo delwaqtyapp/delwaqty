@@ -7,18 +7,24 @@ ALTER TABLE users ADD COLUMN IF NOT EXISTS trade_license_url TEXT;
 ALTER TABLE users ADD COLUMN IF NOT EXISTS driving_license_url TEXT;
 
 -- ─── C3: RPC for efficient row counting (replaces N+1 queries) ─
+-- SECURITY INVOKER: page counts reflect the caller's RLS visibility,
+-- never worse than the direct .select().count() calls it replaces.
 
 CREATE OR REPLACE FUNCTION count_table_rows(table_name TEXT)
 RETURNS INTEGER
 LANGUAGE plpgsql
-SECURITY DEFINER
+SECURITY INVOKER
 AS $$
+DECLARE
+  row_count INTEGER;
 BEGIN
-  RETURN (
-    EXECUTE format('SELECT COUNT(*) FROM %I', table_name)
-  );
+  EXECUTE format('SELECT COUNT(*) FROM %I', table_name) INTO row_count;
+  RETURN row_count;
 END;
 $$;
+
+REVOKE EXECUTE ON FUNCTION count_table_rows(TEXT) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION count_table_rows(TEXT) TO authenticated;
 
 -- ─── C4: Add 'moderator' to admin_users role CHECK ──────────
 

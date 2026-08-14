@@ -1,10 +1,55 @@
 # SESSION_STATUS.md
 
-> **Last updated:** 2026-08-14 Session 38 (schema alignment migration 028 applied live + verified)
+> **Last updated:** 2026-08-14 Session 39 (schema reconciliation migration 029 applied live + verified)
 
 ---
 
-## Current Task — MIGRATION 028 APPLIED LIVE + VERIFIED (Session 38)
+## Current Task — SCHEMA RECONCILIATION 029 APPLIED LIVE + VERIFIED (Session 39)
+
+**Found (live audit, code-vs-schema diff):** migrations `012_safety_platform.sql` and
+`013_service_audio_logs.sql` were **never applied** live (027 consolidated 017/023/024/025/026 but
+skipped 012 + 013). Live was missing: `sos_alerts`, `live_share_sessions`, `service_audio_logs`
+tables; `trusted_contacts.email/relationship/notify_on_ride/notification_preference` columns;
+`rides.emergency_contact_id`; all 7 safety RPCs (`trigger_sos_alert`, `resolve_sos_alert`,
+`start_live_share`, `stop_live_share`, `get_live_share_session`, `upsert_trusted_contact`,
+`delete_trusted_contact`); the `service-audio-logs` storage bucket. Additionally, 4 RPCs the app
+calls existed in **no** migration file: `get_admin_analytics`, `get_peak_hours`,
+`get_merchant_rating_summary`, `increment_coupon_usage`.
+
+**Fix:** wrote `supabase/migrations/029_schema_reconciliation_safety_audio_rpcs.sql` (new file),
+consolidating the missing 012/013 objects + the 4 orphan RPCs with shapes matching the Dart call
+sites. Two correctness fixes vs the originals:
+- `upsert_trusted_contact` argument order (Postgres requires defaults after a defaulted param —
+  original 012 had a latent 42P13 bug) — signature is `(p_name, p_phone, p_contact_id=NULL, …)`
+- `sos_alerts.status` CHECK → `('active','escalated','resolved','falseAlarm')` — the app
+  serializes `SosAlertStatus.falseAlarm` via `.name` (would have failed the old `false_alarm`
+  constraint when resolving a false alarm)
+
+**Security hardening (matches 028 pattern + fixes Supabase default-privilege leak):** Supabase's
+platform `ALTER DEFAULT PRIVILEGES` auto-grants new functions to `anon`/`authenticated`/`service_role`.
+Migration 028 missed revoking `anon`. 029 explicitly `REVOKE … FROM PUBLIC, anon` + `GRANT … TO
+authenticated` for all 11 RPCs. Verified ACLs now `{postgres=X, authenticated=X, service_role=X}`
+(no anon).
+
+**Applied (HTTP 200, `[]`) + verified live:**
+- Tables present: `sos_alerts`, `live_share_sessions`, `service_audio_logs` (RLS on)
+- `trusted_contacts` has all extension columns; `rides.emergency_contact_id` present
+- All 7 safety RPCs + 4 orphan RPCs present; storage bucket + `audio logs upload/read` policies
+- Realtime publication: `sos_alerts` + `live_share_sessions` added
+- REST (anon key): `get_peak_hours` → 42501 permission denied (anon correctly blocked);
+  `trigger_sos_alert` → 401 (blocked)
+- SQL logic: `get_peak_hours()`, `get_merchant_rating_summary`, `increment_coupon_usage`
+  (`coupon_not_found`), `get_admin_analytics` (real totals: 5 users, 9 merchants) all correct
+- Auth flow: `upsert_trusted_contact` called as real user (JWT claims sim) → `success, contact_id`; test row cleaned up
+- Final code↔live audit: **0 missing RPCs** (45 code / 61 live)
+
+**Files:** `supabase/migrations/029_schema_reconciliation_safety_audio_rpcs.sql` (new, pending review)
+**Gate:** `flutter analyze` + `flutter test --concurrency=2` — TBD (run before commit)
+**Next:** run gate, commit (sprint 72), push, remind user to revoke PAT.
+
+---
+
+## Previous Task — MIGRATION 028 APPLIED LIVE + VERIFIED (Session 38)
 
 **Task (user, Arabic):** continue the deep-repair steps; try all keys I have; ask when a key is
 missing; don't skip any step.

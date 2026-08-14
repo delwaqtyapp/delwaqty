@@ -1,6 +1,6 @@
 # SESSION_STATUS.md
 
-> **Last updated:** 2026-08-14 Session 40 (biometric login audit + password-change biometric invalidation fix)
+> **Last updated:** 2026-08-14 Session 41 (biometric feature DONE — APK installed + running on phone)
 
 ---
 
@@ -37,6 +37,41 @@ tests (`biometric_auth_store_test.dart`, `fingerprint_login_page_test.dart`) pas
 
 **Next:** build APK with `--dart-define-from-file=.env.dev`, install on phone (device not
 connected yet — needs USB/WiFi adb), commit + push, revoke PAT after session.
+
+---
+
+## Previous Task — BIOMETRIC LOGIN: APK INSTALLED + RUNNING ON PHONE (Session 41)
+
+**Task continuation (user, Arabic):** build + install the app on the phone.
+
+**Install method (no adb needed — phone IS the build host via PRoot):**
+1. Built **debug APK** with env defines: `flutter build apk --debug --dart-define-from-file=.env.dev`
+   → `build/app/outputs/flutter-apk/app-debug.apk` (175,085,829 B).
+2. Termux/proot (uid 10026) `pm install` → `SecurityException: INTERACT_ACROSS_USERS_FULL`.
+3. Install from `/sdcard` → SELinux `avc: denied { read }` (system_server vs fuse) →
+   *"Consider using a file under /data/local/tmp/"*.
+4. **Worked:** via Shizuku shell (`rish`, uid 2000) `cp … /data/local/tmp/delwaqty.apk` →
+   `pm install` → first `INSTALL_FAILED_UPDATE_INCOMPATIBLE` (old app signed with a different
+   key) → `pm uninstall com.delwaqty.app` → `pm install -r -t` → **Success**.
+
+**Verified live on DNP-NX9 (Android 16):**
+- `pm list packages` → `package:com.delwaqty.app`; `dumpsys package` → `versionName=1.0.0`,
+  `lastUpdateTime=2026-08-14 14:00:54`
+- `am start com.delwaqty.app/.MainActivity` → running process `com.delwaqty.app` (pid 22795),
+  **topResumedActivity** (visible, foreground)
+- logcat: no FATAL/ConfigValidator crash; only a harmless Overpass nearest-name
+  TimeoutException (offline-maps network call)
+
+**Blocker (documented):** release/profile AOT builds are impossible on this **aarch64** host —
+Flutter publishes no `linux-arm64` host Android `gen_snapshot` (404 verified; Android engine
+zips ship only `linux-x64`). Debug (JIT) build works fine. Release APK must be built on an
+x86_64 machine/CI. Note: a release build WAS made on a previous x86_64 setup (signed with
+`CN=Delwaqty`, 68.7 MB, installed 2026-08-08) — this session's fresh build is debug.
+
+**Files:** `build/app/outputs/flutter-apk/app-debug.apk` (built), `/data/local/tmp/delwaqty.apk`
+(on phone, installed).
+**Gate:** unchanged (no Dart modified this session) — analyze 0 errors, 594/594 tests pass.
+**Next:** commit + push if anything changed (none pending), remind user to revoke the PAT.
 
 ---
 

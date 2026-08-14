@@ -1410,3 +1410,44 @@ Three phone-side infrastructure failures blocked a reboot-proof workflow:
   auto-opens for APK installs.
 - Shizuku remains optional for the server: its probe is best-effort and non-blocking.
 - Requires one real reboot to fully prove the Termux:Boot chain (pending user).
+
+---
+
+## ADR-047: Password change invalidates stored biometric credentials
+
+**Date:** Session 40 (2026-08-14)
+**Status:** Accepted
+**Deciders:** Lead Architect
+
+### Context
+Biometric login stores encrypted email+password in `flutter_secure_storage` (keyed per user)
+so the user can sign in with a fingerprint without re-typing the password. The settings page
+allowed changing the account password without touching that store. After a password change the
+device kept a stale encrypted secret: biometric login would fail (wrong password) while the old
+credential lingered on-device for no reason. The DB flag `users.is_biometric_enabled` also
+stayed `true`, promising a capability that no longer worked.
+
+### Decision
+After a successful `auth.updateUser(password:)` in `ChangePasswordPage`, call
+`_invalidateBiometricLogin()`:
+- `BiometricAuthStore.clearForUser(user.id)` — wipe the encrypted credential immediately,
+  not just on a failed auth attempt.
+- `updateBiometricEnabled(enabled: false)` — reset `users.is_biometric_enabled` in the DB.
+
+Effect: the user must re-enroll (fingerprint + password confirmation) after changing the
+password. No stale secret survives and the DB flag always reflects reality.
+
+### Rationale
+- Security: never leave an obsolete password stored on-device; invalidate on the only
+  password-mutation surface the app exposes.
+- Consistency: the on-device flag and the DB flag move together, matching the already-handled
+  toggle flow (disable = clearForUser + DB false).
+- Least surprise: login with a wrong stored password and silently clearing on splash is replaced
+  by a deterministic ownership of the lifecycle at the point the secret changes.
+
+### Consequences
+- Users who change their password must enable biometric login again (documented in the page's
+  success snackbar flow; enrollment is a one-time dialog).
+- No new tables or migrations; relies on existing `BiometricAuthStore` and
+  `updateBiometricEnabledUseCase`.
+- Covered by existing biometric store + fingerprint page tests; full gate passes (594/594).

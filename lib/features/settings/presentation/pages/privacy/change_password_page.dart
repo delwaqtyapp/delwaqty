@@ -1,16 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:delwaqty/core/extensions/context_extensions.dart';
+import 'package:delwaqty/data/datasources/local/biometric_auth_store.dart';
+import 'package:delwaqty/features/auth/presentation/auth_provider.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-class ChangePasswordPage extends StatefulWidget {
+class ChangePasswordPage extends ConsumerStatefulWidget {
   const ChangePasswordPage({super.key});
 
   @override
-  State<ChangePasswordPage> createState() => _ChangePasswordPageState();
+  ConsumerState<ChangePasswordPage> createState() => _ChangePasswordPageState();
 }
 
-class _ChangePasswordPageState extends State<ChangePasswordPage> {
+class _ChangePasswordPageState extends ConsumerState<ChangePasswordPage> {
   final _formKey = GlobalKey<FormState>();
   final _newPasswordController = TextEditingController();
   final _confirmController = TextEditingController();
@@ -32,6 +35,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
       await Supabase.instance.client.auth.updateUser(
         UserAttributes(password: _newPasswordController.text),
       );
+      await _invalidateBiometricLogin();
       if (!mounted) return;
       final l10n = AppLocalizations.of(context);
       context.showAppSnackBar(l10n.passwordUpdated);
@@ -43,6 +47,20 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
     } finally {
       if (mounted) setState(() => _loading = false);
     }
+  }
+
+  Future<void> _invalidateBiometricLogin() async {
+    final authState = ref.read(authStateProvider);
+    final user = authState.whenOrNull(authenticated: (user) => user);
+    if (user == null) return;
+    try {
+      final store = ref.read(biometricAuthStoreProvider);
+      await store.clearForUser(user.id);
+    } catch (_) {}
+    final notifier = ref.read(authStateProvider.notifier);
+    try {
+      await notifier.updateBiometricEnabled(enabled: false);
+    } catch (_) {}
   }
 
   @override

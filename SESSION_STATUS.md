@@ -1,10 +1,46 @@
 # SESSION_STATUS.md
 
-> **Last updated:** 2026-08-14 Session 39 (schema reconciliation migration 029 applied live + verified)
+> **Last updated:** 2026-08-14 Session 40 (biometric login audit + password-change biometric invalidation fix)
 
 ---
 
-## Current Task — SCHEMA RECONCILIATION 029 APPLIED LIVE + VERIFIED (Session 39)
+## Current Task — BIOMETRIC LOGIN: FULL AUDIT + SECURITY FIX (Session 40)
+
+**Task (user, Arabic):** finish biometric login, add it in settings + login page, plan it
+professionally, wire it to the DB, then build + install the app on the phone.
+
+**Audit result:** the biometric feature was already ~95% implemented across the app. Verified
+end-to-end:
+- **DB:** `users.is_biometric_enabled` BOOLEAN NOT NULL DEFAULT false — live (migration 022)
+- **Device store:** `BiometricAuthStore` (flutter_secure_storage, encrypted credentials keyed by
+  user id: `auth_biometric_<userId>`) — `biometric_auth_store.dart`
+- **Login page:** fingerprint button + remember-me + post-login enrollment offer — `login_page.dart`
+- **Settings:** `FingerprintLoginPage` (toggle + password prompt + multi-account management),
+  reachable from Privacy & Security — `privacy/fingerprint_login_page.dart`
+- **Splash:** biometric auto-login on cold start — `splash_page.dart`
+- **DB sync:** `updateBiometricEnabled` → repository → profile DS → `users.is_biometric_enabled`
+- **Android:** `USE_BIOMETRIC` + `USE_FINGERPRINT` permissions in manifest; `local_auth ^3.0.0`
+  + `flutter_secure_storage ^11.0.0` in pubspec
+- **L10n:** full AR/EN keys present
+
+**Bug found + fixed (security gap):** `ChangePasswordPage` changed the password WITHOUT invalidating
+the encrypted biometric credentials in secure storage — leaving a stale password that would fail
+biometric login and linger as a stored secret. Fix: after a successful password change,
+`_invalidateBiometricLogin()` clears the stored credential for the user and resets
+`is_biometric_enabled=false` in the DB, forcing clean re-enrollment. File:
+`lib/features/settings/presentation/pages/privacy/change_password_page.dart` (converted to
+ConsumerStatefulWidget, imports added).
+
+**Gate:** `flutter analyze` → 0 errors (543 issues: 24 warning + 519 info — unchanged baseline) ·
+`flutter test --no-pub --concurrency=2` → **02:19 +594: All tests passed!** (exit 0). Biometric
+tests (`biometric_auth_store_test.dart`, `fingerprint_login_page_test.dart`) pass individually.
+
+**Next:** build APK with `--dart-define-from-file=.env.dev`, install on phone (device not
+connected yet — needs USB/WiFi adb), commit + push, revoke PAT after session.
+
+---
+
+## Previous Task — SCHEMA RECONCILIATION 029 APPLIED LIVE + VERIFIED (Session 39)
 
 **Found (live audit, code-vs-schema diff):** migrations `012_safety_platform.sql` and
 `013_service_audio_logs.sql` were **never applied** live (027 consolidated 017/023/024/025/026 but

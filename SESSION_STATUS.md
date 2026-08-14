@@ -1,10 +1,115 @@
 # SESSION_STATUS.md
 
-> **Last updated:** 2026-08-13 Session 34 (background persistence verified + battery whitelist applied)
+> **Last updated:** 2026-08-14 Session 37 (final toolchain standardization, documentation + Android compatibility audit)
 
 ---
 
-## Current Task — ALWAYS-ON BACKGROUND: TERMUX FOREGROUND SERVICE + BATTERY WHITELIST (Session 34)
+## Current Task — FINAL TOOLCHAIN STANDARDIZATION + ANDROID COMPATIBILITY AUDIT (Session 37)
+
+**Task (user):** finalize the verified development environment, document the canonical toolchain,
+verify Android compatibility (minimum Android 7.0 / API 24), and prepare the repository for a clean commit.
+
+### Canonical toolchain (authoritative — use for ALL Delwaqty work)
+
+```
+Android/Termux
+    ↓ PRoot Ubuntu
+/root/flutter  →  Flutter 3.44.6 · Dart 3.12.2 · DevTools 2.57.0
+    ↓ Linux host (detected; native-assets OK)
+Android SDK 37 →  /usr/lib/android-sdk
+NDK 28.2.13676358
+QEMU x86_64 wrappers (42 files for incompatible ARM64-native tooling)
+Delwaqty Flutter project  →  /root/Projects/delwaqty
+```
+
+| Item | Value |
+|------|-------|
+| **Canonical project** | `/root/Projects/delwaqty` |
+| **Canonical Flutter** | `/root/flutter` · Flutter **3.44.6** · Dart 3.12.2 · `channel stable` |
+| **Flutter resolution** | `which flutter` → `/usr/local/bin/flutter` → symlink → `/root/flutter/bin/flutter` |
+| **Termux-host Flutter** | `/data/data/com.termux/files/usr/opt/flutter` · Flutter **3.44.2** — **NOT canonical**, patched (android_sdk.dart compileSdk 37), fails `flutter test` on host (detects OS as `android`; native assets unimplemented). **DO NOT remove/upgrade/patch. Not used for project tests/builds.** |
+| **Android SDK** | `/usr/lib/android-sdk` (android-34/35/36/37/37.0, build-tools 36.0.0) |
+| **compileSdk / targetSdk / minSdk** | **37 / 36 / 24** (minSdk 24 = Android 7.0 hard minimum, verified via merged APK manifest) |
+| **NDK** | 28.2.13676358 |
+| **QEMU workaround** | 42 qemu-x86_64 wrapper scripts (e.g. NDK `clang` → `qemu-x86_64 -0 … clang-19.real`); SDK at `/usr/lib/android-sdk`, aapt2 overridden in gradle.properties |
+| **Gradle heap** | `-Xmx4G -XX:MaxMetaspaceSize=2G` (was 8G → OOM on device) |
+| **AGP / Kotlin / Gradle** | 9.0.1 / 2.3.20 / 9.1.0 |
+| **flutter analyze** | **0 errors** (24 warnings + 519 info = 543 issues) |
+| **flutter test** | **594/594 PASS** (exit 0, via `/root/flutter` 3.44.6) |
+| **APK** | debug build · `com.delwaqty.app` · 104,092,316 B · arm64-v8a · minSdk 24 / targetSdk 36 / compileSdk 37 · installed + launched on DNP-NX9 (Android 16) |
+| **Release signing** | **not yet configured** — debug cert only; release will fall back to debug until `android/keystore/release.jks` exists |
+
+### Android compatibility audit result
+- **minSdk 24 (Android 7.0) is viable.** All analyzed Android plugins declare minSdk ≤ 24:
+  flutter_secure_storage 11.0.0 (24), flutter_local_notifications 22.2.0 (24),
+  geolocator_android 5.0.3 (flutter.minSdk), google_maps_flutter_android 2.19.12 (24),
+  local_auth_android 2.0.9 (24), image_picker_android 0.8.13+19 (24),
+  permission_handler_android 12.1.0 (19), connectivity_plus 6.1.5 (19), record_android 2.1.2 (23),
+  firebase_* (local-config ext.minSdk 23), objective_c 9.5.0 (native-assets hook; Linux-host only).
+  Core library desugaring enabled (`desugar_jdk_libs:2.1.4`) for java.time on API 24.
+- Dependency audit found **no known hard blocker to minSdk 24**.
+- App code uses bare `FlutterActivity`; no raw post-API-24 Android APIs; all sensitive paths
+  (notifications, biometrics, permissions, storage) go through plugin layers with built-in guards.
+
+### Session 37 verification (all via canonical `/root/flutter`)
+```
+✓ flutter pub get  → Got dependencies!
+✓ flutter analyze  → 0 errors (543 issues: 24 warning + 519 info; ran 161.4s)
+✓ flutter test     → 02:26 +594: All tests passed!   (exit 0)
+✓ APK audit        → aapt2: minSdk 24, targetSdk 36, compileSdk 37, arm64-v8a, debug cert (CN=Android Debug)
+✓ git audit        → only M SESSION_STATUS.md, M android/gradle.properties (gradle heap 8G→4G); no untracked, no secrets
+```
+
+### Blocked / next (user hands)
+1. **Device verification:** DNP-NX9 not attached at audit time (no adb device). Session 35 verified
+   install + launch + no crash + FlutterSecureStoragePlugin on Android 16 — re-attach to re-verify.
+2. Full release keystore still absent (`android/keystore/release.jks`) → release builds fall back to
+   debug signing; needed before Play Store upload. **Do not create yet (user decision).**
+3. Commit + push awaited — final audit complete, awaiting explicit approval.
+
+---
+
+## Previous Task — ENVIRONMENT REPAIR FOR ANDROID 7 → LATEST: BUILD PIPELINE FIXED, DEBUG APK BUILT (Session 35)
+
+**Task (user, Arabic):** make the app run from Android 7 up to the latest Android, and prepare the
+development environment so it is ready for every Android version.
+
+### Result: DEBUG APK BUILT, INSTALLED & RUNNING ON THE DEVICE
+
+```
+✓ Built build/app/outputs/flutter-apk/app-debug.apk   (104,092,316 B, Aug 14 01:13, signed debug)
+✓ pm install — Success   (DNP NX9, Android 16 / SDK 36)
+✓ am start .MainActivity — process 13290, window focused, no crash
+```
+minSdk = 24 ⇒ installs from **Android 7.0**; compileSdk = 37 ⇒ compiles against the **latest SDK**.
+
+### Root causes found & fixes (in build order)
+
+| # | Failure | Root cause | Fix (applied) |
+|---|---------|-----------|---------------|
+| 1 | `Failed to find target 'android-37'` | `flutter_secure_storage-11.0.0` pins `compileSdk = 37`; official repo only ships `platforms;android-37.0` (no `android-37` package) | switched `sdk.dir` → **`/usr/lib/android-sdk`** (has both `android-37` + `android-37.0`) via `android/local.properties` + `~/.flutter_settings` (`android-sdk`) |
+| 2 | flutter tool crash `AndroidSdk.getNdkBinaryPath` null-check (line 408) | `platform.operatingSystem == "android"` inside Termux; `_llvmHostDirectoryName` map lacks an `android` key | patched `packages/flutter_tools/lib/src/android/android_sdk.dart` → add `'android': 'linux-x86_64'`; rebuilt `flutter_tools.snapshot` (`rm bin/cache/flutter_tools.stamp` → `flutter --version`) |
+| 3 | `Illegal instruction` (exit 132) for SDK `cmake`/`ninja`/NDK `clang` in `…/usr/opt/android-sdk` | host is **aarch64**; those are raw x86-64 ELF binaries that cannot run | use the **qemu-wrapped** SDK at `/usr/lib/android-sdk` (every binary is a `qemu-x86_64` wrapper → all work); aapt2 already overridden there in `gradle.properties` |
+| 4 | `checkDebugAarMetadata` — plugins compiled vs android-34/35/36 need ≥35/36/37 (geolocator, google_maps, …) | Flutter vends `flutter.compileSdkVersion = 34` default to plugins | bumped `FlutterExtension.kt` `compileSdkVersion` 34→37 (source, kept for future jar rebuild) AND patched all resolved plugin `build.gradle(.kts)` to `compileSdk = 37` (geolocator_android, google_maps_flutter_android, permission_handler_android, record_android, flutter_local_notifications, jni, jni_flutter, app_links, connectivity_plus, flutter_secure_storage, …) |
+| 5 | Gradle OOM / silent process death | daemon heap `-Xmx8G` vs ~2.5–3.4 G available | `android/gradle.properties` → `-Xmx4G -XX:MaxMetaspaceSize=2G`; `./gradlew --stop` between attempts |
+
+### Environment inventory (verified)
+`flutter 3.44.2` (+1 patch), Dart 3.12.2, JDK 21.0.12, Gradle wrapper 9.1.0, AGP 9.0.1, Kotlin
+2.3.20, NDK 28.2.13676358, SDK `platforms` 34/35/36/37/37.0, `build-tools` 36.0.0. `flutter pub get` ✓,
+`build_runner` ✓ (1283 outputs), `flutter analyze` 0 errors, `flutter test` 594/594 passed.
+
+### Blocked / next (user hands)
+1. **DONE live: installed + launched on the device** — APK copied to `/data/local/tmp/`,
+   `pm install -r -t` (after `pm uninstall` of the old signature), `am start` → process 13290,
+   `MainActivity` focused, no AndroidRuntime crash, `FlutterSecureStoragePlugin` key created OK.
+2. `flutter pub get` once more to confirm the plugin `compileSdk = 37` patches survive, and
+   document them as an environment fix (they live in the pub-cache).
+3. Full release keystore still absent (`android/keystore/release.jks`) → release builds fall back to
+   debug signing; needed before Play Store upload.
+
+---
+
+## Previous Task — ALWAYS-ON BACKGROUND: TERMUX FOREGROUND SERVICE + BATTERY WHITELIST (Session 34)
 
 **Task (user, Arabic):** keep Termux running in the background permanently — visible ONLY as a
 notification ("running in background"), without the user having to keep opening the Termux app.

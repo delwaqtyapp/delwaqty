@@ -1427,5 +1427,10 @@
   "documentsSectionMessage": "ارفع مستنداتك ليتم إرسال حسابك للمراجعة.",
   "submitDocuments": "إرسال المستندات",
   "documentsUploaded": "تم رفع المستندات بنجاح",
-  "documentsUploadFailed": "فشل رفع المستندات. يرجى المحاولة مرة أخرى."
+  "documentsUploadFailed": "فشل رفع المستندات. يرجى المحاولة مرة أخرى.",
+  "selectRegion": "اختر منطقتك",
+  "regionSearchHint": "ابحث عن المحافظات",
+  "regions": "المناطق",
+  "regionSaved": "تم حفظ المنطقة",
+  "regionSelectionFailed": "تعذر حفظ المنطقة"
 }

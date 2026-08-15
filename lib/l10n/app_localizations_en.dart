@@ -4306,4 +4306,19 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get documentsUploadFailed =>
       'Failed to upload documents. Please try again.';
+
+  @override
+  String get selectRegion => 'Select your region';
+
+  @override
+  String get regionSearchHint => 'Search governorates';
+
+  @override
+  String get regions => 'Regions';
+
+  @override
+  String get regionSaved => 'Region saved';
+
+  @override
+  String get regionSelectionFailed => 'Could not save region';
 }

@@ -1431,5 +1431,10 @@
   "documentsSectionMessage": "Upload your documents to submit your account for review.",
   "submitDocuments": "Submit Documents",
   "documentsUploaded": "Documents uploaded successfully",
-  "documentsUploadFailed": "Failed to upload documents. Please try again."
+  "documentsUploadFailed": "Failed to upload documents. Please try again.",
+  "selectRegion": "Select your region",
+  "regionSearchHint": "Search governorates",
+  "regions": "Regions",
+  "regionSaved": "Region saved",
+  "regionSelectionFailed": "Could not save region"
 }

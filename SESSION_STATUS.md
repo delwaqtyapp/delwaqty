@@ -1,10 +1,197 @@
 # SESSION_STATUS.md
 
-> **Last updated:** 2026-08-15 Session 42 (biometric Phase 1 hardening — centralized event-driven stale-credential invalidation; gate 603/603)
+> **Last updated:** 2026-08-15 Session 45 (Phase 2.1 Regional System — implemented + gated, 🟢 **LIVE VERIFIED**, awaiting user review/approval)
 
 ---
 
-## Current Task — BIOMETRIC FINAL HARDENING — PHASE 1 (Session 42)
+## Current Task — PHASE 2.1: REGIONAL SYSTEM (REGIONS) — IMPLEMENTATION (Session 45)
+
+**Task (user):** after approving the Phase 2.0 audit (🟡) + the D1–D4 design decisions, implement
+Phase 2.1 (Egypt regional foundation): schema + canonical dataset (migration 030), Flutter
+`regions` feature module, tests, full Pre-Commit Gate, and return the PHASE 2.1 VERDICT. **Do NOT
+commit/push, do NOT start Phase 2.2.**
+
+**Outcome: 🟢 CODE-COMPLETE + LIVE-VERIFIED — 60 new tests, gate green, migration 030 applied + verified live, nothing committed.**
+
+### Migration `supabase/migrations/030_regional_system.sql`
+- `regions` (recursive: country → governorate → city/district/area) + `user_region_preferences`
+  (detected/manual/verified). Idempotent seed (`ON CONFLICT (id) DO NOTHING`), deterministic UUIDs,
+  ISO 3166-2 codes, `updated_at` via `public.set_updated_at()` (018), RLS: regions SELECT public +
+  admin write via `public.is_admin()` (016); preferences owner r/w + admin select.
+- Dataset: Egypt country (…001) + **27/27 governorates** (…101–…127) — official AR/EN names +
+  aliases; **city/district/area intentionally NOT fabricated** (D2: no data we cannot prove).
+
+### Flutter `regions` module (registered in `lib/module_registry.dart`, route `/region-selection`)
+- Domain: Freezed `Region`/`UserRegionPreference` + enums; `RegionResolver` (Arabic/English
+  normalization, aliases, phrase match, ambiguity→null) + `RegionPreferencePolicy`.
+- Data: `SupabaseRegionDataSource` (SQL-ordered, ilike search, upsert) + passthrough repo.
+- Presentation: `governoratesProvider`, `regionSearchProvider`, `currentUserRegionProvider`,
+  `selectRegionProvider`, `detectedRegionProvider` (GPS detailedAddress → resolver),
+  `applyDetectedRegionProvider` (policy-guarded); `RegionSelectionPage` (search + list + save).
+- L10n: +5 keys EN/AR; `flutter gen-l10n` regenerated (pre-existing AR gaps `addBranch`,
+  `branchName` remain — unrelated debt).
+
+### Gate
+| Check | Result |
+|-------|--------|
+| `flutter analyze` | ✅ 0 errors · 24 warnings + 519 info (pre-existing baseline; **0 issues in region files**) |
+| `flutter test --no-pub --concurrency=2` | ✅ **663/663** (60 new region tests) |
+| **Live apply (030)** | ✅ Management API HTTP 201, no errors; re-run idempotent (28/28 rows intact) |
+| **Live schema** | ✅ 28 rows (Egypt + 27 governorates), UNIQUE ids/codes, FK CASCADE, type/source CHECK, indexes, triggers `set_updated_at` |
+| **Live security** | ✅ RLS on both tables; grants hardened: anon = SELECT only on `regions`, **nothing** on `user_region_preferences`; no TRUNCATE/TRIGGER for anon/authenticated |
+| **Live RLS functional** | ✅ anon INSERT blocked (42501) · anon UPDATE/DELETE no-op (data intact) · non-admin authenticated INSERT blocked (42501) · **owner** (8a23b719…) CAN write own preference + regions · is_admin() live: false/true |
+| **Flutter↔Supabase static** | ✅ queries use live snake_case columns; `_fromRow` maps to camelCase entities; enums match DB CHECKs; `upsert onConflict: 'user_id'` = PK |
+
+### Security hardening applied (migration 030, revoke-before-grant)
+Supabase platform default privileges auto-grant **ALL** (incl. TRUNCATE) on new tables to `anon`/`authenticated`. The original 030 GRANTs were purely additive, so `anon` held full DML + TRUNCATE. Added
+`REVOKE ALL … FROM anon, authenticated` on both tables before the approved GRANTs. Verified post-fix ACLs:
+- `regions`: anon=SELECT only · authenticated=SELECT/INSERT/UPDATE/DELETE (no TRUNCATE/TRIGGER/REFERENCES)
+- `user_region_preferences`: anon=none · authenticated=SELECT/INSERT/UPDATE/DELETE
+
+### Files
+- New: `supabase/migrations/030_regional_system.sql`, `lib/features/regions/**`,
+  `test/features/regions/**`, `docs/HANDOFF/27_SPRINT_76_PHASE2_REGIONS.md`
+- Edited: `lib/module_registry.dart`, `lib/l10n/app_en.arb`, `lib/l10n/app_ar.arb`,
+  `docs/DECISION_LOG.md` (ADR-049…052 in design session), `SESSION_STATUS.md`
+- Basis: `docs/HANDOFF/25_…AUDIT.md`, `docs/HANDOFF/26_…DESIGN_DECISIONS.md`
+
+**Verdict: 🟢 CODE-COMPLETE + LIVE VERIFIED** — migration 030 applied to `bttnlkmwhorjamzemwda` via Management API, all schema/security/compat checks passed, NOT committed/pushed.
+
+**Next (user hands):** review the verdict + diff → approve → commit (`sprint 76: …`) + push →
+then approve **Phase 2.2 (Admin hierarchy unification, D1)**.
+
+---
+
+## Previous Task — DEEP FREE AI PROVIDER DISCOVERY (GITHUB + LIVE API AUDIT) (Session 44)
+
+**Task:** discover ADDITIONAL genuinely FREE AI providers/models NOT covered by OmniRoute/Kilo, via
+aggressive GitHub search + mandatory live API verification. Additive only — nothing protected touched.
+
+**Outcome: 🟢 COMPLETE — new independent provider `llm7` added (6 anonymous free models).**
+
+### Discovery summary
+- **2 research agents** scanned: free-coding-models (2.3k★), mnfst/awesome-free-llm-apis (6.6k★),
+  FreeLLMAPI, freellmpool, free-llm-gateway, models.dev live registry (185 providers), OpenCode docs.
+- **Only 2 providers fully keyless/anonymous:** **LLM7.io** and **OVHcloud AI Endpoints**.
+- All other candidates (Cerebras, NVIDIA NIM, SambaNova, Z.AI, HF Inference, Cloudflare Workers,
+  GitHub Models, Mistral, ModelScope, SiliconFlow, etc.) = **PROVIDER_REQUIRES_API_KEY** → not added.
+- **OVHcloud** classified D (free but permanent 2 RPM/IP/model → impractical for agent loops; alternates 429/200).
+- **LLM7** = Class **B (free anonymous API)**; **independence score 5** (brand-new upstream).
+
+### LLM7 verification (live, anonymous, no key)
+| Model | Basic | Coding | Stream | Tools | Agent | Latency | Ctx |
+|-------|-------|--------|--------|-------|-------|---------|-----|
+| `default` (→Codestral) | 200 | GOOD | YES | YES | B | ~1.8s | 32k |
+| `gpt-oss:20b` | 200 | EXCELL | YES | YES | **A** | ~1.0s | ~128k |
+| `DeepSeek-V4-Flash-0731` | 200 | EXCELL | YES | YES | **A** | ~1.5s | 400k |
+| `gemini-3.1-flash-lite` | 200 | GOOD | - | YES | **A** | ~0.7s | 256k |
+| `codestral-latest` | 200 | GOOD | - | YES | B | ~1.1s | 32k |
+| `minimax-m2.7` | 200 | GOOD | - | YES | **A** | ~2s | ~200k |
+
+- Coding: Dart `addTwo` correct on all; Flutter AGP/compileSdk diagnostics accurate (gpt-oss + DeepSeek).
+- Streaming SSE: real `data:` chunks + `[DONE]` termination.
+- Tool calling: `finish_reason: tool_calls` with valid args on all 6.
+- Agent loop roundtrip: correct `/root/Projects/delwaqty` answer (A/B).
+- SDK verified end-to-end via `@ai-sdk/openai-compatible` v3 (`chatModel`) — **no apiKey** (any
+  non-empty Bearer → 401, empty/no header → 200).
+- Rate limit: anonymous burst ~5-6 req then transient 429, recovers ~15s.
+
+### Config change (additive)
+- Backup: `/root/.opencode_llm7_backup_2026-08-15.jsonc`
+- Added `llm7` provider block (`baseURL: https://api.llm7.io/v1`, **no apiKey**) + 6 models.
+- JSON valid; server reloaded via `opencode-ctl restart`; `/config` shows `llm7` + 6 models.
+
+### Regression (all green)
+- OpenCode health: `{"healthy":true,"version":"1.18.10"}` on 4096
+- OmniRoute: 125 models on 20128 (intact)
+- Kilo: 9 models intact · OmniRoute: 8 models intact
+- Providers: google, groq, openrouter, omniroute, kilo, **llm7** — all present, none removed
+
+**Excluded:** OVH (2 RPM cap) · all key-required providers (reported, not added) ·
+`mistral-Nemo-Instruct-2407` (no tools) · LLM7 paid aliases (`claude-*`, `gpt-5.x`, `kimi-*`, `pro`).
+
+**Files:** `/root/.config/opencode/opencode.jsonc` · `/root/.opencode_llm7_backup_2026-08-15.jsonc` ·
+`docs/DECISION_LOG.md` (ADR-054) · `SESSION_STATUS.md`. Harnesses: `/tmp/opencode/llm7_*`.
+
+**Next (user):** select an LLM7 model in `/models` and use it (all 6 share the anonymous burst budget).
+
+---
+
+## Previous Task — KILO AI GATEWAY AS NEW ANONYMOUS FREE OPencode PROVIDER (Session 44)
+
+**Task:** investigate Kilo AI Gateway as a NEW, INDEPENDENT OpenCode provider — verify anonymous
+free-model access, live-test free models (basic/coding/streaming/tools/agent loop), then ONLY add
+genuinely free + working models. Fully additive — OmniRoute models, lifecycle, providers, and the
+Delwaqty repo untouched.
+
+**Outcome: 🟢 COMPLETE — 9 free models added, all protected services intact.**
+
+| Step | Result |
+|------|--------|
+| **Anonymous access** | `GET /api/gateway/models` → 200 (361 models) no key; official docs confirm anonymous free-model access (200 req/hr/IP) |
+| **Catalog audit** | 14 models `isFree=true`, all pricing $0; richest: `kilo-auto/free` (256k), Poolside Laguna S/XS, Cohere North Mini Code, NVIDIA Nemotron 3 family (up to 1M ctx), Tencent Hy3, Dots3-Note (512k) |
+| **Basic completion** | 13/14 free models → HTTP 200 correct output (1 was `content-safety` guardrail — unsuitable for coding) |
+| **Coding test** | 12/12 Dart `addTwo` correct (cohere/north + hy3 needed 1000-token budget for reasoning) |
+| **Streaming (SSE)** | 6/6 proper `data:` chunks + `[DONE]` termination |
+| **Tool calling** | 6/6 emit `finish_reason: tool_calls` with valid function args |
+| **Agent loop** | 8/8 tool-result roundtrip → correct `/root/Projects/delwaqty` answer |
+| **Rate limit** | `poolside/laguna-xs-2.1:free` transient 429 upstream → passed on retry (documented, not bypassed) |
+| **Config** | Backed up → added `kilo` provider (`@ai-sdk/openai-compatible`, `baseURL https://api.kilo.ai/api/gateway`) with **9 models**; JSON valid; server reloaded via `opencode-ctl restart` |
+| **Verification** | Server `/config` lists `kilo` provider + 9 models; OmniRoute recovered (125 models, pid 18866); health 200 on 4096 |
+
+**Added models:** `kilo-auto/free` · `poolside/laguna-s-2.1:free` · `poolside/laguna-xs-2.1:free` ·
+`cohere/north-mini-code:free` · `nvidia/nemotron-3-ultra-550b-a55b:free` ·
+`nvidia/nemotron-3-super-120b-a12b:free` · `nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free` ·
+`tencent/hy3:free` · `dots-studio/dots-3-note-preview:free`.
+
+**Excluded:** `nvidia/nemotron-3.5-content-safety:free` (guardrail model) · `liquid/lfm-2.5-2.6b:free`
+(44 s coding latency) · `openrouter/free` (redundant) · `stepfun/step-3.7-flash:free` (reached via
+`kilo-auto/free`).
+
+**Files:** `/root/.config/opencode/opencode.jsonc` (+`kilo` provider) ·
+`/root/.opencode_kilo_backup_2026-08-15.jsonc` (backup) · `docs/DECISION_LOG.md` (ADR-053) ·
+`SESSION_STATUS.md`. Test harnesses/catalog: `/tmp/opencode/kilo_*.sh`, `/tmp/opencode/kilo_models_live.json`.
+
+**Next (user):** select a Kilo model in `/models` and use it; watch the 200 req/h anonymous budget.
+
+---
+
+## Previous Task — PHASE 2.0 ARCHITECTURE AUDIT (Session 43)
+
+**Task (user):** audit the existing platform for Phase 2 (Emergency Support Chat, Notifications,
+Egypt regional system, Admin hierarchy, Escalation/routing, RLS/RPC security, realtime chat, push
+notifications). **Audit only — no migrations, no tables, no production code.** Return the 23-item
+audit + verdict (🟢/🟡/🔴) and STOP for approval before Phase 2.1.
+
+**Verdict: 🟡 REQUIRES DESIGN DECISION — READY TO PROCEED (nothing 🔴 BLOCKED).** Full report:
+`docs/HANDOFF/25_SPRINT_76_PHASE2_ARCHITECTURE_AUDIT.md`.
+
+**Key findings (evidence-based):**
+
+| Area | Status |
+|------|--------|
+| **Chat** | REUSE — `chat_rooms`/`chat_messages` (014/015) with deterministic RLS (016: admins full, participants own); full Flutter stack in `features/support_chat`; storage buckets exist. No realtime on chat yet |
+| **Complaints** | REUSE — full lifecycle incl. status `escalated` + priority `urgent`; RPC `add_admin_note`; `admin_complaints_page` |
+| **Notifications** | REUSE — `notifications` (026, idempotency + RLS) + `notification_tokens` + FCM push service + realtime channel `in-app-notifications` (proven pattern) |
+| **Regions** | **NOT FOUND** — no governorate/region tables, no canonical IDs, no hierarchy (only geocode address strings). Build in 2.1 |
+| **Admin hierarchy** | **NOT FOUND** — `admin_users` flat. **CONFLICT (D1):** `016 is_admin()` uses `users.role IN ('admin','owner')` vs `005 is_admin(uid)` uses `admin_users`; Flutter router + chat RLS use the former, admin_web manages the latter. Resolve in 2.2 |
+| **Escalation engine** | **NOT FOUND** — `escalated` only a status string (complaints/sos). No events/assignment/ticket. Build in 2.3/2.5 |
+| **Emergency flag** | **NOT FOUND** on chat — only `complaints.priority` + ride-bound `sos_alerts` |
+| **Security pattern** | 016 = canonical (SECURITY DEFINER + `SET search_path` + REVOKE/GRANT). **Gap:** 029 RPCs lack `SET search_path` — harden in 2.7 |
+| **Tests** | No chat/complaints tests yet; admin/auth/notifications/location/safety tests exist |
+
+**Design decisions to resolve at sub-phase gates:** D1 canonical admin identity (2.2) · D2 region
+model (2.1) · D3 chat room extension vs new support_conversations (2.3) · D4 emergency flag model (2.5).
+
+**Files:** `docs/HANDOFF/25_SPRINT_76_PHASE2_ARCHITECTURE_AUDIT.md` (new) · `SESSION_STATUS.md`.
+Working tree clean at `f65ab61`. Nothing committed/pushed.
+
+**Next (user approval):** begin **Phase 2.1 — Regions** (canonical Egypt governorate dataset,
+hierarchy, detection mapping, manual fallback) and STOP at its review gate.
+
+---
+
+## Previous Task — BIOMETRIC FINAL HARDENING — PHASE 1 (Session 42)
 
 **Task (user, Arabic):** implement the Phase 1 final hardening spec (sections A–L) for the
 biometric login system: event-driven stale-credential invalidation, centralized invalidation,

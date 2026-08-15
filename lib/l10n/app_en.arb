@@ -1380,6 +1380,7 @@
   "enableBiometricConfirm": "Enable",
   "enableBiometricLater": "Not now",
   "biometricEnableFailed": "Could not enable fingerprint login. Please try again.",
+  "biometricStaleCredentials": "Biometric login failed. The saved login was reset for security. Please sign in with your email and password.",
   "saveAccount": "Save account",
   "savedAccounts": "Saved accounts",
   "savedAccountsHint": "Tap a saved account to sign in quickly",

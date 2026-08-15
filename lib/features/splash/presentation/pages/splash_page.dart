@@ -116,7 +116,17 @@ class _SplashPageState extends ConsumerState<SplashPage>
           );
       final next = ref.read(authStateProvider);
       if (next is AuthError || next is AuthUnauthenticated) {
-        await store.clearForUser(fallback.userId);
+        await ref
+            .read(authStateProvider.notifier)
+            .invalidateBiometricCredentials(userId: fallback.userId);
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(l10n.biometricStaleCredentials),
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+        }
       }
     } on Exception {
       await store.clearAll();

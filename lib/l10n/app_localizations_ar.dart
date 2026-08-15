@@ -4124,6 +4124,10 @@ class AppLocalizationsAr extends AppLocalizations {
       'تعذر تفعيل تسجيل الدخول بالبصمة. يرجى المحاولة مرة أخرى.';
 
   @override
+  String get biometricStaleCredentials =>
+      'فشل تسجيل الدخول بالبصمة. تمت إعادة تعيين الدخول المحفوظ لأسباب أمنية. يرجى تسجيل الدخول بالبريد الإلكتروني وكلمة المرور.';
+
+  @override
   String get saveAccount => 'حفظ الحساب';
 
   @override

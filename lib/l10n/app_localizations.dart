@@ -8275,6 +8275,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Failed to upload documents. Please try again.'**
   String get documentsUploadFailed;
+
+  /// No description provided for @selectRegion.
+  ///
+  /// In en, this message translates to:
+  /// **'Select your region'**
+  String get selectRegion;
+
+  /// No description provided for @regionSearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search governorates'**
+  String get regionSearchHint;
+
+  /// No description provided for @regions.
+  ///
+  /// In en, this message translates to:
+  /// **'Regions'**
+  String get regions;
+
+  /// No description provided for @regionSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Region saved'**
+  String get regionSaved;
+
+  /// No description provided for @regionSelectionFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not save region'**
+  String get regionSelectionFailed;
 }
 
 class _AppLocalizationsDelegate

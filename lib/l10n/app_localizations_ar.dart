@@ -4274,4 +4274,19 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get documentsUploadFailed =>
       'فشل رفع المستندات. يرجى المحاولة مرة أخرى.';
+
+  @override
+  String get selectRegion => 'اختر منطقتك';
+
+  @override
+  String get regionSearchHint => 'ابحث عن المحافظات';
+
+  @override
+  String get regions => 'المناطق';
+
+  @override
+  String get regionSaved => 'تم حفظ المنطقة';
+
+  @override
+  String get regionSelectionFailed => 'تعذر حفظ المنطقة';
 }

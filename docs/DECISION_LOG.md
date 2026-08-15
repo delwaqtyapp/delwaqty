@@ -1503,3 +1503,149 @@ remained after ADR-047:
 - No schema/migration changes; relies on existing `BiometricAuthStore` +
   `updateBiometricEnabledUseCase`.
 - Covered by 9 new tests; full gate passes (603/603, analyzer 0 errors / 543 baseline unchanged).
+## ADR-049: Canonical admin identity is the 016 model; admin_users is legacy metadata
+
+**Date:** Session 43 (2026-08-15)
+**Status:** Accepted
+**Deciders:** Lead Architect + user approval
+
+### Context
+Two admin authorities existed: (a) `users.role IN ('admin','owner')` via `public.is_admin()` (016) —
+already used by chat/complaints/notifications RLS, the router, and providers; and (b) `admin_users`
+(002), whose `id` is a separate UUID not linked to `users.id`, with no seed rows and RLS that compares
+`admin_users.id = auth.uid()` (structurally impossible), making it inaccessible to real users and to the
+anon-key admin_web.
+
+### Decision
+Adopt the 016 model as the SINGLE canonical authorization authority. Preserve `admin_users` as
+dormant/legacy metadata (AGENTS.md §12.1) — do not delete. In Phase 2.2, *link* legacy `admin_users`
+rows to canonical identities via an additive `user_id` FK and build the admin hierarchy on the canonical
+identity model. Never create a third admin system.
+
+### Rationale
+Zero rewiring (all consumers already use the 016 model); eliminates the duplicate authority; the
+dead-in-practice `admin_users` adds no authorization value but is safe to keep as metadata.
+
+### Consequences
+All sensitive authorization stays server-side via `public.is_admin()` (SECURITY DEFINER, 016 pattern).
+New region write policies reuse `public.is_admin()`.
+
+## ADR-050: Canonical Egypt region model — recursive regions + per-user preference state
+
+**Date:** Session 43 (2026-08-15)
+**Status:** Accepted
+**Deciders:** Lead Architect + user approval
+
+### Context
+No region tables existed; geocoding produced only free-string city/district fields. Phase 2 requires a
+canonical region hierarchy (Egypt → governorate → city/district → area) with stable IDs, RLS, and
+per-user state distinguishing detected/manual/verified.
+
+### Decision
+New `regions` self-referencing table (`parent_region_id`, `code` stable/unique using ISO 3166-2:EG,
+`type` country/governorate/city/district/area, `name_ar`/`name_en`, `is_active`, `metadata`, timestamps)
+plus `user_region_preferences` (user_id PK, region_id, `source` detected/manual/verified). Seed: country
+Egypt + all 27 governorates from the authoritative ISO 3166-2:EG/official list. City/district/area data
+is NOT fabricated and is deferred to a verified source. RLS: regions SELECT public / write admin-only;
+preferences owner rw / admin select. Detection pipeline never creates duplicate regions; state
+preservation policy prevents silent overwrite of verified/manual.
+
+### Rationale
+Recursive parent keeps all depth lookups generic; separate preference table cleanly separates shared
+catalog from per-user state; stable deterministic UUIDs + ISO codes give immutable references for
+routing/assignment.
+
+### Consequences
+New migration 030. Flutter gains a `regions` feature module (entity, resolver, repository, data source,
+providers, selection page). Admin mutation of regions is RLS-restricted to `public.is_admin()`.
+
+## ADR-051: Extend chat_rooms/chat_messages — no parallel conversation system
+
+**Date:** Session 43 (2026-08-15)
+**Status:** Accepted
+**Deciders:** Lead Architect + user approval
+
+### Context
+`chat_rooms` already models support conversations (`room_type='support'`, `participant_ids`), is RLS
+deterministic (016), and has a full Flutter stack. Phase 2 needs priority, region routing, assignment,
+status, escalation, audit reference.
+
+### Decision
+Keep `chat_rooms`/`chat_messages` as the single conversation source of truth and extend `chat_rooms`
+with additive columns in 2.3: `priority` (normal/high/urgent/emergency), `region_id` FK, `assigned_admin_id`,
+`status`, escalation fields, `closed_at`, `audit_reference`. No `support_conversations` table.
+
+### Rationale
+Additive extension preserves identity/RLS/UX and avoids fragmenting conversations across two stores.
+
+### Consequences
+2.3 adds an ALTER TABLE migration + scoped RLS; assignment/escalation writes go through SECURITY
+DEFINER RPCs (016 pattern).
+
+## ADR-052: Emergency chat is conversation-level priority, not a second engine
+
+**Date:** Session 43 (2026-08-15)
+**Status:** Accepted
+**Deciders:** Lead Architect + user approval
+
+### Context
+No emergency concept exists on chat; `complaints.priority` and ride-bound `sos_alerts` are unrelated.
+
+### Decision
+Emergency is `chat_rooms.priority = 'emergency'` (with normal/high/urgent). It affects routing
+(highest-available admin / escalation to parent/global), notification urgency (dedicated high-priority
+channel via existing FCM/realtime infra), and admin visibility (filter). No separate message transport.
+
+### Rationale
+One chat engine; escalation semantics reuse the D3 extension; notifications reuse 026/018 infra.
+
+### Consequences
+Implementations land in 2.3 (schema), 2.4 (urgency/deep-links), 2.5 (escalation engine). No standalone
+emergency system.
+
+---
+
+## Verification Record (non-ADR): Phase 2.1 live apply + default-privilege security hardening
+
+**Date:** Session 45 (2026-08-15)
+**Status:** Applied, verified live, closed. Not a new decision — records the verification and
+implementation-level fix for accepted **ADR-050 / D1–D4**.
+
+### Context
+Migration 030 (implementing ADR-050) was applied to the live project `bttnlkmwhorjamzemwda` via the
+Supabase Management API and verified end-to-end.
+
+### Finding (discovered during the live gate)
+Supabase's platform `ALTER DEFAULT PRIVILEGES` auto-grants **ALL** privileges (including
+`TRUNCATE`/`TRIGGER`/`REFERENCES`) on new tables to `anon`, `authenticated`, and `service_role`.
+Migration 030's `GRANT`s were purely additive, so on first live apply `anon` held full DML +
+`TRUNCATE` on `regions` and `user_region_preferences` — exceeding the approved grant model
+(regions: anon SELECT-only; preferences: no anon access) and leaving a DB-level write path
+(`TRUNCATE`) that RLS does not cover.
+
+### Fix
+Enforced the approved model with revoke-before-grant inside **migration 030** (no new migration,
+no previously-applied migration touched):
+
+```sql
+REVOKE ALL ON public.regions FROM anon, authenticated;
+REVOKE ALL ON public.user_region_preferences FROM anon, authenticated;
+GRANT SELECT ON public.regions TO anon, authenticated;
+GRANT INSERT, UPDATE, DELETE ON public.regions TO authenticated;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.user_region_preferences TO authenticated;
+```
+
+### Verified final ACL state (live)
+- `regions`: anon = **SELECT only**; authenticated = SELECT/INSERT/UPDATE/DELETE (admin writes
+  gated by `is_admin()` RLS); no TRUNCATE/TRIGGER/REFERENCES for either.
+- `user_region_preferences`: anon = **no access**; authenticated = SELECT/INSERT/UPDATE/DELETE
+  (owner-only writes via `auth.uid() = user_id` RLS).
+
+### Consequences
+- RLS remains authoritative; the revoked surface additionally closes non-RLS paths (`TRUNCATE`).
+- Live data verified: 28 regions (1 Egypt root + 27/27 governorates), 0 duplicates, 0 orphans;
+  idempotent re-run confirmed.
+- Functional RLS tests passed: anon INSERT → 42501; anon UPDATE/DELETE → no-op (data intact);
+  non-admin authenticated region INSERT → 42501; owner can write regions + own preference but not
+  another user's preference.
+- Full details: `docs/HANDOFF/27_SPRINT_76_PHASE2_REGIONS.md` §8.

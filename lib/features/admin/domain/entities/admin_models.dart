@@ -6,7 +6,20 @@ part 'admin_models.g.dart';
 
 // ─── Enums ─────────────────────────────────────────────────
 
-enum AdminRole { superAdmin, admin, moderator, support }
+enum AdminRole {
+  owner,
+  admin;
+
+  static AdminRole fromDb(String? value) => switch (value) {
+    'super_admin' => AdminRole.owner,
+    _ => AdminRole.admin,
+  };
+
+  String toDb() => switch (this) {
+    AdminRole.owner => 'super_admin',
+    AdminRole.admin => 'admin',
+  };
+}
 
 enum AdminUserStatus { active, suspended, pending, deactivated }
 

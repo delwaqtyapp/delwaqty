@@ -3519,16 +3519,10 @@ class AppLocalizationsAr extends AppLocalizations {
   String get rideTypeTaxi => 'تاكسي';
 
   @override
-  String get roleSuperAdmin => 'مدير عام';
+  String get roleOwner => 'مالك';
 
   @override
   String get roleAdmin => 'مدير';
-
-  @override
-  String get roleModerator => 'مشرف';
-
-  @override
-  String get roleSupport => 'دعم';
 
   @override
   String get typeRestaurant => 'مطعم';

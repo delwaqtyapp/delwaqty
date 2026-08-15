@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:delwaqty/core/extensions/context_extensions.dart';
+import 'package:delwaqty/core/auth/admin_access.dart';
 import 'package:delwaqty/core/localization/locale_provider.dart';
 import 'package:delwaqty/core/theme/app_colors.dart';
 import 'package:delwaqty/core/theme/app_spacing.dart';
@@ -31,9 +32,7 @@ class ProfilePage extends ConsumerWidget {
       return _buildGuestProfile(context, ref, l10n);
     }
 
-    final isAdmin =
-        authState is AuthAuthenticated &&
-        (authState.user.role == 'admin' || authState.user.role == 'owner');
+    final isAdmin = authState is AuthAuthenticated && authState.user.isAdmin;
     final isDriver =
         authState is AuthAuthenticated && authState.user.role == 'driver';
     final isMerchant =

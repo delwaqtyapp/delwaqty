@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:delwaqty/core/theme/app_colors.dart';
 import 'package:delwaqty/features/admin_web/presentation/pages/admin_categories_page.dart';
 import 'package:delwaqty/features/admin_web/presentation/pages/admin_overview_page.dart';
+import 'package:delwaqty/features/admin_web/presentation/pages/admin_region_scope_page.dart';
 import 'package:delwaqty/features/admin_web/presentation/pages/admin_users_page.dart';
 import 'package:delwaqty/features/admin_web/presentation/pages/admin_verifications_page.dart';
 
@@ -20,6 +22,7 @@ class _AdminWebShellState extends State<AdminWebShell> {
     AdminUsersPage(),
     AdminVerificationsWebPage(),
     AdminCategoriesPage(),
+    AdminRegionScopePage(),
   ];
 
   final _navItems = const [
@@ -27,6 +30,7 @@ class _AdminWebShellState extends State<AdminWebShell> {
     (Icons.people_rounded, 'Users'),
     (Icons.verified_rounded, 'Verifications'),
     (Icons.category_rounded, 'Categories'),
+    (Icons.location_city_rounded, 'Region Scope'),
   ];
 
   @override
@@ -94,6 +98,19 @@ class _AdminWebShellState extends State<AdminWebShell> {
                     onTap: () => setState(() => _selectedIndex = i),
                   ),
                 const Spacer(),
+                const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  child: Divider(color: Colors.white12, height: 1),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: _NavItem(
+                    icon: Icons.logout_rounded,
+                    label: 'Sign out',
+                    selected: false,
+                    onTap: () => Supabase.instance.client.auth.signOut(),
+                  ),
+                ),
                 const Padding(
                   padding: EdgeInsets.all(16),
                   child: Text(

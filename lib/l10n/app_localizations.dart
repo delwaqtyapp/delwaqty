@@ -6836,29 +6836,17 @@ abstract class AppLocalizations {
   /// **'Taxi'**
   String get rideTypeTaxi;
 
-  /// No description provided for @roleSuperAdmin.
+  /// No description provided for @roleOwner.
   ///
   /// In en, this message translates to:
-  /// **'SuperAdmin'**
-  String get roleSuperAdmin;
+  /// **'Owner'**
+  String get roleOwner;
 
   /// No description provided for @roleAdmin.
   ///
   /// In en, this message translates to:
   /// **'Admin'**
   String get roleAdmin;
-
-  /// No description provided for @roleModerator.
-  ///
-  /// In en, this message translates to:
-  /// **'Moderator'**
-  String get roleModerator;
-
-  /// No description provided for @roleSupport.
-  ///
-  /// In en, this message translates to:
-  /// **'Support'**
-  String get roleSupport;
 
   /// No description provided for @typeRestaurant.
   ///

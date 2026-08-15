@@ -559,10 +559,7 @@ class AdminRepository implements admin.AdminRepository {
           id: json['id'] as String,
           name: json['name'] as String,
           email: json['email'] as String,
-          role: AdminRole.values.firstWhere(
-            (r) => r.name == json['role'],
-            orElse: () => AdminRole.support,
-          ),
+          role: AdminRole.fromDb(json['role'] as String?),
           status: AdminUserStatus.values.firstWhere(
             (s) => s.name == json['status'],
             orElse: () => AdminUserStatus.pending,
@@ -585,7 +582,7 @@ class AdminRepository implements admin.AdminRepository {
           .insert({
             'name': user.name,
             'email': user.email,
-            'role': user.role.name,
+            'role': user.role.toDb(),
             'status': user.status.name,
           })
           .select()
@@ -611,7 +608,7 @@ class AdminRepository implements admin.AdminRepository {
           .update({
             'name': user.name,
             'email': user.email,
-            'role': user.role.name,
+            'role': user.role.toDb(),
             'status': user.status.name,
           })
           .eq('id', user.id)

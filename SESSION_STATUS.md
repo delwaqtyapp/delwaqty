@@ -1,10 +1,117 @@
 # SESSION_STATUS.md
 
-> **Last updated:** 2026-08-15 Session 45 (Phase 2.1 Regional System — implemented + gated, 🟢 **LIVE VERIFIED**, awaiting user review/approval)
+> **Last updated:** 2026-08-15 Session 47 (Phase 2.2 Admin Hierarchy — IMPLEMENTATION + CONTROLLED FINAL REVIEW complete. **Verdict: 🟢 READY TO COMMIT** — awaiting explicit user approval; nothing committed/pushed)
 
 ---
 
-## Current Task — PHASE 2.1: REGIONAL SYSTEM (REGIONS) — IMPLEMENTATION (Session 45)
+## Current Task — PHASE 2.2: ADMIN HIERARCHY UNIFICATION (D1) — IMPLEMENTATION (Session 47)
+
+**Task (user):** execute the approved Phase 2.2 implementation (D1): migration 031
+(`admin_region_assignments` + RLS standardization), shared Flutter `isAdminUser` helper + 6-site
+refactor, `AdminRole` two-tier alignment (decision A), admin_web auth gate, region-scope UI,
+comprehensive tests, live Supabase verification, then a complete FINAL PRE-COMMIT GATE report and
+STOP. **No commit/push, no Phase 2.3.**
+
+**User-approved decisions:** gate (A) align Dart `AdminRole` to two-tier **owner > admin**; keep
+`admin_users` as dormant legacy surface (MUST NOT become authz source); add/connect
+`admin_users.user_id` FK (ADR-055); canonical authority = `users.role` + `public.is_admin()`;
+no admin seeds in 031; owner `8a23b719-a923-4a18-bd6e-04972097fb4b` remains the only admin-tier account.
+
+### Completed in this session
+- **2.2A–2.2E:** migration `supabase/migrations/031_admin_hierarchy_region_assignments.sql`
+  WRITTEN (idempotent): `admin_users.user_id` FK + UNIQUE; `admin_region_assignments` table + RLS +
+  revoke-before-grant; `public.is_admin_for_region()` SECURITY DEFINER; F1/F2 policy rewrites (6)
+  to `is_admin()`; F3 dedup on `notifications`/`notification_tokens` (incl. `{public}` anon-leak
+  fix on "Service role manage tokens" → `TO service_role`); no-self-elevation
+  `users_guard_role_change()` BEFORE UPDATE trigger + `admin_set_user_role(uuid,text)` RPC.
+- **2.2F helper + refactor + `AdminRole` two-tier (decision A):**
+  - `lib/core/auth/admin_access.dart` (`isAdminUser` + `User.isAdmin` extension); all 6 gate sites
+    refactored (app_router, chat_providers, service_audio_log_providers — fixed pre-existing
+    `user.id` bug, floating_sidebar_overlay — fixed operator-precedence bug, profile_page, main_web via gate).
+  - `admin_models.dart`: `enum AdminRole { owner, admin }` + `fromDb` (legacy
+    `super_admin`→owner, `admin/moderator/support/finance`→admin) + `toDb()` (owner→`super_admin`,
+    admin→`admin` — stays inside dormant table's role CHECK vocabulary).
+  - `admin_repository.dart`: read mapping `AdminRole.fromDb(json['role'])` (fixes C2 silent
+    `super_admin`→`support`); `createUser`/`updateUser` write `user.role.toDb()`.
+  - `admin_users_page.dart`: role label/chip owner/admin; default role admin. l10n `roleOwner`
+    EN/AR; regenerated.
+- **2.2G admin_web auth gate:** `lib/features/admin_web/presentation/pages/admin_web_gate.dart`
+  (`AdminWebGateStatus` + `adminWebGateStatus()` pure fn + gate/login/denied widgets, DI'd resolvers);
+  `lib/main_web.dart` `home: const AdminWebGate()`; shell gains Sign out. 9 tests.
+- **2.2H region-scope UI:** `admin_region_assignments` domain entity (`AdminRegionScope`
+  self/descendants + snake_case mapper in data source — freezed JSON stays camelCase per repo
+  convention), repository interface + impl, data source, providers, `AdminRegionScopePage`
+  (admin list ↔ assignments, Cairo self example, add/delete, dropdowns keyed
+  `region-select`/`scope-select`), 5th shell nav item. 12 tests.
+- **2.2I tests + regression:** admin + admin_web suites = **77/77**; full suite = **686/686**;
+  `flutter analyze` = **0 errors** (547 issues = 543 pre-existing baseline + 2 repo-convention
+  `DropdownButtonFormField.value` deprecation infos, 0 in new source files). New-file lint fixes
+  applied (removed `@JsonKey` per repo convention, unused import, `DecoratedBox`, `const`).
+- **2.2J live verification (ALL GREEN):** migration 031 applied to `bttnlkmwhorjamzemwda` via
+  Management API; **idempotent re-run OK**; schema/ACL/realtime checks pass; **14-probe RLS
+  attack matrix** (anon denied/0/false, customer RLS-blocked + self-elevation trigger
+  `Cannot change your own role`, owner global, scoped-admin recursive descendants
+  true/true/false, non-owner owner-grant guard, legit admin grant) all as expected; F1/F2
+  drift scan empty; all temp probe data cleaned. **Pre-existing finding (flagged, out of 031
+  scope):** anon can INSERT into `activity_logs` (PUBLIC insert policy, no WITH CHECK) — follow-up
+  recommended (REVOKE from anon/authenticated or `TO service_role`).
+- **2.2K FINAL PRE-COMMIT GATE report:** `docs/HANDOFF/29_SPRINT_76_PHASE_2_2_FINAL_PRE_COMMIT_GATE.md`.
+- **CONTROLLED FINAL REVIEW (this session):** full diff reviewed vs ADR-055/056 (all Phase 2.2 scope,
+  zero regions/030 drift, zero unrelated product changes); migration 031 re-verified idempotent +
+  non-destructive; security invariants re-confirmed (owner global, admin scoped incl. recursive
+  descendants, no self/lower-admin elevation, cross-region denied, anon denied, gate cannot bypass
+  RLS, SECURITY DEFINER `search_path` set, no PUBLIC/anon leaks, no admin seed); live DB re-confirmed
+  (031 objects present, no dup policies, ACLs correct, assignments 0, temp data removed);
+  `flutter test --no-pub --concurrency=2` 686/686; `flutter analyze` 0 errors (545 = baseline 543 + 2
+  convention infos); `git diff --check` = CRLF artifact only (pre-existing file format); secret scan
+  clean; ROADMAP 2.2 status updated. `activity_logs` anon-INSERT finding classified
+  **PRE-EXISTING / OUT OF SCOPE / FOLLOW-UP REQUIRED** (verified Phase 2.2 has zero reliance — only a
+  read path; not silently fixed). Scope note: DECISION_LOG diff includes pre-existing additive docs
+  ADR-053/054 (Session 44), not Phase 2.2 code. **Final verdict: 🟢 READY TO COMMIT (awaiting user
+  approval).**
+
+### Gate summary
+| Check | Result |
+|-------|--------|
+| `flutter analyze` | ✅ 0 errors (547 issues; baseline 543 + 2 convention infos) |
+| `flutter test` | ✅ **686/686** |
+| Live apply + idempotency | ✅ applied, re-run OK |
+| Live RLS/ACL/attack matrix | ✅ 14/14 probes green, no drift, no leaks |
+| Secret scan | ✅ env files ignored, no secrets in diff |
+
+### Files modified this session
+- New: `lib/core/auth/admin_access.dart`, `supabase/migrations/031_admin_hierarchy_region_assignments.sql`,
+  `lib/features/admin_web/presentation/pages/admin_web_gate.dart`,
+  `lib/features/admin_web/presentation/pages/admin_region_scope_page.dart`,
+  `lib/features/admin/domain/entities/admin_region_assignment.dart`,
+  `lib/features/admin/domain/repositories/admin_region_assignment_repository.dart`,
+  `lib/features/admin/data/repositories/admin_region_assignment_repository_impl.dart`,
+  `lib/features/admin/data/datasources/remote/supabase_admin_region_assignment_data_source.dart`,
+  `lib/features/admin/presentation/providers/admin_region_providers.dart`,
+  `test/features/admin/data/admin_region_assignment_repository_test.dart`,
+  `test/features/admin/domain/admin_region_assignment_test.dart`,
+  `test/features/admin_web/admin_web_gate_test.dart`,
+  `test/features/admin_web/admin_region_scope_page_test.dart`,
+  `docs/HANDOFF/28_SPRINT_76_PHASE_2_2_ADMIN_HIERARCHY_AUDIT.md`,
+  `docs/HANDOFF/29_SPRINT_76_PHASE_2_2_FINAL_PRE_COMMIT_GATE.md`
+- Edited: `lib/features/admin/domain/entities/admin_models.dart`,
+  `lib/data/repositories/admin_repository.dart`,
+  `lib/features/admin/presentation/pages/admin_users_page.dart`,
+  `lib/features/admin_web/presentation/pages/admin_web_shell.dart`,
+  `lib/main_web.dart`, `lib/core/router/app_router.dart`,
+  `lib/features/support_chat/presentation/chat_providers.dart`,
+  `lib/features/service_audio_logs/presentation/service_audio_log_providers.dart`,
+  `lib/features/floating_sidebar/floating_sidebar_overlay.dart`,
+  `lib/features/profile/presentation/pages/profile_page.dart`,
+  `lib/l10n/app_en.arb`, `lib/l10n/app_ar.arb`, `lib/l10n/app_localizations*.dart` (regenerated),
+  `test/features/admin/domain/entities_test.dart`, `docs/DECISION_LOG.md` (ADR-055/056),
+  `ROADMAP.md`, `SESSION_STATUS.md`
+
+**Next (user hands):** review the diff → approve → `git add . && git commit -m "sprint 76: unify admin hierarchy with region scope" && git push origin master`.
+
+---
+
+## Previous Task — PHASE 2.1: REGIONAL SYSTEM (REGIONS) — IMPLEMENTATION (Session 45)
 
 **Task (user):** after approving the Phase 2.0 audit (🟡) + the D1–D4 design decisions, implement
 Phase 2.1 (Egypt regional foundation): schema + canonical dataset (migration 030), Flutter

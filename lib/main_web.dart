@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:delwaqty/core/theme/app_theme.dart';
-import 'package:delwaqty/features/admin_web/presentation/pages/admin_web_shell.dart';
+import 'package:delwaqty/features/admin_web/presentation/pages/admin_web_gate.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -22,7 +22,7 @@ class AdminWebApp extends StatelessWidget {
       title: 'Delwaqty Admin',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme(),
-      home: const AdminWebShell(),
+      home: const AdminWebGate(),
     );
   }
 }

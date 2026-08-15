@@ -1,4 +1,6 @@
 import 'package:delwaqty/features/regions/domain/entities/region.dart';
+import 'package:delwaqty/features/regions/domain/entities/geo_entity.dart';
+import 'package:delwaqty/features/regions/domain/entities/spatial_resolution.dart';
 
 abstract class RegionRepository {
   Future<List<Region>> getGovernorates();
@@ -18,4 +20,15 @@ abstract class RegionRepository {
   });
 
   Future<UserRegionPreference?> getUserRegion(String userId);
+
+  Future<List<GeoPlace>> getGeoPlaces({String? type, String? query});
+
+  Future<GeoPlace?> getGeoPlace(String id);
+
+  Future<SpatialResolution?> resolveRegionForPoint({
+    required double lat,
+    required double lon,
+    int maxDepth = 2,
+    double toleranceM = 25000,
+  });
 }

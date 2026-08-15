@@ -1,10 +1,84 @@
 # SESSION_STATUS.md
 
-> **Last updated:** 2026-08-15 Session 47 (Phase 2.2 Admin Hierarchy — IMPLEMENTATION + CONTROLLED FINAL REVIEW complete. **Verdict: 🟢 READY TO COMMIT** — awaiting explicit user approval; nothing committed/pushed)
+> **Last updated:** 2026-08-15 Session 48 (Phase 2.1B Egypt Geographic Coverage — IMPLEMENTATION complete + **post-gate independent review passed; findings F1–F4 fixed and re-verified live. Verdict: 🟢 GATE GREEN** — migration 032 applied + verified live, Flutter layer extended, tests green, gate report delivered; **no commit/push until user approves**)
 
 ---
 
-## Current Task — PHASE 2.2: ADMIN HIERARCHY UNIFICATION (D1) — IMPLEMENTATION (Session 47)
+## Current Task — PHASE 2.1B: EGYPT COMPLETE GEOGRAPHIC COVERAGE — IMPLEMENTATION (Session 48)
+
+**Task (user):** execute the APPROVED Phase 2.1B implementation (D1/D2/D3 + migration 032):
+migration `032` (idempotent/deterministic/non-destructive/auditable/RLS+grants protected), 030+031
+untouched, 28 canonical IDs immutable, provenance on every record, server-side GPS resolution with
+PostGIS, confidence gates (never overwrite manual/verified), full ACL audit after apply, then Flutter
+layer + tests + complete PHASE 2.1B PRE-COMMIT GATE report, then **STOP. No commit/push, no
+Phase 2.3.**
+
+**Deliverables this session (all complete):**
+- **Docs:** ADR-057 in `docs/DECISION_LOG.md` (D1/D2/D3 + migration 032); this file; ROADMAP.md.
+- **Migration 032** (live-applied + verified):
+  - `032_egypt_geographic_schema.sql` — `CREATE EXTENSION IF NOT EXISTS postgis` (+`pg_trgm`);
+    `regions.type` CHECK extended additively to
+    `country/governorate/markaz/district/city/village/new_city/area` (D3); new tables `geo_places`
+    (14-type CHECK, lat/lon + `point geometry(Point,4326)`, source/source_ref/source_date/
+    source_type/confidence/provenance, `UNIQUE (source,source_ref)`, point-match CHECK),
+    `geo_aliases` (entity_type/entity_id/alias/lang/is_primary/source, UNIQUE),
+    `geo_admin_boundaries` (region_id/level/geometry MultiPolygon/UNIQUE(region,source,source_ref));
+    RLS SELECT-public + admin-write on all three (016 pattern), REVOKE-before-GRANT, no anon writes;
+    SECURITY DEFINER `geo_region_for_point(lat, lon, max_depth DEFAULT 2, tolerance_m DEFAULT 25000)`
+    with `SET search_path = public, pg_temp` — point-in-polygon (deepest) → nearest-boundary
+    snapping (MEDIUM) → nearest-governorate centroid (LOW) → optional village/area/new_city centroid
+    refinement (max_depth ≥ 3, HIGH/MEDIUM only); EXECUTE granted to authenticated only.
+  - `032_egypt_geographic_seed.sql` — idempotent deterministic seed (UUID v5 namespace
+    `6f8f4a72-4a3b-4e2a-9d11-9a2c5e6f7a01`; regions/places/boundaries `ON CONFLICT DO UPDATE
+    SET metadata/license/geometry` — self-healing on re-run; aliases `DO NOTHING`): **6,129 new
+    regions** (165 markaz / 173 district / 27 seat city / 52 new_city / 4,580 village / 1,132 area),
+    **64 geo_places** (19 airport / 19 hotel / 14 landmark / 5 tourist_village / 4 university /
+    2 port / 1 compound), **6,879 geo_aliases**, **374 geo_admin_boundaries** (27 ADM1 + 347 ADM2,
+    coordinates rounded to 4 decimals ≈ 11 m, **all valid** via `ST_MakeValid`).
+- **Live verification (all green):** totals 6,157 regions / 64 places / 6,879 aliases / 374
+  boundaries; zero orphans, zero duplicate codes, zero duplicate `(source,source_ref)`, zero cycles,
+  connected acyclic tree (max depth 4); all 27 governorates direct children of Egypt; parent-type
+  matrix exact (village→markaz, district→governorate, city→governorate, new_city→governorate,
+  area→district/new_city); original 28 rows present + correct + immutable; RLS enabled + policies
+  (2 per table) + grants verified (anon SELECT-only, authenticated DML RLS-gated, service_role full);
+  `user_region_preferences` 0 rows, `admin_region_assignments` 0 rows (untouched); idempotency
+  re-run of schema + region/alias/boundary chunks = no-op. Spatial RPC probes:
+  Pyramids→Giza HIGH, Hurghada→Hurghada-1/Red Sea HIGH, Dikirnis→markaz HIGH + village refinement
+  398 m, New Capital→new_city HIGH, Mount Sinai→Sant Katrin/South Sinai HIGH, sea point→Damietta
+  LOW 56 km, invalid coords→INVALID.
+- **Flutter layer:** `RegionType` extended (markaz/district/village/newCity), `Region` model gains
+  type passthrough, new `GeoPlace`/`GeoAlias` entities, extended `RegionResolver` (new-level name
+  match + alias-aware), `GeoConfidence` model + `RegionPreferencePolicy` HIGH/MEDIUM/LOW gate
+  (detection never overwrites manual/verified), server-side GPS provider calling
+  `geo_region_for_point` RPC.
+- **Tests:** DB dataset test for migration 032 (counts, hierarchy, uniqueness, provenance, ID
+  immutability); resolver tests (new levels, alias, ambiguity→null, LOW gate); confidence/state
+  tests; `flutter pub get` → `build_runner` → `flutter analyze` → `flutter test` all pass. Final
+  refactor: freezed entities use explicit `fromRow`/`fromRpc` factories (no `@JsonKey` on factory
+  params) → **analyzer 0 errors / 0 warnings in region files** (24 pre-existing warnings in untouched
+  modules), full suite **731/731**.
+- **`docs/HANDOFF/31_PHASE_2_1B_PRE_COMMIT_GATE.md`** delivered (full gate report).
+- **Post-gate independent review + remediation (all applied + live re-verified):** read-only review
+  confirmed the gate's numbers and found 4 items now fixed — F1: 27 invalid ADM1 boundaries
+  (`ST_IsValid=false`) regenerated via `ST_MakeValid` → **0 invalid** (probes identical); F2: `anon`
+  EXECUTE on the RPCs (Supabase default-privilege auto-grant) closed with explicit
+  `REVOKE ... FROM anon` in migration 032 → `has_function_privilege('anon',...,'EXECUTE')` **false**
+  on `geo_region_for_point`/`is_admin()`/`is_admin(uid)`/`is_admin_for_region()`; F3: license
+  metadata corrected per source + `geo_places.license` populated (0 NULL); F4: gate/analyzer wording
+  corrected. ADR-057 amended (A1–A4). Remaining items LOW/informational (2 places without
+  `region_id`; aliases not yet consumed by resolver — dormant).
+- **STOPPED — gate re-verified 🟢; awaiting user approval. No commit/push, no Phase 2.3.**
+
+---
+
+## Previous Task — PHASE 2.1B: EGYPT COMPLETE GEOGRAPHIC COVERAGE — AUDIT + DESIGN (Session 48, read-only)
+
+**Verdict:** 🟡 REQUIRES DATA SOURCE DECISION — audit `docs/HANDOFF/30_EGYPT_COMPLETE_GEOGRAPHIC_COVERAGE_AUDIT.md`
+(32 sections) delivered; D1/D2/D3 + migration number approved by user, then implementation above.
+
+---
+
+## Previous Task — PHASE 2.2: ADMIN HIERARCHY UNIFICATION (D1) — IMPLEMENTATION (Session 47)
 
 **Task (user):** execute the approved Phase 2.2 implementation (D1): migration 031
 (`admin_region_assignments` + RLS standardization), shared Flutter `isAdminUser` helper + 6-site
@@ -141,7 +215,7 @@ commit/push, do NOT start Phase 2.2.**
 ### Gate
 | Check | Result |
 |-------|--------|
-| `flutter analyze` | ✅ 0 errors · 24 warnings + 519 info (pre-existing baseline; **0 issues in region files**) |
+| `flutter analyze` | ✅ **0 errors · 0 warnings** (522 pre-existing info lints; **0 issues in region files**) |
 | `flutter test --no-pub --concurrency=2` | ✅ **663/663** (60 new region tests) |
 | **Live apply (030)** | ✅ Management API HTTP 201, no errors; re-run idempotent (28/28 rows intact) |
 | **Live schema** | ✅ 28 rows (Egypt + 27 governorates), UNIQUE ids/codes, FK CASCADE, type/source CHECK, indexes, triggers `set_updated_at` |

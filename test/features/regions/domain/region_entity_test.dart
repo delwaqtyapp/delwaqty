@@ -6,17 +6,23 @@ void main() {
 
   group('RegionType', () {
     test('has all values', () {
-      expect(RegionType.values.length, 5);
+      expect(RegionType.values.length, 8);
       expect(RegionType.country.code, 'country');
       expect(RegionType.governorate.code, 'governorate');
-      expect(RegionType.city.code, 'city');
+      expect(RegionType.markaz.code, 'markaz');
       expect(RegionType.district.code, 'district');
+      expect(RegionType.city.code, 'city');
+      expect(RegionType.village.code, 'village');
+      expect(RegionType.newCity.code, 'new_city');
       expect(RegionType.area.code, 'area');
     });
 
     test('fromCode maps known codes and falls back to country', () {
       expect(RegionType.fromCode('governorate'), RegionType.governorate);
+      expect(RegionType.fromCode('markaz'), RegionType.markaz);
       expect(RegionType.fromCode('city'), RegionType.city);
+      expect(RegionType.fromCode('village'), RegionType.village);
+      expect(RegionType.fromCode('new_city'), RegionType.newCity);
       expect(RegionType.fromCode('district'), RegionType.district);
       expect(RegionType.fromCode('area'), RegionType.area);
       expect(RegionType.fromCode('country'), RegionType.country);

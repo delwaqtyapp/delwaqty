@@ -1819,3 +1819,97 @@ variants. Single server-side authority: `public.is_admin()`; `is_admin_for_regio
 - Verified in the 2.2 implementation gate by live RLS probes (owner/global-admin/scoped-admin/anon
   matrix, §7 of doc 28).
 - No behavioral change for non-admin roles; no data changes; additive coverage only for owner.
+
+---
+
+## ADR-057: Egypt complete geographic coverage — layered model, hybrid geocoder, extended region taxonomy
+
+**Date:** Session 48 (2026-08-15)
+**Status:** Accepted (Phase 2.1B approved implementation)
+**Deciders:** Lead Architect (D1/D2/D3 user gate approved; audit
+`docs/HANDOFF/30_EGYPT_COMPLETE_GEOGRAPHIC_COVERAGE_AUDIT.md` §0.1)
+
+### Context
+Phase 2.1 shipped the canonical 27-governorate hierarchy (ADR-050, migration 030). Phase 2.1B must
+extend geographic coverage to the full Egyptian admin hierarchy (markaz / aqsam / cities / villages /
+new cities) and add a tourism/POI layer for GPS resolution, region selection, and admin scoping —
+without fabricating data, without breaking `is_admin_for_region()` (ADR-055/056, migration 031), and
+without turning the geo layer into a business directory. Three decisions were gated to the user:
+authoritative dataset (D1), geocoder stack (D2), and `regions.type` taxonomy (D3).
+
+### Decision
+- **D1 — layered authoritative-data strategy.** Load dataset = OCHA HDX COD-AB Egypt (CC BY-IGO;
+  admin levels 0–3 with Arabic/English names and stable pcodes). New cities = Wikipedia/NUCA roster
+  (52, SECONDARY VERIFIED; New Galala flagged not-NUCA). Places = GeoNames (CC BY 4.0) +
+  Wikipedia + OSM Nominatim for verified coordinates. Gaps are reported, never guessed.
+- **D2 — hybrid geocoder.** Server-side 016-pattern proxy (`geo_region_for_point`) using PostGIS
+  point-in-polygon over `geo_admin_boundaries` (ADM1+ADM2), nearest-boundary snapping within
+  tolerance, nearest-governorate-centroid fallback (LOW). Photon/OSM + GeoNames are storable;
+  Google is online-only and never persisted (ToS). Provider disagreement feeds confidence, never
+  fabrication.
+- **D3 — additive `regions.type` CHECK.** Extended to
+  `country / governorate / markaz / district / city / village / new_city / area`. Urban aqsam are
+  stored as `district` (no `qism` overload). Hotels/resorts/tourist villages/compounds/airports/
+  ports/universities/landmarks/POIs live in `geo_places`, never in `regions`.
+- **Migration 032** (two files): `032_egypt_geographic_schema.sql` (schema + RLS + grants +
+  `CREATE EXTENSION IF NOT EXISTS postgis` + `pg_trgm` + SECURITY DEFINER
+  `geo_region_for_point(lat, lon, max_depth DEFAULT 2, tolerance_m DEFAULT 25000)` with
+  `SET search_path = public, pg_temp`; EXECUTE granted to authenticated only) and
+  `032_egypt_geographic_seed.sql` (idempotent deterministic seed: 6,129 new region rows,
+  64 `geo_places`, 6,879 `geo_aliases`, 374 admin-boundary polygons). 030/031 untouched; the 28
+  canonical IDs remain immutable.
+- **Provenance contract.** Every canonical record carries `source`, `source_ref`, `source_date`,
+  `source_type` (OFFICIAL VERIFIED / SECONDARY VERIFIED / PROVIDER-DERIVED / UNVERIFIED-MISSING),
+  `confidence` (HIGH / MEDIUM / LOW / UNVERIFIED), and `provenance`.
+- **Confidence gates.** HIGH may persist a detected region; MEDIUM only if policy allows; LOW never
+  auto-persists; detection never overwrites manual/verified preferences.
+- **Deterministic IDs.** Governorates immutable; new admin rows are UUID v5 in namespace
+  `6f8f4a72-4a3b-4e2a-9d11-9a2c5e6f7a01` keyed on source pcode/id; `geo_places` v5 from
+  `source+source_ref`; never random.
+
+### Rationale
+- OCHA COD-AB is the only open, machine-readable, licensed dataset with full Arabic names and stable
+  pcodes for levels 0–3 (audit §3–§7, §24); CAPMAS/MLD licensing is uncleared so they stay as
+  cross-checks only.
+- PostGIS point-in-polygon (option B) + string candidate input (option D) + nearest-centroid
+  fallback (option E) is the audited recommended spatial design (§17); it keeps GPS resolution
+  server-side, deterministic, and RLS-safe with no heavy Flutter spatial.
+- Additive CHECK + single canonical admin tree keeps `is_admin_for_region()` parent-walks valid and
+  the selection/routing UI unchanged in shape (audit §21).
+- Deterministic UUIDs + `ON CONFLICT DO NOTHING` make re-imports idempotent and auditable (R9).
+
+### Consequences
+- Live DB now holds 6,157 regions (28 canonical + 6,129 new), 64 `geo_places`, 6,879
+  `geo_aliases`, 374 `geo_admin_boundaries`; verified RLS (anon SELECT-only, admin write),
+  zero orphans/duplicates/cycles, connected acyclic tree depth 4.
+- `geo_region_for_point` resolves GPS fixes to governorate/markaz/district and (max_depth ≥ 3)
+  village/area/new_city with HIGH/MEDIUM/LOW confidence — the client pipeline consumes it via the
+  extended resolver and confidence policy.
+- Flutter `regions` module extends `RegionType` and adds `GeoPlace`/`GeoAlias` entities, an extended
+  resolver, a confidence model, and a server-side GPS resolution provider.
+- `geo_admin_boundaries` polygons are rounded to 4 decimals (~11 m) — precision reduction of the
+  authoritative boundary for payload size, preserving containment semantics.
+- Future Phase 2.3 (chat routing) and admin scoping reuse the deeper hierarchy unchanged.
+
+**Amendment (Session 48, post-gate independent review 2.1B — all applied + live re-verified):**
+- **A1 — EXECUTE lockdown (finding 2.1B-F2).** Supabase `ALTER DEFAULT PRIVILEGES` auto-grants
+  EXECUTE to `anon`/`authenticated`/`service_role` at function creation, so `REVOKE ... FROM PUBLIC`
+  alone left `anon` holding EXECUTE on `geo_region_for_point`, `is_admin()`, legacy `is_admin(uid)`
+  and `is_admin_for_region()`. Migration 032 now ends with explicit
+  `REVOKE ALL ON FUNCTION ... FROM anon` (plus `FROM PUBLIC` for legacy `is_admin(uid)`), so the
+  documented "authenticated-only EXECUTE" actually holds live (verified via
+  `has_function_privilege('anon', ..., 'EXECUTE') = false`). Functions were read-only/RLS-safe
+  regardless; this closes the privilege-vs-documentation gap and applies least privilege.
+- **A2 — boundary validity (finding 2.1B-F1).** 4-decimal rounding produced ring
+  self-intersections in all 27 ADM1 governorate polygons (`ST_IsValid=false`). The seed generator now
+  emits `ST_Multi(ST_CollectionExtract(ST_MakeValid(ST_SetSRID(ST_GeomFromGeoJSON(...),4326)),3))`
+  and upserts `geometry, license` on conflict. Live re-apply: 374/374 valid MultiPolygons (0 invalid),
+  all GPS probes re-verified identical (Pyramids → EG-ADM2-2106 HIGH; Dikirnis → EG-ADM3-120903 HIGH;
+  Hurghada → EG-ADM2-3101 HIGH; New Capital → EG-NC-NEWADMINISTRATIVECAP HIGH).
+- **A3 — license metadata accuracy (finding 2.1B-F3).** `regions.metadata.license` now matches each
+  source (OCHA `CC BY-IGO`, Wikipedia `CC BY-SA 4.0`, GeoNames `CC BY 4.0`); `geo_places.license`
+  populated per source (GeoNames `CC BY 4.0`, Wikipedia `CC BY-SA 4.0`, OSM `ODbL`). Validated in the
+  generator (build fails on mismatch).
+- **A4 — self-healing seed.** Boundary/region/place upserts now `DO UPDATE` (metadata/license/
+  geometry) so re-running the seed repairs previously-applied environments; still deterministic and
+  idempotent. `geo_aliases` remains `DO NOTHING`.

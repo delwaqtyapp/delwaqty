@@ -127,13 +127,14 @@
 
 ## Phase 2 — Admin Hierarchy, Regions, Escalation (sprint 76+, planned)
 
-> Authoritative per-sub-phase gate docs: `docs/HANDOFF/25…28`. Constitution §15 authority. No
+> Authoritative per-sub-phase gate docs: `docs/HANDOFF/25…28, 30`. Constitution §15 authority. No
 > migration is written ahead of its gate's approval (architecture-first, evidence-first).
 
 | Sub-phase | Scope | Migration | Status |
 |-----------|-------|-----------|--------|
 | 2.0 | Architecture audit (D1–D4 defined) | — | ✅ (`25_SPRINT_76_PHASE2_ARCHITECTURE_AUDIT.md`) |
 | 2.1 | Egypt regions: canonical 27-governorate hierarchy + `user_region_preferences` + Flutter `regions` module | `030_regional_system` | ✅ shipped `1f3ba02`, live-verified (`27_SPRINT_76_PHASE2_REGIONS.md`) |
+| 2.1B | Egypt complete geographic coverage: extend admin hierarchy (markaz/aqsam/cities/villages/new cities) + `geo_places`/`geo_aliases`/`geo_admin_boundaries` + server-side GPS/spatial resolution (PostGIS `geo_region_for_point`) | `032_egypt_geographic_schema` + `032_egypt_geographic_seed` | ✅ **IMPLEMENTED + LIVE-VERIFIED + INDEPENDENT REVIEW PASSED, GATE GREEN (awaiting commit)** (ADR-057 + amendment A1–A4; `30_..._AUDIT.md` + `31_..._PRE_COMMIT_GATE.md`; 6,157 regions / 64 places / 6,879 aliases / 374 valid boundaries live; RPC EXECUTE anon-revoked; licenses per source; analyzer 0/0 region files; tests 731/731) |
 | **2.2** | **Admin hierarchy (D1): owner > admin tiers, `admin_region_assignments`, `is_admin_for_region()`, RLS standardization on `is_admin()` (fix literal-role + raw_user_meta_data drift), shared Dart `isAdminUser` helper, admin_web auth gate** | `031_admin_hierarchy_region_assignments` | ✅ **IMPLEMENTED + LIVE-VERIFIED, awaiting commit** (`28_..._ADMIN_HIERARCHY_AUDIT.md` + `29_..._FINAL_PRE_COMMIT_GATE.md`, ADR-055/056) |
 | 2.3 | Chat backend (D3): EXTEND `chat_rooms` (priority/region/assignment/escalation cols), `assign_support_chat`/`escalate_support_chat` RPCs, region routing parent-walk, realtime | `032_support_conversations_priority` | 🏗 contract specified (doc 28 §5) |
 | 2.4 | Notifications: admin send path + conversation deep-links | `034_notification_chat_deeplinks` | 🏗 pending |

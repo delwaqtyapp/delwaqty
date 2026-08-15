@@ -3,6 +3,8 @@ import 'package:mocktail/mocktail.dart';
 import 'package:delwaqty/features/regions/data/datasources/remote/supabase_region_data_source.dart';
 import 'package:delwaqty/features/regions/data/repositories/region_repository_impl.dart';
 import 'package:delwaqty/features/regions/domain/entities/region.dart';
+import 'package:delwaqty/features/regions/domain/entities/geo_entity.dart';
+import 'package:delwaqty/features/regions/domain/entities/spatial_resolution.dart';
 
 class _MockDataSource extends Mock implements RegionDataSource {}
 
@@ -155,6 +157,107 @@ void main() {
           .thenAnswer((_) async => null);
 
       final result = await repository.getUserRegion('u1');
+
+      expect(result, isNull);
+    });
+  });
+
+  group('getGeoPlaces', () {
+    test('forwards type filter to the data source', () async {
+      final places = [
+        GeoPlace(
+          id: 'p1',
+          type: GeoPlaceType.airport,
+          source: 'geonames',
+          sourceRef: 'r1',
+          sourceType: GeoSourceType.secondaryVerified,
+          confidence: GeoConfidence.high,
+          createdAt: now,
+        ),
+      ];
+      when(
+        () => dataSource.getGeoPlaces(type: 'airport'),
+      ).thenAnswer((_) async => places);
+
+      final result = await repository.getGeoPlaces(type: 'airport');
+
+      expect(result, places);
+      verify(() => dataSource.getGeoPlaces(type: 'airport')).called(1);
+    });
+
+    test('forwards query filter to the data source', () async {
+      when(
+        () => dataSource.getGeoPlaces(query: 'pyram'),
+      ).thenAnswer((_) async => const <GeoPlace>[]);
+
+      final result = await repository.getGeoPlaces(query: 'pyram');
+
+      expect(result, isEmpty);
+    });
+  });
+
+  group('getGeoPlace', () {
+    test('returns a single place', () async {
+      final place = GeoPlace(
+        id: 'p1',
+        type: GeoPlaceType.hotel,
+        source: 'geonames',
+        sourceRef: 'r1',
+        sourceType: GeoSourceType.secondaryVerified,
+        confidence: GeoConfidence.medium,
+        createdAt: now,
+      );
+      when(() => dataSource.getGeoPlace('p1')).thenAnswer((_) async => place);
+
+      final result = await repository.getGeoPlace('p1');
+
+      expect(result, place);
+    });
+
+    test('returns null when missing', () async {
+      when(() => dataSource.getGeoPlace('nope')).thenAnswer((_) async => null);
+
+      final result = await repository.getGeoPlace('nope');
+
+      expect(result, isNull);
+    });
+  });
+
+  group('resolveRegionForPoint', () {
+    test('returns spatial resolution from the data source', () async {
+      final resolution = const SpatialResolution(
+        regionId: 'r-giza',
+        governorateId: 'r-giza',
+        confidence: GeoConfidence.high,
+      );
+      when(
+        () => dataSource.resolveRegionForPoint(
+          lat: 29.98,
+          lon: 31.13,
+          maxDepth: any(named: 'maxDepth'),
+          toleranceM: any(named: 'toleranceM'),
+        ),
+      ).thenAnswer((_) async => resolution);
+
+      final result = await repository.resolveRegionForPoint(
+        lat: 29.98,
+        lon: 31.13,
+      );
+
+      expect(result, resolution);
+    });
+
+    test('returns null when the RPC finds nothing', () async {
+      when(
+        () => dataSource.resolveRegionForPoint(
+          lat: 0,
+          lon: 0,
+          maxDepth: any(named: 'maxDepth'),
+          toleranceM: any(named: 'toleranceM'),
+        ),
+      ).thenAnswer((_) async => null);
+
+      final result = await repository.resolveRegionForPoint(lat: 0, lon: 0);
 
       expect(result, isNull);
     });

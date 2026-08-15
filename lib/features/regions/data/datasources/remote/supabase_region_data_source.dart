@@ -1,5 +1,7 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:delwaqty/features/regions/domain/entities/region.dart';
+import 'package:delwaqty/features/regions/domain/entities/geo_entity.dart';
+import 'package:delwaqty/features/regions/domain/entities/spatial_resolution.dart';
 
 abstract class RegionDataSource {
   Future<List<Region>> getGovernorates();
@@ -19,6 +21,17 @@ abstract class RegionDataSource {
   });
 
   Future<UserRegionPreference?> getUserRegion(String userId);
+
+  Future<List<GeoPlace>> getGeoPlaces({String? type, String? query});
+
+  Future<GeoPlace?> getGeoPlace(String id);
+
+  Future<SpatialResolution?> resolveRegionForPoint({
+    required double lat,
+    required double lon,
+    int maxDepth = 2,
+    double toleranceM = 25000,
+  });
 }
 
 class SupabaseRegionDataSource implements RegionDataSource {
@@ -132,6 +145,67 @@ class SupabaseRegionDataSource implements RegionDataSource {
       );
     } catch (e) {
       throw RegionException('Failed to load user region: $e');
+    }
+  }
+
+  @override
+  Future<List<GeoPlace>> getGeoPlaces({String? type, String? query}) async {
+    try {
+      var request = _client
+          .from('geo_places')
+          .select()
+          .eq('is_active', true);
+      if (type != null) {
+        request = request.eq('type', type);
+      }
+      if (query != null && query.trim().isNotEmpty) {
+        final q = query.trim();
+        request = request.or('name_ar.ilike.%$q%,name_en.ilike.%$q%');
+      }
+      final rows = await request.order('name_en').limit(50);
+      return rows.map(GeoPlace.fromRow).toList();
+    } catch (e) {
+      throw RegionException('Failed to load geo places: $e');
+    }
+  }
+
+  @override
+  Future<GeoPlace?> getGeoPlace(String id) async {
+    try {
+      final row = await _client
+          .from('geo_places')
+          .select()
+          .eq('id', id)
+          .maybeSingle();
+      return row == null ? null : GeoPlace.fromRow(row);
+    } catch (e) {
+      throw RegionException('Failed to load geo place $id: $e');
+    }
+  }
+
+  @override
+  Future<SpatialResolution?> resolveRegionForPoint({
+    required double lat,
+    required double lon,
+    int maxDepth = 2,
+    double toleranceM = 25000,
+  }) async {
+    try {
+      final rows = await _client.rpc(
+        'geo_region_for_point',
+        params: {
+          'p_lat': lat,
+          'p_lon': lon,
+          'p_max_depth': maxDepth,
+          'p_tolerance_m': toleranceM,
+        },
+      );
+      if (rows == null || rows.isEmpty) return null;
+      final row = rows is List ? rows.first : rows;
+      if (row is! Map) return null;
+      return SpatialResolution.fromRpc(Map<String, dynamic>.from(row));
+    } catch (e) {
+      throw RegionException('Failed to resolve region for point: $e');
     }
   }
 

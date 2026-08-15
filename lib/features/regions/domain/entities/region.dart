@@ -6,8 +6,11 @@ part 'region.g.dart';
 enum RegionType {
   country('country'),
   governorate('governorate'),
-  city('city'),
+  markaz('markaz'),
   district('district'),
+  city('city'),
+  village('village'),
+  newCity('new_city'),
   area('area');
 
   const RegionType(this.code);

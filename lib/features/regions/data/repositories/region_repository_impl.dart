@@ -1,4 +1,6 @@
 import 'package:delwaqty/features/regions/domain/entities/region.dart';
+import 'package:delwaqty/features/regions/domain/entities/geo_entity.dart';
+import 'package:delwaqty/features/regions/domain/entities/spatial_resolution.dart';
 import 'package:delwaqty/features/regions/domain/repositories/region_repository.dart';
 import 'package:delwaqty/features/regions/data/datasources/remote/supabase_region_data_source.dart';
 
@@ -44,5 +46,28 @@ class RegionRepositoryImpl implements RegionRepository {
   @override
   Future<UserRegionPreference?> getUserRegion(String userId) {
     return _dataSource.getUserRegion(userId);
+  }
+
+  @override
+  Future<List<GeoPlace>> getGeoPlaces({String? type, String? query}) {
+    return _dataSource.getGeoPlaces(type: type, query: query);
+  }
+
+  @override
+  Future<GeoPlace?> getGeoPlace(String id) => _dataSource.getGeoPlace(id);
+
+  @override
+  Future<SpatialResolution?> resolveRegionForPoint({
+    required double lat,
+    required double lon,
+    int maxDepth = 2,
+    double toleranceM = 25000,
+  }) {
+    return _dataSource.resolveRegionForPoint(
+      lat: lat,
+      lon: lon,
+      maxDepth: maxDepth,
+      toleranceM: toleranceM,
+    );
   }
 }

@@ -1,4 +1,5 @@
 import 'package:delwaqty/features/regions/domain/entities/region.dart';
+import 'package:delwaqty/features/regions/domain/entities/spatial_resolution.dart';
 
 /// Pure Dart detection mapping: resolves canonical governorate ids from
 /// geocoded address strings. Deterministic and unit-testable.
@@ -44,7 +45,22 @@ class RegionResolver {
     required List<Region> governorates,
     required List<String> candidateStrings,
   }) {
-    if (governorates.isEmpty || candidateStrings.isEmpty) return null;
+    return resolveRegionId(
+      candidates: governorates,
+      candidateStrings: candidateStrings,
+    );
+  }
+
+  /// Level-aware resolution: returns the canonical id of the single region in
+  /// [candidates] matching the combined candidate strings (Arabic name,
+  /// English name, or alias), scoped to the provided candidate set (typically
+  /// the children of one parent, e.g. all markaz of a governorate).
+  /// Null when nothing or more than one matches.
+  static String? resolveRegionId({
+    required List<Region> candidates,
+    required List<String> candidateStrings,
+  }) {
+    if (candidates.isEmpty || candidateStrings.isEmpty) return null;
 
     final candidateWords = <String>[];
     for (final candidate in candidateStrings) {
@@ -52,9 +68,7 @@ class RegionResolver {
     }
     if (candidateWords.isEmpty) return null;
 
-    final matches = governorates
-        .where((g) => _matches(candidateWords, g))
-        .toList();
+    final matches = candidates.where((c) => _matches(candidateWords, c)).toList();
     if (matches.length != 1) return null;
     return matches.single.id;
   }
@@ -85,8 +99,9 @@ class RegionResolver {
   }
 }
 
-/// State-preservation policy (ADR-050): never silently overwrite a
-/// verified/manual region with uncertain detection.
+/// State-preservation policy (ADR-050 + ADR-057): never silently overwrite a
+/// verified/manual region with uncertain detection; LOW-confidence spatial
+/// resolution never auto-persists.
 class RegionPreferencePolicy {
   /// Whether [incoming] should replace [existing].
   static bool shouldUpdate({
@@ -100,6 +115,32 @@ class RegionPreferencePolicy {
       case RegionPreferenceSource.manual:
       case RegionPreferenceSource.verified:
         return true;
+    }
+  }
+
+  /// Spatial-confidence gate (ADR-057 §17) applied before persisting a
+  /// GPS-derived detection as `detected`:
+  ///   * LOW / UNVERIFIED / INVALID  -> never auto-persisted
+  ///   * MEDIUM (snapped)            -> policy-gated: only when there is no
+  ///                                    existing preference at all
+  ///   * HIGH (point-in-polygon)     -> may persist, but still never
+  ///                                    overwrites manual/verified
+  static bool shouldPersistDetected({
+    required GeoConfidence confidence,
+    required UserRegionPreference? existing,
+  }) {
+    switch (confidence) {
+      case GeoConfidence.low:
+      case GeoConfidence.unverified:
+      case GeoConfidence.invalid:
+        return false;
+      case GeoConfidence.medium:
+        return existing == null;
+      case GeoConfidence.high:
+        return shouldUpdate(
+          existing: existing,
+          incoming: RegionPreferenceSource.detected,
+        );
     }
   }
 }

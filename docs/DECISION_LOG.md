@@ -1503,6 +1503,7 @@ remained after ADR-047:
 - No schema/migration changes; relies on existing `BiometricAuthStore` +
   `updateBiometricEnabledUseCase`.
 - Covered by 9 new tests; full gate passes (603/603, analyzer 0 errors / 543 baseline unchanged).
+
 ## ADR-049: Canonical admin identity is the 016 model; admin_users is legacy metadata
 
 **Date:** Session 43 (2026-08-15)
@@ -1605,6 +1606,88 @@ emergency system.
 
 ---
 
+## ADR-053: Add Kilo AI Gateway as an independent anonymous free OpenCode provider
+
+**Date:** Session 44 (2026-08-15)
+**Status:** Accepted
+**Deciders:** Lead Architect (additive integration; existing providers untouched)
+
+### Context
+Need additional free model capacity for OpenCode without any new account/API key. Kilo AI Gateway
+(`https://api.kilo.ai/api/gateway`) is an OpenAI-compatible gateway that officially allows
+**unauthenticated access to free models** (models tagged `:free` or flagged `isFree=true`), rate
+limited to **200 requests/hour per IP**.
+
+### Decision
+Register a new `kilo` provider in `/root/.config/opencode/opencode.jsonc` using the standard
+`@ai-sdk/openai-compatible` package with `baseURL: https://api.kilo.ai/api/gateway` and a
+non-sensitive dummy `apiKey`. Add **9 verified free models** that passed the full qualification
+matrix (basic completion, streaming SSE, tool calling, agent-loop roundtrip): `kilo-auto/free`,
+`poolside/laguna-s-2.1:free`, `poolside/laguna-xs-2.1:free`, `cohere/north-mini-code:free`,
+`nvidia/nemotron-3-ultra-550b-a55b:free`, `nvidia/nemotron-3-super-120b-a12b:free`,
+`nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free`, `tencent/hy3:free`,
+`dots-studio/dots-3-note-preview:free`.
+
+### Rationale
+- Strictly additive: a new provider block only; the 8 OmniRoute models, Google/Groq/OpenRouter
+  providers, lifecycle, and Delwaqty repo are untouched (config backed up before edit).
+- Anonymous access officially documented (Authentication page); no credentials exposed.
+- Tool calling + streaming verified for all added models → agent-capable.
+
+### Consequences
+- All 9 models consume the shared 200 req/h anonymous budget per IP (documented rate limit, not
+  bypassed).
+- Excluded: `nvidia/nemotron-3.5-content-safety:free` (guardrail, not a coding model),
+  `liquid/lfm-2.5-2.6b:free` (too slow, 44 s coding latency), `openrouter/free` (redundant with
+  existing OpenRouter provider), `stepfun/step-3.7-flash:free` (already reached via `kilo-auto/free`).
+- Test harnesses kept at `/tmp/opencode/kilo_*.sh`; catalog snapshot at
+  `/tmp/opencode/kilo_models_live.json`.
+- If Kilo ever requires auth for free models, the block is simply disabled with no production impact.
+
+---
+
+## ADR-054: Add LLM7 Gateway as an independent anonymous free OpenCode provider
+
+**Date:** Session 44 (2026-08-15)
+**Status:** Accepted
+**Deciders:** Lead Architect (additive integration; existing providers untouched)
+
+### Context
+After GitHub deep search (free-coding-models, mnfst/awesome-free-llm-apis, FreeLLMAPI, models.dev
+registry), only two providers allow **fully anonymous, keyless** free inference: LLM7.io
+(`https://api.llm7.io/v1`) and OVHcloud AI Endpoints. OVH's permanent **2 RPM/IP/model** cap makes it
+unusable for interactive agent loops (alternates 429/200 even when spaced). LLM7 is anonymous,
+OpenAI-compatible, and verifiably free.
+
+### Decision
+Register a new `llm7` provider in `/root/.config/opencode/opencode.jsonc` using
+`@ai-sdk/openai-compatible` with `baseURL: https://api.llm7.io/v1` and **NO `apiKey` option**
+(LLM7 returns 401 for any non-empty `Authorization` header — verified; empty/no header → 200).
+Add **6 verified free anonymous models**: `default` (auto→Codestral), `gpt-oss:20b`,
+`DeepSeek-V4-Flash-0731`, `gemini-3.1-flash-lite`, `codestral-latest`, `minimax-m2.7`.
+
+### Rationale
+- Strictly additive: new provider block only; OmniRoute (8), Kilo (9), Google/Groq/OpenRouter,
+  lifecycle, and Delwaqty repo untouched (config backed up to `/root/.opencode_llm7_backup_2026-08-15.jsonc`).
+- **Independence score 5**: LLM7 is a completely new upstream (Azure/Cloudflare/DeepSeek/Mistral
+  hosted gateway), NOT an alias of OmniRoute or Kilo.
+- Full qualification matrix passed for added models: basic (200), coding (Dart addTwo + Flutter
+  AGP/compileSdk diagnostics accurate), streaming SSE (`[DONE]`), tool calling
+  (`finish_reason: tool_calls`), agent-loop roundtrip (Class A for gpt-oss:20b,
+  DeepSeek-V4-Flash-0731, gemini-3.1-flash-lite, minimax-m2.7; Class B for codestral).
+- Verified end-to-end through `@ai-sdk/openai-compatible` v3 (`chatModel`), no auth header sent.
+
+### Consequences
+- Anonymous burst limit ~5-6 req then transient 429, recovers in ~15 s; docs claim 30 RPM anon.
+  All 6 models share this anonymous IP budget.
+- Excluded: `mistral-Nemo-Instruct-2407` (no tool support), `pro`/premium aliases (402 paid),
+  `claude-*`/`gpt-5.x`/`kimi-*`/`gemini-3-flash` etc. (401 — require key).
+- Excluded: OVHcloud AI Endpoints (2 RPM/IP permanent — impractical for agent use despite being free).
+- Test harnesses: `/tmp/opencode/llm7_*.sh`, `/tmp/opencode/llm7_probe.py`, `/tmp/opencode/llm7_tool.py`,
+  `/tmp/opencode/llm7_coding2.py`, `/tmp/opencode/llm7sdk/` (SDK verification).
+
+---
+
 ## Verification Record (non-ADR): Phase 2.1 live apply + default-privilege security hardening
 
 **Date:** Session 45 (2026-08-15)
@@ -1649,3 +1732,90 @@ GRANT SELECT, INSERT, UPDATE, DELETE ON public.user_region_preferences TO authen
   non-admin authenticated region INSERT → 42501; owner can write regions + own preference but not
   another user's preference.
 - Full details: `docs/HANDOFF/27_SPRINT_76_PHASE2_REGIONS.md` §8.
+
+---
+
+## ADR-055: Admin hierarchy model for Phase 2.2 (two-tier owner > admin + region scoping)
+
+**Date:** Session 46 (2026-08-15)
+**Status:** Accepted (design gate)
+**Deciders:** Lead Architect (evidence-first; live audit §2 of
+`docs/HANDOFF/28_SPRINT_76_PHASE_2_2_ADMIN_HIERARCHY_AUDIT.md`)
+
+### Context
+D1 (canonical admin identity) was already resolved — ADR-049 chose the 016 model
+(`users.role IN ('admin','owner')` + `public.is_admin()`) over `admin_users`. The Phase 2.2 design
+gate had to define the *hierarchy itself* on top of that identity. Live evidence: 5 `users` (3
+customer, 1 provider, 1 owner, 0 admin), `admin_users` 0 rows, `is_admin()` already gate ~28
+policies across 13 tables.
+
+### Decision
+1. **Hierarchy is derived from `users.role`, no new identity table:** two tiers — `owner` (rank 100)
+   > `admin` (rank 90). No `users` schema change, no new role values.
+2. **Region scope via one new table `admin_region_assignments`** (admin_id FK users, region_id FK
+   regions, scope `self|descendants`): an `admin` with no rows = global scope; with rows = scoped to
+   the assigned regions **and their descendants** (reuses the 030 hierarchy). Owner = implicit global.
+3. **`admin_profiles` DEFERRED (YAGNI):** with 0 admins live and two tiers, a per-admin profile table
+   adds no capability; the Dart `AdminPermission`/`PermissionLevel` enums remain aspirational. Revisit
+   at 2.5 if granular permission levels become real.
+4. **`admin_users` stays dormant legacy metadata** (rule 12.1 keep): add a `user_id` FK link column
+   (connect, not fork) in migration 031; never a gate.
+5. **2.2 permission parity:** `is_admin()` surface unchanged (admin == owner); the only
+   differentiation is region scope via new SECURITY DEFINER helper `public.is_admin_for_region()`.
+
+### Rationale
+- Evidence shows zero live admins and a working `is_admin()` surface — building a parallel identity
+  hierarchy would duplicate authority for no current benefit.
+- Region scoping is the concrete 2.3/2.5 need (routing + escalation parent walk) and reuses the
+  shipped 030 region tree.
+- Escalation parent walk contract: scoped admin → regional parent → ancestor → global/owner; global
+  cannot escalate above itself.
+
+### Consequences
+- Migration `031_admin_hierarchy_region_assignments.sql`: link column on `admin_users` + new
+  `admin_region_assignments` table + `is_admin_for_region()` helper (016 pattern), RLS via
+  `is_admin()`, revoke-before-grant (030 lesson).
+- Flutter: shared `isAdminUser` helper replacing 6 literal gates; admin_web auth gate; region-scope
+  UI (2.3-ready). `AdminRole` Dart enum vs SQL CHECK misalignment is a user decision (Gate Q1).
+- No commit/push this gate; implementation follows user approval.
+
+---
+
+## ADR-056: Standardize admin RLS on `public.is_admin()` and eliminate literal-role drift
+
+**Date:** Session 46 (2026-08-15)
+**Status:** Accepted (design gate)
+**Deciders:** Lead Architect (audit finding F1/F2 — live-qualified)
+
+### Context
+Full live policy-surface capture exposed two identity drifts that break the single-authority model
+(ADR-049/055):
+
+- **F1 — literal `users.role = 'admin'` (excludes `owner`)** on 6 policies: `activity_logs` SELECT
+  ("viewable by admins only"), `platform_settings` UPDATE ("Settings updatable by admins"),
+  `categories` ALL ("Admins can manage categories"), `admin_users` SELECT ("viewable by admins
+  only"), `notification_tokens` SELECT ("Admins read all tokens"). The owner — the only admin-tier
+  account live — is silently locked out of all of these today.
+- **F2 — third identity source:** `service_audio_logs` "admin all logs r" reads
+  `auth.users.raw_user_meta_data->>'role'` instead of `public.users.role`/`is_admin()`.
+- **F3 (debt):** duplicate/redundant policies on `notifications` (2× SELECT, 3× INSERT, 2× UPDATE,
+  2× DELETE) and `notification_tokens` (2× SELECT, 2× user ALL) — additive, not security holes.
+
+### Decision
+Migration 031 will (a) rewrite all six F1/F2 policies to `USING public.is_admin()` (+ matching WITH
+CHECK where applicable), and (b) drop the redundant duplicate policies, keeping the `is_admin()`
+variants. Single server-side authority: `public.is_admin()`; `is_admin_for_region()` for scope.
+
+### Rationale
+- Restores the approved single-authority model (ADR-049) and fixes an active live defect (owner
+  currently excluded).
+- Removing duplicates is safe: they are same-table overlaps (OR-satisfiable); coverage is never
+  reduced below today's `is_admin()` surface.
+- `raw_user_meta_data` is not maintained by the app's role flows and can silently desync from
+  `users.role`.
+
+### Consequences
+- Owner regains admin surface on the 6 tables immediately after 031 applies.
+- Verified in the 2.2 implementation gate by live RLS probes (owner/global-admin/scoped-admin/anon
+  matrix, §7 of doc 28).
+- No behavioral change for non-admin roles; no data changes; additive coverage only for owner.

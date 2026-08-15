@@ -7,6 +7,7 @@ import 'package:delwaqty/features/support_chat/data/datasources/remote/supabase_
 import 'package:delwaqty/features/support_chat/data/repositories/chat_repository_impl.dart';
 import 'package:delwaqty/features/auth/presentation/auth_provider.dart';
 import 'package:delwaqty/features/auth/domain/auth_state.dart';
+import 'package:delwaqty/core/auth/admin_access.dart';
 
 final supabaseChatDataSourceProvider = Provider<SupabaseChatDataSource>((ref) {
   return SupabaseChatDataSource(Supabase.instance.client);
@@ -21,7 +22,7 @@ final chatRoomsProvider = FutureProvider<List<ChatRoom>>((ref) async {
   final authState = ref.watch(authStateProvider);
   final user = authState is AuthAuthenticated ? authState.user : null;
   if (user == null) return [];
-  if (user.role == 'admin' || user.role == 'owner') {
+  if (user.isAdmin) {
     return repo.getAllRooms();
   }
   return repo.getMyRooms(user.id);

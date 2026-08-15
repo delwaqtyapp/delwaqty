@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:delwaqty/features/auth/domain/auth_state.dart';
 import 'package:delwaqty/features/auth/presentation/auth_provider.dart';
+import 'package:delwaqty/core/auth/admin_access.dart';
 import 'package:delwaqty/core/theme/app_text_styles.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 import 'sidebar_theme.dart';
@@ -118,9 +119,7 @@ class _FloatingSidebarOverlayState extends State<FloatingSidebarOverlay>
         ? (widget.authState as AuthAuthenticated).user.fullName ?? widget.l10n.user
         : widget.l10n.user;
     final isAdmin = widget.authState is AuthAuthenticated &&
-            (widget.authState as AuthAuthenticated).user.role == 'admin' ||
-        (widget.authState is AuthAuthenticated &&
-            (widget.authState as AuthAuthenticated).user.role == 'owner');
+        (widget.authState as AuthAuthenticated).user.isAdmin;
     final displayRole = isAdmin ? widget.l10n.superAdmin : null;
 
     return Material(

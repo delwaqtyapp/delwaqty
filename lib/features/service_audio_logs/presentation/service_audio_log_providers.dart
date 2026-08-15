@@ -6,6 +6,7 @@ import 'package:delwaqty/features/service_audio_logs/data/datasources/remote/sup
 import 'package:delwaqty/features/service_audio_logs/data/repositories/service_audio_log_repository_impl.dart';
 import 'package:delwaqty/features/auth/presentation/auth_provider.dart';
 import 'package:delwaqty/features/auth/domain/auth_state.dart';
+import 'package:delwaqty/core/auth/admin_access.dart';
 
 final supabaseAudioLogDataSourceProvider = Provider<SupabaseServiceAudioLogDataSource>((ref) {
   return SupabaseServiceAudioLogDataSource(Supabase.instance.client);
@@ -20,7 +21,7 @@ final serviceAudioLogsProvider = FutureProvider<List<ServiceAudioLog>>((ref) asy
   final authState = ref.watch(authStateProvider);
   final user = authState is AuthAuthenticated ? authState.user : null;
   if (user == null) return [];
-  if (user.role == 'admin' || user.role == 'owner') {
+  if (user.isAdmin) {
     return repo.getAllLogs();
   }
   return repo.getLogsForUser(user.id);

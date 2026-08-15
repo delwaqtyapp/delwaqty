@@ -9,10 +9,8 @@ import 'package:delwaqty/shared/widgets/app_loader.dart';
 import 'package:delwaqty/core/theme/app_colors.dart';
 
 String _roleLabel(AdminRole role, AppLocalizations l10n) => switch (role) {
-  AdminRole.superAdmin => l10n.roleSuperAdmin,
+  AdminRole.owner => l10n.roleOwner,
   AdminRole.admin => l10n.roleAdmin,
-  AdminRole.moderator => l10n.roleModerator,
-  AdminRole.support => l10n.roleSupport,
 };
 
 class AdminUsersPage extends ConsumerWidget {
@@ -120,7 +118,7 @@ class AdminUsersPage extends ConsumerWidget {
   ) {
     final nameController = TextEditingController();
     final emailController = TextEditingController();
-    AdminRole selectedRole = AdminRole.support;
+    AdminRole selectedRole = AdminRole.admin;
 
     showDialog(
       context: context,
@@ -289,10 +287,8 @@ class _RoleChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final color = switch (role) {
-      AdminRole.superAdmin => AppColors.errorLight,
+      AdminRole.owner => AppColors.errorLight,
       AdminRole.admin => AppColors.infoLight,
-      AdminRole.moderator => AppColors.warningLight,
-      AdminRole.support => AppColors.successLight,
     };
 
     return Chip(

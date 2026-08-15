@@ -1,6 +1,6 @@
 # ROADMAP.md — Delwaqty Development Roadmap
 
-> **Last updated:** 2026-08-07
+> **Last updated:** 2026-08-15
 > **Authority:** PROJECT_CONSTITUTION.md §15 (v2.0)
 
 ---
@@ -122,6 +122,27 @@
 - [x] Sprint 65: Admin Dashboard (Flutter Web)
 - [x] Sprint 66: Multi-Role Registration + Offline Caching
 - [x] Sprint 67: Merchant Operations & Payments Integration
+
+---
+
+## Phase 2 — Admin Hierarchy, Regions, Escalation (sprint 76+, planned)
+
+> Authoritative per-sub-phase gate docs: `docs/HANDOFF/25…28`. Constitution §15 authority. No
+> migration is written ahead of its gate's approval (architecture-first, evidence-first).
+
+| Sub-phase | Scope | Migration | Status |
+|-----------|-------|-----------|--------|
+| 2.0 | Architecture audit (D1–D4 defined) | — | ✅ (`25_SPRINT_76_PHASE2_ARCHITECTURE_AUDIT.md`) |
+| 2.1 | Egypt regions: canonical 27-governorate hierarchy + `user_region_preferences` + Flutter `regions` module | `030_regional_system` | ✅ shipped `1f3ba02`, live-verified (`27_SPRINT_76_PHASE2_REGIONS.md`) |
+| **2.2** | **Admin hierarchy (D1): owner > admin tiers, `admin_region_assignments`, `is_admin_for_region()`, RLS standardization on `is_admin()` (fix literal-role + raw_user_meta_data drift), shared Dart `isAdminUser` helper, admin_web auth gate** | `031_admin_hierarchy_region_assignments` | ✅ **IMPLEMENTED + LIVE-VERIFIED, awaiting commit** (`28_..._ADMIN_HIERARCHY_AUDIT.md` + `29_..._FINAL_PRE_COMMIT_GATE.md`, ADR-055/056) |
+| 2.3 | Chat backend (D3): EXTEND `chat_rooms` (priority/region/assignment/escalation cols), `assign_support_chat`/`escalate_support_chat` RPCs, region routing parent-walk, realtime | `032_support_conversations_priority` | 🏗 contract specified (doc 28 §5) |
+| 2.4 | Notifications: admin send path + conversation deep-links | `034_notification_chat_deeplinks` | 🏗 pending |
+| 2.5 | Escalation engine: `escalation_events` + engine RPCs; wire complaints `escalated` status | `033_escalation_engine` | 🏗 pending |
+| 2.6 | Realtime hardening | — | 🏗 pending |
+| 2.7 | Security hardening (029 RPC search_path audit, 016 pattern everywhere) | — | 🏗 pending |
+
+**D-resolutions:** D1 → ADR-049 (+ADR-055/056) · D2 → ADR-050 (migration 030) · D3 → 2.3 (extend
+`chat_rooms`, decided in doc 28 §5) · D4 → 2.5 (escalation engine + priority server-side only).
 
 ---
 

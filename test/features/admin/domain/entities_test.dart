@@ -6,11 +6,23 @@ void main() {
 
   group('AdminRole', () {
     test('enum has all values', () {
-      expect(AdminRole.values.length, 4);
-      expect(AdminRole.superAdmin.name, 'superAdmin');
+      expect(AdminRole.values.length, 2);
+      expect(AdminRole.owner.name, 'owner');
       expect(AdminRole.admin.name, 'admin');
-      expect(AdminRole.moderator.name, 'moderator');
-      expect(AdminRole.support.name, 'support');
+    });
+
+    test('fromDb maps legacy vocabulary onto two-tier hierarchy', () {
+      expect(AdminRole.fromDb('super_admin'), AdminRole.owner);
+      expect(AdminRole.fromDb('admin'), AdminRole.admin);
+      expect(AdminRole.fromDb('moderator'), AdminRole.admin);
+      expect(AdminRole.fromDb('support'), AdminRole.admin);
+      expect(AdminRole.fromDb('finance'), AdminRole.admin);
+      expect(AdminRole.fromDb(null), AdminRole.admin);
+    });
+
+    test('toDb stays within legacy admin_users role CHECK vocabulary', () {
+      expect(AdminRole.owner.toDb(), 'super_admin');
+      expect(AdminRole.admin.toDb(), 'admin');
     });
   });
 
@@ -60,14 +72,14 @@ void main() {
         id: 'a1',
         name: 'Admin',
         email: 'admin@example.com',
-        role: AdminRole.superAdmin,
+        role: AdminRole.owner,
         status: AdminUserStatus.active,
         createdAt: now,
       );
 
       final json = user.toJson();
       expect(json['id'], 'a1');
-      expect(json['role'], 'superAdmin');
+      expect(json['role'], 'owner');
       expect(json['status'], 'active');
       expect(json['lastLogin'], isNull);
     });
@@ -108,7 +120,7 @@ void main() {
         id: 'a2',
         name: 'Other',
         email: 'other@example.com',
-        role: AdminRole.moderator,
+        role: AdminRole.admin,
         status: AdminUserStatus.pending,
         createdAt: now,
       );
@@ -128,11 +140,11 @@ void main() {
       );
 
       final updated = user.copyWith(
-        name: 'Super Admin',
-        role: AdminRole.superAdmin,
+        name: 'Owner',
+        role: AdminRole.owner,
       );
-      expect(updated.name, 'Super Admin');
-      expect(updated.role, AdminRole.superAdmin);
+      expect(updated.name, 'Owner');
+      expect(updated.role, AdminRole.owner);
       expect(updated.id, 'a1');
       expect(user.name, 'Admin');
     });

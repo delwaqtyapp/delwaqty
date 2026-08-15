@@ -3539,16 +3539,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get rideTypeTaxi => 'Taxi';
 
   @override
-  String get roleSuperAdmin => 'SuperAdmin';
+  String get roleOwner => 'Owner';
 
   @override
   String get roleAdmin => 'Admin';
-
-  @override
-  String get roleModerator => 'Moderator';
-
-  @override
-  String get roleSupport => 'Support';
 
   @override
   String get typeRestaurant => 'Restaurant';

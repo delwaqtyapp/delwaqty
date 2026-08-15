@@ -1,10 +1,52 @@
 # SESSION_STATUS.md
 
-> **Last updated:** 2026-08-14 Session 41 (biometric feature DONE — APK installed + running on phone)
+> **Last updated:** 2026-08-15 Session 42 (biometric Phase 1 hardening — centralized event-driven stale-credential invalidation; gate 603/603)
 
 ---
 
-## Current Task — BIOMETRIC LOGIN: FULL AUDIT + SECURITY FIX (Session 40)
+## Current Task — BIOMETRIC FINAL HARDENING — PHASE 1 (Session 42)
+
+**Task (user, Arabic):** implement the Phase 1 final hardening spec (sections A–L) for the
+biometric login system: event-driven stale-credential invalidation, centralized invalidation,
+account-deletion cleanup, `_checkBiometric` refresh, 10 focused tests, full gate, and a strict
+final verdict. Do NOT commit/push, do NOT touch Supabase, no device/PAT required, and do NOT start
+the later phases (Emergency Chat, Notifications, Regional System, Admin Hierarchy).
+
+**Implemented:**
+
+| Area | Change |
+|------|--------|
+| **Centralized invalidation** | `AuthStateNotifier.invalidateBiometricCredentials({userId})` (`auth_provider.dart`) is the single invalidation entry point: `clearForUser` (cred + active key) + `is_biometric_enabled=false` via `updateBiometricEnabled` when still authenticated |
+| **Event-driven stale handling (login)** | `login_page.dart` records `_pendingBiometricUserId` before biometric `signIn`; on `AuthError` the listener invalidates that user, re-runs `_checkBiometric()` (button hidden), shows `biometricStaleCredentials`. Manual failures unaffected. No timers |
+| **Event-driven stale handling (splash)** | `splash_page.dart` stale auto-login failure routes through the centralized method + shows the re-login message |
+| **Account deletion cleanup** | `deleteAccount()` captures user id first, clears local biometric creds after successful deletion |
+| **Password change** | `change_password_page.dart` `_invalidateBiometricLogin` now delegates to the centralized method (ADR-047 flow preserved) |
+| **Logout preserved** | `signOut()` still never touches biometric credentials (intentional design) — verified by new test |
+| **L10n** | `biometricStaleCredentials` EN+AR (regenerated via `flutter gen-l10n`) |
+
+**Design decision (ADR-048):** event-driven (NOT timer-based) invalidation; in the unauthenticated
+stale case the server flag is best-effort (no session ⇒ local clear only; flag resets on the next
+authenticated path). No new storage; password stays exclusively in `flutter_secure_storage`.
+
+**Tests (+9 → 603/603):** store (4) in `biometric_auth_store_test.dart` · notifier (4) in
+`auth_provider_test.dart` (stale-password, authenticated invalidation disables server flag,
+signOut preserves, deleteAccount clears) · widget (1) new `login_page_test.dart` (biometric button
+hidden post-invalidation). All 10 required scenarios covered.
+
+**Gate:** `flutter analyze` → **0 errors**, 543 issues (24 warning + 519 info — unchanged baseline;
+no new issues in touched files) · `flutter test --no-pub --concurrency=2` → **603/603 passed**.
+
+**Final verdict (code-gate):** BIOMETRIC SYSTEM 🟢 (code-verified) — see
+`docs/HANDOFF/24_SPRINT_75_BIOMETRIC_HARDENING.md`. DEVICE gate still ⚪ (sensor prompt +
+stale-password scenario on real hardware, not required this session). SECURITY gate 🟢 (no password
+logging, storage unchanged, stale secrets always cleared, account deletion clears creds).
+
+**Next (user hands):** review + approve → commit (`sprint 75: ...`) + push. Then optionally device
+verification, then Phase 2 (only after approval).
+
+---
+
+## Previous Task — BIOMETRIC LOGIN: FULL AUDIT + SECURITY FIX (Session 40)
 
 **Task (user, Arabic):** finish biometric login, add it in settings + login page, plan it
 professionally, wire it to the DB, then build + install the app on the phone.
@@ -70,8 +112,8 @@ x86_64 machine/CI. Note: a release build WAS made on a previous x86_64 setup (si
 
 **Files:** `build/app/outputs/flutter-apk/app-debug.apk` (built), `/data/local/tmp/delwaqty.apk`
 (on phone, installed).
-**Gate:** unchanged (no Dart modified this session) — analyze 0 errors, 594/594 tests pass.
-**Next:** commit + push if anything changed (none pending), remind user to revoke the PAT.
+**Gate:** flutter analyze 0 errors (543 issues: 24 warning + 519 info — baseline unchanged), flutter test 594/594 pass (exit 0).
+**Next:** PAT revocation needed (per sessions 38/39/41). All Dart changes complete; APK built + installed on DNP NX9 (Android 16); git synced origin/master at sprint 74.
 
 ---
 

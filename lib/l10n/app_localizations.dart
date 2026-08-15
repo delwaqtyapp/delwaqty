@@ -7988,6 +7988,12 @@ abstract class AppLocalizations {
   /// **'Could not enable fingerprint login. Please try again.'**
   String get biometricEnableFailed;
 
+  /// No description provided for @biometricStaleCredentials.
+  ///
+  /// In en, this message translates to:
+  /// **'Biometric login failed. The saved login was reset for security. Please sign in with your email and password.'**
+  String get biometricStaleCredentials;
+
   /// No description provided for @saveAccount.
   ///
   /// In en, this message translates to:

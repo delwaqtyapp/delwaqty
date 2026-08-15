@@ -33,6 +33,7 @@ class _LoginPageState extends ConsumerState<LoginPage>
   List<SavedAccount> _savedAccounts = const [];
   bool _pendingSaveAccount = false;
   bool _postLoginHandled = false;
+  String? _pendingBiometricUserId;
   final LocalAuthentication _localAuth = LocalAuthentication();
   late final AnimationController _shakeController;
   late final Animation<double> _shakeAnimation;
@@ -210,6 +211,7 @@ class _LoginPageState extends ConsumerState<LoginPage>
       _emailController.text = credentials.email;
       _passwordController.text = credentials.password;
       _postLoginHandled = false;
+      _pendingBiometricUserId = credentials.userId;
       ref.read(authStateProvider.notifier).signIn(
             email: credentials.email,
             password: credentials.password,
@@ -274,6 +276,7 @@ class _LoginPageState extends ConsumerState<LoginPage>
         authenticated: (user) async {
           if (_postLoginHandled) return;
           _postLoginHandled = true;
+          _pendingBiometricUserId = null;
           await _handlePostLoginSave();
           await _handlePostLoginNavigation(user);
         },
@@ -281,7 +284,17 @@ class _LoginPageState extends ConsumerState<LoginPage>
         error: (msg) {
           _postLoginHandled = false;
           _pendingSaveAccount = false;
-          context.showAppSnackBar(msg);
+          final pendingBiometricUserId = _pendingBiometricUserId;
+          _pendingBiometricUserId = null;
+          if (pendingBiometricUserId != null) {
+            ref
+                .read(authStateProvider.notifier)
+                .invalidateBiometricCredentials(userId: pendingBiometricUserId);
+            _checkBiometric();
+            context.showAppSnackBar(l10n.biometricStaleCredentials);
+          } else {
+            context.showAppSnackBar(msg);
+          }
         },
       );
     });

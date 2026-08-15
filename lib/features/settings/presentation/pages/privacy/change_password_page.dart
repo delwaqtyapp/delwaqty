@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:delwaqty/core/extensions/context_extensions.dart';
-import 'package:delwaqty/data/datasources/local/biometric_auth_store.dart';
 import 'package:delwaqty/features/auth/presentation/auth_provider.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -54,12 +53,9 @@ class _ChangePasswordPageState extends ConsumerState<ChangePasswordPage> {
     final user = authState.whenOrNull(authenticated: (user) => user);
     if (user == null) return;
     try {
-      final store = ref.read(biometricAuthStoreProvider);
-      await store.clearForUser(user.id);
-    } catch (_) {}
-    final notifier = ref.read(authStateProvider.notifier);
-    try {
-      await notifier.updateBiometricEnabled(enabled: false);
+      await ref
+          .read(authStateProvider.notifier)
+          .invalidateBiometricCredentials(userId: user.id);
     } catch (_) {}
   }
 

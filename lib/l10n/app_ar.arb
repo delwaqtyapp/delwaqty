@@ -1376,6 +1376,7 @@
   "enableBiometricConfirm": "تفعيل",
   "enableBiometricLater": "ليس الآن",
   "biometricEnableFailed": "تعذر تفعيل تسجيل الدخول بالبصمة. يرجى المحاولة مرة أخرى.",
+  "biometricStaleCredentials": "فشل تسجيل الدخول بالبصمة. تمت إعادة تعيين الدخول المحفوظ لأسباب أمنية. يرجى تسجيل الدخول بالبريد الإلكتروني وكلمة المرور.",
   "saveAccount": "حفظ الحساب",
   "savedAccounts": "الحسابات المحفوظة",
   "savedAccountsHint": "اضغط على حساب محفوظ لتسجيل الدخول بسرعة",

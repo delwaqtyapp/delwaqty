@@ -1451,3 +1451,55 @@ password. No stale secret survives and the DB flag always reflects reality.
 - No new tables or migrations; relies on existing `BiometricAuthStore` and
   `updateBiometricEnabledUseCase`.
 - Covered by existing biometric store + fingerprint page tests; full gate passes (594/594).
+
+## ADR-048: Centralized event-driven biometric credential invalidation
+
+**Date:** Session 42 (2026-08-15)
+**Status:** Accepted
+**Deciders:** Lead Architect
+
+### Context
+Biometric login stores encrypted email+password per user in `flutter_secure_storage`. Two gaps
+remained after ADR-047:
+1. A stale credential (password changed elsewhere, revoked account, deleted account) was only
+   cleared by the splash's `clearForUser` in one path; the login-page biometric button kept failing
+   and kept retrying with the stale secret. Invalidation was scattered and inconsistent.
+2. Account deletion did not remove local biometric credentials, so a deleted account could still
+   power a biometric auto-login attempt.
+3. Local flag refresh: the login-page `_biometricAvailable` was computed once in `initState` and
+   could be stale after an auth-state change.
+
+### Decision
+1. **Centralized method:** `AuthStateNotifier.invalidateBiometricCredentials(userId)` is the single
+   invalidation entry point. It clears the encrypted credential + active-user key via
+   `BiometricAuthStore.clearForUser`, and — only when still authenticated as that user — resets
+   `users.is_biometric_enabled = false` through the existing `updateBiometricEnabled` flow.
+   All callers route through it: login-page stale failure, splash auto-login failure,
+   password change (ADR-047), fingerprint settings toggle, and account deletion.
+2. **Event-driven, not timer-based:** invalidation fires only when `signInWithEmail` with the
+   stored credentials is rejected by Supabase (`AuthState.error` / `AuthUnauthenticated` right
+   after a biometric unlock). There is no periodic validation sweep.
+3. **Account deletion cleanup:** `AuthStateNotifier.deleteAccount()` captures the current user id
+   before clearing state and calls `clearForUser` after a successful deletion.
+4. **Logout preserves enrollment by design:** `signOut()` never touches biometric credentials —
+   the enrollment is meant to survive logout so the next login can use biometrics. Verified by test.
+5. **Server-flag best-effort in the unauthenticated stale case:** after a failed biometric sign-in
+   there is no session, so `is_biometric_enabled` cannot be reset remotely; local credential
+   deletion is what actually gates biometric login, and the flag is reset on the next authenticated
+   invalidation path (e.g. password change). This limitation is intentional and documented.
+
+### Rationale
+- Single ownership: every invalidation path shares identical semantics (local wipe, active-user
+  clear, flag reset, UI refresh) instead of duplicating store calls.
+- Security: a stale or orphaned secret never survives a rejection, and never survives account
+  deletion.
+- Least surprise: users are told (`biometricStaleCredentials`, EN+AR) that the saved login was
+  reset and to sign in manually, and re-enrollment is offered again afterward.
+
+### Consequences
+- All invalidation flows now delegate to one method; future flows must do the same.
+- Users with stale credentials re-enter their password once and can re-enroll; no data loss beyond
+  the intentionally-invalidated secret.
+- No schema/migration changes; relies on existing `BiometricAuthStore` +
+  `updateBiometricEnabledUseCase`.
+- Covered by 9 new tests; full gate passes (603/603, analyzer 0 errors / 543 baseline unchanged).

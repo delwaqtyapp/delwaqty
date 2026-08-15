@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:typed_data';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:delwaqty/data/datasources/local/biometric_auth_store.dart';
 import 'package:delwaqty/domain/enums/user_type.dart';
 import 'package:delwaqty/domain/entities/user.dart';
 import 'package:delwaqty/features/auth/domain/auth_state.dart';
@@ -214,9 +215,16 @@ class AuthStateNotifier extends Notifier<AuthState> {
   }
 
   Future<void> deleteAccount() async {
+    final current = state;
+    final userId = current.whenOrNull(authenticated: (user) => user.id);
     state = const AuthState.loading();
     try {
       await _deleteAccountUseCase();
+      if (userId != null && userId.isNotEmpty) {
+        try {
+          await ref.read(biometricAuthStoreProvider).clearForUser(userId);
+        } catch (_) {}
+      }
       state = const AuthState.unauthenticated();
     } catch (e) {
       _logger.e('Account deletion failed', e);
@@ -237,6 +245,18 @@ class AuthStateNotifier extends Notifier<AuthState> {
       state = _resolveAuthenticated(user);
     } catch (e) {
       _logger.e('Failed to update biometric flag', e);
+    }
+  }
+
+  Future<void> invalidateBiometricCredentials({required String userId}) async {
+    try {
+      await ref.read(biometricAuthStoreProvider).clearForUser(userId);
+    } catch (_) {}
+    final current = state;
+    if (current is AuthAuthenticated && current.user.id == userId) {
+      try {
+        await updateBiometricEnabled(enabled: false);
+      } catch (_) {}
     }
   }
 

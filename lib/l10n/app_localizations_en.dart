@@ -4154,6 +4154,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'Could not enable fingerprint login. Please try again.';
 
   @override
+  String get biometricStaleCredentials =>
+      'Biometric login failed. The saved login was reset for security. Please sign in with your email and password.';
+
+  @override
   String get saveAccount => 'Save account';
 
   @override

@@ -1913,3 +1913,211 @@ authoritative dataset (D1), geocoder stack (D2), and `regions.type` taxonomy (D3
 - **A4 — self-healing seed.** Boundary/region/place upserts now `DO UPDATE` (metadata/license/
   geometry) so re-running the seed repairs previously-applied environments; still deterministic and
   idempotent. `geo_aliases` remains `DO NOTHING`.
+
+---
+
+## ADR-058: Phase 2.3 — Member management, support routing, emergency & admin delegation architecture
+
+**Date:** Session 49 (2026-08-16)
+**Status:** Accepted (architecture audit approved for design; implementation gated per phase)
+**Deciders:** Lead Architect — audited per directive; owner gate questions listed in
+`docs/HANDOFF/PHASE_2_3_MEMBER_MANAGEMENT_SUPPORT_ARCHITECTURE_AUDIT.md` §32
+
+### Context
+Phase 2.3 must deliver support chat priority/region/assignment (ADR-051/052, doc 28 §5) **plus**
+member management, moderation, account deletion, emergency (incl. live-audio foundation), regional
+offers, approval workflow, member timeline, birthday/anniversary engines — over the existing
+backend (016/031 admin identity, 030/032 regions/geo, realtime, notifications). Directive forbids
+duplicate architecture/security systems and requires hierarchical (non-flat) admin delegation with
+no hardcoded level count.
+
+### Decision
+- **Hierarchy = two orthogonal axes.** Supervision tree (`admin_management.admin_id/supervisor_id`,
+  owner = implicit root, depth derived, not stored) for management/delegation/approvals; existing
+  `admin_region_assignments` (self/descendants) for visibility/routing. No fixed admin levels.
+- **Permissions = computed defaults + explicit grants** (`admin_permission_grants`); central
+  `has_permission()` (identity + role + supervisor + delegated permission + scope + target + action)
+  used by RPCs and RLS. Final penalty/approval mapping stays config-driven (not hardcoded now).
+- **Support chat (migration 033):** additive `chat_rooms` columns (priority incl. `emergency`,
+  region_id, assigned_admin_id, assigned_at, status, escalated_at, escalated_from_admin_id,
+  closed_at) + guard triggers (non-admins can't set priority/status/assignee) + routing
+  (region-scoped → parent-region walk → global → owner; deterministic; live = owner fallback) +
+  escalation keeps the same conversation (ledger `chat_escalations`). **Do NOT write 033 in this
+  gate.**
+- **Moderation:** reuse `sanctions` (additive `approving_admin_id/evidence_url/action_status`) +
+  `users.account_status` (server-only writes). **Deletion is member management, not moderation**:
+  soft-delete + anonymize, audit preserved.
+- **Emergency:** `sos_alerts` (ride-safety) reused; emergency support = `chat_rooms.priority=
+  'emergency'` (ADR-052); command center = realtime feed. **Live audio = foundation only**
+  (`emergency_audio_sessions` state/audit + EMERGENCY_AUDIO grant + customer-visible state; no
+  transport, no recording, no hidden mic).
+- **New tables** (each justified, no reuse possible): `admin_management`, `admin_permission_grants`,
+  `approval_requests` (generic Approval Center), `member_events` (customer-readable timeline vs
+  admin-only `activity_logs`), `chat_escalations`, `regional_offers`+`offer_reviews` (distinct from
+  merchant `offers`), `emergency_audio_sessions`, `member_rewards` (birthday/anniversary idempotency).
+- **RLS fixes (live findings) in 033:** `activity_logs` INSERT `TO public` → `service_role`;
+  `driver_locations` read `auth.role()='authenticated'` → ride participants + admin; add `sos_alerts`
+  admin SELECT. All new RPCs 016-pattern (SECURITY DEFINER, SET search_path, revoke-before-grant,
+  anon EXECUTE revoked).
+- **Privacy/retention:** sensitive data permission+scope-gated; configurable retention
+  (`apply_retention_policies`), no unlimited location history, no exact admin location to customers.
+- **Phasing:** 033 support+RLS → 034 delegation+permissions+approvals → 035 member mgmt+timeline+
+  moderation+deletion → 036 emergency center+audio foundation → 037 offers → 038 birthday/anniversary
+  +retention. Each phase gates independently; 2.4 (FCM/push) stays out of scope.
+
+### Rationale
+- Reuses every existing asset (chat, notifications, realtime, sanctions, sos_alerts, regions/geo,
+  activity_logs, admin hierarchy) — no duplicated engines.
+- Server stays the only authorization authority; UI mirrors permissions only.
+- Deterministic routing and hierarchy-derived authority make the platform auditable and scalable to
+  the four-client split (customer/provider/driver/admin over one backend).
+
+### Consequences
+- Migration numbering shifts: 033 = support chat (doc 32 superseded by the master audit), 2.4 = 034,
+  2.5 = 035 (renumbered in ROADMAP.md).
+- Three live security gaps are on the 033 RLS-fix list (activity_logs anon INSERT, driver_locations
+  wide read, sos_alerts admin access).
+- Approved only at architecture level; owner decisions §32 of the audit must be confirmed before any
+  migration is written. No code, no 033, no commit/push produced in this gate.
+
+## ADR-059: Promotion/Content/Campaign platform — regional offers merge & dedicated migration range
+
+**Date:** Session 50 (2026-08-16)
+**Status:** Accepted (owner decisions O1–O6 approved; migration 039 implementation authorized, gated)
+**Deciders:** Owner (O1–O6) + Lead Architect — documented per
+`docs/HANDOFF/PHASE_2_PROMOTION_CONTENT_ARCHITECTURE_AUDIT.md` §40 (O1–O6)
+
+### Context
+The owner approved the promotion/content/campaign audit (40 sections + M verdict letter, 🟡 → 🟢 for
+O1–O6) and authorized implementation. The audit proved the existing promotion-adjacent assets are not
+campaign containers (merchant `offers` is read-only under RLS, commerce-shaped; `coupons`/`promo_codes`
+are benefit references; home promo carousel is hardcoded in Dart). No campaign/banner/content tables,
+no `regional_offers`, no `approval_requests` exist live. Phase 2.3 (033–038) remains unapproved and
+unimplemented, so the promotion platform must own the generic approval table it depends on.
+
+### Decision
+- **REGIONAL OFFERS MERGE (O1).** Do **not** implement `regional_offers` + `offer_reviews` (ADR-058
+  migration 037). They are **superseded** by the campaign platform: `campaigns` (type `offer`) +
+  `campaign_reviews`. Merchant `offers` is untouched and becomes a referential benefit target. ADR-058's
+  "037 offers" and its `regional_offers`+`offer_reviews` table set are **amended** accordingly; the rest
+  of ADR-058 stands. No production data exists to migrate (table never created); no code references
+  `regional_offers` (verified: zero matches in `lib/` and `supabase/`).
+- **Migration range (O2).** 033–038 = Phase 2.3 (unchanged). **039–042 = Promotion platform:**
+  - **039** `promotion_campaign_schema` — core campaign domain: `campaigns`, `campaign_banners`,
+    `campaign_reviews`, `campaign_cta_routes`, `campaign_seen` + RLS/grants + validate helpers.
+  - **040** `promotion_targeting_media_approval` — `campaign_targets` (multi-region junction, no
+    duplicated campaigns), `campaign-media` bucket + storage policies, CTA/benefit validation, generic
+    **`approval_requests`** (created here, verbatim 2.3 §19 contract — the ONE approval center) +
+    campaign lifecycle/approval RPCs wired to the supervision hierarchy.
+  - **041** `promotion_security_hardening` — public feed RPC `get_active_campaigns` (server-authoritative
+    eligibility: published + window + audience + region + frequency + emergency lane), `get_admin_campaigns`,
+    hardening indexes/RLS/function privileges, campaign engines (`run_campaign_engines`: auto-publish /
+    expire — no pg_cron).
+  - **042** `promotion_analytics_config` — `campaign_events` + `campaign_metrics` (batched ingestion,
+    async aggregation), `track_campaign_event`, `aggregate_campaign_metrics`, `get_campaign_analytics`,
+    `platform_settings.promotions` config (frequency defaults, `free_delivery_enabled`), retention wiring.
+- **Approval (O3).** Campaign approvals reuse the generic `approval_requests`. Because 2.3 is
+  unimplemented, **migration 040 creates `approval_requests`** (matching ADR-058/2.3 §19 DDL exactly);
+  when 2.3 ships, its 034 is **amended to not recreate it** (creates only `admin_management`,
+  `admin_permission_grants`, `has_permission`). Authority now = `is_admin()` + `is_admin_for_region()`
+  + `admin_region_assignments` scope (owner implicit global; 0 admins live → owner routes approvals
+  deterministically). Future supervision chain plugs in via `required_approver` without schema change.
+  No `campaign_approval_requests`. No self-approval, no self-elevation, cross-region prohibited, reason
+  mandatory on every rejection, actor+timestamp on every approval.
+- **Frequency + free delivery (O4).** Frequency control is in the core schema (`campaign_seen` in 039,
+  enforcement in 041 feed RPC): impression limit/cooldown/daily limit per user, optional dismissal,
+  campaign-level override, global defaults in `platform_settings.promotions` (no hardcoded values;
+  safe default ≤ 3 impressions/user/day for ordinary promotional banners; emergency/critical exempt).
+  `free_delivery` benefit is config-flagged + explicitly approved + audited; the promotion engine only
+  **describes** the benefit — the order/pricing engine remains authoritative. A banner alone never
+  creates a financial entitlement.
+- **Media (O5).** Dedicated `campaign-media` bucket (public read only; admin/service-role
+  upload/update/delete, strict MIME png/jpeg/webp, ≤ 5 MB, no executables, no unpublished leak, orphan
+  cleanup + auditability). PostgreSQL stores only storage references — never binary media.
+- **Content seeds (O6).** **No automatically published seeds.** Any dev/test content is created as
+  `draft`, never exposed, clearly marked test/demo. Production content is created through the admin
+  workflow only. The home carousel renders only published/eligible campaigns (empty until admin content
+  exists).
+
+### Rationale
+- Single promotion lifecycle (approve→publish→expire→archive) instead of two parallel machines;
+  directive §1/§9 duplicate-concept prohibition.
+- Campaign types distinguish commercial / content / operational / emergency (separate priority lane);
+  emergency/critical content is exempt from marketing frequency limits and eligible for realtime
+  broadcast via the existing `notifications` channel — never ordinary marketing behavior.
+- All reads flow through a SECURITY DEFINER feed RPC with `SET search_path`; campaign tables have **no
+  client SELECT** — unpublished content cannot leak even via direct table access (defense in depth).
+- Reuses regions/geo, admin hierarchy, `notifications` (type `promotion`, realtime already published),
+  Hive/Ttl caching — no new infra, no Redis, no second region/authz/approval system.
+
+### Consequences
+- 2.3 migration 037 is cancelled/absorbed; 2.3's 034 must not recreate `approval_requests` (documented
+  in the 039 gate; owner ratification noted at 2.3 approval time).
+- Migration numbering 039–042 is reserved for promotion; pre-existing 2.3(034–038) vs 2.4(034)/2.5(035)
+  overlap in ROADMAP remains flagged for owner resolution.
+- Hardcoded home carousel content (`DELWAQTY30`, `_PromoCarousel` slides) is removed in the Flutter
+  phases (E/F); until admin content exists the carousel is empty by design (O6).
+- 039 implements core schema only and gates independently; **no migration 040+ is written until the 039
+  gate passes owner review** (`docs/HANDOFF/PHASE_2_PROMOTION_MIGRATION_039_GATE.md`).
+
+
+## ADR-060: Promotion 040 — targeting, approval center ownership, lifecycle RPCs, campaign media
+
+**Date:** Session 51 (2026-08-16)
+**Status:** Accepted (040 gate pass, pending owner ratification)
+**Deciders:** Lead Architect (implementation under owner-approved O1–O6 / ADR-059 / 040 directive)
+
+### Context
+Migration 039 (campaign core schema) passed its gate. 040 must deliver targeting, audience
+wiring, the generic approval center, lifecycle RPCs, authorization and the campaign-media bucket
+without touching 030/031/032/039, without duplicating regions/approval/system concepts, and
+without destroying production data.
+
+### Decision
+- **Targeting = `campaign_targets`** many-to-many junction (campaign_id + nullable region_id;
+  region_id NULL = national/Egypt). Multi-region = multiple rows on ONE campaign (no duplicated
+  campaigns). Partial unique index `campaign_targets_national_unique` -> at most one national row.
+- **Audience = existing `campaigns.target_roles`** (validated by 039's
+  `campaign_validate_target_roles`); no new audience table (minimal + sufficient).
+- **`approval_requests` created in 040** verbatim per 2.3 §19 contract; request_type
+  `campaign_approve`; `required_approver` NULL = owner. 2.3's 034 is amended (not to recreate it).
+- **Lifecycle API = 8 SECURITY DEFINER RPCs**: `campaign_submit`, `decide_approval_request`
+  (2.3 §19 signature; dispatches campaign_approve only), `campaign_publish`, `campaign_pause`,
+  `campaign_resume`, `campaign_archive`, `campaign_cancel`, `campaign_purge_media` + scope helpers
+  `campaign_can_target_region` / `campaign_targets_authorized` + storage helpers
+  `campaign_id_from_storage_path` / `campaign_published_for_storage` / `campaign_scoped_for_storage`.
+- **Media metadata = `campaign_media`** (kind thumbnail/detail_image/gallery_image, image_path,
+  is_active, sort_order); storage references only — no binary in PostgreSQL. `campaign_banners`
+  stays the display-slot config (placement/locale/CTA).
+- **Orphan cleanup = `campaign_purge_media`** (terminal states only): deletes storage objects
+  (via `storage.allow_delete_query` GUC) + deactivates media/banners. No background infra.
+- **No second hierarchy**: approval authority = `is_admin()` + `admin_region_assignments` scope +
+  owner (global). Self-approval blocked unless requester is owner. Cross-region approval blocked
+  (`campaign_targets_authorized`). National/global publish requires global authority (owner or
+  admin with no region assignments). Rejection + cancellation require a reason. Every decision
+  records `campaign_reviews` + updates `approval_requests` + `notifications` (idempotency key
+  campaign-approve/-reject-<request_id>, type promotion, deep_link /campaign/<id>).
+- **Client INSERTs always land in `draft`**: `campaigns_set_creator` forces `status := 'draft'`
+  on INSERT (039's guard trigger is UPDATE-only; without this a client insert could bypass the
+  approval lifecycle straight into published).
+- **Storage `campaign-media` bucket**: private; published-read policy
+  (`campaign_published_for_storage`) so unpublished media never leaks; admin upload/update/delete
+  policies gated by `campaign_scoped_for_storage` (admin + real campaign + scope); service_role
+  bypasses RLS; strict MIME png/jpeg/webp <= 5 MB.
+- **Grants**: no DELETE on `campaigns` (archival only); `approval_requests` SELECT-only for
+  authenticated (writes are RPC-only); anon gets nothing.
+
+### Rationale
+- Normalized targeting avoids duplicated campaigns (directive §1/§9 duplicate-concept prohibition).
+- One generic approval center owned by the platform that needs it (ADR-059 O3); no
+  `campaign_approval_requests`.
+- RLS-scope + SECURITY DEFINER RPCs keep state transitions server-enforced; direct table DML by
+  non-admins is impossible (grants + RLS), and admins cannot bypass approval preconditions.
+- Storage access via helpers keeps ownership/scope validation in one place (016 pattern).
+
+### Consequences
+- Feed RPC (041) reads targeting via `campaign_targets` + audience via `target_roles` +
+  published media via bucket policy; analytics (042) reuse `campaign_media`/`campaign_seen`.
+- 2.3 034 must not recreate `approval_requests` (amended).
+- `campaigns` UPDATE remains RLS-gated with scope; lifecycle preconditions (window, national
+  global check, reasons) are enforced in the RPC layer.

@@ -1,33 +1,98 @@
 # SESSION_STATUS.md
 
-> **Last updated:** 2026-08-16 Session 52 — **PHASE 2.3 IMPLEMENTATION COMPLETE: MIGRATIONS 033 + 034 + 035 + 038 LIVE & VERIFIED, FLUTTER REWARDS LAYER SHIPPED, FULL GATE 🟢**
-> Phase 2.3 (per owner-authorized 7-phase run: migrations 033–038, Flutter layer, gate): **033**
-> (`support_chat_priority_region_assignment`) applied + idempotent + **22/22 checks green** + ACL
-> hardening (`033_acl_fix.sql`); **034** (`admin_management_permissions_approvals`) applied +
-> idempotent + **74 assertions + 2 denial probes green, zero residue** — including a real
-> **security bug found & fixed live**: `decide_approval_request` decider guard had a **SQL 3-valued
-> logic bypass** when `required_approver IS NULL` (`required_approver = auth.uid()` → NULL → `IF`
-> skipped the raise) → fixed with explicit `IS NULL` branches + self-decision check reordered first;
-> **035** (`member_management_moderation_deletion`) applied + idempotent + **73 assertions + 4 denial
-> probes green, zero residue** — D3/D4 (users `date_of_birth`/`account_status`/`anonymized_at` +
-> `users_guard_account_fields` replacing the 031 role-only guard, closing the `users_update_admin`
-> direct-UPDATE role-escalation gap), `member_events` timeline (§15), sanctions additive columns,
-> moderation/deletion RPCs (approval-gated bans/delete, D4 anonymization, `get_member_profile`
-> sectioned aggregate); **038** (`member_rewards` + `run_member_engines` + retention config) applied +
-> idempotent + **probe suite ALL GREEN (36 assertions + 4 denial probes + 11 residue checks zero)**,
-> incl. live `write_audit` service-context hardening (`COALESCE(auth.uid()::text, 'system')`).
-> **Flutter rewards layer shipped** (module + entity + DS/repo + providers + page + profile tile +
-> `NotificationType.reward` + l10n EN/AR + 8 new tests) — full gate `flutter analyze` 0 errors /
-> `flutter test` **759/759**.
+> **Last updated:** 2026-08-16 Session 52 — **PHASE 2.4.1 IMPLEMENTATION COMPLETE: MIGRATION 041 LIVE & PROBE-VERIFIED, FLUTTER WIRING SHIPPED, FULL GATE 🟢 — STOPPED AT PRE-COMMIT GATE**
+> Phase 2.4.1 per owner-approved ADR-062 / HANDOFF-34: server-side push infrastructure (additive
+> migration **041**, live-applied + idempotent) + Flutter wiring (push service RPCs, realtime-first
+> badge, Notification Center pagination/l10n/priority, controlled deep-links, `/campaign/:id` landing).
+> **Backend:** 041 applied 6× (HTTP 201 + `[]`, idempotent), 3 remediation passes (grants leak +
+> SECURITY DEFINER flaw), full security matrix probed (anon denial, token lifecycle, deep-link allowlist,
+> triggers, campaign RLS), zero residue. **Flutter:** push service (register/heartbeat/deactivate RPCs,
+> `delwaqty_notifications` realtime channel, re-login fix, device-scoped logout), notification center
+> rewrite, campaign detail landing, module registry. **Tests:** 805/805 (`flutter test`, +46 new).
+> **Analyzer:** 0 errors; new code 0 issues. **STOPPED at the PHASE 2.4.1 PRE-COMMIT GATE — NO commit/push
+> until explicit approval** (locked message `sprint 78: implement notification delivery and deep links`).
+> **Remaining:** SP-2.4.2 Edge Function `send-push` + pg_net wiring (blocked: no FCM credentials — 041 is
+> credential-ready, no-op to `push_status='unconfigured'`); physical-device verification PENDING
+> (DNP-NX9 not connected).
+>
+> **Key constraints found during inspection:**
+> - `notifications` table live (12 cols, `deep_link` free-text → injection risk; no `priority`, no
+>   `action`, no `sender_id`; `user_id` nullable). RLS: own SELECT/UPDATE/DELETE + admin SELECT/INSERT/
+>   DELETE + service_role INSERT. **Gaps:** users can UPDATE own content (not just read-state); admins
+>   can INSERT for any user (sender not tracked); `deep_link` raw client navigation with no validation.
+> - `notification_tokens` (10 cols, UNIQUE (user_id,token), `is_active`/`device_id`/`last_seen_at`).
+>   RLS: users ALL own + admins SELECT + service_role ALL. Token lifecycle RPCs missing (client upserts
+>   directly; logout deactivates **ALL** user tokens — must become device-scoped).
+> - **No server-side FCM send exists** (no edge functions, no FCM server credentials in env/repo/gcloud;
+>   google-services.json project `delwaqty0` present, client-side firebase_messaging exists; pg_net
+>   installed live). Plan: Edge Function `send-push` (reads `FIREBASE_SERVICE_ACCOUNT` +
+>   `SEND_PUSH_TOKEN` Supabase secrets, FCM v1, graceful no-op when unconfigured) called via
+>   `net.http_post` from service_role trigger/RPC `dispatch_push` → **Flutter → RPC → server sender → FCM**.
+> - Realtime: `notifications` on `supabase_realtime`; client channel `in-app-notifications` unscoped
+>   (RLS-only filter). Unread badge uses 1-min polling (`unreadCountProvider`); `badgeAggregatorProvider`
+>   dead code.
+> - 040 campaign lifecycle writes `type='promotion'` notifications with raw `deep_link /campaign/<id>`
+>   (no customer campaign route exists → router error today; plan adds read-only `/campaign/:id`);
+>   033 chat routing writes `chat_assigned`/`chat_escalated` with raw deep-links. 033/040/038 use
+>   `ON CONFLICT (idempotency_key) DO NOTHING` (dedup pattern to extend).
+> - Migration number: **041**. DNP-NX9 not connected → physical-device verification **PENDING**.
 >
 > **Open gate (Session 49, pending):** Phase 2.3 decision-lock `PHASE_2_3_DECISION_LOCK_REPORT.md` —
-> 🟡 awaiting owner ratification (D1/D2 modifications + M1–M6 + M-D1…M-D6) before 2.3A (migration 033).
-> Owner's standing O1–O6 ratification (Session 50) + the Session-52 7-phase authorization permit
-> implementation; per AGENTS.md §10 this autonomous run proceeds until a manual decision is required.
+> 🟡 awaiting owner ratification (D1/D2 modifications + M1–M6 + M-D1…M-D6). Owner's Session-52
+> 7-phase authorization permit (Phases 2.3–2.9) overrides the decision-lock gate per AGENTS.md §10;
+> this autonomous run proceeds until a manual decision (e.g. FCM server credentials) is required.
 
 ---
 
-## Current Task — PHASE 2.3: IMPLEMENTATION RUN — COMPLETE + GATE 🟢 (Session 52)
+## Current Task — PHASE 2.4.1: NOTIFICATION DELIVERY LAYER — IMPLEMENTATION COMPLETE + GATE 🟢, PRE-COMMIT STOP (Session 52)
+
+**Task (user):** execute PHASE 2.4.1 (owner-approved ADR-062 / HANDOFF-34): additive migration 041,
+live-apply + backend probes, minimal Flutter wiring, full gates, then **STOP at the PRE-COMMIT GATE**.
+
+**Completed:**
+- **Migration `041_notification_delivery_layer.sql`** (additive only; 030–040 untouched) applied live +
+  idempotent re-runs; 3 remediation passes (pg_default_acl grants leak + SECURITY DEFINER `current_user`
+  authz flaw → `auth.uid() IS NULL` pattern). 12 `notification_destinations` seeds (3 admin-only),
+  `notification_push_config` (id=1 is_enabled=false), notification columns (priority/sender_id/send_push/
+  push_status/push_sent_at/push_error), 13 RPCs (register_device_token/refresh_token_heartbeat/
+  deactivate_device_tokens/cleanup_invalid_token/deactivate_stale_tokens/validate_notification_deep_link/
+  guard trigger/dispatch_push/get_unread_notification_count hardened), 5 triggers, realtime publication,
+  `notification_tokens` RLS + policies, `campaigns` public-published SELECT policy.
+- **Backend probes green + zero residue:** anon denies all (42501); token lifecycle own-allow/cross-deny/
+  rotation; deep-link matrix (wildcard room route ok; injection/traversal/unknown/empty → NULL); UPDATE
+  guard blocks content edits, allows read-state; unread cross-user `P0001`; dispatch_push non-admin `P0001`;
+  triggers (chat first-of-turn + same-turn suppressed, complaint → admin + complainant, SOS → admin
+  high-priority); campaign RLS chain create→submit→approve→publish→customer-read/anon-denied; fixtures
+  cleaned (0 residue).
+- **Flutter wiring:** `push_notification_service.dart` (RPC token save/heartbeat, `delwaqty_notifications`
+  realtime channel + user_id filter, re-login `initialize()` fix, device-scoped logout via
+  `deactivate_device_tokens`); `app_notification.dart` (priority/pushStatus/senderId); supabase data
+  source + repository (register/heartbeat/deactivate RPC paths, row mapping); shared channel allowlist +
+  route resolver (fallback `/notifications`); `device_identity.dart` (persisted UUIDv4);
+  `notification_center_page.dart` (pagination, l10n grouping, priority chip, resolver deep links);
+  **campaigns feature** (entity/repository/DS/impl/providers/detail page + `/campaign/:id` GoRoute in
+  `module_registry.dart` after RewardsModule); l10n 11 keys AR/EN; freezed/l10n regenerated.
+- **Tests:** 10 new files / 46 cases (delivery model, channels, resolver, device identity, campaign
+  entity/repo/page, notification DS via real client + mocked http, repository impl, center pagination);
+  one timer-leak fix (pump 2s after scrollUntilVisible to flush AnimatedFadeIn Future.delayed).
+- **Full gates:** `flutter analyze` 0 errors (new code 0 issues; repo info/warning pre-existing);
+  `flutter test` **805/805**; secret scan clean (no PAT/keys; only prose mention of `SEND_PUSH_TOKEN` name);
+  `git diff --check` clean except CRLF-at-EOL on `.arb` files (repo convention, HEAD also CRLF);
+  `supabase/.temp/` gitignored; scope audit: no edge functions (send-push blocked on credentials),
+  no 2.5+ features, no enum churn (13 NotificationType), 030–040 untouched.
+
+**STOPPED at PHASE 2.4.1 PRE-COMMIT GATE** — awaiting explicit approval to commit+push
+(`sprint 78: implement notification delivery and deep links`). 10-item report delivered.
+
+**Blocked / next (user hands):**
+- FCM server credentials → SP-2.4.2 `send-push` Edge Function + pg_net wiring (041 already no-ops to
+  `push_status='unconfigured'` by design).
+- DNP-NX9 physical-device verification (device not connected).
+- After approval: commit+push sprint 78, then SP-2.4.3/2.4.4 (edge function + physical E2E).
+
+---
+
+## Previous Task — PHASE 2.3: IMPLEMENTATION RUN — COMPLETE + GATE 🟢 (Session 52)
 
 **Task (user):** execute the owner-authorized 7-phase large implementation run (Phases 2.3–2.9),
 backend-first, each phase gated/committed. Phase 2.3 = migrations 033 (support chat priority +

@@ -19,5 +19,5 @@ abstract class NotificationRepository {
 
   Future<bool> existsByIdempotencyKey(String key);
 
-  Future<void> deactivateAllTokens();
+  Future<void> deactivateDeviceTokens(String deviceId);
 }

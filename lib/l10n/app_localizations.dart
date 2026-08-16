@@ -8383,6 +8383,72 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Could not save region'**
   String get regionSelectionFailed;
+
+  /// No description provided for @notificationToday.
+  ///
+  /// In en, this message translates to:
+  /// **'Today'**
+  String get notificationToday;
+
+  /// No description provided for @notificationYesterday.
+  ///
+  /// In en, this message translates to:
+  /// **'Yesterday'**
+  String get notificationYesterday;
+
+  /// No description provided for @notificationOlder.
+  ///
+  /// In en, this message translates to:
+  /// **'Older'**
+  String get notificationOlder;
+
+  /// No description provided for @notificationPriorityHigh.
+  ///
+  /// In en, this message translates to:
+  /// **'High'**
+  String get notificationPriorityHigh;
+
+  /// No description provided for @loadMore.
+  ///
+  /// In en, this message translates to:
+  /// **'Load more'**
+  String get loadMore;
+
+  /// No description provided for @campaignTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Campaign'**
+  String get campaignTitle;
+
+  /// No description provided for @campaignNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'Campaign not found'**
+  String get campaignNotFound;
+
+  /// No description provided for @campaignStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Status'**
+  String get campaignStatus;
+
+  /// No description provided for @campaignType.
+  ///
+  /// In en, this message translates to:
+  /// **'Type'**
+  String get campaignType;
+
+  /// No description provided for @campaignDates.
+  ///
+  /// In en, this message translates to:
+  /// **'Dates'**
+  String get campaignDates;
+
+  /// No description provided for @campaignDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Description'**
+  String get campaignDescription;
 }
 
 class _AppLocalizationsDelegate

@@ -4329,4 +4329,37 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get regionSelectionFailed => 'تعذر حفظ المنطقة';
+
+  @override
+  String get notificationToday => 'اليوم';
+
+  @override
+  String get notificationYesterday => 'أمس';
+
+  @override
+  String get notificationOlder => 'أقدم';
+
+  @override
+  String get notificationPriorityHigh => 'عالي';
+
+  @override
+  String get loadMore => 'تحميل المزيد';
+
+  @override
+  String get campaignTitle => 'الحملة';
+
+  @override
+  String get campaignNotFound => 'الحملة غير موجودة';
+
+  @override
+  String get campaignStatus => 'الحالة';
+
+  @override
+  String get campaignType => 'النوع';
+
+  @override
+  String get campaignDates => 'المواعيد';
+
+  @override
+  String get campaignDescription => 'الوصف';
 }

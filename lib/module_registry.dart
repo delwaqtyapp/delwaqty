@@ -26,6 +26,7 @@ import 'package:delwaqty/features/support_chat/support_chat_module.dart';
 import 'package:delwaqty/features/home_services/home_services_module.dart';
 import 'package:delwaqty/features/regions/regions_module.dart';
 import 'package:delwaqty/features/rewards/rewards_module.dart';
+import 'package:delwaqty/features/campaigns/campaigns_module.dart';
 
 void registerAllModules() {
   final registry = FeatureRegistry.instance;
@@ -58,6 +59,7 @@ void registerAllModules() {
     HomeServicesModule(),
     RegionsModule(),
     RewardsModule(),
+    CampaignsModule(),
   ]);
 
   registry.freeze();

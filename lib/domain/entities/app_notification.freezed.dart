@@ -30,6 +30,9 @@ mixin _$AppNotification {
   String? get idempotencyKey => throw _privateConstructorUsedError;
   DateTime? get readAt => throw _privateConstructorUsedError;
   DateTime get createdAt => throw _privateConstructorUsedError;
+  NotificationPriority get priority => throw _privateConstructorUsedError;
+  String? get senderId => throw _privateConstructorUsedError;
+  NotificationPushStatus get pushStatus => throw _privateConstructorUsedError;
 
   /// Serializes this AppNotification to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -58,6 +61,9 @@ abstract class $AppNotificationCopyWith<$Res> {
     String? idempotencyKey,
     DateTime? readAt,
     DateTime createdAt,
+    NotificationPriority priority,
+    String? senderId,
+    NotificationPushStatus pushStatus,
   });
 }
 
@@ -85,6 +91,9 @@ class _$AppNotificationCopyWithImpl<$Res, $Val extends AppNotification>
     Object? idempotencyKey = freezed,
     Object? readAt = freezed,
     Object? createdAt = null,
+    Object? priority = null,
+    Object? senderId = freezed,
+    Object? pushStatus = null,
   }) {
     return _then(
       _value.copyWith(
@@ -124,6 +133,18 @@ class _$AppNotificationCopyWithImpl<$Res, $Val extends AppNotification>
                 ? _value.createdAt
                 : createdAt // ignore: cast_nullable_to_non_nullable
                       as DateTime,
+            priority: null == priority
+                ? _value.priority
+                : priority // ignore: cast_nullable_to_non_nullable
+                      as NotificationPriority,
+            senderId: freezed == senderId
+                ? _value.senderId
+                : senderId // ignore: cast_nullable_to_non_nullable
+                      as String?,
+            pushStatus: null == pushStatus
+                ? _value.pushStatus
+                : pushStatus // ignore: cast_nullable_to_non_nullable
+                      as NotificationPushStatus,
           )
           as $Val,
     );
@@ -149,6 +170,9 @@ abstract class _$$AppNotificationImplCopyWith<$Res>
     String? idempotencyKey,
     DateTime? readAt,
     DateTime createdAt,
+    NotificationPriority priority,
+    String? senderId,
+    NotificationPushStatus pushStatus,
   });
 }
 
@@ -175,6 +199,9 @@ class __$$AppNotificationImplCopyWithImpl<$Res>
     Object? idempotencyKey = freezed,
     Object? readAt = freezed,
     Object? createdAt = null,
+    Object? priority = null,
+    Object? senderId = freezed,
+    Object? pushStatus = null,
   }) {
     return _then(
       _$AppNotificationImpl(
@@ -214,6 +241,18 @@ class __$$AppNotificationImplCopyWithImpl<$Res>
             ? _value.createdAt
             : createdAt // ignore: cast_nullable_to_non_nullable
                   as DateTime,
+        priority: null == priority
+            ? _value.priority
+            : priority // ignore: cast_nullable_to_non_nullable
+                  as NotificationPriority,
+        senderId: freezed == senderId
+            ? _value.senderId
+            : senderId // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        pushStatus: null == pushStatus
+            ? _value.pushStatus
+            : pushStatus // ignore: cast_nullable_to_non_nullable
+                  as NotificationPushStatus,
       ),
     );
   }
@@ -232,6 +271,9 @@ class _$AppNotificationImpl implements _AppNotification {
     this.idempotencyKey,
     this.readAt,
     required this.createdAt,
+    this.priority = NotificationPriority.normal,
+    this.senderId,
+    this.pushStatus = NotificationPushStatus.pending,
   });
 
   factory _$AppNotificationImpl.fromJson(Map<String, dynamic> json) =>
@@ -256,10 +298,18 @@ class _$AppNotificationImpl implements _AppNotification {
   final DateTime? readAt;
   @override
   final DateTime createdAt;
+  @override
+  @JsonKey()
+  final NotificationPriority priority;
+  @override
+  final String? senderId;
+  @override
+  @JsonKey()
+  final NotificationPushStatus pushStatus;
 
   @override
   String toString() {
-    return 'AppNotification(id: $id, title: $title, body: $body, type: $type, isRead: $isRead, deepLink: $deepLink, idempotencyKey: $idempotencyKey, readAt: $readAt, createdAt: $createdAt)';
+    return 'AppNotification(id: $id, title: $title, body: $body, type: $type, isRead: $isRead, deepLink: $deepLink, idempotencyKey: $idempotencyKey, readAt: $readAt, createdAt: $createdAt, priority: $priority, senderId: $senderId, pushStatus: $pushStatus)';
   }
 
   @override
@@ -278,7 +328,13 @@ class _$AppNotificationImpl implements _AppNotification {
                 other.idempotencyKey == idempotencyKey) &&
             (identical(other.readAt, readAt) || other.readAt == readAt) &&
             (identical(other.createdAt, createdAt) ||
-                other.createdAt == createdAt));
+                other.createdAt == createdAt) &&
+            (identical(other.priority, priority) ||
+                other.priority == priority) &&
+            (identical(other.senderId, senderId) ||
+                other.senderId == senderId) &&
+            (identical(other.pushStatus, pushStatus) ||
+                other.pushStatus == pushStatus));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
@@ -294,6 +350,9 @@ class _$AppNotificationImpl implements _AppNotification {
     idempotencyKey,
     readAt,
     createdAt,
+    priority,
+    senderId,
+    pushStatus,
   );
 
   /// Create a copy of AppNotification
@@ -324,6 +383,9 @@ abstract class _AppNotification implements AppNotification {
     final String? idempotencyKey,
     final DateTime? readAt,
     required final DateTime createdAt,
+    final NotificationPriority priority,
+    final String? senderId,
+    final NotificationPushStatus pushStatus,
   }) = _$AppNotificationImpl;
 
   factory _AppNotification.fromJson(Map<String, dynamic> json) =
@@ -347,6 +409,12 @@ abstract class _AppNotification implements AppNotification {
   DateTime? get readAt;
   @override
   DateTime get createdAt;
+  @override
+  NotificationPriority get priority;
+  @override
+  String? get senderId;
+  @override
+  NotificationPushStatus get pushStatus;
 
   /// Create a copy of AppNotification
   /// with the given fields replaced by the non-null parameter values.

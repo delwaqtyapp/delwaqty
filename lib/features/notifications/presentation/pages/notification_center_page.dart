@@ -3,19 +3,64 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:delwaqty/domain/entities/app_notification.dart';
 import 'package:delwaqty/features/notifications/notifications_module.dart';
+import 'package:delwaqty/shared/notifications/notification_route_resolver.dart';
 import 'package:delwaqty/shared/widgets/app_loader.dart';
 import 'package:delwaqty/shared/widgets/premium_empty_state.dart';
 import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 import 'package:delwaqty/core/theme/app_colors.dart';
 
-class NotificationCenterPage extends ConsumerWidget {
+const _pageSize = 20;
+
+class NotificationCenterPage extends ConsumerStatefulWidget {
   const NotificationCenterPage({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<NotificationCenterPage> createState() =>
+      _NotificationCenterPageState();
+}
+
+class _NotificationCenterPageState extends ConsumerState<NotificationCenterPage> {
+  final List<AppNotification> _items = [];
+  int _offset = 0;
+  bool _loading = false;
+  bool _hasMore = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadMore();
+  }
+
+  Future<void> _loadMore() async {
+    if (_loading || !_hasMore) return;
+    setState(() => _loading = true);
+    try {
+      final repo = ref.read(notificationRepositoryProvider);
+      final page = await repo.getNotifications(offset: _offset);
+      setState(() {
+        _items.addAll(page);
+        _offset += page.length;
+        _hasMore = page.length == _pageSize;
+        _loading = false;
+      });
+    } catch (_) {
+      setState(() => _loading = false);
+    }
+  }
+
+  Future<void> _refresh() async {
+    setState(() {
+      _items.clear();
+      _offset = 0;
+      _hasMore = true;
+    });
+    await _loadMore();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final notificationsAsync = ref.watch(notificationsProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -25,7 +70,10 @@ class NotificationCenterPage extends ConsumerWidget {
             onPressed: () async {
               final repo = ref.read(notificationRepositoryProvider);
               await repo.markAllAsRead();
-              ref.invalidate(notificationsProvider);
+              for (var i = 0; i < _items.length; i++) {
+                _items[i] = _items[i].copyWith(isRead: true);
+              }
+              setState(() {});
               ref.invalidate(unreadCountProvider);
             },
             child: Text(l10n.markAllRead),
@@ -33,88 +81,114 @@ class NotificationCenterPage extends ConsumerWidget {
           IconButton(
             tooltip: l10n.deleteAllNotifications,
             icon: const Icon(Icons.delete_sweep_rounded),
-            onPressed: () => _confirmDeleteAll(context, ref),
+            onPressed: () => _confirmDeleteAll(context),
           ),
         ],
       ),
-      body: notificationsAsync.when(
-        data: (notifications) {
-          if (notifications.isEmpty) {
-            return PremiumEmptyState(
+      body: _items.isEmpty && _loading
+          ? ListView.builder(
+              padding: const EdgeInsets.all(16),
+              itemCount: 5,
+              itemBuilder: (context, index) => const SkeletonListTile(),
+            )
+          : _items.isEmpty
+          ? PremiumEmptyState(
               icon: Icons.notifications_none_rounded,
               title: l10n.noNotifications,
               message: l10n.noNotificationsMessage,
+            )
+          : _buildList(),
+    );
+  }
+
+  Widget _buildList() {
+    final notifications = List<AppNotification>.from(_items);
+    final grouped = _groupByDate(notifications);
+    final sections = grouped.entries.toList();
+
+    return RefreshIndicator(
+      onRefresh: _refresh,
+      child: ListView.builder(
+        physics: const AlwaysScrollableScrollPhysics(),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        itemCount: sections.length + 1,
+        itemBuilder: (context, sectionIndex) {
+          if (sectionIndex == sections.length) {
+            if (!_hasMore) return const SizedBox(height: 24);
+            return Padding(
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              child: Center(
+                child: _loading
+                    ? const SizedBox(
+                        width: 24,
+                        height: 24,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : OutlinedButton(
+                        onPressed: _loadMore,
+                        child: Text(AppLocalizations.of(context).loadMore),
+                      ),
+              ),
             );
           }
 
-          final grouped = _groupByDate(notifications);
-          final sections = grouped.entries.toList();
-
-          return ListView.builder(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            itemCount: sections.length,
-            itemBuilder: (context, sectionIndex) {
-              final section = sections[sectionIndex];
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.only(top: 16, bottom: 8),
-                    child: Text(
-                      section.key,
-                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                            fontWeight: FontWeight.w700,
-                            color: Theme.of(context).colorScheme.onSurfaceVariant,
-                          ),
+          final section = sections[sectionIndex];
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(top: 16, bottom: 8),
+                child: Text(
+                  section.key,
+                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.w700,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
+                ),
+              ),
+              ...List.generate(section.value.length, (index) {
+                final notification = section.value[index];
+                return AnimatedFadeIn(
+                  delay: Duration(milliseconds: index * 30),
+                  child: Padding(
+                    padding: const EdgeInsets.only(bottom: 8),
+                    child: _NotificationCard(
+                      notification: notification,
+                      onTap: () async {
+                        final repo =
+                            ref.read(notificationRepositoryProvider);
+                        await repo.markAsRead(notification.id);
+                        final index = _items.indexWhere(
+                          (n) => n.id == notification.id,
+                        );
+                        if (index != -1) {
+                          _items[index] = _items[index].copyWith(isRead: true);
+                          setState(() {});
+                        }
+                        ref.invalidate(unreadCountProvider);
+                        if (context.mounted) {
+                          final route = NotificationRouteResolver.safe(
+                            deepLink: notification.deepLink,
+                          );
+                          context.push(route);
+                        }
+                      },
+                      onDelete: () async {
+                        final repo =
+                            ref.read(notificationRepositoryProvider);
+                        await repo.deleteNotification(notification.id);
+                        _items.removeWhere((n) => n.id == notification.id);
+                        _offset = _items.length;
+                        setState(() {});
+                        ref.invalidate(unreadCountProvider);
+                      },
                     ),
                   ),
-                  ...List.generate(section.value.length, (index) {
-                    final notification = section.value[index];
-                    return AnimatedFadeIn(
-                      delay: Duration(milliseconds: index * 30),
-                      child: Padding(
-                        padding: const EdgeInsets.only(bottom: 8),
-                        child: _NotificationCard(
-                          notification: notification,
-                          onTap: () async {
-                            final repo =
-                                ref.read(notificationRepositoryProvider);
-                            await repo.markAsRead(notification.id);
-                            ref.invalidate(notificationsProvider);
-                            ref.invalidate(unreadCountProvider);
-                            if (notification.deepLink != null &&
-                                context.mounted) {
-                              context.push(notification.deepLink!);
-                            }
-                          },
-                          onDelete: () async {
-                            final repo =
-                                ref.read(notificationRepositoryProvider);
-                            await repo.deleteNotification(notification.id);
-                            ref.invalidate(notificationsProvider);
-                            ref.invalidate(unreadCountProvider);
-                          },
-                        ),
-                      ),
-                    );
-                  }),
-                ],
-              );
-            },
+                );
+              }),
+            ],
           );
         },
-        loading: () => ListView.builder(
-          padding: const EdgeInsets.all(16),
-          itemCount: 5,
-          itemBuilder: (context, index) => const SkeletonListTile(),
-        ),
-        error: (e, _) => PremiumEmptyState(
-          icon: Icons.error_outline_rounded,
-          title: l10n.error,
-          message: e.toString(),
-          actionLabel: l10n.retry,
-          onAction: () => ref.invalidate(notificationsProvider),
-        ),
       ),
     );
   }
@@ -126,50 +200,56 @@ class NotificationCenterPage extends ConsumerWidget {
     final today = DateTime(now.year, now.month, now.day);
     final yesterday = today.subtract(const Duration(days: 1));
 
+    final l10n = AppLocalizations.of(context);
+
     final Map<String, List<AppNotification>> grouped = {};
 
     for (final n in notifications) {
       final date = DateTime(n.createdAt.year, n.createdAt.month, n.createdAt.day);
       String label;
       if (!date.isBefore(today)) {
-        label = 'اليوم';
+        label = l10n.notificationToday;
       } else if (!date.isBefore(yesterday)) {
-        label = 'أمس';
+        label = l10n.notificationYesterday;
       } else {
-        label = 'أقدم';
+        label = l10n.notificationOlder;
       }
       grouped.putIfAbsent(label, () => []).add(n);
     }
 
     return grouped;
   }
-}
 
-Future<void> _confirmDeleteAll(BuildContext context, WidgetRef ref) async {
-  final l10n = AppLocalizations.of(context);
-  final confirmed = await showDialog<bool>(
-    context: context,
-    builder: (context) => AlertDialog(
-      title: Text(l10n.deleteAllNotifications),
-      content: Text(l10n.deleteAllNotificationsConfirm),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.of(context).pop(false),
-          child: Text(l10n.cancel),
-        ),
-        FilledButton(
-          onPressed: () => Navigator.of(context).pop(true),
-          child: Text(l10n.delete),
-        ),
-      ],
-    ),
-  );
-  if (confirmed != true || !context.mounted) return;
+  Future<void> _confirmDeleteAll(BuildContext context) async {
+    final l10n = AppLocalizations.of(context);
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(l10n.deleteAllNotifications),
+        content: Text(l10n.deleteAllNotificationsConfirm),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: Text(l10n.cancel),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: Text(l10n.delete),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) return;
 
-  final repo = ref.read(notificationRepositoryProvider);
-  await repo.clearAll();
-  ref.invalidate(notificationsProvider);
-  ref.invalidate(unreadCountProvider);
+    final repo = ref.read(notificationRepositoryProvider);
+    await repo.clearAll();
+    setState(() {
+      _items.clear();
+      _offset = 0;
+      _hasMore = false;
+    });
+    ref.invalidate(unreadCountProvider);
+  }
 }
 
 class _NotificationCard extends StatelessWidget {
@@ -230,6 +310,28 @@ class _NotificationCard extends StatelessWidget {
                                 ),
                           ),
                         ),
+                        if (notification.priority == NotificationPriority.high)
+                          Container(
+                            margin: const EdgeInsets.only(right: 6),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 6,
+                              vertical: 2,
+                            ),
+                            decoration: BoxDecoration(
+                              color: AppColors.errorLight.withValues(alpha: 0.15),
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            child: Text(
+                              AppLocalizations.of(
+                                context,
+                              ).notificationPriorityHigh,
+                              style: Theme.of(context).textTheme.labelSmall
+                                  ?.copyWith(
+                                    color: AppColors.errorLight,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                            ),
+                          ),
                         if (!notification.isRead)
                           Container(
                             width: 8,
@@ -343,9 +445,10 @@ class _NotificationCard extends StatelessWidget {
     final now = DateTime.now();
     final diff = now.difference(dateTime);
 
-    if (diff.inMinutes < 60) return '${diff.inMinutes}m ago';
-    if (diff.inHours < 24) return '${diff.inHours}h ago';
-    if (diff.inDays < 7) return '${diff.inDays}d ago';
+    if (diff.inMinutes < 1) return 'now';
+    if (diff.inMinutes < 60) return '${diff.inMinutes}m';
+    if (diff.inHours < 24) return '${diff.inHours}h';
+    if (diff.inDays < 7) return '${diff.inDays}d';
     return '${dateTime.day}/${dateTime.month}/${dateTime.year}';
   }
 }

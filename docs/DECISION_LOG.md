@@ -2180,3 +2180,70 @@ and the Flutter rewards presentation layer.
   run under a JWT (authenticated/service_role RPC paths keep their existing `auth.uid()` guards).
 - Flutter consumers map `RewardType`/`RewardStatus` by `.name` (DB vocab), keeping enum drift
   visible at parse time; `benefitKind` renders benefit labels l10n-driven.
+
+## ADR-062: Phase 2.4 architecture — notification delivery layer (send path, token lifecycle, deep-links)
+
+**Date:** Session 52 (2026-08-16)
+**Status:** Proposed (plan `34_PHASE_2_4_IMPLEMENTATION_PLAN.md` awaiting owner approval; recorded now
+because the plan locks genuinely new architectural decisions)
+**Deciders:** Lead Architect (implementation under owner's Session-52 7-phase authorization permit)
+
+### Context
+Phase 2.4 must add server-side push (FCM), a device-scoped token lifecycle, realtime-first delivery,
+a production Notification Center, and safe deep-links. Inspection (live project
+`bttnlkmwhorjamzemwda` + repo) verified: `notifications` + `notification_tokens` are fully reusable
+(no parallel system), `notifications` is already in `supabase_realtime`, `pg_net` is installed live,
+`supabase/functions/` is empty, and **no FCM credentials exist anywhere** (no service-account JSON,
+no server key, no secrets). No Edge Functions or FCM send path exist today. Existing writers (033
+chat routing, 038 rewards, 040 campaigns, 019 broadcast) insert `notifications` rows directly and
+MUST NOT be edited (applied migrations are immutable).
+
+### Decision
+- **Reuse, don't rebuild:** `notifications` + `notification_tokens` remain the single source of
+  truth. Migration **041** is purely additive (columns `priority/sender_id/send_push/push_status/
+  push_sent_at/push_error`; allowlist table `notification_destinations`; no policy widenings).
+- **Server send path:** `AFTER INSERT` trigger on `notifications` (SECURITY DEFINER) calls
+  `pg_net.net.http_post` → Edge Function **`send-push`** (new, `supabase/functions/send-push`) →
+  FCM HTTP v1 (`projects/delwaqty0/messages:send`). **Credential-ready + graceful no-op:** without
+  FCM secrets the function marks `push_status='unconfigured'` and returns; realtime still delivers
+  in-app. Operator backstop RPC `dispatch_push` re-enqueues failed/unconfigured sends.
+- **Device-scoped token lifecycle RPCs:** `register_device_token`, `deactivate_device_tokens`
+  (logout = this device only, replacing the current deactivate-ALL), `refresh_token_heartbeat`,
+  `cleanup_invalid_token` (FCM 404/410). All SECURITY DEFINER + pinned `search_path`; token RPCs
+  `authenticated`, cleanup `service_role`.
+- **Realtime-first client:** reuse existing `in-app-notifications` channel via a centralized channel
+  registry; unread badge/live list driven by realtime events with periodic reconcile (replaces
+  1-min polling); reconnect + duplicate guards; auth-gated subscribe/unsubscribe (fixes the
+  `_initialized` re-login bug).
+- **Controlled deep-links:** server `notification_destinations` allowlist + `validate_...` RPC;
+  client resolver rewrites `NotificationPayload.resolveDeepLink` to only push known routes, falling
+  back to `/notifications`; new read-only `/campaign/:id` landing (040's `deep_link` today hits the
+  router error page).
+- **Stable type vocabulary:** NO new `NotificationType` enum values (keeps 13 + exhaustive-switch
+  tests intact); server strings `chat_assigned/chat_escalated→message`, `emergency→security`,
+  `complaint→system`, `admin→account` mapped in the data source.
+- **Notification sources:** new triggers notify chat replies (support chat), complaint status,
+  SOS emergency (priority high; informational — never an authz bypass), while 019/033/038/040 rows
+  gain push automatically via the same insert trigger with zero writer edits.
+- **Security hardening in 041:** `get_unread_notification_count` gains `search_path` + self/admin
+  authz (was any-user info leak); `deactivate_stale_tokens` gains `search_path`; a
+  `guard_notifications_user_update` trigger blocks users from rewriting own-row content (read-state
+  only). No FCM/PAT credentials are ever stored in code or repo.
+
+### Rationale
+- A trigger is the only non-invasive integration point that captures inserts from every existing
+  writer without editing applied migrations; `pg_net` (verified live) makes it fire-and-forget.
+- FCM credential absence is an operational fact; the design must ship green today and go live with
+  keys later with **zero code change** (secrets only).
+- Device-scoped lifecycle prevents logout on one phone killing notifications on another and matches
+  the real FCM token-per-install model.
+- Deep-link allowlisting closes the current arbitrary-route navigation gap while remaining additive
+  and compatible with existing stored `deep_link` values.
+
+### Consequences
+- Phase 2.4 ships without a real FCM delivery proof until the owner supplies credentials; the gate
+  records push to the `unconfigured` boundary and marks physical-device verification PENDING.
+- 030–040 migration files are untouched; 041 is the only new migration (next number verified).
+- Client Notification Center gains pagination/l10n/priority visuals without enum churn.
+- Emergency notifications remain informational (rows + push); admin access stays RLS-gated; the
+  Phase 2.5 command center is NOT started.

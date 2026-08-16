@@ -50,6 +50,7 @@ class AuthStateNotifier extends Notifier<AuthState> {
       _logger.i('Auth event: ${event.type}');
       switch (event.type) {
         case AuthEventType.signedIn:
+          ref.read(pushNotificationServiceProvider).initialize();
           if (!_isSignUpInProgress && !_isSignInInProgress) {
             checkAuthStatus();
           }

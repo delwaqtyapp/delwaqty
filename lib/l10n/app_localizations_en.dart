@@ -4361,4 +4361,37 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get regionSelectionFailed => 'Could not save region';
+
+  @override
+  String get notificationToday => 'Today';
+
+  @override
+  String get notificationYesterday => 'Yesterday';
+
+  @override
+  String get notificationOlder => 'Older';
+
+  @override
+  String get notificationPriorityHigh => 'High';
+
+  @override
+  String get loadMore => 'Load more';
+
+  @override
+  String get campaignTitle => 'Campaign';
+
+  @override
+  String get campaignNotFound => 'Campaign not found';
+
+  @override
+  String get campaignStatus => 'Status';
+
+  @override
+  String get campaignType => 'Type';
+
+  @override
+  String get campaignDates => 'Dates';
+
+  @override
+  String get campaignDescription => 'Description';
 }

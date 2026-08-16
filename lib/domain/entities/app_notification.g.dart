@@ -20,6 +20,16 @@ _$AppNotificationImpl _$$AppNotificationImplFromJson(
       ? null
       : DateTime.parse(json['readAt'] as String),
   createdAt: DateTime.parse(json['createdAt'] as String),
+  priority:
+      $enumDecodeNullable(_$NotificationPriorityEnumMap, json['priority']) ??
+      NotificationPriority.normal,
+  senderId: json['senderId'] as String?,
+  pushStatus:
+      $enumDecodeNullable(
+        _$NotificationPushStatusEnumMap,
+        json['pushStatus'],
+      ) ??
+      NotificationPushStatus.pending,
 );
 
 Map<String, dynamic> _$$AppNotificationImplToJson(
@@ -34,6 +44,9 @@ Map<String, dynamic> _$$AppNotificationImplToJson(
   'idempotencyKey': instance.idempotencyKey,
   'readAt': instance.readAt?.toIso8601String(),
   'createdAt': instance.createdAt.toIso8601String(),
+  'priority': _$NotificationPriorityEnumMap[instance.priority]!,
+  'senderId': instance.senderId,
+  'pushStatus': _$NotificationPushStatusEnumMap[instance.pushStatus]!,
 };
 
 const _$NotificationTypeEnumMap = {
@@ -50,4 +63,17 @@ const _$NotificationTypeEnumMap = {
   NotificationType.success: 'success',
   NotificationType.reminder: 'reminder',
   NotificationType.reward: 'reward',
+};
+
+const _$NotificationPriorityEnumMap = {
+  NotificationPriority.low: 'low',
+  NotificationPriority.normal: 'normal',
+  NotificationPriority.high: 'high',
+};
+
+const _$NotificationPushStatusEnumMap = {
+  NotificationPushStatus.pending: 'pending',
+  NotificationPushStatus.sent: 'sent',
+  NotificationPushStatus.failed: 'failed',
+  NotificationPushStatus.unconfigured: 'unconfigured',
 };

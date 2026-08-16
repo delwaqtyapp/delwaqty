@@ -1445,5 +1445,16 @@
   "regionSearchHint": "ابحث عن المحافظات",
   "regions": "المناطق",
   "regionSaved": "تم حفظ المنطقة",
-  "regionSelectionFailed": "تعذر حفظ المنطقة"
+  "regionSelectionFailed": "تعذر حفظ المنطقة",
+  "notificationToday": "اليوم",
+  "notificationYesterday": "أمس",
+  "notificationOlder": "أقدم",
+  "notificationPriorityHigh": "عالي",
+  "loadMore": "تحميل المزيد",
+  "campaignTitle": "الحملة",
+  "campaignNotFound": "الحملة غير موجودة",
+  "campaignStatus": "الحالة",
+  "campaignType": "النوع",
+  "campaignDates": "المواعيد",
+  "campaignDescription": "الوصف"
 }

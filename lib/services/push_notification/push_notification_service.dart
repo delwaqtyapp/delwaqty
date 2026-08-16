@@ -11,6 +11,8 @@ import 'package:delwaqty/core/router/app_router.dart';
 import 'package:delwaqty/domain/entities/app_notification.dart';
 import 'package:delwaqty/features/notifications/notifications_module.dart';
 import 'package:delwaqty/services/logger/app_logger.dart';
+import 'package:delwaqty/services/push_notification/device_identity.dart';
+import 'package:delwaqty/shared/notifications/notification_route_resolver.dart';
 
 final pushNotificationServiceProvider = Provider<PushNotificationService>((
   ref,
@@ -19,6 +21,7 @@ final pushNotificationServiceProvider = Provider<PushNotificationService>((
   service.onRealtimeNotification = (_) {
     ref.invalidate(notificationsProvider);
     ref.invalidate(unreadCountProvider);
+    ref.invalidate(unreadCountStreamProvider);
   };
   return service;
 });
@@ -102,8 +105,8 @@ Future<void> _showLocalNotification({
 
 void _handleNotificationTap(Map<String, dynamic> data) {
   final payload = NotificationPayload.fromMap(data);
-  final deepLink = payload.resolveDeepLink();
-  if (deepLink == null || rootNavigatorKey.currentContext == null) return;
+  final deepLink = NotificationRouteResolver.safePayload(payload);
+  if (rootNavigatorKey.currentContext == null) return;
 
   final context = rootNavigatorKey.currentContext!;
   final router = GoRouter.of(context);
@@ -133,19 +136,21 @@ class PushNotificationService {
   final FirebaseMessaging _messaging = FirebaseMessaging.instance;
 
   String? _lastToken;
+  String? _deviceId;
   Timer? _heartbeat;
+  RealtimeChannel? _realtimeChannel;
   bool _initialized = false;
 
   void Function(Map<String, dynamic> record)? onRealtimeNotification;
 
   Future<void> initialize() async {
     if (_initialized) return;
-    _initialized = true;
 
     try {
       await _initLocalNotifications();
-
       _setupRealtimeNotifications();
+
+      _deviceId = await DeviceIdentity.getOrCreate();
 
       final settings = await _messaging.requestPermission();
 
@@ -175,8 +180,10 @@ class PushNotificationService {
         _handleBackgroundMessage(initialMessage);
       }
 
+      _initialized = true;
       _logger.i('Push notifications initialized');
     } catch (e) {
+      _initialized = false;
       _logger.e('Failed to initialize push notifications', e);
     }
   }
@@ -187,7 +194,8 @@ class PushNotificationService {
       final userId = client.auth.currentUser?.id;
       if (userId == null) return;
 
-      client
+      _realtimeChannel?.unsubscribe();
+      _realtimeChannel = client
           .channel('in-app-notifications')
           .onPostgresChanges(
             event: PostgresChangeEvent.insert,
@@ -217,17 +225,15 @@ class PushNotificationService {
   Future<void> _saveToken(String token) async {
     try {
       final client = Supabase.instance.client;
-      final userId = client.auth.currentUser?.id;
-      if (userId == null) return;
+      if (client.auth.currentUser == null) return;
+      final deviceId = _deviceId ?? await DeviceIdentity.getOrCreate();
+      _deviceId = deviceId;
 
-      await client.from('notification_tokens').upsert({
-        'user_id': userId,
-        'token': token,
-        'platform': _platformName(),
-        'is_active': true,
-        'last_seen_at': DateTime.now().toIso8601String(),
-        'updated_at': DateTime.now().toIso8601String(),
-      }, onConflict: 'user_id,token');
+      await client.rpc('register_device_token', params: {
+        'p_token': token,
+        'p_platform': _platformName(),
+        'p_device_id': deviceId,
+      });
 
       _logger.i('Push notification token saved');
     } catch (e) {
@@ -240,7 +246,17 @@ class PushNotificationService {
     _heartbeat = Timer.periodic(const Duration(minutes: 5), (_) async {
       final token = _lastToken;
       if (token == null) return;
-      await _saveToken(token);
+      try {
+        final client = Supabase.instance.client;
+        final deviceId = _deviceId ?? await DeviceIdentity.getOrCreate();
+        _deviceId = deviceId;
+        await client.rpc('refresh_token_heartbeat', params: {
+          'p_token': token,
+          'p_device_id': deviceId,
+        });
+      } catch (e) {
+        _logger.e('Failed to refresh push heartbeat', e);
+      }
     });
   }
 
@@ -263,9 +279,9 @@ class PushNotificationService {
   void _handleBackgroundMessage(RemoteMessage message) {
     _logger.i('Opened message: ${message.notification?.title}');
     final payload = NotificationPayload.fromMap(message.data);
-    final deepLink = payload.resolveDeepLink();
+    final deepLink = NotificationRouteResolver.safePayload(payload);
 
-    if (deepLink != null && rootNavigatorKey.currentContext != null) {
+    if (rootNavigatorKey.currentContext != null) {
       final context = rootNavigatorKey.currentContext!;
       GoRouter.of(context).push(deepLink);
     }
@@ -278,15 +294,18 @@ class PushNotificationService {
   Future<void> deactivateTokensOnLogout() async {
     try {
       final client = Supabase.instance.client;
-      final userId = client.auth.currentUser?.id;
-      if (userId == null) return;
+      if (client.auth.currentUser == null) return;
 
-      await client
-          .from('notification_tokens')
-          .update({'is_active': false})
-          .eq('user_id', userId);
+      final deviceId = _deviceId ?? await DeviceIdentity.getOrCreate();
+      _deviceId = deviceId;
+      await client.rpc('deactivate_device_tokens', params: {
+        'p_device_id': deviceId,
+      });
 
       _heartbeat?.cancel();
+      _heartbeat = null;
+      await _realtimeChannel?.unsubscribe();
+      _realtimeChannel = null;
       _lastToken = null;
       _initialized = false;
 

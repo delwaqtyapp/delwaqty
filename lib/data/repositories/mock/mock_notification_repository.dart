@@ -98,5 +98,5 @@ class MockNotificationRepository implements NotificationRepository {
   }
 
   @override
-  Future<void> deactivateAllTokens() async {}
+  Future<void> deactivateDeviceTokens(String deviceId) async {}
 }

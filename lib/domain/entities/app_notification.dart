@@ -15,10 +15,34 @@ class AppNotification with _$AppNotification {
     String? idempotencyKey,
     DateTime? readAt,
     required DateTime createdAt,
+    @Default(NotificationPriority.normal) NotificationPriority priority,
+    String? senderId,
+    @Default(NotificationPushStatus.pending)
+    NotificationPushStatus pushStatus,
   }) = _AppNotification;
 
   factory AppNotification.fromJson(Map<String, dynamic> json) =>
       _$AppNotificationFromJson(json);
+}
+
+enum NotificationPriority {
+  @JsonValue('low')
+  low,
+  @JsonValue('normal')
+  normal,
+  @JsonValue('high')
+  high,
+}
+
+enum NotificationPushStatus {
+  @JsonValue('pending')
+  pending,
+  @JsonValue('sent')
+  sent,
+  @JsonValue('failed')
+  failed,
+  @JsonValue('unconfigured')
+  unconfigured,
 }
 
 enum NotificationType {
@@ -60,13 +84,6 @@ class NotificationPayload {
     this.action,
   });
 
-  final String? notificationId;
-  final String? type;
-  final String? deepLink;
-  final String? entityId;
-  final String? entityType;
-  final String? action;
-
   factory NotificationPayload.fromMap(Map<String, dynamic> data) {
     return NotificationPayload(
       notificationId: data['notification_id'] as String?,
@@ -77,6 +94,13 @@ class NotificationPayload {
       action: data['action'] as String?,
     );
   }
+
+  final String? notificationId;
+  final String? type;
+  final String? deepLink;
+  final String? entityId;
+  final String? entityType;
+  final String? action;
 
   Map<String, dynamic> toMap() => {
         if (notificationId != null) 'notification_id': notificationId,

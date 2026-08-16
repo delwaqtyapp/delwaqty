@@ -1449,5 +1449,16 @@
   "regionSearchHint": "Search governorates",
   "regions": "Regions",
   "regionSaved": "Region saved",
-  "regionSelectionFailed": "Could not save region"
+  "regionSelectionFailed": "Could not save region",
+  "notificationToday": "Today",
+  "notificationYesterday": "Yesterday",
+  "notificationOlder": "Older",
+  "notificationPriorityHigh": "High",
+  "loadMore": "Load more",
+  "campaignTitle": "Campaign",
+  "campaignNotFound": "Campaign not found",
+  "campaignStatus": "Status",
+  "campaignType": "Type",
+  "campaignDates": "Dates",
+  "campaignDescription": "Description"
 }

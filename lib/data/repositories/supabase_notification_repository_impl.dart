@@ -87,9 +87,9 @@ class SupabaseNotificationRepositoryImpl implements NotificationRepository {
   }
 
   @override
-  Future<void> deactivateAllTokens() async {
+  Future<void> deactivateDeviceTokens(String deviceId) async {
     try {
-      await _dataSource.deactivateAllTokens();
+      await _dataSource.deactivateDeviceTokens(deviceId);
     } catch (e) {
       throw ServerException(message: e.toString());
     }

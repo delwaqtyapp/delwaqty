@@ -1,60 +1,160 @@
 # SESSION_STATUS.md
 
-> **Last updated:** 2026-08-16 Session 51 — **PROMOTION MIGRATION 040 APPLIED LIVE + 040 GATE 🟢 PASS → STOPPED**
-> (`docs/HANDOFF/PHASE_2_PROMOTION_MIGRATION_040_GATE.md`): `040_promotion_targeting_media_approval.sql` live on
-> `bttnlkmwhorjamzemwda` (`campaign_targets` + `approval_requests` + `campaign_media` + `campaign-media`
-> bucket + 8 lifecycle RPCs + scope/storage helpers; 44/44 checks green; idempotent; non-destructive;
-> Dart migration tests 20/20; full suite 751 pass). **Awaiting owner approval of the 040 gate. No migration
-> 041/042, no Flutter changes, no commit until then.**
+> **Last updated:** 2026-08-16 Session 52 — **PHASE 2.3 IMPLEMENTATION COMPLETE: MIGRATIONS 033 + 034 + 035 + 038 LIVE & VERIFIED, FLUTTER REWARDS LAYER SHIPPED, FULL GATE 🟢**
+> Phase 2.3 (per owner-authorized 7-phase run: migrations 033–038, Flutter layer, gate): **033**
+> (`support_chat_priority_region_assignment`) applied + idempotent + **22/22 checks green** + ACL
+> hardening (`033_acl_fix.sql`); **034** (`admin_management_permissions_approvals`) applied +
+> idempotent + **74 assertions + 2 denial probes green, zero residue** — including a real
+> **security bug found & fixed live**: `decide_approval_request` decider guard had a **SQL 3-valued
+> logic bypass** when `required_approver IS NULL` (`required_approver = auth.uid()` → NULL → `IF`
+> skipped the raise) → fixed with explicit `IS NULL` branches + self-decision check reordered first;
+> **035** (`member_management_moderation_deletion`) applied + idempotent + **73 assertions + 4 denial
+> probes green, zero residue** — D3/D4 (users `date_of_birth`/`account_status`/`anonymized_at` +
+> `users_guard_account_fields` replacing the 031 role-only guard, closing the `users_update_admin`
+> direct-UPDATE role-escalation gap), `member_events` timeline (§15), sanctions additive columns,
+> moderation/deletion RPCs (approval-gated bans/delete, D4 anonymization, `get_member_profile`
+> sectioned aggregate); **038** (`member_rewards` + `run_member_engines` + retention config) applied +
+> idempotent + **probe suite ALL GREEN (36 assertions + 4 denial probes + 11 residue checks zero)**,
+> incl. live `write_audit` service-context hardening (`COALESCE(auth.uid()::text, 'system')`).
+> **Flutter rewards layer shipped** (module + entity + DS/repo + providers + page + profile tile +
+> `NotificationType.reward` + l10n EN/AR + 8 new tests) — full gate `flutter analyze` 0 errors /
+> `flutter test` **759/759**.
 >
-> **Open gate (Session 50, approved in principle):** migration 039 gate 🟢 PASS — 040 was authorized by the
-> owner's O1–O6 ratification and was implemented under it; the remaining gates are 041/042 (each stops for
-> approval).
->
-> **Open gate (Session 49, still pending):** Phase 2.3 decision-lock `PHASE_2_3_DECISION_LOCK_REPORT.md` — 🟡 awaiting owner ratification (D1/D2 modifications + M1–M6 + M-D1…M-D6) before 2.3A (migration 033).
+> **Open gate (Session 49, pending):** Phase 2.3 decision-lock `PHASE_2_3_DECISION_LOCK_REPORT.md` —
+> 🟡 awaiting owner ratification (D1/D2 modifications + M1–M6 + M-D1…M-D6) before 2.3A (migration 033).
+> Owner's standing O1–O6 ratification (Session 50) + the Session-52 7-phase authorization permit
+> implementation; per AGENTS.md §10 this autonomous run proceeds until a manual decision is required.
 
 ---
 
-## Current Task — PROMOTION PLATFORM: MIGRATION 040 GATE 🟢 PASS — STOPPED (Session 51)
+## Current Task — PHASE 2.3: IMPLEMENTATION RUN — COMPLETE + GATE 🟢 (Session 52)
 
-**Task (user):** implement migration 040 (`promotion_targeting_media_approval`) per the owner-authorized
-040 directive — targeting + audience + generic `approval_requests` + lifecycle RPCs + `campaign-media`
-bucket; then STOP with `docs/HANDOFF/PHASE_2_PROMOTION_MIGRATION_040_GATE.md`. Do NOT start 041/042/Phase
-2.4, do NOT commit.
+**Task (user):** execute the owner-authorized 7-phase large implementation run (Phases 2.3–2.9),
+backend-first, each phase gated/committed. Phase 2.3 = migrations 033 (support chat priority +
+assignment), 034 (admin management + permissions + approvals), 035 (member management), 038 (member
+rewards/engines), then the Flutter layer, then the full gate + commit + push (incl. 3 untracked
+Phase 2.3 docs).
 
 **Completed this session:**
-- **Design (ADR-060):** targeting = `campaign_targets` junction (NULL region = national, partial unique
-  `campaign_targets_national_unique`); audience = existing `campaigns.target_roles`; `approval_requests`
-  created verbatim per 2.3 §19 contract; 8 SECURITY DEFINER lifecycle RPCs + scope/storage helpers; media
-  = storage-reference metadata; orphan cleanup via `campaign_purge_media` (terminal states only); no
-  second hierarchy (owner + `is_admin()` + `admin_region_assignments` scope). **Review fixes:** D1
-  `campaigns_set_creator` forces `status := 'draft'` on INSERT (039 guard is UPDATE-only — closes
-  published-bypass); D2 `campaign_purge_media` uses `set_config('storage.allow_delete_query', …)` GUC
-  before storage DELETE (plain SQL DELETE is blocked by `storage.protect_delete()` 42501).
-- **Migration `040_promotion_targeting_media_approval.sql`** WRITTEN + **APPLIED live** (HTTP 201 ×3:
-  initial + post-fix + idempotency re-run): 3 tables RLS-on + 6 indexes (incl. both partial uniques);
-  14 functions (`search_path = public, pg_temp`, 13 ACL-granted, `campaigns_set_creator` trigger-only);
-  18 policies (14 table + 4 storage); bucket `campaign-media` (private, 5 MB, png/jpeg/webp).
-- **ACL audit:** anon nothing; authenticated = `arwd` targets/media/banners, `arw` campaigns (**no
-  DELETE**), `r` approval_requests (writes RPC-only); service_role ALL.
-- **44/44 checks green (live):** targeting/scope matrix across gadmin/radmin/owner; audience + benefit
-  validation; approval center (submit/approve/reject/resubmit, notifications `campaign-approve/-reject-<id>`,
-  self-approval blocked, reject-reason required, already-decided, unsupported type, duplicate-pending 23505);
-  lifecycle (force-draft, submit→pending_review, approve→approved, publish→published+published_at,
-  scheduled window, pause/resume, cancel→cancelled, archive→archived, reject→draft→resubmit); negatives
-  (double-submit, invalid decision, pause-draft, cancel-no-reason, purge-non-terminal, radmin-national-
-  publish, customer/anon 42501/0-rows, no DELETE grant, approval-writes RPC-only, radmin scoped-filter);
-  storage (in-scope upload OK, out-of-scope/bad-path denied, published readable, unpublished hidden,
-  purge deletes objects + deactivates media/banners, safe path parsing).
-- **Dart migration tests:** `test/features/promotion/migrations/promotion_migration_040_test.dart`
-  (20/20 pass; parses the SQL file as source of truth — precedent: egypt_geographic_dataset_test.dart);
-  full suite `flutter test` = **751/751**; `flutter analyze` = 0 errors (546 = exact pre-existing baseline).
-- **Non-destruction + cleanup:** regions 6,157 / users 5 untouched; buckets 5→6 (campaign-media intended);
-  all `040_*` fixtures + test admins removed; P_ARCHIVE + all probes txn-rolled-back (final state re-checked).
-- **Docs:** ADR-060 in `docs/DECISION_LOG.md`; `docs/HANDOFF/PHASE_2_PROMOTION_MIGRATION_040_GATE.md`;
-  `ROADMAP.md`; this file.
-- **STOPPED 🟢 — awaiting owner approval of the 040 gate. No migration 041/042, no Flutter changes, no
-  commit/push.**
+- **Migration 033** (`033_support_chat_priority_region_assignment.sql`) applied, idempotent, **22/22
+  checks green** (17/17 functional + 5/5 expected-denials). Runtime bugs found by live probes and
+  fixed in-file (re-applied): `resolve_support_admin` wrong outer alias (`a.admin_id` → `best.admin_id`)
+  + `MIN(uuid)` removed (deterministic `eff_depth ASC, open_count ASC, admin_id ASC`); `activity_logs`
+  policy create made idempotent (`DROP POLICY IF EXISTS`); `_assign_chat_to_admin` notification insert
+  `ON CONFLICT (idempotency_key) DO NOTHING`. ACL hardening (`033_acl_fix.sql`): internal helpers
+  `write_audit`/`resolve_support_admin`/`_assign_chat_to_admin` = postgres/service_role only; public
+  routing RPCs = authenticated/service_role only (anon revoked). Probes: T1_TIERING 8/8, T2_GUARD_INSERT,
+  T3_RPC_TRUST, T4_EMERGENCY 5/5, T4b_EMERGENCY_RPC 5/5, T5_ESCALATION, N-probes all DENIED-OK, zero
+  residue.
+- **Migration 034** (`034_admin_management_permissions_approvals.sql`) applied live (HTTP 201) +
+  idempotent re-runs. Dual-axis authority (supervision tree `admin_management` + region scope
+  `admin_region_assignments`); central `has_permission()` decision engine; M1 invariants (no cycles,
+  region containment, owner-only root creation, grantor-must-possess, no self-grant, grant-only
+  permissions, owner undeletable, `admin_set_user_role` hardened). Approval Center: `submit_approval_request`
+  + extended `decide_approval_request` (040 `campaign_approve` preserved verbatim; `admin_*` executors
+  share the exact lifecycle code path).
+- **SECURITY BUG FOUND + FIXED (live):** `decide_approval_request` decider guard used
+  `NOT (required_approver = auth.uid() OR is_supervisor_of(...))` — with `required_approver IS NULL`
+  the first term is NULL → whole predicate NULL → `IF` treated as false → **guard skipped**. An
+  unrelated-but-executor-authorized admin could decide an owner-addressed request. Fixed with explicit
+  `IS NULL` branches; self-decision check reordered first (`Cannot decide your own request`). Re-applied
+  idempotently; T4 re-run all green.
+- **Migration 035** (`035_member_management_moderation_deletion.sql`) applied live (HTTP 201) +
+  idempotent re-runs. D3/D4: `users.date_of_birth`/`account_status`/`anonymized_at` + derived-status
+  enforcement (`_enforce_member_status`, strictest active sanction wins; deactivated never auto-lifted);
+  **`users_guard_account_fields` BEFORE-UPDATE trigger replaces the 031 role-only guard** — role/
+  account_status/DOB/anonymized_at are server-managed (direct authenticated/anon writes rejected, incl.
+  the RLS `users_update_admin` path that previously allowed any active admin to UPDATE any user's role/
+  status); `member_events` timeline table (§15 21-type CHECK, customer-safe own-read RLS + admin
+  timeline RLS); `sanctions` additive (`approving_admin_id`, `evidence_url`, `action_status` CHECK
+  active/expired/revoked/completed, target_role vocabulary + 'delivery', composite index); moderation
+  RPCs `issue_sanction` (warning/fine/suspension direct → restricted/suspended; temporary_ban/
+  permanent_ban approval-gated + MEMBER_BAN grant-only double-gate; escalation temp→permanent allowed,
+  duplicate active permanent ban blocked at approval execution) + `revoke_sanction` (restorative,
+  recomputes status) + `delete_member_account` (confirmation token `DELETE-<sha256(email)>`,
+  always owner-approved, D4 soft-delete + anonymize) + `update_member_dob` (self + MEMBER_VIEW admin,
+  in-scope) + `get_member_status` (self + MEMBER_VIEW) + `get_member_timeline` (keyset, self-safe
+  types) + `get_member_profile` (permission-sectioned admin aggregate, no raw rows); `_approval_apply`
+  extended with `member_ban`/`member_delete` branches (decider executes the same executors as the
+  direct RPCs; a superior decider without the underlying grant can still complete an approved action).
+  ACL: internal helpers/executors service_role-only; public RPCs authenticated+service_role; anon
+  revoked everywhere; `_member_region_id` granted to authenticated (member_events RLS uses it).
+- **035 verification (all green):** T1 sanctions/direct-matrix 21/21 · T2 ban-approval lifecycle 10/10 ·
+  T3 delete+D4 anonymization 13/13 · T4 guard trigger + DOB 12/12 · T5 timeline/profile/RLS 17/17 ·
+  N1 anon-moderation, N2 customer-sanction, N3 customer-delete, N4 customer-profile all DENIED-OK ·
+  **zero residue** (approval_requests 0, sanctions 0, member_events 0, admin_management 0, grants 0,
+  probe users/regions/notifications/audit/rides/sos/complaints 0; users D3 columns live).
+- **Migration 038** (`038_member_rewards_engines_retention.sql`) WRITTEN + APPLIED live (HTTP 201) +
+  idempotent re-run (HTTP 201). Contract: `member_rewards` ledger (reward_type birthday/anniversary,
+  period_key idempotency, benefit jsonb with `_reward_benefit_valid` CHECK incl. free_delivery gate,
+  campaign_id ref, status granted/claimed/expired); `retention_policies` (9 M1 defaults) +
+  `_reward_config` view (platform_settings.promotions) + `apply_retention_policies()`;
+  `run_member_engines(date)` (birthday/anniversary grants, suspended excluded, admin excluded,
+  per-period idempotent via period_key, notification idempotency `reward-<type>-<period>-<uid>`,
+  `member_events` birthday_reward/anniversary_reward); own-read + `has_permission('MEMBER_VIEW',
+  _member_region_id(user_id))` admin-read RLS; REVOKE-before-GRANT; service_role-only engines.
+  **`write_audit` hardening (root-cause fix the probe exposed):** `write_audit` (033) inserted
+  `auth.uid()::text` into `activity_logs.user_id` (NOT NULL), crashing the retention audit in
+  service context (no JWT → NULL). 038 now `CREATE OR REPLACE FUNCTION public.write_audit(...)` using
+  `COALESCE(auth.uid()::text, 'system')`; signature + ACL unchanged (service_role EXECUTE only).
+- **038 verification — probe suite ALL GREEN (`/tmp/opencode/probe_038/`):** T1 birthday 9/9
+  (2 birthdays granted, suspended/admin excluded, double-run no-op, 2027 re-grant, benefit
+  `{"kind":"none"}`, `notified_at` set, notification idempotency key, member_events row) · T2
+  anniversary 7/7 (2-year grant, double-run no-op, next-year 3, free_delivery DENIED until
+  `promotions.free_delivery_enabled`) · T3 retention (policies toggle, location_updates/activity_logs/
+  member_events/sanctions/campaigns/chat purge, archive step, absent tables skipped, RETURNED jsonb,
+  audited, re-run OK) · T4 campaign expiry (full RPC chain submit→approve→publish→backdated ends_at→
+  engine flips to expired; future stays published; draft untouched; idempotent) · T5 RLS/ACL 9/9 +
+  authenticated-role RLS block (own-read only; Maadi admin sees Maadi reward, 0 for Cairo; 42501 on
+  member/retention INSERTs; member_events CHECK) · N1–N4 anon/authenticated engine+retention all
+  DENIED-OK (HTTP 400) · **Z_RESIDUE 11/11 zero** (probe_rewards/users/campaigns/notifications/events/
+  audit/locations/sanctions/chat 0, archive exists 1, invariant violations 0). Suite totals: **36
+  assertions green, 4 denial probes, 11 residue checks zero = RESULT ALL GREEN.**
+- **Flutter presentation layer (rewards):** new `lib/features/rewards/` module registered in
+  `lib/module_registry.dart` (`RewardsModule`, `id 'rewards'`, `Icons.card_giftcard_rounded`,
+  `isNavModule false`, `navPriority 84`, `shellSubRoutes` `/rewards`) — freezed `MemberReward` entity
+  (`RewardType`/`RewardStatus` enums, `benefitKind` getter via `const MemberReward._()`), own-read
+  `SupabaseRewardsDataSource` (snake_case `_fromRow` mapping per repo convention — no `@JsonKey` on
+  factory params), `SupabaseRewardsRepositoryImpl` (ServerException wrap), `rewardsRepositoryProvider`
+  + `myRewardsProvider` (`FutureProvider.autoDispose` gated on `authStateProvider`
+  `AuthAuthenticated.user.id`, empty for guest), `RewardsPage` (loading/error/data states, empty
+  state, reward cards with status chip + benefit label, all l10n-driven). Profile page gains a
+  Rewards tile (`context.push('/rewards')`); `NotificationType.reward` added (enum + icon/color
+  mapping in notification_center_page + admin_push_notifications_page exhaustive switch). L10n +16
+  keys EN/AR regenerated. Tests: `member_reward_entity_test.dart` (fromJson/enum/benefitKind 5) +
+  `supabase_rewards_repository_test.dart` (mocktail 3) = **8 new tests**; existing NotificationType
+  enum tests updated 12→13.
+- **Full gate 🟢:** `flutter pub get` ✅ · `flutter analyze` **0 errors, 0 new warnings** (remaining
+  warnings/infos pre-existing baseline) ✅ · `flutter test` **759/759** ✅.
+- **Test-harness discipline:** probe files transactional (ROLLBACK), temp-table assertion accumulation
+  + single final SELECT (Management API returns only last-statement rows), JWT actor via
+  `set_config('request.jwt.claims', …)`, RLS/guard paths via `SET LOCAL ROLE authenticated`.
+
+**Files modified this session (so far):**
+- `supabase/migrations/033_support_chat_priority_region_assignment.sql` (applied; 033 probe fixes
+  already in-file from Session 51→52 continuity)
+- `supabase/migrations/034_admin_management_permissions_approvals.sql` (3VL decider-guard fix +
+  self-check reorder — both re-applied live, idempotent)
+- `supabase/migrations/035_member_management_moderation_deletion.sql` (NEW — written, applied,
+  idempotent, 73+4 probes green, zero residue; `name_en` regions fix)
+- `supabase/migrations/038_member_rewards_engines_retention.sql` (NEW — written, applied, idempotent,
+  probe ALL GREEN; `write_audit` service-context hardening)
+- Flutter rewards layer: `lib/features/rewards/**` (module, entity, data source, repository, providers,
+  page) + `lib/module_registry.dart` (register) + `lib/features/profile/presentation/pages/profile_page.dart`
+  (tile) + `lib/domain/entities/app_notification.dart` (`NotificationType.reward`) +
+  `lib/features/notifications/presentation/pages/notification_center_page.dart` +
+  `lib/features/admin/presentation/pages/admin_push_notifications_page.dart` (exhaustive switch) +
+  `lib/l10n/app_en.arb` + `app_ar.arb` + regenerated `app_localizations*.dart` +
+  `test/features/rewards/**` (8 tests) + NotificationType enum tests (12→13)
+- Probe suites: `/tmp/opencode/probe_033/`, `/tmp/opencode/probe_034/` (T1–T7, N1/N2, DBG diagnostic,
+  runner.py), `/tmp/opencode/probe_035/` (T1–T5, N1–N4, Z_RESIDUE, runner.py), `/tmp/opencode/probe_038/`
+  (P_SETUP_38, T1–T5, N1–N4, Z_RESIDUE, runner.py), `/tmp/opencode/apply.py`, `/tmp/opencode/sq.py`
+- `docs/HANDOFF/32_PHASE_2_3_SUPPORT_CHAT_PRIORITY_ASSIGNMENT_AUDIT.md`,
+  `docs/HANDOFF/PHASE_2_3_MEMBER_MANAGEMENT_SUPPORT_ARCHITECTURE_AUDIT.md`,
+  `docs/HANDOFF/PHASE_2_3_DECISION_LOCK_REPORT.md` (3 untracked Phase 2.3 docs — ship with the commit)
+- `SESSION_STATUS.md` (this file)
+
+**Remaining in Phase 2.3:** commit + push (HEAD `991819e…` sprint 76). Then Phases 2.4–2.9.
 
 ---
 

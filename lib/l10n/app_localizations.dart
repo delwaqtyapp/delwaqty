@@ -560,6 +560,96 @@ abstract class AppLocalizations {
   /// **'Notifications'**
   String get notifications;
 
+  /// No description provided for @rewards.
+  ///
+  /// In en, this message translates to:
+  /// **'Rewards'**
+  String get rewards;
+
+  /// No description provided for @rewardsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Birthday and anniversary rewards'**
+  String get rewardsHint;
+
+  /// No description provided for @noRewards.
+  ///
+  /// In en, this message translates to:
+  /// **'No rewards yet'**
+  String get noRewards;
+
+  /// No description provided for @noRewardsMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Rewards are granted on your birthday and on your account anniversary.'**
+  String get noRewardsMessage;
+
+  /// No description provided for @rewardBirthday.
+  ///
+  /// In en, this message translates to:
+  /// **'Birthday reward'**
+  String get rewardBirthday;
+
+  /// No description provided for @rewardAnniversary.
+  ///
+  /// In en, this message translates to:
+  /// **'Anniversary reward'**
+  String get rewardAnniversary;
+
+  /// No description provided for @rewardStatusGranted.
+  ///
+  /// In en, this message translates to:
+  /// **'Granted'**
+  String get rewardStatusGranted;
+
+  /// No description provided for @rewardStatusClaimed.
+  ///
+  /// In en, this message translates to:
+  /// **'Claimed'**
+  String get rewardStatusClaimed;
+
+  /// No description provided for @rewardStatusExpired.
+  ///
+  /// In en, this message translates to:
+  /// **'Expired'**
+  String get rewardStatusExpired;
+
+  /// No description provided for @benefitNone.
+  ///
+  /// In en, this message translates to:
+  /// **'Thank you gift'**
+  String get benefitNone;
+
+  /// No description provided for @benefitCoupon.
+  ///
+  /// In en, this message translates to:
+  /// **'Coupon'**
+  String get benefitCoupon;
+
+  /// No description provided for @benefitPromoCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Promo code'**
+  String get benefitPromoCode;
+
+  /// No description provided for @benefitOffer.
+  ///
+  /// In en, this message translates to:
+  /// **'Offer'**
+  String get benefitOffer;
+
+  /// No description provided for @benefitCodeCopy.
+  ///
+  /// In en, this message translates to:
+  /// **'Promo code'**
+  String get benefitCodeCopy;
+
+  /// No description provided for @benefitFreeDelivery.
+  ///
+  /// In en, this message translates to:
+  /// **'Free delivery'**
+  String get benefitFreeDelivery;
+
   /// No description provided for @back.
   ///
   /// In en, this message translates to:

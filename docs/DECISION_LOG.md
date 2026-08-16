@@ -2121,3 +2121,62 @@ without destroying production data.
 - 2.3 034 must not recreate `approval_requests` (amended).
 - `campaigns` UPDATE remains RLS-gated with scope; lifecycle preconditions (window, national
   global check, reasons) are enforced in the RPC layer.
+
+## ADR-061: Phase 2.3 implementation — member rewards ledger, engines, retention & Flutter rewards layer
+
+**Date:** Session 52 (2026-08-16)
+**Status:** Accepted (033/034/035/038 applied live + probe-verified; full gate green; pending owner
+ratification of the 2.3 decision-lock)
+**Deciders:** Lead Architect (implementation under owner's Session-52 7-phase authorization permit)
+
+### Context
+The owner-authorized 7-phase run requires Phase 2.3 = migrations 033–038 + Flutter layer + gate.
+033/034/035 shipped and verified in earlier Session 52 work. This ADR covers migration 038 (member
+rewards + engines + retention), the `write_audit` service-context hardening the live probe exposed,
+and the Flutter rewards presentation layer.
+
+### Decision
+- **Ledger:** `member_rewards` (reward_type `birthday|anniversary`, `period_key` idempotency token,
+  `benefit` jsonb validated by `_reward_benefit_valid` incl. a `free_delivery` gate tied to
+  `platform_settings.promotions.free_delivery_enabled`, `campaign_id` optional ref, `status`
+  `granted|claimed|expired`, `notified_at`). RLS: own-read for the member + admin-read via
+  `has_permission('MEMBER_VIEW', _member_region_id(user_id))`.
+- **Engines:** single deterministic `run_member_engines(date)` (SECURITY DEFINER, `search_path`
+  pinned, service_role-only EXECUTE) grants birthday + anniversary rewards; suspended members and
+  `admin` role excluded; per-period idempotent via `period_key` (double-run = no-op); each grant
+  writes a `member_events` row (`birthday_reward`/`anniversary_reward`) and a notification with
+  idempotency key `reward-<type>-<period>-<uid>`.
+- **Retention:** `retention_policies` (9 M1-default policies; disabled = keep) +
+  `apply_retention_policies()` purges expired rows per policy (archive step for `activity_logs`),
+  skips absent tables without error, audits every purge (`RETENTION_PURGED`), and never touches
+  active sanctions or non-expired campaigns (archived/expired only).
+- **`write_audit` hardening (root-cause fix):** 033's `write_audit` inserted `auth.uid()::text`
+  into NOT NULL `activity_logs.user_id`, which crashed every audit call made from service context
+  (no JWT → NULL). 038 `CREATE OR REPLACE`s it with `COALESCE(auth.uid()::text, 'system')`;
+  signature and service_role-only ACL unchanged.
+- **Flutter layer:** new `features/rewards` module (registered in `lib/module_registry.dart`,
+  `/rewards` route, profile tile) with freezed `MemberReward` (`benefitKind` getter via
+  `const MemberReward._()`), own-read `SupabaseRewardsDataSource` using repo-convention
+  snake_case→camelCase `_fromRow` mapping (**no `@JsonKey` on factory params**), repository impl
+  wrapping `ServerException`, `myRewardsProvider` (autoDispose, gated on `AuthAuthenticated.user.id`,
+  empty list for guests), and an l10n-driven `RewardsPage`. `NotificationType.reward` added with
+  icon/color mapping (incl. the admin push-notifications exhaustive switch).
+
+### Rationale
+- A ledger + idempotent engine keeps rewards grant-once and audit-traced; config-driven benefit
+  selection avoids hardcoded benefit logic in the engine (architecture-first rule).
+- Retention as configurable policies (rather than hardcoded deletes) matches the 2.3 §19 privacy
+  contract and stays owner-tunable via the admin surface.
+- The probe exposed a real service-context crash before it could affect production retention runs;
+  the COALESCE fix keeps audit identity (JWT when present, `system` in trusted service context).
+- Flutter integration mirrors proven repo patterns (service_audio_logs module shape,
+  notifications `_fromRow`, profile usecase-provider wiring) so the feature is modular, registered,
+  and independently tested (8 new tests).
+
+### Consequences
+- 039/040 campaign facts unchanged; `campaign_expire` whitelist in 039 remains the campaign
+  lifecycle path (engine reads it, never mutates campaigns directly).
+- `write_audit` now tolerates service-context callers; callers that need real actor identity must
+  run under a JWT (authenticated/service_role RPC paths keep their existing `auth.uid()` guards).
+- Flutter consumers map `RewardType`/`RewardStatus` by `.name` (DB vocab), keeping enum drift
+  visible at parse time; `benefitKind` renders benefit labels l10n-driven.

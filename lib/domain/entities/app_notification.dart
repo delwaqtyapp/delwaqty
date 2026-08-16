@@ -46,6 +46,8 @@ enum NotificationType {
   success,
   @JsonValue('reminder')
   reminder,
+  @JsonValue('reward')
+  reward,
 }
 
 class NotificationPayload {

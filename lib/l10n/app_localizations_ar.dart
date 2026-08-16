@@ -249,6 +249,52 @@ class AppLocalizationsAr extends AppLocalizations {
   String get notifications => 'الإشعارات';
 
   @override
+  String get rewards => 'المكافآت';
+
+  @override
+  String get rewardsHint => 'مكافآت عيد الميلاد وذكرى الحساب';
+
+  @override
+  String get noRewards => 'لا توجد مكافآت بعد';
+
+  @override
+  String get noRewardsMessage =>
+      'تُمنح المكافآت في عيد ميلادك وفي ذكرى حسابك السنوية.';
+
+  @override
+  String get rewardBirthday => 'مكافأة عيد الميلاد';
+
+  @override
+  String get rewardAnniversary => 'مكافأة ذكرى الحساب';
+
+  @override
+  String get rewardStatusGranted => 'ممنوحة';
+
+  @override
+  String get rewardStatusClaimed => 'تم استلامها';
+
+  @override
+  String get rewardStatusExpired => 'منتهية';
+
+  @override
+  String get benefitNone => 'هدية شكر';
+
+  @override
+  String get benefitCoupon => 'كوبون';
+
+  @override
+  String get benefitPromoCode => 'كود خصم';
+
+  @override
+  String get benefitOffer => 'عرض';
+
+  @override
+  String get benefitCodeCopy => 'كود خصم';
+
+  @override
+  String get benefitFreeDelivery => 'توصيل مجاني';
+
+  @override
   String get back => 'رجوع';
 
   @override

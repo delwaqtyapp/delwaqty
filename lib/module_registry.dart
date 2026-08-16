@@ -25,6 +25,7 @@ import 'package:delwaqty/features/location_tracking/location_tracking_module.dar
 import 'package:delwaqty/features/support_chat/support_chat_module.dart';
 import 'package:delwaqty/features/home_services/home_services_module.dart';
 import 'package:delwaqty/features/regions/regions_module.dart';
+import 'package:delwaqty/features/rewards/rewards_module.dart';
 
 void registerAllModules() {
   final registry = FeatureRegistry.instance;
@@ -56,6 +57,7 @@ void registerAllModules() {
     OrdersModule(),
     HomeServicesModule(),
     RegionsModule(),
+    RewardsModule(),
   ]);
 
   registry.freeze();

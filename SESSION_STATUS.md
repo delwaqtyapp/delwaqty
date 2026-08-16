@@ -1,10 +1,155 @@
 # SESSION_STATUS.md
 
-> **Last updated:** 2026-08-15 Session 48 (Phase 2.1B Egypt Geographic Coverage — IMPLEMENTATION complete + **post-gate independent review passed; findings F1–F4 fixed and re-verified live. Verdict: 🟢 GATE GREEN** — migration 032 applied + verified live, Flutter layer extended, tests green, gate report delivered; **no commit/push until user approves**)
+> **Last updated:** 2026-08-16 Session 51 — **PROMOTION MIGRATION 040 APPLIED LIVE + 040 GATE 🟢 PASS → STOPPED**
+> (`docs/HANDOFF/PHASE_2_PROMOTION_MIGRATION_040_GATE.md`): `040_promotion_targeting_media_approval.sql` live on
+> `bttnlkmwhorjamzemwda` (`campaign_targets` + `approval_requests` + `campaign_media` + `campaign-media`
+> bucket + 8 lifecycle RPCs + scope/storage helpers; 44/44 checks green; idempotent; non-destructive;
+> Dart migration tests 20/20; full suite 751 pass). **Awaiting owner approval of the 040 gate. No migration
+> 041/042, no Flutter changes, no commit until then.**
+>
+> **Open gate (Session 50, approved in principle):** migration 039 gate 🟢 PASS — 040 was authorized by the
+> owner's O1–O6 ratification and was implemented under it; the remaining gates are 041/042 (each stops for
+> approval).
+>
+> **Open gate (Session 49, still pending):** Phase 2.3 decision-lock `PHASE_2_3_DECISION_LOCK_REPORT.md` — 🟡 awaiting owner ratification (D1/D2 modifications + M1–M6 + M-D1…M-D6) before 2.3A (migration 033).
 
 ---
 
-## Current Task — PHASE 2.1B: EGYPT COMPLETE GEOGRAPHIC COVERAGE — IMPLEMENTATION (Session 48)
+## Current Task — PROMOTION PLATFORM: MIGRATION 040 GATE 🟢 PASS — STOPPED (Session 51)
+
+**Task (user):** implement migration 040 (`promotion_targeting_media_approval`) per the owner-authorized
+040 directive — targeting + audience + generic `approval_requests` + lifecycle RPCs + `campaign-media`
+bucket; then STOP with `docs/HANDOFF/PHASE_2_PROMOTION_MIGRATION_040_GATE.md`. Do NOT start 041/042/Phase
+2.4, do NOT commit.
+
+**Completed this session:**
+- **Design (ADR-060):** targeting = `campaign_targets` junction (NULL region = national, partial unique
+  `campaign_targets_national_unique`); audience = existing `campaigns.target_roles`; `approval_requests`
+  created verbatim per 2.3 §19 contract; 8 SECURITY DEFINER lifecycle RPCs + scope/storage helpers; media
+  = storage-reference metadata; orphan cleanup via `campaign_purge_media` (terminal states only); no
+  second hierarchy (owner + `is_admin()` + `admin_region_assignments` scope). **Review fixes:** D1
+  `campaigns_set_creator` forces `status := 'draft'` on INSERT (039 guard is UPDATE-only — closes
+  published-bypass); D2 `campaign_purge_media` uses `set_config('storage.allow_delete_query', …)` GUC
+  before storage DELETE (plain SQL DELETE is blocked by `storage.protect_delete()` 42501).
+- **Migration `040_promotion_targeting_media_approval.sql`** WRITTEN + **APPLIED live** (HTTP 201 ×3:
+  initial + post-fix + idempotency re-run): 3 tables RLS-on + 6 indexes (incl. both partial uniques);
+  14 functions (`search_path = public, pg_temp`, 13 ACL-granted, `campaigns_set_creator` trigger-only);
+  18 policies (14 table + 4 storage); bucket `campaign-media` (private, 5 MB, png/jpeg/webp).
+- **ACL audit:** anon nothing; authenticated = `arwd` targets/media/banners, `arw` campaigns (**no
+  DELETE**), `r` approval_requests (writes RPC-only); service_role ALL.
+- **44/44 checks green (live):** targeting/scope matrix across gadmin/radmin/owner; audience + benefit
+  validation; approval center (submit/approve/reject/resubmit, notifications `campaign-approve/-reject-<id>`,
+  self-approval blocked, reject-reason required, already-decided, unsupported type, duplicate-pending 23505);
+  lifecycle (force-draft, submit→pending_review, approve→approved, publish→published+published_at,
+  scheduled window, pause/resume, cancel→cancelled, archive→archived, reject→draft→resubmit); negatives
+  (double-submit, invalid decision, pause-draft, cancel-no-reason, purge-non-terminal, radmin-national-
+  publish, customer/anon 42501/0-rows, no DELETE grant, approval-writes RPC-only, radmin scoped-filter);
+  storage (in-scope upload OK, out-of-scope/bad-path denied, published readable, unpublished hidden,
+  purge deletes objects + deactivates media/banners, safe path parsing).
+- **Dart migration tests:** `test/features/promotion/migrations/promotion_migration_040_test.dart`
+  (20/20 pass; parses the SQL file as source of truth — precedent: egypt_geographic_dataset_test.dart);
+  full suite `flutter test` = **751/751**; `flutter analyze` = 0 errors (546 = exact pre-existing baseline).
+- **Non-destruction + cleanup:** regions 6,157 / users 5 untouched; buckets 5→6 (campaign-media intended);
+  all `040_*` fixtures + test admins removed; P_ARCHIVE + all probes txn-rolled-back (final state re-checked).
+- **Docs:** ADR-060 in `docs/DECISION_LOG.md`; `docs/HANDOFF/PHASE_2_PROMOTION_MIGRATION_040_GATE.md`;
+  `ROADMAP.md`; this file.
+- **STOPPED 🟢 — awaiting owner approval of the 040 gate. No migration 041/042, no Flutter changes, no
+  commit/push.**
+
+---
+
+## Previous Task — PROMOTION PLATFORM: MIGRATION 039 GATE 🟢 PASS — STOPPED (Session 50)
+
+**Completed this session:**
+- **Pre-implementation verification:** `regional_offers` absent live + zero code refs → write-only compat;
+  no campaign tables live; no `approval_requests` live (040 owns it); no `campaign-media` bucket; regions
+  6,157; users 5 (0 admins); hardcoded carousel re-confirmed; Flutter 3.44.6 available.
+- **ADR-059** appended to `docs/DECISION_LOG.md` (Promotion/Regional Offers Merge; migration map 039–042;
+  approval_requests ownership; 2.3 037/034 amendments).
+- **`docs/HANDOFF/PHASE_2_PROMOTION_IMPLEMENTATION_PLAN.md`** delivered (domain model, targeting,
+  approval, media, feed/caching, analytics, phases + gates, compat, risks, exact 039 scope).
+- **Migration `039_promotion_campaign_schema.sql`** WRITTEN + **APPLIED live** (HTTP 201; idempotent
+  re-run OK): `campaigns` (12 types, priority lane, lifecycle statuses, bilingual, referential benefit,
+  frequency, audience), `campaign_banners`, `campaign_reviews`, `campaign_cta_routes` (39-route allowlist
+  seeded from FeatureRegistry), `campaign_seen`; 4 SECURITY DEFINER validators (priority/cta/benefit/
+  target_roles) + `campaigns_guard_status_change` trigger + `campaigns_emergency_critical`/window CHECKs.
+- **039 gate — 🟢 PASS (21/21 probes):** RLS ON all 5 tables (content tables = admin SELECT only; no
+  client write policies; `campaign_seen` = no client access); ACLs (anon nothing except cta_routes SELECT;
+  authenticated SELECT-only on 4 tables; campaign_seen none); anon EXECUTE revoked on validators +
+  `SET search_path` verified; NOT on realtime; anon SELECT campaigns 42501; customer 0 rows; owner visible;
+  customer INSERT/UPDATE/DELETE + campaign_seen 42501; javascript: CTA false; free_delivery false until
+  042 flag; fake coupon false; emergency⇒critical enforced; trigger blocks draft→published, allows
+  draft→pending_review; existing data untouched (regions 6,157, users 5, buckets 5, coupons/offers/
+  promo_codes unchanged); analyzer 0 errors (546 = baseline); secret scan clean; new files LF-clean
+  (DECISION_LOG CRLF = pre-existing format); fixtures cleaned.
+- **Gate report:** `docs/HANDOFF/PHASE_2_PROMOTION_MIGRATION_039_GATE.md`.
+- **STOPPED 🟢 — awaiting owner approval of the 039 gate. No migration 040, no Flutter changes, no
+  commit/push.**
+
+---
+
+## Previous Task — PROMOTION, CONTENT & CAMPAIGN ARCHITECTURE AUDIT (Session 50, part 1)
+
+**Verdict: 🟡 REQUIRES OWNER DECISION → 🟢 APPROVED (O1–O6).** Full audit:
+`docs/HANDOFF/PHASE_2_PROMOTION_CONTENT_ARCHITECTURE_AUDIT.md` (40 sections + M verdict letter).
+Owner approved all 6 decisions + authorized implementation (ADR-059). Baseline `b1081d2`; no code/migration
+produced in the audit phase. See the implementation plan (above) for the resulting contract.
+
+---
+
+## Previous Task — PHASE 2.3: MEMBER MANAGEMENT + SUPPORT + EMERGENCY — ARCHITECTURE AUDIT (Session 49)
+
+**Task (user):** per the Phase 2.3 architecture directive — build a controlled operating platform
+(hierarchical admin delegation, member management, moderation, emergency, regional offers, approvals,
+birthday/anniversary) over one backend, **audit-only**: inspect repo + live DB, deliver
+`docs/HANDOFF/PHASE_2_3_MEMBER_MANAGEMENT_SUPPORT_ARCHITECTURE_AUDIT.md` (32 required sections), update
+docs, **STOP. No product code, no migration 033, no migrations beyond 033, no commit/push, no Phase 2.4.**
+
+**Completed this session:**
+- **Baseline:** HEAD `b1081d2` (sprint 76), master clean, local==remote.
+- **Live evidence (Management API `bttnlkmwhorjamzemwda`):** 65 tables (all RLS except PostGIS);
+  `users` shape (5 rows, 1 owner, 0 admin; **no `date_of_birth`, no `account_status`**); `sanctions`
+  CHECK (warning/fine/temporary_ban/permanent_ban/suspension) — **reuse for moderation**; `sos_alerts`
+  (ride-bound, no admin SELECT policy); `activity_logs` (user_id text, details jsonb); `driver_documents`;
+  realtime publication (chat_messages/chat_rooms/complaints/notifications/sos_alerts/sanctions/
+  location_updates/driver_locations + 8 more); app RPC inventory (`is_admin*`, `admin_set_user_role`,
+  `admin_broadcast_notification`, `resolve_sos_alert`, `geo_region_for_point`, …).
+- **Three live security findings captured (fixes in 033):** (1) `activity_logs` INSERT policy
+  **`TO public` WITH CHECK true** — anon can poison the audit log; (2) `driver_locations` "driver
+  location read" = **`auth.role()='authenticated'`** — any user can read any driver live location;
+  (3) `sos_alerts` has no admin SELECT policy.
+- **Architecture designed (§1–§32 of the audit):** dual admin hierarchy (supervision tree
+  `admin_management` + region scope `admin_region_assignments`, no fixed levels) · permission model
+  (computed defaults + `admin_permission_grants`; central `has_permission()`) · member visibility
+  matrix + "why can I see this?" `explain_admin_access()` · moderation on `sanctions` + enforceable
+  `users.account_status` · account deletion = member management (soft-delete + anonymize, audit
+  preserved, NOT a moderation action) · emergency command center (realtime SOS + emergency chat) ·
+  **live audio foundation only** (`emergency_audio_sessions` + EMERGENCY_AUDIO grant + customer-visible
+  state; no transport chosen, no recording) · support chat migration 033 (additive chat_rooms cols +
+  guard triggers + deterministic routing region→parent→global→owner + escalation same-room ledger) ·
+  member timeline `member_events` · birthday/anniversary engines with `member_rewards` idempotency ·
+  `regional_offers`+`offer_reviews` (distinct from merchant `offers`) · generic `approval_requests`
+  Approval Center · RLS/RPC/audit design · privacy + configurable retention · schema/migration/test/
+  performance strategy · risk register · implementation phases 2.3A–2.3G · **10 owner decisions (§32)**.
+- **Docs:** `PHASE_2_3_MEMBER_MANAGEMENT_SUPPORT_ARCHITECTURE_AUDIT.md` (supersedes doc 32 for the 2.3
+  design) · `docs/DECISION_LOG.md` **ADR-058** · `ROADMAP.md` (2.3→DESIGNED, 2.4=`034`, 2.5=`035`) ·
+  `SESSION_STATUS.md` (this section).
+- **STOPPED 🟡 — awaiting owner approval of the architecture + §32 decisions. No code, no migration,
+  no commit/push.**
+- **Decision-lock sub-gate (same session):** delivered `docs/HANDOFF/PHASE_2_3_DECISION_LOCK_REPORT.md`
+  — extracted the 10 §32 decisions verbatim; per-decision review (ID/proposal/why/impact/risks/
+  recommendation/status: **8 APPROVED, 2 APPROVED WITH MODIFICATION** D1+D2, none rejected);
+  6 contradictions resolved (C1–C6); 6 missing decisions (retention defaults, offer approval depth,
+  sanction→approval mapping, birthday benefit approach, deletion token format, Phase 2.5 primitive
+  boundary); 6 recommended modifications (M-D1…M-D6); full 033–038 migration map; A–S test strategy;
+  privacy model; Phase 2.5 contract; risk register (R1–R14); implementation order 2.3A–2.3G with exit
+  criteria. **Final status: 🟡 REQUIRES OWNER DECISION** — ratification of the 2 modifications, 6
+  modifications, and 6 missing decisions is required before 2.3A may be written. Baseline re-verified
+  live unchanged (5 users, 1 owner, users.email UNIQUE, no 033). No code/migration/commit produced.
+
+---
+
+## Previous Task — PHASE 2.1B: EGYPT COMPLETE GEOGRAPHIC COVERAGE — IMPLEMENTATION (Session 48)
 
 **Task (user):** execute the APPROVED Phase 2.1B implementation (D1/D2/D3 + migration 032):
 migration `032` (idempotent/deterministic/non-destructive/auditable/RLS+grants protected), 030+031

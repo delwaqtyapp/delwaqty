@@ -1,6 +1,6 @@
 # ROADMAP.md — Delwaqty Development Roadmap
 
-> **Last updated:** 2026-08-15
+> **Last updated:** 2026-08-16
 > **Authority:** PROJECT_CONSTITUTION.md §15 (v2.0)
 
 ---
@@ -134,13 +134,14 @@
 |-----------|-------|-----------|--------|
 | 2.0 | Architecture audit (D1–D4 defined) | — | ✅ (`25_SPRINT_76_PHASE2_ARCHITECTURE_AUDIT.md`) |
 | 2.1 | Egypt regions: canonical 27-governorate hierarchy + `user_region_preferences` + Flutter `regions` module | `030_regional_system` | ✅ shipped `1f3ba02`, live-verified (`27_SPRINT_76_PHASE2_REGIONS.md`) |
-| 2.1B | Egypt complete geographic coverage: extend admin hierarchy (markaz/aqsam/cities/villages/new cities) + `geo_places`/`geo_aliases`/`geo_admin_boundaries` + server-side GPS/spatial resolution (PostGIS `geo_region_for_point`) | `032_egypt_geographic_schema` + `032_egypt_geographic_seed` | ✅ **IMPLEMENTED + LIVE-VERIFIED + INDEPENDENT REVIEW PASSED, GATE GREEN (awaiting commit)** (ADR-057 + amendment A1–A4; `30_..._AUDIT.md` + `31_..._PRE_COMMIT_GATE.md`; 6,157 regions / 64 places / 6,879 aliases / 374 valid boundaries live; RPC EXECUTE anon-revoked; licenses per source; analyzer 0/0 region files; tests 731/731) |
-| **2.2** | **Admin hierarchy (D1): owner > admin tiers, `admin_region_assignments`, `is_admin_for_region()`, RLS standardization on `is_admin()` (fix literal-role + raw_user_meta_data drift), shared Dart `isAdminUser` helper, admin_web auth gate** | `031_admin_hierarchy_region_assignments` | ✅ **IMPLEMENTED + LIVE-VERIFIED, awaiting commit** (`28_..._ADMIN_HIERARCHY_AUDIT.md` + `29_..._FINAL_PRE_COMMIT_GATE.md`, ADR-055/056) |
-| 2.3 | Chat backend (D3): EXTEND `chat_rooms` (priority/region/assignment/escalation cols), `assign_support_chat`/`escalate_support_chat` RPCs, region routing parent-walk, realtime | `032_support_conversations_priority` | 🏗 contract specified (doc 28 §5) |
-| 2.4 | Notifications: admin send path + conversation deep-links | `034_notification_chat_deeplinks` | 🏗 pending |
-| 2.5 | Escalation engine: `escalation_events` + engine RPCs; wire complaints `escalated` status | `033_escalation_engine` | 🏗 pending |
+| 2.1B | Egypt complete geographic coverage: extend admin hierarchy (markaz/aqsam/cities/villages/new cities) + `geo_places`/`geo_aliases`/`geo_admin_boundaries` + server-side GPS/spatial resolution (PostGIS `geo_region_for_point`) | `032_egypt_geographic_schema` + `032_egypt_geographic_seed` | ✅ **SHIPPED** in sprint 76 (`b1081d2`; ADR-057 + amendment A1–A4; `30_..._AUDIT.md` + `31_..._PRE_COMMIT_GATE.md`; 6,157 regions / 64 places / 6,879 aliases / 374 valid boundaries live; RPC EXECUTE anon-revoked; licenses per source; analyzer 0/0 region files; tests 731/731) |
+| **2.2** | **Admin hierarchy (D1): owner > admin tiers, `admin_region_assignments`, `is_admin_for_region()`, RLS standardization on `is_admin()` (fix literal-role + raw_user_meta_data drift), shared Dart `isAdminUser` helper, admin_web auth gate** | `031_admin_hierarchy_region_assignments` | ✅ **SHIPPED** in sprint 76 (`b1081d2`; `28_..._ADMIN_HIERARCHY_AUDIT.md` + `29_..._FINAL_PRE_COMMIT_GATE.md`, ADR-055/056) |
+| 2.3 | Member Management + Support + Emergency (D3): EXTEND `chat_rooms` (priority incl. `emergency`/region/assignment/escalation) + routing/escalation + guard triggers; admin delegation (supervision tree + permission grants + Approval Center); member mgmt/moderation/deletion; emergency command center + audio foundation; regional offers + approval workflow; birthday/anniversary engines; RLS fixes (activity_logs insert, driver_locations read, sos_alerts admin) | `033_support_chat_priority_region_assignment` (then 034–038 per sub-phase) | 🏗 **DESIGNED — awaiting approval** (`PHASE_2_3_MEMBER_MANAGEMENT_SUPPORT_ARCHITECTURE_AUDIT.md`, ADR-058) |
+| 2.4 | Notifications: FCM send path + conversation deep-links | `034_notification_chat_deeplinks` | 🏗 pending |
+| 2.5 | Escalation engine: `escalation_events` + engine RPCs; wire complaints `escalated` status | `035_escalation_engine` | 🏗 pending |
 | 2.6 | Realtime hardening | — | 🏗 pending |
 | 2.7 | Security hardening (029 RPC search_path audit, 016 pattern everywhere) | — | 🏗 pending |
+| **Promo** | **Promotion / Content / Campaign platform (owner O1–O6 APPROVED):** `campaigns` (types incl. offer/promotion/coupon/announcement/operational/emergency; `regional_offers` **MERGE/REPLACED**), `campaign_banners`, `campaign_reviews`, `campaign_cta_routes`, `campaign_seen` (frequency) · targeting `campaign_targets` (multi-region junction) · generic `approval_requests` reuse (owned by 040; 2.3 034 amended) · `campaign-media` bucket · feed `get_active_campaigns` (server-authoritative, SECURITY DEFINER, no client SELECT) · analytics `campaign_events`→`campaign_metrics` · Flutter home carousel/campaign detail replacing hardcoded `_PromoCarousel` (O6: no auto-published seeds) | **`039_promotion_campaign_schema` → `040` targeting/media/approval → `041` security/feed → `042` analytics/config** | 🏗 **IMPLEMENTATION IN PROGRESS — 039 + 040 APPLIED LIVE, GATES 🟢 PASS → STOPPED for owner approval of 040 gate** (039/040 gate reports, ADR-059/060) |
 
 **D-resolutions:** D1 → ADR-049 (+ADR-055/056) · D2 → ADR-050 (migration 030) · D3 → 2.3 (extend
 `chat_rooms`, decided in doc 28 §5) · D4 → 2.5 (escalation engine + priority server-side only).

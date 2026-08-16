@@ -494,6 +494,13 @@ class ProfilePage extends ConsumerWidget {
           onTap: () => context.push('/wallet'),
         ),
         _SectionTile(
+          icon: Icons.card_giftcard_rounded,
+          color: AppColors.brandViolet,
+          title: l10n.rewards,
+          subtitle: l10n.rewardsHint,
+          onTap: () => context.push('/rewards'),
+        ),
+        _SectionTile(
           icon: Icons.notifications_outlined,
           color: AppColors.infoLight,
           title: l10n.notifications,

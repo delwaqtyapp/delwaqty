@@ -249,6 +249,52 @@ class AppLocalizationsEn extends AppLocalizations {
   String get notifications => 'Notifications';
 
   @override
+  String get rewards => 'Rewards';
+
+  @override
+  String get rewardsHint => 'Birthday and anniversary rewards';
+
+  @override
+  String get noRewards => 'No rewards yet';
+
+  @override
+  String get noRewardsMessage =>
+      'Rewards are granted on your birthday and on your account anniversary.';
+
+  @override
+  String get rewardBirthday => 'Birthday reward';
+
+  @override
+  String get rewardAnniversary => 'Anniversary reward';
+
+  @override
+  String get rewardStatusGranted => 'Granted';
+
+  @override
+  String get rewardStatusClaimed => 'Claimed';
+
+  @override
+  String get rewardStatusExpired => 'Expired';
+
+  @override
+  String get benefitNone => 'Thank you gift';
+
+  @override
+  String get benefitCoupon => 'Coupon';
+
+  @override
+  String get benefitPromoCode => 'Promo code';
+
+  @override
+  String get benefitOffer => 'Offer';
+
+  @override
+  String get benefitCodeCopy => 'Promo code';
+
+  @override
+  String get benefitFreeDelivery => 'Free delivery';
+
+  @override
   String get back => 'Back';
 
   @override

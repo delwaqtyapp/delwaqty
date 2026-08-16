@@ -399,6 +399,8 @@ class _AdminPushNotificationsPageState
         return Icons.shield_outlined;
       case NotificationType.message:
         return Icons.chat_bubble_outline_rounded;
+      case NotificationType.reward:
+        return Icons.card_giftcard_rounded;
     }
   }
 }

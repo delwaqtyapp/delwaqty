@@ -303,6 +303,8 @@ class _NotificationCard extends StatelessWidget {
         return AppColors.successLight;
       case NotificationType.reminder:
         return AppColors.orderPreparing;
+      case NotificationType.reward:
+        return AppColors.brandPurple;
     }
   }
 
@@ -332,6 +334,8 @@ class _NotificationCard extends StatelessWidget {
         return Icons.check_circle_outline_rounded;
       case NotificationType.reminder:
         return Icons.alarm_rounded;
+      case NotificationType.reward:
+        return Icons.card_giftcard_rounded;
     }
   }
 

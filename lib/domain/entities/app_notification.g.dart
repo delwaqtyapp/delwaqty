@@ -49,4 +49,5 @@ const _$NotificationTypeEnumMap = {
   NotificationType.warning: 'warning',
   NotificationType.success: 'success',
   NotificationType.reminder: 'reminder',
+  NotificationType.reward: 'reward',
 };

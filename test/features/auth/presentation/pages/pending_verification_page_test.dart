@@ -73,6 +73,31 @@ void main() {
     verify(() => mockRepo.getCurrentUser()).called(1);
   });
 
+  testWidgets('shows rejection reason when provided', (tester) async {
+    final user = _rejectedUser.copyWith(rejectionReason: 'Blurry ID card');
+    when(() => mockRepo.getCurrentUser()).thenAnswer((_) async => user);
+
+    await tester.pumpWidget(_buildTestApp(mockRepo));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Reason: Blurry ID card'), findsOneWidget);
+  });
+
+  testWidgets('re-apply button opens the documents flow', (tester) async {
+    when(() => mockRepo.getCurrentUser())
+        .thenAnswer((_) async => _rejectedUser);
+
+    await tester.pumpWidget(_buildTestApp(mockRepo));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Re-apply'), findsOneWidget);
+    await tester.tap(find.text('Re-apply'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Complete your verification'), findsOneWidget);
+    expect(find.text('Submit Documents'), findsOneWidget);
+  });
+
   testWidgets('shows review-only state when docs present and pending',
       (tester) async {
     when(() => mockRepo.getCurrentUser()).thenAnswer((_) async => _pendingUser);

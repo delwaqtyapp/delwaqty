@@ -1989,6 +1989,30 @@ class AppLocalizationsAr extends AppLocalizations {
       'تم رفض مستندات تسجيلك. يرجى التواصل مع الدعم للمساعدة أو المحاولة مرة أخرى للتسجيل.';
 
   @override
+  String verificationRejectionReason(Object reason) {
+    return 'السبب: $reason';
+  }
+
+  @override
+  String get verificationRejectReasonTitle => 'سبب الرفض';
+
+  @override
+  String get verificationRejectReasonHint => 'مطلوب. سيظهر هذا السبب للعضو.';
+
+  @override
+  String get reapplyVerification => 'إعادة التقديم';
+
+  @override
+  String get reapplyVerificationConfirmation => 'إعادة التقديم بمستندات جديدة؟';
+
+  @override
+  String get reapplyVerificationSuccess => 'تمت إعادة إرسال التحقق للمراجعة';
+
+  @override
+  String get verificationReapplyFailed =>
+      'فشلت إعادة إرسال التحقق. يرجى المحاولة مرة أخرى.';
+
+  @override
   String get noDeliveriesAvailable => 'لا توجد طلبات توصيل متاحة';
 
   @override

@@ -3884,6 +3884,48 @@ abstract class AppLocalizations {
   /// **'Your registration documents were rejected. Please contact support for help or try registering again.'**
   String get verificationRejectedMessage;
 
+  /// No description provided for @verificationRejectionReason.
+  ///
+  /// In en, this message translates to:
+  /// **'Reason: {reason}'**
+  String verificationRejectionReason(Object reason);
+
+  /// No description provided for @verificationRejectReasonTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Reason for rejection'**
+  String get verificationRejectReasonTitle;
+
+  /// No description provided for @verificationRejectReasonHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Required. This will be shown to the member.'**
+  String get verificationRejectReasonHint;
+
+  /// No description provided for @reapplyVerification.
+  ///
+  /// In en, this message translates to:
+  /// **'Re-apply'**
+  String get reapplyVerification;
+
+  /// No description provided for @reapplyVerificationConfirmation.
+  ///
+  /// In en, this message translates to:
+  /// **'Re-apply with new documents?'**
+  String get reapplyVerificationConfirmation;
+
+  /// No description provided for @reapplyVerificationSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Verification resubmitted for review'**
+  String get reapplyVerificationSuccess;
+
+  /// No description provided for @verificationReapplyFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to resubmit verification. Please try again.'**
+  String get verificationReapplyFailed;
+
   /// No description provided for @noDeliveriesAvailable.
   ///
   /// In en, this message translates to:

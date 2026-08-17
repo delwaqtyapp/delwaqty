@@ -314,9 +314,12 @@ class AdminService {
     }
   }
 
-  Future<bool> rejectVerification(String userId) async {
+  Future<bool> rejectVerification(
+    String userId, {
+    required String reason,
+  }) async {
     try {
-      await _repository.rejectVerification(userId);
+      await _repository.rejectVerification(userId, reason: reason);
       return true;
     } catch (e) {
       debugPrint('AdminService.rejectVerification error: $e');

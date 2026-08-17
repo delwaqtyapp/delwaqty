@@ -38,6 +38,7 @@ mixin _$UserModel {
   String? get profilePhotoUrl => throw _privateConstructorUsedError;
   String? get tradeLicenseUrl => throw _privateConstructorUsedError;
   String? get drivingLicenseUrl => throw _privateConstructorUsedError;
+  String? get rejectionReason => throw _privateConstructorUsedError;
   DateTime? get dateOfBirth => throw _privateConstructorUsedError;
   DateTime get createdAt => throw _privateConstructorUsedError;
   DateTime? get updatedAt => throw _privateConstructorUsedError;
@@ -74,6 +75,7 @@ abstract class $UserModelCopyWith<$Res> {
     String? profilePhotoUrl,
     String? tradeLicenseUrl,
     String? drivingLicenseUrl,
+    String? rejectionReason,
     DateTime? dateOfBirth,
     DateTime createdAt,
     DateTime? updatedAt,
@@ -111,6 +113,7 @@ class _$UserModelCopyWithImpl<$Res, $Val extends UserModel>
     Object? profilePhotoUrl = freezed,
     Object? tradeLicenseUrl = freezed,
     Object? drivingLicenseUrl = freezed,
+    Object? rejectionReason = freezed,
     Object? dateOfBirth = freezed,
     Object? createdAt = null,
     Object? updatedAt = freezed,
@@ -181,6 +184,10 @@ class _$UserModelCopyWithImpl<$Res, $Val extends UserModel>
                 ? _value.drivingLicenseUrl
                 : drivingLicenseUrl // ignore: cast_nullable_to_non_nullable
                       as String?,
+            rejectionReason: freezed == rejectionReason
+                ? _value.rejectionReason
+                : rejectionReason // ignore: cast_nullable_to_non_nullable
+                      as String?,
             dateOfBirth: freezed == dateOfBirth
                 ? _value.dateOfBirth
                 : dateOfBirth // ignore: cast_nullable_to_non_nullable
@@ -225,6 +232,7 @@ abstract class _$$UserModelImplCopyWith<$Res>
     String? profilePhotoUrl,
     String? tradeLicenseUrl,
     String? drivingLicenseUrl,
+    String? rejectionReason,
     DateTime? dateOfBirth,
     DateTime createdAt,
     DateTime? updatedAt,
@@ -261,6 +269,7 @@ class __$$UserModelImplCopyWithImpl<$Res>
     Object? profilePhotoUrl = freezed,
     Object? tradeLicenseUrl = freezed,
     Object? drivingLicenseUrl = freezed,
+    Object? rejectionReason = freezed,
     Object? dateOfBirth = freezed,
     Object? createdAt = null,
     Object? updatedAt = freezed,
@@ -331,6 +340,10 @@ class __$$UserModelImplCopyWithImpl<$Res>
             ? _value.drivingLicenseUrl
             : drivingLicenseUrl // ignore: cast_nullable_to_non_nullable
                   as String?,
+        rejectionReason: freezed == rejectionReason
+            ? _value.rejectionReason
+            : rejectionReason // ignore: cast_nullable_to_non_nullable
+                  as String?,
         dateOfBirth: freezed == dateOfBirth
             ? _value.dateOfBirth
             : dateOfBirth // ignore: cast_nullable_to_non_nullable
@@ -368,6 +381,7 @@ class _$UserModelImpl extends _UserModel {
     this.profilePhotoUrl,
     this.tradeLicenseUrl,
     this.drivingLicenseUrl,
+    this.rejectionReason,
     this.dateOfBirth,
     required this.createdAt,
     this.updatedAt,
@@ -415,6 +429,8 @@ class _$UserModelImpl extends _UserModel {
   @override
   final String? drivingLicenseUrl;
   @override
+  final String? rejectionReason;
+  @override
   final DateTime? dateOfBirth;
   @override
   final DateTime createdAt;
@@ -423,7 +439,7 @@ class _$UserModelImpl extends _UserModel {
 
   @override
   String toString() {
-    return 'UserModel(id: $id, email: $email, fullName: $fullName, username: $username, phone: $phone, avatarUrl: $avatarUrl, language: $language, isOnboarded: $isOnboarded, isBiometricEnabled: $isBiometricEnabled, role: $role, userType: $userType, verificationStatus: $verificationStatus, idCardUrl: $idCardUrl, profilePhotoUrl: $profilePhotoUrl, tradeLicenseUrl: $tradeLicenseUrl, drivingLicenseUrl: $drivingLicenseUrl, dateOfBirth: $dateOfBirth, createdAt: $createdAt, updatedAt: $updatedAt)';
+    return 'UserModel(id: $id, email: $email, fullName: $fullName, username: $username, phone: $phone, avatarUrl: $avatarUrl, language: $language, isOnboarded: $isOnboarded, isBiometricEnabled: $isBiometricEnabled, role: $role, userType: $userType, verificationStatus: $verificationStatus, idCardUrl: $idCardUrl, profilePhotoUrl: $profilePhotoUrl, tradeLicenseUrl: $tradeLicenseUrl, drivingLicenseUrl: $drivingLicenseUrl, rejectionReason: $rejectionReason, dateOfBirth: $dateOfBirth, createdAt: $createdAt, updatedAt: $updatedAt)';
   }
 
   @override
@@ -459,6 +475,8 @@ class _$UserModelImpl extends _UserModel {
                 other.tradeLicenseUrl == tradeLicenseUrl) &&
             (identical(other.drivingLicenseUrl, drivingLicenseUrl) ||
                 other.drivingLicenseUrl == drivingLicenseUrl) &&
+            (identical(other.rejectionReason, rejectionReason) ||
+                other.rejectionReason == rejectionReason) &&
             (identical(other.dateOfBirth, dateOfBirth) ||
                 other.dateOfBirth == dateOfBirth) &&
             (identical(other.createdAt, createdAt) ||
@@ -487,6 +505,7 @@ class _$UserModelImpl extends _UserModel {
     profilePhotoUrl,
     tradeLicenseUrl,
     drivingLicenseUrl,
+    rejectionReason,
     dateOfBirth,
     createdAt,
     updatedAt,
@@ -524,6 +543,7 @@ abstract class _UserModel extends UserModel {
     final String? profilePhotoUrl,
     final String? tradeLicenseUrl,
     final String? drivingLicenseUrl,
+    final String? rejectionReason,
     final DateTime? dateOfBirth,
     required final DateTime createdAt,
     final DateTime? updatedAt,
@@ -565,6 +585,8 @@ abstract class _UserModel extends UserModel {
   String? get tradeLicenseUrl;
   @override
   String? get drivingLicenseUrl;
+  @override
+  String? get rejectionReason;
   @override
   DateTime? get dateOfBirth;
   @override

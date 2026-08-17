@@ -2356,3 +2356,73 @@ During long sessions the connection silently dies: `adb devices` shows stale `of
 - The keepalive must run for the session; it auto-starts with OpenCode and can also be run manually
   (`tool/opencode/keep_adb_alive.sh once|loop`).
 - No product code, migrations, or dependencies changed; gate unaffected.
+
+## ADR-065: Allowlisted deep-link classification layer for `io.delwaqty://`
+
+**Date:** Session 52G (2026-08-17)
+**Status:** Accepted
+**Deciders:** Lead Architect
+
+### Context
+Email-confirm / OAuth returns hit `io.delwaqty://login-callback`. supabase_flutter already owns the
+PKCE auth-callback exchange (`code`/`access_token`) on its own `AppLinks` subscription, and the router
+redirect already lands users on the correct page after the auth listener fires. There was no app-level
+allowlisted classification of inbound URIs, so any deep link was implicitly trusted and there was no
+testable hook point.
+
+### Decision
+1. **`DeepLinkResolver`** (pure) — classify `io.delwaqty://...` URIs; only `login-callback` host maps to
+   `DeepLinkRoute.loginCallback`; unknown hosts / foreign schemes → `null` (allowlist, never trust).
+2. **`DeepLinkService`** — wraps `app_links` 7.2.1 (now a direct dependency) exposing:
+   - `routes` broadcast stream of classified inbound routes,
+   - `initialRoute` (cold-start, via `getInitialLink()`),
+   - injectable `overrideStream` for tests.
+3. **`app.dart`** starts the service and, on `loginCallback`, triggers `checkAuthStatus()` as a cheap,
+   idempotent safety net after the SDK exchange (auth listener already handles the normal path).
+
+### Rationale
+- The SDK + router ownership means a full routing table in Dart would duplicate functionality; the
+  service stays a thin, allowlisted observer with an explicit in-app safety net.
+- A pure resolver is trivially testable; the service stream override makes provider wiring testable.
+
+### Consequences
+- Deep links are classified by an allowlist; unknown hosts are ignored (no navigation side effects).
+- `app_links` moved from transitive (under supabase_flutter) to a direct dependency in `pubspec.yaml`.
+- Backend auth `site_url`/`uri_allow_list` already permit `io.delwaqty://login-callback` (ADR-040);
+  `AndroidManifest.xml` intent filter unchanged (already present, lines 37–42).
+
+## ADR-066: Rejected-verification re-apply through SECURITY DEFINER RPCs (migration 047)
+
+**Date:** Session 52G (2026-08-17)
+**Status:** Accepted
+**Deciders:** Lead Architect
+
+### Context
+Rejected members had no path back: `verification_status` was writable via raw authenticated UPDATE
+(`users_update_admin` RLS / admin repo `/users.update`), `approval_requests` was not wired to
+verification, `notification_destinations` lacked a verification route, and no reject reason was stored.
+
+### Decision
+Migration `047_verification_reapply.sql` (applied live):
+1. **`users.rejection_reason` + `users.rejection_reason_at`** columns store the admin's reject reason.
+2. **`reapply_verification(p_id_card_url, p_profile_photo_url)`** — SECURITY DEFINER; caller must own the
+   row, current status must be `rejected`; sets `pending`, clears reason, writes docs, inserts a
+   notification (`send_push=false`, idempotency key) and audit `VERIFICATION_REAPPLIED`.
+3. **`decide_user_verification(p_user_id, p_decision, p_reason)`** — SECURITY DEFINER; `is_admin()`
+   required, reject mandates a reason; sets status + reason/at, notifies (`send_push=true`,
+   approve → `/profile`, reject → `/pending-verification`), audit `VERIFICATION_DECIDED`.
+4. **`users_guard_account_fields` extended** — authenticated/anon direct `verification_status` writes now
+   raise `'Verification status is managed by the verification RPCs'` (admin repository switched to the
+   RPCs; raw `/users.update` no longer works).
+
+### Rationale
+- Centralized status transitions with guardrails (state machine, required reason, audit, notification)
+  replace ad-hoc admin UPDATEs and the (unreachable-for-reapply) approval_requests path.
+- SECURITY DEFINER + ownership check keeps it safe for members while admins retain `is_admin()` gating.
+- Reject reason flows member-facing (re-apply page) and admin-facing (reason prompt + display).
+
+### Consequences
+- Rejected members see the admin reason and can re-apply with new documents (pending gate resumes).
+- Admin approve/reject now goes through `decide_user_verification` in `admin_repository.dart`;
+  `rejectVerification` requires a `reason` (UI prompts for it).
+- `User`/`UserModel` gained `rejectionReason`; profile repository gained `reapplyVerification`.

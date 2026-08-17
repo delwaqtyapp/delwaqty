@@ -107,3 +107,26 @@ final watchProfileUseCaseProvider = StreamProvider.autoDispose
       final repository = ref.watch(profileRepositoryProvider);
       return repository.watchProfile(userId);
     });
+
+final reapplyVerificationUseCaseProvider =
+    Provider<ReapplyVerificationUseCase>((ref) {
+  return ReapplyVerificationUseCase(ref.watch(profileRepositoryProvider));
+});
+
+class ReapplyVerificationUseCase {
+  ReapplyVerificationUseCase(this._repository);
+
+  final ProfileRepository _repository;
+
+  Future<void> call({
+    required String userId,
+    required String idCardUrl,
+    required String profilePhotoUrl,
+  }) {
+    return _repository.reapplyVerification(
+      userId: userId,
+      idCardUrl: idCardUrl,
+      profilePhotoUrl: profilePhotoUrl,
+    );
+  }
+}

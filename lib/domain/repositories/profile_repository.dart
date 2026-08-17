@@ -21,5 +21,10 @@ abstract class ProfileRepository {
     required List<int> bytes,
     required String fileName,
   });
+  Future<void> reapplyVerification({
+    required String userId,
+    required String idCardUrl,
+    required String profilePhotoUrl,
+  });
   Stream<User> watchProfile(String userId);
 }

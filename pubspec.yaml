@@ -36,6 +36,7 @@ dependencies:
 
   # Routing
   go_router: ^14.0.2
+  app_links: ^7.2.1
 
   # Immutable data models
   freezed_annotation: ^2.4.1

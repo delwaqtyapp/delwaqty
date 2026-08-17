@@ -192,4 +192,55 @@ void main() {
       ).called(1);
     });
   });
+
+  group('ReapplyVerificationUseCase', () {
+    late ReapplyVerificationUseCase useCase;
+
+    setUp(() {
+      useCase = ReapplyVerificationUseCase(mockRepository);
+    });
+
+    test('calls reapplyVerification on repository', () async {
+      when(
+        () => mockRepository.reapplyVerification(
+          userId: 'user-123',
+          idCardUrl: 'https://example.com/id-card.jpg',
+          profilePhotoUrl: 'https://example.com/photo.jpg',
+        ),
+      ).thenAnswer((_) async {});
+
+      await useCase(
+        userId: 'user-123',
+        idCardUrl: 'https://example.com/id-card.jpg',
+        profilePhotoUrl: 'https://example.com/photo.jpg',
+      );
+
+      verify(
+        () => mockRepository.reapplyVerification(
+          userId: 'user-123',
+          idCardUrl: 'https://example.com/id-card.jpg',
+          profilePhotoUrl: 'https://example.com/photo.jpg',
+        ),
+      ).called(1);
+    });
+
+    test('propagates exceptions from repository', () async {
+      when(
+        () => mockRepository.reapplyVerification(
+          userId: any(named: 'userId'),
+          idCardUrl: any(named: 'idCardUrl'),
+          profilePhotoUrl: any(named: 'profilePhotoUrl'),
+        ),
+      ).thenThrow(Exception('Not rejected'));
+
+      expect(
+        () => useCase(
+          userId: 'user-123',
+          idCardUrl: 'https://example.com/id-card.jpg',
+          profilePhotoUrl: 'https://example.com/photo.jpg',
+        ),
+        throwsA(isA<Exception>()),
+      );
+    });
+  });
 }

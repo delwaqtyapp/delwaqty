@@ -31,6 +31,9 @@ _$UserModelImpl _$$UserModelImplFromJson(Map<String, dynamic> json) =>
       profilePhotoUrl: json['profilePhotoUrl'] as String?,
       tradeLicenseUrl: json['tradeLicenseUrl'] as String?,
       drivingLicenseUrl: json['drivingLicenseUrl'] as String?,
+      dateOfBirth: json['dateOfBirth'] == null
+          ? null
+          : DateTime.parse(json['dateOfBirth'] as String),
       createdAt: DateTime.parse(json['createdAt'] as String),
       updatedAt: json['updatedAt'] == null
           ? null
@@ -56,6 +59,7 @@ Map<String, dynamic> _$$UserModelImplToJson(_$UserModelImpl instance) =>
       'profilePhotoUrl': instance.profilePhotoUrl,
       'tradeLicenseUrl': instance.tradeLicenseUrl,
       'drivingLicenseUrl': instance.drivingLicenseUrl,
+      'dateOfBirth': instance.dateOfBirth?.toIso8601String(),
       'createdAt': instance.createdAt.toIso8601String(),
       'updatedAt': instance.updatedAt?.toIso8601String(),
     };

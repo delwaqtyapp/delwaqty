@@ -84,6 +84,7 @@ void main() {
           'verification_status': 'rejected',
           'id_card_url': 'https://example.com/id.jpg',
           'profile_photo_url': 'https://example.com/photo.jpg',
+          'date_of_birth': '1990-05-14',
           'created_at': testDateIso,
           'updated_at': testDateIso,
         };
@@ -96,6 +97,28 @@ void main() {
         expect(model.verificationStatus, VerificationStatus.rejected);
         expect(model.idCardUrl, 'https://example.com/id.jpg');
         expect(model.profilePhotoUrl, 'https://example.com/photo.jpg');
+        expect(model.dateOfBirth, DateTime(1990, 5, 14));
+      });
+
+      test('parses date_of_birth from Supabase JSON as a date-only value', () {
+        final supabaseJson = <String, dynamic>{
+          'id': 'user-123',
+          'email': 'test@example.com',
+          'date_of_birth': '1985-12-03T00:00:00',
+          'created_at': testDateIso,
+        };
+        final model = UserModel.fromSupabase(supabaseJson);
+        expect(model.dateOfBirth, DateTime(1985, 12, 3));
+      });
+
+      test('defaults date_of_birth to null when missing', () {
+        final supabaseJson = <String, dynamic>{
+          'id': 'user-123',
+          'email': 'test@example.com',
+          'created_at': testDateIso,
+        };
+        final model = UserModel.fromSupabase(supabaseJson);
+        expect(model.dateOfBirth, isNull);
       });
 
       test('maps is_biometric_enabled from Supabase JSON', () {
@@ -219,6 +242,7 @@ void main() {
         expect(entity.verificationStatus, model.verificationStatus);
         expect(entity.idCardUrl, model.idCardUrl);
         expect(entity.profilePhotoUrl, model.profilePhotoUrl);
+        expect(entity.dateOfBirth, model.dateOfBirth);
         expect(entity.createdAt, model.createdAt);
         expect(entity.updatedAt, model.updatedAt);
       });

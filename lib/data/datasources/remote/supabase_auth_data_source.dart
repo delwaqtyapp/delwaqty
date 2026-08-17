@@ -43,6 +43,7 @@ class SupabaseAuthDataSource {
     required String password,
     String? fullName,
     String? userType = 'customer',
+    String? language = 'en',
   }) async {
     try {
       final response = await _auth.signUp(
@@ -51,6 +52,7 @@ class SupabaseAuthDataSource {
         data: {
           'full_name': fullName,
           'user_type': userType,
+          'language': language,
           'verification_status':
               userType == 'customer' ? 'approved' : 'pending',
         },

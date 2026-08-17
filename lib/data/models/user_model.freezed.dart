@@ -38,6 +38,7 @@ mixin _$UserModel {
   String? get profilePhotoUrl => throw _privateConstructorUsedError;
   String? get tradeLicenseUrl => throw _privateConstructorUsedError;
   String? get drivingLicenseUrl => throw _privateConstructorUsedError;
+  DateTime? get dateOfBirth => throw _privateConstructorUsedError;
   DateTime get createdAt => throw _privateConstructorUsedError;
   DateTime? get updatedAt => throw _privateConstructorUsedError;
 
@@ -73,6 +74,7 @@ abstract class $UserModelCopyWith<$Res> {
     String? profilePhotoUrl,
     String? tradeLicenseUrl,
     String? drivingLicenseUrl,
+    DateTime? dateOfBirth,
     DateTime createdAt,
     DateTime? updatedAt,
   });
@@ -109,6 +111,7 @@ class _$UserModelCopyWithImpl<$Res, $Val extends UserModel>
     Object? profilePhotoUrl = freezed,
     Object? tradeLicenseUrl = freezed,
     Object? drivingLicenseUrl = freezed,
+    Object? dateOfBirth = freezed,
     Object? createdAt = null,
     Object? updatedAt = freezed,
   }) {
@@ -178,6 +181,10 @@ class _$UserModelCopyWithImpl<$Res, $Val extends UserModel>
                 ? _value.drivingLicenseUrl
                 : drivingLicenseUrl // ignore: cast_nullable_to_non_nullable
                       as String?,
+            dateOfBirth: freezed == dateOfBirth
+                ? _value.dateOfBirth
+                : dateOfBirth // ignore: cast_nullable_to_non_nullable
+                      as DateTime?,
             createdAt: null == createdAt
                 ? _value.createdAt
                 : createdAt // ignore: cast_nullable_to_non_nullable
@@ -218,6 +225,7 @@ abstract class _$$UserModelImplCopyWith<$Res>
     String? profilePhotoUrl,
     String? tradeLicenseUrl,
     String? drivingLicenseUrl,
+    DateTime? dateOfBirth,
     DateTime createdAt,
     DateTime? updatedAt,
   });
@@ -253,6 +261,7 @@ class __$$UserModelImplCopyWithImpl<$Res>
     Object? profilePhotoUrl = freezed,
     Object? tradeLicenseUrl = freezed,
     Object? drivingLicenseUrl = freezed,
+    Object? dateOfBirth = freezed,
     Object? createdAt = null,
     Object? updatedAt = freezed,
   }) {
@@ -322,6 +331,10 @@ class __$$UserModelImplCopyWithImpl<$Res>
             ? _value.drivingLicenseUrl
             : drivingLicenseUrl // ignore: cast_nullable_to_non_nullable
                   as String?,
+        dateOfBirth: freezed == dateOfBirth
+            ? _value.dateOfBirth
+            : dateOfBirth // ignore: cast_nullable_to_non_nullable
+                  as DateTime?,
         createdAt: null == createdAt
             ? _value.createdAt
             : createdAt // ignore: cast_nullable_to_non_nullable
@@ -355,6 +368,7 @@ class _$UserModelImpl extends _UserModel {
     this.profilePhotoUrl,
     this.tradeLicenseUrl,
     this.drivingLicenseUrl,
+    this.dateOfBirth,
     required this.createdAt,
     this.updatedAt,
   }) : super._();
@@ -401,13 +415,15 @@ class _$UserModelImpl extends _UserModel {
   @override
   final String? drivingLicenseUrl;
   @override
+  final DateTime? dateOfBirth;
+  @override
   final DateTime createdAt;
   @override
   final DateTime? updatedAt;
 
   @override
   String toString() {
-    return 'UserModel(id: $id, email: $email, fullName: $fullName, username: $username, phone: $phone, avatarUrl: $avatarUrl, language: $language, isOnboarded: $isOnboarded, isBiometricEnabled: $isBiometricEnabled, role: $role, userType: $userType, verificationStatus: $verificationStatus, idCardUrl: $idCardUrl, profilePhotoUrl: $profilePhotoUrl, tradeLicenseUrl: $tradeLicenseUrl, drivingLicenseUrl: $drivingLicenseUrl, createdAt: $createdAt, updatedAt: $updatedAt)';
+    return 'UserModel(id: $id, email: $email, fullName: $fullName, username: $username, phone: $phone, avatarUrl: $avatarUrl, language: $language, isOnboarded: $isOnboarded, isBiometricEnabled: $isBiometricEnabled, role: $role, userType: $userType, verificationStatus: $verificationStatus, idCardUrl: $idCardUrl, profilePhotoUrl: $profilePhotoUrl, tradeLicenseUrl: $tradeLicenseUrl, drivingLicenseUrl: $drivingLicenseUrl, dateOfBirth: $dateOfBirth, createdAt: $createdAt, updatedAt: $updatedAt)';
   }
 
   @override
@@ -443,6 +459,8 @@ class _$UserModelImpl extends _UserModel {
                 other.tradeLicenseUrl == tradeLicenseUrl) &&
             (identical(other.drivingLicenseUrl, drivingLicenseUrl) ||
                 other.drivingLicenseUrl == drivingLicenseUrl) &&
+            (identical(other.dateOfBirth, dateOfBirth) ||
+                other.dateOfBirth == dateOfBirth) &&
             (identical(other.createdAt, createdAt) ||
                 other.createdAt == createdAt) &&
             (identical(other.updatedAt, updatedAt) ||
@@ -451,7 +469,7 @@ class _$UserModelImpl extends _UserModel {
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(
+  int get hashCode => Object.hashAll([
     runtimeType,
     id,
     email,
@@ -469,9 +487,10 @@ class _$UserModelImpl extends _UserModel {
     profilePhotoUrl,
     tradeLicenseUrl,
     drivingLicenseUrl,
+    dateOfBirth,
     createdAt,
     updatedAt,
-  );
+  ]);
 
   /// Create a copy of UserModel
   /// with the given fields replaced by the non-null parameter values.
@@ -505,6 +524,7 @@ abstract class _UserModel extends UserModel {
     final String? profilePhotoUrl,
     final String? tradeLicenseUrl,
     final String? drivingLicenseUrl,
+    final DateTime? dateOfBirth,
     required final DateTime createdAt,
     final DateTime? updatedAt,
   }) = _$UserModelImpl;
@@ -545,6 +565,8 @@ abstract class _UserModel extends UserModel {
   String? get tradeLicenseUrl;
   @override
   String? get drivingLicenseUrl;
+  @override
+  DateTime? get dateOfBirth;
   @override
   DateTime get createdAt;
   @override

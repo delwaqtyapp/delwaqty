@@ -7,6 +7,10 @@ abstract class ProfileRepository {
     required String userId,
     required Map<String, dynamic> data,
   });
+  Future<User> updateDateOfBirth({
+    required String userId,
+    required DateTime? dateOfBirth,
+  });
   Future<String> uploadAvatar({
     required String userId,
     required List<int> bytes,

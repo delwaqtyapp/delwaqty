@@ -37,6 +37,27 @@ class UpdateProfileUseCase {
   }
 }
 
+final updateDateOfBirthUseCaseProvider =
+    Provider<UpdateDateOfBirthUseCase>((ref) {
+  return UpdateDateOfBirthUseCase(ref.watch(profileRepositoryProvider));
+});
+
+class UpdateDateOfBirthUseCase {
+  UpdateDateOfBirthUseCase(this._repository);
+
+  final ProfileRepository _repository;
+
+  Future<User> call({
+    required String userId,
+    required DateTime? dateOfBirth,
+  }) {
+    return _repository.updateDateOfBirth(
+      userId: userId,
+      dateOfBirth: dateOfBirth,
+    );
+  }
+}
+
 final uploadAvatarUseCaseProvider = Provider<UploadAvatarUseCase>((ref) {
   return UploadAvatarUseCase(ref.watch(profileRepositoryProvider));
 });

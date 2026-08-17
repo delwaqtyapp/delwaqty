@@ -7,8 +7,8 @@
 
 ## Current Task — STEP 10: BIRTHDAY + ANNIVERSARY REWARDS — COMPLETE (Session 52D)
 
-**Commit:** sprint 80: implement birthday and anniversary rewards
-**Push:** origin/master (pending push)
+**Commit:** `878fdc9` "sprint 80: implement birthday and anniversary rewards" + `2db9762` "chore: normalize markdown trailing whitespace in handoff docs"
+**Push:** origin/master GREEN — HEAD == origin/master == `2db9762`
 
 ### Completed this session
 - **Migration 045 live + verified:** `supabase/migrations/045_rewards_config_approvals_region.sql` (additive/idempotent, re-applied live).

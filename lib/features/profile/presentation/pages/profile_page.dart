@@ -397,132 +397,22 @@ class ProfilePage extends ConsumerWidget {
     User user,
     AppLocalizations l10n,
   ) async {
-    final nameController = TextEditingController(text: user.fullName ?? '');
-    final usernameController = TextEditingController(text: user.username ?? '');
-    final phoneController = TextEditingController(text: user.phone ?? '');
-    DateTime? selectedDate = user.dateOfBirth;
-
-    final saved = await showDialog<bool>(
+    final result = await showDialog<_EditProfileResult>(
       context: context,
-      builder: (dialogContext) => StatefulBuilder(
-        builder: (context, setDialogState) => AlertDialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(AppSpacing.radiusDialog),
-          ),
-          title: Text(l10n.editProfile),
-          content: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                TextField(
-                  controller: nameController,
-                  decoration: InputDecoration(labelText: l10n.fullName),
-                ),
-                const SizedBox(height: 12),
-                TextField(
-                  controller: usernameController,
-                  decoration: InputDecoration(
-                    labelText: l10n.username,
-                    prefixText: '@',
-                  ),
-                ),
-                const SizedBox(height: 12),
-                TextField(
-                  controller: phoneController,
-                  decoration: InputDecoration(labelText: l10n.phone),
-                  keyboardType: TextInputType.phone,
-                ),
-                const SizedBox(height: 12),
-                InkWell(
-                  borderRadius: BorderRadius.circular(8),
-                  onTap: () async {
-                    final picked = await showDatePicker(
-                      context: context,
-                      initialDate: selectedDate ?? DateTime(2000),
-                      firstDate: DateTime(1900),
-                      lastDate: DateTime.now(),
-                      helpText: l10n.dateOfBirth,
-                    );
-                    if (picked != null) {
-                      setDialogState(() {
-                        selectedDate = DateTime(
-                          picked.year,
-                          picked.month,
-                          picked.day,
-                        );
-                      });
-                    }
-                  },
-                  child: InputDecorator(
-                    decoration: InputDecoration(labelText: l10n.dateOfBirth),
-                    child: Row(
-                      children: [
-                        const Icon(Icons.cake_outlined, size: 20),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: Text(
-                            selectedDate == null
-                                ? l10n.notSet
-                                : _formatDate(selectedDate!),
-                            style: Theme.of(context).textTheme.bodyLarge,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    l10n.dateOfBirthPrivacy,
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 12),
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: TextButton.icon(
-                    onPressed: () => setDialogState(() => selectedDate = null),
-                    icon: const Icon(Icons.clear, size: 16),
-                    label: Text(l10n.clear),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(dialogContext).pop(false),
-              child: Text(l10n.cancel),
-            ),
-            FilledButton(
-              onPressed: () => Navigator.of(dialogContext).pop(true),
-              child: Text(l10n.saveChanges),
-            ),
-          ],
-        ),
+      builder: (dialogContext) => _EditProfileDialog(
+        user: user,
+        l10n: l10n,
       ),
     );
 
-    nameController.dispose();
-    usernameController.dispose();
-    phoneController.dispose();
-
-    if (saved != true || !context.mounted) return;
+    if (result == null || !context.mounted) return;
 
     final data = <String, dynamic>{};
-    if (nameController.text.trim().isNotEmpty) {
-      data['full_name'] = nameController.text.trim();
+    if (result.name.isNotEmpty) {
+      data['full_name'] = result.name;
     }
-    data['username'] = usernameController.text.trim().isEmpty
-        ? null
-        : usernameController.text.trim();
-    data['phone'] = phoneController.text.trim().isEmpty
-        ? null
-        : phoneController.text.trim();
+    data['username'] = result.username.isEmpty ? null : result.username;
+    data['phone'] = result.phone.isEmpty ? null : result.phone;
 
     try {
       if (data.isNotEmpty) {
@@ -530,11 +420,11 @@ class ProfilePage extends ConsumerWidget {
             .read(updateProfileUseCaseProvider)
             .call(userId: user.id, data: data);
       }
-      final dobChanged = selectedDate != user.dateOfBirth;
+      final dobChanged = result.dateOfBirth != user.dateOfBirth;
       if (dobChanged) {
         await ref.read(updateDateOfBirthUseCaseProvider).call(
               userId: user.id,
-              dateOfBirth: selectedDate,
+              dateOfBirth: result.dateOfBirth,
             );
       }
       if (context.mounted) {
@@ -545,13 +435,6 @@ class ProfilePage extends ConsumerWidget {
         context.showAppSnackBar(l10n.error);
       }
     }
-  }
-
-  String _formatDate(DateTime date) {
-    final year = date.year;
-    final month = date.month.toString().padLeft(2, '0');
-    final day = date.day.toString().padLeft(2, '0');
-    return '$year-$month-$day';
   }
 
   Widget _buildSettingsSection(
@@ -716,6 +599,177 @@ class ProfilePage extends ConsumerWidget {
           borderRadius: BorderRadius.circular(AppSpacing.radiusButton),
         ),
       ),
+    );
+  }
+}
+
+class _EditProfileResult {
+  const _EditProfileResult({
+    required this.name,
+    required this.username,
+    required this.phone,
+    required this.dateOfBirth,
+  });
+
+  final String name;
+  final String username;
+  final String phone;
+  final DateTime? dateOfBirth;
+}
+
+class _EditProfileDialog extends StatefulWidget {
+  const _EditProfileDialog({required this.user, required this.l10n});
+
+  final User user;
+  final AppLocalizations l10n;
+
+  @override
+  State<_EditProfileDialog> createState() => _EditProfileDialogState();
+}
+
+class _EditProfileDialogState extends State<_EditProfileDialog> {
+  late final TextEditingController _nameController;
+  late final TextEditingController _usernameController;
+  late final TextEditingController _phoneController;
+  DateTime? _selectedDate;
+
+  @override
+  void initState() {
+    super.initState();
+    _nameController = TextEditingController(
+      text: widget.user.fullName ?? '',
+    );
+    _usernameController = TextEditingController(
+      text: widget.user.username ?? '',
+    );
+    _phoneController = TextEditingController(text: widget.user.phone ?? '');
+    _selectedDate = widget.user.dateOfBirth;
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _usernameController.dispose();
+    _phoneController.dispose();
+    super.dispose();
+  }
+
+  String _formatDate(DateTime date) {
+    final year = date.year;
+    final month = date.month.toString().padLeft(2, '0');
+    final day = date.day.toString().padLeft(2, '0');
+    return '$year-$month-$day';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = widget.l10n;
+    return AlertDialog(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(AppSpacing.radiusDialog),
+      ),
+      title: Text(l10n.editProfile),
+      content: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: _nameController,
+              decoration: InputDecoration(labelText: l10n.fullName),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: _usernameController,
+              decoration: InputDecoration(
+                labelText: l10n.username,
+                prefixText: '@',
+              ),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: _phoneController,
+              decoration: InputDecoration(labelText: l10n.phone),
+              keyboardType: TextInputType.phone,
+            ),
+            const SizedBox(height: 12),
+            InkWell(
+              borderRadius: BorderRadius.circular(8),
+              onTap: () async {
+                final picked = await showDatePicker(
+                  context: context,
+                  initialDate: _selectedDate ?? DateTime(2000),
+                  firstDate: DateTime(1900),
+                  lastDate: DateTime.now(),
+                  helpText: l10n.dateOfBirth,
+                );
+                if (picked != null) {
+                  setState(() {
+                    _selectedDate = DateTime(
+                      picked.year,
+                      picked.month,
+                      picked.day,
+                    );
+                  });
+                }
+              },
+              child: InputDecorator(
+                decoration: InputDecoration(labelText: l10n.dateOfBirth),
+                child: Row(
+                  children: [
+                    const Icon(Icons.cake_outlined, size: 20),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        _selectedDate == null
+                            ? l10n.notSet
+                            : _formatDate(_selectedDate!),
+                        style: Theme.of(context).textTheme.bodyLarge,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 8),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                l10n.dateOfBirthPrivacy,
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: TextButton.icon(
+                onPressed: () =>
+                    setState(() => _selectedDate = null),
+                icon: const Icon(Icons.clear, size: 16),
+                label: Text(l10n.clear),
+              ),
+            ),
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: Text(l10n.cancel),
+        ),
+        FilledButton(
+          onPressed: () => Navigator.of(context).pop(
+            _EditProfileResult(
+              name: _nameController.text.trim(),
+              username: _usernameController.text.trim(),
+              phone: _phoneController.text.trim(),
+              dateOfBirth: _selectedDate,
+            ),
+          ),
+          child: Text(l10n.saveChanges),
+        ),
+      ],
     );
   }
 }

@@ -7,7 +7,7 @@
 
 ## Current Task — STEP 10: BIRTHDAY + ANNIVERSARY REWARDS — COMPLETE (Session 52D)
 
-**Commit:** sprint 80: implement birthday and anniversary rewards  
+**Commit:** sprint 80: implement birthday and anniversary rewards
 **Push:** origin/master (pending push)
 
 ### Completed this session

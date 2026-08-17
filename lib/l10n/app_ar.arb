@@ -90,6 +90,22 @@
   "noRewardsMessage": "تُمنح المكافآت في عيد ميلادك وفي ذكرى حسابك السنوية.",
   "rewardBirthday": "مكافأة عيد الميلاد",
   "rewardAnniversary": "مكافأة ذكرى الحساب",
+  "rewardPeriodBirthday": "هدية عيد الميلاد لعام {year}",
+  "@rewardPeriodBirthday": {
+    "placeholders": {
+      "year": {
+        "type": "int"
+      }
+    }
+  },
+  "rewardPeriodAnniversary": "معنا منذ {years} سنوات",
+  "@rewardPeriodAnniversary": {
+    "placeholders": {
+      "years": {
+        "type": "int"
+      }
+    }
+  },
   "rewardStatusGranted": "ممنوحة",
   "rewardStatusClaimed": "تم استلامها",
   "rewardStatusExpired": "منتهية",

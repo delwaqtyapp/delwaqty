@@ -58,6 +58,59 @@ void main() {
     });
   });
 
+  group('period helpers', () {
+    test('birthdayYear parses the year from the period key', () {
+      final reward = MemberReward(
+        id: 'r',
+        userId: 'u',
+        rewardType: RewardType.birthday,
+        periodKey: 'birthday:2026',
+        status: RewardStatus.granted,
+        createdAt: DateTime(2026),
+      );
+      expect(reward.birthdayYear, 2026);
+      expect(reward.anniversaryYears, isNull);
+    });
+
+    test('anniversaryYears parses the years from the period key', () {
+      final reward = MemberReward(
+        id: 'r',
+        userId: 'u',
+        rewardType: RewardType.anniversary,
+        periodKey: 'anniversary:3',
+        status: RewardStatus.granted,
+        createdAt: DateTime(2026),
+      );
+      expect(reward.anniversaryYears, 3);
+      expect(reward.birthdayYear, isNull);
+    });
+
+    test('period helpers return null for malformed keys', () {
+      final reward = MemberReward(
+        id: 'r',
+        userId: 'u',
+        rewardType: RewardType.birthday,
+        periodKey: 'birthday',
+        status: RewardStatus.granted,
+        createdAt: DateTime(2026),
+      );
+      expect(reward.birthdayYear, isNull);
+    });
+
+    test('benefitCode returns the code value from the benefit payload', () {
+      final reward = MemberReward.fromJson({
+        'id': 'r',
+        'userId': 'u',
+        'rewardType': 'birthday',
+        'periodKey': 'birthday:2026',
+        'benefit': {'kind': 'code_copy', 'code': 'SAVE10'},
+        'status': 'granted',
+        'createdAt': '2026-07-19T10:00:00.000Z',
+      });
+      expect(reward.benefitCode, 'SAVE10');
+    });
+  });
+
   group('RewardType', () {
     test('exposes snake_case JsonValue names', () {
       expect(RewardType.birthday.name, 'birthday');

@@ -1,41 +1,42 @@
 # SESSION_STATUS.md
 
-> **Last updated:** 2026-08-17 Session 52C — **STEP 9 COMPLETE: MEMBER MANAGEMENT + SANCTIONS RPC WIRING — PUSHED**
-> Full Step 9 delivered: member management Flutter module (entity, data source, repository, providers, list page, detail page, module registration, routes, sidebar), sanctions RPC wiring (issue_sanction + revoke_sanction replacing all direct table DML), refresh after operations, 29 new tests, 856/856 full suite, 0 analyzer errors, live verification (10/10 probes green), owner re-verified.
+> **Last updated:** 2026-08-17 Session 52D — **STEP 10 COMPLETE: BIRTHDAY + ANNIVERSARY REWARDS (PRODUCTION-HARDENED)**
+> Step 10 delivered: migration 045 (promotions gate fix, region-aware reward config, Cairo-timezone engine, config-driven expiry, approval-pipeline reward config change), Flutter reward card period/validity/benefit detail, +7 tests (862/862 suite), live engine probes 20/20 green, owner re-confirmed.
 
 ---
 
-## Current Task — STEP 9: MEMBER MANAGEMENT — COMPLETE + COMMITTED (Session 52C)
+## Current Task — STEP 10: BIRTHDAY + ANNIVERSARY REWARDS — COMPLETE (Session 52D)
 
-**Commit:** sprint 80: add member management Flutter module  
-**Push:** origin/master
+**Commit:** sprint 80: implement birthday and anniversary rewards  
+**Push:** origin/master (pending push)
 
 ### Completed this session
-- **Sanctions RPC wiring:** Rewrote `SupabaseSanctionsDataSource` — removed all 3 direct DML methods (`createSanction` INSERT, `updateSanction` UPDATE, `revokeSanction` UPDATE), replaced with `rpc('issue_sanction')` and `rpc('revoke_sanction')` calls. Updated repository interface, implementation, providers.
-- **Member detail page:** Added sanction issue FAB, sanction revoke button per active sanction, confirmation dialogs, loading states, error handling, `invalidate(memberStatusProvider)` + `invalidate(memberTimelineProvider)` after operations. Enhanced timeline with type-specific icons/colors.
-- **Admin sanctions page:** Added revoke action on active sanctions with confirmation dialog, refresh on revoke.
-- **Tests (29 new):** `sanctions_rpc_wiring_test.dart` (7 mocktail tests: issueSanction delegation/params/errors, revokeSanction delegation/errors, getSanctions read), `sanction_entity_test.dart` (15 architecture tests: no direct DML, RPC signatures, permission checks, admin blocking, approval workflow, audit, ACLs, page wiring, refresh), `member_management_module_test.dart` (7: migration 044, RPC existence, entity, registry, routes, sidebar).
-- **Live verification (10/10 probes green):** Owner `said.3pkarino@gmail.com` = `owner` role, 11 RPCs confirmed with correct signatures, anon denied EXECUTE, authenticated + service_role granted, SECURITY DEFINER verified, member_events + activity_logs tables confirmed, sanctions table 18 columns.
-- **Full gate:** `flutter analyze` 0 errors (touched files), `flutter test --no-pub --concurrency=2` **856/856**, `git diff --check` clean, secret scan clean, scope audit correct.
+- **Migration 045 live + verified:** `supabase/migrations/045_rewards_config_approvals_region.sql` (additive/idempotent, re-applied live).
+- **Fixes the free-delivery gate:** `platform_settings.promotions` column created + seeded `free_delivery_enabled:false` (referenced-but-never-created; gate silently returned false before).
+- **Region-aware reward config:** `_reward_config(reward_type, region_id)` overload — regional override → global fallback → no-op; engine resolves each member's region.
+- **Cairo timezone engine:** default run-date `(now() AT TIME ZONE 'Africa/Cairo')::date`; anniversary matching in Cairo local date.
+- **Config-driven expiry:** `valid_days` in reward config auto-expires `granted → expired` + audit.
+- **Approval-pipeline config changes:** `reward_config_change` approval type, `_reward_config_exec` apply (owner-global / in-scope-admin-regional), `request_reward_config_change` RPC (authenticated, gates inside).
+- **Flutter:** reward card now shows period ("Birthday gift for 2026" / "With us for 3 years"), status chip, benefit label + copyable benefit-code box; entity getters `birthdayYear`/`anniversaryYears`/`benefitCode`; l10n EN/AR + regenerated.
+- **Tests:** `rewards_page_test.dart` (2 widget tests) + 5 entity tests → rewards feature 14/14; full suite **862/862**.
+- **Live probes:** 20/20 green (free-delivery gate on/off, birthday grant, missing-DOB skip, idempotency, anniversary calc + idempotency, localized notification w/ display name, region override resolution + engine usage, expiry, approval vocab/apply/reject, RPC ACL, migration re-run, fixture cleanup, state reset).
+- **Gate:** `flutter analyze` 0 errors on touched files, build_runner ok, `git diff --check` clean, secret scan clean, `app_ar.arb` CRLF→LF normalized (matches en).
 
-### Files modified (10)
-- `lib/features/sanctions/data/datasources/remote/supabase_sanctions_data_source.dart` — RPC-wired
-- `lib/features/sanctions/data/repositories/sanctions_repository_impl.dart` — RPC-wired
-- `lib/features/sanctions/domain/entities/sanction.dart` — constructor reorder
-- `lib/features/sanctions/domain/repositories/sanctions_repository.dart` — RPC interface
-- `lib/features/sanctions/presentation/pages/admin_sanctions_page.dart` — revoke action
-- `lib/features/sanctions/presentation/sanctions_providers.dart` — minor cleanup
-- `lib/features/admin/admin_module.dart` — member routes
-- `lib/features/floating_sidebar/floating_sidebar_overlay.dart` — sidebar nav item
-- `lib/module_registry.dart` — MemberManagementModule
-- `SESSION_STATUS.md` — this file
+### Files modified (4 + generated)
+- `lib/features/rewards/domain/entities/member_reward.dart`
+- `lib/features/rewards/presentation/pages/rewards_page.dart`
+- `lib/l10n/app_en.arb`, `lib/l10n/app_ar.arb` + generated `app_localizations.dart` / `_ar` / `_en`
+- `test/features/rewards/member_reward_entity_test.dart`
 
-### Files created (12)
-- `lib/features/member_management/` (8 files: entity, DS, repo interface, repo impl, providers, list page, detail page, module)
-- `supabase/migrations/044_member_management_list_rpc.sql`
-- `test/features/member_management/member_management_module_test.dart`
-- `test/features/sanctions/sanction_entity_test.dart`
-- `test/features/sanctions/sanctions_rpc_wiring_test.dart`
+### Files created (2)
+- `supabase/migrations/045_rewards_config_approvals_region.sql`
+- `test/features/rewards/rewards_page_test.dart`
+
+---
+
+## Previous Task — STEP 9: MEMBER MANAGEMENT + SANCTIONS RPC WIRING — COMMITTED (Session 52C)
+
+**Commit `a87b314`** + docs `2bc1a26` pushed: "sprint 80: add member management Flutter module + sanctions RPC wiring"
 
 ---
 

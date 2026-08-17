@@ -39,4 +39,18 @@ class MemberReward with _$MemberReward {
   const MemberReward._();
 
   String get benefitKind => (benefit?['kind'] as String?) ?? 'none';
+
+  int? get birthdayYear {
+    if (rewardType != RewardType.birthday) return null;
+    final parts = periodKey.split(':');
+    return parts.length == 2 ? int.tryParse(parts[1]) : null;
+  }
+
+  int? get anniversaryYears {
+    if (rewardType != RewardType.anniversary) return null;
+    final parts = periodKey.split(':');
+    return parts.length == 2 ? int.tryParse(parts[1]) : null;
+  }
+
+  String? get benefitCode => benefit?['code'] as String?;
 }

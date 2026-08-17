@@ -57,6 +57,49 @@ void main() {
     });
   });
 
+  group('CampaignPriority', () {
+    test('fromDb maps values', () {
+      expect(CampaignPriority.fromDb('normal'), CampaignPriority.normal);
+      expect(CampaignPriority.fromDb('important'), CampaignPriority.important);
+      expect(CampaignPriority.fromDb('critical'), CampaignPriority.critical);
+      expect(CampaignPriority.fromDb(null), CampaignPriority.normal);
+      expect(CampaignPriority.fromDb('unknown'), CampaignPriority.normal);
+    });
+
+    test('dbName round-trips', () {
+      for (final priority in CampaignPriority.values) {
+        expect(CampaignPriority.fromDb(priority.dbName), priority);
+      }
+    });
+  });
+
+  group('CampaignCta', () {
+    test('fromJson maps a copy_code cta', () {
+      final cta = CampaignCta.fromJson({
+        'type': 'copy_code',
+        'code': 'DELWAQTY30',
+      });
+
+      expect(cta.type, CampaignCtaType.copyCode);
+      expect(cta.code, 'DELWAQTY30');
+    });
+
+    test('fromJson maps an internal_route cta', () {
+      final cta = CampaignCta.fromJson({
+        'type': 'internal_route',
+        'route': '/rewards',
+      });
+
+      expect(cta.type, CampaignCtaType.internalRoute);
+      expect(cta.route, '/rewards');
+    });
+
+    test('fromJson falls back to none', () {
+      final cta = CampaignCta.fromJson(const {'type': 'none'});
+      expect(cta.type, CampaignCtaType.none);
+    });
+  });
+
   group('Campaign', () {
     test('fromJson maps fields', () {
       final json = {
@@ -80,6 +123,29 @@ void main() {
       expect(campaign.status, CampaignStatus.published);
       expect(campaign.startsAt, DateTime.parse('2026-08-01T00:00:00.000Z'));
       expect(campaign.endsAt, DateTime.parse('2026-08-31T00:00:00.000Z'));
+      expect(campaign.priority, CampaignPriority.normal);
+      expect(campaign.imagePath, isNull);
+      expect(campaign.cta, isNull);
+    });
+
+    test('fromJson maps feed fields', () {
+      final json = {
+        'id': 'c2',
+        'code': 'HOT',
+        'campaign_type': 'coupon',
+        'name_ar': 'كوبون',
+        'status': 'published',
+        'priority': 'critical',
+        'image_path': 'campaigns/hot/banner.png',
+        'cta': {'type': 'copy_code', 'code': 'HOT10'},
+      };
+
+      final campaign = Campaign.fromJson(json);
+
+      expect(campaign.priority, CampaignPriority.critical);
+      expect(campaign.imagePath, 'campaigns/hot/banner.png');
+      expect(campaign.cta?.type, CampaignCtaType.copyCode);
+      expect(campaign.cta?.code, 'HOT10');
     });
   });
 }

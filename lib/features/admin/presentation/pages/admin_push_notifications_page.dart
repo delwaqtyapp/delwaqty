@@ -401,6 +401,21 @@ class _AdminPushNotificationsPageState
         return Icons.chat_bubble_outline_rounded;
       case NotificationType.reward:
         return Icons.card_giftcard_rounded;
+      case NotificationType.chatReply:
+      case NotificationType.chatAssigned:
+      case NotificationType.chatEscalated:
+      case NotificationType.chatClosed:
+        return Icons.chat_bubble_outline_rounded;
+      case NotificationType.complaint:
+      case NotificationType.complaintNote:
+        return Icons.report_outlined;
+      case NotificationType.emergency:
+      case NotificationType.emergencyAlert:
+      case NotificationType.emergencyResolved:
+        return Icons.emergency_rounded;
+      case NotificationType.adminManagement:
+      case NotificationType.moderation:
+        return Icons.admin_panel_settings_outlined;
     }
   }
 }

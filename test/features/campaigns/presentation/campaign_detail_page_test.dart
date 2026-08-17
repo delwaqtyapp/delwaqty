@@ -25,6 +25,7 @@ void main() {
       ProviderScope(
         overrides: [
           campaignByIdProvider.overrideWith((ref, id) async => campaign),
+          campaignMediaUrlProvider.overrideWith((ref, path) async => null),
         ],
         child: const MaterialApp(
           localizationsDelegates: AppLocalizations.localizationsDelegates,

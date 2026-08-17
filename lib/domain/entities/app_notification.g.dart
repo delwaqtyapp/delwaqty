@@ -63,6 +63,17 @@ const _$NotificationTypeEnumMap = {
   NotificationType.success: 'success',
   NotificationType.reminder: 'reminder',
   NotificationType.reward: 'reward',
+  NotificationType.chatReply: 'chat_reply',
+  NotificationType.chatAssigned: 'chat_assigned',
+  NotificationType.chatEscalated: 'chat_escalated',
+  NotificationType.chatClosed: 'chat_closed',
+  NotificationType.complaint: 'complaint',
+  NotificationType.complaintNote: 'complaint_note',
+  NotificationType.emergency: 'emergency',
+  NotificationType.emergencyAlert: 'emergency_alert',
+  NotificationType.emergencyResolved: 'emergency_resolved',
+  NotificationType.adminManagement: 'admin_management',
+  NotificationType.moderation: 'moderation',
 };
 
 const _$NotificationPriorityEnumMap = {

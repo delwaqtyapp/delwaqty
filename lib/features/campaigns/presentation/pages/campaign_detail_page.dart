@@ -36,13 +36,13 @@ class CampaignDetailPage extends ConsumerWidget {
   }
 }
 
-class _CampaignBody extends StatelessWidget {
+class _CampaignBody extends ConsumerWidget {
   const _CampaignBody({required this.campaign});
 
   final Campaign campaign;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final name = campaign.nameAr.isNotEmpty
         ? campaign.nameAr
@@ -50,10 +50,26 @@ class _CampaignBody extends StatelessWidget {
     final description = campaign.descriptionAr?.isNotEmpty == true
         ? campaign.descriptionAr
         : campaign.descriptionEn;
+    final imageUrl = ref
+        .watch(campaignMediaUrlProvider(campaign.imagePath))
+        .value;
 
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
+        if (imageUrl != null) ...[
+          ClipRRect(
+            borderRadius: BorderRadius.circular(16),
+            child: Image.network(
+              imageUrl,
+              height: 180,
+              width: double.infinity,
+              fit: BoxFit.cover,
+              errorBuilder: (_, __, ___) => const SizedBox.shrink(),
+            ),
+          ),
+          const SizedBox(height: 16),
+        ],
         Row(
           children: [
             Container(

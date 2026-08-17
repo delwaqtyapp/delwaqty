@@ -15,6 +15,7 @@ class SupabaseCampaignDataSource {
   final SupabaseClient _client;
 
   static const String _tableName = 'campaigns';
+  static const String _bucketName = 'campaign-media';
 
   Future<Campaign?> getById(String campaignId) async {
     final data = await _client
@@ -25,6 +26,22 @@ class SupabaseCampaignDataSource {
 
     if (data == null) return null;
     return _fromRow(data);
+  }
+
+  Future<List<Campaign>> getActiveCampaigns({String locale = 'ar'}) async {
+    final data = await _client.rpc(
+      'get_active_campaigns',
+      params: {'p_locale': locale},
+    );
+    final rows = (data as List?) ?? const [];
+    return rows
+        .map((row) => _fromRow(Map<String, dynamic>.from(row as Map)))
+        .toList();
+  }
+
+  Future<String?> getMediaUrl(String? path) async {
+    if (path == null || path.isEmpty) return null;
+    return await _client.storage.from(_bucketName).createSignedUrl(path, 600);
   }
 
   Campaign _fromRow(Map<String, dynamic> row) {
@@ -50,6 +67,13 @@ class SupabaseCampaignDataSource {
           : null,
       createdAt: row['created_at'] != null
           ? DateTime.tryParse(row['created_at'] as String)
+          : null,
+      priority: CampaignPriority.fromDb(row['priority'] as String?),
+      imagePath: row['image_path'] as String?,
+      cta: row['cta'] != null
+          ? CampaignCta.fromJson(
+              Map<String, dynamic>.from(row['cta'] as Map),
+            )
           : null,
     );
   }

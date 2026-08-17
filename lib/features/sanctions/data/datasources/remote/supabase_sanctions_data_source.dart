@@ -2,9 +2,9 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:delwaqty/features/sanctions/domain/entities/sanction.dart';
 
 class SupabaseSanctionsDataSource {
-  final SupabaseClient _client;
-
   SupabaseSanctionsDataSource(this._client);
+
+  final SupabaseClient _client;
 
   Future<List<Sanction>> getSanctions({bool? active}) async {
     var query = _client.from('sanctions').select();
@@ -27,25 +27,34 @@ class SupabaseSanctionsDataSource {
     return Sanction.fromJson(row);
   }
 
-  Future<Sanction> createSanction(Sanction sanction) async {
-    final payload = Map<String, dynamic>.from(sanction.toJson());
-    if (payload['id'] == null || (payload['id'] as String).isEmpty) {
-      payload.remove('id');
-    }
-    final row = await _client.from('sanctions').insert(payload).select().single();
-    return Sanction.fromJson(row);
+  Future<String> issueSanction({
+    required String memberId,
+    required String sanctionType,
+    required String reason,
+    int durationDays = 0,
+    double amount = 0,
+    String? evidenceUrl,
+  }) async {
+    final params = <String, dynamic>{
+      'p_member_id': memberId,
+      'p_sanction_type': sanctionType,
+      'p_reason': reason,
+      'p_duration_days': durationDays,
+      'p_amount': amount,
+    };
+    if (evidenceUrl != null) params['p_evidence_url'] = evidenceUrl;
+
+    final result = await _client.rpc('issue_sanction', params: params);
+    return result as String;
   }
 
-  Future<Sanction> updateSanction(String id, Map<String, dynamic> updates) async {
-    updates['updated_at'] = DateTime.now().toIso8601String();
-    await _client.from('sanctions').update(updates).eq('id', id);
-    return getSanctionById(id);
-  }
-
-  Future<void> revokeSanction(String id) async {
-    await _client.from('sanctions').update({
-      'is_active': false,
-      'updated_at': DateTime.now().toIso8601String(),
-    }).eq('id', id);
+  Future<void> revokeSanction({
+    required String sanctionId,
+    required String reason,
+  }) async {
+    await _client.rpc('revoke_sanction', params: {
+      'p_sanction_id': sanctionId,
+      'p_reason': reason,
+    });
   }
 }

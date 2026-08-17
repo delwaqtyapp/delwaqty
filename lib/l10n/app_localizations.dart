@@ -596,6 +596,18 @@ abstract class AppLocalizations {
   /// **'Anniversary reward'**
   String get rewardAnniversary;
 
+  /// No description provided for @rewardPeriodBirthday.
+  ///
+  /// In en, this message translates to:
+  /// **'Birthday gift for {year}'**
+  String rewardPeriodBirthday(int year);
+
+  /// No description provided for @rewardPeriodAnniversary.
+  ///
+  /// In en, this message translates to:
+  /// **'With us for {years} years'**
+  String rewardPeriodAnniversary(int years);
+
   /// No description provided for @rewardStatusGranted.
   ///
   /// In en, this message translates to:

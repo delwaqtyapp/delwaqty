@@ -268,6 +268,16 @@ class AppLocalizationsAr extends AppLocalizations {
   String get rewardAnniversary => 'مكافأة ذكرى الحساب';
 
   @override
+  String rewardPeriodBirthday(int year) {
+    return 'هدية عيد الميلاد لعام $year';
+  }
+
+  @override
+  String rewardPeriodAnniversary(int years) {
+    return 'معنا منذ $years سنوات';
+  }
+
+  @override
   String get rewardStatusGranted => 'ممنوحة';
 
   @override

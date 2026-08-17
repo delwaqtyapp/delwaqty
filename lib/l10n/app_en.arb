@@ -90,6 +90,22 @@
   "noRewardsMessage": "Rewards are granted on your birthday and on your account anniversary.",
   "rewardBirthday": "Birthday reward",
   "rewardAnniversary": "Anniversary reward",
+  "rewardPeriodBirthday": "Birthday gift for {year}",
+  "@rewardPeriodBirthday": {
+    "placeholders": {
+      "year": {
+        "type": "int"
+      }
+    }
+  },
+  "rewardPeriodAnniversary": "With us for {years} years",
+  "@rewardPeriodAnniversary": {
+    "placeholders": {
+      "years": {
+        "type": "int"
+      }
+    }
+  },
   "rewardStatusGranted": "Granted",
   "rewardStatusClaimed": "Claimed",
   "rewardStatusExpired": "Expired",

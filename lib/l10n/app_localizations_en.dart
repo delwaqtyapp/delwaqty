@@ -268,6 +268,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get rewardAnniversary => 'Anniversary reward';
 
   @override
+  String rewardPeriodBirthday(int year) {
+    return 'Birthday gift for $year';
+  }
+
+  @override
+  String rewardPeriodAnniversary(int years) {
+    return 'With us for $years years';
+  }
+
+  @override
   String get rewardStatusGranted => 'Granted';
 
   @override

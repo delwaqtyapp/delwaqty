@@ -130,7 +130,7 @@ class _RewardCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    _formatDate(reward.createdAt),
+                    _periodLabel(reward, l10n),
                     style: textTheme.bodySmall?.copyWith(
                       color: colorScheme.onSurfaceVariant,
                     ),
@@ -148,6 +148,10 @@ class _RewardCard extends StatelessWidget {
                       ),
                     ],
                   ),
+                  if (reward.benefitCode != null) ...[
+                    const SizedBox(height: 8),
+                    _BenefitCode(code: reward.benefitCode!),
+                  ],
                 ],
               ),
             ),
@@ -155,6 +159,17 @@ class _RewardCard extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  String _periodLabel(MemberReward reward, AppLocalizations l10n) {
+    if (reward.rewardType == RewardType.birthday) {
+      final year = reward.birthdayYear;
+      if (year != null) return l10n.rewardPeriodBirthday(year);
+      return l10n.rewardBirthday;
+    }
+    final years = reward.anniversaryYears;
+    if (years != null) return l10n.rewardPeriodAnniversary(years);
+    return l10n.rewardAnniversary;
   }
 
   String _benefitLabel(String kind, AppLocalizations l10n) {
@@ -173,9 +188,42 @@ class _RewardCard extends StatelessWidget {
         return l10n.benefitNone;
     }
   }
+}
 
-  String _formatDate(DateTime dt) {
-    return '${dt.day}/${dt.month}/${dt.year}';
+class _BenefitCode extends StatelessWidget {
+  const _BenefitCode({required this.code});
+
+  final String code;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
+        color: colorScheme.primary.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: colorScheme.primary.withValues(alpha: 0.3)),
+      ),
+      child: Row(
+        children: [
+          Icon(Icons.confirmation_number_outlined,
+              size: 18, color: colorScheme.primary),
+          const SizedBox(width: 8),
+          Expanded(
+            child: SelectableText(
+              code,
+              style: TextStyle(
+                fontWeight: FontWeight.w700,
+                letterSpacing: 1.2,
+                color: colorScheme.primary,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
 

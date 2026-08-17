@@ -1,11 +1,58 @@
 # SESSION_STATUS.md
 
-> **Last updated:** 2026-08-17 Session 52E — **STEP 11 COMPLETE: PROFILE + REGISTRATION (CUSTOMER/PROVIDER/DRIVER)**
-> Step 11 delivered: migration 046 (user_type CHECK widened to merchant/driver, `handle_new_user` persists language), DOB editing end-to-end via `update_member_dob` RPC with privacy rule (never shown raw in rewards text), registration language threaded end-to-end, admin verification queue covers all roles + rejected-state UI, +6 tests (868/868 suite), live DB probes 9/9 green.
+> **Last updated:** 2026-08-17 Session 52G — **ADB KEEPALIVE → TERMUX:Boot (MIGRATED LIVE)** — keepalive moved to an independent Termux:Boot daemon (`~/.termux/boot/keep-adb-alive-init.sh`), hook removed from `opencode-omniroute-start`, flock leak fixed (adb server was inheriting lock fd 9), dynamic uid-2000 port discovery replaces stale KNOWN_PORTS. Incident resolved: transport dropped mid-migration (dual adb binaries fighting + key mismatch) — restored on port 45417, OpenCode 200, OmniRoute alive. Report: `docs/HANDOFF/36_ADB_KEEPALIVE_TERMUX_BOOT_MIGRATION.md`.
 
 ---
 
-## Current Task — STEP 11: PROFILE + REGISTRATION — COMPLETE (Session 52E)
+## Current Task — ADB KEEPALIVE ON INDEPENDENT TERMUX:Boot LIFECYCLE (Session 52G)
+
+**Status:** Complete — migrated live, transport healthy
+
+### What changed this session
+- **New independent daemon:** `tool/opencode/keep-adb-alive-init.sh` installed at
+  `~/.termux/boot/keep-adb-alive-init.sh` — launches the loop in its own session
+  (`setsid`), so the keepalive survives OpenCode / proot / OmniRoute restarts.
+- **Hook removed** from `opencode-omniroute-start` (OmniRoute logic untouched).
+- **flock leak fixed:** the forked adb *server* inherited lock fd 9 and held the
+  flock forever. `adb()` now runs `( exec 9>&-; adb ... )` — lock stays with the
+  keepalive only.
+- **Dynamic port discovery:** reads phone `/proc/net/tcp[6]` uid-2000 (adbd)
+  listeners via rish, decodes hex port, validates with `adb connect`. Survived a
+  live rotation 34797 → 45417 and reconnected automatically.
+- **Incident (resolved):** transport dropped mid-migration — dual adb binaries
+  (proot v34 vs host v35) shared one 5037 server + host adb key ≠ authorized
+  proot key → `offline`. Fixed: aligned host key to the authorized proot key,
+  identified the real adbd listener (uid 2000, not the system uid-1000 ports).
+
+### Verified
+- Single keepalive (PID 13974, TracerPid 0, UID 10526, outside proot); old 13774 GONE.
+- `adb devices` → `192.168.8.36:45417 device`; OpenCode `:4096` = 200; OmniRoute `:20128` listening.
+- Report: `docs/HANDOFF/36_ADB_KEEPALIVE_TERMUX_BOOT_MIGRATION.md`.
+
+### Root cause (diagnosed on-device)
+- Wireless debugging toggle was ON (`adb_wifi_enabled=1`), but the **adb-over-Wi-Fi port is dynamic**
+  (changes on every toggle/adbd restart); adbd does not register via mDNS in this PRoot, so the adb
+  server kept stale `offline` transports and lost the device → `flutter run`/`adb install` broke.
+- MagicOS PowerGenius / smart battery could suspend the Wi-Fi transport: `stay_on_while_plugged_in=0`,
+  `wifi_sleep_policy` unset, `com.termux` not doze-whitelisted.
+
+### Fix delivered
+- **`tool/opencode/keep_adb_alive.sh`** — background loop (20s): re-asserts
+  `stay_on_while_plugged_in=7` / `wifi_sleep_policy=2` / `adb_wifi_enabled=1` / doze-whitelist +
+  RUN_IN_BACKGROUND for `com.termux` via Shizuku/rish (shell uid), auto-rediscovers the current
+  wireless-debugging port, prunes stale `offline` transports, never kills a healthy connection.
+- **Auto-start hook** in `opencode-omniroute-start` (idempotent, non-fatal, same pattern as OmniRoute).
+- Verified: `flutter devices` → `DNP NX9 (mobile) • 192.168.8.36:39775 • android-arm64 • Android 16 (API 36)`.
+- Docs: ADR-064 in `docs/DECISION_LOG.md`.
+
+### Files touched
+- `tool/opencode/keep_adb_alive.sh` (new)
+- `.opencode-ctl/opencode-omniroute-start` (hook, outside repo)
+- `docs/DECISION_LOG.md` (ADR-064)
+
+---
+
+## Previous Task — STEP 11: PROFILE + REGISTRATION — COMPLETE (Session 52E)
 
 **Commit:** sprint 80: complete profile and registration flows
 **Push:** origin/master (pending push)

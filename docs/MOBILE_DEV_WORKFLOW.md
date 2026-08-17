@@ -100,6 +100,17 @@ flutter emulators --launch <emulator-name>
 flutter run --device-id <device-ip>:<port>
 ```
 
+> **Keeping the wireless connection alive (DNP NX9 / HONOR / MagicOS):**
+> The wireless-debugging port is **dynamic** — it changes on every toggle of "Wireless debugging"
+> or adbd restart, and the adb server in this PRoot does not rediscover it via mDNS. It also
+> re-asserts the device battery/network knobs that MagicOS PowerGenius can reset (screen stay-on,
+> Wi-Fi never-sleep, doze whitelist for `com.termux`). Run the keepalive:
+> ```bash
+> ./tool/opencode/keep_adb_alive.sh        # loop (auto-starts with OpenCode via opencode-omniroute-start)
+> ./tool/opencode/keep_adb_alive.sh once   # single diagnostic pass
+> ```
+> Verify with `flutter devices` — it should list `DNP NX9 (mobile) • <ip>:<port>`.
+
 ## Acode Integration
 
 ### Setup

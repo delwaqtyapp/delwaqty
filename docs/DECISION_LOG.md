@@ -2304,3 +2304,55 @@ earlier split-screen signup work:
 - DOB is stored, editable by owner, and never leaks into reward text.
 - Mixed-role verification queue + explicit rejected screen reduce stuck-user UX.
 - 045/046 migrations are additive; 020/035 untouched. Flutter git diff clean; `flutter test` 868/868.
+
+---
+
+## ADR-064: Keep Android wireless debugging alive for the whole coding session
+
+**Date:** Session 52E (2026-08-17)
+**Status:** Accepted
+**Deciders:** Lead Architect (tooling/infra; no product code touched)
+
+### Context
+The DNP NX9 (HONOR, MagicOS) doubles as both the dev machine (Termux PRoot running Flutter/OpenCode)
+and the target device. `flutter run`/`adb install` relies on **adb over Wi-Fi (wireless debugging)**.
+During long sessions the connection silently dies: `adb devices` shows stale `offline` transports and
+`flutter devices` loses the Android target, so hot reload / APK install breaks.
+
+### Root-cause investigation (all on-device)
+- **`adb_wifi_enabled=1`** — Wireless debugging toggle is ON; not a user toggle problem.
+- **Dynamic port:** MagicOS/adbd picks a NEW random listening port on every "Wireless debugging"
+  toggle or adbd restart (observed ports 46121/38411/62110/39531/36923/39775). The previously saved
+  `adb connect IP:OLD_PORT` silently goes stale — this is the primary drop mechanism.
+- **adbd never auto-registers via mDNS** in this PRoot (`adb mdns services` is empty), so the adb
+  server cannot rediscover the new port by itself; it keeps stale `offline` entries for dead ports.
+- **adb server self-connection:** an earlier `adb connect 127.0.0.1:5037` (the adb server port itself)
+  produced a bogus `offline` entry; harmless but noise.
+- **MagicOS PowerGenius / smart battery** can suspend the Wi-Fi transport when the screen is off.
+  `stay_on_while_plugged_in=0` and no doze whitelist were set. `com.termux` was NOT frozen (it is in
+  `mNeverOptimizeApps` + `mStandbyProtectedApps`), but the Wi-Fi-sleep/battery knobs were wrong.
+- SELinux `auditd` denials for uid 10526 are the PRoot app trying to reach `adbd`/`wifi` services
+  directly — NOT the cause of drops; shell access via Shizuku/rish (uid 2000) is the correct path.
+
+### Decision
+1. **New helper `tool/opencode/keep_adb_alive.sh`** — background loop (default 20s) that:
+   - Re-asserts Android knobs each pass via Shizuku/rish (shell uid): `stay_on_while_plugged_in=7`,
+     `wifi_sleep_policy=2`, `adb_wifi_enabled=1`, doze-whitelist + RUN_IN_BACKGROUND for `com.termux`.
+   - If no healthy transport: rediscover the CURRENT wireless-debugging port by `adb connect`-scanning
+     the phone IP's known ports, keep only the `device` one, prune stale `offline` transports.
+   - Never `kill-server` while a healthy transport exists (protects the live connection).
+2. **Auto-start hook in `opencode-omniroute-start`** — idempotent background launch of the keepalive
+   whenever OpenCode boots, matching the existing non-blocking style of that helper.
+
+### Rationale
+- The root cause is infrastructural (dynamic port + no mDNS + battery policy), not a Flutter bug;
+  a keepalive is the smallest, robust fix that works under the PRoot constraints.
+- Re-asserting settings every pass defeats MagicOS background policies without needing root/Magisk.
+- Hook placement reuses the proven idempotent/non-fatal startup chain (`opencode-launch` ->
+  `opencode-omniroute-start` -> `opencode`).
+
+### Consequences
+- `flutter devices` again lists `DNP NX9 (mobile) • <ip>:<port> • android-arm64 • Android 16 (API 36)`.
+- The keepalive must run for the session; it auto-starts with OpenCode and can also be run manually
+  (`tool/opencode/keep_adb_alive.sh once|loop`).
+- No product code, migrations, or dependencies changed; gate unaffected.

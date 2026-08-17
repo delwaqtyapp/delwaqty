@@ -25,6 +25,7 @@ class UserModel with _$UserModel {
     String? profilePhotoUrl,
     String? tradeLicenseUrl,
     String? drivingLicenseUrl,
+    DateTime? dateOfBirth,
     required DateTime createdAt,
     DateTime? updatedAt,
   }) = _UserModel;
@@ -57,6 +58,7 @@ class UserModel with _$UserModel {
       profilePhotoUrl: json['profile_photo_url'] as String?,
       tradeLicenseUrl: json['trade_license_url'] as String?,
       drivingLicenseUrl: json['driving_license_url'] as String?,
+      dateOfBirth: _parseDateOfBirth(json['date_of_birth']),
       createdAt: DateTime.parse(json['created_at'] as String),
       updatedAt: json['updated_at'] != null
           ? DateTime.parse(json['updated_at'] as String)
@@ -71,6 +73,13 @@ class UserModel with _$UserModel {
       (json['user_type'] ?? role) as String?,
     );
     return userType == UserType.customer ? 'approved' : 'pending';
+  }
+
+  static DateTime? _parseDateOfBirth(dynamic value) {
+    if (value == null || value is! String || value.isEmpty) return null;
+    final date = DateTime.tryParse(value);
+    if (date == null) return null;
+    return DateTime(date.year, date.month, date.day);
   }
 
   User toEntity() => User(
@@ -90,6 +99,7 @@ class UserModel with _$UserModel {
     profilePhotoUrl: profilePhotoUrl,
     tradeLicenseUrl: tradeLicenseUrl,
     drivingLicenseUrl: drivingLicenseUrl,
+    dateOfBirth: dateOfBirth,
     createdAt: createdAt,
     updatedAt: updatedAt,
   );

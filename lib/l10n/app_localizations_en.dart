@@ -1979,6 +1979,23 @@ class AppLocalizationsEn extends AppLocalizations {
   String get notSet => 'Not set';
 
   @override
+  String get clear => 'Clear';
+
+  @override
+  String get dateOfBirth => 'Date of birth';
+
+  @override
+  String get dateOfBirthPrivacy =>
+      'Your date of birth is private. It is only used to grant birthday rewards and is never shown to other users.';
+
+  @override
+  String get verificationRejectedTitle => 'Verification rejected';
+
+  @override
+  String get verificationRejectedMessage =>
+      'Your registration documents were rejected. Please contact support for help or try registering again.';
+
+  @override
   String get noDeliveriesAvailable => 'No deliveries available';
 
   @override

@@ -38,6 +38,7 @@ mixin _$User {
   String? get profilePhotoUrl => throw _privateConstructorUsedError;
   String? get tradeLicenseUrl => throw _privateConstructorUsedError;
   String? get drivingLicenseUrl => throw _privateConstructorUsedError;
+  DateTime? get dateOfBirth => throw _privateConstructorUsedError;
   DateTime get createdAt => throw _privateConstructorUsedError;
   DateTime? get updatedAt => throw _privateConstructorUsedError;
 
@@ -72,6 +73,7 @@ abstract class $UserCopyWith<$Res> {
     String? profilePhotoUrl,
     String? tradeLicenseUrl,
     String? drivingLicenseUrl,
+    DateTime? dateOfBirth,
     DateTime createdAt,
     DateTime? updatedAt,
   });
@@ -108,6 +110,7 @@ class _$UserCopyWithImpl<$Res, $Val extends User>
     Object? profilePhotoUrl = freezed,
     Object? tradeLicenseUrl = freezed,
     Object? drivingLicenseUrl = freezed,
+    Object? dateOfBirth = freezed,
     Object? createdAt = null,
     Object? updatedAt = freezed,
   }) {
@@ -177,6 +180,10 @@ class _$UserCopyWithImpl<$Res, $Val extends User>
                 ? _value.drivingLicenseUrl
                 : drivingLicenseUrl // ignore: cast_nullable_to_non_nullable
                       as String?,
+            dateOfBirth: freezed == dateOfBirth
+                ? _value.dateOfBirth
+                : dateOfBirth // ignore: cast_nullable_to_non_nullable
+                      as DateTime?,
             createdAt: null == createdAt
                 ? _value.createdAt
                 : createdAt // ignore: cast_nullable_to_non_nullable
@@ -216,6 +223,7 @@ abstract class _$$UserImplCopyWith<$Res> implements $UserCopyWith<$Res> {
     String? profilePhotoUrl,
     String? tradeLicenseUrl,
     String? drivingLicenseUrl,
+    DateTime? dateOfBirth,
     DateTime createdAt,
     DateTime? updatedAt,
   });
@@ -249,6 +257,7 @@ class __$$UserImplCopyWithImpl<$Res>
     Object? profilePhotoUrl = freezed,
     Object? tradeLicenseUrl = freezed,
     Object? drivingLicenseUrl = freezed,
+    Object? dateOfBirth = freezed,
     Object? createdAt = null,
     Object? updatedAt = freezed,
   }) {
@@ -318,6 +327,10 @@ class __$$UserImplCopyWithImpl<$Res>
             ? _value.drivingLicenseUrl
             : drivingLicenseUrl // ignore: cast_nullable_to_non_nullable
                   as String?,
+        dateOfBirth: freezed == dateOfBirth
+            ? _value.dateOfBirth
+            : dateOfBirth // ignore: cast_nullable_to_non_nullable
+                  as DateTime?,
         createdAt: null == createdAt
             ? _value.createdAt
             : createdAt // ignore: cast_nullable_to_non_nullable
@@ -351,6 +364,7 @@ class _$UserImpl implements _User {
     this.profilePhotoUrl,
     this.tradeLicenseUrl,
     this.drivingLicenseUrl,
+    this.dateOfBirth,
     required this.createdAt,
     this.updatedAt,
   });
@@ -397,13 +411,15 @@ class _$UserImpl implements _User {
   @override
   final String? drivingLicenseUrl;
   @override
+  final DateTime? dateOfBirth;
+  @override
   final DateTime createdAt;
   @override
   final DateTime? updatedAt;
 
   @override
   String toString() {
-    return 'User(id: $id, email: $email, fullName: $fullName, username: $username, phone: $phone, avatarUrl: $avatarUrl, language: $language, isOnboarded: $isOnboarded, isBiometricEnabled: $isBiometricEnabled, role: $role, userType: $userType, verificationStatus: $verificationStatus, idCardUrl: $idCardUrl, profilePhotoUrl: $profilePhotoUrl, tradeLicenseUrl: $tradeLicenseUrl, drivingLicenseUrl: $drivingLicenseUrl, createdAt: $createdAt, updatedAt: $updatedAt)';
+    return 'User(id: $id, email: $email, fullName: $fullName, username: $username, phone: $phone, avatarUrl: $avatarUrl, language: $language, isOnboarded: $isOnboarded, isBiometricEnabled: $isBiometricEnabled, role: $role, userType: $userType, verificationStatus: $verificationStatus, idCardUrl: $idCardUrl, profilePhotoUrl: $profilePhotoUrl, tradeLicenseUrl: $tradeLicenseUrl, drivingLicenseUrl: $drivingLicenseUrl, dateOfBirth: $dateOfBirth, createdAt: $createdAt, updatedAt: $updatedAt)';
   }
 
   @override
@@ -439,6 +455,8 @@ class _$UserImpl implements _User {
                 other.tradeLicenseUrl == tradeLicenseUrl) &&
             (identical(other.drivingLicenseUrl, drivingLicenseUrl) ||
                 other.drivingLicenseUrl == drivingLicenseUrl) &&
+            (identical(other.dateOfBirth, dateOfBirth) ||
+                other.dateOfBirth == dateOfBirth) &&
             (identical(other.createdAt, createdAt) ||
                 other.createdAt == createdAt) &&
             (identical(other.updatedAt, updatedAt) ||
@@ -447,7 +465,7 @@ class _$UserImpl implements _User {
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(
+  int get hashCode => Object.hashAll([
     runtimeType,
     id,
     email,
@@ -465,9 +483,10 @@ class _$UserImpl implements _User {
     profilePhotoUrl,
     tradeLicenseUrl,
     drivingLicenseUrl,
+    dateOfBirth,
     createdAt,
     updatedAt,
-  );
+  ]);
 
   /// Create a copy of User
   /// with the given fields replaced by the non-null parameter values.
@@ -501,6 +520,7 @@ abstract class _User implements User {
     final String? profilePhotoUrl,
     final String? tradeLicenseUrl,
     final String? drivingLicenseUrl,
+    final DateTime? dateOfBirth,
     required final DateTime createdAt,
     final DateTime? updatedAt,
   }) = _$UserImpl;
@@ -539,6 +559,8 @@ abstract class _User implements User {
   String? get tradeLicenseUrl;
   @override
   String? get drivingLicenseUrl;
+  @override
+  DateTime? get dateOfBirth;
   @override
   DateTime get createdAt;
   @override

@@ -71,6 +71,60 @@ void main() {
     });
   });
 
+  group('UpdateDateOfBirthUseCase', () {
+    late UpdateDateOfBirthUseCase useCase;
+
+    setUp(() {
+      useCase = UpdateDateOfBirthUseCase(mockRepository);
+    });
+
+    test('calls updateDateOfBirth on repository', () async {
+      final dob = DateTime(1990, 5, 14);
+      final updatedUser = testUser.copyWith(dateOfBirth: dob);
+
+      when(
+        () => mockRepository.updateDateOfBirth(
+          userId: 'user-123',
+          dateOfBirth: dob,
+        ),
+      ).thenAnswer((_) async => updatedUser);
+
+      final result = await useCase(
+        userId: 'user-123',
+        dateOfBirth: dob,
+      );
+
+      expect(result.dateOfBirth, dob);
+      verify(
+        () => mockRepository.updateDateOfBirth(
+          userId: 'user-123',
+          dateOfBirth: dob,
+        ),
+      ).called(1);
+    });
+
+    test('calls updateDateOfBirth on repository with null (clear)', () async {
+      final updatedUser = testUser.copyWith(dateOfBirth: null);
+
+      when(
+        () => mockRepository.updateDateOfBirth(
+          userId: 'user-123',
+          dateOfBirth: null,
+        ),
+      ).thenAnswer((_) async => updatedUser);
+
+      final result = await useCase(userId: 'user-123', dateOfBirth: null);
+
+      expect(result.dateOfBirth, isNull);
+      verify(
+        () => mockRepository.updateDateOfBirth(
+          userId: 'user-123',
+          dateOfBirth: null,
+        ),
+      ).called(1);
+    });
+  });
+
   group('UploadAvatarUseCase', () {
     late UploadAvatarUseCase useCase;
 

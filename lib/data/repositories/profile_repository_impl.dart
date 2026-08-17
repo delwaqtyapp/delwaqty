@@ -45,6 +45,23 @@ class ProfileRepositoryImpl implements ProfileRepository {
   }
 
   @override
+  Future<User> updateDateOfBirth({
+    required String userId,
+    required DateTime? dateOfBirth,
+  }) async {
+    try {
+      final model = await _dataSource.updateDateOfBirth(
+        userId: userId,
+        dateOfBirth: dateOfBirth,
+      );
+      return model.toEntity();
+    } catch (e) {
+      _logger.e('Failed to update date of birth: $userId', e);
+      throw ServerException(message: e.toString());
+    }
+  }
+
+  @override
   Future<String> uploadAvatar({
     required String userId,
     required List<int> bytes,

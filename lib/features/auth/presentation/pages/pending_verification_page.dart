@@ -176,9 +176,68 @@ class _PendingVerificationPageState
             ? const Center(child: CircularProgressIndicator())
             : _user == null
             ? _buildLoadError(l10n, authState)
+            : _user!.verificationStatus.isRejected
+            ? _buildRejected(l10n, authState, _user!)
             : _needsDocuments(_user!)
             ? _buildDocumentsFlow(l10n, authState, _user!)
             : _buildReviewOnly(l10n, authState),
+      ),
+    );
+  }
+
+  Widget _buildRejected(
+    AppLocalizations l10n,
+    AuthState authState,
+    User user,
+  ) {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 32),
+      child: Column(
+        children: [
+          _buildHeader(l10n),
+          const SizedBox(height: 28),
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: const Color(0xFFFFF5F5),
+              borderRadius: BorderRadius.circular(24),
+              border: Border.all(color: const Color(0xFFE57373)),
+            ),
+            child: Column(
+              children: [
+                const Icon(
+                  Icons.error_outline_rounded,
+                  size: 40,
+                  color: Color(0xFFE57373),
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  l10n.verificationRejectedTitle,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                    color: Color(0xFF1A1035),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  l10n.verificationRejectedMessage,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 13,
+                    height: 1.5,
+                    color: const Color(0xFF1A1035).withValues(alpha: 0.6),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 20),
+          _buildLogoutButton(l10n, authState),
+          const SizedBox(height: 24),
+        ],
       ),
     );
   }

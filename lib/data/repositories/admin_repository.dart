@@ -847,7 +847,12 @@ class AdminRepository implements admin.AdminRepository {
           .from('users')
           .select()
           .eq('verification_status', 'pending')
-          .inFilter('user_type', ['provider', 'delivery'])
+          .inFilter('user_type', [
+            'provider',
+            'delivery',
+            'merchant',
+            'driver',
+          ])
           .order('created_at', ascending: false);
 
       return (response as List).map((json) {

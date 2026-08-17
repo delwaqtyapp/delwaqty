@@ -192,6 +192,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
           password: _passwordController.text,
           fullName: _nameController.text.trim(),
           userType: role,
+          language: _selectedLanguage,
           idCardBytes: idCardBytes,
           idCardFileName: idCardFileName,
           profilePhotoBytes: profilePhotoBytes,

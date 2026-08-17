@@ -55,6 +55,28 @@ class SupabaseProfileDataSource {
     }
   }
 
+  Future<UserModel> updateDateOfBirth({
+    required String userId,
+    required DateTime? dateOfBirth,
+  }) async {
+    try {
+      final date = dateOfBirth == null
+          ? null
+          : DateTime(dateOfBirth.year, dateOfBirth.month, dateOfBirth.day);
+      await _client.rpc(
+        'update_member_dob',
+        params: {
+          'p_date_of_birth': date?.toIso8601String(),
+          'p_member_id': userId,
+        },
+      );
+      return getProfile(userId);
+    } catch (e, stack) {
+      _logger.e('Failed to update date of birth for $userId', e, stack);
+      rethrow;
+    }
+  }
+
   Future<UserModel> createProfile(UserModel model) async {
     try {
       final data = await _client

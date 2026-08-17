@@ -24,6 +24,7 @@ class User with _$User {
     String? profilePhotoUrl,
     String? tradeLicenseUrl,
     String? drivingLicenseUrl,
+    DateTime? dateOfBirth,
     required DateTime createdAt,
     DateTime? updatedAt,
   }) = _User;

@@ -51,6 +51,7 @@ class AuthRepositoryImpl implements AuthRepository {
     required String password,
     String? fullName,
     UserType userType = UserType.customer,
+    String language = 'en',
     Uint8List? idCardBytes,
     String? idCardFileName,
     Uint8List? profilePhotoBytes,
@@ -66,6 +67,7 @@ class AuthRepositoryImpl implements AuthRepository {
         password: password,
         fullName: fullName,
         userType: userType.code,
+        language: language,
       );
       if (response.session != null && response.user != null) {
         await _persistSignUpProfile(
@@ -73,6 +75,7 @@ class AuthRepositoryImpl implements AuthRepository {
           email: email,
           fullName: fullName,
           userType: userType,
+          language: language,
           idCardBytes: idCardBytes,
           idCardFileName: idCardFileName,
           profilePhotoBytes: profilePhotoBytes,
@@ -98,6 +101,7 @@ class AuthRepositoryImpl implements AuthRepository {
     required String email,
     String? fullName,
     required UserType userType,
+    String language = 'en',
     Uint8List? idCardBytes,
     String? idCardFileName,
     Uint8List? profilePhotoBytes,
@@ -149,7 +153,7 @@ class AuthRepositoryImpl implements AuthRepository {
       id: userId,
       email: email,
       fullName: fullName,
-      language: 'en',
+      language: language,
       isOnboarded: false,
       role: userType.code,
       userType: userType,

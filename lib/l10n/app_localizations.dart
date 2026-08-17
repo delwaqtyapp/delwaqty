@@ -3854,6 +3854,36 @@ abstract class AppLocalizations {
   /// **'Not set'**
   String get notSet;
 
+  /// No description provided for @clear.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear'**
+  String get clear;
+
+  /// No description provided for @dateOfBirth.
+  ///
+  /// In en, this message translates to:
+  /// **'Date of birth'**
+  String get dateOfBirth;
+
+  /// No description provided for @dateOfBirthPrivacy.
+  ///
+  /// In en, this message translates to:
+  /// **'Your date of birth is private. It is only used to grant birthday rewards and is never shown to other users.'**
+  String get dateOfBirthPrivacy;
+
+  /// No description provided for @verificationRejectedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Verification rejected'**
+  String get verificationRejectedTitle;
+
+  /// No description provided for @verificationRejectedMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Your registration documents were rejected. Please contact support for help or try registering again.'**
+  String get verificationRejectedMessage;
+
   /// No description provided for @noDeliveriesAvailable.
   ///
   /// In en, this message translates to:

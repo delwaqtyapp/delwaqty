@@ -1972,6 +1972,23 @@ class AppLocalizationsAr extends AppLocalizations {
   String get notSet => 'غير محدد';
 
   @override
+  String get clear => 'مسح';
+
+  @override
+  String get dateOfBirth => 'تاريخ الميلاد';
+
+  @override
+  String get dateOfBirthPrivacy =>
+      'تاريخ ميلادك خاص. يُستخدم فقط لمنح مكافآت عيد الميلاد ولا يُعرض أبداً للمستخدمين الآخرين.';
+
+  @override
+  String get verificationRejectedTitle => 'تم رفض التحقق';
+
+  @override
+  String get verificationRejectedMessage =>
+      'تم رفض مستندات تسجيلك. يرجى التواصل مع الدعم للمساعدة أو المحاولة مرة أخرى للتسجيل.';
+
+  @override
   String get noDeliveriesAvailable => 'لا توجد طلبات توصيل متاحة';
 
   @override

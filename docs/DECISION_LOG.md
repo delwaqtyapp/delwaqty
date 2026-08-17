@@ -2247,3 +2247,60 @@ MUST NOT be edited (applied migrations are immutable).
 - Client Notification Center gains pagination/l10n/priority visuals without enum churn.
 - Emergency notifications remain informational (rows + push); admin access stays RLS-gated; the
   Phase 2.5 command center is NOT started.
+
+---
+
+## ADR-063: Profile + registration completion (DOB privacy, role CHECK, language persistence)
+
+**Date:** 2026-08-17
+**Status:** Accepted
+**Deciders:** Lead Architect (STEPS 9-10 directive)
+
+### Context
+Step 11 (profile + registration: customer/provider/driver) exposed three latent gaps from the
+earlier split-screen signup work:
+1. **users.user_type CHECK** (migration 020) only allowed `customer/provider/delivery`, but the
+   register wizard and `UserType` enum register `merchant` and `driver`. Every such sign-up
+   violated the CHECK on insert - registration for two advertised roles was structurally impossible.
+2. **Registration language preference** was collected in the 4-step wizard (step 2: ar/en) but
+   dropped: `handle_new_user()` hardcoded `language=en` and the client-side `_persistSignUpProfile`
+   did the same. The whole checkout ignored the user choice.
+3. **DOB privacy + editing:** `users.date_of_birth` + `update_member_dob` RPC + guard trigger
+   existed (migration 035) but no Flutter code read, wrote, or showed it; the admin verification
+   queue excluded `merchant`/`driver`; and a rejected user was trapped on the pending-verification
+   screen with no rejected state.
+
+### Decision
+- **Migration 046** (additive/idempotent, applied live): widen `users_user_type_check` to
+  `(customer,merchant,driver,provider,delivery)` and teach `handle_new_user()` to read
+  `language` from `raw_user_meta_data` (default `en`). No new tables or RPCs; no ACL surface change.
+- **DOB flows through the sanctioned RPC only.** The client adds `updateDateOfBirth` on the profile
+  DS/repo/usecase that calls `update_member_dob(p_date_of_birth, p_member_id)`; `date_of_birth` is
+  deliberately exclud from `toInsertJson`/`toUpdateJson` because the guard trigger in 035 rejects
+  direct writes by `authenticated`/`anon`.
+- **DOB never shown raw in rewards text.** Rewards render only a derived year (already true) and the
+  profile edit dialog shows a date picker with an explicit privacy note (l10n `dateOfBirthPrivacy`).
+- **Registration language end-to-end:** register page -> AuthStateNotifier.signUp(language)
+  -> SignUpUseCase -> AuthRepository.signUpWithEmail -> `_auth.signUp(data.language)` + trigger path
+  -> `users.language`. Client-side `_persistSignUpProfile` now uses the passed language instead of
+  the hardcoded `en`.
+- **Verification integration:** admin verification queue widened to include `merchant`/`driver`;
+  the pending-verification page gains `_buildRejected` when `verificationStatus.isRejected`.
+
+### Rationale
+- The CHECK fix is the minimal change that makes the advertised role flows real; the trigger change
+  reuses the existing metadata contract so both the email-confirmation and session paths persist the
+  same preference.
+- Routing DOB through the RPC preserves the single-writer invariant from 035 (no second write path,
+  no RLS loosening on `users`).
+- Privacy is enforced at the UI contract level (year-only in rewards) AND at the write path (RPC
+  with future/range validation live-verified).
+- Admin queue + rejected state make the merge of role registration and verification observable and
+  actionable by admins.
+
+### Consequences
+- Merchant/driver sign-up now succeeds end-to-end; language preference survives both registration
+  paths.
+- DOB is stored, editable by owner, and never leaks into reward text.
+- Mixed-role verification queue + explicit rejected screen reduce stuck-user UX.
+- 045/046 migrations are additive; 020/035 untouched. Flutter git diff clean; `flutter test` 868/868.

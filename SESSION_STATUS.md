@@ -1,36 +1,46 @@
 # SESSION_STATUS.md
 
-> **Last updated:** 2026-08-17 Session 52D — **STEP 10 COMPLETE: BIRTHDAY + ANNIVERSARY REWARDS (PRODUCTION-HARDENED)**
-> Step 10 delivered: migration 045 (promotions gate fix, region-aware reward config, Cairo-timezone engine, config-driven expiry, approval-pipeline reward config change), Flutter reward card period/validity/benefit detail, +7 tests (862/862 suite), live engine probes 20/20 green, owner re-confirmed.
+> **Last updated:** 2026-08-17 Session 52E — **STEP 11 COMPLETE: PROFILE + REGISTRATION (CUSTOMER/PROVIDER/DRIVER)**
+> Step 11 delivered: migration 046 (user_type CHECK widened to merchant/driver, `handle_new_user` persists language), DOB editing end-to-end via `update_member_dob` RPC with privacy rule (never shown raw in rewards text), registration language threaded end-to-end, admin verification queue covers all roles + rejected-state UI, +6 tests (868/868 suite), live DB probes 9/9 green.
 
 ---
 
-## Current Task — STEP 10: BIRTHDAY + ANNIVERSARY REWARDS — COMPLETE (Session 52D)
+## Current Task — STEP 11: PROFILE + REGISTRATION — COMPLETE (Session 52E)
 
-**Commit:** `878fdc9` "sprint 80: implement birthday and anniversary rewards" + `2db9762` "chore: normalize markdown trailing whitespace in handoff docs"
-**Push:** origin/master GREEN — HEAD == origin/master == `2db9762`
+**Commit:** sprint 80: complete profile and registration flows
+**Push:** origin/master (pending push)
 
 ### Completed this session
-- **Migration 045 live + verified:** `supabase/migrations/045_rewards_config_approvals_region.sql` (additive/idempotent, re-applied live).
-- **Fixes the free-delivery gate:** `platform_settings.promotions` column created + seeded `free_delivery_enabled:false` (referenced-but-never-created; gate silently returned false before).
-- **Region-aware reward config:** `_reward_config(reward_type, region_id)` overload — regional override → global fallback → no-op; engine resolves each member's region.
-- **Cairo timezone engine:** default run-date `(now() AT TIME ZONE 'Africa/Cairo')::date`; anniversary matching in Cairo local date.
-- **Config-driven expiry:** `valid_days` in reward config auto-expires `granted → expired` + audit.
-- **Approval-pipeline config changes:** `reward_config_change` approval type, `_reward_config_exec` apply (owner-global / in-scope-admin-regional), `request_reward_config_change` RPC (authenticated, gates inside).
-- **Flutter:** reward card now shows period ("Birthday gift for 2026" / "With us for 3 years"), status chip, benefit label + copyable benefit-code box; entity getters `birthdayYear`/`anniversaryYears`/`benefitCode`; l10n EN/AR + regenerated.
-- **Tests:** `rewards_page_test.dart` (2 widget tests) + 5 entity tests → rewards feature 14/14; full suite **862/862**.
-- **Live probes:** 20/20 green (free-delivery gate on/off, birthday grant, missing-DOB skip, idempotency, anniversary calc + idempotency, localized notification w/ display name, region override resolution + engine usage, expiry, approval vocab/apply/reject, RPC ACL, migration re-run, fixture cleanup, state reset).
-- **Gate:** `flutter analyze` 0 errors on touched files, build_runner ok, `git diff --check` clean, secret scan clean, `app_ar.arb` CRLF→LF normalized (matches en).
+- **Migration 046 live + verified:** `supabase/migrations/046_profile_registration_roles_language.sql` (additive/idempotent, re-applied live).
+- **Role registration unblocked:** `users.user_type` CHECK widened to `('customer','merchant','driver','provider','delivery')` — merchant/driver sign-up previously violated the 020 CHECK on insert.
+- **Registration language persisted:** `handle_new_user()` now reads `language` from `raw_user_meta_data` (default `en`); client threads `_selectedLanguage` from register wizard → provider → usecase → repo → signUp metadata → `_persistSignUpProfile` (was hardcoded `'en'`).
+- **DOB end-to-end (privacy rule):** `User`/`UserModel.dateOfBirth` (date-only, excluded from insert/update JSON — guard trigger rejects direct writes); `updateDateOfBirth` DS/repo/usecase calling the sanctioned `update_member_dob` RPC; profile edit dialog gains date picker + clear + `dateOfBirthPrivacy` note; rewards text unchanged (year-only, never raw DOB).
+- **Verification integration:** admin verification queue includes `merchant`/`driver`; `pending_verification_page` gains `_buildRejected` (via new `VerificationStatus.isRejected`).
+- **Tests:** +6 (3 model DOB, 2 updateDateOfBirth usecase, 1 auth language, +2 widget tests in new `pending_verification_page_test.dart` → net +6); full suite **868/868**.
+- **Gate:** `flutter analyze` 0 errors on touched files, build_runner ok, `git diff --check` clean, secret scan clean, `DECISION_LOG.md` CRLF→LF normalized.
 
-### Files modified (4 + generated)
-- `lib/features/rewards/domain/entities/member_reward.dart`
-- `lib/features/rewards/presentation/pages/rewards_page.dart`
-- `lib/l10n/app_en.arb`, `lib/l10n/app_ar.arb` + generated `app_localizations.dart` / `_ar` / `_en`
-- `test/features/rewards/member_reward_entity_test.dart`
+### Live probes (9/9 green)
+- user_type CHECK widened · merchant insert succeeds · `handle_new_user` reads language · real trigger path (auth.users → profile row `merchant/merchant/ar/pending`) · `update_member_dob` writes DOB · direct UPDATE blocked (guard) · future date rejected · migration re-run idempotent · fixtures cleaned.
+
+### Files modified (16 + generated)
+- `lib/domain/entities/user.dart`, `lib/data/models/user_model.dart`
+- `lib/domain/repositories/profile_repository.dart`, `lib/data/repositories/profile_repository_impl.dart`, `lib/data/datasources/remote/supabase_profile_data_source.dart`, `lib/domain/usecases/profile/profile_usecases.dart`
+- `lib/features/profile/presentation/pages/profile_page.dart`
+- `lib/domain/repositories/auth_repository.dart`, `lib/data/repositories/auth_repository_impl.dart`, `lib/data/datasources/remote/supabase_auth_data_source.dart`, `lib/domain/usecases/auth/auth_usecases.dart`, `lib/features/auth/presentation/auth_provider.dart`, `lib/features/auth/presentation/pages/register_page.dart`, `lib/features/auth/presentation/pages/pending_verification_page.dart`
+- `lib/domain/enums/verification_status.dart`, `lib/data/repositories/admin_repository.dart`
+- `lib/l10n/app_en.arb`, `app_ar.arb` + generated `app_localizations*.dart`
+- `docs/DECISION_LOG.md` (ADR-063), `ROADMAP.md`
 
 ### Files created (2)
-- `supabase/migrations/045_rewards_config_approvals_region.sql`
-- `test/features/rewards/rewards_page_test.dart`
+- `supabase/migrations/046_profile_registration_roles_language.sql`
+- `test/features/auth/presentation/pages/pending_verification_page_test.dart`
+- `docs/HANDOFF/STEP_11_PROFILE_REGISTRATION.md`
+
+---
+
+## Previous Task — STEP 10: BIRTHDAY + ANNIVERSARY REWARDS — COMMITTED (Session 52D)
+
+**Commit `878fdc9`** + docs `2db9762` pushed: "sprint 80: implement birthday and anniversary rewards"
 
 ---
 

@@ -14,6 +14,7 @@ abstract class AuthRepository {
     required String password,
     String? fullName,
     UserType userType = UserType.customer,
+    String language = 'en',
     Uint8List? idCardBytes,
     String? idCardFileName,
     Uint8List? profilePhotoBytes,

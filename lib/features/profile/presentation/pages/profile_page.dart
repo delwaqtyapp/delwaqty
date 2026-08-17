@@ -400,49 +400,110 @@ class ProfilePage extends ConsumerWidget {
     final nameController = TextEditingController(text: user.fullName ?? '');
     final usernameController = TextEditingController(text: user.username ?? '');
     final phoneController = TextEditingController(text: user.phone ?? '');
+    DateTime? selectedDate = user.dateOfBirth;
 
     final saved = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(AppSpacing.radiusDialog),
-        ),
-        title: Text(l10n.editProfile),
-        content: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: nameController,
-                decoration: InputDecoration(labelText: l10n.fullName),
-              ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: usernameController,
-                decoration: InputDecoration(
-                  labelText: l10n.username,
-                  prefixText: '@',
+      builder: (dialogContext) => StatefulBuilder(
+        builder: (context, setDialogState) => AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AppSpacing.radiusDialog),
+          ),
+          title: Text(l10n.editProfile),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(
+                  controller: nameController,
+                  decoration: InputDecoration(labelText: l10n.fullName),
                 ),
-              ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: phoneController,
-                decoration: InputDecoration(labelText: l10n.phone),
-                keyboardType: TextInputType.phone,
-              ),
-            ],
+                const SizedBox(height: 12),
+                TextField(
+                  controller: usernameController,
+                  decoration: InputDecoration(
+                    labelText: l10n.username,
+                    prefixText: '@',
+                  ),
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: phoneController,
+                  decoration: InputDecoration(labelText: l10n.phone),
+                  keyboardType: TextInputType.phone,
+                ),
+                const SizedBox(height: 12),
+                InkWell(
+                  borderRadius: BorderRadius.circular(8),
+                  onTap: () async {
+                    final picked = await showDatePicker(
+                      context: context,
+                      initialDate: selectedDate ?? DateTime(2000),
+                      firstDate: DateTime(1900),
+                      lastDate: DateTime.now(),
+                      helpText: l10n.dateOfBirth,
+                    );
+                    if (picked != null) {
+                      setDialogState(() {
+                        selectedDate = DateTime(
+                          picked.year,
+                          picked.month,
+                          picked.day,
+                        );
+                      });
+                    }
+                  },
+                  child: InputDecorator(
+                    decoration: InputDecoration(labelText: l10n.dateOfBirth),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.cake_outlined, size: 20),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            selectedDate == null
+                                ? l10n.notSet
+                                : _formatDate(selectedDate!),
+                            style: Theme.of(context).textTheme.bodyLarge,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    l10n.dateOfBirthPrivacy,
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: TextButton.icon(
+                    onPressed: () => setDialogState(() => selectedDate = null),
+                    icon: const Icon(Icons.clear, size: 16),
+                    label: Text(l10n.clear),
+                  ),
+                ),
+              ],
+            ),
           ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(false),
+              child: Text(l10n.cancel),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.of(dialogContext).pop(true),
+              child: Text(l10n.saveChanges),
+            ),
+          ],
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: Text(l10n.cancel),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            child: Text(l10n.saveChanges),
-          ),
-        ],
       ),
     );
 
@@ -464,9 +525,18 @@ class ProfilePage extends ConsumerWidget {
         : phoneController.text.trim();
 
     try {
-      await ref
-          .read(updateProfileUseCaseProvider)
-          .call(userId: user.id, data: data);
+      if (data.isNotEmpty) {
+        await ref
+            .read(updateProfileUseCaseProvider)
+            .call(userId: user.id, data: data);
+      }
+      final dobChanged = selectedDate != user.dateOfBirth;
+      if (dobChanged) {
+        await ref.read(updateDateOfBirthUseCaseProvider).call(
+              userId: user.id,
+              dateOfBirth: selectedDate,
+            );
+      }
       if (context.mounted) {
         context.showAppSnackBar(l10n.success);
       }
@@ -475,6 +545,13 @@ class ProfilePage extends ConsumerWidget {
         context.showAppSnackBar(l10n.error);
       }
     }
+  }
+
+  String _formatDate(DateTime date) {
+    final year = date.year;
+    final month = date.month.toString().padLeft(2, '0');
+    final day = date.day.toString().padLeft(2, '0');
+    return '$year-$month-$day';
   }
 
   Widget _buildSettingsSection(

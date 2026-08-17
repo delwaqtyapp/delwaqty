@@ -877,28 +877,29 @@ class AdminRepository implements admin.AdminRepository {
   @override
   Future<void> approveVerification(String userId) async {
     try {
-      await _supabase
-          .from('users')
-          .update({
-            'verification_status': 'approved',
-            'updated_at': DateTime.now().toIso8601String(),
-          })
-          .eq('id', userId);
+      await _supabase.rpc(
+        'decide_user_verification',
+        params: {
+          'p_user_id': userId,
+          'p_decision': 'approved',
+        },
+      );
     } catch (e) {
       throw AdminException('Failed to approve verification: $e');
     }
   }
 
   @override
-  Future<void> rejectVerification(String userId) async {
+  Future<void> rejectVerification(String userId, {required String reason}) async {
     try {
-      await _supabase
-          .from('users')
-          .update({
-            'verification_status': 'rejected',
-            'updated_at': DateTime.now().toIso8601String(),
-          })
-          .eq('id', userId);
+      await _supabase.rpc(
+        'decide_user_verification',
+        params: {
+          'p_user_id': userId,
+          'p_decision': 'rejected',
+          'p_reason': reason,
+        },
+      );
     } catch (e) {
       throw AdminException('Failed to reject verification: $e');
     }

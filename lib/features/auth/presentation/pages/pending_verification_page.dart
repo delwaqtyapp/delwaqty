@@ -29,6 +29,7 @@ class _PendingVerificationPageState
   XFile? _idCardFile;
   XFile? _profilePhotoFile;
   bool _submitting = false;
+  bool _isReapply = false;
 
   @override
   void initState() {
@@ -131,20 +132,35 @@ class _PendingVerificationPageState
         bytes: profilePhotoBytes,
         fileName: _profilePhotoFile!.name,
       );
-      final updated = await ref.read(updateProfileUseCaseProvider)(
-        userId: user.id,
-        data: {'id_card_url': idCardUrl, 'profile_photo_url': profilePhotoUrl},
-      );
+      if (_isReapply) {
+        await ref.read(reapplyVerificationUseCaseProvider)(
+          userId: user.id,
+          idCardUrl: idCardUrl,
+          profilePhotoUrl: profilePhotoUrl,
+        );
+      } else {
+        await ref.read(updateProfileUseCaseProvider)(
+          userId: user.id,
+          data: {'id_card_url': idCardUrl, 'profile_photo_url': profilePhotoUrl},
+        );
+      }
       if (!mounted) return;
+      final wasReapply = _isReapply;
       setState(() {
-        _user = updated;
         _idCardFile = null;
         _profilePhotoFile = null;
+        _isReapply = false;
       });
-      context.showAppSnackBar(l10n.documentsUploaded);
+      await _loadUser();
+      if (!mounted) return;
+      context.showAppSnackBar(
+        wasReapply ? l10n.reapplyVerificationSuccess : l10n.documentsUploaded,
+      );
     } catch (_) {
       if (mounted) {
-        context.showAppSnackBar(l10n.documentsUploadFailed);
+        context.showAppSnackBar(
+          _isReapply ? l10n.verificationReapplyFailed : l10n.documentsUploadFailed,
+        );
       }
     } finally {
       if (mounted) {
@@ -177,7 +193,11 @@ class _PendingVerificationPageState
             : _user == null
             ? _buildLoadError(l10n, authState)
             : _user!.verificationStatus.isRejected
-            ? _buildRejected(l10n, authState, _user!)
+            ? _isReapply
+                ? _needsDocuments(_user!)
+                    ? _buildDocumentsFlow(l10n, authState, _user!)
+                    : _buildReviewOnly(l10n, authState)
+                : _buildRejected(l10n, authState, _user!)
             : _needsDocuments(_user!)
             ? _buildDocumentsFlow(l10n, authState, _user!)
             : _buildReviewOnly(l10n, authState),
@@ -231,10 +251,53 @@ class _PendingVerificationPageState
                     color: const Color(0xFF1A1035).withValues(alpha: 0.6),
                   ),
                 ),
+                if ((user.rejectionReason ?? '').isNotEmpty) ...[
+                  const SizedBox(height: 12),
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFFFE9E9),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      l10n.verificationRejectionReason(user.rejectionReason!),
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                        fontSize: 13,
+                        height: 1.5,
+                        fontWeight: FontWeight.w600,
+                        color: Color(0xFFB3261E),
+                      ),
+                    ),
+                  ),
+                ],
               ],
             ),
           ),
           const SizedBox(height: 20),
+          SizedBox(
+            width: double.infinity,
+            height: 54,
+            child: FilledButton(
+              onPressed: () {
+                setState(() => _isReapply = true);
+              },
+              style: FilledButton.styleFrom(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(18),
+                ),
+              ),
+              child: Text(
+                l10n.reapplyVerification,
+                style: const TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 12),
           _buildLogoutButton(l10n, authState),
           const SizedBox(height: 24),
         ],

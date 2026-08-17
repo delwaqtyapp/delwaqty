@@ -1996,6 +1996,32 @@ class AppLocalizationsEn extends AppLocalizations {
       'Your registration documents were rejected. Please contact support for help or try registering again.';
 
   @override
+  String verificationRejectionReason(Object reason) {
+    return 'Reason: $reason';
+  }
+
+  @override
+  String get verificationRejectReasonTitle => 'Reason for rejection';
+
+  @override
+  String get verificationRejectReasonHint =>
+      'Required. This will be shown to the member.';
+
+  @override
+  String get reapplyVerification => 'Re-apply';
+
+  @override
+  String get reapplyVerificationConfirmation => 'Re-apply with new documents?';
+
+  @override
+  String get reapplyVerificationSuccess =>
+      'Verification resubmitted for review';
+
+  @override
+  String get verificationReapplyFailed =>
+      'Failed to resubmit verification. Please try again.';
+
+  @override
   String get noDeliveriesAvailable => 'No deliveries available';
 
   @override

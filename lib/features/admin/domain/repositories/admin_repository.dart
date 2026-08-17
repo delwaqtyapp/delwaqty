@@ -29,5 +29,5 @@ abstract class AdminRepository {
   Future<Map<String, dynamic>> getAnalytics({DateTime? from, DateTime? to});
   Future<List<VerificationRequest>> getVerificationRequests();
   Future<void> approveVerification(String userId);
-  Future<void> rejectVerification(String userId);
+  Future<void> rejectVerification(String userId, {required String reason});
 }

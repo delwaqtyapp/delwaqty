@@ -99,6 +99,24 @@ class ProfileRepositoryImpl implements ProfileRepository {
   }
 
   @override
+  Future<void> reapplyVerification({
+    required String userId,
+    required String idCardUrl,
+    required String profilePhotoUrl,
+  }) async {
+    try {
+      await _dataSource.reapplyVerification(
+        userId: userId,
+        idCardUrl: idCardUrl,
+        profilePhotoUrl: profilePhotoUrl,
+      );
+    } catch (e) {
+      _logger.e('Failed to reapply verification: $userId', e);
+      throw ServerException(message: e.toString());
+    }
+  }
+
+  @override
   Stream<User> watchProfile(String userId) {
     return _dataSource.watchProfile(userId).map((model) => model.toEntity());
   }

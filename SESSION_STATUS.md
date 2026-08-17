@@ -1,10 +1,45 @@
 # SESSION_STATUS.md
 
-> **Last updated:** 2026-08-17 Session 52G — **ADB KEEPALIVE → TERMUX:Boot (MIGRATED LIVE)** — keepalive moved to an independent Termux:Boot daemon (`~/.termux/boot/keep-adb-alive-init.sh`), hook removed from `opencode-omniroute-start`, flock leak fixed (adb server was inheriting lock fd 9), dynamic uid-2000 port discovery replaces stale KNOWN_PORTS. Incident resolved: transport dropped mid-migration (dual adb binaries fighting + key mismatch) — restored on port 45417, OpenCode 200, OmniRoute alive. Report: `docs/HANDOFF/36_ADB_KEEPALIVE_TERMUX_BOOT_MIGRATION.md`.
+> **Last updated:** 2026-08-17 Session 52G — **STEP 12: VERIFICATION RE-APPLY + LOGIN-CALLBACK DEEP LINK (COMPLETE, COMMITTED)** — migration `047_verification_reapply.sql` (re-apply + decide-verification RPCs, rejection reason, guard blocks direct status writes) applied live + probe-verified; `DeepLinkResolver`/`DeepLinkService` allowlist for `io.delwaqty://login-callback` (app_links direct dep); pending-verification page shows reject reason + Re-apply flow; admin reject requires reason via prompt; targeted suites green. Report: `docs/HANDOFF/STEP_12_VERIFICATION_REAPPLY_DEEP_LINK.md`.
 
 ---
 
-## Current Task — ADB KEEPALIVE ON INDEPENDENT TERMUX:Boot LIFECYCLE (Session 52G)
+## Current Task — STEP 12: VERIFICATION RE-APPLY + LOGIN-CALLBACK DEEP LINK (Session 52G)
+
+**Status:** Complete — committed + pushed
+
+### What changed this session
+- **Backend (`supabase/migrations/047_verification_reapply.sql`, applied live):**
+  - `users.rejection_reason` + `users.rejection_reason_at`.
+  - `reapply_verification(p_id_card_url, p_profile_photo_url)` — SECURITY DEFINER, caller owns row,
+    requires `rejected`, sets `pending`, clears reason, writes docs, inserts notification
+    (`send_push=false`) + audit `VERIFICATION_REAPPLIED`.
+  - `decide_user_verification(p_user_id, p_decision, p_reason)` — SECURITY DEFINER, `is_admin()` required,
+    reject mandates a reason; sets status + reason/at, notifies (`send_push=true`, `/profile` or
+    `/pending-verification`), audit `VERIFICATION_DECIDED`.
+  - `users_guard_account_fields` extended: direct `verification_status` writes now raise
+    `'Verification status is managed by the verification RPCs'`.
+  - Live probes green (columns/RPCs/grants/guard/cycle + fixture restore).
+- **Deep link:** `lib/core/deep_link/deep_link_resolver.dart` (pure allowlist) +
+  `lib/services/deep_link/deep_link_service.dart` (routes stream + initialRoute + overrideStream);
+  `app.dart` starts service and re-checks auth on `loginCallback` (safety net after SDK PKCE exchange);
+  `pubspec.yaml` adds `app_links: ^7.2.1` direct.
+- **Re-apply flow:** `User`/`UserModel` + `rejectionReason`; `ProfileRepository.reapplyVerification` +
+  data source RPC + `ReapplyVerificationUseCase`; pending-verification page rejected state shows reason
+  + Re-apply CTA → documents flow → RPC; admin repo/service + page use
+  `decide_user_verification` (reject prompts for required reason).
+- **l10n EN/AR:** 6 new keys.
+- **Docs:** ADR-065/066 in `docs/DECISION_LOG.md`; ROADMAP (Phase 2.3 + sprint history); handoff report.
+
+### Verified
+- `dart analyze` (touched files): 0 errors/warnings (remaining `annotate_overrides` infos pre-existing).
+- Targets: resolver 5/5, service 5/5, profile usecases (incl. reapply) +17, pending-verification page
+  (incl. reason + re-apply) +4, profile page 2/2, admin + auth suites 92/92.
+- Live backend cycle (owner reject → member reapply → owner approve) green.
+
+---
+
+## Previous Task — ADB KEEPALIVE ON INDEPENDENT TERMUX:Boot LIFECYCLE (Session 52G)
 
 **Status:** Complete — migrated live, transport healthy
 

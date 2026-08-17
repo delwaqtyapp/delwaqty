@@ -29,33 +29,86 @@ class _AdminVerificationsPageState
     required bool approve,
   }) async {
     final l10n = AppLocalizations.of(context);
+    if (!approve) {
+      final reason = await _askRejectReason(l10n);
+      if (reason == null || !mounted) return;
+      final confirmed = await ConfirmDialog.show(
+        context,
+        title: l10n.adminVerifications,
+        message: l10n.confirmRejectVerification,
+        confirmLabel: l10n.reject,
+        isDestructive: true,
+      );
+      if (!confirmed || !mounted) return;
+
+      setState(() => _processingUserId = request.userId);
+      final success = await ref
+          .read(adminServiceProvider)
+          .rejectVerification(request.userId, reason: reason);
+      if (!mounted) return;
+      setState(() => _processingUserId = null);
+      if (success) {
+        ref.invalidate(verificationRequestsProvider);
+        context.showAppSnackBar(l10n.rejectionSuccessful);
+      } else {
+        context.showAppSnackBar(l10n.verificationDecisionFailed);
+      }
+      return;
+    }
+
     final confirmed = await ConfirmDialog.show(
       context,
       title: l10n.adminVerifications,
-      message: approve
-          ? l10n.confirmApproveVerification
-          : l10n.confirmRejectVerification,
-      confirmLabel: approve ? l10n.approve : l10n.reject,
-      isDestructive: !approve,
+      message: l10n.confirmApproveVerification,
+      confirmLabel: l10n.approve,
     );
     if (!confirmed || !mounted) return;
 
     setState(() => _processingUserId = request.userId);
-    final adminService = ref.read(adminServiceProvider);
-    final success = approve
-        ? await adminService.approveVerification(request.userId)
-        : await adminService.rejectVerification(request.userId);
-
+    final success = await ref
+        .read(adminServiceProvider)
+        .approveVerification(request.userId);
     if (!mounted) return;
     setState(() => _processingUserId = null);
     if (success) {
       ref.invalidate(verificationRequestsProvider);
-      context.showAppSnackBar(
-        approve ? l10n.approvalSuccessful : l10n.rejectionSuccessful,
-      );
+      context.showAppSnackBar(l10n.approvalSuccessful);
     } else {
       context.showAppSnackBar(l10n.verificationDecisionFailed);
     }
+  }
+
+  Future<String?> _askRejectReason(AppLocalizations l10n) async {
+    final controller = TextEditingController();
+    final reason = await showDialog<String>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(l10n.verificationRejectReasonTitle),
+        content: TextField(
+          controller: controller,
+          autofocus: true,
+          maxLines: 3,
+          decoration: InputDecoration(
+            hintText: l10n.verificationRejectReasonHint,
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(),
+            child: Text(l10n.cancel),
+          ),
+          FilledButton(
+            onPressed: () =>
+                Navigator.of(dialogContext).pop(controller.text.trim()),
+            child: Text(l10n.reject),
+          ),
+        ],
+      ),
+    );
+    return (reason == null || reason.isEmpty) ? null : reason;
   }
 
   void _showDocument({required String url, required String label}) {

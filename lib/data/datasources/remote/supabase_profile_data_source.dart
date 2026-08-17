@@ -77,6 +77,25 @@ class SupabaseProfileDataSource {
     }
   }
 
+  Future<void> reapplyVerification({
+    required String userId,
+    required String idCardUrl,
+    required String profilePhotoUrl,
+  }) async {
+    try {
+      await _client.rpc(
+        'reapply_verification',
+        params: {
+          'p_id_card_url': idCardUrl,
+          'p_profile_photo_url': profilePhotoUrl,
+        },
+      );
+    } catch (e, stack) {
+      _logger.e('Failed to reapply verification for $userId', e, stack);
+      rethrow;
+    }
+  }
+
   Future<UserModel> createProfile(UserModel model) async {
     try {
       final data = await _client

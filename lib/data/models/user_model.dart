@@ -25,6 +25,7 @@ class UserModel with _$UserModel {
     String? profilePhotoUrl,
     String? tradeLicenseUrl,
     String? drivingLicenseUrl,
+    String? rejectionReason,
     DateTime? dateOfBirth,
     required DateTime createdAt,
     DateTime? updatedAt,
@@ -58,6 +59,7 @@ class UserModel with _$UserModel {
       profilePhotoUrl: json['profile_photo_url'] as String?,
       tradeLicenseUrl: json['trade_license_url'] as String?,
       drivingLicenseUrl: json['driving_license_url'] as String?,
+      rejectionReason: json['rejection_reason'] as String?,
       dateOfBirth: _parseDateOfBirth(json['date_of_birth']),
       createdAt: DateTime.parse(json['created_at'] as String),
       updatedAt: json['updated_at'] != null
@@ -99,6 +101,7 @@ class UserModel with _$UserModel {
     profilePhotoUrl: profilePhotoUrl,
     tradeLicenseUrl: tradeLicenseUrl,
     drivingLicenseUrl: drivingLicenseUrl,
+    rejectionReason: rejectionReason,
     dateOfBirth: dateOfBirth,
     createdAt: createdAt,
     updatedAt: updatedAt,

@@ -23,4 +23,22 @@ class SupabaseCampaignRepositoryImpl implements CampaignRepository {
       throw ServerException(message: e.toString());
     }
   }
+
+  @override
+  Future<List<Campaign>> getActiveCampaigns({String locale = 'ar'}) async {
+    try {
+      return await _dataSource.getActiveCampaigns(locale: locale);
+    } catch (e) {
+      throw ServerException(message: e.toString());
+    }
+  }
+
+  @override
+  Future<String?> getMediaUrl(String? path) async {
+    try {
+      return await _dataSource.getMediaUrl(path);
+    } catch (e) {
+      throw ServerException(message: e.toString());
+    }
+  }
 }

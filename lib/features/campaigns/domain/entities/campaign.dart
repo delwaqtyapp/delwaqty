@@ -87,6 +87,72 @@ enum CampaignStatus {
       : name;
 }
 
+enum CampaignPriority {
+  normal,
+  important,
+  critical;
+
+  static CampaignPriority fromDb(String? value) {
+    if (value == null) return CampaignPriority.normal;
+    return CampaignPriority.values.firstWhere(
+      (p) => p.name == value,
+      orElse: () => CampaignPriority.normal,
+    );
+  }
+
+  String get dbName => name;
+}
+
+enum CampaignCtaType {
+  none,
+  internalRoute,
+  entity,
+  externalUrl,
+  copyCode;
+
+  static CampaignCtaType fromDb(String? value) {
+    switch (value) {
+      case 'internal_route':
+        return CampaignCtaType.internalRoute;
+      case 'entity':
+        return CampaignCtaType.entity;
+      case 'external_url':
+        return CampaignCtaType.externalUrl;
+      case 'copy_code':
+        return CampaignCtaType.copyCode;
+      default:
+        return CampaignCtaType.none;
+    }
+  }
+}
+
+class CampaignCta {
+  const CampaignCta({
+    this.type = CampaignCtaType.none,
+    this.route,
+    this.url,
+    this.code,
+    this.entityType,
+    this.entityId,
+  });
+
+  factory CampaignCta.fromJson(Map<String, dynamic> json) => CampaignCta(
+        type: CampaignCtaType.fromDb(json['type'] as String?),
+        route: json['route'] as String?,
+        url: json['url'] as String?,
+        code: json['code'] as String?,
+        entityType: json['entity_type'] as String?,
+        entityId: json['entity_id'] as String?,
+      );
+
+  final CampaignCtaType type;
+  final String? route;
+  final String? url;
+  final String? code;
+  final String? entityType;
+  final String? entityId;
+}
+
 @freezed
 class Campaign with _$Campaign {
   const factory Campaign({
@@ -104,6 +170,9 @@ class Campaign with _$Campaign {
     DateTime? endsAt,
     DateTime? publishedAt,
     DateTime? createdAt,
+    @Default(CampaignPriority.normal) CampaignPriority priority,
+    String? imagePath,
+    CampaignCta? cta,
   }) = _Campaign;
 
   static Campaign fromJson(Map<String, dynamic> json) => Campaign(
@@ -128,6 +197,13 @@ class Campaign with _$Campaign {
             : null,
         createdAt: json['created_at'] != null
             ? DateTime.tryParse(json['created_at'] as String)
+            : null,
+        priority: CampaignPriority.fromDb(json['priority'] as String?),
+        imagePath: json['image_path'] as String?,
+        cta: json['cta'] != null
+            ? CampaignCta.fromJson(
+                Map<String, dynamic>.from(json['cta'] as Map),
+              )
             : null,
       );
 }

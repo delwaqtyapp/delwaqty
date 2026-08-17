@@ -6,13 +6,16 @@ void main() {
 
   group('NotificationType', () {
     test('enum has all values', () {
-      expect(NotificationType.values.length, 13);
+      expect(NotificationType.values.length, 24);
       expect(NotificationType.info.name, 'info');
       expect(NotificationType.warning.name, 'warning');
       expect(NotificationType.success.name, 'success');
       expect(NotificationType.reminder.name, 'reminder');
       expect(NotificationType.reward.name, 'reward');
       expect(NotificationType.system.name, 'system');
+      expect(NotificationType.chatReply.name, 'chatReply');
+      expect(NotificationType.emergency.name, 'emergency');
+      expect(NotificationType.moderation.name, 'moderation');
       expect(NotificationType.order.name, 'order');
       expect(NotificationType.payment.name, 'payment');
       expect(NotificationType.promotion.name, 'promotion');

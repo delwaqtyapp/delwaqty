@@ -72,6 +72,28 @@ enum NotificationType {
   reminder,
   @JsonValue('reward')
   reward,
+  @JsonValue('chat_reply')
+  chatReply,
+  @JsonValue('chat_assigned')
+  chatAssigned,
+  @JsonValue('chat_escalated')
+  chatEscalated,
+  @JsonValue('chat_closed')
+  chatClosed,
+  @JsonValue('complaint')
+  complaint,
+  @JsonValue('complaint_note')
+  complaintNote,
+  @JsonValue('emergency')
+  emergency,
+  @JsonValue('emergency_alert')
+  emergencyAlert,
+  @JsonValue('emergency_resolved')
+  emergencyResolved,
+  @JsonValue('admin_management')
+  adminManagement,
+  @JsonValue('moderation')
+  moderation,
 }
 
 class NotificationPayload {

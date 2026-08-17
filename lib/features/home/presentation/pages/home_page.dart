@@ -8,9 +8,13 @@ import 'package:delwaqty/core/extensions/context_extensions.dart';
 import 'package:delwaqty/features/commerce/domain/entities/merchant.dart';
 import 'package:delwaqty/features/commerce/domain/entities/favorite.dart';
 import 'package:delwaqty/features/commerce/presentation/widgets/favorite_button.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:delwaqty/features/auth/domain/auth_state.dart';
 import 'package:delwaqty/features/auth/presentation/auth_provider.dart';
+import 'package:delwaqty/features/campaigns/domain/entities/campaign.dart';
+import 'package:delwaqty/features/campaigns/presentation/campaign_providers.dart';
 import 'package:delwaqty/features/notifications/notifications_module.dart';
+import 'package:delwaqty/shared/notifications/notification_channels.dart';
 import 'package:delwaqty/features/location/presentation/providers/location_provider.dart';
 import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
 import 'package:delwaqty/shared/widgets/pressable_scale.dart';
@@ -143,8 +147,6 @@ MerchantType? _categoryNameToMerchantType(String name) {
 class HomePage extends ConsumerWidget {
   const HomePage({super.key});
 
-  static const String couponCode = 'DELWAQTY30';
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
@@ -164,6 +166,7 @@ class HomePage extends ConsumerWidget {
               ref.invalidate(nearbyMerchantsProvider);
               ref.invalidate(activeCategoriesProvider);
               ref.invalidate(discoveryMerchantsProvider);
+              ref.invalidate(activeCampaignsProvider);
               ref.read(userLocationProvider.notifier).refreshQuick();
             },
             child: NotificationListener<ScrollNotification>(
@@ -1009,32 +1012,23 @@ class _HeroParticle extends StatelessWidget {
   }
 }
 
-class _PromoCarousel extends StatefulWidget {
+class _PromoCarousel extends ConsumerStatefulWidget {
   const _PromoCarousel();
 
   @override
-  State<_PromoCarousel> createState() => _PromoCarouselState();
+  ConsumerState<_PromoCarousel> createState() => _PromoCarouselState();
 }
 
-class _PromoCarouselState extends State<_PromoCarousel> {
-  static const String couponCode = 'DELWAQTY30';
+class _PromoCarouselState extends ConsumerState<_PromoCarousel> {
   late final PageController _controller;
   Timer? _timer;
   int _current = 0;
+  int _count = 0;
 
   @override
   void initState() {
     super.initState();
     _controller = PageController(viewportFraction: 0.92);
-    _timer = Timer.periodic(const Duration(seconds: 4), (_) {
-      if (!mounted || !_controller.hasClients) return;
-      final next = (_current + 1) % 3;
-      _controller.animateToPage(
-        next,
-        duration: const Duration(milliseconds: 520),
-        curve: Curves.easeInOutCubic,
-      );
-    });
   }
 
   @override
@@ -1044,124 +1038,202 @@ class _PromoCarouselState extends State<_PromoCarousel> {
     super.dispose();
   }
 
-  Future<void> _copyCoupon(BuildContext context) async {
-    await Clipboard.setData(const ClipboardData(text: couponCode));
-    if (!context.mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(AppLocalizations.of(context).codeCopied),
-        duration: const Duration(milliseconds: 1500),
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
-      ),
-    );
+  void _syncAutoPlay(int count) {
+    if (count == _count) return;
+    _count = count;
+    _timer?.cancel();
+    _timer = null;
+    if (_current >= count) _current = 0;
+    if (count <= 1) return;
+    _timer = Timer.periodic(const Duration(seconds: 4), (_) {
+      if (!mounted || !_controller.hasClients) return;
+      final next = (_current + 1) % count;
+      _controller.animateToPage(
+        next,
+        duration: const Duration(milliseconds: 520),
+        curve: Curves.easeInOutCubic,
+      );
+    });
   }
 
-  @override
-  Widget build(BuildContext context) {
+  Future<void> _handleTap(BuildContext context, Campaign campaign) async {
     final l10n = AppLocalizations.of(context);
-    final slides = [
-      _PromoSlideData(
-        title: '30% OFF',
-        subtitle: l10n.onboardingDesc2,
-        coupon: couponCode,
-        colors: const [AppColors.brandPurpleDeep, AppColors.brandViolet],
-      ),
-      _PromoSlideData(
-        title: l10n.freeDelivery,
-        subtitle: l10n.freeDeliveryPromoSub,
-        colors: const [Color(0xFF0D9488), Color(0xFF14B8A6)],
-      ),
-      _PromoSlideData(
-        title: l10n.discount,
-        subtitle: l10n.offersPromoSub,
-        colors: const [Color(0xFFBE185D), Color(0xFFF43F5E)],
-      ),
-    ];
-
-    return AnimatedFadeIn(
-      delay: const Duration(milliseconds: 450),
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 14, 16, 0),
-        child: Column(
-          children: [
-            SizedBox(
-              height: 140,
-              child: PageView.builder(
-                controller: _controller,
-                itemCount: slides.length,
-                onPageChanged: (i) => setState(() => _current = i),
-                itemBuilder: (context, index) {
-                  final slide = slides[index];
-                  return GestureDetector(
-                    onTap: () {
-                      if (slide.coupon != null) {
-                        _copyCoupon(context);
-                      } else {
-                        context.push('/market');
-                      }
-                    },
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 4),
-                      child: _PromoSlide(data: slide),
-                    ),
-                  );
-                },
+    final cta = campaign.cta;
+    if (cta != null) {
+      switch (cta.type) {
+        case CampaignCtaType.copyCode:
+          final code = cta.code;
+          if (code == null) return;
+          await Clipboard.setData(ClipboardData(text: code));
+          if (!context.mounted) return;
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(l10n.codeCopied),
+              duration: const Duration(milliseconds: 1500),
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
               ),
             ),
-            const SizedBox(height: 12),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
+          );
+          return;
+        case CampaignCtaType.externalUrl:
+          final url = cta.url;
+          if (url != null) {
+            await launchUrl(
+              Uri.parse(url),
+              mode: LaunchMode.externalApplication,
+            );
+          }
+          return;
+        case CampaignCtaType.internalRoute:
+          final route = cta.route;
+          if (route != null &&
+              NotificationChannels.isAllowed(route, isAdmin: false)) {
+            context.push(route);
+          }
+          return;
+        case CampaignCtaType.entity:
+        case CampaignCtaType.none:
+          break;
+      }
+    }
+    if (context.mounted) context.push('/campaign/${campaign.id}');
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final campaignsAsync = ref.watch(activeCampaignsProvider);
+
+    return campaignsAsync.when(
+      loading: () => const _PromoCarouselLoading(),
+      error: (_, __) => const SizedBox.shrink(),
+      data: (campaigns) {
+        if (campaigns.isEmpty) return const SizedBox.shrink();
+        final count = campaigns.length;
+        _syncAutoPlay(count);
+        return AnimatedFadeIn(
+          delay: const Duration(milliseconds: 450),
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 14, 16, 0),
+            child: Column(
               children: [
-                for (var i = 0; i < slides.length; i++)
-                  AnimatedContainer(
-                    duration: const Duration(milliseconds: 240),
-                    curve: Curves.easeOutCubic,
-                    margin: const EdgeInsets.symmetric(horizontal: 3),
-                    width: _current == i ? 22 : 7,
-                    height: 7,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(999),
-                      color: _current == i
-                          ? AppColors.brandPurple
-                          : context.colorScheme.outlineVariant.withValues(
-                              alpha: 0.5,
-                            ),
-                    ),
+                SizedBox(
+                  height: 140,
+                  child: PageView.builder(
+                    controller: _controller,
+                    itemCount: count,
+                    onPageChanged: (i) => setState(() => _current = i),
+                    itemBuilder: (context, index) {
+                      final campaign = campaigns[index];
+                      return GestureDetector(
+                        onTap: () => _handleTap(context, campaign),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 4),
+                          child: _PromoSlide(campaign: campaign),
+                        ),
+                      );
+                    },
                   ),
+                ),
+                if (count > 1) ...[
+                  const SizedBox(height: 12),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      for (var i = 0; i < count; i++)
+                        AnimatedContainer(
+                          duration: const Duration(milliseconds: 240),
+                          curve: Curves.easeOutCubic,
+                          margin: const EdgeInsets.symmetric(horizontal: 3),
+                          width: _current == i ? 22 : 7,
+                          height: 7,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(999),
+                            color: _current == i
+                                ? AppColors.brandPurple
+                                : context.colorScheme.outlineVariant
+                                    .withValues(alpha: 0.5),
+                          ),
+                        ),
+                    ],
+                  ),
+                ],
               ],
             ),
-          ],
-        ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _PromoCarouselLoading extends StatelessWidget {
+  const _PromoCarouselLoading();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Padding(
+      padding: EdgeInsets.fromLTRB(16, 14, 16, 0),
+      child: ShimmerBox(
+        width: double.infinity,
+        height: 140,
+        borderRadius: 24,
       ),
     );
   }
 }
 
-class _PromoSlideData {
-  const _PromoSlideData({
-    required this.title,
-    required this.subtitle,
-    this.coupon,
-    required this.colors,
-  });
-
-  final String title;
-  final String subtitle;
-  final String? coupon;
-  final List<Color> colors;
+List<Color> _campaignColors(Campaign campaign) {
+  switch (campaign.priority) {
+    case CampaignPriority.critical:
+      return const [Color(0xFF991B1B), Color(0xFFF87171)];
+    case CampaignPriority.important:
+      return const [Color(0xFF92400E), Color(0xFFFBBF24)];
+    case CampaignPriority.normal:
+      switch (campaign.campaignType) {
+        case CampaignType.coupon:
+          return const [Color(0xFF0D9488), Color(0xFF14B8A6)];
+        case CampaignType.offer:
+        case CampaignType.promotion:
+        case CampaignType.productPromotion:
+        case CampaignType.servicePromotion:
+          return const [AppColors.brandPurpleDeep, AppColors.brandViolet];
+        case CampaignType.outage:
+        case CampaignType.importantNotice:
+        case CampaignType.emergencyNotice:
+        case CampaignType.safetyNotice:
+          return const [Color(0xFFBE185D), Color(0xFFF43F5E)];
+        case CampaignType.announcement:
+        case CampaignType.informational:
+        case CampaignType.serviceAnnouncement:
+          return const [Color(0xFF1E40AF), Color(0xFF3B82F6)];
+      }
+  }
 }
 
-class _PromoSlide extends StatelessWidget {
-  const _PromoSlide({required this.data});
+class _PromoSlide extends ConsumerWidget {
+  const _PromoSlide({required this.campaign});
 
-  final _PromoSlideData data;
+  final Campaign campaign;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
+    final name = campaign.nameAr.isNotEmpty
+        ? campaign.nameAr
+        : (campaign.nameEn ?? campaign.nameAr);
+    final subtitle = campaign.subtitleAr?.isNotEmpty == true
+        ? campaign.subtitleAr
+        : campaign.subtitleEn;
+    final colors = _campaignColors(campaign);
+    final coupon = campaign.cta?.type == CampaignCtaType.copyCode
+        ? campaign.cta?.code
+        : null;
+    final imageUrl = ref
+        .watch(campaignMediaUrlProvider(campaign.imagePath))
+        .value;
+
     return Container(
       clipBehavior: Clip.antiAlias,
       decoration: BoxDecoration(
@@ -1169,39 +1241,34 @@ class _PromoSlide extends StatelessWidget {
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: data.colors,
+          colors: colors,
         ),
         boxShadow: [
           BoxShadow(
-            color: data.colors.first.withValues(alpha: 0.3),
+            color: colors.first.withValues(alpha: 0.3),
             blurRadius: 24,
             offset: const Offset(0, 10),
           ),
         ],
       ),
       child: Stack(
+        fit: StackFit.expand,
         children: [
-          Positioned(
-            right: -20,
-            top: -30,
-            child: Container(
-              width: 120,
-              height: 120,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: Colors.white.withValues(alpha: 0.1),
-              ),
+          if (imageUrl != null)
+            Image.network(
+              imageUrl,
+              fit: BoxFit.cover,
+              errorBuilder: (_, __, ___) => const SizedBox.shrink(),
             ),
-          ),
-          Positioned(
-            right: 10,
-            bottom: -34,
-            child: Container(
-              width: 90,
-              height: 90,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: Colors.white.withValues(alpha: 0.07),
+          DecoratedBox(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  colors.first.withValues(alpha: 0.72),
+                  colors.last.withValues(alpha: 0.86),
+                ],
               ),
             ),
           ),
@@ -1215,7 +1282,7 @@ class _PromoSlide extends StatelessWidget {
                   children: [
                     Expanded(
                       child: Text(
-                        data.title,
+                        name,
                         style: context.textTheme.headlineSmall?.copyWith(
                           color: Colors.white,
                           fontWeight: FontWeight.w900,
@@ -1224,7 +1291,7 @@ class _PromoSlide extends StatelessWidget {
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
-                    if (data.coupon != null)
+                    if (coupon != null)
                       Container(
                         padding: const EdgeInsets.symmetric(
                           horizontal: 10,
@@ -1244,17 +1311,19 @@ class _PromoSlide extends StatelessWidget {
                       ),
                   ],
                 ),
-                const SizedBox(height: 4),
-                Text(
-                  data.subtitle,
-                  style: AppTextStyles.bodyMedium.copyWith(
-                    color: Colors.white.withValues(alpha: 0.85),
-                    fontSize: 13,
+                if (subtitle != null && subtitle.isNotEmpty) ...[
+                  const SizedBox(height: 4),
+                  Text(
+                    subtitle,
+                    style: AppTextStyles.bodyMedium.copyWith(
+                      color: Colors.white.withValues(alpha: 0.85),
+                      fontSize: 13,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                if (data.coupon != null) ...[
+                ],
+                if (coupon != null) ...[
                   const SizedBox(height: 10),
                   Container(
                     padding: const EdgeInsets.symmetric(
@@ -1266,7 +1335,7 @@ class _PromoSlide extends StatelessWidget {
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Text(
-                      data.coupon!,
+                      coupon,
                       style: AppTextStyles.labelMedium.copyWith(
                         color: Colors.white,
                         fontWeight: FontWeight.w700,

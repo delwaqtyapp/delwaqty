@@ -544,49 +544,49 @@ class AdminRepository implements admin.AdminRepository {
 
   // ─── Users ────────────────────────────────────────────────
 
-  Future<List<AdminUser>> getUsers({String? search}) async {
-    try {
-      var query = _supabase.from('admin_users').select();
-
-      if (search != null && search.isNotEmpty) {
-        query = query.or('name.ilike.%$search%,email.ilike.%$search%');
-      }
-
-      final response = await query.order('created_at', ascending: false);
-
-      return (response as List).map((json) {
-        return AdminUser(
-          id: json['id'] as String,
-          name: json['name'] as String,
-          email: json['email'] as String,
-          role: AdminRole.fromDb(json['role'] as String?),
-          status: AdminUserStatus.values.firstWhere(
-            (s) => s.name == json['status'],
-            orElse: () => AdminUserStatus.pending,
-          ),
-          lastLogin: json['last_login'] != null
-              ? DateTime.parse(json['last_login'] as String)
-              : null,
-          createdAt: DateTime.parse(json['created_at'] as String),
-        );
-      }).toList();
-    } catch (e) {
-      throw AdminException('Failed to fetch users: $e');
-    }
-  }
+Future<List<AdminUser>> getUsers({String? search}) async {
+     try {
+       var query = _supabase.from('admin_users').select('full_name as name, email, role, status, last_login, created_at');
+ 
+       if (search != null && search.isNotEmpty) {
+         query = query.or('full_name.ilike.%$search%,email.ilike.%$search%');
+       }
+ 
+       final response = await query.order('created_at', ascending: false);
+ 
+       return (response as List).map((json) {
+         return AdminUser(
+           id: json['id'] as String,
+           name: json['full_name'] as String,
+           email: json['email'] as String,
+           role: AdminRole.fromDb(json['role'] as String?),
+           status: AdminUserStatus.values.firstWhere(
+             (s) => s.name == json['status'],
+             orElse: () => AdminUserStatus.pending,
+           ),
+           lastLogin: json['last_login'] != null
+               ? DateTime.parse(json['last_login'] as String)
+               : null,
+           createdAt: DateTime.parse(json['created_at'] as String),
+         );
+       }).toList();
+     } catch (e) {
+       throw AdminException('Failed to fetch users: $e');
+     }
+   }
 
   Future<AdminUser> createUser(AdminUser user) async {
     try {
-      final response = await _supabase
-          .from('admin_users')
-          .insert({
-            'name': user.name,
-            'email': user.email,
-            'role': user.role.toDb(),
-            'status': user.status.name,
-          })
-          .select()
-          .single();
+final response = await _supabase
+           .from('admin_users')
+           .insert({
+             'full_name': user.fullName,
+             'email': user.email,
+             'role': user.role.toDb(),
+             'status': user.status.name,
+           })
+           .select()
+           .single();
 
       return AdminUser(
         id: response['id'] as String,
@@ -603,17 +603,17 @@ class AdminRepository implements admin.AdminRepository {
 
   Future<AdminUser> updateUser(AdminUser user) async {
     try {
-      final response = await _supabase
-          .from('admin_users')
-          .update({
-            'name': user.name,
-            'email': user.email,
-            'role': user.role.toDb(),
-            'status': user.status.name,
-          })
-          .eq('id', user.id)
-          .select()
-          .single();
+final response = await _supabase
+           .from('admin_users')
+           .update({
+             'full_name': user.fullName,
+             'email': user.email,
+             'role': user.role.toDb(),
+             'status': user.status.name,
+           })
+           .eq('id', user.id)
+           .select()
+           .single();
 
       return AdminUser(
         id: response['id'] as String,

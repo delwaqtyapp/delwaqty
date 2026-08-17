@@ -264,12 +264,12 @@ class _AdminDashboardPageState extends ConsumerState<AdminDashboardPage> {
         const Color(0xFF34C759),
         '/admin/verifications',
       ),
-      _QuickActionData(
-        l10n.userManagement,
-        Icons.people_outline_rounded,
-        const Color(0xFF4A90D9),
-        '/admin/users',
-      ),
+_QuickActionData(
+          l10n.userManagement,
+          Icons.people_outline_rounded,
+          const Color(0xFF4A90D9),
+          '/admin/members',
+        ),
       _QuickActionData(
         l10n.merchantManagement,
         Icons.store_outlined,

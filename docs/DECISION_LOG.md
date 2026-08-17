@@ -659,6 +659,7 @@ Portable toolchain under `E:\app\` with environment variables set per-session. F
 | 032 | M5 Provider-Agnostic Destination Search | Accepted | Google Places, cache, debounce, saved places |
 | 033 | M6 Complete Driver Platform | Accepted | Onboarding, vehicles, documents, performance, wallet |
 | 034 | M7 Unified Delivery & Logistics Platform | Accepted | 9 service types, rides table reuse, delivery pricing |
+| 067 | Escalation engine — ledger + RPCs + strict-upward routing | Accepted | `048_escalation_engine.sql`, region-aware admin tiering, owner queue |
 
 ---
 
@@ -2426,3 +2427,54 @@ Migration `047_verification_reapply.sql` (applied live):
 - Admin approve/reject now goes through `decide_user_verification` in `admin_repository.dart`;
   `rejectVerification` requires a `reason` (UI prompts for it).
 - `User`/`UserModel` gained `rejectionReason`; profile repository gained `reapplyVerification`.
+
+---
+
+## ADR-067: Escalation engine — ledger, strict-upward routing, marker-based server-origin guards (migration 048)
+
+**Date:** Session 53 (2026-08-18, STEP 13 / Phase 2.5)
+**Status:** Accepted
+**Deciders:** Lead Architect
+
+### Context
+Complaints had no escalation path: no ledger of escalation hops, no region-aware admin escalation
+tiering, and `status` could be forced to `'escalated'` by raw UPDATEs. The routing requirement was:
+scoped admin → parent/nearest ancestor region admin → global admin → owner queue, with priority/status
+never decreasing and assignment fields unspoofable by clients.
+
+### Decision
+Migration `048_escalation_engine.sql` (applied live, idempotent, rerun-clean):
+1. **`escalation_events` table** (entity_type/entity_id, from/to admin, actor, reason, previous/new scope)
+   + index `(entity_type, entity_id)` + RLS + revokes/grants (anon/authenticated denied on read).
+2. **`complaints` ALTER**: `assigned_admin_id`, `escalated_at`, `escalated_from_admin_id`.
+3. **`escalate_complaint` / `assign_complaint` / `get_escalation_events`** SECURITY DEFINER RPCs
+   (016 pattern, `search_path` pinned, revoke-then-grant). `escalate_complaint` routes **strictly upward**:
+   unassigned → best regional admin (`resolve_support_admin(v_region, true, NULL)`), scoped → global tier
+   (`resolve_support_admin(v_region, false, v_current)`), global → **owner queue** (terminal, `to_admin_id=NULL`);
+   an owner-queue event short-circuits further escalations (early RETURN).
+4. **Marker-based server-origin proof**: RPCs set `set_config('app.escalation_rpc', 'true', true)` /
+   `app.notify_dispatch` (transaction-local). `complaints_fixup_insert` / `complaints_fixup_update` and
+   `guard_notifications_user_update` trust marker → `auth.uid() IS NULL` → `is_admin()` before forcing
+   safe defaults (insert) or restoring OLD values (non-admin update); admins bypass for legitimate direct
+   edits except `status→'escalated'` and assignment fields, which RAISE "must be escalated via escalate_complaint()".
+5. **Trigger isolation verified live** — probe suite runs with
+   `ALTER TABLE public.notifications DISABLE TRIGGER notify_notification_push` + `GRANT ALL ON pg_temp`
+   (SET ROLE probes cannot touch superuser temp tables otherwise).
+
+### Rationale
+- `session_user`/`current_user` **cannot** distinguish server origin under PostgREST: `session_user`
+  is always `authenticator` and differs from the PostgREST-set `current_user`, so the discriminator was
+  observably bypassable (a forged customer `status='escalated'` POST returned 201 before the fix).
+  `set_config` with `is_local=true` is not settable by PostgREST table CRUD, so it is the unspoofable proof.
+- Strict-upward routing + owner-queue terminal prevents both downgrades and the R1↔G escalation cycle
+  observed in multi-hop probes, and gives the owner a deterministic final queue.
+- Ledger-first design makes routing auditable (`get_escalation_events`) and is reusable for other entities
+  (`entity_type`).
+
+### Consequences
+- `flutter analyze` 0 errors/warnings on touched files; escalation + complaints targeted suites green.
+- Complaint escalate from the admin UI now routes through `escalate_complaint` (RPC); direct
+  `updateComplaintStatus('escalated')` throws a descriptive `ServerException`.
+- New `lib/features/escalation/` module (entity, repository, data source, impl, providers, admin queue page)
+  registered in `module_registry.dart`; `/admin/escalations` route; l10n en+ar keys.
+- Probe leave-behinds in the dev project must be cleaned by T* probe fixtures (temp admins/customers).

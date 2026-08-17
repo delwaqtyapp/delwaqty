@@ -7484,6 +7484,90 @@ abstract class AppLocalizations {
   /// **'Add Note'**
   String get addNote;
 
+  /// No description provided for @escalationQueueTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Escalation Queue'**
+  String get escalationQueueTitle;
+
+  /// No description provided for @escalationPending.
+  ///
+  /// In en, this message translates to:
+  /// **'No escalations pending'**
+  String get escalationPending;
+
+  /// No description provided for @noEscalationsDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Escalations will appear here once raised.'**
+  String get noEscalationsDescription;
+
+  /// No description provided for @escalationEscalate.
+  ///
+  /// In en, this message translates to:
+  /// **'Escalate'**
+  String get escalationEscalate;
+
+  /// No description provided for @escalationReason.
+  ///
+  /// In en, this message translates to:
+  /// **'Escalation Reason'**
+  String get escalationReason;
+
+  /// No description provided for @escalationReasonHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Required. Explain why this complaint must be escalated.'**
+  String get escalationReasonHint;
+
+  /// No description provided for @escalationRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'A reason is required to escalate'**
+  String get escalationRequired;
+
+  /// No description provided for @escalationFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Escalation failed'**
+  String get escalationFailed;
+
+  /// No description provided for @escalationEscalatedSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Complaint escalated'**
+  String get escalationEscalatedSuccess;
+
+  /// No description provided for @escalationAssignedTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Assigned to'**
+  String get escalationAssignedTo;
+
+  /// No description provided for @escalationUnassigned.
+  ///
+  /// In en, this message translates to:
+  /// **'Unassigned'**
+  String get escalationUnassigned;
+
+  /// No description provided for @escalationScoped.
+  ///
+  /// In en, this message translates to:
+  /// **'Regional'**
+  String get escalationScoped;
+
+  /// No description provided for @escalationGlobal.
+  ///
+  /// In en, this message translates to:
+  /// **'Global'**
+  String get escalationGlobal;
+
+  /// No description provided for @escalationOwnerQueue.
+  ///
+  /// In en, this message translates to:
+  /// **'Owner queue'**
+  String get escalationOwnerQueue;
+
   /// No description provided for @sanctions.
   ///
   /// In en, this message translates to:

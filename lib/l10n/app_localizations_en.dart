@@ -3890,6 +3890,50 @@ class AppLocalizationsEn extends AppLocalizations {
   String get addNote => 'Add Note';
 
   @override
+  String get escalationQueueTitle => 'Escalation Queue';
+
+  @override
+  String get escalationPending => 'No escalations pending';
+
+  @override
+  String get noEscalationsDescription =>
+      'Escalations will appear here once raised.';
+
+  @override
+  String get escalationEscalate => 'Escalate';
+
+  @override
+  String get escalationReason => 'Escalation Reason';
+
+  @override
+  String get escalationReasonHint =>
+      'Required. Explain why this complaint must be escalated.';
+
+  @override
+  String get escalationRequired => 'A reason is required to escalate';
+
+  @override
+  String get escalationFailed => 'Escalation failed';
+
+  @override
+  String get escalationEscalatedSuccess => 'Complaint escalated';
+
+  @override
+  String get escalationAssignedTo => 'Assigned to';
+
+  @override
+  String get escalationUnassigned => 'Unassigned';
+
+  @override
+  String get escalationScoped => 'Regional';
+
+  @override
+  String get escalationGlobal => 'Global';
+
+  @override
+  String get escalationOwnerQueue => 'Owner queue';
+
+  @override
   String get sanctions => 'Sanctions';
 
   @override

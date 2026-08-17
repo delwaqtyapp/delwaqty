@@ -12,7 +12,8 @@ class AdminComplaintsPage extends ConsumerStatefulWidget {
   const AdminComplaintsPage({super.key});
 
   @override
-  ConsumerState<AdminComplaintsPage> createState() => _AdminComplaintsPageState();
+  ConsumerState<AdminComplaintsPage> createState() =>
+      _AdminComplaintsPageState();
 }
 
 class _AdminComplaintsPageState extends ConsumerState<AdminComplaintsPage> {
@@ -78,11 +79,22 @@ class _AdminComplaintsPageState extends ConsumerState<AdminComplaintsPage> {
               decoration: InputDecoration(
                 labelText: 'Status',
                 isDense: true,
-                contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
+                ),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
               ),
-              items: ['all', 'pending', 'investigating', 'resolved', 'rejected', 'escalated']
-                  .map((s) => DropdownMenuItem(value: s, child: Text(s))).toList(),
+              items: [
+                'all',
+                'pending',
+                'investigating',
+                'resolved',
+                'rejected',
+                'escalated',
+              ].map((s) => DropdownMenuItem(value: s, child: Text(s))).toList(),
               onChanged: (v) => setState(() => _statusFilter = v!),
             ),
           ),
@@ -93,11 +105,22 @@ class _AdminComplaintsPageState extends ConsumerState<AdminComplaintsPage> {
               decoration: InputDecoration(
                 labelText: l10n.type,
                 isDense: true,
-                contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
+                ),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
               ),
-              items: ['all', 'driver', 'merchant', 'customer', 'provider', 'other']
-                  .map((s) => DropdownMenuItem(value: s, child: Text(s))).toList(),
+              items: [
+                'all',
+                'driver',
+                'merchant',
+                'customer',
+                'provider',
+                'other',
+              ].map((s) => DropdownMenuItem(value: s, child: Text(s))).toList(),
               onChanged: (v) => setState(() => _typeFilter = v!),
             ),
           ),
@@ -143,16 +166,27 @@ class _ComplaintTile extends StatelessWidget {
   final AppLocalizations l10n;
   final VoidCallback onTap;
 
-  const _ComplaintTile({required this.complaint, required this.cs, required this.l10n, required this.onTap});
+  const _ComplaintTile({
+    required this.complaint,
+    required this.cs,
+    required this.l10n,
+    required this.onTap,
+  });
 
   Color _statusColor(String status) {
     switch (status) {
-      case 'pending': return cs.tertiary;
-      case 'investigating': return Colors.orange;
-      case 'resolved': return Colors.green;
-      case 'rejected': return Colors.red;
-      case 'escalated': return Colors.deepPurple;
-      default: return cs.onSurface;
+      case 'pending':
+        return cs.tertiary;
+      case 'investigating':
+        return Colors.orange;
+      case 'resolved':
+        return Colors.green;
+      case 'rejected':
+        return Colors.red;
+      case 'escalated':
+        return Colors.deepPurple;
+      default:
+        return cs.onSurface;
     }
   }
 
@@ -170,13 +204,28 @@ class _ComplaintTile extends StatelessWidget {
                 color: _statusColor(complaint.status).withValues(alpha: 0.15),
                 borderRadius: BorderRadius.circular(10),
               ),
-              child: Icon(Icons.warning_rounded, color: _statusColor(complaint.status)),
+              child: Icon(
+                Icons.warning_rounded,
+                color: _statusColor(complaint.status),
+              ),
             ),
-            title: Text(complaint.subject, maxLines: 1, overflow: TextOverflow.ellipsis),
-            subtitle: Text('${complaint.complaintType} · ${complaint.status}', maxLines: 1),
+            title: Text(
+              complaint.subject,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+            subtitle: Text(
+              '${complaint.complaintType} · ${complaint.status}',
+              maxLines: 1,
+            ),
             trailing: Chip(
-              label: Text(complaint.priority, style: const TextStyle(fontSize: 10)),
-              backgroundColor: complaint.priority == 'urgent' ? Colors.red.withValues(alpha: 0.2) : null,
+              label: Text(
+                complaint.priority,
+                style: const TextStyle(fontSize: 10),
+              ),
+              backgroundColor: complaint.priority == 'urgent'
+                  ? Colors.red.withValues(alpha: 0.2)
+                  : null,
             ),
             onTap: onTap,
           ),
@@ -190,15 +239,79 @@ class _ComplaintDetailSheet extends ConsumerStatefulWidget {
   final Complaint complaint;
   final VoidCallback onStatusChanged;
 
-  const _ComplaintDetailSheet({required this.complaint, required this.onStatusChanged});
+  const _ComplaintDetailSheet({
+    required this.complaint,
+    required this.onStatusChanged,
+  });
 
   @override
-  ConsumerState<_ComplaintDetailSheet> createState() => _ComplaintDetailSheetState();
+  ConsumerState<_ComplaintDetailSheet> createState() =>
+      _ComplaintDetailSheetState();
 }
 
 class _ComplaintDetailSheetState extends ConsumerState<_ComplaintDetailSheet> {
   final _noteController = TextEditingController();
   String _selectedStatus = '';
+
+  Future<void> _escalateWithReason(Complaint c) async {
+    final l10n = AppLocalizations.of(context);
+    final reasonController = TextEditingController();
+    final escalated = await showDialog<bool>(
+      context: context,
+      builder: (dctx) => AlertDialog(
+        title: Text(l10n.escalationEscalate),
+        content: TextField(
+          controller: reasonController,
+          autofocus: true,
+          maxLines: 3,
+          decoration: InputDecoration(
+            labelText: l10n.escalationReason,
+            hintText: l10n.escalationReasonHint,
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dctx).pop(false),
+            child: Text(AppLocalizations.of(context).cancel),
+          ),
+          FilledButton(
+            onPressed: () {
+              if (reasonController.text.trim().isEmpty) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text(l10n.escalationRequired)),
+                );
+                return;
+              }
+              Navigator.of(dctx).pop(true);
+            },
+            child: Text(l10n.escalationEscalate),
+          ),
+        ],
+      ),
+    );
+    final reason = reasonController.text.trim();
+    reasonController.dispose();
+    if (escalated != true || reason.isEmpty) return;
+
+    final ctx = context;
+    try {
+      final repo = ref.read(complaintsRepositoryProvider);
+      await repo.escalateComplaint(id: c.id, reason: reason);
+      widget.onStatusChanged();
+      if (ctx.mounted) {
+        Navigator.of(ctx).pop();
+        ScaffoldMessenger.of(ctx).showSnackBar(
+          SnackBar(content: Text(l10n.escalationEscalatedSuccess)),
+        );
+      }
+    } catch (_) {
+      if (ctx.mounted) {
+        ScaffoldMessenger.of(
+          ctx,
+        ).showSnackBar(SnackBar(content: Text(l10n.escalationFailed)));
+      }
+    }
+  }
 
   @override
   void initState() {
@@ -228,18 +341,29 @@ class _ComplaintDetailSheetState extends ConsumerState<_ComplaintDetailSheet> {
             children: [
               Center(
                 child: Container(
-                  width: 40, height: 4,
-                  decoration: BoxDecoration(color: Colors.grey[400], borderRadius: BorderRadius.circular(2)),
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: Colors.grey[400],
+                    borderRadius: BorderRadius.circular(2),
+                  ),
                 ),
               ),
               const SizedBox(height: 16),
               Text(c.subject, style: Theme.of(context).textTheme.titleLarge),
               const SizedBox(height: 8),
-              Text(c.description, style: Theme.of(context).textTheme.bodyMedium),
+              Text(
+                c.description,
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
               const SizedBox(height: 16),
               Row(
                 children: [
-                  Chip(label: Text('${AppLocalizations.of(context).type}: ${c.complaintType}')),
+                  Chip(
+                    label: Text(
+                      '${AppLocalizations.of(context).type}: ${c.complaintType}',
+                    ),
+                  ),
                   const SizedBox(width: 8),
                   Chip(label: Text('Status: ${c.status}')),
                 ],
@@ -247,14 +371,21 @@ class _ComplaintDetailSheetState extends ConsumerState<_ComplaintDetailSheet> {
               const SizedBox(height: 16),
               DropdownButtonFormField<String>(
                 value: _selectedStatus,
-                decoration: InputDecoration(labelText: AppLocalizations.of(context).updateStatus),
-                items: ['pending', 'investigating', 'resolved', 'rejected', 'escalated']
-                    .map((s) => DropdownMenuItem(value: s, child: Text(s))).toList(),
+                decoration: InputDecoration(
+                  labelText: AppLocalizations.of(context).updateStatus,
+                ),
+                items: ['pending', 'investigating', 'resolved', 'rejected']
+                    .map((s) => DropdownMenuItem(value: s, child: Text(s)))
+                    .toList(),
                 onChanged: (v) => setState(() => _selectedStatus = v!),
               ),
               const SizedBox(height: 12),
               ElevatedButton(
                 onPressed: () async {
+                  if (_selectedStatus == 'escalated') {
+                    await _escalateWithReason(c);
+                    return;
+                  }
                   final repo = ref.read(complaintsRepositoryProvider);
                   await repo.updateComplaintStatus(c.id, _selectedStatus);
                   widget.onStatusChanged();
@@ -262,12 +393,21 @@ class _ComplaintDetailSheetState extends ConsumerState<_ComplaintDetailSheet> {
                 },
                 child: Text(AppLocalizations.of(context).save),
               ),
+              const SizedBox(height: 8),
+              if (!c.isClosed)
+                OutlinedButton.icon(
+                  onPressed: () => _escalateWithReason(c),
+                  icon: const Icon(Icons.swap_vert_circle_rounded),
+                  label: Text(AppLocalizations.of(context).escalationEscalate),
+                ),
               const SizedBox(height: 16),
               TextField(
                 controller: _noteController,
                 decoration: InputDecoration(
                   labelText: AppLocalizations.of(context).addAdminNote,
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
                 ),
                 maxLines: 3,
               ),

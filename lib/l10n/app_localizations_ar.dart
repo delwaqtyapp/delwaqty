@@ -3862,6 +3862,48 @@ class AppLocalizationsAr extends AppLocalizations {
   String get addNote => 'إضافة ملاحظة';
 
   @override
+  String get escalationQueueTitle => 'قائمة التصعيد';
+
+  @override
+  String get escalationPending => 'لا يوجد تصعيد معلق';
+
+  @override
+  String get noEscalationsDescription => 'ستظهر التصعيدات هنا بعد رفعها.';
+
+  @override
+  String get escalationEscalate => 'تصعيد';
+
+  @override
+  String get escalationReason => 'سبب التصعيد';
+
+  @override
+  String get escalationReasonHint => 'مطلوب. اشرح لماذا يجب تصعيد هذه الشكوى.';
+
+  @override
+  String get escalationRequired => 'يُلزم إدخال سبب للتصعيد';
+
+  @override
+  String get escalationFailed => 'فشل التصعيد';
+
+  @override
+  String get escalationEscalatedSuccess => 'تم تصعيد الشكوى';
+
+  @override
+  String get escalationAssignedTo => 'مُسند إلى';
+
+  @override
+  String get escalationUnassigned => 'غير مُسند';
+
+  @override
+  String get escalationScoped => 'إقليمي';
+
+  @override
+  String get escalationGlobal => 'عام';
+
+  @override
+  String get escalationOwnerQueue => 'قائمة المالك';
+
+  @override
   String get sanctions => 'العقوبات';
 
   @override

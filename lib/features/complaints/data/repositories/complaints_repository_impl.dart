@@ -28,8 +28,21 @@ class ComplaintsRepositoryImpl implements ComplaintsRepository {
   }
 
   @override
-  Future<Complaint> updateComplaintStatus(String id, String status, {String? resolutionNote}) {
-    return _dataSource.updateComplaintStatus(id, status, resolutionNote: resolutionNote);
+  Future<Complaint> updateComplaintStatus(
+    String id,
+    String status, {
+    String? resolutionNote,
+  }) {
+    return _dataSource.updateComplaintStatus(
+      id,
+      status,
+      resolutionNote: resolutionNote,
+    );
+  }
+
+  @override
+  Future<void> escalateComplaint({required String id, required String reason}) {
+    return _dataSource.escalateComplaint(id: id, reason: reason);
   }
 
   @override

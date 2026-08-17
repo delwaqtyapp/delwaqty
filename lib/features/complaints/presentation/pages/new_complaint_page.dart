@@ -45,19 +45,26 @@ class _NewComplaintPageState extends ConsumerState<NewComplaintPage> {
                 controller: _subjectController,
                 decoration: InputDecoration(
                   labelText: AppLocalizations.of(context).subject,
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
                 ),
-                validator: (v) => v == null || v.trim().isEmpty ? AppLocalizations.of(context).requiredField : null,
+                validator: (v) => v == null || v.trim().isEmpty
+                    ? AppLocalizations.of(context).requiredField
+                    : null,
               ),
               const SizedBox(height: 16),
               DropdownButtonFormField<String>(
                 value: _complaintType,
                 decoration: InputDecoration(
                   labelText: AppLocalizations.of(context).complaintType,
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
                 ),
                 items: ['driver', 'merchant', 'customer', 'provider', 'other']
-                    .map((s) => DropdownMenuItem(value: s, child: Text(s))).toList(),
+                    .map((s) => DropdownMenuItem(value: s, child: Text(s)))
+                    .toList(),
                 onChanged: (v) => setState(() => _complaintType = v!),
               ),
               const SizedBox(height: 16),
@@ -65,10 +72,13 @@ class _NewComplaintPageState extends ConsumerState<NewComplaintPage> {
                 value: _priority,
                 decoration: InputDecoration(
                   labelText: AppLocalizations.of(context).priority,
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
                 ),
                 items: ['low', 'medium', 'high', 'urgent']
-                    .map((s) => DropdownMenuItem(value: s, child: Text(s))).toList(),
+                    .map((s) => DropdownMenuItem(value: s, child: Text(s)))
+                    .toList(),
                 onChanged: (v) => setState(() => _priority = v!),
               ),
               const SizedBox(height: 16),
@@ -76,10 +86,14 @@ class _NewComplaintPageState extends ConsumerState<NewComplaintPage> {
                 controller: _descriptionController,
                 decoration: InputDecoration(
                   labelText: AppLocalizations.of(context).description,
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
                 ),
                 maxLines: 5,
-                validator: (v) => v == null || v.trim().isEmpty ? AppLocalizations.of(context).requiredField : null,
+                validator: (v) => v == null || v.trim().isEmpty
+                    ? AppLocalizations.of(context).requiredField
+                    : null,
               ),
               const SizedBox(height: 24),
               SizedBox(
@@ -87,7 +101,11 @@ class _NewComplaintPageState extends ConsumerState<NewComplaintPage> {
                 child: ElevatedButton(
                   onPressed: _submitting ? null : _submitComplaint,
                   child: _submitting
-                      ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
                       : Text(AppLocalizations.of(context).submit),
                 ),
               ),
@@ -123,7 +141,9 @@ class _NewComplaintPageState extends ConsumerState<NewComplaintPage> {
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(AppLocalizations.of(context).complaintSubmitted)),
+          SnackBar(
+            content: Text(AppLocalizations.of(context).complaintSubmitted),
+          ),
         );
         Navigator.of(context).pop();
       }

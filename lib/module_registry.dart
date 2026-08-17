@@ -27,6 +27,7 @@ import 'package:delwaqty/features/home_services/home_services_module.dart';
 import 'package:delwaqty/features/regions/regions_module.dart';
 import 'package:delwaqty/features/rewards/rewards_module.dart';
 import 'package:delwaqty/features/campaigns/campaigns_module.dart';
+import 'package:delwaqty/features/escalation/escalation_module.dart';
 import 'package:delwaqty/features/member_management/member_management_module.dart';
 
 void registerAllModules() {
@@ -62,6 +63,7 @@ void registerAllModules() {
     RewardsModule(),
     CampaignsModule(),
     MemberManagementModule(),
+    EscalationModule(),
   ]);
 
   registry.freeze();

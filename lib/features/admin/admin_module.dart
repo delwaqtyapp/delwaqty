@@ -16,6 +16,8 @@ import 'package:delwaqty/features/sanctions/presentation/pages/admin_sanctions_p
 import 'package:delwaqty/features/location_tracking/presentation/pages/admin_live_tracking_page.dart';
 import 'package:delwaqty/features/support_chat/presentation/pages/admin_support_chat_page.dart';
 import 'package:delwaqty/features/support_chat/presentation/pages/support_chat_room_page.dart';
+import 'package:delwaqty/features/member_management/presentation/pages/member_list_page.dart';
+import 'package:delwaqty/features/member_management/presentation/pages/member_detail_page.dart';
 
 class AdminModule extends FeatureModule {
   @override
@@ -102,6 +104,19 @@ class AdminModule extends FeatureModule {
               builder: (context, state) {
                 final roomId = state.pathParameters['roomId']!;
                 return SupportChatRoomPage(roomId: roomId);
+              },
+            ),
+          ],
+        ),
+        GoRoute(
+          path: 'members',
+          builder: (context, state) => const MemberListPage(),
+          routes: [
+            GoRoute(
+              path: ':memberId',
+              builder: (context, state) {
+                final memberId = state.pathParameters['memberId']!;
+                return MemberDetailPage(memberId: memberId);
               },
             ),
           ],

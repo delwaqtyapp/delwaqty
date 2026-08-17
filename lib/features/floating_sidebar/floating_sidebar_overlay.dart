@@ -347,6 +347,15 @@ class _FloatingSidebarOverlayState extends State<FloatingSidebarOverlay>
                                         _navigate('/admin/support-chat');
                                       },
                                     ),
+                                    SidebarItem(
+                                      icon: Icons.people_rounded,
+                                      label: 'Members',
+                                      isSelected: _selectedIndex == 19,
+                                      onTap: () {
+                                        setState(() => _selectedIndex = 19);
+                                        _navigate('/admin/members');
+                                      },
+                                    ),
                                   ],
                                 ),
                               ],

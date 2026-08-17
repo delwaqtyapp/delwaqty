@@ -1,20 +1,4 @@
 class Sanction {
-  final String id;
-  final String targetUserId;
-  final String targetRole;
-  final String sanctionType;
-  final String? complaintId;
-  final String reason;
-  final double amount;
-  final int durationDays;
-  final DateTime startDate;
-  final DateTime? endDate;
-  final bool isActive;
-  final String? notes;
-  final String issuedBy;
-  final DateTime createdAt;
-  final DateTime? updatedAt;
-
   const Sanction({
     required this.id,
     required this.targetUserId,
@@ -52,6 +36,22 @@ class Sanction {
       updatedAt: json['updated_at'] != null ? DateTime.parse(json['updated_at'] as String) : null,
     );
   }
+
+  final String id;
+  final String targetUserId;
+  final String targetRole;
+  final String sanctionType;
+  final String? complaintId;
+  final String reason;
+  final double amount;
+  final int durationDays;
+  final DateTime startDate;
+  final DateTime? endDate;
+  final bool isActive;
+  final String? notes;
+  final String issuedBy;
+  final DateTime createdAt;
+  final DateTime? updatedAt;
 
   Map<String, dynamic> toJson() => {
     'id': id,

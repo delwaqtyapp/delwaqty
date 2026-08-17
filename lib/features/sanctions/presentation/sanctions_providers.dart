@@ -5,12 +5,15 @@ import 'package:delwaqty/features/sanctions/domain/repositories/sanctions_reposi
 import 'package:delwaqty/features/sanctions/data/datasources/remote/supabase_sanctions_data_source.dart';
 import 'package:delwaqty/features/sanctions/data/repositories/sanctions_repository_impl.dart';
 
-final supabaseSanctionsDataSourceProvider = Provider<SupabaseSanctionsDataSource>((ref) {
+final supabaseSanctionsDataSourceProvider =
+    Provider<SupabaseSanctionsDataSource>((ref) {
   return SupabaseSanctionsDataSource(Supabase.instance.client);
 });
 
 final sanctionsRepositoryProvider = Provider<SanctionsRepository>((ref) {
-  return SanctionsRepositoryImpl(ref.read(supabaseSanctionsDataSourceProvider));
+  return SanctionsRepositoryImpl(
+    ref.read(supabaseSanctionsDataSourceProvider),
+  );
 });
 
 final sanctionsProvider = FutureProvider<List<Sanction>>((ref) async {

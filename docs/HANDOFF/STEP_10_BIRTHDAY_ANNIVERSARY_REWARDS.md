@@ -1,7 +1,7 @@
 # HANDOFF: Step 10 — Birthday + Account Anniversary Rewards (Production-Hardened)
 
-**Commit:** (sprint 80: implement birthday and anniversary rewards)  
-**Date:** 2026-08-17  
+**Commit:** (sprint 80: implement birthday and anniversary rewards)
+**Date:** 2026-08-17
 **Gate:** 862/862 tests, 0 analyzer errors, live engine probes green
 
 ---

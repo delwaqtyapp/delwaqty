@@ -7,12 +7,15 @@ import 'package:delwaqty/features/complaints/data/repositories/complaints_reposi
 import 'package:delwaqty/features/auth/presentation/auth_provider.dart';
 import 'package:delwaqty/features/auth/domain/auth_state.dart';
 
-final supabaseComplaintsDataSourceProvider = Provider<SupabaseComplaintsDataSource>((ref) {
-  return SupabaseComplaintsDataSource(Supabase.instance.client);
-});
+final supabaseComplaintsDataSourceProvider =
+    Provider<SupabaseComplaintsDataSource>((ref) {
+      return SupabaseComplaintsDataSource(Supabase.instance.client);
+    });
 
 final complaintsRepositoryProvider = Provider<ComplaintsRepository>((ref) {
-  return ComplaintsRepositoryImpl(ref.read(supabaseComplaintsDataSourceProvider));
+  return ComplaintsRepositoryImpl(
+    ref.read(supabaseComplaintsDataSourceProvider),
+  );
 });
 
 final complaintsProvider = FutureProvider<List<Complaint>>((ref) async {

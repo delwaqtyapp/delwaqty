@@ -51,15 +51,25 @@ class _MyComplaintsPageState extends ConsumerState<MyComplaintsPage> {
                       leading: Container(
                         padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
-                          color: c.status == 'resolved' ? Colors.green.withValues(alpha: 0.15) : Colors.orange.withValues(alpha: 0.15),
+                          color: c.status == 'resolved'
+                              ? Colors.green.withValues(alpha: 0.15)
+                              : Colors.orange.withValues(alpha: 0.15),
                           borderRadius: BorderRadius.circular(10),
                         ),
                         child: Icon(
-                          c.status == 'resolved' ? Icons.check_circle : Icons.pending,
-                          color: c.status == 'resolved' ? Colors.green : Colors.orange,
+                          c.status == 'resolved'
+                              ? Icons.check_circle
+                              : Icons.pending,
+                          color: c.status == 'resolved'
+                              ? Colors.green
+                              : Colors.orange,
                         ),
                       ),
-                      title: Text(c.subject, maxLines: 1, overflow: TextOverflow.ellipsis),
+                      title: Text(
+                        c.subject,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
                       subtitle: Text('Status: ${c.status}'),
                     ),
                   ),

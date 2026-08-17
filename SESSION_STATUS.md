@@ -1,41 +1,45 @@
 # SESSION_STATUS.md
 
-> **Last updated:** 2026-08-17 Session 52G — **STEP 12: VERIFICATION RE-APPLY + LOGIN-CALLBACK DEEP LINK (COMPLETE, COMMITTED)** — migration `047_verification_reapply.sql` (re-apply + decide-verification RPCs, rejection reason, guard blocks direct status writes) applied live + probe-verified; `DeepLinkResolver`/`DeepLinkService` allowlist for `io.delwaqty://login-callback` (app_links direct dep); pending-verification page shows reject reason + Re-apply flow; admin reject requires reason via prompt; targeted suites green. Report: `docs/HANDOFF/STEP_12_VERIFICATION_REAPPLY_DEEP_LINK.md`.
+> **Last updated:** 2026-08-18 Session 53 — **STEP 13/PHASE 2.5: ESCALATION ENGINE (COMPLETE, COMMITTED)** — migration `048_escalation_engine.sql` (escalation ledger + engine RPCs, strict-upward routing scoped→global→owner queue, marker-based server-origin guards) applied live + probe-verified incl. real PostgREST REST chain; Flutter `lib/features/escalation/` module + `/admin/escalations` page + Escalate action; targeted suites green. Report: `docs/HANDOFF/STEP_13_ESCALATION_ENGINE_PLAN.md`.
 
 ---
 
-## Current Task — STEP 12: VERIFICATION RE-APPLY + LOGIN-CALLBACK DEEP LINK (Session 52G)
+## Current Task — STEP 13: ESCALATION ENGINE (Session 53)
 
 **Status:** Complete — committed + pushed
 
 ### What changed this session
-- **Backend (`supabase/migrations/047_verification_reapply.sql`, applied live):**
-  - `users.rejection_reason` + `users.rejection_reason_at`.
-  - `reapply_verification(p_id_card_url, p_profile_photo_url)` — SECURITY DEFINER, caller owns row,
-    requires `rejected`, sets `pending`, clears reason, writes docs, inserts notification
-    (`send_push=false`) + audit `VERIFICATION_REAPPLIED`.
-  - `decide_user_verification(p_user_id, p_decision, p_reason)` — SECURITY DEFINER, `is_admin()` required,
-    reject mandates a reason; sets status + reason/at, notifies (`send_push=true`, `/profile` or
-    `/pending-verification`), audit `VERIFICATION_DECIDED`.
-  - `users_guard_account_fields` extended: direct `verification_status` writes now raise
-    `'Verification status is managed by the verification RPCs'`.
-  - Live probes green (columns/RPCs/grants/guard/cycle + fixture restore).
-- **Deep link:** `lib/core/deep_link/deep_link_resolver.dart` (pure allowlist) +
-  `lib/services/deep_link/deep_link_service.dart` (routes stream + initialRoute + overrideStream);
-  `app.dart` starts service and re-checks auth on `loginCallback` (safety net after SDK PKCE exchange);
-  `pubspec.yaml` adds `app_links: ^7.2.1` direct.
-- **Re-apply flow:** `User`/`UserModel` + `rejectionReason`; `ProfileRepository.reapplyVerification` +
-  data source RPC + `ReapplyVerificationUseCase`; pending-verification page rejected state shows reason
-  + Re-apply CTA → documents flow → RPC; admin repo/service + page use
-  `decide_user_verification` (reject prompts for required reason).
-- **l10n EN/AR:** 6 new keys.
-- **Docs:** ADR-065/066 in `docs/DECISION_LOG.md`; ROADMAP (Phase 2.3 + sprint history); handoff report.
+- **Backend (`supabase/migrations/048_escalation_engine.sql`, applied live, idempotent):**
+  - `escalation_events` ledger table + `(entity_type, entity_id)` index + RLS + revokes/grants.
+  - `complaints` ALTER: `assigned_admin_id`, `escalated_at`, `escalated_from_admin_id`.
+  - `escalate_complaint` / `assign_complaint` / `get_escalation_events` SECURITY DEFINER RPCs; escalate routes
+    strictly upward: unassigned → best regional admin, scoped → global tier, global → owner queue (terminal,
+    `to_admin_id=NULL`, early RETURN when an owner-queue event already exists).
+  - **Marker-based server-origin guards:** RPCs set `set_config('app.escalation_rpc'|'app.notify_dispatch','true',true)`;
+    `complaints_fixup_insert/update` + `guard_notifications_user_update` trust marker → `auth.uid() IS NULL` →
+    `is_admin()`, otherwise force safe defaults / restore old values; admins direct-writing `status→'escalated'` or
+    assignment fields RAISE (must use the RPC). The `current_user IS DISTINCT FROM session_user` discriminator was
+    **proven unusable under PostgREST** (session_user is always `authenticator`) and removed.
+  - Live verification: multi-hop probes confirmed strict-upward routing (previously G↔R1 downgrade cycle);
+    forged customer insert that previously returned HTTP 201 with escalated values now returns 201 with neutralized
+    `pending`/NULL fields; full real-PostgREST chain (customer file → neutralized → admin escalate RPC → events →
+    complaint state escalated to real admin → 1 notification) green.
+- **Flutter:**
+  - New `lib/features/escalation/` module: `domain/entities/escalation_event.dart`,
+    `domain/repositories/escalation_repository.dart`, `data/datasources/remote/supabase_escalation_data_source.dart`,
+    `data/repositories/escalation_repository_impl.dart`, `presentation/escalation_providers.dart`,
+    `presentation/pages/admin_escalations_page.dart`, `escalation_module.dart`.
+  - `module_registry.dart` registers `EscalationModule`; `/admin/escalations` route in `admin_module.dart`.
+  - `Complaint` entity extended with `assignedAdminId` / `escalatedAt` / `escalatedFromAdminId` + `isClosed`.
+  - `SupabaseComplaintsDataSource.updateComplaintStatus('escalated')` now raises (`ServerException` must use
+    `escalate_complaint`); `escalateComplaint(id, reason)` RPC added to repo chain.
+  - Admin complaints page: Escalate action with required-reason prompt; status dropdown excludes `escalated`.
+  - l10n EN/AR: 14 escalation keys.
 
 ### Verified
-- `dart analyze` (touched files): 0 errors/warnings (remaining `annotate_overrides` infos pre-existing).
-- Targets: resolver 5/5, service 5/5, profile usecases (incl. reapply) +17, pending-verification page
-  (incl. reason + re-apply) +4, profile page 2/2, admin + auth suites 92/92.
-- Live backend cycle (owner reject → member reapply → owner approve) green.
+- `dart analyze` (touched files): 0 errors/warnings (remaining infos pre-existing across repo).
+- Targets: `escalation_rpc_wiring_test` 8/8, `complaint_entity_test` 3/3.
+- Live backend: escalation ledger proof (`unassigned→scoped→global→owner`), REST chain green.
 
 ---
 

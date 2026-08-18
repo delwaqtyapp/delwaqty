@@ -12,12 +12,17 @@ import 'package:delwaqty/domain/entities/app_notification.dart';
 import 'package:delwaqty/features/notifications/notifications_module.dart';
 import 'package:delwaqty/services/logger/app_logger.dart';
 import 'package:delwaqty/services/push_notification/device_identity.dart';
+import 'package:delwaqty/services/realtime/realtime_channel_constants.dart';
+import 'package:delwaqty/services/realtime/realtime_service.dart';
 import 'package:delwaqty/shared/notifications/notification_route_resolver.dart';
 
 final pushNotificationServiceProvider = Provider<PushNotificationService>((
   ref,
 ) {
-  final service = PushNotificationService(ref.watch(loggerProvider));
+  final service = PushNotificationService(
+    ref.watch(loggerProvider),
+    ref.watch(realtimeServiceProvider),
+  );
   service.onRealtimeNotification = (_) {
     ref.invalidate(notificationsProvider);
     ref.invalidate(unreadCountProvider);
@@ -130,15 +135,15 @@ Future<void> _markNotificationRead(String notificationId) async {
 }
 
 class PushNotificationService {
-  PushNotificationService(this._logger);
+  PushNotificationService(this._logger, this._realtime);
 
   final AppLogger _logger;
+  final RealtimeService _realtime;
   final FirebaseMessaging _messaging = FirebaseMessaging.instance;
 
   String? _lastToken;
   String? _deviceId;
   Timer? _heartbeat;
-  RealtimeChannel? _realtimeChannel;
   bool _initialized = false;
 
   void Function(Map<String, dynamic> record)? onRealtimeNotification;
@@ -190,14 +195,15 @@ class PushNotificationService {
 
   void _setupRealtimeNotifications() {
     try {
-      final client = Supabase.instance.client;
-      final userId = client.auth.currentUser?.id;
+      final userId = Supabase.instance.client.auth.currentUser?.id;
       if (userId == null) return;
 
-      _realtimeChannel?.unsubscribe();
-      _realtimeChannel = client
-          .channel('in-app-notifications')
-          .onPostgresChanges(
+      _realtime.unsubscribe(RealtimeChannels.inAppNotifications);
+
+      _realtime.subscribe(
+        channelName: RealtimeChannels.inAppNotifications,
+        opts: [
+          RealtimeChannelFilter(
             event: PostgresChangeEvent.insert,
             schema: 'public',
             table: 'notifications',
@@ -215,8 +221,10 @@ class PushNotificationService {
               _showLocalNotification(title: title, body: body);
               onRealtimeNotification?.call(record);
             },
-          )
-          .subscribe();
+          ),
+        ],
+        onError: (msg) => _logger.e('Notification channel error: $msg'),
+      );
     } catch (e) {
       _logger.e('Failed to setup realtime notifications', e);
     }
@@ -304,8 +312,7 @@ class PushNotificationService {
 
       _heartbeat?.cancel();
       _heartbeat = null;
-      await _realtimeChannel?.unsubscribe();
-      _realtimeChannel = null;
+      await _realtime.unsubscribeAll();
       _lastToken = null;
       _initialized = false;
 

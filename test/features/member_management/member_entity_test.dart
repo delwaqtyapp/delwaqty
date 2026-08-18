@@ -1,12 +1,9 @@
-import 'package:test/test.dart';
-import 'package:mocktail/mocktail.dart';
+import 'package:flutter_test/flutter_test.dart';
 import 'package:delwaqty/features/member_management/domain/entities/member.dart';
-
-class MockMemberRepository extends Mock implements MemberRepository {}
 
 void main() {
   group('Member entity parsing', () {
-    test('parses basic fields correctly', () {
+    test('parses all fields from JSON correctly', () {
       final json = {
         'id': 'uuid-123',
         'full_name': 'John Doe',
@@ -38,9 +35,64 @@ void main() {
       expect(member.id, 'uuid-123');
       expect(member.fullName, 'John Doe');
       expect(member.email, 'john@example.com');
-      expect(member.phone, '+'); // truncated, but type is String?
+      expect(member.phone, '+1234567890');
       expect(member.username, 'john_doe');
       expect(member.avatarUrl, 'https://example.com/avatar.jpg');
-      // Add more expectations as needed
+      expect(member.role, 'customer');
+      expect(member.userType, 'customer');
+      expect(member.accountStatus, 'active');
+      expect(member.verificationStatus, 'verified');
+      expect(member.regionId, 'region-uuid');
+      expect(member.regionLabel, 'Cairo / Downtown');
+      expect(member.lastSeenAt, isNotNull);
+      expect(member.isOnline, true);
+      expect(member.serviceTypes, ['food_delivery', 'retail_delivery']);
+      expect(member.serviceCategories, ['restaurant', 'grocery']);
+      expect(member.ordersCount, 5);
+      expect(member.ridesCount, 2);
+      expect(member.bookingsCount, 1);
+      expect(member.walletBalance, 1250.5);
+      expect(member.walletCurrency, 'SAR');
+      expect(member.activeSanctionsCount, 0);
+      expect(member.createdAt, DateTime.utc(2026, 8, 17, 12));
+    });
+
+    test('handles null fields gracefully', () {
+      final json = <String, dynamic>{
+        'id': 'uuid-456',
+        'created_at': '2026-01-01T00:00:00.000Z',
+      };
+
+      final member = Member.fromJson(json);
+
+      expect(member.id, 'uuid-456');
+      expect(member.fullName, isNull);
+      expect(member.email, isNull);
+      expect(member.role, 'customer');
+      expect(member.accountStatus, 'active');
+      expect(member.verificationStatus, 'unverified');
+      expect(member.ordersCount, isNull);
+      expect(member.walletBalance, isNull);
+    });
+
+    test('toJson roundtrips correctly', () {
+      final original = Member(
+        id: 'test-id',
+        fullName: 'Test User',
+        email: 'test@example.com',
+        role: 'driver',
+        accountStatus: 'active',
+        verificationStatus: 'verified',
+        createdAt: DateTime.utc(2026, 8, 18),
+      );
+
+      final json = original.toJson();
+      final restored = Member.fromJson(json);
+
+      expect(restored.id, original.id);
+      expect(restored.fullName, original.fullName);
+      expect(restored.email, original.email);
+      expect(restored.role, original.role);
     });
   });
+}

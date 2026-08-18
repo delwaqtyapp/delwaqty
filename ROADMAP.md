@@ -183,6 +183,7 @@
 | 79 | Promotion/Content/Campaign platform — migrations 039/040/042, DB-driven campaign carousel, sprint 79 | ✅ |
 | 80 | Profile + registration completion (Step 11) + verification re-apply & login-callback deep link (Step 12), migration 047, sprint 80 | ✅ |
 | 81 | Member Operations Center Completion — Member Drawer (14 intelligence sections), Operations Center (responsive split-layout), Member entity extension (26 fields), repository refactoring, 10 lazy-loading providers, security probes (owner/anon/customer), all tests green, sprint 81 | ✅ |
+| 82 | Platform Operations + Financial Intelligence Center — 14 SECURITY DEFINER RPCs, new admin dashboard (12 KPIs, time filter, revenue, alerts), financial center, delivery/merchant/provider/wallet intelligence, transaction ledger, 20 Freezed entities, data source, 15 Riverpod providers, 7 Flutter pages, sprint 82 | ✅ |
 
 ---
 

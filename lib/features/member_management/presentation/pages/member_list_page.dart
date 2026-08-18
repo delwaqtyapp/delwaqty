@@ -3,19 +3,18 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:delwaqty/features/member_management/domain/entities/member.dart';
 import 'package:delwaqty/features/member_management/presentation/member_providers.dart';
-import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
 import 'package:delwaqty/shared/widgets/premium_empty_state.dart';
-import 'package:delwaqty/l10n/app_localizations.dart';
 
-class MemberListPage extends ConsumerWidget {
-  const MemberListPage({super.key});
+class MemberListPage extends ConsumerStatefulWidget {
+  const MemberListPage({super.key, this.onMemberSelected});
+
+  final ValueChanged<String>? onMemberSelected;
 
   @override
   ConsumerState<MemberListPage> createState() => _MemberListPageState();
 }
 
 class _MemberListPageState extends ConsumerState<MemberListPage> {
-  // Filters
   String _search = '';
   String? _roleFilter;
   String? _accountStatusFilter;
@@ -23,189 +22,161 @@ class _MemberListPageState extends ConsumerState<MemberListPage> {
   String? _sortBy;
   String? _serviceCategoryFilter;
   String? _sanctionStatusFilter;
-  int _limit = 25;
-  int _offset = 0;
+  final int _limit = 25;
+  final int _offset = 0;
+
+  void _applyFilters() {
+    final notifier = ref.read(memberOpsProvider.notifier);
+    notifier.setFilters({
+      'search': _search,
+      'role': _roleFilter,
+      'userType': null,
+      'accountStatus': _accountStatusFilter,
+      'verificationStatus': _verificationStatusFilter,
+      'serviceCategory': _serviceCategoryFilter,
+      'sanctionStatus': _sanctionStatusFilter,
+      'sort': _sortBy ?? 'newest',
+      'limit': _limit,
+      'offset': _offset,
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-    final notifier = ref.read(memberOpsProvider.notifier);
+    final members = ref.watch(memberOpsProvider);
 
-    // Apply filters when called
-    void _applyFilters() {
-      final filters = {
-        'search': _search,
-        'role': _roleFilter,
-        'userType': null,
-        'accountStatus': _accountStatusFilter,
-        'verificationStatus': _verificationStatusFilter,
-        'serviceCategory': _serviceCategoryFilter,
-        'sanctionStatus': _sanctionStatusFilter,
-        'sort': _sortBy ?? 'newest',
-        'limit': _limit,
-        'offset': _offset,
-      };
-      notifier.setFilters(filters);
-    }
-
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Members'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh_rounded),
-            onPressed: () => setState(() {}),
-          ),
-        ],
-      ),
-      body: Column(
-        children: [
-          // Search bar
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-            child: TextField(
-              decoration: InputDecoration(
-                hintText: l10n.search,
-                prefixIcon: const Icon(Icons.search_rounded),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+          child: TextField(
+            decoration: InputDecoration(
+              hintText: 'Search members...',
+              prefixIcon: const Icon(Icons.search_rounded),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
               ),
-              onChanged: (v) => setState(() => _search = v),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 16),
             ),
+            onChanged: (v) => setState(() => _search = v),
+            onSubmitted: (_) => _applyFilters(),
           ),
-          // Filter chips
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            child: Wrap(
-              spacing: 8,
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          child: SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
               children: [
                 _FilterChip(
                   label: 'All Roles',
                   selected: _roleFilter == null,
                   onTap: () => setState(() => _roleFilter = null),
                 ),
+                const SizedBox(width: 8),
                 _FilterChip(
                   label: 'Customer',
                   selected: _roleFilter == 'customer',
                   onTap: () => setState(() => _roleFilter = 'customer'),
                 ),
+                const SizedBox(width: 8),
                 _FilterChip(
                   label: 'Driver',
                   selected: _roleFilter == 'driver',
                   onTap: () => setState(() => _roleFilter = 'driver'),
                 ),
+                const SizedBox(width: 8),
                 _FilterChip(
                   label: 'Merchant',
                   selected: _roleFilter == 'merchant',
                   onTap: () => setState(() => _roleFilter = 'merchant'),
                 ),
+                const SizedBox(width: 8),
+                _FilterChip(
+                  label: 'Provider',
+                  selected: _roleFilter == 'provider',
+                  onTap: () => setState(() => _roleFilter = 'provider'),
+                ),
+                const SizedBox(width: 16),
                 _FilterChip(
                   label: 'Active',
                   selected: _accountStatusFilter == 'active',
                   onTap: () => setState(() => _accountStatusFilter = 'active'),
                 ),
+                const SizedBox(width: 8),
                 _FilterChip(
                   label: 'Suspended',
                   selected: _accountStatusFilter == 'suspended',
                   onTap: () => setState(() => _accountStatusFilter = 'suspended'),
                 ),
-                _FilterChip(
-                  label: 'Unverified',
-                  selected: _verificationStatusFilter == 'unverified',
-                  onTap: () => setState(() => _verificationStatusFilter = 'unverified'),
-                ),
-                _FilterChip(
-                  label: 'Verified',
-                  selected: _verificationStatusFilter == 'verified',
-                  onTap: () => setState(() => _verificationStatusFilter = 'verified'),
-                ),
               ],
             ),
           ),
-          // Sort dropdown
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            child: DropdownButtonFormField<String>(
-              value: _sortBy,
-              decoration: InputDecoration(
-                labelText: l10n.sortBy,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: Row(
+            children: [
+              Expanded(
+                child: DropdownButtonFormField<String>(
+                  value: _sortBy,
+                  decoration: InputDecoration(
+                    labelText: 'Sort by',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 12),
+                    isDense: true,
+                  ),
+                  items: const [
+                    DropdownMenuItem(value: 'newest', child: Text('Newest')),
+                    DropdownMenuItem(value: 'oldest', child: Text('Oldest')),
+                    DropdownMenuItem(value: 'name', child: Text('Name')),
+                    DropdownMenuItem(value: 'orders', child: Text('Orders')),
+                    DropdownMenuItem(value: 'wallet', child: Text('Wallet')),
+                  ],
+                  onChanged: (value) => setState(() => _sortBy = value),
                 ),
               ),
-              items: [
-                DropdownMenuItem(
-                  value: 'newest',
-                  child: Text(l10n.sortNewest),
-                ),
-                DropdownMenuItem(
-                    value: 'oldest',
-                    child: Text(l10n.sortOldest),
-                  ),
-                DropdownMenuItem(
-                    value: 'name',
-                    child: Text(l10n.sortName),
-                  ),
-                DropdownMenuItem(
-                  value: 'orders',
-                  child: Text(l10n.sortOrders),
-                ),
-                DropdownMenuItem(
-                  value: 'wallet',
-                  child: Text(l10n.sortWallet),
-                ),
-              ],
-              onChanged: (value) => setState(() => _sortBy = value),
-            ),
-          ),
-          // Apply button
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            child: ElevatedButton(
-              onPressed: _applyFilters,
-              child: Text(l10n.applyFilters),
-            ),
-          ),
-          // Member list
-          Expanded(
-            child: ref.watch(memberOpsProvider).when(
-              loading: () => const Center(child: CircularProgressIndicator()),
-              error: (e, _) => PremiumEmptyState(
-                icon: Icons.error_outline,
-                title: l10n.error,
-                message: e.toString(),
+              const SizedBox(width: 8),
+              ElevatedButton(
+                onPressed: _applyFilters,
+                child: const Text('Apply'),
               ),
-              data: (members) {
-                if (members.isEmpty) {
-                  return const PremiumEmptyState(
-                    icon: Icons.people_outline_rounded,
-                    title: 'No members found',
-                    message: 'Try adjusting your search or filters.',
-                  );
-                }
-                return ListView.builder(
+            ],
+          ),
+        ),
+        const SizedBox(height: 8),
+        Expanded(
+          child: members.isEmpty
+              ? const PremiumEmptyState(
+                  icon: Icons.people_outline_rounded,
+                  title: 'No members found',
+                  message: 'Try adjusting your search or filters.',
+                )
+              : ListView.builder(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   itemCount: members.length,
                   itemBuilder: (context, index) {
                     final member = members[index];
                     return _MemberTile(
                       member: member,
-                      onTap: () => context.push('/admin/members/${member.id}'),
+                      onTap: () {
+                        if (widget.onMemberSelected != null) {
+                          widget.onMemberSelected!(member.id);
+                        } else {
+                          context.push('/admin/members/${member.id}');
+                        }
+                      },
                     );
                   },
-                );
-              },
-            ),
-          ),
-        ],
-      ),
+                ),
+        ),
+      ],
     );
   }
 }
 
-// Helper widget for filter chips
 class _FilterChip extends StatelessWidget {
   const _FilterChip({
     required this.label,
@@ -245,40 +216,8 @@ class _FilterChip extends StatelessWidget {
   }
 }
 
-// Helper widget for region badge inside member tile
-class _RegionBadge extends StatelessWidget {
-  const _RegionBadge({
-    required this.regionLabel,
-  });
-
-  final String? regionLabel;
-
-  @override
-  Widget build(BuildContext context) {
-    if (regionLabel == null || regionLabel!.isEmpty) return const SizedBox();
-    return Padding(
-      padding: const EdgeInsets.only(top: 4),
-      child: Chip(
-        label: Text(regionLabel!),
-        labelStyle: TextStyle(
-          fontSize: 10,
-          color: Theme.of(context).colorScheme.onSurface,
-        ),
-        backgroundColor: Theme.of(context).colorScheme.secondary.withValues(alpha: 0.2),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
-      ),
-    );
-  }
-}
-
-// Compact member tile with region badge and status color
 class _MemberTile extends StatelessWidget {
-  const _MemberTile({
-    required this.member,
-    required this.onTap,
-  });
+  const _MemberTile({required this.member, required this.onTap});
 
   final Member member;
   final VoidCallback onTap;
@@ -300,7 +239,7 @@ class _MemberTile extends StatelessWidget {
         contentPadding:
             const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
         leading: CircleAvatar(
-          backgroundColor: statusColor.withValues(alpha: 0.15),
+          backgroundColor: statusColor.withAlpha(38),
           child: Text(
             (member.fullName ?? member.email ?? member.username ?? '?')
                 .substring(0, 1)
@@ -311,33 +250,44 @@ class _MemberTile extends StatelessWidget {
             ),
           ),
         ),
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              member.fullName ?? 'Unnamed',
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: Theme.of(context).textTheme.titleSmall,
-            ),
-            if (member.regionLabel != null)
-              _RegionBadge(regionLabel: member.regionLabel),
-          ],
-        ),
-        subtitle: Text(
-          '${member.email ?? ''}  •  ${member.role}',
+        title: Text(
+          member.fullName ?? 'Unnamed',
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
-          style: Theme.of(context).textTheme.bodySmall,
+          style: Theme.of(context).textTheme.titleSmall,
+        ),
+        subtitle: Row(
+          children: [
+            if (member.regionLabel != null) ...[
+              Icon(Icons.location_on_outlined, size: 12, color: Colors.grey.shade500),
+              const SizedBox(width: 2),
+              Flexible(
+                child: Text(
+                  member.regionLabel!,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: Colors.grey.shade500,
+                  ),
+                ),
+              ),
+            ] else
+              Text(
+                member.email ?? '',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+          ],
         ),
         trailing: Container(
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
           decoration: BoxDecoration(
-            color: statusColor.withValues(alpha: 0.12),
+            color: statusColor.withAlpha(31),
             borderRadius: BorderRadius.circular(8),
           ),
           child: Text(
-            member.accountStatus,
+            member.accountStatus ?? 'active',
             style: TextStyle(
               color: statusColor,
               fontWeight: FontWeight.w600,

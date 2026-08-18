@@ -59,8 +59,8 @@ class Member {
   final String? avatarUrl;
   final String? role;
   final String? userType;
-  final String accountStatus;
-  final String verificationStatus;
+  final String? accountStatus;
+  final String? verificationStatus;
   final String? regionId;
   final String? regionLabel;
   final DateTime? lastSeenAt;

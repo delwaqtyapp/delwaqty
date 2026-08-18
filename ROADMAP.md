@@ -182,6 +182,7 @@
 | 78 | Notifications delivery layer — `041_notification_delivery_layer` (FCM send path, device token lifecycle RPCs, realtime badge, Notification Center), sprint 78 | ✅ |
 | 79 | Promotion/Content/Campaign platform — migrations 039/040/042, DB-driven campaign carousel, sprint 79 | ✅ |
 | 80 | Profile + registration completion (Step 11) + verification re-apply & login-callback deep link (Step 12), migration 047, sprint 80 | ✅ |
+| 81 | Member Operations Center Completion — Member Drawer (14 intelligence sections), Operations Center (responsive split-layout), Member entity extension (26 fields), repository refactoring, 10 lazy-loading providers, security probes (owner/anon/customer), all tests green, sprint 81 | ✅ |
 
 ---
 

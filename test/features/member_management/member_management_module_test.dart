@@ -66,9 +66,7 @@ void main() {
     final file = File('lib/features/admin/admin_module.dart');
     final content = await file.readAsString();
     expect(content, contains("path: 'members'"));
-    expect(content, contains("path: ':memberId'"));
-    expect(content, contains('MemberListPage'));
-    expect(content, contains('MemberDetailPage'));
+    expect(content, contains('MemberOperationsCenter'));
   });
 
   test('sidebar includes members nav item', () async {

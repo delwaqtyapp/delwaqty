@@ -1,32 +1,17 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:delwaqty/features/member_management/domain/entities/member.dart';
-import 'package:delwaqty/features/member_management/domain/repositories/member_repository.dart';
+import 'package:delwaqty/features/member_management/data/repositories/supabase_member_repository_impl.dart';
 import 'package:delwaqty/services/supabase/supabase_service.dart';
-
-final memberRepositoryProvider = Provider<MemberRepository>((ref) {
-  return ref.watch(supabaseMemberRepositoryProvider);
-});
-
-final supabaseMemberRepositoryProvider = Provider<SupabaseMemberRepositoryImpl>((ref) {
-  return SupabaseMemberRepositoryImpl(
-    ref.watch(supabaseClientProvider),
-  );
-});
-
-final supabaseMemberDataSourceProvider = Provider<SupabaseMemberDataSource>((ref) {
-  return SupabaseMemberDataSource(ref.watch(supabaseMemberDataSourceProvider));
-});
 
 final memberListProvider =
     FutureProvider.autoDispose<List<Member>>((ref) async {
-  final repo = ref.read(memberRepositoryProvider);
+  final repo = ref.watch(memberRepositoryProvider);
   return await repo.listMembers();
 });
 
-/// State notifier for member operations list with filters and pagination
 class MemberOpsListNotifier extends StateNotifier<List<Member>> {
   MemberOpsListNotifier(this.ref) : super([]) {
-    _load(); // Load initial data
+    _load();
   }
 
   final Ref ref;
@@ -42,11 +27,6 @@ class MemberOpsListNotifier extends StateNotifier<List<Member>> {
     'limit': 25,
     'offset': 0,
   };
-
-  @override
-  void dispose() {
-    super.dispose();
-  }
 
   void setFilters(Map<String, dynamic> newFilters) {
     _filters.addAll(newFilters);
@@ -64,8 +44,6 @@ class MemberOpsListNotifier extends StateNotifier<List<Member>> {
       serviceCategory: _filters['serviceCategory'] as String?,
       sanctionStatus: _filters['sanctionStatus'] as String?,
       sort: _filters['sort'] as String?,
-      cursorCreatedAt: _filters['cursorCreatedAt'] as DateTime?,
-      cursorId: _filters['cursorId'] as DateTime?,
       offset: _filters['offset'] as int,
       limit: _filters['limit'] as int,
     );
@@ -74,7 +52,7 @@ class MemberOpsListNotifier extends StateNotifier<List<Member>> {
 }
 
 final memberOpsProvider =
-    StateNotifierProvider<MemberOpsListNotifier>((ref) {
+    StateNotifierProvider<MemberOpsListNotifier, List<Member>>((ref) {
   return MemberOpsListNotifier(ref);
 });
 
@@ -109,8 +87,101 @@ final memberStatusProvider =
 });
 
 final memberTimelineProvider =
-    FutureProvider.autoDispose
-        .family<List<Map<String, dynamic>>, String>((ref, memberId) async {
+    FutureProvider.autoDispose.family<List<Map<String, dynamic>>, String>((ref, memberId) async {
   final repo = ref.read(memberRepositoryProvider);
   return await repo.getMemberTimeline(memberId);
+});
+
+final memberComplaintsProvider =
+    FutureProvider.family<List<Map<String, dynamic>>, String>((ref, memberId) async {
+  final client = ref.read(supabaseClientProvider);
+  final data = await client
+      .from('complaints')
+      .select()
+      .or('complainant_id.eq.$memberId,respondent_id.eq.$memberId')
+      .order('created_at', ascending: false)
+      .limit(50);
+  return (data as List).map((e) => Map<String, dynamic>.from(e as Map)).toList();
+});
+
+final memberSanctionsProvider =
+    FutureProvider.family<List<Map<String, dynamic>>, String>((ref, memberId) async {
+  final client = ref.read(supabaseClientProvider);
+  final data = await client
+      .from('sanctions')
+      .select()
+      .eq('target_user_id', memberId)
+      .order('created_at', ascending: false)
+      .limit(50);
+  return (data as List).map((e) => Map<String, dynamic>.from(e as Map)).toList();
+});
+
+final memberSupportRoomsProvider =
+    FutureProvider.family<List<Map<String, dynamic>>, String>((ref, memberId) async {
+  final client = ref.read(supabaseClientProvider);
+  final data = await client
+      .from('chat_rooms')
+      .select()
+      .contains('participant_ids', [memberId])
+      .order('last_message_at', ascending: false)
+      .limit(20);
+  return (data as List).map((e) => Map<String, dynamic>.from(e as Map)).toList();
+});
+
+final memberVerificationProvider =
+    FutureProvider.family<Map<String, dynamic>?, String>((ref, memberId) async {
+  final client = ref.read(supabaseClientProvider);
+  final data = await client
+      .from('verification_attempts')
+      .select()
+      .eq('user_id', memberId)
+      .order('created_at', ascending: false)
+      .limit(1)
+      .maybeSingle();
+  return data;
+});
+
+final memberOrdersProvider =
+    FutureProvider.family<List<Map<String, dynamic>>, String>((ref, memberId) async {
+  final client = ref.read(supabaseClientProvider);
+  final data = await client
+      .from('orders')
+      .select()
+      .eq('user_id', memberId)
+      .order('created_at', ascending: false)
+      .limit(50);
+  return (data as List).map((e) => Map<String, dynamic>.from(e as Map)).toList();
+});
+
+final memberServiceBookingsProvider =
+    FutureProvider.family<List<Map<String, dynamic>>, String>((ref, memberId) async {
+  final client = ref.read(supabaseClientProvider);
+  final data = await client
+      .from('service_bookings')
+      .select()
+      .eq('user_id', memberId)
+      .order('created_at', ascending: false)
+      .limit(50);
+  return (data as List).map((e) => Map<String, dynamic>.from(e as Map)).toList();
+});
+
+final memberDriverLocationProvider =
+    FutureProvider.family<Map<String, dynamic>?, String>((ref, memberId) async {
+  final client = ref.read(supabaseClientProvider);
+  final driverRow = await client
+      .from('drivers')
+      .select('id')
+      .eq('user_id', memberId)
+      .limit(1)
+      .maybeSingle();
+  if (driverRow == null) return null;
+  final driverId = driverRow['id'] as String;
+  final data = await client
+      .from('driver_locations')
+      .select()
+      .eq('driver_id', driverId)
+      .order('updated_at', ascending: false)
+      .limit(1)
+      .maybeSingle();
+  return data;
 });

@@ -28,26 +28,36 @@ class MemberOpsListNotifier extends StateNotifier<List<Member>> {
     'offset': 0,
   };
 
+  Object? lastError;
+
+  void refresh() => _load();
+
   void setFilters(Map<String, dynamic> newFilters) {
     _filters.addAll(newFilters);
     _load();
   }
 
   Future<void> _load() async {
-    final repo = ref.read(memberRepositoryProvider);
-    final result = await repo.memberOpsList(
-      search: _filters['search'] as String?,
-      role: _filters['role'] as String?,
-      userType: _filters['userType'] as String?,
-      accountStatus: _filters['accountStatus'] as String?,
-      verificationStatus: _filters['verificationStatus'] as String?,
-      serviceCategory: _filters['serviceCategory'] as String?,
-      sanctionStatus: _filters['sanctionStatus'] as String?,
-      sort: _filters['sort'] as String?,
-      offset: _filters['offset'] as int,
-      limit: _filters['limit'] as int,
-    );
-    state = result;
+    try {
+      final repo = ref.read(memberRepositoryProvider);
+      final result = await repo.memberOpsList(
+        search: _filters['search'] as String?,
+        role: _filters['role'] as String?,
+        userType: _filters['userType'] as String?,
+        accountStatus: _filters['accountStatus'] as String?,
+        verificationStatus: _filters['verificationStatus'] as String?,
+        serviceCategory: _filters['serviceCategory'] as String?,
+        sanctionStatus: _filters['sanctionStatus'] as String?,
+        sort: _filters['sort'] as String?,
+        offset: _filters['offset'] as int,
+        limit: _filters['limit'] as int,
+      );
+      lastError = null;
+      state = result;
+    } catch (e) {
+      lastError = e;
+      state = const [];
+    }
   }
 }
 

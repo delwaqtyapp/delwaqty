@@ -4455,4 +4455,85 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get campaignDescription => 'الوصف';
+
+  @override
+  String get adminCommandCenter => 'مركز القيادة';
+
+  @override
+  String get adminMembers => 'الأعضاء';
+
+  @override
+  String get adminUsersPage => 'المستخدمون';
+
+  @override
+  String get adminMerchants => 'التجار';
+
+  @override
+  String get adminDrivers => 'السائقون';
+
+  @override
+  String get adminOrdersPage => 'الطلبات';
+
+  @override
+  String get adminDeliveries => 'التوصيلات';
+
+  @override
+  String get adminEscalations => 'التصعيدات';
+
+  @override
+  String get adminFinancialCenter => 'المركز المالي';
+
+  @override
+  String get adminTransactionLedger => 'دفتر المعاملات';
+
+  @override
+  String get adminWalletIntelligence => 'ذكاء المحافظ';
+
+  @override
+  String get adminServicePerformance => 'أداء الخدمة';
+
+  @override
+  String get adminAnalytics => 'التحليلات';
+
+  @override
+  String get adminPushNotifications => 'الإشعارات الفورية';
+
+  @override
+  String get adminDeliveryIntelligence => 'ذكاء التوصيل';
+
+  @override
+  String get adminMerchantIntelligence => 'ذكاء التجار';
+
+  @override
+  String get adminProviderIntelligence => 'ذكاء مقدمي الخدمة';
+
+  @override
+  String get adminEmergency => 'الطوارئ';
+
+  @override
+  String get adminLegacyDashboard => 'لوحة المعلومات القديمة';
+
+  @override
+  String get adminSettingsPage => 'الإعدادات';
+
+  @override
+  String get adminOperationsSection => 'العمليات';
+
+  @override
+  String get adminSupportSection => 'الدعم';
+
+  @override
+  String get adminFinancialSection => 'المالية';
+
+  @override
+  String get adminMarketingSection => 'التسويق';
+
+  @override
+  String get adminAdvancedSection => 'الإدارة المتقدمة';
+
+  @override
+  String get adminCollapse => 'طي قائمة الإدارة';
+
+  @override
+  String get adminExpand => 'توسيع قائمة الإدارة';
 }

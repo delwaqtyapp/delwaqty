@@ -2478,3 +2478,45 @@ Migration `048_escalation_engine.sql` (applied live, idempotent, rerun-clean):
 - New `lib/features/escalation/` module (entity, repository, data source, impl, providers, admin queue page)
   registered in `module_registry.dart`; `/admin/escalations` route; l10n en+ar keys.
 - Probe leave-behinds in the dev project must be cleaned by T* probe fixtures (temp admins/customers).
+
+## ADR-068: Admin Command Center normalization & navigation rebuild (STEP 18, sprint 84)
+
+**Date:** Session 57 (2026-08-18, STEP 18 / Phase 2.8)
+**Status:** Accepted
+**Deciders:** Lead Architect
+
+### Context
+A full audit of the admin platform (STEP_18_ADMIN_COMMAND_CENTER_AUDIT.md) found 9 integration bugs:
+(1) admin quick actions used `context.go(/admin/...)` so Android Back could exit the app; (2) the member
+drawer read `profile[basic]`/`region.hierarchical_label`/`can_decide_verification` but `get_member_ops_profile`
+(049) returns `member`/`region.label`/`can_view_*`; (3) `/admin/members/:id` was a dangling push with no
+GoRoute; (4) `/admin/escalations` was registered twice; (5) the sidebar reached only 6 of 25 admin routes;
+(6) a hardcoded non-localized `Members` label; (9) the notification center deep-link never passed `isAdmin`.
+Live verification also exposed a runtime crash: `Member.fromJson` cast JSON `List<dynamic>` -> `List<String>`,
+blanking the member list even though `member_ops_list` returns 17 rows.
+
+### Decision
+1. **Drawer normalization layer** — `normalizeMemberOpsProfile()` converts the 049 RPC shape (`member`,
+   `region.label`, `can_view_location`/`can_view_chat`/`can_view_documents`/`can_moderate`) to the drawer
+   vocabulary at the boundary; widgets stay untouched. The intra-module schema mismatch is resolved at the
+   adapter the same way the cross-module normalization layer does elsewhere.
+2. **Router fixes** — quick actions `go`->`push`; register `/admin/members/:id` -> `MemberDetailPage`;
+   drop the duplicate `/admin/escalations` from `AdminModule` (EscalationModule owns it).
+3. **Sidebar rebuild** — new `CollapsibleSidebarSection`; admin menu grouped into 5 localized groups
+   (العمليات/الدعم/المالية/التسويق/الإدارة المتقدمة) covering all 25 routes + new `/admin/emergency`.
+4. **New `/admin/emergency`** — Emergency/SOS page reading `sos_alerts` (admin select policy, migration 033)
+   + critical `platform_operational_alerts`, refreshed through `RealtimeService` on `RealtimeChannels.sosAlerts`.
+5. **Member list crash fix** — safe `(json[...] as List<dynamic>?)?.cast<String>()`; notifier captures
+   `lastError` for a retry UI. No backend change required.
+
+### Rationale
+The failures were connector bugs (route wiring, schema adapters, JSON casts), not platform gaps; the backend
+was authoritative and correct (`member_ops_list` returns all rows under owner JWT). Fixing at the UI
+boundary keeps server RLS/RPCs untouched while making every existing feature reachable from one surface.
+
+### Consequences
+- `dart analyze lib/` 0 errors/0 warnings; 139 targeted tests green (incl. a dynamic-array regression test).
+- Verified on device: grouped Arabic sidebar, Command Center KPIs (real zeros/matches), Back returns in-app
+  from admin pages, member list renders all 17 live users, member drawer renders on a live admin.
+- Explicitly tracked as partial: platform-wide live-tracking stream still needs a server RPC + RLS policy;
+  chat keeps its RLS-scoped `.stream()` (RealtimeService remains canonical for new channels).

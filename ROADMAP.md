@@ -1,6 +1,6 @@
 # ROADMAP.md — Delwaqty Development Roadmap
 
-> **Last updated:** 2026-08-17
+> **Last updated:** 2026-08-18
 > **Authority:** PROJECT_CONSTITUTION.md §15 (v2.0)
 
 ---
@@ -185,6 +185,7 @@
 | 81 | Member Operations Center Completion — Member Drawer (14 intelligence sections), Operations Center (responsive split-layout), Member entity extension (26 fields), repository refactoring, 10 lazy-loading providers, security probes (owner/anon/customer), all tests green, sprint 81 | ✅ |
 | 82 | Platform Operations + Financial Intelligence Center — 14 SECURITY DEFINER RPCs, new admin dashboard (12 KPIs, time filter, revenue, alerts), financial center, delivery/merchant/provider/wallet intelligence, transaction ledger, 20 Freezed entities, data source, 15 Riverpod providers, 7 Flutter pages, sprint 82 | ✅ |
 | 83 | Realtime + Security Hardening — centralized RealtimeService, channel constants, PushNotificationService migration, migration 051 (search_path on 26 RPCs, REVOKE anon from 15 platform_* RPCs, 016 pattern everywhere), sprint 83 | ✅ |
+| 84 | Admin Command Center — grouped admin sidebar (25/25 routes, Arabic groups, collapsible), Command Center dashboard (grouped KPIs Platform/Operations/Financial/Risk, region scope selector, global search), Emergency/SOS page (realtime sos_alerts), `/admin/members/:id` route, member drawer schema normalizer, member-list dynamic-array cast fix, admin notification isAdmin deep-link, Back-navigation verified on device, sprint 84 | ✅ |
 
 ---
 

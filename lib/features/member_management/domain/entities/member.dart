@@ -40,8 +40,10 @@ class Member {
         regionLabel: json['region_label'] as String?,
         lastSeenAt: json['last_seen_at'] != null ? DateTime.parse(json['last_seen_at'] as String) : null,
         isOnline: json['is_online'] as bool?,
-        serviceTypes: json['service_types'] as List<String>?,
-        serviceCategories: json['service_categories'] as List<String>?,
+        serviceTypes: (json['service_types'] as List<dynamic>?)
+            ?.cast<String>(),
+        serviceCategories: (json['service_categories'] as List<dynamic>?)
+            ?.cast<String>(),
         ordersCount: (json['orders_count'] as num?)?.toInt(),
         ridesCount: (json['rides_count'] as num?)?.toInt(),
         bookingsCount: (json['bookings_count'] as num?)?.toInt(),

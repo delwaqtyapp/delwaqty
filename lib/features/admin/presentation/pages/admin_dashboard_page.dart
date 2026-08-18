@@ -362,7 +362,7 @@ _QuickActionData(
               child: _QuickActionCard(
                 data: action,
                 cs: cs,
-                onTap: () => context.go(action.route),
+                onTap: () => context.push(action.route),
               ),
             );
           },

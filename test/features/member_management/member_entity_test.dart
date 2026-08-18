@@ -94,5 +94,57 @@ void main() {
       expect(restored.email, original.email);
       expect(restored.role, original.role);
     });
+
+    test('parses member_ops_list rows with dynamic-typed arrays', () {
+      final rows = [
+        {
+          'id': 'uuid-1',
+          'full_name': 'User One',
+          'email': 'one@example.com',
+          'role': 'customer',
+          'user_type': 'customer',
+          'account_status': 'active',
+          'verification_status': 'unverified',
+          'is_online': false,
+          'service_types': <dynamic>[],
+          'service_categories': <dynamic>[],
+          'orders_count': 0,
+          'rides_count': 0,
+          'bookings_count': 0,
+          'wallet_balance': null,
+          'active_sanctions_count': 0,
+          'created_at': '2026-08-17T12:00:00.000Z',
+        },
+        {
+          'id': 'uuid-2',
+          'full_name': 'Active Driver',
+          'email': 'driver@example.com',
+          'role': 'delivery',
+          'user_type': 'delivery_user',
+          'account_status': 'suspended',
+          'verification_status': 'verified',
+          'is_online': true,
+          'service_types': <dynamic>['food_delivery', 'retail_delivery'],
+          'service_categories': <dynamic>['restaurant'],
+          'orders_count': 12,
+          'rides_count': 3,
+          'bookings_count': 0,
+          'wallet_balance': 500,
+          'active_sanctions_count': 1,
+          'created_at': '2026-08-16T10:00:00.000Z',
+        },
+      ];
+
+      final members = rows.map(Member.fromJson).toList();
+
+      expect(members, hasLength(2));
+      expect(members[0].serviceTypes, isEmpty);
+      expect(members[0].serviceCategories, isEmpty);
+      expect(members[1].serviceTypes, ['food_delivery', 'retail_delivery']);
+      expect(members[1].serviceCategories, ['restaurant']);
+      expect(members[1].isOnline, true);
+      expect(members[1].walletBalance, 500);
+      expect(members[1].createdAt, DateTime.utc(2026, 8, 16, 10));
+    });
   });
 }

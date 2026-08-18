@@ -9,6 +9,10 @@ final platformIntelligenceDataSourceProvider =
   return PlatformIntelligenceDataSource();
 });
 
+// ─── Admin Scope State ────────────────────────────────────
+
+final adminScopeRegionProvider = StateProvider<String?>((ref) => null);
+
 // ─── Time Filter State ────────────────────────────────────
 
 enum AdminTimePeriod { today, week, month, quarter, all }
@@ -69,8 +73,9 @@ final adminTimeFilterProvider =
 final platformKpiProvider = FutureProvider<PlatformKpiSummary>((ref) async {
   final ds = ref.watch(platformIntelligenceDataSourceProvider);
   final filter = ref.watch(adminTimeFilterProvider);
+  final regionId = ref.watch(adminScopeRegionProvider);
   final (from, to) = filter.dateRange;
-  return ds.getKpiSummary(from: from, to: to);
+  return ds.getKpiSummary(from: from, to: to, regionId: regionId);
 });
 
 // ─── Service Performance ──────────────────────────────────

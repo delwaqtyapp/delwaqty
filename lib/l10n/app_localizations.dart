@@ -8617,6 +8617,168 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Description'**
   String get campaignDescription;
+
+  /// No description provided for @adminCommandCenter.
+  ///
+  /// In en, this message translates to:
+  /// **'Command Center'**
+  String get adminCommandCenter;
+
+  /// No description provided for @adminMembers.
+  ///
+  /// In en, this message translates to:
+  /// **'Members'**
+  String get adminMembers;
+
+  /// No description provided for @adminUsersPage.
+  ///
+  /// In en, this message translates to:
+  /// **'Users'**
+  String get adminUsersPage;
+
+  /// No description provided for @adminMerchants.
+  ///
+  /// In en, this message translates to:
+  /// **'Merchants'**
+  String get adminMerchants;
+
+  /// No description provided for @adminDrivers.
+  ///
+  /// In en, this message translates to:
+  /// **'Drivers'**
+  String get adminDrivers;
+
+  /// No description provided for @adminOrdersPage.
+  ///
+  /// In en, this message translates to:
+  /// **'Orders'**
+  String get adminOrdersPage;
+
+  /// No description provided for @adminDeliveries.
+  ///
+  /// In en, this message translates to:
+  /// **'Deliveries'**
+  String get adminDeliveries;
+
+  /// No description provided for @adminEscalations.
+  ///
+  /// In en, this message translates to:
+  /// **'Escalations'**
+  String get adminEscalations;
+
+  /// No description provided for @adminFinancialCenter.
+  ///
+  /// In en, this message translates to:
+  /// **'Financial Center'**
+  String get adminFinancialCenter;
+
+  /// No description provided for @adminTransactionLedger.
+  ///
+  /// In en, this message translates to:
+  /// **'Transaction Ledger'**
+  String get adminTransactionLedger;
+
+  /// No description provided for @adminWalletIntelligence.
+  ///
+  /// In en, this message translates to:
+  /// **'Wallet Intelligence'**
+  String get adminWalletIntelligence;
+
+  /// No description provided for @adminServicePerformance.
+  ///
+  /// In en, this message translates to:
+  /// **'Service Performance'**
+  String get adminServicePerformance;
+
+  /// No description provided for @adminAnalytics.
+  ///
+  /// In en, this message translates to:
+  /// **'Analytics'**
+  String get adminAnalytics;
+
+  /// No description provided for @adminPushNotifications.
+  ///
+  /// In en, this message translates to:
+  /// **'Push Notifications'**
+  String get adminPushNotifications;
+
+  /// No description provided for @adminDeliveryIntelligence.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivery Intelligence'**
+  String get adminDeliveryIntelligence;
+
+  /// No description provided for @adminMerchantIntelligence.
+  ///
+  /// In en, this message translates to:
+  /// **'Merchant Intelligence'**
+  String get adminMerchantIntelligence;
+
+  /// No description provided for @adminProviderIntelligence.
+  ///
+  /// In en, this message translates to:
+  /// **'Provider Intelligence'**
+  String get adminProviderIntelligence;
+
+  /// No description provided for @adminEmergency.
+  ///
+  /// In en, this message translates to:
+  /// **'Emergency'**
+  String get adminEmergency;
+
+  /// No description provided for @adminLegacyDashboard.
+  ///
+  /// In en, this message translates to:
+  /// **'Legacy Dashboard'**
+  String get adminLegacyDashboard;
+
+  /// No description provided for @adminSettingsPage.
+  ///
+  /// In en, this message translates to:
+  /// **'Settings'**
+  String get adminSettingsPage;
+
+  /// No description provided for @adminOperationsSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Operations'**
+  String get adminOperationsSection;
+
+  /// No description provided for @adminSupportSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Support'**
+  String get adminSupportSection;
+
+  /// No description provided for @adminFinancialSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Financial'**
+  String get adminFinancialSection;
+
+  /// No description provided for @adminMarketingSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Marketing'**
+  String get adminMarketingSection;
+
+  /// No description provided for @adminAdvancedSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Advanced'**
+  String get adminAdvancedSection;
+
+  /// No description provided for @adminCollapse.
+  ///
+  /// In en, this message translates to:
+  /// **'Collapse admin menu'**
+  String get adminCollapse;
+
+  /// No description provided for @adminExpand.
+  ///
+  /// In en, this message translates to:
+  /// **'Expand admin menu'**
+  String get adminExpand;
 }
 
 class _AppLocalizationsDelegate

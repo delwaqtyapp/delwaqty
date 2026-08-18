@@ -4491,4 +4491,85 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get campaignDescription => 'Description';
+
+  @override
+  String get adminCommandCenter => 'Command Center';
+
+  @override
+  String get adminMembers => 'Members';
+
+  @override
+  String get adminUsersPage => 'Users';
+
+  @override
+  String get adminMerchants => 'Merchants';
+
+  @override
+  String get adminDrivers => 'Drivers';
+
+  @override
+  String get adminOrdersPage => 'Orders';
+
+  @override
+  String get adminDeliveries => 'Deliveries';
+
+  @override
+  String get adminEscalations => 'Escalations';
+
+  @override
+  String get adminFinancialCenter => 'Financial Center';
+
+  @override
+  String get adminTransactionLedger => 'Transaction Ledger';
+
+  @override
+  String get adminWalletIntelligence => 'Wallet Intelligence';
+
+  @override
+  String get adminServicePerformance => 'Service Performance';
+
+  @override
+  String get adminAnalytics => 'Analytics';
+
+  @override
+  String get adminPushNotifications => 'Push Notifications';
+
+  @override
+  String get adminDeliveryIntelligence => 'Delivery Intelligence';
+
+  @override
+  String get adminMerchantIntelligence => 'Merchant Intelligence';
+
+  @override
+  String get adminProviderIntelligence => 'Provider Intelligence';
+
+  @override
+  String get adminEmergency => 'Emergency';
+
+  @override
+  String get adminLegacyDashboard => 'Legacy Dashboard';
+
+  @override
+  String get adminSettingsPage => 'Settings';
+
+  @override
+  String get adminOperationsSection => 'Operations';
+
+  @override
+  String get adminSupportSection => 'Support';
+
+  @override
+  String get adminFinancialSection => 'Financial';
+
+  @override
+  String get adminMarketingSection => 'Marketing';
+
+  @override
+  String get adminAdvancedSection => 'Advanced';
+
+  @override
+  String get adminCollapse => 'Collapse admin menu';
+
+  @override
+  String get adminExpand => 'Expand admin menu';
 }

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:delwaqty/features/admin/presentation/providers/platform_intelligence_providers.dart';
 import 'package:delwaqty/features/admin/domain/entities/platform_intelligence.dart';
+import 'package:delwaqty/features/regions/presentation/providers/region_providers.dart';
 import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
 import 'package:delwaqty/shared/widgets/premium_empty_state.dart';
 import 'package:delwaqty/shared/widgets/app_loader.dart';
@@ -39,8 +40,13 @@ class _PlatformIntelligenceDashboardState
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(l10n.adminDashboard),
+        title: Text(l10n.adminCommandCenter),
         actions: [
+          IconButton(
+            tooltip: l10n.search,
+            icon: const Icon(Icons.search_rounded),
+            onPressed: () => context.push('/search'),
+          ),
           IconButton(
             icon: const Icon(Icons.refresh_rounded),
             onPressed: () {
@@ -64,6 +70,10 @@ class _PlatformIntelligenceDashboardState
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               AnimatedFadeIn(
+                child: _buildScopeRow(context),
+              ),
+              const SizedBox(height: 12),
+              AnimatedFadeIn(
                 child: _buildTimeFilter(filter, cs),
               ),
               const SizedBox(height: 20),
@@ -85,7 +95,7 @@ class _PlatformIntelligenceDashboardState
                     ),
                   ),
                 ),
-                data: (kpi) => _buildKpiGrid(kpi, cs),
+                data: (kpi) => _buildKpiGroups(kpi, cs),
               ),
               const SizedBox(height: 24),
               AnimatedFadeIn(
@@ -200,6 +210,133 @@ class _PlatformIntelligenceDashboardState
     );
   }
 
+  Widget _buildScopeRow(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final regionAsync = ref.watch(governoratesProvider);
+    final scopeRegion = ref.watch(adminScopeRegionProvider);
+
+    return Row(
+      children: [
+        const Icon(
+          Icons.tune_rounded,
+          size: 16,
+          color: Color(0xFF5B3DF0),
+        ),
+        const SizedBox(width: 6),
+        Text(
+          l10n.regions,
+          style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
+        ),
+        const SizedBox(width: 8),
+        Expanded(
+          child: regionAsync.when(
+            loading: () => const SizedBox.shrink(),
+            error: (_, __) => const SizedBox.shrink(),
+            data: (regions) {
+              return DropdownButtonFormField<String?>(
+                initialValue: scopeRegion,
+                isDense: true,
+                decoration: const InputDecoration(
+                  isDense: true,
+                  contentPadding: EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 8,
+                  ),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(10)),
+                  ),
+                ),
+                items: [
+                  const DropdownMenuItem<String?>(
+                    value: null,
+                    child: Text('كافة المحافظات'),
+                  ),
+                  for (final r in regions.take(30))
+                    DropdownMenuItem<String?>(
+                      value: r.id,
+                      child: Text(r.nameAr),
+                    ),
+                ],
+                onChanged: (v) {
+                  ref.read(adminScopeRegionProvider.notifier).state = v;
+                },
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildKpiGroups(PlatformKpiSummary kpi, ColorScheme cs) {
+    final groups = [
+      (
+        'المنصة',
+        Icons.dashboard_outlined,
+        const Color(0xFF007AFF),
+        [
+          _KpiItem('إجمالي المستخدمين', kpi.totalUsers.toString(), Icons.people_outline_rounded, const Color(0xFF4A90D9)),
+          _KpiItem('المتاجر النشطة', kpi.activeMerchants.toString(), Icons.store_outlined, const Color(0xFF34C759)),
+          _KpiItem('السائقون المتصلون', kpi.onlineDrivers.toString(), Icons.local_shipping_rounded, const Color(0xFF007AFF)),
+          _KpiItem('التوثيقات المعلقة', kpi.pendingVerification.toString(), Icons.verified_user_outlined, const Color(0xFF8B5CF6)),
+        ],
+      ),
+      (
+        'العمليات',
+        Icons.settings_outlined,
+        const Color(0xFFFF9500),
+        [
+          _KpiItem('إجمالي الطلبات', kpi.totalOrders.toString(), Icons.receipt_long_rounded, const Color(0xFFFF9500)),
+          _KpiItem('الرحلات النشطة', kpi.activeRides.toString(), Icons.directions_car_rounded, const Color(0xFF00C7BE)),
+          _KpiItem('الشكاوى المعلقة', kpi.openComplaints.toString(), Icons.warning_amber_rounded, const Color(0xFFFF3B30)),
+          _KpiItem('العقوبات النشطة', kpi.activeSanctions.toString(), Icons.gavel_rounded, const Color(0xFFFF6482)),
+        ],
+      ),
+      (
+        'المالية',
+        Icons.account_balance_rounded,
+        const Color(0xFF5B3DF0),
+        [
+          _KpiItem('إجمالي GMV', 'ج.م ${kpi.totalGmv.toStringAsFixed(0)}', Icons.payments_outlined, const Color(0xFFAF52DE)),
+          _KpiItem('عمولة المنصة', 'ج.م ${kpi.platformCommission.toStringAsFixed(0)}', Icons.account_balance_rounded, const Color(0xFF5B3DF0)),
+          _KpiItem('التزام المحفظة', 'ج.م ${kpi.totalWalletLiability.toStringAsFixed(0)}', Icons.savings_outlined, const Color(0xFF14B8A6)),
+          _KpiItem('فشل المدفوعات', kpi.paymentFailures.toString(), Icons.error_outline_rounded, const Color(0xFFE65100)),
+        ],
+      ),
+      (
+        'المخاطر',
+        Icons.security_outlined,
+        const Color(0xFFFF3B30),
+        [
+          _KpiItem('نداءات SOS النشطة', kpi.sosActive.toString(), Icons.sos_rounded, const Color(0xFFFF3B30)),
+          _KpiItem('عمليات السحب المعلقة', kpi.pendingWithdrawals.toString(), Icons.currency_exchange_rounded, const Color(0xFF8B5CF6)),
+          _KpiItem('طلبات ملغاة', kpi.cancelledOrders.toString(), Icons.cancel_outlined, const Color(0xFFFF9500)),
+          _KpiItem('طلبات معلقة', kpi.pendingOrders.toString(), Icons.hourglass_empty_rounded, const Color(0xFF34C759)),
+        ],
+      ),
+    ];
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        for (int g = 0; g < groups.length; g++)
+          Padding(
+            padding: EdgeInsets.only(top: g == 0 ? 0 : 16),
+            child: _KpiGroup(
+              title: groups[g].$1,
+              icon: groups[g].$2,
+              color: groups[g].$3,
+              items: groups[g].$4,
+              startDelay: g * 100,
+              cs: cs,
+            ),
+          ),
+      ],
+    );
+  }
+
   Widget _buildTimeFilter(AdminTimeFilter filter, ColorScheme cs) {
     return SizedBox(
       height: 40,
@@ -234,48 +371,6 @@ class _PlatformIntelligenceDashboardState
           );
         },
       ),
-    );
-  }
-
-  Widget _buildKpiGrid(PlatformKpiSummary kpi, ColorScheme cs) {
-    final items = [
-      _KpiItem('إجمالي المستخدمين', kpi.totalUsers.toString(), Icons.people_outline_rounded, const Color(0xFF4A90D9)),
-      _KpiItem('المتاجر النشطة', kpi.activeMerchants.toString(), Icons.store_outlined, const Color(0xFF34C759)),
-      _KpiItem('إجمالي الطلبات', kpi.totalOrders.toString(), Icons.receipt_long_rounded, const Color(0xFFFF9500)),
-      _KpiItem('إجمالي GMV', 'ج.م ${kpi.totalGmv.toStringAsFixed(0)}', Icons.payments_outlined, const Color(0xFFAF52DE)),
-      _KpiItem('عمولة المنصة', 'ج.م ${kpi.platformCommission.toStringAsFixed(0)}', Icons.account_balance_rounded, const Color(0xFF5B3DF0)),
-      _KpiItem('السائقون المتصلون', kpi.onlineDrivers.toString(), Icons.local_shipping_rounded, const Color(0xFF007AFF)),
-      _KpiItem('الرحلات النشطة', kpi.activeRides.toString(), Icons.directions_car_rounded, const Color(0xFF00C7BE)),
-      _KpiItem('الشكاوى المعلقة', kpi.openComplaints.toString(), Icons.warning_amber_rounded, const Color(0xFFFF3B30)),
-      _KpiItem('العقوبات النشطة', kpi.activeSanctions.toString(), Icons.gavel_rounded, const Color(0xFFFF6482)),
-      _KpiItem('التوثيقات المعلقة', kpi.pendingVerification.toString(), Icons.verified_user_outlined, const Color(0xFF8B5CF6)),
-      _KpiItem('التزام المحفظة', 'ج.م ${kpi.totalWalletLiability.toStringAsFixed(0)}', Icons.savings_outlined, const Color(0xFF14B8A6)),
-      _KpiItem('فشل المدفوعات', kpi.paymentFailures.toString(), Icons.error_outline_rounded, const Color(0xFFE65100)),
-    ];
-
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final crossAxisCount = constraints.maxWidth > 900
-            ? 4
-            : constraints.maxWidth > 600
-                ? 3
-                : 2;
-        return GridView.count(
-          crossAxisCount: crossAxisCount,
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          mainAxisSpacing: 10,
-          crossAxisSpacing: 10,
-          childAspectRatio: 1.4,
-          children: [
-            for (int i = 0; i < items.length; i++)
-              AnimatedFadeIn(
-                delay: Duration(milliseconds: 50 + i * 40),
-                child: _KpiCard(item: items[i], cs: cs),
-              ),
-          ],
-        );
-      },
     );
   }
 
@@ -386,7 +481,7 @@ class _PlatformIntelligenceDashboardState
             return AnimatedFadeIn(
               delay: Duration(milliseconds: 400 + index * 50),
               child: GestureDetector(
-                onTap: () => context.go(action.route),
+                onTap: () => context.push(action.route),
                 child: PremiumCard(
                   padding: const EdgeInsets.all(8),
                   radius: AppSpacing.radiusCard,
@@ -430,6 +525,80 @@ class _KpiItem {
   final String value;
   final IconData icon;
   final Color color;
+}
+
+class _KpiGroup extends StatelessWidget {
+  const _KpiGroup({
+    required this.title,
+    required this.icon,
+    required this.color,
+    required this.items,
+    required this.startDelay,
+    required this.cs,
+  });
+
+  final String title;
+  final IconData icon;
+  final Color color;
+  final List<_KpiItem> items;
+  final int startDelay;
+  final ColorScheme cs;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        AnimatedFadeIn(
+          delay: Duration(milliseconds: startDelay),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(5),
+                decoration: BoxDecoration(
+                  color: color.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(icon, size: 14, color: color),
+              ),
+              const SizedBox(width: 8),
+              Text(
+                title,
+                style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 10),
+        LayoutBuilder(
+          builder: (context, constraints) {
+            final crossAxisCount = constraints.maxWidth > 900
+                ? 4
+                : constraints.maxWidth > 600
+                    ? 3
+                    : 2;
+            return GridView.count(
+              crossAxisCount: crossAxisCount,
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              mainAxisSpacing: 10,
+              crossAxisSpacing: 10,
+              childAspectRatio: 1.4,
+              children: [
+                for (int i = 0; i < items.length; i++)
+                  AnimatedFadeIn(
+                    delay: Duration(milliseconds: startDelay + i * 40),
+                    child: _KpiCard(item: items[i], cs: cs),
+                  ),
+              ],
+            );
+          },
+        ),
+      ],
+    );
+  }
 }
 
 class _KpiCard extends StatelessWidget {

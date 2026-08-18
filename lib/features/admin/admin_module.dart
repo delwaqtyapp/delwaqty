@@ -13,18 +13,19 @@ import 'package:delwaqty/features/admin/presentation/pages/admin_deliveries_page
 import 'package:delwaqty/features/admin/presentation/pages/admin_push_notifications_page.dart';
 import 'package:delwaqty/features/admin/presentation/pages/admin_verifications_page.dart';
 import 'package:delwaqty/features/admin/presentation/pages/admin_financial_center.dart';
+import 'package:delwaqty/features/admin/presentation/pages/admin_emergency_page.dart';
 import 'package:delwaqty/features/admin/presentation/pages/admin_delivery_intelligence_page.dart';
 import 'package:delwaqty/features/admin/presentation/pages/admin_merchant_intelligence_page.dart';
 import 'package:delwaqty/features/admin/presentation/pages/admin_provider_intelligence_page.dart';
 import 'package:delwaqty/features/admin/presentation/pages/admin_wallet_intelligence_page.dart';
 import 'package:delwaqty/features/admin/presentation/pages/admin_transaction_ledger_page.dart';
 import 'package:delwaqty/features/complaints/presentation/pages/admin_complaints_page.dart';
-import 'package:delwaqty/features/escalation/presentation/pages/admin_escalations_page.dart';
 import 'package:delwaqty/features/sanctions/presentation/pages/admin_sanctions_page.dart';
 import 'package:delwaqty/features/location_tracking/presentation/pages/admin_live_tracking_page.dart';
 import 'package:delwaqty/features/support_chat/presentation/pages/admin_support_chat_page.dart';
 import 'package:delwaqty/features/support_chat/presentation/pages/support_chat_room_page.dart';
 import 'package:delwaqty/features/member_management/presentation/pages/member_operations_center.dart';
+import 'package:delwaqty/features/member_management/presentation/pages/member_detail_page.dart';
 
 class AdminModule extends FeatureModule {
   @override
@@ -99,10 +100,6 @@ class AdminModule extends FeatureModule {
           builder: (context, state) => const AdminComplaintsPage(),
         ),
         GoRoute(
-          path: 'escalations',
-          builder: (context, state) => const AdminEscalationsPage(),
-        ),
-        GoRoute(
           path: 'sanctions',
           builder: (context, state) => const AdminSanctionsPage(),
         ),
@@ -126,10 +123,23 @@ class AdminModule extends FeatureModule {
         GoRoute(
           path: 'members',
           builder: (context, state) => const MemberOperationsCenter(),
+          routes: [
+            GoRoute(
+              path: ':id',
+              builder: (context, state) {
+                final id = state.pathParameters['id']!;
+                return MemberDetailPage(memberId: id);
+              },
+            ),
+          ],
         ),
         GoRoute(
           path: 'financial-center',
           builder: (context, state) => const AdminFinancialCenter(),
+        ),
+        GoRoute(
+          path: 'emergency',
+          builder: (context, state) => const AdminEmergencyPage(),
         ),
         GoRoute(
           path: 'delivery-intelligence',

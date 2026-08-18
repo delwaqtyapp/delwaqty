@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:delwaqty/domain/entities/app_notification.dart';
+import 'package:delwaqty/core/auth/admin_access.dart';
+import 'package:delwaqty/features/auth/domain/auth_state.dart';
+import 'package:delwaqty/features/auth/presentation/auth_provider.dart';
 import 'package:delwaqty/features/notifications/notifications_module.dart';
 import 'package:delwaqty/shared/notifications/notification_route_resolver.dart';
 import 'package:delwaqty/shared/widgets/app_loader.dart';
@@ -167,8 +170,12 @@ class _NotificationCenterPageState extends ConsumerState<NotificationCenterPage>
                         }
                         ref.invalidate(unreadCountProvider);
                         if (context.mounted) {
+                          final authState = ref.read(authStateProvider);
+                          final isAdmin = authState is AuthAuthenticated &&
+                              authState.user.isAdmin;
                           final route = NotificationRouteResolver.safe(
                             deepLink: notification.deepLink,
+                            isAdmin: isAdmin,
                           );
                           context.push(route);
                         }

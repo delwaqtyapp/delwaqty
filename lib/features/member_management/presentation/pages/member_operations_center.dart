@@ -338,7 +338,17 @@ class _MemberListPanelState extends ConsumerState<_MemberListPanel> {
           child: Builder(
             builder: (context) {
               final members = ref.watch(memberOpsProvider);
+              final notifier = ref.read(memberOpsProvider.notifier);
               if (members.isEmpty) {
+                if (notifier.lastError != null) {
+                  return PremiumEmptyState(
+                    icon: Icons.error_outline_rounded,
+                    title: 'Failed to load members',
+                    message: '${notifier.lastError}',
+                    actionLabel: 'Retry',
+                    onAction: () => notifier.refresh(),
+                  );
+                }
                 return const PremiumEmptyState(
                   icon: Icons.people_outline_rounded,
                   title: 'No members found',

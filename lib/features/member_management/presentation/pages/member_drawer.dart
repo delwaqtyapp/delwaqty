@@ -35,13 +35,14 @@ class MemberDrawer extends ConsumerWidget {
             message: 'This member does not exist or you lack access.',
           );
         }
+        final adapted = normalizeMemberOpsProfile(profile);
         final permissions =
-            (profile['permissions'] as Map<String, dynamic>?) ?? {};
+            (adapted['permissions'] as Map<String, dynamic>?) ?? {};
         return CustomScrollView(
           slivers: [
             SliverToBoxAdapter(
               child: _DrawerHeader(
-                profile: profile,
+                profile: adapted,
                 onDismiss: onDismiss,
               ),
             ),
@@ -49,7 +50,7 @@ class MemberDrawer extends ConsumerWidget {
               child: _OverviewSection(),
             ),
             SliverToBoxAdapter(
-              child: _IdentitySection(profile: profile),
+              child: _IdentitySection(profile: adapted),
             ),
             SliverToBoxAdapter(
               child: _VerificationSection(
@@ -58,19 +59,19 @@ class MemberDrawer extends ConsumerWidget {
               ),
             ),
             SliverToBoxAdapter(
-              child: _LocationSection(profile: profile),
+              child: _LocationSection(profile: adapted),
             ),
             SliverToBoxAdapter(
               child: _ActivityTimelineSection(memberId: memberId),
             ),
             SliverToBoxAdapter(
               child: _OrdersSection(
-                profile: profile,
+                profile: adapted,
                 memberId: memberId,
               ),
             ),
             SliverToBoxAdapter(
-              child: _ServicesSection(profile: profile),
+              child: _ServicesSection(profile: adapted),
             ),
             SliverToBoxAdapter(
               child: _WalletFinancialsSection(memberId: memberId),
@@ -94,12 +95,12 @@ class MemberDrawer extends ConsumerWidget {
               ),
             ),
             SliverToBoxAdapter(
-              child: _DocumentsSection(profile: profile),
+              child: _DocumentsSection(profile: adapted),
             ),
             SliverToBoxAdapter(
               child: _AdminActionsSection(
                 memberId: memberId,
-                profile: profile,
+                profile: adapted,
                 permissions: permissions,
               ),
             ),
@@ -2250,4 +2251,56 @@ class _AdminActionsSectionState extends ConsumerState<_AdminActionsSection> {
       }
     }
   }
+}
+
+/// Normalizes the live `get_member_ops_profile` (migration 049) response into
+/// the map shape the member drawer expects.
+///
+/// The RPC returns top-level keys `member`, `region.label`, `location`,
+/// `last_seen`, `driver`, `merchants`, `providers`, `orders`, `rides`,
+/// `bookings`, `wallet`, `financials`, `active_sanctions`, `complaints`,
+/// `support`, `timeline`, and `permissions` with `can_view_*`/`can_moderate`.
+///
+/// The drawer was originally written against `get_member_profile` (035) which
+/// returned `basic`, `region.hierarchical_label` and fine-grained action
+/// permissions. This adapter produces `basic` from `member` and maps the
+/// permission vocabulary so the existing widgets render real data.
+Map<String, dynamic> normalizeMemberOpsProfile(Map<String, dynamic> profile) {
+  final member = profile['member'] as Map<String, dynamic>? ?? {};
+  final region = profile['region'] as Map<String, dynamic>? ?? {};
+  final permissions = profile['permissions'] as Map<String, dynamic>? ?? {};
+  final lastSeen = profile['last_seen'] as String?;
+
+  final canModerate = permissions['can_moderate'] as bool? ?? false;
+
+  final basic = {
+    ...member,
+    'last_seen_at': lastSeen,
+    'is_online': lastSeen != null &&
+        DateTime.now().difference(DateTime.parse(lastSeen)).inMinutes < 5,
+  };
+
+  final adaptedRegion = {
+    ...region,
+    'hierarchical_label': region['label'] ?? '-',
+  };
+
+  return {
+    ...profile,
+    'basic': basic,
+    'region': adaptedRegion,
+    'permissions': {
+      'can_view_location': permissions['can_view_location'] ?? false,
+      'can_view_chat': permissions['can_view_chat'] ?? false,
+      'can_view_documents': permissions['can_view_documents'] ?? false,
+      'can_moderate': canModerate,
+      'can_decide_verification': canModerate,
+      'can_issue_sanction': canModerate,
+      'can_revoke_sanction': canModerate,
+      'can_restrict_account': canModerate,
+      'can_suspend_account': canModerate,
+      'can_delete_account': canModerate,
+      'can_edit_profile': false,
+    },
+  };
 }

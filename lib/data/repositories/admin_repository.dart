@@ -580,7 +580,7 @@ Future<List<AdminUser>> getUsers({String? search}) async {
 final response = await _supabase
            .from('admin_users')
            .insert({
-             'full_name': user.fullName,
+             'full_name': user.name,
              'email': user.email,
              'role': user.role.toDb(),
              'status': user.status.name,
@@ -606,7 +606,7 @@ final response = await _supabase
 final response = await _supabase
            .from('admin_users')
            .update({
-             'full_name': user.fullName,
+             'full_name': user.name,
              'email': user.email,
              'role': user.role.toDb(),
              'status': user.status.name,

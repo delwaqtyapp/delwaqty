@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:delwaqty/core/module/feature_module.dart';
 import 'package:delwaqty/features/admin/presentation/pages/admin_dashboard_page.dart';
+import 'package:delwaqty/features/admin/presentation/pages/platform_intelligence_dashboard.dart';
 import 'package:delwaqty/features/admin/presentation/pages/admin_users_page.dart';
 import 'package:delwaqty/features/admin/presentation/pages/admin_merchants_page.dart';
 import 'package:delwaqty/features/admin/presentation/pages/admin_orders_page.dart';
@@ -11,6 +12,12 @@ import 'package:delwaqty/features/admin/presentation/pages/admin_analytics_page.
 import 'package:delwaqty/features/admin/presentation/pages/admin_deliveries_page.dart';
 import 'package:delwaqty/features/admin/presentation/pages/admin_push_notifications_page.dart';
 import 'package:delwaqty/features/admin/presentation/pages/admin_verifications_page.dart';
+import 'package:delwaqty/features/admin/presentation/pages/admin_financial_center.dart';
+import 'package:delwaqty/features/admin/presentation/pages/admin_delivery_intelligence_page.dart';
+import 'package:delwaqty/features/admin/presentation/pages/admin_merchant_intelligence_page.dart';
+import 'package:delwaqty/features/admin/presentation/pages/admin_provider_intelligence_page.dart';
+import 'package:delwaqty/features/admin/presentation/pages/admin_wallet_intelligence_page.dart';
+import 'package:delwaqty/features/admin/presentation/pages/admin_transaction_ledger_page.dart';
 import 'package:delwaqty/features/complaints/presentation/pages/admin_complaints_page.dart';
 import 'package:delwaqty/features/escalation/presentation/pages/admin_escalations_page.dart';
 import 'package:delwaqty/features/sanctions/presentation/pages/admin_sanctions_page.dart';
@@ -45,8 +52,12 @@ class AdminModule extends FeatureModule {
   List<RouteBase> get standaloneRoutes => [
     GoRoute(
       path: '/admin',
-      builder: (context, state) => const AdminDashboardPage(),
+      builder: (context, state) => const PlatformIntelligenceDashboard(),
       routes: [
+        GoRoute(
+          path: 'legacy',
+          builder: (context, state) => const AdminDashboardPage(),
+        ),
         GoRoute(
           path: 'users',
           builder: (context, state) => const AdminUsersPage(),
@@ -115,6 +126,34 @@ class AdminModule extends FeatureModule {
         GoRoute(
           path: 'members',
           builder: (context, state) => const MemberOperationsCenter(),
+        ),
+        GoRoute(
+          path: 'financial-center',
+          builder: (context, state) => const AdminFinancialCenter(),
+        ),
+        GoRoute(
+          path: 'delivery-intelligence',
+          builder: (context, state) => const AdminDeliveryIntelligencePage(),
+        ),
+        GoRoute(
+          path: 'merchant-intelligence',
+          builder: (context, state) => const AdminMerchantIntelligencePage(),
+        ),
+        GoRoute(
+          path: 'provider-intelligence',
+          builder: (context, state) => const AdminProviderIntelligencePage(),
+        ),
+        GoRoute(
+          path: 'wallet-intelligence',
+          builder: (context, state) => const AdminWalletIntelligencePage(),
+        ),
+        GoRoute(
+          path: 'transaction-ledger',
+          builder: (context, state) => const AdminTransactionLedgerPage(),
+        ),
+        GoRoute(
+          path: 'service-performance',
+          builder: (context, state) => const AdminAnalyticsPage(),
         ),
       ],
     ),

@@ -9,6 +9,7 @@ import 'package:delwaqty/features/admin/presentation/pages/admin_orders_page.dar
 import 'package:delwaqty/features/admin/presentation/pages/admin_settings_page.dart';
 import 'package:delwaqty/features/admin/presentation/pages/admin_drivers_page.dart';
 import 'package:delwaqty/features/admin/presentation/pages/admin_analytics_page.dart';
+import 'package:delwaqty/features/admin/presentation/pages/service_performance_page.dart';
 import 'package:delwaqty/features/admin/presentation/pages/admin_deliveries_page.dart';
 import 'package:delwaqty/features/admin/presentation/pages/admin_push_notifications_page.dart';
 import 'package:delwaqty/features/admin/presentation/pages/admin_verifications_page.dart';
@@ -190,7 +191,7 @@ class AdminModule extends FeatureModule {
         ),
         GoRoute(
           path: 'service-performance',
-          builder: (context, state) => _admin(const AdminAnalyticsPage()),
+          builder: (context, state) => _admin(const ServicePerformancePage()),
         ),
       ],
     ),

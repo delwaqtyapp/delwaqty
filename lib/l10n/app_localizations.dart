@@ -8636,6 +8636,36 @@ abstract class AppLocalizations {
   /// **'Service Performance'**
   String get adminServicePerformance;
 
+  /// No description provided for @adminServiceCompletion.
+  ///
+  /// In en, this message translates to:
+  /// **'Service Completion'**
+  String get adminServiceCompletion;
+
+  /// No description provided for @adminSLA.
+  ///
+  /// In en, this message translates to:
+  /// **'SLA Adherence'**
+  String get adminSLA;
+
+  /// No description provided for @adminServicePerformancePending.
+  ///
+  /// In en, this message translates to:
+  /// **'Service performance data pending'**
+  String get adminServicePerformancePending;
+
+  /// No description provided for @adminSLAPlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'SLA data pending'**
+  String get adminSLAPlaceholder;
+
+  /// No description provided for @adminServiceCompletionPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Service completion data pending'**
+  String get adminServiceCompletionPending;
+
   /// No description provided for @adminAnalytics.
   ///
   /// In en, this message translates to:
@@ -10375,6 +10405,132 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Amount (\$)'**
   String get amountDollars;
+
+  /// No description provided for @homeServiceCategoryPlumbing.
+  ///
+  /// In en, this message translates to:
+  /// **'Plumbing'**
+  String get homeServiceCategoryPlumbing;
+
+  /// No description provided for @homeServiceCategoryElectrical.
+  ///
+  /// In en, this message translates to:
+  /// **'Electrical'**
+  String get homeServiceCategoryElectrical;
+
+  /// No description provided for @homeServiceCategoryCarpentry.
+  ///
+  /// In en, this message translates to:
+  /// **'Carpentry'**
+  String get homeServiceCategoryCarpentry;
+
+  /// No description provided for @homeServiceCategoryACMaintenance.
+  ///
+  /// In en, this message translates to:
+  /// **'AC Maintenance'**
+  String get homeServiceCategoryACMaintenance;
+
+  /// No description provided for @homeServiceCategoryPainting.
+  ///
+  /// In en, this message translates to:
+  /// **'Painting'**
+  String get homeServiceCategoryPainting;
+
+  /// No description provided for @homeServiceCategoryCleaning.
+  ///
+  /// In en, this message translates to:
+  /// **'Cleaning'**
+  String get homeServiceCategoryCleaning;
+
+  /// No description provided for @homeServiceCategoryPestControl.
+  ///
+  /// In en, this message translates to:
+  /// **'Pest Control'**
+  String get homeServiceCategoryPestControl;
+
+  /// No description provided for @homeServiceCategoryApplianceRepair.
+  ///
+  /// In en, this message translates to:
+  /// **'Appliance Repair'**
+  String get homeServiceCategoryApplianceRepair;
+
+  /// No description provided for @homeServiceCategoryOther.
+  ///
+  /// In en, this message translates to:
+  /// **'Other Services'**
+  String get homeServiceCategoryOther;
+
+  /// No description provided for @bookingSentSuccessfully.
+  ///
+  /// In en, this message translates to:
+  /// **'Booking sent successfully'**
+  String get bookingSentSuccessfully;
+
+  /// No description provided for @bookingErrorTryAgain.
+  ///
+  /// In en, this message translates to:
+  /// **'Error, try again'**
+  String get bookingErrorTryAgain;
+
+  /// No description provided for @chooseServiceProvider.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose service provider'**
+  String get chooseServiceProvider;
+
+  /// No description provided for @errorTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Error'**
+  String get errorTitle;
+
+  /// No description provided for @failedToLoadProviders.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load service providers'**
+  String get failedToLoadProviders;
+
+  /// No description provided for @noProvidersAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'No providers available'**
+  String get noProvidersAvailable;
+
+  /// No description provided for @noAvailableProviders.
+  ///
+  /// In en, this message translates to:
+  /// **'No available service providers found'**
+  String get noAvailableProviders;
+
+  /// No description provided for @dateAndTimeOfBooking.
+  ///
+  /// In en, this message translates to:
+  /// **'Date and time of booking'**
+  String get dateAndTimeOfBooking;
+
+  /// No description provided for @problemDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Problem description'**
+  String get problemDescription;
+
+  /// No description provided for @explainProblemDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Explain the problem in detail...'**
+  String get explainProblemDetail;
+
+  /// No description provided for @additionalNotesOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'Additional notes (optional)'**
+  String get additionalNotesOptional;
+
+  /// No description provided for @confirmBooking.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm booking'**
+  String get confirmBooking;
 }
 
 class _AppLocalizationsDelegate

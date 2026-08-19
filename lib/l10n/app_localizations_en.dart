@@ -4501,6 +4501,22 @@ class AppLocalizationsEn extends AppLocalizations {
   String get adminServicePerformance => 'Service Performance';
 
   @override
+  String get adminServiceCompletion => 'Service Completion';
+
+  @override
+  String get adminSLA => 'SLA Adherence';
+
+  @override
+  String get adminServicePerformancePending =>
+      'Service performance data pending';
+
+  @override
+  String get adminSLAPlaceholder => 'SLA data pending';
+
+  @override
+  String get adminServiceCompletionPending => 'Service completion data pending';
+
+  @override
   String get adminAnalytics => 'Analytics';
 
   @override
@@ -5419,4 +5435,67 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get amountDollars => 'Amount (\$)';
+
+  @override
+  String get homeServiceCategoryPlumbing => 'Plumbing';
+
+  @override
+  String get homeServiceCategoryElectrical => 'Electrical';
+
+  @override
+  String get homeServiceCategoryCarpentry => 'Carpentry';
+
+  @override
+  String get homeServiceCategoryACMaintenance => 'AC Maintenance';
+
+  @override
+  String get homeServiceCategoryPainting => 'Painting';
+
+  @override
+  String get homeServiceCategoryCleaning => 'Cleaning';
+
+  @override
+  String get homeServiceCategoryPestControl => 'Pest Control';
+
+  @override
+  String get homeServiceCategoryApplianceRepair => 'Appliance Repair';
+
+  @override
+  String get homeServiceCategoryOther => 'Other Services';
+
+  @override
+  String get bookingSentSuccessfully => 'Booking sent successfully';
+
+  @override
+  String get bookingErrorTryAgain => 'Error, try again';
+
+  @override
+  String get chooseServiceProvider => 'Choose service provider';
+
+  @override
+  String get errorTitle => 'Error';
+
+  @override
+  String get failedToLoadProviders => 'Failed to load service providers';
+
+  @override
+  String get noProvidersAvailable => 'No providers available';
+
+  @override
+  String get noAvailableProviders => 'No available service providers found';
+
+  @override
+  String get dateAndTimeOfBooking => 'Date and time of booking';
+
+  @override
+  String get problemDescription => 'Problem description';
+
+  @override
+  String get explainProblemDetail => 'Explain the problem in detail...';
+
+  @override
+  String get additionalNotesOptional => 'Additional notes (optional)';
+
+  @override
+  String get confirmBooking => 'Confirm booking';
 }

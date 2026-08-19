@@ -4465,6 +4465,23 @@ class AppLocalizationsAr extends AppLocalizations {
   String get adminServicePerformance => 'أداء الخدمة';
 
   @override
+  String get adminServiceCompletion => 'إنجاز الخدمة';
+
+  @override
+  String get adminSLA => 'التزام SLA';
+
+  @override
+  String get adminServicePerformancePending =>
+      'بيانات أداء الخدمة قيد الانتظار';
+
+  @override
+  String get adminSLAPlaceholder => 'بيانات SLA قيد الانتظار';
+
+  @override
+  String get adminServiceCompletionPending =>
+      'بيانات إنجاز الخدمة قيد الانتظار';
+
+  @override
   String get adminAnalytics => 'التحليلات';
 
   @override
@@ -5355,10 +5372,10 @@ class AppLocalizationsAr extends AppLocalizations {
   String get timeline => 'الخط الزمني';
 
   @override
-  String get memberOperationsCenter => 'مركز عمليات الأعضاء';
+  String get memberOperationsCenter => 'مركزOperations الأعضاء';
 
   @override
-  String get selectMemberHint => 'اختر عضواً لعرض التفاصيل';
+  String get selectMemberHint => 'اختر Member لعرض التفاصيل';
 
   @override
   String get allRoles => 'جميع الأدوار';
@@ -5381,4 +5398,67 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get amountDollars => 'المبلغ (\$)';
+
+  @override
+  String get homeServiceCategoryPlumbing => 'سباكة';
+
+  @override
+  String get homeServiceCategoryElectrical => 'كهرباء';
+
+  @override
+  String get homeServiceCategoryCarpentry => 'نجارة';
+
+  @override
+  String get homeServiceCategoryACMaintenance => 'صيانة تكييف';
+
+  @override
+  String get homeServiceCategoryPainting => 'دهان';
+
+  @override
+  String get homeServiceCategoryCleaning => 'تنظيف';
+
+  @override
+  String get homeServiceCategoryPestControl => 'مكافحة حشرات';
+
+  @override
+  String get homeServiceCategoryApplianceRepair => 'إصلاح أجهزة';
+
+  @override
+  String get homeServiceCategoryOther => 'خدمات أخرى';
+
+  @override
+  String get bookingSentSuccessfully => 'تم إرسال الحجز بنجاح';
+
+  @override
+  String get bookingErrorTryAgain => 'حدث خطأ. حاول مرة أخرى.';
+
+  @override
+  String get chooseServiceProvider => 'اختر مزود الخدمة';
+
+  @override
+  String get errorTitle => 'خطأ';
+
+  @override
+  String get failedToLoadProviders => 'تعذر تحميل مزودي الخدمة';
+
+  @override
+  String get noProvidersAvailable => 'لا يوجد مزودين';
+
+  @override
+  String get noAvailableProviders => 'لم يتم العثور على مزودي خدمة متاحين';
+
+  @override
+  String get dateAndTimeOfBooking => 'تاريخ ووقت الحجز';
+
+  @override
+  String get problemDescription => 'وصف المشكلة';
+
+  @override
+  String get explainProblemDetail => 'اشرح المشكلة بالتفصيل...';
+
+  @override
+  String get additionalNotesOptional => 'ملاحظات إضافية (اختياري)';
+
+  @override
+  String get confirmBooking => 'تأكيد الحجز';
 }

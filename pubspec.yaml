@@ -58,7 +58,7 @@ dependencies:
   connectivity_plus: ^6.0.3
 
   # Google Maps
-  google_maps_flutter: ^2.10.0
+  google_maps_flutter: ^2.18.0
 
   # HTTP client
   http: ^1.6.0

@@ -19,14 +19,9 @@ import 'package:delwaqty/features/search/search_module.dart';
 import 'package:delwaqty/features/orders/orders_module.dart';
 import 'package:delwaqty/features/service_audio_logs/service_audio_logs_module.dart';
 import 'package:delwaqty/features/complaints/complaints_module.dart';
-import 'package:delwaqty/features/sanctions/sanctions_module.dart';
-import 'package:delwaqty/features/location_tracking/location_tracking_module.dart';
-import 'package:delwaqty/features/support_chat/support_chat_module.dart';
-import 'package:delwaqty/features/home_services/home_services_module.dart';
 import 'package:delwaqty/features/regions/regions_module.dart';
 import 'package:delwaqty/features/rewards/rewards_module.dart';
 import 'package:delwaqty/features/campaigns/campaigns_module.dart';
-import 'package:delwaqty/features/escalation/escalation_module.dart';
 
 void registerAllModules() {
   final registry = FeatureRegistry.instance;
@@ -50,16 +45,11 @@ void registerAllModules() {
     SafetyModule(),
     ServiceAudioLogsModule(),
     ComplaintsModule(),
-    SanctionsModule(),
-    LocationTrackingModule(),
-    SupportChatModule(),
     SearchModule(),
     OrdersModule(),
-    HomeServicesModule(),
     RegionsModule(),
     RewardsModule(),
     CampaignsModule(),
-    EscalationModule(),
   ]);
 
   registry.freeze();

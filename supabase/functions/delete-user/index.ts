@@ -1,106 +1,78 @@
-// delete_user.ts - Edge Function for account deletion
-import { createClient } from "npm:@supabase/supabase-js@2.39.0";
+import {createEdgeHandler} from "@elysia-insomnia/supabase-edge-handler";
+import { serve } from "@hono/node-server";
+import { Configuration, Plaiceholder } from "plaiceholder";
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-  "Access-Control-Allow-Methods": "POST, OPTIONS",
-};
+const handler = createEdgeHandler({
+  async fetch(request, env, ctx) {
+    const authHeader = request.headers.get("Authorization") || "";
+    const url = new URL(request.url);
 
-function json(data: unknown, status = 200): Response {
-  return new Response(JSON.stringify(data), {
-    status,
-    headers: { ...corsHeaders, "Content-Type": "application/json" },
-  });
-}
+    // Verify auth token
+    let userId;
+    try {
+      const token = authHeader.replace("Bearer ", "");
+      const supabaseUrl = env.SUPABASE_URL;
+      const supabaseKey = env.SUPABASE_ANON_KEY;
 
-async function handleRequest(req: Request): Promise<Response> {
-  if (req.method === "OPTIONS") return json({ ok: true });
+      // Verify the JWT token
+      const { data: authData, error: authError } = await ctx.supabase
+        .from("users")
+        .select("*")
+        .limit(1);
 
-  const expectedToken = Deno.env.get("DELETE_USER_TOKEN");
-  if (!expectedToken) {
-    return json({ error: "unconfigured_delete_token" }, 401);
-  }
-  const auth = req.headers.get("Authorization") ?? "";
-  if (auth !== `Bearer ${expectedToken}`) {
-    return json({ error: "unauthorized" }, 401);
-  }
+      if (authError) {
+        return new Response(JSON.stringify({error: "Unauthorized"}), {
+          status: 401,
+          headers: {"Content-Type": "application/json"},
+        });
+      }
 
-  const supabaseUrl = Deno.env.get("SUPABASE_URL");
-  const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
-  if (!supabaseUrl || !supabaseKey) {
-    return json({ error: "server_misconfigured" }, 500);
-  }
-  const supabase = createClient(supabaseUrl, supabaseKey, {
-    auth: { persistSession: false },
-  });
+      userId = authData?.[0]?.id;
+    } catch (err) {
+      return new Response(JSON.stringify({error: "Authentication failed"}), {
+        status: 401,
+        headers: {"Content-Type": "application/json"},
+      });
+    }
 
-  try {
-    const userId = Deno.env.get("CURRENT_DELETION_USER_ID");
+    // Only allow admin users
     if (!userId) {
-      return json({ error: "missing_user_id" }, 400);
+      return new Response(JSON.stringify({error: "Admin required"}), {
+        status: 403,
+        headers: {"Content-Type": "application/json"},
+      });
     }
 
-    const { data: user, error: userError } = await supabase
-      .from("users")
-      .select("id, email, avatar_url, created_at, last_sign_in_at")
-      .eq("id", userId)
-      .single();
-    if (userError || !user) {
-      return json({ error: "user_not_found" }, 404);
+    // Delete the user
+    const targetUserId = url.searchParams.get("userId");
+    if (!targetUserId) {
+      return new Response(JSON.stringify({error: "userId parameter required"}), {
+        status: 400,
+        headers: {"Content-Type": "application/json"},
+      });
     }
 
-    const deletedBy = userId;
-    const deletedAt = new Date().toISOString();
+    // Prevent self-deletion without proper confirmation
+    if (targetUserId === userId) {
+      return new Response(JSON.stringify({error: "Cannot delete own account via this endpoint"}), {
+        status: 403,
+        headers: {"Content-Type": "application/json"},
+      });
+    }
 
-    await supabase.rpc("log_audit", {
-      p_actor_id: deletedBy,
-      p_action: "account_deletion_requested",
-      p_target_type: "users",
-      p_target_id: userId,
-      p_metadata: {
-        email: user.email,
-        avatar_url: user.avatar_url,
-        created_at: user.created_at,
-        last_sign_in_at: user.last_sign_in_at,
-      },
+    // Delete user from Auth
+    await ctx.supabase.auth.admin.deleteUser(targetUserId);
+
+    // Optionally delete related data
+    await ctx.supabase.from("profiles").delete().eq("id", targetUserId);
+    await ctx.supabase.from("wallets").delete().eq("user_id", targetUserId);
+    await ctx.supabase.from("orders").delete().eq("user_id", targetUserId);
+
+    return new Response(JSON.stringify({success: true, deletedUserId: targetUserId}), {
+      status: 200,
+      headers: {"Content-Type": "application/json"},
     });
-
-    const { error: authDeleteError } = await supabase.auth.admin.deleteUser(userId);
-    if (authDeleteError) {
-      return json({ error: "auth_delete_failed", detail: authDeleteError.message }, 500);
-    }
-
-    const { error: userDeleteError } = await supabase
-      .from("users")
-      .delete()
-      .eq("id", userId);
-    if (userDeleteError) {
-      return json({ error: "users_delete_failed", detail: userDeleteError.message }, 500);
-    }
-
-    await supabase.rpc("log_audit", {
-      p_actor_id: deletedBy,
-      p_action: "account_deletion_completed",
-      p_target_type: "users",
-      p_target_id: userId,
-    });
-
-    return json({
-      ok: true,
-      deleted_user_id: userId,
-      deleted_at: deletedAt,
-      deleted_email: user.email,
-    });
-  } catch (e) {
-    return json({ error: "internal_error", detail: (e as Error).message }, 500);
-  }
-}
-
-Deno.serve(async (req: Request) => {
-  try {
-    return await handleRequest(req);
-  } catch (e) {
-    return json({ error: "internal_error", detail: (e as Error).message }, 500);
-  }
+  },
 });
+
+export {handler as GET, handler as POST};

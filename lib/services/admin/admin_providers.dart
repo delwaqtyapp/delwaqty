@@ -21,13 +21,6 @@ final dashboardMetricsProvider = FutureProvider<AdminDashboardMetrics>((ref) asy
   return adminService.getDashboardMetrics();
 });
 
-// ─── Legacy Dashboard ──────────────────────────────────────
-
-final dashboardProvider = FutureProvider<AdminDashboard?>((ref) async {
-  final adminService = ref.watch(adminServiceProvider);
-  return adminService.getDashboardLegacy();
-});
-
 // ─── Recent Activity ───────────────────────────────────────
 
 final recentActivityProvider = FutureProvider<List<AdminActivityLog>>((

@@ -858,12 +858,6 @@ class AppLocalizationsEn extends AppLocalizations {
       'You\'re all caught up! New notifications will appear here.';
 
   @override
-  String get adminDashboard => 'Admin Dashboard';
-
-  @override
-  String get platformOverview => 'Platform Overview';
-
-  @override
   String get totalUsers => 'Total Users';
 
   @override
@@ -877,9 +871,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get activeDrivers => 'Active Drivers';
-
-  @override
-  String get pendingOrdersStat => 'Pending Orders';
 
   @override
   String get recentActivity => 'Recent Activity';
@@ -4528,9 +4519,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get adminEmergency => 'Emergency';
 
   @override
-  String get adminLegacyDashboard => 'Legacy Dashboard';
-
-  @override
   String get adminSettingsPage => 'Settings';
 
   @override
@@ -4773,4 +4761,662 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get reqTypeRewardConfig => 'Rewards config change';
+
+  @override
+  String get periodToday => 'Today';
+
+  @override
+  String get periodWeek => 'This week';
+
+  @override
+  String get periodMonth => 'This month';
+
+  @override
+  String get periodQuarter => 'This quarter';
+
+  @override
+  String get periodAll => 'All';
+
+  @override
+  String get dashGroupPlatform => 'Platform';
+
+  @override
+  String get dashGroupOperations => 'Operations';
+
+  @override
+  String get dashGroupFinancial => 'Financial';
+
+  @override
+  String get dashGroupRisk => 'Risk';
+
+  @override
+  String get kpiTotalUsers => 'Total users';
+
+  @override
+  String get kpiActiveMerchants => 'Active merchants';
+
+  @override
+  String get kpiOnlineDrivers => 'Online drivers';
+
+  @override
+  String get kpiPendingVerification => 'Pending verifications';
+
+  @override
+  String get kpiTotalOrders => 'Total orders';
+
+  @override
+  String get kpiActiveRides => 'Active rides';
+
+  @override
+  String get kpiOpenComplaints => 'Open complaints';
+
+  @override
+  String get kpiActiveSanctions => 'Active sanctions';
+
+  @override
+  String get kpiTotalGmv => 'Total GMV';
+
+  @override
+  String get kpiPlatformCommission => 'Platform commission';
+
+  @override
+  String get kpiWalletLiability => 'Wallet liability';
+
+  @override
+  String get kpiPaymentFailures => 'Payment failures';
+
+  @override
+  String get kpiSosActive => 'Active SOS calls';
+
+  @override
+  String get kpiPendingWithdrawals => 'Pending withdrawals';
+
+  @override
+  String get kpiCancelledOrders => 'Cancelled orders';
+
+  @override
+  String get kpiPendingOrders => 'Pending orders';
+
+  @override
+  String get revenueGmv => 'Total GMV';
+
+  @override
+  String get revenuePlatformCommission => 'Platform commission';
+
+  @override
+  String get revenueRideGmv => 'Rides GMV';
+
+  @override
+  String get revenueDeliveryGmv => 'Deliveries GMV';
+
+  @override
+  String get operationalAlertsTitle => 'Operational alerts';
+
+  @override
+  String get noOperationalAlerts => 'No alerts';
+
+  @override
+  String get platformHealthy => 'The platform is operating normally';
+
+  @override
+  String get allGovernorates => 'All governorates';
+
+  @override
+  String get weeksAgo => 'w ago';
+
+  @override
+  String get recentActivityTitle => 'Recent activity';
+
+  @override
+  String get memberNotFound => 'Member not found';
+
+  @override
+  String get memberNotFoundMessage =>
+      'This member does not exist or you lack access.';
+
+  @override
+  String get unnamed => 'Unnamed';
+
+  @override
+  String get onlineBadge => 'online';
+
+  @override
+  String lastSeenLabel(Object time) {
+    return 'Last seen: $time';
+  }
+
+  @override
+  String get identitySection => 'Identity';
+
+  @override
+  String get userTypeLabel => 'User Type';
+
+  @override
+  String get avatarUrl => 'Avatar URL';
+
+  @override
+  String get tradeLicense => 'Trade License';
+
+  @override
+  String get verificationSection => 'Verification';
+
+  @override
+  String get failedToLoad => 'Failed to load';
+
+  @override
+  String get noVerificationAttempts => 'No verification attempts';
+
+  @override
+  String get attempts => 'Attempts';
+
+  @override
+  String get reviewedBy => 'Reviewed By';
+
+  @override
+  String get approveVerification => 'Approve Verification';
+
+  @override
+  String get rejectVerification => 'Reject Verification';
+
+  @override
+  String get approvalNote => 'Optional approval note';
+
+  @override
+  String get rejectionReasonRequired => 'Rejection reason *';
+
+  @override
+  String get locationSection => 'Location';
+
+  @override
+  String get governorate => 'Governorate';
+
+  @override
+  String get coordinates => 'Coordinates';
+
+  @override
+  String get lastLocationUpdate => 'Last Location Update';
+
+  @override
+  String get activityTimelineSection => 'Activity Timeline';
+
+  @override
+  String get failedToLoadTimeline => 'Failed to load timeline';
+
+  @override
+  String get noEventsYet => 'No events yet';
+
+  @override
+  String get totalSpending => 'Total Spending';
+
+  @override
+  String get deliveriesSection => 'Deliveries';
+
+  @override
+  String get merchantOrdersSection => 'Merchant Orders';
+
+  @override
+  String get jobsSection => 'Jobs';
+
+  @override
+  String get ordersRequestsSection => 'Orders & Requests';
+
+  @override
+  String get responseRate => 'Response Rate';
+
+  @override
+  String get completionRate => 'Completion Rate';
+
+  @override
+  String get serviceArea => 'Service Area';
+
+  @override
+  String get walletFinancialsSection => 'Wallet & Financials';
+
+  @override
+  String get failedToLoadFinancials => 'Failed to load financials';
+
+  @override
+  String get noFinancialData => 'No financial data';
+
+  @override
+  String get balance => 'Balance';
+
+  @override
+  String get availableStat => 'Available';
+
+  @override
+  String get totalEarned => 'Total Earned';
+
+  @override
+  String get withdrawnStat => 'Withdrawn';
+
+  @override
+  String get commissionsStat => 'Commissions';
+
+  @override
+  String get refunds => 'Refunds';
+
+  @override
+  String get earningsCommissionsSection => 'Earnings & Commissions';
+
+  @override
+  String get noEarningsData => 'No earnings data';
+
+  @override
+  String get grossEarnings => 'Gross Earnings';
+
+  @override
+  String get commissionRate => 'Commission Rate';
+
+  @override
+  String get netEarnings => 'Net Earnings';
+
+  @override
+  String get paid => 'Paid';
+
+  @override
+  String get complaintsSection => 'Complaints';
+
+  @override
+  String get noComplaintsFound => 'No complaints found';
+
+  @override
+  String get resolvedStat => 'Resolved';
+
+  @override
+  String get escalated => 'Escalated';
+
+  @override
+  String get urgent => 'Urgent';
+
+  @override
+  String get latestComplaints => 'Latest Complaints';
+
+  @override
+  String get noSupportConversations => 'No support conversations';
+
+  @override
+  String get conversations => 'Conversations';
+
+  @override
+  String get emergencyStat => 'Emergency';
+
+  @override
+  String get sanctionsSection => 'Sanctions';
+
+  @override
+  String get activeSanctions => 'Active Sanctions';
+
+  @override
+  String get issueSanction => 'Issue Sanction';
+
+  @override
+  String get sanctionType => 'Type';
+
+  @override
+  String get warning => 'Warning';
+
+  @override
+  String get fine => 'Fine';
+
+  @override
+  String get suspension => 'Suspension';
+
+  @override
+  String get temporaryBan => 'Temporary Ban';
+
+  @override
+  String get permanentBan => 'Permanent Ban';
+
+  @override
+  String get enterSanctionReason => 'Enter reason for sanction';
+
+  @override
+  String get issue => 'Issue';
+
+  @override
+  String get sanctionIssued => 'Sanction issued';
+
+  @override
+  String issuedBy(Object issuer) {
+    return 'by $issuer';
+  }
+
+  @override
+  String get revoke => 'Revoke';
+
+  @override
+  String get revokeSanction => 'Revoke Sanction';
+
+  @override
+  String revokeQuestion(Object type) {
+    return 'Revoke $type?';
+  }
+
+  @override
+  String get enterRevocationReason => 'Enter reason for revocation';
+
+  @override
+  String get sanctionRevoked => 'Sanction revoked';
+
+  @override
+  String get documentsSection => 'Documents';
+
+  @override
+  String get documentSubmitted => 'submitted';
+
+  @override
+  String get adminActionsSection => 'Admin Actions';
+
+  @override
+  String get verificationDecision => 'Verification Decision';
+
+  @override
+  String get restrictAccount => 'Restrict Account';
+
+  @override
+  String get suspendAccount => 'Suspend Account';
+
+  @override
+  String get restoreAccount => 'Restore Account';
+
+  @override
+  String actionAccountTitle(Object action) {
+    return '$action Account';
+  }
+
+  @override
+  String actionConfirmMessage(Object action) {
+    return 'Are you sure you want to $action this account?';
+  }
+
+  @override
+  String get enterReason => 'Enter reason';
+
+  @override
+  String get restorationUnsupported =>
+      'Restoring is not supported through the API; contact the owner to restore the account';
+
+  @override
+  String accountActionCompleted(Object action) {
+    return 'Account $action completed';
+  }
+
+  @override
+  String failedWithError(Object error) {
+    return 'Failed: $error';
+  }
+
+  @override
+  String get submitDeletionRequest => 'Submit deletion request';
+
+  @override
+  String get deletionRequestSubmitted =>
+      'Deletion request submitted for approval';
+
+  @override
+  String get deleteAccountMessage =>
+      'This will permanently deactivate the member and anonymize their personal data. An approval request is submitted for review.';
+
+  @override
+  String memberEmailLabel(Object email) {
+    return 'Member email: $email';
+  }
+
+  @override
+  String get activeSosCalls => 'Active SOS Calls';
+
+  @override
+  String get noActiveSosCalls => 'No active SOS calls';
+
+  @override
+  String get allUsersSafe => 'All platform users are safe';
+
+  @override
+  String get noCriticalAlerts => 'No critical alerts';
+
+  @override
+  String get noCriticalIssues => 'No critical issues require intervention';
+
+  @override
+  String sosUserLabel(Object id) {
+    return 'User: $id';
+  }
+
+  @override
+  String sosRideInfo(Object rideId, Object time) {
+    return 'Ride: $rideId • $time';
+  }
+
+  @override
+  String sosAlertType(Object type) {
+    return 'SOS $type';
+  }
+
+  @override
+  String get timeNow => 'Now';
+
+  @override
+  String sinceMinutes(Object count) {
+    return 'Since $count min';
+  }
+
+  @override
+  String sinceHours(Object count) {
+    return 'Since $count h';
+  }
+
+  @override
+  String sinceDays(Object count) {
+    return 'Since $count d';
+  }
+
+  @override
+  String get driversSection => 'Drivers';
+
+  @override
+  String get totalDrivers => 'Total drivers';
+
+  @override
+  String get verifiedStat => 'Verified';
+
+  @override
+  String get deliveryPerformance => 'Delivery performance';
+
+  @override
+  String get driverEarnings => 'Driver earnings';
+
+  @override
+  String get withdrawalsSection => 'Withdrawals';
+
+  @override
+  String pendingWithdrawalsCount(Object count) {
+    return '$count pending withdrawals';
+  }
+
+  @override
+  String paidWithdrawalsCount(Object count) {
+    return '$count paid withdrawals';
+  }
+
+  @override
+  String get revenueSummary => 'Revenue summary';
+
+  @override
+  String get commissionRules => 'Commission rules';
+
+  @override
+  String get returnsLabel => 'Returns';
+
+  @override
+  String get commissionRate7 => '7% commission';
+
+  @override
+  String get commissionRate3 => '3% commission';
+
+  @override
+  String get realizedStat => 'Realized';
+
+  @override
+  String activeRulesCount(Object count) {
+    return 'Active rules ($count)';
+  }
+
+  @override
+  String get serviceBookingType => 'Service';
+
+  @override
+  String get amount => 'Amount';
+
+  @override
+  String get commissionLabel => 'Commission';
+
+  @override
+  String get netLabel => 'Net';
+
+  @override
+  String get totalLiability => 'Total liability';
+
+  @override
+  String get merchantsByType => 'Merchants by type';
+
+  @override
+  String get providersByCategory => 'Providers by category';
+
+  @override
+  String get bookingsByCategory => 'Bookings by category';
+
+  @override
+  String get typeLabel => 'Type';
+
+  @override
+  String get statusLabel => 'Status';
+
+  @override
+  String get completedDeliveries => 'Completed deliveries';
+
+  @override
+  String get pendingDeliveries => 'Pending deliveries';
+
+  @override
+  String get cancelledDeliveries => 'Cancelled deliveries';
+
+  @override
+  String get deliveryGmv => 'Deliveries GMV';
+
+  @override
+  String get pendingWithdrawalsAmount => 'Pending withdrawals amount';
+
+  @override
+  String get paidWithdrawalsAmount => 'Paid withdrawals amount';
+
+  @override
+  String get status => 'Status';
+
+  @override
+  String get region => 'Region';
+
+  @override
+  String get history => 'History';
+
+  @override
+  String get lastSeen => 'Last Seen';
+
+  @override
+  String get reasonRequired => 'Reason *';
+
+  @override
+  String get restrict => 'Restrict';
+
+  @override
+  String get restore => 'Restore';
+
+  @override
+  String get submitted => 'Submitted';
+
+  @override
+  String get activeStat => 'Active';
+
+  @override
+  String expiresIn(Object expiry) {
+    return 'expires $expiry';
+  }
+
+  @override
+  String get onlineStat => 'Online';
+
+  @override
+  String get pendingStat => 'Pending';
+
+  @override
+  String get unverified => 'Unverified';
+
+  @override
+  String get newest => 'Newest';
+
+  @override
+  String get oldest => 'Oldest';
+
+  @override
+  String get applyFilters => 'Apply Filters';
+
+  @override
+  String get failedToLoadMembers => 'Failed to load members';
+
+  @override
+  String get noMembersFound => 'No members found';
+
+  @override
+  String get tryAdjustingSearch => 'Try adjusting your search or filters.';
+
+  @override
+  String get memberProfile => 'Member Profile';
+
+  @override
+  String get sanctionTypeLabel => 'Sanction Type';
+
+  @override
+  String get durationDays => 'Duration (days)';
+
+  @override
+  String get contact => 'Contact';
+
+  @override
+  String roleValueLabel(Object role) {
+    return 'Role: $role';
+  }
+
+  @override
+  String get noActiveSanctions => 'No active sanctions';
+
+  @override
+  String get timeline => 'Timeline';
+
+  @override
+  String get memberOperationsCenter => 'Member Operations Center';
+
+  @override
+  String get selectMemberHint => 'Select a member to view details';
+
+  @override
+  String get allRoles => 'All Roles';
+
+  @override
+  String get nameLabel => 'Name';
+
+  @override
+  String get retryLabel => 'Retry';
+
+  @override
+  String failedToIssueSanction(Object error) {
+    return 'Failed to issue sanction: $error';
+  }
+
+  @override
+  String failedToRevoke(Object error) {
+    return 'Failed to revoke: $error';
+  }
+
+  @override
+  String get amountDollars => 'Amount (\$)';
 }

@@ -1,10 +1,37 @@
 # SESSION_STATUS.md
 
-> **Last updated:** 2026-08-19 Session 58 — **STEP 18: ADMIN COMMAND CENTER — BACKEND HARDENING (COMPLETE)** — Migrations 052/053/054 applied+verified (approvals dispatcher restored, commission rules management, deletion confirmation, approval listing), AdminShell + independent Arabic admin locale, `/admin/commissions` + `/admin/approvals` pages, Danger Zone removed, sidebar collapsed to a single admin entry. Touched areas analyze clean, 77/77 admin+member tests green. Report: `docs/HANDOFF/STEP_18_ADMIN_COMMAND_CENTER_FINAL.md` (§8–§12).
+> **Last updated:** 2026-08-19 Session 59 — **STEP 18: FULL ADMIN & MEMBER LOCALIZATION (COMPLETE)** — Every admin page + member drawer, operations center, and member detail page fully localized with the independent admin locale (EN/AR parity validated by `gen-l10n`). Member deletion reworked to a pure confirmation dialog (email auto-supplied from profile, no typing). All 25 admin nav targets + `/admin/escalations` + `/search` verified to resolve. Touched files analyze clean, 73/73 admin+member tests green, debug APK built with `.env.dev`. Un-committed heading to `sprint 86`.
 
 ---
 
-## Current Task — STEP 18 BACKEND HARDENING (Session 58)
+## Current Task — STEP 18 FULL LOCALIZATION (Session 59)
+
+**Status:** Complete — un-committed (sprint 86 pending)
+
+### What changed this session (localization + deletion rework)
+
+1. **Member drawer fully localized** (`member_drawer.dart`) — every section (Identity, Verification, Location, Timeline, Orders/Deliveries/Services, Wallet/Earnings, Complaints, Support, Sanctions, Documents, Admin Actions) reads `AppLocalizations`; status/region/history/lastSeen/activeStat/expiresIn/reasonRequired/restrict/suspend/restore/delete keys added.
+2. **Member deletion rework (mandate #3)** — `_confirmDeletion` is now a pure confirmation dialog: warning + auto-shown member email + reason field only; email is passed automatically from `profile['email']` to `request_member_deletion`. Email-typing UI removed entirely.
+3. **Admin pages localized** — admin_module display name, emergency page, delivery intelligence, financial center, wallet/merchant/provider intelligence, merchants, commission management, analytics (AM/PM via `formatTimeOfDay`), transaction ledger, member operations center, member detail page.
+4. **Keys** — ~135 new keys added to BOTH `app_en.arb` + `app_ar.arb` (OrderedDict-preserving), incl. missing Arabic `addBranch`/`branchName`; every `gen-l10n` cycle parity-clean.
+5. **Link audit (mandate #4)** — all 25 `/admin/*` nav targets + `/admin` + `/admin/escalations` + `/search` resolve to registered routes.
+6. **Cleanup** — removed `provider` role branch (no key existed), null-safe `member.role ?? ''`.
+
+### Verified
+- `dart analyze <touched files>` — 0 errors / 0 warnings on every modified file
+- `flutter test test/features/admin test/features/member_management` — 73/73 green
+- `flutter build apk --debug --dart-define-from-file=.env.dev` — built (135.6s)
+
+### Files modified
+- `lib/l10n/app_en.arb` · `app_ar.arb` + generated `app_localizations*.dart` (new key set)
+- `lib/features/member_management/presentation/pages/member_drawer.dart` (localized; deletion confirmation rework)
+- `lib/features/member_management/presentation/pages/member_operations_center.dart` · `member_detail_page.dart` (localized)
+- `lib/features/admin/admin_module.dart` · `admin_shell.dart` · `domain/entities/admin_models.dart`
+- `lib/features/admin/presentation/pages/*` (all localized; `admin_dashboard_page.dart` deleted as redundant vs Command Center)
+- `lib/services/admin/admin_providers.dart` · `admin_service.dart`
+- `test/features/admin/domain/entities_test.dart`
+
+---
 
 **Status:** Complete — committed `1361a22` + pushed (`sprint 85: harden admin backend, add commissions and approvals centers`)
 

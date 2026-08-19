@@ -22,7 +22,7 @@ class AdminProviderIntelligencePage extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('استخبارات مزودي الخدمة'),
+        title: Text(l10n.adminProviderIntelligence),
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),
@@ -66,7 +66,7 @@ class AdminProviderIntelligencePage extends ConsumerWidget {
           AnimatedFadeIn(
             delay: const Duration(milliseconds: 100),
             child: Text(
-              'المزودون حسب التصنيف',
+              l10n.providersByCategory,
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.bold,
               ),
@@ -81,7 +81,7 @@ class AdminProviderIntelligencePage extends ConsumerWidget {
           AnimatedFadeIn(
             delay: const Duration(milliseconds: 200),
             child: Text(
-              'الحجوزات حسب التصنيف',
+              l10n.bookingsByCategory,
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.bold,
               ),

@@ -17,7 +17,7 @@ class MemberDetailPage extends ConsumerWidget {
     final profileAsync = ref.watch(memberProfileProvider(memberId));
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Member Profile')),
+      appBar: AppBar(title: Text(l10n.memberProfile)),
       body: profileAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => PremiumEmptyState(
@@ -27,10 +27,10 @@ class MemberDetailPage extends ConsumerWidget {
         ),
         data: (profile) {
           if (profile == null) {
-            return const PremiumEmptyState(
+            return PremiumEmptyState(
               icon: Icons.person_off_rounded,
-              title: 'Member not found',
-              message: 'This member does not exist or you lack access.',
+              title: l10n.memberNotFound,
+              message: l10n.memberNotFoundMessage,
             );
           }
           return _MemberProfileBody(
@@ -42,7 +42,7 @@ class MemberDetailPage extends ConsumerWidget {
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => _showIssueSanctionSheet(context, ref),
         icon: const Icon(Icons.gavel_rounded),
-        label: const Text('Issue Sanction'),
+        label: Text(l10n.issueSanction),
       ),
     );
   }
@@ -103,6 +103,7 @@ class _IssueSanctionSheetState extends ConsumerState<_IssueSanctionSheet> {
   }
 
   Future<void> _submit() async {
+    final l10n = AppLocalizations.of(context);
     if (_reasonController.text.trim().isEmpty) return;
     setState(() => _isSubmitting = true);
     try {
@@ -118,13 +119,15 @@ class _IssueSanctionSheetState extends ConsumerState<_IssueSanctionSheet> {
         widget.onIssued();
         Navigator.of(context).pop();
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Sanction issued')),
+          SnackBar(content: Text(l10n.sanctionIssued)),
         );
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to issue sanction: $e')),
+          SnackBar(
+            content: Text(l10n.failedToIssueSanction(e.toString())),
+          ),
         );
       }
     } finally {
@@ -134,6 +137,7 @@ class _IssueSanctionSheetState extends ConsumerState<_IssueSanctionSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Padding(
       padding: EdgeInsets.only(
         left: 16,
@@ -157,19 +161,24 @@ class _IssueSanctionSheetState extends ConsumerState<_IssueSanctionSheet> {
               ),
             ),
             const SizedBox(height: 16),
-            Text('Issue Sanction',
+            Text(l10n.issueSanction,
                 style: Theme.of(context).textTheme.titleLarge),
             const SizedBox(height: 16),
             DropdownButtonFormField<String>(
               initialValue: _selectedType,
               decoration: InputDecoration(
-                labelText: 'Sanction Type',
+                labelText: l10n.sanctionTypeLabel,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
               ),
               items: _types
-                  .map((t) => DropdownMenuItem(value: t, child: Text(t)))
+                  .map(
+                    (t) => DropdownMenuItem(
+                      value: t,
+                      child: Text(_sanctionTypeName(l10n, t)),
+                    ),
+                  )
                   .toList(),
               onChanged: (v) => setState(() => _selectedType = v!),
             ),
@@ -177,8 +186,8 @@ class _IssueSanctionSheetState extends ConsumerState<_IssueSanctionSheet> {
             TextField(
               controller: _reasonController,
               decoration: InputDecoration(
-                labelText: 'Reason *',
-                hintText: 'Enter reason for sanction',
+                labelText: l10n.reasonRequired,
+                hintText: l10n.enterSanctionReason,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
@@ -192,7 +201,7 @@ class _IssueSanctionSheetState extends ConsumerState<_IssueSanctionSheet> {
                   child: TextField(
                     controller: _durationController,
                     decoration: InputDecoration(
-                      labelText: 'Duration (days)',
+                      labelText: l10n.durationDays,
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
@@ -205,7 +214,7 @@ class _IssueSanctionSheetState extends ConsumerState<_IssueSanctionSheet> {
                   child: TextField(
                     controller: _amountController,
                     decoration: InputDecoration(
-                      labelText: 'Amount (\$)',
+                      labelText: l10n.amountDollars,
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
@@ -226,13 +235,24 @@ class _IssueSanctionSheetState extends ConsumerState<_IssueSanctionSheet> {
                         height: 20,
                         child: CircularProgressIndicator(strokeWidth: 2),
                       )
-                    : const Text('Issue Sanction'),
+                    : Text(l10n.issueSanction),
               ),
             ),
           ],
         ),
       ),
     );
+  }
+
+  String _sanctionTypeName(AppLocalizations l10n, String type) {
+    return switch (type) {
+      'warning' => l10n.warning,
+      'fine' => l10n.fine,
+      'suspension' => l10n.suspension,
+      'temporary_ban' => l10n.temporaryBan,
+      'permanent_ban' => l10n.permanentBan,
+      _ => type,
+    };
   }
 }
 
@@ -247,9 +267,10 @@ class _MemberProfileBody extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final statusAsync = ref.watch(memberStatusProvider(memberId));
     final basicInfo = profile['basic'] as Map<String, dynamic>? ?? {};
-    final name = basicInfo['full_name'] as String? ?? 'Unnamed';
+    final name = basicInfo['full_name'] as String? ?? l10n.unnamed;
     final email = basicInfo['email'] as String? ?? '';
     final phone = basicInfo['phone'] as String? ?? '';
     final role = basicInfo['role'] as String? ?? 'customer';
@@ -299,7 +320,7 @@ class _MemberProfileBody extends ConsumerWidget {
               borderRadius: BorderRadius.circular(20),
             ),
             child: Text(
-              accountStatus,
+              _accountStatusLabel(l10n, accountStatus),
               style: TextStyle(
                 color: statusColor,
                 fontWeight: FontWeight.w600,
@@ -309,12 +330,12 @@ class _MemberProfileBody extends ConsumerWidget {
           ),
         ),
         const SizedBox(height: 20),
-        _InfoCard(title: 'Contact', items: [
+        _InfoCard(title: l10n.contact, items: [
           if (email.isNotEmpty)
             _InfoRow(icon: Icons.email_outlined, text: email),
           if (phone.isNotEmpty)
             _InfoRow(icon: Icons.phone_outlined, text: phone),
-          _InfoRow(icon: Icons.badge_outlined, text: 'Role: $role'),
+          _InfoRow(icon: Icons.badge_outlined, text: l10n.roleValueLabel(role)),
         ]),
         const SizedBox(height: 12),
         if (statusAsync.hasValue)
@@ -326,6 +347,16 @@ class _MemberProfileBody extends ConsumerWidget {
         _TimelineSection(memberId: memberId),
       ],
     );
+  }
+
+  String _accountStatusLabel(AppLocalizations l10n, String key) {
+    return switch (key) {
+      'active' => l10n.active,
+      'suspended' => l10n.suspended,
+      'restricted' => l10n.restrictAccount,
+      'banned' => l10n.permanentBan,
+      _ => key,
+    };
   }
 }
 
@@ -399,23 +430,24 @@ class _SanctionsSectionState extends ConsumerState<_SanctionsSection> {
   bool _isRevoking = false;
 
   Future<void> _confirmRevoke(Map<String, dynamic> sanction) async {
+    final l10n = AppLocalizations.of(context);
     final reasonController = TextEditingController();
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Revoke Sanction'),
+        title: Text(l10n.revokeSanction),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              'Revoke ${sanction['sanction_type']}?',
+              l10n.revokeQuestion('${sanction['sanction_type']}'),
             ),
             const SizedBox(height: 12),
             TextField(
               controller: reasonController,
               decoration: InputDecoration(
-                labelText: 'Reason',
-                hintText: 'Enter reason for revocation',
+                labelText: l10n.reason,
+                hintText: l10n.enterRevocationReason,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
@@ -430,14 +462,14 @@ class _SanctionsSectionState extends ConsumerState<_SanctionsSection> {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(false),
-            child: const Text('Cancel'),
+            child: Text(l10n.cancel),
           ),
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(true),
             style: TextButton.styleFrom(
               foregroundColor: Theme.of(context).colorScheme.error,
             ),
-            child: const Text('Revoke'),
+            child: Text(l10n.revoke),
           ),
         ],
       ),
@@ -457,13 +489,15 @@ class _SanctionsSectionState extends ConsumerState<_SanctionsSection> {
           ref.invalidate(memberStatusProvider(widget.memberId));
           ref.invalidate(memberTimelineProvider(widget.memberId));
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Sanction revoked')),
+            SnackBar(content: Text(l10n.sanctionRevoked)),
           );
         }
       } catch (e) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Failed to revoke: $e')),
+            SnackBar(
+              content: Text(l10n.failedToRevoke(e.toString())),
+            ),
           );
         }
       } finally {
@@ -474,6 +508,7 @@ class _SanctionsSectionState extends ConsumerState<_SanctionsSection> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final sanctions = widget.statusData['active_sanctions'] as List? ?? [];
     return Card(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -482,14 +517,14 @@ class _SanctionsSectionState extends ConsumerState<_SanctionsSection> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Active Sanctions',
+            Text(l10n.activeSanctions,
                 style: Theme.of(context).textTheme.titleSmall?.copyWith(
                       fontWeight: FontWeight.w700,
                     )),
             const SizedBox(height: 8),
             if (sanctions.isEmpty)
               Text(
-                'No active sanctions',
+                l10n.noActiveSanctions,
                 style: Theme.of(context).textTheme.bodySmall,
               )
             else
@@ -505,8 +540,11 @@ class _SanctionsSectionState extends ConsumerState<_SanctionsSection> {
                           size: 14, color: Colors.orange),
                       const SizedBox(width: 6),
                       Expanded(
-                        child: Text('$type — $reason',
-                            maxLines: 2, overflow: TextOverflow.ellipsis),
+                        child: Text(
+                          '${_sanctionTypeName(l10n, type)} — $reason',
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
                       ),
                       if (sanctionId.isNotEmpty)
                         IconButton(
@@ -520,7 +558,7 @@ class _SanctionsSectionState extends ConsumerState<_SanctionsSection> {
                               : const Icon(Icons.undo_rounded, size: 16),
                           onPressed:
                               _isRevoking ? null : () => _confirmRevoke(s),
-                          tooltip: 'Revoke',
+                          tooltip: l10n.revoke,
                           visualDensity: VisualDensity.compact,
                         ),
                     ],
@@ -532,6 +570,17 @@ class _SanctionsSectionState extends ConsumerState<_SanctionsSection> {
       ),
     );
   }
+
+  String _sanctionTypeName(AppLocalizations l10n, String type) {
+    return switch (type) {
+      'warning' => l10n.warning,
+      'fine' => l10n.fine,
+      'suspension' => l10n.suspension,
+      'temporary_ban' => l10n.temporaryBan,
+      'permanent_ban' => l10n.permanentBan,
+      _ => type,
+    };
+  }
 }
 
 class _TimelineSection extends ConsumerWidget {
@@ -541,6 +590,7 @@ class _TimelineSection extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final timelineAsync = ref.watch(memberTimelineProvider(memberId));
 
     return Card(
@@ -550,7 +600,7 @@ class _TimelineSection extends ConsumerWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Timeline',
+            Text(l10n.timeline,
                 style: Theme.of(context).textTheme.titleSmall?.copyWith(
                       fontWeight: FontWeight.w700,
                     )),
@@ -559,12 +609,12 @@ class _TimelineSection extends ConsumerWidget {
               loading: () => const ShimmerLoading(
                 child: SizedBox(height: 80),
               ),
-              error: (e, _) => Text('Failed to load timeline',
+              error: (e, _) => Text(l10n.failedToLoadTimeline,
                   style: Theme.of(context).textTheme.bodySmall),
               data: (events) {
                 if (events.isEmpty) {
                   return Text(
-                    'No events yet',
+                    l10n.noEventsYet,
                     style: Theme.of(context).textTheme.bodySmall,
                   );
                 }

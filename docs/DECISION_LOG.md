@@ -2574,3 +2574,36 @@ gets data it is permitted to see.
 - New pages `/admin/commissions` and `/admin/approvals`; `member_management_module_test` updated for the
   single-entry sidebar; 77/77 admin+member tests green; touched areas analyze clean (0 errors/warnings).
 - Useful mental model for future migrations: no owner session persists across `apply.py` batches.
+
+---
+
+## ADR-070: Full Admin + Member Localization Under the Independent Admin Locale
+
+Date: 2026-08-19 · Status: Accepted
+
+### Context
+STEP 18 mandates required (2) 100% EN/AR localization of every admin-related page and member-management
+surface with the independent admin locale, and (3) member deletion as a confirmation dialog without typing
+the email. Inventory scans had flagged unlocalized strings across the member drawer, operations center,
+member detail, and 10+ admin pages.
+
+### Decision
+- Localize every remaining admin/member-management page against `AppLocalizations`; add all new keys to BOTH
+  ARBs with a python OrderedDict-preserving script and re-run `flutter gen-l10n` (translation parity
+  validated each cycle).
+- Reuse helpers (`_accountStatusLabel`, `_roleLabel`, `_sanctionTypeName`) instead of mapping inline.
+- Replace hardcoded `AM`/`PM` with `MaterialLocalizations.formatTimeOfDay`.
+- Rework `_confirmDeletion`: confirmation dialog only; email auto-supplied from the profile; server-side
+  email validation (053) retained unmodified.
+- Run a link audit: every nav item in `admin_shell.dart` + `/admin/escalations` + `/search` must resolve to a
+  registered route.
+
+### Rationale
+User-facing strings were the last untranslated surface in the admin command center; a common admin locale
+requires every shell-hosted page to be locale-aware. Removing typed-email deletion matches the mandated UX
+without weakening server-side guarantees.
+
+### Consequences
+- ~135 new ARB keys (EN+AR) added; `addBranch`/`branchName` Arabic backfilled; all parity checks clean.
+- `member_drawer.dart` deletion flow is dialog-only; email still validated by the 053 RPC.
+- 73/73 admin+member tests green; touched files analyze clean; debug APK builds with `.env.dev`.

@@ -18,23 +18,6 @@ class AdminService {
     }
   }
 
-  Future<AdminDashboard?> getDashboardLegacy() async {
-    try {
-      final metrics = await _repository.getDashboardMetrics();
-      return AdminDashboard(
-        totalUsers: metrics.totalUsers,
-        totalMerchants: metrics.totalMerchants,
-        totalOrders: metrics.pendingOrders + metrics.completedDeliveries,
-        totalRevenue: metrics.totalRevenue,
-        activeDrivers: metrics.activeDrivers,
-        pendingOrders: metrics.pendingOrders,
-      );
-    } catch (e) {
-      debugPrint('AdminService.getDashboardLegacy error: $e');
-      return null;
-    }
-  }
-
   Future<List<AdminActivityLog>> getRecentActivity({int limit = 20}) async {
     try {
       return await _repository.getRecentActivity(limit: limit);

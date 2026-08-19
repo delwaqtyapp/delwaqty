@@ -118,7 +118,7 @@ class _AdminEmergencyPageState extends ConsumerState<AdminEmergencyPage> {
           children: [
             AnimatedFadeIn(
               child: Text(
-                'نداءات الاستغاثة النشطة',
+                l10n.activeSosCalls,
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
@@ -137,8 +137,8 @@ class _AdminEmergencyPageState extends ConsumerState<AdminEmergencyPage> {
                 child: PremiumCard(
                   child: PremiumEmptyState(
                     icon: Icons.emergency_rounded,
-                    title: 'لا توجد نداءات استغاثة نشطة',
-                    message: 'جميع مستخدمي المنصة في أمان',
+                    title: l10n.noActiveSosCalls,
+                    message: l10n.allUsersSafe,
                   ),
                 ),
               )
@@ -149,7 +149,7 @@ class _AdminEmergencyPageState extends ConsumerState<AdminEmergencyPage> {
                   delay: Duration(milliseconds: i * 60),
                   child: Padding(
                     padding: EdgeInsets.only(bottom: 8),
-                    child: _EmergencyCard(sos: sos),
+                    child: _EmergencyCard(sos: sos, l10n: l10n),
                   ),
                 );
               }),
@@ -157,7 +157,7 @@ class _AdminEmergencyPageState extends ConsumerState<AdminEmergencyPage> {
             AnimatedFadeIn(
               delay: const Duration(milliseconds: 150),
               child: Text(
-                'التنبيهات التشغيلية',
+                l10n.operationalAlertsTitle,
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
@@ -191,8 +191,8 @@ class _AdminEmergencyPageState extends ConsumerState<AdminEmergencyPage> {
                   return PremiumCard(
                     child: PremiumEmptyState(
                       icon: Icons.check_circle_outline_rounded,
-                      title: 'لا توجد تنبيهات حرجة',
-                      message: 'لا توجد مشاكل حرجة تستدعي التدخل',
+                      title: l10n.noCriticalAlerts,
+                      message: l10n.noCriticalIssues,
                     ),
                   );
                 }
@@ -220,9 +220,10 @@ class _AdminEmergencyPageState extends ConsumerState<AdminEmergencyPage> {
 }
 
 class _EmergencyCard extends StatelessWidget {
-  const _EmergencyCard({required this.sos});
+  const _EmergencyCard({required this.sos, required this.l10n});
 
   final SosAlert sos;
+  final AppLocalizations l10n;
 
   @override
   Widget build(BuildContext context) {
@@ -251,7 +252,7 @@ class _EmergencyCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'نداء استغاثة ${sos.alertType.name}',
+                  l10n.sosAlertType(sos.alertType.name),
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                         fontWeight: FontWeight.bold,
                       ),
@@ -266,13 +267,13 @@ class _EmergencyCard extends StatelessWidget {
                   ),
                 const SizedBox(height: 4),
                 Text(
-                  'المستخدم: ${sos.userId}',
+                  l10n.sosUserLabel(sos.userId),
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         color: Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
                 ),
                 Text(
-                  'الرحلة: ${sos.rideId}  •  ${_formatTime(sos.createdAt)}',
+                  l10n.sosRideInfo(sos.rideId, _formatTime(sos.createdAt)),
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         color: Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
@@ -287,9 +288,9 @@ class _EmergencyCard extends StatelessWidget {
               color: const Color(0xFFFF3B30).withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
             ),
-            child: const Text(
-              'نشط',
-              style: TextStyle(
+            child: Text(
+              l10n.activeStat,
+              style: const TextStyle(
                 color: Color(0xFFFF3B30),
                 fontSize: 11,
                 fontWeight: FontWeight.bold,
@@ -304,10 +305,10 @@ class _EmergencyCard extends StatelessWidget {
   String _formatTime(DateTime dt) {
     final now = DateTime.now();
     final diff = now.difference(dt);
-    if (diff.inMinutes < 1) return 'الآن';
-    if (diff.inMinutes < 60) return 'منذ ${diff.inMinutes} د';
-    if (diff.inHours < 24) return 'منذ ${diff.inHours} س';
-    return 'منذ ${diff.inDays} ي';
+    if (diff.inMinutes < 1) return l10n.timeNow;
+    if (diff.inMinutes < 60) return l10n.sinceMinutes(diff.inMinutes);
+    if (diff.inHours < 24) return l10n.sinceHours(diff.inHours);
+    return l10n.sinceDays(diff.inDays);
   }
 }
 

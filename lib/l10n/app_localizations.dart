@@ -1730,18 +1730,6 @@ abstract class AppLocalizations {
   /// **'You\'re all caught up! New notifications will appear here.'**
   String get noNotificationsMessage;
 
-  /// No description provided for @adminDashboard.
-  ///
-  /// In en, this message translates to:
-  /// **'Admin Dashboard'**
-  String get adminDashboard;
-
-  /// No description provided for @platformOverview.
-  ///
-  /// In en, this message translates to:
-  /// **'Platform Overview'**
-  String get platformOverview;
-
   /// No description provided for @totalUsers.
   ///
   /// In en, this message translates to:
@@ -1771,12 +1759,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Active Drivers'**
   String get activeDrivers;
-
-  /// No description provided for @pendingOrdersStat.
-  ///
-  /// In en, this message translates to:
-  /// **'Pending Orders'**
-  String get pendingOrdersStat;
 
   /// No description provided for @recentActivity.
   ///
@@ -8690,12 +8672,6 @@ abstract class AppLocalizations {
   /// **'Emergency'**
   String get adminEmergency;
 
-  /// No description provided for @adminLegacyDashboard.
-  ///
-  /// In en, this message translates to:
-  /// **'Legacy Dashboard'**
-  String get adminLegacyDashboard;
-
   /// No description provided for @adminSettingsPage.
   ///
   /// In en, this message translates to:
@@ -9175,6 +9151,1230 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Rewards config change'**
   String get reqTypeRewardConfig;
+
+  /// No description provided for @periodToday.
+  ///
+  /// In en, this message translates to:
+  /// **'Today'**
+  String get periodToday;
+
+  /// No description provided for @periodWeek.
+  ///
+  /// In en, this message translates to:
+  /// **'This week'**
+  String get periodWeek;
+
+  /// No description provided for @periodMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'This month'**
+  String get periodMonth;
+
+  /// No description provided for @periodQuarter.
+  ///
+  /// In en, this message translates to:
+  /// **'This quarter'**
+  String get periodQuarter;
+
+  /// No description provided for @periodAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get periodAll;
+
+  /// No description provided for @dashGroupPlatform.
+  ///
+  /// In en, this message translates to:
+  /// **'Platform'**
+  String get dashGroupPlatform;
+
+  /// No description provided for @dashGroupOperations.
+  ///
+  /// In en, this message translates to:
+  /// **'Operations'**
+  String get dashGroupOperations;
+
+  /// No description provided for @dashGroupFinancial.
+  ///
+  /// In en, this message translates to:
+  /// **'Financial'**
+  String get dashGroupFinancial;
+
+  /// No description provided for @dashGroupRisk.
+  ///
+  /// In en, this message translates to:
+  /// **'Risk'**
+  String get dashGroupRisk;
+
+  /// No description provided for @kpiTotalUsers.
+  ///
+  /// In en, this message translates to:
+  /// **'Total users'**
+  String get kpiTotalUsers;
+
+  /// No description provided for @kpiActiveMerchants.
+  ///
+  /// In en, this message translates to:
+  /// **'Active merchants'**
+  String get kpiActiveMerchants;
+
+  /// No description provided for @kpiOnlineDrivers.
+  ///
+  /// In en, this message translates to:
+  /// **'Online drivers'**
+  String get kpiOnlineDrivers;
+
+  /// No description provided for @kpiPendingVerification.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending verifications'**
+  String get kpiPendingVerification;
+
+  /// No description provided for @kpiTotalOrders.
+  ///
+  /// In en, this message translates to:
+  /// **'Total orders'**
+  String get kpiTotalOrders;
+
+  /// No description provided for @kpiActiveRides.
+  ///
+  /// In en, this message translates to:
+  /// **'Active rides'**
+  String get kpiActiveRides;
+
+  /// No description provided for @kpiOpenComplaints.
+  ///
+  /// In en, this message translates to:
+  /// **'Open complaints'**
+  String get kpiOpenComplaints;
+
+  /// No description provided for @kpiActiveSanctions.
+  ///
+  /// In en, this message translates to:
+  /// **'Active sanctions'**
+  String get kpiActiveSanctions;
+
+  /// No description provided for @kpiTotalGmv.
+  ///
+  /// In en, this message translates to:
+  /// **'Total GMV'**
+  String get kpiTotalGmv;
+
+  /// No description provided for @kpiPlatformCommission.
+  ///
+  /// In en, this message translates to:
+  /// **'Platform commission'**
+  String get kpiPlatformCommission;
+
+  /// No description provided for @kpiWalletLiability.
+  ///
+  /// In en, this message translates to:
+  /// **'Wallet liability'**
+  String get kpiWalletLiability;
+
+  /// No description provided for @kpiPaymentFailures.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment failures'**
+  String get kpiPaymentFailures;
+
+  /// No description provided for @kpiSosActive.
+  ///
+  /// In en, this message translates to:
+  /// **'Active SOS calls'**
+  String get kpiSosActive;
+
+  /// No description provided for @kpiPendingWithdrawals.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending withdrawals'**
+  String get kpiPendingWithdrawals;
+
+  /// No description provided for @kpiCancelledOrders.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancelled orders'**
+  String get kpiCancelledOrders;
+
+  /// No description provided for @kpiPendingOrders.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending orders'**
+  String get kpiPendingOrders;
+
+  /// No description provided for @revenueGmv.
+  ///
+  /// In en, this message translates to:
+  /// **'Total GMV'**
+  String get revenueGmv;
+
+  /// No description provided for @revenuePlatformCommission.
+  ///
+  /// In en, this message translates to:
+  /// **'Platform commission'**
+  String get revenuePlatformCommission;
+
+  /// No description provided for @revenueRideGmv.
+  ///
+  /// In en, this message translates to:
+  /// **'Rides GMV'**
+  String get revenueRideGmv;
+
+  /// No description provided for @revenueDeliveryGmv.
+  ///
+  /// In en, this message translates to:
+  /// **'Deliveries GMV'**
+  String get revenueDeliveryGmv;
+
+  /// No description provided for @operationalAlertsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Operational alerts'**
+  String get operationalAlertsTitle;
+
+  /// No description provided for @noOperationalAlerts.
+  ///
+  /// In en, this message translates to:
+  /// **'No alerts'**
+  String get noOperationalAlerts;
+
+  /// No description provided for @platformHealthy.
+  ///
+  /// In en, this message translates to:
+  /// **'The platform is operating normally'**
+  String get platformHealthy;
+
+  /// No description provided for @allGovernorates.
+  ///
+  /// In en, this message translates to:
+  /// **'All governorates'**
+  String get allGovernorates;
+
+  /// No description provided for @weeksAgo.
+  ///
+  /// In en, this message translates to:
+  /// **'w ago'**
+  String get weeksAgo;
+
+  /// No description provided for @recentActivityTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Recent activity'**
+  String get recentActivityTitle;
+
+  /// No description provided for @memberNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'Member not found'**
+  String get memberNotFound;
+
+  /// No description provided for @memberNotFoundMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'This member does not exist or you lack access.'**
+  String get memberNotFoundMessage;
+
+  /// No description provided for @unnamed.
+  ///
+  /// In en, this message translates to:
+  /// **'Unnamed'**
+  String get unnamed;
+
+  /// No description provided for @onlineBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'online'**
+  String get onlineBadge;
+
+  /// No description provided for @lastSeenLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Last seen: {time}'**
+  String lastSeenLabel(Object time);
+
+  /// No description provided for @identitySection.
+  ///
+  /// In en, this message translates to:
+  /// **'Identity'**
+  String get identitySection;
+
+  /// No description provided for @userTypeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'User Type'**
+  String get userTypeLabel;
+
+  /// No description provided for @avatarUrl.
+  ///
+  /// In en, this message translates to:
+  /// **'Avatar URL'**
+  String get avatarUrl;
+
+  /// No description provided for @tradeLicense.
+  ///
+  /// In en, this message translates to:
+  /// **'Trade License'**
+  String get tradeLicense;
+
+  /// No description provided for @verificationSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Verification'**
+  String get verificationSection;
+
+  /// No description provided for @failedToLoad.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load'**
+  String get failedToLoad;
+
+  /// No description provided for @noVerificationAttempts.
+  ///
+  /// In en, this message translates to:
+  /// **'No verification attempts'**
+  String get noVerificationAttempts;
+
+  /// No description provided for @attempts.
+  ///
+  /// In en, this message translates to:
+  /// **'Attempts'**
+  String get attempts;
+
+  /// No description provided for @reviewedBy.
+  ///
+  /// In en, this message translates to:
+  /// **'Reviewed By'**
+  String get reviewedBy;
+
+  /// No description provided for @approveVerification.
+  ///
+  /// In en, this message translates to:
+  /// **'Approve Verification'**
+  String get approveVerification;
+
+  /// No description provided for @rejectVerification.
+  ///
+  /// In en, this message translates to:
+  /// **'Reject Verification'**
+  String get rejectVerification;
+
+  /// No description provided for @approvalNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Optional approval note'**
+  String get approvalNote;
+
+  /// No description provided for @rejectionReasonRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Rejection reason *'**
+  String get rejectionReasonRequired;
+
+  /// No description provided for @locationSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Location'**
+  String get locationSection;
+
+  /// No description provided for @governorate.
+  ///
+  /// In en, this message translates to:
+  /// **'Governorate'**
+  String get governorate;
+
+  /// No description provided for @coordinates.
+  ///
+  /// In en, this message translates to:
+  /// **'Coordinates'**
+  String get coordinates;
+
+  /// No description provided for @lastLocationUpdate.
+  ///
+  /// In en, this message translates to:
+  /// **'Last Location Update'**
+  String get lastLocationUpdate;
+
+  /// No description provided for @activityTimelineSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Activity Timeline'**
+  String get activityTimelineSection;
+
+  /// No description provided for @failedToLoadTimeline.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load timeline'**
+  String get failedToLoadTimeline;
+
+  /// No description provided for @noEventsYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No events yet'**
+  String get noEventsYet;
+
+  /// No description provided for @totalSpending.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Spending'**
+  String get totalSpending;
+
+  /// No description provided for @deliveriesSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Deliveries'**
+  String get deliveriesSection;
+
+  /// No description provided for @merchantOrdersSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Merchant Orders'**
+  String get merchantOrdersSection;
+
+  /// No description provided for @jobsSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Jobs'**
+  String get jobsSection;
+
+  /// No description provided for @ordersRequestsSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Orders & Requests'**
+  String get ordersRequestsSection;
+
+  /// No description provided for @responseRate.
+  ///
+  /// In en, this message translates to:
+  /// **'Response Rate'**
+  String get responseRate;
+
+  /// No description provided for @completionRate.
+  ///
+  /// In en, this message translates to:
+  /// **'Completion Rate'**
+  String get completionRate;
+
+  /// No description provided for @serviceArea.
+  ///
+  /// In en, this message translates to:
+  /// **'Service Area'**
+  String get serviceArea;
+
+  /// No description provided for @walletFinancialsSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Wallet & Financials'**
+  String get walletFinancialsSection;
+
+  /// No description provided for @failedToLoadFinancials.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load financials'**
+  String get failedToLoadFinancials;
+
+  /// No description provided for @noFinancialData.
+  ///
+  /// In en, this message translates to:
+  /// **'No financial data'**
+  String get noFinancialData;
+
+  /// No description provided for @balance.
+  ///
+  /// In en, this message translates to:
+  /// **'Balance'**
+  String get balance;
+
+  /// No description provided for @availableStat.
+  ///
+  /// In en, this message translates to:
+  /// **'Available'**
+  String get availableStat;
+
+  /// No description provided for @totalEarned.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Earned'**
+  String get totalEarned;
+
+  /// No description provided for @withdrawnStat.
+  ///
+  /// In en, this message translates to:
+  /// **'Withdrawn'**
+  String get withdrawnStat;
+
+  /// No description provided for @commissionsStat.
+  ///
+  /// In en, this message translates to:
+  /// **'Commissions'**
+  String get commissionsStat;
+
+  /// No description provided for @refunds.
+  ///
+  /// In en, this message translates to:
+  /// **'Refunds'**
+  String get refunds;
+
+  /// No description provided for @earningsCommissionsSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Earnings & Commissions'**
+  String get earningsCommissionsSection;
+
+  /// No description provided for @noEarningsData.
+  ///
+  /// In en, this message translates to:
+  /// **'No earnings data'**
+  String get noEarningsData;
+
+  /// No description provided for @grossEarnings.
+  ///
+  /// In en, this message translates to:
+  /// **'Gross Earnings'**
+  String get grossEarnings;
+
+  /// No description provided for @commissionRate.
+  ///
+  /// In en, this message translates to:
+  /// **'Commission Rate'**
+  String get commissionRate;
+
+  /// No description provided for @netEarnings.
+  ///
+  /// In en, this message translates to:
+  /// **'Net Earnings'**
+  String get netEarnings;
+
+  /// No description provided for @paid.
+  ///
+  /// In en, this message translates to:
+  /// **'Paid'**
+  String get paid;
+
+  /// No description provided for @complaintsSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Complaints'**
+  String get complaintsSection;
+
+  /// No description provided for @noComplaintsFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No complaints found'**
+  String get noComplaintsFound;
+
+  /// No description provided for @resolvedStat.
+  ///
+  /// In en, this message translates to:
+  /// **'Resolved'**
+  String get resolvedStat;
+
+  /// No description provided for @escalated.
+  ///
+  /// In en, this message translates to:
+  /// **'Escalated'**
+  String get escalated;
+
+  /// No description provided for @urgent.
+  ///
+  /// In en, this message translates to:
+  /// **'Urgent'**
+  String get urgent;
+
+  /// No description provided for @latestComplaints.
+  ///
+  /// In en, this message translates to:
+  /// **'Latest Complaints'**
+  String get latestComplaints;
+
+  /// No description provided for @noSupportConversations.
+  ///
+  /// In en, this message translates to:
+  /// **'No support conversations'**
+  String get noSupportConversations;
+
+  /// No description provided for @conversations.
+  ///
+  /// In en, this message translates to:
+  /// **'Conversations'**
+  String get conversations;
+
+  /// No description provided for @emergencyStat.
+  ///
+  /// In en, this message translates to:
+  /// **'Emergency'**
+  String get emergencyStat;
+
+  /// No description provided for @sanctionsSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Sanctions'**
+  String get sanctionsSection;
+
+  /// No description provided for @activeSanctions.
+  ///
+  /// In en, this message translates to:
+  /// **'Active Sanctions'**
+  String get activeSanctions;
+
+  /// No description provided for @issueSanction.
+  ///
+  /// In en, this message translates to:
+  /// **'Issue Sanction'**
+  String get issueSanction;
+
+  /// No description provided for @sanctionType.
+  ///
+  /// In en, this message translates to:
+  /// **'Type'**
+  String get sanctionType;
+
+  /// No description provided for @warning.
+  ///
+  /// In en, this message translates to:
+  /// **'Warning'**
+  String get warning;
+
+  /// No description provided for @fine.
+  ///
+  /// In en, this message translates to:
+  /// **'Fine'**
+  String get fine;
+
+  /// No description provided for @suspension.
+  ///
+  /// In en, this message translates to:
+  /// **'Suspension'**
+  String get suspension;
+
+  /// No description provided for @temporaryBan.
+  ///
+  /// In en, this message translates to:
+  /// **'Temporary Ban'**
+  String get temporaryBan;
+
+  /// No description provided for @permanentBan.
+  ///
+  /// In en, this message translates to:
+  /// **'Permanent Ban'**
+  String get permanentBan;
+
+  /// No description provided for @enterSanctionReason.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter reason for sanction'**
+  String get enterSanctionReason;
+
+  /// No description provided for @issue.
+  ///
+  /// In en, this message translates to:
+  /// **'Issue'**
+  String get issue;
+
+  /// No description provided for @sanctionIssued.
+  ///
+  /// In en, this message translates to:
+  /// **'Sanction issued'**
+  String get sanctionIssued;
+
+  /// No description provided for @issuedBy.
+  ///
+  /// In en, this message translates to:
+  /// **'by {issuer}'**
+  String issuedBy(Object issuer);
+
+  /// No description provided for @revoke.
+  ///
+  /// In en, this message translates to:
+  /// **'Revoke'**
+  String get revoke;
+
+  /// No description provided for @revokeSanction.
+  ///
+  /// In en, this message translates to:
+  /// **'Revoke Sanction'**
+  String get revokeSanction;
+
+  /// No description provided for @revokeQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'Revoke {type}?'**
+  String revokeQuestion(Object type);
+
+  /// No description provided for @enterRevocationReason.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter reason for revocation'**
+  String get enterRevocationReason;
+
+  /// No description provided for @sanctionRevoked.
+  ///
+  /// In en, this message translates to:
+  /// **'Sanction revoked'**
+  String get sanctionRevoked;
+
+  /// No description provided for @documentsSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Documents'**
+  String get documentsSection;
+
+  /// No description provided for @documentSubmitted.
+  ///
+  /// In en, this message translates to:
+  /// **'submitted'**
+  String get documentSubmitted;
+
+  /// No description provided for @adminActionsSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Admin Actions'**
+  String get adminActionsSection;
+
+  /// No description provided for @verificationDecision.
+  ///
+  /// In en, this message translates to:
+  /// **'Verification Decision'**
+  String get verificationDecision;
+
+  /// No description provided for @restrictAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Restrict Account'**
+  String get restrictAccount;
+
+  /// No description provided for @suspendAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Suspend Account'**
+  String get suspendAccount;
+
+  /// No description provided for @restoreAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore Account'**
+  String get restoreAccount;
+
+  /// No description provided for @actionAccountTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{action} Account'**
+  String actionAccountTitle(Object action);
+
+  /// No description provided for @actionConfirmMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to {action} this account?'**
+  String actionConfirmMessage(Object action);
+
+  /// No description provided for @enterReason.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter reason'**
+  String get enterReason;
+
+  /// No description provided for @restorationUnsupported.
+  ///
+  /// In en, this message translates to:
+  /// **'Restoring is not supported through the API; contact the owner to restore the account'**
+  String get restorationUnsupported;
+
+  /// No description provided for @accountActionCompleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Account {action} completed'**
+  String accountActionCompleted(Object action);
+
+  /// No description provided for @failedWithError.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed: {error}'**
+  String failedWithError(Object error);
+
+  /// No description provided for @submitDeletionRequest.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit deletion request'**
+  String get submitDeletionRequest;
+
+  /// No description provided for @deletionRequestSubmitted.
+  ///
+  /// In en, this message translates to:
+  /// **'Deletion request submitted for approval'**
+  String get deletionRequestSubmitted;
+
+  /// No description provided for @deleteAccountMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'This will permanently deactivate the member and anonymize their personal data. An approval request is submitted for review.'**
+  String get deleteAccountMessage;
+
+  /// No description provided for @memberEmailLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Member email: {email}'**
+  String memberEmailLabel(Object email);
+
+  /// No description provided for @activeSosCalls.
+  ///
+  /// In en, this message translates to:
+  /// **'Active SOS Calls'**
+  String get activeSosCalls;
+
+  /// No description provided for @noActiveSosCalls.
+  ///
+  /// In en, this message translates to:
+  /// **'No active SOS calls'**
+  String get noActiveSosCalls;
+
+  /// No description provided for @allUsersSafe.
+  ///
+  /// In en, this message translates to:
+  /// **'All platform users are safe'**
+  String get allUsersSafe;
+
+  /// No description provided for @noCriticalAlerts.
+  ///
+  /// In en, this message translates to:
+  /// **'No critical alerts'**
+  String get noCriticalAlerts;
+
+  /// No description provided for @noCriticalIssues.
+  ///
+  /// In en, this message translates to:
+  /// **'No critical issues require intervention'**
+  String get noCriticalIssues;
+
+  /// No description provided for @sosUserLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'User: {id}'**
+  String sosUserLabel(Object id);
+
+  /// No description provided for @sosRideInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Ride: {rideId} • {time}'**
+  String sosRideInfo(Object rideId, Object time);
+
+  /// No description provided for @sosAlertType.
+  ///
+  /// In en, this message translates to:
+  /// **'SOS {type}'**
+  String sosAlertType(Object type);
+
+  /// No description provided for @timeNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Now'**
+  String get timeNow;
+
+  /// No description provided for @sinceMinutes.
+  ///
+  /// In en, this message translates to:
+  /// **'Since {count} min'**
+  String sinceMinutes(Object count);
+
+  /// No description provided for @sinceHours.
+  ///
+  /// In en, this message translates to:
+  /// **'Since {count} h'**
+  String sinceHours(Object count);
+
+  /// No description provided for @sinceDays.
+  ///
+  /// In en, this message translates to:
+  /// **'Since {count} d'**
+  String sinceDays(Object count);
+
+  /// No description provided for @driversSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Drivers'**
+  String get driversSection;
+
+  /// No description provided for @totalDrivers.
+  ///
+  /// In en, this message translates to:
+  /// **'Total drivers'**
+  String get totalDrivers;
+
+  /// No description provided for @verifiedStat.
+  ///
+  /// In en, this message translates to:
+  /// **'Verified'**
+  String get verifiedStat;
+
+  /// No description provided for @deliveryPerformance.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivery performance'**
+  String get deliveryPerformance;
+
+  /// No description provided for @driverEarnings.
+  ///
+  /// In en, this message translates to:
+  /// **'Driver earnings'**
+  String get driverEarnings;
+
+  /// No description provided for @withdrawalsSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Withdrawals'**
+  String get withdrawalsSection;
+
+  /// No description provided for @pendingWithdrawalsCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} pending withdrawals'**
+  String pendingWithdrawalsCount(Object count);
+
+  /// No description provided for @paidWithdrawalsCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} paid withdrawals'**
+  String paidWithdrawalsCount(Object count);
+
+  /// No description provided for @revenueSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Revenue summary'**
+  String get revenueSummary;
+
+  /// No description provided for @commissionRules.
+  ///
+  /// In en, this message translates to:
+  /// **'Commission rules'**
+  String get commissionRules;
+
+  /// No description provided for @returnsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Returns'**
+  String get returnsLabel;
+
+  /// No description provided for @commissionRate7.
+  ///
+  /// In en, this message translates to:
+  /// **'7% commission'**
+  String get commissionRate7;
+
+  /// No description provided for @commissionRate3.
+  ///
+  /// In en, this message translates to:
+  /// **'3% commission'**
+  String get commissionRate3;
+
+  /// No description provided for @realizedStat.
+  ///
+  /// In en, this message translates to:
+  /// **'Realized'**
+  String get realizedStat;
+
+  /// No description provided for @activeRulesCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Active rules ({count})'**
+  String activeRulesCount(Object count);
+
+  /// No description provided for @serviceBookingType.
+  ///
+  /// In en, this message translates to:
+  /// **'Service'**
+  String get serviceBookingType;
+
+  /// No description provided for @amount.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount'**
+  String get amount;
+
+  /// No description provided for @commissionLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Commission'**
+  String get commissionLabel;
+
+  /// No description provided for @netLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Net'**
+  String get netLabel;
+
+  /// No description provided for @totalLiability.
+  ///
+  /// In en, this message translates to:
+  /// **'Total liability'**
+  String get totalLiability;
+
+  /// No description provided for @merchantsByType.
+  ///
+  /// In en, this message translates to:
+  /// **'Merchants by type'**
+  String get merchantsByType;
+
+  /// No description provided for @providersByCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Providers by category'**
+  String get providersByCategory;
+
+  /// No description provided for @bookingsByCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Bookings by category'**
+  String get bookingsByCategory;
+
+  /// No description provided for @typeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Type'**
+  String get typeLabel;
+
+  /// No description provided for @statusLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Status'**
+  String get statusLabel;
+
+  /// No description provided for @completedDeliveries.
+  ///
+  /// In en, this message translates to:
+  /// **'Completed deliveries'**
+  String get completedDeliveries;
+
+  /// No description provided for @pendingDeliveries.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending deliveries'**
+  String get pendingDeliveries;
+
+  /// No description provided for @cancelledDeliveries.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancelled deliveries'**
+  String get cancelledDeliveries;
+
+  /// No description provided for @deliveryGmv.
+  ///
+  /// In en, this message translates to:
+  /// **'Deliveries GMV'**
+  String get deliveryGmv;
+
+  /// No description provided for @pendingWithdrawalsAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending withdrawals amount'**
+  String get pendingWithdrawalsAmount;
+
+  /// No description provided for @paidWithdrawalsAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Paid withdrawals amount'**
+  String get paidWithdrawalsAmount;
+
+  /// No description provided for @status.
+  ///
+  /// In en, this message translates to:
+  /// **'Status'**
+  String get status;
+
+  /// No description provided for @region.
+  ///
+  /// In en, this message translates to:
+  /// **'Region'**
+  String get region;
+
+  /// No description provided for @history.
+  ///
+  /// In en, this message translates to:
+  /// **'History'**
+  String get history;
+
+  /// No description provided for @lastSeen.
+  ///
+  /// In en, this message translates to:
+  /// **'Last Seen'**
+  String get lastSeen;
+
+  /// No description provided for @reasonRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Reason *'**
+  String get reasonRequired;
+
+  /// No description provided for @restrict.
+  ///
+  /// In en, this message translates to:
+  /// **'Restrict'**
+  String get restrict;
+
+  /// No description provided for @restore.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore'**
+  String get restore;
+
+  /// No description provided for @submitted.
+  ///
+  /// In en, this message translates to:
+  /// **'Submitted'**
+  String get submitted;
+
+  /// No description provided for @activeStat.
+  ///
+  /// In en, this message translates to:
+  /// **'Active'**
+  String get activeStat;
+
+  /// No description provided for @expiresIn.
+  ///
+  /// In en, this message translates to:
+  /// **'expires {expiry}'**
+  String expiresIn(Object expiry);
+
+  /// No description provided for @onlineStat.
+  ///
+  /// In en, this message translates to:
+  /// **'Online'**
+  String get onlineStat;
+
+  /// No description provided for @pendingStat.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending'**
+  String get pendingStat;
+
+  /// No description provided for @unverified.
+  ///
+  /// In en, this message translates to:
+  /// **'Unverified'**
+  String get unverified;
+
+  /// No description provided for @newest.
+  ///
+  /// In en, this message translates to:
+  /// **'Newest'**
+  String get newest;
+
+  /// No description provided for @oldest.
+  ///
+  /// In en, this message translates to:
+  /// **'Oldest'**
+  String get oldest;
+
+  /// No description provided for @applyFilters.
+  ///
+  /// In en, this message translates to:
+  /// **'Apply Filters'**
+  String get applyFilters;
+
+  /// No description provided for @failedToLoadMembers.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load members'**
+  String get failedToLoadMembers;
+
+  /// No description provided for @noMembersFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No members found'**
+  String get noMembersFound;
+
+  /// No description provided for @tryAdjustingSearch.
+  ///
+  /// In en, this message translates to:
+  /// **'Try adjusting your search or filters.'**
+  String get tryAdjustingSearch;
+
+  /// No description provided for @memberProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'Member Profile'**
+  String get memberProfile;
+
+  /// No description provided for @sanctionTypeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Sanction Type'**
+  String get sanctionTypeLabel;
+
+  /// No description provided for @durationDays.
+  ///
+  /// In en, this message translates to:
+  /// **'Duration (days)'**
+  String get durationDays;
+
+  /// No description provided for @contact.
+  ///
+  /// In en, this message translates to:
+  /// **'Contact'**
+  String get contact;
+
+  /// No description provided for @roleValueLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Role: {role}'**
+  String roleValueLabel(Object role);
+
+  /// No description provided for @noActiveSanctions.
+  ///
+  /// In en, this message translates to:
+  /// **'No active sanctions'**
+  String get noActiveSanctions;
+
+  /// No description provided for @timeline.
+  ///
+  /// In en, this message translates to:
+  /// **'Timeline'**
+  String get timeline;
+
+  /// No description provided for @memberOperationsCenter.
+  ///
+  /// In en, this message translates to:
+  /// **'Member Operations Center'**
+  String get memberOperationsCenter;
+
+  /// No description provided for @selectMemberHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Select a member to view details'**
+  String get selectMemberHint;
+
+  /// No description provided for @allRoles.
+  ///
+  /// In en, this message translates to:
+  /// **'All Roles'**
+  String get allRoles;
+
+  /// No description provided for @nameLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Name'**
+  String get nameLabel;
+
+  /// No description provided for @retryLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get retryLabel;
+
+  /// No description provided for @failedToIssueSanction.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to issue sanction: {error}'**
+  String failedToIssueSanction(Object error);
+
+  /// No description provided for @failedToRevoke.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to revoke: {error}'**
+  String failedToRevoke(Object error);
+
+  /// No description provided for @amountDollars.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount (\$)'**
+  String get amountDollars;
 }
 
 class _AppLocalizationsDelegate

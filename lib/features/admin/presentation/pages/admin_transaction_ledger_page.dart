@@ -48,7 +48,7 @@ class _AdminTransactionLedgerPageState
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('سجل المعاملات'),
+        title: Text(l10n.adminTransactionLedger),
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),
@@ -111,7 +111,7 @@ class _AdminTransactionLedgerPageState
       null: l10n.all,
       'order': l10n.orders,
       'ride': l10n.ride,
-      'service_booking': 'خدمة',
+      'service_booking': l10n.serviceBookingType,
       'delivery': l10n.delivery,
     };
 
@@ -327,20 +327,20 @@ class _LedgerItemTile extends StatelessWidget {
           Row(
             children: [
               _AmountColumn(
-                label: 'المبلغ',
+                label: l10n.amount,
                 value: '${item.grossAmount.toStringAsFixed(2)} ${item.currency}',
                 cs: cs,
               ),
               const SizedBox(width: 12),
               _AmountColumn(
-                label: 'العمولة',
+                label: l10n.commissionLabel,
                 value: '${(item.commissionRate * 100).toStringAsFixed(0)}%',
                 cs: cs,
                 isSmall: true,
               ),
               const SizedBox(width: 12),
               _AmountColumn(
-                label: 'صافي',
+                label: l10n.netLabel,
                 value: '${item.commissionAmount.toStringAsFixed(2)} ${item.currency}',
                 cs: cs,
               ),
@@ -349,7 +349,7 @@ class _LedgerItemTile extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Text(
-                    'الصافي',
+                    l10n.netLabel,
                     style: AppTextStyles.labelSmall.copyWith(
                       color: cs.onSurfaceVariant,
                     ),

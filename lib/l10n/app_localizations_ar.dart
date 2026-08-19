@@ -533,10 +533,10 @@ class AppLocalizationsAr extends AppLocalizations {
   String get branches => 'الفروع';
 
   @override
-  String get addBranch => 'Add Branch';
+  String get addBranch => 'إضافة فرع';
 
   @override
-  String get branchName => 'Branch Name';
+  String get branchName => 'اسم الفرع';
 
   @override
   String get phone => 'الهاتف';
@@ -854,12 +854,6 @@ class AppLocalizationsAr extends AppLocalizations {
       'لا شيء جديد! ستظهر الإشعارات الجديدة هنا.';
 
   @override
-  String get adminDashboard => 'لوحة التحكم';
-
-  @override
-  String get platformOverview => 'نظرة عامة على المنصة';
-
-  @override
   String get totalUsers => 'إجمالي المستخدمين';
 
   @override
@@ -873,9 +867,6 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get activeDrivers => 'السائقون النشطون';
-
-  @override
-  String get pendingOrdersStat => 'الطلبات المعلقة';
 
   @override
   String get recentActivity => 'النشاط الأخير';
@@ -4492,9 +4483,6 @@ class AppLocalizationsAr extends AppLocalizations {
   String get adminEmergency => 'الطوارئ';
 
   @override
-  String get adminLegacyDashboard => 'لوحة المعلومات القديمة';
-
-  @override
   String get adminSettingsPage => 'الإعدادات';
 
   @override
@@ -4736,4 +4724,661 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get reqTypeRewardConfig => 'تغيير إعدادات المكافآت';
+
+  @override
+  String get periodToday => 'اليوم';
+
+  @override
+  String get periodWeek => 'هذا الأسبوع';
+
+  @override
+  String get periodMonth => 'هذا الشهر';
+
+  @override
+  String get periodQuarter => 'هذا الربع';
+
+  @override
+  String get periodAll => 'الكل';
+
+  @override
+  String get dashGroupPlatform => 'المنصة';
+
+  @override
+  String get dashGroupOperations => 'العمليات';
+
+  @override
+  String get dashGroupFinancial => 'المالية';
+
+  @override
+  String get dashGroupRisk => 'المخاطر';
+
+  @override
+  String get kpiTotalUsers => 'إجمالي المستخدمين';
+
+  @override
+  String get kpiActiveMerchants => 'المتاجر النشطة';
+
+  @override
+  String get kpiOnlineDrivers => 'السائقون المتصلون';
+
+  @override
+  String get kpiPendingVerification => 'التوثيقات المعلقة';
+
+  @override
+  String get kpiTotalOrders => 'إجمالي الطلبات';
+
+  @override
+  String get kpiActiveRides => 'الرحلات النشطة';
+
+  @override
+  String get kpiOpenComplaints => 'الشكاوى المعلقة';
+
+  @override
+  String get kpiActiveSanctions => 'العقوبات النشطة';
+
+  @override
+  String get kpiTotalGmv => 'إجمالي GMV';
+
+  @override
+  String get kpiPlatformCommission => 'عمولة المنصة';
+
+  @override
+  String get kpiWalletLiability => 'التزام المحفظة';
+
+  @override
+  String get kpiPaymentFailures => 'فشل المدفوعات';
+
+  @override
+  String get kpiSosActive => 'نداءات SOS النشطة';
+
+  @override
+  String get kpiPendingWithdrawals => 'عمليات السحب المعلقة';
+
+  @override
+  String get kpiCancelledOrders => 'طلبات ملغاة';
+
+  @override
+  String get kpiPendingOrders => 'طلبات معلقة';
+
+  @override
+  String get revenueGmv => 'إجمالي GMV';
+
+  @override
+  String get revenuePlatformCommission => 'عمولة المنصة';
+
+  @override
+  String get revenueRideGmv => 'GMV الرحلات';
+
+  @override
+  String get revenueDeliveryGmv => 'GMV التوصيل';
+
+  @override
+  String get operationalAlertsTitle => 'التنبيهات التشغيلية';
+
+  @override
+  String get noOperationalAlerts => 'لا توجد تنبيهات';
+
+  @override
+  String get platformHealthy => 'المنصة تعمل بشكل طبيعي';
+
+  @override
+  String get allGovernorates => 'كافة المحافظات';
+
+  @override
+  String get weeksAgo => 'أسبوع';
+
+  @override
+  String get recentActivityTitle => 'النشاط الأخير';
+
+  @override
+  String get memberNotFound => 'العضو غير موجود';
+
+  @override
+  String get memberNotFoundMessage =>
+      'هذا العضو غير موجود أو ليس لديك صلاحية الوصول.';
+
+  @override
+  String get unnamed => 'غير مسمّى';
+
+  @override
+  String get onlineBadge => 'متصل';
+
+  @override
+  String lastSeenLabel(Object time) {
+    return 'آخر ظهور: $time';
+  }
+
+  @override
+  String get identitySection => 'الهوية';
+
+  @override
+  String get userTypeLabel => 'نوع المستخدم';
+
+  @override
+  String get avatarUrl => 'رابط الصورة الشخصية';
+
+  @override
+  String get tradeLicense => 'الرخصة التجارية';
+
+  @override
+  String get verificationSection => 'التحقق';
+
+  @override
+  String get failedToLoad => 'فشل في التحميل';
+
+  @override
+  String get noVerificationAttempts => 'لا توجد محاولات تحقق';
+
+  @override
+  String get attempts => 'المحاولات';
+
+  @override
+  String get reviewedBy => 'تمت المراجعة بواسطة';
+
+  @override
+  String get approveVerification => 'الموافقة على التحقق';
+
+  @override
+  String get rejectVerification => 'رفض التحقق';
+
+  @override
+  String get approvalNote => 'ملاحظة موافقة اختيارية';
+
+  @override
+  String get rejectionReasonRequired => 'سبب الرفض *';
+
+  @override
+  String get locationSection => 'الموقع';
+
+  @override
+  String get governorate => 'المحافظة';
+
+  @override
+  String get coordinates => 'الإحداثيات';
+
+  @override
+  String get lastLocationUpdate => 'آخر تحديث للموقع';
+
+  @override
+  String get activityTimelineSection => 'الخط الزمني للنشاط';
+
+  @override
+  String get failedToLoadTimeline => 'فشل في تحميل الخط الزمني';
+
+  @override
+  String get noEventsYet => 'لا توجد أحداث بعد';
+
+  @override
+  String get totalSpending => 'إجمالي الإنفاق';
+
+  @override
+  String get deliveriesSection => 'التوصيلات';
+
+  @override
+  String get merchantOrdersSection => 'طلبات المتجر';
+
+  @override
+  String get jobsSection => 'الوظائف';
+
+  @override
+  String get ordersRequestsSection => 'الطلبات والمسابقات';
+
+  @override
+  String get responseRate => 'معدل الاستجابة';
+
+  @override
+  String get completionRate => 'معدل الإنجاز';
+
+  @override
+  String get serviceArea => 'منطقة الخدمة';
+
+  @override
+  String get walletFinancialsSection => 'المحفظة والمالية';
+
+  @override
+  String get failedToLoadFinancials => 'فشل في تحميل البيانات المالية';
+
+  @override
+  String get noFinancialData => 'لا توجد بيانات مالية';
+
+  @override
+  String get balance => 'الرصيد';
+
+  @override
+  String get availableStat => 'متاح';
+
+  @override
+  String get totalEarned => 'إجمالي المكاسب';
+
+  @override
+  String get withdrawnStat => 'تم سحبه';
+
+  @override
+  String get commissionsStat => 'العمولات';
+
+  @override
+  String get refunds => 'المرتجعات';
+
+  @override
+  String get earningsCommissionsSection => 'المكاسب والعمولات';
+
+  @override
+  String get noEarningsData => 'لا توجد بيانات مكاسب';
+
+  @override
+  String get grossEarnings => 'إجمالي المكاسب الخام';
+
+  @override
+  String get commissionRate => 'معدل العمولة';
+
+  @override
+  String get netEarnings => 'صافي المكاسب';
+
+  @override
+  String get paid => 'مدفوع';
+
+  @override
+  String get complaintsSection => 'الشكاوى';
+
+  @override
+  String get noComplaintsFound => 'لا توجد شكاوى';
+
+  @override
+  String get resolvedStat => 'تم الحل';
+
+  @override
+  String get escalated => 'تم التصعيد';
+
+  @override
+  String get urgent => 'عاجل';
+
+  @override
+  String get latestComplaints => 'أحدث الشكاوى';
+
+  @override
+  String get noSupportConversations => 'لا توجد محادثات دعم';
+
+  @override
+  String get conversations => 'المحادثات';
+
+  @override
+  String get emergencyStat => 'طوارئ';
+
+  @override
+  String get sanctionsSection => 'العقوبات';
+
+  @override
+  String get activeSanctions => 'العقوبات النشطة';
+
+  @override
+  String get issueSanction => 'إصدار عقوبة';
+
+  @override
+  String get sanctionType => 'النوع';
+
+  @override
+  String get warning => 'تحذير';
+
+  @override
+  String get fine => 'غرامة';
+
+  @override
+  String get suspension => 'إيقاف مؤقت';
+
+  @override
+  String get temporaryBan => 'حظر مؤقت';
+
+  @override
+  String get permanentBan => 'حظر دائم';
+
+  @override
+  String get enterSanctionReason => 'أدخل سبب العقوبة';
+
+  @override
+  String get issue => 'إصدار';
+
+  @override
+  String get sanctionIssued => 'تم إصدار العقوبة';
+
+  @override
+  String issuedBy(Object issuer) {
+    return 'بواسطة $issuer';
+  }
+
+  @override
+  String get revoke => 'إلغاء';
+
+  @override
+  String get revokeSanction => 'إلغاء العقوبة';
+
+  @override
+  String revokeQuestion(Object type) {
+    return 'إلغاء $type؟';
+  }
+
+  @override
+  String get enterRevocationReason => 'أدخل سبب الإلغاء';
+
+  @override
+  String get sanctionRevoked => 'تم إلغاء العقوبة';
+
+  @override
+  String get documentsSection => 'المستندات';
+
+  @override
+  String get documentSubmitted => 'مقدّم';
+
+  @override
+  String get adminActionsSection => 'إجراءات المسؤول';
+
+  @override
+  String get verificationDecision => 'قرار التحقق';
+
+  @override
+  String get restrictAccount => 'تقييد الحساب';
+
+  @override
+  String get suspendAccount => 'إيقاف الحساب';
+
+  @override
+  String get restoreAccount => 'استعادة الحساب';
+
+  @override
+  String actionAccountTitle(Object action) {
+    return '$action الحساب';
+  }
+
+  @override
+  String actionConfirmMessage(Object action) {
+    return 'هل أنت متأكد أنك تريد $action هذا الحساب؟';
+  }
+
+  @override
+  String get enterReason => 'أدخل السبب';
+
+  @override
+  String get restorationUnsupported =>
+      'الاستعادة غير مدعومة عبر الواجهة؛ تواصل مع المالك لاستعادة الحساب';
+
+  @override
+  String accountActionCompleted(Object action) {
+    return 'تم $action الحساب';
+  }
+
+  @override
+  String failedWithError(Object error) {
+    return 'فشل: $error';
+  }
+
+  @override
+  String get submitDeletionRequest => 'تقديم طلب الحذف';
+
+  @override
+  String get deletionRequestSubmitted => 'تم تقديم طلب الحذف للموافقة';
+
+  @override
+  String get deleteAccountMessage =>
+      'سيؤدي هذا إلى إلغاء تفعيل العضو نهائياً وإخفاء بياناته الشخصية. سيتم تقديم طلب للموافقة.';
+
+  @override
+  String memberEmailLabel(Object email) {
+    return 'البريد الإلكتروني للعضو: $email';
+  }
+
+  @override
+  String get activeSosCalls => 'نداءات الاستغاثة النشطة';
+
+  @override
+  String get noActiveSosCalls => 'لا توجد نداءات استغاثة نشطة';
+
+  @override
+  String get allUsersSafe => 'جميع مستخدمي المنصة في أمان';
+
+  @override
+  String get noCriticalAlerts => 'لا توجد تنبيهات حرجة';
+
+  @override
+  String get noCriticalIssues => 'لا توجد مشاكل حرجة تستدعي التدخل';
+
+  @override
+  String sosUserLabel(Object id) {
+    return 'المستخدم: $id';
+  }
+
+  @override
+  String sosRideInfo(Object rideId, Object time) {
+    return 'الرحلة: $rideId • $time';
+  }
+
+  @override
+  String sosAlertType(Object type) {
+    return 'نداء استغاثة $type';
+  }
+
+  @override
+  String get timeNow => 'الآن';
+
+  @override
+  String sinceMinutes(Object count) {
+    return 'منذ $count د';
+  }
+
+  @override
+  String sinceHours(Object count) {
+    return 'منذ $count س';
+  }
+
+  @override
+  String sinceDays(Object count) {
+    return 'منذ $count ي';
+  }
+
+  @override
+  String get driversSection => 'السائقون';
+
+  @override
+  String get totalDrivers => 'إجمالي السائقين';
+
+  @override
+  String get verifiedStat => 'موثق';
+
+  @override
+  String get deliveryPerformance => 'أداء التوصيل';
+
+  @override
+  String get driverEarnings => 'أرباح السائقين';
+
+  @override
+  String get withdrawalsSection => 'السحوبات';
+
+  @override
+  String pendingWithdrawalsCount(Object count) {
+    return '$count سحوبات معلقة';
+  }
+
+  @override
+  String paidWithdrawalsCount(Object count) {
+    return '$count سحوبات مدفوعة';
+  }
+
+  @override
+  String get revenueSummary => 'ملخص الإيرادات';
+
+  @override
+  String get commissionRules => 'قواعد العمولة';
+
+  @override
+  String get returnsLabel => 'المرتجعات';
+
+  @override
+  String get commissionRate7 => 'عمولة 7%';
+
+  @override
+  String get commissionRate3 => 'عمولة 3%';
+
+  @override
+  String get realizedStat => 'محقق';
+
+  @override
+  String activeRulesCount(Object count) {
+    return 'القواعد النشطة ($count)';
+  }
+
+  @override
+  String get serviceBookingType => 'خدمة';
+
+  @override
+  String get amount => 'المبلغ';
+
+  @override
+  String get commissionLabel => 'العمولة';
+
+  @override
+  String get netLabel => 'صافي';
+
+  @override
+  String get totalLiability => 'إجمالي المسؤولية';
+
+  @override
+  String get merchantsByType => 'التجار حسب النوع';
+
+  @override
+  String get providersByCategory => 'المزودون حسب التصنيف';
+
+  @override
+  String get bookingsByCategory => 'الحجوزات حسب التصنيف';
+
+  @override
+  String get typeLabel => 'النوع';
+
+  @override
+  String get statusLabel => 'الحالة';
+
+  @override
+  String get completedDeliveries => 'توصيلات مكتملة';
+
+  @override
+  String get pendingDeliveries => 'توصيلات معلقة';
+
+  @override
+  String get cancelledDeliveries => 'توصيلات ملغاة';
+
+  @override
+  String get deliveryGmv => 'إجمالي GMV للتوصيل';
+
+  @override
+  String get pendingWithdrawalsAmount => 'المبلغ المعلق للسحب';
+
+  @override
+  String get paidWithdrawalsAmount => 'المبلغ المدفوع للسحب';
+
+  @override
+  String get status => 'الحالة';
+
+  @override
+  String get region => 'المنطقة';
+
+  @override
+  String get history => 'السجل';
+
+  @override
+  String get lastSeen => 'آخر ظهور';
+
+  @override
+  String get reasonRequired => 'السبب *';
+
+  @override
+  String get restrict => 'تقييد';
+
+  @override
+  String get restore => 'استعادة';
+
+  @override
+  String get submitted => 'مقدم';
+
+  @override
+  String get activeStat => 'نشط';
+
+  @override
+  String expiresIn(Object expiry) {
+    return 'ينتهي $expiry';
+  }
+
+  @override
+  String get onlineStat => 'متصلون';
+
+  @override
+  String get pendingStat => 'معلقون';
+
+  @override
+  String get unverified => 'غير موثق';
+
+  @override
+  String get newest => 'الأحدث';
+
+  @override
+  String get oldest => 'الأقدم';
+
+  @override
+  String get applyFilters => 'تطبيق الفلاتر';
+
+  @override
+  String get failedToLoadMembers => 'فشل في تحميل الأعضاء';
+
+  @override
+  String get noMembersFound => 'لا يوجد أعضاء';
+
+  @override
+  String get tryAdjustingSearch => 'حاول تعديل البحث أو الفلاتر.';
+
+  @override
+  String get memberProfile => 'الملف الشخصي للعضو';
+
+  @override
+  String get sanctionTypeLabel => 'نوع العقوبة';
+
+  @override
+  String get durationDays => 'المدة (أيام)';
+
+  @override
+  String get contact => 'التواصل';
+
+  @override
+  String roleValueLabel(Object role) {
+    return 'الدور: $role';
+  }
+
+  @override
+  String get noActiveSanctions => 'لا توجد عقوبات نشطة';
+
+  @override
+  String get timeline => 'الخط الزمني';
+
+  @override
+  String get memberOperationsCenter => 'مركز عمليات الأعضاء';
+
+  @override
+  String get selectMemberHint => 'اختر عضواً لعرض التفاصيل';
+
+  @override
+  String get allRoles => 'جميع الأدوار';
+
+  @override
+  String get nameLabel => 'الاسم';
+
+  @override
+  String get retryLabel => 'إعادة المحاولة';
+
+  @override
+  String failedToIssueSanction(Object error) {
+    return 'فشل في إصدار العقوبة: $error';
+  }
+
+  @override
+  String failedToRevoke(Object error) {
+    return 'فشل في إلغاء العقوبة: $error';
+  }
+
+  @override
+  String get amountDollars => 'المبلغ (\$)';
 }

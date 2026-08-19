@@ -22,7 +22,7 @@ class AdminWalletIntelligencePage extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('استخبارات المحفظة'),
+        title: Text(l10n.adminWalletIntelligence),
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),
@@ -118,7 +118,7 @@ class AdminWalletIntelligencePage extends ConsumerWidget {
               cs: cs,
             ),
             _SummaryCard(
-              title: 'إجمالي المسؤولية',
+              title: l10n.totalLiability,
               value: '${l10n.currencySymbol} ${data.totalLiability.toStringAsFixed(0)}',
               icon: Icons.account_balance_outlined,
               color: const Color(0xFFFF3B30),

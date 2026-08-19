@@ -22,7 +22,7 @@ class AdminMerchantIntelligencePage extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('استخبارات التجار'),
+        title: Text(l10n.adminMerchantIntelligence),
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),
@@ -66,7 +66,7 @@ class AdminMerchantIntelligencePage extends ConsumerWidget {
           AnimatedFadeIn(
             delay: const Duration(milliseconds: 100),
             child: Text(
-              'التجار حسب النوع',
+              l10n.merchantsByType,
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.bold,
               ),

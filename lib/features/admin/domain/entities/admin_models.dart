@@ -43,23 +43,6 @@ class AdminUser with _$AdminUser {
       _$AdminUserFromJson(json);
 }
 
-// ─── Admin Dashboard (Legacy) ──────────────────────────────
-
-@freezed
-class AdminDashboard with _$AdminDashboard {
-  const factory AdminDashboard({
-    required int totalUsers,
-    required int totalMerchants,
-    required int totalOrders,
-    required double totalRevenue,
-    required int activeDrivers,
-    required int pendingOrders,
-  }) = _AdminDashboard;
-
-  factory AdminDashboard.fromJson(Map<String, dynamic> json) =>
-      _$AdminDashboardFromJson(json);
-}
-
 // ─── Admin Activity Log ────────────────────────────────────
 
 @freezed

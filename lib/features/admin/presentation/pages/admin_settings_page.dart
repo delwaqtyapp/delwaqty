@@ -7,6 +7,7 @@ import 'package:delwaqty/shared/widgets/app_loader.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 import 'package:delwaqty/core/constants/app_constants.dart';
 import 'package:delwaqty/core/theme/app_colors.dart';
+import 'package:delwaqty/core/localization/admin_locale_provider.dart';
 
 class AdminSettingsPage extends ConsumerStatefulWidget {
   const AdminSettingsPage({super.key});
@@ -58,10 +59,11 @@ class _AdminSettingsPageState extends ConsumerState<AdminSettingsPage> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final settingsAsync = ref.watch(platformSettingsProvider);
+    final adminLocale = ref.watch(adminLocaleProvider);
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(l10n.platformSettings),
+        title: Text(l10n.adminSettingsPage),
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),
@@ -89,15 +91,85 @@ class _AdminSettingsPageState extends ConsumerState<AdminSettingsPage> {
             children: [
               AnimatedFadeIn(
                 child: Text(
-                  l10n.generalSettings,
+                  l10n.adminPersonalSettings,
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
                 ),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 4),
               AnimatedFadeIn(
-                delay: const Duration(milliseconds: 100),
+                delay: const Duration(milliseconds: 60),
+                child: Text(
+                  l10n.adminPersonalSettingsDesc,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
+              AnimatedFadeIn(
+                delay: const Duration(milliseconds: 120),
+                child: Card(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 8),
+                    child: Column(
+                      children: [
+                        ListTile(
+                          title: Text(l10n.adminLanguage),
+                          subtitle: Text(l10n.adminLanguageDesc),
+                          trailing: SegmentedButton<String>(
+                            segments: [
+                              ButtonSegment(
+                                value: 'ar',
+                                label: Text(l10n.arabicAbbreviation),
+                              ),
+                              ButtonSegment(
+                                value: 'en',
+                                label: Text(l10n.englishAbbreviation),
+                              ),
+                            ],
+                            selected: {adminLocale.languageCode},
+                            onSelectionChanged: (selected) {
+                              ref
+                                  .read(adminLocaleProvider.notifier)
+                                  .setAdminLocale(
+                                    Locale(selected.first),
+                                  );
+                            },
+                            style: const ButtonStyle(
+                              visualDensity: VisualDensity.compact,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 24),
+              AnimatedFadeIn(
+                delay: const Duration(milliseconds: 180),
+                child: Text(
+                  l10n.adminGlobalSettings,
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 4),
+              AnimatedFadeIn(
+                delay: const Duration(milliseconds: 240),
+                child: Text(
+                  l10n.adminGlobalSettingsDesc,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
+              AnimatedFadeIn(
+                delay: const Duration(milliseconds: 300),
                 child: Card(
                   child: Padding(
                     padding: const EdgeInsets.all(16),
@@ -143,7 +215,7 @@ class _AdminSettingsPageState extends ConsumerState<AdminSettingsPage> {
               ),
               const SizedBox(height: 24),
               AnimatedFadeIn(
-                delay: const Duration(milliseconds: 200),
+                delay: const Duration(milliseconds: 360),
                 child: SizedBox(
                   width: double.infinity,
                   child: FilledButton(
@@ -157,56 +229,6 @@ class _AdminSettingsPageState extends ConsumerState<AdminSettingsPage> {
                             ),
                           )
                         : Text(l10n.saveSettings),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 24),
-              AnimatedFadeIn(
-                delay: const Duration(milliseconds: 300),
-                child: Text(
-                  l10n.dangerZone,
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: Theme.of(context).colorScheme.error,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 16),
-              AnimatedFadeIn(
-                delay: const Duration(milliseconds: 400),
-                child: Card(
-                  child: ListTile(
-                    title: Text(l10n.resetAllData),
-                    subtitle: Text(l10n.resetAllDataDesc),
-                    trailing: Icon(
-                      Icons.warning,
-                      color: Theme.of(context).colorScheme.error,
-                    ),
-                    onTap: () {
-                      showDialog(
-                        context: context,
-                        builder: (context) => AlertDialog(
-                          title: Text(l10n.resetAllDataTitle),
-                          content: Text(l10n.resetAllDataWarning),
-                          actions: [
-                            TextButton(
-                              onPressed: () => Navigator.pop(context),
-                              child: Text(l10n.cancel),
-                            ),
-                            TextButton(
-                              onPressed: () => Navigator.pop(context),
-                              child: Text(
-                                l10n.reset,
-                                style: TextStyle(
-                                  color:
-                                      Theme.of(context).colorScheme.error,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      );
-                    },
                   ),
                 ),
               ),

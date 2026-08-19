@@ -987,25 +987,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsFailed => 'Failed to save settings';
 
   @override
-  String get dangerZone => 'Danger Zone';
-
-  @override
-  String get resetAllData => 'Reset All Data';
-
-  @override
-  String get resetAllDataDesc => 'Permanently delete all platform data';
-
-  @override
-  String get resetAllDataTitle => 'Reset All Data?';
-
-  @override
-  String get resetAllDataWarning =>
-      'This action cannot be undone. All data will be permanently deleted.';
-
-  @override
-  String get reset => 'Reset';
-
-  @override
   String get account => 'Account';
 
   @override
@@ -4572,4 +4553,224 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get adminExpand => 'Expand admin menu';
+
+  @override
+  String get adminLeadershipSection => 'Leadership';
+
+  @override
+  String get adminMembersSection => 'Members';
+
+  @override
+  String get adminPlatformSection => 'Platform';
+
+  @override
+  String get adminAdministrationSection => 'Administration';
+
+  @override
+  String get adminSettingsGroupSection => 'Admin Settings';
+
+  @override
+  String get adminShellMenu => 'Admin menu';
+
+  @override
+  String get adminCommissions => 'Commissions';
+
+  @override
+  String get adminCommissionManagement => 'Commission Management';
+
+  @override
+  String get adminCommissionManagementDesc =>
+      'Configure the active commission rules for every account type, service type and service category';
+
+  @override
+  String get adminApprovals => 'Approvals';
+
+  @override
+  String get adminApprovalsCenter => 'Approval Center';
+
+  @override
+  String get adminApprovalsCenterDesc =>
+      'Decide pending admin, member deletion, sanction, campaign and configuration approval requests';
+
+  @override
+  String get adminPersonalSettings => 'Personal Settings';
+
+  @override
+  String get adminPersonalSettingsDesc => 'Preferences stored on this device';
+
+  @override
+  String get adminGlobalSettings => 'Global Platform Settings';
+
+  @override
+  String get adminGlobalSettingsDesc =>
+      'Platform-wide configuration that affects every admin';
+
+  @override
+  String get adminLanguage => 'Admin Language';
+
+  @override
+  String get adminLanguageDesc =>
+      'Independent from the app language. Arabic by default';
+
+  @override
+  String get commissionAccountGroup => 'Account Types';
+
+  @override
+  String get commissionServiceTypeGroup => 'Service Types';
+
+  @override
+  String get commissionServiceCategoryGroup => 'Service Categories';
+
+  @override
+  String get commissionChange => 'Change rate';
+
+  @override
+  String get commissionNewRate => 'New rate (%)';
+
+  @override
+  String get commissionRateHint => 'Rate between 0 and 100';
+
+  @override
+  String get commissionSave => 'Save rate';
+
+  @override
+  String get commissionRateUpdated => 'Commission rate updated';
+
+  @override
+  String get commissionRateFailed => 'Failed to update commission rate';
+
+  @override
+  String get commissionEffectiveFrom => 'Effective from';
+
+  @override
+  String get commissionNoExpiry => 'No expiry';
+
+  @override
+  String get commissionActive => 'Active';
+
+  @override
+  String get commissionHistory => 'History';
+
+  @override
+  String get commissionAccountCustomer => 'Customers';
+
+  @override
+  String get commissionAccountAdmin => 'Platform staff';
+
+  @override
+  String get commissionAccountDriver => 'Drivers';
+
+  @override
+  String get commissionAccountProvider => 'Providers';
+
+  @override
+  String get commissionAccountMerchant => 'Merchants';
+
+  @override
+  String get commissionCategoryRestaurant => 'Restaurants';
+
+  @override
+  String get commissionCategoryPharmacy => 'Pharmacies';
+
+  @override
+  String get commissionCategoryGrocery => 'Groceries';
+
+  @override
+  String get commissionCategoryMarketplace => 'Marketplace';
+
+  @override
+  String get commissionCategoryPlumbing => 'Plumbing';
+
+  @override
+  String get commissionCategoryElectrical => 'Electrical';
+
+  @override
+  String get commissionCategoryCleaning => 'Cleaning';
+
+  @override
+  String get approvalRequest => 'Approval Request';
+
+  @override
+  String get approvalRequests => 'Approval Requests';
+
+  @override
+  String get approvalDecide => 'Decide';
+
+  @override
+  String get approveRequest => 'Approve';
+
+  @override
+  String get rejectRequest => 'Reject';
+
+  @override
+  String get rejectionReasonHint => 'Rejection requires a reason';
+
+  @override
+  String get approvalApproved => 'Approved';
+
+  @override
+  String get approvalRejected => 'Rejected';
+
+  @override
+  String get approvalPending => 'Pending';
+
+  @override
+  String get approvalRequestApproved => 'Request approved';
+
+  @override
+  String get approvalRequestRejected => 'Request rejected';
+
+  @override
+  String get approvalConfirmApprove => 'Approve this request?';
+
+  @override
+  String get approvalConfirmReject => 'Reject this request?';
+
+  @override
+  String get approvalDecisionFailed => 'Failed to decide request';
+
+  @override
+  String get requestedBy => 'Requested by';
+
+  @override
+  String get requester => 'Requester';
+
+  @override
+  String get reason => 'Reason';
+
+  @override
+  String get noPendingApprovals => 'No pending approval requests';
+
+  @override
+  String get reqTypeAdminCreate => 'Create admin';
+
+  @override
+  String get reqTypeAdminRole => 'Admin role change';
+
+  @override
+  String get reqTypeAdminRegion => 'Admin region change';
+
+  @override
+  String get reqTypeAdminSupervisor => 'Supervisor change';
+
+  @override
+  String get reqTypeAdminDeactivate => 'Deactivate admin';
+
+  @override
+  String get reqTypeCampaign => 'Campaign approval';
+
+  @override
+  String get reqTypeMemberBan => 'Member ban';
+
+  @override
+  String get reqTypeMemberDelete => 'Member deletion';
+
+  @override
+  String get reqTypeOfferApprove => 'Offer approval';
+
+  @override
+  String get reqTypeOfferPublish => 'Offer publish';
+
+  @override
+  String get reqTypeRewardConfig => 'Rewards config change';
 }

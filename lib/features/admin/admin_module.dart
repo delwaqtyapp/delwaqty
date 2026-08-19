@@ -26,6 +26,13 @@ import 'package:delwaqty/features/support_chat/presentation/pages/admin_support_
 import 'package:delwaqty/features/support_chat/presentation/pages/support_chat_room_page.dart';
 import 'package:delwaqty/features/member_management/presentation/pages/member_operations_center.dart';
 import 'package:delwaqty/features/member_management/presentation/pages/member_detail_page.dart';
+import 'package:delwaqty/features/admin/admin_shell.dart';
+import 'package:delwaqty/features/admin/presentation/pages/admin_commission_management_page.dart';
+import 'package:delwaqty/features/admin/presentation/pages/admin_approvals_center_page.dart';
+
+AdminShell _admin(Widget page, {bool showFab = true}) {
+  return AdminShell(showFab: showFab, child: page);
+}
 
 class AdminModule extends FeatureModule {
   @override
@@ -53,117 +60,141 @@ class AdminModule extends FeatureModule {
   List<RouteBase> get standaloneRoutes => [
     GoRoute(
       path: '/admin',
-      builder: (context, state) => const PlatformIntelligenceDashboard(),
+      builder: (context, state) =>
+          _admin(const PlatformIntelligenceDashboard()),
       routes: [
         GoRoute(
           path: 'legacy',
-          builder: (context, state) => const AdminDashboardPage(),
+          builder: (context, state) => _admin(const AdminDashboardPage()),
         ),
         GoRoute(
           path: 'users',
-          builder: (context, state) => const AdminUsersPage(),
+          builder: (context, state) => _admin(const AdminUsersPage()),
         ),
         GoRoute(
           path: 'merchants',
-          builder: (context, state) => const AdminMerchantsPage(),
+          builder: (context, state) => _admin(const AdminMerchantsPage()),
         ),
         GoRoute(
           path: 'orders',
-          builder: (context, state) => const AdminOrdersPage(),
+          builder: (context, state) => _admin(const AdminOrdersPage()),
         ),
         GoRoute(
           path: 'settings',
-          builder: (context, state) => const AdminSettingsPage(),
+          builder: (context, state) => _admin(const AdminSettingsPage()),
         ),
         GoRoute(
           path: 'drivers',
-          builder: (context, state) => const AdminDriversPage(),
+          builder: (context, state) => _admin(const AdminDriversPage()),
         ),
         GoRoute(
           path: 'analytics',
-          builder: (context, state) => const AdminAnalyticsPage(),
+          builder: (context, state) => _admin(const AdminAnalyticsPage()),
         ),
         GoRoute(
           path: 'deliveries',
-          builder: (context, state) => const AdminDeliveriesPage(),
+          builder: (context, state) => _admin(const AdminDeliveriesPage()),
         ),
         GoRoute(
           path: 'push-notifications',
-          builder: (context, state) => const AdminPushNotificationsPage(),
+          builder: (context, state) =>
+              _admin(const AdminPushNotificationsPage()),
         ),
         GoRoute(
           path: 'verifications',
-          builder: (context, state) => const AdminVerificationsPage(),
+          builder: (context, state) => _admin(const AdminVerificationsPage()),
+        ),
+        GoRoute(
+          path: 'commissions',
+          builder: (context, state) =>
+              _admin(const AdminCommissionManagementPage()),
+        ),
+        GoRoute(
+          path: 'approvals',
+          builder: (context, state) =>
+              _admin(const AdminApprovalsCenterPage()),
         ),
         GoRoute(
           path: 'complaints',
-          builder: (context, state) => const AdminComplaintsPage(),
+          builder: (context, state) => _admin(const AdminComplaintsPage()),
         ),
         GoRoute(
           path: 'sanctions',
-          builder: (context, state) => const AdminSanctionsPage(),
+          builder: (context, state) => _admin(const AdminSanctionsPage()),
         ),
         GoRoute(
           path: 'live-tracking',
-          builder: (context, state) => const AdminLiveTrackingPage(),
+          builder: (context, state) => _admin(const AdminLiveTrackingPage()),
         ),
         GoRoute(
           path: 'support-chat',
-          builder: (context, state) => const AdminSupportChatPage(),
+          builder: (context, state) => _admin(const AdminSupportChatPage()),
           routes: [
             GoRoute(
               path: 'room/:roomId',
               builder: (context, state) {
                 final roomId = state.pathParameters['roomId']!;
-                return SupportChatRoomPage(roomId: roomId);
+                return _admin(
+                  SupportChatRoomPage(roomId: roomId),
+                  showFab: false,
+                );
               },
             ),
           ],
         ),
         GoRoute(
           path: 'members',
-          builder: (context, state) => const MemberOperationsCenter(),
+          builder: (context, state) =>
+              _admin(const MemberOperationsCenter()),
           routes: [
             GoRoute(
               path: ':id',
               builder: (context, state) {
                 final id = state.pathParameters['id']!;
-                return MemberDetailPage(memberId: id);
+                return _admin(
+                  MemberDetailPage(memberId: id),
+                  showFab: false,
+                );
               },
             ),
           ],
         ),
         GoRoute(
           path: 'financial-center',
-          builder: (context, state) => const AdminFinancialCenter(),
+          builder: (context, state) => _admin(const AdminFinancialCenter()),
         ),
         GoRoute(
           path: 'emergency',
-          builder: (context, state) => const AdminEmergencyPage(),
+          builder: (context, state) => _admin(const AdminEmergencyPage()),
         ),
         GoRoute(
           path: 'delivery-intelligence',
-          builder: (context, state) => const AdminDeliveryIntelligencePage(),
+          builder: (context, state) =>
+              _admin(const AdminDeliveryIntelligencePage()),
         ),
         GoRoute(
           path: 'merchant-intelligence',
-          builder: (context, state) => const AdminMerchantIntelligencePage(),
+          builder: (context, state) =>
+              _admin(const AdminMerchantIntelligencePage()),
         ),
         GoRoute(
           path: 'provider-intelligence',
-          builder: (context, state) => const AdminProviderIntelligencePage(),
+          builder: (context, state) =>
+              _admin(const AdminProviderIntelligencePage()),
         ),
         GoRoute(
           path: 'wallet-intelligence',
-          builder: (context, state) => const AdminWalletIntelligencePage(),
+          builder: (context, state) =>
+              _admin(const AdminWalletIntelligencePage()),
         ),
         GoRoute(
           path: 'transaction-ledger',
-          builder: (context, state) => const AdminTransactionLedgerPage(),
+          builder: (context, state) =>
+              _admin(const AdminTransactionLedgerPage()),
         ),
         GoRoute(
           path: 'service-performance',
-          builder: (context, state) => const AdminAnalyticsPage(),
+          builder: (context, state) => _admin(const AdminAnalyticsPage()),
         ),
       ],
     ),

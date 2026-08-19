@@ -186,6 +186,7 @@
 | 82 | Platform Operations + Financial Intelligence Center — 14 SECURITY DEFINER RPCs, new admin dashboard (12 KPIs, time filter, revenue, alerts), financial center, delivery/merchant/provider/wallet intelligence, transaction ledger, 20 Freezed entities, data source, 15 Riverpod providers, 7 Flutter pages, sprint 82 | ✅ |
 | 83 | Realtime + Security Hardening — centralized RealtimeService, channel constants, PushNotificationService migration, migration 051 (search_path on 26 RPCs, REVOKE anon from 15 platform_* RPCs, 016 pattern everywhere), sprint 83 | ✅ |
 | 84 | Admin Command Center — grouped admin sidebar (25/25 routes, Arabic groups, collapsible), Command Center dashboard (grouped KPIs Platform/Operations/Financial/Risk, region scope selector, global search), Emergency/SOS page (realtime sos_alerts), `/admin/members/:id` route, member drawer schema normalizer, member-list dynamic-array cast fix, admin notification isAdmin deep-link, Back-navigation verified on device, sprint 84 | ✅ |
+| 85 | Admin backend hardening — migrations 052/053/054 (restored full `decide_approval_request` dispatcher, real commission rules management `set_commission_rate`/`list_commission_rules` + rule-derived analytics, secured `get_admin_analytics`, deletion confirmation `request_member_deletion`, approval listing `list_approval_requests`), AdminShell + independent persisted Arabic admin locale, `/admin/commissions` + `/admin/approvals` pages, Danger Zone removed, sidebar collapsed to single admin entry, 77/77 admin+member tests green, sprint 85 | ✅ |
 
 ---
 

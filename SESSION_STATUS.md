@@ -1,10 +1,46 @@
 # SESSION_STATUS.md
 
-> **Last updated:** 2026-08-18 Session 57 — **STEP 18: ADMIN COMMAND CENTER (COMPLETE)** — Grouped admin sidebar (25/25 routes), Command Center dashboard (grouped KPIs + region scope + search), Emergency/SOS page, member detail route, member-list cast fix, admin deep-link fix. 0 analyze errors, 139 tests green, verified on device. Report: `docs/HANDOFF/STEP_18_ADMIN_COMMAND_CENTER_FINAL.md`.
+> **Last updated:** 2026-08-19 Session 58 — **STEP 18: ADMIN COMMAND CENTER — BACKEND HARDENING (COMPLETE)** — Migrations 052/053/054 applied+verified (approvals dispatcher restored, commission rules management, deletion confirmation, approval listing), AdminShell + independent Arabic admin locale, `/admin/commissions` + `/admin/approvals` pages, Danger Zone removed, sidebar collapsed to a single admin entry. Touched areas analyze clean, 77/77 admin+member tests green. Report: `docs/HANDOFF/STEP_18_ADMIN_COMMAND_CENTER_FINAL.md` (§8–§12).
 
 ---
 
-## Current Task — STEP 18: ADMIN COMMAND CENTER (Session 57)
+## Current Task — STEP 18 BACKEND HARDENING (Session 58)
+
+**Status:** Complete — commit + push pending
+
+### What changed this session (backend)
+
+1. **Finding A → Migration 052** — `decide_approval_request` was regressed in 040 to campaign-only; restored full dispatcher (`admin_*`, `member_ban`, `member_delete`, `reward_config_change`) via `_approval_apply` + authority guards.
+2. **Finding B → Migration 052** — 050 analytics hardcoded commission 7/3; added `set_commission_rate` (PLATFORM_REVENUE-gated, versioned, audited), `list_commission_rules`, effective-date `get_commission_rate`; recreated `platform_kpi_summary` / `platform_revenue_breakdown` / `platform_revenue_overview` with rule-derived buckets.
+3. **Finding C → Migration 052** — `get_admin_analytics` now SECURITY DEFINER + `is_admin()` gate + locked search_path.
+4. **Finding D → Migration 053** — `request_member_deletion(p_member_id, p_confirmation_email, p_reason)` verifies the admin-typed email, computes `DELETE-<sha256>` server-side, chains into `delete_member_account`. E2E-verified (wrong email rejected; correct email → approved → deactivated + anonymized).
+5. **Finding E → Migration 054** — `list_approval_requests(p_state, p_limit)` admin-gated listing.
+6. **Finding F → removed** fake "Reset All Data" Danger Zone (UI + l10n keys).
+7. **AdminShell** (`admin_shell.dart`) — wraps all `/admin` routes: independent persisted admin locale (Arabic default) via `Localizations.override` + Directionality, grouped rail (≥1100px) / drawer (phones), one floating nav control.
+8. **New pages** — `/admin/commissions` (rule groups, history, edit-rate dialog), `/admin/approvals` (pending queue, approve / reject-with-reason).
+9. **Settings rebuild** — Personal (admin language switch) + Global (platform) sections.
+10. **Sidebar** — collapsed to a single app-level admin entry; grouped navigation now lives inside the shell.
+
+### Verified
+- `dart analyze` — 0 errors/0 warnings on all touched areas (removed 2 pre-existing unused imports)
+- `flutter test test/features/admin test/features/member_management` — 77/77 green (sidebar/shell tests updated)
+- Migrations 052–054 applied live (HTTP 201); every behavior probed under owner JWT (see FINAL doc §8)
+
+### Files modified
+- `supabase/migrations/052_admin_commission_approval_fixes.sql` · `053_member_deletion_confirmation.sql` · `054_approval_center_listing.sql` (new, applied)
+- `lib/features/admin/admin_shell.dart` · `admin_approvals_center_page.dart` · `admin_commission_management_page.dart` (new)
+- `lib/core/localization/admin_locale_provider.dart` (new), `lib/core/constants/storage_keys.dart`
+- `lib/services/admin/admin_providers.dart` (`commissionRulesProvider`, `pendingApprovalsProvider`)
+- `lib/features/admin/admin_module.dart` (shell wrap + 2 routes), `admin_settings_page.dart` (rebuild), `admin_dashboard_page.dart` + `admin_analytics_page.dart` (unused imports)
+- `lib/features/floating_sidebar/floating_sidebar_overlay.dart` (single admin entry)
+- `lib/features/member_management/presentation/pages/member_drawer.dart` (deletion/sanction flows)
+- `lib/l10n/app_en.arb` · `app_ar.arb` + generated files (approval/commission/shell keys; danger-zone keys removed)
+- `test/features/member_management/member_management_module_test.dart`
+- `docs/DECISION_LOG.md` (ADR-069), `docs/HANDOFF/STEP_18_ADMIN_COMMAND_CENTER_AUDIT.md` (§8 resolution matrix), `..._FINAL.md` (appendix)
+
+---
+
+## Previous Task — STEP 18: ADMIN COMMAND CENTER (Session 57)
 
 **Status:** Complete
 

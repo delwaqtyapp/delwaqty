@@ -2173,6 +2173,11 @@ class _AdminActionsSectionState extends ConsumerState<_AdminActionsSection> {
     String actionKey,
     Color color,
   ) async {
+    if (actionKey == 'delete_account') {
+      await _confirmDeletion();
+      return;
+    }
+
     final reason = await showDialog<String>(
       context: context,
       builder: (ctx) {
@@ -2219,28 +2224,136 @@ class _AdminActionsSectionState extends ConsumerState<_AdminActionsSection> {
 
     try {
       final client = ref.read(supabaseClientProvider);
-      if (actionKey == 'delete_account') {
-        await client.rpc('delete_user_account', params: {
-          'p_user_id': widget.memberId,
-          'p_reason': reason.trim(),
-        });
-      } else {
-        final statusMap = {
-          'restrict_account': 'restricted',
-          'suspend_account': 'suspended',
-          'restore_account': 'active',
-        };
-        final newStatus = statusMap[actionKey];
-        if (newStatus != null) {
-          await client.from('users').update({
-            'account_status': newStatus,
-          }).eq('id', widget.memberId);
-        }
+      if (actionKey == 'restore_account') {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Restoration is not supported through the API; '
+              'contact the owner to restore the account',
+            ),
+          ),
+        );
+        return;
       }
+      final sanctionType = actionKey == 'suspend_account'
+          ? 'suspension'
+          : 'warning';
+      await client.rpc('issue_sanction', params: {
+        'p_member_id': widget.memberId,
+        'p_sanction_type': sanctionType,
+        'p_reason': reason.trim(),
+      });
       if (mounted) {
         ref.invalidate(memberOpsProfileProvider(widget.memberId));
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Account $action completed')),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed: $e')),
+        );
+      }
+    }
+  }
+
+  /// Deletion (D4): soft-delete + anonymize + preserved audit. Requires the
+  /// admin to type the member's email as confirmation; the server validates it
+  /// (`request_member_deletion`, migration 053) and submits an
+  /// owner-decided approval request rather than deleting directly.
+  Future<void> _confirmDeletion() async {
+    final basic = widget.profile['basic'] as Map<String, dynamic>? ?? {};
+    final memberEmail = basic['email'] as String? ?? '';
+
+    final confirmation = await showDialog<(String, String)>(
+      context: context,
+      builder: (ctx) {
+        final emailController = TextEditingController();
+        final reasonController = TextEditingController();
+        return AlertDialog(
+          title: const Text('Delete Account'),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text(
+                  'Deleting an account permanently deactivates it and '
+                  'anonymizes the member\'s personal data. An approval '
+                  'request is submitted for review.',
+                ),
+                const SizedBox(height: 8),
+                if (memberEmail.isNotEmpty)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 8),
+                    child: Text(
+                      'Member email: $memberEmail',
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                TextField(
+                  controller: emailController,
+                  decoration: const InputDecoration(
+                    labelText: 'Confirm by typing the member email *',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(12)),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: reasonController,
+                  decoration: const InputDecoration(
+                    labelText: 'Reason *',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(12)),
+                    ),
+                  ),
+                  maxLines: 3,
+                ),
+              ],
+            ),
+          ),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(),
+              child: const Text('Cancel'),
+            ),
+            FilledButton(
+              style: FilledButton.styleFrom(
+                backgroundColor: Theme.of(ctx).colorScheme.error,
+              ),
+              onPressed: () => Navigator.of(ctx).pop((
+                emailController.text.trim(),
+                reasonController.text.trim(),
+              )),
+              child: const Text('Submit deletion request'),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (confirmation == null || !mounted) return;
+    final (email, reason) = confirmation;
+    if (email.isEmpty || reason.isEmpty) return;
+
+    try {
+      final client = ref.read(supabaseClientProvider);
+      await client.rpc('request_member_deletion', params: {
+        'p_member_id': widget.memberId,
+        'p_confirmation_email': email,
+        'p_reason': reason,
+      });
+      if (mounted) {
+        ref.invalidate(memberOpsProfileProvider(widget.memberId));
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Deletion request submitted for approval'),
+          ),
         );
       }
     } catch (e) {

@@ -2520,3 +2520,57 @@ boundary keeps server RLS/RPCs untouched while making every existing feature rea
   from admin pages, member list renders all 17 live users, member drawer renders on a live admin.
 - Explicitly tracked as partial: platform-wide live-tracking stream still needs a server RPC + RLS policy;
   chat keeps its RLS-scoped `.stream()` (RealtimeService remains canonical for new channels).
+
+---
+
+## ADR-069: Admin backend hardening — approvals dispatcher, commission rules, deletion confirmation, approval listing (migrations 052-054, sprint 85)
+
+**Date:** Session 58 (2026-08-19, STEP 18 / Phase 2.9)
+**Status:** Accepted
+**Deciders:** Lead Architect
+
+### Context
+Sprint-84 rebuilt the admin UI but left backend gaps: (A) `decide_approval_request` (040:354) had regressed
+to campaign-only, so owners could never decide admin/member/offer approvals; (B) `050` analytics hardcoded
+`commission_rate = 7/3` instead of consulting `commission_rules`; (C) `get_admin_analytics` (029) was not
+SECURITY DEFINER, carried no gate, yet was granted to `authenticated`; (D) the member drawer called a
+nonexistent `delete_user_account` (real RPC is `delete_member_account`, 035:631) with no confirmation;
+(E) there was no browsable approval queue for a future Approvals Center; (F) Admin Settings shipped a fake
+"Reset All Data" Danger Zone dialog with no backing RPC or permission.
+
+### Decision
+1. **052 — Restore the full approval dispatcher.** `decide_approval_request` now applies authority guards
+   and routes every type (admin_*, member_ban, member_delete, campaign_approve, reward_config_change) through
+   `_approval_apply`. Owner bypass remains; non-owners are rejected.
+2. **052 — Real commission management.** New `set_commission_rate` (PLATFORM_REVENUE-gated, keeps versioned
+   history in `commission_rules`, writes `COMMISSION_RATE_CHANGED` audit) and `list_commission_rules`.
+   `get_commission_rate` returns the effective-dated, most-specific rule. All three `050` analytics functions
+   were recreated to derive buckets via service_role-only `_commission_bucket_amount`.
+3. **052 — Harden `get_admin_analytics`** with SECURITY DEFINER + `is_admin()` gate + locked `search_path`.
+4. **053 — Deletion confirmation.** `request_member_deletion(p_member_id, p_confirmation_email, p_reason)`
+   validates the admin-typed email against the member email, computes `DELETE-<sha256>` server-side, and opens
+   a `member_delete` approval that executes through `delete_member_account`.
+5. **054 — Approval listing.** `list_approval_requests(p_state, p_limit)` returns `{"requests":[...]}` to
+   admins, powering the new Approvals Center.
+6. **AdminShell + independent admin locale.** Every `/admin` route is wrapped in `AdminShell`
+   (Localizations.override + Directionality + grouped rail/drawer). `admin_locale` (default Arabic, persisted,
+   live switch) decouples the admin UI language from the app language.
+7. **UI: remove catastrophic surface.** Danger Zone deleted; delete flow now uses `request_member_deletion`;
+   restrict/suspend use `issue_sanction`. Sidebar collapsed to a single app-level admin entry with the full
+   grouped navigation inside the shell.
+8. **Tooling reality.** `apply.py` auto-commits every statement; `set_config('request.jwt.claims')` is
+   batch-transaction-local, so owner-simulation fixtures must share one batch with their assertions.
+
+### Rationale
+Server-side gaps (hardcoded rates, a broken decision dispatcher, an ungated admin RPC) are authoritative
+bugs — a UI could not mask them. Migrations keep RLS/authorization server-authoritative while the UI only
+gets data it is permitted to see.
+
+### Consequences
+- All four migrations applied live (HTTP 201) and probed: non-campaign decisions execute under owner;
+  commission rates round-trip (provider 7.00/merchant 3.00/driver 7.00/customer 0.00/restaurant 3.00);
+  non-admin `get_admin_analytics` -> `P0001: Not authorized`; typed-email deletion verified end-to-end with a
+  fixture (deactivated + anonymized), then cleaned up.
+- New pages `/admin/commissions` and `/admin/approvals`; `member_management_module_test` updated for the
+  single-entry sidebar; 77/77 admin+member tests green; touched areas analyze clean (0 errors/warnings).
+- Useful mental model for future migrations: no owner session persists across `apply.py` batches.

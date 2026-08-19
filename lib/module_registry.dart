@@ -8,7 +8,6 @@ import 'package:delwaqty/features/settings/settings_module.dart';
 import 'package:delwaqty/features/profile/profile_module.dart';
 import 'package:delwaqty/features/notifications/notifications_module.dart';
 import 'package:delwaqty/features/commerce/commerce_module.dart';
-import 'package:delwaqty/features/admin/admin_module.dart';
 import 'package:delwaqty/features/restaurant/restaurant_module.dart';
 import 'package:delwaqty/features/merchant/merchant_module.dart';
 import 'package:delwaqty/features/wallet/wallet_module.dart';
@@ -28,7 +27,6 @@ import 'package:delwaqty/features/regions/regions_module.dart';
 import 'package:delwaqty/features/rewards/rewards_module.dart';
 import 'package:delwaqty/features/campaigns/campaigns_module.dart';
 import 'package:delwaqty/features/escalation/escalation_module.dart';
-import 'package:delwaqty/features/member_management/member_management_module.dart';
 
 void registerAllModules() {
   final registry = FeatureRegistry.instance;
@@ -49,7 +47,6 @@ void registerAllModules() {
     SettingsModule(),
     ProfileModule(),
     NotificationsModule(),
-    AdminModule(),
     SafetyModule(),
     ServiceAudioLogsModule(),
     ComplaintsModule(),
@@ -62,7 +59,6 @@ void registerAllModules() {
     RegionsModule(),
     RewardsModule(),
     CampaignsModule(),
-    MemberManagementModule(),
     EscalationModule(),
   ]);
 

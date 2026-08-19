@@ -1,39 +1,67 @@
 # SESSION_STATUS.md
 
-> **Last updated:** 2026-08-19 Session 59 — **STEP 18: FULL ADMIN & MEMBER LOCALIZATION (COMPLETE)** — Every admin page + member drawer, operations center, and member detail page fully localized with the independent admin locale (EN/AR parity validated by `gen-l10n`). Member deletion reworked to a pure confirmation dialog (email auto-supplied from profile, no typing). All 25 admin nav targets + `/admin/escalations` + `/search` verified to resolve. Touched files analyze clean, 73/73 admin+member tests green, debug APK built with `.env.dev`. Un-committed heading to `sprint 86`.
+> **Last updated:** 2026-08-19 Session 60 — **STEP 19: ADMIN APP EXTRACTION VIA BUILD FLAVORS (COMPLETE)** — Admin Delwaqty extracted as standalone Flutter app via Android build flavors. Two entry points (main.dart / main_admin.dart), two module registries, two MaterialApps, two GoRouters. Customer sidebar cleaned (admin entry removed). Flavor-specific Android source sets (customer/admin) with distinct package IDs, deep link schemes, notification channels, and app names. Both apps build successfully. 896/896 tests green, `dart analyze` clean. Documentation created. UNCOMMITTED — heading to sprint 87.
 
 ---
 
-## Current Task — STEP 18 FULL LOCALIZATION (Session 59)
+## Current Task — STEP 19: ADMIN APP EXTRACTION (Session 60)
 
-**Status:** Complete — un-committed (sprint 86 pending)
+**Status:** Complete — un-committed (sprint 87 pending)
 
-### What changed this session (localization + deletion rework)
+### What changed this session (build flavors extraction)
 
-1. **Member drawer fully localized** (`member_drawer.dart`) — every section (Identity, Verification, Location, Timeline, Orders/Deliveries/Services, Wallet/Earnings, Complaints, Support, Sanctions, Documents, Admin Actions) reads `AppLocalizations`; status/region/history/lastSeen/activeStat/expiresIn/reasonRequired/restrict/suspend/restore/delete keys added.
-2. **Member deletion rework (mandate #3)** — `_confirmDeletion` is now a pure confirmation dialog: warning + auto-shown member email + reason field only; email is passed automatically from `profile['email']` to `request_member_deletion`. Email-typing UI removed entirely.
-3. **Admin pages localized** — admin_module display name, emergency page, delivery intelligence, financial center, wallet/merchant/provider intelligence, merchants, commission management, analytics (AM/PM via `formatTimeOfDay`), transaction ledger, member operations center, member detail page.
-4. **Keys** — ~135 new keys added to BOTH `app_en.arb` + `app_ar.arb` (OrderedDict-preserving), incl. missing Arabic `addBranch`/`branchName`; every `gen-l10n` cycle parity-clean.
-5. **Link audit (mandate #4)** — all 25 `/admin/*` nav targets + `/admin` + `/admin/escalations` + `/search` resolve to registered routes.
-6. **Cleanup** — removed `provider` role branch (no key existed), null-safe `member.role ?? ''`.
+1. **Two entry points** — `lib/main.dart` (customer, calls `registerAllModules()`) + `lib/main_admin.dart` (admin, calls `registerAdminModules()`).
+2. **Two module registries** — `lib/module_registry.dart` (customer: 28 modules, AdminModule + MemberManagementModule removed) + `lib/module_registry_admin.dart` (admin: 12 modules).
+3. **Admin MaterialApp** (`lib/app/app_admin.dart`) — Arabic default locale, admin GoRouter, independent locale state.
+4. **Admin GoRouter** (`lib/core/router/admin_router.dart`) — admin-only routes, admin access guard (redirects non-admin to `/login`), ValueNotifier refresh on auth state.
+5. **Customer sidebar cleanup** — admin sidebar entry removed from `floating_sidebar_overlay.dart`; admin navigation lives exclusively inside AdminShell.
+6. **Android build flavors** — `build.gradle.kts` updated with `flavorDimensions += "app"`, productFlavors customer/admin with separate applicationIds.
+7. **Flavor-specific Android source sets** — `android/app/src/customer/` and `android/app/src/admin/` each with AndroidManifest.xml (distinct deep link schemes, notification channels) and `res/values/strings.xml` (app names).
+8. **Firebase dual-client** — google-services.json updated with both com.delwaqty.app and com.delwaqty.admin client entries.
+9. **Tests fixed** — 2 member_management_module_test tests updated for new architecture (customer registry excludes admin modules, customer sidebar has no admin entry).
+10. **Documentation** — 6 handoff files created (STEP_19_*), ADR-071 added to DECISION_LOG.
+
+### Build commands
+```bash
+# Customer app
+flutter build apk --debug --flavor customer --target lib/main.dart --dart-define-from-file=.env.dev
+
+# Admin app
+flutter build apk --debug --flavor admin --target lib/main_admin.dart --dart-define-from-file=.env.dev
+```
 
 ### Verified
-- `dart analyze <touched files>` — 0 errors / 0 warnings on every modified file
-- `flutter test test/features/admin test/features/member_management` — 73/73 green
-- `flutter build apk --debug --dart-define-from-file=.env.dev` — built (135.6s)
+- `flutter test` — 896/896 green
+- `dart analyze` — 0 errors on all touched files
+- `flutter build apk --flavor customer` — builds successfully
+- `flutter build apk --flavor admin` — builds successfully
+- Release builds impossible on arm64 host (no gen_snapshot for android-arm64)
+
+### Files created
+- `lib/main_admin.dart` — admin entry point
+- `lib/app/app_admin.dart` — admin MaterialApp
+- `lib/core/router/admin_router.dart` — admin GoRouter
+- `lib/module_registry_admin.dart` — admin module registration
+- `android/app/src/customer/AndroidManifest.xml` — customer flavor manifest
+- `android/app/src/admin/AndroidManifest.xml` — admin flavor manifest
+- `android/app/src/customer/res/values/strings.xml` — customer app_name
+- `android/app/src/admin/res/values/strings.xml` — admin app_name
+- `docs/HANDOFF/STEP_19_ADMIN_EXTRACTION_AUDIT.md`
+- `docs/HANDOFF/STEP_19_ADMIN_APP_FINAL.md`
+- `docs/HANDOFF/STEP_19_CUSTOMER_APP_DECOUPLING.md`
+- `docs/HANDOFF/STEP_19_SHARED_PLATFORM_ARCHITECTURE.md`
+- `docs/HANDOFF/STEP_19_DRIVER_EXTRACTION_READINESS.md`
+- `docs/HANDOFF/STEP_19_PARTNER_EXTRACTION_READINESS.md`
 
 ### Files modified
-- `lib/l10n/app_en.arb` · `app_ar.arb` + generated `app_localizations*.dart` (new key set)
-- `lib/features/member_management/presentation/pages/member_drawer.dart` (localized; deletion confirmation rework)
-- `lib/features/member_management/presentation/pages/member_operations_center.dart` · `member_detail_page.dart` (localized)
-- `lib/features/admin/admin_module.dart` · `admin_shell.dart` · `domain/entities/admin_models.dart`
-- `lib/features/admin/presentation/pages/*` (all localized; `admin_dashboard_page.dart` deleted as redundant vs Command Center)
-- `lib/services/admin/admin_providers.dart` · `admin_service.dart`
-- `test/features/admin/domain/entities_test.dart`
-
----
-
-**Status:** Complete — committed `1361a22` + pushed (`sprint 85: harden admin backend, add commissions and approvals centers`)
+- `lib/module_registry.dart` — customer-only (AdminModule + MemberManagementModule removed)
+- `lib/features/floating_sidebar/floating_sidebar_overlay.dart` — admin sidebar entry removed
+- `android/app/build.gradle.kts` — flavor dimensions + product flavors
+- `android/app/src/main/AndroidManifest.xml` — stripped to shared permissions
+- `android/app/google-services.json` — added admin client entry
+- `test/features/member_management/member_management_module_test.dart` — 2 tests updated
+- `docs/DECISION_LOG.md` — ADR-071 added
+- `ROADMAP.md` — sprint 87 row needed
 
 ### What changed this session (backend)
 

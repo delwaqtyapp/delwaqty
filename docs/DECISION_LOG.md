@@ -2607,3 +2607,38 @@ without weakening server-side guarantees.
 - ~135 new ARB keys (EN+AR) added; `addBranch`/`branchName` Arabic backfilled; all parity checks clean.
 - `member_drawer.dart` deletion flow is dialog-only; email still validated by the 053 RPC.
 - 73/73 admin+member tests green; touched files analyze clean; debug APK builds with `.env.dev`.
+
+---
+
+## ADR-071: Admin Extraction via Android Build Flavors (STEP 19)
+
+**Date:** 2026-08-19 (Session 59)
+**Status:** Accepted
+**Deciders:** Lead Architect
+
+### Context
+STEP 19 requires extracting Admin Delwaqty as a standalone Flutter app while preserving a single codebase shared by both Customer and Admin apps. The goal is independent deployment (separate APKs, separate Play Store listings) with shared Supabase backend, shared business logic, and shared authentication — no code duplication, no separate repositories.
+
+### Decision
+1. **Android build flavors** — `customer` (com.delwaqty.app) and `admin` (com.delwaqty.admin) declared in `build.gradle.kts` with `flavorDimensions += "app"`. Each flavor produces its own APK; both share the same Dart codebase.
+2. **Two entry points** — `lib/main.dart` (customer, default `--target`) calls `registerAllModules()` (28 customer-facing modules). `lib/main_admin.dart` (admin, `--target lib/main_admin.dart`) calls `registerAdminModules()` (12 admin-only modules).
+3. **Two MaterialApps** — `lib/app/app.dart` (customer) and `lib/app/app_admin.dart` (admin, Arabic default locale, independent locale state).
+4. **Two GoRouters** — Customer router unchanged; `lib/core/router/admin_router.dart` serves only `registry.allStandaloneRoutes` with an admin access guard (redirects non-admin to `/login`).
+5. **Two module registries** — `lib/module_registry.dart` (customer, excludes AdminModule + MemberManagementModule) and `lib/module_registry_admin.dart` (admin-only, registers AuthModule, AdminModule, MemberManagementModule, ComplaintsModule, SanctionsModule, LocationTrackingModule, SupportChatModule, EscalationModule, RegionsModule, CampaignsModule, RewardsModule, NotificationsModule).
+6. **Customer sidebar cleanup** — Admin sidebar entry removed from `floating_sidebar_overlay.dart`; admin navigation now lives exclusively inside AdminShell.
+7. **Flavor-specific Android source sets** — `android/app/src/customer/` and `android/app/src/admin/` each with AndroidManifest.xml (distinct deep link schemes: `io.delwaqty` vs `io.delwaqty.admin`, distinct notification channels) and `res/values/strings.xml` (app_name = "Delwaqty" vs "Admin Delwaqty"). Main AndroidManifest.xml contains only shared permissions.
+8. **Firebase dual-client** — google-services.json updated with both `com.delwaqty.app` and `com.delwaqty.admin` client entries.
+9. **Admin app identity** — name "Admin Delwaqty", package com.delwaqty.admin, entry main_admin.dart, deep link scheme io.delwaqty.admin, notification channel delwaqty_admin_notifications, locale default Arabic (independent from customer app).
+
+### Rationale
+- Build flavors are the official Flutter/Android mechanism for multi-app codebases; no third-party plugins required.
+- Selective module registration (two registry functions) cleanly separates customer vs admin code paths while sharing all infrastructure (Supabase, auth, realtime, notifications, theme, localization, domain/data layers).
+- Two entry points with two MaterialApps give each app independent locale, theme, and router — matching the mandate that admin locale is independent.
+- Removing the admin sidebar entry from the customer app ensures no admin code leaks into the customer surface.
+
+### Consequences
+- Both apps build successfully (`flutter build apk --flavor customer` and `flutter build apk --flavor admin`).
+- `flutter test` — 896/896 pass; `dart analyze` — 0 errors on all touched files.
+- Admin code still compiles in the customer APK (single codebase), but is never registered or instantiated.
+- Release APK builds are impossible on the current arm64 host (Flutter 3.44.6 does not ship linux-arm64 gen_snapshot for Android); only debug builds are available.
+- google-services.json has a placeholder `mobilesdk_app_id` for the admin package — needs real Firebase app registration before production.

@@ -55,11 +55,18 @@ void main() {
     expect(json['role'], 'customer');
   });
 
-  test('module_registry includes member_management', () async {
+  test('module_registry excludes admin modules (customer app)', () async {
     final file = File('lib/module_registry.dart');
     final content = await file.readAsString();
+    expect(content, isNot(contains('AdminModule')));
+    expect(content, isNot(contains('MemberManagementModule')));
+  });
+
+  test('module_registry_admin includes admin modules', () async {
+    final file = File('lib/module_registry_admin.dart');
+    final content = await file.readAsString();
+    expect(content, contains('AdminModule'));
     expect(content, contains('MemberManagementModule'));
-    expect(content, contains('member_management/member_management_module.dart'));
   });
 
   test('admin_module includes member routes', () async {
@@ -69,11 +76,11 @@ void main() {
     expect(content, contains('MemberOperationsCenter'));
   });
 
-  test('sidebar collapses admin nav to a single entry', () async {
+  test('customer sidebar has no admin entry', () async {
     final file = File('lib/features/floating_sidebar/floating_sidebar_overlay.dart');
     final content = await file.readAsString();
-    expect(content, contains('/admin'));
-    expect(content, isNot(contains('/admin/members')));
+    expect(content, isNot(contains('adminCommandCenter')));
+    expect(content, isNot(contains('/admin')));
   });
 
   test('admin_shell hosts the grouped admin navigation', () async {

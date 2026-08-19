@@ -4,7 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:delwaqty/features/auth/domain/auth_state.dart';
 import 'package:delwaqty/features/auth/presentation/auth_provider.dart';
-import 'package:delwaqty/core/auth/admin_access.dart';
 import 'package:delwaqty/core/theme/app_text_styles.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 import 'sidebar_theme.dart';
@@ -118,9 +117,7 @@ class _FloatingSidebarOverlayState extends State<FloatingSidebarOverlay>
     final userName = widget.authState is AuthAuthenticated
         ? (widget.authState as AuthAuthenticated).user.fullName ?? widget.l10n.user
         : widget.l10n.user;
-    final isAdmin = widget.authState is AuthAuthenticated &&
-        (widget.authState as AuthAuthenticated).user.isAdmin;
-    final displayRole = isAdmin ? widget.l10n.superAdmin : null;
+    final displayRole = null;
 
     return Material(
       color: Colors.transparent,
@@ -295,25 +292,6 @@ class _FloatingSidebarOverlayState extends State<FloatingSidebarOverlay>
                                   ),
                                 ],
                               ),
-                              if (isAdmin) ...[
-                                SidebarDivider(),
-                                SidebarSection(
-                                  title: widget.l10n.adminPanel,
-                                  controller: _animation,
-                                  startIndex: 8,
-                                  items: [
-                                    SidebarItem(
-                                      icon: Icons.admin_panel_settings_outlined,
-                                      label: widget.l10n.adminCommandCenter,
-                                      isSelected: _selectedIndex == 8,
-                                      onTap: () {
-                                        setState(() => _selectedIndex = 8);
-                                        _navigate('/admin');
-                                      },
-                                    ),
-                                  ],
-                                ),
-                              ],
                               SidebarDivider(),
                               SidebarSection(
                                 title: widget.l10n.supportSection,

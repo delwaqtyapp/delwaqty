@@ -69,9 +69,18 @@ void main() {
     expect(content, contains('MemberOperationsCenter'));
   });
 
-  test('sidebar includes members nav item', () async {
+  test('sidebar collapses admin nav to a single entry', () async {
     final file = File('lib/features/floating_sidebar/floating_sidebar_overlay.dart');
     final content = await file.readAsString();
+    expect(content, contains('/admin'));
+    expect(content, isNot(contains('/admin/members')));
+  });
+
+  test('admin_shell hosts the grouped admin navigation', () async {
+    final file = File('lib/features/admin/admin_shell.dart');
+    final content = await file.readAsString();
     expect(content, contains('/admin/members'));
+    expect(content, contains('/admin/commissions'));
+    expect(content, contains('/admin/approvals'));
   });
 }

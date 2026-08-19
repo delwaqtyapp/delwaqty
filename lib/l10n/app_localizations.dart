@@ -1988,42 +1988,6 @@ abstract class AppLocalizations {
   /// **'Failed to save settings'**
   String get settingsFailed;
 
-  /// No description provided for @dangerZone.
-  ///
-  /// In en, this message translates to:
-  /// **'Danger Zone'**
-  String get dangerZone;
-
-  /// No description provided for @resetAllData.
-  ///
-  /// In en, this message translates to:
-  /// **'Reset All Data'**
-  String get resetAllData;
-
-  /// No description provided for @resetAllDataDesc.
-  ///
-  /// In en, this message translates to:
-  /// **'Permanently delete all platform data'**
-  String get resetAllDataDesc;
-
-  /// No description provided for @resetAllDataTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Reset All Data?'**
-  String get resetAllDataTitle;
-
-  /// No description provided for @resetAllDataWarning.
-  ///
-  /// In en, this message translates to:
-  /// **'This action cannot be undone. All data will be permanently deleted.'**
-  String get resetAllDataWarning;
-
-  /// No description provided for @reset.
-  ///
-  /// In en, this message translates to:
-  /// **'Reset'**
-  String get reset;
-
   /// No description provided for @account.
   ///
   /// In en, this message translates to:
@@ -8779,6 +8743,438 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Expand admin menu'**
   String get adminExpand;
+
+  /// No description provided for @adminLeadershipSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Leadership'**
+  String get adminLeadershipSection;
+
+  /// No description provided for @adminMembersSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Members'**
+  String get adminMembersSection;
+
+  /// No description provided for @adminPlatformSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Platform'**
+  String get adminPlatformSection;
+
+  /// No description provided for @adminAdministrationSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Administration'**
+  String get adminAdministrationSection;
+
+  /// No description provided for @adminSettingsGroupSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Admin Settings'**
+  String get adminSettingsGroupSection;
+
+  /// No description provided for @adminShellMenu.
+  ///
+  /// In en, this message translates to:
+  /// **'Admin menu'**
+  String get adminShellMenu;
+
+  /// No description provided for @adminCommissions.
+  ///
+  /// In en, this message translates to:
+  /// **'Commissions'**
+  String get adminCommissions;
+
+  /// No description provided for @adminCommissionManagement.
+  ///
+  /// In en, this message translates to:
+  /// **'Commission Management'**
+  String get adminCommissionManagement;
+
+  /// No description provided for @adminCommissionManagementDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Configure the active commission rules for every account type, service type and service category'**
+  String get adminCommissionManagementDesc;
+
+  /// No description provided for @adminApprovals.
+  ///
+  /// In en, this message translates to:
+  /// **'Approvals'**
+  String get adminApprovals;
+
+  /// No description provided for @adminApprovalsCenter.
+  ///
+  /// In en, this message translates to:
+  /// **'Approval Center'**
+  String get adminApprovalsCenter;
+
+  /// No description provided for @adminApprovalsCenterDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Decide pending admin, member deletion, sanction, campaign and configuration approval requests'**
+  String get adminApprovalsCenterDesc;
+
+  /// No description provided for @adminPersonalSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Personal Settings'**
+  String get adminPersonalSettings;
+
+  /// No description provided for @adminPersonalSettingsDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Preferences stored on this device'**
+  String get adminPersonalSettingsDesc;
+
+  /// No description provided for @adminGlobalSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Global Platform Settings'**
+  String get adminGlobalSettings;
+
+  /// No description provided for @adminGlobalSettingsDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Platform-wide configuration that affects every admin'**
+  String get adminGlobalSettingsDesc;
+
+  /// No description provided for @adminLanguage.
+  ///
+  /// In en, this message translates to:
+  /// **'Admin Language'**
+  String get adminLanguage;
+
+  /// No description provided for @adminLanguageDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Independent from the app language. Arabic by default'**
+  String get adminLanguageDesc;
+
+  /// No description provided for @commissionAccountGroup.
+  ///
+  /// In en, this message translates to:
+  /// **'Account Types'**
+  String get commissionAccountGroup;
+
+  /// No description provided for @commissionServiceTypeGroup.
+  ///
+  /// In en, this message translates to:
+  /// **'Service Types'**
+  String get commissionServiceTypeGroup;
+
+  /// No description provided for @commissionServiceCategoryGroup.
+  ///
+  /// In en, this message translates to:
+  /// **'Service Categories'**
+  String get commissionServiceCategoryGroup;
+
+  /// No description provided for @commissionChange.
+  ///
+  /// In en, this message translates to:
+  /// **'Change rate'**
+  String get commissionChange;
+
+  /// No description provided for @commissionNewRate.
+  ///
+  /// In en, this message translates to:
+  /// **'New rate (%)'**
+  String get commissionNewRate;
+
+  /// No description provided for @commissionRateHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Rate between 0 and 100'**
+  String get commissionRateHint;
+
+  /// No description provided for @commissionSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save rate'**
+  String get commissionSave;
+
+  /// No description provided for @commissionRateUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Commission rate updated'**
+  String get commissionRateUpdated;
+
+  /// No description provided for @commissionRateFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to update commission rate'**
+  String get commissionRateFailed;
+
+  /// No description provided for @commissionEffectiveFrom.
+  ///
+  /// In en, this message translates to:
+  /// **'Effective from'**
+  String get commissionEffectiveFrom;
+
+  /// No description provided for @commissionNoExpiry.
+  ///
+  /// In en, this message translates to:
+  /// **'No expiry'**
+  String get commissionNoExpiry;
+
+  /// No description provided for @commissionActive.
+  ///
+  /// In en, this message translates to:
+  /// **'Active'**
+  String get commissionActive;
+
+  /// No description provided for @commissionHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'History'**
+  String get commissionHistory;
+
+  /// No description provided for @commissionAccountCustomer.
+  ///
+  /// In en, this message translates to:
+  /// **'Customers'**
+  String get commissionAccountCustomer;
+
+  /// No description provided for @commissionAccountAdmin.
+  ///
+  /// In en, this message translates to:
+  /// **'Platform staff'**
+  String get commissionAccountAdmin;
+
+  /// No description provided for @commissionAccountDriver.
+  ///
+  /// In en, this message translates to:
+  /// **'Drivers'**
+  String get commissionAccountDriver;
+
+  /// No description provided for @commissionAccountProvider.
+  ///
+  /// In en, this message translates to:
+  /// **'Providers'**
+  String get commissionAccountProvider;
+
+  /// No description provided for @commissionAccountMerchant.
+  ///
+  /// In en, this message translates to:
+  /// **'Merchants'**
+  String get commissionAccountMerchant;
+
+  /// No description provided for @commissionCategoryRestaurant.
+  ///
+  /// In en, this message translates to:
+  /// **'Restaurants'**
+  String get commissionCategoryRestaurant;
+
+  /// No description provided for @commissionCategoryPharmacy.
+  ///
+  /// In en, this message translates to:
+  /// **'Pharmacies'**
+  String get commissionCategoryPharmacy;
+
+  /// No description provided for @commissionCategoryGrocery.
+  ///
+  /// In en, this message translates to:
+  /// **'Groceries'**
+  String get commissionCategoryGrocery;
+
+  /// No description provided for @commissionCategoryMarketplace.
+  ///
+  /// In en, this message translates to:
+  /// **'Marketplace'**
+  String get commissionCategoryMarketplace;
+
+  /// No description provided for @commissionCategoryPlumbing.
+  ///
+  /// In en, this message translates to:
+  /// **'Plumbing'**
+  String get commissionCategoryPlumbing;
+
+  /// No description provided for @commissionCategoryElectrical.
+  ///
+  /// In en, this message translates to:
+  /// **'Electrical'**
+  String get commissionCategoryElectrical;
+
+  /// No description provided for @commissionCategoryCleaning.
+  ///
+  /// In en, this message translates to:
+  /// **'Cleaning'**
+  String get commissionCategoryCleaning;
+
+  /// No description provided for @approvalRequest.
+  ///
+  /// In en, this message translates to:
+  /// **'Approval Request'**
+  String get approvalRequest;
+
+  /// No description provided for @approvalRequests.
+  ///
+  /// In en, this message translates to:
+  /// **'Approval Requests'**
+  String get approvalRequests;
+
+  /// No description provided for @approvalDecide.
+  ///
+  /// In en, this message translates to:
+  /// **'Decide'**
+  String get approvalDecide;
+
+  /// No description provided for @approveRequest.
+  ///
+  /// In en, this message translates to:
+  /// **'Approve'**
+  String get approveRequest;
+
+  /// No description provided for @rejectRequest.
+  ///
+  /// In en, this message translates to:
+  /// **'Reject'**
+  String get rejectRequest;
+
+  /// No description provided for @rejectionReasonHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Rejection requires a reason'**
+  String get rejectionReasonHint;
+
+  /// No description provided for @approvalApproved.
+  ///
+  /// In en, this message translates to:
+  /// **'Approved'**
+  String get approvalApproved;
+
+  /// No description provided for @approvalRejected.
+  ///
+  /// In en, this message translates to:
+  /// **'Rejected'**
+  String get approvalRejected;
+
+  /// No description provided for @approvalPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending'**
+  String get approvalPending;
+
+  /// No description provided for @approvalRequestApproved.
+  ///
+  /// In en, this message translates to:
+  /// **'Request approved'**
+  String get approvalRequestApproved;
+
+  /// No description provided for @approvalRequestRejected.
+  ///
+  /// In en, this message translates to:
+  /// **'Request rejected'**
+  String get approvalRequestRejected;
+
+  /// No description provided for @approvalConfirmApprove.
+  ///
+  /// In en, this message translates to:
+  /// **'Approve this request?'**
+  String get approvalConfirmApprove;
+
+  /// No description provided for @approvalConfirmReject.
+  ///
+  /// In en, this message translates to:
+  /// **'Reject this request?'**
+  String get approvalConfirmReject;
+
+  /// No description provided for @approvalDecisionFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to decide request'**
+  String get approvalDecisionFailed;
+
+  /// No description provided for @requestedBy.
+  ///
+  /// In en, this message translates to:
+  /// **'Requested by'**
+  String get requestedBy;
+
+  /// No description provided for @requester.
+  ///
+  /// In en, this message translates to:
+  /// **'Requester'**
+  String get requester;
+
+  /// No description provided for @reason.
+  ///
+  /// In en, this message translates to:
+  /// **'Reason'**
+  String get reason;
+
+  /// No description provided for @noPendingApprovals.
+  ///
+  /// In en, this message translates to:
+  /// **'No pending approval requests'**
+  String get noPendingApprovals;
+
+  /// No description provided for @reqTypeAdminCreate.
+  ///
+  /// In en, this message translates to:
+  /// **'Create admin'**
+  String get reqTypeAdminCreate;
+
+  /// No description provided for @reqTypeAdminRole.
+  ///
+  /// In en, this message translates to:
+  /// **'Admin role change'**
+  String get reqTypeAdminRole;
+
+  /// No description provided for @reqTypeAdminRegion.
+  ///
+  /// In en, this message translates to:
+  /// **'Admin region change'**
+  String get reqTypeAdminRegion;
+
+  /// No description provided for @reqTypeAdminSupervisor.
+  ///
+  /// In en, this message translates to:
+  /// **'Supervisor change'**
+  String get reqTypeAdminSupervisor;
+
+  /// No description provided for @reqTypeAdminDeactivate.
+  ///
+  /// In en, this message translates to:
+  /// **'Deactivate admin'**
+  String get reqTypeAdminDeactivate;
+
+  /// No description provided for @reqTypeCampaign.
+  ///
+  /// In en, this message translates to:
+  /// **'Campaign approval'**
+  String get reqTypeCampaign;
+
+  /// No description provided for @reqTypeMemberBan.
+  ///
+  /// In en, this message translates to:
+  /// **'Member ban'**
+  String get reqTypeMemberBan;
+
+  /// No description provided for @reqTypeMemberDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Member deletion'**
+  String get reqTypeMemberDelete;
+
+  /// No description provided for @reqTypeOfferApprove.
+  ///
+  /// In en, this message translates to:
+  /// **'Offer approval'**
+  String get reqTypeOfferApprove;
+
+  /// No description provided for @reqTypeOfferPublish.
+  ///
+  /// In en, this message translates to:
+  /// **'Offer publish'**
+  String get reqTypeOfferPublish;
+
+  /// No description provided for @reqTypeRewardConfig.
+  ///
+  /// In en, this message translates to:
+  /// **'Rewards config change'**
+  String get reqTypeRewardConfig;
 }
 
 class _AppLocalizationsDelegate

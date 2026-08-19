@@ -5,7 +5,6 @@ import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
 import 'package:delwaqty/shared/widgets/glass_card.dart';
 import 'package:delwaqty/shared/widgets/premium_empty_state.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
-import 'package:delwaqty/core/theme/app_colors.dart';
 import 'package:delwaqty/core/theme/app_text_styles.dart';
 
 class AdminAnalyticsPage extends ConsumerWidget {

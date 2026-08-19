@@ -123,3 +123,68 @@ No backend (migration/SQL) changes were required for this step.
 ## 7. Commit
 
 `sprint 84: rebuild admin command center`
+
+---
+
+# APPENDIX — Sprint 85: Backend Hardening + Commission Management + Approvals Center + Admin Locale
+
+**Date:** 2026-08-19 · **Sprint 85 · Status:** implemented, migrated, tested
+
+Follow-up deep-dive that moved the admin surface from "rebuild on top of existing" to **fixing the backend itself**. Four live migrations closed real authorization/logic gaps and two brand-new admin pages replaced dead UI.
+
+---
+
+## 8. Backend findings → fixes (live-verified)
+
+| # | Finding | Root cause | Fix | Verified |
+|---|---------|------------|-----|----------|
+| A | **`decide_approval_request` regressed** to campaign-only: `040:354` rejected every type except `campaign_approve` (owner could never decide admin/member/offer approvals) | Migration 040 narrowed a full dispatcher (admin_*, member_ban, member_delete, reward_config_change) that existed in 034/045 | **052** restored the full dispatcher (authority guards + `_approval_apply`) | Owner approve → request executes; non-owner → `P0001: Not authorized` |
+| B | **Commissions hardcoded** `rate = 7` / `rate = 3` inside `050` `platform_kpi_summary` / `platform_revenue_breakdown` / `platform_revenue_overview` | 050 inlined constants instead of consulting `commission_rules` | **052** added `set_commission_rate` (PLATFORM_REVENUE-gated, versioned history, `COMMISSION_RATE_CHANGED` audit) + `list_commission_rules`; recreated `get_commission_rate` (effective-date, most-specific-wins); added service_role-only `_commission_bucket_amount`; recreated all three analytics fns with rule-derived buckets | Rates: provider 7.00 / merchant 3.00 / driver 7.00 / customer 0.00 / restaurant 3.00; owner-set 4.25 test rate round-trips then was removed |
+| C | **`get_admin_analytics` unsecured**: not SECURITY DEFINER, no gate, but granted to `authenticated` | 029 shipped an admin-only RPC without access control | **052** hardened it (SECURITY DEFINER + `is_admin()` gate + `SET search_path`) | Non-admin call → `P0001: Not authorized` |
+| D | **UI called nonexistent `delete_user_account`**; `delete_member_account` (035:631) had no email-confirmation step | RPC name mismatch + destructive action without final confirmation  | **053** added `request_member_deletion(p_member_id, p_confirmation_email, p_reason)` — validates the admin-typed email against the member, computes `DELETE-<sha256(email)>` server-side, opens a `member_delete` approval | Wrong email → rejected; correct email → approval → owner decide → user deactivated + anonymized (`deleted-…@anonymized.invalid`); fixture cleaned up |
+| E | **No listing API** for the Approvals Center (current 034 functions only decide/create) | Approvals were admin-action side-effects, not a browsable queue | **054** added `list_approval_requests(p_state='pending', p_limit=100)` (admin-gated, JSON `{requests:[...]}`) | `apply.py` → HTTP 201; rows returned under owner JWT |
+| F | **Fake "Reset All Data" Danger Zone** in Admin Settings (dialog with no RPC, no permission) | Leftover placeholder UI | Removed UI entirely + dropped the l10n keys | `dart analyze` clean; no destructive surface remains |
+| G | Sidebar exposed **every admin route at app level** → navigation duplicated with the new in-admin nav | Sprint-84 shipped both | Sidebar collapsed to **one App-level admin entry**; the full grouped navigation now lives inside `AdminShell` (26 grouped items) | Tests updated |
+
+**Server-side tooling note:** `apply.py` auto-commits every statement and JWT claims are **transaction/batch-local** — owner-simulation fixtures must live in the same batch as their assertions (cross-batch probes fail with "Not authorized for this member"). Verified empirically; this also means fresh migrations are applied as `authenticated` (no owner session persists).
+
+---
+
+## 9. New UI
+
+- **`AdminShell`** (`lib/features/admin/admin_shell.dart`) — wraps all 26 `/admin` routes: applies the **independent Admin locale** via `Localizations.override` + `Directionality` (RTL for Arabic), hosts the **grouped admin rail** (≥1100px) / **drawer + floating control** (phones, hidden on chat-room/member-detail), syncs active state with the matched route.
+- **`AdminLocaleNotifier`** (`lib/core/localization/admin_locale_provider.dart`) — separate persisted locale (`admin_locale`, default `Locale('ar')`), switchable live from Admin Settings without touching the app language.
+- **Commission Management** (`/admin/commissions`) — groups all rules by account/service/category, shows active + history rows, inline edit dialog (decimal filter) → `set_commission_rate` → invalidates `commissionRulesProvider`.
+- **Approvals Center** (`/admin/approvals`) — `pendingApprovalsProvider` renders the pending queue with localized request-type badges; approve / reject-with-reason dialogs → `decide_approval_request`.
+- **Admin Settings rebuilt** — two sections: *Personal* (Admin language switch) + *Global* (platform settings); Danger Zone removed.
+
+---
+
+## 10. Verification
+
+- **Static:** `dart analyze` on all touched areas — 0 errors, 0 warnings. Removed two pre-existing unused imports (`AppColors`) in `admin_dashboard_page.dart` / `admin_analytics_page.dart`.
+- **Tests:** `flutter test test/features/admin test/features/member_management` — **77/77 green**, including updated sidebar test (collapsed single entry) + new `admin_shell` grouped-nav assertions.
+- **Live SQL:** migrations **052**, **053**, **054** applied (HTTP 201) and each behavior probed with the owner JWT as recorded in §8.
+
+---
+
+## 11. Files (sprint 85)
+
+- `supabase/migrations/052_admin_commission_approval_fixes.sql` · `053_member_deletion_confirmation.sql` · `054_approval_center_listing.sql` — **new, applied**
+- `lib/features/admin/admin_shell.dart` — **new** shell/rail/drawer + admin nav groups
+- `lib/features/admin/presentation/pages/admin_commission_management_page.dart` · `admin_approvals_center_page.dart` — **new**
+- `lib/core/localization/admin_locale_provider.dart` · `lib/core/constants/storage_keys.dart` (`adminLocale`) — **new**
+- `lib/services/admin/admin_providers.dart` — `commissionRulesProvider`, `pendingApprovalsProvider`
+- `lib/features/admin/admin_module.dart` — wrapped every route in `AdminShell`, registered `commissions` + `approvals`
+- `lib/features/admin/presentation/pages/admin_settings_page.dart` — personal/global split, admin language switch, no Danger Zone
+- `lib/features/floating_sidebar/floating_sidebar_overlay.dart` — single app-level admin entry (grouped nav moved into the shell)
+- `lib/features/member_management/presentation/pages/member_drawer.dart` — `request_member_deletion`, `issue_sanction`, restore unsupported snackbar
+- `lib/features/admin/presentation/pages/admin_analytics_page.dart`, `admin_dashboard_page.dart` — removed unused imports
+- `lib/l10n/app_en.arb`, `app_ar.arb` + generated files — approval/commission/shell keys; removed danger-zone keys
+- `test/features/member_management/member_management_module_test.dart` — updated sidebar + shell tests
+
+---
+
+## 12. Commit
+
+`commit upcoming: sprint 85: harden admin backend, add commissions + approvals centers`

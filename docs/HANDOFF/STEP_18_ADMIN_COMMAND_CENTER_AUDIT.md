@@ -185,3 +185,27 @@ Legend:
 6. **Emergency/SOS** page (exists as data, no page).
 7. **Realtime** connect Live Tracking + Chat through `RealtimeService`.
 8. **Notification deep-link isAdmin fix** (#9).
+
+---
+
+## 8. Sprint-85 Resolution Matrix
+
+Every gap below was closed with live migrations + UI during sprint 85. Details and verification evidence: `STEP_18_ADMIN_COMMAND_CENTER_FINAL.md` (§8–§10).
+
+| # | Audit/finding (earlier discovery) | Resolution | Migration / file |
+|---|-----------------------------------|------------|------------------|
+| 1 | `decide_approval_request` rejected all non-campaign types | Full dispatcher restored (authority guards + `_approval_apply`) | `052_...` |
+| 2 | Commission analytics hardcoded 7/3 in 050 | `set_commission_rate` + `list_commission_rules` + `get_commission_rate` with effective dates; analytics recreated on rule-derived buckets | `052_...` |
+| 3 | `get_admin_analytics` ungated, not SECURITY DEFINER | SECURITY DEFINER + `is_admin()` gate + locked search_path | `052_...` |
+| 4 | UI `delete_user_account` (nonexistent) | `request_member_deletion` with typed-email verification → `delete_member_account` chain | `053_...` + `member_drawer.dart` |
+| 5 | No browsable approval queue | `list_approval_requests(p_state, p_limit)` → `{requests:[...]}` | `054_...` |
+| 6 | Fake "Reset All Data" Danger Zone | Removed UI + keys (no catastrophic surface exists) | `admin_settings_page.dart`, ARBs |
+| 7 | Sidebar duplicated full admin nav at app level | Collapsed to single entry; grouped nav (26 items) lives in `AdminShell` | `admin_shell.dart`, `floating_sidebar_overlay.dart` |
+| 8 | Admin UI language tied to app language | Independent `admin_locale` (Arabic default, persisted, live switch) | `admin_locale_provider.dart`, settings page |
+| 9 | Commissions/approvals had no UI | `/admin/commissions` + `/admin/approvals` pages, routed + shell-wrapped | two new pages, `admin_module.dart` |
+
+Integration notes:
+- Member restrict/suspend now call `issue_sanction`; restore reports platform-unsupported (no RPC).
+- Normal user flows still never initialize admin realtime (STEP 17 invariant preserved).
+- `apply.py` batches are JWT-transaction-local — future owner-simulation SQL must keep fixture + assertion in one batch.
+- Migrations 052–054 are applied and probed live; next free number = `055`.

@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:delwaqty/features/admin/domain/entities/admin_models.dart';
 import 'package:delwaqty/data/repositories/admin_repository.dart';
 import 'package:delwaqty/services/admin/admin_service.dart';
+import 'package:delwaqty/services/supabase/supabase_service.dart';
 
 // ─── Repository & Service Providers ────────────────────────
 
@@ -68,6 +69,28 @@ final platformSettingsProvider = FutureProvider<Map<String, dynamic>>((
 ) async {
   final adminService = ref.watch(adminServiceProvider);
   return adminService.getSettings();
+});
+
+// ─── Commission Rules (052) ────────────────────────────────
+
+final commissionRulesProvider =
+    FutureProvider<Map<String, dynamic>>((ref) async {
+  final client = ref.watch(supabaseClientProvider);
+  final response = await client.rpc('list_commission_rules');
+  return Map<String, dynamic>.from(response as Map);
+});
+
+// ─── Pending Approval Requests (052) ───────────────────────
+
+final pendingApprovalsProvider =
+    FutureProvider<List<Map<String, dynamic>>>((ref) async {
+  final client = ref.watch(supabaseClientProvider);
+  final response = await client.rpc('list_approval_requests');
+  if (response == null) {
+    return [];
+  }
+  final data = (response as Map)['requests'] as List;
+  return data.map((e) => Map<String, dynamic>.from(e as Map)).toList();
 });
 
 // ─── Active Drivers ────────────────────────────────────────

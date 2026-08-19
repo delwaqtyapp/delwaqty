@@ -983,25 +983,6 @@ class AppLocalizationsAr extends AppLocalizations {
   String get settingsFailed => 'فشل في حفظ الإعدادات';
 
   @override
-  String get dangerZone => 'منطقة الخطر';
-
-  @override
-  String get resetAllData => 'إعادة تعيين جميع البيانات';
-
-  @override
-  String get resetAllDataDesc => 'حذف جميع بيانات المنصة نهائياً';
-
-  @override
-  String get resetAllDataTitle => 'إعادة تعيين جميع البيانات؟';
-
-  @override
-  String get resetAllDataWarning =>
-      'لا يمكن التراجع عن هذا الإجراء. سيتم حذف جميع البيانات نهائياً.';
-
-  @override
-  String get reset => 'إعادة تعيين';
-
-  @override
   String get account => 'الحساب';
 
   @override
@@ -4536,4 +4517,223 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get adminExpand => 'توسيع قائمة الإدارة';
+
+  @override
+  String get adminLeadershipSection => 'القيادة';
+
+  @override
+  String get adminMembersSection => 'الأعضاء';
+
+  @override
+  String get adminPlatformSection => 'المنصة';
+
+  @override
+  String get adminAdministrationSection => 'الإدارة';
+
+  @override
+  String get adminSettingsGroupSection => 'إعدادات الإدارة';
+
+  @override
+  String get adminShellMenu => 'قائمة الإدارة';
+
+  @override
+  String get adminCommissions => 'العمولات';
+
+  @override
+  String get adminCommissionManagement => 'إدارة العمولات';
+
+  @override
+  String get adminCommissionManagementDesc =>
+      'تكوين قواعد العمولات النشطة لكل نوع حساب ونوع خدمة وفئة خدمة';
+
+  @override
+  String get adminApprovals => 'الموافقات';
+
+  @override
+  String get adminApprovalsCenter => 'مركز الموافقات';
+
+  @override
+  String get adminApprovalsCenterDesc =>
+      'البَت في طلبات الموافقات المعلقة: إدارة النظام، حذف الأعضاء، الجزاءات، الحملات، وتغييرات الإعدادات';
+
+  @override
+  String get adminPersonalSettings => 'الإعدادات الشخصية';
+
+  @override
+  String get adminPersonalSettingsDesc => 'تفضيلات مخزنة على هذا الجهاز';
+
+  @override
+  String get adminGlobalSettings => 'إعدادات المنصة العامة';
+
+  @override
+  String get adminGlobalSettingsDesc =>
+      'إعدادات على مستوى المنصة تؤثر على كل المديرين';
+
+  @override
+  String get adminLanguage => 'لغة الإدارة';
+
+  @override
+  String get adminLanguageDesc => 'مستقلة عن لغة التطبيق. العربية افتراضياً';
+
+  @override
+  String get commissionAccountGroup => 'أنواع الحسابات';
+
+  @override
+  String get commissionServiceTypeGroup => 'أنواع الخدمات';
+
+  @override
+  String get commissionServiceCategoryGroup => 'فئات الخدمات';
+
+  @override
+  String get commissionChange => 'تغيير النسبة';
+
+  @override
+  String get commissionNewRate => 'النسبة الجديدة (%)';
+
+  @override
+  String get commissionRateHint => 'نسبة بين 0 و 100';
+
+  @override
+  String get commissionSave => 'حفظ النسبة';
+
+  @override
+  String get commissionRateUpdated => 'تم تحديث نسبة العمولة';
+
+  @override
+  String get commissionRateFailed => 'فشل تحديث نسبة العمولة';
+
+  @override
+  String get commissionEffectiveFrom => 'سارية من';
+
+  @override
+  String get commissionNoExpiry => 'بدون تاريخ انتهاء';
+
+  @override
+  String get commissionActive => 'نشطة';
+
+  @override
+  String get commissionHistory => 'السجل';
+
+  @override
+  String get commissionAccountCustomer => 'العملاء';
+
+  @override
+  String get commissionAccountAdmin => 'موظفو المنصة';
+
+  @override
+  String get commissionAccountDriver => 'السائقون';
+
+  @override
+  String get commissionAccountProvider => 'مقدمو الخدمات';
+
+  @override
+  String get commissionAccountMerchant => 'التجار';
+
+  @override
+  String get commissionCategoryRestaurant => 'المطاعم';
+
+  @override
+  String get commissionCategoryPharmacy => 'الصيدليات';
+
+  @override
+  String get commissionCategoryGrocery => 'البقالة';
+
+  @override
+  String get commissionCategoryMarketplace => 'السوق الإلكتروني';
+
+  @override
+  String get commissionCategoryPlumbing => 'السباكة';
+
+  @override
+  String get commissionCategoryElectrical => 'الكهرباء';
+
+  @override
+  String get commissionCategoryCleaning => 'التنظيف';
+
+  @override
+  String get approvalRequest => 'طلب موافقة';
+
+  @override
+  String get approvalRequests => 'طلبات الموافقة';
+
+  @override
+  String get approvalDecide => 'البَت';
+
+  @override
+  String get approveRequest => 'موافقة';
+
+  @override
+  String get rejectRequest => 'رفض';
+
+  @override
+  String get rejectionReasonHint => 'الرفض يتطلب سبباً';
+
+  @override
+  String get approvalApproved => 'تمت الموافقة';
+
+  @override
+  String get approvalRejected => 'مرفوض';
+
+  @override
+  String get approvalPending => 'معلق';
+
+  @override
+  String get approvalRequestApproved => 'تمت الموافقة على الطلب';
+
+  @override
+  String get approvalRequestRejected => 'تم رفض الطلب';
+
+  @override
+  String get approvalConfirmApprove => 'الموافقة على هذا الطلب؟';
+
+  @override
+  String get approvalConfirmReject => 'رفض هذا الطلب؟';
+
+  @override
+  String get approvalDecisionFailed => 'فشل البَت في الطلب';
+
+  @override
+  String get requestedBy => 'تم الطلب بواسطة';
+
+  @override
+  String get requester => 'مقدّم الطلب';
+
+  @override
+  String get reason => 'السبب';
+
+  @override
+  String get noPendingApprovals => 'لا توجد طلبات موافقة معلقة';
+
+  @override
+  String get reqTypeAdminCreate => 'إنشاء مسؤول';
+
+  @override
+  String get reqTypeAdminRole => 'تغيير دور مسؤول';
+
+  @override
+  String get reqTypeAdminRegion => 'تغيير منطقة مسؤول';
+
+  @override
+  String get reqTypeAdminSupervisor => 'تغيير المشرف';
+
+  @override
+  String get reqTypeAdminDeactivate => 'إيقاف مسؤول';
+
+  @override
+  String get reqTypeCampaign => 'موافقة حملة';
+
+  @override
+  String get reqTypeMemberBan => 'حظر عضو';
+
+  @override
+  String get reqTypeMemberDelete => 'حذف عضو';
+
+  @override
+  String get reqTypeOfferApprove => 'موافقة عرض';
+
+  @override
+  String get reqTypeOfferPublish => 'نشر عرض';
+
+  @override
+  String get reqTypeRewardConfig => 'تغيير إعدادات المكافآت';
 }

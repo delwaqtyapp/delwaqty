@@ -171,11 +171,6 @@ final List<_AdminNavGroup> _adminGroups = [
         icon: Icons.storefront_rounded,
         label: (l) => l.adminMerchants,
       ),
-      _AdminNavItem(
-        path: '/admin/legacy',
-        icon: Icons.dashboard_rounded,
-        label: (l) => l.adminLegacyDashboard,
-      ),
     ],
   ),
   _AdminNavGroup(

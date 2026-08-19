@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:delwaqty/features/member_management/presentation/member_providers.dart';
+import 'package:delwaqty/l10n/app_localizations.dart';
 import 'package:delwaqty/shared/widgets/premium_empty_state.dart';
 import 'package:delwaqty/shared/widgets/shimmer_loading.dart';
 import 'package:delwaqty/shared/widgets/stat_card.dart';
@@ -19,20 +20,21 @@ class MemberDrawer extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final profileAsync = ref.watch(memberOpsProfileProvider(memberId));
+    final l10n = AppLocalizations.of(context);
 
     return profileAsync.when(
       loading: () => const Center(child: CircularProgressIndicator()),
       error: (e, _) => PremiumEmptyState(
         icon: Icons.error_outline,
-        title: 'Error',
+        title: l10n.error,
         message: e.toString(),
       ),
       data: (profile) {
         if (profile == null) {
-          return const PremiumEmptyState(
+          return PremiumEmptyState(
             icon: Icons.person_off_rounded,
-            title: 'Member not found',
-            message: 'This member does not exist or you lack access.',
+            title: l10n.memberNotFound,
+            message: l10n.memberNotFoundMessage,
           );
         }
         final adapted = normalizeMemberOpsProfile(profile);
@@ -125,10 +127,11 @@ class _DrawerHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final cs = Theme.of(context).colorScheme;
     final basic = profile['basic'] as Map<String, dynamic>? ?? {};
     final region = profile['region'] as Map<String, dynamic>? ?? {};
-    final name = basic['full_name'] as String? ?? 'Unnamed';
+    final name = basic['full_name'] as String? ?? l10n.unnamed;
     final email = basic['email'] as String? ?? '';
     final role = basic['role'] as String? ?? 'customer';
     final accountStatus = basic['account_status'] as String? ?? 'active';
@@ -235,8 +238,8 @@ class _DrawerHeader extends StatelessWidget {
                 color: verificationColor,
               ),
               if (isOnline)
-                const _Badge(
-                  label: 'online',
+                _Badge(
+                  label: l10n.onlineBadge,
                   color: Colors.green,
                 ),
             ],
@@ -275,7 +278,7 @@ class _DrawerHeader extends StatelessWidget {
                 ),
                 const SizedBox(width: 4),
                 Text(
-                  'Last seen: $lastSeenAt',
+                  l10n.lastSeenLabel(lastSeenAt),
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         color: cs.onSurfaceVariant,
                       ),
@@ -378,6 +381,7 @@ class _IdentitySection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final basic = profile['basic'] as Map<String, dynamic>? ?? {};
     final fullName = basic['full_name'] as String? ?? '-';
     final username = basic['username'] as String? ?? '-';
@@ -398,27 +402,27 @@ class _IdentitySection extends StatelessWidget {
         tilePadding: const EdgeInsets.symmetric(horizontal: 16),
         childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
         leading: const Icon(Icons.badge_outlined, size: 20),
-        title: const Text('Identity'),
+        title: Text(l10n.identitySection),
         children: [
-          _InfoTile(label: 'Full Name', value: fullName, icon: Icons.person_outline),
-          _InfoTile(label: 'Username', value: username, icon: Icons.alternate_email),
-          _InfoTile(label: 'Email', value: email, icon: Icons.email_outlined),
-          _InfoTile(label: 'Phone', value: phone, icon: Icons.phone_outlined),
-          _InfoTile(label: 'Date of Birth', value: dob, icon: Icons.cake_outlined),
-          _InfoTile(label: 'Role', value: role),
-          _InfoTile(label: 'User Type', value: userType),
-          _InfoTile(label: 'Avatar URL', value: avatarUrl),
+          _InfoTile(label: l10n.fullName, value: fullName, icon: Icons.person_outline),
+          _InfoTile(label: l10n.username, value: username, icon: Icons.alternate_email),
+          _InfoTile(label: l10n.email, value: email, icon: Icons.email_outlined),
+          _InfoTile(label: l10n.phone, value: phone, icon: Icons.phone_outlined),
+          _InfoTile(label: l10n.dateOfBirth, value: dob, icon: Icons.cake_outlined),
+          _InfoTile(label: l10n.role, value: role),
+          _InfoTile(label: l10n.userTypeLabel, value: userType),
+          _InfoTile(label: l10n.avatarUrl, value: avatarUrl),
           if (idCardUrl != null)
-            _InfoTile(label: 'ID Card', value: idCardUrl, icon: Icons.credit_card),
+            _InfoTile(label: l10n.idCard, value: idCardUrl, icon: Icons.credit_card),
           if (tradeLicenseUrl != null)
             _InfoTile(
-              label: 'Trade License',
+              label: l10n.tradeLicense,
               value: tradeLicenseUrl,
               icon: Icons.business_center_outlined,
             ),
           if (drivingLicenseUrl != null)
             _InfoTile(
-              label: 'Driving License',
+              label: l10n.drivingLicense,
               value: drivingLicenseUrl,
               icon: Icons.drive_eta_outlined,
             ),
@@ -439,6 +443,7 @@ class _VerificationSection extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final verificationAsync = ref.watch(memberVerificationProvider(memberId));
     final canDecideVerification =
         permissions['can_decide_verification'] as bool? ?? false;
@@ -450,21 +455,21 @@ class _VerificationSection extends ConsumerWidget {
         tilePadding: const EdgeInsets.symmetric(horizontal: 16),
         childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
         leading: const Icon(Icons.verified_user_outlined, size: 20),
-        title: const Text('Verification'),
+        title: Text(l10n.verificationSection),
         children: [
           verificationAsync.when(
             loading: () => const ShimmerLoading(
               child: SizedBox(height: 60),
             ),
             error: (e, _) => Text(
-              'Failed to load',
+              l10n.failedToLoad,
               style: Theme.of(context).textTheme.bodySmall,
             ),
             data: (attempt) {
               if (attempt == null) {
-                return const _InfoTile(
-                  label: 'Status',
-                  value: 'No verification attempts',
+                return _InfoTile(
+                  label: l10n.status,
+                  value: l10n.noVerificationAttempts,
                 );
               }
               final status = attempt['status'] as String? ?? 'pending';
@@ -477,17 +482,17 @@ class _VerificationSection extends ConsumerWidget {
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _InfoTile(label: 'Status', value: status),
+                  _InfoTile(label: l10n.status, value: status),
                   _InfoTile(
-                    label: 'Attempts',
+                    label: l10n.attempts,
                     value: attemptsCount.toString(),
                   ),
-                  _InfoTile(label: 'Submitted', value: createdAt),
+                  _InfoTile(label: l10n.submitted, value: createdAt),
                   if (reviewedBy != null && reviewedBy.isNotEmpty)
-                    _InfoTile(label: 'Reviewed By', value: reviewedBy),
+                    _InfoTile(label: l10n.reviewedBy, value: reviewedBy),
                   if (rejectionReason != null && rejectionReason.isNotEmpty)
                     _InfoTile(
-                      label: 'Rejection Reason',
+                      label: l10n.rejectionReason,
                       value: rejectionReason,
                       icon: Icons.info_outline,
                     ),
@@ -500,7 +505,7 @@ class _VerificationSection extends ConsumerWidget {
                             onPressed: () =>
                                 _showVerificationDecision(context, ref, true),
                             icon: const Icon(Icons.check_rounded, size: 16),
-                            label: const Text('Approve'),
+                            label: Text(l10n.approve),
                           ),
                         ),
                         const SizedBox(width: 8),
@@ -509,7 +514,7 @@ class _VerificationSection extends ConsumerWidget {
                             onPressed: () =>
                                 _showVerificationDecision(context, ref, false),
                             icon: const Icon(Icons.close_rounded, size: 16),
-                            label: const Text('Reject'),
+                            label: Text(l10n.reject),
                           ),
                         ),
                       ],
@@ -529,19 +534,22 @@ class _VerificationSection extends ConsumerWidget {
     WidgetRef ref,
     bool approve,
   ) async {
+    final l10n = AppLocalizations.of(context);
     final reason = await showDialog<String>(
       context: context,
       builder: (ctx) {
         final controller = TextEditingController();
         return AlertDialog(
-          title: Text(approve ? 'Approve Verification' : 'Reject Verification'),
+          title: Text(
+            approve ? l10n.approveVerification : l10n.rejectVerification,
+          ),
           content: TextField(
             controller: controller,
             decoration: InputDecoration(
-              labelText: 'Reason',
+              labelText: l10n.reason,
               hintText: approve
-                  ? 'Optional approval note'
-                  : 'Rejection reason *',
+                  ? l10n.approvalNote
+                  : l10n.rejectionReasonRequired,
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
               ),
@@ -554,11 +562,11 @@ class _VerificationSection extends ConsumerWidget {
           actions: [
             TextButton(
               onPressed: () => Navigator.of(ctx).pop(),
-              child: const Text('Cancel'),
+              child: Text(l10n.cancel),
             ),
             TextButton(
               onPressed: () => Navigator.of(ctx).pop(controller.text),
-              child: Text(approve ? 'Approve' : 'Reject'),
+              child: Text(approve ? l10n.approve : l10n.reject),
             ),
           ],
         );
@@ -570,7 +578,7 @@ class _VerificationSection extends ConsumerWidget {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            approve ? 'Verification approved' : 'Verification rejected',
+            approve ? l10n.verificationApproved : l10n.verificationRejected,
           ),
         ),
       );
@@ -587,6 +595,7 @@ class _LocationSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final region = profile['region'] as Map<String, dynamic>? ?? {};
     final location = profile['location'] as Map<String, dynamic>? ?? {};
     final hierarchicalLabel = region['hierarchical_label'] as String? ?? '-';
@@ -605,20 +614,20 @@ class _LocationSection extends StatelessWidget {
         tilePadding: const EdgeInsets.symmetric(horizontal: 16),
         childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
         leading: const Icon(Icons.location_on_outlined, size: 20),
-        title: const Text('Location'),
+        title: Text(l10n.locationSection),
         children: [
-          _InfoTile(label: 'Region', value: hierarchicalLabel, icon: Icons.map_outlined),
-          _InfoTile(label: 'Governorate', value: governorate),
-          _InfoTile(label: 'City', value: city),
+          _InfoTile(label: l10n.region, value: hierarchicalLabel, icon: Icons.map_outlined),
+          _InfoTile(label: l10n.governorate, value: governorate),
+          _InfoTile(label: l10n.city, value: city),
           if (latitude != null && longitude != null)
             _InfoTile(
-              label: 'Coordinates',
+              label: l10n.coordinates,
               value: '${latitude.toStringAsFixed(6)}, ${longitude.toStringAsFixed(6)}',
               icon: Icons.my_location,
             ),
           if (lastLocationUpdate != null)
-            _InfoTile(label: 'Last Location Update', value: lastLocationUpdate),
-          _InfoTile(label: 'Last Seen', value: lastSeenAt, icon: Icons.access_time),
+            _InfoTile(label: l10n.lastLocationUpdate, value: lastLocationUpdate),
+          _InfoTile(label: l10n.lastSeen, value: lastSeenAt, icon: Icons.access_time),
         ],
       ),
     );
@@ -632,6 +641,7 @@ class _ActivityTimelineSection extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final timelineAsync = ref.watch(memberTimelineProvider(memberId));
     final cs = Theme.of(context).colorScheme;
 
@@ -642,20 +652,20 @@ class _ActivityTimelineSection extends ConsumerWidget {
         tilePadding: const EdgeInsets.symmetric(horizontal: 16),
         childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
         leading: const Icon(Icons.timeline_outlined, size: 20),
-        title: const Text('Activity Timeline'),
+        title: Text(l10n.activityTimelineSection),
         children: [
           timelineAsync.when(
             loading: () => const ShimmerLoading(
               child: SizedBox(height: 120),
             ),
             error: (e, _) => Text(
-              'Failed to load timeline',
+              l10n.failedToLoadTimeline,
               style: Theme.of(context).textTheme.bodySmall,
             ),
             data: (events) {
               if (events.isEmpty) {
                 return Text(
-                  'No events yet',
+                  l10n.noEventsYet,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         color: cs.onSurfaceVariant,
                       ),
@@ -798,6 +808,7 @@ class _OrdersSection extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final basic = profile['basic'] as Map<String, dynamic>? ?? {};
     final role = basic['role'] as String? ?? 'customer';
     final financials = profile['financials'] as Map<String, dynamic>? ?? {};
@@ -810,20 +821,20 @@ class _OrdersSection extends ConsumerWidget {
         tilePadding: const EdgeInsets.symmetric(horizontal: 16),
         childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
         leading: const Icon(Icons.receipt_long_rounded, size: 20),
-        title: Text(_sectionTitle(role)),
+        title: Text(_sectionTitle(l10n, role)),
         children: [
           ref.watch(memberOrdersProvider(memberId)).when(
             loading: () => const ShimmerLoading(
               child: SizedBox(height: 100),
             ),
             error: (e, _) => Text(
-              'Failed to load',
+              l10n.failedToLoad,
               style: Theme.of(context).textTheme.bodySmall,
             ),
             data: (orders) {
               if (orders.isEmpty) {
                 return Text(
-                  'No orders found',
+                  l10n.noOrdersFound,
                   style: Theme.of(context).textTheme.bodySmall,
                 );
               }
@@ -847,31 +858,31 @@ class _OrdersSection extends ConsumerWidget {
                     runSpacing: 8,
                     children: [
                       StatCard(
-                        title: 'Total',
+                        title: l10n.total,
                         value: ordersCount.toString(),
                         icon: Icons.receipt_long_rounded,
                         color: Theme.of(context).colorScheme.primary,
                       ),
                       StatCard(
-                        title: 'Completed',
+                        title: l10n.completed,
                         value: completed.toString(),
                         icon: Icons.check_circle_outline,
                         color: Colors.green,
                       ),
                       StatCard(
-                        title: 'Cancelled',
+                        title: l10n.cancelled,
                         value: cancelled.toString(),
                         icon: Icons.cancel_outlined,
                         color: Colors.red,
                       ),
                       StatCard(
-                        title: 'Pending',
+                        title: l10n.pending,
                         value: pending.toString(),
                         icon: Icons.pending_outlined,
                         color: Colors.orange,
                       ),
                       StatCard(
-                        title: 'Total Spending',
+                        title: l10n.totalSpending,
                         value: totalSpending.toStringAsFixed(2),
                         icon: Icons.payments_outlined,
                         color: Colors.teal,
@@ -887,12 +898,12 @@ class _OrdersSection extends ConsumerWidget {
     );
   }
 
-  String _sectionTitle(String role) {
+  String _sectionTitle(AppLocalizations l10n, String role) {
     return switch (role) {
-      'driver' => 'Deliveries',
-      'merchant' => 'Merchant Orders',
-      'provider' => 'Jobs',
-      _ => 'Orders & Requests',
+      'driver' => l10n.deliveriesSection,
+      'merchant' => l10n.merchantOrdersSection,
+      'provider' => l10n.jobsSection,
+      _ => l10n.ordersRequestsSection,
     };
   }
 }
@@ -904,6 +915,7 @@ class _ServicesSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final services = profile['services'] as Map<String, dynamic>? ?? {};
     final categories = services['categories'] as List? ?? [];
     final serviceArea = services['service_area'] as String? ?? '-';
@@ -926,7 +938,7 @@ class _ServicesSection extends StatelessWidget {
         tilePadding: const EdgeInsets.symmetric(horizontal: 16),
         childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
         leading: const Icon(Icons.build_outlined, size: 20),
-        title: const Text('Services'),
+        title: Text(l10n.servicesSection),
         children: [
           if (categories.isNotEmpty)
             Padding(
@@ -950,34 +962,34 @@ class _ServicesSection extends StatelessWidget {
             runSpacing: 8,
             children: [
               StatCard(
-                title: 'Completed',
+                title: l10n.completed,
                 value: completedCount.toString(),
                 icon: Icons.check_circle_outline,
                 color: Colors.green,
               ),
               StatCard(
-                title: 'Cancelled',
+                title: l10n.cancelled,
                 value: cancelledCount.toString(),
                 icon: Icons.cancel_outlined,
                 color: Colors.red,
               ),
               if (rating != null)
                 StatCard(
-                  title: 'Rating',
+                  title: l10n.rating,
                   value: rating.toStringAsFixed(1),
                   icon: Icons.star_outline_rounded,
                   color: Colors.amber,
                 ),
               if (responseRate != null)
                 StatCard(
-                  title: 'Response Rate',
+                  title: l10n.responseRate,
                   value: '${(responseRate * 100).toStringAsFixed(0)}%',
                   icon: Icons.speed_outlined,
                   color: Colors.blue,
                 ),
               if (completionRate != null)
                 StatCard(
-                  title: 'Completion Rate',
+                  title: l10n.completionRate,
                   value: '${(completionRate * 100).toStringAsFixed(0)}%',
                   icon: Icons.done_all_rounded,
                   color: Colors.teal,
@@ -988,7 +1000,7 @@ class _ServicesSection extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.only(top: 8),
               child: _InfoTile(
-                label: 'Service Area',
+                label: l10n.serviceArea,
                 value: serviceArea,
                 icon: Icons.map_outlined,
               ),
@@ -1006,6 +1018,7 @@ class _WalletFinancialsSection extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final financialAsync = ref.watch(memberFinancialSummaryProvider(memberId));
 
     return Card(
@@ -1015,20 +1028,20 @@ class _WalletFinancialsSection extends ConsumerWidget {
         tilePadding: const EdgeInsets.symmetric(horizontal: 16),
         childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
         leading: const Icon(Icons.account_balance_wallet_outlined, size: 20),
-        title: const Text('Wallet & Financials'),
+        title: Text(l10n.walletFinancialsSection),
         children: [
           financialAsync.when(
             loading: () => const ShimmerLoading(
               child: SizedBox(height: 120),
             ),
             error: (e, _) => Text(
-              'Failed to load financials',
+              l10n.failedToLoadFinancials,
               style: Theme.of(context).textTheme.bodySmall,
             ),
             data: (data) {
               if (data == null) {
                 return Text(
-                  'No financial data',
+                  l10n.noFinancialData,
                   style: Theme.of(context).textTheme.bodySmall,
                 );
               }
@@ -1057,43 +1070,43 @@ class _WalletFinancialsSection extends ConsumerWidget {
                     runSpacing: 8,
                     children: [
                       StatCard(
-                        title: 'Balance',
+                        title: l10n.balance,
                         value: balance.toStringAsFixed(2),
                         icon: Icons.account_balance_wallet_outlined,
                         color: Colors.green,
                       ),
                       StatCard(
-                        title: 'Available',
+                        title: l10n.availableStat,
                         value: available.toStringAsFixed(2),
                         icon: Icons.check_circle_outline,
                         color: Colors.teal,
                       ),
                       StatCard(
-                        title: 'Pending',
+                        title: l10n.pending,
                         value: pending.toStringAsFixed(2),
                         icon: Icons.pending_outlined,
                         color: Colors.orange,
                       ),
                       StatCard(
-                        title: 'Total Earned',
+                        title: l10n.totalEarned,
                         value: totalEarned.toStringAsFixed(2),
                         icon: Icons.trending_up_rounded,
                         color: Colors.blue,
                       ),
                       StatCard(
-                        title: 'Withdrawn',
+                        title: l10n.withdrawnStat,
                         value: totalWithdrawn.toStringAsFixed(2),
                         icon: Icons.money_off_rounded,
                         color: Colors.purple,
                       ),
                       StatCard(
-                        title: 'Commissions',
+                        title: l10n.commissionsStat,
                         value: totalCommissions.toStringAsFixed(2),
                         icon: Icons.receipt_long_rounded,
                         color: Colors.amber,
                       ),
                       StatCard(
-                        title: 'Refunds',
+                        title: l10n.refunds,
                         value: totalRefunds.toStringAsFixed(2),
                         icon: Icons.replay_rounded,
                         color: Colors.red,
@@ -1103,7 +1116,7 @@ class _WalletFinancialsSection extends ConsumerWidget {
                   if (transactions.isNotEmpty) ...[
                     const SizedBox(height: 12),
                     Text(
-                      'Recent Transactions',
+                      l10n.recentTransactions,
                       style: Theme.of(context).textTheme.titleSmall?.copyWith(
                             fontWeight: FontWeight.w700,
                           ),
@@ -1172,6 +1185,7 @@ class _EarningsCommissionsSection extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final financialAsync = ref.watch(memberFinancialSummaryProvider(memberId));
 
     return Card(
@@ -1181,20 +1195,20 @@ class _EarningsCommissionsSection extends ConsumerWidget {
         tilePadding: const EdgeInsets.symmetric(horizontal: 16),
         childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
         leading: const Icon(Icons.payments_outlined, size: 20),
-        title: const Text('Earnings & Commissions'),
+        title: Text(l10n.earningsCommissionsSection),
         children: [
           financialAsync.when(
             loading: () => const ShimmerLoading(
               child: SizedBox(height: 80),
             ),
             error: (e, _) => Text(
-              'Failed to load',
+              l10n.failedToLoad,
               style: Theme.of(context).textTheme.bodySmall,
             ),
             data: (data) {
               if (data == null) {
                 return Text(
-                  'No earnings data',
+                  l10n.noEarningsData,
                   style: Theme.of(context).textTheme.bodySmall,
                 );
               }
@@ -1215,37 +1229,37 @@ class _EarningsCommissionsSection extends ConsumerWidget {
                 runSpacing: 8,
                 children: [
                   StatCard(
-                    title: 'Gross Earnings',
+                    title: l10n.grossEarnings,
                     value: grossEarnings.toStringAsFixed(2),
                     icon: Icons.trending_up_rounded,
                     color: Colors.blue,
                   ),
                   StatCard(
-                    title: 'Commission Rate',
+                    title: l10n.commissionRate,
                     value: '${(commissionRate * 100).toStringAsFixed(0)}%',
                     icon: Icons.percent_rounded,
                     color: Colors.amber,
                   ),
                   StatCard(
-                    title: 'Commission',
+                    title: l10n.commissionLabel,
                     value: commissionAmount.toStringAsFixed(2),
                     icon: Icons.receipt_long_rounded,
                     color: Colors.orange,
                   ),
                   StatCard(
-                    title: 'Net Earnings',
+                    title: l10n.netEarnings,
                     value: netEarnings.toStringAsFixed(2),
                     icon: Icons.account_balance_rounded,
                     color: Colors.green,
                   ),
                   StatCard(
-                    title: 'Pending',
+                    title: l10n.pending,
                     value: pendingEarnings.toStringAsFixed(2),
                     icon: Icons.pending_outlined,
                     color: Colors.orange,
                   ),
                   StatCard(
-                    title: 'Paid',
+                    title: l10n.paid,
                     value: paidEarnings.toStringAsFixed(2),
                     icon: Icons.check_circle_outline,
                     color: Colors.teal,
@@ -1271,6 +1285,7 @@ class _ComplaintsSection extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final complaintsAsync = ref.watch(memberComplaintsProvider(memberId));
 
     return Card(
@@ -1280,20 +1295,20 @@ class _ComplaintsSection extends ConsumerWidget {
         tilePadding: const EdgeInsets.symmetric(horizontal: 16),
         childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
         leading: const Icon(Icons.warning_amber_rounded, size: 20),
-        title: const Text('Complaints'),
+        title: Text(l10n.complaintsSection),
         children: [
           complaintsAsync.when(
             loading: () => const ShimmerLoading(
               child: SizedBox(height: 100),
             ),
             error: (e, _) => Text(
-              'Failed to load',
+              l10n.failedToLoad,
               style: Theme.of(context).textTheme.bodySmall,
             ),
             data: (complaints) {
               if (complaints.isEmpty) {
                 return Text(
-                  'No complaints found',
+                  l10n.noComplaintsFound,
                   style: Theme.of(context).textTheme.bodySmall,
                 );
               }
@@ -1317,31 +1332,31 @@ class _ComplaintsSection extends ConsumerWidget {
                     runSpacing: 8,
                     children: [
                       StatCard(
-                        title: 'Total',
+                        title: l10n.total,
                         value: complaints.length.toString(),
                         icon: Icons.warning_amber_rounded,
                         color: Colors.amber,
                       ),
                       StatCard(
-                        title: 'Open',
+                        title: l10n.open,
                         value: openCount.toString(),
                         icon: Icons.radio_button_checked,
                         color: Colors.orange,
                       ),
                       StatCard(
-                        title: 'Resolved',
+                        title: l10n.resolvedStat,
                         value: resolvedCount.toString(),
                         icon: Icons.check_circle_outline,
                         color: Colors.green,
                       ),
                       StatCard(
-                        title: 'Escalated',
+                        title: l10n.escalated,
                         value: escalatedCount.toString(),
                         icon: Icons.trending_up_rounded,
                         color: Colors.red,
                       ),
                       StatCard(
-                        title: 'Urgent',
+                        title: l10n.urgent,
                         value: urgentCount.toString(),
                         icon: Icons.priority_high_rounded,
                         color: Colors.red.shade700,
@@ -1350,7 +1365,7 @@ class _ComplaintsSection extends ConsumerWidget {
                   ),
                   const SizedBox(height: 12),
                   Text(
-                    'Latest Complaints',
+                    l10n.latestComplaints,
                     style: Theme.of(context).textTheme.titleSmall?.copyWith(
                           fontWeight: FontWeight.w700,
                         ),
@@ -1418,6 +1433,7 @@ class _SupportSection extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final roomsAsync = ref.watch(memberSupportRoomsProvider(memberId));
 
     return Card(
@@ -1427,20 +1443,20 @@ class _SupportSection extends ConsumerWidget {
         tilePadding: const EdgeInsets.symmetric(horizontal: 16),
         childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
         leading: const Icon(Icons.chat_bubble_outline, size: 20),
-        title: const Text('Support'),
+        title: Text(l10n.supportSection),
         children: [
           roomsAsync.when(
             loading: () => const ShimmerLoading(
               child: SizedBox(height: 80),
             ),
             error: (e, _) => Text(
-              'Failed to load',
+              l10n.failedToLoad,
               style: Theme.of(context).textTheme.bodySmall,
             ),
             data: (rooms) {
               if (rooms.isEmpty) {
                 return Text(
-                  'No support conversations',
+                  l10n.noSupportConversations,
                   style: Theme.of(context).textTheme.bodySmall,
                 );
               }
@@ -1461,25 +1477,25 @@ class _SupportSection extends ConsumerWidget {
                     runSpacing: 8,
                     children: [
                       StatCard(
-                        title: 'Conversations',
+                        title: l10n.conversations,
                         value: rooms.length.toString(),
                         icon: Icons.chat_bubble_outline,
                         color: Colors.blue,
                       ),
                       StatCard(
-                        title: 'Active',
+                        title: l10n.activeStat,
                         value: activeCount.toString(),
                         icon: Icons.radio_button_checked,
                         color: Colors.green,
                       ),
                       StatCard(
-                        title: 'Emergency',
+                        title: l10n.emergencyStat,
                         value: emergencyCount.toString(),
                         icon: Icons.emergency_rounded,
                         color: Colors.red,
                       ),
                       StatCard(
-                        title: 'Escalated',
+                        title: l10n.escalated,
                         value: escalatedCount.toString(),
                         icon: Icons.trending_up_rounded,
                         color: Colors.orange,
@@ -1488,7 +1504,7 @@ class _SupportSection extends ConsumerWidget {
                   ),
                   const SizedBox(height: 8),
                   ...rooms.take(5).map((r) {
-                    final roomTitle = r['title'] as String? ?? 'Support';
+                    final roomTitle = r['title'] as String? ?? l10n.supportSection;
                     final priority = r['priority'] as String? ?? 'normal';
                     final isEmergency = r['is_emergency'] as bool? ?? false;
                     final assignedAdmin =
@@ -1544,6 +1560,7 @@ class _SanctionsSectionState extends ConsumerState<_SanctionsSection> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final sanctionsAsync = ref.watch(memberSanctionsProvider(widget.memberId));
     final canIssueSanction =
         widget.permissions['can_issue_sanction'] as bool? ?? false;
@@ -1557,20 +1574,20 @@ class _SanctionsSectionState extends ConsumerState<_SanctionsSection> {
         tilePadding: const EdgeInsets.symmetric(horizontal: 16),
         childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
         leading: const Icon(Icons.gavel_rounded, size: 20),
-        title: const Text('Sanctions'),
+        title: Text(l10n.sanctionsSection),
         children: [
           sanctionsAsync.when(
             loading: () => const ShimmerLoading(
               child: SizedBox(height: 100),
             ),
             error: (e, _) => Text(
-              'Failed to load',
+              l10n.failedToLoad,
               style: Theme.of(context).textTheme.bodySmall,
             ),
             data: (sanctions) {
               if (sanctions.isEmpty) {
                 return Text(
-                  'No sanctions',
+                  l10n.noSanctions,
                   style: Theme.of(context).textTheme.bodySmall,
                 );
               }
@@ -1582,7 +1599,7 @@ class _SanctionsSectionState extends ConsumerState<_SanctionsSection> {
                 children: [
                   if (active.isNotEmpty) ...[
                     Text(
-                      'Active Sanctions',
+                      l10n.activeSanctions,
                       style: Theme.of(context).textTheme.titleSmall?.copyWith(
                             fontWeight: FontWeight.w700,
                           ),
@@ -1601,7 +1618,7 @@ class _SanctionsSectionState extends ConsumerState<_SanctionsSection> {
                   if (sanctions.length > active.length) ...[
                     const SizedBox(height: 12),
                     Text(
-                      'History',
+                      l10n.history,
                       style: Theme.of(context).textTheme.titleSmall?.copyWith(
                             fontWeight: FontWeight.w700,
                           ),
@@ -1624,7 +1641,7 @@ class _SanctionsSectionState extends ConsumerState<_SanctionsSection> {
                             ? null
                             : () => _showIssueSanctionDialog(context),
                         icon: const Icon(Icons.add_rounded, size: 16),
-                        label: const Text('Issue Sanction'),
+                        label: Text(l10n.issueSanction),
                       ),
                     ),
                   ],
@@ -1638,6 +1655,7 @@ class _SanctionsSectionState extends ConsumerState<_SanctionsSection> {
   }
 
   void _showIssueSanctionDialog(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final reasonController = TextEditingController();
     String selectedType = 'warning';
 
@@ -1645,32 +1663,38 @@ class _SanctionsSectionState extends ConsumerState<_SanctionsSection> {
       context: context,
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setDialogState) => AlertDialog(
-          title: const Text('Issue Sanction'),
+          title: Text(l10n.issueSanction),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               DropdownButtonFormField<String>(
                 initialValue: selectedType,
                 decoration: InputDecoration(
-                  labelText: 'Type',
+                  labelText: l10n.sanctionType,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
-                items: const [
-                  DropdownMenuItem(value: 'warning', child: Text('Warning')),
-                  DropdownMenuItem(value: 'fine', child: Text('Fine')),
+                items: [
+                  DropdownMenuItem(
+                    value: 'warning',
+                    child: Text(l10n.warning),
+                  ),
+                  DropdownMenuItem(
+                    value: 'fine',
+                    child: Text(l10n.fine),
+                  ),
                   DropdownMenuItem(
                     value: 'suspension',
-                    child: Text('Suspension'),
+                    child: Text(l10n.suspension),
                   ),
                   DropdownMenuItem(
                     value: 'temporary_ban',
-                    child: Text('Temporary Ban'),
+                    child: Text(l10n.temporaryBan),
                   ),
                   DropdownMenuItem(
                     value: 'permanent_ban',
-                    child: Text('Permanent Ban'),
+                    child: Text(l10n.permanentBan),
                   ),
                 ],
                 onChanged: (v) => setDialogState(() => selectedType = v!),
@@ -1679,8 +1703,8 @@ class _SanctionsSectionState extends ConsumerState<_SanctionsSection> {
               TextField(
                 controller: reasonController,
                 decoration: InputDecoration(
-                  labelText: 'Reason *',
-                  hintText: 'Enter reason for sanction',
+                  labelText: l10n.reasonRequired,
+                  hintText: l10n.enterSanctionReason,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
@@ -1695,7 +1719,7 @@ class _SanctionsSectionState extends ConsumerState<_SanctionsSection> {
           actions: [
             TextButton(
               onPressed: () => Navigator.of(ctx).pop(),
-              child: const Text('Cancel'),
+              child: Text(l10n.cancel),
             ),
             TextButton(
               onPressed: () {
@@ -1703,7 +1727,7 @@ class _SanctionsSectionState extends ConsumerState<_SanctionsSection> {
                 Navigator.of(ctx).pop();
                 _issueSanction(selectedType, reasonController.text.trim());
               },
-              child: const Text('Issue'),
+              child: Text(l10n.issue),
             ),
           ],
         ),
@@ -1712,6 +1736,7 @@ class _SanctionsSectionState extends ConsumerState<_SanctionsSection> {
   }
 
   Future<void> _issueSanction(String type, String reason) async {
+    final l10n = AppLocalizations.of(context);
     setState(() => _isProcessing = true);
     try {
       final client = ref.read(supabaseClientProvider);
@@ -1724,13 +1749,13 @@ class _SanctionsSectionState extends ConsumerState<_SanctionsSection> {
         ref.invalidate(memberSanctionsProvider(widget.memberId));
         ref.invalidate(memberOpsProfileProvider(widget.memberId));
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Sanction issued')),
+          SnackBar(content: Text(l10n.sanctionIssued)),
         );
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed: $e')),
+          SnackBar(content: Text(l10n.failedWithError(e.toString()))),
         );
       }
     } finally {
@@ -1759,6 +1784,7 @@ class _SanctionTileState extends ConsumerState<_SanctionTile> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final type = widget.sanction['sanction_type'] as String? ?? '?';
     final reason = widget.sanction['reason'] as String? ?? '';
     final issuedAt = widget.sanction['created_at'] as String? ?? '';
@@ -1800,7 +1826,7 @@ class _SanctionTileState extends ConsumerState<_SanctionTile> {
                     overflow: TextOverflow.ellipsis,
                   ),
                 Text(
-                  '$issuedAt${issuedBy != null ? ' · by $issuedBy' : ''}${expiry != null ? ' · expires $expiry' : ''}',
+                  '$issuedAt${issuedBy != null ? ' · ${l10n.issuedBy(issuedBy)}' : ''}${expiry != null ? ' · ${l10n.expiresIn(expiry)}' : ''}',
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         fontSize: 10,
                         color: Theme.of(context).colorScheme.onSurfaceVariant,
@@ -1819,7 +1845,7 @@ class _SanctionTileState extends ConsumerState<_SanctionTile> {
                     )
                   : const Icon(Icons.undo_rounded, size: 16),
               onPressed: _isRevoking ? null : () => _confirmRevoke(),
-              tooltip: 'Revoke',
+              tooltip: l10n.revoke,
               visualDensity: VisualDensity.compact,
             ),
         ],
@@ -1828,23 +1854,24 @@ class _SanctionTileState extends ConsumerState<_SanctionTile> {
   }
 
   Future<void> _confirmRevoke() async {
+    final l10n = AppLocalizations.of(context);
     final reasonController = TextEditingController();
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Revoke Sanction'),
+        title: Text(l10n.revokeSanction),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              'Revoke ${widget.sanction['sanction_type']}?',
+              l10n.revokeQuestion('${widget.sanction['sanction_type']}'),
             ),
             const SizedBox(height: 12),
             TextField(
               controller: reasonController,
               decoration: InputDecoration(
-                labelText: 'Reason',
-                hintText: 'Enter reason for revocation',
+                labelText: l10n.reason,
+                hintText: l10n.enterRevocationReason,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
@@ -1859,14 +1886,14 @@ class _SanctionTileState extends ConsumerState<_SanctionTile> {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(false),
-            child: const Text('Cancel'),
+            child: Text(l10n.cancel),
           ),
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(true),
             style: TextButton.styleFrom(
               foregroundColor: Theme.of(context).colorScheme.error,
             ),
-            child: const Text('Revoke'),
+            child: Text(l10n.revoke),
           ),
         ],
       ),
@@ -1885,13 +1912,15 @@ class _SanctionTileState extends ConsumerState<_SanctionTile> {
         if (mounted) {
           widget.onRevoked();
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Sanction revoked')),
+            SnackBar(content: Text(l10n.sanctionRevoked)),
           );
         }
       } catch (e) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Failed to revoke: $e')),
+            SnackBar(
+              content: Text(l10n.failedWithError(e.toString())),
+            ),
           );
         }
       } finally {
@@ -1908,42 +1937,43 @@ class _DocumentsSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final basic = profile['basic'] as Map<String, dynamic>? ?? {};
     final documents = <Map<String, dynamic>>[];
 
     final idCardUrl = basic['id_card_url'] as String?;
     if (idCardUrl != null && idCardUrl.isNotEmpty) {
       documents.add({
-        'type': 'ID Card',
+        'type': l10n.idCard,
         'url': idCardUrl,
-        'status': 'submitted',
+        'status': l10n.submitted,
       });
     }
 
     final tradeLicenseUrl = basic['trade_license_url'] as String?;
     if (tradeLicenseUrl != null && tradeLicenseUrl.isNotEmpty) {
       documents.add({
-        'type': 'Trade License',
+        'type': l10n.tradeLicense,
         'url': tradeLicenseUrl,
-        'status': 'submitted',
+        'status': l10n.submitted,
       });
     }
 
     final drivingLicenseUrl = basic['driving_license_url'] as String?;
     if (drivingLicenseUrl != null && drivingLicenseUrl.isNotEmpty) {
       documents.add({
-        'type': 'Driving License',
+        'type': l10n.drivingLicense,
         'url': drivingLicenseUrl,
-        'status': 'submitted',
+        'status': l10n.submitted,
       });
     }
 
     final profilePhotoUrl = basic['avatar_url'] as String?;
     if (profilePhotoUrl != null && profilePhotoUrl.isNotEmpty) {
       documents.add({
-        'type': 'Profile Photo',
+        'type': l10n.profilePhoto,
         'url': profilePhotoUrl,
-        'status': 'submitted',
+        'status': l10n.submitted,
       });
     }
 
@@ -1958,7 +1988,7 @@ class _DocumentsSection extends StatelessWidget {
         tilePadding: const EdgeInsets.symmetric(horizontal: 16),
         childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
         leading: const Icon(Icons.folder_outlined, size: 20),
-        title: const Text('Documents'),
+        title: Text(l10n.documentsSection),
         children: documents.map((doc) {
           final type = doc['type'] as String;
           final status = doc['status'] as String;
@@ -2006,6 +2036,7 @@ class _AdminActionsSectionState extends ConsumerState<_AdminActionsSection> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final canEditProfile =
         widget.permissions['can_edit_profile'] as bool? ?? false;
     final canDecideVerification =
@@ -2044,14 +2075,14 @@ class _AdminActionsSectionState extends ConsumerState<_AdminActionsSection> {
         tilePadding: const EdgeInsets.symmetric(horizontal: 16),
         childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
         leading: const Icon(Icons.admin_panel_settings_outlined, size: 20),
-        title: const Text('Admin Actions'),
+        title: Text(l10n.adminActionsSection),
         children: [
           if (canEditProfile)
             ListTile(
               dense: true,
               contentPadding: EdgeInsets.zero,
               leading: const Icon(Icons.edit_outlined, size: 18),
-              title: const Text('Edit Profile', style: TextStyle(fontSize: 13)),
+              title: Text(l10n.editProfile, style: const TextStyle(fontSize: 13)),
               onTap: () {},
             ),
           if (canDecideVerification)
@@ -2059,9 +2090,9 @@ class _AdminActionsSectionState extends ConsumerState<_AdminActionsSection> {
               dense: true,
               contentPadding: EdgeInsets.zero,
               leading: const Icon(Icons.verified_user_outlined, size: 18),
-              title: const Text(
-                'Verification Decision',
-                style: TextStyle(fontSize: 13),
+              title: Text(
+                l10n.verificationDecision,
+                style: const TextStyle(fontSize: 13),
               ),
               onTap: () {},
             ),
@@ -2070,9 +2101,9 @@ class _AdminActionsSectionState extends ConsumerState<_AdminActionsSection> {
               dense: true,
               contentPadding: EdgeInsets.zero,
               leading: const Icon(Icons.gavel_rounded, size: 18),
-              title: const Text(
-                'Issue Sanction',
-                style: TextStyle(fontSize: 13),
+              title: Text(
+                l10n.issueSanction,
+                style: const TextStyle(fontSize: 13),
               ),
               onTap: () {},
             ),
@@ -2081,9 +2112,9 @@ class _AdminActionsSectionState extends ConsumerState<_AdminActionsSection> {
               dense: true,
               contentPadding: EdgeInsets.zero,
               leading: const Icon(Icons.undo_rounded, size: 18),
-              title: const Text(
-                'Revoke Sanction',
-                style: TextStyle(fontSize: 13),
+              title: Text(
+                l10n.revokeSanction,
+                style: const TextStyle(fontSize: 13),
               ),
               onTap: () {},
             ),
@@ -2092,12 +2123,12 @@ class _AdminActionsSectionState extends ConsumerState<_AdminActionsSection> {
               dense: true,
               contentPadding: EdgeInsets.zero,
               leading: const Icon(Icons.block_outlined, size: 18, color: Colors.orange),
-              title: const Text(
-                'Restrict Account',
-                style: TextStyle(fontSize: 13, color: Colors.orange),
+              title: Text(
+                l10n.restrictAccount,
+                style: const TextStyle(fontSize: 13, color: Colors.orange),
               ),
               onTap: () => _showAccountActionDialog(
-                'Restrict',
+                l10n.restrict,
                 'restrict_account',
                 Colors.orange,
               ),
@@ -2108,12 +2139,12 @@ class _AdminActionsSectionState extends ConsumerState<_AdminActionsSection> {
               dense: true,
               contentPadding: EdgeInsets.zero,
               leading: const Icon(Icons.pause_circle_outline, size: 18, color: Colors.red),
-              title: const Text(
-                'Suspend Account',
-                style: TextStyle(fontSize: 13, color: Colors.red),
+              title: Text(
+                l10n.suspendAccount,
+                style: const TextStyle(fontSize: 13, color: Colors.red),
               ),
               onTap: () => _showAccountActionDialog(
-                'Suspend',
+                l10n.suspend,
                 'suspend_account',
                 Colors.red,
               ),
@@ -2123,12 +2154,12 @@ class _AdminActionsSectionState extends ConsumerState<_AdminActionsSection> {
               dense: true,
               contentPadding: EdgeInsets.zero,
               leading: const Icon(Icons.restore_rounded, size: 18, color: Colors.green),
-              title: const Text(
-                'Restore Account',
-                style: TextStyle(fontSize: 13, color: Colors.green),
+              title: Text(
+                l10n.restoreAccount,
+                style: const TextStyle(fontSize: 13, color: Colors.green),
               ),
               onTap: () => _showAccountActionDialog(
-                'Restore',
+                l10n.restore,
                 'restore_account',
                 Colors.green,
               ),
@@ -2138,12 +2169,12 @@ class _AdminActionsSectionState extends ConsumerState<_AdminActionsSection> {
               dense: true,
               contentPadding: EdgeInsets.zero,
               leading: const Icon(Icons.restore_rounded, size: 18, color: Colors.green),
-              title: const Text(
-                'Restore Account',
-                style: TextStyle(fontSize: 13, color: Colors.green),
+              title: Text(
+                l10n.restoreAccount,
+                style: const TextStyle(fontSize: 13, color: Colors.green),
               ),
               onTap: () => _showAccountActionDialog(
-                'Restore',
+                l10n.restore,
                 'restore_account',
                 Colors.green,
               ),
@@ -2154,11 +2185,11 @@ class _AdminActionsSectionState extends ConsumerState<_AdminActionsSection> {
               contentPadding: EdgeInsets.zero,
               leading: Icon(Icons.delete_forever_outlined, size: 18, color: cs.error),
               title: Text(
-                'Delete Account',
+                l10n.deleteAccount,
                 style: TextStyle(fontSize: 13, color: cs.error),
               ),
               onTap: () => _showAccountActionDialog(
-                'Delete',
+                l10n.delete,
                 'delete_account',
                 cs.error,
               ),
@@ -2173,6 +2204,7 @@ class _AdminActionsSectionState extends ConsumerState<_AdminActionsSection> {
     String actionKey,
     Color color,
   ) async {
+    final l10n = AppLocalizations.of(context);
     if (actionKey == 'delete_account') {
       await _confirmDeletion();
       return;
@@ -2183,17 +2215,17 @@ class _AdminActionsSectionState extends ConsumerState<_AdminActionsSection> {
       builder: (ctx) {
         final controller = TextEditingController();
         return AlertDialog(
-          title: Text('$action Account'),
+          title: Text(l10n.actionAccountTitle(action)),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text('Are you sure you want to $action this account?'),
+              Text(l10n.actionConfirmMessage(action)),
               const SizedBox(height: 12),
               TextField(
                 controller: controller,
                 decoration: InputDecoration(
-                  labelText: 'Reason *',
-                  hintText: 'Enter reason',
+                  labelText: l10n.reasonRequired,
+                  hintText: l10n.enterReason,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
@@ -2208,7 +2240,7 @@ class _AdminActionsSectionState extends ConsumerState<_AdminActionsSection> {
           actions: [
             TextButton(
               onPressed: () => Navigator.of(ctx).pop(),
-              child: const Text('Cancel'),
+              child: Text(l10n.cancel),
             ),
             TextButton(
               onPressed: () => Navigator.of(ctx).pop(controller.text),
@@ -2226,10 +2258,9 @@ class _AdminActionsSectionState extends ConsumerState<_AdminActionsSection> {
       final client = ref.read(supabaseClientProvider);
       if (actionKey == 'restore_account') {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
+          SnackBar(
             content: Text(
-              'Restoration is not supported through the API; '
-              'contact the owner to restore the account',
+              l10n.restorationUnsupported,
             ),
           ),
         );
@@ -2246,66 +2277,51 @@ class _AdminActionsSectionState extends ConsumerState<_AdminActionsSection> {
       if (mounted) {
         ref.invalidate(memberOpsProfileProvider(widget.memberId));
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Account $action completed')),
+          SnackBar(content: Text(l10n.accountActionCompleted(action))),
         );
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed: $e')),
+          SnackBar(content: Text(l10n.failedWithError(e.toString()))),
         );
       }
     }
   }
 
-  /// Deletion (D4): soft-delete + anonymize + preserved audit. Requires the
-  /// admin to type the member's email as confirmation; the server validates it
-  /// (`request_member_deletion`, migration 053) and submits an
-  /// owner-decided approval request rather than deleting directly.
+  /// Deletion (D4): soft-delete + anonymize + preserved audit. The member
+  /// email is taken from the loaded profile (never typed) and validated
+  /// server-side by `request_member_deletion` (migration 053), which submits
+  /// an owner-decided approval request rather than deleting directly.
   Future<void> _confirmDeletion() async {
+    final l10n = AppLocalizations.of(context);
     final basic = widget.profile['basic'] as Map<String, dynamic>? ?? {};
     final memberEmail = basic['email'] as String? ?? '';
 
-    final confirmation = await showDialog<(String, String)>(
+    final reason = await showDialog<String>(
       context: context,
       builder: (ctx) {
-        final emailController = TextEditingController();
         final reasonController = TextEditingController();
         return AlertDialog(
-          title: const Text('Delete Account'),
+          title: Text(l10n.deleteAccount),
           content: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Text(
-                  'Deleting an account permanently deactivates it and '
-                  'anonymizes the member\'s personal data. An approval '
-                  'request is submitted for review.',
-                ),
-                const SizedBox(height: 8),
-                if (memberEmail.isNotEmpty)
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 8),
-                    child: Text(
-                      'Member email: $memberEmail',
-                      style: const TextStyle(fontWeight: FontWeight.bold),
-                    ),
+                Text(l10n.deleteAccountMessage),
+                if (memberEmail.isNotEmpty) ...[
+                  const SizedBox(height: 8),
+                  Text(
+                    l10n.memberEmailLabel(memberEmail),
+                    style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
-                TextField(
-                  controller: emailController,
-                  decoration: const InputDecoration(
-                    labelText: 'Confirm by typing the member email *',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.all(Radius.circular(12)),
-                    ),
-                  ),
-                ),
+                ],
                 const SizedBox(height: 12),
                 TextField(
                   controller: reasonController,
-                  decoration: const InputDecoration(
-                    labelText: 'Reason *',
-                    border: OutlineInputBorder(
+                  decoration: InputDecoration(
+                    labelText: l10n.reasonRequired,
+                    border: const OutlineInputBorder(
                       borderRadius: BorderRadius.all(Radius.circular(12)),
                     ),
                   ),
@@ -2320,46 +2336,42 @@ class _AdminActionsSectionState extends ConsumerState<_AdminActionsSection> {
           actions: [
             TextButton(
               onPressed: () => Navigator.of(ctx).pop(),
-              child: const Text('Cancel'),
+              child: Text(l10n.cancel),
             ),
             FilledButton(
               style: FilledButton.styleFrom(
                 backgroundColor: Theme.of(ctx).colorScheme.error,
               ),
-              onPressed: () => Navigator.of(ctx).pop((
-                emailController.text.trim(),
-                reasonController.text.trim(),
-              )),
-              child: const Text('Submit deletion request'),
+              onPressed: () =>
+                  Navigator.of(ctx).pop(reasonController.text.trim()),
+              child: Text(l10n.submitDeletionRequest),
             ),
           ],
         );
       },
     );
 
-    if (confirmation == null || !mounted) return;
-    final (email, reason) = confirmation;
-    if (email.isEmpty || reason.isEmpty) return;
+    if (reason == null || reason.isEmpty || !mounted) return;
 
     try {
       final client = ref.read(supabaseClientProvider);
       await client.rpc('request_member_deletion', params: {
         'p_member_id': widget.memberId,
-        'p_confirmation_email': email,
+        'p_confirmation_email': memberEmail,
         'p_reason': reason,
       });
       if (mounted) {
         ref.invalidate(memberOpsProfileProvider(widget.memberId));
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Deletion request submitted for approval'),
+          SnackBar(
+            content: Text(l10n.deletionRequestSubmitted),
           ),
         );
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed: $e')),
+          SnackBar(content: Text(l10n.failedWithError(e.toString()))),
         );
       }
     }

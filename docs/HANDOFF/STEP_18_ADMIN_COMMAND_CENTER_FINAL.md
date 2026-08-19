@@ -188,3 +188,38 @@ Follow-up deep-dive that moved the admin surface from "rebuild on top of existin
 ## 12. Commit
 
 `commit upcoming: sprint 85: harden admin backend, add commissions + approvals centers`
+---
+
+## 13. Appendix — Sprint 86 (Full Localization + Deletion Rework)
+
+### 13.1 Member deletion rework (mandate #3)
+
+`_confirmDeletion` in `member_drawer.dart` is now a pure **confirmation dialog**: shows `deleteAccountMessage` warning, auto-displays the member's email (`memberEmailLabel`, read from `profile['email']`), and collects only a reason. The email is passed automatically to `request_member_deletion(p_member_id, p_confirmation_email, p_reason)`. All email-typing UI removed — the server still validates the email (053) so the security guarantee is intact.
+
+### 13.2 Localization coverage (mandate #2)
+
+- **Member drawer** — all sections localized (Identity, Verification, Location, Timeline, Orders/Deliveries, Services, Wallet/Earnings, Complaints, Support, Sanctions, Documents, Admin Actions) with `_StatusChip`-style helpers.
+- **Admin pages** — emergency, delivery intelligence, financial center, wallet/merchant/provider intelligence, merchants, commission management, analytics (`MaterialLocalizations.formatTimeOfDay` replaces hardcoded AM/PM), transaction ledger.
+- **Member management** — operations center (filters, sort, tiles via `_accountStatusLabel`/`_roleLabel`), member detail (sanction sheet, contact card, sanctions section, timeline).
+- Added ~135 keys to **both** `app_en.arb` and `app_ar.arb` (OrderedDict-preserving python script; parity validated each `gen-l10n`); missing Arabic `addBranch`/`branchName` backfilled.
+- Removed a non-existent `l10n.provider` role branch (fallback keeps raw role).
+
+### 13.3 Link audit (mandate #4)
+
+All 26 admin nav items in `admin_shell.dart` resolve to registered routes in `admin_module.dart`; `/admin/escalations` resolves via `escalation_module.dart`; `/search` resolves via `search_module.dart`. No dangling links.
+
+### 13.4 Verification
+
+- `dart analyze <touched>` — 0 errors / 0 warnings per file
+- `flutter test test/features/admin test/features/member_management` — **73/73 green**
+- `flutter build apk --debug --dart-define-from-file=.env.dev` — built
+
+### 13.5 Files (sprint 86)
+
+- `lib/l10n/app_en.arb` · `app_ar.arb` + `app_localizations*.dart` (new key set)
+- `lib/features/member_management/presentation/pages/member_drawer.dart` (deletion rework + localization)
+- `lib/features/member_management/presentation/pages/member_operations_center.dart` · `member_detail_page.dart`
+- `lib/features/admin/admin_module.dart` · `admin_shell.dart` · `domain/entities/admin_models.dart`
+- `lib/features/admin/presentation/pages/*` (all localized; `admin_dashboard_page.dart` deleted — redundant vs Command Center)
+- `lib/services/admin/admin_providers.dart` · `admin_service.dart`
+- `test/features/admin/domain/entities_test.dart`

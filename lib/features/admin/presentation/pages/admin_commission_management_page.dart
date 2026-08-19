@@ -94,9 +94,9 @@ class _AdminCommissionManagementPageState
             const SizedBox(height: 12),
             TextField(
               controller: descController,
-              decoration: const InputDecoration(
-                labelText: 'Description',
-                border: OutlineInputBorder(
+              decoration: InputDecoration(
+                labelText: l10n.description,
+                border: const OutlineInputBorder(
                   borderRadius: BorderRadius.all(Radius.circular(12)),
                 ),
               ),

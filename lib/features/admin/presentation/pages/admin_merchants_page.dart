@@ -217,9 +217,9 @@ class _MerchantTile extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Type: $type'),
+                  Text('${l10n.typeLabel}: $type'),
                   const SizedBox(height: 4),
-                  Text('Status: $statusLabel'),
+                  Text('${l10n.statusLabel}: $statusLabel'),
                 ],
               ),
               actions: [

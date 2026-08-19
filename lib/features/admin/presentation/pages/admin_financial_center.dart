@@ -22,7 +22,7 @@ class AdminFinancialCenter extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('المركز المالي'),
+        title: Text(l10n.adminFinancialCenter),
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh_rounded),
@@ -70,7 +70,7 @@ class AdminFinancialCenter extends ConsumerWidget {
               AnimatedFadeIn(
                 delay: const Duration(milliseconds: 100),
                 child: Text(
-                  'ملخص الإيرادات',
+                  l10n.revenueSummary,
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
@@ -91,7 +91,7 @@ class AdminFinancialCenter extends ConsumerWidget {
               AnimatedFadeIn(
                 delay: const Duration(milliseconds: 200),
                 child: Text(
-                  'قواعد العمولة',
+                  l10n.commissionRules,
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
@@ -124,6 +124,7 @@ class AdminFinancialCenter extends ConsumerWidget {
   }
 
   Widget _buildRevenueHero(RevenueOverview revenue, ColorScheme cs, BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return PremiumCard(
       padding: const EdgeInsets.all(16),
       radius: AppSpacing.radiusCard,
@@ -146,7 +147,7 @@ class AdminFinancialCenter extends ConsumerWidget {
             ),
             const SizedBox(height: 12),
             Text(
-              'ج.م ${revenue.totalGmv.toStringAsFixed(2)}',
+              '${l10n.currencySymbol} ${revenue.totalGmv.toStringAsFixed(2)}',
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                 color: cs.onPrimary,
                 fontWeight: FontWeight.bold,
@@ -154,7 +155,7 @@ class AdminFinancialCenter extends ConsumerWidget {
             ),
             const SizedBox(height: 4),
             Text(
-              'إجمالي GMV',
+              l10n.kpiTotalGmv,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                 color: cs.onPrimary.withValues(alpha: 0.7),
               ),
@@ -166,12 +167,13 @@ class AdminFinancialCenter extends ConsumerWidget {
   }
 
   Widget _buildRevenueOverviewCards(RevenueOverview overview, ColorScheme cs, BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final items = [
-      _MetricData('إجمالي GMV', overview.totalGmv, const Color(0xFF5B3DF0)),
-      _MetricData('عمولة المنصة', overview.totalCommission, const Color(0xFF34C759)),
-      _MetricData('المرتجعات', overview.refundCount.toDouble(), const Color(0xFFFF3B30)),
-      _MetricData('عمولة 7%', overview.commission7pct, const Color(0xFF00C7BE)),
-      _MetricData('عمولة 3%', overview.commission3pct, const Color(0xFFFF9500)),
+      _MetricData(l10n.kpiTotalGmv, overview.totalGmv, const Color(0xFF5B3DF0)),
+      _MetricData(l10n.kpiPlatformCommission, overview.totalCommission, const Color(0xFF34C759)),
+      _MetricData(l10n.returnsLabel, overview.refundCount.toDouble(), const Color(0xFFFF3B30)),
+      _MetricData(l10n.commissionRate7, overview.commission7pct, const Color(0xFF00C7BE)),
+      _MetricData(l10n.commissionRate3, overview.commission3pct, const Color(0xFFFF9500)),
     ];
 
     return LayoutBuilder(
@@ -207,7 +209,7 @@ class AdminFinancialCenter extends ConsumerWidget {
                           FittedBox(
                             fit: BoxFit.scaleDown,
                             child: Text(
-                              'ج.م ${item.value.toStringAsFixed(0)}',
+                              '${l10n.currencySymbol} ${item.value.toStringAsFixed(0)}',
                               style: Theme.of(context).textTheme.titleMedium?.copyWith(
                                 fontWeight: FontWeight.bold,
                               ),
@@ -235,6 +237,7 @@ class AdminFinancialCenter extends ConsumerWidget {
   }
 
   Widget _buildCommissionSection(CommissionSummary summary, ColorScheme cs, BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Column(
       children: [
         PremiumCard(
@@ -243,21 +246,21 @@ class AdminFinancialCenter extends ConsumerWidget {
           child: Row(
             children: [
               _CommissionStatCard(
-                label: 'الإجمالي',
+                label: l10n.total,
                 value: summary.totalCommission,
                 color: const Color(0xFF5B3DF0),
                 context: context,
               ),
               const SizedBox(width: 12),
               _CommissionStatCard(
-                label: 'معلق',
+                label: l10n.pending,
                 value: summary.pendingCommission,
                 color: const Color(0xFFFF9500),
                 context: context,
               ),
               const SizedBox(width: 12),
               _CommissionStatCard(
-                label: 'محقق',
+                label: l10n.realizedStat,
                 value: summary.fulfilledCommission,
                 color: const Color(0xFF34C759),
                 context: context,
@@ -276,7 +279,7 @@ class AdminFinancialCenter extends ConsumerWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'القواعد النشطة (${summary.activeRules.length})',
+                    l10n.activeRulesCount(summary.activeRules.length),
                     style: Theme.of(context).textTheme.titleSmall?.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
@@ -349,12 +352,13 @@ class _CommissionStatCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Expanded(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'ج.م ${value.toStringAsFixed(0)}',
+            '${l10n.currencySymbol} ${value.toStringAsFixed(0)}',
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
               fontWeight: FontWeight.bold,
               color: color,

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:delwaqty/l10n/app_localizations.dart';
 import 'package:delwaqty/core/module/feature_module.dart';
-import 'package:delwaqty/features/admin/presentation/pages/admin_dashboard_page.dart';
 import 'package:delwaqty/features/admin/presentation/pages/platform_intelligence_dashboard.dart';
 import 'package:delwaqty/features/admin/presentation/pages/admin_users_page.dart';
 import 'package:delwaqty/features/admin/presentation/pages/admin_merchants_page.dart';
@@ -39,7 +39,7 @@ class AdminModule extends FeatureModule {
   String get id => 'admin';
 
   @override
-  String name(BuildContext context) => 'Admin Panel';
+  String name(BuildContext context) => AppLocalizations.of(context).adminPanel;
 
   @override
   IconData? get icon => Icons.admin_panel_settings_outlined;
@@ -63,10 +63,6 @@ class AdminModule extends FeatureModule {
       builder: (context, state) =>
           _admin(const PlatformIntelligenceDashboard()),
       routes: [
-        GoRoute(
-          path: 'legacy',
-          builder: (context, state) => _admin(const AdminDashboardPage()),
-        ),
         GoRoute(
           path: 'users',
           builder: (context, state) => _admin(const AdminUsersPage()),

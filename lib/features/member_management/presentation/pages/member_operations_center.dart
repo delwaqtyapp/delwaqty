@@ -35,7 +35,7 @@ class _MemberOperationsCenterState
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Member Operations Center'),
+        title: Text(AppLocalizations.of(context).memberOperationsCenter),
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh_rounded),
@@ -70,6 +70,7 @@ class _DesktopLayout extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final cs = Theme.of(context).colorScheme;
 
     return Row(
@@ -102,7 +103,7 @@ class _DesktopLayout extends ConsumerWidget {
                       ),
                       const SizedBox(height: 16),
                       Text(
-                        'Select a member to view details',
+                        l10n.selectMemberHint,
                         style: Theme.of(context).textTheme.titleMedium?.copyWith(
                               color: cs.onSurfaceVariant,
                             ),
@@ -229,27 +230,27 @@ class _MemberListPanelState extends ConsumerState<_MemberListPanel> {
             child: Row(
               children: [
                 _FilterChipWidget(
-                  label: 'All Roles',
+                  label: l10n.allRoles,
                   selected: _roleFilter == null,
                   onTap: () => setState(() => _roleFilter = null),
                 ),
                 _FilterChipWidget(
-                  label: 'Customer',
+                  label: l10n.customer,
                   selected: _roleFilter == 'customer',
                   onTap: () => setState(() => _roleFilter = 'customer'),
                 ),
                 _FilterChipWidget(
-                  label: 'Driver',
+                  label: l10n.driver,
                   selected: _roleFilter == 'driver',
                   onTap: () => setState(() => _roleFilter = 'driver'),
                 ),
                 _FilterChipWidget(
-                  label: 'Merchant',
+                  label: l10n.merchant,
                   selected: _roleFilter == 'merchant',
                   onTap: () => setState(() => _roleFilter = 'merchant'),
                 ),
                 _FilterChipWidget(
-                  label: 'Active',
+                  label: l10n.active,
                   selected: _accountStatusFilter == 'active',
                   onTap: () => setState(() {
                     _accountStatusFilter =
@@ -257,7 +258,7 @@ class _MemberListPanelState extends ConsumerState<_MemberListPanel> {
                   }),
                 ),
                 _FilterChipWidget(
-                  label: 'Suspended',
+                  label: l10n.suspended,
                   selected: _accountStatusFilter == 'suspended',
                   onTap: () => setState(() {
                     _accountStatusFilter =
@@ -265,7 +266,7 @@ class _MemberListPanelState extends ConsumerState<_MemberListPanel> {
                   }),
                 ),
                 _FilterChipWidget(
-                  label: 'Unverified',
+                  label: l10n.unverified,
                   selected: _verificationStatusFilter == 'unverified',
                   onTap: () => setState(() {
                     _verificationStatusFilter =
@@ -275,7 +276,7 @@ class _MemberListPanelState extends ConsumerState<_MemberListPanel> {
                   }),
                 ),
                 _FilterChipWidget(
-                  label: 'Verified',
+                  label: l10n.verified,
                   selected: _verificationStatusFilter == 'verified',
                   onTap: () => setState(() {
                     _verificationStatusFilter =
@@ -299,26 +300,26 @@ class _MemberListPanelState extends ConsumerState<_MemberListPanel> {
               ),
               isDense: true,
             ),
-            items: const [
+            items: [
               DropdownMenuItem(
                 value: 'newest',
-                child: Text('Newest'),
+                child: Text(l10n.newest),
               ),
               DropdownMenuItem(
                 value: 'oldest',
-                child: Text('Oldest'),
+                child: Text(l10n.oldest),
               ),
               DropdownMenuItem(
                 value: 'name',
-                child: Text('Name'),
+                child: Text(l10n.nameLabel),
               ),
               DropdownMenuItem(
                 value: 'orders',
-                child: Text('Orders'),
+                child: Text(l10n.orders),
               ),
               DropdownMenuItem(
                 value: 'wallet',
-                child: Text('Wallet'),
+                child: Text(l10n.wallet),
               ),
             ],
             onChanged: (value) => setState(() => _sortBy = value),
@@ -330,7 +331,7 @@ class _MemberListPanelState extends ConsumerState<_MemberListPanel> {
             width: double.infinity,
             child: ElevatedButton(
               onPressed: applyFilters,
-              child: const Text('Apply Filters'),
+              child: Text(l10n.applyFilters),
             ),
           ),
         ),
@@ -343,16 +344,16 @@ class _MemberListPanelState extends ConsumerState<_MemberListPanel> {
                 if (notifier.lastError != null) {
                   return PremiumEmptyState(
                     icon: Icons.error_outline_rounded,
-                    title: 'Failed to load members',
+                    title: l10n.failedToLoadMembers,
                     message: '${notifier.lastError}',
-                    actionLabel: 'Retry',
+                    actionLabel: l10n.retryLabel,
                     onAction: () => notifier.refresh(),
                   );
                 }
-                return const PremiumEmptyState(
+                return PremiumEmptyState(
                   icon: Icons.people_outline_rounded,
-                  title: 'No members found',
-                  message: 'Try adjusting your search or filters.',
+                  title: l10n.noMembersFound,
+                  message: l10n.tryAdjustingSearch,
                 );
               }
               return ListView.builder(
@@ -429,6 +430,7 @@ class _MemberTileWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final statusColor = switch (member.accountStatus) {
       'active' => Colors.green,
       'restricted' => Colors.orange,
@@ -462,7 +464,7 @@ class _MemberTileWidget extends StatelessWidget {
           ),
         ),
         title: Text(
-          member.fullName ?? 'Unnamed',
+          member.fullName ?? l10n.unnamed,
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
@@ -470,7 +472,7 @@ class _MemberTileWidget extends StatelessWidget {
               ),
         ),
         subtitle: Text(
-          '${member.email ?? ''}  ·  ${member.role}',
+          '${member.email ?? ''}  ·  ${_roleLabel(l10n, member.role ?? '')}',
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
           style: Theme.of(context).textTheme.bodySmall,
@@ -482,7 +484,7 @@ class _MemberTileWidget extends StatelessWidget {
             borderRadius: BorderRadius.circular(6),
           ),
           child: Text(
-            member.accountStatus ?? 'active',
+            _accountStatusLabel(l10n, member.accountStatus ?? 'active'),
             style: TextStyle(
               color: statusColor,
               fontWeight: FontWeight.w600,
@@ -492,5 +494,25 @@ class _MemberTileWidget extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  String _accountStatusLabel(AppLocalizations l10n, String key) {
+    return switch (key) {
+      'active' => l10n.active,
+      'suspended' => l10n.suspended,
+      'restricted' => l10n.restrictAccount,
+      'banned' => l10n.permanentBan,
+      _ => key,
+    };
+  }
+
+  String _roleLabel(AppLocalizations l10n, String role) {
+    return switch (role) {
+      'customer' => l10n.customer,
+      'driver' => l10n.driver,
+      'merchant' => l10n.merchant,
+      'admin' => l10n.roleAdmin,
+      _ => role,
+    };
   }
 }

@@ -273,11 +273,14 @@ class _PeakHoursSection extends StatelessWidget {
               cs: cs,
             ),
             data: (hours) {
+              final ml = MaterialLocalizations.of(context);
               final topHours = hours.take(3).map((h) {
                 final hour = h['hour'] as int;
-                final period = hour >= 12 ? 'PM' : 'AM';
-                final displayHour = hour == 0 ? 12 : (hour > 12 ? hour - 12 : hour);
-                return '${displayHour.toString().padLeft(2, '0')}:00 $period';
+                final formatted = ml.formatTimeOfDay(
+                  TimeOfDay(hour: hour, minute: 0),
+                  alwaysUse24HourFormat: false,
+                );
+                return formatted;
               }).join(' • ');
               return _PeerMetricCard(
                 label: '${l10n.peakHours} (${hours.length} ${l10n.days})',
@@ -346,7 +349,7 @@ class _TopMerchantsSection extends StatelessWidget {
                   padding: const EdgeInsets.all(8),
                   child: Column(
                     children: merchants.take(5).map((m) {
-                      final name = m['name'] as String? ?? 'Unknown';
+                      final name = m['name'] as String? ?? l10n.unknown;
                       final revenue = (m['total_revenue'] as num?)?.toDouble() ?? 0;
                       final deliveries = m['total_deliveries'] as int? ?? 0;
                       return ListTile(
@@ -439,9 +442,9 @@ class _DriverPerformanceSection extends StatelessWidget {
                   padding: const EdgeInsets.all(8),
                   child: Column(
                     children: drivers.take(5).map((d) {
-                      final name = d['driver_name'] as String? ??
-                          d['full_name'] as String? ??
-                          'Unknown';
+final name = d['driver_name'] as String? ??
+                        d['full_name'] as String? ??
+                        l10n.unknown;
                       final completed = d['completed'] as int? ?? 0;
                       final revenue = (d['total_revenue'] as num?)?.toDouble() ?? 0;
                       final rating = (d['rating'] as num?)?.toDouble() ?? 0;

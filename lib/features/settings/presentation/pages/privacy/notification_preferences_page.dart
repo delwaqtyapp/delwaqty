@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
+import 'package:delwaqty/core/constants/storage_keys.dart';
 
 class NotificationPreferencesPage extends StatefulWidget {
   const NotificationPreferencesPage({super.key});
@@ -9,11 +11,27 @@ class NotificationPreferencesPage extends StatefulWidget {
 }
 
 class _NotificationPreferencesPageState extends State<NotificationPreferencesPage> {
+  late final SharedPreferences _prefs;
   bool _rideUpdates = true;
   bool _deliveryUpdates = true;
   bool _promotions = false;
   bool _securityAlerts = true;
   bool _chatMessages = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _initPrefs();
+  }
+
+  Future<void> _initPrefs() async {
+    _prefs = await SharedPreferences.getInstance();
+    _rideUpdates = _prefs.getBool(StorageKeys.rideUpdates) ?? true;
+    _deliveryUpdates = _prefs.getBool(StorageKeys.deliveryUpdates) ?? true;
+    _promotions = _prefs.getBool(StorageKeys.promotions) ?? false;
+    _securityAlerts = _prefs.getBool(StorageKeys.securityAlerts) ?? true;
+    _chatMessages = _prefs.getBool(StorageKeys.chatMessages) ?? true;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -35,7 +53,10 @@ class _NotificationPreferencesPageState extends State<NotificationPreferencesPag
             title: Text(l10n.rideUpdates),
             subtitle: Text(l10n.rideUpdatesDescription),
             value: _rideUpdates,
-            onChanged: (v) => setState(() => _rideUpdates = v),
+            onChanged: (v) async {
+              setState(() => _rideUpdates = v);
+              await _prefs.setBool(StorageKeys.rideUpdates, v);
+            },
           ),
           const Divider(height: 1),
           SwitchListTile(
@@ -43,7 +64,10 @@ class _NotificationPreferencesPageState extends State<NotificationPreferencesPag
             title: Text(l10n.deliveryUpdates),
             subtitle: Text(l10n.deliveryUpdatesDescription),
             value: _deliveryUpdates,
-            onChanged: (v) => setState(() => _deliveryUpdates = v),
+            onChanged: (v) async {
+              setState(() => _deliveryUpdates = v);
+              await _prefs.setBool(StorageKeys.deliveryUpdates, v);
+            },
           ),
           const Divider(height: 1),
           SwitchListTile(
@@ -51,7 +75,10 @@ class _NotificationPreferencesPageState extends State<NotificationPreferencesPag
             title: Text(l10n.chatMessages),
             subtitle: Text(l10n.chatMessagesDescription),
             value: _chatMessages,
-            onChanged: (v) => setState(() => _chatMessages = v),
+            onChanged: (v) async {
+              setState(() => _chatMessages = v);
+              await _prefs.setBool(StorageKeys.chatMessages, v);
+            },
           ),
           const Divider(height: 1),
           SwitchListTile(
@@ -59,7 +86,10 @@ class _NotificationPreferencesPageState extends State<NotificationPreferencesPag
             title: Text(l10n.promotions),
             subtitle: Text(l10n.promotionsDescription),
             value: _promotions,
-            onChanged: (v) => setState(() => _promotions = v),
+            onChanged: (v) async {
+              setState(() => _promotions = v);
+              await _prefs.setBool(StorageKeys.promotions, v);
+            },
           ),
           const Divider(height: 1),
           SwitchListTile(
@@ -67,7 +97,10 @@ class _NotificationPreferencesPageState extends State<NotificationPreferencesPag
             title: Text(l10n.securityAlerts),
             subtitle: Text(l10n.securityAlertsDescription),
             value: _securityAlerts,
-            onChanged: (v) => setState(() => _securityAlerts = v),
+            onChanged: (v) async {
+              setState(() => _securityAlerts = v);
+              await _prefs.setBool(StorageKeys.securityAlerts, v);
+            },
           ),
         ],
       ),

@@ -97,6 +97,11 @@ final List<_AdminNavGroup> _adminGroups = [
         icon: Icons.map_rounded,
         label: (l) => l.liveTracking,
       ),
+      _AdminNavItem(
+        path: '/admin/escalations',
+        icon: Icons.gavel_rounded,
+        label: (l) => l.adminEscalations,
+      ),
     ],
   ),
   _AdminNavGroup(

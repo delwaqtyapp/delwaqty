@@ -29,7 +29,6 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.delwaqty.app"
         minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
@@ -39,6 +38,19 @@ android {
             ?: project.findProperty("MAPS_API_KEY") as? String
             ?: ""
         manifestPlaceholders["MAPS_API_KEY"] = mapsApiKey
+    }
+
+    flavorDimensions += "app"
+
+    productFlavors {
+        create("customer") {
+            dimension = "app"
+            applicationId = "com.delwaqty.app"
+        }
+        create("admin") {
+            dimension = "app"
+            applicationId = "com.delwaqty.admin"
+        }
     }
 
     buildTypes {

@@ -8,6 +8,7 @@ import 'package:delwaqty/l10n/app_localizations.dart';
 import 'package:delwaqty/core/constants/app_constants.dart';
 import 'package:delwaqty/core/theme/app_colors.dart';
 import 'package:delwaqty/core/localization/admin_locale_provider.dart';
+import 'package:delwaqty/core/theme/theme_mode_provider.dart';
 
 class AdminSettingsPage extends ConsumerStatefulWidget {
   const AdminSettingsPage({super.key});
@@ -60,6 +61,7 @@ class _AdminSettingsPageState extends ConsumerState<AdminSettingsPage> {
     final l10n = AppLocalizations.of(context);
     final settingsAsync = ref.watch(platformSettingsProvider);
     final adminLocale = ref.watch(adminLocaleProvider);
+    final themeMode = ref.watch(themeModeProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -141,6 +143,19 @@ class _AdminSettingsPageState extends ConsumerState<AdminSettingsPage> {
                               visualDensity: VisualDensity.compact,
                             ),
                           ),
+                        ),
+                        const Divider(),
+                        SwitchListTile(
+                          title: Text(l10n.darkMode),
+                          secondary: Icon(
+                            themeMode == ThemeMode.dark
+                                ? Icons.dark_mode_rounded
+                                : Icons.light_mode_rounded,
+                          ),
+                          value: themeMode == ThemeMode.dark,
+                          onChanged: (_) {
+                            ref.read(themeModeProvider.notifier).toggleTheme();
+                          },
                         ),
                       ],
                     ),

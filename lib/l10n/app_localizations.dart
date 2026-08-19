@@ -6137,7 +6137,7 @@ abstract class AppLocalizations {
   /// No description provided for @arabicAbbreviation.
   ///
   /// In en, this message translates to:
-  /// **'عر'**
+  /// **'عربي'**
   String get arabicAbbreviation;
 
   /// No description provided for @englishAbbreviation.

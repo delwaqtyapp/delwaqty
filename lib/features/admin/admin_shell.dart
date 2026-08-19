@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -225,7 +226,6 @@ class _AdminShellState extends ConsumerState<AdminShell> {
   @override
   Widget build(BuildContext context) {
     final adminLocale = ref.watch(adminLocaleProvider);
-    final l10n = AppLocalizations.of(context);
     final isRtl = adminLocale.languageCode == 'ar';
 
     return Localizations.override(
@@ -256,13 +256,11 @@ class _AdminShellState extends ConsumerState<AdminShell> {
                       right: isRtl ? null : 16,
                       left: isRtl ? 16 : null,
                       bottom: 16,
-                      child: FloatingActionButton.extended(
-                        heroTag: 'admin-nav-fab',
+                      child: _AdminGlassFab(
                         onPressed: () {
                           _scaffoldKey.currentState?.openDrawer();
                         },
-                        icon: const Icon(Icons.admin_panel_settings_outlined),
-                        label: Text(l10n.adminPanel),
+                        isRtl: isRtl,
                       ),
                     ),
                 ],
@@ -373,6 +371,73 @@ class _RailTile extends StatelessWidget {
       selectedTileColor: scheme.primary.withValues(alpha: 0.08),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       onTap: onTap,
+    );
+  }
+}
+
+class _AdminGlassFab extends StatelessWidget {
+  const _AdminGlassFab({required this.onPressed, required this.isRtl});
+
+  final VoidCallback onPressed;
+  final bool isRtl;
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return GestureDetector(
+      onTap: onPressed,
+      child: Container(
+        width: 56,
+        height: 56,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: isDark
+                ? [
+                    const Color(0xFF6C41C8),
+                    const Color(0xFF4A90D9),
+                  ]
+                : [
+                    const Color(0xFF7C5CE0),
+                    const Color(0xFF5BA0E8),
+                  ],
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: const Color(0xFF7C5CE0).withValues(alpha: 0.35),
+              blurRadius: 20,
+              spreadRadius: -2,
+              offset: const Offset(0, 8),
+            ),
+            BoxShadow(
+              color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.08),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: ClipOval(
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: Colors.white.withValues(alpha: isDark ? 0.15 : 0.3),
+                ),
+              ),
+              child: const Icon(
+                Icons.admin_panel_settings_rounded,
+                color: Colors.white,
+                size: 24,
+              ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

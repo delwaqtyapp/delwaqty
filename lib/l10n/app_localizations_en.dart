@@ -3169,7 +3169,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get englishLanguageName => 'English';
 
   @override
-  String get arabicAbbreviation => 'عر';
+  String get arabicAbbreviation => 'عربي';
 
   @override
   String get englishAbbreviation => 'EN';

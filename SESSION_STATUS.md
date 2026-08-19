@@ -6,7 +6,7 @@
 
 ## Current Task — STEP 18 BACKEND HARDENING (Session 58)
 
-**Status:** Complete — commit + push pending
+**Status:** Complete — committed `1361a22` + pushed (`sprint 85: harden admin backend, add commissions and approvals centers`)
 
 ### What changed this session (backend)
 

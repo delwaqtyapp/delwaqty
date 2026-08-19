@@ -11,6 +11,7 @@ import 'package:delwaqty/app/app_admin.dart';
 import 'package:delwaqty/config/app_config.dart';
 import 'package:delwaqty/config/config_validator.dart';
 import 'package:delwaqty/config/firebase_config.dart';
+import 'package:delwaqty/core/config/app_mode_provider.dart';
 import 'package:delwaqty/data/datasources/local/shared_preferences_service.dart';
 import 'package:delwaqty/data/datasources/local/hive_cache_service.dart';
 import 'package:delwaqty/data/repositories/auth_repository_impl.dart';
@@ -82,6 +83,7 @@ void main() async {
   runApp(
     ProviderScope(
       overrides: [
+        isAdminAppProvider.overrideWithValue(true),
         sharedPreferencesProvider.overrideWithValue(sharedPrefsService),
         authRepositoryProvider.overrideWith(
           (ref) => ref.watch(authRepositoryImplProvider),

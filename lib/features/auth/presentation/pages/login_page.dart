@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:local_auth/local_auth.dart';
+import 'package:delwaqty/core/config/app_mode_provider.dart';
 import 'package:delwaqty/core/extensions/context_extensions.dart';
 import 'package:delwaqty/core/theme/app_colors.dart';
 import 'package:delwaqty/core/utils/validators.dart';
@@ -139,7 +140,6 @@ class _LoginPageState extends ConsumerState<LoginPage>
     if (_biometricAvailable && !user.isBiometricEnabled) {
       await _offerBiometricEnrollment(user);
     }
-    if (mounted) context.go('/home');
   }
 
   Future<void> _offerBiometricEnrollment(User user) async {
@@ -204,7 +204,6 @@ class _LoginPageState extends ConsumerState<LoginPage>
       } on Exception {
         didAuth = await _localAuth.authenticate(
           localizedReason: l10n.biometricReason,
-          biometricOnly: false,
         );
       }
       if (!didAuth || !mounted) return;
@@ -270,6 +269,7 @@ class _LoginPageState extends ConsumerState<LoginPage>
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final authState = ref.watch(authStateProvider);
+    final isAdminApp = ref.watch(isAdminAppProvider);
 
     ref.listen<AuthState>(authStateProvider, (prev, next) {
       next.whenOrNull(
@@ -341,9 +341,11 @@ class _LoginPageState extends ConsumerState<LoginPage>
                         _buildSavedAccountsSection(l10n),
                         _buildForm(l10n, authState),
                         const SizedBox(height: 24),
-                        _buildGuestButton(l10n),
-                        const SizedBox(height: 20),
-                        _buildRegisterLink(l10n),
+                        if (!isAdminApp) ...[
+                          _buildGuestButton(l10n),
+                          const SizedBox(height: 20),
+                          _buildRegisterLink(l10n),
+                        ],
                         const SizedBox(height: 40),
                       ],
                     ),

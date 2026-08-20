@@ -1449,6 +1449,7 @@
   "adminTransactionLedger": "دفتر المعاملات",
   "adminWalletIntelligence": "ذكاء المحافظ",
   "adminServicePerformance": "أداء الخدمة",
+  "adminServices": "الخدمات",
   "adminServiceCompletion": "إنجاز الخدمة",
   "adminSLA": "التزام SLA",
   "adminServicePerformancePending": "بيانات أداء الخدمة قيد الانتظار",

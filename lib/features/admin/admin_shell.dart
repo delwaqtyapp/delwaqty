@@ -201,19 +201,18 @@ final List<_AdminNavGroup> _adminGroups = [
   ),
 ];
 
-/// Wraps every `/admin` route:
-///  * applies the independent Admin locale (Arabic by default, persisted
-///    separately from the app language) via Localizations.override,
-///  * hosts the full grouped Admin navigation INSIDE the admin experience
-///    (NavigationRail on wide screens, drawer + floating control on phones),
-///  * keeps each admin page's own Scaffold/AppBar untouched.
+const _bottomNavPaths = [
+  '/admin',
+  '/admin/members',
+  '/admin/orders',
+  '/admin/financial-center',
+  '/admin/settings',
+];
+
 class AdminShell extends ConsumerStatefulWidget {
   const AdminShell({super.key, required this.child, this.showFab = true});
 
   final Widget child;
-
-  /// Detail pages (chat room, member profile) hide the floating nav control
-  /// so it never overlaps their own input/app bars.
   final bool showFab;
 
   @override
@@ -226,6 +225,17 @@ class _AdminShellState extends ConsumerState<AdminShell> {
   void _navigateTo(BuildContext context, String path) {
     context.go(path);
     Navigator.of(context).pop();
+  }
+
+  int _currentBottomIndex(BuildContext context) {
+    final path = GoRouterState.of(context).matchedLocation;
+    for (var i = 0; i < _bottomNavPaths.length; i++) {
+      if (path == _bottomNavPaths[i] ||
+          (_bottomNavPaths[i] != '/admin' && path.startsWith(_bottomNavPaths[i]))) {
+        return i;
+      }
+    }
+    return 0;
   }
 
   @override
@@ -244,52 +254,170 @@ class _AdminShellState extends ConsumerState<AdminShell> {
       ],
       child: Directionality(
         textDirection: isRtl ? TextDirection.rtl : TextDirection.ltr,
-        child: Scaffold(
-          key: _scaffoldKey,
-          drawer: _AdminDrawer(
-            isRtl: isRtl,
-            onNavigate: (path) => _navigateTo(context, path),
-          ),
-          body: LayoutBuilder(
-            builder: (context, constraints) {
-              final wide = constraints.maxWidth >= 1100;
-              final content = Stack(
-                children: [
-                  widget.child,
-                  if (!wide && widget.showFab)
-                    Positioned(
-                      right: isRtl ? null : 16,
-                      left: isRtl ? 16 : null,
-                      bottom: 16,
-                      child: _AdminGlassFab(
-                        onPressed: () {
-                          _scaffoldKey.currentState?.openDrawer();
-                        },
+        child: Builder(
+          builder: (context) {
+            final showBottomBar = widget.showFab;
+            return Scaffold(
+              key: _scaffoldKey,
+              drawer: _AdminDrawer(
+                isRtl: isRtl,
+                onNavigate: (path) => _navigateTo(context, path),
+              ),
+              bottomNavigationBar: showBottomBar
+                  ? _AdminBottomNavBar(
+                      currentIndex: _currentBottomIndex(context),
+                      onIndexChanged: (index) {
+                        context.go(_bottomNavPaths[index]);
+                      },
+                      isRtl: isRtl,
+                    )
+                  : null,
+              body: LayoutBuilder(
+                builder: (context, constraints) {
+                  final wide = constraints.maxWidth >= 1100;
+                  if (!wide) {
+                    return widget.child;
+                  }
+                  return Row(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      _AdminRail(
                         isRtl: isRtl,
+                        onNavigate: (path) => _navigateTo(context, path),
+                      ),
+                      const VerticalDivider(width: 1),
+                      Expanded(child: widget.child),
+                    ],
+                  );
+                },
+              ),
+            );
+          },
+        ),
+      ),
+    );
+  }
+}
+
+class _AdminBottomNavBar extends StatelessWidget {
+  const _AdminBottomNavBar({
+    required this.currentIndex,
+    required this.onIndexChanged,
+    required this.isRtl,
+  });
+
+  final int currentIndex;
+  final ValueChanged<int> onIndexChanged;
+  final bool isRtl;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final scheme = Theme.of(context).colorScheme;
+
+    final items = [
+      _BottomNavEntry(Icons.dashboard_rounded, l10n.adminCommandCenter),
+      _BottomNavEntry(Icons.people_rounded, l10n.adminMembers),
+      _BottomNavEntry(Icons.receipt_long_rounded, l10n.adminOrdersPage),
+      _BottomNavEntry(Icons.account_balance_wallet_rounded, l10n.adminFinancialCenter),
+      _BottomNavEntry(Icons.settings_rounded, l10n.adminSettingsPage),
+    ];
+
+    return ClipRect(
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 30, sigmaY: 30),
+        child: Container(
+          decoration: BoxDecoration(
+            color: isDark
+                ? Colors.white.withValues(alpha: 0.06)
+                : Colors.white.withValues(alpha: 0.82),
+            border: Border(
+              top: BorderSide(
+                color: scheme.outlineVariant.withValues(alpha: 0.2),
+                width: 0.5,
+              ),
+            ),
+          ),
+          child: SafeArea(
+            top: false,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 8),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: List.generate(items.length, (i) {
+                  final entry = items[i];
+                  final isActive = currentIndex == i;
+                  return GestureDetector(
+                    onTap: () => onIndexChanged(i),
+                    behavior: HitTestBehavior.opaque,
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 250),
+                      curve: Curves.easeInOut,
+                      width: 62,
+                      padding: const EdgeInsets.symmetric(vertical: 4),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          AnimatedContainer(
+                            duration: const Duration(milliseconds: 250),
+                            width: 44,
+                            height: 44,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: isActive
+                                  ? scheme.primary.withValues(alpha: isDark ? 0.22 : 0.15)
+                                  : Colors.transparent,
+                              boxShadow: isActive
+                                  ? [
+                                      BoxShadow(
+                                        color: scheme.primary.withValues(alpha: 0.2),
+                                        blurRadius: 8,
+                                        spreadRadius: -1,
+                                        offset: const Offset(0, 3),
+                                      ),
+                                    ]
+                                  : null,
+                            ),
+                            child: Icon(
+                              entry.icon,
+                              size: 22,
+                              color: isActive
+                                  ? scheme.primary
+                                  : scheme.onSurface.withValues(alpha: 0.5),
+                            ),
+                          ),
+                          const SizedBox(height: 3),
+                          Text(
+                            entry.label,
+                            style: TextStyle(
+                              fontSize: 10,
+                              fontWeight: isActive ? FontWeight.w700 : FontWeight.w400,
+                              color: isActive
+                                  ? scheme.primary
+                                  : scheme.onSurface.withValues(alpha: 0.5),
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
                       ),
                     ),
-                ],
-              );
-              if (!wide) {
-                return content;
-              }
-              return Row(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  _AdminRail(
-                    isRtl: isRtl,
-                    onNavigate: (path) => _navigateTo(context, path),
-                  ),
-                  const VerticalDivider(width: 1),
-                  Expanded(child: content),
-                ],
-              );
-            },
+                  );
+                }),
+              ),
+            ),
           ),
         ),
       ),
     );
   }
+}
+
+class _BottomNavEntry {
+  const _BottomNavEntry(this.icon, this.label);
+  final IconData icon;
+  final String label;
 }
 
 class _AdminRail extends ConsumerWidget {
@@ -376,73 +504,6 @@ class _RailTile extends StatelessWidget {
       selectedTileColor: scheme.primary.withValues(alpha: 0.08),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       onTap: onTap,
-    );
-  }
-}
-
-class _AdminGlassFab extends StatelessWidget {
-  const _AdminGlassFab({required this.onPressed, required this.isRtl});
-
-  final VoidCallback onPressed;
-  final bool isRtl;
-
-  @override
-  Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
-    return GestureDetector(
-      onTap: onPressed,
-      child: Container(
-        width: 56,
-        height: 56,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: isDark
-                ? [
-                    const Color(0xFF6C41C8),
-                    const Color(0xFF4A90D9),
-                  ]
-                : [
-                    const Color(0xFF7C5CE0),
-                    const Color(0xFF5BA0E8),
-                  ],
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: const Color(0xFF7C5CE0).withValues(alpha: 0.35),
-              blurRadius: 20,
-              spreadRadius: -2,
-              offset: const Offset(0, 8),
-            ),
-            BoxShadow(
-              color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.08),
-              blurRadius: 12,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
-        child: ClipOval(
-          child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(
-                  color: Colors.white.withValues(alpha: isDark ? 0.15 : 0.3),
-                ),
-              ),
-              child: const Icon(
-                Icons.admin_panel_settings_rounded,
-                color: Colors.white,
-                size: 24,
-              ),
-            ),
-          ),
-        ),
-      ),
     );
   }
 }

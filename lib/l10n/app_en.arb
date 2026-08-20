@@ -1451,6 +1451,7 @@
   "adminTransactionLedger": "Transaction Ledger",
   "adminWalletIntelligence": "Wallet Intelligence",
   "adminServicePerformance": "Service Performance",
+  "adminServices": "Services",
   "adminServiceCompletion": "Service Completion",
   "adminSLA": "SLA Adherence",
   "adminServicePerformancePending": "Service performance data pending",

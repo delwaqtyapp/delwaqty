@@ -4506,7 +4506,10 @@ class AppLocalizationsAr extends AppLocalizations {
   String get adminSettingsPage => 'الإعدادات';
 
   @override
-  String get adminMore => 'المزيد';
+  String get adminMore => 'إجراءات';
+
+  @override
+  String get adminQuickActions => 'إجراءات سريعة';
 
   @override
   String get adminOperationsSection => 'العمليات';

@@ -30,6 +30,7 @@ import 'package:delwaqty/features/admin/member_management/presentation/pages/mem
 import 'package:delwaqty/features/admin/admin_shell.dart';
 import 'package:delwaqty/features/admin/presentation/pages/admin_commission_management_page.dart';
 import 'package:delwaqty/features/admin/presentation/pages/admin_approvals_center_page.dart';
+import 'package:delwaqty/features/admin/presentation/pages/admin_quick_actions_page.dart';
 
 AdminShell _admin(Widget page, {bool showFab = true}) {
   return AdminShell(showFab: showFab, child: page);
@@ -192,6 +193,10 @@ class AdminModule extends FeatureModule {
         GoRoute(
           path: 'service-performance',
           builder: (context, state) => _admin(const ServicePerformancePage()),
+        ),
+        GoRoute(
+          path: 'actions',
+          builder: (context, state) => _admin(const AdminQuickActionsPage()),
         ),
       ],
     ),

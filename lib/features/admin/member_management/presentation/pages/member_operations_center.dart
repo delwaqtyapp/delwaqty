@@ -1,5 +1,6 @@
 ﻿import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:delwaqty/features/admin/member_management/domain/entities/member.dart';
 import 'package:delwaqty/features/admin/member_management/presentation/member_providers.dart';
 import 'package:delwaqty/features/admin/member_management/presentation/pages/member_drawer.dart';
@@ -30,6 +31,7 @@ class _MemberOperationsCenterState
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final screenWidth = MediaQuery.sizeOf(context).width;
     final isDesktop = screenWidth >= 728;
 
@@ -46,15 +48,60 @@ class _MemberOperationsCenterState
           ),
         ],
       ),
-      body: isDesktop
-          ? _DesktopLayout(
-              selectedMemberId: _selectedMemberId,
-              onSelectMember: _selectMember,
-            )
-          : _MobileLayout(
-              selectedMemberId: _selectedMemberId,
-              onSelectMember: _selectMember,
+      body: Column(
+        children: [
+          SizedBox(
+            height: 72,
+            child: ListView(
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              children: [
+                _MemberQuickAction(
+                  icon: Icons.verified_user_rounded,
+                  label: l10n.adminVerifications,
+                  color: const Color(0xFF34C759),
+                  onTap: () => context.push('/admin/verifications'),
+                ),
+                _MemberQuickAction(
+                  icon: Icons.gavel_rounded,
+                  label: l10n.sanctions,
+                  color: const Color(0xFFFF9500),
+                  onTap: () => context.push('/admin/sanctions'),
+                ),
+                _MemberQuickAction(
+                  icon: Icons.warning_amber_rounded,
+                  label: l10n.complaints,
+                  color: const Color(0xFFFF3B30),
+                  onTap: () => context.push('/admin/complaints'),
+                ),
+                _MemberQuickAction(
+                  icon: Icons.map_rounded,
+                  label: l10n.liveTracking,
+                  color: const Color(0xFF00C7BE),
+                  onTap: () => context.push('/admin/live-tracking'),
+                ),
+                _MemberQuickAction(
+                  icon: Icons.priority_high_rounded,
+                  label: l10n.adminEscalations,
+                  color: const Color(0xFFFF6482),
+                  onTap: () => context.push('/admin/escalations'),
+                ),
+              ],
             ),
+          ),
+          Expanded(
+            child: isDesktop
+                ? _DesktopLayout(
+                    selectedMemberId: _selectedMemberId,
+                    onSelectMember: _selectMember,
+                  )
+                : _MobileLayout(
+                    selectedMemberId: _selectedMemberId,
+                    onSelectMember: _selectMember,
+                  ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -514,5 +561,49 @@ class _MemberTileWidget extends StatelessWidget {
       'admin' => l10n.roleAdmin,
       _ => role,
     };
+  }
+}
+
+class _MemberQuickAction extends StatelessWidget {
+  const _MemberQuickAction({
+    required this.icon,
+    required this.label,
+    required this.color,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final String label;
+  final Color color;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        margin: const EdgeInsets.only(right: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 14),
+        decoration: BoxDecoration(
+          color: color.withValues(alpha: 0.12),
+          borderRadius: BorderRadius.circular(14),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, size: 18, color: color),
+            const SizedBox(width: 6),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                color: color,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }

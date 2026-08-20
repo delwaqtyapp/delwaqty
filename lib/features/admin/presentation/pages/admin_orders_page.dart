@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:delwaqty/services/admin/admin_providers.dart';
 import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
 import 'package:delwaqty/shared/widgets/premium_empty_state.dart';
@@ -27,6 +28,39 @@ class AdminOrdersPage extends ConsumerWidget {
       ),
       body: Column(
         children: [
+          SizedBox(
+            height: 68,
+            child: ListView(
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              children: [
+                _OrderQuickAction(
+                  icon: Icons.delivery_dining_rounded,
+                  label: l10n.adminDeliveries,
+                  color: const Color(0xFFFF9500),
+                  onTap: () => context.push('/admin/deliveries'),
+                ),
+                _OrderQuickAction(
+                  icon: Icons.local_shipping_rounded,
+                  label: l10n.adminDrivers,
+                  color: const Color(0xFF007AFF),
+                  onTap: () => context.push('/admin/drivers'),
+                ),
+                _OrderQuickAction(
+                  icon: Icons.sos_rounded,
+                  label: l10n.adminEmergency,
+                  color: const Color(0xFFFF3B30),
+                  onTap: () => context.push('/admin/emergency'),
+                ),
+                _OrderQuickAction(
+                  icon: Icons.chat_bubble_rounded,
+                  label: l10n.supportChat,
+                  color: const Color(0xFF34C759),
+                  onTap: () => context.push('/admin/support-chat'),
+                ),
+              ],
+            ),
+          ),
           Padding(
             padding: const EdgeInsets.all(16),
             child: Row(
@@ -263,6 +297,50 @@ class _OrderTile extends StatelessWidget {
             ),
           );
         },
+      ),
+    );
+  }
+}
+
+class _OrderQuickAction extends StatelessWidget {
+  const _OrderQuickAction({
+    required this.icon,
+    required this.label,
+    required this.color,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final String label;
+  final Color color;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        margin: const EdgeInsets.only(right: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 14),
+        decoration: BoxDecoration(
+          color: color.withValues(alpha: 0.12),
+          borderRadius: BorderRadius.circular(14),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, size: 18, color: color),
+            const SizedBox(width: 6),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                color: color,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

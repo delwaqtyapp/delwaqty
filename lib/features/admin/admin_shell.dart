@@ -206,6 +206,7 @@ const _bottomNavPaths = [
   '/admin/members',
   '/admin/orders',
   '/admin/financial-center',
+  '/admin/actions',
 ];
 
 class AdminShell extends ConsumerStatefulWidget {
@@ -243,16 +244,6 @@ class _AdminShellState extends ConsumerState<AdminShell> {
     }
   }
 
-  void _showMoreSheet() {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      useSafeArea: true,
-      backgroundColor: Colors.transparent,
-      builder: (_) => const _AdminMoreSheet(),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final adminLocale = ref.watch(adminLocaleProvider);
@@ -282,7 +273,6 @@ class _AdminShellState extends ConsumerState<AdminShell> {
                   ? _AdminBottomNavBar(
                       currentIndex: _currentBottomIndex(context),
                       onTap: _onBottomNavTap,
-                      onMoreTap: _showMoreSheet,
                       isRtl: isRtl,
                     )
                   : null,
@@ -317,13 +307,11 @@ class _AdminBottomNavBar extends StatelessWidget {
   const _AdminBottomNavBar({
     required this.currentIndex,
     required this.onTap,
-    required this.onMoreTap,
     required this.isRtl,
   });
 
   final int currentIndex;
   final ValueChanged<int> onTap;
-  final VoidCallback onMoreTap;
   final bool isRtl;
 
   @override
@@ -337,6 +325,7 @@ class _AdminBottomNavBar extends StatelessWidget {
       _BottomNavEntry(Icons.people_rounded, l10n.adminMembers),
       _BottomNavEntry(Icons.receipt_long_rounded, l10n.adminOrdersPage),
       _BottomNavEntry(Icons.account_balance_rounded, l10n.adminFinancialCenter),
+      _BottomNavEntry(Icons.bolt_rounded, l10n.adminMore),
     ];
 
     return ClipRect(
@@ -357,24 +346,17 @@ class _AdminBottomNavBar extends StatelessWidget {
           child: SafeArea(
             top: false,
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 8),
+              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  for (var i = 0; i < items.length; i++)
-                    _BottomNavTile(
-                      entry: items[i],
-                      isActive: currentIndex == i,
-                      onTap: () => onTap(i),
-                      isDark: isDark,
-                    ),
-                  _BottomNavTile(
-                    entry: _BottomNavEntry(Icons.grid_view_rounded, l10n.adminMore),
-                    isActive: false,
-                    onTap: onMoreTap,
+                children: List.generate(items.length, (i) {
+                  return _BottomNavTile(
+                    entry: items[i],
+                    isActive: currentIndex == i,
+                    onTap: () => onTap(i),
                     isDark: isDark,
-                  ),
-                ],
+                  );
+                }),
               ),
             ),
           ),
@@ -463,157 +445,6 @@ class _BottomNavEntry {
   const _BottomNavEntry(this.icon, this.label);
   final IconData icon;
   final String label;
-}
-
-class _AdminMoreSheet extends ConsumerWidget {
-  const _AdminMoreSheet();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final l10n = AppLocalizations.of(context);
-    final scheme = Theme.of(context).colorScheme;
-    final adminLocale = ref.watch(adminLocaleProvider);
-    final isRtl = adminLocale.languageCode == 'ar';
-    final currentPath = GoRouterState.of(context).matchedLocation;
-
-    final groups = _adminGroups;
-
-    return Directionality(
-      textDirection: isRtl ? TextDirection.rtl : TextDirection.ltr,
-      child: Container(
-        height: MediaQuery.of(context).size.height * 0.75,
-        decoration: BoxDecoration(
-          color: scheme.surface,
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-        ),
-        child: Column(
-          children: [
-            Container(
-              margin: const EdgeInsets.only(top: 12),
-              width: 36,
-              height: 4,
-              decoration: BoxDecoration(
-                color: scheme.onSurface.withValues(alpha: 0.2),
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 16, 20, 4),
-              child: Row(
-                children: [
-                  Icon(Icons.grid_view_rounded, color: scheme.primary, size: 20),
-                  const SizedBox(width: 8),
-                  Text(
-                    l10n.adminMore,
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const Spacer(),
-                  IconButton(
-                    icon: const Icon(Icons.close_rounded, size: 20),
-                    onPressed: () => Navigator.pop(context),
-                  ),
-                ],
-              ),
-            ),
-            const Divider(height: 1),
-            Expanded(
-              child: ListView(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                children: [
-                  for (final group in groups) ...[
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(8, 16, 8, 6),
-                      child: Text(
-                        group.label(l10n),
-                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                          color: scheme.primary,
-                          fontWeight: FontWeight.w700,
-                          letterSpacing: 0.5,
-                        ),
-                      ),
-                    ),
-                    Wrap(
-                      spacing: 8,
-                      runSpacing: 8,
-                      children: [
-                        for (final item in group.items)
-                          _MoreSheetTile(
-                            item: item,
-                            isActive: currentPath == item.path,
-                            onTap: () {
-                              Navigator.pop(context);
-                              context.go(item.path);
-                            },
-                          ),
-                      ],
-                    ),
-                  ],
-                  const SizedBox(height: 24),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _MoreSheetTile extends StatelessWidget {
-  const _MoreSheetTile({
-    required this.item,
-    required this.isActive,
-    required this.onTap,
-  });
-
-  final _AdminNavItem item;
-  final bool isActive;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-    final scheme = Theme.of(context).colorScheme;
-
-    return Material(
-      color: isActive
-          ? scheme.primary.withValues(alpha: 0.12)
-          : scheme.surfaceContainerLow,
-      borderRadius: BorderRadius.circular(12),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(12),
-        onTap: onTap,
-        child: Container(
-          width: 105,
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                item.icon,
-                size: 24,
-                color: isActive ? scheme.primary : scheme.onSurface.withValues(alpha: 0.7),
-              ),
-              const SizedBox(height: 6),
-              Text(
-                item.label(l10n),
-                style: TextStyle(
-                  fontSize: 11,
-                  fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,
-                  color: isActive ? scheme.primary : scheme.onSurface.withValues(alpha: 0.8),
-                ),
-                textAlign: TextAlign.center,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
 }
 
 class _AdminRail extends ConsumerWidget {

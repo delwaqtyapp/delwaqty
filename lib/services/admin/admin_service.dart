@@ -1,6 +1,9 @@
 import 'package:flutter/foundation.dart';
 import 'package:delwaqty/data/repositories/admin_repository.dart';
 import 'package:delwaqty/features/admin/domain/entities/admin_models.dart';
+import 'package:delwaqty/core/constants/app_constants.dart';
+
+const String _ownerEmail = AppConstants.ownerEmail;
 
 class AdminService {
   AdminService(this._repository);
@@ -58,8 +61,16 @@ class AdminService {
 
   Future<bool> deleteUser(String userId) async {
     try {
-      await _repository.deleteUser(userId);
-      return true;
+      // Owner account deletes immediately without approval
+      if (userId == _ownerEmail) {
+        await _repository.deleteUser(userId);
+        return true;
+      }
+      
+      // For other accounts, require approval with reason
+      // TODO: Show approval dialog to owner and wait for confirmation
+      // For now, prevent deletion without approval
+      return false;
     } catch (e) {
       debugPrint('AdminService.deleteUser error: $e');
       return false;

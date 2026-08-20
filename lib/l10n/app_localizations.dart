@@ -8636,6 +8636,12 @@ abstract class AppLocalizations {
   /// **'Service Performance'**
   String get adminServicePerformance;
 
+  /// No description provided for @adminServices.
+  ///
+  /// In en, this message translates to:
+  /// **'Services'**
+  String get adminServices;
+
   /// No description provided for @adminServiceCompletion.
   ///
   /// In en, this message translates to:

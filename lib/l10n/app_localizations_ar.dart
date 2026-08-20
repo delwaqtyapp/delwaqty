@@ -4465,6 +4465,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get adminServicePerformance => 'أداء الخدمة';
 
   @override
+  String get adminServices => 'الخدمات';
+
+  @override
   String get adminServiceCompletion => 'إنجاز الخدمة';
 
   @override

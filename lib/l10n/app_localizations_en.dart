@@ -4501,6 +4501,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get adminServicePerformance => 'Service Performance';
 
   @override
+  String get adminServices => 'Services';
+
+  @override
   String get adminServiceCompletion => 'Service Completion';
 
   @override

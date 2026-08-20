@@ -206,7 +206,6 @@ const _bottomNavPaths = [
   '/admin/members',
   '/admin/orders',
   '/admin/financial-center',
-  '/admin/settings',
 ];
 
 class AdminShell extends ConsumerStatefulWidget {
@@ -235,7 +234,23 @@ class _AdminShellState extends ConsumerState<AdminShell> {
         return i;
       }
     }
-    return 0;
+    return -1;
+  }
+
+  void _onBottomNavTap(int index) {
+    if (index < _bottomNavPaths.length) {
+      context.go(_bottomNavPaths[index]);
+    }
+  }
+
+  void _showMoreSheet() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      useSafeArea: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => const _AdminMoreSheet(),
+    );
   }
 
   @override
@@ -266,9 +281,8 @@ class _AdminShellState extends ConsumerState<AdminShell> {
               bottomNavigationBar: showBottomBar
                   ? _AdminBottomNavBar(
                       currentIndex: _currentBottomIndex(context),
-                      onIndexChanged: (index) {
-                        context.go(_bottomNavPaths[index]);
-                      },
+                      onTap: _onBottomNavTap,
+                      onMoreTap: _showMoreSheet,
                       isRtl: isRtl,
                     )
                   : null,
@@ -302,12 +316,14 @@ class _AdminShellState extends ConsumerState<AdminShell> {
 class _AdminBottomNavBar extends StatelessWidget {
   const _AdminBottomNavBar({
     required this.currentIndex,
-    required this.onIndexChanged,
+    required this.onTap,
+    required this.onMoreTap,
     required this.isRtl,
   });
 
   final int currentIndex;
-  final ValueChanged<int> onIndexChanged;
+  final ValueChanged<int> onTap;
+  final VoidCallback onMoreTap;
   final bool isRtl;
 
   @override
@@ -317,17 +333,16 @@ class _AdminBottomNavBar extends StatelessWidget {
     final scheme = Theme.of(context).colorScheme;
 
     final items = [
-      _BottomNavEntry(Icons.dashboard_rounded, l10n.adminCommandCenter),
+      _BottomNavEntry(Icons.speed_rounded, l10n.adminCommandCenter),
       _BottomNavEntry(Icons.people_rounded, l10n.adminMembers),
       _BottomNavEntry(Icons.receipt_long_rounded, l10n.adminOrdersPage),
-      _BottomNavEntry(Icons.account_balance_wallet_rounded, l10n.adminFinancialCenter),
-      _BottomNavEntry(Icons.settings_rounded, l10n.adminSettingsPage),
+      _BottomNavEntry(Icons.account_balance_rounded, l10n.adminFinancialCenter),
     ];
 
     return ClipRect(
       child: BackdropFilter(
         filter: ImageFilter.blur(sigmaX: 30, sigmaY: 30),
-        child: Container(
+        child: DecoratedBox(
           decoration: BoxDecoration(
             color: isDark
                 ? Colors.white.withValues(alpha: 0.06)
@@ -345,69 +360,99 @@ class _AdminBottomNavBar extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 8),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: List.generate(items.length, (i) {
-                  final entry = items[i];
-                  final isActive = currentIndex == i;
-                  return GestureDetector(
-                    onTap: () => onIndexChanged(i),
-                    behavior: HitTestBehavior.opaque,
-                    child: AnimatedContainer(
-                      duration: const Duration(milliseconds: 250),
-                      curve: Curves.easeInOut,
-                      width: 62,
-                      padding: const EdgeInsets.symmetric(vertical: 4),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          AnimatedContainer(
-                            duration: const Duration(milliseconds: 250),
-                            width: 44,
-                            height: 44,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: isActive
-                                  ? scheme.primary.withValues(alpha: isDark ? 0.22 : 0.15)
-                                  : Colors.transparent,
-                              boxShadow: isActive
-                                  ? [
-                                      BoxShadow(
-                                        color: scheme.primary.withValues(alpha: 0.2),
-                                        blurRadius: 8,
-                                        spreadRadius: -1,
-                                        offset: const Offset(0, 3),
-                                      ),
-                                    ]
-                                  : null,
-                            ),
-                            child: Icon(
-                              entry.icon,
-                              size: 22,
-                              color: isActive
-                                  ? scheme.primary
-                                  : scheme.onSurface.withValues(alpha: 0.5),
-                            ),
-                          ),
-                          const SizedBox(height: 3),
-                          Text(
-                            entry.label,
-                            style: TextStyle(
-                              fontSize: 10,
-                              fontWeight: isActive ? FontWeight.w700 : FontWeight.w400,
-                              color: isActive
-                                  ? scheme.primary
-                                  : scheme.onSurface.withValues(alpha: 0.5),
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ],
-                      ),
+                children: [
+                  for (var i = 0; i < items.length; i++)
+                    _BottomNavTile(
+                      entry: items[i],
+                      isActive: currentIndex == i,
+                      onTap: () => onTap(i),
+                      isDark: isDark,
                     ),
-                  );
-                }),
+                  _BottomNavTile(
+                    entry: _BottomNavEntry(Icons.grid_view_rounded, l10n.adminMore),
+                    isActive: false,
+                    onTap: onMoreTap,
+                    isDark: isDark,
+                  ),
+                ],
               ),
             ),
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class _BottomNavTile extends StatelessWidget {
+  const _BottomNavTile({
+    required this.entry,
+    required this.isActive,
+    required this.onTap,
+    required this.isDark,
+  });
+
+  final _BottomNavEntry entry;
+  final bool isActive;
+  final VoidCallback onTap;
+  final bool isDark;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 250),
+        curve: Curves.easeInOut,
+        width: 62,
+        padding: const EdgeInsets.symmetric(vertical: 4),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 250),
+              width: 44,
+              height: 44,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: isActive
+                    ? scheme.primary.withValues(alpha: isDark ? 0.22 : 0.15)
+                    : Colors.transparent,
+                boxShadow: isActive
+                    ? [
+                        BoxShadow(
+                          color: scheme.primary.withValues(alpha: 0.2),
+                          blurRadius: 8,
+                          spreadRadius: -1,
+                          offset: const Offset(0, 3),
+                        ),
+                      ]
+                    : null,
+              ),
+              child: Icon(
+                entry.icon,
+                size: 22,
+                color: isActive
+                    ? scheme.primary
+                    : scheme.onSurface.withValues(alpha: 0.5),
+              ),
+            ),
+            const SizedBox(height: 3),
+            Text(
+              entry.label,
+              style: TextStyle(
+                fontSize: 10,
+                fontWeight: isActive ? FontWeight.w700 : FontWeight.w400,
+                color: isActive
+                    ? scheme.primary
+                    : scheme.onSurface.withValues(alpha: 0.5),
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ],
         ),
       ),
     );
@@ -418,6 +463,157 @@ class _BottomNavEntry {
   const _BottomNavEntry(this.icon, this.label);
   final IconData icon;
   final String label;
+}
+
+class _AdminMoreSheet extends ConsumerWidget {
+  const _AdminMoreSheet();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+    final scheme = Theme.of(context).colorScheme;
+    final adminLocale = ref.watch(adminLocaleProvider);
+    final isRtl = adminLocale.languageCode == 'ar';
+    final currentPath = GoRouterState.of(context).matchedLocation;
+
+    final groups = _adminGroups;
+
+    return Directionality(
+      textDirection: isRtl ? TextDirection.rtl : TextDirection.ltr,
+      child: Container(
+        height: MediaQuery.of(context).size.height * 0.75,
+        decoration: BoxDecoration(
+          color: scheme.surface,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        child: Column(
+          children: [
+            Container(
+              margin: const EdgeInsets.only(top: 12),
+              width: 36,
+              height: 4,
+              decoration: BoxDecoration(
+                color: scheme.onSurface.withValues(alpha: 0.2),
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 16, 20, 4),
+              child: Row(
+                children: [
+                  Icon(Icons.grid_view_rounded, color: scheme.primary, size: 20),
+                  const SizedBox(width: 8),
+                  Text(
+                    l10n.adminMore,
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const Spacer(),
+                  IconButton(
+                    icon: const Icon(Icons.close_rounded, size: 20),
+                    onPressed: () => Navigator.pop(context),
+                  ),
+                ],
+              ),
+            ),
+            const Divider(height: 1),
+            Expanded(
+              child: ListView(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                children: [
+                  for (final group in groups) ...[
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(8, 16, 8, 6),
+                      child: Text(
+                        group.label(l10n),
+                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                          color: scheme.primary,
+                          fontWeight: FontWeight.w700,
+                          letterSpacing: 0.5,
+                        ),
+                      ),
+                    ),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: [
+                        for (final item in group.items)
+                          _MoreSheetTile(
+                            item: item,
+                            isActive: currentPath == item.path,
+                            onTap: () {
+                              Navigator.pop(context);
+                              context.go(item.path);
+                            },
+                          ),
+                      ],
+                    ),
+                  ],
+                  const SizedBox(height: 24),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _MoreSheetTile extends StatelessWidget {
+  const _MoreSheetTile({
+    required this.item,
+    required this.isActive,
+    required this.onTap,
+  });
+
+  final _AdminNavItem item;
+  final bool isActive;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final scheme = Theme.of(context).colorScheme;
+
+    return Material(
+      color: isActive
+          ? scheme.primary.withValues(alpha: 0.12)
+          : scheme.surfaceContainerLow,
+      borderRadius: BorderRadius.circular(12),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(12),
+        onTap: onTap,
+        child: Container(
+          width: 105,
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                item.icon,
+                size: 24,
+                color: isActive ? scheme.primary : scheme.onSurface.withValues(alpha: 0.7),
+              ),
+              const SizedBox(height: 6),
+              Text(
+                item.label(l10n),
+                style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,
+                  color: isActive ? scheme.primary : scheme.onSurface.withValues(alpha: 0.8),
+                ),
+                textAlign: TextAlign.center,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 }
 
 class _AdminRail extends ConsumerWidget {
@@ -517,19 +713,50 @@ class _AdminDrawer extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
+    final currentPath = GoRouterState.of(context).matchedLocation;
     return SafeArea(
       child: Drawer(
         width: 292,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 20, 16, 12),
-              child: Text(
-                l10n.adminPanel,
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.fromLTRB(20, 24, 20, 16),
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.3),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    width: 48,
+                    height: 48,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.2),
+                    ),
+                    child: Icon(
+                      Icons.admin_panel_settings_rounded,
+                      color: Theme.of(context).colorScheme.primary,
+                      size: 28,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    l10n.adminPanel,
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    l10n.adminCommandCenter,
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+                    ),
+                  ),
+                ],
               ),
             ),
             const Divider(height: 1),
@@ -542,8 +769,7 @@ class _AdminDrawer extends ConsumerWidget {
                       padding: const EdgeInsets.fromLTRB(16, 14, 16, 4),
                       child: Text(
                         group.label(l10n),
-                        style: Theme.of(context).textTheme.labelSmall
-                            ?.copyWith(
+                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
                           color: Theme.of(context).colorScheme.primary,
                           fontWeight: FontWeight.w600,
                         ),
@@ -552,9 +778,7 @@ class _AdminDrawer extends ConsumerWidget {
                     for (final item in group.items)
                       _RailTile(
                         item: item,
-                        isActive:
-                            GoRouterState.of(context).matchedLocation ==
-                                item.path,
+                        isActive: currentPath == item.path,
                         onTap: () => onNavigate(item.path),
                       ),
                   ],

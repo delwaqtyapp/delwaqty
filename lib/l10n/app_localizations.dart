@@ -8714,6 +8714,12 @@ abstract class AppLocalizations {
   /// **'Settings'**
   String get adminSettingsPage;
 
+  /// No description provided for @adminMore.
+  ///
+  /// In en, this message translates to:
+  /// **'More'**
+  String get adminMore;
+
   /// No description provided for @adminOperationsSection.
   ///
   /// In en, this message translates to:

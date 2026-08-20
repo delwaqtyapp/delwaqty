@@ -10549,6 +10549,234 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Confirm booking'**
   String get confirmBooking;
+
+  /// No description provided for @deleteAccountDirectMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'As the owner, this account will be permanently deleted.'**
+  String get deleteAccountDirectMessage;
+
+  /// No description provided for @deleteNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Now'**
+  String get deleteNow;
+
+  /// No description provided for @memberDeletedSuccessfully.
+  ///
+  /// In en, this message translates to:
+  /// **'Account deleted successfully'**
+  String get memberDeletedSuccessfully;
+
+  /// No description provided for @adminProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'Admin Profile'**
+  String get adminProfile;
+
+  /// No description provided for @adminEarnings.
+  ///
+  /// In en, this message translates to:
+  /// **'My Earnings'**
+  String get adminEarnings;
+
+  /// No description provided for @adminEarningsDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Revenue earned from your managed region'**
+  String get adminEarningsDesc;
+
+  /// No description provided for @adminRole.
+  ///
+  /// In en, this message translates to:
+  /// **'Role'**
+  String get adminRole;
+
+  /// No description provided for @adminPosition.
+  ///
+  /// In en, this message translates to:
+  /// **'Position'**
+  String get adminPosition;
+
+  /// No description provided for @adminAssignedRegion.
+  ///
+  /// In en, this message translates to:
+  /// **'Assigned Region'**
+  String get adminAssignedRegion;
+
+  /// No description provided for @totalEarnings.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Earnings'**
+  String get totalEarnings;
+
+  /// No description provided for @platformRevenueShare.
+  ///
+  /// In en, this message translates to:
+  /// **'Platform Revenue Share'**
+  String get platformRevenueShare;
+
+  /// No description provided for @regionPerformance.
+  ///
+  /// In en, this message translates to:
+  /// **'Region Performance'**
+  String get regionPerformance;
+
+  /// No description provided for @assignSubAdmin.
+  ///
+  /// In en, this message translates to:
+  /// **'Assign Sub-Admin'**
+  String get assignSubAdmin;
+
+  /// No description provided for @revokePermission.
+  ///
+  /// In en, this message translates to:
+  /// **'Revoke Permission'**
+  String get revokePermission;
+
+  /// No description provided for @grantPermission.
+  ///
+  /// In en, this message translates to:
+  /// **'Grant Permission'**
+  String get grantPermission;
+
+  /// No description provided for @permissionDelegation.
+  ///
+  /// In en, this message translates to:
+  /// **'Permission Delegation'**
+  String get permissionDelegation;
+
+  /// No description provided for @deletionApprovalPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Deletion Approval Pending'**
+  String get deletionApprovalPending;
+
+  /// No description provided for @approveDeletion.
+  ///
+  /// In en, this message translates to:
+  /// **'Approve Deletion'**
+  String get approveDeletion;
+
+  /// No description provided for @rejectDeletion.
+  ///
+  /// In en, this message translates to:
+  /// **'Reject Deletion'**
+  String get rejectDeletion;
+
+  /// No description provided for @deletionApproved.
+  ///
+  /// In en, this message translates to:
+  /// **'Deletion approved'**
+  String get deletionApproved;
+
+  /// No description provided for @deletionRejected.
+  ///
+  /// In en, this message translates to:
+  /// **'Deletion rejected'**
+  String get deletionRejected;
+
+  /// No description provided for @pendingDeletions.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending Deletions'**
+  String get pendingDeletions;
+
+  /// No description provided for @ownerFullAccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Full Access (Owner)'**
+  String get ownerFullAccess;
+
+  /// No description provided for @governorateAdmin.
+  ///
+  /// In en, this message translates to:
+  /// **'Governorate Admin'**
+  String get governorateAdmin;
+
+  /// No description provided for @centerAdmin.
+  ///
+  /// In en, this message translates to:
+  /// **'Center Admin'**
+  String get centerAdmin;
+
+  /// No description provided for @villageAdmin.
+  ///
+  /// In en, this message translates to:
+  /// **'Village Admin'**
+  String get villageAdmin;
+
+  /// No description provided for @countryAdmin.
+  ///
+  /// In en, this message translates to:
+  /// **'Country Admin'**
+  String get countryAdmin;
+
+  /// No description provided for @regionGovernorate.
+  ///
+  /// In en, this message translates to:
+  /// **'Governorate'**
+  String get regionGovernorate;
+
+  /// No description provided for @regionCenter.
+  ///
+  /// In en, this message translates to:
+  /// **'Center'**
+  String get regionCenter;
+
+  /// No description provided for @regionVillage.
+  ///
+  /// In en, this message translates to:
+  /// **'Village'**
+  String get regionVillage;
+
+  /// No description provided for @regionCountry.
+  ///
+  /// In en, this message translates to:
+  /// **'Country'**
+  String get regionCountry;
+
+  /// No description provided for @assignRegion.
+  ///
+  /// In en, this message translates to:
+  /// **'Assign Region'**
+  String get assignRegion;
+
+  /// No description provided for @selectGovernorate.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Governorate'**
+  String get selectGovernorate;
+
+  /// No description provided for @selectCenter.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Center'**
+  String get selectCenter;
+
+  /// No description provided for @selectVillage.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Vills'**
+  String get selectVillage;
+
+  /// No description provided for @noAdmins.
+  ///
+  /// In en, this message translates to:
+  /// **'No admins found'**
+  String get noAdmins;
+
+  /// No description provided for @noPendingDeletions.
+  ///
+  /// In en, this message translates to:
+  /// **'No pending deletions'**
+  String get noPendingDeletions;
+
+  /// No description provided for @allCaughtUp.
+  ///
+  /// In en, this message translates to:
+  /// **'All caught up!'**
+  String get allCaughtUp;
 }
 
 class _AppLocalizationsDelegate

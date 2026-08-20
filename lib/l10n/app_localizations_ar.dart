@@ -5470,4 +5470,119 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get confirmBooking => 'تأكيد الحجز';
+
+  @override
+  String get deleteAccountDirectMessage =>
+      'بصفتك المالك، سيتم حذف هذا الحساب نهائياً.';
+
+  @override
+  String get deleteNow => 'حذف الآن';
+
+  @override
+  String get memberDeletedSuccessfully => 'تم حذف الحساب بنجاح';
+
+  @override
+  String get adminProfile => 'ملف المسؤول';
+
+  @override
+  String get adminEarnings => 'أرباحي';
+
+  @override
+  String get adminEarningsDesc => 'الدخل المكتسب من المنطقة التي تديرها';
+
+  @override
+  String get adminRole => 'الدور';
+
+  @override
+  String get adminPosition => 'المنصب';
+
+  @override
+  String get adminAssignedRegion => 'المنطقة المخصصة';
+
+  @override
+  String get totalEarnings => 'إجمالي الأرباح';
+
+  @override
+  String get platformRevenueShare => 'نسبة إيرادات المنصة';
+
+  @override
+  String get regionPerformance => 'أداء المنطقة';
+
+  @override
+  String get assignSubAdmin => 'تعيين مسؤول فرعي';
+
+  @override
+  String get revokePermission => 'إلغاء صلاحية';
+
+  @override
+  String get grantPermission => 'منح صلاحية';
+
+  @override
+  String get permissionDelegation => 'تفويض الصلاحيات';
+
+  @override
+  String get deletionApprovalPending => 'موافقة الحذف معلقة';
+
+  @override
+  String get approveDeletion => 'الموافقة على الحذف';
+
+  @override
+  String get rejectDeletion => 'رفض الحذف';
+
+  @override
+  String get deletionApproved => 'تمت الموافقة على الحذف';
+
+  @override
+  String get deletionRejected => 'تم رفض الحذف';
+
+  @override
+  String get pendingDeletions => 'طلبات الحذف المعلقة';
+
+  @override
+  String get ownerFullAccess => 'صلاحيات كاملة (المالك)';
+
+  @override
+  String get governorateAdmin => 'مسؤول محافظة';
+
+  @override
+  String get centerAdmin => 'مسؤول مركز';
+
+  @override
+  String get villageAdmin => 'مسؤول قرية';
+
+  @override
+  String get countryAdmin => 'مسؤول الدولة';
+
+  @override
+  String get regionGovernorate => 'محافظة';
+
+  @override
+  String get regionCenter => 'مركز';
+
+  @override
+  String get regionVillage => 'قرية';
+
+  @override
+  String get regionCountry => 'دولة';
+
+  @override
+  String get assignRegion => 'تعيين منطقة';
+
+  @override
+  String get selectGovernorate => 'اختر المحافظة';
+
+  @override
+  String get selectCenter => 'اختر المركز';
+
+  @override
+  String get selectVillage => 'اختر القرية';
+
+  @override
+  String get noAdmins => 'لم يتم العثور على مسؤولين';
+
+  @override
+  String get noPendingDeletions => 'لا توجد طلبات حذف معلقة';
+
+  @override
+  String get allCaughtUp => 'كل شيء محدّث!';
 }

@@ -1,11 +1,13 @@
 ﻿import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:delwaqty/features/admin/member_management/presentation/member_providers.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 import 'package:delwaqty/shared/widgets/premium_empty_state.dart';
 import 'package:delwaqty/shared/widgets/shimmer_loading.dart';
 import 'package:delwaqty/shared/widgets/stat_card.dart';
 import 'package:delwaqty/services/supabase/supabase_service.dart';
+import 'package:delwaqty/core/constants/app_constants.dart';
 
 class MemberDrawer extends ConsumerWidget {
   const MemberDrawer({
@@ -2289,14 +2291,14 @@ class _AdminActionsSectionState extends ConsumerState<_AdminActionsSection> {
     }
   }
 
-  /// Deletion (D4): soft-delete + anonymize + preserved audit. The member
-  /// email is taken from the loaded profile (never typed) and validated
-  /// server-side by `request_member_deletion` (migration 053), which submits
-  /// an owner-decided approval request rather than deleting directly.
+  /// Deletion: Owner deletes directly. Others submit a deletion request
+  /// that requires owner approval.
   Future<void> _confirmDeletion() async {
     final l10n = AppLocalizations.of(context);
     final basic = widget.profile['basic'] as Map<String, dynamic>? ?? {};
     final memberEmail = basic['email'] as String? ?? '';
+    final currentEmail = Supabase.instance.client.auth.currentUser?.email;
+    final isOwner = currentEmail == AppConstants.ownerEmail;
 
     final reason = await showDialog<String>(
       context: context,
@@ -2308,7 +2310,9 @@ class _AdminActionsSectionState extends ConsumerState<_AdminActionsSection> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text(l10n.deleteAccountMessage),
+                Text(isOwner
+                    ? l10n.deleteAccountDirectMessage
+                    : l10n.deleteAccountMessage),
                 if (memberEmail.isNotEmpty) ...[
                   const SizedBox(height: 8),
                   Text(
@@ -2344,7 +2348,7 @@ class _AdminActionsSectionState extends ConsumerState<_AdminActionsSection> {
               ),
               onPressed: () =>
                   Navigator.of(ctx).pop(reasonController.text.trim()),
-              child: Text(l10n.submitDeletionRequest),
+              child: Text(isOwner ? l10n.deleteNow : l10n.submitDeletionRequest),
             ),
           ],
         );
@@ -2355,16 +2359,25 @@ class _AdminActionsSectionState extends ConsumerState<_AdminActionsSection> {
 
     try {
       final client = ref.read(supabaseClientProvider);
-      await client.rpc('request_member_deletion', params: {
-        'p_member_id': widget.memberId,
-        'p_confirmation_email': memberEmail,
-        'p_reason': reason,
-      });
+      if (isOwner) {
+        await client.rpc('delete_member_direct', params: {
+          'p_member_id': widget.memberId,
+          'p_reason': reason,
+        });
+      } else {
+        await client.rpc('request_member_deletion', params: {
+          'p_member_id': widget.memberId,
+          'p_confirmation_email': memberEmail,
+          'p_reason': reason,
+        });
+      }
       if (mounted) {
         ref.invalidate(memberOpsProfileProvider(widget.memberId));
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(l10n.deletionRequestSubmitted),
+            content: Text(isOwner
+                ? l10n.memberDeletedSuccessfully
+                : l10n.deletionRequestSubmitted),
           ),
         );
       }

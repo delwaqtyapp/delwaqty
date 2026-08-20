@@ -13,12 +13,10 @@ class ThemeModeNotifier extends Notifier<ThemeMode> {
     final sharedPrefs = ref.watch(sharedPreferencesProvider);
     final savedMode = sharedPrefs.getString(key: StorageKeys.themeMode);
     switch (savedMode) {
-      case 'light':
-        return ThemeMode.light;
       case 'dark':
         return ThemeMode.dark;
       default:
-        return ThemeMode.system;
+        return ThemeMode.light;
     }
   }
 

@@ -5507,4 +5507,119 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get confirmBooking => 'Confirm booking';
+
+  @override
+  String get deleteAccountDirectMessage =>
+      'As the owner, this account will be permanently deleted.';
+
+  @override
+  String get deleteNow => 'Delete Now';
+
+  @override
+  String get memberDeletedSuccessfully => 'Account deleted successfully';
+
+  @override
+  String get adminProfile => 'Admin Profile';
+
+  @override
+  String get adminEarnings => 'My Earnings';
+
+  @override
+  String get adminEarningsDesc => 'Revenue earned from your managed region';
+
+  @override
+  String get adminRole => 'Role';
+
+  @override
+  String get adminPosition => 'Position';
+
+  @override
+  String get adminAssignedRegion => 'Assigned Region';
+
+  @override
+  String get totalEarnings => 'Total Earnings';
+
+  @override
+  String get platformRevenueShare => 'Platform Revenue Share';
+
+  @override
+  String get regionPerformance => 'Region Performance';
+
+  @override
+  String get assignSubAdmin => 'Assign Sub-Admin';
+
+  @override
+  String get revokePermission => 'Revoke Permission';
+
+  @override
+  String get grantPermission => 'Grant Permission';
+
+  @override
+  String get permissionDelegation => 'Permission Delegation';
+
+  @override
+  String get deletionApprovalPending => 'Deletion Approval Pending';
+
+  @override
+  String get approveDeletion => 'Approve Deletion';
+
+  @override
+  String get rejectDeletion => 'Reject Deletion';
+
+  @override
+  String get deletionApproved => 'Deletion approved';
+
+  @override
+  String get deletionRejected => 'Deletion rejected';
+
+  @override
+  String get pendingDeletions => 'Pending Deletions';
+
+  @override
+  String get ownerFullAccess => 'Full Access (Owner)';
+
+  @override
+  String get governorateAdmin => 'Governorate Admin';
+
+  @override
+  String get centerAdmin => 'Center Admin';
+
+  @override
+  String get villageAdmin => 'Village Admin';
+
+  @override
+  String get countryAdmin => 'Country Admin';
+
+  @override
+  String get regionGovernorate => 'Governorate';
+
+  @override
+  String get regionCenter => 'Center';
+
+  @override
+  String get regionVillage => 'Village';
+
+  @override
+  String get regionCountry => 'Country';
+
+  @override
+  String get assignRegion => 'Assign Region';
+
+  @override
+  String get selectGovernorate => 'Select Governorate';
+
+  @override
+  String get selectCenter => 'Select Center';
+
+  @override
+  String get selectVillage => 'Select Vills';
+
+  @override
+  String get noAdmins => 'No admins found';
+
+  @override
+  String get noPendingDeletions => 'No pending deletions';
+
+  @override
+  String get allCaughtUp => 'All caught up!';
 }

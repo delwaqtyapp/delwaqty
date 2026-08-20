@@ -1,5 +1,5 @@
-import 'package:flutter_test/flutter_test.dart';
-import 'package:delwaqty/features/ride/domain/entities/ride.dart';
+﻿import 'package:flutter_test/flutter_test.dart';
+import 'package:delwaqty/features/customer/ride/domain/entities/ride.dart';
 
 void main() {
   final now = DateTime(2025, 6, 15);

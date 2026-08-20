@@ -1,4 +1,4 @@
-import 'package:supabase_flutter/supabase_flutter.dart';
+﻿import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:delwaqty/features/admin/domain/entities/admin_models.dart';
 import 'package:delwaqty/features/admin/domain/repositories/admin_repository.dart'
     as admin;
@@ -10,7 +10,7 @@ class AdminRepository implements admin.AdminRepository {
 
   final SupabaseClient _supabase;
 
-  // ─── Dashboard Metrics ────────────────────────────────────
+  // â”€â”€â”€ Dashboard Metrics â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   Future<AdminDashboardMetrics> getDashboardMetrics() async {
     try {
@@ -157,7 +157,7 @@ class AdminRepository implements admin.AdminRepository {
     }
   }
 
-  // ─── Revenue Chart ────────────────────────────────────────
+  // â”€â”€â”€ Revenue Chart â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   Future<List<RevenueData>> getRevenueChart({required int days}) async {
     try {
@@ -195,7 +195,7 @@ class AdminRepository implements admin.AdminRepository {
     }
   }
 
-  // ─── Active Drivers ───────────────────────────────────────
+  // â”€â”€â”€ Active Drivers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   Future<List<DriverModel>> getActiveDrivers() async {
     try {
@@ -213,7 +213,7 @@ class AdminRepository implements admin.AdminRepository {
     }
   }
 
-  // ─── All Drivers ──────────────────────────────────────────
+  // â”€â”€â”€ All Drivers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   Future<List<DriverModel>> getAllDrivers({
     String? search,
@@ -252,7 +252,7 @@ class AdminRepository implements admin.AdminRepository {
     }
   }
 
-  // ─── Verify Driver ────────────────────────────────────────
+  // â”€â”€â”€ Verify Driver â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   Future<void> verifyDriver({
     required String driverId,
@@ -272,7 +272,7 @@ class AdminRepository implements admin.AdminRepository {
     }
   }
 
-  // ─── Update Driver Status ─────────────────────────────────
+  // â”€â”€â”€ Update Driver Status â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   Future<void> updateDriverStatus({
     required String driverId,
@@ -292,7 +292,7 @@ class AdminRepository implements admin.AdminRepository {
     }
   }
 
-  // ─── Recent Rides ─────────────────────────────────────────
+  // â”€â”€â”€ Recent Rides â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   Future<List<RideModel>> getRecentRides({
     int limit = 20,
@@ -317,7 +317,7 @@ class AdminRepository implements admin.AdminRepository {
     }
   }
 
-  // ─── Recent Deliveries ────────────────────────────────────
+  // â”€â”€â”€ Recent Deliveries â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   Future<List<DeliveryModel>> getRecentDeliveries({
     int limit = 20,
@@ -342,7 +342,7 @@ class AdminRepository implements admin.AdminRepository {
     }
   }
 
-  // ─── Peak Hours ───────────────────────────────────────────
+  // â”€â”€â”€ Peak Hours â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   Future<List<Map<String, dynamic>>> getPeakHours() async {
     try {
@@ -378,7 +378,7 @@ class AdminRepository implements admin.AdminRepository {
     return peakHours;
   }
 
-  // ─── Top Merchants ────────────────────────────────────────
+  // â”€â”€â”€ Top Merchants â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   Future<List<Map<String, dynamic>>> getTopMerchants({int limit = 10}) async {
     try {
@@ -417,7 +417,7 @@ class AdminRepository implements admin.AdminRepository {
             'phone': merchantData?['phone'],
             'total_revenue': entry.value,
             'total_deliveries': merchantTrips[entry.key] ?? 0,
-            'currency': 'ج.م',
+            'currency': 'Ø¬.Ù…',
           });
         } catch (_) {
           topMerchants.add({
@@ -425,7 +425,7 @@ class AdminRepository implements admin.AdminRepository {
             'name': 'Unknown',
             'total_revenue': entry.value,
             'total_deliveries': merchantTrips[entry.key] ?? 0,
-            'currency': 'ج.م',
+            'currency': 'Ø¬.Ù…',
           });
         }
       }
@@ -436,7 +436,7 @@ class AdminRepository implements admin.AdminRepository {
     }
   }
 
-  // ─── Driver Performance ───────────────────────────────────
+  // â”€â”€â”€ Driver Performance â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   Future<List<Map<String, dynamic>>> getDriverPerformance({
     int limit = 10,
@@ -497,7 +497,7 @@ class AdminRepository implements admin.AdminRepository {
             'completed_trips': entry.value['completed'],
             'cancelled_trips': entry.value['cancelled'],
             'total_revenue': entry.value['total_revenue'],
-            'currency': 'ج.م',
+            'currency': 'Ø¬.Ù…',
           });
         } catch (_) {
           results.add({
@@ -506,7 +506,7 @@ class AdminRepository implements admin.AdminRepository {
             'completed_trips': entry.value['completed'],
             'cancelled_trips': entry.value['cancelled'],
             'total_revenue': entry.value['total_revenue'],
-            'currency': 'ج.م',
+            'currency': 'Ø¬.Ù…',
           });
         }
       }
@@ -517,7 +517,7 @@ class AdminRepository implements admin.AdminRepository {
     }
   }
 
-  // ─── Recent Activity ──────────────────────────────────────
+  // â”€â”€â”€ Recent Activity â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   Future<List<AdminActivityLog>> getRecentActivity({int limit = 20}) async {
     try {
@@ -542,7 +542,7 @@ class AdminRepository implements admin.AdminRepository {
     }
   }
 
-  // ─── Users ────────────────────────────────────────────────
+  // â”€â”€â”€ Users â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 Future<List<AdminUser>> getUsers({String? search}) async {
      try {
@@ -637,7 +637,7 @@ final response = await _supabase
     }
   }
 
-  // ─── Merchants ────────────────────────────────────────────
+  // â”€â”€â”€ Merchants â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   Future<List<Map<String, dynamic>>> getMerchants({
     String? search,
@@ -675,7 +675,7 @@ final response = await _supabase
     }
   }
 
-  // ─── Orders ───────────────────────────────────────────────
+  // â”€â”€â”€ Orders â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   Future<List<Map<String, dynamic>>> getOrders({
     String? search,
@@ -722,7 +722,7 @@ final response = await _supabase
     }
   }
 
-  // ─── Settings ─────────────────────────────────────────────
+  // â”€â”€â”€ Settings â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   Future<Map<String, dynamic>> getSettings() async {
     try {
@@ -749,7 +749,7 @@ final response = await _supabase
     }
   }
 
-  // ─── Legacy Rides ─────────────────────────────────────────
+  // â”€â”€â”€ Legacy Rides â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   Future<List<Map<String, dynamic>>> getRides({
     String? status,
@@ -777,7 +777,7 @@ final response = await _supabase
     }
   }
 
-  // ─── Legacy Deliveries ────────────────────────────────────
+  // â”€â”€â”€ Legacy Deliveries â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   Future<List<Map<String, dynamic>>> getDeliveries({
     String? status,
@@ -812,7 +812,7 @@ final response = await _supabase
     }
   }
 
-  // ─── Analytics ────────────────────────────────────────────
+  // â”€â”€â”€ Analytics â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   Future<Map<String, dynamic>> getAnalytics({
     DateTime? from,
@@ -838,7 +838,7 @@ final response = await _supabase
     }
   }
 
-  // ─── Account Verification ────────────────────────────────
+  // â”€â”€â”€ Account Verification â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   @override
   Future<List<VerificationRequest>> getVerificationRequests() async {
@@ -905,7 +905,7 @@ final response = await _supabase
     }
   }
 
-  // ─── Private Mappers ──────────────────────────────────────
+  // â”€â”€â”€ Private Mappers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   DriverModel _mapToDriverModel(Map<String, dynamic> json) {
     return DriverModel(

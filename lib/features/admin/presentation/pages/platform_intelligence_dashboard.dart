@@ -1,10 +1,10 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:delwaqty/features/admin/presentation/providers/platform_intelligence_providers.dart';
 import 'package:delwaqty/features/admin/domain/entities/admin_models.dart';
 import 'package:delwaqty/features/admin/domain/entities/platform_intelligence.dart';
-import 'package:delwaqty/features/regions/presentation/providers/region_providers.dart';
+import 'package:delwaqty/features/_shared/regions/presentation/providers/region_providers.dart';
 import 'package:delwaqty/services/admin/admin_providers.dart';
 import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
 import 'package:delwaqty/shared/widgets/premium_empty_state.dart';
@@ -1067,7 +1067,7 @@ class _ActivityGlassTile extends StatelessWidget {
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  '${activity.resource} · $timeText',
+                  '${activity.resource} Â· $timeText',
                   style: Theme.of(
                     context,
                   ).textTheme.bodySmall?.copyWith(color: cs.onSurfaceVariant),

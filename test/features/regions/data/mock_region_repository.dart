@@ -1,7 +1,7 @@
-import 'package:delwaqty/features/regions/domain/entities/region.dart';
-import 'package:delwaqty/features/regions/domain/entities/geo_entity.dart';
-import 'package:delwaqty/features/regions/domain/entities/spatial_resolution.dart';
-import 'package:delwaqty/features/regions/domain/repositories/region_repository.dart';
+﻿import 'package:delwaqty/features/_shared/regions/domain/entities/region.dart';
+import 'package:delwaqty/features/_shared/regions/domain/entities/geo_entity.dart';
+import 'package:delwaqty/features/_shared/regions/domain/entities/spatial_resolution.dart';
+import 'package:delwaqty/features/_shared/regions/domain/repositories/region_repository.dart';
 
 /// In-memory fake used by widget tests. Mirrors the hand-rolled mock
 /// repository pattern already used for notifications.

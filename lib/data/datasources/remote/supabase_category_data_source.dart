@@ -1,9 +1,9 @@
-import 'dart:typed_data';
+﻿import 'dart:typed_data';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:delwaqty/services/supabase/supabase_service.dart';
 import 'package:delwaqty/services/logger/app_logger.dart';
-import 'package:delwaqty/features/home/domain/entities/platform_category.dart';
+import 'package:delwaqty/features/customer/home/domain/entities/platform_category.dart';
 
 final supabaseCategoryDataSourceProvider = Provider<SupabaseCategoryDataSource>(
   (ref) => SupabaseCategoryDataSource(

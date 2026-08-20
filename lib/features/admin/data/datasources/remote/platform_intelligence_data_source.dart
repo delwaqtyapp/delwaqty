@@ -1,4 +1,4 @@
-import 'package:supabase_flutter/supabase_flutter.dart';
+﻿import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:delwaqty/features/admin/domain/entities/platform_intelligence.dart';
 
 class PlatformIntelligenceDataSource {

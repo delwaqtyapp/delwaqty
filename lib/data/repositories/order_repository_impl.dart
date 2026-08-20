@@ -1,8 +1,8 @@
-import 'package:delwaqty/core/errors/exceptions.dart';
+﻿import 'package:delwaqty/core/errors/exceptions.dart';
 import 'package:delwaqty/data/datasources/remote/supabase_order_data_source.dart';
-import 'package:delwaqty/features/commerce/domain/entities/cart.dart';
-import 'package:delwaqty/features/commerce/domain/entities/order.dart';
-import 'package:delwaqty/features/commerce/domain/repositories/order_repository.dart';
+import 'package:delwaqty/features/customer/commerce/domain/entities/cart.dart';
+import 'package:delwaqty/features/customer/commerce/domain/entities/order.dart';
+import 'package:delwaqty/features/customer/commerce/domain/repositories/order_repository.dart';
 
 class OrderRepositoryImpl implements OrderRepository {
   OrderRepositoryImpl(this._dataSource);

@@ -1,9 +1,9 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:delwaqty/features/home_services/domain/entities/service_category.dart';
-import 'package:delwaqty/features/home_services/domain/entities/service_booking.dart';
-import 'package:delwaqty/features/home_services/domain/entities/service_provider.dart';
-import 'package:delwaqty/features/home_services/domain/repositories/service_booking_repository.dart';
-import 'package:delwaqty/features/home_services/data/repositories/service_booking_repository_impl.dart';
+﻿import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:delwaqty/features/customer/home_services/domain/entities/service_category.dart';
+import 'package:delwaqty/features/customer/home_services/domain/entities/service_booking.dart';
+import 'package:delwaqty/features/customer/home_services/domain/entities/service_provider.dart';
+import 'package:delwaqty/features/customer/home_services/domain/repositories/service_booking_repository.dart';
+import 'package:delwaqty/features/customer/home_services/data/repositories/service_booking_repository_impl.dart';
 import 'package:delwaqty/data/datasources/local/hive_cache_service.dart';
 import 'package:delwaqty/services/connectivity/connectivity_service.dart';
 

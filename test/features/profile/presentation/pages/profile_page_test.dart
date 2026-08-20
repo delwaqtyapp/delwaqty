@@ -1,4 +1,4 @@
-import 'dart:async';
+﻿import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -11,9 +11,9 @@ import 'package:delwaqty/domain/entities/user.dart';
 import 'package:delwaqty/domain/enums/verification_status.dart';
 import 'package:delwaqty/domain/repositories/profile_repository.dart';
 import 'package:delwaqty/domain/usecases/profile/profile_usecases.dart';
-import 'package:delwaqty/features/auth/domain/auth_state.dart';
-import 'package:delwaqty/features/auth/presentation/auth_provider.dart';
-import 'package:delwaqty/features/profile/presentation/pages/profile_page.dart';
+import 'package:delwaqty/features/_shared/auth/domain/auth_state.dart';
+import 'package:delwaqty/features/_shared/auth/presentation/auth_provider.dart';
+import 'package:delwaqty/features/customer/profile/presentation/pages/profile_page.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 
 class _MockProfileRepository extends Mock implements ProfileRepository {}

@@ -1,13 +1,13 @@
-import 'dart:convert';
+﻿import 'dart:convert';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 
-import 'package:delwaqty/features/search/data/providers/google_places_provider.dart';
-import 'package:delwaqty/features/search/domain/entities/geo_point.dart';
-import 'package:delwaqty/features/search/domain/entities/search_session.dart';
-import 'package:delwaqty/features/search/domain/geocoding_provider.dart';
+import 'package:delwaqty/features/customer/search/data/providers/google_places_provider.dart';
+import 'package:delwaqty/features/customer/search/domain/entities/geo_point.dart';
+import 'package:delwaqty/features/customer/search/domain/entities/search_session.dart';
+import 'package:delwaqty/features/customer/search/domain/geocoding_provider.dart';
 
 http.Response _json(Map<String, dynamic> body) =>
     http.Response(json.encode(body), 200);

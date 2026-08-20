@@ -1,8 +1,8 @@
-import 'package:flutter_test/flutter_test.dart';
+﻿import 'package:flutter_test/flutter_test.dart';
 
-import 'package:delwaqty/features/ride/domain/entities/ride.dart';
-import 'package:delwaqty/features/driver/domain/entities/ride_offer.dart';
-import 'package:delwaqty/features/driver/domain/entities/driver_stats.dart';
+import 'package:delwaqty/features/customer/ride/domain/entities/ride.dart';
+import 'package:delwaqty/features/customer/driver/domain/entities/ride_offer.dart';
+import 'package:delwaqty/features/customer/driver/domain/entities/driver_stats.dart';
 
 void main() {
   group('RideStatusX', () {

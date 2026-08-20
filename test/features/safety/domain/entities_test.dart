@@ -1,5 +1,5 @@
-import 'package:flutter_test/flutter_test.dart';
-import 'package:delwaqty/features/safety/domain/entities/trusted_contact.dart';
+﻿import 'package:flutter_test/flutter_test.dart';
+import 'package:delwaqty/features/customer/safety/domain/entities/trusted_contact.dart';
 
 void main() {
   final now = DateTime(2025, 6, 15);

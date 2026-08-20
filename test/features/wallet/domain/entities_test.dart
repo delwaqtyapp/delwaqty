@@ -1,6 +1,6 @@
-import 'package:flutter_test/flutter_test.dart';
-import 'package:delwaqty/features/wallet/domain/entities/wallet_balance.dart';
-import 'package:delwaqty/features/wallet/domain/entities/wallet_transaction.dart';
+﻿import 'package:flutter_test/flutter_test.dart';
+import 'package:delwaqty/features/customer/wallet/domain/entities/wallet_balance.dart';
+import 'package:delwaqty/features/customer/wallet/domain/entities/wallet_transaction.dart';
 
 void main() {
   final now = DateTime(2025, 6, 15);
@@ -22,7 +22,7 @@ void main() {
         'id': 'wb1',
         'userId': 'u1',
         'balance': 500.0,
-        'currency': 'ج.م',
+        'currency': 'Ø¬.Ù…',
         'updatedAt': now.toIso8601String(),
       };
 
@@ -30,7 +30,7 @@ void main() {
       expect(wallet.id, 'wb1');
       expect(wallet.userId, 'u1');
       expect(wallet.balance, 500.0);
-      expect(wallet.currency, 'ج.م');
+      expect(wallet.currency, 'Ø¬.Ù…');
     });
 
     test('toJson serializes correctly', () {
@@ -44,7 +44,7 @@ void main() {
       expect(json['id'], 'wb1');
       expect(json['userId'], 'u1');
       expect(json['balance'], 0.0);
-      expect(json['currency'], 'ج.م');
+      expect(json['currency'], 'Ø¬.Ù…');
     });
 
     test('fromJson roundtrip preserves data', () {
@@ -52,7 +52,7 @@ void main() {
         id: 'wb1',
         userId: 'u1',
         balance: 1250.50,
-        currency: 'ج.م',
+        currency: 'Ø¬.Ù…',
         updatedAt: now,
       );
 
@@ -107,7 +107,7 @@ void main() {
       );
 
       expect(wallet.balance, 0.0);
-      expect(wallet.currency, 'ج.م');
+      expect(wallet.currency, 'Ø¬.Ù…');
     });
   });
 

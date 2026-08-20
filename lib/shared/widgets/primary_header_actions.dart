@@ -1,11 +1,11 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:delwaqty/features/auth/domain/auth_state.dart';
-import 'package:delwaqty/features/auth/presentation/auth_provider.dart';
-import 'package:delwaqty/features/commerce/presentation/widgets/cart_badge.dart';
-import 'package:delwaqty/features/floating_sidebar/floating_sidebar.dart';
-import 'package:delwaqty/features/notifications/notifications_module.dart';
+import 'package:delwaqty/features/_shared/auth/domain/auth_state.dart';
+import 'package:delwaqty/features/_shared/auth/presentation/auth_provider.dart';
+import 'package:delwaqty/features/customer/commerce/presentation/widgets/cart_badge.dart';
+import 'package:delwaqty/features/admin/floating_sidebar/floating_sidebar.dart';
+import 'package:delwaqty/features/_shared/notifications/notifications_module.dart';
 
 class PrimaryHeaderActions extends ConsumerWidget {
   const PrimaryHeaderActions({

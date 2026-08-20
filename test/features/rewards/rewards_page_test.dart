@@ -1,15 +1,15 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:delwaqty/domain/entities/user.dart';
 import 'package:delwaqty/domain/enums/verification_status.dart';
-import 'package:delwaqty/features/auth/domain/auth_state.dart';
-import 'package:delwaqty/features/auth/presentation/auth_provider.dart';
-import 'package:delwaqty/features/rewards/domain/entities/member_reward.dart';
-import 'package:delwaqty/features/rewards/domain/repositories/rewards_repository.dart';
-import 'package:delwaqty/features/rewards/presentation/pages/rewards_page.dart';
-import 'package:delwaqty/features/rewards/presentation/rewards_providers.dart';
+import 'package:delwaqty/features/_shared/auth/domain/auth_state.dart';
+import 'package:delwaqty/features/_shared/auth/presentation/auth_provider.dart';
+import 'package:delwaqty/features/_shared/rewards/domain/entities/member_reward.dart';
+import 'package:delwaqty/features/_shared/rewards/domain/repositories/rewards_repository.dart';
+import 'package:delwaqty/features/_shared/rewards/presentation/pages/rewards_page.dart';
+import 'package:delwaqty/features/_shared/rewards/presentation/rewards_providers.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 
 class MockRewardsRepository extends Mock implements RewardsRepository {}

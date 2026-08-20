@@ -1,9 +1,9 @@
-import 'dart:async';
+﻿import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:delwaqty/features/commerce/domain/entities/merchant.dart';
-import 'package:delwaqty/features/commerce/domain/entities/product.dart';
-import 'package:delwaqty/features/home_services/domain/entities/service_category.dart';
+import 'package:delwaqty/features/customer/commerce/domain/entities/merchant.dart';
+import 'package:delwaqty/features/customer/commerce/domain/entities/product.dart';
+import 'package:delwaqty/features/customer/home_services/domain/entities/service_category.dart';
 import 'package:delwaqty/services/logger/app_logger.dart';
 
 const String _merchantsBox = 'cached_merchants';

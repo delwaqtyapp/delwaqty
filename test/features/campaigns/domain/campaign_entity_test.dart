@@ -1,5 +1,5 @@
-import 'package:flutter_test/flutter_test.dart';
-import 'package:delwaqty/features/campaigns/domain/entities/campaign.dart';
+﻿import 'package:flutter_test/flutter_test.dart';
+import 'package:delwaqty/features/_shared/campaigns/domain/entities/campaign.dart';
 
 void main() {
   group('CampaignType', () {
@@ -106,7 +106,7 @@ void main() {
         'id': 'c1',
         'code': 'SUMMER20',
         'campaign_type': 'offer',
-        'name_ar': 'عرض الصيف',
+        'name_ar': 'Ø¹Ø±Ø¶ Ø§Ù„ØµÙŠÙ',
         'name_en': 'Summer Offer',
         'status': 'published',
         'starts_at': '2026-08-01T00:00:00.000Z',
@@ -118,7 +118,7 @@ void main() {
       expect(campaign.id, 'c1');
       expect(campaign.code, 'SUMMER20');
       expect(campaign.campaignType, CampaignType.offer);
-      expect(campaign.nameAr, 'عرض الصيف');
+      expect(campaign.nameAr, 'Ø¹Ø±Ø¶ Ø§Ù„ØµÙŠÙ');
       expect(campaign.nameEn, 'Summer Offer');
       expect(campaign.status, CampaignStatus.published);
       expect(campaign.startsAt, DateTime.parse('2026-08-01T00:00:00.000Z'));
@@ -133,7 +133,7 @@ void main() {
         'id': 'c2',
         'code': 'HOT',
         'campaign_type': 'coupon',
-        'name_ar': 'كوبون',
+        'name_ar': 'ÙƒÙˆØ¨ÙˆÙ†',
         'status': 'published',
         'priority': 'critical',
         'image_path': 'campaigns/hot/banner.png',

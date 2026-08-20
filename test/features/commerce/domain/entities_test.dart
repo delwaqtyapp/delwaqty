@@ -1,14 +1,14 @@
-import 'package:flutter_test/flutter_test.dart';
-import 'package:delwaqty/features/commerce/domain/entities/merchant.dart';
-import 'package:delwaqty/features/commerce/domain/entities/product.dart';
-import 'package:delwaqty/features/commerce/domain/entities/cart.dart';
-import 'package:delwaqty/features/commerce/domain/entities/order.dart';
-import 'package:delwaqty/features/commerce/domain/entities/review.dart';
-import 'package:delwaqty/features/commerce/domain/entities/coupon.dart';
-import 'package:delwaqty/features/commerce/domain/entities/favorite.dart';
-import 'package:delwaqty/features/commerce/domain/entities/catalog_category.dart';
-import 'package:delwaqty/features/commerce/domain/entities/search_filter.dart';
-import 'package:delwaqty/features/commerce/domain/entities/geo_location.dart';
+﻿import 'package:flutter_test/flutter_test.dart';
+import 'package:delwaqty/features/customer/commerce/domain/entities/merchant.dart';
+import 'package:delwaqty/features/customer/commerce/domain/entities/product.dart';
+import 'package:delwaqty/features/customer/commerce/domain/entities/cart.dart';
+import 'package:delwaqty/features/customer/commerce/domain/entities/order.dart';
+import 'package:delwaqty/features/customer/commerce/domain/entities/review.dart';
+import 'package:delwaqty/features/customer/commerce/domain/entities/coupon.dart';
+import 'package:delwaqty/features/customer/commerce/domain/entities/favorite.dart';
+import 'package:delwaqty/features/customer/commerce/domain/entities/catalog_category.dart';
+import 'package:delwaqty/features/customer/commerce/domain/entities/search_filter.dart';
+import 'package:delwaqty/features/customer/commerce/domain/entities/geo_location.dart';
 
 void main() {
   final now = DateTime(2025, 6, 15);

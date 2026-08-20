@@ -1,8 +1,8 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+﻿import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:delwaqty/services/supabase/supabase_service.dart';
 import 'package:delwaqty/services/logger/app_logger.dart';
-import 'package:delwaqty/features/commerce/domain/entities/catalog_category.dart';
+import 'package:delwaqty/features/customer/commerce/domain/entities/catalog_category.dart';
 
 final supabaseCatalogCategoryDataSourceProvider =
     Provider<SupabaseCatalogCategoryDataSource>((ref) {

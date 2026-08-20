@@ -1,7 +1,7 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:delwaqty/features/commerce/domain/repositories/merchant_repository.dart';
-import 'package:delwaqty/features/commerce/domain/entities/merchant.dart';
-import 'package:delwaqty/features/commerce/domain/entities/search_filter.dart';
+﻿import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:delwaqty/features/customer/commerce/domain/repositories/merchant_repository.dart';
+import 'package:delwaqty/features/customer/commerce/domain/entities/merchant.dart';
+import 'package:delwaqty/features/customer/commerce/domain/entities/search_filter.dart';
 import 'package:delwaqty/data/datasources/remote/supabase_merchant_data_source.dart';
 import 'package:delwaqty/core/errors/exceptions.dart';
 import 'package:delwaqty/services/logger/app_logger.dart';

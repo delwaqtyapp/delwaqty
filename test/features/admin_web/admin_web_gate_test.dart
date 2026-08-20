@@ -1,8 +1,8 @@
-import 'dart:async';
+﻿import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:delwaqty/features/admin_web/presentation/pages/admin_web_gate.dart';
+import 'package:delwaqty/features/admin/admin_web/presentation/pages/admin_web_gate.dart';
 
 void main() {
   group('adminWebGateStatus', () {

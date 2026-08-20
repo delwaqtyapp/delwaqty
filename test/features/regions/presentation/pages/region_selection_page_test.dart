@@ -1,12 +1,12 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:delwaqty/domain/entities/user.dart';
-import 'package:delwaqty/features/auth/domain/auth_state.dart';
-import 'package:delwaqty/features/auth/presentation/auth_provider.dart';
-import 'package:delwaqty/features/regions/domain/entities/region.dart';
-import 'package:delwaqty/features/regions/presentation/pages/region_selection_page.dart';
-import 'package:delwaqty/features/regions/presentation/providers/region_providers.dart';
+import 'package:delwaqty/features/_shared/auth/domain/auth_state.dart';
+import 'package:delwaqty/features/_shared/auth/presentation/auth_provider.dart';
+import 'package:delwaqty/features/_shared/regions/domain/entities/region.dart';
+import 'package:delwaqty/features/_shared/regions/presentation/pages/region_selection_page.dart';
+import 'package:delwaqty/features/_shared/regions/presentation/providers/region_providers.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 
 import '../../data/mock_region_repository.dart';
@@ -29,7 +29,7 @@ void main() {
     id: 'r-cairo',
     code: 'EG-C',
     type: RegionType.governorate,
-    nameAr: 'القاهرة',
+    nameAr: 'Ø§Ù„Ù‚Ø§Ù‡Ø±Ø©',
     nameEn: 'Cairo',
     createdAt: now,
   );
@@ -37,7 +37,7 @@ void main() {
     id: 'r-giza',
     code: 'EG-GZ',
     type: RegionType.governorate,
-    nameAr: 'الجيزة',
+    nameAr: 'Ø§Ù„Ø¬ÙŠØ²Ø©',
     nameEn: 'Giza',
     createdAt: now,
   );

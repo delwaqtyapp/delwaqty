@@ -1,7 +1,7 @@
-import 'package:delwaqty/features/restaurant/domain/entities/offer.dart';
-import 'package:delwaqty/features/restaurant/domain/entities/restaurant_settings.dart';
-import 'package:delwaqty/features/restaurant/presentation/widgets/offer_banner_card.dart';
-import 'package:delwaqty/features/restaurant/presentation/widgets/service_type_chips.dart';
+﻿import 'package:delwaqty/features/customer/restaurant/domain/entities/offer.dart';
+import 'package:delwaqty/features/customer/restaurant/domain/entities/restaurant_settings.dart';
+import 'package:delwaqty/features/customer/restaurant/presentation/widgets/offer_banner_card.dart';
+import 'package:delwaqty/features/customer/restaurant/presentation/widgets/service_type_chips.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';

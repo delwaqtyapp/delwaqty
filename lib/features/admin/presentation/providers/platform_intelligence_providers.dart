@@ -1,19 +1,19 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+﻿import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:delwaqty/features/admin/data/datasources/remote/platform_intelligence_data_source.dart';
 import 'package:delwaqty/features/admin/domain/entities/platform_intelligence.dart';
 
-// ─── Data Source Provider ─────────────────────────────────
+// â”€â”€â”€ Data Source Provider â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 final platformIntelligenceDataSourceProvider =
     Provider<PlatformIntelligenceDataSource>((ref) {
   return PlatformIntelligenceDataSource();
 });
 
-// ─── Admin Scope State ────────────────────────────────────
+// â”€â”€â”€ Admin Scope State â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 final adminScopeRegionProvider = StateProvider<String?>((ref) => null);
 
-// ─── Time Filter State ────────────────────────────────────
+// â”€â”€â”€ Time Filter State â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 enum AdminTimePeriod { today, week, month, quarter, all }
 
@@ -68,7 +68,7 @@ class AdminTimeFilter {
 final adminTimeFilterProvider =
     StateProvider<AdminTimeFilter>((ref) => const AdminTimeFilter());
 
-// ─── KPI Summary ──────────────────────────────────────────
+// â”€â”€â”€ KPI Summary â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 final platformKpiProvider = FutureProvider<PlatformKpiSummary>((ref) async {
   final ds = ref.watch(platformIntelligenceDataSourceProvider);
@@ -78,7 +78,7 @@ final platformKpiProvider = FutureProvider<PlatformKpiSummary>((ref) async {
   return ds.getKpiSummary(from: from, to: to, regionId: regionId);
 });
 
-// ─── Service Performance ──────────────────────────────────
+// â”€â”€â”€ Service Performance â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 final servicePerformanceProvider = FutureProvider<ServicePerformance>((ref) async {
   final ds = ref.watch(platformIntelligenceDataSourceProvider);
@@ -87,7 +87,7 @@ final servicePerformanceProvider = FutureProvider<ServicePerformance>((ref) asyn
   return ds.getServicePerformance(from: from, to: to);
 });
 
-// ─── Delivery Intelligence ────────────────────────────────
+// â”€â”€â”€ Delivery Intelligence â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 final deliveryIntelligenceProvider = FutureProvider<DeliveryIntelligence>((ref) async {
   final ds = ref.watch(platformIntelligenceDataSourceProvider);
@@ -96,7 +96,7 @@ final deliveryIntelligenceProvider = FutureProvider<DeliveryIntelligence>((ref) 
   return ds.getDeliveryIntelligence(from: from, to: to);
 });
 
-// ─── Merchant Intelligence ────────────────────────────────
+// â”€â”€â”€ Merchant Intelligence â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 final merchantIntelligenceProvider = FutureProvider<MerchantIntelligence>((ref) async {
   final ds = ref.watch(platformIntelligenceDataSourceProvider);
@@ -105,7 +105,7 @@ final merchantIntelligenceProvider = FutureProvider<MerchantIntelligence>((ref) 
   return ds.getMerchantIntelligence(from: from, to: to);
 });
 
-// ─── Wallet Intelligence ──────────────────────────────────
+// â”€â”€â”€ Wallet Intelligence â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 final walletIntelligenceProvider = FutureProvider<WalletIntelligence>((ref) async {
   final ds = ref.watch(platformIntelligenceDataSourceProvider);
@@ -114,7 +114,7 @@ final walletIntelligenceProvider = FutureProvider<WalletIntelligence>((ref) asyn
   return ds.getWalletIntelligence(from: from, to: to);
 });
 
-// ─── Provider Intelligence ────────────────────────────────
+// â”€â”€â”€ Provider Intelligence â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 final providerIntelligenceProvider = FutureProvider<ProviderIntelligence>((ref) async {
   final ds = ref.watch(platformIntelligenceDataSourceProvider);
@@ -123,7 +123,7 @@ final providerIntelligenceProvider = FutureProvider<ProviderIntelligence>((ref) 
   return ds.getProviderIntelligence(from: from, to: to);
 });
 
-// ─── Commission Summary ───────────────────────────────────
+// â”€â”€â”€ Commission Summary â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 final commissionSummaryProvider = FutureProvider<CommissionSummary>((ref) async {
   final ds = ref.watch(platformIntelligenceDataSourceProvider);
@@ -132,7 +132,7 @@ final commissionSummaryProvider = FutureProvider<CommissionSummary>((ref) async 
   return ds.getCommissionSummary(from: from, to: to);
 });
 
-// ─── Complaint Summary ────────────────────────────────────
+// â”€â”€â”€ Complaint Summary â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 final complaintSummaryProvider = FutureProvider<ComplaintSummary>((ref) async {
   final ds = ref.watch(platformIntelligenceDataSourceProvider);
@@ -141,7 +141,7 @@ final complaintSummaryProvider = FutureProvider<ComplaintSummary>((ref) async {
   return ds.getComplaintSummary(from: from, to: to);
 });
 
-// ─── Transaction Ledger ───────────────────────────────────
+// â”€â”€â”€ Transaction Ledger â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 final transactionLedgerProvider =
     FutureProvider.family<TransactionLedger, ({String? type, String? search, int page})>(
@@ -160,7 +160,7 @@ final transactionLedgerProvider =
   },
 );
 
-// ─── Revenue Overview ─────────────────────────────────────
+// â”€â”€â”€ Revenue Overview â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 final revenueOverviewProvider =
     FutureProvider.family<RevenueOverview, String?>((ref, period) async {
@@ -170,7 +170,7 @@ final revenueOverviewProvider =
   return ds.getRevenueOverview(period: period, from: from, to: to);
 });
 
-// ─── Orders Timeseries ────────────────────────────────────
+// â”€â”€â”€ Orders Timeseries â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 final ordersTimeseriesProvider = FutureProvider<TimeseriesData>((ref) async {
   final ds = ref.watch(platformIntelligenceDataSourceProvider);
@@ -179,7 +179,7 @@ final ordersTimeseriesProvider = FutureProvider<TimeseriesData>((ref) async {
   return ds.getOrdersTimeseries(from: from, to: to);
 });
 
-// ─── Rides Timeseries ─────────────────────────────────────
+// â”€â”€â”€ Rides Timeseries â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 final ridesTimeseriesProvider = FutureProvider<TimeseriesData>((ref) async {
   final ds = ref.watch(platformIntelligenceDataSourceProvider);
@@ -188,14 +188,14 @@ final ridesTimeseriesProvider = FutureProvider<TimeseriesData>((ref) async {
   return ds.getRidesTimeseries(from: from, to: to);
 });
 
-// ─── Operational Alerts ───────────────────────────────────
+// â”€â”€â”€ Operational Alerts â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 final operationalAlertsProvider = FutureProvider<List<OperationalAlert>>((ref) async {
   final ds = ref.watch(platformIntelligenceDataSourceProvider);
   return ds.getOperationalAlerts();
 });
 
-// ─── Revenue Breakdown ────────────────────────────────────
+// â”€â”€â”€ Revenue Breakdown â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 final revenueBreakdownProvider = FutureProvider<RevenueOverview>((ref) async {
   final ds = ref.watch(platformIntelligenceDataSourceProvider);

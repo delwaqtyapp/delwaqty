@@ -1,14 +1,14 @@
-import 'package:flutter_test/flutter_test.dart';
+﻿import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 
-import 'package:delwaqty/features/search/data/datasources/local/recent_searches_store.dart';
-import 'package:delwaqty/features/search/data/datasources/remote/supabase_saved_places_data_source.dart';
-import 'package:delwaqty/features/search/data/repositories/places_repository_impl.dart';
-import 'package:delwaqty/features/search/domain/entities/geo_point.dart';
-import 'package:delwaqty/features/search/domain/entities/place_details.dart';
-import 'package:delwaqty/features/search/domain/entities/place_suggestion.dart';
-import 'package:delwaqty/features/search/domain/entities/search_session.dart';
-import 'package:delwaqty/features/search/domain/geocoding_provider.dart';
+import 'package:delwaqty/features/customer/search/data/datasources/local/recent_searches_store.dart';
+import 'package:delwaqty/features/customer/search/data/datasources/remote/supabase_saved_places_data_source.dart';
+import 'package:delwaqty/features/customer/search/data/repositories/places_repository_impl.dart';
+import 'package:delwaqty/features/customer/search/domain/entities/geo_point.dart';
+import 'package:delwaqty/features/customer/search/domain/entities/place_details.dart';
+import 'package:delwaqty/features/customer/search/domain/entities/place_suggestion.dart';
+import 'package:delwaqty/features/customer/search/domain/entities/search_session.dart';
+import 'package:delwaqty/features/customer/search/domain/geocoding_provider.dart';
 
 class _MockSavedPlaces extends Mock implements SupabaseSavedPlacesDataSource {}
 

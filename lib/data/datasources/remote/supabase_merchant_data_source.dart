@@ -1,9 +1,9 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+﻿import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:delwaqty/services/supabase/supabase_service.dart';
 import 'package:delwaqty/services/logger/app_logger.dart';
-import 'package:delwaqty/features/commerce/domain/entities/merchant.dart';
-import 'package:delwaqty/features/commerce/domain/entities/search_filter.dart';
+import 'package:delwaqty/features/customer/commerce/domain/entities/merchant.dart';
+import 'package:delwaqty/features/customer/commerce/domain/entities/search_filter.dart';
 
 final supabaseMerchantDataSourceProvider = Provider<SupabaseMerchantDataSource>(
   (ref) {

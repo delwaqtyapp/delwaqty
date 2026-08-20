@@ -1,5 +1,5 @@
-import 'package:flutter_test/flutter_test.dart';
-import 'package:delwaqty/features/member_management/domain/entities/member.dart';
+﻿import 'package:flutter_test/flutter_test.dart';
+import 'package:delwaqty/features/admin/member_management/domain/entities/member.dart';
 
 void main() {
   group('Member entity parsing', () {

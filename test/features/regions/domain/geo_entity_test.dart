@@ -1,6 +1,6 @@
-import 'package:flutter_test/flutter_test.dart';
-import 'package:delwaqty/features/regions/domain/entities/geo_entity.dart';
-import 'package:delwaqty/features/regions/domain/entities/spatial_resolution.dart';
+﻿import 'package:flutter_test/flutter_test.dart';
+import 'package:delwaqty/features/_shared/regions/domain/entities/geo_entity.dart';
+import 'package:delwaqty/features/_shared/regions/domain/entities/spatial_resolution.dart';
 
 void main() {
   group('GeoPlace.fromRow', () {
@@ -38,7 +38,7 @@ void main() {
       final arabic = GeoPlace(
         id: 'p1',
         type: GeoPlaceType.landmark,
-        nameAr: 'أهرامات الجيزة',
+        nameAr: 'Ø£Ù‡Ø±Ø§Ù…Ø§Øª Ø§Ù„Ø¬ÙŠØ²Ø©',
         nameEn: 'Pyramids of Giza',
         source: 'geonames',
         sourceRef: '355017',
@@ -46,7 +46,7 @@ void main() {
         confidence: GeoConfidence.high,
         createdAt: DateTime(2026, 8, 15),
       );
-      expect(arabic.displayName('ar'), 'أهرامات الجيزة');
+      expect(arabic.displayName('ar'), 'Ø£Ù‡Ø±Ø§Ù…Ø§Øª Ø§Ù„Ø¬ÙŠØ²Ø©');
       expect(arabic.displayName('en'), 'Pyramids of Giza');
 
       final bare = GeoPlace(
@@ -82,14 +82,14 @@ void main() {
       final alias = GeoAlias.fromRow({
         'entity_type': 'region',
         'entity_id': '5d6b5ccd-22c6-5f46-91b0-75794b297639',
-        'alias': 'قسم اول مدينة العاشر من رمضان',
+        'alias': 'Ù‚Ø³Ù… Ø§ÙˆÙ„ Ù…Ø¯ÙŠÙ†Ø© Ø§Ù„Ø¹Ø§Ø´Ø± Ù…Ù† Ø±Ù…Ø¶Ø§Ù†',
         'lang': 'ar',
         'is_primary': true,
         'source': 'cod-ab',
       });
       expect(alias.entityType, 'region');
       expect(alias.isPrimary, isTrue);
-      expect(alias.alias, 'قسم اول مدينة العاشر من رمضان');
+      expect(alias.alias, 'Ù‚Ø³Ù… Ø§ÙˆÙ„ Ù…Ø¯ÙŠÙ†Ø© Ø§Ù„Ø¹Ø§Ø´Ø± Ù…Ù† Ø±Ù…Ø¶Ø§Ù†');
     });
   });
 
@@ -98,13 +98,13 @@ void main() {
       final resolution = SpatialResolution.fromRpc({
         'region_id': 'e5f675e5-cfe5-5432-bdf5-0ebb38bf55b5',
         'code': 'EG-ADM2-3202',
-        'name_ar': 'مركز الواحات الداخلة',
+        'name_ar': 'Ù…Ø±ÙƒØ² Ø§Ù„ÙˆØ§Ø­Ø§Øª Ø§Ù„Ø¯Ø§Ø®Ù„Ø©',
         'name_en': 'A-Dakhla Oasis',
         'type': 'markaz',
         'parent_region_id': '00000000-0000-0000-0000-000000000127',
         'governorate_id': '00000000-0000-0000-0000-000000000127',
         'governorate_code': 'EG-WAD',
-        'governorate_name_ar': 'الوادي الجديد',
+        'governorate_name_ar': 'Ø§Ù„ÙˆØ§Ø¯ÙŠ Ø§Ù„Ø¬Ø¯ÙŠØ¯',
         'governorate_name_en': 'New Valley',
         'confidence': 'HIGH',
         'distance_m': 0,
@@ -122,13 +122,13 @@ void main() {
       final resolution = SpatialResolution.fromRpc({
         'region_id': '00000000-0000-0000-0000-000000000109',
         'code': 'EG-DT',
-        'name_ar': 'دمياط',
+        'name_ar': 'Ø¯Ù…ÙŠØ§Ø·',
         'name_en': 'Damietta',
         'type': 'governorate',
         'parent_region_id': '00000000-0000-0000-0000-000000000001',
         'governorate_id': '00000000-0000-0000-0000-000000000109',
         'governorate_code': 'EG-DT',
-        'governorate_name_ar': 'دمياط',
+        'governorate_name_ar': 'Ø¯Ù…ÙŠØ§Ø·',
         'governorate_name_en': 'Damietta',
         'confidence': 'LOW',
         'distance_m': 56209,

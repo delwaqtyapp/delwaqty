@@ -1,9 +1,9 @@
-import 'package:flutter_test/flutter_test.dart';
+﻿import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:delwaqty/core/errors/exceptions.dart';
-import 'package:delwaqty/features/campaigns/data/datasources/remote/supabase_campaign_data_source.dart';
-import 'package:delwaqty/features/campaigns/data/repositories/supabase_campaign_repository_impl.dart';
-import 'package:delwaqty/features/campaigns/domain/entities/campaign.dart';
+import 'package:delwaqty/features/_shared/campaigns/data/datasources/remote/supabase_campaign_data_source.dart';
+import 'package:delwaqty/features/_shared/campaigns/data/repositories/supabase_campaign_repository_impl.dart';
+import 'package:delwaqty/features/_shared/campaigns/domain/entities/campaign.dart';
 
 class MockCampaignDataSource extends Mock implements SupabaseCampaignDataSource {}
 
@@ -22,7 +22,7 @@ void main() {
         id: 'c1',
         code: 'CODE',
         campaignType: CampaignType.offer,
-        nameAr: 'عرض',
+        nameAr: 'Ø¹Ø±Ø¶',
         status: CampaignStatus.published,
       );
       when(() => mockDataSource.getById('c1')).thenAnswer((_) async => campaign);
@@ -59,7 +59,7 @@ void main() {
         id: 'c1',
         code: 'CODE',
         campaignType: CampaignType.coupon,
-        nameAr: 'كوبون',
+        nameAr: 'ÙƒÙˆØ¨ÙˆÙ†',
         status: CampaignStatus.published,
         priority: CampaignPriority.critical,
       );

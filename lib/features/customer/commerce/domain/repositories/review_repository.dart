@@ -1,0 +1,34 @@
+﻿import 'package:delwaqty/features/customer/commerce/domain/entities/review.dart';
+
+abstract interface class ReviewRepository {
+  Future<List<Review>> getMerchantReviews(
+    String merchantId, {
+    int? limit,
+    int? offset,
+  });
+  Future<List<Review>> getProductReviews(
+    String productId, {
+    int? limit,
+    int? offset,
+  });
+  Future<Review?> getReviewById(String id);
+  Future<Review> submitReview({
+    required String merchantId,
+    required String userId,
+    String? productId,
+    String? orderId,
+    required double rating,
+    String? comment,
+    List<String>? imageUrls,
+  });
+  Future<Review> updateReview({
+    required String reviewId,
+    double? rating,
+    String? comment,
+    List<String>? imageUrls,
+  });
+  Future<void> deleteReview(String reviewId);
+  Future<ReviewSummary> getMerchantRatingSummary(String merchantId);
+  Future<ReviewSummary> getProductRatingSummary(String productId);
+  Stream<Review> watchMerchantReviews(String merchantId);
+}

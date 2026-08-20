@@ -1,10 +1,10 @@
-import 'dart:async';
+﻿import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:delwaqty/features/admin/presentation/providers/platform_intelligence_providers.dart';
 import 'package:delwaqty/features/admin/domain/entities/platform_intelligence.dart';
-import 'package:delwaqty/features/safety/domain/entities/sos_alert.dart';
+import 'package:delwaqty/features/customer/safety/domain/entities/sos_alert.dart';
 import 'package:delwaqty/services/realtime/realtime_service.dart';
 import 'package:delwaqty/services/realtime/realtime_channel_constants.dart';
 import 'package:delwaqty/services/supabase/supabase_service.dart';

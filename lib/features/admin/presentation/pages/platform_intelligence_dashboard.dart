@@ -2,10 +2,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:delwaqty/features/admin/presentation/providers/platform_intelligence_providers.dart';
-import 'package:delwaqty/features/admin/domain/entities/admin_models.dart';
 import 'package:delwaqty/features/admin/domain/entities/platform_intelligence.dart';
 import 'package:delwaqty/features/_shared/regions/presentation/providers/region_providers.dart';
-import 'package:delwaqty/services/admin/admin_providers.dart';
 import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
 import 'package:delwaqty/shared/widgets/premium_empty_state.dart';
 import 'package:delwaqty/shared/widgets/app_loader.dart';
@@ -31,7 +29,6 @@ class _PlatformIntelligenceDashboardState
     final kpiAsync = ref.watch(platformKpiProvider);
     final alertsAsync = ref.watch(operationalAlertsProvider);
     final revenueAsync = ref.watch(revenueBreakdownProvider);
-    final activityAsync = ref.watch(recentActivityProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -42,14 +39,13 @@ class _PlatformIntelligenceDashboardState
             icon: const Icon(Icons.search_rounded),
             onPressed: () => context.push('/search'),
           ),
-          IconButton(
-            icon: const Icon(Icons.refresh_rounded),
-            onPressed: () {
-              ref.invalidate(platformKpiProvider);
-              ref.invalidate(operationalAlertsProvider);
-              ref.invalidate(revenueBreakdownProvider);
-              ref.invalidate(recentActivityProvider);
-            },
+            IconButton(
+              icon: const Icon(Icons.refresh_rounded),
+              onPressed: () {
+                ref.invalidate(platformKpiProvider);
+                ref.invalidate(operationalAlertsProvider);
+                ref.invalidate(revenueBreakdownProvider);
+              },
           ),
         ],
       ),
@@ -58,7 +54,6 @@ class _PlatformIntelligenceDashboardState
           ref.invalidate(platformKpiProvider);
           ref.invalidate(operationalAlertsProvider);
           ref.invalidate(revenueBreakdownProvider);
-          ref.invalidate(recentActivityProvider);
         },
         child: SingleChildScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
@@ -184,79 +179,6 @@ class _PlatformIntelligenceDashboardState
                   );
                 },
               ),
-              const SizedBox(height: 24),
-              AnimatedFadeIn(
-                delay: const Duration(milliseconds: 300),
-                child: Text(
-                  l10n.recentActivityTitle,
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 12),
-              activityAsync.when(
-                loading: () => const Center(
-                  child: Padding(
-                    padding: EdgeInsets.all(32),
-                    child: AppLoaderCircular(),
-                  ),
-                ),
-                error: (e, _) => AnimatedFadeIn(
-                  delay: const Duration(milliseconds: 320),
-                  child: PremiumCard(
-                    child: PremiumEmptyState(
-                      icon: Icons.history_rounded,
-                      title: l10n.error,
-                      message: l10n.errorLoadingActivity,
-                      actionLabel: l10n.retry,
-                      onAction: () => ref.invalidate(recentActivityProvider),
-                    ),
-                  ),
-                ),
-                data: (activities) {
-                  if (activities.isEmpty) {
-                    return AnimatedFadeIn(
-                      delay: const Duration(milliseconds: 320),
-                      child: PremiumCard(
-                        child: PremiumEmptyState(
-                          icon: Icons.history_rounded,
-                          title: l10n.noRecentActivity,
-                          message: l10n.noRecentActivity,
-                        ),
-                      ),
-                    );
-                  }
-                  return Column(
-                    children: [
-                      for (int i = 0; i < activities.length && i < 8; i++)
-                        AnimatedFadeIn(
-                          delay: Duration(milliseconds: 320 + i * 50),
-                          child: Padding(
-                            padding: EdgeInsets.only(bottom: i < 7 ? 8 : 0),
-                            child: _ActivityGlassTile(
-                              activity: activities[i],
-                              l10n: l10n,
-                              cs: cs,
-                            ),
-                          ),
-                        ),
-                    ],
-                  );
-                },
-              ),
-              const SizedBox(height: 24),
-              AnimatedFadeIn(
-                delay: const Duration(milliseconds: 360),
-                child: Text(
-                  l10n.quickActions,
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 12),
-              _buildQuickActionsGrid(context, l10n),
             ],
           ),
         ),
@@ -341,24 +263,28 @@ class _PlatformIntelligenceDashboardState
             kpi.totalUsers.toString(),
             Icons.people_outline_rounded,
             const Color(0xFF4A90D9),
+            '/admin/members',
           ),
           _KpiItem(
             l10n.kpiActiveMerchants,
             kpi.activeMerchants.toString(),
             Icons.store_outlined,
             const Color(0xFF34C759),
+            '/admin/merchants',
           ),
           _KpiItem(
             l10n.kpiOnlineDrivers,
             kpi.onlineDrivers.toString(),
             Icons.local_shipping_rounded,
             const Color(0xFF007AFF),
+            '/admin/drivers',
           ),
           _KpiItem(
             l10n.kpiPendingVerification,
             kpi.pendingVerification.toString(),
             Icons.verified_user_outlined,
             const Color(0xFF8B5CF6),
+            '/admin/verifications',
           ),
         ],
       ),
@@ -372,24 +298,28 @@ class _PlatformIntelligenceDashboardState
             kpi.totalOrders.toString(),
             Icons.receipt_long_rounded,
             const Color(0xFFFF9500),
+            '/admin/orders',
           ),
           _KpiItem(
             l10n.kpiActiveRides,
             kpi.activeRides.toString(),
             Icons.directions_car_rounded,
             const Color(0xFF00C7BE),
+            '/admin/deliveries',
           ),
           _KpiItem(
             l10n.kpiOpenComplaints,
             kpi.openComplaints.toString(),
             Icons.warning_amber_rounded,
             const Color(0xFFFF3B30),
+            '/admin/complaints',
           ),
           _KpiItem(
             l10n.kpiActiveSanctions,
             kpi.activeSanctions.toString(),
             Icons.gavel_rounded,
             const Color(0xFFFF6482),
+            '/admin/sanctions',
           ),
         ],
       ),
@@ -403,24 +333,28 @@ class _PlatformIntelligenceDashboardState
             '$currency ${kpi.totalGmv.toStringAsFixed(0)}',
             Icons.payments_outlined,
             const Color(0xFFAF52DE),
+            '/admin/financial-center',
           ),
           _KpiItem(
             l10n.kpiPlatformCommission,
             '$currency ${kpi.platformCommission.toStringAsFixed(0)}',
             Icons.account_balance_rounded,
             const Color(0xFF5B3DF0),
+            '/admin/commissions',
           ),
           _KpiItem(
             l10n.kpiWalletLiability,
             '$currency ${kpi.totalWalletLiability.toStringAsFixed(0)}',
             Icons.savings_outlined,
             const Color(0xFF14B8A6),
+            '/admin/wallet-intelligence',
           ),
           _KpiItem(
             l10n.kpiPaymentFailures,
             kpi.paymentFailures.toString(),
             Icons.error_outline_rounded,
             const Color(0xFFE65100),
+            '/admin/transaction-ledger',
           ),
         ],
       ),
@@ -434,24 +368,28 @@ class _PlatformIntelligenceDashboardState
             kpi.sosActive.toString(),
             Icons.sos_rounded,
             const Color(0xFFFF3B30),
+            '/admin/emergency',
           ),
           _KpiItem(
             l10n.kpiPendingWithdrawals,
             kpi.pendingWithdrawals.toString(),
             Icons.currency_exchange_rounded,
             const Color(0xFF8B5CF6),
+            '/admin/financial-center',
           ),
           _KpiItem(
             l10n.kpiCancelledOrders,
             kpi.cancelledOrders.toString(),
             Icons.cancel_outlined,
             const Color(0xFFFF9500),
+            '/admin/orders',
           ),
           _KpiItem(
             l10n.kpiPendingOrders,
             kpi.pendingOrders.toString(),
             Icons.hourglass_empty_rounded,
             const Color(0xFF34C759),
+            '/admin/orders',
           ),
         ],
       ),
@@ -611,167 +549,15 @@ class _PlatformIntelligenceDashboardState
       },
     );
   }
-
-  Widget _buildQuickActionsGrid(BuildContext context, AppLocalizations l10n) {
-    final actions = [
-      _QuickActionData(
-        l10n.adminFinancialCenter,
-        Icons.account_balance_rounded,
-        const Color(0xFF5B3DF0),
-        '/admin/financial-center',
-      ),
-      _QuickActionData(
-        l10n.adminMembers,
-        Icons.people_rounded,
-        const Color(0xFF4A90D9),
-        '/admin/members',
-      ),
-      _QuickActionData(
-        l10n.adminDeliveryIntelligence,
-        Icons.local_shipping_rounded,
-        const Color(0xFF00897B),
-        '/admin/delivery-intelligence',
-      ),
-      _QuickActionData(
-        l10n.adminVerifications,
-        Icons.verified_user_rounded,
-        const Color(0xFF34C759),
-        '/admin/verifications',
-      ),
-      _QuickActionData(
-        l10n.adminMerchantIntelligence,
-        Icons.store_outlined,
-        const Color(0xFF34C759),
-        '/admin/merchant-intelligence',
-      ),
-      _QuickActionData(
-        l10n.complaints,
-        Icons.warning_amber_rounded,
-        const Color(0xFFFF3B30),
-        '/admin/complaints',
-      ),
-      _QuickActionData(
-        l10n.adminProviderIntelligence,
-        Icons.engineering_outlined,
-        const Color(0xFF0288D1),
-        '/admin/provider-intelligence',
-      ),
-      _QuickActionData(
-        l10n.sanctions,
-        Icons.gavel_rounded,
-        const Color(0xFFFF9500),
-        '/admin/sanctions',
-      ),
-      _QuickActionData(
-        l10n.adminWalletIntelligence,
-        Icons.account_balance_wallet_rounded,
-        const Color(0xFFAF52DE),
-        '/admin/wallet-intelligence',
-      ),
-      _QuickActionData(
-        l10n.liveTracking,
-        Icons.map_rounded,
-        const Color(0xFF00C7BE),
-        '/admin/live-tracking',
-      ),
-      _QuickActionData(
-        l10n.adminTransactionLedger,
-        Icons.receipt_long_rounded,
-        const Color(0xFFFF9500),
-        '/admin/transaction-ledger',
-      ),
-      _QuickActionData(
-        l10n.supportChat,
-        Icons.chat_bubble_rounded,
-        const Color(0xFF34C759),
-        '/admin/support-chat',
-      ),
-      _QuickActionData(
-        l10n.adminServicePerformance,
-        Icons.analytics_rounded,
-        const Color(0xFF5856D6),
-        '/admin/service-performance',
-      ),
-      _QuickActionData(
-        l10n.adminPushNotifications,
-        Icons.campaign_rounded,
-        const Color(0xFF34C759),
-        '/admin/push-notifications',
-      ),
-      _QuickActionData(
-        l10n.adminSettingsPage,
-        Icons.settings_rounded,
-        const Color(0xFFAF52DE),
-        '/admin/settings',
-      ),
-    ];
-
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final crossAxisCount = constraints.maxWidth > 900
-            ? 4
-            : constraints.maxWidth > 600
-                ? 3
-                : 3;
-        return GridView.builder(
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: crossAxisCount,
-            mainAxisSpacing: 10,
-            crossAxisSpacing: 10,
-            childAspectRatio: 1.0,
-          ),
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          itemCount: actions.length,
-          itemBuilder: (context, index) {
-            final action = actions[index];
-            return AnimatedFadeIn(
-              delay: Duration(milliseconds: 400 + index * 50),
-              child: GestureDetector(
-                onTap: () => context.push(action.route),
-                child: PremiumCard(
-                  padding: const EdgeInsets.all(8),
-                  radius: AppSpacing.radiusCard,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(10),
-                        decoration: BoxDecoration(
-                          color: action.color.withValues(alpha: 0.15),
-                          borderRadius: BorderRadius.circular(14),
-                        ),
-                        child: Icon(action.icon, color: action.color, size: 22),
-                      ),
-                      const SizedBox(height: 6),
-                      Text(
-                        action.label,
-                        style: Theme.of(context)
-                            .textTheme
-                            .labelSmall
-                            ?.copyWith(fontWeight: FontWeight.w600),
-                        textAlign: TextAlign.center,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            );
-          },
-        );
-      },
-    );
-  }
 }
 
 class _KpiItem {
-  const _KpiItem(this.label, this.value, this.icon, this.color);
+  const _KpiItem(this.label, this.value, this.icon, this.color, this.route);
   final String label;
   final String value;
   final IconData icon;
   final Color color;
+  final String route;
 }
 
 class _KpiGroup extends StatelessWidget {
@@ -855,47 +641,58 @@ class _KpiCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return PremiumCard(
-      padding: const EdgeInsets.all(12),
-      radius: AppSpacing.radiusCard,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: item.color.withValues(alpha: 0.15),
-              borderRadius: BorderRadius.circular(12),
+    return GestureDetector(
+      onTap: () => context.push(item.route),
+      child: PremiumCard(
+        padding: const EdgeInsets.all(12),
+        radius: AppSpacing.radiusCard,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: item.color.withValues(alpha: 0.15),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(item.icon, color: item.color, size: 20),
             ),
-            child: Icon(item.icon, color: item.color, size: 20),
-          ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              FittedBox(
-                fit: BoxFit.scaleDown,
-                child: Text(
-                  item.value,
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text(
+                    item.value,
+                    style: Theme.of(context)
+                        .textTheme
+                        .titleLarge
+                        ?.copyWith(fontWeight: FontWeight.bold),
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  item.label,
                   style: Theme.of(context)
                       .textTheme
-                      .titleLarge
-                      ?.copyWith(fontWeight: FontWeight.bold),
+                      .labelSmall
+                      ?.copyWith(color: cs.onSurfaceVariant),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
+              ],
+            ),
+            Align(
+              alignment: AlignmentDirectional.centerEnd,
+              child: Icon(
+                Icons.open_in_new_rounded,
+                size: 12,
+                color: cs.onSurfaceVariant.withValues(alpha: 0.5),
               ),
-              const SizedBox(height: 2),
-              Text(
-                item.label,
-                style: Theme.of(context)
-                    .textTheme
-                    .labelSmall
-                    ?.copyWith(color: cs.onSurfaceVariant),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ],
-          ),
-        ],
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -1011,116 +808,5 @@ class _AlertCard extends StatelessWidget {
       default:
         return Icons.notifications_none_rounded;
     }
-  }
-}
-
-class _QuickActionData {
-  const _QuickActionData(this.label, this.icon, this.color, this.route);
-  final String label;
-  final IconData icon;
-  final Color color;
-  final String route;
-}
-
-class _ActivityGlassTile extends StatelessWidget {
-  const _ActivityGlassTile({
-    required this.activity,
-    required this.l10n,
-    required this.cs,
-  });
-
-  final AdminActivityLog activity;
-  final AppLocalizations l10n;
-  final ColorScheme cs;
-
-  @override
-  Widget build(BuildContext context) {
-    final icon = _getActivityIcon(activity.action);
-    final iconColor = _getActivityColor(activity.action);
-    final timeText = _formatTime(activity.timestamp);
-
-    return PremiumCard(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-      radius: AppSpacing.radiusCard,
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: iconColor.withValues(alpha: 0.15),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Icon(icon, color: iconColor, size: 18),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  activity.action,
-                  style: Theme.of(
-                    context,
-                  ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  '${activity.resource} Â· $timeText',
-                  style: Theme.of(
-                    context,
-                  ).textTheme.bodySmall?.copyWith(color: cs.onSurfaceVariant),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ],
-            ),
-          ),
-          Icon(Icons.chevron_right, color: cs.onSurfaceVariant, size: 18),
-        ],
-      ),
-    );
-  }
-
-  IconData _getActivityIcon(String action) {
-    final a = action.toLowerCase();
-    if (a.contains('create') || a.contains('register'))
-      return Icons.person_add_rounded;
-    if (a.contains('order')) return Icons.shopping_cart_rounded;
-    if (a.contains('dispute') || a.contains('report'))
-      return Icons.warning_amber_rounded;
-    if (a.contains('payout') || a.contains('payment'))
-      return Icons.payments_rounded;
-    if (a.contains('ride') || a.contains('trip'))
-      return Icons.directions_car_rounded;
-    if (a.contains('delivery')) return Icons.inventory_2_rounded;
-    if (a.contains('driver')) return Icons.person_rounded;
-    return Icons.info_outline_rounded;
-  }
-
-  Color _getActivityColor(String action) {
-    final a = action.toLowerCase();
-    if (a.contains('create') || a.contains('register'))
-      return const Color(0xFF4A90D9);
-    if (a.contains('order')) return const Color(0xFFFF9500);
-    if (a.contains('dispute') || a.contains('report'))
-      return const Color(0xFFFF3B30);
-    if (a.contains('payout') || a.contains('payment'))
-      return const Color(0xFF34C759);
-    if (a.contains('ride') || a.contains('trip'))
-      return const Color(0xFF00C7BE);
-    if (a.contains('delivery')) return const Color(0xFFFF6482);
-    if (a.contains('driver')) return const Color(0xFF007AFF);
-    return cs.onSurfaceVariant;
-  }
-
-  String _formatTime(DateTime timestamp) {
-    final diff = DateTime.now().difference(timestamp);
-    if (diff.inMinutes < 1) return l10n.justNow;
-    if (diff.inMinutes < 60) return l10n.minutesAgo(diff.inMinutes.toString());
-    if (diff.inHours < 24) return l10n.hoursAgo(diff.inHours.toString());
-    if (diff.inDays < 7) return l10n.daysAgo(diff.inDays.toString());
-    return l10n.weeksAgo;
   }
 }

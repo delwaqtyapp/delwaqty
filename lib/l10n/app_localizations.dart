@@ -8717,8 +8717,14 @@ abstract class AppLocalizations {
   /// No description provided for @adminMore.
   ///
   /// In en, this message translates to:
-  /// **'More'**
+  /// **'Actions'**
   String get adminMore;
+
+  /// No description provided for @adminQuickActions.
+  ///
+  /// In en, this message translates to:
+  /// **'Quick Actions'**
+  String get adminQuickActions;
 
   /// No description provided for @adminOperationsSection.
   ///

@@ -1,5 +1,6 @@
 ﻿import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:delwaqty/features/admin/presentation/providers/platform_intelligence_providers.dart';
 import 'package:delwaqty/features/admin/domain/entities/platform_intelligence.dart';
 import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
@@ -46,6 +47,33 @@ class AdminFinancialCenter extends ConsumerWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              SizedBox(
+                height: 68,
+                child: ListView(
+                  scrollDirection: Axis.horizontal,
+                  padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
+                  children: [
+                    _FinanceQuickAction(
+                      icon: Icons.menu_book_rounded,
+                      label: l10n.adminTransactionLedger,
+                      color: const Color(0xFFFF9500),
+                      onTap: () => context.push('/admin/transaction-ledger'),
+                    ),
+                    _FinanceQuickAction(
+                      icon: Icons.percent_rounded,
+                      label: l10n.adminCommissions,
+                      color: const Color(0xFF5B3DF0),
+                      onTap: () => context.push('/admin/commissions'),
+                    ),
+                    _FinanceQuickAction(
+                      icon: Icons.account_balance_wallet_rounded,
+                      label: l10n.adminWalletIntelligence,
+                      color: const Color(0xFFAF52DE),
+                      onTap: () => context.push('/admin/wallet-intelligence'),
+                    ),
+                  ],
+                ),
+              ),
               AnimatedFadeIn(
                 child: revenueAsync.when(
                   loading: () => const Center(
@@ -372,6 +400,50 @@ class _CommissionStatCard extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _FinanceQuickAction extends StatelessWidget {
+  const _FinanceQuickAction({
+    required this.icon,
+    required this.label,
+    required this.color,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final String label;
+  final Color color;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        margin: const EdgeInsets.only(right: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 14),
+        decoration: BoxDecoration(
+          color: color.withValues(alpha: 0.12),
+          borderRadius: BorderRadius.circular(14),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, size: 18, color: color),
+            const SizedBox(width: 6),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                color: color,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

@@ -4541,6 +4541,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get adminSettingsPage => 'Settings';
 
   @override
+  String get adminMore => 'More';
+
+  @override
   String get adminOperationsSection => 'Operations';
 
   @override

@@ -10,6 +10,10 @@ import 'package:delwaqty/core/theme/app_colors.dart';
 
 String _roleLabel(AdminRole role, AppLocalizations l10n) => switch (role) {
   AdminRole.owner => l10n.roleOwner,
+  AdminRole.countryAdmin => l10n.countryAdmin,
+  AdminRole.governorateAdmin => l10n.governorateAdmin,
+  AdminRole.centerAdmin => l10n.centerAdmin,
+  AdminRole.villageAdmin => l10n.villageAdmin,
   AdminRole.admin => l10n.roleAdmin,
 };
 
@@ -288,6 +292,10 @@ class _RoleChip extends StatelessWidget {
   Widget build(BuildContext context) {
     final color = switch (role) {
       AdminRole.owner => AppColors.errorLight,
+      AdminRole.countryAdmin => const Color(0xFF6200EE),
+      AdminRole.governorateAdmin => AppColors.warningLight,
+      AdminRole.centerAdmin => AppColors.infoLight,
+      AdminRole.villageAdmin => AppColors.successLight,
       AdminRole.admin => AppColors.infoLight,
     };
 

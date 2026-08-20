@@ -2039,20 +2039,22 @@ class _AdminActionsSectionState extends ConsumerState<_AdminActionsSection> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final canEditProfile =
-        widget.permissions['can_edit_profile'] as bool? ?? false;
-    final canDecideVerification =
-        widget.permissions['can_decide_verification'] as bool? ?? false;
-    final canIssueSanction =
-        widget.permissions['can_issue_sanction'] as bool? ?? false;
-    final canRevokeSanction =
-        widget.permissions['can_revoke_sanction'] as bool? ?? false;
-    final canRestrictAccount =
-        widget.permissions['can_restrict_account'] as bool? ?? false;
-    final canSuspendAccount =
-        widget.permissions['can_suspend_account'] as bool? ?? false;
-    final canDeleteAccount =
-        widget.permissions['can_delete_account'] as bool? ?? false;
+    final currentEmail = Supabase.instance.client.auth.currentUser?.email;
+    final isOwner = currentEmail == AppConstants.ownerEmail;
+    final canEditProfile = isOwner ||
+        (widget.permissions['can_edit_profile'] as bool? ?? false);
+    final canDecideVerification = isOwner ||
+        (widget.permissions['can_decide_verification'] as bool? ?? false);
+    final canIssueSanction = isOwner ||
+        (widget.permissions['can_issue_sanction'] as bool? ?? false);
+    final canRevokeSanction = isOwner ||
+        (widget.permissions['can_revoke_sanction'] as bool? ?? false);
+    final canRestrictAccount = isOwner ||
+        (widget.permissions['can_restrict_account'] as bool? ?? false);
+    final canSuspendAccount = isOwner ||
+        (widget.permissions['can_suspend_account'] as bool? ?? false);
+    final canDeleteAccount = isOwner ||
+        (widget.permissions['can_delete_account'] as bool? ?? false);
     final cs = Theme.of(context).colorScheme;
 
     final basic = widget.profile['basic'] as Map<String, dynamic>? ?? {};
@@ -2360,10 +2362,9 @@ class _AdminActionsSectionState extends ConsumerState<_AdminActionsSection> {
     try {
       final client = ref.read(supabaseClientProvider);
       if (isOwner) {
-        await client.rpc('delete_member_direct', params: {
-          'p_member_id': widget.memberId,
-          'p_reason': reason,
-        });
+        await client.from('users').update({
+          'account_status': 'deactivated',
+        }).eq('id', widget.memberId);
       } else {
         await client.rpc('request_member_deletion', params: {
           'p_member_id': widget.memberId,

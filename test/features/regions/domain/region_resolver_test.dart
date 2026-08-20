@@ -1,7 +1,7 @@
-import 'package:flutter_test/flutter_test.dart';
-import 'package:delwaqty/features/regions/domain/entities/region.dart';
-import 'package:delwaqty/features/regions/domain/entities/spatial_resolution.dart';
-import 'package:delwaqty/features/regions/domain/services/region_resolver.dart';
+﻿import 'package:flutter_test/flutter_test.dart';
+import 'package:delwaqty/features/_shared/regions/domain/entities/region.dart';
+import 'package:delwaqty/features/_shared/regions/domain/entities/spatial_resolution.dart';
+import 'package:delwaqty/features/_shared/regions/domain/services/region_resolver.dart';
 
 void main() {
   final now = DateTime(2026, 8, 15);
@@ -27,28 +27,28 @@ void main() {
   final cairo = governorate(
     id: 'r-cairo',
     code: 'EG-C',
-    nameAr: 'القاهرة',
+    nameAr: 'Ø§Ù„Ù‚Ø§Ù‡Ø±Ø©',
     nameEn: 'Cairo',
     aliases: const ['Al Qahirah', 'El Qahira'],
   );
   final giza = governorate(
     id: 'r-giza',
     code: 'EG-GZ',
-    nameAr: 'الجيزة',
+    nameAr: 'Ø§Ù„Ø¬ÙŠØ²Ø©',
     nameEn: 'Giza',
     aliases: const ['Al Jizah', 'El Giza'],
   );
   final suez = governorate(
     id: 'r-suez',
     code: 'EG-SUZ',
-    nameAr: 'السويس',
+    nameAr: 'Ø§Ù„Ø³ÙˆÙŠØ³',
     nameEn: 'Suez',
     aliases: const ['As Suways'],
   );
   final alexandria = governorate(
     id: 'r-alx',
     code: 'EG-ALX',
-    nameAr: 'الإسكندرية',
+    nameAr: 'Ø§Ù„Ø¥Ø³ÙƒÙ†Ø¯Ø±ÙŠØ©',
     nameEn: 'Alexandria',
     aliases: const ['Al Iskandariyah'],
   );
@@ -57,20 +57,20 @@ void main() {
 
   group('RegionResolver.normalize', () {
     test('normalizes Arabic hamza variants', () {
-      expect(RegionResolver.normalize('الإسكندرية'), 'الاسكندريه');
-      expect(RegionResolver.normalize('الأسكندرية'), 'الاسكندريه');
-      expect(RegionResolver.normalize('سيناء'), 'سينا');
+      expect(RegionResolver.normalize('Ø§Ù„Ø¥Ø³ÙƒÙ†Ø¯Ø±ÙŠØ©'), 'Ø§Ù„Ø§Ø³ÙƒÙ†Ø¯Ø±ÙŠÙ‡');
+      expect(RegionResolver.normalize('Ø§Ù„Ø£Ø³ÙƒÙ†Ø¯Ø±ÙŠØ©'), 'Ø§Ù„Ø§Ø³ÙƒÙ†Ø¯Ø±ÙŠÙ‡');
+      expect(RegionResolver.normalize('Ø³ÙŠÙ†Ø§Ø¡'), 'Ø³ÙŠÙ†Ø§');
     });
 
     test('strips Arabic diacritics and tatweel', () {
-      expect(RegionResolver.normalize('القَاهرة'), 'القاهره');
-      expect(RegionResolver.normalize('القاهرةـ'), 'القاهره');
+      expect(RegionResolver.normalize('Ø§Ù„Ù‚ÙŽØ§Ù‡Ø±Ø©'), 'Ø§Ù„Ù‚Ø§Ù‡Ø±Ù‡');
+      expect(RegionResolver.normalize('Ø§Ù„Ù‚Ø§Ù‡Ø±Ø©Ù€'), 'Ø§Ù„Ù‚Ø§Ù‡Ø±Ù‡');
     });
 
     test('normalizes teh marbuta and alef maqsura', () {
-      expect(RegionResolver.normalize('محافظة'), 'محافظه');
-      expect(RegionResolver.normalize('المنيا'), 'المنيا');
-      expect(RegionResolver.normalize('شمال سيناء'), 'شمال سينا');
+      expect(RegionResolver.normalize('Ù…Ø­Ø§ÙØ¸Ø©'), 'Ù…Ø­Ø§ÙØ¸Ù‡');
+      expect(RegionResolver.normalize('Ø§Ù„Ù…Ù†ÙŠØ§'), 'Ø§Ù„Ù…Ù†ÙŠØ§');
+      expect(RegionResolver.normalize('Ø´Ù…Ø§Ù„ Ø³ÙŠÙ†Ø§Ø¡'), 'Ø´Ù…Ø§Ù„ Ø³ÙŠÙ†Ø§');
     });
 
     test('lowercases and trims English', () {
@@ -79,7 +79,7 @@ void main() {
     });
 
     test('tokenize strips governorate stop words', () {
-      expect(RegionResolver.tokenize('محافظة القاهرة'), ['القاهره']);
+      expect(RegionResolver.tokenize('Ù…Ø­Ø§ÙØ¸Ø© Ø§Ù„Ù‚Ø§Ù‡Ø±Ø©'), ['Ø§Ù„Ù‚Ø§Ù‡Ø±Ù‡']);
       expect(
         RegionResolver.tokenize('Cairo Governorate, Egypt'),
         ['cairo', 'egypt'],
@@ -92,7 +92,7 @@ void main() {
       expect(
         RegionResolver.resolveGovernorateId(
           governorates: governorates,
-          candidateStrings: const ['القاهرة'],
+          candidateStrings: const ['Ø§Ù„Ù‚Ø§Ù‡Ø±Ø©'],
         ),
         'r-cairo',
       );
@@ -102,7 +102,7 @@ void main() {
       expect(
         RegionResolver.resolveGovernorateId(
           governorates: governorates,
-          candidateStrings: const ['محافظة القاهرة، مصر'],
+          candidateStrings: const ['Ù…Ø­Ø§ÙØ¸Ø© Ø§Ù„Ù‚Ø§Ù‡Ø±Ø©ØŒ Ù…ØµØ±'],
         ),
         'r-cairo',
       );
@@ -112,7 +112,7 @@ void main() {
       expect(
         RegionResolver.resolveGovernorateId(
           governorates: governorates,
-          candidateStrings: const ['محافظة القَاهرة'],
+          candidateStrings: const ['Ù…Ø­Ø§ÙØ¸Ø© Ø§Ù„Ù‚ÙŽØ§Ù‡Ø±Ø©'],
         ),
         'r-cairo',
       );
@@ -160,7 +160,7 @@ void main() {
         RegionResolver.resolveGovernorateId(
           governorates: governorates,
           candidateStrings: const [
-            'Zafarana offices، مركز السويس - قرية الزعفرانة، محافظة السويس، مصر',
+            'Zafarana officesØŒ Ù…Ø±ÙƒØ² Ø§Ù„Ø³ÙˆÙŠØ³ - Ù‚Ø±ÙŠØ© Ø§Ù„Ø²Ø¹ÙØ±Ø§Ù†Ø©ØŒ Ù…Ø­Ø§ÙØ¸Ø© Ø§Ù„Ø³ÙˆÙŠØ³ØŒ Ù…ØµØ±',
           ],
         ),
         'r-suez',
@@ -248,21 +248,21 @@ void main() {
     }
 
     final markazes = [
-      markaz(id: 'r-giza-markaz', nameAr: 'مركز الجيزة', nameEn: 'Giza'),
+      markaz(id: 'r-giza-markaz', nameAr: 'Ù…Ø±ÙƒØ² Ø§Ù„Ø¬ÙŠØ²Ø©', nameEn: 'Giza'),
       markaz(
         id: 'r-imbaba',
-        nameAr: 'إمبابة',
+        nameAr: 'Ø¥Ù…Ø¨Ø§Ø¨Ø©',
         nameEn: 'Imbaba',
         aliases: const ['Imbabah', 'Embaba'],
       ),
-      markaz(id: 'r-ayyats', nameAr: 'العياط', nameEn: 'Ayyat'),
+      markaz(id: 'r-ayyats', nameAr: 'Ø§Ù„Ø¹ÙŠØ§Ø·', nameEn: 'Ayyat'),
     ];
 
     test('matches an Arabic markaz name within the parent scope', () {
       expect(
         RegionResolver.resolveRegionId(
           candidates: markazes,
-          candidateStrings: const ['مركز إمبابة'],
+          candidateStrings: const ['Ù…Ø±ÙƒØ² Ø¥Ù…Ø¨Ø§Ø¨Ø©'],
         ),
         'r-imbaba',
       );
@@ -302,7 +302,7 @@ void main() {
       expect(
         RegionResolver.resolveRegionId(
           candidates: markazes,
-          candidateStrings: const ['مركز الفيوم'],
+          candidateStrings: const ['Ù…Ø±ÙƒØ² Ø§Ù„ÙÙŠÙˆÙ…'],
         ),
         isNull,
       );
@@ -310,8 +310,8 @@ void main() {
 
     test('returns null on ambiguity inside the scope', () {
       final dupes = [
-        markaz(id: 'r-imbaba', nameAr: 'إمبابة', nameEn: 'Imbaba'),
-        markaz(id: 'r-imbaba2', nameAr: 'إمبابة الشرقية', nameEn: 'Imbaba'),
+        markaz(id: 'r-imbaba', nameAr: 'Ø¥Ù…Ø¨Ø§Ø¨Ø©', nameEn: 'Imbaba'),
+        markaz(id: 'r-imbaba2', nameAr: 'Ø¥Ù…Ø¨Ø§Ø¨Ø© Ø§Ù„Ø´Ø±Ù‚ÙŠØ©', nameEn: 'Imbaba'),
       ];
       expect(
         RegionResolver.resolveRegionId(
@@ -328,7 +328,7 @@ void main() {
         code: 'EG-ADM3-120901',
         parentRegionId: 'm-dikirnis',
         type: RegionType.village,
-        nameAr: 'دكرنس',
+        nameAr: 'Ø¯ÙƒØ±Ù†Ø³',
         createdAt: now,
       );
       final villages = [
@@ -338,14 +338,14 @@ void main() {
           code: 'EG-ADM3-120902',
           parentRegionId: 'm-dikirnis',
           type: RegionType.village,
-          nameAr: 'بلقاس',
+          nameAr: 'Ø¨Ù„Ù‚Ø§Ø³',
           createdAt: now,
         ),
       ];
       expect(
         RegionResolver.resolveRegionId(
           candidates: villages,
-          candidateStrings: const ['قرية دكرنس'],
+          candidateStrings: const ['Ù‚Ø±ÙŠØ© Ø¯ÙƒØ±Ù†Ø³'],
         ),
         'v-dikirnis',
       );

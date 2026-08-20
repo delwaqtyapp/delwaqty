@@ -1,5 +1,5 @@
-import 'package:flutter_test/flutter_test.dart';
-import 'package:delwaqty/features/rewards/domain/entities/member_reward.dart';
+﻿import 'package:flutter_test/flutter_test.dart';
+import 'package:delwaqty/features/_shared/rewards/domain/entities/member_reward.dart';
 
 void main() {
   group('MemberReward.fromJson', () {

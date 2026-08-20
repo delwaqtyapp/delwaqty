@@ -1,10 +1,10 @@
-import 'package:flutter_test/flutter_test.dart';
+﻿import 'package:flutter_test/flutter_test.dart';
 
-import 'package:delwaqty/features/search/domain/entities/geo_point.dart';
-import 'package:delwaqty/features/search/domain/entities/place_suggestion.dart';
-import 'package:delwaqty/features/search/domain/entities/recent_search.dart';
-import 'package:delwaqty/features/search/domain/entities/saved_place.dart';
-import 'package:delwaqty/features/search/domain/entities/search_session.dart';
+import 'package:delwaqty/features/customer/search/domain/entities/geo_point.dart';
+import 'package:delwaqty/features/customer/search/domain/entities/place_suggestion.dart';
+import 'package:delwaqty/features/customer/search/domain/entities/recent_search.dart';
+import 'package:delwaqty/features/customer/search/domain/entities/saved_place.dart';
+import 'package:delwaqty/features/customer/search/domain/entities/search_session.dart';
 
 void main() {
   group('SearchSession', () {

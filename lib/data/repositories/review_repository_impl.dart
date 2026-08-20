@@ -1,7 +1,7 @@
-import 'package:delwaqty/core/errors/exceptions.dart';
+﻿import 'package:delwaqty/core/errors/exceptions.dart';
 import 'package:delwaqty/data/datasources/remote/supabase_review_data_source.dart';
-import 'package:delwaqty/features/commerce/domain/entities/review.dart';
-import 'package:delwaqty/features/commerce/domain/repositories/review_repository.dart';
+import 'package:delwaqty/features/customer/commerce/domain/entities/review.dart';
+import 'package:delwaqty/features/customer/commerce/domain/repositories/review_repository.dart';
 
 class ReviewRepositoryImpl implements ReviewRepository {
   ReviewRepositoryImpl(this._dataSource);

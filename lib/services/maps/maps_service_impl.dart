@@ -1,6 +1,8 @@
-import 'dart:async';
+﻿import 'dart:async';
 import 'dart:convert';
-import 'package:delwaqty/features/commerce/domain/entities/geo_location.dart';
+import 'dart:math';
+import 'package:flutter/foundation.dart';
+import 'package:delwaqty/features/customer/commerce/domain/entities/geo_location.dart';
 import 'package:delwaqty/services/maps/maps_service.dart';
 import 'package:http/http.dart' as http;
 
@@ -134,14 +136,15 @@ class MapsServiceImpl implements MapsService {
           latitude: geometry['lat'],
           longitude: geometry['lng'],
         ),
-        type: result['types'].firstWhere(
-              (t) => t != 'establishment',
-              orElse: () => result['types'].firstOrNull ?? '',
-            ) ||
-            '',
+        type: result['types'].isNotEmpty
+            ? result['types'].firstWhere(
+                (t) => t != 'establishment',
+                orElse: () => result['types'][0] ?? '',
+              )
+            : '',
         rating: _parseDouble(result['rating']),
         distanceMetres: _parseDouble(result['icon']),
-        isOpenNow: result['opening_hours']?.get('open_now') ?? false,
+        isOpenNow: result['opening_hours']?['open_now'] ?? false,
       ));
     }
 
@@ -212,9 +215,8 @@ class MapsServiceImpl implements MapsService {
     return double.parse(value.toString());
   }
 
-  @mustBeOverridden
   @override
   void dispose() {
-    _client.dispose();
+    _client.close();
   }
 }

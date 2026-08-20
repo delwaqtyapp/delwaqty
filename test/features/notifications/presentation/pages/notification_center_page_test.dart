@@ -1,9 +1,9 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:delwaqty/data/repositories/mock/mock_notification_repository.dart';
-import 'package:delwaqty/features/notifications/notifications_module.dart';
-import 'package:delwaqty/features/notifications/presentation/pages/notification_center_page.dart';
+import 'package:delwaqty/features/_shared/notifications/notifications_module.dart';
+import 'package:delwaqty/features/_shared/notifications/presentation/pages/notification_center_page.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 
 Widget _buildTestApp() {

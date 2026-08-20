@@ -1,6 +1,6 @@
-import 'dart:async';
+﻿import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:delwaqty/features/commerce/domain/entities/geo_location.dart';
+import 'package:delwaqty/features/customer/commerce/domain/entities/geo_location.dart';
 import 'package:delwaqty/services/maps/maps_service_impl.dart';
 
 final mapsServiceProvider = Provider<MapsService>((ref) {

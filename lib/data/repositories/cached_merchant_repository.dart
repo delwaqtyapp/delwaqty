@@ -1,9 +1,9 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:delwaqty/features/commerce/domain/entities/merchant.dart';
-import 'package:delwaqty/features/commerce/domain/entities/product.dart';
-import 'package:delwaqty/features/commerce/domain/entities/search_filter.dart';
-import 'package:delwaqty/features/commerce/domain/repositories/merchant_repository.dart';
-import 'package:delwaqty/features/commerce/commerce_module.dart';
+﻿import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:delwaqty/features/customer/commerce/domain/entities/merchant.dart';
+import 'package:delwaqty/features/customer/commerce/domain/entities/product.dart';
+import 'package:delwaqty/features/customer/commerce/domain/entities/search_filter.dart';
+import 'package:delwaqty/features/customer/commerce/domain/repositories/merchant_repository.dart';
+import 'package:delwaqty/features/customer/commerce/commerce_module.dart';
 import 'package:delwaqty/data/datasources/local/hive_cache_service.dart';
 import 'package:delwaqty/services/connectivity/connectivity_service.dart';
 

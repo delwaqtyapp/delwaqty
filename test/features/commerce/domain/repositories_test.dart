@@ -1,22 +1,22 @@
-import 'package:mocktail/mocktail.dart';
+﻿import 'package:mocktail/mocktail.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:delwaqty/features/commerce/domain/repositories/merchant_repository.dart';
-import 'package:delwaqty/features/commerce/domain/repositories/product_repository.dart';
-import 'package:delwaqty/features/commerce/domain/repositories/catalog_category_repository.dart';
-import 'package:delwaqty/features/commerce/domain/repositories/cart_repository.dart';
-import 'package:delwaqty/features/commerce/domain/repositories/order_repository.dart';
-import 'package:delwaqty/features/commerce/domain/repositories/review_repository.dart';
-import 'package:delwaqty/features/commerce/domain/repositories/coupon_repository.dart';
-import 'package:delwaqty/features/commerce/domain/repositories/favorite_repository.dart';
-import 'package:delwaqty/features/commerce/domain/entities/merchant.dart';
-import 'package:delwaqty/features/commerce/domain/entities/product.dart';
-import 'package:delwaqty/features/commerce/domain/entities/catalog_category.dart';
-import 'package:delwaqty/features/commerce/domain/entities/cart.dart';
-import 'package:delwaqty/features/commerce/domain/entities/order.dart';
-import 'package:delwaqty/features/commerce/domain/entities/review.dart';
-import 'package:delwaqty/features/commerce/domain/entities/coupon.dart';
-import 'package:delwaqty/features/commerce/domain/entities/favorite.dart';
-import 'package:delwaqty/features/commerce/domain/entities/search_filter.dart';
+import 'package:delwaqty/features/customer/commerce/domain/repositories/merchant_repository.dart';
+import 'package:delwaqty/features/customer/commerce/domain/repositories/product_repository.dart';
+import 'package:delwaqty/features/customer/commerce/domain/repositories/catalog_category_repository.dart';
+import 'package:delwaqty/features/customer/commerce/domain/repositories/cart_repository.dart';
+import 'package:delwaqty/features/customer/commerce/domain/repositories/order_repository.dart';
+import 'package:delwaqty/features/customer/commerce/domain/repositories/review_repository.dart';
+import 'package:delwaqty/features/customer/commerce/domain/repositories/coupon_repository.dart';
+import 'package:delwaqty/features/customer/commerce/domain/repositories/favorite_repository.dart';
+import 'package:delwaqty/features/customer/commerce/domain/entities/merchant.dart';
+import 'package:delwaqty/features/customer/commerce/domain/entities/product.dart';
+import 'package:delwaqty/features/customer/commerce/domain/entities/catalog_category.dart';
+import 'package:delwaqty/features/customer/commerce/domain/entities/cart.dart';
+import 'package:delwaqty/features/customer/commerce/domain/entities/order.dart';
+import 'package:delwaqty/features/customer/commerce/domain/entities/review.dart';
+import 'package:delwaqty/features/customer/commerce/domain/entities/coupon.dart';
+import 'package:delwaqty/features/customer/commerce/domain/entities/favorite.dart';
+import 'package:delwaqty/features/customer/commerce/domain/entities/search_filter.dart';
 
 class MockMerchantRepository extends Mock implements MerchantRepository {}
 class MockProductRepository extends Mock implements ProductRepository {}

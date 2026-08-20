@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -9,9 +9,9 @@ import 'package:delwaqty/domain/repositories/auth_repository.dart';
 import 'package:delwaqty/domain/repositories/user_repository.dart';
 import 'package:delwaqty/domain/usecases/auth/auth_usecases.dart';
 import 'package:delwaqty/domain/usecases/user/get_user.dart';
-import 'package:delwaqty/features/auth/domain/auth_state.dart';
-import 'package:delwaqty/features/auth/presentation/auth_provider.dart';
-import 'package:delwaqty/features/settings/presentation/pages/privacy/fingerprint_login_page.dart';
+import 'package:delwaqty/features/_shared/auth/domain/auth_state.dart';
+import 'package:delwaqty/features/_shared/auth/presentation/auth_provider.dart';
+import 'package:delwaqty/features/customer/settings/presentation/pages/privacy/fingerprint_login_page.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 
 class _FakeAuthNotifier extends AuthStateNotifier {

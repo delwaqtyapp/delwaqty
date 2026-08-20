@@ -1,4 +1,4 @@
-import 'package:flutter/foundation.dart';
+﻿import 'package:flutter/foundation.dart';
 import 'package:delwaqty/data/repositories/admin_repository.dart';
 import 'package:delwaqty/features/admin/domain/entities/admin_models.dart';
 import 'package:delwaqty/core/constants/app_constants.dart';
@@ -10,7 +10,7 @@ class AdminService {
 
   final AdminRepository _repository;
 
-  // ─── Dashboard ────────────────────────────────────────────
+  // â”€â”€â”€ Dashboard â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   Future<AdminDashboardMetrics> getDashboardMetrics() async {
     try {
@@ -30,7 +30,7 @@ class AdminService {
     }
   }
 
-  // ─── Users ────────────────────────────────────────────────
+  // â”€â”€â”€ Users â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   Future<List<AdminUser>> getUsers({String? search}) async {
     try {
@@ -77,7 +77,7 @@ class AdminService {
     }
   }
 
-  // ─── Merchants ────────────────────────────────────────────
+  // â”€â”€â”€ Merchants â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   Future<List<Map<String, dynamic>>> getMerchants({
     String? search,
@@ -101,7 +101,7 @@ class AdminService {
     }
   }
 
-  // ─── Orders ───────────────────────────────────────────────
+  // â”€â”€â”€ Orders â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   Future<List<Map<String, dynamic>>> getOrders({
     String? search,
@@ -132,7 +132,7 @@ class AdminService {
     }
   }
 
-  // ─── Settings ─────────────────────────────────────────────
+  // â”€â”€â”€ Settings â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   Future<Map<String, dynamic>> getSettings() async {
     try {
@@ -153,7 +153,7 @@ class AdminService {
     }
   }
 
-  // ─── Drivers ──────────────────────────────────────────────
+  // â”€â”€â”€ Drivers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   Future<List<DriverModel>> getActiveDrivers() async {
     try {
@@ -205,7 +205,7 @@ class AdminService {
     }
   }
 
-  // ─── Rides ────────────────────────────────────────────────
+  // â”€â”€â”€ Rides â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   Future<List<RideModel>> getRecentRides({String? status}) async {
     try {
@@ -216,7 +216,7 @@ class AdminService {
     }
   }
 
-  // ─── Deliveries ───────────────────────────────────────────
+  // â”€â”€â”€ Deliveries â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   Future<List<DeliveryModel>> getRecentDeliveries({String? serviceType}) async {
     try {
@@ -237,7 +237,7 @@ class AdminService {
     }
   }
 
-  // ─── Revenue & Analytics ──────────────────────────────────
+  // â”€â”€â”€ Revenue & Analytics â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   Future<List<RevenueData>> getRevenueChart({required int days}) async {
     try {
@@ -287,7 +287,7 @@ class AdminService {
     }
   }
 
-  // ─── Account Verification ────────────────────────────────
+  // â”€â”€â”€ Account Verification â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   Future<List<VerificationRequest>> getVerificationRequests() async {
     try {

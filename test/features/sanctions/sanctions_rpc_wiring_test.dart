@@ -1,9 +1,9 @@
-import 'package:flutter_test/flutter_test.dart';
+﻿import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:delwaqty/core/errors/exceptions.dart';
-import 'package:delwaqty/features/sanctions/data/datasources/remote/supabase_sanctions_data_source.dart';
-import 'package:delwaqty/features/sanctions/data/repositories/sanctions_repository_impl.dart';
-import 'package:delwaqty/features/sanctions/domain/entities/sanction.dart';
+import 'package:delwaqty/features/admin/sanctions/data/datasources/remote/supabase_sanctions_data_source.dart';
+import 'package:delwaqty/features/admin/sanctions/data/repositories/sanctions_repository_impl.dart';
+import 'package:delwaqty/features/admin/sanctions/domain/entities/sanction.dart';
 
 class MockSanctionsDataSource extends Mock
     implements SupabaseSanctionsDataSource {}

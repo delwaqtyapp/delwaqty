@@ -1,6 +1,6 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:delwaqty/features/commerce/domain/repositories/catalog_category_repository.dart';
-import 'package:delwaqty/features/commerce/domain/entities/catalog_category.dart';
+﻿import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:delwaqty/features/customer/commerce/domain/repositories/catalog_category_repository.dart';
+import 'package:delwaqty/features/customer/commerce/domain/entities/catalog_category.dart';
 import 'package:delwaqty/data/datasources/remote/supabase_catalog_category_data_source.dart';
 import 'package:delwaqty/core/errors/exceptions.dart';
 import 'package:delwaqty/services/logger/app_logger.dart';

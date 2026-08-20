@@ -8,7 +8,8 @@ import 'package:flutter_test/flutter_test.dart';
 /// client write grants on approval_requests / campaigns beyond the contract.
 void main() {
   final migration = File('supabase/migrations/040_promotion_targeting_media_approval.sql')
-      .readAsStringSync();
+      .readAsStringSync()
+      .replaceAll('\r\n', '\n');
 
   group('040 — tables, constraints, RLS', () {
     test('creates the 3 new tables with RLS enabled', () {

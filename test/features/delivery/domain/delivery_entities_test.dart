@@ -1,9 +1,9 @@
-import 'package:flutter_test/flutter_test.dart';
-import 'package:delwaqty/features/delivery/domain/entities/delivery_order.dart';
-import 'package:delwaqty/features/delivery/domain/entities/delivery_pricing.dart';
-import 'package:delwaqty/features/delivery/domain/entities/delivery_request.dart';
-import 'package:delwaqty/features/delivery/domain/entities/driver_capability.dart';
-import 'package:delwaqty/features/delivery/domain/entities/merchant_profile.dart';
+﻿import 'package:flutter_test/flutter_test.dart';
+import 'package:delwaqty/features/customer/delivery/domain/entities/delivery_order.dart';
+import 'package:delwaqty/features/customer/delivery/domain/entities/delivery_pricing.dart';
+import 'package:delwaqty/features/customer/delivery/domain/entities/delivery_request.dart';
+import 'package:delwaqty/features/customer/delivery/domain/entities/driver_capability.dart';
+import 'package:delwaqty/features/customer/delivery/domain/entities/merchant_profile.dart';
 
 void main() {
   group('DeliveryOrder', () {

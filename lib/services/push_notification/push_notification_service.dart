@@ -1,4 +1,4 @@
-import 'dart:async';
+﻿import 'dart:async';
 import 'dart:convert';
 
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -9,7 +9,7 @@ import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:delwaqty/core/router/app_router.dart';
 import 'package:delwaqty/domain/entities/app_notification.dart';
-import 'package:delwaqty/features/notifications/notifications_module.dart';
+import 'package:delwaqty/features/_shared/notifications/notifications_module.dart';
 import 'package:delwaqty/services/logger/app_logger.dart';
 import 'package:delwaqty/services/push_notification/device_identity.dart';
 import 'package:delwaqty/services/realtime/realtime_channel_constants.dart';

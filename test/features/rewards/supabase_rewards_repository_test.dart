@@ -1,9 +1,9 @@
-import 'package:flutter_test/flutter_test.dart';
+﻿import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:delwaqty/core/errors/exceptions.dart';
-import 'package:delwaqty/features/rewards/data/datasources/remote/supabase_rewards_data_source.dart';
-import 'package:delwaqty/features/rewards/data/repositories/supabase_rewards_repository_impl.dart';
-import 'package:delwaqty/features/rewards/domain/entities/member_reward.dart';
+import 'package:delwaqty/features/_shared/rewards/data/datasources/remote/supabase_rewards_data_source.dart';
+import 'package:delwaqty/features/_shared/rewards/data/repositories/supabase_rewards_repository_impl.dart';
+import 'package:delwaqty/features/_shared/rewards/domain/entities/member_reward.dart';
 
 class MockRewardsDataSource extends Mock implements SupabaseRewardsDataSource {}
 

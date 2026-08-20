@@ -1,11 +1,11 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:delwaqty/features/admin/domain/entities/admin_region_assignment.dart';
 import 'package:delwaqty/features/admin/presentation/providers/admin_region_providers.dart';
-import 'package:delwaqty/features/admin_web/presentation/pages/admin_region_scope_page.dart';
-import 'package:delwaqty/features/regions/domain/entities/region.dart';
-import 'package:delwaqty/features/regions/presentation/providers/region_providers.dart';
+import 'package:delwaqty/features/admin/admin_web/presentation/pages/admin_region_scope_page.dart';
+import 'package:delwaqty/features/_shared/regions/domain/entities/region.dart';
+import 'package:delwaqty/features/_shared/regions/presentation/providers/region_providers.dart';
 
 void main() {
   final now = DateTime(2026, 8, 15);
@@ -13,7 +13,7 @@ void main() {
     id: 'r1',
     code: 'EG-CAI',
     type: RegionType.governorate,
-    nameAr: 'القاهرة',
+    nameAr: 'Ø§Ù„Ù‚Ø§Ù‡Ø±Ø©',
     nameEn: 'Cairo',
     createdAt: now,
   );
@@ -21,7 +21,7 @@ void main() {
     id: 'r2',
     code: 'EG-ALX',
     type: RegionType.governorate,
-    nameAr: 'الإسكندرية',
+    nameAr: 'Ø§Ù„Ø¥Ø³ÙƒÙ†Ø¯Ø±ÙŠØ©',
     nameEn: 'Alexandria',
     createdAt: now,
   );
@@ -123,7 +123,7 @@ void main() {
     await tester.tap(find.text('Owner One'));
     await tester.pumpAndSettle();
 
-    expect(find.text('No assignments — admin is global'), findsOneWidget);
+    expect(find.text('No assignments â€” admin is global'), findsOneWidget);
   });
 
   testWidgets('adds a new assignment via the form', (tester) async {

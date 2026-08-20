@@ -1,7 +1,7 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+﻿import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:delwaqty/services/supabase/supabase_service.dart';
-import 'package:delwaqty/features/commerce/domain/entities/review.dart';
+import 'package:delwaqty/features/customer/commerce/domain/entities/review.dart';
 
 final supabaseReviewDataSourceProvider = Provider<SupabaseReviewDataSource>((
   ref,

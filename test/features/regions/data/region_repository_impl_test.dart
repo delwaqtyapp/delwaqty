@@ -1,10 +1,10 @@
-import 'package:flutter_test/flutter_test.dart';
+﻿import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:delwaqty/features/regions/data/datasources/remote/supabase_region_data_source.dart';
-import 'package:delwaqty/features/regions/data/repositories/region_repository_impl.dart';
-import 'package:delwaqty/features/regions/domain/entities/region.dart';
-import 'package:delwaqty/features/regions/domain/entities/geo_entity.dart';
-import 'package:delwaqty/features/regions/domain/entities/spatial_resolution.dart';
+import 'package:delwaqty/features/_shared/regions/data/datasources/remote/supabase_region_data_source.dart';
+import 'package:delwaqty/features/_shared/regions/data/repositories/region_repository_impl.dart';
+import 'package:delwaqty/features/_shared/regions/domain/entities/region.dart';
+import 'package:delwaqty/features/_shared/regions/domain/entities/geo_entity.dart';
+import 'package:delwaqty/features/_shared/regions/domain/entities/spatial_resolution.dart';
 
 class _MockDataSource extends Mock implements RegionDataSource {}
 
@@ -15,7 +15,7 @@ void main() {
     id: 'r-cairo',
     code: 'EG-C',
     type: RegionType.governorate,
-    nameAr: 'القاهرة',
+    nameAr: 'Ø§Ù„Ù‚Ø§Ù‡Ø±Ø©',
     nameEn: 'Cairo',
     createdAt: now,
   );
@@ -23,7 +23,7 @@ void main() {
     id: 'r-giza',
     code: 'EG-GZ',
     type: RegionType.governorate,
-    nameAr: 'الجيزة',
+    nameAr: 'Ø§Ù„Ø¬ÙŠØ²Ø©',
     nameEn: 'Giza',
     createdAt: now,
   );

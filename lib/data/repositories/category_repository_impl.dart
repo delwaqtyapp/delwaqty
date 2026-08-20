@@ -1,7 +1,7 @@
-import 'dart:typed_data';
+﻿import 'dart:typed_data';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:delwaqty/features/home/domain/entities/platform_category.dart';
-import 'package:delwaqty/features/home/domain/repositories/platform_category_repository.dart';
+import 'package:delwaqty/features/customer/home/domain/entities/platform_category.dart';
+import 'package:delwaqty/features/customer/home/domain/repositories/platform_category_repository.dart';
 import 'package:delwaqty/data/datasources/remote/supabase_category_data_source.dart';
 import 'package:delwaqty/services/logger/app_logger.dart';
 

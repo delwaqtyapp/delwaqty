@@ -1,6 +1,6 @@
-import 'package:flutter_test/flutter_test.dart';
+﻿import 'package:flutter_test/flutter_test.dart';
 
-import 'package:delwaqty/features/search/data/cache/debouncer.dart';
+import 'package:delwaqty/features/customer/search/data/cache/debouncer.dart';
 
 void main() {
   group('Debouncer', () {

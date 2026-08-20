@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
@@ -7,9 +7,9 @@ import 'package:delwaqty/domain/enums/user_type.dart';
 import 'package:delwaqty/domain/enums/verification_status.dart';
 import 'package:delwaqty/domain/repositories/user_repository.dart';
 import 'package:delwaqty/domain/usecases/user/get_user.dart';
-import 'package:delwaqty/features/auth/domain/auth_state.dart';
-import 'package:delwaqty/features/auth/presentation/auth_provider.dart';
-import 'package:delwaqty/features/auth/presentation/pages/pending_verification_page.dart';
+import 'package:delwaqty/features/_shared/auth/domain/auth_state.dart';
+import 'package:delwaqty/features/_shared/auth/presentation/auth_provider.dart';
+import 'package:delwaqty/features/_shared/auth/presentation/pages/pending_verification_page.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 
 class MockUserRepository extends Mock implements UserRepository {}

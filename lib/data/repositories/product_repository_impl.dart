@@ -1,7 +1,7 @@
-import 'package:delwaqty/core/errors/exceptions.dart';
+﻿import 'package:delwaqty/core/errors/exceptions.dart';
 import 'package:delwaqty/data/datasources/remote/supabase_product_data_source.dart';
-import 'package:delwaqty/features/commerce/domain/entities/product.dart';
-import 'package:delwaqty/features/commerce/domain/repositories/product_repository.dart';
+import 'package:delwaqty/features/customer/commerce/domain/entities/product.dart';
+import 'package:delwaqty/features/customer/commerce/domain/repositories/product_repository.dart';
 
 class ProductRepositoryImpl implements ProductRepository {
   ProductRepositoryImpl(this._dataSource);

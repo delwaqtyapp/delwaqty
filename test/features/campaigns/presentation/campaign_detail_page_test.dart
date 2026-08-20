@@ -1,9 +1,9 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:delwaqty/features/campaigns/domain/entities/campaign.dart';
-import 'package:delwaqty/features/campaigns/presentation/campaign_providers.dart';
-import 'package:delwaqty/features/campaigns/presentation/pages/campaign_detail_page.dart';
+import 'package:delwaqty/features/_shared/campaigns/domain/entities/campaign.dart';
+import 'package:delwaqty/features/_shared/campaigns/presentation/campaign_providers.dart';
+import 'package:delwaqty/features/_shared/campaigns/presentation/pages/campaign_detail_page.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 
 void main() {
@@ -12,10 +12,10 @@ void main() {
       id: 'c1',
       code: 'SUMMER20',
       campaignType: CampaignType.offer,
-      nameAr: 'عرض الصيف',
+      nameAr: 'Ø¹Ø±Ø¶ Ø§Ù„ØµÙŠÙ',
       nameEn: 'Summer Offer',
-      subtitleAr: 'خصم 20%',
-      descriptionAr: 'خصم يصل إلى 20% على جميع الطلبات',
+      subtitleAr: 'Ø®ØµÙ… 20%',
+      descriptionAr: 'Ø®ØµÙ… ÙŠØµÙ„ Ø¥Ù„Ù‰ 20% Ø¹Ù„Ù‰ Ø¬Ù…ÙŠØ¹ Ø§Ù„Ø·Ù„Ø¨Ø§Øª',
       status: CampaignStatus.published,
       startsAt: DateTime(2026, 8),
       endsAt: DateTime(2026, 8, 31),
@@ -37,9 +37,9 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('عرض الصيف'), findsOneWidget);
+    expect(find.text('Ø¹Ø±Ø¶ Ø§Ù„ØµÙŠÙ'), findsOneWidget);
     expect(find.text('1/8/2026 - 31/8/2026'), findsOneWidget);
-    expect(find.text('خصم يصل إلى 20% على جميع الطلبات'), findsOneWidget);
+    expect(find.text('Ø®ØµÙ… ÙŠØµÙ„ Ø¥Ù„Ù‰ 20% Ø¹Ù„Ù‰ Ø¬Ù…ÙŠØ¹ Ø§Ù„Ø·Ù„Ø¨Ø§Øª'), findsOneWidget);
     expect(find.text('Published'), findsOneWidget);
   });
 

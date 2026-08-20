@@ -1,4 +1,4 @@
-import 'package:delwaqty/features/admin/domain/entities/admin_region_assignment.dart';
+﻿import 'package:delwaqty/features/admin/domain/entities/admin_region_assignment.dart';
 
 abstract class AdminRegionAssignmentRepository {
   Future<List<AdminRegionAssignment>> getAssignments({String? adminId});

@@ -187,11 +187,26 @@ final List<_AdminNavGroup> _adminGroups = [
         icon: Icons.fact_check_rounded,
         label: (l) => l.adminApprovals,
       ),
+      _AdminNavItem(
+        path: '/admin/pending-deletions',
+        icon: Icons.person_remove_rounded,
+        label: (l) => l.pendingDeletions,
+      ),
+      _AdminNavItem(
+        path: '/admin/hierarchy',
+        icon: Icons.account_tree_rounded,
+        label: (l) => l.permissionDelegation,
+      ),
     ],
   ),
   _AdminNavGroup(
     label: (l) => l.adminSettingsGroupSection,
     items: [
+      _AdminNavItem(
+        path: '/admin/profile',
+        icon: Icons.person_rounded,
+        label: (l) => l.adminProfile,
+      ),
       _AdminNavItem(
         path: '/admin/settings',
         icon: Icons.settings_rounded,

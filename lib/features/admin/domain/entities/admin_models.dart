@@ -8,17 +8,40 @@ part 'admin_models.g.dart';
 
 enum AdminRole {
   owner,
+  countryAdmin,
+  governorateAdmin,
+  centerAdmin,
+  villageAdmin,
   admin;
 
   static AdminRole fromDb(String? value) => switch (value) {
     'super_admin' => AdminRole.owner,
+    'country_admin' => AdminRole.countryAdmin,
+    'governorate_admin' => AdminRole.governorateAdmin,
+    'center_admin' => AdminRole.centerAdmin,
+    'village_admin' => AdminRole.villageAdmin,
     _ => AdminRole.admin,
   };
 
   String toDb() => switch (this) {
     AdminRole.owner => 'super_admin',
+    AdminRole.countryAdmin => 'country_admin',
+    AdminRole.governorateAdmin => 'governorate_admin',
+    AdminRole.centerAdmin => 'center_admin',
+    AdminRole.villageAdmin => 'village_admin',
     AdminRole.admin => 'admin',
   };
+
+  int get hierarchyLevel => switch (this) {
+    AdminRole.owner => 0,
+    AdminRole.countryAdmin => 1,
+    AdminRole.governorateAdmin => 2,
+    AdminRole.centerAdmin => 3,
+    AdminRole.villageAdmin => 4,
+    AdminRole.admin => 5,
+  };
+
+  bool canAssignRole(AdminRole target) => hierarchyLevel < target.hierarchyLevel;
 }
 
 enum AdminUserStatus { active, suspended, pending, deactivated }

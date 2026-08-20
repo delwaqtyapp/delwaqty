@@ -31,6 +31,9 @@ import 'package:delwaqty/features/admin/admin_shell.dart';
 import 'package:delwaqty/features/admin/presentation/pages/admin_commission_management_page.dart';
 import 'package:delwaqty/features/admin/presentation/pages/admin_approvals_center_page.dart';
 import 'package:delwaqty/features/admin/presentation/pages/admin_quick_actions_page.dart';
+import 'package:delwaqty/features/admin/presentation/pages/admin_profile_page.dart';
+import 'package:delwaqty/features/admin/presentation/pages/admin_hierarchy_page.dart';
+import 'package:delwaqty/features/admin/presentation/pages/admin_pending_deletions_page.dart';
 
 AdminShell _admin(Widget page, {bool showFab = true}) {
   return AdminShell(showFab: showFab, child: page);
@@ -197,6 +200,18 @@ class AdminModule extends FeatureModule {
         GoRoute(
           path: 'actions',
           builder: (context, state) => _admin(const AdminQuickActionsPage()),
+        ),
+        GoRoute(
+          path: 'profile',
+          builder: (context, state) => _admin(const AdminProfilePage()),
+        ),
+        GoRoute(
+          path: 'hierarchy',
+          builder: (context, state) => _admin(const AdminHierarchyPage()),
+        ),
+        GoRoute(
+          path: 'pending-deletions',
+          builder: (context, state) => _admin(const AdminPendingDeletionsPage()),
         ),
       ],
     ),

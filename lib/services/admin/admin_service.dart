@@ -1,4 +1,5 @@
 ﻿import 'package:flutter/foundation.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:delwaqty/data/repositories/admin_repository.dart';
 import 'package:delwaqty/features/admin/domain/entities/admin_models.dart';
 import 'package:delwaqty/core/constants/app_constants.dart';
@@ -59,17 +60,18 @@ class AdminService {
     }
   }
 
-  Future<bool> deleteUser(String userId) async {
+  bool get isOwner {
+    final email = Supabase.instance.client.auth.currentUser?.email;
+    return email == _ownerEmail;
+  }
+
+  Future<bool> deleteUser(String userId, {String? reason}) async {
     try {
-      // Owner account deletes immediately without approval
-      if (userId == _ownerEmail) {
+      if (isOwner) {
         await _repository.deleteUser(userId);
         return true;
       }
-      
-      // For other accounts, require approval with reason
-      // TODO: Show approval dialog to owner and wait for confirmation
-      // For now, prevent deletion without approval
+
       return false;
     } catch (e) {
       debugPrint('AdminService.deleteUser error: $e');

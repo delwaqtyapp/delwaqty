@@ -4,6 +4,38 @@
 
 ---
 
+## Current Task — MASTER RELEASE AUDIT (Session 69) — IN PROGRESS
+
+**Status:** Autonomous AUDIT → FIX → VERIFY loop running. Working from the provided MISSION 1–42 master task.
+
+### Completed this session (committed + pushed)
+- `b76a616` sprint 99: SQL security — new migration `060_security_hardening_delivery_platform.sql` adds `search_path = public, pg_temp` + restricts EXECUTE to authenticated/service_role on the 6 delivery RPCs from `011`; removes `anon` EXECUTE grant on all `platform_*` RPCs (`050`).
+- `b76a616` sprint 99: Fixed commission display bug (700% due to `* 100` on integer-percent `commission_rate`) in `member_drawer.dart:1243` and `admin_transaction_ledger_page.dart:337`.
+- `b76a616` sprint 99: Removed dead buttons — `merchant_detail_page` Call/Chat (no phone/chat backend) removed; Directions implemented via `url_launcher`; `member_drawer` document open button now launches the doc URL; `safety_settings_page` switches kept disabled-honest (no backend contract — documented as pending).
+- `5c0f2d0` sprint 99: Localized Arabic-only hardcoded strings in `service_booking_page.dart` (bookingSubmitted/bookingErrorRetry) and `audio_recording_dialog.dart` (l10n.ok). Added 2 ARB keys.
+
+### Known open issues (audit findings, not yet fixed)
+- LOCALIZATION (Mission 21): ~28 more hardcoded English strings across admin_web (gate/verifications/region_scope/categories), merchant (reservations/dashboard/branches), driver_onboarding, complaints (status label), admin_hierarchy. Pending batch.
+- RIDE/PASSENGER CODE (product-direction violation): active passenger ride booking in customer (`features/customer/ride`, `ride_booking`) + driver ride hub/trip (`driver_ride_hub_page`, `driver_trip_page`) + admin `RideModel` analytics. Contradicts "delivery/service only" rule. Requires careful unwinding (shared `Ride` entity used by delivery). Plan: dedicated phase, keep shared delivery `Ride` model, remove passenger-specific screens/dispatch, quarantine migrations.
+- SQL: other migrations not yet fully audited for search_path/grants (only 011 + 050 done).
+
+### Environment limits (documented honestly)
+- `flutter analyze` / `flutter test` blocked (Windows Dev Mode off). Compile gate = `flutter build apk` (both flavors PASS).
+- No live DB access → RPC/SQL runtime probes impossible (🟡/🔴).
+- Physical-device verification limited (🔴) — fixes verified by compile only.
+
+### Files modified (this session)
+- `supabase/migrations/060_security_hardening_delivery_platform.sql` (new)
+- `lib/features/admin/member_management/presentation/pages/member_drawer.dart`
+- `lib/features/admin/presentation/pages/admin_transaction_ledger_page.dart`
+- `lib/features/customer/safety/presentation/pages/safety_settings_page.dart`
+- `lib/features/customer/commerce/presentation/pages/merchant_detail_page.dart`
+- `lib/features/customer/home_services/presentation/pages/service_booking_page.dart`
+- `lib/features/customer/service_audio_logs/presentation/pages/audio_recording_dialog.dart`
+- `lib/l10n/app_en.arb`, `lib/l10n/app_ar.arb` (+ regenerated l10n)
+
+---
+
 ## Current Task — SPRINT 96 COMPLETED: BIOMETRIC LOGIN + ENCODING REPAIR (Session 68)
 
 **Status:** DONE + committed + pushed. Both APKs rebuilt and installed; Arabic verified on device; DIAG logs removed.

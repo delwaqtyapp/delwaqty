@@ -52,6 +52,11 @@
 - **Impact:** Cannot register or login real users
 - **Fix:** Wire auth pages to `AuthService` with Supabase Auth
 
+### 9. `admin_users` legacy table retained (technical debt)
+- **Issue:** `admin_repository.dart` `getUsers/createUser/updateUser/deleteUser` still read/write the legacy `admin_users` table. The modern admin stack uses `users`/`admin_management` + RPCs (`get_all_admins`, `create_admin_account`, `assign_admin_role`, `deactivate_admin`, `owner_delete_member`). `admin_users` is "dormant metadata" (`031:141`) with a separate UUID PK (`016:14`) linked to `users.id` via `user_id` FK (ADR-055). No complete, behavior-preserving mapping exists for any of the 4 ops (missing `full_name`/`status`/`last_login` in admin RPCs; `create_admin_account` only promotes an existing `users.id`; `owner_delete_member` is owner-only, keys on `users.id`, and orphans the `admin_users` row).
+- **Impact:** Parallel admin store; the admin-users screen cannot be cleanly migrated without new RPCs / UI changes.
+- **Fix:** Deliberately retained (sprint 97, rules 3/8/9). Future: rebuild the screen on `get_all_admins()` + extend admin RPCs to return `full_name`/`status`/`last_login` + add an admin-create-user RPC, or formally deprecate `admin_users`. See `SESSION_STATUS.md` (SPRINT 97) for the full mapping table.
+
 ## Low
 
 ### 162 Info-Level Lint Warnings

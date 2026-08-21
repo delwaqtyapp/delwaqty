@@ -14,6 +14,7 @@ import 'package:delwaqty/l10n/app_localizations.dart';
 import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
 import 'package:delwaqty/shared/widgets/shimmer_loading.dart';
 import 'package:delwaqty/core/theme/app_colors.dart';
+import 'package:delwaqty/features/driver/driver_module.dart';
 
 class DriverDeliveryHubPage extends ConsumerWidget {
   const DriverDeliveryHubPage({super.key});

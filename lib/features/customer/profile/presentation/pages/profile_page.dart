@@ -533,20 +533,7 @@ class ProfilePage extends ConsumerWidget {
             label: l10n.admin,
             onTap: () => context.push('/admin'),
           ),
-        if (isDriver || isAdmin)
-          _PortalTile(
-            icon: Icons.delivery_dining_outlined,
-            gradient: const [AppColors.brandViolet, AppColors.infoLight],
-            label: l10n.driverDashboard,
-            onTap: () => context.push('/driver'),
-          ),
-        if (isMerchant || isAdmin)
-          _PortalTile(
-            icon: Icons.store_outlined,
-            gradient: const [AppColors.orderReady, AppColors.successLight],
-            label: l10n.merchantDashboard,
-            onTap: () => context.push('/merchant-dashboard'),
-          ),
+
       ],
     );
   }

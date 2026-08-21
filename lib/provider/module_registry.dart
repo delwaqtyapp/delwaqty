@@ -13,7 +13,7 @@ import 'package:delwaqty/features/_shared/rewards/rewards_module.dart';
 import 'package:delwaqty/features/_shared/campaigns/campaigns_module.dart';
 import 'package:delwaqty/features/customer/commerce/commerce_module.dart';
 import 'package:delwaqty/features/customer/restaurant/restaurant_module.dart';
-import 'package:delwaqty/features/customer/merchant/merchant_module.dart';
+import 'package:delwaqty/features/provider/merchant/merchant_module.dart';
 import 'package:delwaqty/features/customer/delivery/delivery_module.dart';
 import 'package:delwaqty/features/customer/wallet/wallet_module.dart';
 import 'package:delwaqty/features/customer/service_audio_logs/service_audio_logs_module.dart';

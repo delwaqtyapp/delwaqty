@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:delwaqty/features/customer/merchant/merchant_module.dart';
-import 'package:delwaqty/features/customer/merchant/domain/entities/merchant_order.dart';
+import 'package:delwaqty/features/provider/merchant/presentation/providers/merchant_providers.dart';
+import 'package:delwaqty/features/provider/merchant/merchant_module.dart';
+import 'package:delwaqty/features/provider/merchant/domain/entities/merchant_order.dart';
 import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
 import 'package:delwaqty/shared/widgets/premium_empty_state.dart';
 import 'package:delwaqty/shared/widgets/shimmer_loading.dart';
@@ -9,7 +10,7 @@ import 'package:delwaqty/l10n/app_localizations.dart';
 import 'package:delwaqty/core/theme/app_colors.dart';
 import 'package:delwaqty/core/theme/app_text_styles.dart';
 
-final _merchantIdProvider = Provider<String>((_) => 'current-merchant-id');
+final _merchantIdProvider = providerMerchantIdProvider;
 
 final _ordersFilterProvider = StateProvider<String?>((ref) => null);
 

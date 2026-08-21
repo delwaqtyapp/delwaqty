@@ -2,17 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:delwaqty/core/module/feature_module.dart';
-import 'package:delwaqty/features/customer/merchant/data/datasources/remote/supabase_merchant_dashboard_data_source.dart';
-import 'package:delwaqty/features/customer/merchant/data/repositories/merchant_dashboard_repository_impl.dart';
-import 'package:delwaqty/features/customer/merchant/domain/repositories/merchant_dashboard_repository.dart';
-import 'package:delwaqty/features/customer/merchant/presentation/pages/merchant_dashboard_page.dart';
-import 'package:delwaqty/features/customer/merchant/presentation/pages/merchant_orders_page.dart';
-import 'package:delwaqty/features/customer/merchant/presentation/pages/merchant_products_page.dart';
-import 'package:delwaqty/features/customer/merchant/presentation/pages/merchant_product_form_page.dart';
-import 'package:delwaqty/features/customer/merchant/presentation/pages/merchant_offers_page.dart';
-import 'package:delwaqty/features/customer/merchant/presentation/pages/merchant_branches_page.dart';
-import 'package:delwaqty/features/customer/merchant/presentation/pages/merchant_reservations_page.dart';
-import 'package:delwaqty/features/customer/merchant/presentation/pages/merchant_reviews_page.dart';
+import 'package:delwaqty/features/provider/merchant/data/datasources/remote/supabase_merchant_dashboard_data_source.dart';
+import 'package:delwaqty/features/provider/merchant/data/repositories/merchant_dashboard_repository_impl.dart';
+import 'package:delwaqty/features/provider/merchant/domain/repositories/merchant_dashboard_repository.dart';
+import 'package:delwaqty/features/provider/merchant/presentation/pages/merchant_dashboard_page.dart';
+import 'package:delwaqty/features/provider/merchant/presentation/pages/merchant_orders_page.dart';
+import 'package:delwaqty/features/provider/merchant/presentation/pages/merchant_products_page.dart';
+import 'package:delwaqty/features/provider/merchant/presentation/pages/merchant_product_form_page.dart';
+import 'package:delwaqty/features/provider/merchant/presentation/pages/merchant_offers_page.dart';
+import 'package:delwaqty/features/provider/merchant/presentation/pages/merchant_branches_page.dart';
+import 'package:delwaqty/features/provider/merchant/presentation/pages/merchant_reservations_page.dart';
+import 'package:delwaqty/features/provider/merchant/presentation/pages/merchant_reviews_page.dart';
 
 final merchantDashboardRepositoryImplProvider =
     Provider<MerchantDashboardRepositoryImpl>(

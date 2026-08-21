@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:delwaqty/features/provider/merchant/presentation/providers/merchant_providers.dart';
 import 'package:go_router/go_router.dart';
 import 'package:delwaqty/core/extensions/context_extensions.dart';
-import 'package:delwaqty/features/customer/merchant/merchant_module.dart';
+import 'package:delwaqty/features/provider/merchant/merchant_module.dart';
 import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
 import 'package:delwaqty/shared/widgets/app_loader.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 
-final _merchantIdProvider = Provider<String>((_) => 'current-merchant-id');
+final _merchantIdProvider = providerMerchantIdProvider;
 
 final _productProvider =
     FutureProvider.family<Map<String, dynamic>?, String>((ref, productId) async {

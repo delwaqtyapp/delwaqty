@@ -866,12 +866,6 @@ abstract class AppLocalizations {
   /// **'Car Wash'**
   String get carwash;
 
-  /// No description provided for @ride.
-  ///
-  /// In en, this message translates to:
-  /// **'Ride'**
-  String get ride;
-
   /// No description provided for @delivery.
   ///
   /// In en, this message translates to:
@@ -3314,12 +3308,6 @@ abstract class AppLocalizations {
   /// **'Total Deliveries'**
   String get totalDeliveries;
 
-  /// No description provided for @totalRides.
-  ///
-  /// In en, this message translates to:
-  /// **'Total Rides'**
-  String get totalRides;
-
   /// No description provided for @earnings.
   ///
   /// In en, this message translates to:
@@ -3500,12 +3488,6 @@ abstract class AppLocalizations {
   /// **'Premium'**
   String get premium;
 
-  /// No description provided for @rateYourTrip.
-  ///
-  /// In en, this message translates to:
-  /// **'Rate your trip'**
-  String get rateYourTrip;
-
   /// No description provided for @rateDriverPrompt.
   ///
   /// In en, this message translates to:
@@ -3524,30 +3506,6 @@ abstract class AppLocalizations {
   /// **'Submit Rating'**
   String get submitRating;
 
-  /// No description provided for @noRidesYet.
-  ///
-  /// In en, this message translates to:
-  /// **'No rides yet'**
-  String get noRidesYet;
-
-  /// No description provided for @startFirstRide.
-  ///
-  /// In en, this message translates to:
-  /// **'Book your first ride now!'**
-  String get startFirstRide;
-
-  /// No description provided for @rideHistory.
-  ///
-  /// In en, this message translates to:
-  /// **'Ride History'**
-  String get rideHistory;
-
-  /// No description provided for @rideDetails.
-  ///
-  /// In en, this message translates to:
-  /// **'Ride Details'**
-  String get rideDetails;
-
   /// No description provided for @pickup.
   ///
   /// In en, this message translates to:
@@ -3559,12 +3517,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Dropoff'**
   String get dropoff;
-
-  /// No description provided for @fare.
-  ///
-  /// In en, this message translates to:
-  /// **'Fare'**
-  String get fare;
 
   /// No description provided for @distance.
   ///
@@ -3596,12 +3548,6 @@ abstract class AppLocalizations {
   /// **'Driver is arriving'**
   String get driverArriving;
 
-  /// No description provided for @inTrip.
-  ///
-  /// In en, this message translates to:
-  /// **'In Trip'**
-  String get inTrip;
-
   /// No description provided for @arrived.
   ///
   /// In en, this message translates to:
@@ -3614,23 +3560,11 @@ abstract class AppLocalizations {
   /// **'Driver is en route'**
   String get driverEnRoute;
 
-  /// No description provided for @shareTrip.
-  ///
-  /// In en, this message translates to:
-  /// **'Share Trip'**
-  String get shareTrip;
-
   /// No description provided for @sos.
   ///
   /// In en, this message translates to:
   /// **'SOS'**
   String get sos;
-
-  /// No description provided for @tripShared.
-  ///
-  /// In en, this message translates to:
-  /// **'Trip shared successfully!'**
-  String get tripShared;
 
   /// No description provided for @emergencyAlert.
   ///
@@ -3680,18 +3614,6 @@ abstract class AppLocalizations {
   /// **'Other reason'**
   String get cancelReasonOther;
 
-  /// No description provided for @cancelRide.
-  ///
-  /// In en, this message translates to:
-  /// **'Cancel Ride'**
-  String get cancelRide;
-
-  /// No description provided for @keepRide.
-  ///
-  /// In en, this message translates to:
-  /// **'Keep Ride'**
-  String get keepRide;
-
   /// No description provided for @cheapest.
   ///
   /// In en, this message translates to:
@@ -3709,24 +3631,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Luxury car'**
   String get luxury;
-
-  /// No description provided for @chooseRideType.
-  ///
-  /// In en, this message translates to:
-  /// **'Choose a ride type'**
-  String get chooseRideType;
-
-  /// No description provided for @tripProtected.
-  ///
-  /// In en, this message translates to:
-  /// **'Your trip is protected with SOS coverage'**
-  String get tripProtected;
-
-  /// No description provided for @confirmRide.
-  ///
-  /// In en, this message translates to:
-  /// **'Confirm Ride'**
-  String get confirmRide;
 
   /// No description provided for @enterDestination.
   ///
@@ -3751,12 +3655,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Destination'**
   String get destination;
-
-  /// No description provided for @trackRide.
-  ///
-  /// In en, this message translates to:
-  /// **'Track Ride'**
-  String get trackRide;
 
   /// No description provided for @matched.
   ///
@@ -3962,42 +3860,6 @@ abstract class AppLocalizations {
   /// **'You are offline'**
   String get youAreOffline;
 
-  /// No description provided for @acceptRide.
-  ///
-  /// In en, this message translates to:
-  /// **'Accept'**
-  String get acceptRide;
-
-  /// No description provided for @rejectRide.
-  ///
-  /// In en, this message translates to:
-  /// **'Reject'**
-  String get rejectRide;
-
-  /// No description provided for @newRideRequest.
-  ///
-  /// In en, this message translates to:
-  /// **'New ride request'**
-  String get newRideRequest;
-
-  /// No description provided for @pickupPassenger.
-  ///
-  /// In en, this message translates to:
-  /// **'Pick up passenger'**
-  String get pickupPassenger;
-
-  /// No description provided for @startTrip.
-  ///
-  /// In en, this message translates to:
-  /// **'Start Trip'**
-  String get startTrip;
-
-  /// No description provided for @finishTrip.
-  ///
-  /// In en, this message translates to:
-  /// **'Finish Trip'**
-  String get finishTrip;
-
   /// No description provided for @arrivedAtPickup.
   ///
   /// In en, this message translates to:
@@ -4007,7 +3869,7 @@ abstract class AppLocalizations {
   /// No description provided for @waitingForPassenger.
   ///
   /// In en, this message translates to:
-  /// **'Waiting for passenger'**
+  /// **'Waiting for customer'**
   String get waitingForPassenger;
 
   /// No description provided for @enterPickupOtp.
@@ -4027,18 +3889,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Invalid code'**
   String get invalidOtp;
-
-  /// No description provided for @tripStarted.
-  ///
-  /// In en, this message translates to:
-  /// **'Trip started'**
-  String get tripStarted;
-
-  /// No description provided for @tripCompleted.
-  ///
-  /// In en, this message translates to:
-  /// **'Trip completed'**
-  String get tripCompleted;
 
   /// No description provided for @todayEarnings.
   ///
@@ -4166,18 +4016,6 @@ abstract class AppLocalizations {
   /// **'Your driver has arrived'**
   String get driverArrived;
 
-  /// No description provided for @onTrip.
-  ///
-  /// In en, this message translates to:
-  /// **'On trip'**
-  String get onTrip;
-
-  /// No description provided for @estimatedFare.
-  ///
-  /// In en, this message translates to:
-  /// **'Estimated fare'**
-  String get estimatedFare;
-
   /// No description provided for @distanceLabel.
   ///
   /// In en, this message translates to:
@@ -4195,42 +4033,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'km'**
   String get kmShort;
-
-  /// No description provided for @rideEconomy.
-  ///
-  /// In en, this message translates to:
-  /// **'Economy'**
-  String get rideEconomy;
-
-  /// No description provided for @rideComfort.
-  ///
-  /// In en, this message translates to:
-  /// **'Comfort'**
-  String get rideComfort;
-
-  /// No description provided for @ridePremium.
-  ///
-  /// In en, this message translates to:
-  /// **'Premium'**
-  String get ridePremium;
-
-  /// No description provided for @rideXL.
-  ///
-  /// In en, this message translates to:
-  /// **'XL'**
-  String get rideXL;
-
-  /// No description provided for @rideMotorbike.
-  ///
-  /// In en, this message translates to:
-  /// **'Motorbike'**
-  String get rideMotorbike;
-
-  /// No description provided for @rideTaxi.
-  ///
-  /// In en, this message translates to:
-  /// **'Taxi'**
-  String get rideTaxi;
 
   /// No description provided for @savedPlaces.
   ///
@@ -4316,42 +4118,6 @@ abstract class AppLocalizations {
   /// **'Code copied!'**
   String get codeCopied;
 
-  /// No description provided for @tripReceipt.
-  ///
-  /// In en, this message translates to:
-  /// **'Trip Receipt'**
-  String get tripReceipt;
-
-  /// No description provided for @baseFare.
-  ///
-  /// In en, this message translates to:
-  /// **'Base fare'**
-  String get baseFare;
-
-  /// No description provided for @distanceFare.
-  ///
-  /// In en, this message translates to:
-  /// **'Distance'**
-  String get distanceFare;
-
-  /// No description provided for @timeFare.
-  ///
-  /// In en, this message translates to:
-  /// **'Time'**
-  String get timeFare;
-
-  /// No description provided for @surgeFare.
-  ///
-  /// In en, this message translates to:
-  /// **'Surge'**
-  String get surgeFare;
-
-  /// No description provided for @totalFare.
-  ///
-  /// In en, this message translates to:
-  /// **'Total'**
-  String get totalFare;
-
   /// No description provided for @cash.
   ///
   /// In en, this message translates to:
@@ -4381,12 +4147,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Add Trusted Contact'**
   String get addTrustedContact;
-
-  /// No description provided for @shareLiveTrip.
-  ///
-  /// In en, this message translates to:
-  /// **'Share Live Trip'**
-  String get shareLiveTrip;
 
   /// No description provided for @emergencySos.
   ///
@@ -4423,36 +4183,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Favorite Drivers'**
   String get favoriteDrivers;
-
-  /// No description provided for @cancelRideConfirm.
-  ///
-  /// In en, this message translates to:
-  /// **'Are you sure you want to cancel?'**
-  String get cancelRideConfirm;
-
-  /// No description provided for @rideCancelled.
-  ///
-  /// In en, this message translates to:
-  /// **'Ride cancelled'**
-  String get rideCancelled;
-
-  /// No description provided for @noActiveRide.
-  ///
-  /// In en, this message translates to:
-  /// **'No active ride'**
-  String get noActiveRide;
-
-  /// No description provided for @requestRide.
-  ///
-  /// In en, this message translates to:
-  /// **'Request Ride'**
-  String get requestRide;
-
-  /// No description provided for @ridePlaceholder.
-  ///
-  /// In en, this message translates to:
-  /// **'Enter destination'**
-  String get ridePlaceholder;
 
   /// No description provided for @daysAgo.
   ///
@@ -4532,12 +4262,6 @@ abstract class AppLocalizations {
   /// **'Page not found'**
   String get pageNotFound;
 
-  /// No description provided for @fareBreakdown.
-  ///
-  /// In en, this message translates to:
-  /// **'Fare breakdown'**
-  String get fareBreakdown;
-
   /// No description provided for @driverFound.
   ///
   /// In en, this message translates to:
@@ -4561,12 +4285,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Share this code with your driver at pickup'**
   String get shareCodeWithDriver;
-
-  /// No description provided for @passengers.
-  ///
-  /// In en, this message translates to:
-  /// **'Passengers'**
-  String get passengers;
 
   /// No description provided for @luggage.
   ///
@@ -4622,18 +4340,6 @@ abstract class AppLocalizations {
   /// **'Arrives in {minutes} min'**
   String arrivesInMinutes(Object minutes);
 
-  /// No description provided for @bookAnotherRide.
-  ///
-  /// In en, this message translates to:
-  /// **'Book another ride'**
-  String get bookAnotherRide;
-
-  /// No description provided for @tripCancelled.
-  ///
-  /// In en, this message translates to:
-  /// **'Trip cancelled'**
-  String get tripCancelled;
-
   /// No description provided for @loadingMap.
   ///
   /// In en, this message translates to:
@@ -4651,42 +4357,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{seats} seats'**
   String seatsOnly(Object seats);
-
-  /// No description provided for @rideEconomyDesc.
-  ///
-  /// In en, this message translates to:
-  /// **'Affordable everyday rides'**
-  String get rideEconomyDesc;
-
-  /// No description provided for @rideComfortDesc.
-  ///
-  /// In en, this message translates to:
-  /// **'Newer cars with extra legroom'**
-  String get rideComfortDesc;
-
-  /// No description provided for @ridePremiumDesc.
-  ///
-  /// In en, this message translates to:
-  /// **'Luxury cars, top-rated drivers'**
-  String get ridePremiumDesc;
-
-  /// No description provided for @rideXLDesc.
-  ///
-  /// In en, this message translates to:
-  /// **'Spacious rides for groups'**
-  String get rideXLDesc;
-
-  /// No description provided for @rideMotorbikeDesc.
-  ///
-  /// In en, this message translates to:
-  /// **'Fast and cheap for one'**
-  String get rideMotorbikeDesc;
-
-  /// No description provided for @rideTaxiDesc.
-  ///
-  /// In en, this message translates to:
-  /// **'Metered street taxis'**
-  String get rideTaxiDesc;
 
   /// No description provided for @documents.
   ///
@@ -4718,12 +4388,6 @@ abstract class AppLocalizations {
   /// **'Arrive'**
   String get arrive;
 
-  /// No description provided for @ratePassenger.
-  ///
-  /// In en, this message translates to:
-  /// **'Rate passenger'**
-  String get ratePassenger;
-
   /// No description provided for @incomingRequest.
   ///
   /// In en, this message translates to:
@@ -4735,24 +4399,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Estimated earnings'**
   String get estimatedEarnings;
-
-  /// No description provided for @driverRides.
-  ///
-  /// In en, this message translates to:
-  /// **'Ride requests'**
-  String get driverRides;
-
-  /// No description provided for @activeTrip.
-  ///
-  /// In en, this message translates to:
-  /// **'Active trip'**
-  String get activeTrip;
-
-  /// No description provided for @todayRides.
-  ///
-  /// In en, this message translates to:
-  /// **'Today\'s rides'**
-  String get todayRides;
 
   /// No description provided for @acceptanceRate.
   ///
@@ -4793,7 +4439,7 @@ abstract class AppLocalizations {
   /// No description provided for @waitingForRides.
   ///
   /// In en, this message translates to:
-  /// **'Waiting for ride requests'**
+  /// **'Waiting for delivery requests'**
   String get waitingForRides;
 
   /// No description provided for @goOnlineToReceive.
@@ -4820,41 +4466,11 @@ abstract class AppLocalizations {
   /// **'I have arrived'**
   String get confirmArrival;
 
-  /// No description provided for @completeTrip.
-  ///
-  /// In en, this message translates to:
-  /// **'Complete trip'**
-  String get completeTrip;
-
-  /// No description provided for @rateThePassenger.
-  ///
-  /// In en, this message translates to:
-  /// **'Rate the passenger'**
-  String get rateThePassenger;
-
-  /// No description provided for @noActiveTrip.
-  ///
-  /// In en, this message translates to:
-  /// **'No active trip'**
-  String get noActiveTrip;
-
   /// No description provided for @away.
   ///
   /// In en, this message translates to:
   /// **'away'**
   String get away;
-
-  /// No description provided for @callPassenger.
-  ///
-  /// In en, this message translates to:
-  /// **'Call passenger'**
-  String get callPassenger;
-
-  /// No description provided for @registerAsRideDriver.
-  ///
-  /// In en, this message translates to:
-  /// **'Register as a ride driver'**
-  String get registerAsRideDriver;
 
   /// No description provided for @plateNumber.
   ///
@@ -4889,7 +4505,7 @@ abstract class AppLocalizations {
   /// No description provided for @minimumFareNotMet.
   ///
   /// In en, this message translates to:
-  /// **'Minimum amount not met'**
+  /// **'Minimum delivery amount not met'**
   String get minimumFareNotMet;
 
   /// No description provided for @amountExceedsBalance.
@@ -4939,12 +4555,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Adjustment'**
   String get adjustment;
-
-  /// No description provided for @rideNoLongerAvailable.
-  ///
-  /// In en, this message translates to:
-  /// **'This ride is no longer available'**
-  String get rideNoLongerAvailable;
 
   /// No description provided for @driverBusy.
   ///
@@ -5300,18 +4910,6 @@ abstract class AppLocalizations {
   /// **'Total Withdrawn'**
   String get totalWithdrawn;
 
-  /// No description provided for @completedTrips.
-  ///
-  /// In en, this message translates to:
-  /// **'Completed Trips'**
-  String get completedTrips;
-
-  /// No description provided for @cancelledTrips.
-  ///
-  /// In en, this message translates to:
-  /// **'Cancelled Trips'**
-  String get cancelledTrips;
-
   /// No description provided for @cancellationRate.
   ///
   /// In en, this message translates to:
@@ -5636,18 +5234,6 @@ abstract class AppLocalizations {
   /// **'Trip Sharing'**
   String get tripSharing;
 
-  /// No description provided for @autoShareTrip.
-  ///
-  /// In en, this message translates to:
-  /// **'Auto Share Trip'**
-  String get autoShareTrip;
-
-  /// No description provided for @autoShareTripDescription.
-  ///
-  /// In en, this message translates to:
-  /// **'Automatically share trip with trusted contacts'**
-  String get autoShareTripDescription;
-
   /// No description provided for @shareDuration.
   ///
   /// In en, this message translates to:
@@ -5773,18 +5359,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Relationship'**
   String get relationship;
-
-  /// No description provided for @notifyOnRide.
-  ///
-  /// In en, this message translates to:
-  /// **'Notify on ride'**
-  String get notifyOnRide;
-
-  /// No description provided for @notifyOnRideDescription.
-  ///
-  /// In en, this message translates to:
-  /// **'Get notified when this contact is on a ride'**
-  String get notifyOnRideDescription;
 
   /// No description provided for @notificationMethod.
   ///
@@ -5954,48 +5528,6 @@ abstract class AppLocalizations {
   /// **'All safety tools and guidelines'**
   String get safetyHubDesc;
 
-  /// No description provided for @tripSafetyInstructions.
-  ///
-  /// In en, this message translates to:
-  /// **'Trip Safety Instructions'**
-  String get tripSafetyInstructions;
-
-  /// No description provided for @beforeTrip.
-  ///
-  /// In en, this message translates to:
-  /// **'Before Trip'**
-  String get beforeTrip;
-
-  /// No description provided for @duringTrip.
-  ///
-  /// In en, this message translates to:
-  /// **'During Trip'**
-  String get duringTrip;
-
-  /// No description provided for @afterTrip.
-  ///
-  /// In en, this message translates to:
-  /// **'After Trip'**
-  String get afterTrip;
-
-  /// No description provided for @beforeTripInstructions.
-  ///
-  /// In en, this message translates to:
-  /// **'Verify driver name, photo, vehicle plate, and car color before getting in.'**
-  String get beforeTripInstructions;
-
-  /// No description provided for @duringTripInstructions.
-  ///
-  /// In en, this message translates to:
-  /// **'Share your trip with trusted contacts. Keep your phone charged. If you feel unsafe, use the SOS button immediately.'**
-  String get duringTripInstructions;
-
-  /// No description provided for @afterTripInstructions.
-  ///
-  /// In en, this message translates to:
-  /// **'Rate your trip. Report any issues. Check your belongings before leaving the vehicle.'**
-  String get afterTripInstructions;
-
   /// No description provided for @driverInstructions.
   ///
   /// In en, this message translates to:
@@ -6005,19 +5537,13 @@ abstract class AppLocalizations {
   /// No description provided for @driverBeforeTrip.
   ///
   /// In en, this message translates to:
-  /// **'Verify passenger identity. Check the OTP code. Confirm the destination.'**
+  /// **'Verify the OTP code. Confirm the destination.'**
   String get driverBeforeTrip;
-
-  /// No description provided for @driverDuringTrip.
-  ///
-  /// In en, this message translates to:
-  /// **'Follow the GPS route. Drive safely. Do not make unauthorized stops.'**
-  String get driverDuringTrip;
 
   /// No description provided for @driverAfterTrip.
   ///
   /// In en, this message translates to:
-  /// **'Wait for passenger to exit safely. Check for left items. End trip in the app.'**
+  /// **'Wait for the customer to exit safely. Check for left items. End the trip in the app.'**
   String get driverAfterTrip;
 
   /// No description provided for @safetyTools.
@@ -6212,35 +5738,17 @@ abstract class AppLocalizations {
   /// **'Searching'**
   String get searching;
 
-  /// No description provided for @matchedRide.
-  ///
-  /// In en, this message translates to:
-  /// **'Matched'**
-  String get matchedRide;
-
   /// No description provided for @completed.
   ///
   /// In en, this message translates to:
   /// **'Completed'**
   String get completed;
 
-  /// No description provided for @rideNumber.
-  ///
-  /// In en, this message translates to:
-  /// **'Ride #'**
-  String get rideNumber;
-
   /// No description provided for @assigned.
   ///
   /// In en, this message translates to:
   /// **'Assigned'**
   String get assigned;
-
-  /// No description provided for @passenger.
-  ///
-  /// In en, this message translates to:
-  /// **'Passenger'**
-  String get passenger;
 
   /// No description provided for @deliveryManagement.
   ///
@@ -6521,7 +6029,7 @@ abstract class AppLocalizations {
   /// No description provided for @tosSection5Body.
   ///
   /// In en, this message translates to:
-  /// **'Ride and delivery services are provided by independent drivers and merchants. Delwaqty facilitates the connection but is not responsible for the quality, safety, or legality of the services provided. Estimated delivery and arrival times are approximate and not guaranteed. Users must provide accurate pickup and drop-off locations.'**
+  /// **'Delivery and service requests are provided by independent drivers and merchants. DelwaQty facilitates the connection but is not responsible for the quality, safety, or legality of the services provided. Estimated delivery and arrival times are approximate and not guaranteed. Users must provide accurate pickup and drop-off locations.'**
   String get tosSection5Body;
 
   /// No description provided for @tosSection6Title.
@@ -6884,78 +6392,6 @@ abstract class AppLocalizations {
   /// **'Auth'**
   String get auth;
 
-  /// No description provided for @rideStatusSearching.
-  ///
-  /// In en, this message translates to:
-  /// **'Searching'**
-  String get rideStatusSearching;
-
-  /// No description provided for @rideStatusMatched.
-  ///
-  /// In en, this message translates to:
-  /// **'Matched'**
-  String get rideStatusMatched;
-
-  /// No description provided for @rideStatusArrived.
-  ///
-  /// In en, this message translates to:
-  /// **'Arrived'**
-  String get rideStatusArrived;
-
-  /// No description provided for @rideStatusInTrip.
-  ///
-  /// In en, this message translates to:
-  /// **'In Trip'**
-  String get rideStatusInTrip;
-
-  /// No description provided for @rideStatusCompleted.
-  ///
-  /// In en, this message translates to:
-  /// **'Completed'**
-  String get rideStatusCompleted;
-
-  /// No description provided for @rideStatusCancelled.
-  ///
-  /// In en, this message translates to:
-  /// **'Cancelled'**
-  String get rideStatusCancelled;
-
-  /// No description provided for @rideTypeEconomy.
-  ///
-  /// In en, this message translates to:
-  /// **'Economy'**
-  String get rideTypeEconomy;
-
-  /// No description provided for @rideTypeComfort.
-  ///
-  /// In en, this message translates to:
-  /// **'Comfort'**
-  String get rideTypeComfort;
-
-  /// No description provided for @rideTypePremium.
-  ///
-  /// In en, this message translates to:
-  /// **'Premium'**
-  String get rideTypePremium;
-
-  /// No description provided for @rideTypeXl.
-  ///
-  /// In en, this message translates to:
-  /// **'XL'**
-  String get rideTypeXl;
-
-  /// No description provided for @rideTypeMotorbike.
-  ///
-  /// In en, this message translates to:
-  /// **'Motorbike'**
-  String get rideTypeMotorbike;
-
-  /// No description provided for @rideTypeTaxi.
-  ///
-  /// In en, this message translates to:
-  /// **'Taxi'**
-  String get rideTypeTaxi;
-
   /// No description provided for @roleOwner.
   ///
   /// In en, this message translates to:
@@ -7225,18 +6661,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Your location data is encrypted and only used to provide delivery and ride services.'**
   String get locationPrivacyNote;
-
-  /// No description provided for @rideUpdates.
-  ///
-  /// In en, this message translates to:
-  /// **'Ride Updates'**
-  String get rideUpdates;
-
-  /// No description provided for @rideUpdatesDescription.
-  ///
-  /// In en, this message translates to:
-  /// **'Get notified about ride status changes'**
-  String get rideUpdatesDescription;
 
   /// No description provided for @deliveryUpdates.
   ///
@@ -9284,12 +8708,6 @@ abstract class AppLocalizations {
   /// **'Total orders'**
   String get kpiTotalOrders;
 
-  /// No description provided for @kpiActiveRides.
-  ///
-  /// In en, this message translates to:
-  /// **'Active rides'**
-  String get kpiActiveRides;
-
   /// No description provided for @kpiOpenComplaints.
   ///
   /// In en, this message translates to:
@@ -9365,7 +8783,7 @@ abstract class AppLocalizations {
   /// No description provided for @revenueRideGmv.
   ///
   /// In en, this message translates to:
-  /// **'Rides GMV'**
+  /// **'Delivery GMV'**
   String get revenueRideGmv;
 
   /// No description provided for @revenueDeliveryGmv.
@@ -10001,7 +9419,7 @@ abstract class AppLocalizations {
   /// No description provided for @sosRideInfo.
   ///
   /// In en, this message translates to:
-  /// **'Ride: {rideId} • {time}'**
+  /// **'Delivery: {rideId} • {time}'**
   String sosRideInfo(Object rideId, Object time);
 
   /// No description provided for @sosAlertType.
@@ -11443,6 +10861,96 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Error: {error}'**
   String errorOccurred(Object error);
+
+  /// No description provided for @todayRides.
+  ///
+  /// In en, this message translates to:
+  /// **'Today\'s Deliveries'**
+  String get todayRides;
+
+  /// No description provided for @noActiveTrip.
+  ///
+  /// In en, this message translates to:
+  /// **'No active delivery'**
+  String get noActiveTrip;
+
+  /// No description provided for @completedTrips.
+  ///
+  /// In en, this message translates to:
+  /// **'Completed Deliveries'**
+  String get completedTrips;
+
+  /// No description provided for @kpiActiveRides.
+  ///
+  /// In en, this message translates to:
+  /// **'Active Deliveries'**
+  String get kpiActiveRides;
+
+  /// No description provided for @driverDuringTrip.
+  ///
+  /// In en, this message translates to:
+  /// **'During the delivery'**
+  String get driverDuringTrip;
+
+  /// No description provided for @beforeTrip.
+  ///
+  /// In en, this message translates to:
+  /// **'Before the Delivery'**
+  String get beforeTrip;
+
+  /// No description provided for @afterTrip.
+  ///
+  /// In en, this message translates to:
+  /// **'After the Delivery'**
+  String get afterTrip;
+
+  /// No description provided for @duringTrip.
+  ///
+  /// In en, this message translates to:
+  /// **'During the Delivery'**
+  String get duringTrip;
+
+  /// No description provided for @beforeTripInstructions.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm the pickup address. Check the order items.'**
+  String get beforeTripInstructions;
+
+  /// No description provided for @afterTripInstructions.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm delivery completion. Collect feedback.'**
+  String get afterTripInstructions;
+
+  /// No description provided for @duringTripInstructions.
+  ///
+  /// In en, this message translates to:
+  /// **'Follow the route. Keep the customer updated.'**
+  String get duringTripInstructions;
+
+  /// No description provided for @notifyOnRide.
+  ///
+  /// In en, this message translates to:
+  /// **'Notify on Delivery'**
+  String get notifyOnRide;
+
+  /// No description provided for @notifyOnRideDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Alert trusted contacts when a delivery starts'**
+  String get notifyOnRideDescription;
+
+  /// No description provided for @autoShareTrip.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto-share Delivery'**
+  String get autoShareTrip;
+
+  /// No description provided for @autoShareTripDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Automatically share live delivery with trusted contacts'**
+  String get autoShareTripDescription;
 }
 
 class _AppLocalizationsDelegate

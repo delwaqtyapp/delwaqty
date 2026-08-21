@@ -407,9 +407,6 @@ class AppLocalizationsAr extends AppLocalizations {
   String get carwash => 'غسيل سيارات';
 
   @override
-  String get ride => 'النقل';
-
-  @override
   String get delivery => 'التوصيل';
 
   @override
@@ -1692,9 +1689,6 @@ class AppLocalizationsAr extends AppLocalizations {
   String get totalDeliveries => 'إجمالي التوصيلات';
 
   @override
-  String get totalRides => 'إجمالي الرحلات';
-
-  @override
   String get earnings => 'الأرباح';
 
   @override
@@ -1791,9 +1785,6 @@ class AppLocalizationsAr extends AppLocalizations {
   String get premium => 'فاخر';
 
   @override
-  String get rateYourTrip => 'قيم رحلتك';
-
-  @override
   String get rateDriverPrompt => 'كيف كان السائق؟';
 
   @override
@@ -1803,25 +1794,10 @@ class AppLocalizationsAr extends AppLocalizations {
   String get submitRating => 'إرسال التقييم';
 
   @override
-  String get noRidesYet => 'لا توجد رحلات بعد';
-
-  @override
-  String get startFirstRide => 'احجز رحلتك الأولى الآن!';
-
-  @override
-  String get rideHistory => 'سجل الرحلات';
-
-  @override
-  String get rideDetails => 'تفاصيل الرحلة';
-
-  @override
   String get pickup => 'نقطة الانطلاق';
 
   @override
   String get dropoff => 'الوجهة';
-
-  @override
-  String get fare => 'الأجرة';
 
   @override
   String get distance => 'المسافة';
@@ -1839,22 +1815,13 @@ class AppLocalizationsAr extends AppLocalizations {
   String get driverArriving => 'السائق يقترب';
 
   @override
-  String get inTrip => 'في الطريق';
-
-  @override
   String get arrived => 'وصلنا';
 
   @override
   String get driverEnRoute => 'السائق في طريقه إليك';
 
   @override
-  String get shareTrip => 'مشاركة الرحلة';
-
-  @override
   String get sos => 'طوارئ SOS';
-
-  @override
-  String get tripShared => 'تم مشاركة الرحلة بنجاح!';
 
   @override
   String get emergencyAlert => 'تنبيه طوارئ';
@@ -1882,12 +1849,6 @@ class AppLocalizationsAr extends AppLocalizations {
   String get cancelReasonOther => 'سبب آخر';
 
   @override
-  String get cancelRide => 'إلغاء الرحلة';
-
-  @override
-  String get keepRide => 'الإبقاء على الرحلة';
-
-  @override
   String get cheapest => 'الأرخص سعراً';
 
   @override
@@ -1895,15 +1856,6 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get luxury => 'سيارة فاخرة';
-
-  @override
-  String get chooseRideType => 'اختر نوع الرحلة';
-
-  @override
-  String get tripProtected => 'رحلتك محمية بتغطية طوارئ SOS';
-
-  @override
-  String get confirmRide => 'تأكيد الرحلة';
 
   @override
   String get enterDestination => 'أدخل عنوان وجهتك';
@@ -1916,9 +1868,6 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get destination => 'الوجهة';
-
-  @override
-  String get trackRide => 'تتبع الرحلة';
 
   @override
   String get matched => 'تم العثور على سائق';
@@ -2034,28 +1983,10 @@ class AppLocalizationsAr extends AppLocalizations {
   String get youAreOffline => 'أنت غير متصل';
 
   @override
-  String get acceptRide => 'قبول';
-
-  @override
-  String get rejectRide => 'رفض';
-
-  @override
-  String get newRideRequest => 'طلب رحلة جديد';
-
-  @override
-  String get pickupPassenger => 'استلام الراكب';
-
-  @override
-  String get startTrip => 'بدء الرحلة';
-
-  @override
-  String get finishTrip => 'إنهاء الرحلة';
-
-  @override
   String get arrivedAtPickup => 'وصلت إلى نقطة الالتقاء';
 
   @override
-  String get waitingForPassenger => 'في انتظار الراكب';
+  String get waitingForPassenger => 'بانتظار العميل';
 
   @override
   String get enterPickupOtp => 'أدخل رمز الالتقاء';
@@ -2065,12 +1996,6 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get invalidOtp => 'رمز غير صحيح';
-
-  @override
-  String get tripStarted => 'بدأت الرحلة';
-
-  @override
-  String get tripCompleted => 'اكتملت الرحلة';
 
   @override
   String get todayEarnings => 'اليوم';
@@ -2136,12 +2061,6 @@ class AppLocalizationsAr extends AppLocalizations {
   String get driverArrived => 'وصل السائق';
 
   @override
-  String get onTrip => 'في رحلة';
-
-  @override
-  String get estimatedFare => 'التكلفة التقديرية';
-
-  @override
   String get distanceLabel => 'المسافة';
 
   @override
@@ -2149,24 +2068,6 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get kmShort => 'كم';
-
-  @override
-  String get rideEconomy => 'اقتصادي';
-
-  @override
-  String get rideComfort => 'مريح';
-
-  @override
-  String get ridePremium => 'فاخر';
-
-  @override
-  String get rideXL => 'عائلي';
-
-  @override
-  String get rideMotorbike => 'دراجة نارية';
-
-  @override
-  String get rideTaxi => 'تاكسي';
 
   @override
   String get savedPlaces => 'الأماكن المحفوظة';
@@ -2211,24 +2112,6 @@ class AppLocalizationsAr extends AppLocalizations {
   String get codeCopied => 'تم نسخ الكود!';
 
   @override
-  String get tripReceipt => 'إيصال الرحلة';
-
-  @override
-  String get baseFare => 'التعرفة الأساسية';
-
-  @override
-  String get distanceFare => 'المسافة';
-
-  @override
-  String get timeFare => 'الوقت';
-
-  @override
-  String get surgeFare => 'زيادة الطلب';
-
-  @override
-  String get totalFare => 'الإجمالي';
-
-  @override
   String get cash => 'نقداً';
 
   @override
@@ -2242,9 +2125,6 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get addTrustedContact => 'إضافة جهة اتصال موثوقة';
-
-  @override
-  String get shareLiveTrip => 'مشاركة الرحلة المباشرة';
 
   @override
   String get emergencySos => 'استغاثة طوارئ';
@@ -2263,21 +2143,6 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get favoriteDrivers => 'السائقون المفضلون';
-
-  @override
-  String get cancelRideConfirm => 'هل أنت متأكد من رغبتك في الإلغاء؟';
-
-  @override
-  String get rideCancelled => 'تم إلغاء الرحلة';
-
-  @override
-  String get noActiveRide => 'لا توجد رحلة نشطة';
-
-  @override
-  String get requestRide => 'اطلب رحلة';
-
-  @override
-  String get ridePlaceholder => 'أدخل الوجهة';
 
   @override
   String daysAgo(Object count) {
@@ -2325,9 +2190,6 @@ class AppLocalizationsAr extends AppLocalizations {
   String get pageNotFound => 'الصفحة غير موجودة';
 
   @override
-  String get fareBreakdown => 'تفاصيل الأجرة';
-
-  @override
   String get driverFound => 'تم العثور على سائق!';
 
   @override
@@ -2339,9 +2201,6 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get shareCodeWithDriver => 'شارك هذا الرمز مع السائق عند الركوب';
-
-  @override
-  String get passengers => 'الركاب';
 
   @override
   String get luggage => 'الأمتعة';
@@ -2375,12 +2234,6 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
-  String get bookAnotherRide => 'احجز رحلة أخرى';
-
-  @override
-  String get tripCancelled => 'تم إلغاء الرحلة';
-
-  @override
   String get loadingMap => 'جارٍ تحميل الخريطة...';
 
   @override
@@ -2392,24 +2245,6 @@ class AppLocalizationsAr extends AppLocalizations {
   String seatsOnly(Object seats) {
     return '$seats مقاعد';
   }
-
-  @override
-  String get rideEconomyDesc => 'رحلات يومية بأسعار مناسبة';
-
-  @override
-  String get rideComfortDesc => 'سيارات أحدث بمساحة أكبر';
-
-  @override
-  String get ridePremiumDesc => 'سيارات فاخرة وسائقون مميزون';
-
-  @override
-  String get rideXLDesc => 'رحلات واسعة للمجموعات';
-
-  @override
-  String get rideMotorbikeDesc => 'سريعة ورخيصة لشخص واحد';
-
-  @override
-  String get rideTaxiDesc => 'تاكسي الشارع بالعداد';
 
   @override
   String get documents => 'المستندات';
@@ -2427,22 +2262,10 @@ class AppLocalizationsAr extends AppLocalizations {
   String get arrive => 'وصلت';
 
   @override
-  String get ratePassenger => 'قيّم الراكب';
-
-  @override
   String get incomingRequest => 'طلب رحلة وارد';
 
   @override
   String get estimatedEarnings => 'الأرباح المتوقعة';
-
-  @override
-  String get driverRides => 'طلبات الرحلات';
-
-  @override
-  String get activeTrip => 'رحلة نشطة';
-
-  @override
-  String get todayRides => 'رحلات اليوم';
 
   @override
   String get acceptanceRate => 'معدل القبول';
@@ -2463,7 +2286,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get earningsCredited => 'تمت إضافة الأرباح';
 
   @override
-  String get waitingForRides => 'بانتظار طلبات الرحلات';
+  String get waitingForRides => 'بانتظار طلبات التوصيل';
 
   @override
   String get goOnlineToReceive => 'اتصل بالإنترنت لاستقبال طلبات الرحلات';
@@ -2478,22 +2301,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get confirmArrival => 'لقد وصلت';
 
   @override
-  String get completeTrip => 'إنهاء الرحلة';
-
-  @override
-  String get rateThePassenger => 'قيّم الراكب';
-
-  @override
-  String get noActiveTrip => 'لا توجد رحلة نشطة';
-
-  @override
   String get away => 'بعيد';
-
-  @override
-  String get callPassenger => 'اتصل بالراكب';
-
-  @override
-  String get registerAsRideDriver => 'سجّل كسائق رحلات';
 
   @override
   String get plateNumber => 'رقم اللوحة';
@@ -2511,7 +2319,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get withdrawalMethod => 'طريقة السحب';
 
   @override
-  String get minimumFareNotMet => 'لم يتم بلوغ الحد الأدنى';
+  String get minimumFareNotMet => 'الحد الأدنى للتوصيل غير مكتمل';
 
   @override
   String get amountExceedsBalance => 'المبلغ يتجاوز الرصيد';
@@ -2536,9 +2344,6 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get adjustment => 'تسوية';
-
-  @override
-  String get rideNoLongerAvailable => 'هذه الرحلة لم تعد متاحة';
 
   @override
   String get driverBusy => 'لديك رحلة نشطة بالفعل';
@@ -2718,12 +2523,6 @@ class AppLocalizationsAr extends AppLocalizations {
   String get totalWithdrawn => 'إجمالي المسحوب';
 
   @override
-  String get completedTrips => 'الرحلات المكتملة';
-
-  @override
-  String get cancelledTrips => 'الرحلات الملغاة';
-
-  @override
   String get cancellationRate => 'معدل الإلغاء';
 
   @override
@@ -2890,13 +2689,6 @@ class AppLocalizationsAr extends AppLocalizations {
   String get tripSharing => 'مشاركة الرحلة';
 
   @override
-  String get autoShareTrip => 'مشاركة الرحلة تلقائياً';
-
-  @override
-  String get autoShareTripDescription =>
-      'مشاركة الرحلة تلقائياً مع جهات الاتصال الموثوقة';
-
-  @override
   String get shareDuration => 'مدة المشاركة';
 
   @override
@@ -2961,13 +2753,6 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get relationship => 'العلاقة';
-
-  @override
-  String get notifyOnRide => 'إخطار عند الرحلة';
-
-  @override
-  String get notifyOnRideDescription =>
-      'استلام إشعار عند وجود هذا الشخص في رحلة';
 
   @override
   String get notificationMethod => 'طريقة الإخطار';
@@ -3055,43 +2840,14 @@ class AppLocalizationsAr extends AppLocalizations {
   String get safetyHubDesc => 'كل أدوات الأمان والإرشادات';
 
   @override
-  String get tripSafetyInstructions => 'تعليمات أمان الرحلة';
-
-  @override
-  String get beforeTrip => 'قبل الرحلة';
-
-  @override
-  String get duringTrip => 'أثناء الرحلة';
-
-  @override
-  String get afterTrip => 'بعد الرحلة';
-
-  @override
-  String get beforeTripInstructions =>
-      'تأكد من اسم السائق وصورته ورقم اللوحة ولون العربية قبل ما تركب.';
-
-  @override
-  String get duringTripInstructions =>
-      'شارك رحلتك مع جهات اتصال موثوقة. شحن تليفونك. لو حسيت بخطر، استخدم زر الطوارئ فوراً.';
-
-  @override
-  String get afterTripInstructions =>
-      'قيّم رحلتك. بلّغ عن أي مشكلة. تأكد من أغراضك قبل ما تنزل من العربية.';
-
-  @override
   String get driverInstructions => 'إرشادات السائق';
 
   @override
-  String get driverBeforeTrip =>
-      'تأكد من هوية الراكب. تحقق من رمز OTP. أكّد وجهة الرحلة.';
-
-  @override
-  String get driverDuringTrip =>
-      'اتبع خارطة GPS. قيّد بأمان. لا تتوقف في أماكن غير مصرح بها.';
+  String get driverBeforeTrip => 'تحقق من رمز التحقق OTP. أكد الوجهة.';
 
   @override
   String get driverAfterTrip =>
-      'انتظر خروج الراكب بأمان. تحقق من أغراض متبقية. أنهِ الرحلة في التطبيق.';
+      'انتظر خروج العميل بأمان. تحقق من الأغراض المنسية. أنهِ الرحلة من التطبيق.';
 
   @override
   String get safetyTools => 'أدوات الأمان';
@@ -3191,19 +2947,10 @@ class AppLocalizationsAr extends AppLocalizations {
   String get searching => 'جارٍ البحث';
 
   @override
-  String get matchedRide => 'تم الربط';
-
-  @override
   String get completed => 'مكتمل';
 
   @override
-  String get rideNumber => 'رحلة رقم';
-
-  @override
   String get assigned => 'معين';
-
-  @override
-  String get passenger => 'ركاب';
 
   @override
   String get deliveryManagement => 'إدارة التوصيلات';
@@ -3349,7 +3096,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get tosSection5Body =>
-      'يقدم سائقون وتجار مستقلون خدمات النقل والتوصيل. دلوقتي تسهل الاتصال لكنها غير مسؤولة عن جودة أو سلامة أو قانونية الخدمات المقدمة. أوقات التوصيل والوصول المقدرة تقريبية وليست مضمونة. يجب على المستخدمين تقديم مواقع الاستلام والdrop-off دقيقة.';
+      'تُقدَّم طلبات التوصيل والخدمات بواسطة سائقين وتجار مستقلين. تسهّل DelwaQty الربط فقط ولا تتحمّل مسؤولية جودة الخدمة أو سلامتها أو قانونيتها. أوقات التوصيل والوصول التقديرية تقريبية وغير مضمونة. يجب على المستخدمين توفير مواقع التقاط وتسليم دقيقة.';
 
   @override
   String get tosSection6Title => '6. الخصوصية';
@@ -3552,42 +3299,6 @@ class AppLocalizationsAr extends AppLocalizations {
   String get auth => 'تسجيل الدخول';
 
   @override
-  String get rideStatusSearching => 'بحث';
-
-  @override
-  String get rideStatusMatched => 'تم الإقران';
-
-  @override
-  String get rideStatusArrived => 'وصل';
-
-  @override
-  String get rideStatusInTrip => 'في الطريق';
-
-  @override
-  String get rideStatusCompleted => 'مكتمل';
-
-  @override
-  String get rideStatusCancelled => 'ملغي';
-
-  @override
-  String get rideTypeEconomy => 'اقتصادي';
-
-  @override
-  String get rideTypeComfort => 'مريح';
-
-  @override
-  String get rideTypePremium => 'بريميوم';
-
-  @override
-  String get rideTypeXl => 'كبير';
-
-  @override
-  String get rideTypeMotorbike => 'دراجة نارية';
-
-  @override
-  String get rideTypeTaxi => 'تاكسي';
-
-  @override
   String get roleOwner => 'مالك';
 
   @override
@@ -3728,12 +3439,6 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get locationPrivacyNote =>
       'بيانات موقعك مشفرة وتُستخدم فقط لتوفير خدمات التوصيل والنقل.';
-
-  @override
-  String get rideUpdates => 'تحديثات الرحلات';
-
-  @override
-  String get rideUpdatesDescription => 'استلام إشعارات عن تغييرات حالة الرحلة';
 
   @override
   String get deliveryUpdates => 'تحديثات التوصيل';
@@ -4794,9 +4499,6 @@ class AppLocalizationsAr extends AppLocalizations {
   String get kpiTotalOrders => 'إجمالي الطلبات';
 
   @override
-  String get kpiActiveRides => 'الرحلات النشطة';
-
-  @override
   String get kpiOpenComplaints => 'الشكاوى المعلقة';
 
   @override
@@ -4833,7 +4535,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get revenuePlatformCommission => 'عمولة المنصة';
 
   @override
-  String get revenueRideGmv => 'GMV الرحلات';
+  String get revenueRideGmv => 'إجمالي التوصيل GMV';
 
   @override
   String get revenueDeliveryGmv => 'GMV التوصيل';
@@ -5173,7 +4875,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String sosRideInfo(Object rideId, Object time) {
-    return 'الرحلة: $rideId • $time';
+    return 'توصيلة: $rideId • $time';
   }
 
   @override
@@ -5927,4 +5629,52 @@ class AppLocalizationsAr extends AppLocalizations {
   String errorOccurred(Object error) {
     return 'خطأ: $error';
   }
+
+  @override
+  String get todayRides => 'توصيلات اليوم';
+
+  @override
+  String get noActiveTrip => 'لا توجد توصيلة نشطة';
+
+  @override
+  String get completedTrips => 'التوصيلات المكتملة';
+
+  @override
+  String get kpiActiveRides => 'التوصيلات النشطة';
+
+  @override
+  String get driverDuringTrip => 'أثناء التوصيل';
+
+  @override
+  String get beforeTrip => 'قبل التوصيل';
+
+  @override
+  String get afterTrip => 'بعد التوصيل';
+
+  @override
+  String get duringTrip => 'أثناء التوصيل';
+
+  @override
+  String get beforeTripInstructions =>
+      'تأكد من عنوان الالتقاط. تحقق من عناصر الطلب.';
+
+  @override
+  String get afterTripInstructions => 'أكد إتمام التوصيل. اجمع التقييم.';
+
+  @override
+  String get duringTripInstructions => 'اتبع المسار. أبلغ العميل بالمستجدات.';
+
+  @override
+  String get notifyOnRide => 'إشعار عند التوصيل';
+
+  @override
+  String get notifyOnRideDescription =>
+      'أبلغ جهات الاتصال الموثوقة عند بدء التوصيل';
+
+  @override
+  String get autoShareTrip => 'مشاركة التوصيل تلقائياً';
+
+  @override
+  String get autoShareTripDescription =>
+      'شارك التوصيل المباشر تلقائياً مع جهات الاتصال الموثوقة';
 }

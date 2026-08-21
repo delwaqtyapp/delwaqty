@@ -73,6 +73,29 @@
                                                                                                   ]
                                                               }
                                     }
+                   },
+                   {
+                       "client_info":  {
+                                           "mobilesdk_app_id":  "1:772052634679:android:17267a5736408b918b43b2",
+                                           "android_client_info":  {
+                                                                       "package_name":  "com.delwaqty.provider"
+                                                                   }
+                                       },
+                       "oauth_client":  [
+
+                                        ],
+                       "api_key":  [
+                                       {
+                                           "current_key":  "AIzaSyBsBH-EQilAypJ2LGVyOK40UpqGWfjHt1A"
+                                       }
+                                   ],
+                       "services":  {
+                                        "appinvite_service":  {
+                                                                  "other_platform_oauth_client":  [
+
+                                                                                                  ]
+                                                              }
+                                    }
                    }
                ],
     "configuration_version":  "1"

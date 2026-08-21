@@ -4,7 +4,31 @@
 
 ---
 
-## Current Task — SPRINT 100: INDEPENDENT DELWAQTY DRIVER APP (Phases 1–20 DONE) — IN PROGRESS
+## Current Task — SPRINT 101: INDEPENDENT DELWAQTY PROVIDER APP (extraction milestone 1) — IN PROGRESS
+
+**Status: Real, independent Provider app created and building.** `lib/provider/{main,app,app_router,module_registry}.dart` + `provider` Android flavor (`com.delwaqty.provider`). Provider APK builds green; all four apps (Customer/Admin/Driver/Provider) build; **891/891 tests pass**; 0 analyze errors.
+
+**What was done (Phases 1–5, 15, 29, 30, 31)**
+- **Audit (1–4):** mapped provider supply-side code. Provider OPERATIONAL UI is concentrated in `lib/features/customer/merchant/**` (`MerchantModule`: `/merchant-dashboard` + orders/products/offers/branches/reservations/reviews) plus the orphaned delivery `MerchantOrdersPage`. `restaurant`/`commerce` modules are CUSTOMER BROWSING but their repos/entities are required by merchant pages (so their MODULES are registered). Home-services has no provider mgmt UI yet (repos exist). Wallet + ServiceAudioLogs reusable.
+- **Provider app (5):** created `lib/provider/*` — `registerProviderModules()` registers Splash/Onboarding/Welcome/Auth/Regions/Complaints/Settings/Profile/Notifications/Safety/Rewards/Campaigns + Commerce/Restaurant/Merchant/DirectDelivery/Wallet/ServiceAudioLogs. `providerGoRouterProvider` redirects authed providers to `/merchant-dashboard`.
+- **Flavor (15/28):** added `provider` product flavor (`com.delwaqty.provider`) + `com.delwaqty.provider` Firebase client in `google-services.json` (duplicated app client; runtime guarded by `FirebaseConfig.isConfigured`).
+- **Four-app matrix (30) BUILD VERIFIED:** Customer ✅ Admin ✅ Driver ✅ Provider ✅ (`app-provider-debug.apk`).
+- **Tests (29):** 891/891 pass. **Analyzer (31):** 0 errors.
+
+**Known gaps (intentional, documented — not blockers for build):**
+- `merchant_dashboard_page.dart` hardcodes merchant id stub (`'current-merchant-id'`) — needs real provider-id resolver (Phase 4). Pre-existing in Customer app too.
+- `UserType.provider` not yet wired into a provider gate (Customer `profile_page` only checks `role=='merchant'`) — Provider app redirects all authed users to `/merchant-dashboard` for now.
+- No provider-facing commission/earnings view exists (admin-only today) — Phase 15 gap.
+- Notification deep-links default to customer routes — remap needed (Phase 18).
+- Restaurant/home-service management UIs absent (repos exist) — build gaps.
+- Code NOT yet physically moved to `lib/features/provider/**`; Provider app reuses existing `features/customer/*` supply modules (same pattern as Driver's initial delivery). Deep extraction + removal from Customer = Phases 25–33 (next milestone).
+
+**Remaining (6–14, 16–28, 32–39):**
+- Build real Provider nav shell (6), dashboard KPIs (7), orders/bookings/catalog/branches/availability/verification/documents/financial center (8–17), notifications/realtime (18–19), support/profile/settings (20–22), AR/EN (23), routing (24), then extraction safety (25), customer boundary (26), shared contract (27), firebase polish (28), provider tests (29 baseline done), four-app regression (34), APK sizes (35), security regression (36), dead-code (37), quality (38), commit (39).
+
+---
+
+## Current Task — SPRINT 100: INDEPENDENT DELWAQTY DRIVER APP — COMPLETED (committed eef96bd, pushed master)
 
 **Status: Driver feature fully extracted into a REAL independent Flutter app.** `lib/driver/main.dart` + module/router/app + `driver` Android flavor (`com.delwaqty.driver`). Driver APK builds green; Customer + Admin still build; **891/891 tests pass**; 0 analyze errors.
 

@@ -110,7 +110,7 @@ class _AdminTransactionLedgerPageState
     final typeLabels = <String?, String>{
       null: l10n.all,
       'order': l10n.orders,
-      'ride': l10n.ride,
+      'ride': l10n.delivery,
       'service_booking': l10n.serviceBookingType,
       'delivery': l10n.delivery,
     };

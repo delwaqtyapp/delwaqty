@@ -408,9 +408,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get carwash => 'Car Wash';
 
   @override
-  String get ride => 'Ride';
-
-  @override
   String get delivery => 'Delivery';
 
   @override
@@ -1698,9 +1695,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get totalDeliveries => 'Total Deliveries';
 
   @override
-  String get totalRides => 'Total Rides';
-
-  @override
   String get earnings => 'Earnings';
 
   @override
@@ -1797,9 +1791,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get premium => 'Premium';
 
   @override
-  String get rateYourTrip => 'Rate your trip';
-
-  @override
   String get rateDriverPrompt => 'How was your driver?';
 
   @override
@@ -1809,25 +1800,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get submitRating => 'Submit Rating';
 
   @override
-  String get noRidesYet => 'No rides yet';
-
-  @override
-  String get startFirstRide => 'Book your first ride now!';
-
-  @override
-  String get rideHistory => 'Ride History';
-
-  @override
-  String get rideDetails => 'Ride Details';
-
-  @override
   String get pickup => 'Pickup';
 
   @override
   String get dropoff => 'Dropoff';
-
-  @override
-  String get fare => 'Fare';
 
   @override
   String get distance => 'Distance';
@@ -1845,22 +1821,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get driverArriving => 'Driver is arriving';
 
   @override
-  String get inTrip => 'In Trip';
-
-  @override
   String get arrived => 'Arrived';
 
   @override
   String get driverEnRoute => 'Driver is en route';
 
   @override
-  String get shareTrip => 'Share Trip';
-
-  @override
   String get sos => 'SOS';
-
-  @override
-  String get tripShared => 'Trip shared successfully!';
 
   @override
   String get emergencyAlert => 'Emergency Alert';
@@ -1889,12 +1856,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get cancelReasonOther => 'Other reason';
 
   @override
-  String get cancelRide => 'Cancel Ride';
-
-  @override
-  String get keepRide => 'Keep Ride';
-
-  @override
   String get cheapest => 'Cheapest';
 
   @override
@@ -1902,15 +1863,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get luxury => 'Luxury car';
-
-  @override
-  String get chooseRideType => 'Choose a ride type';
-
-  @override
-  String get tripProtected => 'Your trip is protected with SOS coverage';
-
-  @override
-  String get confirmRide => 'Confirm Ride';
 
   @override
   String get enterDestination => 'Enter destination address';
@@ -1923,9 +1875,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get destination => 'Destination';
-
-  @override
-  String get trackRide => 'Track Ride';
 
   @override
   String get matched => 'Driver Matched';
@@ -2043,28 +1992,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get youAreOffline => 'You are offline';
 
   @override
-  String get acceptRide => 'Accept';
-
-  @override
-  String get rejectRide => 'Reject';
-
-  @override
-  String get newRideRequest => 'New ride request';
-
-  @override
-  String get pickupPassenger => 'Pick up passenger';
-
-  @override
-  String get startTrip => 'Start Trip';
-
-  @override
-  String get finishTrip => 'Finish Trip';
-
-  @override
   String get arrivedAtPickup => 'Arrived at pickup';
 
   @override
-  String get waitingForPassenger => 'Waiting for passenger';
+  String get waitingForPassenger => 'Waiting for customer';
 
   @override
   String get enterPickupOtp => 'Enter pickup code';
@@ -2074,12 +2005,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get invalidOtp => 'Invalid code';
-
-  @override
-  String get tripStarted => 'Trip started';
-
-  @override
-  String get tripCompleted => 'Trip completed';
 
   @override
   String get todayEarnings => 'Today';
@@ -2145,12 +2070,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get driverArrived => 'Your driver has arrived';
 
   @override
-  String get onTrip => 'On trip';
-
-  @override
-  String get estimatedFare => 'Estimated fare';
-
-  @override
   String get distanceLabel => 'Distance';
 
   @override
@@ -2158,24 +2077,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get kmShort => 'km';
-
-  @override
-  String get rideEconomy => 'Economy';
-
-  @override
-  String get rideComfort => 'Comfort';
-
-  @override
-  String get ridePremium => 'Premium';
-
-  @override
-  String get rideXL => 'XL';
-
-  @override
-  String get rideMotorbike => 'Motorbike';
-
-  @override
-  String get rideTaxi => 'Taxi';
 
   @override
   String get savedPlaces => 'Saved Places';
@@ -2220,24 +2121,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get codeCopied => 'Code copied!';
 
   @override
-  String get tripReceipt => 'Trip Receipt';
-
-  @override
-  String get baseFare => 'Base fare';
-
-  @override
-  String get distanceFare => 'Distance';
-
-  @override
-  String get timeFare => 'Time';
-
-  @override
-  String get surgeFare => 'Surge';
-
-  @override
-  String get totalFare => 'Total';
-
-  @override
   String get cash => 'Cash';
 
   @override
@@ -2251,9 +2134,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get addTrustedContact => 'Add Trusted Contact';
-
-  @override
-  String get shareLiveTrip => 'Share Live Trip';
 
   @override
   String get emergencySos => 'Emergency SOS';
@@ -2272,21 +2152,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get favoriteDrivers => 'Favorite Drivers';
-
-  @override
-  String get cancelRideConfirm => 'Are you sure you want to cancel?';
-
-  @override
-  String get rideCancelled => 'Ride cancelled';
-
-  @override
-  String get noActiveRide => 'No active ride';
-
-  @override
-  String get requestRide => 'Request Ride';
-
-  @override
-  String get ridePlaceholder => 'Enter destination';
 
   @override
   String daysAgo(Object count) {
@@ -2334,9 +2199,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get pageNotFound => 'Page not found';
 
   @override
-  String get fareBreakdown => 'Fare breakdown';
-
-  @override
   String get driverFound => 'Driver found!';
 
   @override
@@ -2349,9 +2211,6 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get shareCodeWithDriver =>
       'Share this code with your driver at pickup';
-
-  @override
-  String get passengers => 'Passengers';
 
   @override
   String get luggage => 'Luggage';
@@ -2385,12 +2244,6 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get bookAnotherRide => 'Book another ride';
-
-  @override
-  String get tripCancelled => 'Trip cancelled';
-
-  @override
   String get loadingMap => 'Loading map...';
 
   @override
@@ -2402,24 +2255,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String seatsOnly(Object seats) {
     return '$seats seats';
   }
-
-  @override
-  String get rideEconomyDesc => 'Affordable everyday rides';
-
-  @override
-  String get rideComfortDesc => 'Newer cars with extra legroom';
-
-  @override
-  String get ridePremiumDesc => 'Luxury cars, top-rated drivers';
-
-  @override
-  String get rideXLDesc => 'Spacious rides for groups';
-
-  @override
-  String get rideMotorbikeDesc => 'Fast and cheap for one';
-
-  @override
-  String get rideTaxiDesc => 'Metered street taxis';
 
   @override
   String get documents => 'Documents';
@@ -2437,22 +2272,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get arrive => 'Arrive';
 
   @override
-  String get ratePassenger => 'Rate passenger';
-
-  @override
   String get incomingRequest => 'Incoming ride request';
 
   @override
   String get estimatedEarnings => 'Estimated earnings';
-
-  @override
-  String get driverRides => 'Ride requests';
-
-  @override
-  String get activeTrip => 'Active trip';
-
-  @override
-  String get todayRides => 'Today\'s rides';
 
   @override
   String get acceptanceRate => 'Acceptance rate';
@@ -2473,7 +2296,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get earningsCredited => 'Earnings credited';
 
   @override
-  String get waitingForRides => 'Waiting for ride requests';
+  String get waitingForRides => 'Waiting for delivery requests';
 
   @override
   String get goOnlineToReceive => 'Go online to receive ride requests';
@@ -2488,22 +2311,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get confirmArrival => 'I have arrived';
 
   @override
-  String get completeTrip => 'Complete trip';
-
-  @override
-  String get rateThePassenger => 'Rate the passenger';
-
-  @override
-  String get noActiveTrip => 'No active trip';
-
-  @override
   String get away => 'away';
-
-  @override
-  String get callPassenger => 'Call passenger';
-
-  @override
-  String get registerAsRideDriver => 'Register as a ride driver';
 
   @override
   String get plateNumber => 'Plate number';
@@ -2521,7 +2329,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get withdrawalMethod => 'Withdrawal method';
 
   @override
-  String get minimumFareNotMet => 'Minimum amount not met';
+  String get minimumFareNotMet => 'Minimum delivery amount not met';
 
   @override
   String get amountExceedsBalance => 'Amount exceeds balance';
@@ -2546,9 +2354,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get adjustment => 'Adjustment';
-
-  @override
-  String get rideNoLongerAvailable => 'This ride is no longer available';
 
   @override
   String get driverBusy => 'You already have an active trip';
@@ -2729,12 +2534,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get totalWithdrawn => 'Total Withdrawn';
 
   @override
-  String get completedTrips => 'Completed Trips';
-
-  @override
-  String get cancelledTrips => 'Cancelled Trips';
-
-  @override
   String get cancellationRate => 'Cancellation Rate';
 
   @override
@@ -2905,13 +2704,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get tripSharing => 'Trip Sharing';
 
   @override
-  String get autoShareTrip => 'Auto Share Trip';
-
-  @override
-  String get autoShareTripDescription =>
-      'Automatically share trip with trusted contacts';
-
-  @override
   String get shareDuration => 'Share Duration';
 
   @override
@@ -2977,13 +2769,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get relationship => 'Relationship';
-
-  @override
-  String get notifyOnRide => 'Notify on ride';
-
-  @override
-  String get notifyOnRideDescription =>
-      'Get notified when this contact is on a ride';
 
   @override
   String get notificationMethod => 'Notification method';
@@ -3071,43 +2856,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get safetyHubDesc => 'All safety tools and guidelines';
 
   @override
-  String get tripSafetyInstructions => 'Trip Safety Instructions';
-
-  @override
-  String get beforeTrip => 'Before Trip';
-
-  @override
-  String get duringTrip => 'During Trip';
-
-  @override
-  String get afterTrip => 'After Trip';
-
-  @override
-  String get beforeTripInstructions =>
-      'Verify driver name, photo, vehicle plate, and car color before getting in.';
-
-  @override
-  String get duringTripInstructions =>
-      'Share your trip with trusted contacts. Keep your phone charged. If you feel unsafe, use the SOS button immediately.';
-
-  @override
-  String get afterTripInstructions =>
-      'Rate your trip. Report any issues. Check your belongings before leaving the vehicle.';
-
-  @override
   String get driverInstructions => 'Driver Guidelines';
 
   @override
   String get driverBeforeTrip =>
-      'Verify passenger identity. Check the OTP code. Confirm the destination.';
-
-  @override
-  String get driverDuringTrip =>
-      'Follow the GPS route. Drive safely. Do not make unauthorized stops.';
+      'Verify the OTP code. Confirm the destination.';
 
   @override
   String get driverAfterTrip =>
-      'Wait for passenger to exit safely. Check for left items. End trip in the app.';
+      'Wait for the customer to exit safely. Check for left items. End the trip in the app.';
 
   @override
   String get safetyTools => 'Safety Tools';
@@ -3209,19 +2966,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get searching => 'Searching';
 
   @override
-  String get matchedRide => 'Matched';
-
-  @override
   String get completed => 'Completed';
 
   @override
-  String get rideNumber => 'Ride #';
-
-  @override
   String get assigned => 'Assigned';
-
-  @override
-  String get passenger => 'Passenger';
 
   @override
   String get deliveryManagement => 'Delivery Management';
@@ -3370,7 +3118,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get tosSection5Body =>
-      'Ride and delivery services are provided by independent drivers and merchants. Delwaqty facilitates the connection but is not responsible for the quality, safety, or legality of the services provided. Estimated delivery and arrival times are approximate and not guaranteed. Users must provide accurate pickup and drop-off locations.';
+      'Delivery and service requests are provided by independent drivers and merchants. DelwaQty facilitates the connection but is not responsible for the quality, safety, or legality of the services provided. Estimated delivery and arrival times are approximate and not guaranteed. Users must provide accurate pickup and drop-off locations.';
 
   @override
   String get tosSection6Title => '6. Privacy';
@@ -3574,42 +3322,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get auth => 'Auth';
 
   @override
-  String get rideStatusSearching => 'Searching';
-
-  @override
-  String get rideStatusMatched => 'Matched';
-
-  @override
-  String get rideStatusArrived => 'Arrived';
-
-  @override
-  String get rideStatusInTrip => 'In Trip';
-
-  @override
-  String get rideStatusCompleted => 'Completed';
-
-  @override
-  String get rideStatusCancelled => 'Cancelled';
-
-  @override
-  String get rideTypeEconomy => 'Economy';
-
-  @override
-  String get rideTypeComfort => 'Comfort';
-
-  @override
-  String get rideTypePremium => 'Premium';
-
-  @override
-  String get rideTypeXl => 'XL';
-
-  @override
-  String get rideTypeMotorbike => 'Motorbike';
-
-  @override
-  String get rideTypeTaxi => 'Taxi';
-
-  @override
   String get roleOwner => 'Owner';
 
   @override
@@ -3752,12 +3464,6 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get locationPrivacyNote =>
       'Your location data is encrypted and only used to provide delivery and ride services.';
-
-  @override
-  String get rideUpdates => 'Ride Updates';
-
-  @override
-  String get rideUpdatesDescription => 'Get notified about ride status changes';
 
   @override
   String get deliveryUpdates => 'Delivery Updates';
@@ -4830,9 +4536,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get kpiTotalOrders => 'Total orders';
 
   @override
-  String get kpiActiveRides => 'Active rides';
-
-  @override
   String get kpiOpenComplaints => 'Open complaints';
 
   @override
@@ -4869,7 +4572,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get revenuePlatformCommission => 'Platform commission';
 
   @override
-  String get revenueRideGmv => 'Rides GMV';
+  String get revenueRideGmv => 'Delivery GMV';
 
   @override
   String get revenueDeliveryGmv => 'Deliveries GMV';
@@ -5210,7 +4913,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String sosRideInfo(Object rideId, Object time) {
-    return 'Ride: $rideId • $time';
+    return 'Delivery: $rideId • $time';
   }
 
   @override
@@ -5966,4 +5669,54 @@ class AppLocalizationsEn extends AppLocalizations {
   String errorOccurred(Object error) {
     return 'Error: $error';
   }
+
+  @override
+  String get todayRides => 'Today\'s Deliveries';
+
+  @override
+  String get noActiveTrip => 'No active delivery';
+
+  @override
+  String get completedTrips => 'Completed Deliveries';
+
+  @override
+  String get kpiActiveRides => 'Active Deliveries';
+
+  @override
+  String get driverDuringTrip => 'During the delivery';
+
+  @override
+  String get beforeTrip => 'Before the Delivery';
+
+  @override
+  String get afterTrip => 'After the Delivery';
+
+  @override
+  String get duringTrip => 'During the Delivery';
+
+  @override
+  String get beforeTripInstructions =>
+      'Confirm the pickup address. Check the order items.';
+
+  @override
+  String get afterTripInstructions =>
+      'Confirm delivery completion. Collect feedback.';
+
+  @override
+  String get duringTripInstructions =>
+      'Follow the route. Keep the customer updated.';
+
+  @override
+  String get notifyOnRide => 'Notify on Delivery';
+
+  @override
+  String get notifyOnRideDescription =>
+      'Alert trusted contacts when a delivery starts';
+
+  @override
+  String get autoShareTrip => 'Auto-share Delivery';
+
+  @override
+  String get autoShareTripDescription =>
+      'Automatically share live delivery with trusted contacts';
 }

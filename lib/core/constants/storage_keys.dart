@@ -10,7 +10,6 @@ abstract final class StorageKeys {
   static const String shareWithDrivers = 'share_with_drivers';
   static const String shareWithMerchants = 'share_with_merchants';
   static const String backgroundLocation = 'background_location';
-  static const String rideUpdates = 'ride_updates';
   static const String deliveryUpdates = 'delivery_updates';
   static const String promotions = 'promotions';
   static const String securityAlerts = 'security_alerts';

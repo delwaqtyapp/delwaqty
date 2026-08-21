@@ -12,7 +12,6 @@ class NotificationPreferencesPage extends StatefulWidget {
 
 class _NotificationPreferencesPageState extends State<NotificationPreferencesPage> {
   late final SharedPreferences _prefs;
-  bool _rideUpdates = true;
   bool _deliveryUpdates = true;
   bool _promotions = false;
   bool _securityAlerts = true;
@@ -26,7 +25,6 @@ class _NotificationPreferencesPageState extends State<NotificationPreferencesPag
 
   Future<void> _initPrefs() async {
     _prefs = await SharedPreferences.getInstance();
-    _rideUpdates = _prefs.getBool(StorageKeys.rideUpdates) ?? true;
     _deliveryUpdates = _prefs.getBool(StorageKeys.deliveryUpdates) ?? true;
     _promotions = _prefs.getBool(StorageKeys.promotions) ?? false;
     _securityAlerts = _prefs.getBool(StorageKeys.securityAlerts) ?? true;
@@ -48,17 +46,6 @@ class _NotificationPreferencesPageState extends State<NotificationPreferencesPag
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          SwitchListTile(
-            secondary: const Icon(Icons.directions_car_outlined),
-            title: Text(l10n.rideUpdates),
-            subtitle: Text(l10n.rideUpdatesDescription),
-            value: _rideUpdates,
-            onChanged: (v) async {
-              setState(() => _rideUpdates = v);
-              await _prefs.setBool(StorageKeys.rideUpdates, v);
-            },
-          ),
-          const Divider(height: 1),
           SwitchListTile(
             secondary: const Icon(Icons.local_shipping_outlined),
             title: Text(l10n.deliveryUpdates),

@@ -7,7 +7,6 @@ abstract class AdminRepository {
   Future<List<DriverModel>> getAllDrivers({String? search, String? status});
   Future<void> verifyDriver({required String driverId, required bool isVerified});
   Future<void> updateDriverStatus({required String driverId, required bool isActive});
-  Future<List<RideModel>> getRecentRides({int limit = 20, String? status});
   Future<List<DeliveryModel>> getRecentDeliveries({int limit = 20, String? serviceType});
   Future<List<Map<String, dynamic>>> getPeakHours();
   Future<List<Map<String, dynamic>>> getTopMerchants({int limit = 10});

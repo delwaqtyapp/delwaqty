@@ -12,7 +12,6 @@ import 'package:delwaqty/features/customer/restaurant/restaurant_module.dart';
 import 'package:delwaqty/features/customer/merchant/merchant_module.dart';
 import 'package:delwaqty/features/customer/wallet/wallet_module.dart';
 import 'package:delwaqty/features/customer/driver/driver_module.dart';
-import 'package:delwaqty/features/customer/ride/ride_module.dart';
 import 'package:delwaqty/features/customer/delivery/delivery_module.dart';
 import 'package:delwaqty/features/customer/safety/safety_module.dart';
 import 'package:delwaqty/features/customer/search/search_module.dart';
@@ -37,7 +36,6 @@ void registerAllModules() {
     MerchantModule(),
     WalletModule(),
     DriverModule(),
-    RideModule(),
     DirectDeliveryModule(),
     SettingsModule(),
     ProfileModule(),

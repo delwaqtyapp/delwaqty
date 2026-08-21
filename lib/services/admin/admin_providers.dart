@@ -101,14 +101,6 @@ final allDriversProvider =
   return adminService.getAllDrivers(search: search);
 });
 
-// ─── Recent Rides ──────────────────────────────────────────
-
-final recentRidesProvider =
-    FutureProvider.family<List<RideModel>, String?>((ref, status) async {
-  final adminService = ref.watch(adminServiceProvider);
-  return adminService.getRecentRides(status: status);
-});
-
 // ─── Recent Deliveries ─────────────────────────────────────
 
 final recentDeliveriesProvider =

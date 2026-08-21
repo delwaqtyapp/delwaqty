@@ -452,14 +452,6 @@ class _ActionGrid extends StatelessWidget {
           children: [
             Expanded(
               child: _ActionCard(
-                icon: Icons.local_taxi_rounded,
-                label: l10n.driverRides,
-                onTap: () => context.push('/driver/rides'),
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: _ActionCard(
                 icon: Icons.account_balance_wallet_rounded,
                 label: l10n.wallet,
                 onTap: () => context.push('/driver/earnings'),

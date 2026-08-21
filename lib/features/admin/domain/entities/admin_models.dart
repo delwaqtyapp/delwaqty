@@ -124,34 +124,6 @@ class DriverModel with _$DriverModel {
       _$DriverModelFromJson(json);
 }
 
-// ─── Ride Model ────────────────────────────────────────────
-
-@freezed
-class RideModel with _$RideModel {
-  const factory RideModel({
-    required String id,
-    String? userId,
-    String? driverId,
-    @Default('ride') String serviceType,
-    required String status,
-    required double pickupLatitude,
-    required double pickupLongitude,
-    required double dropoffLatitude,
-    required double dropoffLongitude,
-    double? fare,
-    double? distanceKm,
-    int? durationMinutes,
-    @Default(false) bool isScheduled,
-    DateTime? scheduledTime,
-    @Default('cash') String paymentMethod,
-    required DateTime createdAt,
-    DateTime? completedAt,
-  }) = _RideModel;
-
-  factory RideModel.fromJson(Map<String, dynamic> json) =>
-      _$RideModelFromJson(json);
-}
-
 // ─── Delivery Model ────────────────────────────────────────
 // Deliveries use the rides table with service_type != 'ride'
 

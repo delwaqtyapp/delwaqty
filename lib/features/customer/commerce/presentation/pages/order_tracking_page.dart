@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:delwaqty/features/customer/commerce/commerce_module.dart';
@@ -667,7 +667,7 @@ class _DriverSection extends StatelessWidget {
                         ),
                         const SizedBox(height: 2),
                         Text(
-                          'â€¢â€¢â€¢ 4521',
+                          '••• 4521',
                           style: textTheme.bodySmall?.copyWith(
                             color: colorScheme.onSurface.withValues(alpha: 0.5),
                           ),

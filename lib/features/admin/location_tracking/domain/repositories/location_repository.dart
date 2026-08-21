@@ -1,4 +1,4 @@
-﻿import 'package:delwaqty/features/admin/location_tracking/domain/entities/location_update.dart';
+import 'package:delwaqty/features/admin/location_tracking/domain/entities/location_update.dart';
 
 abstract class LocationRepository {
   Future<List<LocationUpdate>> getUserLocations(String userId, {int limit = 50});

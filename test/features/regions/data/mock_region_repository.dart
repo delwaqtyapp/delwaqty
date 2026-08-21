@@ -1,4 +1,4 @@
-﻿import 'package:delwaqty/features/_shared/regions/domain/entities/region.dart';
+import 'package:delwaqty/features/_shared/regions/domain/entities/region.dart';
 import 'package:delwaqty/features/_shared/regions/domain/entities/geo_entity.dart';
 import 'package:delwaqty/features/_shared/regions/domain/entities/spatial_resolution.dart';
 import 'package:delwaqty/features/_shared/regions/domain/repositories/region_repository.dart';

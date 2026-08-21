@@ -1,4 +1,4 @@
-﻿import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:delwaqty/features/_shared/regions/data/datasources/remote/supabase_region_data_source.dart';
 import 'package:delwaqty/features/_shared/regions/data/repositories/region_repository_impl.dart';
@@ -15,7 +15,7 @@ void main() {
     id: 'r-cairo',
     code: 'EG-C',
     type: RegionType.governorate,
-    nameAr: 'Ø§Ù„Ù‚Ø§Ù‡Ø±Ø©',
+    nameAr: 'القاهرة',
     nameEn: 'Cairo',
     createdAt: now,
   );
@@ -23,7 +23,7 @@ void main() {
     id: 'r-giza',
     code: 'EG-GZ',
     type: RegionType.governorate,
-    nameAr: 'Ø§Ù„Ø¬ÙŠØ²Ø©',
+    nameAr: 'الجيزة',
     nameEn: 'Giza',
     createdAt: now,
   );

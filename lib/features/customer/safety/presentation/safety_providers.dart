@@ -1,4 +1,4 @@
-﻿import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:delwaqty/features/customer/safety/domain/repositories/safety_repository.dart';
 import 'package:delwaqty/features/customer/safety/data/datasources/remote/supabase_safety_data_source.dart';

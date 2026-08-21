@@ -1,4 +1,4 @@
-﻿import 'package:delwaqty/features/customer/driver/domain/entities/driver_stats.dart';
+import 'package:delwaqty/features/customer/driver/domain/entities/driver_stats.dart';
 import 'package:delwaqty/features/customer/driver/domain/entities/ride_offer.dart';
 import 'package:delwaqty/features/customer/ride/domain/entities/ride.dart';
 

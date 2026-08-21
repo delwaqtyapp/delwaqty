@@ -79,7 +79,7 @@ BEGIN
     'total_merchants',     (SELECT count(*) FROM merchants),
     'active_merchants',    (SELECT count(*) FROM merchants WHERE status = 'active'),
     'merchants_by_type',   (
-      SELECT COALESCE(jsonb_agg(jsonb_build_object('type', t, 'count', c)), '[]'::jsonb)
+      SELECT COALESCE(jsonb_agg(jsonb_build_object('type', type, 'count', c)), '[]'::jsonb)
       FROM (SELECT type, count(*) as c FROM merchants GROUP BY type) sub
     ),
 
@@ -142,9 +142,8 @@ BEGIN
     'payment_failures',    (SELECT count(*) FROM payment_transactions WHERE status = 'failed' AND created_at >= v_from AND created_at <= v_to),
 
     -- Period
-    'date_from', v_from,
-    'date_to',   v_to
-  ) INTO v_result;
+    'date_from', v_from
+  ) || jsonb_build_object('date_to', v_to) INTO v_result;
 
   RETURN v_result;
 END;

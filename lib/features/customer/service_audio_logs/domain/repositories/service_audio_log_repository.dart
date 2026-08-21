@@ -1,4 +1,4 @@
-﻿import 'package:delwaqty/features/customer/service_audio_logs/domain/entities/service_audio_log.dart';
+import 'package:delwaqty/features/customer/service_audio_logs/domain/entities/service_audio_log.dart';
 
 abstract interface class ServiceAudioLogRepository {
   Future<List<ServiceAudioLog>> getLogsForUser(String userId);

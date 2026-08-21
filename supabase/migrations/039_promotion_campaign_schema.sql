@@ -1,7 +1,7 @@
 -- ============================================================
 -- 039_promotion_campaign_schema.sql
 -- Phase 2 Promotion/Content/Campaign platform — migration 039
--- (owner O1–O6 approved; ADR-059; PHASE_2_PROMOTION_IMPLEMENTATION_PLAN.md §13)
+-- (owner O1�O6 approved; ADR-059; PHASE_2_PROMOTION_IMPLEMENTATION_PLAN.md �13)
 --
 -- Scope (core campaign domain — schema + RLS + validators ONLY):
 --   1. campaigns             — the single promotion/content container

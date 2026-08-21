@@ -1,7 +1,7 @@
 -- ============================================================
 -- 035_member_management_moderation_deletion.sql
 -- Phase 2.3 — Member management: moderation + deletion + profile (2.3C / D3/D4,
--- docs/HANDOFF/PHASE_2_3_DECISION_LOCK_REPORT.md §035, §8/§9/§15/§16/§22/§23
+-- docs/HANDOFF/PHASE_2_3_DECISION_LOCK_REPORT.md �035, �8/�9/�15/�16/�22/�23
 -- of the master member-management/support audit).
 --
 -- Scope (locked design):
@@ -12,7 +12,7 @@
 --      RPCs (current_user = postgres/service_role) are exempt. This also closes
 --      the users_update_admin direct-UPDATE role-escalation gap (admin could
 --      previously UPDATE any user's role via RLS with no WITH CHECK).
---   3. member_events — §15 timeline/audit trail (21-type CHECK vocabulary),
+--   3. member_events � �15 timeline/audit trail (21-type CHECK vocabulary),
 --      customer-safe own-read RLS + admin timeline RLS (has_permission + region).
 --   4. sanctions additive columns (approving_admin_id, evidence_url,
 --      action_status) + additive target_role vocabulary ('delivery') + composite
@@ -22,7 +22,7 @@
 --      are the only writers.
 --   6. Sanction matrix: warning/fine → restricted, suspension → suspended,
 --      temporary_ban/permanent_ban → banned. Approval-gated (M3):
---      temporary_ban + permanent_ban (also MEMBER_BAN grant-only, §6). Direct:
+--      temporary_ban + permanent_ban (also MEMBER_BAN grant-only, �6). Direct:
 --      warning/fine/suspension.
 --   7. Approval Center dispatch extended with member_ban + member_delete
 --      (decider executes the SAME executors as the direct RPCs; _valid_approval_type
@@ -113,7 +113,7 @@ CREATE TRIGGER users_guard_account_fields
   FOR EACH ROW
   EXECUTE FUNCTION public.users_guard_account_fields();
 
--- ─── 3. MEMBER EVENTS (timeline / audit trail, §15) ────────────────────
+-- --- 3. MEMBER EVENTS (timeline / audit trail, �15) --------------------
 
 -- Member's canonical region (user_region_preferences, latest wins). Used by RLS
 -- and the moderation RPCs for geographic scope. Defined before the member_events
@@ -754,7 +754,7 @@ BEGIN
 END;
 $$;
 
--- Permission-sectioned admin aggregate (no raw rows, §24). A section is
+-- Permission-sectioned admin aggregate (no raw rows, �24). A section is
 -- included ONLY when the viewer holds its permission + region scope.
 CREATE OR REPLACE FUNCTION public.get_member_profile(p_member_id uuid)
 RETURNS jsonb

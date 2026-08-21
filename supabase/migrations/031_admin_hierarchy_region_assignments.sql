@@ -3,7 +3,7 @@
 -- Phase 2.2 — Admin hierarchy unification + region authorization
 -- (D1 resolution, ADR-055 / ADR-056).
 --
--- Scope (approved design, docs/HANDOFF/28 §4.5):
+-- Scope (approved design, docs/HANDOFF/28 �4.5):
 --   1. Connect, not fork: admin_users gains a user_id FK to the canonical
 --      public.users identity (legacy metadata stays dormant; never an authz
 --      source).

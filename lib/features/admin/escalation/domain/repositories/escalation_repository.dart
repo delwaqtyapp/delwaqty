@@ -1,4 +1,4 @@
-﻿import 'package:delwaqty/features/admin/escalation/domain/entities/escalation_event.dart';
+import 'package:delwaqty/features/admin/escalation/domain/entities/escalation_event.dart';
 
 abstract class EscalationRepository {
   Future<void> escalateComplaint({

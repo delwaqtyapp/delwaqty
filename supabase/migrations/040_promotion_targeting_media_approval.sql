@@ -1,7 +1,7 @@
 -- ============================================================
 -- 040_promotion_targeting_media_approval.sql
 -- Phase 2 Promotion/Content/Campaign platform — migration 040
--- (owner authorized after 039 gate 🟢; ADR-059; PHASE_2_PROMOTION_IMPLEMENTATION_PLAN.md §3/§5/§6/§7)
+-- (owner authorized after 039 gate ??; ADR-059; PHASE_2_PROMOTION_IMPLEMENTATION_PLAN.md �3/�5/�6/�7)
 --
 -- Scope (targeting + audience + approval + lifecycle + media):
 --   1. campaign_targets    — normalized many-to-many region targeting
@@ -9,7 +9,7 @@
 --      regional admin scope enforced server-side; owner global).
 --   2. audience            — campaigns.target_roles array (039) validated via
 --      campaign_validate_target_roles; no new table (minimal + sufficient).
---   3. approval_requests   — the ONE generic Approval Center (2.3 §19 contract,
+--   3. approval_requests   � the ONE generic Approval Center (2.3 �19 contract,
 --      created verbatim here; 2.3's 034 is amended to not recreate it).
 --   4. campaign lifecycle RPCs — minimum secure API (submit / decide /
 --      publish / pause / resume / archive / cancel / purge_media) + scope
@@ -98,7 +98,7 @@ CREATE TRIGGER campaign_media_set_updated_at
   FOR EACH ROW
   EXECUTE FUNCTION public.set_updated_at();
 
--- ─── 3. approval_requests (generic Approval Center, 2.3 §19 verbatim) ────
+-- --- 3. approval_requests (generic Approval Center, 2.3 �19 verbatim) ----
 
 CREATE TABLE IF NOT EXISTS public.approval_requests (
   id               uuid PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -347,7 +347,7 @@ BEGIN
 END;
 $$;
 
--- DECIDE: the single approval-center decision RPC (2.3 §19 signature).
+-- DECIDE: the single approval-center decision RPC (2.3 �19 signature).
 -- Dispatches request_type='campaign_approve'. Self-approval blocked unless the
 -- requester is the owner. Rejection requires a reason. Decider must have
 -- authority over the campaign's targets (cross-region approval blocked).

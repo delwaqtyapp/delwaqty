@@ -1,4 +1,4 @@
-﻿import 'package:delwaqty/features/customer/ride/domain/entities/ride.dart';
+import 'package:delwaqty/features/customer/ride/domain/entities/ride.dart';
 
 class RideOffer {
   const RideOffer({

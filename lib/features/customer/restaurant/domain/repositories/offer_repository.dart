@@ -1,4 +1,4 @@
-﻿import 'package:delwaqty/features/customer/restaurant/domain/entities/offer.dart';
+import 'package:delwaqty/features/customer/restaurant/domain/entities/offer.dart';
 
 abstract interface class OfferRepository {
   Future<List<Offer>> getOffers(String merchantId);

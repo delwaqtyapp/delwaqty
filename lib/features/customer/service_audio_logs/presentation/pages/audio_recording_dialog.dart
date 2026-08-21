@@ -1,4 +1,4 @@
-﻿import 'dart:async';
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -126,7 +126,7 @@ class _AudioRecordingDialogState extends ConsumerState<AudioRecordingDialog>
               setState(() => _consented = true);
               _startRecording();
             },
-            child: const Text('Ù…ÙˆØ§ÙÙ‚'),
+            child: const Text('موافق'),
           ),
         ],
       );

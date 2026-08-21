@@ -1,4 +1,4 @@
-﻿import 'package:delwaqty/features/customer/search/domain/entities/geo_point.dart';
+import 'package:delwaqty/features/customer/search/domain/entities/geo_point.dart';
 import 'package:delwaqty/features/customer/search/domain/entities/place_details.dart';
 import 'package:delwaqty/features/customer/search/domain/entities/place_suggestion.dart';
 import 'package:delwaqty/features/customer/search/domain/entities/recent_search.dart';

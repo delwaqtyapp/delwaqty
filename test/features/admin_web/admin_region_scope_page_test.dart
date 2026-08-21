@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:delwaqty/features/admin/domain/entities/admin_region_assignment.dart';
@@ -13,7 +13,7 @@ void main() {
     id: 'r1',
     code: 'EG-CAI',
     type: RegionType.governorate,
-    nameAr: 'Ø§Ù„Ù‚Ø§Ù‡Ø±Ø©',
+    nameAr: 'القاهرة',
     nameEn: 'Cairo',
     createdAt: now,
   );
@@ -21,7 +21,7 @@ void main() {
     id: 'r2',
     code: 'EG-ALX',
     type: RegionType.governorate,
-    nameAr: 'Ø§Ù„Ø¥Ø³ÙƒÙ†Ø¯Ø±ÙŠØ©',
+    nameAr: 'الإسكندرية',
     nameEn: 'Alexandria',
     createdAt: now,
   );
@@ -123,7 +123,7 @@ void main() {
     await tester.tap(find.text('Owner One'));
     await tester.pumpAndSettle();
 
-    expect(find.text('No assignments â€” admin is global'), findsOneWidget);
+    expect(find.text('No assignments — admin is global'), findsOneWidget);
   });
 
   testWidgets('adds a new assignment via the form', (tester) async {

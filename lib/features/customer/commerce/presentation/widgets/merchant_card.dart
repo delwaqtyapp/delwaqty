@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:delwaqty/features/customer/commerce/domain/entities/merchant.dart';
 import 'package:delwaqty/features/customer/commerce/domain/entities/favorite.dart';
 import 'package:delwaqty/features/customer/commerce/presentation/widgets/favorite_button.dart';

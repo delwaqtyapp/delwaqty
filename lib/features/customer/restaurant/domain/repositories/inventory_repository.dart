@@ -1,4 +1,4 @@
-﻿import 'package:delwaqty/features/customer/restaurant/domain/entities/product_inventory.dart';
+import 'package:delwaqty/features/customer/restaurant/domain/entities/product_inventory.dart';
 
 abstract interface class InventoryRepository {
   Future<ProductInventory?> getInventory(String productId);

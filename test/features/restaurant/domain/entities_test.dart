@@ -1,4 +1,4 @@
-﻿import 'package:delwaqty/features/customer/restaurant/domain/entities/branch.dart';
+import 'package:delwaqty/features/customer/restaurant/domain/entities/branch.dart';
 import 'package:delwaqty/features/customer/restaurant/domain/entities/delivery_zone.dart';
 import 'package:delwaqty/features/customer/restaurant/domain/entities/offer.dart';
 import 'package:delwaqty/features/customer/restaurant/domain/entities/order_tracking.dart';

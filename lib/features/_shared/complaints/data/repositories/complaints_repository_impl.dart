@@ -1,4 +1,4 @@
-﻿import 'package:delwaqty/features/_shared/complaints/domain/entities/complaint.dart';
+import 'package:delwaqty/features/_shared/complaints/domain/entities/complaint.dart';
 import 'package:delwaqty/features/_shared/complaints/domain/repositories/complaints_repository.dart';
 import 'package:delwaqty/features/_shared/complaints/data/datasources/remote/supabase_complaints_data_source.dart';
 

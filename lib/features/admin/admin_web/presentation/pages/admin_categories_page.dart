@@ -1,4 +1,4 @@
-﻿import 'dart:typed_data';
+import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -350,7 +350,7 @@ class _AdminCategoriesPageState extends ConsumerState<AdminCategoriesPage> {
                       ),
                       columns: const [
                         DataColumn(label: Text('Image')),
-                        DataColumn(label: Text('Ø§Ù„Ø§Ø³Ù… (AR)')),
+                        DataColumn(label: Text('الاسم (AR)')),
                         DataColumn(label: Text('Name (EN)')),
                         DataColumn(label: Text('Order')),
                         DataColumn(label: Text('Active')),
@@ -812,8 +812,8 @@ class _CategoryDialogState extends State<_CategoryDialog> {
                 controller: _nameArController,
                 textDirection: TextDirection.rtl,
                 decoration: InputDecoration(
-                  labelText: 'Ø§Ù„Ø§Ø³Ù… Ø¨Ø§Ù„Ø¹Ø±Ø¨ÙŠ',
-                  hintText: 'Ø§Ø³Ù… Ø§Ù„ØªØµÙ†ÙŠÙ',
+                  labelText: 'الاسم بالعربي',
+                  hintText: 'اسم التصنيف',
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),

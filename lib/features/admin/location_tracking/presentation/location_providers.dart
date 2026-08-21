@@ -1,4 +1,4 @@
-﻿import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:delwaqty/features/admin/location_tracking/domain/entities/location_update.dart';
 import 'package:delwaqty/features/admin/location_tracking/domain/repositories/location_repository.dart';

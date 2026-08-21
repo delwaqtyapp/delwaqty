@@ -1,4 +1,4 @@
-﻿import 'package:delwaqty/features/customer/commerce/domain/entities/product.dart';
+import 'package:delwaqty/features/customer/commerce/domain/entities/product.dart';
 
 abstract interface class ProductRepository {
   Future<List<Product>> getProducts({

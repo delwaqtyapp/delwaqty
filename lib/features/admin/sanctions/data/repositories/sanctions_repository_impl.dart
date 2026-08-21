@@ -1,4 +1,4 @@
-﻿import 'package:delwaqty/core/errors/exceptions.dart';
+import 'package:delwaqty/core/errors/exceptions.dart';
 import 'package:delwaqty/features/admin/sanctions/domain/entities/sanction.dart';
 import 'package:delwaqty/features/admin/sanctions/domain/repositories/sanctions_repository.dart';
 import 'package:delwaqty/features/admin/sanctions/data/datasources/remote/supabase_sanctions_data_source.dart';

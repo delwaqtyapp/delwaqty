@@ -1,4 +1,4 @@
-﻿import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:delwaqty/features/admin/sanctions/domain/entities/sanction.dart';
 
 class SupabaseSanctionsDataSource {

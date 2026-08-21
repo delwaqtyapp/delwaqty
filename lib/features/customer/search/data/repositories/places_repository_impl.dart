@@ -1,4 +1,4 @@
-﻿import 'package:delwaqty/features/customer/search/data/cache/ttl_cache.dart';
+import 'package:delwaqty/features/customer/search/data/cache/ttl_cache.dart';
 import 'package:delwaqty/features/customer/search/data/datasources/local/recent_searches_store.dart';
 import 'package:delwaqty/features/customer/search/data/datasources/remote/supabase_saved_places_data_source.dart';
 import 'package:delwaqty/features/customer/search/domain/entities/geo_point.dart';

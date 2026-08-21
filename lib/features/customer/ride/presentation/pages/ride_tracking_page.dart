@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:delwaqty/core/theme/app_colors.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -494,9 +494,9 @@ class _RideTrackingPageState extends ConsumerState<RideTrackingPage>
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
                   _tripStat(context, Icons.straighten_rounded,
-                      '${ride.distance?.toStringAsFixed(1) ?? 'â€”'} ${l10n.kmUnit}'),
+                      '${ride.distance?.toStringAsFixed(1) ?? '—'} ${l10n.kmUnit}'),
                   _tripStat(context, Icons.schedule_rounded,
-                      '${ride.estimatedMinutes ?? 'â€”'} ${l10n.minutesShort}'),
+                      '${ride.estimatedMinutes ?? '—'} ${l10n.minutesShort}'),
                   _tripStat(context, Icons.payments_rounded,
                       _money(context, ride.fare ?? 0)),
                 ],

@@ -1,4 +1,4 @@
-﻿import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:delwaqty/core/localization/locale_provider.dart';
 import 'package:delwaqty/features/_shared/campaigns/domain/entities/campaign.dart';
 import 'package:delwaqty/features/_shared/campaigns/domain/repositories/campaign_repository.dart';

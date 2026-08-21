@@ -393,7 +393,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get homeServices => 'Home Services';
 
   @override
-  String get cafe => 'Cafés & Drinks';
+  String get cafe => 'Caf�s & Drinks';
 
   @override
   String get petShop => 'Pet Shops';
@@ -3320,7 +3320,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get typeAppliances => 'Appliances';
 
   @override
-  String get typeCafe => 'Café';
+  String get typeCafe => 'Caf�';
 
   @override
   String get typePetShop => 'Pet Shop';
@@ -3712,7 +3712,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'This action cannot be undone. All your data will be permanently deleted.';
 
   @override
-  String get accountDeleted => 'Account deleted successfully';
+  String get accountDeleted => 'Permanently deleted';
 
   @override
   String get dataSharing => 'Data Sharing';
@@ -5517,6 +5517,17 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get memberDeletedSuccessfully => 'Account deleted successfully';
+
+  @override
+  String ownerPermanentDeleteConfirm(Object name) {
+    return 'Member $name will be permanently removed from the platform and cannot return. This cannot be undone.';
+  }
+
+  @override
+  String get profileUpdated => 'Profile updated';
+
+  @override
+  String get verificationDecisionSuccessful => 'Verification decision saved';
 
   @override
   String get adminProfile => 'Admin Profile';

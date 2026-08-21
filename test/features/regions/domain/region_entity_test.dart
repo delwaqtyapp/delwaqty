@@ -1,4 +1,4 @@
-﻿import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter_test/flutter_test.dart';
 import 'package:delwaqty/features/_shared/regions/domain/entities/region.dart';
 
 void main() {
@@ -56,7 +56,7 @@ void main() {
         'parentRegionId': '00000000-0000-0000-0000-000000000001',
         'countryCode': 'EG',
         'type': 'governorate',
-        'nameAr': 'Ø§Ù„Ù‚Ø§Ù‡Ø±Ø©',
+        'nameAr': 'القاهرة',
         'nameEn': 'Cairo',
         'isActive': true,
         'metadata': {'iso3166_2': 'EG-C', 'aliases': ['Al Qahirah']},
@@ -69,7 +69,7 @@ void main() {
       expect(region.parentRegionId, '00000000-0000-0000-0000-000000000001');
       expect(region.countryCode, 'EG');
       expect(region.type, RegionType.governorate);
-      expect(region.nameAr, 'Ø§Ù„Ù‚Ø§Ù‡Ø±Ø©');
+      expect(region.nameAr, 'القاهرة');
       expect(region.nameEn, 'Cairo');
       expect(region.isActive, true);
       expect(region.aliases, ['Al Qahirah']);
@@ -80,7 +80,7 @@ void main() {
         'id': 'r1',
         'code': 'EG-C',
         'type': 'governorate',
-        'nameAr': 'Ø§Ù„Ù‚Ø§Ù‡Ø±Ø©',
+        'nameAr': 'القاهرة',
         'createdAt': now.toIso8601String(),
       });
 
@@ -96,12 +96,12 @@ void main() {
         id: 'r1',
         code: 'EG-C',
         type: RegionType.governorate,
-        nameAr: 'Ø§Ù„Ù‚Ø§Ù‡Ø±Ø©',
+        nameAr: 'القاهرة',
         nameEn: 'Cairo',
         createdAt: now,
       );
 
-      expect(region.displayName('ar'), 'Ø§Ù„Ù‚Ø§Ù‡Ø±Ø©');
+      expect(region.displayName('ar'), 'القاهرة');
       expect(region.displayName('en'), 'Cairo');
     });
 
@@ -110,11 +110,11 @@ void main() {
         id: 'r1',
         code: 'EG-C',
         type: RegionType.governorate,
-        nameAr: 'Ø§Ù„Ù‚Ø§Ù‡Ø±Ø©',
+        nameAr: 'القاهرة',
         createdAt: now,
       );
 
-      expect(region.displayName('en'), 'Ø§Ù„Ù‚Ø§Ù‡Ø±Ø©');
+      expect(region.displayName('en'), 'القاهرة');
     });
   });
 

@@ -1,4 +1,4 @@
-﻿import 'dart:math';
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -270,6 +270,7 @@ class _LoginPageState extends ConsumerState<LoginPage>
     final l10n = AppLocalizations.of(context);
     final authState = ref.watch(authStateProvider);
     final isAdminApp = ref.watch(isAdminAppProvider);
+    final isLoading = authState is AuthLoading;
 
     ref.listen<AuthState>(authStateProvider, (prev, next) {
       next.whenOrNull(
@@ -342,11 +343,16 @@ class _LoginPageState extends ConsumerState<LoginPage>
                         _buildForm(l10n, authState),
                         const SizedBox(height: 24),
                         if (!isAdminApp) ...[
-                          _buildGuestButton(l10n),
-                          const SizedBox(height: 20),
                           _buildRegisterLink(l10n),
+                          const SizedBox(height: 24),
                         ],
-                        const SizedBox(height: 40),
+                        if (_biometricAvailable) ...[
+                          _BiometricButton(
+                            onPressed: isLoading ? null : _authenticateWithBiometric,
+                          ),
+                          const SizedBox(height: 32),
+                        ],
+                        const SizedBox(height: 16),
                       ],
                     ),
                   ),
@@ -623,50 +629,7 @@ class _LoginPageState extends ConsumerState<LoginPage>
             isLoading: isLoading,
             label: l10n.signIn,
           ),
-          if (_biometricAvailable) ...[
-            const SizedBox(height: 16),
-            _BiometricButton(
-              onPressed: _authenticateWithBiometric,
-            ),
-          ],
         ],
-      ),
-    );
-  }
-
-  Widget _buildGuestButton(AppLocalizations l10n) {
-    return SizedBox(
-      width: double.infinity,
-      height: 54,
-      child: OutlinedButton.icon(
-        onPressed: () {
-          ref.read(authStateProvider.notifier).enterGuestMode();
-          context.go('/home');
-        },
-        icon: Icon(
-          Icons.person_outline_rounded,
-          color: const Color(0xFF1A1035).withValues(alpha: 0.5),
-          size: 20,
-        ),
-        label: Text(
-          l10n.continueAsGuest,
-          style: TextStyle(
-            fontSize: 15,
-            fontWeight: FontWeight.w500,
-            color: const Color(0xFF1A1035).withValues(alpha: 0.55),
-            letterSpacing: 0.2,
-          ),
-        ),
-        style: OutlinedButton.styleFrom(
-          side: BorderSide(
-            color: const Color(0xFF1A1035).withValues(alpha: 0.1),
-            width: 1.2,
-          ),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(18),
-          ),
-          padding: const EdgeInsets.symmetric(horizontal: 20),
-        ),
       ),
     );
   }
@@ -948,7 +911,7 @@ class _SavedAccountChip extends StatelessWidget {
 class _BiometricButton extends StatelessWidget {
   const _BiometricButton({required this.onPressed});
 
-  final VoidCallback onPressed;
+  final VoidCallback? onPressed;
 
   @override
   Widget build(BuildContext context) {

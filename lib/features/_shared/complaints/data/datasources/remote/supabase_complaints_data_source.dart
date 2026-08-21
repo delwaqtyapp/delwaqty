@@ -1,4 +1,4 @@
-﻿import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:delwaqty/core/errors/exceptions.dart';
 import 'package:delwaqty/features/_shared/complaints/domain/entities/complaint.dart';
 

@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
@@ -45,15 +45,15 @@ class _ServiceBookingPageState extends ConsumerState<ServiceBookingPage> {
   }
 
   String _categoryName(AppLocalizations l10n) => switch (widget.categoryType) {
-    ServiceCategoryType.plumbing => 'Ø³Ø¨Ø§ÙƒØ©',
-    ServiceCategoryType.electrical => 'ÙƒÙ‡Ø±Ø¨Ø§Ø¡',
-    ServiceCategoryType.carpentry => 'Ù†Ø¬Ø§Ø±Ø©',
-    ServiceCategoryType.acMaintenance => 'ØµÙŠØ§Ù†Ø© ØªÙƒÙŠÙŠÙ',
-    ServiceCategoryType.painting => 'Ø¯Ù‡Ø§Ù†',
-    ServiceCategoryType.cleaning => 'ØªÙ†Ø¸ÙŠÙ',
-    ServiceCategoryType.pestControl => 'Ù…ÙƒØ§ÙØ­Ø© Ø­Ø´Ø±Ø§Øª',
-    ServiceCategoryType.applianceRepair => 'Ø¥ØµÙ„Ø§Ø­ Ø£Ø¬Ù‡Ø²Ø©',
-    ServiceCategoryType.other => 'Ø®Ø¯Ù…Ø§Øª Ø£Ø®Ø±Ù‰',
+    ServiceCategoryType.plumbing => 'سباكة',
+    ServiceCategoryType.electrical => 'كهرباء',
+    ServiceCategoryType.carpentry => 'نجارة',
+    ServiceCategoryType.acMaintenance => 'صيانة تكييف',
+    ServiceCategoryType.painting => 'دهان',
+    ServiceCategoryType.cleaning => 'تنظيف',
+    ServiceCategoryType.pestControl => 'مكافحة حشرات',
+    ServiceCategoryType.applianceRepair => 'إصلاح أجهزة',
+    ServiceCategoryType.other => 'خدمات أخرى',
   };
 
   Future<void> _pickDate() async {
@@ -105,7 +105,7 @@ class _ServiceBookingPageState extends ConsumerState<ServiceBookingPage> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('ØªÙ… Ø¥Ø±Ø³Ø§Ù„ Ø§Ù„Ø­Ø¬Ø² Ø¨Ù†Ø¬Ø§Ø­'),
+            content: Text('تم إرسال الحجز بنجاح'),
             backgroundColor: AppColors.successLight,
           ),
         );
@@ -115,7 +115,7 @@ class _ServiceBookingPageState extends ConsumerState<ServiceBookingPage> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Ø­Ø¯Ø« Ø®Ø·Ø£. Ø­Ø§ÙˆÙ„ Ù…Ø±Ø© Ø£Ø®Ø±Ù‰.'),
+            content: Text('حدث خطأ. حاول مرة أخرى.'),
             backgroundColor: Theme.of(context).colorScheme.error,
           ),
         );
@@ -147,7 +147,7 @@ class _ServiceBookingPageState extends ConsumerState<ServiceBookingPage> {
           children: [
             AnimatedFadeIn(
               child: Text(
-                'Ø§Ø®ØªØ± Ù…Ø²ÙˆØ¯ Ø§Ù„Ø®Ø¯Ù…Ø©',
+                'اختر مزود الخدمة',
                 style: context.textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.w700,
                 ),
@@ -158,15 +158,15 @@ class _ServiceBookingPageState extends ConsumerState<ServiceBookingPage> {
               loading: () => const ShimmerCard(height: 100),
               error: (_, __) => const PremiumEmptyState(
                 icon: Icons.error_outline,
-                title: 'Ø®Ø·Ø£',
-                message: 'ØªØ¹Ø°Ø± ØªØ­Ù…ÙŠÙ„ Ù…Ø²ÙˆØ¯ÙŠ Ø§Ù„Ø®Ø¯Ù…Ø©',
+                title: 'خطأ',
+                message: 'تعذر تحميل مزودي الخدمة',
               ),
               data: (providers) {
                 if (providers.isEmpty) {
                   return const PremiumEmptyState(
                     icon: Icons.person_off_outlined,
-                    title: 'Ù„Ø§ ÙŠÙˆØ¬Ø¯ Ù…Ø²ÙˆØ¯ÙŠÙ†',
-                    message: 'Ù„Ù… ÙŠØªÙ… Ø§Ù„Ø¹Ø«ÙˆØ± Ø¹Ù„Ù‰ Ù…Ø²ÙˆØ¯ÙŠ Ø®Ø¯Ù…Ø© Ù…ØªØ§Ø­ÙŠÙ†',
+                    title: 'لا يوجد مزودين',
+                    message: 'لم يتم العثور على مزودي خدمة متاحين',
                   );
                 }
                 return SizedBox(
@@ -258,7 +258,7 @@ class _ServiceBookingPageState extends ConsumerState<ServiceBookingPage> {
             AnimatedFadeIn(
               delay: const Duration(milliseconds: 100),
               child: Text(
-                'ØªØ§Ø±ÙŠØ® ÙˆÙˆÙ‚Øª Ø§Ù„Ø­Ø¬Ø²',
+                'تاريخ ووقت الحجز',
                 style: context.textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.w700,
                 ),
@@ -291,7 +291,7 @@ class _ServiceBookingPageState extends ConsumerState<ServiceBookingPage> {
             AnimatedFadeIn(
               delay: const Duration(milliseconds: 200),
               child: Text(
-                'ÙˆØµÙ Ø§Ù„Ù…Ø´ÙƒÙ„Ø©',
+                'وصف المشكلة',
                 style: context.textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.w700,
                 ),
@@ -304,7 +304,7 @@ class _ServiceBookingPageState extends ConsumerState<ServiceBookingPage> {
                 controller: _descriptionController,
                 maxLines: 3,
                 decoration: InputDecoration(
-                  hintText: 'Ø§Ø´Ø±Ø­ Ø§Ù„Ù…Ø´ÙƒÙ„Ø© Ø¨Ø§Ù„ØªÙØµÙŠÙ„...',
+                  hintText: 'اشرح المشكلة بالتفصيل...',
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(14),
                   ),
@@ -317,7 +317,7 @@ class _ServiceBookingPageState extends ConsumerState<ServiceBookingPage> {
               child: TextField(
                 controller: _notesController,
                 decoration: InputDecoration(
-                  hintText: 'Ù…Ù„Ø§Ø­Ø¸Ø§Øª Ø¥Ø¶Ø§ÙÙŠØ© (Ø§Ø®ØªÙŠØ§Ø±ÙŠ)',
+                  hintText: 'ملاحظات إضافية (اختياري)',
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(14),
                   ),
@@ -350,7 +350,7 @@ class _ServiceBookingPageState extends ConsumerState<ServiceBookingPage> {
                           ),
                         )
                       : Text(
-                          'ØªØ£ÙƒÙŠØ¯ Ø§Ù„Ø­Ø¬Ø²',
+                          'تأكيد الحجز',
                           style: AppTextStyles.labelLarge.copyWith(
                             color: Colors.white,
                             fontWeight: FontWeight.w700,

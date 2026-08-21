@@ -1,4 +1,4 @@
-﻿import 'package:delwaqty/features/customer/restaurant/domain/entities/reservation.dart';
+import 'package:delwaqty/features/customer/restaurant/domain/entities/reservation.dart';
 
 abstract interface class ReservationRepository {
   Future<List<Reservation>> getReservations(

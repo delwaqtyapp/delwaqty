@@ -1,4 +1,4 @@
-﻿import 'package:delwaqty/features/admin/location_tracking/domain/entities/location_update.dart';
+import 'package:delwaqty/features/admin/location_tracking/domain/entities/location_update.dart';
 import 'package:delwaqty/features/admin/location_tracking/domain/repositories/location_repository.dart';
 import 'package:delwaqty/features/admin/location_tracking/data/datasources/remote/supabase_location_data_source.dart';
 

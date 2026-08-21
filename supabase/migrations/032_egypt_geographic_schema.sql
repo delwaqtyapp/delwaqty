@@ -60,7 +60,7 @@ CREATE INDEX IF NOT EXISTS idx_regions_name_en_trgm
 
 -- ─── 3. GEO_PLACES ──────────────────────────────────────────
 -- Significant named geographic entities only. NEVER an admin unit and
--- NEVER a business directory (ADR-057 §14 gate).
+-- NEVER a business directory (ADR-057 �14 gate).
 CREATE TABLE IF NOT EXISTS public.geo_places (
   id uuid PRIMARY KEY,
   type text NOT NULL CHECK (

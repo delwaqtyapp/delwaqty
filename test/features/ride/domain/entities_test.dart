@@ -1,4 +1,4 @@
-﻿import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter_test/flutter_test.dart';
 import 'package:delwaqty/features/customer/ride/domain/entities/ride.dart';
 
 void main() {

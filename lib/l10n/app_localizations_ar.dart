@@ -3688,7 +3688,7 @@ class AppLocalizationsAr extends AppLocalizations {
       'لا يمكن التراجع عن هذا الإجراء. سيتم حذف جميع بياناتك نهائياً.';
 
   @override
-  String get accountDeleted => 'تم حذف الحساب بنجاح';
+  String get accountDeleted => 'تم الحذف نهائياً';
 
   @override
   String get dataSharing => 'مشاركة البيانات';
@@ -5480,6 +5480,17 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get memberDeletedSuccessfully => 'تم حذف الحساب بنجاح';
+
+  @override
+  String ownerPermanentDeleteConfirm(Object name) {
+    return 'سيتم حذف العضو $name نهائياً من المنصة، ولن يتمكن من العودة. هذا الإجراء لا يمكن التراجع عنه.';
+  }
+
+  @override
+  String get profileUpdated => 'تم تحديث الملف الشخصي';
+
+  @override
+  String get verificationDecisionSuccessful => 'تم اتخاذ قرار التحقق بنجاح';
 
   @override
   String get adminProfile => 'ملف المسؤول';

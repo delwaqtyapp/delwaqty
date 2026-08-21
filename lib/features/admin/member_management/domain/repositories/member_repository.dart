@@ -1,4 +1,4 @@
-﻿import 'package:delwaqty/features/admin/member_management/domain/entities/member.dart';
+import 'package:delwaqty/features/admin/member_management/domain/entities/member.dart';
 
 abstract class MemberRepository {
   Future<List<Member>> listMembers({

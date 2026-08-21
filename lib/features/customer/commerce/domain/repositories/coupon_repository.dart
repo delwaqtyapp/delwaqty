@@ -1,4 +1,4 @@
-﻿import 'package:delwaqty/features/customer/commerce/domain/entities/coupon.dart';
+import 'package:delwaqty/features/customer/commerce/domain/entities/coupon.dart';
 
 abstract interface class CouponRepository {
   Future<List<Coupon>> getAvailableCoupons();

@@ -1,4 +1,4 @@
-﻿import 'package:delwaqty/features/customer/commerce/domain/entities/cart.dart';
+import 'package:delwaqty/features/customer/commerce/domain/entities/cart.dart';
 
 abstract interface class CartRepository {
   Future<Cart?> getCurrentCart();

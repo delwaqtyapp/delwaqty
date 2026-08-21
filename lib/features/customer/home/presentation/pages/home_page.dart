@@ -1,4 +1,4 @@
-﻿import 'dart:async';
+import 'dart:async';
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -90,57 +90,57 @@ Color _merchantTypeColor(MerchantType type) => switch (type) {
 };
 
 String _merchantEmoji(MerchantType type) => switch (type) {
-  MerchantType.restaurant => 'ðŸ½ï¸',
-  MerchantType.grocery => 'ðŸ›’',
-  MerchantType.supermarket => 'ðŸª',
-  MerchantType.fruits => 'ðŸ¥¬',
-  MerchantType.meat => 'ðŸ¥©',
-  MerchantType.seafood => 'ðŸŸ',
-  MerchantType.pharmacy => 'ðŸ’Š',
-  MerchantType.bakery => 'ðŸ¥',
-  MerchantType.sweets => 'ðŸ°',
-  MerchantType.flowers => 'ðŸ’',
-  MerchantType.clothing => 'ðŸ‘”',
-  MerchantType.shoes => 'ðŸ‘Ÿ',
-  MerchantType.electronics => 'ðŸ“±',
-  MerchantType.mobile => 'ðŸ“ž',
-  MerchantType.furniture => 'ðŸ›‹ï¸',
-  MerchantType.fashion => 'ðŸ‘—',
-  MerchantType.appliances => 'ðŸ”Œ',
-  MerchantType.home => 'ðŸ”§',
-  MerchantType.cafe => 'â˜•',
-  MerchantType.petShop => 'ðŸ¾',
-  MerchantType.fitness => 'ðŸ’ª',
-  MerchantType.gas => 'â›½',
-  MerchantType.carwash => 'ðŸš¿',
-  MerchantType.other => 'ðŸª',
+  MerchantType.restaurant => '🍽️',
+  MerchantType.grocery => '🛒',
+  MerchantType.supermarket => '🏪',
+  MerchantType.fruits => '🥬',
+  MerchantType.meat => '🥩',
+  MerchantType.seafood => '🐟',
+  MerchantType.pharmacy => '💊',
+  MerchantType.bakery => '🥐',
+  MerchantType.sweets => '🍰',
+  MerchantType.flowers => '💐',
+  MerchantType.clothing => '👔',
+  MerchantType.shoes => '👟',
+  MerchantType.electronics => '📱',
+  MerchantType.mobile => '📞',
+  MerchantType.furniture => '🛋️',
+  MerchantType.fashion => '👗',
+  MerchantType.appliances => '🔌',
+  MerchantType.home => '🔧',
+  MerchantType.cafe => '☕',
+  MerchantType.petShop => '🐾',
+  MerchantType.fitness => '💪',
+  MerchantType.gas => '⛽',
+  MerchantType.carwash => '🚿',
+  MerchantType.other => '🏪',
 };
 
 MerchantType? _categoryNameToMerchantType(String name) {
   final lower = name.toLowerCase();
-  if (lower.contains('Ù…Ø·Ø¹Ù…') || lower.contains('restaurant')) return MerchantType.restaurant;
-  if (lower.contains('Ø¨Ù‚Ø§Ù„') || lower.contains('grocery')) return MerchantType.grocery;
-  if (lower.contains('Ø³ÙˆØ¨Ø±Ù…Ø§Ø±ÙƒØª') || lower.contains('supermarket')) return MerchantType.supermarket;
-  if (lower.contains('ÙØ§ÙƒÙ‡Ø©') || lower.contains('fruit')) return MerchantType.fruits;
-  if (lower.contains('Ù„Ø­ÙˆÙ…') || lower.contains('meat')) return MerchantType.meat;
-  if (lower.contains('Ø³Ù…Ùƒ') || lower.contains('seafood')) return MerchantType.seafood;
-  if (lower.contains('ØµÙŠØ¯Ù„') || lower.contains('pharmacy')) return MerchantType.pharmacy;
-  if (lower.contains('Ù…Ø®Ø¨') || lower.contains('bakery')) return MerchantType.bakery;
-  if (lower.contains('Ø­Ù„ÙˆÙŠ') || lower.contains('sweet')) return MerchantType.sweets;
-  if (lower.contains('ÙˆØ±ÙˆØ¯') || lower.contains('flower')) return MerchantType.flowers;
-  if (lower.contains('Ù…Ù„Ø§Ø¨Ø³') || lower.contains('clothing')) return MerchantType.clothing;
-  if (lower.contains('Ø§Ø­Ø°ÙŠ') || lower.contains('shoe')) return MerchantType.shoes;
-  if (lower.contains('electronic') || lower.contains('Ø¥Ù„ÙƒØªØ±ÙˆÙ†ÙŠ')) return MerchantType.electronics;
-  if (lower.contains('Ø¬ÙˆØ§Ù„') || lower.contains('mobile') || lower.contains('Ù‡Ø§ØªÙ')) return MerchantType.mobile;
-  if (lower.contains('Ø§Ø«Ø§Ø«') || lower.contains('furniture')) return MerchantType.furniture;
-  if (lower.contains('Ø£Ø²ÙŠØ§Ø¡') || lower.contains('fashion') || lower.contains('mode')) return MerchantType.fashion;
-  if (lower.contains('Ø£Ø¬Ù‡Ø²Ø©') || lower.contains('appliance')) return MerchantType.appliances;
-  if (lower.contains('Ù…Ù†Ø²Ù„') || lower.contains('home')) return MerchantType.home;
-  if (lower.contains('ÙƒØ§ÙÙŠÙ‡') || lower.contains('Ù‚Ù‡ÙˆØ©') || lower.contains('cafe')) return MerchantType.cafe;
-  if (lower.contains('Ø­ÙŠÙˆØ§Ù†') || lower.contains('pet')) return MerchantType.petShop;
-  if (lower.contains('Ù„ÙŠØ§Ù‚Ø©') || lower.contains('fitness')) return MerchantType.fitness;
-  if (lower.contains('Ø¨Ù†Ø²ÙŠÙ†') || lower.contains('gas')) return MerchantType.gas;
-  if (lower.contains('ØºØ³ÙŠÙ„') || lower.contains('carwash')) return MerchantType.carwash;
+  if (lower.contains('مطعم') || lower.contains('restaurant')) return MerchantType.restaurant;
+  if (lower.contains('بقال') || lower.contains('grocery')) return MerchantType.grocery;
+  if (lower.contains('سوبرماركت') || lower.contains('supermarket')) return MerchantType.supermarket;
+  if (lower.contains('فاكهة') || lower.contains('fruit')) return MerchantType.fruits;
+  if (lower.contains('لحوم') || lower.contains('meat')) return MerchantType.meat;
+  if (lower.contains('سمك') || lower.contains('seafood')) return MerchantType.seafood;
+  if (lower.contains('صيدل') || lower.contains('pharmacy')) return MerchantType.pharmacy;
+  if (lower.contains('مخب') || lower.contains('bakery')) return MerchantType.bakery;
+  if (lower.contains('حلوي') || lower.contains('sweet')) return MerchantType.sweets;
+  if (lower.contains('ورود') || lower.contains('flower')) return MerchantType.flowers;
+  if (lower.contains('ملابس') || lower.contains('clothing')) return MerchantType.clothing;
+  if (lower.contains('احذي') || lower.contains('shoe')) return MerchantType.shoes;
+  if (lower.contains('electronic') || lower.contains('إلكتروني')) return MerchantType.electronics;
+  if (lower.contains('جوال') || lower.contains('mobile') || lower.contains('هاتف')) return MerchantType.mobile;
+  if (lower.contains('اثاث') || lower.contains('furniture')) return MerchantType.furniture;
+  if (lower.contains('أزياء') || lower.contains('fashion') || lower.contains('mode')) return MerchantType.fashion;
+  if (lower.contains('أجهزة') || lower.contains('appliance')) return MerchantType.appliances;
+  if (lower.contains('منزل') || lower.contains('home')) return MerchantType.home;
+  if (lower.contains('كافيه') || lower.contains('قهوة') || lower.contains('cafe')) return MerchantType.cafe;
+  if (lower.contains('حيوان') || lower.contains('pet')) return MerchantType.petShop;
+  if (lower.contains('لياقة') || lower.contains('fitness')) return MerchantType.fitness;
+  if (lower.contains('بنزين') || lower.contains('gas')) return MerchantType.gas;
+  if (lower.contains('غسيل') || lower.contains('carwash')) return MerchantType.carwash;
   return null;
 }
 
@@ -318,7 +318,7 @@ class HomePage extends ConsumerWidget {
               children: [
                 Flexible(
                   child: Text(
-                    'Ø§ÙƒØªØ´Ù Ø¨Ø§Ù„Ù‚Ø±Ø¨ Ù…Ù†Ùƒ',
+                    'اكتشف بالقرب منك',
                     style: context.textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.w800,
                       fontSize: 18,
@@ -389,7 +389,7 @@ class _CompactCategories extends StatelessWidget {
                     : AppColors.brandPurple;
                 final emoji = merchantType != null
                     ? _merchantEmoji(merchantType)
-                    : 'ðŸª';
+                    : '🏪';
 
                 return AnimatedFadeIn(
                   delay: Duration(milliseconds: 280 + index * 40),
@@ -478,7 +478,7 @@ class _DiscoveryTabs extends ConsumerStatefulWidget {
 class _DiscoveryTabsState extends ConsumerState<_DiscoveryTabs> {
   int _selectedIndex = 0;
 
-  static const _labels = ['Ø§Ù„Ù‚Ø±ÙŠØ¨Ø©', 'Ù…ÙˆØµÙ‰ Ù„Ùƒ', 'Ø§Ù„Ø£Ø´Ù‡Ø±'];
+  static const _labels = ['القريبة', 'موصى لك', 'الأشهر'];
   static const _modes = [
     DiscoveryMode.nearby,
     DiscoveryMode.recommended,

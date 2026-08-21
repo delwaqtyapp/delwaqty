@@ -1,4 +1,4 @@
-﻿import 'package:delwaqty/features/customer/driver/domain/entities/driver_profile.dart';
+import 'package:delwaqty/features/customer/driver/domain/entities/driver_profile.dart';
 import 'package:delwaqty/features/customer/driver/domain/entities/driver_delivery.dart';
 import 'package:delwaqty/features/customer/driver/domain/entities/vehicle.dart';
 import 'package:delwaqty/features/customer/driver/domain/entities/driver_document.dart';

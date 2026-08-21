@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:delwaqty/features/admin/escalation/presentation/escalation_providers.dart';
 import 'package:delwaqty/features/admin/escalation/domain/entities/escalation_event.dart';
@@ -100,7 +100,7 @@ class _EscalationTile extends StatelessWidget {
               style: const TextStyle(fontWeight: FontWeight.w600),
             ),
             subtitle: Text(
-              '${_scopeLabel(event.previousScope, l10n)} â†’ '
+              '${_scopeLabel(event.previousScope, l10n)} → '
               '${_scopeLabel(event.newScope, l10n)}\n${event.reason}',
             ),
           ),

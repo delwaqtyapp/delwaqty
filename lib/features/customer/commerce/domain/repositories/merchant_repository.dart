@@ -1,4 +1,4 @@
-﻿import 'package:delwaqty/features/customer/commerce/domain/entities/merchant.dart';
+import 'package:delwaqty/features/customer/commerce/domain/entities/merchant.dart';
 import 'package:delwaqty/features/customer/commerce/domain/entities/search_filter.dart';
 
 abstract interface class MerchantRepository {

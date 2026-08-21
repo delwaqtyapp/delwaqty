@@ -3,7 +3,7 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 part 'spatial_resolution.freezed.dart';
 part 'spatial_resolution.g.dart';
 
-/// Confidence of a server-side spatial resolution (ADR-057 §17).
+/// Confidence of a server-side spatial resolution (ADR-057 �17).
 ///   HIGH    point-in-polygon match (or verified centroid refinement)
 ///   MEDIUM  nearest-boundary snap within tolerance
 ///   LOW     nearest governorate centroid fallback

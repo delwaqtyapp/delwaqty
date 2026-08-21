@@ -839,7 +839,7 @@ abstract class AppLocalizations {
   /// No description provided for @cafe.
   ///
   /// In en, this message translates to:
-  /// **'Cafés & Drinks'**
+  /// **'Caf�s & Drinks'**
   String get cafe;
 
   /// No description provided for @petShop.
@@ -6431,7 +6431,7 @@ abstract class AppLocalizations {
   /// No description provided for @typeCafe.
   ///
   /// In en, this message translates to:
-  /// **'Café'**
+  /// **'Caf�'**
   String get typeCafe;
 
   /// No description provided for @typePetShop.
@@ -7157,7 +7157,7 @@ abstract class AppLocalizations {
   /// No description provided for @accountDeleted.
   ///
   /// In en, this message translates to:
-  /// **'Account deleted successfully'**
+  /// **'Permanently deleted'**
   String get accountDeleted;
 
   /// No description provided for @dataSharing.
@@ -10567,6 +10567,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Account deleted successfully'**
   String get memberDeletedSuccessfully;
+
+  /// No description provided for @ownerPermanentDeleteConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Member {name} will be permanently removed from the platform and cannot return. This cannot be undone.'**
+  String ownerPermanentDeleteConfirm(Object name);
+
+  /// No description provided for @profileUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile updated'**
+  String get profileUpdated;
+
+  /// No description provided for @verificationDecisionSuccessful.
+  ///
+  /// In en, this message translates to:
+  /// **'Verification decision saved'**
+  String get verificationDecisionSuccessful;
 
   /// No description provided for @adminProfile.
   ///

@@ -105,7 +105,7 @@ class _ServiceBookingPageState extends ConsumerState<ServiceBookingPage> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('تم إرسال الحجز بنجاح'),
+            content: Text(l10n.bookingSubmitted),
             backgroundColor: AppColors.successLight,
           ),
         );
@@ -115,7 +115,7 @@ class _ServiceBookingPageState extends ConsumerState<ServiceBookingPage> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('حدث خطأ. حاول مرة أخرى.'),
+            content: Text(l10n.bookingErrorRetry),
             backgroundColor: Theme.of(context).colorScheme.error,
           ),
         );

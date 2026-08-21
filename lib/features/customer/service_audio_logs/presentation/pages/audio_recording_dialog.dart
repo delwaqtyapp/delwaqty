@@ -126,7 +126,7 @@ class _AudioRecordingDialogState extends ConsumerState<AudioRecordingDialog>
               setState(() => _consented = true);
               _startRecording();
             },
-            child: const Text('موافق'),
+            child: Text(l10n.ok),
           ),
         ],
       );

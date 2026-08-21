@@ -11281,6 +11281,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Region updated'**
   String get adminMgmtRegionUpdated;
+
+  /// No description provided for @bookingSubmitted.
+  ///
+  /// In en, this message translates to:
+  /// **'Booking submitted successfully'**
+  String get bookingSubmitted;
+
+  /// No description provided for @bookingErrorRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'An error occurred. Please try again.'**
+  String get bookingErrorRetry;
 }
 
 class _AppLocalizationsDelegate

@@ -230,30 +230,6 @@ class SupabaseDeliveryDataSource {
     }));
   }
 
-  // ── Merchant ──
-
-  Future<void> merchantReadyForDispatch(
-      String rideId, String merchantId) async {
-    _checkRpc(await _client.rpc('merchant_ready_for_dispatch', params: {
-      'p_ride_id': rideId,
-      'p_merchant_id': merchantId,
-    }));
-  }
-
-  Future<List<DeliveryOrder>> getMerchantDeliveries(String merchantId,
-      {String? status}) async {
-    final params = <String, dynamic>{
-      'p_merchant_id': merchantId,
-      'p_status': status,
-    };
-    final data =
-        await _client.rpc('get_merchant_deliveries', params: params);
-    return (data as List).map((r) {
-      final row = Map<String, dynamic>.from(r as Map);
-      return _deliveryFromRow(row);
-    }).toList();
-  }
-
   // ── Pricing ──
 
   Future<DeliveryPricingModel> getDeliveryPricing(String serviceType) async {

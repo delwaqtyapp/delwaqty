@@ -36,10 +36,10 @@ class MerchantModule extends FeatureModule {
   IconData? get icon => Icons.store_outlined;
 
   @override
-  bool get isNavModule => false;
+  bool get isNavModule => true;
 
   @override
-  int get navPriority => 80;
+  int get navPriority => 10;
 
   @override
   Set<ModuleCapability> get capabilities => {
@@ -47,51 +47,55 @@ class MerchantModule extends FeatureModule {
   };
 
   @override
-  List<RouteBase> get standaloneRoutes => [
-    GoRoute(
-      path: '/merchant-dashboard',
-      builder: (context, state) => const MerchantDashboardPage(),
+  StatefulShellBranch? buildBranch() {
+    return StatefulShellBranch(
       routes: [
         GoRoute(
-          path: 'orders',
-          builder: (context, state) => const MerchantOrdersPage(),
-        ),
-        GoRoute(
-          path: 'products',
-          builder: (context, state) => const MerchantProductsPage(),
+          path: '/merchant-dashboard',
+          builder: (context, state) => const MerchantDashboardPage(),
           routes: [
             GoRoute(
-              path: 'new',
-              builder: (context, state) =>
-                  const MerchantProductFormPage(),
+              path: 'orders',
+              builder: (context, state) => const MerchantOrdersPage(),
             ),
             GoRoute(
-              path: ':id/edit',
-              builder: (context, state) => MerchantProductFormPage(
-                productId: state.pathParameters['id'],
-              ),
+              path: 'products',
+              builder: (context, state) => const MerchantProductsPage(),
+              routes: [
+                GoRoute(
+                  path: 'new',
+                  builder: (context, state) =>
+                      const MerchantProductFormPage(),
+                ),
+                GoRoute(
+                  path: ':id/edit',
+                  builder: (context, state) => MerchantProductFormPage(
+                    productId: state.pathParameters['id'],
+                  ),
+                ),
+              ],
+            ),
+            GoRoute(
+              path: 'offers',
+              builder: (context, state) => const MerchantOffersPage(),
+            ),
+            GoRoute(
+              path: 'branches',
+              builder: (context, state) => const MerchantBranchesPage(),
+            ),
+            GoRoute(
+              path: 'reservations',
+              builder: (context, state) => const MerchantReservationsPage(),
+            ),
+            GoRoute(
+              path: 'reviews',
+              builder: (context, state) => const MerchantReviewsPage(),
             ),
           ],
         ),
-        GoRoute(
-          path: 'offers',
-          builder: (context, state) => const MerchantOffersPage(),
-        ),
-        GoRoute(
-          path: 'branches',
-          builder: (context, state) => const MerchantBranchesPage(),
-        ),
-        GoRoute(
-          path: 'reservations',
-          builder: (context, state) => const MerchantReservationsPage(),
-        ),
-        GoRoute(
-          path: 'reviews',
-          builder: (context, state) => const MerchantReviewsPage(),
-        ),
       ],
-    ),
-  ];
+    );
+  }
 
   @override
   List<Override> providerOverrides(Ref ref) => [];

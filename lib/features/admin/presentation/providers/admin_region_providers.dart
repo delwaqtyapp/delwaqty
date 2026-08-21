@@ -1,4 +1,4 @@
-﻿import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:delwaqty/features/admin/data/datasources/remote/supabase_admin_region_assignment_data_source.dart';
 import 'package:delwaqty/features/admin/data/repositories/admin_region_assignment_repository_impl.dart';

@@ -4,8 +4,8 @@
 -- escalation + emergency lane + the three live RLS security fixes.
 --
 -- Scope (approved: docs/HANDOFF/PHASE_2_3_DECISION_LOCK_REPORT.md
--- §16-033, PHASE_2_3_MEMBER_MANAGEMENT_SUPPORT_ARCHITECTURE_AUDIT.md
--- §12-14/§21, and 32_PHASE_2_3_SUPPORT_CHAT_PRIORITY_ASSIGNMENT_AUDIT.md):
+-- �16-033, PHASE_2_3_MEMBER_MANAGEMENT_SUPPORT_ARCHITECTURE_AUDIT.md
+-- �12-14/�21, and 32_PHASE_2_3_SUPPORT_CHAT_PRIORITY_ASSIGNMENT_AUDIT.md):
 --   1. chat_rooms: additive columns priority/region_id/assigned_admin_id/
 --      assigned_at/status/escalated_at/escalated_from_admin_id/closed_at
 --      + CHECK constraints + indexes (ADR-051/052: extend, never replace).

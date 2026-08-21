@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:delwaqty/features/customer/ride_booking/ride_booking_theme.dart';
 
 class QuickDestinationCards extends StatelessWidget {

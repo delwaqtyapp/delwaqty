@@ -236,7 +236,7 @@ abstract final class AppColors {
   /// Color representing home services.
   static const Color serviceHome = Color(0xFF4E342E);
 
-  /// Color representing the cafés & drinks service.
+  /// Color representing the caf�s & drinks service.
   static const Color serviceCafe = Color(0xFF6D4C41);
 
   /// Color representing the pet shops service.

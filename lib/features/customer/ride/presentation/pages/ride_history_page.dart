@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:delwaqty/core/theme/app_colors.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -236,21 +236,21 @@ class _RideHistoryPageState extends ConsumerState<RideHistoryPage> {
                     child: _buildDetailStat(
                       context,
                       label: l10n.fare,
-                      value: '${ride.fare?.toStringAsFixed(1) ?? 'â€”'} ${l10n.currencySymbol}',
+                      value: '${ride.fare?.toStringAsFixed(1) ?? '—'} ${l10n.currencySymbol}',
                     ),
                   ),
                   Expanded(
                     child: _buildDetailStat(
                       context,
                       label: l10n.distance,
-                      value: '${ride.distance?.toStringAsFixed(1) ?? 'â€”'} ${l10n.kmShort}',
+                      value: '${ride.distance?.toStringAsFixed(1) ?? '—'} ${l10n.kmShort}',
                     ),
                   ),
                   Expanded(
                     child: _buildDetailStat(
                       context,
                       label: l10n.time,
-                      value: '${ride.estimatedMinutes ?? 'â€”'} ${l10n.minutesShort}',
+                      value: '${ride.estimatedMinutes ?? '—'} ${l10n.minutesShort}',
                     ),
                   ),
                   Expanded(
@@ -479,7 +479,7 @@ class _RideHistoryTile extends StatelessWidget {
                       borderRadius: BorderRadius.circular(6),
                     ),
                     child: Text(
-                      '${ride.fare?.toStringAsFixed(1) ?? 'â€”'} ${l10n.currencySymbol}',
+                      '${ride.fare?.toStringAsFixed(1) ?? '—'} ${l10n.currencySymbol}',
                       style: context.textTheme.labelSmall?.copyWith(
                         fontWeight: FontWeight.w700,
                         color: context.colorScheme.primary,

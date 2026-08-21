@@ -1,4 +1,4 @@
-﻿import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:delwaqty/core/errors/exceptions.dart';
 import 'package:delwaqty/features/_shared/campaigns/data/datasources/remote/supabase_campaign_data_source.dart';
@@ -22,7 +22,7 @@ void main() {
         id: 'c1',
         code: 'CODE',
         campaignType: CampaignType.offer,
-        nameAr: 'Ø¹Ø±Ø¶',
+        nameAr: 'عرض',
         status: CampaignStatus.published,
       );
       when(() => mockDataSource.getById('c1')).thenAnswer((_) async => campaign);
@@ -59,7 +59,7 @@ void main() {
         id: 'c1',
         code: 'CODE',
         campaignType: CampaignType.coupon,
-        nameAr: 'ÙƒÙˆØ¨ÙˆÙ†',
+        nameAr: 'كوبون',
         status: CampaignStatus.published,
         priority: CampaignPriority.critical,
       );

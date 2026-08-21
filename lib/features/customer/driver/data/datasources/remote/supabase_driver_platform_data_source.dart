@@ -1,4 +1,4 @@
-﻿import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:delwaqty/services/supabase/supabase_service.dart';
 import 'package:delwaqty/features/customer/driver/domain/entities/vehicle.dart';
@@ -24,7 +24,7 @@ class SupabaseDriverPlatformDataSource {
     return map;
   }
 
-  // â”€â”€ Onboarding â”€â”€
+  // ── Onboarding ──
 
   Future<void> submitOnboardingStep(
     String driverId, {
@@ -52,7 +52,7 @@ class SupabaseDriverPlatformDataSource {
     }));
   }
 
-  // â”€â”€ Vehicles â”€â”€
+  // ── Vehicles ──
 
   Vehicle _vehicleFromRow(Map<String, dynamic> row) {
     return Vehicle(
@@ -149,7 +149,7 @@ class SupabaseDriverPlatformDataSource {
     }));
   }
 
-  // â”€â”€ Documents â”€â”€
+  // ── Documents ──
 
   DriverDocument _documentFromRow(Map<String, dynamic> row) {
     return DriverDocument(
@@ -201,7 +201,7 @@ class SupabaseDriverPlatformDataSource {
     return map['document_id'] as String? ?? '';
   }
 
-  // â”€â”€ Wallet â”€â”€
+  // ── Wallet ──
 
   Future<WalletDetail> getWalletDetail(String driverId) async {
     final map = _checkRpc(await _client.rpc('get_driver_wallet_detail', params: {
@@ -217,7 +217,7 @@ class SupabaseDriverPlatformDataSource {
     );
   }
 
-  // â”€â”€ Performance â”€â”€
+  // ── Performance ──
 
   Future<DriverPerformance> getPerformance(String driverId) async {
     final map = _checkRpc(await _client.rpc('get_driver_performance', params: {

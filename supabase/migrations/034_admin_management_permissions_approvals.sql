@@ -1,7 +1,7 @@
 -- ============================================================
 -- 034_admin_management_permissions_approvals.sql
 -- Phase 2.3 — Admin delegation + permissions + approvals (2.3B / D1/D2/D7,
--- docs/HANDOFF/PHASE_2_3_DECISION_LOCK_REPORT.md §034, §5/§6 of the master
+-- docs/HANDOFF/PHASE_2_3_DECISION_LOCK_REPORT.md �034, �5/�6 of the master
 -- member-management/support audit).
 --
 -- Scope (locked design):
@@ -28,7 +28,7 @@
 --                              040 — NOT recreated here). campaign_approve dispatch
 --                              preserved verbatim; admin_* types execute via the same
 --                              executors the lifecycle RPCs use (single code path).
---   9. explain_admin_access  — internal "why can I see this?" debug helper (§7.2).
+--   9. explain_admin_access  � internal "why can I see this?" debug helper (�7.2).
 --
 -- Security (030/031/033 lessons): REVOKE-before-GRANT on the new tables; all new
 -- RPCs SECURITY DEFINER + SET search_path = public, pg_temp; anon gets nothing;
@@ -284,7 +284,7 @@ $$;
 -- Evaluates the 7-input tuple: actor identity + actor role + supervisor
 -- relationship + delegated permission + actor geographic scope + target +
 -- target region + requested action. Single evaluator across RPCs AND policies
--- (no drift, R2). Defaults per §6 of the master audit.
+-- (no drift, R2). Defaults per �6 of the master audit.
 
 CREATE OR REPLACE FUNCTION public.has_permission(
   p_permission text,
@@ -332,7 +332,7 @@ BEGIN
   IF v_granted THEN
     RETURN true;
   END IF;
-  -- default in-scope matrix (§6); OFFER_PUBLISH is owner-only (handled above),
+  -- default in-scope matrix (�6); OFFER_PUBLISH is owner-only (handled above),
   -- everything not in this set (MEMBER_VIEW_DOCUMENTS / MEMBER_BAN /
   -- MEMBER_DELETE / EMERGENCY_AUDIO / OFFER_APPROVE) is grant-only.
   SELECT p_permission IN (
@@ -1095,7 +1095,7 @@ BEGIN
 END;
 $$;
 
--- ─── 12. explain_admin_access (internal debug helper, §7.2) ────────────
+-- --- 12. explain_admin_access (internal debug helper, �7.2) ------------
 
 CREATE OR REPLACE FUNCTION public.explain_admin_access(
   p_member_id uuid,

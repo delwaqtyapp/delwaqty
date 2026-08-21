@@ -1,4 +1,4 @@
-﻿import 'package:flutter/foundation.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -53,11 +53,11 @@ void main() async {
     DeviceOrientation.portraitDown,
   ]);
 
-  // â”€â”€ Validate configuration before any service init â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Validate configuration before any service init ──────────
   if (kDebugMode) AppConfig.logConfig();
   ConfigValidator.validateOrThrow();
 
-  // â”€â”€ Initialize services â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Initialize services ─────────────────────────────────────
   final results = await Future.wait([
     SharedPreferences.getInstance(),
     _initFirebase(),

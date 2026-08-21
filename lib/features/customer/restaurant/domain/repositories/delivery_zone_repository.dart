@@ -1,4 +1,4 @@
-﻿import 'package:delwaqty/features/customer/restaurant/domain/entities/delivery_zone.dart';
+import 'package:delwaqty/features/customer/restaurant/domain/entities/delivery_zone.dart';
 
 abstract interface class DeliveryZoneRepository {
   Future<List<DeliveryZone>> getZones(String merchantId);

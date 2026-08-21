@@ -1,4 +1,4 @@
-﻿import 'package:delwaqty/core/module/feature_registry.dart';
+import 'package:delwaqty/core/module/feature_registry.dart';
 import 'package:delwaqty/features/customer/splash/splash_module.dart';
 import 'package:delwaqty/features/customer/onboarding/onboarding_module.dart';
 import 'package:delwaqty/features/customer/welcome/welcome_module.dart';

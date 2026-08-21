@@ -1,4 +1,4 @@
-﻿import 'package:delwaqty/features/customer/safety/domain/entities/sos_alert.dart';
+import 'package:delwaqty/features/customer/safety/domain/entities/sos_alert.dart';
 import 'package:delwaqty/features/customer/safety/domain/entities/sos_result.dart';
 import 'package:delwaqty/features/customer/safety/domain/entities/trusted_contact.dart';
 import 'package:delwaqty/features/customer/safety/domain/entities/contact_result.dart';

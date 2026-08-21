@@ -1,4 +1,4 @@
-﻿import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 import 'package:delwaqty/features/customer/search/domain/entities/geo_point.dart';
 import 'package:delwaqty/features/customer/search/domain/entities/place_suggestion.dart';

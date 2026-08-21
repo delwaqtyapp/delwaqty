@@ -1,4 +1,4 @@
-﻿import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:delwaqty/features/_shared/rewards/domain/entities/member_reward.dart';
 import 'package:delwaqty/features/_shared/rewards/domain/repositories/rewards_repository.dart';
 import 'package:delwaqty/features/_shared/rewards/data/repositories/supabase_rewards_repository_impl.dart';

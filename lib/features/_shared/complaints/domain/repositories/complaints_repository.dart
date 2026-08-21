@@ -1,4 +1,4 @@
-﻿import 'package:delwaqty/features/_shared/complaints/domain/entities/complaint.dart';
+import 'package:delwaqty/features/_shared/complaints/domain/entities/complaint.dart';
 
 abstract class ComplaintsRepository {
   Future<List<Complaint>> getComplaints({String? status, String? type});

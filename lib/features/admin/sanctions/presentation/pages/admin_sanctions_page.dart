@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:delwaqty/features/admin/sanctions/presentation/sanctions_providers.dart';
 import 'package:delwaqty/features/admin/sanctions/domain/entities/sanction.dart';
@@ -91,7 +91,7 @@ class _AdminSanctionsPageState extends ConsumerState<AdminSanctionsPage> {
                               : Colors.orange,
                         ),
                       ),
-                      title: Text('${s.sanctionType} â€” ${s.targetRole}',
+                      title: Text('${s.sanctionType} — ${s.targetRole}',
                           maxLines: 1),
                       subtitle: Text(s.reason,
                           maxLines: 2, overflow: TextOverflow.ellipsis),
@@ -257,7 +257,7 @@ class _SanctionDetailSheetState extends ConsumerState<_SanctionDetailSheet> {
                 ),
               ),
               const SizedBox(height: 16),
-              Text('${sanction.sanctionType} â€” ${sanction.targetRole}',
+              Text('${sanction.sanctionType} — ${sanction.targetRole}',
                   style: Theme.of(context).textTheme.titleLarge),
               const SizedBox(height: 8),
               Text(sanction.reason,

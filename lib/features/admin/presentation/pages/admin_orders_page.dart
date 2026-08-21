@@ -233,7 +233,7 @@ class _OrderTile extends StatelessWidget {
         ),
         subtitle: Row(
           children: [
-            Expanded(child: Text('$customerName · $merchantName')),
+            Expanded(child: Text('$customerName � $merchantName')),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
               decoration: BoxDecoration(

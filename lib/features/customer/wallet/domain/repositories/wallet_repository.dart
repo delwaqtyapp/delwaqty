@@ -1,4 +1,4 @@
-﻿import 'package:delwaqty/features/customer/wallet/domain/entities/wallet_balance.dart';
+import 'package:delwaqty/features/customer/wallet/domain/entities/wallet_balance.dart';
 import 'package:delwaqty/features/customer/wallet/domain/entities/wallet_transaction.dart';
 
 abstract interface class WalletRepository {

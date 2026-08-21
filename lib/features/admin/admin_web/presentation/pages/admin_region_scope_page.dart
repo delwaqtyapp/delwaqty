@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:delwaqty/core/theme/app_colors.dart';
 import 'package:delwaqty/features/admin/domain/entities/admin_region_assignment.dart';
@@ -295,7 +295,7 @@ class _AssignmentsPanel extends StatelessWidget {
                 : assignments.isEmpty
                     ? const Center(
                         child: Text(
-                          'No assignments â€” admin is global',
+                          'No assignments — admin is global',
                           style: TextStyle(color: Colors.grey),
                         ),
                       )

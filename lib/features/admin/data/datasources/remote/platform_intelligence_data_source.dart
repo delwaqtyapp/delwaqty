@@ -1,4 +1,4 @@
-﻿import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:delwaqty/features/admin/domain/entities/platform_intelligence.dart';
 
 class PlatformIntelligenceDataSource {
@@ -12,13 +12,17 @@ class PlatformIntelligenceDataSource {
     DateTime? to,
     String? regionId,
   }) async {
-    final response = await _supabase.rpc('platform_kpi_summary', params: {
-      'p_from': from?.toIso8601String(),
-      'p_to': to?.toIso8601String(),
-      'p_region_id': regionId,
-    });
-    final data = _unwrapResponse(response, 'platform_kpi_summary');
-    return PlatformKpiSummary.fromJson(data);
+    try {
+      final response = await _supabase.rpc('platform_kpi_summary', params: {
+        'p_from': from?.toIso8601String(),
+        'p_to': to?.toIso8601String(),
+        'p_region_id': regionId,
+      });
+      final data = _unwrapResponse(response, 'platform_kpi_summary');
+      return PlatformKpiSummary.fromJson(data);
+    } catch (e) {
+      rethrow;
+    }
   }
 
   Future<ServicePerformance> getServicePerformance({
@@ -168,15 +172,19 @@ class PlatformIntelligenceDataSource {
   }
 
   Future<List<OperationalAlert>> getOperationalAlerts() async {
-    final response = await _supabase.rpc('platform_operational_alerts');
-    if (response is List) {
-      return response
-          .map((e) => OperationalAlert.fromJson(
-                Map<String, dynamic>.from(e as Map),
-              ))
-          .toList();
+    try {
+      final response = await _supabase.rpc('platform_operational_alerts');
+      if (response is List) {
+        return response
+            .map((e) => OperationalAlert.fromJson(
+                  Map<String, dynamic>.from(e as Map),
+                ))
+            .toList();
+      }
+      return [];
+    } catch (e) {
+      rethrow;
     }
-    return [];
   }
 
   Future<RevenueOverview> getRevenueBreakdown({
@@ -184,13 +192,17 @@ class PlatformIntelligenceDataSource {
     DateTime? to,
     String? regionId,
   }) async {
-    final response = await _supabase.rpc('platform_revenue_breakdown', params: {
-      'p_from': from?.toIso8601String(),
-      'p_to': to?.toIso8601String(),
-      'p_region_id': regionId,
-    });
-    final data = _unwrapResponse(response, 'platform_revenue_breakdown');
-    return RevenueOverview.fromJson(data);
+    try {
+      final response = await _supabase.rpc('platform_revenue_breakdown', params: {
+        'p_from': from?.toIso8601String(),
+        'p_to': to?.toIso8601String(),
+        'p_region_id': regionId,
+      });
+      final data = _unwrapResponse(response, 'platform_revenue_breakdown');
+      return RevenueOverview.fromJson(data);
+    } catch (e) {
+      rethrow;
+    }
   }
 
   Map<String, dynamic> _unwrapResponse(dynamic response, String key) {

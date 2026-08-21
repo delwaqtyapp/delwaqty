@@ -1,4 +1,4 @@
-﻿import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter_test/flutter_test.dart';
 import 'package:delwaqty/domain/entities/user.dart';
 import 'package:delwaqty/features/_shared/auth/domain/auth_state.dart';
 

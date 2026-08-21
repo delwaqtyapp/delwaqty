@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:delwaqty/domain/entities/user.dart';
@@ -29,7 +29,7 @@ void main() {
     id: 'r-cairo',
     code: 'EG-C',
     type: RegionType.governorate,
-    nameAr: 'Ø§Ù„Ù‚Ø§Ù‡Ø±Ø©',
+    nameAr: 'القاهرة',
     nameEn: 'Cairo',
     createdAt: now,
   );
@@ -37,7 +37,7 @@ void main() {
     id: 'r-giza',
     code: 'EG-GZ',
     type: RegionType.governorate,
-    nameAr: 'Ø§Ù„Ø¬ÙŠØ²Ø©',
+    nameAr: 'الجيزة',
     nameEn: 'Giza',
     createdAt: now,
   );

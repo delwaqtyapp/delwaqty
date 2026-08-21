@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:delwaqty/features/admin/presentation/providers/platform_intelligence_providers.dart';
@@ -37,7 +37,7 @@ class _PlatformIntelligenceDashboardState
           IconButton(
             tooltip: l10n.search,
             icon: const Icon(Icons.search_rounded),
-            onPressed: () => context.push('/search'),
+            onPressed: () => context.push('/admin/members'),
           ),
             IconButton(
               icon: const Icon(Icons.refresh_rounded),

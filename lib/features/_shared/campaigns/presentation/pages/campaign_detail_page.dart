@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:delwaqty/features/_shared/campaigns/domain/entities/campaign.dart';
 import 'package:delwaqty/features/_shared/campaigns/presentation/campaign_providers.dart';

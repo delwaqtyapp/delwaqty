@@ -1,4 +1,4 @@
-﻿import 'package:delwaqty/features/customer/delivery/domain/entities/delivery_order.dart';
+import 'package:delwaqty/features/customer/delivery/domain/entities/delivery_order.dart';
 import 'package:delwaqty/features/customer/delivery/domain/entities/merchant_profile.dart';
 import 'package:delwaqty/features/customer/delivery/domain/entities/driver_capability.dart';
 import 'package:delwaqty/features/customer/delivery/domain/entities/delivery_pricing.dart';

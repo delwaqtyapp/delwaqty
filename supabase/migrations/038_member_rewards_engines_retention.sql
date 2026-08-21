@@ -1,8 +1,8 @@
 -- ============================================================
 -- 038_member_rewards_engines_retention.sql
 -- Phase 2.3 — Member rewards + engines + retention (2.3F / M1 + M4,
--- docs/HANDOFF/PHASE_2_3_DECISION_LOCK_REPORT.md §16/038, §4/M1, §4/M4,
--- §14/§16/§17/§25 of the master member-management/support audit).
+-- docs/HANDOFF/PHASE_2_3_DECISION_LOCK_REPORT.md �16/038, �4/M1, �4/M4,
+-- �14/�16/�17/�25 of the master member-management/support audit).
 --
 -- Scope (locked design):
 --   1. member_rewards — idempotent reward ledger (D7/M4). UNIQUE
@@ -13,13 +13,13 @@
 --      as 039 campaign_validate_benefit).
 --   3. run_member_engines(p_run_date) — birthday + anniversary reward
 --      issuance (idempotent), campaign expiry (published→expired via the 039
---      lifecycle whitelist) and retention purge (per migration map §16/038).
+--      lifecycle whitelist) and retention purge (per migration map �16/038).
 --      Service-only (scheduler/edge function / app-open best-effort, C6).
 --   4. apply_retention_policies() — configurable purge per retention_policies
 --      (M1 defaults: location 90d, member_events 5y, audit 7y, sanctions 7y,
 --      chat 2y, audio metadata 2y, notifications 1y, campaigns 5y). Location
 --      rows hard-deleted; audit rows ARCHIVED-then-purged (never silently
---      destroyed, §25). Every purge is audited (write_audit).
+--      destroyed, �25). Every purge is audited (write_audit).
 --   5. retention_policies — config table (M1). Engine guards absent tables
 --      with to_regclass (036/037 were absorbed into the promotion platform,
 --      so emergency_audio_sessions / regional_offers do not exist live).
@@ -105,7 +105,7 @@ CREATE POLICY member_rewards_admin_read ON public.member_rewards
   );
 
 -- ─── 3. retention_policies (config, M1) ────────────────────────────────
--- Defaults from §25/missing-decision M1. Never purges ACTIVE sanctions;
+-- Defaults from �25/missing-decision M1. Never purges ACTIVE sanctions;
 -- campaign purge touches ARCHIVED campaigns only; absent tables skipped.
 
 CREATE TABLE IF NOT EXISTS public.retention_policies (
@@ -544,7 +544,7 @@ BEGIN
     AND ends_at < now();
   GET DIAGNOSTICS v_campaigns_expired = ROW_COUNT;
 
-  -- ── retention purge (same schedule; §16/038) ──────────────────────
+  -- -- retention purge (same schedule; �16/038) ----------------------
   v_retention := public.apply_retention_policies();
 
   RETURN jsonb_build_object(
@@ -559,7 +559,7 @@ $$;
 
 -- ─── 7. ACL CLOSES ─────────────────────────────────────────────────────
 -- Internal helpers + engines: service_role ONLY (no client execution; the
--- engine is a scheduler/edge-function surface per §26/038). anon revoked.
+-- engine is a scheduler/edge-function surface per �26/038). anon revoked.
 
 REVOKE ALL ON FUNCTION public._reward_config(text) FROM PUBLIC;
 REVOKE ALL ON FUNCTION public._reward_config(text) FROM anon;

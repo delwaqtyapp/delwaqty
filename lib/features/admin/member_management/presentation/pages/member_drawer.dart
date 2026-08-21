@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:delwaqty/features/admin/member_management/presentation/member_providers.dart';
@@ -8,6 +8,7 @@ import 'package:delwaqty/shared/widgets/shimmer_loading.dart';
 import 'package:delwaqty/shared/widgets/stat_card.dart';
 import 'package:delwaqty/services/supabase/supabase_service.dart';
 import 'package:delwaqty/core/constants/app_constants.dart';
+import 'package:delwaqty/shared/widgets/animated_feedback.dart';
 
 class MemberDrawer extends ConsumerWidget {
   const MemberDrawer({
@@ -106,6 +107,7 @@ class MemberDrawer extends ConsumerWidget {
                 memberId: memberId,
                 profile: adapted,
                 permissions: permissions,
+                onDismiss: onDismiss,
               ),
             ),
             const SliverToBoxAdapter(
@@ -1138,7 +1140,7 @@ class _WalletFinancialsSection extends ConsumerWidget {
                           color: _txColor(txType),
                         ),
                         title: Text(
-                          '$txType â€” $amount',
+                          '$txType — $amount',
                           style: const TextStyle(fontSize: 13),
                         ),
                         subtitle: Text(
@@ -1389,7 +1391,7 @@ class _ComplaintsSection extends ConsumerWidget {
                         color: _complaintPriorityColor(priority),
                       ),
                       title: Text(
-                        '$category â€” $status',
+                        '$category — $status',
                         style: const TextStyle(fontSize: 13),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -1750,8 +1752,9 @@ class _SanctionsSectionState extends ConsumerState<_SanctionsSection> {
       if (mounted) {
         ref.invalidate(memberSanctionsProvider(widget.memberId));
         ref.invalidate(memberOpsProfileProvider(widget.memberId));
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.sanctionIssued)),
+        showAnimatedSuccessToast(
+          context,
+          message: l10n.sanctionIssued,
         );
       }
     } catch (e) {
@@ -1811,7 +1814,7 @@ class _SanctionTileState extends ConsumerState<_SanctionTile> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  '$type â€” $status',
+                  '$type — $status',
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         fontWeight: FontWeight.w600,
                       ),
@@ -1913,8 +1916,9 @@ class _SanctionTileState extends ConsumerState<_SanctionTile> {
         });
         if (mounted) {
           widget.onRevoked();
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(l10n.sanctionRevoked)),
+          showAnimatedSuccessToast(
+            context,
+            message: l10n.sanctionRevoked,
           );
         }
       } catch (e) {
@@ -2023,11 +2027,13 @@ class _AdminActionsSection extends ConsumerStatefulWidget {
     required this.memberId,
     required this.profile,
     required this.permissions,
+    this.onDismiss,
   });
 
   final String memberId;
   final Map<String, dynamic> profile;
   final Map<String, dynamic> permissions;
+  final VoidCallback? onDismiss;
 
   @override
   ConsumerState<_AdminActionsSection> createState() =>
@@ -2087,7 +2093,7 @@ class _AdminActionsSectionState extends ConsumerState<_AdminActionsSection> {
               contentPadding: EdgeInsets.zero,
               leading: const Icon(Icons.edit_outlined, size: 18),
               title: Text(l10n.editProfile, style: const TextStyle(fontSize: 13)),
-              onTap: () {},
+              onTap: () => _editProfile(),
             ),
           if (canDecideVerification)
             ListTile(
@@ -2098,7 +2104,7 @@ class _AdminActionsSectionState extends ConsumerState<_AdminActionsSection> {
                 l10n.verificationDecision,
                 style: const TextStyle(fontSize: 13),
               ),
-              onTap: () {},
+              onTap: () => _decideVerification(),
             ),
           if (canIssueSanction)
             ListTile(
@@ -2109,7 +2115,7 @@ class _AdminActionsSectionState extends ConsumerState<_AdminActionsSection> {
                 l10n.issueSanction,
                 style: const TextStyle(fontSize: 13),
               ),
-              onTap: () {},
+              onTap: () => _issueSanction(),
             ),
           if (canRevokeSanction)
             ListTile(
@@ -2120,7 +2126,7 @@ class _AdminActionsSectionState extends ConsumerState<_AdminActionsSection> {
                 l10n.revokeSanction,
                 style: const TextStyle(fontSize: 13),
               ),
-              onTap: () {},
+              onTap: () => _revokeSanction(),
             ),
           if (canRestrictAccount && accountStatus == 'active')
             ListTile(
@@ -2280,8 +2286,9 @@ class _AdminActionsSectionState extends ConsumerState<_AdminActionsSection> {
       });
       if (mounted) {
         ref.invalidate(memberOpsProfileProvider(widget.memberId));
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.accountActionCompleted(action))),
+        showAnimatedSuccessToast(
+          context,
+          message: l10n.accountActionCompleted(action),
         );
       }
     } catch (e) {
@@ -2293,14 +2300,444 @@ class _AdminActionsSectionState extends ConsumerState<_AdminActionsSection> {
     }
   }
 
-  /// Deletion: Owner deletes directly. Others submit a deletion request
-  /// that requires owner approval.
+  /// Edit Profile: owner or admin with MEMBER_MODERATE. Only full_name and
+  /// phone are editable through admin_update_member_profile (057).
+  Future<void> _editProfile() async {
+    final l10n = AppLocalizations.of(context);
+    final basic = widget.profile['basic'] as Map<String, dynamic>? ?? {};
+    final nameController = TextEditingController(
+      text: basic['full_name'] as String? ?? '',
+    );
+    final phoneController = TextEditingController(
+      text: basic['phone'] as String? ?? '',
+    );
+
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (ctx) {
+        return AlertDialog(
+          title: Text(l10n.editProfile),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: nameController,
+                decoration: InputDecoration(
+                  labelText: l10n.fullName,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: phoneController,
+                decoration: InputDecoration(
+                  labelText: l10n.phone,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(false),
+              child: Text(l10n.cancel),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.of(ctx).pop(true),
+              child: Text(l10n.confirm),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (result != true || !mounted) return;
+
+    try {
+      final client = ref.read(supabaseClientProvider);
+      await client.rpc('admin_update_member_profile', params: {
+        'p_member_id': widget.memberId,
+        'p_full_name': nameController.text.trim(),
+        'p_phone': phoneController.text.trim(),
+      });
+      if (mounted) {
+        ref.invalidate(memberOpsProfileProvider(widget.memberId));
+        showAnimatedSuccessToast(
+          context,
+          message: l10n.profileUpdated,
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n.failedWithError(e.toString()))),
+        );
+      }
+    }
+  }
+
+  /// Verification Decision: approve/reject via decide_user_verification (047).
+  Future<void> _decideVerification() async {
+    final l10n = AppLocalizations.of(context);
+
+    final result = await showDialog<({String decision, String reason})>(
+      context: context,
+      builder: (ctx) {
+        final reasonController = TextEditingController();
+        final isApprove = ValueNotifier<bool>(true);
+        return AlertDialog(
+          title: Text(l10n.verificationDecision),
+          content: ValueListenableBuilder<bool>(
+            valueListenable: isApprove,
+            builder: (ctx, approve, _) {
+              return Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  SegmentedButton<bool>(
+                    segments: [
+                      ButtonSegment(
+                        value: true,
+                        label: Text(l10n.approveVerification),
+                        icon: const Icon(Icons.check_rounded),
+                      ),
+                      ButtonSegment(
+                        value: false,
+                        label: Text(l10n.rejectVerification),
+                        icon: const Icon(Icons.close_rounded),
+                      ),
+                    ],
+                    selected: {approve},
+                    onSelectionChanged: (sel) {
+                      isApprove.value = sel.first;
+                    },
+                  ),
+                  const SizedBox(height: 12),
+                  TextField(
+                    controller: reasonController,
+                    decoration: InputDecoration(
+                      labelText: l10n.rejectionReasonRequired,
+                      hintText: l10n.rejectionReasonHint,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    maxLines: 3,
+                  ),
+                ],
+              );
+            },
+          ),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(),
+              child: Text(l10n.cancel),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.of(ctx).pop((
+                decision: isApprove.value ? 'approve' : 'reject',
+                reason: reasonController.text.trim(),
+              )),
+              child: Text(l10n.confirm),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (result == null || !mounted) return;
+    if (result.decision == 'reject' && result.reason.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.rejectionReasonRequired)),
+      );
+      return;
+    }
+
+    try {
+      final client = ref.read(supabaseClientProvider);
+      await client.rpc('decide_user_verification', params: {
+        'p_user_id': widget.memberId,
+        'p_decision': result.decision,
+        'p_reason': result.reason.isEmpty ? null : result.reason,
+      });
+      if (mounted) {
+        ref.invalidate(memberOpsProfileProvider(widget.memberId));
+        showAnimatedSuccessToast(
+          context,
+          message: l10n.verificationDecisionSuccessful,
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n.verificationDecisionFailed)),
+        );
+      }
+    }
+  }
+
+  /// Issue Sanction: warning / fine / suspension via issue_sanction (035).
+  Future<void> _issueSanction() async {
+    final l10n = AppLocalizations.of(context);
+    final typeController = ValueNotifier<String>('warning');
+    final reasonController = TextEditingController();
+    final amountController = TextEditingController();
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) {
+        return AlertDialog(
+          title: Text(l10n.issueSanction),
+          content: ValueListenableBuilder<String>(
+            valueListenable: typeController,
+            builder: (ctx, type, _) {
+              return Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  DropdownButtonFormField<String>(
+                    initialValue: type,
+                    decoration: InputDecoration(
+                      labelText: l10n.sanctionType,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    items: [
+                      DropdownMenuItem(
+                        value: 'warning',
+                        child: Text(l10n.warning),
+                      ),
+                      DropdownMenuItem(value: 'fine', child: Text(l10n.fine)),
+                      DropdownMenuItem(
+                        value: 'suspension',
+                        child: Text(l10n.suspension),
+                      ),
+                    ],
+                    onChanged: (v) {
+                      typeController.value = v ?? 'warning';
+                    },
+                  ),
+                  const SizedBox(height: 12),
+                  if (type == 'fine')
+                    TextField(
+                      controller: amountController,
+                      keyboardType: TextInputType.number,
+                      decoration: InputDecoration(
+                        labelText: l10n.fineAmount,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                    ),
+                  const SizedBox(height: 12),
+                  TextField(
+                    controller: reasonController,
+                    decoration: InputDecoration(
+                      labelText: l10n.enterSanctionReason,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    maxLines: 3,
+                  ),
+                ],
+              );
+            },
+          ),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(false),
+              child: Text(l10n.cancel),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.of(ctx).pop(true),
+              child: Text(l10n.confirm),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (confirmed != true || !mounted) return;
+
+    final reason = reasonController.text.trim();
+    if (reason.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.reasonRequired)),
+      );
+      return;
+    }
+
+    try {
+      final client = ref.read(supabaseClientProvider);
+      await client.rpc('issue_sanction', params: {
+        'p_member_id': widget.memberId,
+        'p_sanction_type': typeController.value,
+        'p_reason': reason,
+        'p_amount': double.tryParse(amountController.text.trim()) ?? 0,
+      });
+      if (mounted) {
+        ref.invalidate(memberOpsProfileProvider(widget.memberId));
+        showAnimatedSuccessToast(
+          context,
+          message: l10n.sanctionIssued,
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n.failedToIssueSanction(e.toString()))),
+        );
+      }
+    }
+  }
+
+  /// Revoke Sanction: pick the first active sanction via revoke_sanction (035).
+  Future<void> _revokeSanction() async {
+    final l10n = AppLocalizations.of(context);
+    final activeSanctions = (widget.profile['active_sanctions'] as List?)
+            ?.whereType<Map>()
+            .map((e) => Map<String, dynamic>.from(e))
+            .toList() ??
+        const [];
+
+    if (activeSanctions.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.noActiveSanctions)),
+      );
+      return;
+    }
+
+    final sanction = activeSanctions.first;
+    final reason = await showDialog<String>(
+      context: context,
+      builder: (ctx) {
+        final controller = TextEditingController();
+        return AlertDialog(
+          title: Text(l10n.revokeSanction),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                l10n.actionConfirmMessage(l10n.revokeSanction),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: controller,
+                decoration: InputDecoration(
+                  labelText: l10n.reasonRequired,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                maxLines: 3,
+              ),
+            ],
+          ),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(),
+              child: Text(l10n.cancel),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.of(ctx).pop(controller.text.trim()),
+              child: Text(l10n.confirm),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (reason == null || reason.isEmpty || !mounted) return;
+
+    try {
+      final client = ref.read(supabaseClientProvider);
+      await client.rpc('revoke_sanction', params: {
+        'p_sanction_id': sanction['id'],
+        'p_reason': reason,
+      });
+      if (mounted) {
+        ref.invalidate(memberOpsProfileProvider(widget.memberId));
+        showAnimatedSuccessToast(
+          context,
+          message: l10n.sanctionRevoked,
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n.failedWithError(e.toString()))),
+        );
+      }
+    }
+  }
+
+  /// Deletion: Owner deletes directly (no reason needed, permanent).
+  /// Others submit a deletion request that requires owner approval.
   Future<void> _confirmDeletion() async {
     final l10n = AppLocalizations.of(context);
     final basic = widget.profile['basic'] as Map<String, dynamic>? ?? {};
     final memberEmail = basic['email'] as String? ?? '';
+    final memberName = basic['full_name'] as String? ?? memberEmail;
     final currentEmail = Supabase.instance.client.auth.currentUser?.email;
     final isOwner = currentEmail == AppConstants.ownerEmail;
+
+    if (isOwner) {
+      final confirmed = await showAnimatedConfirmDialog(
+        context,
+        title: l10n.deleteAccount,
+        message: l10n.ownerPermanentDeleteConfirm(memberName),
+        confirmLabel: l10n.deleteNow,
+        cancelLabel: l10n.cancel,
+        icon: Icons.delete_forever_rounded,
+        confirmColor: const Color(0xFFDC2626),
+      );
+      if (!confirmed || !mounted) return;
+
+      try {
+        final client = ref.read(supabaseClientProvider);
+        await client.rpc('owner_delete_member', params: {
+          'p_member_id': widget.memberId,
+        });
+        if (!mounted) return;
+        showAnimatedSuccessToast(
+          context,
+          title: l10n.accountDeleted,
+          message: l10n.memberDeletedSuccessfully,
+        );
+        await Future<void>.delayed(const Duration(milliseconds: 900));
+        if (!mounted) return;
+        widget.onDismiss?.call();
+        ref.invalidate(memberOpsProvider);
+        ref.invalidate(memberOpsProfileProvider(widget.memberId));
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(l10n.failedWithError(e.toString())),
+              duration: const Duration(seconds: 5),
+            ),
+          );
+        }
+      }
+      return;
+    }
 
     final reason = await showDialog<String>(
       context: context,
@@ -2312,9 +2749,7 @@ class _AdminActionsSectionState extends ConsumerState<_AdminActionsSection> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text(isOwner
-                    ? l10n.deleteAccountDirectMessage
-                    : l10n.deleteAccountMessage),
+                Text(l10n.deleteAccountMessage),
                 if (memberEmail.isNotEmpty) ...[
                   const SizedBox(height: 8),
                   Text(
@@ -2350,7 +2785,7 @@ class _AdminActionsSectionState extends ConsumerState<_AdminActionsSection> {
               ),
               onPressed: () =>
                   Navigator.of(ctx).pop(reasonController.text.trim()),
-              child: Text(isOwner ? l10n.deleteNow : l10n.submitDeletionRequest),
+              child: Text(l10n.submitDeletionRequest),
             ),
           ],
         );
@@ -2361,31 +2796,25 @@ class _AdminActionsSectionState extends ConsumerState<_AdminActionsSection> {
 
     try {
       final client = ref.read(supabaseClientProvider);
-      if (isOwner) {
-        await client.from('users').update({
-          'account_status': 'deactivated',
-        }).eq('id', widget.memberId);
-      } else {
-        await client.rpc('request_member_deletion', params: {
-          'p_member_id': widget.memberId,
-          'p_confirmation_email': memberEmail,
-          'p_reason': reason,
-        });
-      }
+      await client.rpc('request_member_deletion', params: {
+        'p_member_id': widget.memberId,
+        'p_confirmation_email': memberEmail,
+        'p_reason': reason,
+      });
       if (mounted) {
         ref.invalidate(memberOpsProfileProvider(widget.memberId));
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(isOwner
-                ? l10n.memberDeletedSuccessfully
-                : l10n.deletionRequestSubmitted),
-          ),
+        showAnimatedSuccessToast(
+          context,
+          message: l10n.deletionRequestSubmitted,
         );
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.failedWithError(e.toString()))),
+          SnackBar(
+            content: Text(l10n.failedWithError(e.toString())),
+            duration: const Duration(seconds: 5),
+          ),
         );
       }
     }

@@ -1,11 +1,11 @@
-﻿import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:delwaqty/features/_shared/regions/domain/entities/spatial_resolution.dart';
 
 part 'geo_entity.freezed.dart';
 part 'geo_entity.g.dart';
 
 /// Significant named geographic entities (ADR-057 Â§14): tourism, transport,
-/// landmarks, universities â€” NEVER an admin unit and NEVER a business
+/// landmarks, universities — NEVER an admin unit and NEVER a business
 /// directory.
 enum GeoPlaceType {
   hotel('hotel'),

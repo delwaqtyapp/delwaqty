@@ -1,4 +1,4 @@
-﻿import 'package:delwaqty/features/admin/data/datasources/remote/supabase_admin_region_assignment_data_source.dart';
+import 'package:delwaqty/features/admin/data/datasources/remote/supabase_admin_region_assignment_data_source.dart';
 import 'package:delwaqty/features/admin/domain/entities/admin_region_assignment.dart';
 import 'package:delwaqty/features/admin/domain/repositories/admin_region_assignment_repository.dart';
 

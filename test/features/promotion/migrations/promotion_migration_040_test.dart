@@ -31,7 +31,7 @@ void main() {
       expect(migration, contains('ON public.campaign_targets (campaign_id) WHERE region_id IS NULL'));
     });
 
-    test('approval_requests matches the 2.3 §19 contract verbatim', () {
+    test('approval_requests matches the 2.3 �19 contract verbatim', () {
       expect(migration, contains('request_type     text NOT NULL'));
       expect(migration, contains('entity_type      text NOT NULL'));
       expect(migration, contains('entity_id        uuid,'));

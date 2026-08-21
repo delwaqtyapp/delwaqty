@@ -1,4 +1,4 @@
-﻿import 'dart:async';
+import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -156,30 +156,30 @@ String _merchantTypeLabel(MerchantType type, AppLocalizations l10n) =>
     };
 
 String _merchantEmoji(MerchantType type) => switch (type) {
-  MerchantType.restaurant => 'ðŸ½ï¸',
-  MerchantType.grocery => 'ðŸ›’',
-  MerchantType.supermarket => 'ðŸª',
-  MerchantType.fruits => 'ðŸ¥¬',
-  MerchantType.meat => 'ðŸ¥©',
-  MerchantType.seafood => 'ðŸŸ',
-  MerchantType.pharmacy => 'ðŸ’Š',
-  MerchantType.bakery => 'ðŸ¥',
-  MerchantType.sweets => 'ðŸ°',
-  MerchantType.flowers => 'ðŸ’',
-  MerchantType.clothing => 'ðŸ‘”',
-  MerchantType.shoes => 'ðŸ‘Ÿ',
-  MerchantType.electronics => 'ðŸ“±',
-  MerchantType.mobile => 'ðŸ“ž',
-  MerchantType.furniture => 'ðŸ›‹ï¸',
-  MerchantType.fashion => 'ðŸ‘—',
-  MerchantType.appliances => 'ðŸ”Œ',
-  MerchantType.home => 'ðŸ”§',
-  MerchantType.cafe => 'â˜•',
-  MerchantType.petShop => 'ðŸ¾',
-  MerchantType.fitness => 'ðŸ’ª',
-  MerchantType.gas => 'â›½',
-  MerchantType.carwash => 'ðŸš¿',
-  MerchantType.other => 'ðŸª',
+  MerchantType.restaurant => '🍽️',
+  MerchantType.grocery => '🛒',
+  MerchantType.supermarket => '🏪',
+  MerchantType.fruits => '🥬',
+  MerchantType.meat => '🥩',
+  MerchantType.seafood => '🐟',
+  MerchantType.pharmacy => '💊',
+  MerchantType.bakery => '🥐',
+  MerchantType.sweets => '🍰',
+  MerchantType.flowers => '💐',
+  MerchantType.clothing => '👔',
+  MerchantType.shoes => '👟',
+  MerchantType.electronics => '📱',
+  MerchantType.mobile => '📞',
+  MerchantType.furniture => '🛋️',
+  MerchantType.fashion => '👗',
+  MerchantType.appliances => '🔌',
+  MerchantType.home => '🔧',
+  MerchantType.cafe => '☕',
+  MerchantType.petShop => '🐾',
+  MerchantType.fitness => '💪',
+  MerchantType.gas => '⛽',
+  MerchantType.carwash => '🚿',
+  MerchantType.other => '🏪',
 };
 
 final _queryProvider = StateProvider<String>((_) => '');

@@ -1,14 +1,14 @@
-﻿import 'package:delwaqty/features/_shared/regions/domain/entities/region.dart';
+import 'package:delwaqty/features/_shared/regions/domain/entities/region.dart';
 import 'package:delwaqty/features/_shared/regions/domain/entities/spatial_resolution.dart';
 
 /// Pure Dart detection mapping: resolves canonical governorate ids from
 /// geocoded address strings. Deterministic and unit-testable.
 ///
-/// Never creates region records â€” it only ever returns ids that already exist
+/// Never creates region records — it only ever returns ids that already exist
 /// in the canonical [Region] dataset loaded from Supabase.
 class RegionResolver {
   static const Set<String> _stopTokens = {
-    'Ù…Ø­Ø§ÙØ¸Ù‡',
+    'محافظه',
     'governorate',
     'province',
     'muhafazah',
@@ -20,12 +20,12 @@ class RegionResolver {
   static String normalize(String value) {
     var v = value.trim().toLowerCase();
     v = v.replaceAll(RegExp(r'[\u064B-\u0652\u0670]'), '');
-    v = v.replaceAll('Ø£', 'Ø§').replaceAll('Ø¥', 'Ø§').replaceAll('Ø¢', 'Ø§');
-    v = v.replaceAll('Ø¡', '');
-    v = v.replaceAll('Ù‰', 'ÙŠ');
-    v = v.replaceAll('Ø©', 'Ù‡');
-    v = v.replaceAll('Ù€', '');
-    v = v.replaceAll('â€™', "'");
+    v = v.replaceAll('أ', 'ا').replaceAll('إ', 'ا').replaceAll('آ', 'ا');
+    v = v.replaceAll('ء', '');
+    v = v.replaceAll('ى', 'ي');
+    v = v.replaceAll('ة', 'ه');
+    v = v.replaceAll('ـ', '');
+    v = v.replaceAll('’', "'");
     v = v.replaceAll(RegExp(r'[^a-z0-9\u0621-\u064A\u0660-\u0669\u06F0-\u06F9]+'), ' ');
     v = v.trim().replaceAll(RegExp(r'\s+'), ' ');
     return v;

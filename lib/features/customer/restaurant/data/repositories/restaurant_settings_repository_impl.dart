@@ -1,4 +1,4 @@
-﻿import 'package:delwaqty/core/errors/exceptions.dart';
+import 'package:delwaqty/core/errors/exceptions.dart';
 import 'package:delwaqty/features/customer/restaurant/data/datasources/remote/supabase_restaurant_settings_data_source.dart';
 import 'package:delwaqty/features/customer/restaurant/domain/entities/restaurant_settings.dart';
 import 'package:delwaqty/features/customer/restaurant/domain/repositories/restaurant_settings_repository.dart';

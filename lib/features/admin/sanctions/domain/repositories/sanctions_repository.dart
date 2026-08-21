@@ -1,4 +1,4 @@
-﻿import 'package:delwaqty/features/admin/sanctions/domain/entities/sanction.dart';
+import 'package:delwaqty/features/admin/sanctions/domain/entities/sanction.dart';
 
 abstract class SanctionsRepository {
   Future<List<Sanction>> getSanctions({bool? active});

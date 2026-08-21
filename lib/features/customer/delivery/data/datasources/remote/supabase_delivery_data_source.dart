@@ -1,4 +1,4 @@
-﻿import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:delwaqty/services/supabase/supabase_service.dart';
 import 'package:delwaqty/features/customer/delivery/domain/entities/delivery_order.dart';
@@ -107,7 +107,7 @@ class SupabaseDeliveryDataSource {
     );
   }
 
-  // â”€â”€ Dispatch â”€â”€
+  // ── Dispatch ──
 
   Future<String> dispatchDelivery(String rideId,
       {double radiusKm = 10, int limit = 5}) async {
@@ -160,7 +160,7 @@ class SupabaseDeliveryDataSource {
     });
   }
 
-  // â”€â”€ Lifecycle â”€â”€
+  // ── Lifecycle ──
 
   Stream<DeliveryOrder?> watchActiveDelivery(String driverId) {
     return _client
@@ -230,7 +230,7 @@ class SupabaseDeliveryDataSource {
     }));
   }
 
-  // â”€â”€ Merchant â”€â”€
+  // ── Merchant ──
 
   Future<void> merchantReadyForDispatch(
       String rideId, String merchantId) async {
@@ -254,7 +254,7 @@ class SupabaseDeliveryDataSource {
     }).toList();
   }
 
-  // â”€â”€ Pricing â”€â”€
+  // ── Pricing ──
 
   Future<DeliveryPricingModel> getDeliveryPricing(String serviceType) async {
     final row = await _client
@@ -293,7 +293,7 @@ class SupabaseDeliveryDataSource {
     return Map<String, dynamic>.from(map);
   }
 
-  // â”€â”€ Driver capabilities â”€â”€
+  // ── Driver capabilities ──
 
   Future<DriverCapability> getDriverCapabilities(String driverId) async {
     final row = await _client
@@ -330,7 +330,7 @@ class SupabaseDeliveryDataSource {
     }));
   }
 
-  // â”€â”€ Merchant profiles â”€â”€
+  // ── Merchant profiles ──
 
   Future<MerchantProfile?> getMerchantProfile(String merchantId) async {
     final row = await _client
@@ -375,7 +375,7 @@ class SupabaseDeliveryDataSource {
     });
   }
 
-  // â”€â”€ Stats (reuse existing dispatch) â”€â”€
+  // ── Stats (reuse existing dispatch) ──
 
   Future<DriverStats> getDashboardStats(String driverId) async {
     final map = _checkRpc(await _client.rpc('driver_dashboard_stats', params: {
@@ -417,7 +417,7 @@ class SupabaseDeliveryDataSource {
     }).toList();
   }
 
-  // â”€â”€ Rating â”€â”€
+  // ── Rating ──
 
   Future<void> rateDelivery(
       String rideId, String driverId, int stars,

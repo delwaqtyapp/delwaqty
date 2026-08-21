@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 import 'package:delwaqty/core/module/feature_module.dart';
@@ -35,8 +35,32 @@ import 'package:delwaqty/features/admin/presentation/pages/admin_profile_page.da
 import 'package:delwaqty/features/admin/presentation/pages/admin_hierarchy_page.dart';
 import 'package:delwaqty/features/admin/presentation/pages/admin_pending_deletions_page.dart';
 
-AdminShell _admin(Widget page, {bool showFab = true}) {
-  return AdminShell(showFab: showFab, child: page);
+/// Smooth page transition for the admin module: quick fade + subtle rise.
+Page<void> _adminPage(
+  Widget page, {
+  bool showFab = true,
+  String? keySuffix,
+}) {
+  return CustomTransitionPage<void>(
+    key: ValueKey('${page.runtimeType}-$keySuffix'),
+    transitionDuration: const Duration(milliseconds: 320),
+    reverseTransitionDuration: const Duration(milliseconds: 220),
+    transitionsBuilder: (context, animation, secondaryAnimation, child) {
+      final curved = CurvedAnimation(
+        parent: animation,
+        curve: Curves.easeOutCubic,
+      );
+      final slide = Tween<Offset>(
+        begin: const Offset(0, 0.03),
+        end: Offset.zero,
+      ).animate(curved);
+      return FadeTransition(
+        opacity: curved,
+        child: SlideTransition(position: slide, child: child),
+      );
+    },
+    child: AdminShell(showFab: showFab, child: page),
+  );
 }
 
 class AdminModule extends FeatureModule {
@@ -65,79 +89,89 @@ class AdminModule extends FeatureModule {
   List<RouteBase> get standaloneRoutes => [
     GoRoute(
       path: '/admin',
-      builder: (context, state) =>
-          _admin(const PlatformIntelligenceDashboard()),
+      pageBuilder: (context, state) =>
+          _adminPage(const PlatformIntelligenceDashboard()),
       routes: [
         GoRoute(
           path: 'users',
-          builder: (context, state) => _admin(const AdminUsersPage()),
+          pageBuilder: (context, state) => _adminPage(const AdminUsersPage()),
         ),
         GoRoute(
           path: 'merchants',
-          builder: (context, state) => _admin(const AdminMerchantsPage()),
+          pageBuilder: (context, state) =>
+              _adminPage(const AdminMerchantsPage()),
         ),
         GoRoute(
           path: 'orders',
-          builder: (context, state) => _admin(const AdminOrdersPage()),
+          pageBuilder: (context, state) => _adminPage(const AdminOrdersPage()),
         ),
         GoRoute(
           path: 'settings',
-          builder: (context, state) => _admin(const AdminSettingsPage()),
+          pageBuilder: (context, state) =>
+              _adminPage(const AdminSettingsPage()),
         ),
         GoRoute(
           path: 'drivers',
-          builder: (context, state) => _admin(const AdminDriversPage()),
+          pageBuilder: (context, state) => _adminPage(const AdminDriversPage()),
         ),
         GoRoute(
           path: 'analytics',
-          builder: (context, state) => _admin(const AdminAnalyticsPage()),
+          pageBuilder: (context, state) =>
+              _adminPage(const AdminAnalyticsPage()),
         ),
         GoRoute(
           path: 'deliveries',
-          builder: (context, state) => _admin(const AdminDeliveriesPage()),
+          pageBuilder: (context, state) =>
+              _adminPage(const AdminDeliveriesPage()),
         ),
         GoRoute(
           path: 'push-notifications',
-          builder: (context, state) =>
-              _admin(const AdminPushNotificationsPage()),
+          pageBuilder: (context, state) =>
+              _adminPage(const AdminPushNotificationsPage()),
         ),
         GoRoute(
           path: 'verifications',
-          builder: (context, state) => _admin(const AdminVerificationsPage()),
+          pageBuilder: (context, state) =>
+              _adminPage(const AdminVerificationsPage()),
         ),
         GoRoute(
           path: 'commissions',
-          builder: (context, state) =>
-              _admin(const AdminCommissionManagementPage()),
+          pageBuilder: (context, state) =>
+              _adminPage(const AdminCommissionManagementPage()),
         ),
         GoRoute(
           path: 'approvals',
-          builder: (context, state) =>
-              _admin(const AdminApprovalsCenterPage()),
+          pageBuilder: (context, state) =>
+              _adminPage(const AdminApprovalsCenterPage()),
         ),
         GoRoute(
           path: 'complaints',
-          builder: (context, state) => _admin(const AdminComplaintsPage()),
+          pageBuilder: (context, state) =>
+              _adminPage(const AdminComplaintsPage()),
         ),
         GoRoute(
           path: 'sanctions',
-          builder: (context, state) => _admin(const AdminSanctionsPage()),
+          pageBuilder: (context, state) =>
+              _adminPage(const AdminSanctionsPage()),
         ),
         GoRoute(
           path: 'live-tracking',
-          builder: (context, state) => _admin(const AdminLiveTrackingPage()),
+          pageBuilder: (context, state) =>
+              _adminPage(const AdminLiveTrackingPage()),
         ),
         GoRoute(
           path: 'support-chat',
-          builder: (context, state) => _admin(const AdminSupportChatPage()),
+          pageBuilder: (context, state) =>
+              _adminPage(const AdminSupportChatPage()),
           routes: [
             GoRoute(
               path: 'room/:roomId',
-              builder: (context, state) {
+              pageBuilder: (context, state) {
                 final roomId = state.pathParameters['roomId']!;
-                return _admin(
+                return _adminPage(
                   SupportChatRoomPage(roomId: roomId),
                   showFab: false,
+                  keySuffix: roomId,
                 );
               },
             ),
@@ -145,16 +179,17 @@ class AdminModule extends FeatureModule {
         ),
         GoRoute(
           path: 'members',
-          builder: (context, state) =>
-              _admin(const MemberOperationsCenter()),
+          pageBuilder: (context, state) =>
+              _adminPage(const MemberOperationsCenter()),
           routes: [
             GoRoute(
               path: ':id',
-              builder: (context, state) {
+              pageBuilder: (context, state) {
                 final id = state.pathParameters['id']!;
-                return _admin(
+                return _adminPage(
                   MemberDetailPage(memberId: id),
                   showFab: false,
+                  keySuffix: id,
                 );
               },
             ),
@@ -162,56 +197,63 @@ class AdminModule extends FeatureModule {
         ),
         GoRoute(
           path: 'financial-center',
-          builder: (context, state) => _admin(const AdminFinancialCenter()),
+          pageBuilder: (context, state) =>
+              _adminPage(const AdminFinancialCenter()),
         ),
         GoRoute(
           path: 'emergency',
-          builder: (context, state) => _admin(const AdminEmergencyPage()),
+          pageBuilder: (context, state) =>
+              _adminPage(const AdminEmergencyPage()),
         ),
         GoRoute(
           path: 'delivery-intelligence',
-          builder: (context, state) =>
-              _admin(const AdminDeliveryIntelligencePage()),
+          pageBuilder: (context, state) =>
+              _adminPage(const AdminDeliveryIntelligencePage()),
         ),
         GoRoute(
           path: 'merchant-intelligence',
-          builder: (context, state) =>
-              _admin(const AdminMerchantIntelligencePage()),
+          pageBuilder: (context, state) =>
+              _adminPage(const AdminMerchantIntelligencePage()),
         ),
         GoRoute(
           path: 'provider-intelligence',
-          builder: (context, state) =>
-              _admin(const AdminProviderIntelligencePage()),
+          pageBuilder: (context, state) =>
+              _adminPage(const AdminProviderIntelligencePage()),
         ),
         GoRoute(
           path: 'wallet-intelligence',
-          builder: (context, state) =>
-              _admin(const AdminWalletIntelligencePage()),
+          pageBuilder: (context, state) =>
+              _adminPage(const AdminWalletIntelligencePage()),
         ),
         GoRoute(
           path: 'transaction-ledger',
-          builder: (context, state) =>
-              _admin(const AdminTransactionLedgerPage()),
+          pageBuilder: (context, state) =>
+              _adminPage(const AdminTransactionLedgerPage()),
         ),
         GoRoute(
           path: 'service-performance',
-          builder: (context, state) => _admin(const ServicePerformancePage()),
+          pageBuilder: (context, state) =>
+              _adminPage(const ServicePerformancePage()),
         ),
         GoRoute(
           path: 'actions',
-          builder: (context, state) => _admin(const AdminQuickActionsPage()),
+          pageBuilder: (context, state) =>
+              _adminPage(const AdminQuickActionsPage()),
         ),
         GoRoute(
           path: 'profile',
-          builder: (context, state) => _admin(const AdminProfilePage()),
+          pageBuilder: (context, state) =>
+              _adminPage(const AdminProfilePage()),
         ),
         GoRoute(
           path: 'hierarchy',
-          builder: (context, state) => _admin(const AdminHierarchyPage()),
+          pageBuilder: (context, state) =>
+              _adminPage(const AdminHierarchyPage()),
         ),
         GoRoute(
           path: 'pending-deletions',
-          builder: (context, state) => _admin(const AdminPendingDeletionsPage()),
+          pageBuilder: (context, state) =>
+              _adminPage(const AdminPendingDeletionsPage()),
         ),
       ],
     ),

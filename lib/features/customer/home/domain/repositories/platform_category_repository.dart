@@ -1,4 +1,4 @@
-﻿import 'dart:typed_data';
+import 'dart:typed_data';
 import 'package:delwaqty/features/customer/home/domain/entities/platform_category.dart';
 
 abstract interface class PlatformCategoryRepository {

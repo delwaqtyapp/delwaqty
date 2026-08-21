@@ -1,4 +1,4 @@
-﻿import 'package:delwaqty/features/admin/support_chat/domain/entities/chat_room.dart';
+import 'package:delwaqty/features/admin/support_chat/domain/entities/chat_room.dart';
 import 'package:delwaqty/features/admin/support_chat/domain/entities/chat_message.dart';
 import 'package:delwaqty/features/admin/support_chat/domain/repositories/chat_repository.dart';
 import 'package:delwaqty/features/admin/support_chat/data/datasources/remote/supabase_chat_data_source.dart';

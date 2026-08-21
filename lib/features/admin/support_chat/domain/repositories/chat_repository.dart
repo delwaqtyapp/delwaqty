@@ -1,4 +1,4 @@
-﻿import 'package:delwaqty/features/admin/support_chat/domain/entities/chat_room.dart';
+import 'package:delwaqty/features/admin/support_chat/domain/entities/chat_room.dart';
 import 'package:delwaqty/features/admin/support_chat/domain/entities/chat_message.dart';
 
 abstract class ChatRepository {

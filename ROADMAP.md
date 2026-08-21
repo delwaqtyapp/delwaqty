@@ -1,7 +1,7 @@
 # ROADMAP.md — Delwaqty Development Roadmap
 
 > **Last updated:** 2026-08-18
-> **Authority:** PROJECT_CONSTITUTION.md §15 (v2.0)
+> **Authority:** PROJECT_CONSTITUTION.md �15 (v2.0)
 
 ---
 
@@ -58,7 +58,7 @@
 | Login UX (fingerprint + saved accounts) | ✅ Fingerprint login fixed (biometric permissions, Keystore-backed password via flutter_secure_storage v11), saved-accounts section with quick re-login, social login removed, save-account checkbox wired end-to-end |
 | **Mocks remaining in codepath** | **0** |
 
-## Next Steps (Constitution v2.0 §15)
+## Next Steps (Constitution v2.0 �15)
 
 ### Phase 8: Transportation Platform (Ride-Hailing Ecosystem)
 - [x] M1: Full Arabic-default localization + EGP currency (sprint 28)
@@ -127,7 +127,7 @@
 
 ## Phase 2 — Admin Hierarchy, Regions, Escalation (sprint 76+, planned)
 
-> Authoritative per-sub-phase gate docs: `docs/HANDOFF/25…28, 30`. Constitution §15 authority. No
+> Authoritative per-sub-phase gate docs: `docs/HANDOFF/25�28, 30`. Constitution �15 authority. No
 > migration is written ahead of its gate's approval (architecture-first, evidence-first).
 
 | Sub-phase | Scope | Migration | Status |
@@ -141,10 +141,10 @@
 | 2.5 | Escalation engine: `escalation_events` + engine RPCs; wire complaints `escalated` status | `048_escalation_engine` | ✅ **SHIPPED** — migration `048_escalation_engine.sql` applied live + probe-verified (strict-upward routing: scoped → global → owner queue; marker-based server-origin guards replacing the unusable `session_user`/`current_user` discriminator under PostgREST); **Step 13**: Flutter `lib/features/escalation/` module (entity/repo/data source/impl/providers/admin queue page), `/admin/escalations` route + module registry registration, complaints `escalated` routed via `escalate_complaint` RPC (direct UPDATE raises), Escalate action with required-reason prompt, l10n en+ar; targeted suites green; `sprint 81` committed+pushed |
 | 2.6 | Realtime hardening: centralized `RealtimeService` (channel tracking, cleanup, error callbacks) + `RealtimeChannels` constants (11 canonical names) + `PushNotificationService` migrated to use service | `—` (Dart only) | ✅ **SHIPPED** — `sprint 83` committed+pushed; `dart analyze` 0 errors; 119 tests green |
 | 2.7 | Security hardening: `SET search_path = public, pg_temp` on 26 legacy SECURITY DEFINER RPCs (005/010/012/029/021) + `REVOKE ... FROM anon` on 15 platform_* admin-only RPCs + full 016 pattern everywhere | `051_rpc_search_path_and_acl_hardening` | ✅ **SHIPPED** — `sprint 83` committed+pushed; migration 051 applied live; pg_proc verified all 26 RPCs have search_path; anon blocked from all RPCs |
-| **Promo** | **Promotion / Content / Campaign platform:** `campaigns`, `campaign_banners`, `campaign_reviews`, `campaign_cta_routes`, `campaign_seen` · targeting `campaign_targets` · generic `approval_requests` · `campaign-media` bucket · feed `get_active_campaigns` (SECURITY DEFINER) · analytics `campaign_events`→`campaign_metrics` · Flutter home carousel/campaign detail | **039 + 040 + 042 applied** | ✅ **SHIPPED** — `sprint 79` committed+pushed; DB-driven campaign carousel + notification gap wiring; `flutter test` 856/856 |
+| **Promo** | **Promotion / Content / Campaign platform:** `campaigns`, `campaign_banners`, `campaign_reviews`, `campaign_cta_routes`, `campaign_seen` � targeting `campaign_targets` � generic `approval_requests` � `campaign-media` bucket � feed `get_active_campaigns` (SECURITY DEFINER) � analytics `campaign_events`?`campaign_metrics` � Flutter home carousel/campaign detail | **039 + 040 + 042 applied** | ? **SHIPPED** � `sprint 79` committed+pushed; DB-driven campaign carousel + notification gap wiring; `flutter test` 856/856 |
 
-**D-resolutions:** D1 → ADR-049 (+ADR-055/056) · D2 → ADR-050 (migration 030) · D3 → 2.3 (extend
-`chat_rooms`, decided in doc 28 §5) · D4 → 2.5 (escalation engine + priority server-side only).
+**D-resolutions:** D1 ? ADR-049 (+ADR-055/056) � D2 ? ADR-050 (migration 030) � D3 ? 2.3 (extend
+`chat_rooms`, decided in doc 28 �5) � D4 ? 2.5 (escalation engine + priority server-side only).
 
 ---
 

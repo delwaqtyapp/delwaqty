@@ -1,4 +1,4 @@
-﻿import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:delwaqty/features/_shared/regions/domain/entities/region.dart';
 import 'package:delwaqty/features/_shared/regions/domain/entities/geo_entity.dart';
 import 'package:delwaqty/features/_shared/regions/domain/entities/spatial_resolution.dart';

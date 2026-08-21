@@ -1,4 +1,4 @@
-﻿import 'dart:async';
+import 'dart:async';
 import 'dart:math' as math;
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
@@ -386,12 +386,12 @@ class _SplashPageState extends ConsumerState<SplashPage>
                     letterSpacing: 0.5,
                   ),
                   children: [
-                    TextSpan(text: 'Ø¯', style: TextStyle(color: Colors.white)),
-                    TextSpan(text: 'Ù„', style: TextStyle(color: Colors.white)),
-                    TextSpan(text: 'Ùˆ', style: TextStyle(color: Colors.white)),
-                    TextSpan(text: 'Ù‚', style: TextStyle(color: Color(0xFF7A5CFF))),
-                    TextSpan(text: 'Øª', style: TextStyle(color: Color(0xFF4E8DFF))),
-                    TextSpan(text: 'ÙŠ', style: TextStyle(color: Color(0xFF2DD4BF))),
+                    TextSpan(text: 'د', style: TextStyle(color: Colors.white)),
+                    TextSpan(text: 'ل', style: TextStyle(color: Colors.white)),
+                    TextSpan(text: 'و', style: TextStyle(color: Colors.white)),
+                    TextSpan(text: 'ق', style: TextStyle(color: Color(0xFF7A5CFF))),
+                    TextSpan(text: 'ت', style: TextStyle(color: Color(0xFF4E8DFF))),
+                    TextSpan(text: 'ي', style: TextStyle(color: Color(0xFF2DD4BF))),
                   ],
                 ),
               ),

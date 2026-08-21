@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:delwaqty/core/module/feature_module.dart';
@@ -34,7 +34,7 @@ import 'package:delwaqty/features/customer/commerce/presentation/pages/order_tra
 import 'package:delwaqty/features/customer/commerce/presentation/pages/order_completed_page.dart';
 import 'package:delwaqty/features/customer/commerce/presentation/pages/favorites_page.dart';
 
-// â”€â”€â”€ Repository Providers â”€â”€â”€
+// ─── Repository Providers ───
 
 final merchantRepositoryProvider = Provider<MerchantRepository>(
   (ref) => ref.watch(merchantRepositoryImplProvider),
@@ -88,7 +88,7 @@ final favoriteRepositoryProvider = Provider<FavoriteRepository>(
   (ref) => ref.watch(favoriteRepositoryImplProvider),
 );
 
-// â”€â”€â”€ Commerce Module â”€â”€â”€
+// ─── Commerce Module ───
 
 class CommerceModule extends FeatureModule {
   @override

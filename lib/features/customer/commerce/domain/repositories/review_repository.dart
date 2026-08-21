@@ -1,4 +1,4 @@
-﻿import 'package:delwaqty/features/customer/commerce/domain/entities/review.dart';
+import 'package:delwaqty/features/customer/commerce/domain/entities/review.dart';
 
 abstract interface class ReviewRepository {
   Future<List<Review>> getMerchantReviews(

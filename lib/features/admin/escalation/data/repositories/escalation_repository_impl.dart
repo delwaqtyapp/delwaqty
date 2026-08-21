@@ -1,4 +1,4 @@
-﻿import 'package:delwaqty/features/admin/escalation/domain/entities/escalation_event.dart';
+import 'package:delwaqty/features/admin/escalation/domain/entities/escalation_event.dart';
 import 'package:delwaqty/features/admin/escalation/domain/repositories/escalation_repository.dart';
 import 'package:delwaqty/features/admin/escalation/data/datasources/remote/supabase_escalation_data_source.dart';
 

@@ -1,4 +1,4 @@
-﻿import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:delwaqty/features/admin/member_management/domain/entities/member.dart';
 import 'package:delwaqty/features/admin/member_management/data/repositories/supabase_member_repository_impl.dart';
 import 'package:delwaqty/services/supabase/supabase_service.dart';

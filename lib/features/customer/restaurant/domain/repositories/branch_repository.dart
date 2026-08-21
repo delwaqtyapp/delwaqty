@@ -1,4 +1,4 @@
-﻿import 'package:delwaqty/features/customer/restaurant/domain/entities/branch.dart';
+import 'package:delwaqty/features/customer/restaurant/domain/entities/branch.dart';
 
 abstract interface class BranchRepository {
   Future<List<Branch>> getBranches(String merchantId);

@@ -1,4 +1,4 @@
-﻿import 'dart:io';
+import 'dart:io';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -647,7 +647,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
         children: [
           Expanded(
             child: _LanguageOption(
-              label: 'Ø§Ù„Ø¹Ø±Ø¨ÙŠØ©',
+              label: 'العربية',
               isSelected: _selectedLanguage == 'ar',
               onTap: () => setState(() => _selectedLanguage = 'ar'),
             ),
@@ -781,7 +781,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
         ),
         const SizedBox(height: 8),
         Text(
-          'ÙƒÙ„ Ø§Ø­ØªÙŠØ§Ø¬Ø§ØªÙƒ... Ø¯Ù„ÙˆÙ‚ØªÙŠ',
+          'كل احتياجاتك... دلوقتي',
           style: TextStyle(
             fontSize: 14,
             color: const Color(0xFF1A1035).withValues(alpha: 0.4),

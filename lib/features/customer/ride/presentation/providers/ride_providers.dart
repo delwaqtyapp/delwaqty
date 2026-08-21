@@ -1,4 +1,4 @@
-﻿import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:delwaqty/services/supabase/supabase_service.dart';
 import 'package:delwaqty/features/customer/ride/domain/entities/ride.dart';
 import 'package:delwaqty/features/customer/ride/domain/entities/fare_quote.dart';

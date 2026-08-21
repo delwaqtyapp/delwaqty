@@ -1,4 +1,4 @@
-﻿import 'package:delwaqty/features/customer/restaurant/domain/entities/product_modifier.dart';
+import 'package:delwaqty/features/customer/restaurant/domain/entities/product_modifier.dart';
 
 abstract interface class ModifierRepository {
   Future<List<ProductModifier>> getModifiers(String productId);

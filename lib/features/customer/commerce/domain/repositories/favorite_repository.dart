@@ -1,4 +1,4 @@
-﻿import 'package:delwaqty/features/customer/commerce/domain/entities/favorite.dart';
+import 'package:delwaqty/features/customer/commerce/domain/entities/favorite.dart';
 
 abstract interface class FavoriteRepository {
   Future<List<Favorite>> getFavorites({FavoriteType? type});

@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:delwaqty/features/customer/safety/presentation/safety_providers.dart';
 import 'package:delwaqty/features/customer/safety/domain/entities/trusted_contact.dart';

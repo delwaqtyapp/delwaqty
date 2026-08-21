@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:delwaqty/features/admin/member_management/presentation/member_providers.dart';
 import 'package:delwaqty/features/admin/sanctions/presentation/sanctions_providers.dart';
@@ -541,7 +541,7 @@ class _SanctionsSectionState extends ConsumerState<_SanctionsSection> {
                       const SizedBox(width: 6),
                       Expanded(
                         child: Text(
-                          '${_sanctionTypeName(l10n, type)} â€” $reason',
+                          '${_sanctionTypeName(l10n, type)} — $reason',
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -635,7 +635,7 @@ class _TimelineSection extends ConsumerWidget {
                       ),
                       title: Text(type, style: const TextStyle(fontSize: 13)),
                       subtitle: Text(
-                        reason.isNotEmpty ? '$createdAt â€” $reason' : createdAt,
+                        reason.isNotEmpty ? '$createdAt — $reason' : createdAt,
                         style: const TextStyle(fontSize: 11),
                       ),
                     );

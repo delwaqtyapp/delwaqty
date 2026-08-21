@@ -1,4 +1,4 @@
-﻿import 'package:delwaqty/features/customer/restaurant/domain/entities/offer.dart';
+import 'package:delwaqty/features/customer/restaurant/domain/entities/offer.dart';
 import 'package:delwaqty/features/customer/restaurant/domain/entities/restaurant_settings.dart';
 import 'package:delwaqty/features/customer/restaurant/presentation/widgets/offer_banner_card.dart';
 import 'package:delwaqty/features/customer/restaurant/presentation/widgets/service_type_chips.dart';

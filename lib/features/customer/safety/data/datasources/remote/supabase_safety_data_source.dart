@@ -1,4 +1,4 @@
-﻿import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:delwaqty/features/customer/safety/domain/entities/sos_alert.dart';
 import 'package:delwaqty/features/customer/safety/domain/entities/sos_result.dart';
 import 'package:delwaqty/features/customer/safety/domain/entities/trusted_contact.dart';

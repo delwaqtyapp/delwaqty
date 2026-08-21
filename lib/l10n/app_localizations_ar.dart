@@ -5623,4 +5623,223 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get deviceUnlockStale =>
       'بيانات الحساب المحفوظة غير صحيحة، سجّل الدخول بكلمة المرور';
+
+  @override
+  String get adminMgmtList => 'إدارة المشرفين';
+
+  @override
+  String get adminMgmtRefresh => 'تحديث';
+
+  @override
+  String get adminMgmtCreate => 'إنشاء مشرف';
+
+  @override
+  String get adminMgmtSearch => 'بحث عن مشرف...';
+
+  @override
+  String get adminMgmtFilterRole => 'الدور';
+
+  @override
+  String get adminMgmtFilterStatus => 'الحالة';
+
+  @override
+  String get adminMgmtFilterRegion => 'المنطقة';
+
+  @override
+  String get adminMgmtAll => 'الكل';
+
+  @override
+  String get adminMgmtRoleOwner => 'مالك';
+
+  @override
+  String get adminMgmtRoleAdmin => 'مشرف';
+
+  @override
+  String get adminMgmtStatusActive => 'نشط';
+
+  @override
+  String get adminMgmtStatusInactive => 'غير نشط';
+
+  @override
+  String get adminMgmtSortCreated => 'الأحدث';
+
+  @override
+  String get adminMgmtSortName => 'الاسم';
+
+  @override
+  String get adminMgmtSortRole => 'الدور';
+
+  @override
+  String get adminMgmtRegion => 'المنطقة';
+
+  @override
+  String get adminMgmtUnknown => 'غير معروف';
+
+  @override
+  String get adminMgmtPage => 'صفحة';
+
+  @override
+  String get adminMgmtNoAdmins => 'لا يوجد مشرفون';
+
+  @override
+  String get adminMgmtFailed => 'فشلت العملية';
+
+  @override
+  String get adminMgmtCreateTitle => 'إنشاء حساب مشرف';
+
+  @override
+  String get adminMgmtFullName => 'الاسم الكامل';
+
+  @override
+  String get adminMgmtEmail => 'البريد الإلكتروني';
+
+  @override
+  String get adminMgmtFullNameRequired => 'الاسم الكامل مطلوب';
+
+  @override
+  String get adminMgmtEmailInvalid => 'أدخل بريدًا صالحًا';
+
+  @override
+  String get adminMgmtPassword => 'كلمة المرور';
+
+  @override
+  String get adminMgmtPasswordHint => '8 أحرف على الأقل';
+
+  @override
+  String get adminMgmtSelectSupervisor => 'اختر المشرف';
+
+  @override
+  String get adminMgmtSelectRegion => 'اختر المنطقة';
+
+  @override
+  String get adminMgmtNone => 'لا شيء';
+
+  @override
+  String get adminMgmtCancel => 'إلغاء';
+
+  @override
+  String get adminMgmtCreateSuccess => 'تم إنشاء حساب المشرف';
+
+  @override
+  String get adminMgmtProfile => 'ملف المشرف';
+
+  @override
+  String get adminMgmtIdentity => 'الهوية';
+
+  @override
+  String get adminMgmtAccountStatus => 'حالة الحساب';
+
+  @override
+  String get adminMgmtLastActivity => 'آخر نشاط';
+
+  @override
+  String get adminMgmtNotTracked => 'غير متتبع';
+
+  @override
+  String get adminMgmtHierarchy => 'التدرج الإداري';
+
+  @override
+  String get adminMgmtSupervisor => 'المشرف';
+
+  @override
+  String get adminMgmtChangeSupervisor => 'تغيير المشرف';
+
+  @override
+  String get adminMgmtRegionScope => 'النطاق الإقليمي';
+
+  @override
+  String get adminMgmtScopeSelf => 'الذات فقط';
+
+  @override
+  String get adminMgmtScopeDescendants => 'الذات والفروع';
+
+  @override
+  String get adminMgmtAssignRegion => 'تعيين منطقة';
+
+  @override
+  String get adminMgmtPermissions => 'الصلاحيات';
+
+  @override
+  String get adminMgmtEffective => 'الصلاحيات الفعالة';
+
+  @override
+  String get adminMgmtGranted => 'ممنوحة صراحة';
+
+  @override
+  String get adminMgmtGrant => 'منح';
+
+  @override
+  String get adminMgmtRevoke => 'سحب';
+
+  @override
+  String get adminMgmtAudit => 'سجل التدقيق';
+
+  @override
+  String get adminMgmtNoAudit => 'لا يوجد سجل تدقيق';
+
+  @override
+  String get adminMgmtDeactivate => 'إلغاء التفعيل';
+
+  @override
+  String get adminMgmtReactivate => 'إعادة التفعيل';
+
+  @override
+  String get adminMgmtConfirm => 'تأكيد';
+
+  @override
+  String get adminMgmtReason => 'السبب';
+
+  @override
+  String get adminMgmtReasonHint => 'قدم سببًا لهذا الإجراء';
+
+  @override
+  String get adminMgmtId => 'المعرف';
+
+  @override
+  String get adminMgmtStatus => 'الحالة';
+
+  @override
+  String get adminMgmtScope => 'النطاق';
+
+  @override
+  String get adminMgmtNotFound => 'المشرف غير موجود';
+
+  @override
+  String get adminMgmtAssignRole => 'تعيين الدور';
+
+  @override
+  String get adminMgmtSelectRole => 'اختر الدور';
+
+  @override
+  String get adminMgmtRoleUpdated => 'تم تحديث الدور';
+
+  @override
+  String get adminMgmtGrantedUpdated => 'تم تحديث الصلاحيات';
+
+  @override
+  String get adminMgmtNoGrants => 'لا توجد صلاحيات ممنوحة للسحب';
+
+  @override
+  String get adminMgmtRole => 'الدور';
+
+  @override
+  String get adminMgmtRoleLabel => 'الدور';
+
+  @override
+  String get adminMgmtCreatedAt => 'تاريخ الإنشاء';
+
+  @override
+  String get adminMgmtActions => 'الإجراءات';
+
+  @override
+  String get adminMgmtDeactivated => 'تم إلغاء تفعيل المشرف';
+
+  @override
+  String get adminMgmtReactivated => 'تم إعادة تفعيل المشرف';
+
+  @override
+  String get adminMgmtSupervisorUpdated => 'تم تحديث المشرف';
+
+  @override
+  String get adminMgmtRegionUpdated => 'تم تحديث المنطقة';
 }

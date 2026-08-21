@@ -10843,6 +10843,444 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Saved credentials are invalid, sign in with your password'**
   String get deviceUnlockStale;
+
+  /// No description provided for @adminMgmtList.
+  ///
+  /// In en, this message translates to:
+  /// **'Admin Management'**
+  String get adminMgmtList;
+
+  /// No description provided for @adminMgmtRefresh.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh'**
+  String get adminMgmtRefresh;
+
+  /// No description provided for @adminMgmtCreate.
+  ///
+  /// In en, this message translates to:
+  /// **'Create Admin'**
+  String get adminMgmtCreate;
+
+  /// No description provided for @adminMgmtSearch.
+  ///
+  /// In en, this message translates to:
+  /// **'Search admins...'**
+  String get adminMgmtSearch;
+
+  /// No description provided for @adminMgmtFilterRole.
+  ///
+  /// In en, this message translates to:
+  /// **'Role'**
+  String get adminMgmtFilterRole;
+
+  /// No description provided for @adminMgmtFilterStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Status'**
+  String get adminMgmtFilterStatus;
+
+  /// No description provided for @adminMgmtFilterRegion.
+  ///
+  /// In en, this message translates to:
+  /// **'Region'**
+  String get adminMgmtFilterRegion;
+
+  /// No description provided for @adminMgmtAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get adminMgmtAll;
+
+  /// No description provided for @adminMgmtRoleOwner.
+  ///
+  /// In en, this message translates to:
+  /// **'Owner'**
+  String get adminMgmtRoleOwner;
+
+  /// No description provided for @adminMgmtRoleAdmin.
+  ///
+  /// In en, this message translates to:
+  /// **'Admin'**
+  String get adminMgmtRoleAdmin;
+
+  /// No description provided for @adminMgmtStatusActive.
+  ///
+  /// In en, this message translates to:
+  /// **'Active'**
+  String get adminMgmtStatusActive;
+
+  /// No description provided for @adminMgmtStatusInactive.
+  ///
+  /// In en, this message translates to:
+  /// **'Inactive'**
+  String get adminMgmtStatusInactive;
+
+  /// No description provided for @adminMgmtSortCreated.
+  ///
+  /// In en, this message translates to:
+  /// **'Newest'**
+  String get adminMgmtSortCreated;
+
+  /// No description provided for @adminMgmtSortName.
+  ///
+  /// In en, this message translates to:
+  /// **'Name'**
+  String get adminMgmtSortName;
+
+  /// No description provided for @adminMgmtSortRole.
+  ///
+  /// In en, this message translates to:
+  /// **'Role'**
+  String get adminMgmtSortRole;
+
+  /// No description provided for @adminMgmtRegion.
+  ///
+  /// In en, this message translates to:
+  /// **'Region'**
+  String get adminMgmtRegion;
+
+  /// No description provided for @adminMgmtUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown'**
+  String get adminMgmtUnknown;
+
+  /// No description provided for @adminMgmtPage.
+  ///
+  /// In en, this message translates to:
+  /// **'Page'**
+  String get adminMgmtPage;
+
+  /// No description provided for @adminMgmtNoAdmins.
+  ///
+  /// In en, this message translates to:
+  /// **'No admins found'**
+  String get adminMgmtNoAdmins;
+
+  /// No description provided for @adminMgmtFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Operation failed'**
+  String get adminMgmtFailed;
+
+  /// No description provided for @adminMgmtCreateTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Create Admin Account'**
+  String get adminMgmtCreateTitle;
+
+  /// No description provided for @adminMgmtFullName.
+  ///
+  /// In en, this message translates to:
+  /// **'Full name'**
+  String get adminMgmtFullName;
+
+  /// No description provided for @adminMgmtEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Email'**
+  String get adminMgmtEmail;
+
+  /// No description provided for @adminMgmtFullNameRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Full name is required'**
+  String get adminMgmtFullNameRequired;
+
+  /// No description provided for @adminMgmtEmailInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a valid email'**
+  String get adminMgmtEmailInvalid;
+
+  /// No description provided for @adminMgmtPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Password'**
+  String get adminMgmtPassword;
+
+  /// No description provided for @adminMgmtPasswordHint.
+  ///
+  /// In en, this message translates to:
+  /// **'At least 8 characters'**
+  String get adminMgmtPasswordHint;
+
+  /// No description provided for @adminMgmtSelectSupervisor.
+  ///
+  /// In en, this message translates to:
+  /// **'Select supervisor'**
+  String get adminMgmtSelectSupervisor;
+
+  /// No description provided for @adminMgmtSelectRegion.
+  ///
+  /// In en, this message translates to:
+  /// **'Select region'**
+  String get adminMgmtSelectRegion;
+
+  /// No description provided for @adminMgmtNone.
+  ///
+  /// In en, this message translates to:
+  /// **'None'**
+  String get adminMgmtNone;
+
+  /// No description provided for @adminMgmtCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get adminMgmtCancel;
+
+  /// No description provided for @adminMgmtCreateSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Admin account created'**
+  String get adminMgmtCreateSuccess;
+
+  /// No description provided for @adminMgmtProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'Admin Profile'**
+  String get adminMgmtProfile;
+
+  /// No description provided for @adminMgmtIdentity.
+  ///
+  /// In en, this message translates to:
+  /// **'Identity'**
+  String get adminMgmtIdentity;
+
+  /// No description provided for @adminMgmtAccountStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Account Status'**
+  String get adminMgmtAccountStatus;
+
+  /// No description provided for @adminMgmtLastActivity.
+  ///
+  /// In en, this message translates to:
+  /// **'Last activity'**
+  String get adminMgmtLastActivity;
+
+  /// No description provided for @adminMgmtNotTracked.
+  ///
+  /// In en, this message translates to:
+  /// **'Not tracked'**
+  String get adminMgmtNotTracked;
+
+  /// No description provided for @adminMgmtHierarchy.
+  ///
+  /// In en, this message translates to:
+  /// **'Hierarchy'**
+  String get adminMgmtHierarchy;
+
+  /// No description provided for @adminMgmtSupervisor.
+  ///
+  /// In en, this message translates to:
+  /// **'Supervisor'**
+  String get adminMgmtSupervisor;
+
+  /// No description provided for @adminMgmtChangeSupervisor.
+  ///
+  /// In en, this message translates to:
+  /// **'Change supervisor'**
+  String get adminMgmtChangeSupervisor;
+
+  /// No description provided for @adminMgmtRegionScope.
+  ///
+  /// In en, this message translates to:
+  /// **'Region Scope'**
+  String get adminMgmtRegionScope;
+
+  /// No description provided for @adminMgmtScopeSelf.
+  ///
+  /// In en, this message translates to:
+  /// **'Self only'**
+  String get adminMgmtScopeSelf;
+
+  /// No description provided for @adminMgmtScopeDescendants.
+  ///
+  /// In en, this message translates to:
+  /// **'Self + descendants'**
+  String get adminMgmtScopeDescendants;
+
+  /// No description provided for @adminMgmtAssignRegion.
+  ///
+  /// In en, this message translates to:
+  /// **'Assign region'**
+  String get adminMgmtAssignRegion;
+
+  /// No description provided for @adminMgmtPermissions.
+  ///
+  /// In en, this message translates to:
+  /// **'Permissions'**
+  String get adminMgmtPermissions;
+
+  /// No description provided for @adminMgmtEffective.
+  ///
+  /// In en, this message translates to:
+  /// **'Effective permissions'**
+  String get adminMgmtEffective;
+
+  /// No description provided for @adminMgmtGranted.
+  ///
+  /// In en, this message translates to:
+  /// **'Explicitly granted'**
+  String get adminMgmtGranted;
+
+  /// No description provided for @adminMgmtGrant.
+  ///
+  /// In en, this message translates to:
+  /// **'Grant'**
+  String get adminMgmtGrant;
+
+  /// No description provided for @adminMgmtRevoke.
+  ///
+  /// In en, this message translates to:
+  /// **'Revoke'**
+  String get adminMgmtRevoke;
+
+  /// No description provided for @adminMgmtAudit.
+  ///
+  /// In en, this message translates to:
+  /// **'Audit History'**
+  String get adminMgmtAudit;
+
+  /// No description provided for @adminMgmtNoAudit.
+  ///
+  /// In en, this message translates to:
+  /// **'No audit history'**
+  String get adminMgmtNoAudit;
+
+  /// No description provided for @adminMgmtDeactivate.
+  ///
+  /// In en, this message translates to:
+  /// **'Deactivate'**
+  String get adminMgmtDeactivate;
+
+  /// No description provided for @adminMgmtReactivate.
+  ///
+  /// In en, this message translates to:
+  /// **'Reactivate'**
+  String get adminMgmtReactivate;
+
+  /// No description provided for @adminMgmtConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm'**
+  String get adminMgmtConfirm;
+
+  /// No description provided for @adminMgmtReason.
+  ///
+  /// In en, this message translates to:
+  /// **'Reason'**
+  String get adminMgmtReason;
+
+  /// No description provided for @adminMgmtReasonHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Provide a reason for this action'**
+  String get adminMgmtReasonHint;
+
+  /// No description provided for @adminMgmtId.
+  ///
+  /// In en, this message translates to:
+  /// **'ID'**
+  String get adminMgmtId;
+
+  /// No description provided for @adminMgmtStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Status'**
+  String get adminMgmtStatus;
+
+  /// No description provided for @adminMgmtScope.
+  ///
+  /// In en, this message translates to:
+  /// **'Scope'**
+  String get adminMgmtScope;
+
+  /// No description provided for @adminMgmtNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'Admin not found'**
+  String get adminMgmtNotFound;
+
+  /// No description provided for @adminMgmtAssignRole.
+  ///
+  /// In en, this message translates to:
+  /// **'Assign role'**
+  String get adminMgmtAssignRole;
+
+  /// No description provided for @adminMgmtSelectRole.
+  ///
+  /// In en, this message translates to:
+  /// **'Select role'**
+  String get adminMgmtSelectRole;
+
+  /// No description provided for @adminMgmtRoleUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Role updated'**
+  String get adminMgmtRoleUpdated;
+
+  /// No description provided for @adminMgmtGrantedUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Permissions updated'**
+  String get adminMgmtGrantedUpdated;
+
+  /// No description provided for @adminMgmtNoGrants.
+  ///
+  /// In en, this message translates to:
+  /// **'No explicit grants to revoke'**
+  String get adminMgmtNoGrants;
+
+  /// No description provided for @adminMgmtRole.
+  ///
+  /// In en, this message translates to:
+  /// **'Role'**
+  String get adminMgmtRole;
+
+  /// No description provided for @adminMgmtRoleLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Role'**
+  String get adminMgmtRoleLabel;
+
+  /// No description provided for @adminMgmtCreatedAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Created at'**
+  String get adminMgmtCreatedAt;
+
+  /// No description provided for @adminMgmtActions.
+  ///
+  /// In en, this message translates to:
+  /// **'Actions'**
+  String get adminMgmtActions;
+
+  /// No description provided for @adminMgmtDeactivated.
+  ///
+  /// In en, this message translates to:
+  /// **'Admin deactivated'**
+  String get adminMgmtDeactivated;
+
+  /// No description provided for @adminMgmtReactivated.
+  ///
+  /// In en, this message translates to:
+  /// **'Admin reactivated'**
+  String get adminMgmtReactivated;
+
+  /// No description provided for @adminMgmtSupervisorUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Supervisor updated'**
+  String get adminMgmtSupervisorUpdated;
+
+  /// No description provided for @adminMgmtRegionUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Region updated'**
+  String get adminMgmtRegionUpdated;
 }
 
 class _AppLocalizationsDelegate

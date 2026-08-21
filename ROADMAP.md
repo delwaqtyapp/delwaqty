@@ -57,6 +57,7 @@
 | Account Verification | ✅ Code + live DB (migrations 020+021 applied; user_type/verification_status + admin approve/reject); email confirmation enabled + deep-link `site_url`/`uri_allow_list` configured; **Step 11**: role registration unblocked (user_type CHECK widened to merchant/driver), registration language persisted, admin verification queue covers all roles, rejected state UI; on-device E2E pending |
 | Login UX (fingerprint + saved accounts) | ✅ Fingerprint login fixed (biometric permissions, Keystore-backed password via flutter_secure_storage v11), saved-accounts section with quick re-login, social login removed, save-account checkbox wired end-to-end |
 | **Mocks remaining in codepath** | **0** |
+| Admin Management Center (SPRINT 98) | 🟡 In progress — backend contract (059) + create-admin Edge Function + `lib/features/admin_management` module implemented; both APKs build; live-DB/analyzer/device verification pending |
 
 ## Next Steps (Constitution v2.0 �15)
 

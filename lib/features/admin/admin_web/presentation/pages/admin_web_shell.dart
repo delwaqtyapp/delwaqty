@@ -4,7 +4,7 @@ import 'package:delwaqty/core/theme/app_colors.dart';
 import 'package:delwaqty/features/admin/admin_web/presentation/pages/admin_categories_page.dart';
 import 'package:delwaqty/features/admin/admin_web/presentation/pages/admin_overview_page.dart';
 import 'package:delwaqty/features/admin/admin_web/presentation/pages/admin_region_scope_page.dart';
-import 'package:delwaqty/features/admin/admin_web/presentation/pages/admin_users_page.dart';
+import 'package:delwaqty/features/admin_management/presentation/pages/admin_management_list_page.dart';
 import 'package:delwaqty/features/admin/admin_web/presentation/pages/admin_verifications_page.dart';
 
 class AdminWebShell extends StatefulWidget {
@@ -19,7 +19,7 @@ class _AdminWebShellState extends State<AdminWebShell> {
 
   final _pages = const [
     AdminOverviewPage(),
-    AdminUsersPage(),
+    AdminManagementListPage(),
     AdminVerificationsWebPage(),
     AdminCategoriesPage(),
     AdminRegionScopePage(),

@@ -18,8 +18,6 @@ abstract interface class DeliveryRepository {
   Future<double> completeDelivery(String rideId, String driverId, {String? proofUrl, double? finalDistanceKm});
   Future<void> cancelDelivery(String rideId, {String? reason});
 
-  Future<void> merchantReadyForDispatch(String rideId, String merchantId);
-  Future<List<DeliveryOrder>> getMerchantDeliveries(String merchantId, {String? status});
 
   Future<DeliveryPricingModel> getDeliveryPricing(String serviceType);
   Future<Map<String, dynamic>> estimateDeliveryFee(String serviceType, double distanceKm, {double weightKg = 1.0, String priority = 'standard'});

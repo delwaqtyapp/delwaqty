@@ -56,15 +56,6 @@ class DeliveryRepositoryImpl implements DeliveryRepository {
   Future<void> cancelDelivery(String rideId, {String? reason}) =>
       _dataSource.cancelDelivery(rideId, reason: reason);
 
-  @override
-  Future<void> merchantReadyForDispatch(
-          String rideId, String merchantId) =>
-      _dataSource.merchantReadyForDispatch(rideId, merchantId);
-
-  @override
-  Future<List<DeliveryOrder>> getMerchantDeliveries(
-          String merchantId, {String? status}) =>
-      _dataSource.getMerchantDeliveries(merchantId, status: status);
 
   @override
   Future<DeliveryPricingModel> getDeliveryPricing(String serviceType) =>

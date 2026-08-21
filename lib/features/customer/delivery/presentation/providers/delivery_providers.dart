@@ -31,7 +31,4 @@ final merchantProfileProvider =
   return ref.watch(deliveryRepositoryProvider).getMerchantProfile(merchantId);
 });
 
-final merchantDeliveriesProvider =
-    FutureProvider.family<List<DeliveryOrder>, ({String merchantId, String? status})>((ref, params) {
-  return ref.watch(deliveryRepositoryProvider).getMerchantDeliveries(params.merchantId, status: params.status);
-});
+

@@ -6,25 +6,26 @@
 
 ## Current Task — SPRINT 101: INDEPENDENT DELWAQTY PROVIDER APP (extraction milestone 1) — IN PROGRESS
 
-**Status: Real, independent Provider app created and building.** `lib/provider/{main,app,app_router,module_registry}.dart` + `provider` Android flavor (`com.delwaqty.provider`). Provider APK builds green; all four apps (Customer/Admin/Driver/Provider) build; **891/891 tests pass**; 0 analyze errors.
+**Status: Provider merchant module PHYSICALLY EXTRACTED from Customer + committed (`5b27dfd`, pushed master).** `lib/features/provider/merchant/**` holds the operational UI; `lib/provider/{main,app,app_router,module_registry}.dart` + `provider` flavor. All four apps build; **891/891 tests pass**; 0 analyze errors; Provider APK rebuilds green.
 
-**What was done (Phases 1–5, 15, 29, 30, 31)**
-- **Audit (1–4):** mapped provider supply-side code. Provider OPERATIONAL UI is concentrated in `lib/features/customer/merchant/**` (`MerchantModule`: `/merchant-dashboard` + orders/products/offers/branches/reservations/reviews) plus the orphaned delivery `MerchantOrdersPage`. `restaurant`/`commerce` modules are CUSTOMER BROWSING but their repos/entities are required by merchant pages (so their MODULES are registered). Home-services has no provider mgmt UI yet (repos exist). Wallet + ServiceAudioLogs reusable.
-- **Provider app (5):** created `lib/provider/*` — `registerProviderModules()` registers Splash/Onboarding/Welcome/Auth/Regions/Complaints/Settings/Profile/Notifications/Safety/Rewards/Campaigns + Commerce/Restaurant/Merchant/DirectDelivery/Wallet/ServiceAudioLogs. `providerGoRouterProvider` redirects authed providers to `/merchant-dashboard`.
-- **Flavor (15/28):** added `provider` product flavor (`com.delwaqty.provider`) + `com.delwaqty.provider` Firebase client in `google-services.json` (duplicated app client; runtime guarded by `FirebaseConfig.isConfigured`).
-- **Four-app matrix (30) BUILD VERIFIED:** Customer ✅ Admin ✅ Driver ✅ Provider ✅ (`app-provider-debug.apk`).
-- **Tests (29):** 891/891 pass. **Analyzer (31):** 0 errors.
+**What was done this session (extraction milestone)**
+- **Physical extraction (Phases 25–26):** moved all 18 `lib/features/customer/merchant/**` files → `lib/features/provider/merchant/**` (intra-merchant imports rewritten `features/customer/merchant`→`features/provider/merchant`; shared `restaurant`/`commerce` entity imports kept at `features/customer/*`). Removed `MerchantModule()` + its import from `lib/customer/module_registry.dart`. Removed the Customer `profile_page` Merchant Dashboard portal tile (provider-operational) — also removed the dangling Driver portal tile (orphaned after Driver extraction).
+- **Critical regression fixed (RULE ZERO):** the earlier Driver extraction left `DriverDeliveryHubPage` (a driver-operational, orphaned page) in `lib/features/customer/delivery/**` referencing `driverProfileProvider`, which had moved to `features/driver/**` → `flutter build` FAILED for ALL four apps (shared DeliveryModule). Moved the page to `lib/features/driver/presentation/pages/driver_delivery_hub_page.dart` and repointed its import. Build restored.
+- **Real provider account id (Phase 4):** added `providerMerchantIdProvider` (`lib/features/provider/merchant/presentation/providers/merchant_providers.dart`) that resolves the merchant id from the authenticated session. Backend contract confirmed in `005_rls_hardening.sql` (`get_user_merchant_id(uid)` = `SELECT id FROM merchants WHERE id = uid`; RLS `is_merchant_owner` uses `id = auth.uid()`): a provider's merchant id == their user id. Replaced the `'current-merchant-id'` stub across all 8 merchant pages (dashboard/orders/products/product_form/offers/branches/reservations/reviews). Ownership stays server-enforced (RLS), never client-supplied.
+- **Dead-code removal (PART W) — DONE:** deleted the orphaned `lib/features/customer/delivery/presentation/merchant_orders_page.dart` (note: already moved to `customer/delivery` path) and its exclusive deps (`merchantDeliveriesProvider`, `merchantReadyForDispatch`, `getMerchantDeliveries` across provider/repository/impl/datasource). Verified zero consumers (incl. tests) before deletion. `merchantProfileProvider`/`getMerchantProfile` left (separate dead cluster, out of PART W scope).
+- **Provider Shell (PART 1) — DONE (foundation):** converted `MerchantModule` to a nav module (`isNavModule=true`, `buildBranch`) so the Provider app now uses the standard `AppShell` (bottom-nav chrome + back/refresh) hosting `/merchant-dashboard` + orders/products/offers/branches/reservations/reviews. Provider APK rebuilds green. Capability engine (PART 2) deferred pending backend category contract.
 
-**Known gaps (intentional, documented — not blockers for build):**
-- `merchant_dashboard_page.dart` hardcodes merchant id stub (`'current-merchant-id'`) — needs real provider-id resolver (Phase 4). Pre-existing in Customer app too.
-- `UserType.provider` not yet wired into a provider gate (Customer `profile_page` only checks `role=='merchant'`) — Provider app redirects all authed users to `/merchant-dashboard` for now.
-- No provider-facing commission/earnings view exists (admin-only today) — Phase 15 gap.
-- Notification deep-links default to customer routes — remap needed (Phase 18).
+**Known gaps (remaining provider work — NOT yet done):**
+- No provider-facing commission/earnings (Financial Center) view exists (admin-only today) — Phase 11/15 gap.
+- Notification deep-links default to customer routes — remap needed (Phase 12).
+- Provider nav shell / capability engine not yet built (Phases 2–3).
 - Restaurant/home-service management UIs absent (repos exist) — build gaps.
-- Code NOT yet physically moved to `lib/features/provider/**`; Provider app reuses existing `features/customer/*` supply modules (same pattern as Driver's initial delivery). Deep extraction + removal from Customer = Phases 25–33 (next milestone).
+- `UserType.provider` not yet wired into a provider gate — Provider app redirects all authed users to `/merchant-dashboard` for now.
+- Customer still registers Commerce/Restaurant modules (browsing) — correct; only merchant OPERATIONAL module removed.
 
-**Remaining (6–14, 16–28, 32–39):**
-- Build real Provider nav shell (6), dashboard KPIs (7), orders/bookings/catalog/branches/availability/verification/documents/financial center (8–17), notifications/realtime (18–19), support/profile/settings (20–22), AR/EN (23), routing (24), then extraction safety (25), customer boundary (26), shared contract (27), firebase polish (28), provider tests (29 baseline done), four-app regression (34), APK sizes (35), security regression (36), dead-code (37), quality (38), commit (39).
+**Remaining (per directive STEP 2–21):**
+- Provider order architecture canonicalization + remove dead `MerchantOrdersPage(merchantId)` (after verify).
+- Dashboard KPIs (real), bookings/catalog/branches/availability/verification/documents (7–13), Financial Center + commission display 7% (14–15), wallet (16), notifications remap (12/17), realtime (13/18), support/profile/settings (19–21), AR/EN sweep (14), security regression (15), four-app regression (17), APK sizes, device smoke (18), final dead-code + product audit (19–20), commit.
 
 ---
 

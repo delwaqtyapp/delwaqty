@@ -25,7 +25,24 @@
 
 ---
 
-## Current Task — SPRINT 105: PROVIDER FINANCIAL CENTER (Flutter client) — IN PROGRESS
+## Current Task — SPRINT 106: ADMIN FINANCIAL CENTER (Flutter client) — COMPLETED (committed e4c2959, pushed master)
+
+**Status: Admin Financial Center built on existing migration 065 backend RPCs.** `flutter analyze` = 0 errors (info-level lints only); **895/895 tests pass**; Admin debug APK builds green.
+
+**What was built (reuses 065 RPCs — no new backend, no duplicate financial truth):**
+- `lib/features/admin/financial/**`: entities, `AdminFinancialDataSource` (calls `list_region_topup_requests`, `approve_topup_request`, `reject_topup_request`, `get_region_collection_summary`, `submit_settlement_request`, `approve_settlement_request`, `reject_settlement_request`, `get_or_create_grace`, `admin_set_grace`, `list_platform_receiving_accounts`, `admin_create_receiving_wallet`, `owner_create_receiving_account`, `owner_update_receiving_account`; plus RLS-scoped reads of `regional_collections` / `platform_settlements` / `admin_receiving_wallets`), repository interface + impl, and Riverpod providers (incl. `adminIsOwnerProvider` gated on `AppConstants.ownerEmail`, mirroring existing owner detection).
+- Screens: `AdminTopupRequestsPage` (filter + approve/reject with mandatory reason; self-approval blocked server-side), `AdminCollectionsPage` (summary + reconciliation math `outstanding = collected − approved settlements`, server-derived) + ledger, `AdminSettlementsPage` (submit + owner-only approve/reject), `AdminGraceManagementPage` (lookup account → set limit; server-derived, not hardcoded), `AdminReceivingWalletsPage` (platform accounts owner-only create/activate/deactivate; regional admin receiving-wallet create).
+- Wired 5 new routes under `/admin` in `AdminModule` and added quick-action shortcuts in existing `AdminFinancialCenter`.
+
+**Known gaps (remaining financial work — NOT built this turn):**
+- Driver Financial Center (PHASE 2) — backend reusable; Flutter not built.
+- Owner Global Collections/Settlements/Audit dashboards (PHASE 1 owner section) — backend exists; subset pending.
+- Provider hardening/audit (PHASE 3), Capability Engine (25), Availability (26), Verification (27), Documents (28), Notification remap (29), Realtime (30), Localization sweep (32), Security/Storage/RPC audits (14–16), Integrity tests (17), four-app build matrix (22), device (21), live DB (20).
+- Live DB application + functional verification of 065 RPCs — 🟡 ENVIRONMENT BLOCKED (migration authored from static analysis; review on staging before prod).
+
+---
+
+## Current Task — SPRINT 105: PROVIDER FINANCIAL CENTER (Flutter client) — COMPLETED (committed 79e6292, pushed master)
 
 **Status: Provider Financial Center Flutter module built and committed (`50...` → sprint 105, pushed master).** Wires the sprint-104 backend contract into the Provider app. `flutter analyze` = 0 errors (1 deprecation note, non-blocking); **895/895 tests pass** (891 + 4 new entity tests); Provider debug APK builds green.
 

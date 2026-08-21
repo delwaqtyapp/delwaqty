@@ -1,4 +1,4 @@
-{
+﻿{
   "@@locale": "ar",
   "appTitle": "دلوقتي",
   "hello": "مرحباً",
@@ -1811,5 +1811,13 @@
   "selectVillage": "اختر القرية",
   "noAdmins": "لم يتم العثور على مسؤولين",
   "noPendingDeletions": "لا توجد طلبات حذف معلقة",
-  "allCaughtUp": "كل شيء محدّث!"
+  "allCaughtUp": "كل شيء محدّث!",
+  "deviceUnlockTitle": "فتح التطبيق",
+  "deviceUnlockSubtitle": "سجّل الدخول ببصمتك أو رمز الجهاز أو الوجه",
+  "deviceUnlockAction": "فتح",
+  "deviceUnlockAnotherAccount": "استخدام حساب آخر",
+  "deviceUnlockFailed": "تعذّر الفتح، حاول مرة أخرى",
+  "deviceUnlockLockedOut": "محاولات الجهاز تجاوزت الحد، استخدم كلمة المرور",
+  "deviceUnlockNotEnrolled": "لم يُسجّل أي بصمة أو رمز على الجهاز",
+  "deviceUnlockStale": "بيانات الحساب المحفوظة غير صحيحة، سجّل الدخول بكلمة المرور"
 }

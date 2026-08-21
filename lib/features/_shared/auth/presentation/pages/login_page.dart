@@ -13,6 +13,7 @@ import 'package:delwaqty/domain/entities/user.dart';
 import 'package:delwaqty/features/_shared/auth/domain/auth_state.dart';
 import 'package:delwaqty/features/_shared/auth/domain/saved_account.dart';
 import 'package:delwaqty/features/_shared/auth/presentation/auth_provider.dart';
+import 'package:delwaqty/features/_shared/device_lock/device_lock_provider.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 
 class LoginPage extends ConsumerStatefulWidget {
@@ -279,6 +280,7 @@ class _LoginPageState extends ConsumerState<LoginPage>
           _postLoginHandled = true;
           _pendingBiometricUserId = null;
           await _handlePostLoginSave();
+          ref.read(deviceLockProvider.notifier).markUnlocked();
           await _handlePostLoginNavigation(user);
         },
         guest: () => context.go('/home'),

@@ -5596,4 +5596,31 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get allCaughtUp => 'كل شيء محدّث!';
+
+  @override
+  String get deviceUnlockTitle => 'فتح التطبيق';
+
+  @override
+  String get deviceUnlockSubtitle =>
+      'سجّل الدخول ببصمتك أو رمز الجهاز أو الوجه';
+
+  @override
+  String get deviceUnlockAction => 'فتح';
+
+  @override
+  String get deviceUnlockAnotherAccount => 'استخدام حساب آخر';
+
+  @override
+  String get deviceUnlockFailed => 'تعذّر الفتح، حاول مرة أخرى';
+
+  @override
+  String get deviceUnlockLockedOut =>
+      'محاولات الجهاز تجاوزت الحد، استخدم كلمة المرور';
+
+  @override
+  String get deviceUnlockNotEnrolled => 'لم يُسجّل أي بصمة أو رمز على الجهاز';
+
+  @override
+  String get deviceUnlockStale =>
+      'بيانات الحساب المحفوظة غير صحيحة، سجّل الدخول بكلمة المرور';
 }

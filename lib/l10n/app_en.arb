@@ -1,4 +1,4 @@
-{
+﻿{
   "@@locale": "en",
   "appTitle": "Delwaqty",
   "hello": "Hello",
@@ -1811,5 +1811,13 @@
   "selectVillage": "Select Vills",
   "noAdmins": "No admins found",
   "noPendingDeletions": "No pending deletions",
-  "allCaughtUp": "All caught up!"
+  "allCaughtUp": "All caught up!",
+  "deviceUnlockTitle": "Unlock App",
+  "deviceUnlockSubtitle": "Sign in with your fingerprint, device PIN, or face",
+  "deviceUnlockAction": "Unlock",
+  "deviceUnlockAnotherAccount": "Use another account",
+  "deviceUnlockFailed": "Unlock failed, try again",
+  "deviceUnlockLockedOut": "Too many device attempts, use your password",
+  "deviceUnlockNotEnrolled": "No biometric or device credential enrolled",
+  "deviceUnlockStale": "Saved credentials are invalid, sign in with your password"
 }

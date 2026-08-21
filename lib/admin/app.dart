@@ -5,6 +5,7 @@ import 'package:delwaqty/core/router/admin_router.dart';
 import 'package:delwaqty/core/theme/app_theme.dart';
 import 'package:delwaqty/core/theme/theme_mode_provider.dart';
 import 'package:delwaqty/features/_shared/auth/presentation/auth_provider.dart';
+import 'package:delwaqty/features/_shared/device_lock/device_lock_provider.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 
 class AppAdmin extends ConsumerStatefulWidget {
@@ -18,8 +19,9 @@ class _AppAdminState extends ConsumerState<AppAdmin> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (!mounted) return;
+      await ref.read(deviceLockProvider.notifier).init();
       final authNotifier = ref.read(authStateProvider.notifier);
       authNotifier.startAuthListener();
       authNotifier.checkAuthStatus();

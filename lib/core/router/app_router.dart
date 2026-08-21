@@ -5,6 +5,8 @@ import 'package:delwaqty/core/module/feature_registry.dart';
 import 'package:delwaqty/core/auth/admin_access.dart';
 import 'package:delwaqty/features/_shared/auth/domain/auth_state.dart';
 import 'package:delwaqty/features/_shared/auth/presentation/auth_provider.dart';
+import 'package:delwaqty/features/_shared/device_lock/device_lock_provider.dart';
+import 'package:delwaqty/features/_shared/device_lock/presentation/device_unlock_page.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 
 final GlobalKey<NavigatorState> rootNavigatorKey = GlobalKey<NavigatorState>(
@@ -16,6 +18,10 @@ final goRouterProvider = Provider<GoRouter>((ref) {
   final refreshNotifier = ValueNotifier<int>(0);
 
   ref.listen<AuthState>(authStateProvider, (previous, next) {
+    refreshNotifier.value++;
+  });
+
+  ref.listen(deviceLockProvider, (previous, next) {
     refreshNotifier.value++;
   });
 
@@ -59,6 +65,16 @@ final goRouterProvider = Provider<GoRouter>((ref) {
 
       if (isSplash || isOnboarding) return null;
 
+      // App Lock gate: re-verify on every cold start when a device account
+      // (locally stored credentials) exists.
+      final lock = ref.read(deviceLockProvider);
+      if (lock.hasDeviceAccount && !lock.unlocked) {
+        if (state.matchedLocation != '/device-unlock' && !isAuthRoute) {
+          return '/device-unlock';
+        }
+        return null;
+      }
+
       if (isVerificationPending &&
           !isVerificationPendingRoute &&
           !isAuthRoute) {
@@ -87,6 +103,10 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       ...registry.allStandaloneRoutes,
       registry.buildShellRoute(),
       ...registry.allShellSubRoutes,
+      GoRoute(
+        path: '/device-unlock',
+        builder: (context, state) => const DeviceUnlockPage(),
+      ),
     ],
     errorBuilder: (context, state) => Scaffold(
       body: Center(

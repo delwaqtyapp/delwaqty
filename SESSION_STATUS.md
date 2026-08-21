@@ -13,11 +13,17 @@
 - `b76a616` sprint 99: Fixed commission display bug (700% due to `* 100` on integer-percent `commission_rate`) in `member_drawer.dart:1243` and `admin_transaction_ledger_page.dart:337`.
 - `b76a616` sprint 99: Removed dead buttons — `merchant_detail_page` Call/Chat (no phone/chat backend) removed; Directions implemented via `url_launcher`; `member_drawer` document open button now launches the doc URL; `safety_settings_page` switches kept disabled-honest (no backend contract — documented as pending).
 - `5c0f2d0` sprint 99: Localized Arabic-only hardcoded strings in `service_booking_page.dart` (bookingSubmitted/bookingErrorRetry) and `audio_recording_dialog.dart` (l10n.ok). Added 2 ARB keys.
+- `094bc43` sprint 99: REMOVED active passenger ride functionality — deleted customer `ride`/`ride_booking` booking screens, driver ride hub/trip + offer/register sheets, admin `RideModel` analytics + `getRecentRides`; removed `/ride/*` and `/driver/rides`/`/driver/trip` routes, module registration, driver dashboard rides entry, and the `/ride/$id` notification deep link. PRESERVED shared delivery infrastructure (`Ride` entity, `ride_providers`, `dispatch_providers`, `dispatch_repository`, `supabase_dispatch_data_source`, `ride_repository`, `fare_quote`, `ride_map`) used by delivery.
+- `64dfc2e` sprint 99: Localized ~28 hardcoded English strings across 14 files (driver onboarding, merchant reservations/dashboard/branches, search, admin sanctions/verifications/region_scope/categories/web_gate/hierarchy, pending verification, complaints). Added 25 ARB keys.
 
 ### Known open issues (audit findings, not yet fixed)
-- LOCALIZATION (Mission 21): ~28 more hardcoded English strings across admin_web (gate/verifications/region_scope/categories), merchant (reservations/dashboard/branches), driver_onboarding, complaints (status label), admin_hierarchy. Pending batch.
-- RIDE/PASSENGER CODE (product-direction violation): active passenger ride booking in customer (`features/customer/ride`, `ride_booking`) + driver ride hub/trip (`driver_ride_hub_page`, `driver_trip_page`) + admin `RideModel` analytics. Contradicts "delivery/service only" rule. Requires careful unwinding (shared `Ride` entity used by delivery). Plan: dedicated phase, keep shared delivery `Ride` model, remove passenger-specific screens/dispatch, quarantine migrations.
+- LOCALIZATION (Mission 21): ~28 hardcoded English strings FIXED + Arabic-only FIXED. Remaining: global re-sweep for any new misses + remove now-unused passenger l10n keys (pickupPassenger, passenger, ratePassenger, rideTaxiDesc, enterOtpToStart, callPassenger, driverRides) — `waitingForPassenger` kept (used by delivery tracking).
+- RIDE/PASSENGER CODE: REMOVED active passenger functionality (commit `094bc43`); shared delivery `Ride` entity + dispatch infra preserved. Remaining: DB documentation of historical passenger tables (`ride_requests`, `trip_events`, `ride_ratings`, `ride_pricing` in `007_transportation_platform.sql`) as dormant — do NOT drop production tables.
 - SQL: other migrations not yet fully audited for search_path/grants (only 011 + 050 done).
+- TERMINOLOGY (Mission 7): customer-facing Ride/Trip/Passenger/Taxi/Fare scan still pending after removal.
+- BUTTON/ROUTE/RPC/DB re-audit (Missions 10-12) pending after removal.
+- SECURITY/FINANCIAL regression (Missions 13-14) pending.
+- DEAD CODE cleanup (Mission 19): unused passenger l10n keys + possibly unused `rate_passenger` dispatch method.
 
 ### Environment limits (documented honestly)
 - `flutter analyze` / `flutter test` blocked (Windows Dev Mode off). Compile gate = `flutter build apk` (both flavors PASS).

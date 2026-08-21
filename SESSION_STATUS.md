@@ -82,6 +82,41 @@ Read-only cross-check of all 93 `rpc(...)` calls in `lib/` against `CREATE FUNCT
 - `admin_repository.dart` legacy `admin_users` table direct access (lines 549 select, 581 insert, 607 update, 634 delete). Table still exists with RLS so it currently works, but modern stack uses `users`/`admin_management` + RPCs (`get_all_admins`, `create_admin_account`, `assign_admin_role`, `deactivate_admin`, `owner_delete_member`). `deleteUser` raw delete (634) bypasses SECURITY DEFINER — should route through a proper admin-lifecycle RPC. **Deferred:** blind refactor risks breaking the admin panel (field-shape mismatches, no `analyze`/`test` available here). Requires dedicated pass mapping return shapes + verifying RLS.
 - ~60 transport/delivery/ride/safety/platform-intelligence/notification RPCs confirmed present in migrations but their individual `params:` keys were not diffed line-by-line — recommend a scripted RPC-signature linter as follow-up.
 
+### admin_users legacy refactor — RETAINED as explicit technical debt (evidence-based, NO code change)
+
+Per sprint-97 rules 3/8/9, the four `admin_repository.dart` operations on the legacy `admin_users` table were investigated against the actual schema + RPCs. **None has a complete, behavior-preserving, verified mapping** → all four retained unchanged; documented here; no second admin-management system created; no schema modified; no duplicate RPCs.
+
+**Evidence (source of truth):**
+- `016_fix_rls_policies.sql:14` — `admin_users.id` is a **separate generated UUID (not `users.id`)**.
+- `031_admin_hierarchy_region_assignments.sql:32-47` (ADR-055) — adds `user_id` FK `admin_users→users(id)`; `:141` — `admin_users (F1, dormant metadata — still readable by admins)`.
+- `034:670` `create_admin_account(p_user_id uuid, p_supervisor_id, p_region_id, p_scope)` — promotes an **existing `users.id`** only; no create-from-email.
+- `034:725` `deactivate_admin(p_admin_id uuid, p_reason)` — soft deactivate.
+- `057:252` `get_admin_profile(p_email)` → returns `email, role, is_owner, region_name, total_earnings` (**no full_name / status / last_login**).
+- `057:305` `get_all_admins()` → returns `email, role, region_name, is_active, supervisor_email, created_at` (**no full_name / status / last_login**).
+- `058:27-122` `owner_delete_member(p_member_id uuid, p_reason)` — **owner-only**; deletes `users`+`auth.users` + cleans `admin_management`/drivers/etc.; does **NOT** delete the `admin_users` row (would orphan it).
+
+**Field mapping (OLD → NEW):**
+| OLD `admin_users` field | NEW source/RPC field | Status |
+|---|---|---|
+| `id` (separate UUID) | `admin_users.user_id` → `users.id` (FK, 031) | no 1:1 direct key |
+| `full_name` | `users.full_name` — **not returned by any admin RPC** | ❌ no mapping |
+| `email` | `get_all_admins().email` | ✅ available |
+| `role` | `get_all_admins().role` | ✅ available |
+| `status` (active/suspended/pending) | modern = `admin_management.is_active` (bool); no status enum / no suspend RPC | ❌ no mapping |
+| `last_login` | **not returned by any admin RPC** | ❌ no mapping |
+| `created_at` | `get_all_admins().created_at` | ✅ available |
+| `region` | `get_all_admins().region_name` | ✅ available |
+
+**Action mapping (OLD → NEW):**
+| OLD action | NEW RPC | Verdict |
+|---|---|---|
+| `createUser` (insert new `admin_users` from email+name+role+status) | `create_admin_account` needs existing `users.id` | ❌ NO equivalent → RETAIN |
+| `updateUser` (full_name,email,role,status) | `assign_admin_role`(role, needs users.id) + no RPC for admin full_name/status | ❌ INCOMPLETE → RETAIN |
+| `deleteUser` (hard delete `admin_users` by `admin_users.id`) | `owner_delete_member(p_member_id=users.id)` | ❌ UNSAFE: owner-only (authz change), keys on `users.id` not `admin_users.id`, orphans `admin_users` row → RETAIN |
+| `getUsers` (read) | `get_all_admins()` lacks full_name/status/last_login | ❌ INCOMPLETE → RETAIN |
+
+**Recommended future migration (separate effort, needs product decision + likely new RPCs):** rebuild `admin_users_page` on `get_all_admins()` + extend admin RPCs to return `full_name`/`status`/`last_login` + add an admin-create-user RPC; or formally deprecate `admin_users` (dormant metadata) and stop reading it for the live admin list. Until then the legacy path is the only source of `name`/`status`/`last_login` for that screen.
+
 ### Build commands
 ```powershell
 $env:PUB_CACHE = "E:\app\pub-cache"

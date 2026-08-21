@@ -224,3 +224,9 @@
 - [x] Document upload for merchant/provider verification
 - [x] Offline caching with Hive for categories/products
 - [ ] Push notification admin tool
+
+---
+
+## Technical Debt Backlog
+
+- **`admin_users` legacy table (sprint 97, 2026-08-21):** `admin_repository.dart` `getUsers/createUser/updateUser/deleteUser` still use the legacy `admin_users` table (dormant metadata, separate UUID PK linked to `users.id` via `user_id` FK / ADR-055). No complete behavior-preserving mapping to the modern `users`/`admin_management` RPCs (`get_all_admins`, `create_admin_account`, `assign_admin_role`, `deactivate_admin`, `owner_delete_member`) exists — admin RPCs don't return `full_name`/`status`/`last_login`; `create_admin_account` only promotes an existing `users.id`; `owner_delete_member` is owner-only and orphans the `admin_users` row. Deliberately **retained unchanged** (rules 3/8/9); documented in `SESSION_STATUS.md` + `docs/HANDOFF/08_KNOWN_ISSUES.md`. Future fix needs product decision + likely new RPCs.

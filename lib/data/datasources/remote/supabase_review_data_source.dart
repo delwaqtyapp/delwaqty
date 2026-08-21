@@ -154,8 +154,9 @@ class SupabaseReviewDataSource {
         .maybeSingle();
     if (data != null) return _summaryFromAgg(data);
     final reviews = await getMerchantReviews(merchantId);
-    if (reviews.isEmpty)
+    if (reviews.isEmpty) {
       return const ReviewSummary(averageRating: 0, totalReviews: 0);
+    }
     final avg =
         reviews.map((r) => r.rating).reduce((a, b) => a + b) / reviews.length;
     return ReviewSummary(averageRating: avg, totalReviews: reviews.length);
@@ -163,8 +164,9 @@ class SupabaseReviewDataSource {
 
   Future<ReviewSummary> getProductRatingSummary(String productId) async {
     final reviews = await getProductReviews(productId);
-    if (reviews.isEmpty)
+    if (reviews.isEmpty) {
       return const ReviewSummary(averageRating: 0, totalReviews: 0);
+    }
     final avg =
         reviews.map((r) => r.rating).reduce((a, b) => a + b) / reviews.length;
     return ReviewSummary(averageRating: avg, totalReviews: reviews.length);
@@ -175,7 +177,7 @@ class SupabaseReviewDataSource {
         .from('reviews')
         .stream(primaryKey: ['id'])
         .eq('merchant_id', merchantId)
-        .order('created_at', ascending: false)
+        .order('created_at')
         .limit(1)
         .map((rows) => _fromRow(rows.first));
   }

@@ -225,7 +225,7 @@ void main() {
 
   group('resolveRegionForPoint', () {
     test('returns spatial resolution from the data source', () async {
-      final resolution = const SpatialResolution(
+      const resolution = SpatialResolution(
         regionId: 'r-giza',
         governorateId: 'r-giza',
         confidence: GeoConfidence.high,

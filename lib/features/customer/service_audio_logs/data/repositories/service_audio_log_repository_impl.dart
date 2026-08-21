@@ -3,9 +3,9 @@ import 'package:delwaqty/features/customer/service_audio_logs/domain/repositorie
 import 'package:delwaqty/features/customer/service_audio_logs/data/datasources/remote/supabase_service_audio_log_data_source.dart';
 
 class ServiceAudioLogRepositoryImpl implements ServiceAudioLogRepository {
-  final SupabaseServiceAudioLogDataSource _dataSource;
 
   ServiceAudioLogRepositoryImpl(this._dataSource);
+  final SupabaseServiceAudioLogDataSource _dataSource;
 
   @override
   Future<List<ServiceAudioLog>> getLogsForUser(String userId) {

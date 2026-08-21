@@ -1,6 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:delwaqty/features/customer/commerce/domain/entities/merchant.dart';
-import 'package:delwaqty/features/customer/commerce/domain/entities/product.dart';
 import 'package:delwaqty/features/customer/commerce/domain/entities/search_filter.dart';
 import 'package:delwaqty/features/customer/commerce/domain/repositories/merchant_repository.dart';
 import 'package:delwaqty/features/customer/commerce/commerce_module.dart';

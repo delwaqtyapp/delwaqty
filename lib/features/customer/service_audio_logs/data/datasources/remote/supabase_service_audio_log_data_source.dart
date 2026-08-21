@@ -2,10 +2,10 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:delwaqty/features/customer/service_audio_logs/domain/entities/service_audio_log.dart';
 
 class SupabaseServiceAudioLogDataSource {
-  final SupabaseClient _client;
-  final String _bucketName = 'service-audio-logs';
 
   SupabaseServiceAudioLogDataSource(this._client);
+  final SupabaseClient _client;
+  final String _bucketName = 'service-audio-logs';
 
   Future<List<ServiceAudioLog>> getLogsForUser(String userId) async {
     final rows = await _client

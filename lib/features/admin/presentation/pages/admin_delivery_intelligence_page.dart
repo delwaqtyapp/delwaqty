@@ -7,7 +7,6 @@ import 'package:delwaqty/shared/widgets/premium_empty_state.dart';
 import 'package:delwaqty/shared/widgets/app_loader.dart';
 import 'package:delwaqty/shared/widgets/design/premium_card.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
-import 'package:delwaqty/core/theme/app_spacing.dart';
 
 class AdminDeliveryIntelligencePage extends ConsumerWidget {
   const AdminDeliveryIntelligencePage({super.key});
@@ -141,7 +140,6 @@ class AdminDeliveryIntelligencePage extends ConsumerWidget {
           delay: const Duration(milliseconds: 350),
           child: PremiumCard(
             padding: const EdgeInsets.all(16),
-            radius: AppSpacing.radiusCard,
             child: Row(
               children: [
                 Expanded(
@@ -210,7 +208,6 @@ class _StatCard extends StatelessWidget {
     final cs = Theme.of(context).colorScheme;
     return PremiumCard(
       padding: const EdgeInsets.all(12),
-      radius: AppSpacing.radiusCard,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.spaceBetween,

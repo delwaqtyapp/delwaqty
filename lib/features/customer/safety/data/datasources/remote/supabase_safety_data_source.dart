@@ -7,9 +7,9 @@ import 'package:delwaqty/features/customer/safety/domain/entities/live_share_ses
 import 'package:delwaqty/features/customer/safety/domain/entities/live_share_result.dart';
 
 class SupabaseSafetyDataSource {
-  final SupabaseClient _client;
 
   SupabaseSafetyDataSource(this._client);
+  final SupabaseClient _client;
 
   String get _userId => _client.auth.currentUser!.id;
 
@@ -118,7 +118,7 @@ class SupabaseSafetyDataSource {
         .from('trusted_contacts')
         .stream(primaryKey: ['id'])
         .eq('user_id', _userId)
-        .order('created_at', ascending: false)
+        .order('created_at')
         .map((rows) => rows.map(_trustedContactFromRow).toList());
   }
 

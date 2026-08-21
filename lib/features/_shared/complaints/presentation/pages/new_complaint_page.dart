@@ -7,9 +7,9 @@ import 'package:delwaqty/features/_shared/auth/domain/auth_state.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 
 class NewComplaintPage extends ConsumerStatefulWidget {
-  final String? orderId;
 
   const NewComplaintPage({super.key, this.orderId});
+  final String? orderId;
 
   @override
   ConsumerState<NewComplaintPage> createState() => _NewComplaintPageState();
@@ -55,7 +55,7 @@ class _NewComplaintPageState extends ConsumerState<NewComplaintPage> {
               ),
               const SizedBox(height: 16),
               DropdownButtonFormField<String>(
-                value: _complaintType,
+                initialValue: _complaintType,
                 decoration: InputDecoration(
                   labelText: AppLocalizations.of(context).complaintType,
                   border: OutlineInputBorder(
@@ -69,7 +69,7 @@ class _NewComplaintPageState extends ConsumerState<NewComplaintPage> {
               ),
               const SizedBox(height: 16),
               DropdownButtonFormField<String>(
-                value: _priority,
+                initialValue: _priority,
                 decoration: InputDecoration(
                   labelText: AppLocalizations.of(context).priority,
                   border: OutlineInputBorder(

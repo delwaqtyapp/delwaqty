@@ -3,9 +3,9 @@ import 'package:delwaqty/features/admin/support_chat/domain/entities/chat_room.d
 import 'package:delwaqty/features/admin/support_chat/domain/entities/chat_message.dart';
 
 class SupabaseChatDataSource {
-  final SupabaseClient _client;
 
   SupabaseChatDataSource(this._client);
+  final SupabaseClient _client;
 
   Future<List<ChatRoom>> getRoomsForParticipant(String userId) async {
     final rows = await _client
@@ -84,7 +84,7 @@ class SupabaseChatDataSource {
         .from('chat_messages')
         .stream(primaryKey: ['id'])
         .eq('room_id', roomId)
-        .order('created_at', ascending: false)
+        .order('created_at')
         .map((rows) => rows
             .reversed
             .map((r) => ChatMessage.fromJson(r))

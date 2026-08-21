@@ -1,22 +1,4 @@
 class Complaint {
-  final String id;
-  final String? orderId;
-  final String complainantId;
-  final String? respondentId;
-  final String complaintType;
-  final String subject;
-  final String description;
-  final List<String> attachments;
-  final String status;
-  final String priority;
-  final List<String> adminNotes;
-  final String? resolutionNote;
-  final DateTime? resolvedAt;
-  final String? assignedAdminId;
-  final DateTime? escalatedAt;
-  final String? escalatedFromAdminId;
-  final DateTime createdAt;
-  final DateTime? updatedAt;
 
   const Complaint({
     required this.id,
@@ -38,9 +20,6 @@ class Complaint {
     required this.createdAt,
     this.updatedAt,
   });
-
-  bool get isClosed =>
-      const {'resolved', 'rejected', 'dismissed'}.contains(status);
 
   factory Complaint.fromJson(Map<String, dynamic> json) {
     return Complaint(
@@ -75,6 +54,27 @@ class Complaint {
           : null,
     );
   }
+  final String id;
+  final String? orderId;
+  final String complainantId;
+  final String? respondentId;
+  final String complaintType;
+  final String subject;
+  final String description;
+  final List<String> attachments;
+  final String status;
+  final String priority;
+  final List<String> adminNotes;
+  final String? resolutionNote;
+  final DateTime? resolvedAt;
+  final String? assignedAdminId;
+  final DateTime? escalatedAt;
+  final String? escalatedFromAdminId;
+  final DateTime createdAt;
+  final DateTime? updatedAt;
+
+  bool get isClosed =>
+      const {'resolved', 'rejected', 'dismissed'}.contains(status);
 
   Map<String, dynamic> toJson() => {
     'id': id,

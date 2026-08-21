@@ -4,9 +4,9 @@ import 'package:delwaqty/features/admin/support_chat/domain/repositories/chat_re
 import 'package:delwaqty/features/admin/support_chat/data/datasources/remote/supabase_chat_data_source.dart';
 
 class ChatRepositoryImpl implements ChatRepository {
-  final SupabaseChatDataSource _dataSource;
 
   ChatRepositoryImpl(this._dataSource);
+  final SupabaseChatDataSource _dataSource;
 
   @override
   Future<List<ChatRoom>> getMyRooms(String userId) {

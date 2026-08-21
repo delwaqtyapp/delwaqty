@@ -56,14 +56,14 @@ void main() {
   });
 
   test('module_registry excludes admin modules (customer app)', () async {
-    final file = File('lib/module_registry.dart');
+    final file = File('lib/customer/module_registry.dart');
     final content = await file.readAsString();
     expect(content, isNot(contains('AdminModule')));
     expect(content, isNot(contains('MemberManagementModule')));
   });
 
   test('module_registry_admin includes admin modules', () async {
-    final file = File('lib/module_registry_admin.dart');
+    final file = File('lib/admin/module_registry.dart');
     final content = await file.readAsString();
     expect(content, contains('AdminModule'));
     expect(content, contains('MemberManagementModule'));
@@ -77,7 +77,7 @@ void main() {
   });
 
   test('customer sidebar has no admin entry', () async {
-    final file = File('lib/features/floating_sidebar/floating_sidebar_overlay.dart');
+    final file = File('lib/features/admin/floating_sidebar/floating_sidebar_overlay.dart');
     final content = await file.readAsString();
     expect(content, isNot(contains('adminCommandCenter')));
     expect(content, isNot(contains('/admin')));

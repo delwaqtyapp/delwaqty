@@ -172,7 +172,7 @@ class _SplashPageState extends ConsumerState<SplashPage>
                 child: Image.asset(
                   'assets/logo app/logo.png',
                   fit: BoxFit.contain,
-                  errorBuilder: (_, __, ___) => Container(
+                  errorBuilder: (_, __, ___) => DecoratedBox(
                     decoration: BoxDecoration(
                       gradient: const LinearGradient(
                         colors: [Color(0xFF7A5CFF), Color(0xFF2DD4BF)],
@@ -209,9 +209,9 @@ class _SplashPageState extends ConsumerState<SplashPage>
               _buildLetter('l', 0.16, 0.36, p, Colors.white, 38),
               _buildLetter('w', 0.24, 0.44, p, Colors.white, 38),
               _buildLetter('a', 0.32, 0.52, p, Colors.white, 38),
-              _buildRotatingLetter('Q', 0.4, 0.6, p, Color(0xFF7A5CFF), 42),
-              _buildLetter('t', 0.55, 0.75, p, Color(0xFF4E8DFF), 38),
-              _buildLetter('y', 0.65, 0.85, p, Color(0xFF2DD4BF), 38),
+              _buildRotatingLetter('Q', 0.4, 0.6, p, const Color(0xFF7A5CFF), 42),
+              _buildLetter('t', 0.55, 0.75, p, const Color(0xFF4E8DFF), 38),
+              _buildLetter('y', 0.65, 0.85, p, const Color(0xFF2DD4BF), 38),
             ],
           ),
         );
@@ -307,8 +307,8 @@ class _SplashPageState extends ConsumerState<SplashPage>
               opacity: part2Opacity,
               child: RichText(
                 textDirection: TextDirection.rtl,
-                text: TextSpan(
-                  style: const TextStyle(
+                text: const TextSpan(
+                  style: TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.w700,
                     letterSpacing: 0.5,

@@ -150,7 +150,7 @@ class _DestinationSearchPageState extends ConsumerState<DestinationSearchPage> {
                   borderSide: BorderSide.none,
                 ),
                 contentPadding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 0),
+                    const EdgeInsets.symmetric(horizontal: 12),
               ),
             ),
           ),

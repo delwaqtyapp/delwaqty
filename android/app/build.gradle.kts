@@ -51,6 +51,10 @@ android {
             dimension = "app"
             applicationId = "com.delwaqty.admin"
         }
+        create("driver") {
+            dimension = "app"
+            applicationId = "com.delwaqty.driver"
+        }
     }
 
     buildTypes {

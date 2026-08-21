@@ -12,6 +12,7 @@ class AdminRepository implements admin.AdminRepository {
 
   // ─── Dashboard Metrics ────────────────────────────────────
 
+  @override
   Future<AdminDashboardMetrics> getDashboardMetrics() async {
     try {
       final now = DateTime.now();
@@ -159,6 +160,7 @@ class AdminRepository implements admin.AdminRepository {
 
   // ─── Revenue Chart ────────────────────────────────────────
 
+  @override
   Future<List<RevenueData>> getRevenueChart({required int days}) async {
     try {
       final now = DateTime.now();
@@ -197,6 +199,7 @@ class AdminRepository implements admin.AdminRepository {
 
   // ─── Active Drivers ───────────────────────────────────────
 
+  @override
   Future<List<DriverModel>> getActiveDrivers() async {
     try {
       final response = await _supabase
@@ -215,6 +218,7 @@ class AdminRepository implements admin.AdminRepository {
 
   // ─── All Drivers ──────────────────────────────────────────
 
+  @override
   Future<List<DriverModel>> getAllDrivers({
     String? search,
     String? status,
@@ -254,6 +258,7 @@ class AdminRepository implements admin.AdminRepository {
 
   // ─── Verify Driver ────────────────────────────────────────
 
+  @override
   Future<void> verifyDriver({
     required String driverId,
     required bool isVerified,
@@ -274,6 +279,7 @@ class AdminRepository implements admin.AdminRepository {
 
   // ─── Update Driver Status ─────────────────────────────────
 
+  @override
   Future<void> updateDriverStatus({
     required String driverId,
     required bool isActive,
@@ -294,6 +300,7 @@ class AdminRepository implements admin.AdminRepository {
 
   // ─── Recent Deliveries ────────────────────────────────────
 
+  @override
   Future<List<DeliveryModel>> getRecentDeliveries({
     int limit = 20,
     String? serviceType,
@@ -319,6 +326,7 @@ class AdminRepository implements admin.AdminRepository {
 
   // ─── Peak Hours ───────────────────────────────────────────
 
+  @override
   Future<List<Map<String, dynamic>>> getPeakHours() async {
     try {
       final response = await _supabase.rpc('get_peak_hours');
@@ -355,6 +363,7 @@ class AdminRepository implements admin.AdminRepository {
 
   // ─── Top Merchants ────────────────────────────────────────
 
+  @override
   Future<List<Map<String, dynamic>>> getTopMerchants({int limit = 10}) async {
     try {
       final rides = await _supabase
@@ -413,6 +422,7 @@ class AdminRepository implements admin.AdminRepository {
 
   // ─── Driver Performance ───────────────────────────────────
 
+  @override
   Future<List<Map<String, dynamic>>> getDriverPerformance({
     int limit = 10,
   }) async {
@@ -494,6 +504,7 @@ class AdminRepository implements admin.AdminRepository {
 
   // ─── Recent Activity ──────────────────────────────────────
 
+  @override
   Future<List<AdminActivityLog>> getRecentActivity({int limit = 20}) async {
     try {
       final response = await _supabase
@@ -519,7 +530,8 @@ class AdminRepository implements admin.AdminRepository {
 
   // ─── Users ────────────────────────────────────────────────
 
-Future<List<AdminUser>> getUsers({String? search}) async {
+@override
+  Future<List<AdminUser>> getUsers({String? search}) async {
      try {
        var query = _supabase.from('admin_users').select('full_name as name, email, role, status, last_login, created_at');
  
@@ -550,6 +562,7 @@ Future<List<AdminUser>> getUsers({String? search}) async {
      }
    }
 
+  @override
   Future<AdminUser> createUser(AdminUser user) async {
     try {
 final response = await _supabase
@@ -576,6 +589,7 @@ final response = await _supabase
     }
   }
 
+  @override
   Future<AdminUser> updateUser(AdminUser user) async {
     try {
 final response = await _supabase
@@ -604,6 +618,7 @@ final response = await _supabase
     }
   }
 
+  @override
   Future<void> deleteUser(String userId) async {
     try {
       await _supabase.from('admin_users').delete().eq('id', userId);
@@ -614,6 +629,7 @@ final response = await _supabase
 
   // ─── Merchants ────────────────────────────────────────────
 
+  @override
   Future<List<Map<String, dynamic>>> getMerchants({
     String? search,
     String? status,
@@ -636,6 +652,7 @@ final response = await _supabase
     }
   }
 
+  @override
   Future<void> updateMerchantStatus(String merchantId, String status) async {
     try {
       await _supabase
@@ -652,6 +669,7 @@ final response = await _supabase
 
   // ─── Orders ───────────────────────────────────────────────
 
+  @override
   Future<List<Map<String, dynamic>>> getOrders({
     String? search,
     String? status,
@@ -683,6 +701,7 @@ final response = await _supabase
     }
   }
 
+  @override
   Future<void> updateOrderStatus(String orderId, String status) async {
     try {
       await _supabase
@@ -699,6 +718,7 @@ final response = await _supabase
 
   // ─── Settings ─────────────────────────────────────────────
 
+  @override
   Future<Map<String, dynamic>> getSettings() async {
     try {
       final response = await _supabase
@@ -712,6 +732,7 @@ final response = await _supabase
     }
   }
 
+  @override
   Future<void> updateSettings(Map<String, dynamic> settings) async {
     try {
       await _supabase.from('platform_settings').upsert({
@@ -726,6 +747,7 @@ final response = await _supabase
 
   // ─── Legacy Rides ─────────────────────────────────────────
 
+  @override
   Future<List<Map<String, dynamic>>> getRides({
     String? status,
     int limit = 50,
@@ -754,6 +776,7 @@ final response = await _supabase
 
   // ─── Legacy Deliveries ────────────────────────────────────
 
+  @override
   Future<List<Map<String, dynamic>>> getDeliveries({
     String? status,
     int limit = 50,
@@ -776,6 +799,7 @@ final response = await _supabase
     }
   }
 
+  @override
   Future<void> updateDeliveryStatus(String deliveryId, String status) async {
     try {
       await _supabase
@@ -789,6 +813,7 @@ final response = await _supabase
 
   // ─── Analytics ────────────────────────────────────────────
 
+  @override
   Future<Map<String, dynamic>> getAnalytics({
     DateTime? from,
     DateTime? to,

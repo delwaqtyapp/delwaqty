@@ -39,9 +39,6 @@ void main() {
             memberId: 'member-1',
             sanctionType: 'warning',
             reason: 'Test warning',
-            durationDays: 0,
-            amount: 0,
-            evidenceUrl: null,
           )).called(1);
     });
 
@@ -138,9 +135,9 @@ void main() {
           targetRole: 'customer',
           sanctionType: 'warning',
           reason: 'Test',
-          startDate: DateTime(2026, 1, 1),
+          startDate: DateTime(2026),
           issuedBy: 'admin-1',
-          createdAt: DateTime(2026, 1, 1),
+          createdAt: DateTime(2026),
         ),
       ];
       when(() => mockDataSource.getSanctions(active: any(named: 'active')))
@@ -149,7 +146,7 @@ void main() {
       final result = await repository.getSanctions();
 
       expect(result, sanctions);
-      verify(() => mockDataSource.getSanctions(active: null)).called(1);
+      verify(() => mockDataSource.getSanctions()).called(1);
     });
 
     test('filters by active status', () async {

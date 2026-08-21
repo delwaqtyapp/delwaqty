@@ -1,14 +1,6 @@
 enum AudioLogStatus { recording, completed, failed }
 
 class ServiceAudioLog {
-  final String id;
-  final String orderId;
-  final String userId;
-  final String? providerId;
-  final String? audioUrl;
-  final int? durationSeconds;
-  final DateTime createdAt;
-  final AudioLogStatus status;
 
   const ServiceAudioLog({
     required this.id,
@@ -33,6 +25,14 @@ class ServiceAudioLog {
       status: _parseStatus(json['status'] as String?),
     );
   }
+  final String id;
+  final String orderId;
+  final String userId;
+  final String? providerId;
+  final String? audioUrl;
+  final int? durationSeconds;
+  final DateTime createdAt;
+  final AudioLogStatus status;
 
   Map<String, dynamic> toJson() {
     return {

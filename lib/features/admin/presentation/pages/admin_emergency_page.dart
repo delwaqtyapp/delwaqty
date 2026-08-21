@@ -148,7 +148,7 @@ class _AdminEmergencyPageState extends ConsumerState<AdminEmergencyPage> {
                 return AnimatedFadeIn(
                   delay: Duration(milliseconds: i * 60),
                   child: Padding(
-                    padding: EdgeInsets.only(bottom: 8),
+                    padding: const EdgeInsets.only(bottom: 8),
                     child: _EmergencyCard(sos: sos, l10n: l10n),
                   ),
                 );
@@ -229,7 +229,6 @@ class _EmergencyCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return PremiumCard(
       padding: const EdgeInsets.all(12),
-      radius: AppSpacing.radiusCard,
       color: const Color(0xFFFF3B30).withValues(alpha: 0.08),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -321,7 +320,6 @@ class _AlertCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return PremiumCard(
       padding: const EdgeInsets.all(12),
-      radius: AppSpacing.radiusCard,
       child: Row(
         children: [
           Container(

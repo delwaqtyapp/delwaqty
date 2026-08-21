@@ -25,9 +25,9 @@ class WorkingHoursCard extends StatelessWidget {
       l10n.sunday,
     ];
 
-    return Container(
+    return DecoratedBox(
       decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerHighest.withOpacity(0.5),
+        color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Theme(
@@ -44,7 +44,6 @@ class WorkingHoursCard extends StatelessWidget {
             l10n.workingHours,
             style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
           ),
-          initiallyExpanded: false,
           children: sortedHours.map((hour) {
             final isToday = hour.dayOfWeek == today;
             final dayName = hour.dayOfWeek >= 1 && hour.dayOfWeek <= 7
@@ -87,7 +86,7 @@ class WorkingHoursCard extends StatelessWidget {
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                       decoration: BoxDecoration(
-                        color: theme.colorScheme.primary.withOpacity(0.1),
+                        color: theme.colorScheme.primary.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(4),
                       ),
                       child: Text(

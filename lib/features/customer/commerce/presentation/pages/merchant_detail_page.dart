@@ -535,7 +535,7 @@ class _MerchantDetailPageState extends ConsumerState<MerchantDetailPage> {
                 padding: const EdgeInsets.fromLTRB(16, 16, 16, 10),
                 child: Row(
                   children: [
-                    Icon(Icons.star_outline_rounded, size: 20, color: AppColors.rating),
+                    const Icon(Icons.star_outline_rounded, size: 20, color: AppColors.rating),
                     const SizedBox(width: 8),
                     Text(
                       l10n.popularItems,
@@ -744,7 +744,7 @@ class _MerchantDetailPageState extends ConsumerState<MerchantDetailPage> {
                   ),
                   const Spacer(),
                   Text(
-                    '${avg.toStringAsFixed(1)}',
+                    avg.toStringAsFixed(1),
                     style: context.textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.w800,
                       color: AppColors.rating,
@@ -1364,7 +1364,7 @@ class _OfferCard extends StatelessWidget {
                       if (discount > 0) ...[
                         const SizedBox(width: 4),
                         Text(
-                          '${product.originalPrice!.toStringAsFixed(0)}',
+                          product.originalPrice!.toStringAsFixed(0),
                           style: context.textTheme.labelSmall?.copyWith(
                             decoration: TextDecoration.lineThrough,
                             color: context.colorScheme.onSurfaceVariant,

@@ -447,7 +447,7 @@ class _CompactCategories extends StatelessWidget {
   }
 
   Widget _categoryFallback(Color color, String emoji) {
-    return Container(
+    return DecoratedBox(
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
@@ -717,7 +717,7 @@ class _LocationChip extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(
+          const Icon(
             Icons.location_on_rounded,
             size: 13,
             color: AppColors.brandPurple,
@@ -725,7 +725,7 @@ class _LocationChip extends StatelessWidget {
           const SizedBox(width: 4),
           Flexible(
             child: loading
-                ? SizedBox(
+                ? const SizedBox(
                     width: 12,
                     height: 12,
                     child: CircularProgressIndicator(
@@ -867,9 +867,9 @@ class _HeroOrderCardState extends State<_HeroOrderCard>
                 child: Container(
                   height: 74,
                   clipBehavior: Clip.antiAlias,
-                  decoration: BoxDecoration(
+                  decoration: const BoxDecoration(
                     borderRadius: AppSpacing.borderRadiusCard,
-                    gradient: const LinearGradient(
+                    gradient: LinearGradient(
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                       colors: [AppColors.brandPurpleDeep, AppColors.brandViolet],
@@ -911,7 +911,7 @@ class _HeroOrderCardState extends State<_HeroOrderCard>
                           children: [
                             Transform.translate(
                               offset: Offset(0, -bobY),
-                              child: Icon(
+                              child: const Icon(
                                 Icons.rocket_launch_rounded,
                                 size: 28,
                                 color: Colors.white,
@@ -1518,7 +1518,7 @@ class _HomeMerchantCard extends StatelessWidget {
                     const SizedBox(height: 8),
                     Row(
                       children: [
-                        Icon(
+                        const Icon(
                           Icons.delivery_dining_rounded,
                           size: 14,
                           color: AppColors.brandPurple,

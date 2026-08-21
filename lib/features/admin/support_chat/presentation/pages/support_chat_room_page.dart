@@ -8,9 +8,9 @@ import 'package:delwaqty/shared/widgets/app_loader.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 
 class SupportChatRoomPage extends ConsumerStatefulWidget {
-  final String roomId;
 
   const SupportChatRoomPage({super.key, required this.roomId});
+  final String roomId;
 
   @override
   ConsumerState<SupportChatRoomPage> createState() => _SupportChatRoomPageState();

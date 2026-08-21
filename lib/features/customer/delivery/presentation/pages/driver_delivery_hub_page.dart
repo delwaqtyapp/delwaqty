@@ -8,9 +8,7 @@ import 'package:delwaqty/features/_shared/auth/presentation/auth_provider.dart';
 import 'package:delwaqty/features/_shared/auth/domain/auth_state.dart';
 import 'package:delwaqty/features/customer/delivery/presentation/providers/delivery_providers.dart';
 import 'package:delwaqty/features/customer/delivery/domain/entities/delivery_order.dart';
-import 'package:delwaqty/features/customer/delivery/domain/entities/driver_capability.dart';
 import 'package:delwaqty/features/customer/driver/domain/entities/ride_offer.dart';
-import 'package:delwaqty/features/customer/driver/driver_module.dart';
 import 'package:delwaqty/features/customer/driver/presentation/providers/dispatch_providers.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
@@ -295,12 +293,10 @@ class _OnlineCard extends StatelessWidget {
               color: online ? theme.colorScheme.onPrimary : theme.colorScheme.onSurface,
             ),
           ),
-          loading
-              ? const SizedBox(
+          if (loading) const SizedBox(
                   width: 24,
                   height: 24,
-                  child: CircularProgressIndicator(strokeWidth: 2))
-              : Switch(
+                  child: CircularProgressIndicator(strokeWidth: 2)) else Switch(
                   value: online,
                   onChanged: (_) => onToggle(),
                 ),

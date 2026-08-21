@@ -3,9 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:delwaqty/features/_shared/auth/presentation/auth_provider.dart';
 import 'package:delwaqty/features/_shared/auth/domain/auth_state.dart';
-import 'package:delwaqty/features/customer/driver/driver_module.dart';
-import 'package:delwaqty/features/customer/driver/domain/entities/driver_profile.dart';
-import 'package:delwaqty/features/customer/driver/domain/entities/driver_performance.dart';
+import 'package:delwaqty/features/driver/driver_module.dart';
+import 'package:delwaqty/features/driver/domain/entities/driver_profile.dart';
+import 'package:delwaqty/features/driver/domain/entities/driver_performance.dart';
 import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
 import 'package:delwaqty/shared/widgets/shimmer_loading.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
@@ -254,7 +254,7 @@ class _OnlineHeader extends StatelessWidget {
               ),
               Switch(
                 value: profile.status == DriverStatus.online,
-                activeColor: theme.colorScheme.onPrimary,
+                activeThumbColor: theme.colorScheme.onPrimary,
                 onChanged: (value) async {
                   final repo = ref.read(driverRepositoryProvider);
                   await repo.updateStatus(

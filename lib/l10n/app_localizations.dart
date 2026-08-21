@@ -4457,7 +4457,7 @@ abstract class AppLocalizations {
   /// No description provided for @enterOtpToStart.
   ///
   /// In en, this message translates to:
-  /// **'Enter the passenger\'s code to start the trip'**
+  /// **'Enter the customer\'s code to start the delivery'**
   String get enterOtpToStart;
 
   /// No description provided for @confirmArrival.

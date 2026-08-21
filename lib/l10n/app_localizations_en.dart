@@ -2305,7 +2305,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get arrivingAtPickup => 'Head to pickup';
 
   @override
-  String get enterOtpToStart => 'Enter the passenger\'s code to start the trip';
+  String get enterOtpToStart =>
+      'Enter the customer\'s code to start the delivery';
 
   @override
   String get confirmArrival => 'I have arrived';

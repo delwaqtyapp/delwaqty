@@ -338,7 +338,7 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
   Future<bool> _processPayment(Order order, double amount) async {
     try {
       final paymobService = ref.read(paymobServiceProvider);
-      final auth = await Supabase.instance.client.auth.currentUser;
+      final auth = Supabase.instance.client.auth.currentUser;
 
       final authToken = await paymobService.authenticate();
       if (authToken == null) return false;

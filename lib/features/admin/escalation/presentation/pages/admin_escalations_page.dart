@@ -55,15 +55,15 @@ class _AdminEscalationsPageState extends ConsumerState<AdminEscalationsPage> {
 }
 
 class _EscalationTile extends StatelessWidget {
-  final EscalationEvent event;
-  final ColorScheme cs;
-  final AppLocalizations l10n;
 
   const _EscalationTile({
     required this.event,
     required this.cs,
     required this.l10n,
   });
+  final EscalationEvent event;
+  final ColorScheme cs;
+  final AppLocalizations l10n;
 
   String _scopeLabel(String? scope, AppLocalizations l10n) {
     switch (scope) {

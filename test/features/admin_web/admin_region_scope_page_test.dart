@@ -6,6 +6,7 @@ import 'package:delwaqty/features/admin/presentation/providers/admin_region_prov
 import 'package:delwaqty/features/admin/admin_web/presentation/pages/admin_region_scope_page.dart';
 import 'package:delwaqty/features/_shared/regions/domain/entities/region.dart';
 import 'package:delwaqty/features/_shared/regions/presentation/providers/region_providers.dart';
+import 'package:delwaqty/l10n/app_localizations.dart';
 
 void main() {
   final now = DateTime(2026, 8, 15);
@@ -72,8 +73,10 @@ void main() {
           }),
           upsertOverride,
         ],
-        child: const MaterialApp(
-          home: Scaffold(body: AdminRegionScopePage()),
+        child: MaterialApp(
+          localizationsDelegates: const [AppLocalizations.delegate],
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: const Scaffold(body: AdminRegionScopePage()),
         ),
       ),
     );

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 import 'package:delwaqty/shared/widgets/design/premium_card.dart';
-import 'package:delwaqty/core/theme/app_spacing.dart';
 
 class AdminQuickActionsPage extends StatelessWidget {
   const AdminQuickActionsPage({super.key});
@@ -123,7 +122,6 @@ class AdminQuickActionsPage extends StatelessWidget {
                     crossAxisCount: crossAxisCount,
                     mainAxisSpacing: 8,
                     crossAxisSpacing: 8,
-                    childAspectRatio: 1.0,
                   ),
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
@@ -134,7 +132,6 @@ class AdminQuickActionsPage extends StatelessWidget {
                       onTap: () => context.push(action.route),
                       child: PremiumCard(
                         padding: const EdgeInsets.all(8),
-                        radius: AppSpacing.radiusCard,
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [

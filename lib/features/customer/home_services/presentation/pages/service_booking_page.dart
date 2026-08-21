@@ -75,6 +75,7 @@ class _ServiceBookingPageState extends ConsumerState<ServiceBookingPage> {
   }
 
   Future<void> _submitBooking() async {
+    final l10n = AppLocalizations.of(context);
     if (_selectedProviderId == null || _selectedProviderName == null) return;
 
     final authState = ref.read(authStateProvider);

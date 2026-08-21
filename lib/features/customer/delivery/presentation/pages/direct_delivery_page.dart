@@ -254,7 +254,7 @@ class _DirectDeliveryPageState extends ConsumerState<DirectDeliveryPage> {
     ColorScheme cs,
   ) {
     final theme = Theme.of(context);
-    return Container(
+    return DecoratedBox(
       decoration: BoxDecoration(
         color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
         borderRadius: BorderRadius.circular(16),
@@ -380,16 +380,15 @@ class _DirectDeliveryPageState extends ConsumerState<DirectDeliveryPage> {
                   controller: _itemQtyController,
                   focusNode: _qtyFocusNode,
                   keyboardType: const TextInputType.numberWithOptions(
-                    signed: false,
-                    decimal: false,
+                    
                   ),
                   inputFormatters: [
                     FilteringTextInputFormatter.digitsOnly,
                     LengthLimitingTextInputFormatter(4),
                   ],
-                  decoration: InputDecoration(
+                  decoration: const InputDecoration(
                     hintText: '1',
-                    border: const OutlineInputBorder(),
+                    border: OutlineInputBorder(),
                     isDense: true,
                   ),
                   textAlign: TextAlign.center,
@@ -641,7 +640,7 @@ class _DirectDeliveryPageState extends ConsumerState<DirectDeliveryPage> {
     String? hint,
   }) {
     final theme = Theme.of(context);
-    return Container(
+    return DecoratedBox(
       decoration: BoxDecoration(
         color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
         borderRadius: BorderRadius.circular(16),
@@ -666,10 +665,6 @@ class _DirectDeliveryPageState extends ConsumerState<DirectDeliveryPage> {
 }
 
 class _ShoppingItem {
-  final String name;
-  final int quantity;
-  final String unit;
-  final String? subUnit;
 
   const _ShoppingItem({
     required this.name,
@@ -677,4 +672,8 @@ class _ShoppingItem {
     required this.unit,
     this.subUnit,
   });
+  final String name;
+  final int quantity;
+  final String unit;
+  final String? subUnit;
 }

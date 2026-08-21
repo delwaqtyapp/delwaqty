@@ -240,9 +240,9 @@ class _AdminHierarchyPageState extends ConsumerState<AdminHierarchyPage> {
                   children: [
                     TextField(
                       controller: emailController,
-                      decoration: InputDecoration(
+                      decoration: const InputDecoration(
                         labelText: 'Email',
-                        border: const OutlineInputBorder(),
+                        border: OutlineInputBorder(),
                       ),
                     ),
                     const SizedBox(height: 16),

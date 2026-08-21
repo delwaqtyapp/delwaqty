@@ -2,9 +2,9 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:delwaqty/features/admin/location_tracking/domain/entities/location_update.dart';
 
 class SupabaseLocationDataSource {
-  final SupabaseClient _client;
 
   SupabaseLocationDataSource(this._client);
+  final SupabaseClient _client;
 
   Future<List<LocationUpdate>> getUserLocations(String userId, {int limit = 50}) async {
     final rows = await _client

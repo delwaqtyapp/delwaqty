@@ -54,9 +54,9 @@ class RestaurantOffersPage extends ConsumerWidget {
         loading: () => ListView.builder(
           padding: const EdgeInsets.all(16),
           itemCount: 4,
-          itemBuilder: (_, __) => Padding(
-            padding: const EdgeInsets.only(bottom: 12),
-            child: ShimmerCard(height: 120),
+          itemBuilder: (_, __) => const Padding(
+            padding: EdgeInsets.only(bottom: 12),
+            child: ShimmerCard(),
           ),
         ),
         error: (_, __) => Center(
@@ -86,14 +86,14 @@ class _OfferCard extends StatelessWidget {
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
-      child: Container(
+      child: DecoratedBox(
         decoration: BoxDecoration(
-          color: theme.colorScheme.surfaceContainerHighest.withOpacity(0.5),
+          color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
             color: isExpired
-                ? theme.colorScheme.outline.withOpacity(0.2)
-                : theme.colorScheme.primary.withOpacity(0.2),
+                ? theme.colorScheme.outline.withValues(alpha: 0.2)
+                : theme.colorScheme.primary.withValues(alpha: 0.2),
           ),
         ),
         child: Column(
@@ -106,7 +106,7 @@ class _OfferCard extends StatelessWidget {
                 gradient: LinearGradient(
                   colors: isExpired
                       ? [Colors.grey.shade300, Colors.grey.shade200]
-                      : [theme.colorScheme.primary, theme.colorScheme.primary.withOpacity(0.8)],
+                      : [theme.colorScheme.primary, theme.colorScheme.primary.withValues(alpha: 0.8)],
                 ),
                 borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
               ),
@@ -114,7 +114,7 @@ class _OfferCard extends StatelessWidget {
                 children: [
                   Icon(
                     Icons.local_offer_rounded,
-                    color: Colors.white.withOpacity(0.9),
+                    color: Colors.white.withValues(alpha: 0.9),
                     size: 20,
                   ),
                   const SizedBox(width: 8),

@@ -46,7 +46,6 @@ class _MyComplaintsPageState extends ConsumerState<MyComplaintsPage> {
                 padding: const EdgeInsets.only(bottom: 8),
                 child: AnimatedFadeIn(
                   child: GlassCard(
-                    borderRadius: 16,
                     child: ListTile(
                       leading: Container(
                         padding: const EdgeInsets.all(8),

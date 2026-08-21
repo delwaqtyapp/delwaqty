@@ -13,10 +13,6 @@ import 'package:delwaqty/shared/widgets/app_loader.dart';
 import 'package:delwaqty/core/theme/app_colors.dart';
 
 class ReviewsState {
-  final List<Review> reviews;
-  final bool hasMore;
-  final bool isLoadingMore;
-  final int offset;
 
   const ReviewsState({
     this.reviews = const [],
@@ -24,6 +20,10 @@ class ReviewsState {
     this.isLoadingMore = false,
     this.offset = 0,
   });
+  final List<Review> reviews;
+  final bool hasMore;
+  final bool isLoadingMore;
+  final int offset;
 
   ReviewsState copyWith({
     List<Review>? reviews,
@@ -436,7 +436,7 @@ class _WriteReviewSheetState extends ConsumerState<_WriteReviewSheet> {
                 width: 40,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: theme.colorScheme.onSurfaceVariant.withOpacity(0.3),
+                  color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.3),
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -471,7 +471,7 @@ class _WriteReviewSheetState extends ConsumerState<_WriteReviewSheet> {
               decoration: InputDecoration(
                 hintText: l10n.yourReview,
                 filled: true,
-                fillColor: theme.colorScheme.surfaceContainerHighest.withOpacity(0.5),
+                fillColor: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                   borderSide: BorderSide.none,

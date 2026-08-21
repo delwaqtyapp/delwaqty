@@ -45,12 +45,14 @@ class SupabaseCouponDataSource {
 
   CouponStatus _deriveStatus(Coupon coupon) {
     if (!coupon.isActive) return CouponStatus.inactive;
-    if (coupon.expiresAt != null && coupon.expiresAt!.isBefore(DateTime.now()))
+    if (coupon.expiresAt != null && coupon.expiresAt!.isBefore(DateTime.now())) {
       return CouponStatus.expired;
+    }
     if (coupon.usageLimit != null &&
         coupon.usedCount != null &&
-        coupon.usedCount! >= coupon.usageLimit!)
+        coupon.usedCount! >= coupon.usageLimit!) {
       return CouponStatus.usedUp;
+    }
     return CouponStatus.active;
   }
 
@@ -79,8 +81,9 @@ class SupabaseCouponDataSource {
     final coupon = await getCouponByCode(code);
     if (coupon == null) return null;
     if (_deriveStatus(coupon) != CouponStatus.active) return null;
-    if (coupon.minimumOrder != null && orderTotal < coupon.minimumOrder!)
+    if (coupon.minimumOrder != null && orderTotal < coupon.minimumOrder!) {
       return null;
+    }
     return coupon;
   }
 

@@ -1,13 +1,4 @@
 class LocationUpdate {
-  final String id;
-  final String userId;
-  final double latitude;
-  final double longitude;
-  final double? accuracy;
-  final double? speed;
-  final double? heading;
-  final bool isMoving;
-  final DateTime recordedAt;
 
   const LocationUpdate({
     required this.id,
@@ -34,6 +25,15 @@ class LocationUpdate {
       recordedAt: DateTime.parse(json['recorded_at'] as String),
     );
   }
+  final String id;
+  final String userId;
+  final double latitude;
+  final double longitude;
+  final double? accuracy;
+  final double? speed;
+  final double? heading;
+  final bool isMoving;
+  final DateTime recordedAt;
 
   Map<String, dynamic> toJson() => {
     'id': id,

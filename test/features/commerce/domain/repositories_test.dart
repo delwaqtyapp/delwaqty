@@ -37,25 +37,25 @@ final _testMerchants = [
   Merchant(
     id: 'm2', name: 'Tamimi', type: MerchantType.grocery,
     latitude: 24.6, longitude: 46.7, city: 'Riyadh',
-    rating: 4.0, isOpenNow: true, isFeatured: false,
+    rating: 4.0, isOpenNow: true,
     tags: ['groceries'], createdAt: DateTime(2024),
   ),
   Merchant(
     id: 'm3', name: 'Al Nahdi', type: MerchantType.pharmacy,
     latitude: 24.5, longitude: 46.7, city: 'Riyadh',
-    rating: 4.8, isOpenNow: false, isFeatured: true,
+    rating: 4.8, isFeatured: true,
     tags: ['pharmacy'], createdAt: DateTime(2024),
   ),
   Merchant(
     id: 'm4', name: 'Barn\'s Coffee', type: MerchantType.restaurant,
     latitude: 24.7, longitude: 46.7, city: 'Jeddah',
-    rating: 4.2, isOpenNow: true, isFeatured: false,
+    rating: 4.2, isOpenNow: true,
     tags: ['coffee', 'drinks'], createdAt: DateTime(2024),
   ),
   Merchant(
     id: 'm5', name: 'Pizza Hut', type: MerchantType.restaurant,
     latitude: 24.8, longitude: 46.7, city: 'Riyadh',
-    rating: 3.9, isOpenNow: false, isFeatured: false,
+    rating: 3.9,
     tags: ['pizza'], createdAt: DateTime(2024),
   ),
 ];
@@ -63,35 +63,35 @@ final _testMerchants = [
 final _testProducts = [
   Product(
     id: 'p1', merchantId: 'm1', categoryId: 'c1',
-    name: 'Chicken Meal', price: 35.0, isAvailable: true, isFeatured: true,
+    name: 'Chicken Meal', price: 35.0, isFeatured: true,
     tags: ['chicken'], createdAt: DateTime(2024),
   ),
   Product(
     id: 'p2', merchantId: 'm1', categoryId: 'c1',
-    name: 'Spicy Sandwich', price: 20.0, isAvailable: true,
+    name: 'Spicy Sandwich', price: 20.0,
     tags: ['sandwich'], createdAt: DateTime(2024),
   ),
   Product(
     id: 'p3', merchantId: 'm1', categoryId: 'c2',
-    name: 'Cola', price: 5.0, isAvailable: true,
+    name: 'Cola', price: 5.0,
     tags: ['drink'], createdAt: DateTime(2024),
   ),
   Product(
     id: 'p4', merchantId: 'm2', categoryId: 'c3',
-    name: 'Milk', price: 12.5, isAvailable: true,
+    name: 'Milk', price: 12.5,
     tags: ['dairy'], createdAt: DateTime(2024),
   ),
 ];
 
 final _testCategories = [
-  CatalogCategory(id: 'c1', merchantId: 'm1', name: 'Meals', sortOrder: 0),
-  CatalogCategory(id: 'c2', merchantId: 'm1', name: 'Drinks', sortOrder: 1),
-  CatalogCategory(id: 'c3', merchantId: 'm2', name: 'Dairy', sortOrder: 0),
+  const CatalogCategory(id: 'c1', merchantId: 'm1', name: 'Meals'),
+  const CatalogCategory(id: 'c2', merchantId: 'm1', name: 'Drinks', sortOrder: 1),
+  const CatalogCategory(id: 'c3', merchantId: 'm2', name: 'Dairy'),
 ];
 
 final _testCoupons = [
-  Coupon(id: 'cp1', code: 'SAVE10', type: CouponType.percentage, value: 10, minimumOrder: 50, isActive: true, createdAt: DateTime(2024)),
-  Coupon(id: 'cp2', code: 'FLAT20', type: CouponType.fixed, value: 20, minimumOrder: 100, isActive: true, createdAt: DateTime(2024)),
+  Coupon(id: 'cp1', code: 'SAVE10', type: CouponType.percentage, value: 10, minimumOrder: 50, createdAt: DateTime(2024)),
+  Coupon(id: 'cp2', code: 'FLAT20', type: CouponType.fixed, value: 20, minimumOrder: 100, createdAt: DateTime(2024)),
 ];
 
 void main() {
@@ -183,7 +183,7 @@ void main() {
 
     test('getMerchants filters by minRating', () async {
       final filtered = await repo.getMerchants(
-        filter: SearchFilter(minRating: 4.3),
+        filter: const SearchFilter(minRating: 4.3),
       );
       for (final m in filtered) {
         expect(m.rating, greaterThanOrEqualTo(4.3));
@@ -380,13 +380,13 @@ void main() {
 
   group('CartRepository', () {
     late MockCartRepository repo;
-    Cart? _currentCart;
+    Cart? currentCart;
 
     setUp(() {
       repo = MockCartRepository();
-      _currentCart = null;
+      currentCart = null;
 
-      when(() => repo.getCurrentCart()).thenAnswer((_) async => _currentCart);
+      when(() => repo.getCurrentCart()).thenAnswer((_) async => currentCart);
 
       when(() => repo.addToCart(
         merchantId: any(named: 'merchantId'),
@@ -396,29 +396,29 @@ void main() {
         final merchantId = invocation.namedArguments[#merchantId] as String;
         final merchantName = invocation.namedArguments[#merchantName] as String;
         final item = invocation.namedArguments[#item] as CartItem;
-        if (_currentCart == null || _currentCart!.merchantId != merchantId) {
-          _currentCart = Cart(
+        if (currentCart == null || currentCart!.merchantId != merchantId) {
+          currentCart = Cart(
             id: 'cart_1', merchantId: merchantId, merchantName: merchantName,
             items: [item], subtotal: item.unitPrice * item.quantity,
             total: item.unitPrice * item.quantity, updatedAt: DateTime.now(),
           );
         } else {
-          final existing = _currentCart!.items.where((i) => i.productId == item.productId).toList();
+          final existing = currentCart!.items.where((i) => i.productId == item.productId).toList();
           if (existing.isNotEmpty) {
-            final merged = _currentCart!.items.map((i) =>
+            final merged = currentCart!.items.map((i) =>
               i.productId == item.productId
                 ? CartItem(id: i.id, productId: i.productId, productName: i.productName, quantity: i.quantity + item.quantity, unitPrice: i.unitPrice)
                 : i
             ).toList();
             final sub = merged.fold<double>(0, (sum, i) => sum + i.unitPrice * i.quantity);
-            _currentCart = _currentCart!.copyWith(items: merged, subtotal: sub, total: sub, updatedAt: DateTime.now());
+            currentCart = currentCart!.copyWith(items: merged, subtotal: sub, total: sub, updatedAt: DateTime.now());
           } else {
-            final newItems = [..._currentCart!.items, item];
+            final newItems = [...currentCart!.items, item];
             final sub = newItems.fold<double>(0, (sum, i) => sum + i.unitPrice * i.quantity);
-            _currentCart = _currentCart!.copyWith(items: newItems, subtotal: sub, total: sub, updatedAt: DateTime.now());
+            currentCart = currentCart!.copyWith(items: newItems, subtotal: sub, total: sub, updatedAt: DateTime.now());
           }
         }
-        return _currentCart!;
+        return currentCart!;
       });
 
       when(() => repo.updateCartItem(
@@ -428,62 +428,62 @@ void main() {
         final cartItemId = invocation.namedArguments[#cartItemId] as String;
         final quantity = invocation.namedArguments[#quantity] as int;
         if (quantity <= 0) {
-          final newItems = _currentCart!.items.where((i) => i.id != cartItemId).toList();
+          final newItems = currentCart!.items.where((i) => i.id != cartItemId).toList();
           if (newItems.isEmpty) {
-            _currentCart = Cart(
+            currentCart = Cart(
               id: 'empty', merchantId: '', merchantName: '',
-              items: [], subtotal: 0, total: 0, updatedAt: DateTime.now(),
+              items: [], updatedAt: DateTime.now(),
             );
           } else {
             final sub = newItems.fold<double>(0, (sum, i) => sum + i.unitPrice * i.quantity);
-            _currentCart = _currentCart!.copyWith(items: newItems, subtotal: sub, total: sub, updatedAt: DateTime.now());
+            currentCart = currentCart!.copyWith(items: newItems, subtotal: sub, total: sub, updatedAt: DateTime.now());
           }
         } else {
-          final newItems = _currentCart!.items.map((i) =>
+          final newItems = currentCart!.items.map((i) =>
             i.id == cartItemId ? CartItem(id: i.id, productId: i.productId, productName: i.productName, quantity: quantity, unitPrice: i.unitPrice) : i
           ).toList();
           final sub = newItems.fold<double>(0, (sum, i) => sum + i.unitPrice * i.quantity);
-          _currentCart = _currentCart!.copyWith(items: newItems, subtotal: sub, total: sub, updatedAt: DateTime.now());
+          currentCart = currentCart!.copyWith(items: newItems, subtotal: sub, total: sub, updatedAt: DateTime.now());
         }
-        return _currentCart!;
+        return currentCart!;
       });
 
       when(() => repo.removeFromCart(cartItemId: any(named: 'cartItemId'))).thenAnswer((invocation) async {
-        _currentCart = Cart(
+        currentCart = Cart(
           id: 'empty', merchantId: '', merchantName: '',
-          items: [], subtotal: 0, total: 0, updatedAt: DateTime.now(),
+          items: [], updatedAt: DateTime.now(),
         );
-        return _currentCart!;
+        return currentCart!;
       });
 
       when(() => repo.clearCart()).thenAnswer((_) async {
         final empty = Cart(
           id: 'empty', merchantId: '', merchantName: '',
-          items: [], subtotal: 0, total: 0, updatedAt: DateTime.now(),
+          items: [], updatedAt: DateTime.now(),
         );
-        _currentCart = null;
+        currentCart = null;
         return empty;
       });
 
       when(() => repo.applyCoupon(any(), discount: any(named: 'discount'))).thenAnswer((invocation) async {
         final code = invocation.positionalArguments[0] as String;
         if (code == 'SAVE10') {
-          final sub = _currentCart!.subtotal;
-          _currentCart = _currentCart!.copyWith(
+          final sub = currentCart!.subtotal;
+          currentCart = currentCart!.copyWith(
             couponCode: 'SAVE10', discount: sub * 0.1,
             total: sub - sub * 0.1, updatedAt: DateTime.now(),
           );
         }
-        return _currentCart!;
+        return currentCart!;
       });
 
       when(() => repo.removeCoupon()).thenAnswer((_) async {
-        final sub = _currentCart!.subtotal;
-        _currentCart = _currentCart!.copyWith(
+        final sub = currentCart!.subtotal;
+        currentCart = currentCart!.copyWith(
           couponCode: null, discount: 0,
           total: sub, updatedAt: DateTime.now(),
         );
-        return _currentCart!;
+        return currentCart!;
       });
     });
 
@@ -495,7 +495,7 @@ void main() {
     test('addToCart creates new cart', () async {
       final cart = await repo.addToCart(
         merchantId: 'm1', merchantName: 'Al Baik',
-        item: CartItem(id: 'ci1', productId: 'p1', productName: 'Chicken Meal', quantity: 2, unitPrice: 35.0),
+        item: const CartItem(id: 'ci1', productId: 'p1', productName: 'Chicken Meal', quantity: 2, unitPrice: 35.0),
       );
       expect(cart.merchantId, 'm1');
       expect(cart.items.length, 1);
@@ -506,11 +506,11 @@ void main() {
     test('addToCart merges same product', () async {
       await repo.addToCart(
         merchantId: 'm1', merchantName: 'Al Baik',
-        item: CartItem(id: 'ci1', productId: 'p1', productName: 'Meal', quantity: 1, unitPrice: 35.0),
+        item: const CartItem(id: 'ci1', productId: 'p1', productName: 'Meal', quantity: 1, unitPrice: 35.0),
       );
       final cart = await repo.addToCart(
         merchantId: 'm1', merchantName: 'Al Baik',
-        item: CartItem(id: 'ci2', productId: 'p1', productName: 'Meal', quantity: 2, unitPrice: 35.0),
+        item: const CartItem(id: 'ci2', productId: 'p1', productName: 'Meal', quantity: 2, unitPrice: 35.0),
       );
       expect(cart.items.length, 1);
       expect(cart.items.first.quantity, 3);
@@ -520,11 +520,11 @@ void main() {
     test('addToCart replaces cart for different merchant', () async {
       await repo.addToCart(
         merchantId: 'm1', merchantName: 'Al Baik',
-        item: CartItem(id: 'ci1', productId: 'p1', productName: 'Meal', quantity: 1, unitPrice: 35.0),
+        item: const CartItem(id: 'ci1', productId: 'p1', productName: 'Meal', quantity: 1, unitPrice: 35.0),
       );
       final cart = await repo.addToCart(
         merchantId: 'm2', merchantName: 'Tamimi',
-        item: CartItem(id: 'ci2', productId: 'p4', productName: 'Milk', quantity: 1, unitPrice: 12.5),
+        item: const CartItem(id: 'ci2', productId: 'p4', productName: 'Milk', quantity: 1, unitPrice: 12.5),
       );
       expect(cart.merchantId, 'm2');
       expect(cart.items.length, 1);
@@ -534,7 +534,7 @@ void main() {
     test('updateCartItem updates quantity', () async {
       await repo.addToCart(
         merchantId: 'm1', merchantName: 'Al Baik',
-        item: CartItem(id: 'ci1', productId: 'p1', productName: 'Meal', quantity: 1, unitPrice: 35.0),
+        item: const CartItem(id: 'ci1', productId: 'p1', productName: 'Meal', quantity: 1, unitPrice: 35.0),
       );
       final cart = await repo.updateCartItem(cartItemId: 'ci1', quantity: 3);
       expect(cart.items.first.quantity, 3);
@@ -544,7 +544,7 @@ void main() {
     test('updateCartItem removes item when quantity <= 0', () async {
       await repo.addToCart(
         merchantId: 'm1', merchantName: 'Al Baik',
-        item: CartItem(id: 'ci1', productId: 'p1', productName: 'Meal', quantity: 1, unitPrice: 35.0),
+        item: const CartItem(id: 'ci1', productId: 'p1', productName: 'Meal', quantity: 1, unitPrice: 35.0),
       );
       final cart = await repo.updateCartItem(cartItemId: 'ci1', quantity: 0);
       expect(cart.id, 'empty');
@@ -554,7 +554,7 @@ void main() {
     test('removeFromCart removes item', () async {
       await repo.addToCart(
         merchantId: 'm1', merchantName: 'Al Baik',
-        item: CartItem(id: 'ci1', productId: 'p1', productName: 'Meal', quantity: 1, unitPrice: 35.0),
+        item: const CartItem(id: 'ci1', productId: 'p1', productName: 'Meal', quantity: 1, unitPrice: 35.0),
       );
       final cart = await repo.removeFromCart(cartItemId: 'ci1');
       expect(cart.id, 'empty');
@@ -563,7 +563,7 @@ void main() {
     test('clearCart empties the cart', () async {
       await repo.addToCart(
         merchantId: 'm1', merchantName: 'Al Baik',
-        item: CartItem(id: 'ci1', productId: 'p1', productName: 'Meal', quantity: 1, unitPrice: 35.0),
+        item: const CartItem(id: 'ci1', productId: 'p1', productName: 'Meal', quantity: 1, unitPrice: 35.0),
       );
       final cart = await repo.clearCart();
       expect(cart.id, 'empty');
@@ -575,7 +575,7 @@ void main() {
     test('applyCoupon applies SAVE10 discount', () async {
       await repo.addToCart(
         merchantId: 'm1', merchantName: 'Al Baik',
-        item: CartItem(id: 'ci1', productId: 'p1', productName: 'Meal', quantity: 1, unitPrice: 100.0),
+        item: const CartItem(id: 'ci1', productId: 'p1', productName: 'Meal', quantity: 1, unitPrice: 100.0),
       );
       final cart = await repo.applyCoupon('SAVE10');
       expect(cart.couponCode, 'SAVE10');
@@ -585,7 +585,7 @@ void main() {
     test('removeCoupon removes discount', () async {
       await repo.addToCart(
         merchantId: 'm1', merchantName: 'Al Baik',
-        item: CartItem(id: 'ci1', productId: 'p1', productName: 'Meal', quantity: 1, unitPrice: 100.0),
+        item: const CartItem(id: 'ci1', productId: 'p1', productName: 'Meal', quantity: 1, unitPrice: 100.0),
       );
       await repo.applyCoupon('SAVE10');
       final cart = await repo.removeCoupon();
@@ -596,13 +596,13 @@ void main() {
 
   group('OrderRepository', () {
     late MockOrderRepository repo;
-    final _orders = <String, Order>{};
-    var _nextId = 1;
+    final orders0 = <String, Order>{};
+    var nextId = 1;
 
     setUp(() {
       repo = MockOrderRepository();
-      _orders.clear();
-      _nextId = 1;
+      orders0.clear();
+      nextId = 1;
 
       when(() => repo.getOrders(
         status: any(named: 'status'),
@@ -611,14 +611,14 @@ void main() {
       )).thenAnswer((invocation) async {
         final status = invocation.namedArguments[#status] as OrderStatus?;
         final limit = invocation.namedArguments[#limit] as int? ?? 20;
-        var results = _orders.values.toList();
+        var results = orders0.values.toList();
         if (status != null) results = results.where((o) => o.status == status).toList();
         return results.take(limit).toList();
       });
 
       when(() => repo.getOrderById(any())).thenAnswer((invocation) async {
         final id = invocation.positionalArguments[0] as String;
-        return _orders[id];
+        return orders0[id];
       });
 
       when(() => repo.createOrder(
@@ -640,7 +640,7 @@ void main() {
           totalPrice: ci.unitPrice * ci.quantity,
         )).toList();
         final order = Order(
-          id: 'ord_${_nextId++}',
+          id: 'ord_${nextId++}',
           merchantId: invocation.namedArguments[#merchantId] as String,
           merchantName: invocation.namedArguments[#merchantName] as String,
           items: orderItems,
@@ -651,7 +651,7 @@ void main() {
           status: OrderStatus.pending,
           createdAt: DateTime.now(),
         );
-        _orders[order.id] = order;
+        orders0[order.id] = order;
         return order;
       });
 
@@ -661,14 +661,14 @@ void main() {
       )).thenAnswer((invocation) async {
         final orderId = invocation.namedArguments[#orderId] as String;
         final reason = invocation.namedArguments[#reason] as String?;
-        final order = _orders[orderId];
+        final order = orders0[orderId];
         if (order == null) throw StateError('Order not found');
         final cancelled = order.copyWith(
           status: OrderStatus.cancelled,
           cancellationReason: reason,
           cancelledAt: DateTime.now(),
         );
-        _orders[orderId] = cancelled;
+        orders0[orderId] = cancelled;
         return cancelled;
       });
     });
@@ -681,7 +681,7 @@ void main() {
     test('createOrder creates and returns order', () async {
       final order = await repo.createOrder(
         merchantId: 'm1', merchantName: 'Test Merchant',
-        items: [CartItem(id: 'ci1', productId: 'p1', productName: 'Meal', quantity: 2, unitPrice: 35.0)],
+        items: [const CartItem(id: 'ci1', productId: 'p1', productName: 'Meal', quantity: 2, unitPrice: 35.0)],
         subtotal: 70.0, deliveryFee: 10.0, discount: 0.0, total: 80.0,
       );
       expect(order.id, isNotEmpty);
@@ -747,20 +747,20 @@ void main() {
 
   group('ReviewRepository', () {
     late MockReviewRepository repo;
-    final _reviews = <String, Review>{};
+    final reviews0 = <String, Review>{};
 
     setUp(() {
       repo = MockReviewRepository();
-      _reviews.clear();
+      reviews0.clear();
 
       when(() => repo.getMerchantReviews(any())).thenAnswer((invocation) async {
         final merchantId = invocation.positionalArguments[0] as String;
-        return _reviews.values.where((r) => r.merchantId == merchantId).toList();
+        return reviews0.values.where((r) => r.merchantId == merchantId).toList();
       });
 
       when(() => repo.getReviewById(any())).thenAnswer((invocation) async {
         final id = invocation.positionalArguments[0] as String;
-        return _reviews[id];
+        return reviews0[id];
       });
 
       when(() => repo.submitReview(
@@ -773,14 +773,14 @@ void main() {
         imageUrls: any(named: 'imageUrls'),
       )).thenAnswer((invocation) async {
         final review = Review(
-          id: 'rev_${_reviews.length + 1}',
+          id: 'rev_${reviews0.length + 1}',
           merchantId: invocation.namedArguments[#merchantId] as String,
           userId: invocation.namedArguments[#userId] as String,
           rating: invocation.namedArguments[#rating] as double,
           comment: invocation.namedArguments[#comment] as String?,
           createdAt: DateTime.now(),
         );
-        _reviews[review.id] = review;
+        reviews0[review.id] = review;
         return review;
       });
     });
@@ -893,15 +893,15 @@ void main() {
 
   group('FavoriteRepository', () {
     late MockFavoriteRepository repo;
-    final _favs = <String, Favorite>{};
+    final favs = <String, Favorite>{};
 
     setUp(() {
       repo = MockFavoriteRepository();
-      _favs.clear();
+      favs.clear();
 
       when(() => repo.getFavorites(type: any(named: 'type'))).thenAnswer((invocation) async {
         final type = invocation.namedArguments[#type] as FavoriteType?;
-        var results = _favs.values.toList();
+        var results = favs.values.toList();
         if (type != null) results = results.where((f) => f.type == type).toList();
         return results;
       });
@@ -909,7 +909,7 @@ void main() {
       when(() => repo.isFavorite(any(), any())).thenAnswer((invocation) async {
         final targetId = invocation.positionalArguments[0] as String;
         final type = invocation.positionalArguments[1] as FavoriteType;
-        return _favs.values.any((f) => f.targetId == targetId && f.type == type);
+        return favs.values.any((f) => f.targetId == targetId && f.type == type);
       });
 
       when(() => repo.toggleFavorite(
@@ -918,15 +918,15 @@ void main() {
       )).thenAnswer((invocation) async {
         final targetId = invocation.namedArguments[#targetId] as String;
         final type = invocation.namedArguments[#type] as FavoriteType;
-        final existing = _favs.values.where((f) => f.targetId == targetId && f.type == type).firstOrNull;
+        final existing = favs.values.where((f) => f.targetId == targetId && f.type == type).firstOrNull;
         if (existing != null) {
-          _favs.remove(existing.id);
+          favs.remove(existing.id);
         } else {
           final fav = Favorite(
-            id: 'fav_${_favs.length + 1}',
+            id: 'fav_${favs.length + 1}',
             targetId: targetId, type: type, createdAt: DateTime.now(),
           );
-          _favs[fav.id] = fav;
+          favs[fav.id] = fav;
         }
       });
     });

@@ -5,7 +5,6 @@ import 'package:delwaqty/core/constants/storage_keys.dart';
 import 'package:delwaqty/core/theme/app_spacing.dart';
 import 'package:delwaqty/data/datasources/local/shared_preferences_service.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
-import 'package:delwaqty/core/theme/app_colors.dart';
 import 'package:delwaqty/core/theme/app_text_styles.dart';
 
 class OnboardingPage extends ConsumerStatefulWidget {
@@ -87,7 +86,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage>
             _getColor(_currentPage),
             _bgController.value,
           )!;
-          return Container(
+          return DecoratedBox(
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 begin: Alignment.topLeft,

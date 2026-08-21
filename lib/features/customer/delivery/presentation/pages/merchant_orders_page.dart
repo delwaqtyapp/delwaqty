@@ -55,11 +55,11 @@ class _MerchantOrdersPageState extends ConsumerState<MerchantOrdersPage> {
               loading: () => ListView(
                 padding: const EdgeInsets.all(16),
                 children: const [
-                  ShimmerCard(height: 120),
+                  ShimmerCard(),
                   SizedBox(height: 12),
-                  ShimmerCard(height: 120),
+                  ShimmerCard(),
                   SizedBox(height: 12),
-                  ShimmerCard(height: 120),
+                  ShimmerCard(),
                 ],
               ),
               error: (e, _) => Center(

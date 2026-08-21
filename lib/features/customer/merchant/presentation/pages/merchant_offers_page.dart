@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:delwaqty/core/extensions/context_extensions.dart';
-import 'package:delwaqty/features/customer/merchant/merchant_module.dart';
 import 'package:delwaqty/features/customer/restaurant/restaurant_module.dart';
 import 'package:delwaqty/features/customer/restaurant/domain/entities/offer.dart';
 import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
@@ -87,7 +86,7 @@ class _MerchantOffersPageState extends ConsumerState<MerchantOffersPage> {
                 itemCount: 5,
                 itemBuilder: (_, __) => const Padding(
                   padding: EdgeInsets.only(bottom: 12),
-                  child: ShimmerCard(height: 120),
+                  child: ShimmerCard(),
                 ),
               ),
               error: (e, _) => Center(
@@ -237,14 +236,14 @@ class _OfferCard extends StatelessWidget {
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
-      child: Container(
+      child: DecoratedBox(
         decoration: BoxDecoration(
-          color: theme.colorScheme.surfaceContainerHighest.withOpacity(0.5),
+          color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
             color: offer.isActive
-                ? theme.colorScheme.primary.withOpacity(0.3)
-                : theme.colorScheme.outline.withOpacity(0.2),
+                ? theme.colorScheme.primary.withValues(alpha: 0.3)
+                : theme.colorScheme.outline.withValues(alpha: 0.2),
           ),
         ),
         child: Column(
@@ -260,7 +259,7 @@ class _OfferCard extends StatelessWidget {
                       ? [Colors.grey.shade300, Colors.grey.shade200]
                       : [
                           theme.colorScheme.primary,
-                          theme.colorScheme.primary.withOpacity(0.8),
+                          theme.colorScheme.primary.withValues(alpha: 0.8),
                         ],
                 ),
                 borderRadius: const BorderRadius.vertical(
@@ -271,7 +270,7 @@ class _OfferCard extends StatelessWidget {
                 children: [
                   Icon(
                     Icons.local_offer_rounded,
-                    color: Colors.white.withOpacity(0.9),
+                    color: Colors.white.withValues(alpha: 0.9),
                     size: 20,
                   ),
                   const SizedBox(width: 8),
@@ -495,7 +494,7 @@ class _OfferFormSheetState extends ConsumerState<_OfferFormSheet> {
             width: 40,
             height: 4,
             decoration: BoxDecoration(
-              color: theme.colorScheme.onSurfaceVariant.withOpacity(0.3),
+              color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.3),
               borderRadius: BorderRadius.circular(2),
             ),
           ),
@@ -549,7 +548,7 @@ class _OfferFormSheetState extends ConsumerState<_OfferFormSheet> {
                     ),
                     const SizedBox(height: 16),
                     DropdownButtonFormField<String>(
-                      value: _discountType,
+                      initialValue: _discountType,
                       decoration: InputDecoration(
                         labelText: l10n.discountType,
                         border: const OutlineInputBorder(),

@@ -28,7 +28,7 @@ class ServiceTypeChips extends StatelessWidget {
         return Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
           decoration: BoxDecoration(
-            color: theme.colorScheme.primaryContainer.withOpacity(0.4),
+            color: theme.colorScheme.primaryContainer.withValues(alpha: 0.4),
             borderRadius: BorderRadius.circular(20),
           ),
           child: Row(

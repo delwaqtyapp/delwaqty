@@ -1,14 +1,14 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:delwaqty/features/customer/driver/domain/entities/vehicle.dart';
-import 'package:delwaqty/features/customer/driver/domain/entities/driver_document.dart';
-import 'package:delwaqty/features/customer/driver/domain/entities/wallet_detail.dart';
-import 'package:delwaqty/features/customer/driver/domain/entities/driver_performance.dart';
-import 'package:delwaqty/features/customer/driver/domain/entities/driver_profile.dart';
+import 'package:delwaqty/features/driver/domain/entities/vehicle.dart';
+import 'package:delwaqty/features/driver/domain/entities/driver_document.dart';
+import 'package:delwaqty/features/driver/domain/entities/wallet_detail.dart';
+import 'package:delwaqty/features/driver/domain/entities/driver_performance.dart';
+import 'package:delwaqty/features/driver/domain/entities/driver_profile.dart';
 
 void main() {
   group('Vehicle', () {
     test('fromJson roundtrip', () {
-      final now = DateTime.utc(2026, 1, 1);
+      final now = DateTime.utc(2026);
       final v = Vehicle(
         id: 'v1',
         driverId: 'd1',
@@ -19,8 +19,6 @@ void main() {
         color: 'Red',
         plateNumber: 'ABC-123',
         seats: 2,
-        isActive: true,
-        isVerified: false,
         photoUrl: 'https://example.com/photo.jpg',
         createdAt: now,
       );
@@ -77,9 +75,8 @@ void main() {
         fileUrl: 'https://storage.example.com/license.pdf',
         fileName: 'license.pdf',
         fileSize: 1024,
-        status: 'pending',
         expiresAt: DateTime(2027, 6, 15),
-        createdAt: DateTime(2026, 1, 1),
+        createdAt: DateTime(2026),
       );
       final json = d.toJson();
       final restored = DriverDocument.fromJson(json);
@@ -108,8 +105,7 @@ void main() {
 
     test('document status states', () {
       final pending = DriverDocument(
-        id: 'd1', driverId: 'd1', docType: 'identity',
-        status: 'pending', createdAt: DateTime(2026),
+        id: 'd1', driverId: 'd1', docType: 'identity', createdAt: DateTime(2026),
       );
       final verified = DriverDocument(
         id: 'd2', driverId: 'd1', docType: 'identity',
@@ -145,7 +141,6 @@ void main() {
         incentiveBalance: 100,
         pendingWithdrawals: 300,
         totalWithdrawn: 5000,
-        currency: 'EGP',
       );
       expect(w.balance, 1500.50);
       expect(w.bonusBalance, 200);
@@ -237,7 +232,6 @@ void main() {
         createdAt: DateTime(2026),
         onboardingCompleted: true,
         onboardingStep: 3,
-        verificationStatus: 'pending',
       );
       final json = p.toJson();
       final restored = DriverProfile.fromJson(json);

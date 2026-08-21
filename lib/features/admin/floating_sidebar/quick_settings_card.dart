@@ -45,7 +45,7 @@ class QuickSettingsCard extends StatelessWidget {
               scale: 0.75,
               child: Switch(
                 value: themeMode == ThemeMode.dark,
-                activeColor: st.selectedGradientStart,
+                activeThumbColor: st.selectedGradientStart,
                 onChanged: (_) => ref.read(themeModeProvider.notifier).toggleTheme(),
               ),
             ),

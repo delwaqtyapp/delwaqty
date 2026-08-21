@@ -49,7 +49,7 @@ class LoginActivityPage extends StatelessWidget {
                     ),
                     child: Text(
                       l10n.currentSession,
-                      style: TextStyle(color: AppColors.successLight, fontSize: 12),
+                      style: const TextStyle(color: AppColors.successLight, fontSize: 12),
                     ),
                   )
                 : null,
@@ -61,10 +61,6 @@ class LoginActivityPage extends StatelessWidget {
 }
 
 class _LoginActivity {
-  final String device;
-  final String ip;
-  final String time;
-  final bool current;
 
   const _LoginActivity({
     required this.device,
@@ -72,4 +68,8 @@ class _LoginActivity {
     required this.time,
     required this.current,
   });
+  final String device;
+  final String ip;
+  final String time;
+  final bool current;
 }

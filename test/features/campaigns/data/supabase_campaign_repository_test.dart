@@ -64,13 +64,13 @@ void main() {
         priority: CampaignPriority.critical,
       );
       when(
-        () => mockDataSource.getActiveCampaigns(locale: 'ar'),
+        () => mockDataSource.getActiveCampaigns(),
       ).thenAnswer((_) async => [campaign]);
 
-      final result = await repository.getActiveCampaigns(locale: 'ar');
+      final result = await repository.getActiveCampaigns();
 
       expect(result, [campaign]);
-      verify(() => mockDataSource.getActiveCampaigns(locale: 'ar')).called(1);
+      verify(() => mockDataSource.getActiveCampaigns()).called(1);
     });
 
     test('returns an empty list when nothing is active', () async {
@@ -88,7 +88,7 @@ void main() {
           .thenThrow(Exception('network error'));
 
       expect(
-        () => repository.getActiveCampaigns(locale: 'ar'),
+        () => repository.getActiveCampaigns(),
         throwsA(isA<ServerException>()),
       );
     });

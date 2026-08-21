@@ -8,9 +8,9 @@ import 'package:delwaqty/features/customer/safety/domain/entities/live_share_res
 import 'package:delwaqty/features/customer/safety/data/datasources/remote/supabase_safety_data_source.dart';
 
 class SafetyRepositoryImpl implements SafetyRepository {
-  final SupabaseSafetyDataSource _dataSource;
 
   SafetyRepositoryImpl(this._dataSource);
+  final SupabaseSafetyDataSource _dataSource;
 
   @override
   Future<SosResult> triggerSosAlert(

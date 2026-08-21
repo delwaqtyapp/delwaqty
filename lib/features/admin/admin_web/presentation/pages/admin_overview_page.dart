@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:delwaqty/core/theme/app_colors.dart';
 
 class AdminOverviewPage extends StatefulWidget {
   const AdminOverviewPage({super.key});

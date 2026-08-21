@@ -1,21 +1,4 @@
 class ChatRoom {
-  final String id;
-  final String roomType;
-  final List<String> participantIds;
-  final String? orderId;
-  final String? complaintId;
-  final bool isActive;
-  final String status;
-  final String priority;
-  final String? regionId;
-  final String? assignedAdminId;
-  final DateTime? assignedAt;
-  final DateTime? lastMessageAt;
-  final DateTime? escalatedAt;
-  final String? escalatedFromAdminId;
-  final DateTime? closedAt;
-  final DateTime createdAt;
-  final DateTime? updatedAt;
 
   const ChatRoom({
     required this.id,
@@ -68,6 +51,23 @@ class ChatRoom {
           : null,
     );
   }
+  final String id;
+  final String roomType;
+  final List<String> participantIds;
+  final String? orderId;
+  final String? complaintId;
+  final bool isActive;
+  final String status;
+  final String priority;
+  final String? regionId;
+  final String? assignedAdminId;
+  final DateTime? assignedAt;
+  final DateTime? lastMessageAt;
+  final DateTime? escalatedAt;
+  final String? escalatedFromAdminId;
+  final DateTime? closedAt;
+  final DateTime createdAt;
+  final DateTime? updatedAt;
 
   Map<String, dynamic> toJson() => {
     'id': id,

@@ -69,7 +69,7 @@ class HomeServicesPage extends ConsumerWidget {
           childAspectRatio: 1.2,
         ),
         itemCount: 8,
-        itemBuilder: (_, __) => const ShimmerCard(height: 120),
+        itemBuilder: (_, __) => const ShimmerCard(),
       ),
     );
   }

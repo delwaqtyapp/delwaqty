@@ -65,10 +65,10 @@ class ServiceAudioLogsPage extends ConsumerWidget {
 }
 
 class _AudioLogCard extends StatelessWidget {
-  final ServiceAudioLog log;
-  final AppLocalizations l10n;
 
   const _AudioLogCard({required this.log, required this.l10n});
+  final ServiceAudioLog log;
+  final AppLocalizations l10n;
 
   @override
   Widget build(BuildContext context) {
@@ -146,10 +146,10 @@ class _AudioLogCard extends StatelessWidget {
 }
 
 class _StatusChip extends StatelessWidget {
-  final AudioLogStatus status;
-  final AppLocalizations l10n;
 
   const _StatusChip({required this.status, required this.l10n});
+  final AudioLogStatus status;
+  final AppLocalizations l10n;
 
   @override
   Widget build(BuildContext context) {

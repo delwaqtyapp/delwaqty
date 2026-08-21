@@ -132,11 +132,11 @@ abstract final class AppTheme {
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: colorScheme.surfaceContainerHighest.withValues(alpha: 0.35),
-        border: OutlineInputBorder(
+        border: const OutlineInputBorder(
           borderRadius: AppSpacing.borderRadiusSearch,
           borderSide: BorderSide.none,
         ),
-        enabledBorder: OutlineInputBorder(
+        enabledBorder: const OutlineInputBorder(
           borderRadius: AppSpacing.borderRadiusSearch,
           borderSide: BorderSide.none,
         ),
@@ -169,9 +169,9 @@ abstract final class AppTheme {
         showDragHandle: true,
         dragHandleColor: colorScheme.outlineVariant,
       ),
-      snackBarTheme: SnackBarThemeData(
+      snackBarTheme: const SnackBarThemeData(
         behavior: SnackBarBehavior.floating,
-        shape: const RoundedRectangleBorder(
+        shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.all(Radius.circular(14)),
         ),
       ),
@@ -203,9 +203,7 @@ abstract final class AppTheme {
         },
       ),
       extensions: [
-        colorScheme.brightness == Brightness.dark
-            ? SidebarTheme.dark
-            : SidebarTheme.light,
+        if (colorScheme.brightness == Brightness.dark) SidebarTheme.dark else SidebarTheme.light,
       ],
     );
   }

@@ -30,7 +30,6 @@ void main() {
         status: 'inTrip',
         fare: 50.0,
         deliveryFee: 25.0,
-        currency: 'EGP',
         distance: 12.5,
         estimatedMinutes: 30,
         itemsSummary: '2x Margherita, 1x Cola',
@@ -173,7 +172,7 @@ void main() {
         priorityMultiplier: 1.5,
         expressMultiplier: 2.0,
       );
-      final fee = p.calculateFee(10.0, weightKg: 2.0, priority: 'standard');
+      final fee = p.calculateFee(10.0, weightKg: 2.0);
       expect(fee, 69.0); // 15 + (5*10) + (2*2) = 69
     });
 
@@ -253,8 +252,8 @@ void main() {
         deliveryId: 'del2',
         driverId: 'd2',
         status: 'pending',
-        offeredAt: DateTime(2026, 1, 1),
-        expiresAt: DateTime(2026, 1, 1),
+        offeredAt: DateTime(2026),
+        expiresAt: DateTime(2026),
       );
       expect(r.remaining, Duration.zero);
       expect(r.isExpired, true);
@@ -276,7 +275,7 @@ void main() {
 
   group('DriverCapability', () {
     test('fromJson roundtrip', () {
-      final c = DriverCapability(
+      const c = DriverCapability(
         driverId: 'd1',
         serviceTypes: ['ride', 'food_delivery', 'courier'],
         acceptsDeliveries: true,
@@ -309,11 +308,9 @@ void main() {
         merchantId: 'm1',
         userId: 'u1',
         serviceTypes: ['food_delivery', 'grocery_delivery'],
-        acceptsDirectDispatch: true,
         averagePrepTimeMinutes: 20,
         maxDeliveryRadiusKm: 8.0,
         autoAcceptOrders: true,
-        isActive: true,
         createdAt: now,
       );
       final json = m.toJson();

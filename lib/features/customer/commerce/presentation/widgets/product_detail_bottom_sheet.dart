@@ -75,7 +75,7 @@ class _ProductDetailBottomSheetState
       minChildSize: 0.5,
       expand: false,
       builder: (context, scrollController) {
-        return Container(
+        return DecoratedBox(
           decoration: BoxDecoration(
             color: context.colorScheme.surface,
             borderRadius: const BorderRadius.vertical(
@@ -331,7 +331,7 @@ class _ProductDetailBottomSheetState
           ),
         ),
         const Spacer(),
-        Container(
+        DecoratedBox(
           decoration: BoxDecoration(
             color: context.colorScheme.surfaceContainerHighest.withValues(alpha: 0.4),
             borderRadius: BorderRadius.circular(AppSpacing.radiusFull),

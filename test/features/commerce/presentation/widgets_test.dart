@@ -83,7 +83,7 @@ void main() {
 
     testWidgets('displays rating', (tester) async {
       await tester.pumpWidget(wrapInApp(MerchantCard(
-        merchant: buildMerchant(rating: 4.5),
+        merchant: buildMerchant(),
         onTap: () {},
       )));
 
@@ -92,7 +92,7 @@ void main() {
 
     testWidgets('displays type label for restaurant', (tester) async {
       await tester.pumpWidget(wrapInApp(MerchantCard(
-        merchant: buildMerchant(type: MerchantType.restaurant),
+        merchant: buildMerchant(),
         onTap: () {},
       )));
 
@@ -110,7 +110,7 @@ void main() {
 
     testWidgets('shows Open badge when isOpenNow', (tester) async {
       await tester.pumpWidget(wrapInApp(MerchantCard(
-        merchant: buildMerchant(isOpenNow: true),
+        merchant: buildMerchant(),
         onTap: () {},
       )));
 
@@ -128,7 +128,7 @@ void main() {
 
     testWidgets('shows Verified badge when verified', (tester) async {
       await tester.pumpWidget(wrapInApp(MerchantCard(
-        merchant: buildMerchant(isVerified: true),
+        merchant: buildMerchant(),
         onTap: () {},
       )));
 
@@ -147,9 +147,7 @@ void main() {
     testWidgets('displays delivery info when delivery available', (tester) async {
       await tester.pumpWidget(wrapInApp(MerchantCard(
         merchant: buildMerchant(
-          deliveryAvailable: true,
-          estimatedDeliveryMinutes: 30,
-          deliveryFee: 10.0,
+          
         ),
         onTap: () {},
       )));
@@ -192,7 +190,7 @@ void main() {
 
     testWidgets('displays price', (tester) async {
       await tester.pumpWidget(wrapInApp(ProductCard(
-        product: buildProduct(price: 35.0),
+        product: buildProduct(),
         onTap: () {},
       )));
 
@@ -201,7 +199,7 @@ void main() {
 
     testWidgets('displays discount badge when discounted', (tester) async {
       await tester.pumpWidget(wrapInApp(ProductCard(
-        product: buildProduct(price: 35.0, originalPrice: 50.0),
+        product: buildProduct(originalPrice: 50.0),
         onTap: () {},
       )));
 
@@ -210,7 +208,7 @@ void main() {
 
     testWidgets('hides discount badge when no originalPrice', (tester) async {
       await tester.pumpWidget(wrapInApp(ProductCard(
-        product: buildProduct(price: 35.0),
+        product: buildProduct(),
         onTap: () {},
       )));
 
@@ -228,7 +226,7 @@ void main() {
 
     testWidgets('hides unavailable overlay when available', (tester) async {
       await tester.pumpWidget(wrapInApp(ProductCard(
-        product: buildProduct(isAvailable: true),
+        product: buildProduct(),
         onTap: () {},
       )));
 
@@ -280,7 +278,7 @@ void main() {
 
     testWidgets('hides count when showCount is false', (tester) async {
       await tester.pumpWidget(wrapInApp(
-        const RatingStars(rating: 4.5, showCount: false, count: 120),
+        const RatingStars(rating: 4.5, count: 120),
       ));
 
       expect(find.text('4.5 (120)'), findsNothing);

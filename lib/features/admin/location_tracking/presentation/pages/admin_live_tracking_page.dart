@@ -52,7 +52,6 @@ class _AdminLiveTrackingPageState extends ConsumerState<AdminLiveTrackingPage> {
               Padding(
                 padding: const EdgeInsets.all(12),
                 child: GlassCard(
-                  borderRadius: 16,
                   child: SizedBox(
                     height: 300,
                     child: Center(
@@ -98,7 +97,6 @@ class _AdminLiveTrackingPageState extends ConsumerState<AdminLiveTrackingPage> {
                       padding: const EdgeInsets.only(bottom: 8),
                       child: AnimatedFadeIn(
                         child: GlassCard(
-                          borderRadius: 16,
                           child: ListTile(
                             leading: Container(
                               padding: const EdgeInsets.all(8),

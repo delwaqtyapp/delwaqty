@@ -2295,7 +2295,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get arrivingAtPickup => 'التوجه إلى نقطة الالتقاء';
 
   @override
-  String get enterOtpToStart => 'أدخل رمز الراكب لبدء الرحلة';
+  String get enterOtpToStart => 'أدخل رمز العميل لبدء التوصيل';
 
   @override
   String get confirmArrival => 'لقد وصلت';

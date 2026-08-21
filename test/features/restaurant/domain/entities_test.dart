@@ -51,7 +51,6 @@ void main() {
         latitude: 30.0,
         longitude: 31.0,
         phone: '+1234567890',
-        isActive: true,
         isPrimary: true,
         createdAt: now,
       );
@@ -380,7 +379,7 @@ void main() {
     });
 
     test('toJson serializes correctly', () {
-      final inv = ProductInventory(id: 'pi1', productId: 'p1', merchantId: 'm1');
+      const inv = ProductInventory(id: 'pi1', productId: 'p1', merchantId: 'm1');
       final json = inv.toJson();
       expect(json['id'], 'pi1');
       expect(json['productId'], 'p1');
@@ -394,7 +393,7 @@ void main() {
     });
 
     test('defaults are applied correctly', () {
-      final inv = ProductInventory(id: 'pi1', productId: 'p1', merchantId: 'm1');
+      const inv = ProductInventory(id: 'pi1', productId: 'p1', merchantId: 'm1');
       expect(inv.stockQuantity, 0);
       expect(inv.reservedQuantity, 0);
       expect(inv.lowStockThreshold, 10);
@@ -403,15 +402,15 @@ void main() {
     });
 
     test('equality works correctly', () {
-      final a = ProductInventory(id: 'pi1', productId: 'p1', merchantId: 'm1');
-      final b = ProductInventory(id: 'pi1', productId: 'p1', merchantId: 'm1');
-      final c = ProductInventory(id: 'pi2', productId: 'p1', merchantId: 'm1');
+      const a = ProductInventory(id: 'pi1', productId: 'p1', merchantId: 'm1');
+      const b = ProductInventory(id: 'pi1', productId: 'p1', merchantId: 'm1');
+      const c = ProductInventory(id: 'pi2', productId: 'p1', merchantId: 'm1');
       expect(a, equals(b));
       expect(a, isNot(equals(c)));
     });
 
     test('copyWith creates modified copy', () {
-      final inv = ProductInventory(id: 'pi1', productId: 'p1', merchantId: 'm1');
+      const inv = ProductInventory(id: 'pi1', productId: 'p1', merchantId: 'm1');
       final modified = inv.copyWith(stockQuantity: 100, isInStock: true);
       expect(modified.stockQuantity, 100);
       expect(modified.isInStock, true);

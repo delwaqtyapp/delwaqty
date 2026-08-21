@@ -495,7 +495,7 @@ class _SearchPageState extends ConsumerState<SearchPage> {
           ),
           const SizedBox(width: 8),
           _PremiumPill(
-            label: hasPriceFilter ? '${l10n.priceRange}' : l10n.priceRange,
+            label: hasPriceFilter ? l10n.priceRange : l10n.priceRange,
             icon: Icons.attach_money_rounded,
             compact: true,
             selected: hasPriceFilter,
@@ -1002,7 +1002,6 @@ class _PriceFilterSheetState extends State<_PriceFilterSheet> {
           const SizedBox(height: 16),
           RangeSlider(
             values: _currentRange,
-            min: 0,
             max: 10000,
             divisions: 100,
             activeColor: AppColors.brandPurple,
@@ -1041,7 +1040,7 @@ class _PriceFilterSheetState extends State<_PriceFilterSheet> {
                       borderRadius: BorderRadius.circular(14),
                     ),
                   ),
-                  child: Text(l10n.apply, style: TextStyle(color: Colors.white)),
+                  child: Text(l10n.apply, style: const TextStyle(color: Colors.white)),
                 ),
               ),
             ],

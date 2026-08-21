@@ -30,7 +30,7 @@ class SafetyHubPage extends ConsumerWidget {
                           padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
                             gradient: LinearGradient(
-                              colors: [cs.error, cs.error.withOpacity(0.7)],
+                              colors: [cs.error, cs.error.withValues(alpha: 0.7)],
                             ),
                             borderRadius: BorderRadius.circular(16),
                           ),
@@ -235,7 +235,7 @@ class SafetyHubPage extends ConsumerWidget {
             width: 36,
             height: 36,
             decoration: BoxDecoration(
-              color: color.withOpacity(0.12),
+              color: color.withValues(alpha: 0.12),
               borderRadius: BorderRadius.circular(10),
             ),
             child: Icon(icon, size: 18, color: color),
@@ -280,7 +280,7 @@ class SafetyHubPage extends ConsumerWidget {
                   width: 40,
                   height: 40,
                   decoration: BoxDecoration(
-                    color: color.withOpacity(0.12),
+                    color: color.withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Icon(icon, size: 20, color: color),
@@ -315,7 +315,7 @@ class SafetyHubPage extends ConsumerWidget {
             width: 6,
             height: 6,
             margin: const EdgeInsets.only(top: 6, right: 10),
-            decoration: BoxDecoration(
+            decoration: const BoxDecoration(
               color: AppColors.primaryLight,
               shape: BoxShape.circle,
             ),
@@ -347,11 +347,10 @@ class _GlassCard extends StatelessWidget {
           width: double.infinity,
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: cs.surfaceContainerHighest.withOpacity(0.45),
+            color: cs.surfaceContainerHighest.withValues(alpha: 0.45),
             borderRadius: BorderRadius.circular(20),
             border: Border.all(
-              color: cs.outline.withOpacity(0.12),
-              width: 1,
+              color: cs.outline.withValues(alpha: 0.12),
             ),
           ),
           child: child,

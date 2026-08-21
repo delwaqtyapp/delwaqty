@@ -213,7 +213,6 @@ class _PlatformIntelligenceDashboardState
             data: (regions) {
               return DropdownButtonFormField<String?>(
                 initialValue: scopeRegion,
-                isDense: true,
                 decoration: const InputDecoration(
                   isDense: true,
                   contentPadding: EdgeInsets.symmetric(
@@ -226,7 +225,6 @@ class _PlatformIntelligenceDashboardState
                 ),
                 items: [
                   DropdownMenuItem<String?>(
-                    value: null,
                     child: Text(l10n.allGovernorates),
                   ),
                   for (final r in regions.take(30))
@@ -498,7 +496,6 @@ class _PlatformIntelligenceDashboardState
               .map(
                 (item) => PremiumCard(
                   padding: const EdgeInsets.all(12),
-                  radius: AppSpacing.radiusCard,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -645,7 +642,6 @@ class _KpiCard extends StatelessWidget {
       onTap: () => context.push(item.route),
       child: PremiumCard(
         padding: const EdgeInsets.all(12),
-        radius: AppSpacing.radiusCard,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -717,7 +713,6 @@ class _AlertCard extends StatelessWidget {
 
     return PremiumCard(
       padding: const EdgeInsets.all(12),
-      radius: AppSpacing.radiusCard,
       child: Row(
         children: [
           Container(

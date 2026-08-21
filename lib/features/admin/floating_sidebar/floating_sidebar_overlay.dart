@@ -117,7 +117,6 @@ class _FloatingSidebarOverlayState extends State<FloatingSidebarOverlay>
     final userName = widget.authState is AuthAuthenticated
         ? (widget.authState as AuthAuthenticated).user.fullName ?? widget.l10n.user
         : widget.l10n.user;
-    final displayRole = null;
 
     return Material(
       color: Colors.transparent,
@@ -168,7 +167,6 @@ class _FloatingSidebarOverlayState extends State<FloatingSidebarOverlay>
                           borderRadius: BorderRadius.circular(30),
                           border: Border.all(
                             color: st.cardBorderColor,
-                            width: 1,
                           ),
                           boxShadow: [
                             BoxShadow(
@@ -191,14 +189,12 @@ class _FloatingSidebarOverlayState extends State<FloatingSidebarOverlay>
                                 userEmail: widget.authState is AuthAuthenticated
                                     ? (widget.authState as AuthAuthenticated).user.email
                                     : null,
-                                roleBadge: displayRole,
                                 onEditProfile: () => _navigateReplace('/profile'),
                               ),
-                              SidebarDivider(),
+                              const SidebarDivider(),
                               SidebarSection(
                                 title: widget.l10n.mainSection,
                                 controller: _animation,
-                                startIndex: 0,
                                 items: [
                                   SidebarItem(
                                     icon: Icons.home_rounded,
@@ -247,7 +243,7 @@ class _FloatingSidebarOverlayState extends State<FloatingSidebarOverlay>
                                   ),
                                 ],
                               ),
-                              SidebarDivider(),
+                              const SidebarDivider(),
                               SidebarSection(
                                 title: widget.l10n.servicesSection,
                                 controller: _animation,
@@ -288,11 +284,10 @@ class _FloatingSidebarOverlayState extends State<FloatingSidebarOverlay>
                                       setState(() => _selectedIndex = 7);
                                       _navigate('/wallet');
                                     },
-                                    badgeCount: 0,
                                   ),
                                 ],
                               ),
-                              SidebarDivider(),
+                              const SidebarDivider(),
                               SidebarSection(
                                 title: widget.l10n.supportSection,
                                 controller: _animation,
@@ -354,19 +349,18 @@ class _FloatingSidebarOverlayState extends State<FloatingSidebarOverlay>
                                   ),
                                 ],
                               ),
-                              SidebarDivider(),
+                              const SidebarDivider(),
                               QuickSettingsCard(
                                 ref: widget.ref,
                                 l10n: widget.l10n,
                               ),
                               FooterCard(
                                 children: [
-                                  AppVersionTile(version: 'v1.0.0'),
+                                  const AppVersionTile(version: 'v1.0.0'),
                                   FooterTile(
                                     icon: Icons.logout_rounded,
                                     label: widget.l10n.logout,
                                     isDestructive: true,
-                                    showTopBorder: true,
                                     onTap: _showLogoutDialog,
                                   ),
                                 ],

@@ -9,6 +9,18 @@ class RecentSearch {
     required this.searchedAt,
   });
 
+  factory RecentSearch.fromJson(Map<String, dynamic> json) => RecentSearch(
+        placeId: json['placeId'] as String,
+        primaryText: json['primaryText'] as String,
+        secondaryText: json['secondaryText'] as String? ?? '',
+        location: GeoPoint(
+          (json['lat'] as num).toDouble(),
+          (json['lng'] as num).toDouble(),
+        ),
+        searchedAt: DateTime.tryParse(json['searchedAt'] as String? ?? '') ??
+            DateTime.now(),
+      );
+
   final String placeId;
   final String primaryText;
   final String secondaryText;
@@ -23,16 +35,4 @@ class RecentSearch {
         'lng': location.longitude,
         'searchedAt': searchedAt.toIso8601String(),
       };
-
-  factory RecentSearch.fromJson(Map<String, dynamic> json) => RecentSearch(
-        placeId: json['placeId'] as String,
-        primaryText: json['primaryText'] as String,
-        secondaryText: json['secondaryText'] as String? ?? '',
-        location: GeoPoint(
-          (json['lat'] as num).toDouble(),
-          (json['lng'] as num).toDouble(),
-        ),
-        searchedAt: DateTime.tryParse(json['searchedAt'] as String? ?? '') ??
-            DateTime.now(),
-      );
 }

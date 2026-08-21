@@ -37,7 +37,7 @@ class InventoryRepositoryImpl implements InventoryRepository {
           ? merchantId
           : (existing?.merchantId ?? '');
       if (resolvedMerchantId.isEmpty) {
-        throw ServerException(
+        throw const ServerException(
           message: 'merchantId is required for new inventory',
         );
       }

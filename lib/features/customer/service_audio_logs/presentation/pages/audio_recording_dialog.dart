@@ -8,9 +8,6 @@ import 'package:delwaqty/features/customer/service_audio_logs/domain/entities/se
 import 'package:delwaqty/features/customer/service_audio_logs/presentation/service_audio_log_providers.dart';
 
 class AudioRecordingDialog extends ConsumerStatefulWidget {
-  final String orderId;
-  final String userId;
-  final String? providerId;
 
   const AudioRecordingDialog({
     super.key,
@@ -18,6 +15,9 @@ class AudioRecordingDialog extends ConsumerStatefulWidget {
     required this.userId,
     this.providerId,
   });
+  final String orderId;
+  final String userId;
+  final String? providerId;
 
   @override
   ConsumerState<AudioRecordingDialog> createState() => _AudioRecordingDialogState();
@@ -70,7 +70,6 @@ class _AudioRecordingDialogState extends ConsumerState<AudioRecordingDialog>
       userId: widget.userId,
       providerId: widget.providerId,
       createdAt: DateTime.now(),
-      status: AudioLogStatus.recording,
     );
 
     _logId = log.id;

@@ -17,12 +17,6 @@ final _categoriesProvider = FutureProvider.family<List<CatalogCategory>, String>
 });
 
 class MenuState {
-  final List<Product> products;
-  final bool hasMore;
-  final bool isLoadingMore;
-  final int offset;
-  final String? categoryId;
-  final String searchQuery;
 
   const MenuState({
     this.products = const [],
@@ -32,6 +26,12 @@ class MenuState {
     this.categoryId,
     this.searchQuery = '',
   });
+  final List<Product> products;
+  final bool hasMore;
+  final bool isLoadingMore;
+  final int offset;
+  final String? categoryId;
+  final String searchQuery;
 
   MenuState copyWith({
     List<Product>? products,
@@ -61,8 +61,6 @@ class RestaurantMenuNotifier extends AutoDisposeFamilyAsyncNotifier<MenuState, S
     final repo = ref.watch(productRepositoryProvider);
     final products = await repo.getProducts(
       merchantId: merchantId,
-      limit: _limit,
-      offset: 0,
     );
     return MenuState(
       products: products,
@@ -82,7 +80,6 @@ class RestaurantMenuNotifier extends AutoDisposeFamilyAsyncNotifier<MenuState, S
       final products = await repo.getProducts(
         merchantId: arg,
         categoryId: currentState.categoryId,
-        limit: _limit,
         offset: currentState.offset,
       );
 
@@ -109,8 +106,6 @@ class RestaurantMenuNotifier extends AutoDisposeFamilyAsyncNotifier<MenuState, S
       final products = await repo.getProducts(
         merchantId: arg,
         categoryId: categoryId,
-        limit: _limit,
-        offset: 0,
       );
 
       state = AsyncValue.data(MenuState(
@@ -138,8 +133,6 @@ class RestaurantMenuNotifier extends AutoDisposeFamilyAsyncNotifier<MenuState, S
         products = await repo.getProducts(
           merchantId: arg,
           categoryId: currentState.categoryId,
-          limit: _limit,
-          offset: 0,
         );
       } else {
         products = await repo.searchProducts(query, merchantId: arg);
@@ -237,7 +230,7 @@ class _RestaurantMenuPageState extends ConsumerState<RestaurantMenuPage> {
                       )
                     : null,
                 filled: true,
-                fillColor: theme.colorScheme.surfaceContainerHighest.withOpacity(0.5),
+                fillColor: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                   borderSide: BorderSide.none,
@@ -361,7 +354,7 @@ class _CategoryChip extends StatelessWidget {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(20),
         side: BorderSide(
-          color: isSelected ? theme.colorScheme.primary : theme.colorScheme.outline.withOpacity(0.3),
+          color: isSelected ? theme.colorScheme.primary : theme.colorScheme.outline.withValues(alpha: 0.3),
         ),
       ),
     );
@@ -382,7 +375,7 @@ class _ProductListTile extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
       child: Material(
-        color: theme.colorScheme.surfaceContainerHighest.withOpacity(0.3),
+        color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
         borderRadius: BorderRadius.circular(12),
         child: InkWell(
           onTap: onTap,
@@ -405,7 +398,7 @@ class _ProductListTile extends StatelessWidget {
                         )
                       : Icon(
                           Icons.fastfood_outlined,
-                          color: theme.colorScheme.onSurfaceVariant.withOpacity(0.4),
+                          color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.4),
                         ),
                 ),
                 const SizedBox(width: 12),
@@ -465,7 +458,7 @@ class _ProductListTile extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                     decoration: BoxDecoration(
-                      color: Colors.red.withOpacity(0.1),
+                      color: Colors.red.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(4),
                     ),
                     child: Text(
@@ -476,7 +469,7 @@ class _ProductListTile extends StatelessWidget {
                 else
                   Icon(
                     Icons.chevron_right,
-                    color: theme.colorScheme.onSurfaceVariant.withOpacity(0.5),
+                    color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
                   ),
               ],
             ),

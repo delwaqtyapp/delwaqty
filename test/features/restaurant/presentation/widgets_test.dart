@@ -26,9 +26,6 @@ void main() {
       final settings = RestaurantSettings(
         id: 'rs1',
         merchantId: 'm1',
-        hasDineIn: true,
-        hasTakeaway: true,
-        hasDelivery: true,
         createdAt: DateTime(2025),
       );
 
@@ -45,8 +42,6 @@ void main() {
       final settings = RestaurantSettings(
         id: 'rs1',
         merchantId: 'm1',
-        hasDineIn: true,
-        hasTakeaway: true,
         hasDelivery: false,
         createdAt: DateTime(2025),
       );
@@ -63,7 +58,6 @@ void main() {
       final settings = RestaurantSettings(
         id: 'rs1',
         merchantId: 'm1',
-        hasDineIn: true,
         hasTakeaway: false,
         hasDelivery: false,
         createdAt: DateTime(2025),
@@ -83,7 +77,6 @@ void main() {
         merchantId: 'm1',
         hasDineIn: false,
         hasTakeaway: false,
-        hasDelivery: true,
         createdAt: DateTime(2025),
       );
 
@@ -102,7 +95,6 @@ void main() {
         id: 'o1',
         merchantId: 'm1',
         title: '20% Off Everything',
-        discountType: 'percentage',
         discountValue: 20.0,
         minimumOrder: 15.0,
         createdAt: DateTime(2025, 6, 15),
@@ -159,7 +151,6 @@ void main() {
         merchantId: 'm1',
         title: 'Free Item',
         discountValue: 100.0,
-        minimumOrder: 0.0,
         createdAt: DateTime(2025, 6, 15),
       );
 

@@ -9,8 +9,6 @@ import 'package:delwaqty/features/customer/driver/data/datasources/remote/supaba
 import 'package:delwaqty/features/customer/driver/data/datasources/remote/supabase_driver_platform_data_source.dart';
 import 'package:delwaqty/features/customer/driver/data/repositories/driver_repository_impl.dart';
 import 'package:delwaqty/features/customer/driver/presentation/pages/driver_dashboard_page.dart';
-import 'package:delwaqty/features/customer/driver/presentation/pages/driver_ride_hub_page.dart';
-import 'package:delwaqty/features/customer/driver/presentation/pages/driver_trip_page.dart';
 import 'package:delwaqty/features/customer/driver/presentation/pages/driver_earnings_page.dart';
 import 'package:delwaqty/features/customer/driver/presentation/pages/driver_onboarding_page.dart';
 import 'package:delwaqty/features/customer/driver/presentation/pages/vehicle_management_page.dart';
@@ -65,15 +63,6 @@ class DriverModule extends FeatureModule {
     GoRoute(
       path: '/driver/onboarding/:userId',
       builder: (context, state) => const DriverOnboardingPage(),
-    ),
-    GoRoute(
-      path: '/driver/rides',
-      builder: (context, state) => const DriverRideHubPage(),
-    ),
-    GoRoute(
-      path: '/driver/trip/:id',
-      builder: (context, state) =>
-          DriverTripPage(rideId: state.pathParameters['id']!),
     ),
     GoRoute(
       path: '/driver/earnings',

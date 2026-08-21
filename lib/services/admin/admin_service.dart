@@ -207,17 +207,6 @@ class AdminService {
     }
   }
 
-  // ─── Rides ────────────────────────────────────────────────
-
-  Future<List<RideModel>> getRecentRides({String? status}) async {
-    try {
-      return await _repository.getRecentRides(status: status);
-    } catch (e) {
-      debugPrint('AdminService.getRecentRides error: $e');
-      return [];
-    }
-  }
-
   // ─── Deliveries ───────────────────────────────────────────
 
   Future<List<DeliveryModel>> getRecentDeliveries({String? serviceType}) async {

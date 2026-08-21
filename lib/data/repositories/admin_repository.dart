@@ -292,31 +292,6 @@ class AdminRepository implements admin.AdminRepository {
     }
   }
 
-  // ─── Recent Rides ─────────────────────────────────────────
-
-  Future<List<RideModel>> getRecentRides({
-    int limit = 20,
-    String? status,
-  }) async {
-    try {
-      var query = _supabase.from('rides').select().eq('service_type', 'ride');
-
-      if (status != null && status.isNotEmpty) {
-        query = query.eq('status', status);
-      }
-
-      final response = await query
-          .order('created_at', ascending: false)
-          .limit(limit);
-
-      return (response as List)
-          .map((e) => _mapToRideModel(Map<String, dynamic>.from(e as Map)))
-          .toList();
-    } catch (e) {
-      throw AdminException('Failed to fetch recent rides: $e');
-    }
-  }
-
   // ─── Recent Deliveries ────────────────────────────────────
 
   Future<List<DeliveryModel>> getRecentDeliveries({
@@ -926,32 +901,6 @@ final response = await _supabase
       lastLocationLat: (json['current_latitude'] as num?)?.toDouble(),
       lastLocationLng: (json['current_longitude'] as num?)?.toDouble(),
       createdAt: DateTime.parse(json['created_at'] as String),
-    );
-  }
-
-  RideModel _mapToRideModel(Map<String, dynamic> json) {
-    return RideModel(
-      id: json['id'] as String,
-      userId: json['rider_id'] as String?,
-      driverId: json['driver_id'] as String?,
-      serviceType: (json['service_type'] as String?) ?? 'ride',
-      status: json['status'] as String,
-      pickupLatitude: (json['pickup_latitude'] as num).toDouble(),
-      pickupLongitude: (json['pickup_longitude'] as num).toDouble(),
-      dropoffLatitude: (json['dropoff_latitude'] as num).toDouble(),
-      dropoffLongitude: (json['dropoff_longitude'] as num).toDouble(),
-      fare: (json['fare'] as num?)?.toDouble(),
-      distanceKm: (json['distance'] as num?)?.toDouble(),
-      durationMinutes: json['estimated_minutes'] as int?,
-      isScheduled: json['scheduled_at'] != null,
-      scheduledTime: json['scheduled_at'] != null
-          ? DateTime.parse(json['scheduled_at'] as String)
-          : null,
-      paymentMethod: (json['payment_method'] as String?) ?? 'cash',
-      createdAt: DateTime.parse(json['created_at'] as String),
-      completedAt: json['completed_at'] != null
-          ? DateTime.parse(json['completed_at'] as String)
-          : null,
     );
   }
 

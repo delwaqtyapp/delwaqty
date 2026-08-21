@@ -60,7 +60,7 @@ class SupabaseMemberDataSource {
       'p_member_id': memberId,
       'p_limit': limit,
     };
-    if (cursor != null) params['p_cursor'] = cursor;
+    if (cursor != null) params['p_before'] = cursor;
 
     final data = await _client.rpc('get_member_timeline', params: params);
     final rows = (data as List?) ?? const [];
@@ -92,12 +92,12 @@ class SupabaseMemberDataSource {
     if (userType != null) params['p_user_type'] = userType;
     if (accountStatus != null) params['p_account_status'] = accountStatus;
     if (verificationStatus != null) params['p_verification_status'] = verificationStatus;
-    if (serviceType != null) params['p_service_type'] = serviceType;
+    if (serviceType != null) params['p_service_category'] = serviceType;
     if (serviceCategory != null) params['p_service_category'] = serviceCategory;
     if (regionId != null) params['p_region_id'] = regionId;
     if (sanctionStatus != null) params['p_sanction_status'] = sanctionStatus;
     if (sort != null) params['p_sort'] = sort;
-    if (cursorCreatedAt != null) params['p_cursor_created_at'] = cursorCreatedAt.toIso8601String();
+    if (cursorCreatedAt != null) params['p_cursor'] = cursorCreatedAt.toIso8601String();
     if (cursorId != null) params['p_cursor_id'] = cursorId.toString();
 
     final data = await _client.rpc('member_ops_list', params: params);

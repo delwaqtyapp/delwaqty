@@ -15,7 +15,7 @@ class MemberOpsListNotifier extends StateNotifier<List<Member>> {
   }
 
   final Ref ref;
-  Map<String, dynamic> _filters = {
+  final Map<String, dynamic> _filters = {
     'search': '',
     'role': null,
     'userType': null,

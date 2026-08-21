@@ -74,9 +74,11 @@ class _LocationSharingPageState extends State<LocationSharingPage> {
             onChanged: (v) async {
               setState(() => _backgroundLocation = v);
               await _prefs.setBool(StorageKeys.backgroundLocation, v);
-              if (v) ScaffoldMessenger.of(context).showSnackBar(
+              if (v) {
+                ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(content: Text(l10n.backgroundLocationEnabled)),
               );
+              }
             },
           ),
           const SizedBox(height: 24),

@@ -5,7 +5,6 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import 'package:delwaqty/features/customer/delivery/presentation/providers/delivery_providers.dart';
-import 'package:delwaqty/features/customer/delivery/domain/entities/delivery_order.dart';
 import 'package:delwaqty/features/customer/ride/presentation/providers/ride_providers.dart';
 import 'package:delwaqty/features/customer/ride/presentation/widgets/ride_map.dart';
 import 'package:delwaqty/features/customer/ride/domain/entities/ride.dart';
@@ -65,7 +64,7 @@ class _DeliveryTrackingPageState extends ConsumerState<DeliveryTrackingPage> {
           children: const [
             ShimmerCard(height: 300),
             SizedBox(height: 12),
-            ShimmerCard(height: 120),
+            ShimmerCard(),
             SizedBox(height: 12),
             ShimmerCard(height: 160),
           ],
@@ -152,7 +151,6 @@ class _TrackingBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [

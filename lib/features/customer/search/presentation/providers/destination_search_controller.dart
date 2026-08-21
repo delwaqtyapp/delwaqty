@@ -40,13 +40,12 @@ class DestinationSearchState {
 
 class DestinationSearchController
     extends StateNotifier<DestinationSearchState> {
-  DestinationSearchController(this._ref, {GeoPoint? origin})
-      : _origin = origin,
-        super(const DestinationSearchState());
+  DestinationSearchController(this._ref, {this._origin})
+      : super(const DestinationSearchState());
 
   final Ref _ref;
   final GeoPoint? _origin;
-  final Debouncer _debouncer = Debouncer(delay: const Duration(milliseconds: 350));
+  final Debouncer _debouncer = Debouncer();
 
   SearchSession _session = SearchSession.generate();
   int _requestId = 0;

@@ -54,8 +54,6 @@ class _SkeletonLoaderState extends State<SkeletonLoader>
           blendMode: BlendMode.srcATop,
           shaderCallback: (bounds) {
             return LinearGradient(
-              begin: Alignment.centerLeft,
-              end: Alignment.centerRight,
               colors: [base, highlight, base],
               stops: [
                 _animation.value - 0.3,
@@ -129,34 +127,34 @@ class RestaurantDetailSkeleton extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SkeletonBox(width: double.infinity, height: 240, borderRadius: 0),
+          const SkeletonBox(width: double.infinity, height: 240, borderRadius: 0),
           Padding(
             padding: const EdgeInsets.all(16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
+                const Row(
                   children: [
-                    const SkeletonBox(width: 120, height: 20),
-                    const Spacer(),
-                    const SkeletonBox(width: 60, height: 24, borderRadius: 12),
+                    SkeletonBox(width: 120, height: 20),
+                    Spacer(),
+                    SkeletonBox(width: 60, height: 24, borderRadius: 12),
                   ],
                 ),
                 const SizedBox(height: 12),
-                SkeletonBox(width: double.infinity, height: 16),
+                const SkeletonBox(width: double.infinity, height: 16),
                 const SizedBox(height: 8),
-                SkeletonBox(width: 200, height: 14),
+                const SkeletonBox(width: 200, height: 14),
                 const SizedBox(height: 20),
                 Row(
                   children: List.generate(
                     4,
-                    (_) => Expanded(
+                    (_) => const Expanded(
                       child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 4),
+                        padding: EdgeInsets.symmetric(horizontal: 4),
                         child: Column(
                           children: [
                             SkeletonBox(height: 52, borderRadius: 14),
-                            const SizedBox(height: 6),
+                            SizedBox(height: 6),
                             SkeletonBox(width: 40, height: 10),
                           ],
                         ),
@@ -165,9 +163,9 @@ class RestaurantDetailSkeleton extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 20),
-                SkeletonBox(width: 140, height: 18),
+                const SkeletonBox(width: 140, height: 18),
                 const SizedBox(height: 12),
-                SkeletonBox(width: double.infinity, height: 60, borderRadius: 12),
+                const SkeletonBox(width: double.infinity, height: 60, borderRadius: 12),
               ],
             ),
           ),
@@ -186,20 +184,20 @@ class RestaurantMenuSkeleton extends StatelessWidget {
       physics: const NeverScrollableScrollPhysics(),
       padding: const EdgeInsets.all(16),
       itemCount: 6,
-      itemBuilder: (_, __) => Padding(
-        padding: const EdgeInsets.only(bottom: 12),
+      itemBuilder: (_, __) => const Padding(
+        padding: EdgeInsets.only(bottom: 12),
         child: Row(
           children: [
-            const SkeletonBox(width: 72, height: 72, borderRadius: 10),
-            const SizedBox(width: 12),
+            SkeletonBox(width: 72, height: 72, borderRadius: 10),
+            SizedBox(width: 12),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   SkeletonBox(width: 160, height: 16),
-                  const SizedBox(height: 6),
+                  SizedBox(height: 6),
                   SkeletonBox(width: 100, height: 12),
-                  const SizedBox(height: 6),
+                  SizedBox(height: 6),
                   SkeletonBox(width: 80, height: 14),
                 ],
               ),
@@ -220,28 +218,28 @@ class RestaurantReviewsSkeleton extends StatelessWidget {
       physics: const NeverScrollableScrollPhysics(),
       padding: const EdgeInsets.all(16),
       itemCount: 4,
-      itemBuilder: (_, __) => Padding(
-        padding: const EdgeInsets.only(bottom: 16),
+      itemBuilder: (_, __) => const Padding(
+        padding: EdgeInsets.only(bottom: 16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
               children: [
-                const SkeletonCircle(size: 36),
-                const SizedBox(width: 10),
+                SkeletonCircle(size: 36),
+                SizedBox(width: 10),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     SkeletonBox(width: 100, height: 14),
-                    const SizedBox(height: 4),
+                    SizedBox(height: 4),
                     SkeletonBox(width: 60, height: 12),
                   ],
                 ),
               ],
             ),
-            const SizedBox(height: 8),
+            SizedBox(height: 8),
             SkeletonBox(width: double.infinity, height: 14),
-            const SizedBox(height: 4),
+            SizedBox(height: 4),
             SkeletonBox(width: 200, height: 14),
           ],
         ),

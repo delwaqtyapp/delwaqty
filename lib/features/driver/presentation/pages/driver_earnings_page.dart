@@ -5,9 +5,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:delwaqty/features/_shared/auth/presentation/auth_provider.dart';
 import 'package:delwaqty/features/_shared/auth/domain/auth_state.dart';
-import 'package:delwaqty/features/customer/driver/driver_module.dart';
+import 'package:delwaqty/features/driver/driver_module.dart';
 import 'package:delwaqty/features/customer/driver/domain/entities/driver_stats.dart';
-import 'package:delwaqty/features/customer/driver/domain/entities/wallet_detail.dart';
+import 'package:delwaqty/features/driver/domain/entities/wallet_detail.dart';
 import 'package:delwaqty/features/customer/driver/presentation/providers/dispatch_providers.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 

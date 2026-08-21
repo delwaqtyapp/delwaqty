@@ -1,10 +1,10 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:delwaqty/services/supabase/supabase_service.dart';
-import 'package:delwaqty/features/customer/driver/domain/entities/vehicle.dart';
-import 'package:delwaqty/features/customer/driver/domain/entities/driver_document.dart';
-import 'package:delwaqty/features/customer/driver/domain/entities/wallet_detail.dart';
-import 'package:delwaqty/features/customer/driver/domain/entities/driver_performance.dart';
+import 'package:delwaqty/features/driver/domain/entities/vehicle.dart';
+import 'package:delwaqty/features/driver/domain/entities/driver_document.dart';
+import 'package:delwaqty/features/driver/domain/entities/wallet_detail.dart';
+import 'package:delwaqty/features/driver/domain/entities/driver_performance.dart';
 
 final supabaseDriverPlatformDataSourceProvider =
     Provider<SupabaseDriverPlatformDataSource>((ref) {

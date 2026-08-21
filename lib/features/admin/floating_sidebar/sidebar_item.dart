@@ -37,8 +37,6 @@ class SidebarItem extends StatelessWidget {
             gradient: isSelected
                 ? LinearGradient(
                     colors: [st.selectedGradientStart, st.selectedGradientEnd],
-                    begin: Alignment.centerLeft,
-                    end: Alignment.centerRight,
                   )
                 : null,
             color: isSelected ? null : Colors.transparent,

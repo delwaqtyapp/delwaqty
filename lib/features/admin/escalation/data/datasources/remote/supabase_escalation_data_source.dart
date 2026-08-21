@@ -3,9 +3,9 @@ import 'package:delwaqty/core/errors/exceptions.dart';
 import 'package:delwaqty/features/admin/escalation/domain/entities/escalation_event.dart';
 
 class SupabaseEscalationDataSource {
-  final SupabaseClient _client;
 
   SupabaseEscalationDataSource(this._client);
+  final SupabaseClient _client;
 
   Future<void> escalateComplaint({
     required String complaintId,

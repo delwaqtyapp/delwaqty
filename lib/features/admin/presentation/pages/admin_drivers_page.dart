@@ -1,4 +1,3 @@
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:delwaqty/services/admin/admin_providers.dart';
@@ -68,7 +67,6 @@ class _AdminDriversPageState extends ConsumerState<AdminDriversPage> {
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
             child: GlassCard(
               padding: const EdgeInsets.all(12),
-              borderRadius: 16,
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [

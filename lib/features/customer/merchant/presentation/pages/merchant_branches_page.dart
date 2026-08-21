@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:delwaqty/core/extensions/context_extensions.dart';
-import 'package:delwaqty/features/customer/merchant/merchant_module.dart';
 import 'package:delwaqty/features/customer/restaurant/restaurant_module.dart';
 import 'package:delwaqty/features/customer/restaurant/domain/entities/branch.dart';
 import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
@@ -440,10 +439,10 @@ class _BranchFormSheetState extends ConsumerState<_BranchFormSheet> {
                         Expanded(
                           child: TextFormField(
                             controller: _latitudeController,
-                            decoration: InputDecoration(
+                            decoration: const InputDecoration(
                               labelText: 'Latitude',
                               hintText: '0.0',
-                              border: const OutlineInputBorder(),
+                              border: OutlineInputBorder(),
                             ),
                             keyboardType:
                                 const TextInputType.numberWithOptions(
@@ -456,10 +455,10 @@ class _BranchFormSheetState extends ConsumerState<_BranchFormSheet> {
                         Expanded(
                           child: TextFormField(
                             controller: _longitudeController,
-                            decoration: InputDecoration(
+                            decoration: const InputDecoration(
                               labelText: 'Longitude',
                               hintText: '0.0',
-                              border: const OutlineInputBorder(),
+                              border: OutlineInputBorder(),
                             ),
                             keyboardType:
                                 const TextInputType.numberWithOptions(

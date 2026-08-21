@@ -26,15 +26,15 @@ Failure handleException(Object error) {
   if (message.contains('SocketException') ||
       message.contains('Connection refused') ||
       message.contains('Network is unreachable')) {
-    return Failure.network(
+    return const Failure.network(
       message: 'لا يوجد اتصال بالإنترنت. يرجى التحقق من الشبكة.',
     );
   }
   if (message.contains('TimeoutException') || message.contains('Timed out')) {
-    return Failure.network(message: 'انتهت مهلة الطلب. يرجى المحاولة مرة أخرى.');
+    return const Failure.network(message: 'انتهت مهلة الطلب. يرجى المحاولة مرة أخرى.');
   }
 
-  return Failure.unexpected(message: 'حدث خطأ غير متوقع.');
+  return const Failure.unexpected(message: 'حدث خطأ غير متوقع.');
 }
 
 String _friendlyMessage(String message, int? statusCode) {

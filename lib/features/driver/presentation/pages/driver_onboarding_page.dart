@@ -172,9 +172,7 @@ class _DriverOnboardingPageState extends State<DriverOnboardingPage> {
               _uploadVehicle,
             ),
             const SizedBox(height: 40),
-            _isUploading
-                ? const Center(child: CircularProgressIndicator())
-                : ElevatedButton(
+            if (_isUploading) const Center(child: CircularProgressIndicator()) else ElevatedButton(
                     onPressed: () {
                       Navigator.of(context).pop();
                     },

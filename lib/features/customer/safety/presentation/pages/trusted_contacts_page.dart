@@ -74,7 +74,7 @@ class TrustedContactsPage extends ConsumerWidget {
       child: ListTile(
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         leading: CircleAvatar(
-          backgroundColor: AppColors.primaryLight.withOpacity(0.2),
+          backgroundColor: AppColors.primaryLight.withValues(alpha: 0.2),
           child: Text(
             contact.name.isNotEmpty ? contact.name[0].toUpperCase() : '?',
             style: AppTextStyles.titleSmall.copyWith(
@@ -121,7 +121,7 @@ class TrustedContactsPage extends ConsumerWidget {
               value: 'delete',
               child: Row(
                 children: [
-                  Icon(Icons.delete_rounded, size: 18, color: AppColors.errorLight),
+                  const Icon(Icons.delete_rounded, size: 18, color: AppColors.errorLight),
                   const SizedBox(width: 8),
                   Text(l10n.delete, style: AppTextStyles.bodyMedium.copyWith(color: AppColors.errorLight)),
                 ],
@@ -144,7 +144,7 @@ class TrustedContactsPage extends ConsumerWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Text(
@@ -282,7 +282,7 @@ class TrustedContactsPage extends ConsumerWidget {
                   ),
                   const SizedBox(height: 12),
                   DropdownButtonFormField<ContactRelationship>(
-                    value: selectedRelationship,
+                    initialValue: selectedRelationship,
                     decoration: InputDecoration(
                       labelText: l10n.relationship,
                       border: const OutlineInputBorder(),

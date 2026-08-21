@@ -38,8 +38,9 @@ class CouponRepositoryImpl implements CouponRepository {
   Future<Coupon> applyCoupon(String code, double orderTotal) async {
     try {
       final coupon = await _dataSource.validateCoupon(code, orderTotal);
-      if (coupon == null)
-        throw ServerException(message: 'Invalid or expired coupon');
+      if (coupon == null) {
+        throw const ServerException(message: 'Invalid or expired coupon');
+      }
       await _dataSource.incrementUsage(code);
       return coupon;
     } catch (e) {
@@ -87,7 +88,7 @@ class CouponRepositoryImpl implements CouponRepository {
   Future<CouponStatus> getCouponStatus(String code) async {
     try {
       final coupon = await _dataSource.getCouponByCode(code);
-      if (coupon == null) throw ServerException(message: 'Coupon not found');
+      if (coupon == null) throw const ServerException(message: 'Coupon not found');
       return _dataSource.getCouponStatus(coupon);
     } catch (e) {
       throw ServerException(message: e.toString());

@@ -7,7 +7,6 @@ import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
 import 'package:delwaqty/shared/widgets/premium_empty_state.dart';
 import 'package:delwaqty/shared/widgets/error_state.dart';
 import 'package:delwaqty/shared/widgets/app_loader.dart';
-import 'package:delwaqty/core/theme/app_colors.dart';
 import 'package:delwaqty/core/theme/app_text_styles.dart';
 
 final _merchantProvider = FutureProvider.family<Merchant?, String>((ref, id) async {
@@ -61,7 +60,6 @@ class RestaurantGalleryPage extends ConsumerWidget {
                 crossAxisCount: 2,
                 mainAxisSpacing: 8,
                 crossAxisSpacing: 8,
-                childAspectRatio: 1,
               ),
               itemCount: images.length,
               itemBuilder: (context, index) {

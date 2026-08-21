@@ -38,7 +38,7 @@ class UserLocationNotifier extends AsyncNotifier<UserLocation?> {
   @override
   Future<UserLocation?> build() async {
     ref.watch(localeProvider);
-    return _determinePosition(deepPrecision: false);
+    return _determinePosition();
   }
 
   Future<UserLocation?> refreshDeep() {
@@ -46,7 +46,7 @@ class UserLocationNotifier extends AsyncNotifier<UserLocation?> {
   }
 
   Future<UserLocation?> refreshQuick() {
-    return _determinePosition(deepPrecision: false);
+    return _determinePosition();
   }
 
   Future<UserLocation?> refreshDeepLocked() async {

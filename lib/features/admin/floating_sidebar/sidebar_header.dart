@@ -29,8 +29,8 @@ class SidebarHeader extends StatelessWidget {
 
     return Container(
       padding: const EdgeInsets.fromLTRB(14, 14, 14, 10),
-      decoration: BoxDecoration(
-        borderRadius: const BorderRadius.only(
+      decoration: const BoxDecoration(
+        borderRadius: BorderRadius.only(
           topLeft: Radius.circular(24),
           topRight: Radius.circular(24),
         ),
@@ -152,8 +152,6 @@ class SidebarHeader extends StatelessWidget {
                     cs.primary.withValues(alpha: 0.15),
                     cs.tertiary.withValues(alpha: 0.15),
                   ],
-                  begin: Alignment.centerLeft,
-                  end: Alignment.centerRight,
                 ),
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(

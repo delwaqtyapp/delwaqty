@@ -29,7 +29,7 @@ class DeliveryZoneCard extends ConsumerWidget {
             width: double.infinity,
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: theme.colorScheme.surfaceContainerHighest.withOpacity(0.5),
+              color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Column(
@@ -37,7 +37,7 @@ class DeliveryZoneCard extends ConsumerWidget {
                 Icon(
                   Icons.local_shipping_outlined,
                   size: 32,
-                  color: theme.colorScheme.onSurfaceVariant.withOpacity(0.5),
+                  color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
                 ),
                 const SizedBox(height: 8),
                 Text(
@@ -51,9 +51,9 @@ class DeliveryZoneCard extends ConsumerWidget {
           );
         }
 
-        return Container(
+        return DecoratedBox(
           decoration: BoxDecoration(
-            color: theme.colorScheme.surfaceContainerHighest.withOpacity(0.5),
+            color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
             borderRadius: BorderRadius.circular(12),
           ),
           child: Column(

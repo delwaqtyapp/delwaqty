@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:delwaqty/core/extensions/context_extensions.dart';
-import 'package:delwaqty/features/customer/merchant/merchant_module.dart';
 import 'package:delwaqty/features/customer/restaurant/restaurant_module.dart';
 import 'package:delwaqty/features/customer/restaurant/domain/entities/reservation.dart';
 import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
@@ -62,7 +61,7 @@ class _MerchantReservationsPageState
                 itemCount: 5,
                 itemBuilder: (_, __) => const Padding(
                   padding: EdgeInsets.only(bottom: 12),
-                  child: ShimmerCard(height: 120),
+                  child: ShimmerCard(),
                 ),
               ),
               error: (e, _) => Center(
@@ -124,8 +123,8 @@ class _MerchantReservationsPageState
       MapEntry(null, l10n.all),
       MapEntry(ReservationStatus.pending, l10n.pending),
       MapEntry(ReservationStatus.confirmed, l10n.confirmed),
-      MapEntry(ReservationStatus.seated, 'Seated'),
-      MapEntry(ReservationStatus.completed, 'Completed'),
+      const MapEntry(ReservationStatus.seated, 'Seated'),
+      const MapEntry(ReservationStatus.completed, 'Completed'),
       MapEntry(ReservationStatus.cancelled, l10n.cancelled),
     ];
 
@@ -254,7 +253,7 @@ class _ReservationCard extends StatelessWidget {
               children: [
                 Expanded(
                   child: Text(
-                    '${reservation.userId}',
+                    reservation.userId,
                     style: theme.textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.w600,
                     ),

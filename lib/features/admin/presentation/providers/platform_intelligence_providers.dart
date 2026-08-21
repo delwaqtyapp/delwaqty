@@ -52,12 +52,12 @@ class AdminTimeFilter {
         now,
       ),
       AdminTimePeriod.month => (
-        DateTime(now.year, now.month, 1),
+        DateTime(now.year, now.month),
         now,
       ),
       AdminTimePeriod.quarter => (
         DateTime(now.month <= 3 ? now.year - 1 : now.year,
-            now.month <= 3 ? 10 + now.month : now.month - 2, 1),
+            now.month <= 3 ? 10 + now.month : now.month - 2),
         now,
       ),
       AdminTimePeriod.all => (null, null),
@@ -154,7 +154,6 @@ final transactionLedgerProvider =
       to: to,
       type: params.type,
       search: params.search,
-      limit: 50,
       offset: params.page * 50,
     );
   },

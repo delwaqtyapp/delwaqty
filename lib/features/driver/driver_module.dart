@@ -2,17 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:delwaqty/core/module/feature_module.dart';
-import 'package:delwaqty/features/customer/driver/domain/repositories/driver_repository.dart';
-import 'package:delwaqty/features/customer/driver/domain/entities/driver_profile.dart';
-import 'package:delwaqty/features/customer/driver/domain/entities/driver_delivery.dart';
-import 'package:delwaqty/features/customer/driver/data/datasources/remote/supabase_driver_data_source.dart';
-import 'package:delwaqty/features/customer/driver/data/datasources/remote/supabase_driver_platform_data_source.dart';
-import 'package:delwaqty/features/customer/driver/data/repositories/driver_repository_impl.dart';
-import 'package:delwaqty/features/customer/driver/presentation/pages/driver_dashboard_page.dart';
-import 'package:delwaqty/features/customer/driver/presentation/pages/driver_earnings_page.dart';
-import 'package:delwaqty/features/customer/driver/presentation/pages/driver_onboarding_page.dart';
-import 'package:delwaqty/features/customer/driver/presentation/pages/vehicle_management_page.dart';
-import 'package:delwaqty/features/customer/driver/presentation/pages/document_management_page.dart';
+import 'package:delwaqty/features/driver/domain/repositories/driver_repository.dart';
+import 'package:delwaqty/features/driver/domain/entities/driver_profile.dart';
+import 'package:delwaqty/features/driver/domain/entities/driver_delivery.dart';
+import 'package:delwaqty/features/driver/data/datasources/remote/supabase_driver_data_source.dart';
+import 'package:delwaqty/features/driver/data/datasources/remote/supabase_driver_platform_data_source.dart';
+import 'package:delwaqty/features/driver/data/repositories/driver_repository_impl.dart';
+import 'package:delwaqty/features/driver/presentation/pages/driver_dashboard_page.dart';
+import 'package:delwaqty/features/driver/presentation/pages/driver_earnings_page.dart';
+import 'package:delwaqty/features/driver/presentation/pages/driver_onboarding_page.dart';
+import 'package:delwaqty/features/driver/presentation/pages/vehicle_management_page.dart';
+import 'package:delwaqty/features/driver/presentation/pages/document_management_page.dart';
 
 final supabaseDriverRepositoryImplProvider = Provider<DriverRepositoryImpl>((ref) {
   return DriverRepositoryImpl(

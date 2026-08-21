@@ -1,48 +1,79 @@
-{
-  "project_info": {
-    "project_number": "772052634679",
-    "project_id": "delwaqty0",
-    "storage_bucket": "delwaqty0.firebasestorage.app"
-  },
-  "client": [
-    {
-      "client_info": {
-        "mobilesdk_app_id": "1:772052634679:android:17267a5736408b918b43b2",
-        "android_client_info": {
-          "package_name": "com.delwaqty.app"
-        }
-      },
-      "oauth_client": [],
-      "api_key": [
-        {
-          "current_key": "AIzaSyBsBH-EQilAypJ2LGVyOK40UpqGWfjHt1A"
-        }
-      ],
-      "services": {
-        "appinvite_service": {
-          "other_platform_oauth_client": []
-        }
-      }
-    },
-    {
-      "client_info": {
-        "mobilesdk_app_id": "1:772052634679:android:admin_placeholder",
-        "android_client_info": {
-          "package_name": "com.delwaqty.admin"
-        }
-      },
-      "oauth_client": [],
-      "api_key": [
-        {
-          "current_key": "AIzaSyBsBH-EQilAypJ2LGVyOK40UpqGWfjHt1A"
-        }
-      ],
-      "services": {
-        "appinvite_service": {
-          "other_platform_oauth_client": []
-        }
-      }
-    }
-  ],
-  "configuration_version": "1"
+﻿{
+    "project_info":  {
+                         "project_number":  "772052634679",
+                         "project_id":  "delwaqty0",
+                         "storage_bucket":  "delwaqty0.firebasestorage.app"
+                     },
+    "client":  [
+                   {
+                       "client_info":  {
+                                           "mobilesdk_app_id":  "1:772052634679:android:17267a5736408b918b43b2",
+                                           "android_client_info":  {
+                                                                       "package_name":  "com.delwaqty.app"
+                                                                   }
+                                       },
+                       "oauth_client":  [
+
+                                        ],
+                       "api_key":  [
+                                       {
+                                           "current_key":  "AIzaSyBsBH-EQilAypJ2LGVyOK40UpqGWfjHt1A"
+                                       }
+                                   ],
+                       "services":  {
+                                        "appinvite_service":  {
+                                                                  "other_platform_oauth_client":  [
+
+                                                                                                  ]
+                                                              }
+                                    }
+                   },
+                   {
+                       "client_info":  {
+                                           "mobilesdk_app_id":  "1:772052634679:android:admin_placeholder",
+                                           "android_client_info":  {
+                                                                       "package_name":  "com.delwaqty.admin"
+                                                                   }
+                                       },
+                       "oauth_client":  [
+
+                                        ],
+                       "api_key":  [
+                                       {
+                                           "current_key":  "AIzaSyBsBH-EQilAypJ2LGVyOK40UpqGWfjHt1A"
+                                       }
+                                   ],
+                       "services":  {
+                                        "appinvite_service":  {
+                                                                  "other_platform_oauth_client":  [
+
+                                                                                                  ]
+                                                              }
+                                    }
+                   },
+                   {
+                       "client_info":  {
+                                           "mobilesdk_app_id":  "1:772052634679:android:17267a5736408b918b43b2",
+                                           "android_client_info":  {
+                                                                       "package_name":  "com.delwaqty.driver"
+                                                                   }
+                                       },
+                       "oauth_client":  [
+
+                                        ],
+                       "api_key":  [
+                                       {
+                                           "current_key":  "AIzaSyBsBH-EQilAypJ2LGVyOK40UpqGWfjHt1A"
+                                       }
+                                   ],
+                       "services":  {
+                                        "appinvite_service":  {
+                                                                  "other_platform_oauth_client":  [
+
+                                                                                                  ]
+                                                              }
+                                    }
+                   }
+               ],
+    "configuration_version":  "1"
 }

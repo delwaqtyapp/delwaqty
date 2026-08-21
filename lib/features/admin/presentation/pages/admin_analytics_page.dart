@@ -278,7 +278,6 @@ class _PeakHoursSection extends StatelessWidget {
                 final hour = h['hour'] as int;
                 final formatted = ml.formatTimeOfDay(
                   TimeOfDay(hour: hour, minute: 0),
-                  alwaysUse24HourFormat: false,
                 );
                 return formatted;
               }).join(' • ');

@@ -40,7 +40,7 @@ class PriceTag extends StatelessWidget {
         if (hasDiscount) ...[
           const SizedBox(width: 6),
           Text(
-            '${originalPrice!.toStringAsFixed(0)}',
+            originalPrice!.toStringAsFixed(0),
             style: TextStyle(
               fontSize: size == 'small' ? 10 : 12,
               decoration: TextDecoration.lineThrough,

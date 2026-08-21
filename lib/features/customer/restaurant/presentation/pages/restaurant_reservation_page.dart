@@ -8,7 +8,6 @@ import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
 import 'package:delwaqty/shared/widgets/premium_empty_state.dart';
 import 'package:delwaqty/shared/widgets/app_loader.dart';
 import 'package:delwaqty/shared/widgets/app_snackbar.dart';
-import 'package:delwaqty/core/theme/app_colors.dart';
 
 final _branchesProvider = FutureProvider.family<List<Branch>, String>((ref, merchantId) async {
   final repo = ref.watch(branchRepositoryProvider);
@@ -126,12 +125,12 @@ class _RestaurantReservationPageState extends ConsumerState<RestaurantReservatio
                           decoration: BoxDecoration(
                             color: isSelected
                                 ? theme.colorScheme.primary
-                                : theme.colorScheme.surfaceContainerHighest.withOpacity(0.5),
+                                : theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
                             borderRadius: BorderRadius.circular(10),
                             border: Border.all(
                               color: isSelected
                                   ? theme.colorScheme.primary
-                                  : theme.colorScheme.outline.withOpacity(0.2),
+                                  : theme.colorScheme.outline.withValues(alpha: 0.2),
                             ),
                           ),
                           child: Column(
@@ -147,7 +146,7 @@ class _RestaurantReservationPageState extends ConsumerState<RestaurantReservatio
                                 '${slot.capacity} ${l10n.guests}',
                                 style: theme.textTheme.labelSmall?.copyWith(
                                   color: isSelected
-                                      ? theme.colorScheme.onPrimary.withOpacity(0.8)
+                                      ? theme.colorScheme.onPrimary.withValues(alpha: 0.8)
                                       : theme.colorScheme.onSurfaceVariant,
                                 ),
                               ),
@@ -224,12 +223,12 @@ class _RestaurantReservationPageState extends ConsumerState<RestaurantReservatio
                   decoration: BoxDecoration(
                     color: isSelected
                         ? theme.colorScheme.primary
-                        : theme.colorScheme.surfaceContainerHighest.withOpacity(0.5),
+                        : theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
                       color: isSelected
                           ? theme.colorScheme.primary
-                          : theme.colorScheme.outline.withOpacity(0.2),
+                          : theme.colorScheme.outline.withValues(alpha: 0.2),
                     ),
                   ),
                   child: Column(
@@ -344,7 +343,7 @@ class _RestaurantReservationPageState extends ConsumerState<RestaurantReservatio
           decoration: InputDecoration(
             hintText: l10n.specialRequestsHint,
             filled: true,
-            fillColor: theme.colorScheme.surfaceContainerHighest.withOpacity(0.5),
+            fillColor: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
               borderSide: BorderSide.none,
@@ -422,7 +421,7 @@ class _CircleButton extends StatelessWidget {
         decoration: BoxDecoration(
           color: onTap != null
               ? theme.colorScheme.primaryContainer
-              : theme.colorScheme.surfaceContainerHighest.withOpacity(0.3),
+              : theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
           shape: BoxShape.circle,
         ),
         child: Icon(
@@ -430,7 +429,7 @@ class _CircleButton extends StatelessWidget {
           size: 20,
           color: onTap != null
               ? theme.colorScheme.primary
-              : theme.colorScheme.onSurfaceVariant.withOpacity(0.3),
+              : theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.3),
         ),
       ),
     );

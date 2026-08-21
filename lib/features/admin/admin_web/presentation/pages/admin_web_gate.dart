@@ -113,8 +113,7 @@ class _AdminWebLoading extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-    return Scaffold(
+    return const Scaffold(
       body: Center(
         child: CircularProgressIndicator(color: AppColors.brandPurple),
       ),
@@ -269,6 +268,7 @@ class AdminWebDeniedPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Scaffold(
       body: Center(
         child: ConstrainedBox(

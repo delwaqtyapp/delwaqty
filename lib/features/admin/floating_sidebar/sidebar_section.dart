@@ -71,8 +71,6 @@ class SidebarDivider extends StatelessWidget {
         decoration: BoxDecoration(
           gradient: LinearGradient(
             colors: [st.dividerColor, st.dividerColor.withValues(alpha: 0.0)],
-            begin: Alignment.centerLeft,
-            end: Alignment.centerRight,
           ),
         ),
       ),

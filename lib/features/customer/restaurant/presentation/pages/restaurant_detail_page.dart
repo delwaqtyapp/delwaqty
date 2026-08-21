@@ -250,22 +250,22 @@ class _RestaurantDetailPageState extends ConsumerState<RestaurantDetailPage> {
             if (merchant.imageUrl != null)
               Image.network(merchant.imageUrl!, fit: BoxFit.cover)
             else
-              Container(
+              DecoratedBox(
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                     colors: [
                       theme.colorScheme.primary,
-                      theme.colorScheme.primary.withOpacity(0.7),
-                      theme.colorScheme.tertiary.withOpacity(0.5),
+                      theme.colorScheme.primary.withValues(alpha: 0.7),
+                      theme.colorScheme.tertiary.withValues(alpha: 0.5),
                     ],
                   ),
                 ),
                 child: Icon(
                   Icons.restaurant_rounded,
                   size: 80,
-                  color: theme.colorScheme.onPrimary.withOpacity(0.3),
+                  color: theme.colorScheme.onPrimary.withValues(alpha: 0.3),
                 ),
               ),
             DecoratedBox(
@@ -330,8 +330,8 @@ class _RestaurantDetailPageState extends ConsumerState<RestaurantDetailPage> {
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
               decoration: BoxDecoration(
                 color: merchant.isOpenNow
-                    ? AppColors.successLight.withOpacity(0.1)
-                    : AppColors.errorLight.withOpacity(0.1),
+                    ? AppColors.successLight.withValues(alpha: 0.1)
+                    : AppColors.errorLight.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(20),
               ),
               child: Text(
@@ -391,7 +391,7 @@ class _RestaurantDetailPageState extends ConsumerState<RestaurantDetailPage> {
           child: Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: theme.colorScheme.surfaceContainerHighest.withOpacity(0.5),
+              color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Row(
@@ -531,7 +531,7 @@ class _RestaurantDetailPageState extends ConsumerState<RestaurantDetailPage> {
         Container(
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: theme.colorScheme.surfaceContainerHighest.withOpacity(0.5),
+            color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
             borderRadius: BorderRadius.circular(12),
           ),
           child: Row(
@@ -552,7 +552,7 @@ class _RestaurantDetailPageState extends ConsumerState<RestaurantDetailPage> {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerHighest.withOpacity(0.5),
+        color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Row(

@@ -116,6 +116,7 @@ dev_dependencies:
 # following page: https://dart.dev/tools/pub/pubspec
 
 # The following section is specific to Flutter packages.
+  plugin_platform_interface: any
 flutter:
   generate: true
   uses-material-design: true

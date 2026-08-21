@@ -348,7 +348,7 @@ class _AssignmentsPanel extends StatelessWidget {
                 flex: 2,
                 child: DropdownButtonFormField<String?>(
                   key: const Key('region-select'),
-                  value: pendingRegionId,
+                  initialValue: pendingRegionId,
                   decoration: const InputDecoration(
                     labelText: 'Governorate',
                     border: OutlineInputBorder(),
@@ -368,7 +368,7 @@ class _AssignmentsPanel extends StatelessWidget {
               Expanded(
                 child: DropdownButtonFormField<AdminRegionScope>(
                   key: const Key('scope-select'),
-                  value: pendingScope,
+                  initialValue: pendingScope,
                   decoration: const InputDecoration(
                     labelText: 'Scope',
                     border: OutlineInputBorder(),

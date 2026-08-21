@@ -156,7 +156,7 @@ class AdminManagementDataSource {
     );
     final data = res.data;
     if (data == null) return {};
-    if (data is Map) return Map<String, dynamic>.from(data as Map);
+    if (data is Map) return Map<String, dynamic>.from(data);
     return {};
   }
 }

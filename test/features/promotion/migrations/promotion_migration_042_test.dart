@@ -15,7 +15,7 @@ void main() {
     test('exists and is SECURITY DEFINER STABLE', () {
       expect(
         migration,
-        contains("CREATE OR REPLACE FUNCTION public._campaign_region_visible("),
+        contains('CREATE OR REPLACE FUNCTION public._campaign_region_visible('),
       );
       expect(migration, contains('LANGUAGE sql'));
       expect(migration, contains('STABLE'));

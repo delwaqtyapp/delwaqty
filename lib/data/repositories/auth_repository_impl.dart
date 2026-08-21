@@ -154,7 +154,6 @@ class AuthRepositoryImpl implements AuthRepository {
       email: email,
       fullName: fullName,
       language: language,
-      isOnboarded: false,
       role: userType.code,
       userType: userType,
       verificationStatus: userType.requiresVerification
@@ -211,7 +210,7 @@ class AuthRepositoryImpl implements AuthRepository {
       if (session != null && user != null) {
         return _mapSessionToResult(session, user);
       }
-      return const AuthResult(userId: '', isNewUser: false);
+      return const AuthResult(userId: '');
     } on sb.AuthException catch (e) {
       _logger.e('Google sign in error', e);
       throw AuthException(message: e.message);
@@ -233,7 +232,7 @@ class AuthRepositoryImpl implements AuthRepository {
       if (session != null && user != null) {
         return _mapSessionToResult(session, user);
       }
-      return const AuthResult(userId: '', isNewUser: false);
+      return const AuthResult(userId: '');
     } on sb.AuthException catch (e) {
       _logger.e('Apple sign in error', e);
       throw AuthException(message: e.message);
@@ -255,7 +254,7 @@ class AuthRepositoryImpl implements AuthRepository {
       if (session != null && user != null) {
         return _mapSessionToResult(session, user);
       }
-      return const AuthResult(userId: '', isNewUser: false);
+      return const AuthResult(userId: '');
     } on sb.AuthException catch (e) {
       _logger.e('Facebook sign in error', e);
       throw AuthException(message: e.message);

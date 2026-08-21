@@ -130,11 +130,11 @@ class _PremiumSearchFieldState extends State<PremiumSearchField> {
         ),
         boxShadow: _focused
             ? [
-                BoxShadow(
+                const BoxShadow(
                   color: AppColors.shadowBrand,
                   blurRadius: 28,
                   spreadRadius: -4,
-                  offset: const Offset(0, 10),
+                  offset: Offset(0, 10),
                 ),
               ]
             : [

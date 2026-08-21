@@ -111,7 +111,7 @@ class PaymobService {
   }
 
   String getPaymentUrl(String paymentKey) {
-    final iframeId = AppConfig.paymobIframeId;
+    const iframeId = AppConfig.paymobIframeId;
     return 'https://accept.paymobsolutions.com/api/acceptance/iframes/$iframeId?payment_token=$paymentKey';
   }
 

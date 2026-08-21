@@ -48,8 +48,7 @@ void main() {
 
   test('no direct sanctions DML remains in data source', () async {
     final file = File(
-      'lib/features/sanctions/data/datasources/remote/'
-      'supabase_sanctions_data_source.dart',
+      'lib/features/admin/sanctions/data/datasources/remote/supabase_sanctions_data_source.dart',
     );
     final content = await file.readAsString();
 
@@ -214,8 +213,7 @@ void main() {
 
   test('member detail page uses RPC-based sanctions', () async {
     final file = File(
-      'lib/features/member_management/presentation/pages/'
-      'member_detail_page.dart',
+      'lib/features/admin/member_management/presentation/pages/member_detail_page.dart',
     );
     final content = await file.readAsString();
 
@@ -248,8 +246,7 @@ void main() {
 
   test('member detail page refreshes after sanction operations', () async {
     final file = File(
-      'lib/features/member_management/presentation/pages/'
-      'member_detail_page.dart',
+      'lib/features/admin/member_management/presentation/pages/member_detail_page.dart',
     );
     final content = await file.readAsString();
 
@@ -267,7 +264,7 @@ void main() {
 
   test('admin sanctions page uses RPC-based revoke', () async {
     final file = File(
-      'lib/features/sanctions/presentation/pages/admin_sanctions_page.dart',
+      'lib/features/admin/sanctions/presentation/pages/admin_sanctions_page.dart',
     );
     final content = await file.readAsString();
 

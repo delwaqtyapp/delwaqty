@@ -143,7 +143,7 @@ class ProductCard extends StatelessWidget {
                         const SizedBox(width: 4),
                         Flexible(
                           child: Text(
-                            '${product.originalPrice!.toStringAsFixed(0)}',
+                            product.originalPrice!.toStringAsFixed(0),
                             style: theme.textTheme.bodySmall?.copyWith(
                               decoration: TextDecoration.lineThrough,
                               color: theme.colorScheme.onSurfaceVariant,

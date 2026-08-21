@@ -39,7 +39,7 @@ class PremiumCard extends StatelessWidget {
     final effectiveColor =
         color ?? (gradient != null ? null : colorScheme.surfaceContainerLowest);
 
-    Widget surface = Container(
+    final Widget surface = Container(
       clipBehavior: Clip.antiAlias,
       decoration: BoxDecoration(
         color: effectiveColor,

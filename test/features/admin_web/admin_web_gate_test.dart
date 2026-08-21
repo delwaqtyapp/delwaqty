@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:delwaqty/features/admin/admin_web/presentation/pages/admin_web_gate.dart';
+import 'package:delwaqty/l10n/app_localizations.dart';
 
 void main() {
   group('adminWebGateStatus', () {
@@ -43,7 +44,11 @@ void main() {
     StreamController<AuthState> authStream() =>
         StreamController<AuthState>.broadcast();
 
-    Widget wrap(Widget child) => MaterialApp(home: child);
+    Widget wrap(Widget child) => MaterialApp(
+      localizationsDelegates: const [AppLocalizations.delegate],
+      supportedLocales: AppLocalizations.supportedLocales,
+      home: child,
+    );
 
     testWidgets('shows login page when no user is signed in', (tester) async {
       final stream = authStream();

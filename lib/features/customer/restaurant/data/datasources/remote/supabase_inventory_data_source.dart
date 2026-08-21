@@ -76,8 +76,9 @@ class SupabaseInventoryDataSource {
     required int adjustment,
   }) async {
     final existing = await getInventory(productId);
-    if (existing == null)
+    if (existing == null) {
       throw Exception('Inventory not found for product: $productId');
+    }
     final newQty = existing.stockQuantity + adjustment;
     final isInStock = newQty > 0;
     return upsertInventory(
@@ -94,8 +95,9 @@ class SupabaseInventoryDataSource {
     required int quantity,
   }) async {
     final existing = await getInventory(productId);
-    if (existing == null)
+    if (existing == null) {
       throw Exception('Inventory not found for product: $productId');
+    }
     final available = existing.stockQuantity - existing.reservedQuantity;
     if (available < quantity) throw Exception('Insufficient stock');
     return upsertInventory(
@@ -113,8 +115,9 @@ class SupabaseInventoryDataSource {
     required int quantity,
   }) async {
     final existing = await getInventory(productId);
-    if (existing == null)
+    if (existing == null) {
       throw Exception('Inventory not found for product: $productId');
+    }
     final newReserved = (existing.reservedQuantity - quantity).clamp(
       0,
       existing.reservedQuantity,

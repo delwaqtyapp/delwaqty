@@ -1,13 +1,4 @@
 class ChatMessage {
-  final String id;
-  final String roomId;
-  final String senderId;
-  final String message;
-  final String messageType;
-  final String? attachmentUrl;
-  final bool isRead;
-  final DateTime? readAt;
-  final DateTime createdAt;
 
   const ChatMessage({
     required this.id,
@@ -34,6 +25,15 @@ class ChatMessage {
       createdAt: DateTime.parse(json['created_at'] as String),
     );
   }
+  final String id;
+  final String roomId;
+  final String senderId;
+  final String message;
+  final String messageType;
+  final String? attachmentUrl;
+  final bool isRead;
+  final DateTime? readAt;
+  final DateTime createdAt;
 
   Map<String, dynamic> toJson() => {
     'id': id,

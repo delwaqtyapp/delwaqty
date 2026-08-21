@@ -359,10 +359,10 @@ class _TimelineStep extends StatelessWidget {
 }
 
 class _AudioRecordingCard extends StatelessWidget {
-  final String orderId;
-  final String userId;
 
   const _AudioRecordingCard({required this.orderId, required this.userId});
+  final String orderId;
+  final String userId;
 
   @override
   Widget build(BuildContext context) {

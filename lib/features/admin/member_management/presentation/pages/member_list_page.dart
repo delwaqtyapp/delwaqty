@@ -119,7 +119,7 @@ class _MemberListPageState extends ConsumerState<MemberListPage> {
             children: [
               Expanded(
                 child: DropdownButtonFormField<String>(
-                  value: _sortBy,
+                  initialValue: _sortBy,
                   decoration: InputDecoration(
                     labelText: 'Sort by',
                     border: OutlineInputBorder(

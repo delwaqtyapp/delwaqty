@@ -1,14 +1,4 @@
 class EscalationEvent {
-  final String id;
-  final String entityType;
-  final String entityId;
-  final String? fromAdminId;
-  final String? toAdminId;
-  final String actorId;
-  final String reason;
-  final String? previousScope;
-  final String? newScope;
-  final DateTime createdAt;
 
   const EscalationEvent({
     required this.id,
@@ -39,6 +29,16 @@ class EscalationEvent {
           : DateTime.now(),
     );
   }
+  final String id;
+  final String entityType;
+  final String entityId;
+  final String? fromAdminId;
+  final String? toAdminId;
+  final String actorId;
+  final String reason;
+  final String? previousScope;
+  final String? newScope;
+  final DateTime createdAt;
 
   bool get isOwnerQueue => toAdminId == null;
 }

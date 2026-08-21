@@ -12,12 +12,10 @@ import 'package:delwaqty/features/customer/search/domain/repositories/places_rep
 
 class PlacesRepositoryImpl implements PlacesRepository {
   PlacesRepositoryImpl({
-    required GeocodingProvider provider,
-    required SupabaseSavedPlacesDataSource savedPlaces,
-    required RecentSearchesStore recentSearches,
-  })  : _provider = provider,
-        _savedPlaces = savedPlaces,
-        _recentSearches = recentSearches;
+    required this._provider,
+    required this._savedPlaces,
+    required this._recentSearches,
+  });
 
   final GeocodingProvider _provider;
   final SupabaseSavedPlacesDataSource _savedPlaces;

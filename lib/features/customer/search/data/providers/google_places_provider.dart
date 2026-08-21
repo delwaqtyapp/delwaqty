@@ -10,11 +10,10 @@ import 'package:delwaqty/features/customer/search/domain/geocoding_provider.dart
 
 class GooglePlacesProvider implements GeocodingProvider {
   GooglePlacesProvider({
-    required String apiKey,
+    required this._apiKey,
     http.Client? client,
     this.regionCode = 'eg',
-  })  : _apiKey = apiKey,
-        _client = client ?? http.Client();
+  })  : _client = client ?? http.Client();
 
   final String _apiKey;
   final http.Client _client;

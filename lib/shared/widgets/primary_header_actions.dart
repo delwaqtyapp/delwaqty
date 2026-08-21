@@ -47,7 +47,7 @@ class PrimaryHeaderActions extends ConsumerWidget {
             icon: Badge(
               isLabelVisible: unreadCount > 0,
               backgroundColor: Theme.of(context).colorScheme.error,
-              label: unreadCount > 99 ? Text('99+') : Text('$unreadCount'),
+              label: unreadCount > 99 ? const Text('99+') : Text('$unreadCount'),
               child: const Icon(Icons.notifications_outlined),
             ),
           ),

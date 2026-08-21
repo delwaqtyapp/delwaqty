@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:delwaqty/features/customer/delivery/presentation/providers/delivery_providers.dart';
-import 'package:delwaqty/features/customer/delivery/domain/entities/driver_capability.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
 import 'package:delwaqty/shared/widgets/shimmer_loading.dart';
@@ -51,7 +50,7 @@ class _DriverCapabilitiesPageState
             SizedBox(height: 12),
             ShimmerCard(height: 80),
             SizedBox(height: 12),
-            ShimmerCard(height: 120),
+            ShimmerCard(),
           ],
         ),
         error: (e, _) => Center(child: Text(l10n.errorWithMessage(e.toString()))),

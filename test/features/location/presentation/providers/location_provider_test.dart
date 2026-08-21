@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:geolocator_platform_interface/geolocator_platform_interface.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -336,7 +335,7 @@ void main() {
         ),
       ).thenAnswer(
         (_) => Stream.fromIterable([
-          androidPositionWith(29.2, 32.63, 5.0, satellitesUsedInFix: 0),
+          androidPositionWith(29.2, 32.63, 5.0),
         ]),
       );
 
@@ -404,7 +403,6 @@ void main() {
           29.2,
           32.63,
           100.0,
-          satellitesUsedInFix: 0,
         ),
       );
 
@@ -438,7 +436,6 @@ void main() {
           29.2,
           32.63,
           900.0,
-          satellitesUsedInFix: 0,
         ),
       );
       when(
@@ -515,7 +512,6 @@ void main() {
           29.2,
           32.63,
           100.0,
-          satellitesUsedInFix: 0,
           timestamp: DateTime.now().subtract(const Duration(minutes: 11)),
         ),
       );

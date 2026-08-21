@@ -259,12 +259,11 @@ void main() {
         name: 'Chicken Meal',
         price: 35.0,
         originalPrice: 50.0,
-        isAvailable: true,
         isFeatured: true,
         tags: ['popular'],
         createdAt: now,
         variants: [
-          ProductVariant(
+          const ProductVariant(
             id: 'v1',
             productId: 'p1',
             name: 'Large',
@@ -351,7 +350,7 @@ void main() {
     });
 
     test('toJson serializes correctly', () {
-      final variant = ProductVariant(
+      const variant = ProductVariant(
         id: 'v1',
         productId: 'p1',
         name: 'Large',
@@ -365,7 +364,7 @@ void main() {
     });
 
     test('equality and copyWith work correctly', () {
-      final variant = ProductVariant(
+      const variant = ProductVariant(
         id: 'v1',
         productId: 'p1',
         name: 'Large',
@@ -453,7 +452,7 @@ void main() {
         merchantId: 'm1',
         merchantName: 'Al Baik',
         items: [
-          CartItem(
+          const CartItem(
             id: 'ci1',
             productId: 'p1',
             productName: 'Meal',
@@ -500,7 +499,7 @@ void main() {
     });
 
     test('toJson serializes correctly', () {
-      final item = CartItem(
+      const item = CartItem(
         id: 'ci1',
         productId: 'p1',
         productName: 'Meal',
@@ -515,7 +514,7 @@ void main() {
     });
 
     test('copyWith creates modified copy', () {
-      final item = CartItem(
+      const item = CartItem(
         id: 'ci1',
         productId: 'p1',
         productName: 'Meal',
@@ -592,7 +591,7 @@ void main() {
         merchantId: 'm1',
         merchantName: 'Al Baik',
         items: [
-          OrderItem(
+          const OrderItem(
             productId: 'p1',
             productName: 'Meal',
             quantity: 2,
@@ -651,7 +650,7 @@ void main() {
     });
 
     test('toJson serializes correctly', () {
-      final item = OrderItem(
+      const item = OrderItem(
         productId: 'p1',
         productName: 'Meal',
         quantity: 1,
@@ -704,7 +703,7 @@ void main() {
     });
 
     test('defaults are applied correctly', () {
-      final review = Review(
+      const review = Review(
         id: 'r1',
         merchantId: 'm1',
         userId: 'u1',
@@ -782,7 +781,7 @@ void main() {
     });
 
     test('defaults are applied correctly', () {
-      final coupon = Coupon(
+      const coupon = Coupon(
         id: 'c1',
         code: 'TEST',
         type: CouponType.percentage,
@@ -812,7 +811,6 @@ void main() {
         usageLimit: 100,
         usedCount: 5,
         expiresAt: now,
-        isActive: true,
       );
 
       final restored = Coupon.fromJson(original.toJson());
@@ -891,7 +889,7 @@ void main() {
     });
 
     test('toJson serializes correctly', () {
-      final category = CatalogCategory(
+      const category = CatalogCategory(
         id: 'c1',
         merchantId: 'm1',
         name: 'Meals',
@@ -904,7 +902,7 @@ void main() {
     });
 
     test('fromJson roundtrip preserves data', () {
-      final original = CatalogCategory(
+      const original = CatalogCategory(
         id: 'c1',
         merchantId: 'm1',
         name: 'Meals',
@@ -943,7 +941,7 @@ void main() {
     });
 
     test('toJson serializes correctly', () {
-      final filter = SearchFilter(
+      const filter = SearchFilter(
         minPrice: 10.0,
         sortBy: SortBy.priceLow,
       );
@@ -962,7 +960,7 @@ void main() {
     });
 
     test('defaults are applied correctly', () {
-      final filter = SearchFilter();
+      const filter = SearchFilter();
       expect(filter.minPrice, isNull);
       expect(filter.maxPrice, isNull);
       expect(filter.minRating, isNull);
@@ -971,7 +969,7 @@ void main() {
     });
 
     test('fromJson roundtrip preserves data', () {
-      final original = SearchFilter(
+      const original = SearchFilter(
         minPrice: 10.0,
         maxPrice: 100.0,
         minRating: 4.0,
@@ -1005,7 +1003,7 @@ void main() {
     });
 
     test('toJson serializes correctly', () {
-      final location = GeoLocation(
+      const location = GeoLocation(
         latitude: 24.7136,
         longitude: 46.6753,
       );
@@ -1017,7 +1015,7 @@ void main() {
     });
 
     test('fromJson roundtrip preserves data', () {
-      final original = GeoLocation(
+      const original = GeoLocation(
         latitude: 24.7136,
         longitude: 46.6753,
         address: 'Olaya St',

@@ -53,7 +53,7 @@ class _AdminVerificationsWebPageState extends State<AdminVerificationsWebPage> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(l10n.userApproved),
-            backgroundColor: Color(0xFF2E7D32),
+            backgroundColor: const Color(0xFF2E7D32),
           ),
         );
       }
@@ -83,7 +83,7 @@ class _AdminVerificationsWebPageState extends State<AdminVerificationsWebPage> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(l10n.userRejected),
-            backgroundColor: Color(0xFFF57C00),
+            backgroundColor: const Color(0xFFF57C00),
           ),
         );
       }

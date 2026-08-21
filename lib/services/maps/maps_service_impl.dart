@@ -13,11 +13,11 @@ const _geocodingApiUrl = 'https://maps.googleapis.com/maps/api/geocode/json';
 const _staticMapBaseUrl = 'https://maps.googleapis.com/maps/api/staticmap';
 
 class MapsServiceImpl implements MapsService {
-  late final http.Client _client;
 
   MapsServiceImpl() {
     _client = http.Client();
   }
+  late final http.Client _client;
 
   @override
   Future<Route> getRoute(GeoLocation origin, GeoLocation destination) async {
@@ -215,7 +215,6 @@ class MapsServiceImpl implements MapsService {
     return double.parse(value.toString());
   }
 
-  @override
   void dispose() {
     _client.close();
   }

@@ -52,7 +52,6 @@ void main() {
         id: 'wb1',
         userId: 'u1',
         balance: 1250.50,
-        currency: 'ج.م',
         updatedAt: now,
       );
 

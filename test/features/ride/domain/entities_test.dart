@@ -210,7 +210,6 @@ void main() {
         paymentMethod: 'wallet',
         paymentStatus: 'paid',
         pickupOtp: '5678',
-        currency: 'EGP',
         distance: 20.0,
         estimatedMinutes: 35,
         isSharedTrip: true,

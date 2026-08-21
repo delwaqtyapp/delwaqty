@@ -75,7 +75,7 @@ class _AdminComplaintsPageState extends ConsumerState<AdminComplaintsPage> {
         children: [
           Expanded(
             child: DropdownButtonFormField<String>(
-              value: _statusFilter,
+              initialValue: _statusFilter,
               decoration: InputDecoration(
                 labelText: 'Status',
                 isDense: true,
@@ -101,7 +101,7 @@ class _AdminComplaintsPageState extends ConsumerState<AdminComplaintsPage> {
           const SizedBox(width: 8),
           Expanded(
             child: DropdownButtonFormField<String>(
-              value: _typeFilter,
+              initialValue: _typeFilter,
               decoration: InputDecoration(
                 labelText: l10n.type,
                 isDense: true,
@@ -161,10 +161,6 @@ class _AdminComplaintsPageState extends ConsumerState<AdminComplaintsPage> {
 }
 
 class _ComplaintTile extends StatelessWidget {
-  final Complaint complaint;
-  final ColorScheme cs;
-  final AppLocalizations l10n;
-  final VoidCallback onTap;
 
   const _ComplaintTile({
     required this.complaint,
@@ -172,6 +168,10 @@ class _ComplaintTile extends StatelessWidget {
     required this.l10n,
     required this.onTap,
   });
+  final Complaint complaint;
+  final ColorScheme cs;
+  final AppLocalizations l10n;
+  final VoidCallback onTap;
 
   Color _statusColor(String status) {
     switch (status) {
@@ -196,7 +196,6 @@ class _ComplaintTile extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: 8),
       child: AnimatedFadeIn(
         child: GlassCard(
-          borderRadius: 16,
           child: ListTile(
             leading: Container(
               padding: const EdgeInsets.all(8),
@@ -236,13 +235,13 @@ class _ComplaintTile extends StatelessWidget {
 }
 
 class _ComplaintDetailSheet extends ConsumerStatefulWidget {
-  final Complaint complaint;
-  final VoidCallback onStatusChanged;
 
   const _ComplaintDetailSheet({
     required this.complaint,
     required this.onStatusChanged,
   });
+  final Complaint complaint;
+  final VoidCallback onStatusChanged;
 
   @override
   ConsumerState<_ComplaintDetailSheet> createState() =>
@@ -370,7 +369,7 @@ class _ComplaintDetailSheetState extends ConsumerState<_ComplaintDetailSheet> {
               ),
               const SizedBox(height: 16),
               DropdownButtonFormField<String>(
-                value: _selectedStatus,
+                initialValue: _selectedStatus,
                 decoration: InputDecoration(
                   labelText: AppLocalizations.of(context).updateStatus,
                 ),

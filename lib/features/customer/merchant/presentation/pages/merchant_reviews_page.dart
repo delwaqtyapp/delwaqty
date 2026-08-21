@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:delwaqty/core/extensions/context_extensions.dart';
-import 'package:delwaqty/features/customer/merchant/merchant_module.dart';
 import 'package:delwaqty/features/customer/commerce/commerce_module.dart';
 import 'package:delwaqty/features/customer/commerce/domain/entities/review.dart';
 import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
@@ -225,7 +224,7 @@ class _RatingSummaryCard extends StatelessWidget {
                         style: theme.textTheme.labelSmall,
                       ),
                     ),
-                    Icon(Icons.star_rounded, size: 14, color: AppColors.rating),
+                    const Icon(Icons.star_rounded, size: 14, color: AppColors.rating),
                     const SizedBox(width: AppSpacing.sm),
                     Expanded(
                       child: ClipRRect(
@@ -234,7 +233,7 @@ class _RatingSummaryCard extends StatelessWidget {
                           value: fraction.toDouble(),
                           minHeight: 8,
                           backgroundColor: theme.colorScheme.surfaceContainerHighest,
-                          valueColor: AlwaysStoppedAnimation<Color>(
+                          valueColor: const AlwaysStoppedAnimation<Color>(
                             AppColors.rating,
                           ),
                         ),
@@ -373,7 +372,7 @@ class _ReviewCardState extends State<_ReviewCard> {
                 child: TextButton.icon(
                   onPressed: () => setState(() => _showReplyField = true),
                   icon: const Icon(Icons.reply, size: 16),
-                  label: Text(
+                  label: const Text(
                     'Reply',
                     style: AppTextStyles.labelMedium,
                   ),
@@ -385,10 +384,10 @@ class _ReviewCardState extends State<_ReviewCard> {
                 children: [
                   TextFormField(
                     controller: _replyController,
-                    decoration: InputDecoration(
+                    decoration: const InputDecoration(
                       hintText: 'Write a reply...',
-                      border: const OutlineInputBorder(),
-                      contentPadding: const EdgeInsets.symmetric(
+                      border: OutlineInputBorder(),
+                      contentPadding: EdgeInsets.symmetric(
                         horizontal: AppSpacing.lg,
                         vertical: AppSpacing.md,
                       ),

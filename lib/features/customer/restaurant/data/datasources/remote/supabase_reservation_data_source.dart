@@ -110,8 +110,9 @@ class SupabaseReservationDataSource {
   }) async {
     final update = <String, dynamic>{};
     if (partySize != null) update['party_size'] = partySize;
-    if (reservationTime != null)
+    if (reservationTime != null) {
       update['reservation_time'] = reservationTime.toIso8601String();
+    }
     if (specialRequests != null) update['special_requests'] = specialRequests;
     if (tableNumber != null) update['table_number'] = tableNumber;
     if (update.isEmpty) return (await getReservationById(reservationId))!;

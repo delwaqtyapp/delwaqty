@@ -155,7 +155,6 @@ class AdminFinancialCenter extends ConsumerWidget {
     final l10n = AppLocalizations.of(context);
     return PremiumCard(
       padding: const EdgeInsets.all(16),
-      radius: AppSpacing.radiusCard,
       child: Container(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(16),
@@ -218,7 +217,6 @@ class AdminFinancialCenter extends ConsumerWidget {
               .map(
                 (item) => PremiumCard(
                   padding: const EdgeInsets.all(12),
-                  radius: AppSpacing.radiusCard,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -270,7 +268,6 @@ class AdminFinancialCenter extends ConsumerWidget {
       children: [
         PremiumCard(
           padding: const EdgeInsets.all(16),
-          radius: AppSpacing.radiusCard,
           child: Row(
             children: [
               _CommissionStatCard(
@@ -302,7 +299,6 @@ class AdminFinancialCenter extends ConsumerWidget {
             delay: const Duration(milliseconds: 250),
             child: PremiumCard(
               padding: const EdgeInsets.all(12),
-              radius: AppSpacing.radiusCard,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [

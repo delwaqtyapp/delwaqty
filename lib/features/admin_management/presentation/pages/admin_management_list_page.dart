@@ -32,7 +32,7 @@ class _AdminManagementListPageState
 
   List<AdminAccount> _applyFilters(List<AdminAccount> all) {
     final q = _searchCtrl.text.trim().toLowerCase();
-    var list = all.where((a) {
+    final list = all.where((a) {
       if (_roleFilter != null && a.role != _roleFilter) return false;
       if (_statusFilter == 'active' && !a.isActive) return false;
       if (_statusFilter == 'inactive' && a.isActive) return false;
@@ -116,7 +116,7 @@ class _AdminManagementListPageState
                   value: _roleFilter,
                   hint: Text(loc.adminMgmtFilterRole),
                   items: [
-                    DropdownMenuItem(value: null, child: Text(loc.adminMgmtAll)),
+                    DropdownMenuItem(child: Text(loc.adminMgmtAll)),
                     DropdownMenuItem(
                         value: 'owner', child: Text(loc.adminMgmtRoleOwner)),
                     DropdownMenuItem(
@@ -128,7 +128,7 @@ class _AdminManagementListPageState
                   value: _statusFilter,
                   hint: Text(loc.adminMgmtFilterStatus),
                   items: [
-                    DropdownMenuItem(value: null, child: Text(loc.adminMgmtAll)),
+                    DropdownMenuItem(child: Text(loc.adminMgmtAll)),
                     DropdownMenuItem(
                         value: 'active',
                         child: Text(loc.adminMgmtStatusActive)),
@@ -142,7 +142,7 @@ class _AdminManagementListPageState
                   value: _regionFilter,
                   hint: Text(loc.adminMgmtFilterRegion),
                   items: [
-                    DropdownMenuItem(value: null, child: Text(loc.adminMgmtAll)),
+                    DropdownMenuItem(child: Text(loc.adminMgmtAll)),
                     for (final r in regions)
                       DropdownMenuItem(value: r, child: Text(r)),
                   ],
@@ -293,7 +293,7 @@ class _Pager extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           IconButton(onPressed: page > 0 ? onPrev : null, icon: const Icon(Icons.navigate_before)),
-          Text('${loc.adminMgmtPage} ${page + 1} / ${pageCount}  •  $total'),
+          Text('${loc.adminMgmtPage} ${page + 1} / $pageCount  •  $total'),
           IconButton(
               onPressed: page < pageCount - 1 ? onNext : null,
               icon: const Icon(Icons.navigate_next)),
@@ -348,11 +348,11 @@ Future<void> _openCreateDialog(BuildContext context, WidgetRef ref) async {
                 builder: (c, snap) {
                   final admins = snap.data ?? [];
                   return DropdownButtonFormField<String?>(
-                    value: supervisorId,
+                    initialValue: supervisorId,
                     decoration:
                         InputDecoration(labelText: loc.adminMgmtSelectSupervisor),
                     items: [
-                      DropdownMenuItem(value: null, child: Text(loc.adminMgmtNone)),
+                      DropdownMenuItem(child: Text(loc.adminMgmtNone)),
                       for (final a in admins)
                         DropdownMenuItem(
                             value: a.id, child: Text(a.fullName ?? a.email)),
@@ -370,11 +370,11 @@ Future<void> _openCreateDialog(BuildContext context, WidgetRef ref) async {
                 builder: (c, snap) {
                   final regions = snap.data ?? [];
                   return DropdownButtonFormField<String?>(
-                    value: regionId,
+                    initialValue: regionId,
                     decoration:
                         InputDecoration(labelText: loc.adminMgmtSelectRegion),
                     items: [
-                      DropdownMenuItem(value: null, child: Text(loc.adminMgmtNone)),
+                      DropdownMenuItem(child: Text(loc.adminMgmtNone)),
                       for (final r in regions)
                         DropdownMenuItem(
                             value: r['id'] as String,

@@ -61,7 +61,7 @@ class _AdminProfilePageState
         ),
         actions: [
           TextButton(
-              onPressed: () => Navigator.of(ctx).pop(null),
+              onPressed: () => Navigator.of(ctx).pop(),
               child: Text(loc.adminMgmtCancel)),
           FilledButton(
               onPressed: () => Navigator.of(ctx).pop(ctrl.text.trim()),
@@ -469,7 +469,7 @@ class _AdminProfilePageState
                     InputDecoration(labelText: loc.adminMgmtSelectRegion),
               ),
               DropdownButtonFormField<String>(
-                value: scope,
+                initialValue: scope,
                 items: [
                   DropdownMenuItem(
                       value: 'descendants',

@@ -4,7 +4,37 @@
 
 ---
 
-## Current Task — MASTER RELEASE AUDIT (Session 69) — IN PROGRESS
+## Current Task — SPRINT 100: INDEPENDENT DELWAQTY DRIVER APP (Phases 1–20 DONE) — IN PROGRESS
+
+**Status: Driver feature fully extracted into a REAL independent Flutter app.** `lib/driver/main.dart` + module/router/app + `driver` Android flavor (`com.delwaqty.driver`). Driver APK builds green; Customer + Admin still build; **891/891 tests pass**; 0 analyze errors.
+
+**What was done (Phases 1–20)**
+- **Audit (1–3):** mapped `lib/features/customer/driver/**` (28 files); classified DRIVER-ONLY vs SHARED delivery infra (dispatch cluster: `dispatch_repository`, `dispatch_repository_impl`, `supabase_dispatch_data_source`, `ride_offer`, `driver_stats`, `dispatch_providers` + `Ride` entity) which MUST stay shared.
+- **Move (5–6):** moved 24 DRIVER-ONLY files to `lib/features/driver/` (driver_module + 5 pages + driver_profile/driver_delivery/vehicle/driver_document/wallet_detail/driver_performance entities + driver_repository + driver_repository_impl + 2 driver datasources). Rewrote only intra-moved imports (`features/customer/driver`→`features/driver`); shared dispatch imports kept pointing at `features/customer/driver`.
+- **Driver app (4):** created `lib/driver/{main,app,app_router,module_registry}.dart`. `registerDriverModules()` registers Splash/Onboarding/Welcome/Auth/Regions/Complaints/Settings/Profile/Notifications/Safety/Driver. `driverGoRouterProvider` redirects authed users to `/driver`.
+- **Flavor (15):** added `driver` product flavor (`com.delwaqty.driver`) in `android/app/build.gradle.kts`; added `com.delwaqty.driver` client to `android/app/google-services.json` (duplicated app client — Firebase runtime guarded by `FirebaseConfig.isConfigured`).
+- **Phase 14 honored:** kept `DriverModule` in Customer during build/verify.
+- **Phase 20 executed:** removed `DriverModule()` from `lib/customer/module_registry.dart` (and its now-unused import in `driver_delivery_hub_page.dart`). Customer no longer embeds driver UI; `/driver/*` now lives only in the Driver app. `driver_delivery_hub_page` pushes `/driver/delivery/*` (DeliveryModule routes) — unaffected.
+
+**Verification**
+- `flutter analyze`: 0 errors (23 warnings/info, pre-existing categories).
+- `flutter test --concurrency=2`: 891/891 pass.
+- `flutter build apk --debug --flavor driver --target lib/driver/main.dart --dart-define-from-file=.env.dev` → `app-driver-debug.apk` ✅
+- `flutter build apk --debug --flavor customer ...` → `app-customer-debug.apk` ✅ (no regression)
+
+**Remaining (21–26)**
+- 17: device smoke on DNP NX9 (install driver APK; deep functional test needs live DB — blocked).
+- 18: cross-feature regression scan — DONE (no stale `features/customer/driver/<moved>` refs).
+- 19: duplicate-code audit — shared `features/customer/driver` cluster is intentional (shared delivery infra), not duplication.
+- 21: internal-track publish — blocked (no signing keystore; debug only).
+- 22–23: update architecture docs / module-registry docs to reflect driver separation.
+- 24: commit + push (milestone) — pending user go-ahead (per rules, not auto-committed).
+- 25: **Provider app extraction — now UNBLOCKED** (driver verified) but a separate large effort; recommended as its own planned pass.
+- 26: final report.
+
+---
+
+## Current Task — MASTER RELEASE AUDIT (Session 69) — COMPLETED (findings above)
 
 **Status:** Autonomous AUDIT → FIX → VERIFY loop running. Working from the provided MISSION 1–42 master task.
 
@@ -16,6 +46,9 @@
 - `094bc43` sprint 99: REMOVED active passenger ride functionality — deleted customer `ride`/`ride_booking` booking screens, driver ride hub/trip + offer/register sheets, admin `RideModel` analytics + `getRecentRides`; removed `/ride/*` and `/driver/rides`/`/driver/trip` routes, module registration, driver dashboard rides entry, and the `/ride/$id` notification deep link. PRESERVED shared delivery infrastructure (`Ride` entity, `ride_providers`, `dispatch_providers`, `dispatch_repository`, `supabase_dispatch_data_source`, `ride_repository`, `fare_quote`, `ride_map`) used by delivery.
 - `64dfc2e` sprint 99: Localized ~28 hardcoded English strings across 14 files (driver onboarding, merchant reservations/dashboard/branches, search, admin sanctions/verifications/region_scope/categories/web_gate/hierarchy, pending verification, complaints). Added 25 ARB keys.
 - `POST-REMOVAL CLEANUP` sprint 99: **Localization + terminology pass.** Purged **97 dead passenger l10n keys** (EN+AR) — all `ride*`/`trip*`/`taxi*`/`passenger*`/`fare*` that were genuinely unused (booking screens, ride types, ride status, fare breakdown, rate-passenger, etc.). **Kept + renamed 31 delivery-relevant terms** so delivery UX stays intact: `waitingForPassenger`→"Waiting for customer", `revenueRideGmv`→"Delivery GMV", `sosRideInfo`→"Delivery: …", `waitingForRides`→"Waiting for delivery requests", `minimumFareNotMet`→"Minimum delivery amount not met", `driverBefore/AfterTrip` + `before/during/afterTrip`(+Instructions) + `driverDuringTrip` repointed to delivery, `todayRides`/`completedTrips`/`kpiActiveRides`/`noActiveTrip`→delivery KPIs, `notifyOnRide`/`autoShareTrip`→delivery sharing, `tosSection5Body` rewritten to remove "Ride". Repointed admin ledger `'ride'` map value → `l10n.delivery` (backend `reference_type='ride'` unchanged). Removed `rideUpdates` notification toggle + `StorageKeys.rideUpdates`. Fixed `enterOtpToStart` passenger→customer wording (EN+AR). **Both APKs build clean.** Remaining `passenger`/`taxi` code references are intentional: shared `Ride` entity `RideType.taxi`/`passengerCapacity`, `rate_passenger` RPC (driver rates customer — backend identifier kept per rules), `vehicle_management_page` `case 'taxi'` vehicle category.
+- `d6304fe` sprint 99: `061_security_hardening_privileged_helpers.sql` — `set_updated_at`/`deactivate_stale_tokens`/`get_unread_notification_count` `search_path`; 32 privileged internal helpers (`_admin_exec_*`,`_member_exec_*`,`_approval_apply`,`_is_owner_uid`,`_reward_*`, etc.) `REVOKE EXECUTE FROM PUBLIC,anon` + `GRANT service_role`. Pushed.
+- `87c0655` sprint 99: `062_storage_ownership_hardening.sql` — dropped over-permissive `authenticated read from buckets`/`management buckets`; owner-scoped SELECT/INSERT for `complaints` + `chat_attachments` (`split_part(name,'/',1)::uuid`). `063_commission_account_overrides.sql` — `get_commission_rate(p_user_id)` + `set_commission_rate('account')`; commission precedence account>category>type>default; `platform_commission_for_reference` wired `v_member_id`. Pushed.
+- `00e861b` sprint 99: `064_storage_docs_profiles_and_commission_region.sql` — `driver-documents` bucket + owner/admin policies (was MISSING entirely); `profiles` upload tightened to owner path (avatar-overwrite fix); per-account commission override region-scoped via `user_region_preferences`+`_region_in_scope`. Customer APK build green.
 
 ### Known open issues (audit findings, not yet fixed)
 - LOCALIZATION (Mission 21): ✅ RESOLVED this pass — ~28 EN hardcoded strings localized (commit `64dfc2e`), Arabic-only fixed (`5c0f2d0`), and 97 dead passenger l10n keys purged + delivery terms renamed (POST-REMOVAL CLEANUP). `waitingForPassenger` retained (delivery tracking). Final re-sweep: only intentional `Ride`/`rate_passenger`/`case 'taxi'` references remain (see above).
@@ -26,7 +59,7 @@
 - SECURITY/FINANCIAL regression (Missions 13-14): ✅ commission 700% bug fixed (`b76a616`); `060` SQL hardening. Deep re-audit pending live DB (env-limited).
 - DEAD CODE cleanup (Mission 19): ✅ passenger l10n keys removed; `rideUpdates` toggle + storage key removed. `rate_passenger` dispatch method retained (functional, shared delivery infra — NOT dead).
 - PASSENGER RPC TOMBSTONE (Phase A): 🟠 `estimate_fare`, `find_nearest_drivers`, `dispatch_ride` (taxi/passenger matching+fare) are **dead at app level** — `features/customer/ride` is NOT registered in `module_registry.dart`, so `supabase_ride_data_source.dart` is unreferenced dead code (not compiled). Documented DORMANT, not dropped. `register_ride_driver` (dispatch data source) suspect — no clear UI caller after `register_ride_driver_sheet` removed; DORMANT. All `ride_request`/`trip`/`passenger` RPCs used by delivery (`accept_ride_request`, `reject_ride_request`, `start_trip`, `complete_trip`, `cancel_ride_lifecycle`, `rate_passenger`) are SHARED DELIVERY — KEPT. Historical tables `ride_requests`/`trip_events`/`ride_ratings`/`ride_pricing` DORMANT (RLS on; `ride_ratings`+`ride_pricing` have `USING(true)` public read — low sensitivity).
-- RLS AUDIT (Phase E): ✅ `platform_commissions`/`commission_rules` fully locked (REVOKE ALL). Owner-scoped `wallets`/`wallet_transactions`/`driver_documents`/`sos_alerts`/`chat_*`/`sanctions`/`complaints`/`campaigns`/`member_*` protected. 🔴 `storage.objects` complaint + chat-attachment buckets readable by ANY authenticated (no owner check — 014:196/015:343). 🟠 `drivers` active-location + `service_providers` profile+lat/long public when available; `notification_tokens` admin-readable; `users` admin SELECT exposes verification docs. `driver_locations` read hardened in 033 (verify deployed).
+- RLS AUDIT (Phase E): ✅ `platform_commissions`/`commission_rules` fully locked (REVOKE ALL). Owner-scoped `wallets`/`wallet_transactions`/`driver_documents`/`sos_alerts`/`chat_*`/`sanctions`/`complaints`/`campaigns`/`member_*` protected. ✅ `storage.objects` complaint + chat-attachment buckets now owner-scoped (`062`); `profiles` upload owner-scoped (`064-B`); `driver-documents` bucket + owner/admin policies added (`064-A`). 🟠 `drivers` active-location + `service_providers` profile+lat/long public when available (by design for dispatch/ discovery); `notification_tokens` admin-readable; `users` admin SELECT exposes verification docs (admin-only, acceptable). `driver_locations` read hardened in 033 (verify deployed).
 - FINANCIAL DISPLAY (Phase I): ✅ No `* 100` on integer-percent bug remains; commission rendered `toStringAsFixed(0)%` everywhere; currency `*100` conversions are correct (cents).
 - NOTIFICATION (Phase K): ✅ Clean — no passenger-only ride/trip topics or deep links; `rideUpdates` toggle already removed.
 

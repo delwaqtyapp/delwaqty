@@ -3,9 +3,9 @@ import 'package:delwaqty/core/errors/exceptions.dart';
 import 'package:delwaqty/features/_shared/complaints/domain/entities/complaint.dart';
 
 class SupabaseComplaintsDataSource {
-  final SupabaseClient _client;
 
   SupabaseComplaintsDataSource(this._client);
+  final SupabaseClient _client;
 
   Future<List<Complaint>> getComplaints({String? status, String? type}) async {
     var query = _client.from('complaints').select();

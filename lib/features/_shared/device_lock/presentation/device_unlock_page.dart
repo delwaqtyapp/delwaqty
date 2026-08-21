@@ -36,7 +36,7 @@ class _DeviceUnlockPageState extends ConsumerState<DeviceUnlockPage> {
       final store = ref.read(biometricAuthStoreProvider);
       final userIds = await store.allUserIds();
       final entries = <_AccountEntry>[];
-      String? active = await store.activeUserId();
+      final String? active = await store.activeUserId();
       for (final uid in userIds) {
         final creds = await store.credentialsFor(uid);
         if (creds != null) {
@@ -79,7 +79,6 @@ class _DeviceUnlockPageState extends ConsumerState<DeviceUnlockPage> {
     try {
       final didAuth = await _localAuth.authenticate(
         localizedReason: l10n.biometricReason,
-        biometricOnly: false,
       );
       if (!didAuth || !mounted) {
         if (mounted) setState(() => _isAuthenticating = false);
@@ -136,7 +135,6 @@ class _DeviceUnlockPageState extends ConsumerState<DeviceUnlockPage> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final isAdmin = ref.watch(isAdminAppProvider);
     return Scaffold(
       backgroundColor: const Color(0xFF241E44),
       body: SafeArea(

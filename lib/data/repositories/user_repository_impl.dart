@@ -137,8 +137,6 @@ class UserRepositoryImpl implements UserRepository {
       fullName: supabaseUser.userMetadata?['full_name'] as String? ?? 'User',
       phone: supabaseUser.phone,
       avatarUrl: supabaseUser.userMetadata?['avatar_url'] as String?,
-      language: 'en',
-      isOnboarded: false,
       role: userType.code,
       userType: userType,
       verificationStatus: verificationStatus,

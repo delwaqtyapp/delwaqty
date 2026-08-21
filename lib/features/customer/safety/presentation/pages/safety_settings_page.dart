@@ -49,7 +49,7 @@ class SafetySettingsPage extends ConsumerWidget {
             icon: Icons.share_rounded,
             children: [
               SwitchListTile(
-                secondary: Icon(Icons.share_location_rounded, color: AppColors.primaryLight),
+                secondary: const Icon(Icons.share_location_rounded, color: AppColors.primaryLight),
                 title: Text(l10n.autoShareTrip),
                 subtitle: Text(l10n.autoShareTripDescription),
                 value: false,
@@ -76,7 +76,7 @@ class SafetySettingsPage extends ConsumerWidget {
                 data: (contacts) {
                   final activeCount = contacts.where((c) => c.notifyOnRide).length;
                   return ListTile(
-                    leading: Icon(Icons.people_rounded, color: AppColors.primaryLight),
+                    leading: const Icon(Icons.people_rounded, color: AppColors.primaryLight),
                     title: Text(l10n.trustedContacts),
                     subtitle: Text(
                       activeCount > 0
@@ -134,11 +134,10 @@ class _GlassSection extends StatelessWidget {
           width: double.infinity,
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: cs.surfaceContainerHighest.withOpacity(0.45),
+            color: cs.surfaceContainerHighest.withValues(alpha: 0.45),
             borderRadius: BorderRadius.circular(20),
             border: Border.all(
-              color: cs.outline.withOpacity(0.12),
-              width: 1,
+              color: cs.outline.withValues(alpha: 0.12),
             ),
           ),
           child: Column(

@@ -6,7 +6,7 @@ import 'package:delwaqty/data/repositories/category_repository_impl.dart';
 
 final nearbyMerchantsProvider = FutureProvider<List<Merchant>>((ref) async {
   final repo = ref.watch(merchantRepositoryProvider);
-  return repo.getMerchants(limit: 20);
+  return repo.getMerchants();
 });
 
 final activeCategoriesProvider = FutureProvider<List<PlatformCategory>>((ref) async {
@@ -24,7 +24,7 @@ final discoveryMerchantsProvider = FutureProvider<List<Merchant>>((ref) async {
 
   switch (mode) {
     case DiscoveryMode.nearby:
-      return repo.getMerchants(limit: 20);
+      return repo.getMerchants();
     case DiscoveryMode.recommended:
       final all = await repo.getMerchants(limit: 50);
       final rated = all.where((m) => m.rating >= 4.0).toList();

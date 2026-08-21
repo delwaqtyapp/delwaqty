@@ -6,13 +6,21 @@ void main() {
 
   group('AdminRole', () {
     test('enum has all values', () {
-      expect(AdminRole.values.length, 2);
+      expect(AdminRole.values.length, 6);
       expect(AdminRole.owner.name, 'owner');
+      expect(AdminRole.countryAdmin.name, 'countryAdmin');
+      expect(AdminRole.governorateAdmin.name, 'governorateAdmin');
+      expect(AdminRole.centerAdmin.name, 'centerAdmin');
+      expect(AdminRole.villageAdmin.name, 'villageAdmin');
       expect(AdminRole.admin.name, 'admin');
     });
 
-    test('fromDb maps legacy vocabulary onto two-tier hierarchy', () {
+    test('fromDb maps DB vocabulary including regional tiers', () {
       expect(AdminRole.fromDb('super_admin'), AdminRole.owner);
+      expect(AdminRole.fromDb('country_admin'), AdminRole.countryAdmin);
+      expect(AdminRole.fromDb('governorate_admin'), AdminRole.governorateAdmin);
+      expect(AdminRole.fromDb('center_admin'), AdminRole.centerAdmin);
+      expect(AdminRole.fromDb('village_admin'), AdminRole.villageAdmin);
       expect(AdminRole.fromDb('admin'), AdminRole.admin);
       expect(AdminRole.fromDb('moderator'), AdminRole.admin);
       expect(AdminRole.fromDb('support'), AdminRole.admin);
@@ -20,8 +28,12 @@ void main() {
       expect(AdminRole.fromDb(null), AdminRole.admin);
     });
 
-    test('toDb stays within legacy admin_users role CHECK vocabulary', () {
+    test('toDb returns DB vocabulary including regional tiers', () {
       expect(AdminRole.owner.toDb(), 'super_admin');
+      expect(AdminRole.countryAdmin.toDb(), 'country_admin');
+      expect(AdminRole.governorateAdmin.toDb(), 'governorate_admin');
+      expect(AdminRole.centerAdmin.toDb(), 'center_admin');
+      expect(AdminRole.villageAdmin.toDb(), 'village_admin');
       expect(AdminRole.admin.toDb(), 'admin');
     });
   });
@@ -218,7 +230,7 @@ void main() {
     });
 
     test('toJson serializes correctly', () {
-      final perm = AdminPermission(
+      const perm = AdminPermission(
         id: 'perm1',
         name: 'read_orders',
         description: 'Can read orders',
@@ -232,7 +244,7 @@ void main() {
     });
 
     test('fromJson roundtrip preserves data', () {
-      final original = AdminPermission(
+      const original = AdminPermission(
         id: 'perm1',
         name: 'write_products',
         description: 'Can write products',
@@ -384,127 +396,6 @@ void main() {
     });
   });
 
-  group('RideModel', () {
-    test('fromJson creates RideModel from JSON', () {
-      final json = {
-        'id': 'rm1',
-        'userId': 'u1',
-        'driverId': 'd1',
-        'serviceType': 'ride',
-        'status': 'completed',
-        'pickupLatitude': 30.0444,
-        'pickupLongitude': 31.2357,
-        'dropoffLatitude': 30.0131,
-        'dropoffLongitude': 31.2089,
-        'fare': 50.0,
-        'distanceKm': 12.5,
-        'durationMinutes': 25,
-        'isScheduled': false,
-        'scheduledTime': null,
-        'paymentMethod': 'cash',
-        'createdAt': now.toIso8601String(),
-        'completedAt': null,
-      };
-
-      final ride = RideModel.fromJson(json);
-      expect(ride.id, 'rm1');
-      expect(ride.userId, 'u1');
-      expect(ride.driverId, 'd1');
-      expect(ride.serviceType, 'ride');
-      expect(ride.status, 'completed');
-      expect(ride.pickupLatitude, 30.0444);
-      expect(ride.pickupLongitude, 31.2357);
-      expect(ride.fare, 50.0);
-      expect(ride.distanceKm, 12.5);
-      expect(ride.durationMinutes, 25);
-    });
-
-    test('toJson serializes correctly', () {
-      final ride = RideModel(
-        id: 'rm1',
-        status: 'pending',
-        pickupLatitude: 30.0444,
-        pickupLongitude: 31.2357,
-        dropoffLatitude: 30.0131,
-        dropoffLongitude: 31.2089,
-        createdAt: now,
-      );
-
-      final json = ride.toJson();
-      expect(json['id'], 'rm1');
-      expect(json['serviceType'], 'ride');
-      expect(json['isScheduled'], false);
-      expect(json['paymentMethod'], 'cash');
-    });
-
-    test('fromJson roundtrip preserves data', () {
-      final original = RideModel(
-        id: 'rm1',
-        userId: 'u1',
-        driverId: 'd1',
-        serviceType: 'delivery',
-        status: 'in_progress',
-        pickupLatitude: 30.0444,
-        pickupLongitude: 31.2357,
-        dropoffLatitude: 30.0131,
-        dropoffLongitude: 31.2089,
-        fare: 75.0,
-        distanceKm: 20.0,
-        durationMinutes: 35,
-        isScheduled: true,
-        scheduledTime: now,
-        paymentMethod: 'card',
-        createdAt: now,
-      );
-
-      final restored = RideModel.fromJson(original.toJson());
-      expect(restored, original);
-    });
-
-    test('copyWith creates modified copy', () {
-      final ride = RideModel(
-        id: 'rm1',
-        status: 'pending',
-        pickupLatitude: 30.0444,
-        pickupLongitude: 31.2357,
-        dropoffLatitude: 30.0131,
-        dropoffLongitude: 31.2089,
-        createdAt: now,
-      );
-
-      final updated = ride.copyWith(
-        status: 'completed',
-        fare: 60.0,
-        driverId: 'd1',
-      );
-      expect(updated.status, 'completed');
-      expect(updated.fare, 60.0);
-      expect(updated.driverId, 'd1');
-      expect(ride.status, 'pending');
-    });
-
-    test('defaults are applied correctly', () {
-      final ride = RideModel(
-        id: 'rm1',
-        status: 'pending',
-        pickupLatitude: 30.0444,
-        pickupLongitude: 31.2357,
-        dropoffLatitude: 30.0131,
-        dropoffLongitude: 31.2089,
-        createdAt: now,
-      );
-
-      expect(ride.serviceType, 'ride');
-      expect(ride.isScheduled, false);
-      expect(ride.paymentMethod, 'cash');
-      expect(ride.userId, isNull);
-      expect(ride.driverId, isNull);
-      expect(ride.fare, isNull);
-      expect(ride.distanceKm, isNull);
-      expect(ride.durationMinutes, isNull);
-      expect(ride.scheduledTime, isNull);
-    });
-  });
 
   group('DeliveryModel', () {
     test('fromJson creates DeliveryModel from JSON', () {
@@ -630,7 +521,7 @@ void main() {
     });
 
     test('toJson serializes correctly', () {
-      final metrics = AdminDashboardMetrics(
+      const metrics = AdminDashboardMetrics(
         totalUsers: 500,
         totalRevenue: 50000.0,
       );
@@ -643,7 +534,7 @@ void main() {
     });
 
     test('fromJson roundtrip preserves data', () {
-      final original = AdminDashboardMetrics(
+      const original = AdminDashboardMetrics(
         totalUsers: 1000,
         totalDrivers: 100,
         totalMerchants: 50,
@@ -666,7 +557,7 @@ void main() {
     });
 
     test('defaults are applied correctly', () {
-      final metrics = AdminDashboardMetrics();
+      const metrics = AdminDashboardMetrics();
 
       expect(metrics.totalUsers, 0);
       expect(metrics.totalDrivers, 0);
@@ -686,9 +577,9 @@ void main() {
     });
 
     test('equality works correctly', () {
-      final a = AdminDashboardMetrics(totalUsers: 100, totalRevenue: 5000.0);
-      final b = AdminDashboardMetrics(totalUsers: 100, totalRevenue: 5000.0);
-      final c = AdminDashboardMetrics(totalUsers: 200, totalRevenue: 10000.0);
+      const a = AdminDashboardMetrics(totalUsers: 100, totalRevenue: 5000.0);
+      const b = AdminDashboardMetrics(totalUsers: 100, totalRevenue: 5000.0);
+      const c = AdminDashboardMetrics(totalUsers: 200, totalRevenue: 10000.0);
 
       expect(a, equals(b));
       expect(a, isNot(equals(c)));
@@ -712,7 +603,7 @@ void main() {
     });
 
     test('toJson serializes correctly', () {
-      final action = AdminQuickAction(
+      const action = AdminQuickAction(
         title: 'Dashboard',
         icon: 'dashboard',
         route: '/admin',
@@ -724,7 +615,7 @@ void main() {
     });
 
     test('fromJson roundtrip preserves data', () {
-      final original = AdminQuickAction(
+      const original = AdminQuickAction(
         title: 'Orders',
         icon: 'receipt',
         route: '/admin/orders',

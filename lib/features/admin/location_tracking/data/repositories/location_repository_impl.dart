@@ -3,9 +3,9 @@ import 'package:delwaqty/features/admin/location_tracking/domain/repositories/lo
 import 'package:delwaqty/features/admin/location_tracking/data/datasources/remote/supabase_location_data_source.dart';
 
 class LocationRepositoryImpl implements LocationRepository {
-  final SupabaseLocationDataSource _dataSource;
 
   LocationRepositoryImpl(this._dataSource);
+  final SupabaseLocationDataSource _dataSource;
 
   @override
   Future<List<LocationUpdate>> getUserLocations(String userId, {int limit = 50}) {

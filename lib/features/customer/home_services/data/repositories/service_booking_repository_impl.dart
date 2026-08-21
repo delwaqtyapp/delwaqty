@@ -6,9 +6,9 @@ import '../../domain/entities/service_booking.dart';
 import '../../domain/repositories/service_booking_repository.dart';
 
 class ServiceBookingRepositoryImpl implements ServiceBookingRepository {
-  final SupabaseClient _client;
 
   ServiceBookingRepositoryImpl(this._client);
+  final SupabaseClient _client;
 
   @override
   Future<List<ServiceCategory>> getCategories() async {

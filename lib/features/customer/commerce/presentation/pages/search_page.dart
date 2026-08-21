@@ -956,6 +956,7 @@ class _PriceFilterSheetState extends State<_PriceFilterSheet> {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context);
     return Container(
       decoration: BoxDecoration(
         color: cs.surface,
@@ -1026,7 +1027,7 @@ class _PriceFilterSheetState extends State<_PriceFilterSheet> {
                       borderRadius: BorderRadius.circular(14),
                     ),
                   ),
-                  child: const Text('Reset'),
+                  child: Text(l10n.reset),
                 ),
               ),
               const SizedBox(width: 12),
@@ -1040,7 +1041,7 @@ class _PriceFilterSheetState extends State<_PriceFilterSheet> {
                       borderRadius: BorderRadius.circular(14),
                     ),
                   ),
-                  child: const Text('Apply', style: TextStyle(color: Colors.white)),
+                  child: Text(l10n.apply, style: TextStyle(color: Colors.white)),
                 ),
               ),
             ],

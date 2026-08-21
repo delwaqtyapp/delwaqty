@@ -70,7 +70,7 @@ class _MyComplaintsPageState extends ConsumerState<MyComplaintsPage> {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
-                      subtitle: Text('Status: ${c.status}'),
+                      subtitle: Text('${l10n.statusLabel}: ${c.status}'),
                     ),
                   ),
                 ),

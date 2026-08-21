@@ -5,6 +5,7 @@ import 'package:delwaqty/features/admin/domain/entities/admin_region_assignment.
 import 'package:delwaqty/features/admin/presentation/providers/admin_region_providers.dart';
 import 'package:delwaqty/features/_shared/regions/domain/entities/region.dart';
 import 'package:delwaqty/features/_shared/regions/presentation/providers/region_providers.dart';
+import 'package:delwaqty/l10n/app_localizations.dart';
 
 class AdminRegionScopePage extends ConsumerStatefulWidget {
   const AdminRegionScopePage({super.key});
@@ -256,6 +257,7 @@ class _AssignmentsPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     if (selectedAdminId == null) {
       return const _EmptyPanel(message: 'Select an admin user to manage scope');
     }
@@ -371,14 +373,14 @@ class _AssignmentsPanel extends StatelessWidget {
                     labelText: 'Scope',
                     border: OutlineInputBorder(),
                   ),
-                  items: const [
+                  items: [
                     DropdownMenuItem(
                       value: AdminRegionScope.descendants,
-                      child: Text('Descendants'),
+                      child: Text(l10n.descendants),
                     ),
                     DropdownMenuItem(
                       value: AdminRegionScope.self,
-                      child: Text('Self'),
+                      child: Text(l10n.self),
                     ),
                   ],
                   onChanged: saving
@@ -410,7 +412,7 @@ class _AssignmentsPanel extends StatelessWidget {
                       ),
                     )
                   : const Icon(Icons.add_rounded),
-              label: const Text('Add'),
+              label: Text(l10n.add),
             ),
           ),
         ],

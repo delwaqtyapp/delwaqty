@@ -44,7 +44,7 @@ class _MerchantReservationsPageState
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Reservations'),
+        title: Text(l10n.reservations),
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),
@@ -178,7 +178,7 @@ class _MerchantReservationsPageState
       context: context,
       builder: (context) => AlertDialog(
         title: Text(l10n.cancel),
-        content: const Text('Are you sure you want to cancel this reservation?'),
+        content: Text(l10n.cancelReservationConfirm),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),

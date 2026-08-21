@@ -162,7 +162,7 @@ class _SanctionDetailSheetState extends ConsumerState<_SanctionDetailSheet> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Revoke Sanction'),
+        title: Text(l10n.revokeSanction),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -216,13 +216,13 @@ class _SanctionDetailSheetState extends ConsumerState<_SanctionDetailSheet> {
           widget.onRevoked();
           Navigator.of(context).pop();
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Sanction revoked')),
+            SnackBar(content: Text(l10n.sanctionRevoked)),
           );
         }
       } catch (e) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Failed to revoke: $e')),
+            SnackBar(content: Text(l10n.failedToRevoke(e))),
           );
         }
       } finally {
@@ -294,7 +294,7 @@ class _SanctionDetailSheetState extends ConsumerState<_SanctionDetailSheet> {
                             child: CircularProgressIndicator(strokeWidth: 2),
                           )
                         : const Icon(Icons.undo_rounded),
-                    label: Text(_isRevoking ? 'Revoking...' : 'Revoke Sanction'),
+                    label: Text(_isRevoking ? 'Revoking...' : l10n.revokeSanction),
                     style: ElevatedButton.styleFrom(
                       backgroundColor:
                           Theme.of(context).colorScheme.errorContainer,

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:delwaqty/core/theme/app_colors.dart';
+import 'package:delwaqty/l10n/app_localizations.dart';
 
 class AdminVerificationsWebPage extends StatefulWidget {
   const AdminVerificationsWebPage({super.key});
@@ -41,6 +42,7 @@ class _AdminVerificationsWebPageState extends State<AdminVerificationsWebPage> {
   }
 
   Future<void> _approve(String userId) async {
+    final l10n = AppLocalizations.of(context);
     setState(() => _processingId = userId);
     try {
       await _client
@@ -49,8 +51,8 @@ class _AdminVerificationsWebPageState extends State<AdminVerificationsWebPage> {
       setState(() => _requests.removeWhere((r) => r['id'] == userId));
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('User approved successfully'),
+          SnackBar(
+            content: Text(l10n.userApproved),
             backgroundColor: Color(0xFF2E7D32),
           ),
         );
@@ -70,6 +72,7 @@ class _AdminVerificationsWebPageState extends State<AdminVerificationsWebPage> {
   }
 
   Future<void> _reject(String userId) async {
+    final l10n = AppLocalizations.of(context);
     setState(() => _processingId = userId);
     try {
       await _client
@@ -78,8 +81,8 @@ class _AdminVerificationsWebPageState extends State<AdminVerificationsWebPage> {
       setState(() => _requests.removeWhere((r) => r['id'] == userId));
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('User rejected'),
+          SnackBar(
+            content: Text(l10n.userRejected),
             backgroundColor: Color(0xFFF57C00),
           ),
         );
@@ -195,6 +198,7 @@ class _VerificationCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final name = request['full_name'] ?? 'Unknown';
     final email = request['email'] ?? '';
     final role = request['role'] ?? request['user_type'] ?? 'unknown';
@@ -312,7 +316,7 @@ class _VerificationCard extends StatelessWidget {
                       borderRadius: BorderRadius.circular(10),
                     ),
                   ),
-                  child: const Text('Reject'),
+                  child: Text(l10n.reject),
                 ),
                 const SizedBox(width: 12),
                 FilledButton(
@@ -323,7 +327,7 @@ class _VerificationCard extends StatelessWidget {
                       borderRadius: BorderRadius.circular(10),
                     ),
                   ),
-                  child: const Text('Approve'),
+                  child: Text(l10n.approve),
                 ),
               ],
             ),

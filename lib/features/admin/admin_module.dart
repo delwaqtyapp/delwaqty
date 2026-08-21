@@ -35,6 +35,11 @@ import 'package:delwaqty/features/admin/presentation/pages/admin_quick_actions_p
 import 'package:delwaqty/features/admin/presentation/pages/admin_profile_page.dart';
 import 'package:delwaqty/features/admin/presentation/pages/admin_hierarchy_page.dart';
 import 'package:delwaqty/features/admin/presentation/pages/admin_pending_deletions_page.dart';
+import 'package:delwaqty/features/admin/financial/presentation/pages/admin_topup_requests_page.dart';
+import 'package:delwaqty/features/admin/financial/presentation/pages/admin_collections_page.dart';
+import 'package:delwaqty/features/admin/financial/presentation/pages/admin_settlements_page.dart';
+import 'package:delwaqty/features/admin/financial/presentation/pages/admin_grace_management_page.dart';
+import 'package:delwaqty/features/admin/financial/presentation/pages/admin_receiving_wallets_page.dart';
 
 /// Smooth page transition for the admin module: quick fade + subtle rise.
 Page<void> _adminPage(
@@ -214,6 +219,31 @@ class AdminModule extends FeatureModule {
           path: 'financial-center',
           pageBuilder: (context, state) =>
               _adminPage(const AdminFinancialCenter()),
+        ),
+        GoRoute(
+          path: 'topup-requests',
+          pageBuilder: (context, state) =>
+              _adminPage(const AdminTopupRequestsPage()),
+        ),
+        GoRoute(
+          path: 'collections',
+          pageBuilder: (context, state) =>
+              _adminPage(const AdminCollectionsPage()),
+        ),
+        GoRoute(
+          path: 'settlements',
+          pageBuilder: (context, state) =>
+              _adminPage(const AdminSettlementsPage()),
+        ),
+        GoRoute(
+          path: 'grace-management',
+          pageBuilder: (context, state) =>
+              _adminPage(const AdminGraceManagementPage()),
+        ),
+        GoRoute(
+          path: 'receiving-wallets',
+          pageBuilder: (context, state) =>
+              _adminPage(const AdminReceivingWalletsPage()),
         ),
         GoRoute(
           path: 'emergency',

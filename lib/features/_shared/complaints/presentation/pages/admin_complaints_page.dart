@@ -365,7 +365,7 @@ class _ComplaintDetailSheetState extends ConsumerState<_ComplaintDetailSheet> {
                     ),
                   ),
                   const SizedBox(width: 8),
-                  Chip(label: Text('Status: ${c.status}')),
+                  Chip(label: Text('${AppLocalizations.of(context).statusLabel}: ${c.status}')),
                 ],
               ),
               const SizedBox(height: 16),

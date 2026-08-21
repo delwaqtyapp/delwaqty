@@ -298,14 +298,14 @@ class _AdminHierarchyPageState extends ConsumerState<AdminHierarchyPage> {
         });
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Admin assigned')),
+            SnackBar(content: Text(l10n.adminAssigned)),
           );
           _loadData();
         }
       } catch (e) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Error: $e')),
+            SnackBar(content: Text(l10n.errorOccurred(e))),
           );
         }
       }
@@ -353,7 +353,7 @@ class _AdminHierarchyPageState extends ConsumerState<AdminHierarchyPage> {
                   onPressed: () {
                     Navigator.of(ctx).pop(selectedRole.toDb());
                   },
-                  child: Text('Save'),
+                  child: Text(l10n.save),
                 ),
               ],
             );
@@ -370,14 +370,14 @@ class _AdminHierarchyPageState extends ConsumerState<AdminHierarchyPage> {
         });
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Role updated')),
+            SnackBar(content: Text(l10n.roleUpdated)),
           );
           _loadData();
         }
       } catch (e) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Error: $e')),
+            SnackBar(content: Text(l10n.errorOccurred(e))),
           );
         }
       }
@@ -437,7 +437,7 @@ class _AdminHierarchyPageState extends ConsumerState<AdminHierarchyPage> {
       } catch (e) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Error: $e')),
+            SnackBar(content: Text(l10n.errorOccurred(e))),
           );
         }
       }

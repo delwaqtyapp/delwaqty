@@ -5848,4 +5848,83 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get bookingErrorRetry => 'حدث خطأ. حاول مرة أخرى.';
+
+  @override
+  String get reservations => 'الحجوزات';
+
+  @override
+  String get reset => 'إعادة تعيين';
+
+  @override
+  String get signOut => 'تسجيل الخروج';
+
+  @override
+  String get image => 'صورة';
+
+  @override
+  String get nameAr => 'الاسم (عربي)';
+
+  @override
+  String get nameEn => 'الاسم (إنجليزي)';
+
+  @override
+  String get sortOrder => 'ترتيب الفرز';
+
+  @override
+  String get actions => 'إجراءات';
+
+  @override
+  String get complete => 'إكمال';
+
+  @override
+  String get upload => 'رفع';
+
+  @override
+  String get uploading => 'جارٍ الرفع…';
+
+  @override
+  String get descendants => 'الفروع';
+
+  @override
+  String get self => 'نفسه';
+
+  @override
+  String get userApproved => 'تمت الموافقة على المستخدم بنجاح';
+
+  @override
+  String get userRejected => 'تم رفض المستخدم';
+
+  @override
+  String get adminAssigned => 'تم تعيين المشرف';
+
+  @override
+  String get roleUpdated => 'تم تحديث الدور';
+
+  @override
+  String get addCategory => 'إضافة فئة';
+
+  @override
+  String get deleteCategory => 'حذف الفئة';
+
+  @override
+  String deleteCategoryConfirm(Object name) {
+    return 'حذف \"$name\"؟ لا يمكن التراجع.';
+  }
+
+  @override
+  String get cancelReservationConfirm => 'هل أنت متأكد من إلغاء هذا الحجز؟';
+
+  @override
+  String get add => 'إضافة';
+
+  @override
+  String get documentUploaded => 'تم رفع المستند بنجاح';
+
+  @override
+  String get sequence => 'الترتيب';
+
+  @override
+  String errorOccurred(Object error) {
+    return 'خطأ: $error';
+  }
 }

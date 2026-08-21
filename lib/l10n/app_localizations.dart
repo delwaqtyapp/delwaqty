@@ -11293,6 +11293,156 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'An error occurred. Please try again.'**
   String get bookingErrorRetry;
+
+  /// No description provided for @reservations.
+  ///
+  /// In en, this message translates to:
+  /// **'Reservations'**
+  String get reservations;
+
+  /// No description provided for @reset.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset'**
+  String get reset;
+
+  /// No description provided for @signOut.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign out'**
+  String get signOut;
+
+  /// No description provided for @image.
+  ///
+  /// In en, this message translates to:
+  /// **'Image'**
+  String get image;
+
+  /// No description provided for @nameAr.
+  ///
+  /// In en, this message translates to:
+  /// **'Name (AR)'**
+  String get nameAr;
+
+  /// No description provided for @nameEn.
+  ///
+  /// In en, this message translates to:
+  /// **'Name (EN)'**
+  String get nameEn;
+
+  /// No description provided for @sortOrder.
+  ///
+  /// In en, this message translates to:
+  /// **'Sort order'**
+  String get sortOrder;
+
+  /// No description provided for @actions.
+  ///
+  /// In en, this message translates to:
+  /// **'Actions'**
+  String get actions;
+
+  /// No description provided for @complete.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete'**
+  String get complete;
+
+  /// No description provided for @upload.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload'**
+  String get upload;
+
+  /// No description provided for @uploading.
+  ///
+  /// In en, this message translates to:
+  /// **'Uploading…'**
+  String get uploading;
+
+  /// No description provided for @descendants.
+  ///
+  /// In en, this message translates to:
+  /// **'Descendants'**
+  String get descendants;
+
+  /// No description provided for @self.
+  ///
+  /// In en, this message translates to:
+  /// **'Self'**
+  String get self;
+
+  /// No description provided for @userApproved.
+  ///
+  /// In en, this message translates to:
+  /// **'User approved successfully'**
+  String get userApproved;
+
+  /// No description provided for @userRejected.
+  ///
+  /// In en, this message translates to:
+  /// **'User rejected'**
+  String get userRejected;
+
+  /// No description provided for @adminAssigned.
+  ///
+  /// In en, this message translates to:
+  /// **'Admin assigned'**
+  String get adminAssigned;
+
+  /// No description provided for @roleUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Role updated'**
+  String get roleUpdated;
+
+  /// No description provided for @addCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Add category'**
+  String get addCategory;
+
+  /// No description provided for @deleteCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete category'**
+  String get deleteCategory;
+
+  /// No description provided for @deleteCategoryConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete \"{name}\"? This cannot be undone.'**
+  String deleteCategoryConfirm(Object name);
+
+  /// No description provided for @cancelReservationConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to cancel this reservation?'**
+  String get cancelReservationConfirm;
+
+  /// No description provided for @add.
+  ///
+  /// In en, this message translates to:
+  /// **'Add'**
+  String get add;
+
+  /// No description provided for @documentUploaded.
+  ///
+  /// In en, this message translates to:
+  /// **'Document uploaded successfully'**
+  String get documentUploaded;
+
+  /// No description provided for @sequence.
+  ///
+  /// In en, this message translates to:
+  /// **'Order'**
+  String get sequence;
+
+  /// No description provided for @errorOccurred.
+  ///
+  /// In en, this message translates to:
+  /// **'Error: {error}'**
+  String errorOccurred(Object error);
 }
 
 class _AppLocalizationsDelegate

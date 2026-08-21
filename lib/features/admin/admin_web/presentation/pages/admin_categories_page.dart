@@ -9,6 +9,7 @@ import 'package:delwaqty/data/repositories/category_repository_impl.dart';
 import 'package:delwaqty/features/customer/home/domain/entities/platform_category.dart';
 import 'package:delwaqty/features/customer/home/domain/repositories/platform_category_repository.dart';
 import 'package:delwaqty/shared/widgets/design/premium_card.dart';
+import 'package:delwaqty/l10n/app_localizations.dart';
 
 final _allCategoriesProvider =
     FutureProvider.autoDispose<List<PlatformCategory>>((ref) async {
@@ -129,20 +130,21 @@ class _AdminCategoriesPageState extends ConsumerState<AdminCategoriesPage> {
   }
 
   Future<void> _deleteCategory(PlatformCategory cat) async {
+    final l10n = AppLocalizations.of(context);
     final confirm = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Delete Category'),
-        content: Text('Delete "${cat.name}"? This cannot be undone.'),
+        title: Text(l10n.deleteCategory),
+        content: Text(l10n.deleteCategoryConfirm(cat.name)),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(false),
-            child: const Text('Cancel'),
+            child: Text(l10n.cancel),
           ),
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(true),
             style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: const Text('Delete'),
+            child: Text(l10n.delete),
           ),
         ],
       ),
@@ -241,6 +243,7 @@ class _AdminCategoriesPageState extends ConsumerState<AdminCategoriesPage> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final categoriesAsync = ref.watch(_allCategoriesProvider);
 
     return Padding(
@@ -270,7 +273,7 @@ class _AdminCategoriesPageState extends ConsumerState<AdminCategoriesPage> {
               FilledButton.icon(
                 onPressed: _saving ? null : _addCategory,
                 icon: const Icon(Icons.add_rounded, size: 20),
-                label: const Text('Add Category'),
+                label: Text(l10n.addCategory),
                 style: FilledButton.styleFrom(
                   backgroundColor: AppColors.brandPurple,
                   shape: RoundedRectangleBorder(
@@ -301,7 +304,7 @@ class _AdminCategoriesPageState extends ConsumerState<AdminCategoriesPage> {
                     const SizedBox(height: 12),
                     OutlinedButton(
                       onPressed: _refresh,
-                      child: const Text('Retry'),
+                      child: Text(l10n.retry),
                     ),
                   ],
                 ),
@@ -348,13 +351,13 @@ class _AdminCategoriesPageState extends ConsumerState<AdminCategoriesPage> {
                         fontSize: 13,
                         color: Color(0xFF1A1035),
                       ),
-                      columns: const [
-                        DataColumn(label: Text('Image')),
-                        DataColumn(label: Text('الاسم (AR)')),
-                        DataColumn(label: Text('Name (EN)')),
-                        DataColumn(label: Text('Order')),
-                        DataColumn(label: Text('Active')),
-                        DataColumn(label: Text('Actions')),
+                      columns: [
+                        DataColumn(label: Text(l10n.image)),
+                        DataColumn(label: Text(l10n.nameAr)),
+                        DataColumn(label: Text(l10n.nameEn)),
+                        DataColumn(label: Text(l10n.sequence)),
+                        DataColumn(label: Text(l10n.active)),
+                        DataColumn(label: Text(l10n.actions)),
                       ],
                       rows: sorted.map((cat) {
                         return DataRow(cells: [
@@ -743,8 +746,9 @@ class _CategoryDialogState extends State<_CategoryDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return AlertDialog(
-      title: Text(_isEditing ? 'Edit Category' : 'Add Category'),
+      title: Text(_isEditing ? 'Edit Category' : l10n.addCategory),
       content: SizedBox(
         width: 420,
         child: SingleChildScrollView(
@@ -833,7 +837,7 @@ class _CategoryDialogState extends State<_CategoryDialog> {
               const SizedBox(height: 12),
               Row(
                 children: [
-                  const Text('Sort Order: '),
+                  Text('${l10n.sortOrder}: '),
                   const SizedBox(width: 8),
                   _SortOrderSpinner(
                     value: _sortOrder,
@@ -848,7 +852,7 @@ class _CategoryDialogState extends State<_CategoryDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Cancel'),
+          child: Text(l10n.cancel),
         ),
         FilledButton(
           onPressed: () {

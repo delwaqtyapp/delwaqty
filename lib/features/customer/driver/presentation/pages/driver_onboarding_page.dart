@@ -47,6 +47,7 @@ class _DriverOnboardingPageState extends State<DriverOnboardingPage> {
   }
 
   Future<void> _uploadLicense() async {
+    final l10n = AppLocalizations.of(context);
     if (_licenseImage == null) return;
     setState(() => _isUploading = true);
     try {
@@ -72,7 +73,7 @@ class _DriverOnboardingPageState extends State<DriverOnboardingPage> {
           _licenseError = null;
         });
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('License document uploaded successfully')),
+          SnackBar(content: Text(l10n.documentUploaded)),
         );
       }
     } catch (e) {
@@ -88,6 +89,7 @@ class _DriverOnboardingPageState extends State<DriverOnboardingPage> {
   }
 
   Future<void> _uploadVehicle() async {
+    final l10n = AppLocalizations.of(context);
     if (_vehicleImage == null) return;
     setState(() => _isUploading = true);
     try {
@@ -113,7 +115,7 @@ class _DriverOnboardingPageState extends State<DriverOnboardingPage> {
           _vehicleError = null;
         });
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Vehicle document uploaded successfully')),
+          SnackBar(content: Text(l10n.documentUploaded)),
         );
       }
     } catch (e) {
@@ -176,7 +178,7 @@ class _DriverOnboardingPageState extends State<DriverOnboardingPage> {
                     onPressed: () {
                       Navigator.of(context).pop();
                     },
-                    child: const Text('Complete'),
+                    child: Text(l10n.complete),
                   ),
           ],
         ),
@@ -192,6 +194,7 @@ class _DriverOnboardingPageState extends State<DriverOnboardingPage> {
     VoidCallback onPick,
     VoidCallback onUpload,
   ) {
+    final l10n = AppLocalizations.of(context);
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -254,7 +257,7 @@ class _DriverOnboardingPageState extends State<DriverOnboardingPage> {
                 TextButton.icon(
                   onPressed: onPick,
                   icon: const Icon(Icons.upload_file),
-                  label: Text('Upload'),
+                  label: Text(l10n.upload),
                 ),
                 if (!_isUploading)
                   ElevatedButton.icon(
@@ -266,7 +269,7 @@ class _DriverOnboardingPageState extends State<DriverOnboardingPage> {
                             child: CircularProgressIndicator(strokeWidth: 2),
                           )
                         : const Icon(Icons.arrow_upward),
-                    label: _isUploading ? const Text('Uploading...') : Text('Upload'),
+                    label: _isUploading ? Text(l10n.uploading) : Text(l10n.upload),
                   ),
               ],
             ),

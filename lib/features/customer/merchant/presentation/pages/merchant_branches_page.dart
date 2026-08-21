@@ -472,7 +472,7 @@ class _BranchFormSheetState extends ConsumerState<_BranchFormSheet> {
                     ),
                     const SizedBox(height: AppSpacing.lg),
                     SwitchListTile(
-                      title: const Text('Primary Branch'),
+                      title: Text(l10n.primaryBranch),
                       subtitle: Text(
                         _isPrimary ? 'Yes' : 'No',
                       ),

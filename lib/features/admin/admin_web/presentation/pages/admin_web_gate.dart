@@ -4,6 +4,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:delwaqty/core/auth/admin_access.dart';
 import 'package:delwaqty/core/theme/app_colors.dart';
 import 'package:delwaqty/features/admin/admin_web/presentation/pages/admin_web_shell.dart';
+import 'package:delwaqty/l10n/app_localizations.dart';
 
 enum AdminWebGateStatus { loading, notSignedIn, authorized, denied }
 
@@ -112,7 +113,8 @@ class _AdminWebLoading extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
+    final l10n = AppLocalizations.of(context);
+    return Scaffold(
       body: Center(
         child: CircularProgressIndicator(color: AppColors.brandPurple),
       ),
@@ -300,7 +302,7 @@ class AdminWebDeniedPage extends StatelessWidget {
                 OutlinedButton.icon(
                   onPressed: () => Supabase.instance.client.auth.signOut(),
                   icon: const Icon(Icons.logout_rounded),
-                  label: const Text('Sign out'),
+                  label: Text(l10n.signOut),
                 ),
               ],
             ),

@@ -160,6 +160,7 @@ class _MerchantDashboardPageState
   }
 
   Widget _buildQuickActions(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Card(
       child: Column(
         children: [
@@ -186,21 +187,21 @@ class _MerchantDashboardPageState
           const Divider(height: 1),
           ListTile(
             leading: const Icon(Icons.store_outlined),
-            title: const Text('Branches'),
+            title: Text(l10n.branches),
             trailing: const Icon(Icons.chevron_right_rounded),
             onTap: () => context.push('/merchant-dashboard/branches'),
           ),
           const Divider(height: 1),
           ListTile(
             leading: const Icon(Icons.calendar_month_outlined),
-            title: const Text('Reservations'),
+            title: Text(l10n.reservations),
             trailing: const Icon(Icons.chevron_right_rounded),
             onTap: () => context.push('/merchant-dashboard/reservations'),
           ),
           const Divider(height: 1),
           ListTile(
             leading: const Icon(Icons.rate_review_outlined),
-            title: const Text('Reviews'),
+            title: Text(l10n.reviews),
             trailing: const Icon(Icons.chevron_right_rounded),
             onTap: () => context.push('/merchant-dashboard/reviews'),
           ),

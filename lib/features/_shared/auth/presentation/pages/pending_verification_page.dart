@@ -331,7 +331,7 @@ class _PendingVerificationPageState
             height: 52,
             child: FilledButton(
               onPressed: _loadUser,
-              child: const Text('Retry'),
+              child: Text(l10n.retry),
             ),
           ),
           const Spacer(),

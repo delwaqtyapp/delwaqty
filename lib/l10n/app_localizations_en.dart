@@ -5886,4 +5886,84 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get bookingErrorRetry => 'An error occurred. Please try again.';
+
+  @override
+  String get reservations => 'Reservations';
+
+  @override
+  String get reset => 'Reset';
+
+  @override
+  String get signOut => 'Sign out';
+
+  @override
+  String get image => 'Image';
+
+  @override
+  String get nameAr => 'Name (AR)';
+
+  @override
+  String get nameEn => 'Name (EN)';
+
+  @override
+  String get sortOrder => 'Sort order';
+
+  @override
+  String get actions => 'Actions';
+
+  @override
+  String get complete => 'Complete';
+
+  @override
+  String get upload => 'Upload';
+
+  @override
+  String get uploading => 'Uploading…';
+
+  @override
+  String get descendants => 'Descendants';
+
+  @override
+  String get self => 'Self';
+
+  @override
+  String get userApproved => 'User approved successfully';
+
+  @override
+  String get userRejected => 'User rejected';
+
+  @override
+  String get adminAssigned => 'Admin assigned';
+
+  @override
+  String get roleUpdated => 'Role updated';
+
+  @override
+  String get addCategory => 'Add category';
+
+  @override
+  String get deleteCategory => 'Delete category';
+
+  @override
+  String deleteCategoryConfirm(Object name) {
+    return 'Delete \"$name\"? This cannot be undone.';
+  }
+
+  @override
+  String get cancelReservationConfirm =>
+      'Are you sure you want to cancel this reservation?';
+
+  @override
+  String get add => 'Add';
+
+  @override
+  String get documentUploaded => 'Document uploaded successfully';
+
+  @override
+  String get sequence => 'Order';
+
+  @override
+  String errorOccurred(Object error) {
+    return 'Error: $error';
+  }
 }

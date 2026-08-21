@@ -1745,7 +1745,7 @@ class _SanctionsSectionState extends ConsumerState<_SanctionsSection> {
     try {
       final client = ref.read(supabaseClientProvider);
       await client.rpc('issue_sanction', params: {
-        'p_user_id': widget.memberId,
+        'p_member_id': widget.memberId,
         'p_sanction_type': type,
         'p_reason': reason,
       });

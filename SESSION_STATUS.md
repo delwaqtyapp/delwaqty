@@ -65,16 +65,22 @@ New user request: re-verify with ALL device credentials (PIN/pattern/password + 
 - `lib/customer/app.dart`, `lib/admin/app.dart`
 - `lib/l10n/app_en.arb`, `lib/l10n/app_ar.arb`
 
-### NEXT TASK — SPRINT 97: BUTTON ↔ RPC AUDIT
+### SPRINT 97 (partial): BUTTON ↔ RPC AUDIT — results
 
-Full audit of every admin button against the actual DB RPCs ("ندقق في ربط كل زر ودوال الداتا بيز"). Scope:
+Read-only cross-check of all 93 `rpc(...)` calls in `lib/` against `CREATE FUNCTION` in `supabase/migrations/*.sql` (sub-agent "Manios"). **Every called RPC name resolves to a migration function — no missing/typo'd names.** Param-level findings:
 
-- Enumerate all `client.rpc('...')` calls in `lib/` and cross-check against migrations + live DB
-- Enumerate direct `.from('table').insert/update/delete` calls that RLS may block
-- Fix `admin_repository.dart` legacy `admin_users` table usage (should be users/admin_management)
-- Fix `AdminService.deleteUser` → route through `owner_delete_member`
-- Verify `issue_sanction` param names in member drawer (035 signature)
-- Environment note: `flutter analyze`/`flutter run` fail with "Building with plugins requires symlink support" (Windows Developer Mode off, not elevated). Build + `adb install` + `am start` + uiautomator/REST testing works.
+**Fixed (verified against SQL signatures, both APKs rebuild clean):**
+- `issue_sanction` @ `member_drawer.dart:1748` passed `p_user_id` → wrong (no overload). Changed to `p_member_id` (matches 035 `issue_sanction(p_member_id, ...)`). The other 2 call sites already used `p_member_id`.
+- `get_member_timeline` @ `supabase_member_data_source.dart:63` passed `p_cursor` → wrong. Changed to `p_before` (matches 035 `get_member_timeline(p_member_id, p_before, p_limit)`).
+- `member_ops_list` @ `supabase_member_data_source.dart:95,100` passed `p_service_type` (nonexistent) and `p_cursor_created_at` (nonexistent) → wrong. Changed to `p_service_category` and `p_cursor` (matches 049 `member_ops_list(..., p_service_category, ..., p_cursor, p_cursor_id, ...)`).
+
+**FALSE POSITIVES (do NOT change — verified overloads in `057_owner_delete_missing_admin_rpcs.sql`):**
+- `assign_admin_role` @ `admin_hierarchy_page.dart:295,367` uses `p_email`/`p_role` → matches 057 overload `assign_admin_role(p_email text, p_role text, p_reason)` (034 uuid overload also exists; PostgREST resolves by param types).
+- `assign_admin_region` @ `admin_hierarchy_page.dart:427` uses `p_email`/`p_region` → matches 057 overload `assign_admin_region(p_email text, p_region text, p_scope)` (resolves region by name).
+
+**Remaining (NOT done this pass — needs careful, separate refactor + live-DB verification; flagged as tech debt, not a runtime crash):**
+- `admin_repository.dart` legacy `admin_users` table direct access (lines 549 select, 581 insert, 607 update, 634 delete). Table still exists with RLS so it currently works, but modern stack uses `users`/`admin_management` + RPCs (`get_all_admins`, `create_admin_account`, `assign_admin_role`, `deactivate_admin`, `owner_delete_member`). `deleteUser` raw delete (634) bypasses SECURITY DEFINER — should route through a proper admin-lifecycle RPC. **Deferred:** blind refactor risks breaking the admin panel (field-shape mismatches, no `analyze`/`test` available here). Requires dedicated pass mapping return shapes + verifying RLS.
+- ~60 transport/delivery/ride/safety/platform-intelligence/notification RPCs confirmed present in migrations but their individual `params:` keys were not diffed line-by-line — recommend a scripted RPC-signature linter as follow-up.
 
 ### Build commands
 ```powershell
@@ -84,6 +90,8 @@ flutter build apk --debug --flavor customer --target lib/customer/main.dart --da
 adb -s A3SQUT5A28003808 install -r build\app\outputs\flutter-apk\app-admin-debug.apk
 adb -s A3SQUT5A28003808 shell am start -n com.delwaqty.admin/com.delwaqty.app.MainActivity
 ```
+
+### NEXT TASK — admin_users legacy refactor (careful, separate pass)
 
 ---
 

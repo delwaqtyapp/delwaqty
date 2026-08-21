@@ -4,7 +4,28 @@
 
 ---
 
-## Current Task — SPRINT 101: INDEPENDENT DELWAQTY PROVIDER APP (extraction milestone 1) — IN PROGRESS
+## Current Task — SPRINT 104: PROVIDER FINANCIAL SUBSYSTEM (backend contract) — IN PROGRESS
+
+**Status: Additive backend contract delivered (`supabase/migrations/065_provider_financial_subsystem.sql`, committed, pushed master).** PHASE 1 audit complete: confirmed reuse of existing `wallets`, `wallet_transactions`, `driver_earnings`, `withdrawal_requests`, `platform_commissions` (7%/3% authoritative), `commission_rules`, `platform_*` financial-intelligence RPCs, `user_region_preferences` (account→region). No duplicate tables. New additive tables + RPCs for Grace, Top-Up, Regional Collection, Platform Settlement, Platform/Admin Receiving Accounts.
+
+**What was done this session (financial backend contract)**
+- **Grace (PHASE 3–5,10):** `grace_accounts` + `grace_audit_log`; `get_my_grace()`, `evaluate_order_eligibility(p_amount)` (structured OK / INSUFFICIENT_BALANCE / GRACE_EXHAUSTED), `consume_grace(p_order_id,p_amount)` (atomic row-lock, structured code), `release_grace(p_order_id)` (reversal on cancel/refund), `admin_set_grace(p_user_id,p_new_limit,p_reason)` (region-scoped admin / owner; full audit). Grace is server-derived; never hardcoded.
+- **Top-Up (PHASE 6–11):** `topup_requests` (PENDING on create, NO wallet credit); `resolve_receiver_for_account()` resolves Regional Admin receiving wallet by account region with fallback to owner platform receiving; `create_topup_request(...)` snapshots receiver; `approve_topup_request(p_request_id)` transactional (lock → verify pending → self-approval block → credit wallet + ledger → immutable `regional_collections` → mark approved → audit → notify); `reject_topup_request(...)`; list RPCs.
+- **Regional Collection (PHASE 11–13):** `regional_collections` immutable ledger (UNIQUE per topup_request_id → idempotent approval); `get_region_collection_summary()` derives today/week/month/total/pending/approved/rejected/outstanding (collections − approved settlements) — no editable totals.
+- **Settlement (PHASE 14–15):** `platform_settlements` (Regional Admin → Platform); `submit_settlement_request(...)` (region from admin assignment); `approve_settlement_request(...)` (owner-only, self-approval block, marks collections settled); `reject_settlement_request(...)`. Collections never deleted.
+- **Platform Receiving Accounts (PHASE 17):** `platform_receiving_accounts` (owner-only: cash/instapay/vodafone_cash/bank_transfer/other) + `admin_receiving_wallets` (per-region admin config); owner/admin RPCs. Customer never sees these; Driver/Provider only see resolved receiver for their top-up.
+- **Financial summary (PHASE 21):** `get_my_financial_summary()` composes wallet balance + grace + effective commission rate (reuses `get_commission_rate`) + pending top-ups + recent transactions. Owner/Admin centers reuse existing `platform_*` RPCs plus new collection/settlement summaries.
+- **Security (PHASE 33–35):** all RPCs SECURITY DEFINER, `search_path = public, pg_temp`; RLS on every new table; region-scope via `is_admin_for_region`/`_region_in_scope`; owner-only via `_is_owner_uid`; self-approval protection; GRANT to authenticated/anon/service_role (authz enforced inside each RPC). No `service_role` in Flutter.
+
+**Known gaps (remaining financial work — NOT yet done):**
+- Flutter layer (models/repository/providers/screens) for Provider/Driver Financial Center, Top-Up flow, Grace display, Admin Top-Up Center / Collections / Settlements / Grace Mgmt / Receiving Wallets, Owner global center + platform receiving config — PHASES 21–24 not built.
+- Provider Capability Engine (25), Availability (26), Verification (27), Documents (28), Notification remap (29), Realtime (30), Localization sweep (32) — not built.
+- Live DB application + functional verification of new RPCs — 🟡 ENVIRONMENT BLOCKED (no staging DB in build env; migration authored from static analysis, review on staging before prod).
+- Four-app regression + device smoke for financial flows — 🟡 ENVIRONMENT BLOCKED.
+
+---
+
+## Current Task — SPRINT 101: INDEPENDENT DELWAQTY PROVIDER APP (extraction milestone 1) — COMPLETED (committed 5b27dfd + a9a9a05, pushed master)
 
 **Status: Provider merchant module PHYSICALLY EXTRACTED from Customer + committed (`5b27dfd`, pushed master).** `lib/features/provider/merchant/**` holds the operational UI; `lib/provider/{main,app,app_router,module_registry}.dart` + `provider` flavor. All four apps build; **891/891 tests pass**; 0 analyze errors; Provider APK rebuilds green.
 

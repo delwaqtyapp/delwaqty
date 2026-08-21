@@ -7,6 +7,7 @@ import 'package:delwaqty/core/router/app_router.dart';
 import 'package:delwaqty/core/theme/app_theme.dart';
 import 'package:delwaqty/core/theme/theme_mode_provider.dart';
 import 'package:delwaqty/features/_shared/auth/presentation/auth_provider.dart';
+import 'package:delwaqty/features/_shared/device_lock/device_lock_provider.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 import 'package:delwaqty/services/deep_link/deep_link_service.dart';
 import 'package:delwaqty/services/push_notification/push_notification_service.dart';
@@ -22,8 +23,9 @@ class _AppState extends ConsumerState<App> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (!mounted) return;
+      await ref.read(deviceLockProvider.notifier).init();
       final authNotifier = ref.read(authStateProvider.notifier);
       authNotifier.startAuthListener();
       authNotifier.checkAuthStatus();

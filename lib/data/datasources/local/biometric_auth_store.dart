@@ -82,6 +82,12 @@ class BiometricAuthStore {
     return credentialsFor(userId);
   }
 
+  Future<String?> activeUserId() async {
+    final userId = await _secureStorage.read(key: _activeUserKey);
+    if (userId == null || userId.isEmpty) return null;
+    return userId;
+  }
+
   Future<bool> hasAnyCredentials() async {
     final userIds = await allUserIds();
     for (final uid in userIds) {

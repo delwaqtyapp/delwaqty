@@ -10795,6 +10795,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'All caught up!'**
   String get allCaughtUp;
+
+  /// No description provided for @deviceUnlockTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlock App'**
+  String get deviceUnlockTitle;
+
+  /// No description provided for @deviceUnlockSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in with your fingerprint, device PIN, or face'**
+  String get deviceUnlockSubtitle;
+
+  /// No description provided for @deviceUnlockAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlock'**
+  String get deviceUnlockAction;
+
+  /// No description provided for @deviceUnlockAnotherAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Use another account'**
+  String get deviceUnlockAnotherAccount;
+
+  /// No description provided for @deviceUnlockFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlock failed, try again'**
+  String get deviceUnlockFailed;
+
+  /// No description provided for @deviceUnlockLockedOut.
+  ///
+  /// In en, this message translates to:
+  /// **'Too many device attempts, use your password'**
+  String get deviceUnlockLockedOut;
+
+  /// No description provided for @deviceUnlockNotEnrolled.
+  ///
+  /// In en, this message translates to:
+  /// **'No biometric or device credential enrolled'**
+  String get deviceUnlockNotEnrolled;
+
+  /// No description provided for @deviceUnlockStale.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved credentials are invalid, sign in with your password'**
+  String get deviceUnlockStale;
 }
 
 class _AppLocalizationsDelegate

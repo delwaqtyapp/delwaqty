@@ -5,10 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:local_auth/local_auth.dart';
-import 'package:delwaqty/data/datasources/local/biometric_auth_store.dart';
-import 'package:delwaqty/features/_shared/auth/domain/auth_state.dart';
-import 'package:delwaqty/features/_shared/auth/presentation/auth_provider.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 
 class SplashPage extends ConsumerStatefulWidget {
@@ -73,77 +69,9 @@ class _SplashPageState extends ConsumerState<SplashPage>
   void _navigate() async {
     if (!mounted || _navigated) return;
     _navigated = true;
-    final authState = ref.read(authStateProvider);
-    if (authState is! AuthAuthenticated) {
-      await _tryBiometricAutoLogin();
-    }
-    if (!mounted) return;
+    // The router enforces the App Lock gate (device-unlock screen) when a
+    // locally stored account exists, so we just hand off to the login route.
     context.go('/login');
-  }
-
-  Future<void> _tryBiometricAutoLogin() async {
-    final store = ref.read(biometricAuthStoreProvider);
-    final hasCreds = await store.hasAnyCredentials();
-    if (!hasCreds || !mounted) return;
-
-    final l10n = AppLocalizations.of(context);
-    try {
-      final localAuth = LocalAuthentication();
-      var didAuth = false;
-      try {
-        didAuth = await localAuth.authenticate(
-          localizedReason: l10n.biometricReason,
-          biometricOnly: true,
-        );
-      } on Exception {
-        didAuth = await localAuth.authenticate(
-          localizedReason: l10n.biometricReason,
-          biometricOnly: false,
-        );
-      }
-      if (!didAuth || !mounted) return;
-
-      final credentials = await store.activeCredentials();
-      final fallback = credentials ?? await _pickFirstCredential(store);
-      if (fallback == null) {
-        await store.clearAll();
-        return;
-      }
-
-      await ref.read(authStateProvider.notifier).signIn(
-            email: fallback.email,
-            password: fallback.password,
-          );
-      final next = ref.read(authStateProvider);
-      if (next is AuthError || next is AuthUnauthenticated) {
-        await ref
-            .read(authStateProvider.notifier)
-            .invalidateBiometricCredentials(userId: fallback.userId);
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(l10n.biometricStaleCredentials),
-              behavior: SnackBarBehavior.floating,
-            ),
-          );
-        }
-      }
-    } on Exception {
-      await store.clearAll();
-    } catch (_) {
-      await store.clearAll();
-    }
-  }
-
-  Future<BiometricCredentials?> _pickFirstCredential(
-    BiometricAuthStore store,
-  ) async {
-    final userIds = await store.allUserIds();
-    for (final uid in userIds) {
-      final creds = await store.credentialsFor(uid);
-      if (creds != null) return creds;
-    }
-    return null;
   }
 
   @override

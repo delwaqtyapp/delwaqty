@@ -5633,4 +5633,32 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get allCaughtUp => 'All caught up!';
+
+  @override
+  String get deviceUnlockTitle => 'Unlock App';
+
+  @override
+  String get deviceUnlockSubtitle =>
+      'Sign in with your fingerprint, device PIN, or face';
+
+  @override
+  String get deviceUnlockAction => 'Unlock';
+
+  @override
+  String get deviceUnlockAnotherAccount => 'Use another account';
+
+  @override
+  String get deviceUnlockFailed => 'Unlock failed, try again';
+
+  @override
+  String get deviceUnlockLockedOut =>
+      'Too many device attempts, use your password';
+
+  @override
+  String get deviceUnlockNotEnrolled =>
+      'No biometric or device credential enrolled';
+
+  @override
+  String get deviceUnlockStale =>
+      'Saved credentials are invalid, sign in with your password';
 }

@@ -37,6 +37,34 @@
 - 53 files encoding-repaired + 352 BOMs stripped (lib/, supabase/migrations, test/, ROADMAP.md)
 - `SESSION_STATUS.md` — this update
 
+### Device Lock / App Lock feature (in progress — SESSION 68)
+
+New user request: re-verify with ALL device credentials (PIN/pattern/password + face + fingerprint) on every **cold start**, dedicated App Lock screen, both apps, per saved account.
+
+**Implemented:** `device_lock_provider.dart` (cold-start `init()` sets `unlocked=false` when `hasAnyCredentials()`), `device_unlock_page.dart` (lists saved accounts, `local_auth.authenticate(biometricOnly:false)` → sign-in via stored creds → `markUnlocked()`), lock gate in `app_router.dart` + `admin_router.dart` `redirect`, `/device-unlock` route, `splash_page.dart` auto-biometric removed (router enforces lock), `login_page.dart` `markUnlocked()` on sign-in, `biometric_auth_store.activeUserId()`, 8 l10n keys (deviceUnlock*).
+
+**Audit (read-only sub-agent) + fixes applied:**
+- **C1 (CRITICAL):** lock gate redirected *all* non-`/device-unlock` routes incl. `/login` → "Use another account" + password escape hatch dead → permanent lockout. Fixed: exempt `isAuthRoute` (login/register/forgot-password) in both routers.
+- **M1:** `clearForUser` wiped creds on *any* `AuthError` (incl. network). Fixed: only on credential error ("invalid login credentials").
+- **M2:** zero-account trap resolved by C1 (now `/login` reachable).
+- **M3:** cold-start bypass window before `init()` — low impact (splash delay); accepted.
+- **m1:** removed redundant `isAdmin ? Color : Color` ternary.
+- **m3:** correct unlock destination via `user.isAdmin` (added `admin_access.dart` import for the `isAdmin` extension getter).
+- **m4:** `init()` now explicitly sets `DeviceLockState(unlocked:false, hasDeviceAccount:hasCreds)`.
+- Verified: all 8 l10n keys valid in both arb files; `refreshListenable` bump mechanism correct; backgrounding does NOT re-lock (spec).
+
+**Build:** both APKs rebuild clean (`--flavor customer` + `--flavor admin`). `flutter analyze` still blocked (Dev Mode off). On-device unlock needs physical credential (PIN/face/fingerprint) — not simulatable via adb; UI login seeding blocked by adb `input text` dropping `@`/digits.
+
+### Files modified (device lock)
+- `lib/features/_shared/device_lock/device_lock_provider.dart`
+- `lib/features/_shared/device_lock/presentation/device_unlock_page.dart`
+- `lib/core/router/app_router.dart`, `lib/core/router/admin_router.dart`
+- `lib/features/customer/splash/presentation/pages/splash_page.dart`
+- `lib/features/_shared/auth/presentation/pages/login_page.dart`
+- `lib/data/datasources/local/biometric_auth_store.dart`
+- `lib/customer/app.dart`, `lib/admin/app.dart`
+- `lib/l10n/app_en.arb`, `lib/l10n/app_ar.arb`
+
 ### NEXT TASK — SPRINT 97: BUTTON ↔ RPC AUDIT
 
 Full audit of every admin button against the actual DB RPCs ("ندقق في ربط كل زر ودوال الداتا بيز"). Scope:

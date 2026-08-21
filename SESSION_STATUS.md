@@ -126,7 +126,48 @@ adb -s A3SQUT5A28003808 install -r build\app\outputs\flutter-apk\app-admin-debug
 adb -s A3SQUT5A28003808 shell am start -n com.delwaqty.admin/com.delwaqty.app.MainActivity
 ```
 
-### NEXT TASK — admin_users legacy refactor (careful, separate pass)
+### CURRENT TASK — SPRINT 98: MODERN ADMIN MANAGEMENT CENTER (in progress)
+
+**Status:** Backend contract + Flutter module implemented; both APKs build; docs
+written. **Not yet committed.** Live-DB / analyzer / physical-device verification
+pending (environment-limited → 🟡).
+
+**Delivered**
+- SQL `059_admin_management_center_contract.sql`: extended `get_all_admins()` /
+  `get_admin_profile(p_email)` (backward compatible, adds `id`/`full_name`/
+  `region_id`/`scope`/`supervisor_id`); new `get_admin_permissions`,
+  `get_admin_audit_history`, `reactivate_admin` (+`_admin_exec_reactivate`). All
+  SECURITY DEFINER, authorized = owner OR target-self OR `is_supervisor_of`,
+  region-contained.
+- Edge Function `supabase/functions/create-admin/`: verifies caller JWT +
+  `is_active_admin_uid`, creates Auth identity via service_role Admin API, promotes
+  via `_admin_exec_create`. **service_role key never reaches Flutter.**
+- Flutter module `lib/features/admin_management/` (domain/data/presentation);
+  routes `/admin/admins` + `/admin/admins/:id`; sidebar + quick-action repointed.
+- Legacy `admin_users_page` (mobile + web) **deleted**; table kept DORMANT.
+- 73 Arabic+English l10n keys (independent admin locale). `last_login` documented
+  as NOT TRACKED (UI shows "Not tracked", no fabrication).
+- Build: admin + customer APK both succeeded.
+
+**Open / blocked**
+- 🟡 Live-DB verification of 059 + Edge Function (no DB access here).
+- 🟡 `flutter analyze` / `flutter test` blocked (Windows Dev Mode off) — kernel
+  compile of both APKs used as proxy.
+- ⚪ Automated tests not authored (env can't run them).
+- 🟡 Physical-device run not performed.
+- 🟡 Dormant `admin_users` Dart dead code (`admin_repository`/`admin_service`/
+  `adminUsersProvider`) pending dedicated cleanup.
+
+**Files modified (this sprint)**
+- `supabase/migrations/059_admin_management_center_contract.sql` (new)
+- `supabase/functions/create-admin/index.ts` (new)
+- `lib/features/admin_management/**` (new module)
+- `lib/features/admin/admin_module.dart`, `admin_shell.dart`,
+  `admin_web/.../admin_web_shell.dart`, `admin_quick_actions_page.dart`
+- `lib/l10n/app_en.arb`, `lib/l10n/app_ar.arb`
+- deleted `admin_users_page.dart` (mobile + web)
+- `docs/HANDOFF/SPRINT_98_ADMIN_MANAGEMENT_AUDIT.md` (new),
+  `docs/HANDOFF/SPRINT_98_ADMIN_MANAGEMENT_FINAL.md` (new)
 
 ---
 

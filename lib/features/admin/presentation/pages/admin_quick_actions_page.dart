@@ -57,7 +57,7 @@ class AdminQuickActionsPage extends StatelessWidget {
         l10n.adminPlatformSection,
         const Color(0xFF34C759),
         [
-          _ActionData(l10n.adminUsersPage, Icons.group_rounded, const Color(0xFF4A90D9), '/admin/users'),
+          _ActionData(l10n.adminMgmtList, Icons.group_rounded, const Color(0xFF4A90D9), '/admin/admins'),
           _ActionData(l10n.adminMerchants, Icons.storefront_rounded, const Color(0xFF34C759), '/admin/merchants'),
         ],
       ),

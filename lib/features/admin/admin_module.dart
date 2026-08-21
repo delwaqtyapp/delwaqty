@@ -3,7 +3,8 @@ import 'package:go_router/go_router.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 import 'package:delwaqty/core/module/feature_module.dart';
 import 'package:delwaqty/features/admin/presentation/pages/platform_intelligence_dashboard.dart';
-import 'package:delwaqty/features/admin/presentation/pages/admin_users_page.dart';
+import 'package:delwaqty/features/admin_management/presentation/pages/admin_management_list_page.dart';
+import 'package:delwaqty/features/admin_management/presentation/pages/admin_profile_page.dart';
 import 'package:delwaqty/features/admin/presentation/pages/admin_merchants_page.dart';
 import 'package:delwaqty/features/admin/presentation/pages/admin_orders_page.dart';
 import 'package:delwaqty/features/admin/presentation/pages/admin_settings_page.dart';
@@ -93,8 +94,22 @@ class AdminModule extends FeatureModule {
           _adminPage(const PlatformIntelligenceDashboard()),
       routes: [
         GoRoute(
-          path: 'users',
-          pageBuilder: (context, state) => _adminPage(const AdminUsersPage()),
+          path: 'admins',
+          pageBuilder: (context, state) =>
+              _adminPage(const AdminManagementListPage()),
+          routes: [
+            GoRoute(
+              path: ':id',
+              pageBuilder: (context, state) {
+                final id = state.pathParameters['id']!;
+                return _adminPage(
+                  AdminManagementProfilePage(adminId: id),
+                  showFab: false,
+                  keySuffix: id,
+                );
+              },
+            ),
+          ],
         ),
         GoRoute(
           path: 'merchants',

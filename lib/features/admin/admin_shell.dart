@@ -168,9 +168,9 @@ final List<_AdminNavGroup> _adminGroups = [
     label: (l) => l.adminPlatformSection,
     items: [
       _AdminNavItem(
-        path: '/admin/users',
+        path: '/admin/admins',
         icon: Icons.group_rounded,
-        label: (l) => l.adminUsersPage,
+        label: (l) => l.adminMgmtList,
       ),
       _AdminNavItem(
         path: '/admin/merchants',

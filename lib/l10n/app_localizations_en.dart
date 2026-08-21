@@ -5661,4 +5661,223 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get deviceUnlockStale =>
       'Saved credentials are invalid, sign in with your password';
+
+  @override
+  String get adminMgmtList => 'Admin Management';
+
+  @override
+  String get adminMgmtRefresh => 'Refresh';
+
+  @override
+  String get adminMgmtCreate => 'Create Admin';
+
+  @override
+  String get adminMgmtSearch => 'Search admins...';
+
+  @override
+  String get adminMgmtFilterRole => 'Role';
+
+  @override
+  String get adminMgmtFilterStatus => 'Status';
+
+  @override
+  String get adminMgmtFilterRegion => 'Region';
+
+  @override
+  String get adminMgmtAll => 'All';
+
+  @override
+  String get adminMgmtRoleOwner => 'Owner';
+
+  @override
+  String get adminMgmtRoleAdmin => 'Admin';
+
+  @override
+  String get adminMgmtStatusActive => 'Active';
+
+  @override
+  String get adminMgmtStatusInactive => 'Inactive';
+
+  @override
+  String get adminMgmtSortCreated => 'Newest';
+
+  @override
+  String get adminMgmtSortName => 'Name';
+
+  @override
+  String get adminMgmtSortRole => 'Role';
+
+  @override
+  String get adminMgmtRegion => 'Region';
+
+  @override
+  String get adminMgmtUnknown => 'Unknown';
+
+  @override
+  String get adminMgmtPage => 'Page';
+
+  @override
+  String get adminMgmtNoAdmins => 'No admins found';
+
+  @override
+  String get adminMgmtFailed => 'Operation failed';
+
+  @override
+  String get adminMgmtCreateTitle => 'Create Admin Account';
+
+  @override
+  String get adminMgmtFullName => 'Full name';
+
+  @override
+  String get adminMgmtEmail => 'Email';
+
+  @override
+  String get adminMgmtFullNameRequired => 'Full name is required';
+
+  @override
+  String get adminMgmtEmailInvalid => 'Enter a valid email';
+
+  @override
+  String get adminMgmtPassword => 'Password';
+
+  @override
+  String get adminMgmtPasswordHint => 'At least 8 characters';
+
+  @override
+  String get adminMgmtSelectSupervisor => 'Select supervisor';
+
+  @override
+  String get adminMgmtSelectRegion => 'Select region';
+
+  @override
+  String get adminMgmtNone => 'None';
+
+  @override
+  String get adminMgmtCancel => 'Cancel';
+
+  @override
+  String get adminMgmtCreateSuccess => 'Admin account created';
+
+  @override
+  String get adminMgmtProfile => 'Admin Profile';
+
+  @override
+  String get adminMgmtIdentity => 'Identity';
+
+  @override
+  String get adminMgmtAccountStatus => 'Account Status';
+
+  @override
+  String get adminMgmtLastActivity => 'Last activity';
+
+  @override
+  String get adminMgmtNotTracked => 'Not tracked';
+
+  @override
+  String get adminMgmtHierarchy => 'Hierarchy';
+
+  @override
+  String get adminMgmtSupervisor => 'Supervisor';
+
+  @override
+  String get adminMgmtChangeSupervisor => 'Change supervisor';
+
+  @override
+  String get adminMgmtRegionScope => 'Region Scope';
+
+  @override
+  String get adminMgmtScopeSelf => 'Self only';
+
+  @override
+  String get adminMgmtScopeDescendants => 'Self + descendants';
+
+  @override
+  String get adminMgmtAssignRegion => 'Assign region';
+
+  @override
+  String get adminMgmtPermissions => 'Permissions';
+
+  @override
+  String get adminMgmtEffective => 'Effective permissions';
+
+  @override
+  String get adminMgmtGranted => 'Explicitly granted';
+
+  @override
+  String get adminMgmtGrant => 'Grant';
+
+  @override
+  String get adminMgmtRevoke => 'Revoke';
+
+  @override
+  String get adminMgmtAudit => 'Audit History';
+
+  @override
+  String get adminMgmtNoAudit => 'No audit history';
+
+  @override
+  String get adminMgmtDeactivate => 'Deactivate';
+
+  @override
+  String get adminMgmtReactivate => 'Reactivate';
+
+  @override
+  String get adminMgmtConfirm => 'Confirm';
+
+  @override
+  String get adminMgmtReason => 'Reason';
+
+  @override
+  String get adminMgmtReasonHint => 'Provide a reason for this action';
+
+  @override
+  String get adminMgmtId => 'ID';
+
+  @override
+  String get adminMgmtStatus => 'Status';
+
+  @override
+  String get adminMgmtScope => 'Scope';
+
+  @override
+  String get adminMgmtNotFound => 'Admin not found';
+
+  @override
+  String get adminMgmtAssignRole => 'Assign role';
+
+  @override
+  String get adminMgmtSelectRole => 'Select role';
+
+  @override
+  String get adminMgmtRoleUpdated => 'Role updated';
+
+  @override
+  String get adminMgmtGrantedUpdated => 'Permissions updated';
+
+  @override
+  String get adminMgmtNoGrants => 'No explicit grants to revoke';
+
+  @override
+  String get adminMgmtRole => 'Role';
+
+  @override
+  String get adminMgmtRoleLabel => 'Role';
+
+  @override
+  String get adminMgmtCreatedAt => 'Created at';
+
+  @override
+  String get adminMgmtActions => 'Actions';
+
+  @override
+  String get adminMgmtDeactivated => 'Admin deactivated';
+
+  @override
+  String get adminMgmtReactivated => 'Admin reactivated';
+
+  @override
+  String get adminMgmtSupervisorUpdated => 'Supervisor updated';
+
+  @override
+  String get adminMgmtRegionUpdated => 'Region updated';
 }

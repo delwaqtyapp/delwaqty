@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:delwaqty/features/admin/member_management/presentation/member_providers.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 import 'package:delwaqty/shared/widgets/premium_empty_state.dart';
@@ -1240,7 +1241,7 @@ class _EarningsCommissionsSection extends ConsumerWidget {
                   ),
                   StatCard(
                     title: l10n.commissionRate,
-                    value: '${(commissionRate * 100).toStringAsFixed(0)}%',
+                    value: '${commissionRate.toStringAsFixed(0)}%',
                     icon: Icons.percent_rounded,
                     color: Colors.amber,
                   ),
@@ -2012,7 +2013,14 @@ class _DocumentsSection extends StatelessWidget {
             ),
             trailing: IconButton(
               icon: const Icon(Icons.open_in_new_rounded, size: 16),
-              onPressed: () {},
+              onPressed: () async {
+                final url = doc['url'] as String?;
+                if (url == null || url.isEmpty) return;
+                final uri = Uri.parse(url);
+                if (await canLaunchUrl(uri)) {
+                  await launchUrl(uri, mode: LaunchMode.externalApplication);
+                }
+              },
               visualDensity: VisualDensity.compact,
             ),
           );

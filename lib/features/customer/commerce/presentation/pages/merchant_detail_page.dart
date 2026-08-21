@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:go_router/go_router.dart';
 import 'package:delwaqty/features/customer/commerce/commerce_module.dart';
 import 'package:delwaqty/features/customer/commerce/domain/entities/merchant.dart';
@@ -382,18 +383,6 @@ class _MerchantDetailPageState extends ConsumerState<MerchantDetailPage> {
         child: Row(
           children: [
             _ActionButton(
-              icon: Icons.call_outlined,
-              label: l10n.call,
-              onTap: () {},
-            ),
-            const SizedBox(width: 8),
-            _ActionButton(
-              icon: Icons.chat_outlined,
-              label: l10n.chat,
-              onTap: () {},
-            ),
-            const SizedBox(width: 8),
-            _ActionButton(
               icon: Icons.share_outlined,
               label: l10n.shareMerchant,
               onTap: () {
@@ -412,7 +401,18 @@ class _MerchantDetailPageState extends ConsumerState<MerchantDetailPage> {
             _ActionButton(
               icon: Icons.directions_outlined,
               label: l10n.directions,
-              onTap: () {},
+              onTap: () async {
+                final uri = Uri.parse(
+                  'https://www.google.com/maps/dir/?api=1&destination=${merchant.latitude},${merchant.longitude}',
+                );
+                if (await canLaunchUrl(uri)) {
+                  await launchUrl(uri, mode: LaunchMode.externalApplication);
+                } else if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text(l10n.somethingWentWrong)),
+                  );
+                }
+              },
             ),
             const Spacer(),
             FavoriteButton(

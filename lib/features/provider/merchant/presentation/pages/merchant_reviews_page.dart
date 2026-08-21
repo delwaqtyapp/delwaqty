@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:delwaqty/features/provider/merchant/presentation/providers/merchant_providers.dart';
 import 'package:delwaqty/core/extensions/context_extensions.dart';
 import 'package:delwaqty/features/customer/commerce/commerce_module.dart';
 import 'package:delwaqty/features/customer/commerce/domain/entities/review.dart';
@@ -12,7 +13,7 @@ import 'package:delwaqty/core/theme/app_spacing.dart';
 import 'package:delwaqty/core/theme/app_text_styles.dart';
 import 'package:delwaqty/shared/widgets/design/premium_card.dart';
 
-final _merchantIdProvider = Provider<String>((_) => 'current-merchant-id');
+final _merchantIdProvider = providerMerchantIdProvider;
 
 final _reviewsProvider = FutureProvider<List<Review>>((ref) async {
   final repo = ref.watch(reviewRepositoryProvider);

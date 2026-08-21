@@ -1,8 +1,8 @@
 import 'package:delwaqty/core/errors/exceptions.dart';
-import 'package:delwaqty/features/customer/merchant/data/datasources/remote/supabase_merchant_dashboard_data_source.dart';
-import 'package:delwaqty/features/customer/merchant/domain/entities/merchant_order.dart';
-import 'package:delwaqty/features/customer/merchant/domain/entities/merchant_stats.dart';
-import 'package:delwaqty/features/customer/merchant/domain/repositories/merchant_dashboard_repository.dart';
+import 'package:delwaqty/features/provider/merchant/data/datasources/remote/supabase_merchant_dashboard_data_source.dart';
+import 'package:delwaqty/features/provider/merchant/domain/entities/merchant_order.dart';
+import 'package:delwaqty/features/provider/merchant/domain/entities/merchant_stats.dart';
+import 'package:delwaqty/features/provider/merchant/domain/repositories/merchant_dashboard_repository.dart';
 
 class MerchantDashboardRepositoryImpl implements MerchantDashboardRepository {
   MerchantDashboardRepositoryImpl(this._dataSource);

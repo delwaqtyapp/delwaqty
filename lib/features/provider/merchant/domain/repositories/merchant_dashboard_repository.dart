@@ -1,5 +1,5 @@
-import 'package:delwaqty/features/customer/merchant/domain/entities/merchant_order.dart';
-import 'package:delwaqty/features/customer/merchant/domain/entities/merchant_stats.dart';
+import 'package:delwaqty/features/provider/merchant/domain/entities/merchant_order.dart';
+import 'package:delwaqty/features/provider/merchant/domain/entities/merchant_stats.dart';
 
 abstract interface class MerchantDashboardRepository {
   Future<MerchantStats> getMerchantStats(String merchantId);

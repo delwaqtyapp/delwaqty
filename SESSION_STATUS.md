@@ -25,6 +25,24 @@
 
 ---
 
+## Current Task — SPRINT 105: PROVIDER FINANCIAL CENTER (Flutter client) — IN PROGRESS
+
+**Status: Provider Financial Center Flutter module built and committed (`50...` → sprint 105, pushed master).** Wires the sprint-104 backend contract into the Provider app. `flutter analyze` = 0 errors (1 deprecation note, non-blocking); **895/895 tests pass** (891 + 4 new entity tests); Provider debug APK builds green.
+
+**What was done this session (Provider Financial Center, PHASE 21 foundation)**
+- `lib/features/provider/financial/**`: entities (`financial_entities.dart` — `GraceInfo`, `WalletTransaction`, `TopupRequest`, `FinancialSummary`), `ProviderFinancialDataSource` (calls RPCs `get_my_financial_summary`, `get_my_grace`, `get_my_topup_requests`, `resolve_receiver_for_account`, `create_topup_request`), repository interface + impl (ServerException mapping), and Riverpod providers (`financialSummaryProvider`, `graceProvider`, `topupRequestsProvider`, `receiverProvider`).
+- `FinancialModule` (nav module, `isNavModule=true`, `navPriority=20`) adds a Financial Center bottom-nav tab hosting `/provider-financial-center` + `/provider-financial-center/topup`. Registered in `lib/provider/module_registry.dart`.
+- `FinancialCenterPage` shows balance, effective commission rate, pending top-ups, recent transactions, grace (used/limit/remaining), and top-up history. `TopupRequestPage` submits a top-up request (amount/method/reference/message) and refreshes on success.
+- All values are backend-derived (no hardcoded balances/percentages). Commission rate comes from `get_commission_rate` via `get_my_financial_summary`; not hardcoded to 7%.
+
+**Known gaps (remaining financial Flutter work — NOT yet built):**
+- Driver Financial Center (PHASE 22), Admin Top-Up Center / Collections / Settlements / Grace Mgmt / Receiving Wallets (PHASE 23–24), Owner global center + platform receiving config UI (PHASE 16–17).
+- Grace management UI, top-up approval/reject UI for admins, settlement submit/approve UI, collection dashboards — backend RPCs exist (sprint 104); client screens pending.
+- Provider Capability Engine (25), Availability (26), Verification (27), Documents (28), Notification remap (29), Realtime (30), Localization sweep (32) — not built.
+- Live DB application + functional/device verification of financial flows — 🟡 ENVIRONMENT BLOCKED (no staging DB; migration authored from static analysis, review on staging before prod).
+
+---
+
 ## Current Task — SPRINT 101: INDEPENDENT DELWAQTY PROVIDER APP (extraction milestone 1) — COMPLETED (committed 5b27dfd + a9a9a05, pushed master)
 
 **Status: Provider merchant module PHYSICALLY EXTRACTED from Customer + committed (`5b27dfd`, pushed master).** `lib/features/provider/merchant/**` holds the operational UI; `lib/provider/{main,app,app_router,module_registry}.dart` + `provider` flavor. All four apps build; **891/891 tests pass**; 0 analyze errors; Provider APK rebuilds green.

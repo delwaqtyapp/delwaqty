@@ -1893,5 +1893,7 @@
   "adminMgmtDeactivated": "Admin deactivated",
   "adminMgmtReactivated": "Admin reactivated",
   "adminMgmtSupervisorUpdated": "Supervisor updated",
-  "adminMgmtRegionUpdated": "Region updated"
+  "adminMgmtRegionUpdated": "Region updated",
+  "bookingSubmitted": "Booking submitted successfully",
+  "bookingErrorRetry": "An error occurred. Please try again."
 }

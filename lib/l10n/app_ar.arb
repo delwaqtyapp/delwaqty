@@ -1893,5 +1893,7 @@
   "adminMgmtDeactivated": "تم إلغاء تفعيل المشرف",
   "adminMgmtReactivated": "تم إعادة تفعيل المشرف",
   "adminMgmtSupervisorUpdated": "تم تحديث المشرف",
-  "adminMgmtRegionUpdated": "تم تحديث المنطقة"
+  "adminMgmtRegionUpdated": "تم تحديث المنطقة",
+  "bookingSubmitted": "تم إرسال الحجز بنجاح",
+  "bookingErrorRetry": "حدث خطأ. حاول مرة أخرى."
 }

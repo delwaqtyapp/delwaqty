@@ -5880,4 +5880,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get adminMgmtRegionUpdated => 'Region updated';
+
+  @override
+  String get bookingSubmitted => 'Booking submitted successfully';
+
+  @override
+  String get bookingErrorRetry => 'An error occurred. Please try again.';
 }

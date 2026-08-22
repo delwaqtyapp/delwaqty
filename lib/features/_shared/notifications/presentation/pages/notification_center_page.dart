@@ -175,7 +175,9 @@ class _NotificationCenterPageState extends ConsumerState<NotificationCenterPage>
                               authState.user.isAdmin;
                           final route = NotificationRouteResolver.safe(
                             deepLink: notification.deepLink,
-                            isAdmin: isAdmin,
+                            context: isAdmin
+                                ? AppContext.admin
+                                : NotificationRouteResolver.appContext,
                           );
                           context.push(route);
                         }

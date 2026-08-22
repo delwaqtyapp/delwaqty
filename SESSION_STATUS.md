@@ -4,11 +4,11 @@
 
 ---
 
-## Current Task — SPRINT 111: PROVIDER VERIFICATION + DOCUMENTS — COMPLETE (private storage hardening committed)
+## Current Task — SPRINT 112: NOTIFICATION ROUTING + REALTIME — COMPLETE (uncommitted)
 
 **Status: Provider Capability Engine + capability-aware navigation + Availability (migration 067) delivered.** `flutter analyze` clean; capability unit tests pass; Provider APK builds green.
 
-**Status: SPRINT 111 — Provider Verification (migration 068) + Provider Documents (migrations 069 provider_documents + 070 private provider-documents bucket/RLS/delete RPC) delivered.** Documents now use a PRIVATE bucket (not the public profiles bucket); owner-only storage policies + provider_delete_document RPC + signed-URL preview. Capability engine extended (verification universal). `flutter analyze` = no errors; Provider APK builds green; documents tests pass. Live DB apply + runtime verification: 🟡 ENVIRONMENT BLOCKED.
+**Status: SPRINT 112 — Notification deep-link routing made APP-CONTEXT AWARE (customer/admin/driver/provider). Canonical deep links registered with per-context scoping; each app sets NotificationRouteResolver.appContext in main.dart so a provider/owner deep link can never route the Customer app. Provider-orders realtime wired via existing RealtimeService (providerOrders channel, postgres_changes on orders where merchant_id = auth.uid()); added providerOrders/driverDispatch/adminFinancial channel constants. Provider APK builds green. Notification tap routing + realtime: 🟡 ENVIRONMENT BLOCKED (runtime).**
 
 **Status: Owner Global Dashboard built on two new read-only, owner-only audit RPCs (migration 066) + existing 065 RPCs.** `flutter analyze` = 0 errors; **895/895 tests pass**; Admin debug APK builds green.
 

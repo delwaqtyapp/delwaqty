@@ -22,11 +22,13 @@ import 'package:delwaqty/domain/usecases/profile/profile_usecases.dart';
 import 'package:delwaqty/customer/module_registry.dart';
 import 'package:delwaqty/services/connectivity/connectivity_service.dart';
 import 'package:delwaqty/services/supabase/supabase_initializer.dart';
+import 'package:delwaqty/shared/notifications/notification_route_resolver.dart';
 import 'package:delwaqty/services/push_notification/push_notification_service.dart';
 import 'package:delwaqty/services/logger/app_logger.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  NotificationRouteResolver.appContext = AppContext.customer;
 
   FlutterError.onError = (details) {
     debugPrint('FlutterError: ${details.exception}');

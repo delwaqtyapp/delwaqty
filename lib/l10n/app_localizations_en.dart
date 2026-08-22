@@ -1686,6 +1686,28 @@ class AppLocalizationsEn extends AppLocalizations {
   String get driverDashboard => 'Delivery Dashboard';
 
   @override
+  String get deliveryAccess => 'Your Access';
+
+  @override
+  String get deliveryAccessSubtitle => 'Delivery operational profile';
+
+  @override
+  String get accessManagedInAdmin =>
+      'Role and permission administration is managed in DelwaQty Admin.';
+
+  @override
+  String get ownerFullControl => 'Owner - full Delivery operational control.';
+
+  @override
+  String get accessRole => 'Current role';
+
+  @override
+  String get accessStatus => 'Status';
+
+  @override
+  String get accessUnavailable => 'Access details are unavailable right now.';
+
+  @override
   String get online => 'Online';
 
   @override

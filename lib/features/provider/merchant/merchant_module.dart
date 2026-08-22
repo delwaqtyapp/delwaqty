@@ -14,6 +14,8 @@ import 'package:delwaqty/features/provider/merchant/presentation/pages/merchant_
 import 'package:delwaqty/features/provider/merchant/presentation/pages/merchant_reservations_page.dart';
 import 'package:delwaqty/features/provider/merchant/presentation/pages/merchant_reviews_page.dart';
 import 'package:delwaqty/features/provider/availability/presentation/pages/provider_availability_page.dart';
+import 'package:delwaqty/features/provider/verification/presentation/pages/provider_verification_page.dart';
+import 'package:delwaqty/features/provider/documents/presentation/pages/provider_documents_page.dart';
 
 final merchantDashboardRepositoryImplProvider =
     Provider<MerchantDashboardRepositoryImpl>(
@@ -106,6 +108,14 @@ class MerchantModule extends FeatureModule {
         GoRoute(
           path: '/provider-availability',
           builder: (context, state) => const ProviderAvailabilityPage(),
+        ),
+        GoRoute(
+          path: '/provider-verification',
+          builder: (context, state) => const ProviderVerificationPage(),
+        ),
+        GoRoute(
+          path: '/provider-documents',
+          builder: (context, state) => const ProviderDocumentsPage(),
         ),
       ];
 }

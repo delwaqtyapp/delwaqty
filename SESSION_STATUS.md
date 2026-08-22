@@ -4,9 +4,11 @@
 
 ---
 
-## Current Task — SPRINT 110: PROVIDER CAPABILITY ENGINE + NAVIGATION + AVAILABILITY — COMPLETED
+## Current Task — SPRINT 111: PROVIDER VERIFICATION + DOCUMENTS — COMPLETED (uncommitted)
 
 **Status: Provider Capability Engine + capability-aware navigation + Availability (migration 067) delivered.** `flutter analyze` clean; capability unit tests pass; Provider APK builds green.
+
+**Status: SPRINT 111 — Provider Verification (migration 068, RPC provider_submit_verification + reuses reapply_verification) + Provider Documents (migration 069, provider_documents table + upsert/get RPCs) delivered.** Capability engine extended (verification universal to all provider categories). `flutter analyze` = no errors; Provider APK builds green. Live DB apply + runtime verification: 🟡 ENVIRONMENT BLOCKED.
 
 **Status: Owner Global Dashboard built on two new read-only, owner-only audit RPCs (migration 066) + existing 065 RPCs.** `flutter analyze` = 0 errors; **895/895 tests pass**; Admin debug APK builds green.
 

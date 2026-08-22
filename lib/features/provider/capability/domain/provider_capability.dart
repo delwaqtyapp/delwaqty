@@ -98,6 +98,7 @@ Set<ProviderCapability> resolveCapabilities(ProviderCategory category) {
         ProviderCapability.earnings,
         ProviderCapability.commission,
         ProviderCapability.financial,
+        ProviderCapability.verification,
         ProviderCapability.notifications,
         ProviderCapability.support,
       };
@@ -109,6 +110,7 @@ Set<ProviderCapability> resolveCapabilities(ProviderCategory category) {
         ProviderCapability.branches,
         ProviderCapability.offers,
         ProviderCapability.availability,
+        ProviderCapability.verification,
         ProviderCapability.wallet,
         ProviderCapability.earnings,
         ProviderCapability.commission,
@@ -131,6 +133,7 @@ Set<ProviderCapability> resolveCapabilities(ProviderCategory category) {
         ProviderCapability.earnings,
         ProviderCapability.commission,
         ProviderCapability.financial,
+        ProviderCapability.verification,
         ProviderCapability.notifications,
         ProviderCapability.support,
       };

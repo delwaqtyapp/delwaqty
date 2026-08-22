@@ -192,7 +192,7 @@ class _AdminReceivingWalletsPageState
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final isOwner = ref.watch(adminIsOwnerProvider);
+    final isOwner = ref.watch(adminIsOwnerProvider).value ?? false;
     final accountsAsync = ref.watch(adminReceivingAccountsProvider);
     final walletsAsync = ref.watch(adminReceivingWalletsProvider);
 

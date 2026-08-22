@@ -56,9 +56,19 @@ final adminReceivingWalletsProvider =
           .listAdminReceivingWallets();
     });
 
-final adminIsOwnerProvider = Provider<bool>((ref) {
-  final email = Supabase.instance.client.auth.currentUser?.email;
-  return email == AppConstants.ownerEmail;
+final adminIsOwnerProvider = FutureProvider<bool>((ref) async {
+  final uid = Supabase.instance.client.auth.currentUser?.id;
+  if (uid == null) return false;
+  try {
+    final res = await Supabase.instance.client
+        .from('users')
+        .select('role')
+        .eq('id', uid)
+        .maybeSingle();
+    return (res?['role'] as String?) == 'owner';
+  } catch (_) {
+    return false;
+  }
 });
 
 final graceTargetProvider = StateProvider<String>((ref) => '');

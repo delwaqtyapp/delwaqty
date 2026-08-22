@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:delwaqty/features/admin/financial/presentation/providers/admin_financial_providers.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:delwaqty/features/admin/member_management/presentation/member_providers.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
@@ -2054,7 +2055,7 @@ class _AdminActionsSectionState extends ConsumerState<_AdminActionsSection> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final currentEmail = Supabase.instance.client.auth.currentUser?.email;
-    final isOwner = currentEmail == AppConstants.ownerEmail;
+    final isOwner = ref.watch(adminIsOwnerProvider).value ?? false;
     final canEditProfile = isOwner ||
         (widget.permissions['can_edit_profile'] as bool? ?? false);
     final canDecideVerification = isOwner ||
@@ -2704,7 +2705,7 @@ class _AdminActionsSectionState extends ConsumerState<_AdminActionsSection> {
     final memberEmail = basic['email'] as String? ?? '';
     final memberName = basic['full_name'] as String? ?? memberEmail;
     final currentEmail = Supabase.instance.client.auth.currentUser?.email;
-    final isOwner = currentEmail == AppConstants.ownerEmail;
+    final isOwner = ref.watch(adminIsOwnerProvider).value ?? false;
 
     if (isOwner) {
       final confirmed = await showAnimatedConfirmDialog(

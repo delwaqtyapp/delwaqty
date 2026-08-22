@@ -4,7 +4,9 @@
 
 ---
 
-## Current Task — SPRINT 108: OWNER GLOBAL FINANCIAL DASHBOARD (Flutter + backend audit RPCs) — COMPLETED
+## Current Task — SPRINT 110: PROVIDER CAPABILITY ENGINE + NAVIGATION + AVAILABILITY — COMPLETED
+
+**Status: Provider Capability Engine + capability-aware navigation + Availability (migration 067) delivered.** `flutter analyze` clean; capability unit tests pass; Provider APK builds green.
 
 **Status: Owner Global Dashboard built on two new read-only, owner-only audit RPCs (migration 066) + existing 065 RPCs.** `flutter analyze` = 0 errors; **895/895 tests pass**; Admin debug APK builds green.
 

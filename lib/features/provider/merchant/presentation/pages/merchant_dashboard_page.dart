@@ -5,6 +5,8 @@ import 'package:go_router/go_router.dart';
 import 'package:delwaqty/core/extensions/context_extensions.dart';
 import 'package:delwaqty/features/provider/merchant/merchant_module.dart';
 import 'package:delwaqty/features/provider/merchant/domain/entities/merchant_stats.dart';
+import 'package:delwaqty/features/provider/capability/presentation/providers/provider_capability_providers.dart';
+import 'package:delwaqty/features/provider/capability/domain/provider_capability.dart';
 import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
 import 'package:delwaqty/shared/widgets/premium_empty_state.dart';
 import 'package:delwaqty/shared/widgets/shimmer_loading.dart';
@@ -192,6 +194,17 @@ class _MerchantDashboardPageState
             trailing: const Icon(Icons.chevron_right_rounded),
             onTap: () => context.push('/merchant-dashboard/branches'),
           ),
+          if (ref
+              .watch(providerCapabilitiesProvider)
+              .contains(ProviderCapability.availability)) ...[
+            const Divider(height: 1),
+            ListTile(
+              leading: const Icon(Icons.toggle_on_outlined),
+              title: const Text('Availability'),
+              trailing: const Icon(Icons.chevron_right_rounded),
+              onTap: () => context.push('/provider-availability'),
+            ),
+          ],
           const Divider(height: 1),
           ListTile(
             leading: const Icon(Icons.calendar_month_outlined),

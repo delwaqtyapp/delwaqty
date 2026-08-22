@@ -1,21 +1,27 @@
 -- 072_admin_rbac_roles_permissions.sql
--- Additive. Upgrades admin authorization from simple role checks toward
--- ROLE + PERMISSIONS + SCOPE. Reuses existing admin_permission_grants (034)
--- and admin_region_assignments (031). Permissions are evaluated server-side;
+-- Additive. Implements the CANONICAL Admin RBAC engine used by the Admin
+-- control center. It reuses the single existing grants table
+-- (public.admin_permission_grants, from 034) as the shared source of truth for
+-- explicit permission deviations, and adds role templates (public.admin_roles)
+-- for default permission sets. Permission evaluation is server-side only;
 -- no client email / constant / UI-based authorization.
 --
--- Permission vocabulary (canonical, backend-authoritative):
--- PLATFORM_OWNER, USER_MANAGEMENT, ACCOUNT_MANAGEMENT,
--- ORDER_VIEW, ORDER_MANAGEMENT, ORDER_ASSIGNMENT, ORDER_REASSIGNMENT, ORDER_CANCELLATION,
--- DRIVER_VIEW, DRIVER_MANAGEMENT, DRIVER_ASSIGNMENT, DRIVER_LOCATION_VIEW,
--- PROVIDER_VIEW, PROVIDER_MANAGEMENT, STORE_VIEW, STORE_MANAGEMENT, STORE_SUSPEND, STORE_DELETE,
--- PRODUCT_VIEW, PRODUCT_MANAGEMENT, PRODUCT_DELETE,
--- VERIFICATION_MANAGEMENT, DOCUMENT_MANAGEMENT,
--- SUPPORT_MANAGEMENT, COMPLAINT_MANAGEMENT, SANCTION_MANAGEMENT,
--- FINANCIAL_VIEW, FINANCIAL_MANAGEMENT, TOPUP_MANAGEMENT, COLLECTION_MANAGEMENT, SETTLEMENT_MANAGEMENT,
--- COMMISSION_VIEW, COMMISSION_MANAGEMENT, ACCOUNT_COMMISSION_OVERRIDE,
--- ADMIN_MANAGEMENT, ROLE_MANAGEMENT, PERMISSION_MANAGEMENT, AUDIT_LOG_VIEW,
--- REGIONAL_MANAGEMENT, DISPATCH_VIEW, DISPATCH_MANAGEMENT, DISPATCH_MANUAL_ASSIGN, DISPATCH_AUTO_CONTROL.
+-- Single decision engine for Admin capabilities: public.admin_has_permission(p, region).
+-- (The legacy public.has_permission(...) from 034 remains the engine for
+--  member/customer operations; both consult public.admin_permission_grants,
+--  so grants are never duplicated.)
+--
+-- Canonical permission vocabulary (backend-authoritative):
+--   USER_VIEW, USER_EDIT, USER_SUSPEND, USER_DELETE
+--   ADMIN_CREATE, ADMIN_EDIT, ADMIN_DEACTIVATE, ADMIN_ASSIGN_ROLE, ADMIN_GRANT_PERMISSION
+--   ORDER_VIEW, ORDER_ASSIGN, ORDER_REASSIGN, ORDER_CANCEL, ORDER_MANAGE
+--   DELIVERY_VIEW, DELIVERY_ASSIGN, DELIVERY_REASSIGN, DELIVERY_MOVE, DELIVERY_SUSPEND, DELIVERY_LOCATION_VIEW
+--   DISPATCH_VIEW, DISPATCH_MANAGE, DISPATCH_AUTO, DISPATCH_MANUAL, DISPATCH_CONFIGURE
+--   PROVIDER_VIEW, PROVIDER_EDIT, PROVIDER_VERIFY, PROVIDER_SUSPEND, PROVIDER_CATALOG_MANAGE, PROVIDER_DELETE
+--   FINANCIAL_VIEW, TOPUP_APPROVE, COLLECTION_VIEW, SETTLEMENT_MANAGE,
+--   COMMISSION_VIEW, COMMISSION_MANAGE, RECEIVING_ACCOUNT_MANAGE, GRACE_MANAGE
+--   SUPPORT_VIEW, SUPPORT_REPLY, COMPLAINT_MANAGE
+--   SECURITY_VIEW, AUDIT_VIEW, SANCTION_MANAGE, REGIONAL_MANAGEMENT
 
 CREATE TABLE IF NOT EXISTS public.admin_roles (
   role_key      text PRIMARY KEY,
@@ -26,20 +32,28 @@ CREATE TABLE IF NOT EXISTS public.admin_roles (
 );
 
 INSERT INTO public.admin_roles (role_key, display_name, description, is_system, default_permissions) VALUES
- ('owner',            'Owner',            'Full platform authority (global).', true,
-   '["PLATFORM_OWNER","USER_MANAGEMENT","ACCOUNT_MANAGEMENT","ORDER_VIEW","ORDER_MANAGEMENT","ORDER_ASSIGNMENT","ORDER_REASSIGNMENT","ORDER_CANCELLATION","DRIVER_VIEW","DRIVER_MANAGEMENT","DRIVER_ASSIGNMENT","DRIVER_LOCATION_VIEW","PROVIDER_VIEW","PROVIDER_MANAGEMENT","STORE_VIEW","STORE_MANAGEMENT","STORE_SUSPEND","STORE_DELETE","PRODUCT_VIEW","PRODUCT_MANAGEMENT","PRODUCT_DELETE","VERIFICATION_MANAGEMENT","DOCUMENT_MANAGEMENT","SUPPORT_MANAGEMENT","COMPLAINT_MANAGEMENT","SANCTION_MANAGEMENT","FINANCIAL_VIEW","FINANCIAL_MANAGEMENT","TOPUP_MANAGEMENT","COLLECTION_MANAGEMENT","SETTLEMENT_MANAGEMENT","COMMISSION_VIEW","COMMISSION_MANAGEMENT","ACCOUNT_COMMISSION_OVERRIDE","ADMIN_MANAGEMENT","ROLE_MANAGEMENT","PERMISSION_MANAGEMENT","AUDIT_LOG_VIEW","REGIONAL_MANAGEMENT","DISPATCH_VIEW","DISPATCH_MANAGEMENT","DISPATCH_MANUAL_ASSIGN","DISPATCH_AUTO_CONTROL"]'::jsonb),
- ('accounts_admin',   'Accounts Admin',   'User/account + financial visibility.', true,
-   '["USER_MANAGEMENT","ACCOUNT_MANAGEMENT","FINANCIAL_VIEW","AUDIT_LOG_VIEW"]'::jsonb),
- ('operations_admin', 'Operations Admin', 'Orders, drivers, dispatch (no finance/admin).', true,
-   '["ORDER_VIEW","ORDER_MANAGEMENT","ORDER_ASSIGNMENT","ORDER_REASSIGNMENT","ORDER_CANCELLATION","DRIVER_VIEW","DRIVER_MANAGEMENT","DRIVER_ASSIGNMENT","DRIVER_LOCATION_VIEW","DISPATCH_VIEW","DISPATCH_MANAGEMENT","DISPATCH_MANUAL_ASSIGN","PROVIDER_VIEW","STORE_VIEW","PRODUCT_VIEW"]'::jsonb),
+ ('owner',            'Owner',            'Full platform authority (global, server-derived).', true,
+   '["USER_VIEW","USER_EDIT","USER_SUSPEND","USER_DELETE","ADMIN_CREATE","ADMIN_EDIT","ADMIN_DEACTIVATE","ADMIN_ASSIGN_ROLE","ADMIN_GRANT_PERMISSION","ORDER_VIEW","ORDER_ASSIGN","ORDER_REASSIGN","ORDER_CANCEL","ORDER_MANAGE","DELIVERY_VIEW","DELIVERY_ASSIGN","DELIVERY_REASSIGN","DELIVERY_MOVE","DELIVERY_SUSPEND","DELIVERY_LOCATION_VIEW","DISPATCH_VIEW","DISPATCH_MANAGE","DISPATCH_AUTO","DISPATCH_MANUAL","DISPATCH_CONFIGURE","PROVIDER_VIEW","PROVIDER_EDIT","PROVIDER_VERIFY","PROVIDER_SUSPEND","PROVIDER_CATALOG_MANAGE","PROVIDER_DELETE","FINANCIAL_VIEW","TOPUP_APPROVE","COLLECTION_VIEW","SETTLEMENT_MANAGE","COMMISSION_VIEW","COMMISSION_MANAGE","RECEIVING_ACCOUNT_MANAGE","GRACE_MANAGE","SUPPORT_VIEW","SUPPORT_REPLY","COMPLAINT_MANAGE","SECURITY_VIEW","AUDIT_VIEW","SANCTION_MANAGE","REGIONAL_MANAGEMENT"]'::jsonb),
+ ('accounts_admin',   'Admin Accounts',   'User/account + financial visibility.', true,
+   '["USER_VIEW","USER_EDIT","USER_SUSPEND","USER_DELETE","FINANCIAL_VIEW","AUDIT_VIEW"]'::jsonb),
+ ('operations_admin', 'Operations Admin', 'Orders, delivery, dispatch (no finance/admin).', true,
+   '["ORDER_VIEW","ORDER_ASSIGN","ORDER_REASSIGN","ORDER_CANCEL","ORDER_MANAGE","DELIVERY_VIEW","DELIVERY_ASSIGN","DELIVERY_REASSIGN","DELIVERY_MOVE","DELIVERY_SUSPEND","DELIVERY_LOCATION_VIEW","DISPATCH_VIEW","DISPATCH_MANAGE","DISPATCH_AUTO","DISPATCH_MANUAL","PROVIDER_VIEW","SUPPORT_VIEW"]'::jsonb),
+ ('delivery_operations','Delivery Operations','Delivery workforce + dispatch operations.', true,
+   '["DELIVERY_VIEW","DELIVERY_ASSIGN","DELIVERY_REASSIGN","DELIVERY_MOVE","DELIVERY_SUSPEND","DELIVERY_LOCATION_VIEW","DISPATCH_VIEW","DISPATCH_MANAGE","DISPATCH_AUTO","DISPATCH_MANUAL","DISPATCH_CONFIGURE","ORDER_VIEW"]'::jsonb),
+ ('orders_admin',     'Orders Admin',     'Order management + delivery visibility.', true,
+   '["ORDER_VIEW","ORDER_ASSIGN","ORDER_REASSIGN","ORDER_CANCEL","ORDER_MANAGE","DELIVERY_VIEW","DELIVERY_LOCATION_VIEW"]'::jsonb),
  ('financial_admin',  'Financial Admin',  'Financial + commission management.', true,
-   '["FINANCIAL_VIEW","FINANCIAL_MANAGEMENT","TOPUP_MANAGEMENT","COLLECTION_MANAGEMENT","SETTLEMENT_MANAGEMENT","COMMISSION_VIEW","COMMISSION_MANAGEMENT","ACCOUNT_COMMISSION_OVERRIDE","AUDIT_LOG_VIEW"]'::jsonb),
+   '["FINANCIAL_VIEW","TOPUP_APPROVE","COLLECTION_VIEW","SETTLEMENT_MANAGE","COMMISSION_VIEW","COMMISSION_MANAGE","RECEIVING_ACCOUNT_MANAGE","GRACE_MANAGE","AUDIT_VIEW"]'::jsonb),
+ ('provider_management','Provider Management','Provider verification + catalog management.', true,
+   '["PROVIDER_VIEW","PROVIDER_EDIT","PROVIDER_VERIFY","PROVIDER_SUSPEND","PROVIDER_CATALOG_MANAGE","PROVIDER_DELETE","ORDER_VIEW"]'::jsonb),
  ('support_admin',    'Support Admin',    'Support, complaints, sanctions.', true,
-   '["SUPPORT_MANAGEMENT","COMPLAINT_MANAGEMENT","SANCTION_MANAGEMENT","USER_MANAGEMENT","ORDER_VIEW","PROVIDER_VIEW","STORE_VIEW","PRODUCT_VIEW","DRIVER_VIEW"]'::jsonb),
- ('verification_admin','Verification Admin','Provider verification + documents.', true,
-   '["VERIFICATION_MANAGEMENT","DOCUMENT_MANAGEMENT","PROVIDER_VIEW","STORE_VIEW","AUDIT_LOG_VIEW"]'::jsonb),
+   '["SUPPORT_VIEW","SUPPORT_REPLY","COMPLAINT_MANAGE","USER_VIEW","ORDER_VIEW","PROVIDER_VIEW","DELIVERY_VIEW"]'::jsonb),
  ('regional_admin',   'Regional Admin',   'Region-scoped operations.', true,
-   '["ORDER_VIEW","ORDER_ASSIGNMENT","DRIVER_VIEW","DRIVER_ASSIGNMENT","DRIVER_LOCATION_VIEW","PROVIDER_VIEW","STORE_VIEW","STORE_MANAGEMENT","STORE_SUSPEND","PRODUCT_VIEW","PRODUCT_MANAGEMENT","DISPATCH_VIEW","DISPATCH_MANAGEMENT","DISPATCH_MANUAL_ASSIGN","REGIONAL_MANAGEMENT"]'::jsonb)
+   '["ORDER_VIEW","ORDER_ASSIGN","DELIVERY_VIEW","DELIVERY_ASSIGN","DELIVERY_LOCATION_VIEW","PROVIDER_VIEW","PROVIDER_EDIT","PROVIDER_SUSPEND","PROVIDER_CATALOG_MANAGE","DISPATCH_VIEW","DISPATCH_MANAGE","DISPATCH_MANUAL","REGIONAL_MANAGEMENT"]'::jsonb),
+ ('security_admin',   'Security Admin',   'Security, audit, sanctions.', true,
+   '["SECURITY_VIEW","AUDIT_VIEW","SANCTION_MANAGE","USER_VIEW","USER_SUSPEND","USER_DELETE"]'::jsonb),
+ ('read_only_admin',  'Read Only Admin',  'Read-only platform visibility.', true,
+   '["USER_VIEW","ORDER_VIEW","DELIVERY_VIEW","PROVIDER_VIEW","FINANCIAL_VIEW","SUPPORT_VIEW","SECURITY_VIEW","AUDIT_VIEW","DISPATCH_VIEW","COMPLAINT_MANAGE"]'::jsonb)
 ON CONFLICT (role_key) DO UPDATE SET default_permissions = EXCLUDED.default_permissions;
 
 -- Defensive additive columns so this migration is self-contained.
@@ -63,7 +77,7 @@ SET search_path = public, pg_temp
 AS $$
 DECLARE v_before jsonb;
 BEGIN
-  IF NOT (public._is_owner_uid(auth.uid()) OR public.admin_has_permission('ROLE_MANAGEMENT', NULL)) THEN
+  IF NOT (public._is_owner_uid(auth.uid()) OR public.admin_has_permission('ADMIN_ASSIGN_ROLE', NULL)) THEN
     RAISE EXCEPTION 'forbidden';
   END IF;
   SELECT jsonb_build_object('role', role_key) INTO v_before FROM users WHERE id = p_admin_id;
@@ -86,7 +100,7 @@ SET search_path = public, pg_temp
 AS $$
 DECLARE v_before jsonb;
 BEGIN
-  IF NOT (public._is_owner_uid(auth.uid()) OR public.admin_has_permission('ADMIN_MANAGEMENT', NULL)) THEN
+  IF NOT (public._is_owner_uid(auth.uid()) OR public.admin_has_permission('ADMIN_EDIT', NULL)) THEN
     RAISE EXCEPTION 'forbidden';
   END IF;
   SELECT jsonb_build_object('status', status) INTO v_before FROM users WHERE id = p_admin_id;
@@ -108,7 +122,7 @@ SECURITY DEFINER
 SET search_path = public, pg_temp
 AS $$
 BEGIN
-  IF NOT (public._is_owner_uid(auth.uid()) OR public.admin_has_permission('PERMISSION_MANAGEMENT', p_region_id)) THEN
+  IF NOT (public._is_owner_uid(auth.uid()) OR public.admin_has_permission('ADMIN_GRANT_PERMISSION', p_region_id)) THEN
     RAISE EXCEPTION 'forbidden';
   END IF;
   INSERT INTO public.admin_permission_grants (admin_id, permission, region_id)
@@ -131,7 +145,7 @@ SECURITY DEFINER
 SET search_path = public, pg_temp
 AS $$
 BEGIN
-  IF NOT (public._is_owner_uid(auth.uid()) OR public.admin_has_permission('PERMISSION_MANAGEMENT', p_region_id)) THEN
+  IF NOT (public._is_owner_uid(auth.uid()) OR public.admin_has_permission('ADMIN_GRANT_PERMISSION', p_region_id)) THEN
     RAISE EXCEPTION 'forbidden';
   END IF;
   DELETE FROM public.admin_permission_grants
@@ -167,8 +181,8 @@ $$;
 REVOKE ALL ON FUNCTION public.admin_assign_region(uuid, uuid, text) FROM PUBLIC;
 GRANT EXECUTE ON FUNCTION public.admin_assign_region(uuid, uuid, text) TO authenticated;
 
--- Consolidated permission check: owner short-circuit OR (role defaults UNION explicit grants)
--- AND region scope respected.
+-- Consolidated Admin permission check: owner short-circuit OR
+-- (role-template defaults UNION explicit grants) AND region scope respected.
 CREATE OR REPLACE FUNCTION public.admin_has_permission(
   p_permission text, p_region_id uuid DEFAULT NULL
 )

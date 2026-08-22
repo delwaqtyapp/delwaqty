@@ -219,7 +219,7 @@ DECLARE
   v_order orders%ROWTYPE;
 BEGIN
   IF NOT (public._is_owner_uid(auth.uid())
-          OR public.admin_has_permission('DISPATCH_MANUAL_ASSIGN', NULL)) THEN
+          OR public.admin_has_permission('DISPATCH_MANUAL', NULL)) THEN
     RAISE EXCEPTION 'forbidden';
   END IF;
   SELECT * INTO v_order FROM public.orders WHERE id = p_order_id FOR UPDATE;
@@ -285,15 +285,15 @@ $$;
 REVOKE ALL ON FUNCTION public.complete_delivery(uuid) FROM PUBLIC;
 GRANT EXECUTE ON FUNCTION public.complete_delivery(uuid) TO authenticated, service_role;
 
--- 10) Tighten driver location privacy: only self / owner / authorized admins
---     (DRIVER_LOCATION_VIEW) may read all; customers/providers limited to their
---     own active delivery driver.
+-- 10) Tighten delivery location privacy: only self / owner / authorized admins
+--     (DELIVERY_LOCATION_VIEW) may read all; customers/providers limited to their
+--     own active delivery agent.
 DROP POLICY IF EXISTS driver_locations_select ON public.driver_locations;
 CREATE POLICY driver_locations_select ON public.driver_locations
   FOR SELECT USING (
     driver_id = auth.uid()
     OR public._is_owner_uid(auth.uid())
-    OR public.admin_has_permission('DRIVER_LOCATION_VIEW', NULL)
+    OR public.admin_has_permission('DELIVERY_LOCATION_VIEW', NULL)
     OR EXISTS (
       SELECT 1 FROM public.orders o
       WHERE o.driver_id = driver_locations.driver_id

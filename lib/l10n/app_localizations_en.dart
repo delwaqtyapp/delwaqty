@@ -1683,7 +1683,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get loginToViewWallet => 'Please log in to view your wallet';
 
   @override
-  String get driverDashboard => 'Driver Dashboard';
+  String get driverDashboard => 'Delivery Dashboard';
 
   @override
   String get online => 'Online';
@@ -2940,7 +2940,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get supportEmailAddress => 'support@delwaqty.com';
 
   @override
-  String get driverManagement => 'Driver Management';
+  String get driverManagement => 'Delivery Management';
 
   @override
   String get active => 'Active';
@@ -3035,11 +3035,11 @@ class AppLocalizationsEn extends AppLocalizations {
       'Merchant performance data will appear here.';
 
   @override
-  String get driverPerformance => 'Driver Performance';
+  String get driverPerformance => 'Delivery Performance';
 
   @override
   String get driverPerformancePlaceholder =>
-      'Driver performance metrics will appear here.';
+      'Delivery performance metrics will appear here.';
 
   @override
   String get typeSupermarket => 'Supermarket';

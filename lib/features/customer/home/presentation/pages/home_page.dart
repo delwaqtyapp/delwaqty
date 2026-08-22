@@ -1089,7 +1089,7 @@ class _PromoCarouselState extends ConsumerState<_PromoCarousel> {
         case CampaignCtaType.internalRoute:
           final route = cta.route;
           if (route != null &&
-              NotificationChannels.isAllowed(route, isAdmin: false)) {
+              NotificationChannels.isAllowed(route, context: AppContext.customer)) {
             context.push(route);
           }
           return;

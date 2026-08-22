@@ -12,7 +12,7 @@ void main() {
       expect(
         NotificationRouteResolver.resolve(
           deepLink: '/admin/complaints',
-          isAdmin: true,
+          context: AppContext.admin,
         ),
         '/admin/complaints',
       );

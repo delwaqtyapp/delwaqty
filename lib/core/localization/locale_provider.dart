@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:delwaqty/core/constants/storage_keys.dart';
@@ -15,7 +16,9 @@ class LocaleNotifier extends Notifier<Locale> {
     if (savedLocale != null) {
       return Locale(savedLocale);
     }
-    return const Locale('ar');
+    final system = PlatformDispatcher.instance.locale;
+    final code = system?.languageCode ?? '';
+    return code.toLowerCase() == 'ar' ? const Locale('ar') : const Locale('en');
   }
 
   Future<void> setLocale(Locale locale) async {

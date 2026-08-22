@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:delwaqty/core/constants/storage_keys.dart';
@@ -20,7 +21,9 @@ class AdminLocaleNotifier extends Notifier<Locale> {
     if (saved != null) {
       return Locale(saved);
     }
-    return const Locale('ar');
+    final system = PlatformDispatcher.instance.locale;
+    final code = system?.languageCode ?? '';
+    return code.toLowerCase() == 'ar' ? const Locale('ar') : const Locale('en');
   }
 
   Future<void> setAdminLocale(Locale locale) async {

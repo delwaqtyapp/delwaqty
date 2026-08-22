@@ -13,6 +13,8 @@ import 'package:delwaqty/features/driver/presentation/pages/driver_earnings_page
 import 'package:delwaqty/features/driver/presentation/pages/driver_onboarding_page.dart';
 import 'package:delwaqty/features/driver/presentation/pages/vehicle_management_page.dart';
 import 'package:delwaqty/features/driver/presentation/pages/document_management_page.dart';
+import 'package:delwaqty/features/driver/financial/presentation/pages/driver_financial_center_page.dart';
+import 'package:delwaqty/features/driver/financial/presentation/pages/driver_topup_request_page.dart';
 
 final supabaseDriverRepositoryImplProvider = Provider<DriverRepositoryImpl>((ref) {
   return DriverRepositoryImpl(
@@ -75,6 +77,16 @@ class DriverModule extends FeatureModule {
     GoRoute(
       path: '/driver/documents',
       builder: (context, state) => const DocumentManagementPage(),
+    ),
+    GoRoute(
+      path: '/driver/financial-center',
+      builder: (context, state) => const DriverFinancialCenterPage(),
+      routes: [
+        GoRoute(
+          path: 'topup',
+          builder: (context, state) => const DriverTopupRequestPage(),
+        ),
+      ],
     ),
   ];
 }

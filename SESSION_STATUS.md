@@ -4,7 +4,7 @@
 
 ---
 
-## Current Task — SPRINT 104: PROVIDER FINANCIAL SUBSYSTEM (backend contract) — IN PROGRESS
+## Current Task — SPRINT 107: DRIVER FINANCIAL CENTER (Flutter client) — COMPLETED
 
 **Status: Additive backend contract delivered (`supabase/migrations/065_provider_financial_subsystem.sql`, committed, pushed master).** PHASE 1 audit complete: confirmed reuse of existing `wallets`, `wallet_transactions`, `driver_earnings`, `withdrawal_requests`, `platform_commissions` (7%/3% authoritative), `commission_rules`, `platform_*` financial-intelligence RPCs, `user_region_preferences` (account→region). No duplicate tables. New additive tables + RPCs for Grace, Top-Up, Regional Collection, Platform Settlement, Platform/Admin Receiving Accounts.
 
@@ -39,6 +39,23 @@
 - Owner Global Collections/Settlements/Audit dashboards (PHASE 1 owner section) — backend exists; subset pending.
 - Provider hardening/audit (PHASE 3), Capability Engine (25), Availability (26), Verification (27), Documents (28), Notification remap (29), Realtime (30), Localization sweep (32), Security/Storage/RPC audits (14–16), Integrity tests (17), four-app build matrix (22), device (21), live DB (20).
 - Live DB application + functional verification of 065 RPCs — 🟡 ENVIRONMENT BLOCKED (migration authored from static analysis; review on staging before prod).
+
+---
+
+## Current Task — SPRINT 107: DRIVER FINANCIAL CENTER (Flutter client) — COMPLETED (committed, pushed master)
+
+**Status: Driver Financial Center built on the existing migration 065 backend RPCs + the Driver app's own earnings/wallet providers.** `flutter analyze` = 0 errors; **895/895 tests pass**; Driver debug APK builds green.
+
+**What was built (reuses 065 account-scoped RPCs — no new backend, no duplicate financial truth):**
+- `lib/features/driver/financial/presentation/providers/driver_financial_providers.dart`: `driverWalletDetailProvider` (calls existing `get_driver_wallet_detail`) + reuse of `providerFinancialRepositoryProvider` for account-scoped RPCs (`get_my_financial_summary`, `get_my_grace`, `get_my_topup_requests`, `resolve_receiver_for_account`, `create_topup_request`).
+- `lib/features/driver/financial/presentation/pages/driver_financial_center_page.dart`: unified hub showing balance + grace (used/limit/remaining, server-derived) + effective commission rate (from `get_my_financial_summary`, not hardcoded) + recent transactions + pending top-ups + quick actions (request top-up, view earnings, view wallet, open support).
+- `driver_topup_request_page.dart`: submits a top-up request (amount/method/reference/note) reusing Provider's validated form/helper; refreshes on success.
+- Wired `/driver/financial-center` + `/driver/financial-center/topup` into `DriverModule` (standalone routes, no bottom-nav change per user request) and added a FAB on `driver_earnings_page.dart` linking to the center.
+
+**Known gaps (remaining financial work — NOT built this turn):**
+- Owner Global Collections/Settlements/Audit dashboards (PHASE 1 owner section) — backend exists; Flutter pending.
+- Provider hardening/audit (PHASE 3), Capability Engine (25), Availability (26), Verification (27), Documents (28), Notification remap (29), Realtime (30), Localization sweep (32), Security/Storage/RPC audits (14–16), Integrity tests (17), four-app build matrix (22), device (21), live DB (20).
+- Live DB application + functional/device verification of 065 RPCs — 🟡 ENVIRONMENT BLOCKED (migration authored from static analysis; review on staging before prod).
 
 ---
 

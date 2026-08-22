@@ -13,6 +13,7 @@ import 'package:delwaqty/features/provider/merchant/presentation/pages/merchant_
 import 'package:delwaqty/features/provider/merchant/presentation/pages/merchant_branches_page.dart';
 import 'package:delwaqty/features/provider/merchant/presentation/pages/merchant_reservations_page.dart';
 import 'package:delwaqty/features/provider/merchant/presentation/pages/merchant_reviews_page.dart';
+import 'package:delwaqty/features/provider/availability/presentation/pages/provider_availability_page.dart';
 
 final merchantDashboardRepositoryImplProvider =
     Provider<MerchantDashboardRepositoryImpl>(
@@ -99,4 +100,12 @@ class MerchantModule extends FeatureModule {
 
   @override
   List<Override> providerOverrides(Ref ref) => [];
+
+  @override
+  List<RouteBase> get standaloneRoutes => [
+        GoRoute(
+          path: '/provider-availability',
+          builder: (context, state) => const ProviderAvailabilityPage(),
+        ),
+      ];
 }

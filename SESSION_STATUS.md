@@ -4,6 +4,23 @@
 
 ---
 
+## Current Task — FINAL RELEASE CANDIDATE (4-APP DEVICE INSTALL + PROD HARDENING) — COMPLETE (sprint 115)
+
+**RC verification (DNP NX9, A3SQUT5A28003808):**
+- Part 1 Install: all four APKs (com.delwaqty.app/admin/driver/provider) installed + confirmed in `pm list packages`.
+- Part 2/8 Launch + crash check: all four launch clean — no FATAL EXCEPTION / FlutterError (only Huawei BT framework noise). Screenshots render non-blank (~2MB each).
+- Part 7 Back-nav: BACK + HOME + relaunch clean for all four.
+- Part 9 Localization sweep: added 30+ ARB keys (availability, verification, documents, financial center, top-up, doc labels, day names) to app_en.arb/app_ar.arb; wired 6 Provider screens (availability, verification, documents, financial_center, topup_request, merchant_dashboard nav) + day localization. `flutter analyze` 0 errors; `flutter test` 910/910 pass; `flutter gen-l10n` regenerated.
+- Part 11 Security: no service_role / JWT / private keys in lib.
+- Part 12 RPC audit: all 6 provider RPCs (067-070: get/set_availability, submit/reapply_verification, get/upsert/delete_document) defined in migrations AND called in code.
+- Part 13 Financial: no 700% / double-scaling (w700 = font weight); commission from backend.
+- Part 14 Passenger/taxi: matches are shared delivery infra (ratePassenger, RideStatus, ride.dart historical "Ride" naming) — explicitly kept per directive; no customer taxi-booking UI.
+- Part 15 Build: four-app debug build green. Part 16 APK sizes stable (customer 199.7 / admin 202.5 / driver 196.3 / provider 199.4 MB). Part 17 reinstall all four = Success. Part 18 committed `472d545` + pushed master.
+
+**ENVIRONMENT BLOCKED:** Part 10 live Supabase DB apply/verify of 067-070 + 065/066 runtime; Part 3-7 backend-dependent interactive smoke (login/data flows) require live DB + credentials. Release signing unavailable (debug only).
+
+---
+
 ## Current Task — SPRINT 114: FINAL REGRESSION (4-APP BUILD + TESTS + AUDIT) — COMPLETE
 
 **Status: Provider Capability Engine + capability-aware navigation + Availability (migration 067) delivered.** `flutter analyze` clean; capability unit tests pass; Provider APK builds green.

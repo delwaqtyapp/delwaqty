@@ -1534,7 +1534,7 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
-  String get monday => 'الاثنين';
+  String get monday => 'الإثنين';
 
   @override
   String get tuesday => 'الثلاثاء';
@@ -1656,7 +1656,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get transactions => 'المعاملات';
 
   @override
-  String get recentTransactions => 'آخر المعاملات';
+  String get recentTransactions => 'المعاملات الأخيرة';
 
   @override
   String get noTransactions => 'لا توجد معاملات بعد';
@@ -4697,7 +4697,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get grossEarnings => 'إجمالي المكاسب الخام';
 
   @override
-  String get commissionRate => 'معدل العمولة';
+  String get commissionRate => 'نسبة العمولة';
 
   @override
   String get netEarnings => 'صافي المكاسب';
@@ -5677,4 +5677,112 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get autoShareTripDescription =>
       'شارك التوصيل المباشر تلقائياً مع جهات الاتصال الموثوقة';
+
+  @override
+  String get availability => 'التوفر';
+
+  @override
+  String get customersCanPlaceOrders => 'يمكن للعملاء تقديم الطلبات';
+
+  @override
+  String get temporarilyUnavailable => 'غير متاح مؤقتاً';
+
+  @override
+  String get storeOpenForBusiness => 'المتجر مفتوح للعمل';
+
+  @override
+  String get availabilityHint =>
+      'أوقف التشغيل لتطبيق إغلاق مؤقت. الخادم هو المصدر الموثوق.';
+
+  @override
+  String get weeklySchedule => 'الجدول الأسبوعي';
+
+  @override
+  String get noScheduleSet => 'لم يتم تعيين جدول';
+
+  @override
+  String get configureWorkingHours => 'اضبط ساعات العمل من إعدادات التاجر.';
+
+  @override
+  String get pendingReview => 'قيد المراجعة';
+
+  @override
+  String get notSubmitted => 'لم يتم التقديم بعد';
+
+  @override
+  String get reapply => 'إعادة التقديم';
+
+  @override
+  String get choose => 'اختيار';
+
+  @override
+  String get notUploaded => 'لم يتم الرفع';
+
+  @override
+  String get documentsSubmittedForReview => 'تم تقديم المستندات للمراجعة';
+
+  @override
+  String uploadedForReview(Object label) {
+    return '$label تم رفعها للمراجعة';
+  }
+
+  @override
+  String get replace => 'استبدال';
+
+  @override
+  String get license => 'رخصة مهنية';
+
+  @override
+  String get certification => 'شهادة';
+
+  @override
+  String get docPreview => 'معاينة المستند';
+
+  @override
+  String docRemoved(Object label) {
+    return '$label تمت الإزالة';
+  }
+
+  @override
+  String get financialCenter => 'المركز المالي';
+
+  @override
+  String get requestTopUp => 'طلب تعبئة';
+
+  @override
+  String get noTopUpRequests => 'لا توجد طلبات تعبئة بعد.';
+
+  @override
+  String topUpRequestCreated(Object code) {
+    return 'طلب تعبئة: $code';
+  }
+
+  @override
+  String get submitRequest => 'إرسال الطلب';
+
+  @override
+  String get pendingTopups => 'طلبات تعبئة معلقة';
+
+  @override
+  String get graceLabel => 'فترة السماح';
+
+  @override
+  String graceUsed(Object limit, Object remaining, Object used) {
+    return 'مستخدم $used / الحد $limit ($remaining متبقٍ)';
+  }
+
+  @override
+  String get topUpHistory => 'سجل التعبئة';
+
+  @override
+  String get transferReference => 'مرجع التحويل (اختياري)';
+
+  @override
+  String get messageOptional => 'رسالة (اختياري)';
+
+  @override
+  String get verification => 'التحقق';
+
+  @override
+  String get identity => 'الهوية';
 }

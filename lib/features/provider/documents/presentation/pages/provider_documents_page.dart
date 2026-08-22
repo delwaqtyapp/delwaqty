@@ -1,6 +1,7 @@
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:delwaqty/l10n/app_localizations.dart';
 
 import '../providers/provider_documents_providers.dart';
 
@@ -19,6 +20,7 @@ class _ProviderDocumentsPageState extends ConsumerState<ProviderDocumentsPage> {
   String? _viewUrl;
 
   Future<void> _upload(String docType, String label) async {
+    final l10n = AppLocalizations.of(context);
     if (_busy) return;
     final result = await FilePicker.pickFiles(type: FileType.image);
     if (result.isEmpty) return;
@@ -39,7 +41,7 @@ class _ProviderDocumentsPageState extends ConsumerState<ProviderDocumentsPage> {
       if (mounted) {
         ref.invalidate(providerDocumentsProvider);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('$label uploaded for review')),
+          SnackBar(content: Text(l10n.uploadedForReview(label))),
         );
       }
     } catch (e) {
@@ -50,6 +52,7 @@ class _ProviderDocumentsPageState extends ConsumerState<ProviderDocumentsPage> {
   }
 
   Future<void> _delete(String docType, String label) async {
+    final l10n = AppLocalizations.of(context);
     if (_busy) return;
     setState(() {
       _busy = true;
@@ -63,7 +66,7 @@ class _ProviderDocumentsPageState extends ConsumerState<ProviderDocumentsPage> {
       if (mounted) {
         ref.invalidate(providerDocumentsProvider);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('$label removed')),
+          SnackBar(content: Text(l10n.docRemoved(label))),
         );
       }
     } catch (e) {
@@ -95,11 +98,28 @@ class _ProviderDocumentsPageState extends ConsumerState<ProviderDocumentsPage> {
     }
   }
 
+  String _docLabel(String key) {
+    final l10n = AppLocalizations.of(context);
+    switch (key) {
+      case 'identity':
+        return l10n.identity;
+      case 'license':
+        return l10n.license;
+      case 'certification':
+        return l10n.certification;
+      case 'insurance':
+        return l10n.insurance;
+      default:
+        return key;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(providerDocumentsProvider);
+    final l10n = AppLocalizations.of(context);
     return Scaffold(
-      appBar: AppBar(title: const Text('Documents')),
+      appBar: AppBar(title: Text(l10n.documents)),
       body: state.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => Center(child: Text('Failed to load: $e')),
@@ -120,15 +140,16 @@ class _ProviderDocumentsPageState extends ConsumerState<ProviderDocumentsPage> {
                 final status = existing?['status'] as String?;
                 final fileUrl = existing?['file_url'] as String?;
                 final hasDoc = fileUrl != null && fileUrl.isNotEmpty;
+                final label = _docLabel(doc.key);
                 return Card(
                   child: ListTile(
                     leading: hasDoc
                         ? Icon(Icons.check_circle_outline,
                             color: _statusColor(status))
                         : const Icon(Icons.upload_file_outlined),
-                    title: Text(doc.label),
+                    title: Text(label),
                     subtitle: !hasDoc
-                        ? const Text('Not uploaded')
+                        ? Text(l10n.notUploaded)
                         : Text(
                             (status ?? 'uploaded')[0].toUpperCase() +
                                 (status ?? 'uploaded').substring(1),
@@ -152,13 +173,13 @@ class _ProviderDocumentsPageState extends ConsumerState<ProviderDocumentsPage> {
                                   icon: const Icon(Icons.delete_outline),
                                   onPressed: _busy
                                       ? null
-                                      : () => _delete(doc.key, doc.label),
+                                      : () => _delete(doc.key, label),
                                 ),
                               TextButton(
                                 onPressed: _busy
                                     ? null
-                                    : () => _upload(doc.key, doc.label),
-                                child: Text(hasDoc ? 'Replace' : 'Upload'),
+                                    : () => _upload(doc.key, label),
+                                child: Text(hasDoc ? l10n.replace : l10n.upload),
                               ),
                             ],
                           ),
@@ -183,9 +204,9 @@ class _ProviderDocumentsPageState extends ConsumerState<ProviderDocumentsPage> {
               child: SafeArea(
                 child: Column(
                   children: [
-                    const Padding(
-                      padding: EdgeInsets.all(8),
-                      child: Text('Document preview'),
+                    Padding(
+                      padding: const EdgeInsets.all(8),
+                      child: Text(l10n.docPreview),
                     ),
                     Expanded(
                       child: Image.network(_viewUrl!, fit: BoxFit.contain),

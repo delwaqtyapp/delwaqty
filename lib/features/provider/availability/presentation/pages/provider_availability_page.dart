@@ -46,7 +46,7 @@ class _ProviderAvailabilityPageState
     final availability = ref.watch(providerAvailabilityProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Availability')),
+      appBar: AppBar(title: Text(l10n.availability)),
       body: RefreshIndicator(
         onRefresh: () async => ref.invalidate(providerAvailabilityProvider),
         child: SingleChildScrollView(
@@ -99,7 +99,7 @@ class _ProviderAvailabilityPageState
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                isOpen ? 'Open' : 'Closed',
+                                isOpen ? l10n.open : l10n.closed,
                                 style: Theme.of(context)
                                     .textTheme
                                     .titleMedium
@@ -107,8 +107,8 @@ class _ProviderAvailabilityPageState
                               ),
                               Text(
                                 isOpen
-                                    ? 'Customers can place orders'
-                                    : 'Temporarily unavailable',
+                                    ? l10n.customersCanPlaceOrders
+                                    : l10n.temporarilyUnavailable,
                                 style: Theme.of(context)
                                     .textTheme
                                     .bodySmall
@@ -124,11 +124,8 @@ class _ProviderAvailabilityPageState
                   PremiumCard(
                     padding: const EdgeInsets.all(4),
                     child: SwitchListTile(
-                      title: const Text('Store is open for business'),
-                      subtitle: const Text(
-                        'Turn off to apply a temporary closure. '
-                        'Backend remains the source of truth.',
-                      ),
+                      title: Text(l10n.storeOpenForBusiness),
+                      subtitle: Text(l10n.availabilityHint),
                       value: isOpen,
                       onChanged: _saving ? null : _toggle,
                     ),
@@ -153,7 +150,7 @@ class _ProviderAvailabilityPageState
                     ),
                   const SizedBox(height: 20),
                   Text(
-                    'Weekly schedule',
+                    l10n.weeklySchedule,
                     style: Theme.of(context)
                         .textTheme
                         .titleMedium
@@ -164,9 +161,8 @@ class _ProviderAvailabilityPageState
                     PremiumCard(
                       child: PremiumEmptyState(
                         icon: Icons.schedule_rounded,
-                        title: 'No schedule set',
-                        message:
-                            'Configure working hours from the merchant settings.',
+                        title: l10n.noScheduleSet,
+                        message: l10n.configureWorkingHours,
                       ),
                     )
                   else
@@ -185,15 +181,15 @@ class _ProviderAvailabilityPageState
                                       style: Theme.of(context).textTheme.bodySmall,
                                     ),
                                   ),
-                                  Text(
-                                    (row['is_closed'] as bool? ?? false)
-                                        ? 'Closed'
-                                        : '${row['open_time']} – ${row['close_time']}',
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .bodySmall
-                                        ?.copyWith(fontWeight: FontWeight.bold),
-                                  ),
+                                   Text(
+                                     (row['is_closed'] as bool? ?? false)
+                                         ? l10n.closed
+                                         : '${row['open_time']} – ${row['close_time']}',
+                                     style: Theme.of(context)
+                                         .textTheme
+                                         .bodySmall
+                                         ?.copyWith(fontWeight: FontWeight.bold),
+                                   ),
                                 ],
                               ),
                             ),
@@ -210,15 +206,34 @@ class _ProviderAvailabilityPageState
   }
 
   String _dayLabel(int day) {
+    final l10n = AppLocalizations.of(context);
     const days = [
-      'Sunday',
-      'Monday',
-      'Tuesday',
-      'Wednesday',
-      'Thursday',
-      'Friday',
-      'Saturday',
+      'sunday',
+      'monday',
+      'tuesday',
+      'wednesday',
+      'thursday',
+      'friday',
+      'saturday',
     ];
-    return days[day.clamp(0, 6)];
+    final name = days[day.clamp(0, 6)];
+    switch (name) {
+      case 'sunday':
+        return l10n.sunday;
+      case 'monday':
+        return l10n.monday;
+      case 'tuesday':
+        return l10n.tuesday;
+      case 'wednesday':
+        return l10n.wednesday;
+      case 'thursday':
+        return l10n.thursday;
+      case 'friday':
+        return l10n.friday;
+      case 'saturday':
+        return l10n.saturday;
+      default:
+        return name;
+    }
   }
 }

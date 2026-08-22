@@ -23,6 +23,19 @@
 
 ---
 
+## Current Task — SPRINT 117: PLATFORM CONTROL ARCHITECTURE (branding + language + owner/multi-role RBAC + smart dispatch) — DONE (code-side), runtime BLOCKED
+
+- PART 1 Branding + language isolation: added Android flavor `strings.xml` (en+ar) for driver/provider; fixed admin Arabic label + renamed Admin/Customer labels to standardized names (DelwaQty / DelwaQty Admin / DelwaQty Driver / دلوقتي مقدمى خدمات etc.). Wired `adminLocaleProvider` into Admin `app.dart` (was hardcoded Arabic dead code). Locale default now follows system language (Arabic if system Arabic else English). Language state per-app sandbox-isolated (SharedPrefs per package) → independent. iOS per-flavor branding = 🟠 (needs Xcode schemes).
+- PART 2/3 Owner + multi-role: migration `071` adds `get_my_capabilities()` (backend-authoritative capability resolver from row existence) + unified `audit_log` + `log_admin_action`. Owner = `users.role='owner'`.
+- PART 4-9 Admin RBAC: migration `072` adds `admin_roles` (7 templates: owner/accounts/operations/financial/support/verification/regional), `admin_has_permission(p,region)` (owner short-circuit + role defaults UNION explicit grants + region scope), `admin_assign_role/set_status/grant/revoke/assign_region/effective_permissions` RPCs (all SECURITY DEFINER + audited). Full permission vocabulary defined.
+- PART 10-19 Smart Dispatch Engine: migration `073` reconciles `orders.status` CHECK (adds picked_up/in_transit), adds `orders.driver_id` FK + `dispatch_status`, `order_dispatch` queue, `dispatch_config` center, RPCs `dispatch_order` (auto smart score + FOR UPDATE), `accept_order` (atomic PENDING→ASSIGNED), `decline_order`, `assign_order_manual` (permission-gated), `complete_delivery` (credits driver_earnings + platform_commissions, no duplicate ledger), and tightens `driver_locations` RLS (self/owner/DRIVER_LOCATION_VIEW/customer+provider own-active-delivery only).
+- PART 11/12/15/16 DispatchStrategy in pure Dart: `lib/features/dispatch/domain/dispatch_engine.dart` — `DispatchStrategy` with NearestDriverStrategy/SmartScoreStrategy/HybridStrategy/ManualStrategy, deterministic weighted scoring (documented weights), atomic assignment guard (exactly-one-success under concurrency), no-driver handling. 10 unit tests pass.
+- Gates: `flutter analyze` 0 errors; `flutter test` 920/920 pass; four-app debug build green; all four APKs reinstalled on DNP NX9 and launch + coexist (processes: com.delwaqty.app/.admin/.driver/.provider).
+- Committed `c749508` + pushed master.
+- Live DB apply/verify of 071-073 = 🟡 ENVIRONMENT BLOCKED (no staging DB). RPCs/triggers unverified at runtime; migrations authored additive + documented for DBA review.
+
+---
+
 ## Current Task — SPRINT 114: FINAL REGRESSION (4-APP BUILD + TESTS + AUDIT) — COMPLETE
 
 **Status: Provider Capability Engine + capability-aware navigation + Availability (migration 067) delivered.** `flutter analyze` clean; capability unit tests pass; Provider APK builds green.

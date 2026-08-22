@@ -205,6 +205,28 @@ class _MerchantDashboardPageState
               onTap: () => context.push('/provider-availability'),
             ),
           ],
+          if (ref
+              .watch(providerCapabilitiesProvider)
+              .contains(ProviderCapability.verification)) ...[
+            const Divider(height: 1),
+            ListTile(
+              leading: const Icon(Icons.verified_user_outlined),
+              title: const Text('Verification'),
+              trailing: const Icon(Icons.chevron_right_rounded),
+              onTap: () => context.push('/provider-verification'),
+            ),
+          ],
+          if (ref
+              .watch(providerCapabilitiesProvider)
+              .contains(ProviderCapability.documents)) ...[
+            const Divider(height: 1),
+            ListTile(
+              leading: const Icon(Icons.folder_open_outlined),
+              title: const Text('Documents'),
+              trailing: const Icon(Icons.chevron_right_rounded),
+              onTap: () => context.push('/provider-documents'),
+            ),
+          ],
           const Divider(height: 1),
           ListTile(
             leading: const Icon(Icons.calendar_month_outlined),

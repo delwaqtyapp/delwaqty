@@ -6,9 +6,13 @@ import 'package:delwaqty/features/provider/merchant/domain/entities/merchant_ord
 import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
 import 'package:delwaqty/shared/widgets/premium_empty_state.dart';
 import 'package:delwaqty/shared/widgets/shimmer_loading.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 import 'package:delwaqty/core/theme/app_colors.dart';
 import 'package:delwaqty/core/theme/app_text_styles.dart';
+import 'package:delwaqty/services/realtime/realtime_channel_constants.dart';
+import 'package:delwaqty/services/realtime/realtime_service.dart';
+import 'package:delwaqty/services/supabase/supabase_service.dart';
 
 final _merchantIdProvider = providerMerchantIdProvider;
 
@@ -30,6 +34,41 @@ class MerchantOrdersPage extends ConsumerStatefulWidget {
 }
 
 class _MerchantOrdersPageState extends ConsumerState<MerchantOrdersPage> {
+  @override
+  void initState() {
+    super.initState();
+    _subscribeRealtime();
+  }
+
+  void _subscribeRealtime() {
+    final uid = ref.read(supabaseClientProvider).auth.currentUser?.id;
+    if (uid == null) return;
+    ref.read(realtimeServiceProvider).subscribe(
+          channelName: RealtimeChannels.providerOrders,
+          opts: [
+            RealtimeChannelFilter(
+              event: PostgresChangeEvent.all,
+              schema: 'public',
+              table: 'orders',
+              filter: PostgresChangeFilter(
+                type: PostgresChangeFilterType.eq,
+                column: 'merchant_id',
+                value: uid,
+              ),
+              callback: (_) => ref.invalidate(_ordersProvider),
+            ),
+          ],
+        );
+  }
+
+  @override
+  void dispose() {
+    ref
+        .read(realtimeServiceProvider)
+        .unsubscribe(RealtimeChannels.providerOrders);
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);

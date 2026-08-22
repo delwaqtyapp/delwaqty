@@ -16,4 +16,7 @@ abstract final class RealtimeChannels {
   static const String profileUpdates = 'profile-updates';
   static const String merchantReviews = 'merchant-reviews';
   static const String inventoryUpdates = 'inventory-updates';
+  static const String providerOrders = 'provider-orders';
+  static const String driverDispatch = 'driver-dispatch';
+  static const String adminFinancial = 'admin-financial';
 }

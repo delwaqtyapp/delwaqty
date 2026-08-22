@@ -21,6 +21,7 @@ import 'package:delwaqty/domain/usecases/auth/auth_usecases.dart';
 import 'package:delwaqty/domain/usecases/user/get_user.dart';
 import 'package:delwaqty/domain/usecases/profile/profile_usecases.dart';
 import 'package:delwaqty/admin/module_registry.dart';
+import 'package:delwaqty/core/theme/theme_mode_provider.dart';
 import 'package:delwaqty/services/connectivity/connectivity_service.dart';
 import 'package:delwaqty/services/supabase/supabase_initializer.dart';
 import 'package:delwaqty/shared/notifications/notification_route_resolver.dart';
@@ -96,6 +97,7 @@ void main() async {
         profileRepositoryProvider.overrideWith(
           (ref) => ref.watch(profileRepositoryImplProvider),
         ),
+        themeModeProvider.overrideWith(() => AdminThemeModeNotifier()),
       ],
       child: const AppAdmin(),
     ),

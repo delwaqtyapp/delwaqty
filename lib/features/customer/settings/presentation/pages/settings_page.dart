@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:delwaqty/core/extensions/context_extensions.dart';
 import 'package:delwaqty/core/localization/locale_provider.dart';
 import 'package:delwaqty/core/theme/theme_mode_provider.dart';
+import 'package:delwaqty/features/_shared/auth/presentation/auth_provider.dart';
 import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 
@@ -61,6 +62,47 @@ class SettingsPage extends ConsumerWidget {
               subtitle: Text(l10n.version),
               trailing: const Icon(Icons.chevron_right_rounded),
               onTap: () => context.push('/settings/about'),
+            ),
+          ]),
+        ),
+        const SizedBox(height: 16),
+        AnimatedFadeIn(
+          delay: const Duration(milliseconds: 250),
+          child: _buildSection(context, l10n.account, [
+            ListTile(
+              leading: const Icon(Icons.notifications_outlined),
+              title: Text(l10n.notifications),
+              trailing: const Icon(Icons.chevron_right_rounded),
+              onTap: () => context.push('/notifications'),
+            ),
+            const Divider(height: 1),
+            ListTile(
+              leading: const Icon(Icons.logout_rounded),
+              title: Text(l10n.logout),
+              textColor: context.colorScheme.error,
+              iconColor: context.colorScheme.error,
+              onTap: () async {
+                final confirmed = await showDialog<bool>(
+                  context: context,
+                  builder: (dialogContext) => AlertDialog(
+                    title: Text(l10n.logout),
+                    content: Text(l10n.confirmLogout),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.of(dialogContext).pop(false),
+                        child: Text(l10n.cancel),
+                      ),
+                      FilledButton(
+                        onPressed: () => Navigator.of(dialogContext).pop(true),
+                        child: Text(l10n.logout),
+                      ),
+                    ],
+                  ),
+                );
+                if (confirmed == true && context.mounted) {
+                  await ref.read(authStateProvider.notifier).signOut();
+                }
+              },
             ),
           ]),
         ),
@@ -132,7 +174,7 @@ class SettingsPage extends ConsumerWidget {
             ? Icons.dark_mode_rounded
             : Icons.light_mode_rounded,
       ),
-      title: Text(l10n.darkMode),
+      title: Text(l10n.theme),
       trailing: SegmentedButton<ThemeMode>(
         segments: const [
           ButtonSegment(

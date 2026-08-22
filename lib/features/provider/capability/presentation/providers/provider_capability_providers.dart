@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:delwaqty/services/supabase/supabase_service.dart';
+import 'package:delwaqty/core/auth/platform_capabilities.dart';
 import 'package:delwaqty/features/provider/capability/domain/provider_capability.dart';
 
 /// Resolves the Provider app account's raw database classification.
@@ -10,10 +11,16 @@ import 'package:delwaqty/features/provider/capability/domain/provider_capability
 /// We try `merchants.type` first, then `service_providers.category_type`.
 /// RLS restricts these rows to the caller's own account, so ownership is
 /// enforced server-side and never trusted from a client-supplied value.
+///
+/// The global Owner (users.role='owner') is granted every provider capability
+/// without needing a merchant/service_provider row, so the same Auth identity
+/// works across all four apps. Backend RLS remains authoritative for real ops.
 final providerRawCategoryProvider = FutureProvider<String>((ref) async {
   final client = ref.watch(supabaseClientProvider);
   final uid = client.auth.currentUser?.id;
   if (uid == null || uid.isEmpty) return 'unknown';
+
+  if (await isOwnerByRole(client, uid)) return 'owner';
 
   final merchant = await client
       .from('merchants')

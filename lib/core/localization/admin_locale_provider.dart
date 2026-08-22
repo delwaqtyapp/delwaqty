@@ -1,5 +1,4 @@
 import 'dart:ui';
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:delwaqty/core/constants/storage_keys.dart';
 import 'package:delwaqty/data/datasources/local/shared_preferences_service.dart';
@@ -22,7 +21,7 @@ class AdminLocaleNotifier extends Notifier<Locale> {
       return Locale(saved);
     }
     final system = PlatformDispatcher.instance.locale;
-    final code = system?.languageCode ?? '';
+    final code = system.languageCode;
     return code.toLowerCase() == 'ar' ? const Locale('ar') : const Locale('en');
   }
 

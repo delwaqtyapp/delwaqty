@@ -56,6 +56,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get logout => 'تسجيل الخروج';
 
   @override
+  String get confirmLogout => 'هل أنت متأكد أنك تريد تسجيل الخروج؟';
+
+  @override
   String get register => 'إنشاء حساب';
 
   @override
@@ -87,6 +90,9 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get language => 'اللغة';
+
+  @override
+  String get theme => 'السمة';
 
   @override
   String get darkMode => 'الوضع الداكن';
@@ -5801,6 +5807,27 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get messageOptional => 'رسالة (اختياري)';
+
+  @override
+  String get paymentBankTransfer => 'تحويل بنكي';
+
+  @override
+  String get paymentInstapay => 'انستا باي';
+
+  @override
+  String get paymentVodafoneCash => 'فودافون كاش';
+
+  @override
+  String get paymentCash => 'كاش';
+
+  @override
+  String get proofOfPayment => 'إثبات التحويل';
+
+  @override
+  String get tapToAddProof => 'اضغط لإرفاق إثبات التحويل';
+
+  @override
+  String get changeProof => 'تغيير الإثبات';
 
   @override
   String get verification => 'التحقق';

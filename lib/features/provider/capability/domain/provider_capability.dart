@@ -36,6 +36,7 @@ enum ProviderCategory {
   marketplace,
   retail,
   homeServices,
+  owner,
   unknown;
 
   /// Maps a raw database value (`merchants.type` or
@@ -71,6 +72,8 @@ enum ProviderCategory {
       case 'home_services':
       case 'homeservices':
         return ProviderCategory.homeServices;
+      case 'owner':
+        return ProviderCategory.owner;
       default:
         return ProviderCategory.unknown;
     }
@@ -156,6 +159,27 @@ Set<ProviderCapability> resolveCapabilities(ProviderCategory category) {
     case ProviderCategory.unknown:
       return {
         ProviderCapability.dashboard,
+        ProviderCapability.financial,
+        ProviderCapability.notifications,
+        ProviderCapability.support,
+      };
+    case ProviderCategory.owner:
+      return {
+        ProviderCapability.dashboard,
+        ProviderCapability.orders,
+        ProviderCapability.catalog,
+        ProviderCapability.services,
+        ProviderCapability.bookings,
+        ProviderCapability.branches,
+        ProviderCapability.offers,
+        ProviderCapability.reviews,
+        ProviderCapability.availability,
+        ProviderCapability.deliveries,
+        ProviderCapability.documents,
+        ProviderCapability.verification,
+        ProviderCapability.wallet,
+        ProviderCapability.earnings,
+        ProviderCapability.commission,
         ProviderCapability.financial,
         ProviderCapability.notifications,
         ProviderCapability.support,

@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:delwaqty/features/provider/financial/domain/entities/financial_entities.dart';
 
 abstract class ProviderFinancialRepository {
@@ -16,4 +18,12 @@ abstract class ProviderFinancialRepository {
     String? proofPath,
     String? message,
   });
+
+  Future<String> uploadTopupProof({
+    required String fileName,
+    required Uint8List bytes,
+    required String contentType,
+  });
+
+  Future<String> getTopupProofSignedUrl(String path);
 }

@@ -401,6 +401,59 @@ pending (environment-limited → 🟡).
 
 ---
 
+## SPRINT 118 — PLATFORM CONTROL ARCHITECTURE (RBAC reconciliation, Delivery branding, Your Access)
+
+**Current task**
+- Reconcile admin RBAC to a single authoritative engine (no duplicate system).
+- Fix Delivery product branding (driver flavor label → "DelwaQty Delivery" / "دلوقتي دليفرى").
+- Add Delivery read-only "Your Access" (صلاحياتك) screen.
+- Localization terminology correction (operational labels → Delivery).
+- Live-DB read-only verification.
+
+**Decisions**
+- 072 rewritten to be COMPLEMENTARY, not duplicative: removed parallel lifecycle
+  functions (admin_assign_role/admin_grant_permission/admin_revoke_permission/
+  admin_set_admin_status/admin_assign_region) that duplicated 034's
+  assign_admin_role/grant_admin_permission/revoke_admin_permission/deactivate_admin/
+  assign_admin_region. Kept `admin_roles` template catalog + `admin_apply_role_template`
+  (guarded by existing `has_permission('ADMIN_ROLE_ASSIGN')`) + `admin_has_permission`
+  decision engine reading the SINGLE source of truth `admin_permission_grants`
+  (shared with 034's `has_permission`). Role defaults flow via `admin_roles` UNION grants.
+- Canonical permission vocabulary aligned to directive Part 5 (USER_*, ORDER_*,
+  DELIVERY_*, DISPATCH_*, PROVIDER_*, FINANCIAL_*, SUPPORT_*, SECURITY_*) and
+  role set (owner, accounts_admin, operations_admin, delivery_operations,
+  orders_admin, financial_admin, provider_management, support_admin, regional_admin,
+  security_admin, read_only_admin).
+- 073 dispatch RPCs updated to canonical names (DISPATCH_MANUAL, DELIVERY_LOCATION_VIEW)
+  and keep using `admin_has_permission`.
+
+**Verification (code-side)**
+- `flutter analyze`: 0 errors. `flutter test`: 920/920 pass.
+- Four APKs build green; all four installed on DNP NX9 (A3SQUT5A28003808); launch OK,
+  no FATAL/FlutterError in logcat. Delivery label corrected.
+- Delivery/Provider apps confirmed to contain NO RBAC/role/permission management UI.
+
+**Open / blocked**
+- 🟡 Live-DB DDL (apply 071/072/073) impossible: only anon/publishable key provided,
+  and the provided `sbp_…` key is INVALID for the known project
+  `bttnlkmwhorjamzemwda.supabase.co` (returns "Invalid API key"). Auth-user RBAC /
+  owner / dispatch runtime probes NOT executed. Anonymous access correctly DENIED
+  (RLS active: `permission denied for function is_admin`).
+- 🟡 Admin account wizard (Delivery/Provider/Admin) exists via `admin_management`
+  module (create-admin Edge Function) but full multi-step product UI extensions
+  and Provider category/service-type mapping remain to implement.
+- 🟡 iOS per-flavor branding pending (Android done).
+
+**Files modified (this sprint)**
+- `android/app/src/driver/res/values/strings.xml`, `values-ar/strings.xml` (label)
+- `supabase/migrations/072_admin_rbac_roles_permissions.sql` (reconciled)
+- `supabase/migrations/073_smart_delivery_dispatch_engine.sql` (perm names)
+- `lib/l10n/app_en.arb`, `app_ar.arb` + regenerated `app_localizations*.dart`
+- `lib/features/driver/presentation/pages/driver_access_page.dart` (new)
+- `lib/features/driver/presentation/pages/driver_dashboard_page.dart` (entry)
+
+---
+
 ## Previous Tasks
 
 - **SPRINT 95:** Deletion root-cause fix + missing RPCs + live fixes — 057, KPI, dead buttons, search route

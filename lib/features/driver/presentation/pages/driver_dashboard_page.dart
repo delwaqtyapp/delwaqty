@@ -44,6 +44,16 @@ class DriverDashboardPage extends ConsumerWidget {
         title: Text(l10n.driverDashboard),
         actions: [
           IconButton(
+            icon: const Icon(Icons.notifications_outlined),
+            tooltip: l10n.notifications,
+            onPressed: () => context.push('/notifications'),
+          ),
+          IconButton(
+            icon: const Icon(Icons.settings_outlined),
+            tooltip: l10n.settings,
+            onPressed: () => context.push('/settings'),
+          ),
+          IconButton(
             icon: const Icon(Icons.shield_outlined),
             tooltip: l10n.deliveryAccess,
             onPressed: () => Navigator.of(context).push(

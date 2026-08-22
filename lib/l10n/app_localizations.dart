@@ -188,6 +188,12 @@ abstract class AppLocalizations {
   /// **'Logout'**
   String get logout;
 
+  /// No description provided for @confirmLogout.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to log out?'**
+  String get confirmLogout;
+
   /// No description provided for @register.
   ///
   /// In en, this message translates to:
@@ -253,6 +259,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Language'**
   String get language;
+
+  /// No description provided for @theme.
+  ///
+  /// In en, this message translates to:
+  /// **'Theme'**
+  String get theme;
 
   /// No description provided for @darkMode.
   ///
@@ -11179,6 +11191,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Message (optional)'**
   String get messageOptional;
+
+  /// No description provided for @paymentBankTransfer.
+  ///
+  /// In en, this message translates to:
+  /// **'Bank transfer'**
+  String get paymentBankTransfer;
+
+  /// No description provided for @paymentInstapay.
+  ///
+  /// In en, this message translates to:
+  /// **'InstaPay'**
+  String get paymentInstapay;
+
+  /// No description provided for @paymentVodafoneCash.
+  ///
+  /// In en, this message translates to:
+  /// **'Vodafone Cash'**
+  String get paymentVodafoneCash;
+
+  /// No description provided for @paymentCash.
+  ///
+  /// In en, this message translates to:
+  /// **'Cash'**
+  String get paymentCash;
+
+  /// No description provided for @proofOfPayment.
+  ///
+  /// In en, this message translates to:
+  /// **'Proof of payment'**
+  String get proofOfPayment;
+
+  /// No description provided for @tapToAddProof.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap to attach transfer proof'**
+  String get tapToAddProof;
+
+  /// No description provided for @changeProof.
+  ///
+  /// In en, this message translates to:
+  /// **'Change proof'**
+  String get changeProof;
 
   /// No description provided for @verification.
   ///

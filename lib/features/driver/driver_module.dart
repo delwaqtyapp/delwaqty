@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:delwaqty/core/module/feature_module.dart';
+import 'package:delwaqty/core/auth/platform_capabilities.dart';
 import 'package:delwaqty/features/driver/domain/repositories/driver_repository.dart';
 import 'package:delwaqty/features/driver/domain/entities/driver_profile.dart';
 import 'package:delwaqty/features/driver/domain/entities/driver_delivery.dart';
 import 'package:delwaqty/features/driver/data/datasources/remote/supabase_driver_data_source.dart';
 import 'package:delwaqty/features/driver/data/datasources/remote/supabase_driver_platform_data_source.dart';
 import 'package:delwaqty/features/driver/data/repositories/driver_repository_impl.dart';
+import 'package:delwaqty/l10n/app_localizations.dart';
 import 'package:delwaqty/features/driver/presentation/pages/driver_dashboard_page.dart';
 import 'package:delwaqty/features/driver/presentation/pages/driver_earnings_page.dart';
 import 'package:delwaqty/features/driver/presentation/pages/driver_onboarding_page.dart';
@@ -29,7 +32,24 @@ final driverRepositoryProvider = Provider<DriverRepository>(
 
 final driverProfileProvider = FutureProvider.family<DriverProfile?, String>((ref, userId) async {
   final repo = ref.watch(driverRepositoryProvider);
-  return repo.getProfile(userId);
+  final profile = await repo.getProfile(userId);
+  if (profile != null) return profile;
+  // Owner bypass: a global owner (users.role='owner') is authorized to operate
+  // Delivery without a dedicated driver registration row. This keeps the Owner
+  // inside the Delivery app even when the provisioning RPC has not been applied
+  // to the live database yet. Backend RLS remains authoritative for real ops.
+  final isOwner = await isOwnerByRole(Supabase.instance.client, userId);
+  if (isOwner) {
+    return DriverProfile(
+      id: userId,
+      userId: userId,
+      rating: 5.0,
+      createdAt: DateTime.now(),
+      onboardingCompleted: true,
+      verificationStatus: 'approved',
+    );
+  }
+  return null;
 });
 
 final availableDeliveriesProvider = FutureProvider<List<DriverDelivery>>((ref) async {
@@ -42,7 +62,7 @@ class DriverModule extends FeatureModule {
   String get id => 'driver';
 
   @override
-  String name(BuildContext context) => 'Driver';
+  String name(BuildContext context) => AppLocalizations.of(context).delivery;
 
   @override
   IconData? get icon => Icons.delivery_dining_outlined;

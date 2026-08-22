@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:delwaqty/core/errors/exceptions.dart';
 import 'package:delwaqty/features/provider/financial/data/datasources/remote/supabase_financial_data_source.dart';
 import 'package:delwaqty/features/provider/financial/domain/entities/financial_entities.dart';
@@ -59,6 +61,32 @@ class ProviderFinancialRepositoryImpl implements ProviderFinancialRepository {
         proofPath: proofPath,
         message: message,
       );
+    } catch (e) {
+      throw ServerException(message: e.toString());
+    }
+  }
+
+  @override
+  Future<String> uploadTopupProof({
+    required String fileName,
+    required Uint8List bytes,
+    required String contentType,
+  }) async {
+    try {
+      return await _dataSource.uploadTopupProof(
+        fileName: fileName,
+        bytes: bytes,
+        contentType: contentType,
+      );
+    } catch (e) {
+      throw ServerException(message: e.toString());
+    }
+  }
+
+  @override
+  Future<String> getTopupProofSignedUrl(String path) async {
+    try {
+      return await _dataSource.getTopupProofSignedUrl(path);
     } catch (e) {
       throw ServerException(message: e.toString());
     }

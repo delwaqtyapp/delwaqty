@@ -56,6 +56,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get logout => 'Logout';
 
   @override
+  String get confirmLogout => 'Are you sure you want to log out?';
+
+  @override
   String get register => 'Register';
 
   @override
@@ -87,6 +90,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get language => 'Language';
+
+  @override
+  String get theme => 'Theme';
 
   @override
   String get darkMode => 'Dark Mode';
@@ -5845,6 +5851,27 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get messageOptional => 'Message (optional)';
+
+  @override
+  String get paymentBankTransfer => 'Bank transfer';
+
+  @override
+  String get paymentInstapay => 'InstaPay';
+
+  @override
+  String get paymentVodafoneCash => 'Vodafone Cash';
+
+  @override
+  String get paymentCash => 'Cash';
+
+  @override
+  String get proofOfPayment => 'Proof of payment';
+
+  @override
+  String get tapToAddProof => 'Tap to attach transfer proof';
+
+  @override
+  String get changeProof => 'Change proof';
 
   @override
   String get verification => 'Verification';

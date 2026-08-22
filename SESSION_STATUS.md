@@ -4,11 +4,15 @@
 
 ---
 
-## Current Task — SPRINT 112: NOTIFICATION ROUTING + REALTIME — COMPLETE (uncommitted)
+## Current Task — SPRINT 114: FINAL REGRESSION (4-APP BUILD + TESTS + AUDIT) — COMPLETE
 
 **Status: Provider Capability Engine + capability-aware navigation + Availability (migration 067) delivered.** `flutter analyze` clean; capability unit tests pass; Provider APK builds green.
 
 **Status: SPRINT 112 — Notification deep-link routing made APP-CONTEXT AWARE (customer/admin/driver/provider). Canonical deep links registered with per-context scoping; each app sets NotificationRouteResolver.appContext in main.dart so a provider/owner deep link can never route the Customer app. Provider-orders realtime wired via existing RealtimeService (providerOrders channel, postgres_changes on orders where merchant_id = auth.uid()); added providerOrders/driverDispatch/adminFinancial channel constants. Provider APK builds green. Notification tap routing + realtime: 🟡 ENVIRONMENT BLOCKED (runtime).**
+
+**Status: SPRINT 113 — Static audit. Full-repo `flutter analyze` = 0 errors; `flutter test` = 910/910 pass. Secret scan = none. RPC↔migration consistency = all RPCs present (067-070). Security DEFINER + search_path + REVOKE/GRANT verified on new migrations. RLS + storage policies added. Notification routing API callers + tests fixed. Localization: new provider feature pages use English literals (🟠 PARTIAL); pre-existing Arabic hardcoded strings in error_handler/admin are existing debt (noted).**
+
+**Status: SPRINT 114 — Four-app regression. flutter analyze = 0 errors; flutter test = 910/910 pass; all four APKs build green. Sizes (debug): customer 199.7MB, admin 202.5MB, driver 196.3MB, provider 199.4MB. git diff --check clean; HEAD == origin/master; tree clean.**
 
 **Status: Owner Global Dashboard built on two new read-only, owner-only audit RPCs (migration 066) + existing 065 RPCs.** `flutter analyze` = 0 errors; **895/895 tests pass**; Admin debug APK builds green.
 

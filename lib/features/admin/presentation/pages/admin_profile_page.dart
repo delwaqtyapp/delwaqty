@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:delwaqty/features/admin/financial/presentation/providers/admin_financial_providers.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 import 'package:delwaqty/core/constants/app_constants.dart';
 import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
@@ -26,7 +27,7 @@ class _AdminProfilePageState extends ConsumerState<AdminProfilePage> {
     try {
       final client = Supabase.instance.client;
       final email = client.auth.currentUser?.email ?? '';
-      final isOwner = email == AppConstants.ownerEmail;
+      final isOwner = ref.watch(adminIsOwnerProvider).value ?? false;
 
       final result = await client.rpc('get_admin_profile', params: {
         'p_email': email,
@@ -47,8 +48,7 @@ class _AdminProfilePageState extends ConsumerState<AdminProfilePage> {
         setState(() {
           _profile = {
             'email': Supabase.instance.client.auth.currentUser?.email ?? '',
-            'is_owner': Supabase.instance.client.auth.currentUser?.email ==
-                AppConstants.ownerEmail,
+            'is_owner': false,
             'role': 'admin',
             'assigned_region': null,
             'total_earnings': 0.0,

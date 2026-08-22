@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:delwaqty/features/admin/financial/presentation/providers/admin_financial_providers.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 import 'package:delwaqty/core/constants/app_constants.dart';
 import 'package:delwaqty/features/admin/domain/entities/admin_models.dart';
@@ -28,7 +29,7 @@ class _AdminHierarchyPageState extends ConsumerState<AdminHierarchyPage> {
     try {
       final client = Supabase.instance.client;
       final email = client.auth.currentUser?.email ?? '';
-      final isOwner = email == AppConstants.ownerEmail;
+      final isOwner = ref.watch(adminIsOwnerProvider).value ?? false;
 
       final profileResult = await client.rpc('get_admin_profile', params: {
         'p_email': email,

@@ -10,6 +10,7 @@ import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
 import 'package:delwaqty/shared/widgets/shimmer_loading.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 import 'package:delwaqty/features/driver/presentation/pages/driver_access_page.dart';
+import 'package:delwaqty/core/auth/platform_capabilities.dart';
 
 final _performanceProvider =
     FutureProvider.family<DriverPerformance, String>((ref, driverId) async {
@@ -24,6 +25,9 @@ class DriverDashboardPage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final authState = ref.watch(authStateProvider);
+    // Resolves Owner operational contexts + triggers idempotent provisioning
+    // so the same Owner identity works across all four apps.
+    ref.watch(platformCapabilitiesProvider);
 
     final userId = authState is AuthAuthenticated ? authState.user.id : null;
     if (userId == null) {

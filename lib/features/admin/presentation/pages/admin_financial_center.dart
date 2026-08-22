@@ -102,7 +102,7 @@ class AdminFinancialCenter extends ConsumerWidget {
                       color: const Color(0xFFFF9500),
                       onTap: () => context.push('/admin/receiving-wallets'),
                     ),
-                    if (ref.watch(adminIsOwnerProvider))
+                    if ((ref.watch(adminIsOwnerProvider)).value ?? false)
                       _FinanceQuickAction(
                         icon: Icons.public_rounded,
                         label: 'Global Audit',

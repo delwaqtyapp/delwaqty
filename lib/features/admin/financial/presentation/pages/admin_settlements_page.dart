@@ -183,7 +183,7 @@ class _AdminSettlementsPageState extends ConsumerState<AdminSettlementsPage> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final isOwner = ref.watch(adminIsOwnerProvider);
+    final isOwner = ref.watch(adminIsOwnerProvider).value ?? false;
     final listAsync = ref.watch(adminSettlementsProvider);
 
     return Scaffold(

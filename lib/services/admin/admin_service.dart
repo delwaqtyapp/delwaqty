@@ -2,9 +2,6 @@ import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:delwaqty/data/repositories/admin_repository.dart';
 import 'package:delwaqty/features/admin/domain/entities/admin_models.dart';
-import 'package:delwaqty/core/constants/app_constants.dart';
-
-const String _ownerEmail = AppConstants.ownerEmail;
 
 class AdminService {
   AdminService(this._repository);
@@ -60,14 +57,24 @@ class AdminService {
     }
   }
 
-  bool get isOwner {
-    final email = Supabase.instance.client.auth.currentUser?.email;
-    return email == _ownerEmail;
+  Future<bool> get isOwner async {
+    final uid = Supabase.instance.client.auth.currentUser?.id;
+    if (uid == null) return false;
+    try {
+      final res = await Supabase.instance.client
+          .from('users')
+          .select('role')
+          .eq('id', uid)
+          .maybeSingle();
+      return (res?['role'] as String?) == 'owner';
+    } catch (_) {
+      return false;
+    }
   }
 
   Future<bool> deleteUser(String userId, {String? reason}) async {
     try {
-      if (isOwner) {
+      if (await isOwner) {
         await _repository.deleteUser(userId);
         return true;
       }

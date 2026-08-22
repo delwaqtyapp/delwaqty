@@ -27,7 +27,7 @@ class ProviderDocumentsDataSource {
   Future<String> uploadDoc(String name, Uint8List bytes) async {
     final uid = _client.auth.currentUser?.id ?? 'anon';
     final path = 'provider_documents/$uid/$name';
-    await _client.storage.from('profiles').uploadBinary(
+    await _client.storage.from('provider-documents').uploadBinary(
           path,
           bytes,
           fileOptions: const FileOptions(
@@ -35,6 +35,20 @@ class ProviderDocumentsDataSource {
             contentType: 'image/jpeg',
           ),
         );
-    return _client.storage.from('profiles').getPublicUrl(path);
+    return path;
+  }
+
+  Future<String> getDocumentUrl(String path) async {
+    final res = await _client.storage
+        .from('provider-documents')
+        .createSignedUrl(path, 3600);
+    return res;
+  }
+
+  Future<void> deleteDocument(String docType) async {
+    await _client.rpc(
+      'provider_delete_document',
+      params: {'p_doc_type': docType},
+    );
   }
 }

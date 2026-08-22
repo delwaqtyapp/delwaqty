@@ -7,6 +7,8 @@ abstract class ProviderDocumentsRepository {
   Future<List<Map<String, dynamic>>> getDocuments();
   Future<Map<String, dynamic>> upsertDocument(String docType, String fileUrl);
   Future<String> uploadDoc(String name, Uint8List bytes);
+  Future<String> getDocumentUrl(String path);
+  Future<void> deleteDocument(String docType);
 }
 
 class ProviderDocumentsRepositoryImpl implements ProviderDocumentsRepository {
@@ -41,6 +43,24 @@ class ProviderDocumentsRepositoryImpl implements ProviderDocumentsRepository {
       return await _source.uploadDoc(name, bytes);
     } catch (e) {
       throw ServerException(message: 'Failed to store document: $e');
+    }
+  }
+
+  @override
+  Future<String> getDocumentUrl(String path) async {
+    try {
+      return await _source.getDocumentUrl(path);
+    } catch (e) {
+      throw ServerException(message: 'Failed to open document: $e');
+    }
+  }
+
+  @override
+  Future<void> deleteDocument(String docType) async {
+    try {
+      await _source.deleteDocument(docType);
+    } catch (e) {
+      throw ServerException(message: 'Failed to delete document: $e');
     }
   }
 }

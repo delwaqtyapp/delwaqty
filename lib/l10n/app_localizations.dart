@@ -3287,7 +3287,7 @@ abstract class AppLocalizations {
   /// No description provided for @driverDashboard.
   ///
   /// In en, this message translates to:
-  /// **'Driver Dashboard'**
+  /// **'Delivery Dashboard'**
   String get driverDashboard;
 
   /// No description provided for @online.
@@ -5687,7 +5687,7 @@ abstract class AppLocalizations {
   /// No description provided for @driverManagement.
   ///
   /// In en, this message translates to:
-  /// **'Driver Management'**
+  /// **'Delivery Management'**
   String get driverManagement;
 
   /// No description provided for @active.
@@ -5873,13 +5873,13 @@ abstract class AppLocalizations {
   /// No description provided for @driverPerformance.
   ///
   /// In en, this message translates to:
-  /// **'Driver Performance'**
+  /// **'Delivery Performance'**
   String get driverPerformance;
 
   /// No description provided for @driverPerformancePlaceholder.
   ///
   /// In en, this message translates to:
-  /// **'Driver performance metrics will appear here.'**
+  /// **'Delivery performance metrics will appear here.'**
   String get driverPerformancePlaceholder;
 
   /// No description provided for @typeSupermarket.

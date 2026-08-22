@@ -1677,7 +1677,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get loginToViewWallet => 'سجل الدخول لعرض محفظتك';
 
   @override
-  String get driverDashboard => 'لوحة تحكم السائق';
+  String get driverDashboard => 'لوحة تحكم الدليفرى';
 
   @override
   String get online => 'متصل';
@@ -2920,7 +2920,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get supportEmailAddress => 'support@delwaqty.com';
 
   @override
-  String get driverManagement => 'إدارة السائقين';
+  String get driverManagement => 'إدارة الدليفرى';
 
   @override
   String get active => 'نشط';
@@ -3013,10 +3013,10 @@ class AppLocalizationsAr extends AppLocalizations {
   String get merchantPerformancePlaceholder => 'ستظهر بيانات أداء المتاجر هنا.';
 
   @override
-  String get driverPerformance => 'أداء السائقين';
+  String get driverPerformance => 'أداء الدليفرى';
 
   @override
-  String get driverPerformancePlaceholder => 'ستظهر مقاييس أداء السائقين هنا.';
+  String get driverPerformancePlaceholder => 'ستظهر مقاييس أداء الدليفرى هنا.';
 
   @override
   String get typeSupermarket => 'سوبرماركت';

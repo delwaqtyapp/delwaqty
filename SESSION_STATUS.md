@@ -17,6 +17,8 @@
 - Part 14 Passenger/taxi: matches are shared delivery infra (ratePassenger, RideStatus, ride.dart historical "Ride" naming) — explicitly kept per directive; no customer taxi-booking UI.
 - Part 15 Build: four-app debug build green. Part 16 APK sizes stable (customer 199.7 / admin 202.5 / driver 196.3 / provider 199.4 MB). Part 17 reinstall all four = Success. Part 18 committed `472d545` + pushed master.
 
+**RC CORRECTION (sprint 116):** Device re-verification revealed Driver + Provider packages were installed but had **no launchable activity** — `cmd package resolve-activity` returned "No activity found" and `am start` failed ("Activity class ...MainActivity does not exist"). Root cause: flavor `AndroidManifest.xml` existed only for `customer`/`admin`; `driver`/`provider` fell back to `main` manifest which declares no `<activity>`. Fix: created `android/app/src/driver/AndroidManifest.xml` + `android/app/src/provider/AndroidManifest.xml` (launcher `<activity>` mirroring customer). Rebuilt + reinstalled both; `resolve-activity` now returns `com.delwaqty.driver/com.delwaqty.app.MainActivity` and `com.delwaqty.provider/com.delwaqty.app.MainActivity`; both launch and run (process alive, no FATAL/FlutterError/AndroidRuntime). All four apps now coexist + launch. Committed `7d54fcf` + pushed.
+
 **ENVIRONMENT BLOCKED:** Part 10 live Supabase DB apply/verify of 067-070 + 065/066 runtime; Part 3-7 backend-dependent interactive smoke (login/data flows) require live DB + credentials. Release signing unavailable (debug only).
 
 ---

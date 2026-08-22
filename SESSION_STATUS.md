@@ -4,7 +4,9 @@
 
 ---
 
-## Current Task — SPRINT 107: DRIVER FINANCIAL CENTER (Flutter client) — COMPLETED
+## Current Task — SPRINT 108: OWNER GLOBAL FINANCIAL DASHBOARD (Flutter + backend audit RPCs) — COMPLETED
+
+**Status: Owner Global Dashboard built on two new read-only, owner-only audit RPCs (migration 066) + existing 065 RPCs.** `flutter analyze` = 0 errors; **895/895 tests pass**; Admin debug APK builds green.
 
 **Status: Additive backend contract delivered (`supabase/migrations/065_provider_financial_subsystem.sql`, committed, pushed master).** PHASE 1 audit complete: confirmed reuse of existing `wallets`, `wallet_transactions`, `driver_earnings`, `withdrawal_requests`, `platform_commissions` (7%/3% authoritative), `commission_rules`, `platform_*` financial-intelligence RPCs, `user_region_preferences` (account→region). No duplicate tables. New additive tables + RPCs for Grace, Top-Up, Regional Collection, Platform Settlement, Platform/Admin Receiving Accounts.
 
@@ -56,6 +58,20 @@
 - Owner Global Collections/Settlements/Audit dashboards (PHASE 1 owner section) — backend exists; Flutter pending.
 - Provider hardening/audit (PHASE 3), Capability Engine (25), Availability (26), Verification (27), Documents (28), Notification remap (29), Realtime (30), Localization sweep (32), Security/Storage/RPC audits (14–16), Integrity tests (17), four-app build matrix (22), device (21), live DB (20).
 - Live DB application + functional/device verification of 065 RPCs — 🟡 ENVIRONMENT BLOCKED (migration authored from static analysis; review on staging before prod).
+
+---
+
+## Current Task — SPRINT 108: OWNER GLOBAL FINANCIAL DASHBOARD (Flutter + backend audit RPCs) — COMPLETED (committed, pushed master)
+
+**Status: Owner Global Dashboard built on two new read-only, owner-only audit RPCs (migration 066) + existing 065 RPCs.** `flutter analyze` = 0 errors; **895/895 tests pass**; Admin debug APK builds green.
+
+**What was built:**
+- `supabase/migrations/066_owner_global_financial_audit.sql` (additive, never applied to live DB — 🟡 ENVIRONMENT BLOCKED): two read-only, owner-only (`_is_owner_uid`) audit RPCs — `platform_collection_audit()` (global aggregates of `regional_collections` + by_region + recent rows; `outstanding = total − settled`) and `platform_settlement_audit()` (global aggregates of `platform_settlements` by status + by_region + recent rows; `outstanding = pending + under_review`). SECURITY DEFINER, `search_path = public, pg_temp`, granted to authenticated only. Needed because the owner is not RLS-scoped to read every region's collections directly.
+- Flutter: `AdminFinancialDataSource.platformCollectionAudit()/platformSettlementAudit()` → repository + `platformCollectionAuditProvider`/`platformSettlementAuditProvider` → `AdminOwnerDashboardPage` (summary stat grid + by-region + recent rows for both collections and settlements). Owner-only entry point added as a "Global Audit" quick action in `AdminFinancialCenter`, gated on `adminIsOwnerProvider`. Route `/admin/owner-dashboard` wired in `AdminModule`.
+
+**Known gaps (remaining financial work — NOT built this turn):**
+- Provider hardening/audit (PHASE 3), Capability Engine (25), Availability (26), Verification (27), Documents (28), Notification remap (29), Realtime (30), Localization sweep (32), Security/Storage/RPC audits (14–16), Integrity tests (17), four-app build matrix (22), device (21), live DB (20).
+- Live DB application + functional/device verification of 065/066 RPCs — 🟡 ENVIRONMENT BLOCKED (migrations authored from static analysis; review on staging before prod).
 
 ---
 

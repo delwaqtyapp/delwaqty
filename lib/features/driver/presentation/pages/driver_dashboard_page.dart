@@ -9,6 +9,7 @@ import 'package:delwaqty/features/driver/domain/entities/driver_performance.dart
 import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
 import 'package:delwaqty/shared/widgets/shimmer_loading.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
+import 'package:delwaqty/features/driver/presentation/pages/driver_access_page.dart';
 
 final _performanceProvider =
     FutureProvider.family<DriverPerformance, String>((ref, driverId) async {
@@ -35,7 +36,18 @@ class DriverDashboardPage extends ConsumerWidget {
     final profileAsync = ref.watch(driverProfileProvider(userId));
 
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.driverDashboard)),
+      appBar: AppBar(
+        title: Text(l10n.driverDashboard),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.shield_outlined),
+            tooltip: l10n.deliveryAccess,
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute(builder: (_) => const DriverAccessPage()),
+            ),
+          ),
+        ],
+      ),
       body: RefreshIndicator(
         onRefresh: () async {
           ref.invalidate(driverProfileProvider(userId));

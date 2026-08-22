@@ -1680,6 +1680,28 @@ class AppLocalizationsAr extends AppLocalizations {
   String get driverDashboard => 'لوحة تحكم الدليفرى';
 
   @override
+  String get deliveryAccess => 'صلاحياتك';
+
+  @override
+  String get deliveryAccessSubtitle => 'الملف التشغيلى للدليفرى';
+
+  @override
+  String get accessManagedInAdmin =>
+      'إدارة الأدوار والصلاحيات تتم من دلوقتى Admin.';
+
+  @override
+  String get ownerFullControl => 'مالك - تحكم تشغيلى كامل للدليفرى.';
+
+  @override
+  String get accessRole => 'الدور الحالى';
+
+  @override
+  String get accessStatus => 'الحالة';
+
+  @override
+  String get accessUnavailable => 'تفاصيل الصلاحيات غير متاحة حالياً.';
+
+  @override
   String get online => 'متصل';
 
   @override

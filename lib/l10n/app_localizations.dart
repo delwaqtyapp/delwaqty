@@ -3290,6 +3290,48 @@ abstract class AppLocalizations {
   /// **'Delivery Dashboard'**
   String get driverDashboard;
 
+  /// No description provided for @deliveryAccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Your Access'**
+  String get deliveryAccess;
+
+  /// No description provided for @deliveryAccessSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivery operational profile'**
+  String get deliveryAccessSubtitle;
+
+  /// No description provided for @accessManagedInAdmin.
+  ///
+  /// In en, this message translates to:
+  /// **'Role and permission administration is managed in DelwaQty Admin.'**
+  String get accessManagedInAdmin;
+
+  /// No description provided for @ownerFullControl.
+  ///
+  /// In en, this message translates to:
+  /// **'Owner - full Delivery operational control.'**
+  String get ownerFullControl;
+
+  /// No description provided for @accessRole.
+  ///
+  /// In en, this message translates to:
+  /// **'Current role'**
+  String get accessRole;
+
+  /// No description provided for @accessStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Status'**
+  String get accessStatus;
+
+  /// No description provided for @accessUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Access details are unavailable right now.'**
+  String get accessUnavailable;
+
   /// No description provided for @online.
   ///
   /// In en, this message translates to:

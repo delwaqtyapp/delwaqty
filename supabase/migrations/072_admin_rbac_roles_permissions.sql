@@ -64,8 +64,14 @@ DROP INDEX IF EXISTS uni_admin_perm;
 CREATE UNIQUE INDEX IF NOT EXISTS uni_admin_perm
   ON public.admin_permission_grants (admin_id, permission, COALESCE(region_id, '00000000-0000-0000-0000-000000000000'::uuid));
 
--- Link an admin user to a role template (additive).
-CREATE OR REPLACE FUNCTION public.admin_assign_role(
+-- Apply a role template to an admin. Sets users.role_key so that the
+-- canonical admin capability engine (admin_has_permission) derives the role's
+-- default permission set UNION any explicit grants in admin_permission_grants
+-- (the SINGLE source of truth, shared with the legacy has_permission engine).
+-- Mutations to the grants table themselves MUST go through the existing
+-- grant_admin_permission / revoke_admin_permission RPCs (034) so there is only
+-- one code path that writes authorization state.
+CREATE OR REPLACE FUNCTION public.admin_apply_role_template(
   p_admin_id uuid,
   p_role_key text,
   p_reason   text DEFAULT NULL
@@ -77,109 +83,18 @@ SET search_path = public, pg_temp
 AS $$
 DECLARE v_before jsonb;
 BEGIN
-  IF NOT (public._is_owner_uid(auth.uid()) OR public.admin_has_permission('ADMIN_ASSIGN_ROLE', NULL)) THEN
+  IF NOT (public._is_owner_uid(auth.uid())
+          OR public.has_permission('ADMIN_ROLE_ASSIGN', NULL)) THEN
     RAISE EXCEPTION 'forbidden';
   END IF;
-  SELECT jsonb_build_object('role', role_key) INTO v_before FROM users WHERE id = p_admin_id;
+  SELECT jsonb_build_object('role_key', role_key) INTO v_before FROM users WHERE id = p_admin_id;
   UPDATE users SET role_key = p_role_key WHERE id = p_admin_id;
   PERFORM public.log_admin_action('ADMIN_ROLE_CHANGE', 'admin', p_admin_id::text, v_before,
-    jsonb_build_object('role', p_role_key), p_reason);
+    jsonb_build_object('role_key', p_role_key), p_reason);
 END;
 $$;
-REVOKE ALL ON FUNCTION public.admin_assign_role(uuid, text, text) FROM PUBLIC;
-GRANT EXECUTE ON FUNCTION public.admin_assign_role(uuid, text, text) TO authenticated;
-
--- De/activate admin.
-CREATE OR REPLACE FUNCTION public.admin_set_admin_status(
-  p_admin_id uuid, p_active boolean, p_reason text DEFAULT NULL
-)
-RETURNS void
-LANGUAGE plpgsql
-SECURITY DEFINER
-SET search_path = public, pg_temp
-AS $$
-DECLARE v_before jsonb;
-BEGIN
-  IF NOT (public._is_owner_uid(auth.uid()) OR public.admin_has_permission('ADMIN_EDIT', NULL)) THEN
-    RAISE EXCEPTION 'forbidden';
-  END IF;
-  SELECT jsonb_build_object('status', status) INTO v_before FROM users WHERE id = p_admin_id;
-  UPDATE users SET status = CASE WHEN p_active THEN 'active' ELSE 'inactive' END WHERE id = p_admin_id;
-  PERFORM public.log_admin_action('ADMIN_STATUS_CHANGE', 'admin', p_admin_id::text, v_before,
-    jsonb_build_object('status', CASE WHEN p_active THEN 'active' ELSE 'inactive' END), p_reason);
-END;
-$$;
-REVOKE ALL ON FUNCTION public.admin_set_admin_status(uuid, boolean, text) FROM PUBLIC;
-GRANT EXECUTE ON FUNCTION public.admin_set_admin_status(uuid, boolean, text) TO authenticated;
-
--- Grant / revoke a single permission (additive on top of role defaults).
-CREATE OR REPLACE FUNCTION public.admin_grant_permission(
-  p_admin_id uuid, p_permission text, p_region_id uuid DEFAULT NULL, p_reason text DEFAULT NULL
-)
-RETURNS void
-LANGUAGE plpgsql
-SECURITY DEFINER
-SET search_path = public, pg_temp
-AS $$
-BEGIN
-  IF NOT (public._is_owner_uid(auth.uid()) OR public.admin_has_permission('ADMIN_GRANT_PERMISSION', p_region_id)) THEN
-    RAISE EXCEPTION 'forbidden';
-  END IF;
-  INSERT INTO public.admin_permission_grants (admin_id, permission, region_id)
-  VALUES (p_admin_id, p_permission, p_region_id)
-  ON CONFLICT (admin_id, permission, COALESCE(region_id, '00000000-0000-0000-0000-000000000000'::uuid))
-  DO NOTHING;
-  PERFORM public.log_admin_action('ADMIN_PERMISSION_GRANT', 'admin', p_admin_id::text,
-    NULL, jsonb_build_object('permission', p_permission, 'region', p_region_id), p_reason);
-END;
-$$;
-REVOKE ALL ON FUNCTION public.admin_grant_permission(uuid, text, uuid, text) FROM PUBLIC;
-GRANT EXECUTE ON FUNCTION public.admin_grant_permission(uuid, text, uuid, text) TO authenticated;
-
-CREATE OR REPLACE FUNCTION public.admin_revoke_permission(
-  p_admin_id uuid, p_permission text, p_region_id uuid DEFAULT NULL, p_reason text DEFAULT NULL
-)
-RETURNS void
-LANGUAGE plpgsql
-SECURITY DEFINER
-SET search_path = public, pg_temp
-AS $$
-BEGIN
-  IF NOT (public._is_owner_uid(auth.uid()) OR public.admin_has_permission('ADMIN_GRANT_PERMISSION', p_region_id)) THEN
-    RAISE EXCEPTION 'forbidden';
-  END IF;
-  DELETE FROM public.admin_permission_grants
-   WHERE admin_id = p_admin_id AND permission = p_permission
-     AND COALESCE(region_id, '00000000-0000-0000-0000-000000000000'::uuid) = COALESCE(p_region_id, '00000000-0000-0000-0000-000000000000'::uuid);
-  PERFORM public.log_admin_action('ADMIN_PERMISSION_REVOKE', 'admin', p_admin_id::text,
-    jsonb_build_object('permission', p_permission, 'region', p_region_id), NULL, p_reason);
-END;
-$$;
-REVOKE ALL ON FUNCTION public.admin_revoke_permission(uuid, text, uuid, text) FROM PUBLIC;
-GRANT EXECUTE ON FUNCTION public.admin_revoke_permission(uuid, text, uuid, text) TO authenticated;
-
--- Region assignment (scope).
-CREATE OR REPLACE FUNCTION public.admin_assign_region(
-  p_admin_id uuid, p_region_id uuid, p_reason text DEFAULT NULL
-)
-RETURNS void
-LANGUAGE plpgsql
-SECURITY DEFINER
-SET search_path = public, pg_temp
-AS $$
-BEGIN
-  IF NOT (public._is_owner_uid(auth.uid()) OR public.admin_has_permission('REGIONAL_MANAGEMENT', p_region_id)) THEN
-    RAISE EXCEPTION 'forbidden';
-  END IF;
-  INSERT INTO public.admin_region_assignments (admin_id, region_id)
-  VALUES (p_admin_id, p_region_id)
-  ON CONFLICT (admin_id, region_id) DO NOTHING;
-  PERFORM public.log_admin_action('ADMIN_REGION_ASSIGN', 'admin', p_admin_id::text,
-    NULL, jsonb_build_object('region', p_region_id), p_reason);
-END;
-$$;
-REVOKE ALL ON FUNCTION public.admin_assign_region(uuid, uuid, text) FROM PUBLIC;
-GRANT EXECUTE ON FUNCTION public.admin_assign_region(uuid, uuid, text) TO authenticated;
+REVOKE ALL ON FUNCTION public.admin_apply_role_template(uuid, text, text) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION public.admin_apply_role_template(uuid, text, text) TO authenticated;
 
 -- Consolidated Admin permission check: owner short-circuit OR
 -- (role-template defaults UNION explicit grants) AND region scope respected.

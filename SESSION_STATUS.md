@@ -454,6 +454,57 @@ pending (environment-limited → 🟡).
 
 ---
 
+## SPRINT 119 — GLOBAL OWNER MULTI-ROLE / MULTI-CONTEXT ACCESS
+
+**Current task**
+- Make the global Owner (same auth.uid()) operate as Customer + Delivery +
+  Provider + Admin with NO duplicate account and NO email-based authorization.
+- Remove email-based owner authorization from Flutter.
+
+**Decisions**
+- Root cause: `get_my_capabilities()` (071) already derives contexts from
+  users/drivers/service_providers/merchants rows. Owner (role='owner') lacked
+  drivers + service_providers rows, so Delivery/Provider apps (which gate on
+  those rows via driverProfileProvider) blocked the Owner.
+- 074 (new): idempotent, OWNER-ONLY `ensure_owner_operational_contexts()` RPC
+  that materializes the Owner's Delivery (drivers) + Provider
+  (service_providers) operational rows, marked owner-operated; never creates a
+  new Auth user; audited. Also extended `get_my_capabilities()` with explicit
+  `can_use_customer/delivery/provider/admin` flags.
+- Flutter: `lib/core/auth/platform_capabilities.dart` — `PlatformCapabilities`
+  (from get_my_capabilities) + `OwnerContextResolver` (pure, testable) +
+  `platformCapabilitiesProvider` that calls the RPC and triggers idempotent
+  provisioning for the Owner on app open. No email/constant inference.
+- Removed email-based authorization: `admin_service.isOwner` (gated deleteUser)
+  now derives from users.role via backend; `adminIsOwnerProvider` now async
+  backend-derived (users.role); member_drawer / admin_hierarchy_page /
+  admin_profile_page owner checks now use `adminIsOwnerProvider` instead of
+  `email == AppConstants.ownerEmail`. Delivery dashboard watches
+  platformCapabilitiesProvider so Owner provisioning fires when opening Delivery.
+- `AppConstants.ownerEmail` constant retained only as a documentation value;
+  no code path uses it for authorization anymore.
+
+**Verification**
+- `flutter analyze`: 0 errors. `flutter test`: 927/927 pass (added 7 capability
+  resolver tests). Four APKs build green; all four installed on DNP NX9; launch
+  OK; no FATAL/FlutterError in logcat.
+- 🟡 074 NOT applied to live DB (DDL blocked — see prior sprints). Owner
+  provisioning + capability flags runtime-unverified until valid credentials
+  supplied. Backend contract authored and additive.
+
+**Files modified (this sprint)**
+- `supabase/migrations/074_owner_operational_provisioning.sql` (new)
+- `lib/core/auth/platform_capabilities.dart` (new)
+- `test/core/auth/platform_capabilities_test.dart` (new)
+- `lib/features/admin/financial/presentation/providers/admin_financial_providers.dart`
+- `lib/services/admin/admin_service.dart`
+- `lib/features/admin/member_management/presentation/pages/member_drawer.dart`
+- `lib/features/admin/presentation/pages/admin_hierarchy_page.dart`
+- `lib/features/admin/presentation/pages/admin_profile_page.dart`
+- `lib/features/driver/presentation/pages/driver_dashboard_page.dart`
+
+---
+
 ## Previous Tasks
 
 - **SPRINT 95:** Deletion root-cause fix + missing RPCs + live fixes — 057, KPI, dead buttons, search route

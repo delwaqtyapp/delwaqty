@@ -214,8 +214,26 @@ class AdminFinancialRepositoryImpl implements AdminFinancialRepository {
         walletNumber: walletNumber,
         instructions: instructions,
       );
+      } catch (e) {
+        throw ServerException(message: 'Failed to update receiving account: $e');
+      }
+  }
+
+  @override
+  Future<Map<String, dynamic>> platformCollectionAudit() async {
+    try {
+      return await _source.platformCollectionAudit();
     } catch (e) {
-      throw ServerException(message: 'Failed to update receiving account: $e');
+      throw ServerException(message: 'Failed to load platform collection audit: $e');
+    }
+  }
+
+  @override
+  Future<Map<String, dynamic>> platformSettlementAudit() async {
+    try {
+      return await _source.platformSettlementAudit();
+    } catch (e) {
+      throw ServerException(message: 'Failed to load platform settlement audit: $e');
     }
   }
 }

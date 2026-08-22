@@ -215,4 +215,16 @@ class AdminFinancialDataSource {
     );
     return res as bool? ?? false;
   }
+
+  Future<Map<String, dynamic>> platformCollectionAudit() async {
+    final res = await _client.rpc('platform_collection_audit');
+    if (res == null) return {};
+    return Map<String, dynamic>.from(res as Map);
+  }
+
+  Future<Map<String, dynamic>> platformSettlementAudit() async {
+    final res = await _client.rpc('platform_settlement_audit');
+    if (res == null) return {};
+    return Map<String, dynamic>.from(res as Map);
+  }
 }

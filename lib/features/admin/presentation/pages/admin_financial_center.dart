@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:delwaqty/features/admin/presentation/providers/platform_intelligence_providers.dart';
 import 'package:delwaqty/features/admin/domain/entities/platform_intelligence.dart';
+import 'package:delwaqty/features/admin/financial/presentation/providers/admin_financial_providers.dart';
 import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
 import 'package:delwaqty/shared/widgets/premium_empty_state.dart';
 import 'package:delwaqty/shared/widgets/app_loader.dart';
@@ -101,6 +102,13 @@ class AdminFinancialCenter extends ConsumerWidget {
                       color: const Color(0xFFFF9500),
                       onTap: () => context.push('/admin/receiving-wallets'),
                     ),
+                    if (ref.watch(adminIsOwnerProvider))
+                      _FinanceQuickAction(
+                        icon: Icons.public_rounded,
+                        label: 'Global Audit',
+                        color: const Color(0xFF5B3DF0),
+                        onTap: () => context.push('/admin/owner-dashboard'),
+                      ),
                   ],
                 ),
               ),

@@ -68,3 +68,11 @@ final graceAccountProvider = FutureProvider<GraceAccount?>((ref) {
   if (target.isEmpty) return Future.value(null);
   return ref.watch(adminFinancialRepositoryProvider).getGrace(target);
 });
+
+final platformCollectionAuditProvider = FutureProvider<Map<String, dynamic>>((ref) {
+  return ref.watch(adminFinancialRepositoryProvider).platformCollectionAudit();
+});
+
+final platformSettlementAuditProvider = FutureProvider<Map<String, dynamic>>((ref) {
+  return ref.watch(adminFinancialRepositoryProvider).platformSettlementAudit();
+});

@@ -51,4 +51,6 @@ abstract class AdminFinancialRepository {
     String? walletNumber,
     String? instructions,
   });
+  Future<Map<String, dynamic>> platformCollectionAudit();
+  Future<Map<String, dynamic>> platformSettlementAudit();
 }

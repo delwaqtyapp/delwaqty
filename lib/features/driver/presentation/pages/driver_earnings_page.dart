@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:delwaqty/core/theme/app_colors.dart';
 import 'package:delwaqty/core/theme/app_text_styles.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -35,6 +36,11 @@ class DriverEarningsPage extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.wallet)),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () => context.push('/driver/financial-center'),
+        icon: const Icon(Icons.account_balance_wallet),
+        label: const Text('Financial Center'),
+      ),
       body: profileAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) =>

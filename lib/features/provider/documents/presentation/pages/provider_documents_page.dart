@@ -16,6 +16,7 @@ class _ProviderDocumentsPageState extends ConsumerState<ProviderDocumentsPage> {
   bool _busy = false;
   String? _busyKey;
   String? _error;
+  String? _viewUrl;
 
   Future<void> _upload(String docType, String label) async {
     if (_busy) return;
@@ -29,12 +30,12 @@ class _ProviderDocumentsPageState extends ConsumerState<ProviderDocumentsPage> {
     });
     try {
       final bytes = await file.readAsBytes();
-      final url = await ref
+      final path = await ref
           .read(providerDocumentsRepositoryProvider)
           .uploadDoc('${docType}_${file.name}', bytes);
       await ref
           .read(providerDocumentsRepositoryProvider)
-          .upsertDocument(docType, url);
+          .upsertDocument(docType, path);
       if (mounted) {
         ref.invalidate(providerDocumentsProvider);
         ScaffoldMessenger.of(context).showSnackBar(
@@ -45,6 +46,41 @@ class _ProviderDocumentsPageState extends ConsumerState<ProviderDocumentsPage> {
       if (mounted) setState(() => _error = e.toString());
     } finally {
       if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  Future<void> _delete(String docType, String label) async {
+    if (_busy) return;
+    setState(() {
+      _busy = true;
+      _busyKey = docType;
+      _error = null;
+    });
+    try {
+      await ref
+          .read(providerDocumentsRepositoryProvider)
+          .deleteDocument(docType);
+      if (mounted) {
+        ref.invalidate(providerDocumentsProvider);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('$label removed')),
+        );
+      }
+    } catch (e) {
+      if (mounted) setState(() => _error = e.toString());
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  Future<void> _view(String path) async {
+    try {
+      final url = await ref
+          .read(providerDocumentsRepositoryProvider)
+          .getDocumentUrl(path);
+      if (mounted) setState(() => _viewUrl = url);
+    } catch (e) {
+      if (mounted) setState(() => _error = e.toString());
     }
   }
 
@@ -83,15 +119,19 @@ class _ProviderDocumentsPageState extends ConsumerState<ProviderDocumentsPage> {
                 final existing = byType[doc.key];
                 final status = existing?['status'] as String?;
                 final fileUrl = existing?['file_url'] as String?;
+                final hasDoc = fileUrl != null && fileUrl.isNotEmpty;
                 return Card(
                   child: ListTile(
+                    leading: hasDoc
+                        ? Icon(Icons.check_circle_outline,
+                            color: _statusColor(status))
+                        : const Icon(Icons.upload_file_outlined),
                     title: Text(doc.label),
-                    subtitle: fileUrl == null
+                    subtitle: !hasDoc
                         ? const Text('Not uploaded')
                         : Text(
-                            status == null
-                                ? 'Uploaded'
-                                : status[0].toUpperCase() + status.substring(1),
+                            (status ?? 'uploaded')[0].toUpperCase() +
+                                (status ?? 'uploaded').substring(1),
                           ),
                     trailing: _busy && _busyKey == doc.key
                         ? const SizedBox(
@@ -99,15 +139,28 @@ class _ProviderDocumentsPageState extends ConsumerState<ProviderDocumentsPage> {
                             width: 18,
                             child: CircularProgressIndicator(strokeWidth: 2),
                           )
-                        : TextButton(
-                            onPressed: _busy ? null : () => _upload(doc.key, doc.label),
-                            child: Text(fileUrl == null ? 'Upload' : 'Replace'),
-                          ),
-                    leading: fileUrl == null
-                        ? const Icon(Icons.upload_file_outlined)
-                        : Icon(
-                            Icons.check_circle_outline,
-                            color: _statusColor(status),
+                        : Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              if (hasDoc)
+                                IconButton(
+                                  icon: const Icon(Icons.visibility_outlined),
+                                  onPressed: _busy ? null : () => _view(fileUrl!),
+                                ),
+                              if (hasDoc)
+                                IconButton(
+                                  icon: const Icon(Icons.delete_outline),
+                                  onPressed: _busy
+                                      ? null
+                                      : () => _delete(doc.key, doc.label),
+                                ),
+                              TextButton(
+                                onPressed: _busy
+                                    ? null
+                                    : () => _upload(doc.key, doc.label),
+                                child: Text(hasDoc ? 'Replace' : 'Upload'),
+                              ),
+                            ],
                           ),
                   ),
                 );
@@ -116,6 +169,31 @@ class _ProviderDocumentsPageState extends ConsumerState<ProviderDocumentsPage> {
           );
         },
       ),
+      floatingActionButton: _viewUrl == null
+          ? null
+          : FloatingActionButton(
+              onPressed: () => setState(() => _viewUrl = null),
+              child: const Icon(Icons.close),
+            ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+      bottomSheet: _viewUrl == null
+          ? null
+          : SizedBox(
+              height: 320,
+              child: SafeArea(
+                child: Column(
+                  children: [
+                    const Padding(
+                      padding: EdgeInsets.all(8),
+                      child: Text('Document preview'),
+                    ),
+                    Expanded(
+                      child: Image.network(_viewUrl!, fit: BoxFit.contain),
+                    ),
+                  ],
+                ),
+              ),
+            ),
     );
   }
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:delwaqty/l10n/app_localizations.dart';
 import 'package:delwaqty/features/provider/financial/presentation/providers/financial_providers.dart';
 
 class FinancialCenterPage extends ConsumerWidget {
@@ -8,12 +9,13 @@ class FinancialCenterPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final summary = ref.watch(financialSummaryProvider);
     final grace = ref.watch(graceProvider);
     final topups = ref.watch(topupRequestsProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Financial Center')),
+      appBar: AppBar(title: Text(l10n.financialCenter)),
       body: RefreshIndicator(
         onRefresh: () async {
           ref.invalidate(financialSummaryProvider);
@@ -27,16 +29,16 @@ class FinancialCenterPage extends ConsumerWidget {
               data: (s) => Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _Card(title: 'Balance', value: '${s.balance.toStringAsFixed(2)} SAR'),
+                  _Card(title: l10n.balance, value: '${s.balance.toStringAsFixed(2)} SAR'),
                   _Card(
-                    title: 'Commission rate',
+                    title: l10n.commissionRate,
                     value: '${s.commissionRate.toStringAsFixed(2)}%',
                   ),
-                  _Card(title: 'Pending top-ups', value: '${s.pendingTopups}'),
+                  _Card(title: l10n.pendingTopups, value: '${s.pendingTopups}'),
                   const SizedBox(height: 12),
-                  const Text(
-                    'Recent transactions',
-                    style: TextStyle(fontWeight: FontWeight.bold),
+                  Text(
+                    l10n.recentTransactions,
+                    style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
                   ...s.recentTransactions.map(
                     (t) => ListTile(
@@ -52,9 +54,8 @@ class FinancialCenterPage extends ConsumerWidget {
             ),
             grace.when(
               data: (g) => _Card(
-                title: 'Grace',
-                value:
-                    'Used ${g.used} / Limit ${g.limit} (${g.remaining} remaining)',
+                title: l10n.graceLabel,
+                value: l10n.graceUsed(g.limit, g.remaining, g.used),
               ),
               loading: () => const SizedBox.shrink(),
               error: (e, _) => const SizedBox.shrink(),
@@ -63,16 +64,16 @@ class FinancialCenterPage extends ConsumerWidget {
             ElevatedButton(
               onPressed: () =>
                   context.push('/provider-financial-center/topup'),
-              child: const Text('Request top-up'),
+              child: Text(l10n.requestTopUp),
             ),
             const SizedBox(height: 16),
-            const Text(
-              'Top-up history',
-              style: TextStyle(fontWeight: FontWeight.bold),
+            Text(
+              l10n.topUpHistory,
+              style: const TextStyle(fontWeight: FontWeight.bold),
             ),
             topups.when(
               data: (list) => list.isEmpty
-                  ? const Text('No top-up requests yet.')
+                  ? Text(l10n.noTopUpRequests)
                   : Column(
                       children: list
                           .map(

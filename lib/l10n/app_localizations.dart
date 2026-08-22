@@ -959,7 +959,7 @@ abstract class AppLocalizations {
   /// No description provided for @paymentMethod.
   ///
   /// In en, this message translates to:
-  /// **'Payment Method'**
+  /// **'Payment method'**
   String get paymentMethod;
 
   /// No description provided for @orderSummary.
@@ -3245,7 +3245,7 @@ abstract class AppLocalizations {
   /// No description provided for @recentTransactions.
   ///
   /// In en, this message translates to:
-  /// **'Recent Transactions'**
+  /// **'Recent transactions'**
   String get recentTransactions;
 
   /// No description provided for @noTransactions.
@@ -9101,7 +9101,7 @@ abstract class AppLocalizations {
   /// No description provided for @commissionRate.
   ///
   /// In en, this message translates to:
-  /// **'Commission Rate'**
+  /// **'Commission rate'**
   String get commissionRate;
 
   /// No description provided for @netEarnings.
@@ -10951,6 +10951,204 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Automatically share live delivery with trusted contacts'**
   String get autoShareTripDescription;
+
+  /// No description provided for @availability.
+  ///
+  /// In en, this message translates to:
+  /// **'Availability'**
+  String get availability;
+
+  /// No description provided for @customersCanPlaceOrders.
+  ///
+  /// In en, this message translates to:
+  /// **'Customers can place orders'**
+  String get customersCanPlaceOrders;
+
+  /// No description provided for @temporarilyUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Temporarily unavailable'**
+  String get temporarilyUnavailable;
+
+  /// No description provided for @storeOpenForBusiness.
+  ///
+  /// In en, this message translates to:
+  /// **'Store is open for business'**
+  String get storeOpenForBusiness;
+
+  /// No description provided for @availabilityHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Turn off to apply a temporary closure. Backend remains the source of truth.'**
+  String get availabilityHint;
+
+  /// No description provided for @weeklySchedule.
+  ///
+  /// In en, this message translates to:
+  /// **'Weekly schedule'**
+  String get weeklySchedule;
+
+  /// No description provided for @noScheduleSet.
+  ///
+  /// In en, this message translates to:
+  /// **'No schedule set'**
+  String get noScheduleSet;
+
+  /// No description provided for @configureWorkingHours.
+  ///
+  /// In en, this message translates to:
+  /// **'Configure working hours from the merchant settings.'**
+  String get configureWorkingHours;
+
+  /// No description provided for @pendingReview.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending review'**
+  String get pendingReview;
+
+  /// No description provided for @notSubmitted.
+  ///
+  /// In en, this message translates to:
+  /// **'Not submitted yet'**
+  String get notSubmitted;
+
+  /// No description provided for @reapply.
+  ///
+  /// In en, this message translates to:
+  /// **'Re-apply'**
+  String get reapply;
+
+  /// No description provided for @choose.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose'**
+  String get choose;
+
+  /// No description provided for @notUploaded.
+  ///
+  /// In en, this message translates to:
+  /// **'Not uploaded'**
+  String get notUploaded;
+
+  /// No description provided for @documentsSubmittedForReview.
+  ///
+  /// In en, this message translates to:
+  /// **'Documents submitted for review'**
+  String get documentsSubmittedForReview;
+
+  /// No description provided for @uploadedForReview.
+  ///
+  /// In en, this message translates to:
+  /// **'{label} uploaded for review'**
+  String uploadedForReview(Object label);
+
+  /// No description provided for @replace.
+  ///
+  /// In en, this message translates to:
+  /// **'Replace'**
+  String get replace;
+
+  /// No description provided for @license.
+  ///
+  /// In en, this message translates to:
+  /// **'Professional License'**
+  String get license;
+
+  /// No description provided for @certification.
+  ///
+  /// In en, this message translates to:
+  /// **'Certification'**
+  String get certification;
+
+  /// No description provided for @docPreview.
+  ///
+  /// In en, this message translates to:
+  /// **'Document preview'**
+  String get docPreview;
+
+  /// No description provided for @docRemoved.
+  ///
+  /// In en, this message translates to:
+  /// **'{label} removed'**
+  String docRemoved(Object label);
+
+  /// No description provided for @financialCenter.
+  ///
+  /// In en, this message translates to:
+  /// **'Financial Center'**
+  String get financialCenter;
+
+  /// No description provided for @requestTopUp.
+  ///
+  /// In en, this message translates to:
+  /// **'Request top-up'**
+  String get requestTopUp;
+
+  /// No description provided for @noTopUpRequests.
+  ///
+  /// In en, this message translates to:
+  /// **'No top-up requests yet.'**
+  String get noTopUpRequests;
+
+  /// No description provided for @topUpRequestCreated.
+  ///
+  /// In en, this message translates to:
+  /// **'Top-up request: {code}'**
+  String topUpRequestCreated(Object code);
+
+  /// No description provided for @submitRequest.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit request'**
+  String get submitRequest;
+
+  /// No description provided for @pendingTopups.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending top-ups'**
+  String get pendingTopups;
+
+  /// No description provided for @graceLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Grace'**
+  String get graceLabel;
+
+  /// No description provided for @graceUsed.
+  ///
+  /// In en, this message translates to:
+  /// **'Used {used} / Limit {limit} ({remaining} remaining)'**
+  String graceUsed(Object limit, Object remaining, Object used);
+
+  /// No description provided for @topUpHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'Top-up history'**
+  String get topUpHistory;
+
+  /// No description provided for @transferReference.
+  ///
+  /// In en, this message translates to:
+  /// **'Transfer reference (optional)'**
+  String get transferReference;
+
+  /// No description provided for @messageOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'Message (optional)'**
+  String get messageOptional;
+
+  /// No description provided for @verification.
+  ///
+  /// In en, this message translates to:
+  /// **'Verification'**
+  String get verification;
+
+  /// No description provided for @identity.
+  ///
+  /// In en, this message translates to:
+  /// **'Identity'**
+  String get identity;
 }
 
 class _AppLocalizationsDelegate

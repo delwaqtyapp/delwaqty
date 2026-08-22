@@ -1,6 +1,7 @@
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:delwaqty/l10n/app_localizations.dart';
 
 import '../providers/provider_verification_providers.dart';
 
@@ -44,6 +45,7 @@ class _ProviderVerificationPageState
   }
 
   Future<void> _submit(bool reapply) async {
+    final l10n = AppLocalizations.of(context);
     if (_busy || _submitted) return;
     setState(() {
       _busy = true;
@@ -65,7 +67,7 @@ class _ProviderVerificationPageState
         setState(() => _submitted = true);
         ref.invalidate(providerVerificationProvider);
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Documents submitted for review')),
+          SnackBar(content: Text(l10n.documentsSubmittedForReview)),
         );
       }
     } catch (e) {
@@ -77,9 +79,10 @@ class _ProviderVerificationPageState
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final state = ref.watch(providerVerificationProvider);
     return Scaffold(
-      appBar: AppBar(title: const Text('Verification')),
+      appBar: AppBar(title: Text(l10n.verification)),
       body: state.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => Center(
@@ -98,32 +101,32 @@ class _ProviderVerificationPageState
             padding: const EdgeInsets.all(16),
             children: [
               if (approved)
-                const Card(
+                Card(
                   color: Colors.green,
                   child: ListTile(
                     leading: Icon(Icons.verified, color: Colors.white),
                     title: Text(
-                      'Verified',
-                      style: TextStyle(color: Colors.white),
+                      l10n.verified,
+                      style: const TextStyle(color: Colors.white),
                     ),
                   ),
                 )
               else if (submitted)
-                const Card(
+                Card(
                   color: Colors.orange,
                   child: ListTile(
                     leading: Icon(Icons.hourglass_top, color: Colors.white),
                     title: Text(
-                      'Pending review',
-                      style: TextStyle(color: Colors.white),
+                      l10n.pendingReview,
+                      style: const TextStyle(color: Colors.white),
                     ),
                   ),
                 )
               else
-                const Card(
+                Card(
                   color: Colors.grey,
                   child: ListTile(
-                    title: Text('Not submitted yet'),
+                    title: Text(l10n.notSubmitted),
                   ),
                 ),
               if (rejected && reason != null)
@@ -133,26 +136,26 @@ class _ProviderVerificationPageState
                     color: Colors.red.shade50,
                     child: ListTile(
                       leading: const Icon(Icons.error_outline, color: Colors.red),
-                      title: const Text('Rejected'),
+                      title: Text(l10n.rejected),
                       subtitle: Text(reason),
                     ),
                   ),
                 ),
               const SizedBox(height: 16),
               ListTile(
-                title: const Text('ID card'),
-                subtitle: Text(_idCardFile?.name ?? idCard ?? 'Not uploaded'),
+                title: Text(l10n.idCard),
+                subtitle: Text(_idCardFile?.name ?? idCard ?? l10n.notUploaded),
                 trailing: TextButton(
                   onPressed: _busy ? null : () => _pick(true),
-                  child: const Text('Choose'),
+                  child: Text(l10n.choose),
                 ),
               ),
               ListTile(
-                title: const Text('Profile photo'),
-                subtitle: Text(_photoFile?.name ?? photo ?? 'Not uploaded'),
+                title: Text(l10n.profilePhoto),
+                subtitle: Text(_photoFile?.name ?? photo ?? l10n.notUploaded),
                 trailing: TextButton(
                   onPressed: _busy ? null : () => _pick(false),
-                  child: const Text('Choose'),
+                  child: Text(l10n.choose),
                 ),
               ),
               const SizedBox(height: 16),
@@ -173,7 +176,7 @@ class _ProviderVerificationPageState
                         width: 18,
                         child: CircularProgressIndicator(strokeWidth: 2),
                       )
-                    : Text(rejected ? 'Re-apply' : 'Submit'),
+                    : Text(rejected ? l10n.reapply : l10n.submit),
               ),
             ],
           );

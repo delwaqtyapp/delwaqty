@@ -453,7 +453,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get deliveryAddress => 'Delivery Address';
 
   @override
-  String get paymentMethod => 'Payment Method';
+  String get paymentMethod => 'Payment method';
 
   @override
   String get orderSummary => 'Order Summary';
@@ -1662,7 +1662,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get transactions => 'Transactions';
 
   @override
-  String get recentTransactions => 'Recent Transactions';
+  String get recentTransactions => 'Recent transactions';
 
   @override
   String get noTransactions => 'No transactions yet';
@@ -4735,7 +4735,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get grossEarnings => 'Gross Earnings';
 
   @override
-  String get commissionRate => 'Commission Rate';
+  String get commissionRate => 'Commission rate';
 
   @override
   String get netEarnings => 'Net Earnings';
@@ -5720,4 +5720,113 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get autoShareTripDescription =>
       'Automatically share live delivery with trusted contacts';
+
+  @override
+  String get availability => 'Availability';
+
+  @override
+  String get customersCanPlaceOrders => 'Customers can place orders';
+
+  @override
+  String get temporarilyUnavailable => 'Temporarily unavailable';
+
+  @override
+  String get storeOpenForBusiness => 'Store is open for business';
+
+  @override
+  String get availabilityHint =>
+      'Turn off to apply a temporary closure. Backend remains the source of truth.';
+
+  @override
+  String get weeklySchedule => 'Weekly schedule';
+
+  @override
+  String get noScheduleSet => 'No schedule set';
+
+  @override
+  String get configureWorkingHours =>
+      'Configure working hours from the merchant settings.';
+
+  @override
+  String get pendingReview => 'Pending review';
+
+  @override
+  String get notSubmitted => 'Not submitted yet';
+
+  @override
+  String get reapply => 'Re-apply';
+
+  @override
+  String get choose => 'Choose';
+
+  @override
+  String get notUploaded => 'Not uploaded';
+
+  @override
+  String get documentsSubmittedForReview => 'Documents submitted for review';
+
+  @override
+  String uploadedForReview(Object label) {
+    return '$label uploaded for review';
+  }
+
+  @override
+  String get replace => 'Replace';
+
+  @override
+  String get license => 'Professional License';
+
+  @override
+  String get certification => 'Certification';
+
+  @override
+  String get docPreview => 'Document preview';
+
+  @override
+  String docRemoved(Object label) {
+    return '$label removed';
+  }
+
+  @override
+  String get financialCenter => 'Financial Center';
+
+  @override
+  String get requestTopUp => 'Request top-up';
+
+  @override
+  String get noTopUpRequests => 'No top-up requests yet.';
+
+  @override
+  String topUpRequestCreated(Object code) {
+    return 'Top-up request: $code';
+  }
+
+  @override
+  String get submitRequest => 'Submit request';
+
+  @override
+  String get pendingTopups => 'Pending top-ups';
+
+  @override
+  String get graceLabel => 'Grace';
+
+  @override
+  String graceUsed(Object limit, Object remaining, Object used) {
+    return 'Used $used / Limit $limit ($remaining remaining)';
+  }
+
+  @override
+  String get topUpHistory => 'Top-up history';
+
+  @override
+  String get transferReference => 'Transfer reference (optional)';
+
+  @override
+  String get messageOptional => 'Message (optional)';
+
+  @override
+  String get verification => 'Verification';
+
+  @override
+  String get identity => 'Identity';
 }

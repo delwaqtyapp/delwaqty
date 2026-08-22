@@ -200,7 +200,7 @@ class _MerchantDashboardPageState
             const Divider(height: 1),
             ListTile(
               leading: const Icon(Icons.toggle_on_outlined),
-              title: const Text('Availability'),
+              title: Text(l10n.availability),
               trailing: const Icon(Icons.chevron_right_rounded),
               onTap: () => context.push('/provider-availability'),
             ),
@@ -211,7 +211,7 @@ class _MerchantDashboardPageState
             const Divider(height: 1),
             ListTile(
               leading: const Icon(Icons.verified_user_outlined),
-              title: const Text('Verification'),
+              title: Text(l10n.verification),
               trailing: const Icon(Icons.chevron_right_rounded),
               onTap: () => context.push('/provider-verification'),
             ),
@@ -222,7 +222,7 @@ class _MerchantDashboardPageState
             const Divider(height: 1),
             ListTile(
               leading: const Icon(Icons.folder_open_outlined),
-              title: const Text('Documents'),
+              title: Text(l10n.documents),
               trailing: const Icon(Icons.chevron_right_rounded),
               onTap: () => context.push('/provider-documents'),
             ),

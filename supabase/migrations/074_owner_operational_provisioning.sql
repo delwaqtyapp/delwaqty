@@ -65,8 +65,8 @@ BEGIN
 
   -- Delivery operational identity (owner-operated).
   IF NOT EXISTS (SELECT 1 FROM drivers WHERE user_id = v_uid) THEN
-    INSERT INTO public.drivers (user_id, status, onboarding_completed, verification_status, rating, total_deliveries, total_earnings)
-    VALUES (v_uid, 'online', true, 'verified', 5.0, 0, 0.0);
+    INSERT INTO public.drivers (user_id, full_name, status, onboarding_completed, verification_status, rating, total_deliveries)
+    VALUES (v_uid, COALESCE((SELECT full_name FROM users WHERE id = v_uid), 'Owner'), 'online', true, 'verified', 5.0, 0);
     v_result := v_result || jsonb_build_object('delivery', 'created');
   ELSE
     v_result := v_result || jsonb_build_object('delivery', 'exists');
@@ -74,8 +74,8 @@ BEGIN
 
   -- Provider operational identity (owner-operated).
   IF NOT EXISTS (SELECT 1 FROM service_providers WHERE user_id = v_uid) THEN
-    INSERT INTO public.service_providers (user_id, category_type, verification_status, status)
-    VALUES (v_uid, 'home_services', 'verified', 'active');
+    INSERT INTO public.service_providers (user_id, name, category_type, is_verified)
+    VALUES (v_uid, COALESCE((SELECT full_name FROM users WHERE id = v_uid), 'Owner'), 'home_services', true);
     v_result := v_result || jsonb_build_object('provider', 'created');
   ELSE
     v_result := v_result || jsonb_build_object('provider', 'exists');

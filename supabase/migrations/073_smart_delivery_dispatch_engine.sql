@@ -111,13 +111,13 @@ BEGIN
   IF v_order.dispatch_status <> 'PENDING_DISPATCH' THEN
     RETURN jsonb_build_object('ok', false, 'reason', 'NOT_PENDING', 'dispatch_status', v_order.dispatch_status);
   END IF;
-  v_cat := COALESCE(v_order.service_type, 'food');
+   v_cat := 'food';
 
   SELECT driver_id, score INTO v_best, v_score
   FROM (
     SELECT d.user_id AS driver_id,
       (1.0 / (1.0 + public.driver_distance_km(
-        v_order.pickup_latitude, v_order.pickup_longitude,
+        v_order.delivery_latitude, v_order.delivery_longitude,
         dl.latitude, dl.longitude))) AS score
     FROM public.drivers d
     JOIN public.driver_locations dl ON dl.driver_id = d.user_id
@@ -125,8 +125,8 @@ BEGIN
       AND d.is_verified
       AND d.accepts_deliveries
       AND (d.max_delivery_distance_km IS NULL OR
-           public.driver_distance_km(v_order.pickup_latitude, v_order.pickup_longitude, dl.latitude, dl.longitude)
-           <= d.max_delivery_distance_km)
+           public.driver_distance_km(v_order.delivery_latitude, v_order.delivery_longitude, dl.latitude, dl.longitude)
+            <= d.max_delivery_distance_km)
       AND (d.service_types IS NULL OR d.service_types && ARRAY[v_cat])
     ORDER BY score DESC
     LIMIT 1
@@ -260,19 +260,19 @@ BEGIN
   IF v_order.id IS NULL OR v_order.driver_id IS NULL THEN
     RETURN jsonb_build_object('ok', false, 'reason', 'NOT_ASSIGNED');
   END IF;
-  SELECT rate INTO v_rate FROM public.get_commission_rate(
-    v_order.account_id, v_order.merchant_id, v_order.service_type
-  );
+  IF v_order.status = 'delivered' THEN
+    RETURN jsonb_build_object('ok', false, 'reason', 'ALREADY_DONE');
+  END IF;
+  SELECT COALESCE(public.get_commission_rate('delivery', NULL), 0) INTO v_rate;
   v_rate := COALESCE(v_rate, 0);
-  v_commission := (COALESCE(v_order.total, 0) * v_rate / 100.0);
-  v_net := COALESCE(v_order.total, 0) - v_commission;
+  v_commission := (COALESCE(v_order.total_amount, 0) * v_rate / 100.0);
+  v_net := COALESCE(v_order.total_amount, 0) - v_commission;
 
-  INSERT INTO public.driver_earnings (driver_id, order_id, amount, commission)
-  VALUES (v_order.driver_id, p_order_id, v_net, v_commission)
-  ON CONFLICT (order_id) DO UPDATE SET amount = EXCLUDED.amount, commission = EXCLUDED.commission;
+  INSERT INTO public.driver_earnings (driver_id, ride_id, type, amount, currency, description)
+  VALUES (v_order.driver_id, NULL, 'trip', v_net, 'EGP', 'Order ' || p_order_id::text || ' delivery earning');
 
-  INSERT INTO public.platform_commissions (order_id, account_id, merchant_id, amount, rate, created_at)
-  VALUES (p_order_id, v_order.account_id, v_order.merchant_id, v_commission, v_rate, now());
+  INSERT INTO public.platform_commissions (member_id, reference_type, reference_id, gross_amount, commission_rate, commission_amount, net_amount, currency, status)
+  VALUES (v_order.driver_id, 'order', p_order_id, v_order.total_amount, v_rate, v_commission, v_net, 'EGP', 'settled');
 
   UPDATE public.orders SET status = 'delivered', dispatch_status = 'ACCEPTED'
     WHERE id = p_order_id;
@@ -298,7 +298,7 @@ CREATE POLICY driver_locations_select ON public.driver_locations
       SELECT 1 FROM public.orders o
       WHERE o.driver_id = driver_locations.driver_id
         AND o.dispatch_status IN ('ASSIGNED','ACCEPTED')
-        AND (o.customer_user_id = auth.uid() OR o.merchant_id IN (
+        AND (o.user_id = auth.uid() OR o.merchant_id IN (
           SELECT id FROM public.merchants WHERE owner_user_id = auth.uid()
         ))
     )

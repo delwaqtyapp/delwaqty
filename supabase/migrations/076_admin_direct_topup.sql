@@ -5,6 +5,28 @@
 -- Regional scoping is derived from the target account's canonical region
 -- (user_region_preferences via _member_region_id), never from client input.
 
+-- Authoritative single-wallet resolver (idempotent). Ensures exactly one
+-- wallet row per member and returns its id. Created here because the live
+-- database did not yet have it; additive and SECURITY DEFINER.
+CREATE OR REPLACE FUNCTION public._ensure_wallet(p_user_id uuid)
+RETURNS uuid
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public, pg_temp
+AS $$
+DECLARE v_id uuid;
+BEGIN
+  SELECT id INTO v_id FROM public.wallets WHERE user_id = p_user_id;
+  IF v_id IS NULL THEN
+    INSERT INTO public.wallets (user_id, balance, currency)
+    VALUES (p_user_id, 0, 'EGP') RETURNING id INTO v_id;
+  END IF;
+  RETURN v_id;
+END;
+$$;
+REVOKE ALL ON FUNCTION public._ensure_wallet(uuid) FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION public._ensure_wallet(uuid) TO authenticated, service_role;
+
 CREATE OR REPLACE FUNCTION public.admin_direct_topup(
   p_account_type text,   -- 'delivery' | 'provider'
   p_account_id   uuid,

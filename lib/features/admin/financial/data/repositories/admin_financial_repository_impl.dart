@@ -236,4 +236,23 @@ class AdminFinancialRepositoryImpl implements AdminFinancialRepository {
       throw ServerException(message: 'Failed to load platform settlement audit: $e');
     }
   }
+
+  @override
+  Future<Map<String, dynamic>> adminDirectTopup({
+    required String accountType,
+    required String accountId,
+    required double amount,
+    String? note,
+  }) async {
+    try {
+      return await _source.adminDirectTopup(
+        accountType: accountType,
+        accountId: accountId,
+        amount: amount,
+        note: note,
+      );
+    } catch (e) {
+      throw ServerException(message: 'Failed to top up account: $e');
+    }
+  }
 }

@@ -227,4 +227,22 @@ class AdminFinancialDataSource {
     if (res == null) return {};
     return Map<String, dynamic>.from(res as Map);
   }
+
+  Future<Map<String, dynamic>> adminDirectTopup({
+    required String accountType,
+    required String accountId,
+    required double amount,
+    String? note,
+  }) async {
+    final res = await _client.rpc(
+      'admin_direct_topup',
+      params: {
+        'p_account_type': accountType,
+        'p_account_id': accountId,
+        'p_amount': amount,
+        'p_note': note,
+      },
+    );
+    return Map<String, dynamic>.from(res as Map);
+  }
 }

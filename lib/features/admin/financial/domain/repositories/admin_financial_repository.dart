@@ -53,4 +53,10 @@ abstract class AdminFinancialRepository {
   });
   Future<Map<String, dynamic>> platformCollectionAudit();
   Future<Map<String, dynamic>> platformSettlementAudit();
+  Future<Map<String, dynamic>> adminDirectTopup({
+    required String accountType,
+    required String accountId,
+    required double amount,
+    String? note,
+  });
 }

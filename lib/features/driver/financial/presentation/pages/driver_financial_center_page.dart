@@ -6,19 +6,21 @@ import 'package:delwaqty/features/_shared/auth/domain/auth_state.dart';
 import 'package:delwaqty/features/provider/financial/presentation/providers/financial_providers.dart';
 import 'package:delwaqty/features/driver/financial/presentation/providers/driver_financial_providers.dart';
 import 'package:delwaqty/features/customer/driver/presentation/providers/dispatch_providers.dart';
+import 'package:delwaqty/l10n/app_localizations.dart';
 
 class DriverFinancialCenterPage extends ConsumerWidget {
   const DriverFinancialCenterPage({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final authState = ref.watch(authStateProvider);
     final userId =
         authState is AuthAuthenticated ? authState.user.id : null;
     if (userId == null) {
       return Scaffold(
-        appBar: AppBar(title: const Text('Financial Center')),
-        body: const Center(child: Text('Please log in to view your finances.')),
+        appBar: AppBar(title: Text(l10n.financialCenter)),
+        body: Center(child: Text(l10n.pleaseLogInFinances)),
       );
     }
     final driverId = userId;
@@ -28,13 +30,14 @@ class DriverFinancialCenterPage extends ConsumerWidget {
     final topups = ref.watch(topupRequestsProvider);
     final wallet = ref.watch(driverWalletDetailProvider(driverId));
     final earnings = ref.watch(driverEarningsProvider(driverId));
+    final symbol = l10n.currencySymbol;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Financial Center')),
+      appBar: AppBar(title: Text(l10n.financialCenter)),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => context.push('/driver/financial-center/topup'),
         icon: const Icon(Icons.add),
-        label: const Text('Top-Up'),
+        label: Text(l10n.topUp),
       ),
       body: RefreshIndicator(
         onRefresh: () async {
@@ -51,38 +54,38 @@ class DriverFinancialCenterPage extends ConsumerWidget {
               data: (s) => Column(
                 children: [
                   _StatCard(
-                    title: 'Wallet Balance',
-                    value: '${s.balance.toStringAsFixed(2)} SAR',
+                    title: l10n.walletBalance,
+                    value: '${s.balance.toStringAsFixed(2)} $symbol',
                   ),
                   _StatCard(
-                    title: 'Commission Rate',
+                    title: l10n.commissionRate,
                     value: '${s.commissionRate.toStringAsFixed(2)}%',
                   ),
                   _StatCard(
-                    title: 'Pending Top-Ups',
+                    title: l10n.pendingTopups,
                     value: '${s.pendingTopups}',
                   ),
                 ],
               ),
               loading: () => const Center(child: CircularProgressIndicator()),
               error: (_, __) =>
-                  const _StatCard(title: 'Balance', value: 'Unavailable'),
+                  const _StatCard(title: '', value: ''),
             ),
             wallet.when(
               data: (w) => Column(
                 children: [
                   _StatCard(
-                    title: 'Available Balance',
+                    title: l10n.availableBalance,
                     value:
-                        '${(w.balance - w.pendingWithdrawals).clamp(0.0, double.infinity).toStringAsFixed(2)} EGP',
+                        '${(w.balance - w.pendingWithdrawals).clamp(0.0, double.infinity).toStringAsFixed(2)} $symbol',
                   ),
                   _StatCard(
-                    title: 'Pending Withdrawals',
-                    value: '${w.pendingWithdrawals.toStringAsFixed(2)} EGP',
+                    title: l10n.pendingWithdrawals,
+                    value: '${w.pendingWithdrawals.toStringAsFixed(2)} $symbol',
                   ),
                   _StatCard(
-                    title: 'Total Withdrawn',
-                    value: '${w.totalWithdrawn.toStringAsFixed(2)} EGP',
+                    title: l10n.totalWithdrawn,
+                    value: '${w.totalWithdrawn.toStringAsFixed(2)} $symbol',
                   ),
                 ],
               ),
@@ -91,9 +94,8 @@ class DriverFinancialCenterPage extends ConsumerWidget {
             ),
             grace.when(
               data: (g) => _StatCard(
-                title: 'Grace',
-                value:
-                    'Used ${g.used} / Limit ${g.limit} (${g.remaining} remaining)',
+                title: l10n.graceLabel,
+                value: l10n.graceUsed(g.limit, g.remaining, g.used),
               ),
               loading: () => const SizedBox.shrink(),
               error: (_, __) => const SizedBox.shrink(),
@@ -111,17 +113,17 @@ class DriverFinancialCenterPage extends ConsumerWidget {
                 return Column(
                   children: [
                     _StatCard(
-                      title: 'Gross Earnings',
-                      value: '${gross.toStringAsFixed(2)} EGP',
+                      title: l10n.grossEarnings,
+                      value: '${gross.toStringAsFixed(2)} $symbol',
                     ),
                     _StatCard(
-                      title: 'Commission',
+                      title: l10n.commission,
                       value:
-                          '${commission.toStringAsFixed(2)} EGP (${rate.toStringAsFixed(1)}%)',
+                          '${commission.toStringAsFixed(2)} $symbol (${rate.toStringAsFixed(1)}%)',
                     ),
                     _StatCard(
-                      title: 'Net Earnings',
-                      value: '${net.toStringAsFixed(2)} EGP',
+                      title: l10n.netEarnings,
+                      value: '${net.toStringAsFixed(2)} $symbol',
                     ),
                   ],
                 );
@@ -130,13 +132,13 @@ class DriverFinancialCenterPage extends ConsumerWidget {
               error: (_, __) => const SizedBox.shrink(),
             ),
             const SizedBox(height: 12),
-            const Text(
-              'Recent Transactions',
-              style: TextStyle(fontWeight: FontWeight.bold),
+            Text(
+              l10n.recentTransactions,
+              style: const TextStyle(fontWeight: FontWeight.bold),
             ),
             summary.when(
               data: (s) => s.recentTransactions.isEmpty
-                  ? const Text('No transactions yet.')
+                  ? Text(l10n.noTransactionsYet)
                   : Column(
                       children: s.recentTransactions
                           .map(
@@ -153,13 +155,13 @@ class DriverFinancialCenterPage extends ConsumerWidget {
               error: (_, __) => const SizedBox.shrink(),
             ),
             const SizedBox(height: 12),
-            const Text(
-              'Top-Up History',
-              style: TextStyle(fontWeight: FontWeight.bold),
+            Text(
+              l10n.topUpHistory,
+              style: const TextStyle(fontWeight: FontWeight.bold),
             ),
             topups.when(
               data: (list) => list.isEmpty
-                  ? const Text('No top-up requests yet.')
+                  ? Text(l10n.noTopUpRequests)
                   : Column(
                       children: list
                           .map(
@@ -176,7 +178,7 @@ class DriverFinancialCenterPage extends ConsumerWidget {
                           .toList(),
                     ),
               loading: () => const Center(child: CircularProgressIndicator()),
-              error: (e, _) => Text('Error: $e'),
+              error: (e, _) => Text(l10n.error),
             ),
           ],
         ),

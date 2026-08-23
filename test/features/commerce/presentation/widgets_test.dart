@@ -153,7 +153,7 @@ void main() {
       )));
 
       expect(find.text('30 min'), findsOneWidget);
-      expect(find.text('10 ج.م'), findsOneWidget);
+      expect(find.text('10 EGP'), findsOneWidget);
     });
 
     testWidgets('hides delivery info when not available', (tester) async {
@@ -194,7 +194,7 @@ void main() {
         onTap: () {},
       )));
 
-      expect(find.text('35 ج.م'), findsOneWidget);
+      expect(find.text('35 EGP'), findsOneWidget);
     });
 
     testWidgets('displays discount badge when discounted', (tester) async {
@@ -293,10 +293,10 @@ void main() {
   });
 
   group('PriceTag', () {
-    testWidgets('displays price with ج.م', (tester) async {
+    testWidgets('displays price with EGP', (tester) async {
       await tester.pumpWidget(wrapInApp(const PriceTag(price: 35.0)));
 
-      expect(find.text('35 ج.م'), findsOneWidget);
+      expect(find.text('35 EGP'), findsOneWidget);
     });
 
     testWidgets('displays original price with strikethrough when discounted',
@@ -305,14 +305,14 @@ void main() {
         const PriceTag(price: 35.0, originalPrice: 50.0),
       ));
 
-      expect(find.text('35 ج.م'), findsOneWidget);
+      expect(find.text('35 EGP'), findsOneWidget);
       expect(find.text('50'), findsOneWidget);
     });
 
     testWidgets('hides original price when no discount', (tester) async {
       await tester.pumpWidget(wrapInApp(const PriceTag(price: 35.0)));
 
-      expect(find.text('35 ج.م'), findsOneWidget);
+      expect(find.text('35 EGP'), findsOneWidget);
       expect(find.byIcon(Icons.star_border), findsNothing);
     });
 
@@ -322,7 +322,7 @@ void main() {
         const PriceTag(price: 50.0, originalPrice: 50.0),
       ));
 
-      expect(find.text('50 ج.م'), findsOneWidget);
+      expect(find.text('50 EGP'), findsOneWidget);
       expect(find.text('50'), findsNothing);
     });
   });
@@ -341,7 +341,7 @@ void main() {
         const DeliveryInfo(deliveryFee: 15.0),
       ));
 
-      expect(find.text('15 ج.م'), findsOneWidget);
+      expect(find.text('15 EGP'), findsOneWidget);
     });
 
     testWidgets('displays free delivery when fee is 0', (tester) async {
@@ -357,7 +357,7 @@ void main() {
         const DeliveryInfo(minimumOrder: 25.0),
       ));
 
-      expect(find.text('Min 25 ج.م'), findsOneWidget);
+      expect(find.text('Min 25 EGP'), findsOneWidget);
     });
 
     testWidgets('displays all info when all provided', (tester) async {
@@ -370,8 +370,8 @@ void main() {
       ));
 
       expect(find.text('30 min'), findsOneWidget);
-      expect(find.text('10 ج.م'), findsOneWidget);
-      expect(find.text('Min 25 ج.م'), findsOneWidget);
+      expect(find.text('10 EGP'), findsOneWidget);
+      expect(find.text('Min 25 EGP'), findsOneWidget);
     });
 
     testWidgets('hides sections when null', (tester) async {

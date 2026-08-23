@@ -29,7 +29,7 @@ class FinancialCenterPage extends ConsumerWidget {
               data: (s) => Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _Card(title: l10n.balance, value: '${s.balance.toStringAsFixed(2)} SAR'),
+                  _Card(title: l10n.balance, value: '${s.balance.toStringAsFixed(2)} ${l10n.currencySymbol}'),
                   _Card(
                     title: l10n.commissionRate,
                     value: '${s.commissionRate.toStringAsFixed(2)}%',
@@ -50,7 +50,7 @@ class FinancialCenterPage extends ConsumerWidget {
                 ],
               ),
               loading: () => const Center(child: CircularProgressIndicator()),
-              error: (e, _) => Center(child: Text('Error: $e')),
+              error: (e, _) => Center(child: Text(l10n.error)),
             ),
             grace.when(
               data: (g) => _Card(
@@ -90,7 +90,7 @@ class FinancialCenterPage extends ConsumerWidget {
                           .toList(),
                     ),
               loading: () => const Center(child: CircularProgressIndicator()),
-              error: (e, _) => Center(child: Text('Error: $e')),
+              error: (e, _) => Center(child: Text(l10n.error)),
             ),
           ],
         ),

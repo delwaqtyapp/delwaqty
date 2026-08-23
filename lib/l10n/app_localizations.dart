@@ -4808,6 +4808,72 @@ abstract class AppLocalizations {
   /// **'Vehicle Category'**
   String get vehicleCategory;
 
+  /// No description provided for @vehicleTukTuk.
+  ///
+  /// In en, this message translates to:
+  /// **'Tuk Tuk'**
+  String get vehicleTukTuk;
+
+  /// No description provided for @vehicleTricycle.
+  ///
+  /// In en, this message translates to:
+  /// **'Tricycle'**
+  String get vehicleTricycle;
+
+  /// No description provided for @vehicleMotorcycle.
+  ///
+  /// In en, this message translates to:
+  /// **'Motorcycle'**
+  String get vehicleMotorcycle;
+
+  /// No description provided for @vehicleScooter.
+  ///
+  /// In en, this message translates to:
+  /// **'Scooter'**
+  String get vehicleScooter;
+
+  /// No description provided for @vehicleElectricScooter.
+  ///
+  /// In en, this message translates to:
+  /// **'Electric Scooter'**
+  String get vehicleElectricScooter;
+
+  /// No description provided for @vehicleMiniScooter.
+  ///
+  /// In en, this message translates to:
+  /// **'Mini Scooter'**
+  String get vehicleMiniScooter;
+
+  /// No description provided for @vehicleBicycle.
+  ///
+  /// In en, this message translates to:
+  /// **'Bicycle'**
+  String get vehicleBicycle;
+
+  /// No description provided for @vehicleCar.
+  ///
+  /// In en, this message translates to:
+  /// **'Car'**
+  String get vehicleCar;
+
+  /// No description provided for @vehicleVan.
+  ///
+  /// In en, this message translates to:
+  /// **'Van'**
+  String get vehicleVan;
+
+  /// No description provided for @vehiclePickup.
+  ///
+  /// In en, this message translates to:
+  /// **'Pickup'**
+  String get vehiclePickup;
+
+  /// No description provided for @vehicleLightTransport.
+  ///
+  /// In en, this message translates to:
+  /// **'Light Transport'**
+  String get vehicleLightTransport;
+
   /// No description provided for @vehicleYear.
   ///
   /// In en, this message translates to:

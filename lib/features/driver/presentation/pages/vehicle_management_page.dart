@@ -14,32 +14,63 @@ final _vehiclesProvider = FutureProvider.family<List<Vehicle>, String>((ref, dri
 });
 
 const _vehicleCategories = [
-  'economy',
-  'comfort',
-  'premium',
-  'taxi',
-  'xl',
-  'van',
-  'pickup',
-  'motorbike',
+  'tuk_tuk',
+  'tricycle',
   'motorcycle',
   'scooter',
+  'electric_scooter',
+  'mini_scooter',
+  'bicycle',
+  'car',
+  'van',
+  'pickup',
+  'light_transport',
 ];
+
+String _categoryLabel(AppLocalizations l10n, String category) {
+  switch (category) {
+    case 'tuk_tuk':
+      return l10n.vehicleTukTuk;
+    case 'tricycle':
+      return l10n.vehicleTricycle;
+    case 'motorcycle':
+      return l10n.vehicleMotorcycle;
+    case 'scooter':
+      return l10n.vehicleScooter;
+    case 'electric_scooter':
+      return l10n.vehicleElectricScooter;
+    case 'mini_scooter':
+      return l10n.vehicleMiniScooter;
+    case 'bicycle':
+      return l10n.vehicleBicycle;
+    case 'car':
+      return l10n.vehicleCar;
+    case 'van':
+      return l10n.vehicleVan;
+    case 'pickup':
+      return l10n.vehiclePickup;
+    case 'light_transport':
+      return l10n.vehicleLightTransport;
+    default:
+      return category[0].toUpperCase() + category.substring(1);
+  }
+}
 
 IconData _categoryIcon(String category) {
   switch (category) {
-    case 'economy':
-    case 'comfort':
-    case 'premium':
-    case 'taxi':
+    case 'tuk_tuk':
+    case 'tricycle':
+    case 'car':
       return Icons.directions_car_rounded;
-    case 'xl':
     case 'van':
     case 'pickup':
+    case 'light_transport':
       return Icons.local_shipping_rounded;
-    case 'motorbike':
     case 'motorcycle':
     case 'scooter':
+    case 'electric_scooter':
+    case 'mini_scooter':
+    case 'bicycle':
       return Icons.two_wheeler_rounded;
     default:
       return Icons.directions_car_rounded;
@@ -324,7 +355,7 @@ class _VehicleFormSheetState extends ConsumerState<_VehicleFormSheet> {
   void initState() {
     super.initState();
     final v = widget.vehicle;
-    _category = v?.category ?? 'economy';
+    _category = v?.category ?? 'motorcycle';
     if (v != null) {
       _makeController.text = v.make ?? '';
       _modelController.text = v.model ?? '';
@@ -387,7 +418,7 @@ class _VehicleFormSheetState extends ConsumerState<_VehicleFormSheet> {
                 items: _vehicleCategories.map((c) {
                   return DropdownMenuItem(
                     value: c,
-                    child: Text(c[0].toUpperCase() + c.substring(1)),
+                    child: Text(_categoryLabel(l10n, c)),
                   );
                 }).toList(),
                 onChanged: (v) {

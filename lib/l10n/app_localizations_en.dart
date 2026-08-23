@@ -2484,6 +2484,39 @@ class AppLocalizationsEn extends AppLocalizations {
   String get vehicleCategory => 'Vehicle Category';
 
   @override
+  String get vehicleTukTuk => 'Tuk Tuk';
+
+  @override
+  String get vehicleTricycle => 'Tricycle';
+
+  @override
+  String get vehicleMotorcycle => 'Motorcycle';
+
+  @override
+  String get vehicleScooter => 'Scooter';
+
+  @override
+  String get vehicleElectricScooter => 'Electric Scooter';
+
+  @override
+  String get vehicleMiniScooter => 'Mini Scooter';
+
+  @override
+  String get vehicleBicycle => 'Bicycle';
+
+  @override
+  String get vehicleCar => 'Car';
+
+  @override
+  String get vehicleVan => 'Van';
+
+  @override
+  String get vehiclePickup => 'Pickup';
+
+  @override
+  String get vehicleLightTransport => 'Light Transport';
+
+  @override
   String get vehicleYear => 'Vehicle Year';
 
   @override

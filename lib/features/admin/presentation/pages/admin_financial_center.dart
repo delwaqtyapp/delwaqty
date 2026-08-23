@@ -102,6 +102,12 @@ class AdminFinancialCenter extends ConsumerWidget {
                       color: const Color(0xFFFF9500),
                       onTap: () => context.push('/admin/receiving-wallets'),
                     ),
+                    _FinanceQuickAction(
+                      icon: Icons.add_card_rounded,
+                      label: l10n.topUpAccount,
+                      color: const Color(0xFF34C759),
+                      onTap: () => _showDirectTopupDialog(context, ref),
+                    ),
                     if ((ref.watch(adminIsOwnerProvider)).value ?? false)
                       _FinanceQuickAction(
                         icon: Icons.public_rounded,
@@ -184,6 +190,137 @@ class AdminFinancialCenter extends ConsumerWidget {
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _showDirectTopupDialog(
+    BuildContext context,
+    WidgetRef ref,
+  ) async {
+    final l10n = AppLocalizations.of(context);
+    var accountType = 'delivery';
+    final idController = TextEditingController();
+    final amountController = TextEditingController();
+    final noteController = TextEditingController();
+    final formKey = GlobalKey<FormState>();
+    var submitting = false;
+    var resultMsg = '';
+
+    await showDialog<void>(
+      context: context,
+      builder: (dialogContext) => StatefulBuilder(
+        builder: (ctx, setState) => AlertDialog(
+          title: Text(l10n.topUpAccount),
+          content: Form(
+            key: formKey,
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  DropdownButtonFormField<String>(
+                    value: accountType,
+                    decoration: InputDecoration(labelText: l10n.accountType),
+                    items: [
+                      DropdownMenuItem(
+                        value: 'delivery',
+                        child: Text(l10n.delivery),
+                      ),
+                      DropdownMenuItem(
+                        value: 'provider',
+                        child: Text(l10n.provider),
+                      ),
+                    ],
+                    onChanged: (v) => accountType = v ?? 'delivery',
+                  ),
+                  TextFormField(
+                    controller: idController,
+                    decoration: InputDecoration(labelText: l10n.accountId),
+                    validator: (v) =>
+                        (v == null || v.trim().isEmpty) ? l10n.accountIdRequired : null,
+                  ),
+                  TextFormField(
+                    controller: amountController,
+                    decoration: InputDecoration(labelText: l10n.amount),
+                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                    validator: (v) {
+                      final n = double.tryParse(v ?? '');
+                      if (n == null || n <= 0) return l10n.enterValidAmount;
+                      return null;
+                    },
+                  ),
+                  TextFormField(
+                    controller: noteController,
+                    decoration: InputDecoration(labelText: l10n.note),
+                  ),
+                  if (resultMsg.isNotEmpty)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 8),
+                      child: Text(
+                        resultMsg,
+                        style: TextStyle(
+                          color: Theme.of(ctx).colorScheme.error,
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: submitting ? null : () => Navigator.of(ctx).pop(),
+              child: Text(l10n.cancel),
+            ),
+            FilledButton(
+              onPressed: submitting
+                  ? null
+                  : () async {
+                      if (!formKey.currentState!.validate()) return;
+                      setState(() => submitting = true);
+                      try {
+                        final res = await ref
+                            .read(adminFinancialRepositoryProvider)
+                            .adminDirectTopup(
+                              accountType: accountType,
+                              accountId: idController.text.trim(),
+                              amount: double.parse(amountController.text.trim()),
+                              note: noteController.text.trim().isEmpty
+                                  ? null
+                                  : noteController.text.trim(),
+                            );
+                        if ((res['ok'] as bool? ?? false) == true) {
+                          if (ctx.mounted) Navigator.of(ctx).pop();
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text(l10n.directTopupSuccess)),
+                            );
+                          }
+                        } else {
+                          setState(() {
+                            submitting = false;
+                            resultMsg = l10n.directTopupFailed(
+                              (res['code'] as String?) ?? l10n.error,
+                            );
+                          });
+                        }
+                      } catch (e) {
+                        setState(() {
+                          submitting = false;
+                          resultMsg = l10n.directTopupFailed(e.toString());
+                        });
+                      }
+                    },
+              child: submitting
+                  ? const SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : Text(l10n.confirm),
+            ),
+          ],
         ),
       ),
     );

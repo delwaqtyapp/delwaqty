@@ -1974,7 +1974,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noDeliveriesAvailable => 'No deliveries available';
 
   @override
-  String get enterValidAmount => 'Enter a valid amount';
+  String get enterValidAmount => 'Enter a valid amount greater than zero';
 
   @override
   String get topUpSuccessful => 'Top-up successful';
@@ -2000,7 +2000,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get justNow => 'Just now';
 
   @override
-  String get currencySymbol => 'ج.م';
+  String get currencySymbol => 'EGP';
 
   @override
   String amountWithCurrency(Object amount, Object currency) {
@@ -2454,7 +2454,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get searchPlaceholderCity => 'Search for a place or address';
 
   @override
-  String get onboardingTitle => 'Driver Registration';
+  String get onboardingTitle => 'Delivery Registration';
 
   @override
   String get personalInfo => 'Personal Information';
@@ -5817,6 +5817,44 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get financialCenter => 'Financial Center';
+
+  @override
+  String get walletBalance => 'Wallet Balance';
+
+  @override
+  String get commission => 'Commission';
+
+  @override
+  String get noTransactionsYet => 'No transactions yet.';
+
+  @override
+  String get pleaseLogInFinances => 'Please log in to view your finances.';
+
+  @override
+  String get topUpAccount => 'Top Up Account';
+
+  @override
+  String get accountId => 'Account ID';
+
+  @override
+  String get accountType => 'Account Type';
+
+  @override
+  String get provider => 'Provider';
+
+  @override
+  String get note => 'Note';
+
+  @override
+  String get directTopupSuccess => 'Account funded successfully';
+
+  @override
+  String directTopupFailed(Object reason) {
+    return 'Top-up failed: $reason';
+  }
+
+  @override
+  String get accountIdRequired => 'Account ID is required';
 
   @override
   String get requestTopUp => 'Request top-up';

@@ -3833,7 +3833,7 @@ abstract class AppLocalizations {
   /// No description provided for @enterValidAmount.
   ///
   /// In en, this message translates to:
-  /// **'Enter a valid amount'**
+  /// **'Enter a valid amount greater than zero'**
   String get enterValidAmount;
 
   /// No description provided for @topUpSuccessful.
@@ -3881,7 +3881,7 @@ abstract class AppLocalizations {
   /// No description provided for @currencySymbol.
   ///
   /// In en, this message translates to:
-  /// **'ج.م'**
+  /// **'EGP'**
   String get currencySymbol;
 
   /// No description provided for @amountWithCurrency.
@@ -4751,7 +4751,7 @@ abstract class AppLocalizations {
   /// No description provided for @onboardingTitle.
   ///
   /// In en, this message translates to:
-  /// **'Driver Registration'**
+  /// **'Delivery Registration'**
   String get onboardingTitle;
 
   /// No description provided for @personalInfo.
@@ -11131,6 +11131,78 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Financial Center'**
   String get financialCenter;
+
+  /// No description provided for @walletBalance.
+  ///
+  /// In en, this message translates to:
+  /// **'Wallet Balance'**
+  String get walletBalance;
+
+  /// No description provided for @commission.
+  ///
+  /// In en, this message translates to:
+  /// **'Commission'**
+  String get commission;
+
+  /// No description provided for @noTransactionsYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No transactions yet.'**
+  String get noTransactionsYet;
+
+  /// No description provided for @pleaseLogInFinances.
+  ///
+  /// In en, this message translates to:
+  /// **'Please log in to view your finances.'**
+  String get pleaseLogInFinances;
+
+  /// No description provided for @topUpAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Top Up Account'**
+  String get topUpAccount;
+
+  /// No description provided for @accountId.
+  ///
+  /// In en, this message translates to:
+  /// **'Account ID'**
+  String get accountId;
+
+  /// No description provided for @accountType.
+  ///
+  /// In en, this message translates to:
+  /// **'Account Type'**
+  String get accountType;
+
+  /// No description provided for @provider.
+  ///
+  /// In en, this message translates to:
+  /// **'Provider'**
+  String get provider;
+
+  /// No description provided for @note.
+  ///
+  /// In en, this message translates to:
+  /// **'Note'**
+  String get note;
+
+  /// No description provided for @directTopupSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Account funded successfully'**
+  String get directTopupSuccess;
+
+  /// No description provided for @directTopupFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Top-up failed: {reason}'**
+  String directTopupFailed(Object reason);
+
+  /// No description provided for @accountIdRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Account ID is required'**
+  String get accountIdRequired;
 
   /// No description provided for @requestTopUp.
   ///

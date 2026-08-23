@@ -1965,7 +1965,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get noDeliveriesAvailable => 'لا توجد طلبات توصيل متاحة';
 
   @override
-  String get enterValidAmount => 'أدخل مبلغاً صحيحاً';
+  String get enterValidAmount => 'أدخل مبلغًا صالحًا أكبر من صفر';
 
   @override
   String get topUpSuccessful => 'تم الشحن بنجاح';
@@ -2443,7 +2443,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get searchPlaceholderCity => 'ابحث عن مكان أو عنوان';
 
   @override
-  String get onboardingTitle => 'تسجيل السائق';
+  String get onboardingTitle => 'تسجيل التوصيل';
 
   @override
   String get personalInfo => 'المعلومات الشخصية';
@@ -5773,6 +5773,44 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get financialCenter => 'المركز المالي';
+
+  @override
+  String get walletBalance => 'رصيد المحفظة';
+
+  @override
+  String get commission => 'العمولة';
+
+  @override
+  String get noTransactionsYet => 'لا توجد معاملات بعد.';
+
+  @override
+  String get pleaseLogInFinances => 'يرجى تسجيل الدخول لعرض أموالك.';
+
+  @override
+  String get topUpAccount => 'شحن حساب';
+
+  @override
+  String get accountId => 'معرف الحساب';
+
+  @override
+  String get accountType => 'نوع الحساب';
+
+  @override
+  String get provider => 'مقدم الخدمة';
+
+  @override
+  String get note => 'ملاحظة';
+
+  @override
+  String get directTopupSuccess => 'تم شحن الحساب بنجاح';
+
+  @override
+  String directTopupFailed(Object reason) {
+    return 'فشل الشحن: $reason';
+  }
+
+  @override
+  String get accountIdRequired => 'معرف الحساب مطلوب';
 
   @override
   String get requestTopUp => 'طلب تعبئة';

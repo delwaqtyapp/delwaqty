@@ -2473,6 +2473,39 @@ class AppLocalizationsAr extends AppLocalizations {
   String get vehicleCategory => 'فئة المركبة';
 
   @override
+  String get vehicleTukTuk => 'توك توك';
+
+  @override
+  String get vehicleTricycle => 'تروسيكل';
+
+  @override
+  String get vehicleMotorcycle => 'موتوسيكل';
+
+  @override
+  String get vehicleScooter => 'سكوتر';
+
+  @override
+  String get vehicleElectricScooter => 'سكوتر كهربائي';
+
+  @override
+  String get vehicleMiniScooter => 'ميني سكوتر';
+
+  @override
+  String get vehicleBicycle => 'عجلة';
+
+  @override
+  String get vehicleCar => 'سيارة';
+
+  @override
+  String get vehicleVan => 'فان';
+
+  @override
+  String get vehiclePickup => 'بيك أب';
+
+  @override
+  String get vehicleLightTransport => 'مركبة نقل خفيفة';
+
+  @override
   String get vehicleYear => 'سنة الصنع';
 
   @override

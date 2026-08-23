@@ -562,7 +562,9 @@ class _VehicleFormSheetState extends ConsumerState<_VehicleFormSheet> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(e.toString())),
+          SnackBar(
+            content: Text(AppLocalizations.of(context).somethingWentWrong),
+          ),
         );
       }
     } finally {

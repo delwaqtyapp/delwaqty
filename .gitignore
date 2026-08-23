@@ -103,3 +103,4 @@ app.*.map.json
 # CI/CD generated
 *.hmac
 .github/secrets*
+.flutter-plugins

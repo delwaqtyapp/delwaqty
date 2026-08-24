@@ -158,7 +158,13 @@ class HomePage extends ConsumerWidget {
         : ref.watch(unreadCountProvider).valueOrNull ?? 0;
     final bottomNavVisible = ref.watch(bottomNavVisibleProvider);
 
-    return Scaffold(
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, _) {
+        if (didPop) return;
+        _showExitConfirmation(context, l10n);
+      },
+      child: Scaffold(
       body: SafeArea(
         child: GradientBackground(
           child: RefreshIndicator(
@@ -210,6 +216,7 @@ class HomePage extends ConsumerWidget {
           ),
         ),
       ),
+    ),
     );
   }
 
@@ -343,6 +350,32 @@ class HomePage extends ConsumerWidget {
           const _DiscoveryTabs(),
           const SizedBox(height: 4),
           const _DiscoveryContent(),
+        ],
+      ),
+    );
+  }
+
+  void _showExitConfirmation(BuildContext context, AppLocalizations l10n) {
+    showDialog<void>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppSpacing.radiusDialog),
+        ),
+        title: Text(l10n.exitAppTitle),
+        content: Text(l10n.exitAppConfirm),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: Text(l10n.cancel),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.of(ctx).pop();
+              SystemNavigator.pop();
+            },
+            child: Text(l10n.logout),
+          ),
         ],
       ),
     );

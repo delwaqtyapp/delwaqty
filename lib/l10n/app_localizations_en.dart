@@ -5949,4 +5949,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get identity => 'Identity';
+
+  @override
+  String get exitAppTitle => 'Are you sure you want to exit DelwaQty?';
+
+  @override
+  String get exitAppConfirm => 'Are you sure you want to exit DelwaQty?';
 }

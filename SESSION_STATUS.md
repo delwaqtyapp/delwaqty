@@ -4,6 +4,29 @@
 
 ---
 
+## Current Task — SPRINTS 129-138: REALTIME DB FIX + FULL NAVIGATION/DEEP-LINK AUDIT (4 apps) — COMPLETE
+
+**Status:** Live-DB Realtime publication fixed; systematic route/deep-link audit across all four apps; 3 real 404 deep-links fixed; all four apps rebuilt + installed + launched clean on DNP NX9; `flutter analyze` 0 errors; `flutter test` 918/918 pass; tree clean; HEAD == origin/master.
+
+**Realtime (live Supabase `bttnlkmwhorjamzemwda`, shared by .env.dev AND .env.prod; .env.staging is empty placeholder):**
+- Root cause (on-device `RealtimeSubscribeException`/`channelError` for `users`): app-subscribed tables missing from `supabase_realtime` publication.
+- Fix (idempotent DO block, committed as migration `078_realtime_publication.sql`): added `users, orders, offers, trusted_contacts, reviews, product_inventory, order_dispatch, wallet_transactions, order_tracking`.
+- Verified on device: all four apps (com.delwaqty.app/admin/driver/provider) launch with **no** RealtimeSubscribeException/channelError/Unhandled Exception.
+
+**Navigation/deep-link audit (scripted: parse all `GoRoute`/`ShellRoute` paths → 180 templates; cross-check every `context.push/go` literal + `$`-interpolated target → 79 targets):**
+- Result: **0 unmatched** after fixes below.
+- Fixed 404s:
+  - `sprint 137`: `/market/orders/:id` had no route → registered in `commerce_module.dart` (reuses `OrderTrackingPage`); fixes tapping an order in the list + `order`/`delivery` notification deep-links. `/service-booking/:id` had no destination → redirected to `/home-services` in `app_notification.dart`.
+  - `sprint 138`: `/driver/delivery/:id` had no route → added `getDeliveryOrderById` (datasource→repo→provider) + new `DriverDeliveryDetailPage` (status-aware Accept/Arrive/Start-with-OTP/Complete/Cancel) + route in `driver_module.dart`. Driver app rebuilt + launched clean.
+
+**Env/DB consistency:** `.env.prod` points to the same Supabase project as `.env.dev` → single real DB, already fixed. `.env.staging` is a placeholder. Migration `078` makes laptop/GitHub schema match live.
+
+**Gates:** `flutter analyze` 0 errors (71 info baseline); `flutter test --concurrency=2` 918/918 pass; customer + driver APKs rebuilt (arm64) and installed, clean launch on DNP NX9.
+
+**Remaining backlog (NOT done this turn):** payment/checkout runtime flow, driver live tracking map, campaigns RPC render, full i18n extraction sweep (1,899 keys have ~285 hardcoded-Arabic-literal gaps), 394 TODO/FIXME tech debt, `flutter pub outdated` (70 packages).
+
+---
+
 ## Current Task — SPRINT 126: APP BUNDLE BUILDS (distribution-size proof) — COMPLETE
 
 **Status:** Android App Bundle is now the recommended distribution path; all four flavors build release `.aab`. Committed `debeaa9`.

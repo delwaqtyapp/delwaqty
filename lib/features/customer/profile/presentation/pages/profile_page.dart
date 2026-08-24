@@ -230,12 +230,28 @@ class ProfilePage extends ConsumerWidget {
             ],
           ),
           const SizedBox(height: 16),
-          Text(
-            user.fullName ?? user.username ?? l10n.user,
-            style: context.textTheme.titleLarge?.copyWith(
-              fontWeight: FontWeight.w800,
-            ),
-            textAlign: TextAlign.center,
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Flexible(
+                child: Text(
+                  user.fullName ?? user.username ?? l10n.user,
+                  style: context.textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.w800,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+              if (user.verificationStatus.isApproved) ...[
+                const SizedBox(width: 6),
+                Icon(
+                  Icons.verified_rounded,
+                  size: 20,
+                  color: AppColors.brandPurple,
+                ),
+              ],
+            ],
           ),
           if (user.username?.isNotEmpty == true) ...[
             const SizedBox(height: 4),
@@ -247,13 +263,6 @@ class ProfilePage extends ConsumerWidget {
               ),
             ),
           ],
-          const SizedBox(height: 4),
-          Text(
-            user.email,
-            style: context.textTheme.bodyMedium?.copyWith(
-              color: context.colorScheme.onSurfaceVariant,
-            ),
-          ),
           if (roleLabel != null) ...[
             const SizedBox(height: 10),
             _RoleChip(label: roleLabel),

@@ -146,7 +146,7 @@ class NotificationPayload {
       case 'merchant':
         return '/market/merchant/$entityId';
       case 'service':
-        return '/service-booking/$entityId';
+        return '/home-services';
       case 'delivery':
         return '/market/orders/$entityId';
       default:

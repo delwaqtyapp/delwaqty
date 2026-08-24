@@ -153,6 +153,11 @@ class CommerceModule extends FeatureModule {
           builder: (context, state) => const OrdersPage(),
         ),
         GoRoute(
+          path: 'orders/:orderId',
+          builder: (context, state) =>
+              OrderTrackingPage(orderId: state.pathParameters['orderId']!),
+        ),
+        GoRoute(
           path: 'order-completed/:orderId',
           builder: (context, state) =>
               OrderCompletedPage(orderId: state.pathParameters['orderId']!),

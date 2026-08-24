@@ -292,6 +292,24 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
 
     try {
       final orderRepo = ref.read(orderRepositoryProvider);
+
+      // For card/wallet, initiate Paymob BEFORE creating the DB order so a
+      // missing/failed payment credential never leaves an orphan order behind.
+      if (_paymentMethod != 'cash') {
+        final paymentSuccess = await _initiatePayment(cart.total);
+        if (!paymentSuccess) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(l10n.somethingWentWrong),
+                backgroundColor: cs.error,
+              ),
+            );
+          }
+          return;
+        }
+      }
+
       final order = await orderRepo.createOrder(
         merchantId: cart.merchantId,
         merchantName: cart.merchantName,
@@ -304,20 +322,6 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
         paymentMethod: _paymentMethod,
       );
 
-      if (_paymentMethod != 'cash') {
-        final paymentSuccess = await _processPayment(order, cart.total);
-        if (!paymentSuccess && mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(l10n.somethingWentWrong),
-              backgroundColor: cs.error,
-            ),
-          );
-          setState(() => _isPlacing = false);
-          return;
-        }
-      }
-
       await ref.read(cartRepositoryProvider).clearCart();
       ref.invalidate(_cartFutureProvider);
 
@@ -326,7 +330,10 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.somethingWentWrong), backgroundColor: cs.error),
+        SnackBar(
+          content: Text(l10n.somethingWentWrong),
+          backgroundColor: cs.error,
+        ),
       );
     } finally {
       if (mounted) {
@@ -335,7 +342,7 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
     }
   }
 
-  Future<bool> _processPayment(Order order, double amount) async {
+  Future<bool> _initiatePayment(double amount) async {
     try {
       final paymobService = ref.read(paymobServiceProvider);
       final auth = Supabase.instance.client.auth.currentUser;
@@ -346,7 +353,7 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
       final paymobOrderId = await paymobService.createOrder(
         authToken: authToken,
         amountCents: amount,
-        merchantOrderId: order.id,
+        merchantOrderId: DateTime.now().millisecondsSinceEpoch.toString(),
       );
       if (paymobOrderId == null) return false;
 

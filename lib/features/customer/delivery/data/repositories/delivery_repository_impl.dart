@@ -38,6 +38,10 @@ class DeliveryRepositoryImpl implements DeliveryRepository {
       _dataSource.getActiveDelivery(driverId);
 
   @override
+  Future<DeliveryOrder?> getDeliveryOrderById(String id) =>
+      _dataSource.getDeliveryOrderById(id);
+
+  @override
   Future<void> driverArrivedAtPickup(String rideId, String driverId) =>
       _dataSource.driverArrivedAtPickup(rideId, driverId);
 

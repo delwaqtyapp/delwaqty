@@ -21,6 +21,11 @@ final activeDeliveryProvider =
   return ref.watch(deliveryRepositoryProvider).watchActiveDelivery(driverId);
 });
 
+final deliveryOrderByIdProvider =
+    FutureProvider.family<DeliveryOrder?, String>((ref, id) {
+  return ref.watch(deliveryRepositoryProvider).getDeliveryOrderById(id);
+});
+
 final driverCapabilitiesProvider =
     FutureProvider.family<DriverCapability, String>((ref, driverId) {
   return ref.watch(deliveryRepositoryProvider).getDriverCapabilities(driverId);

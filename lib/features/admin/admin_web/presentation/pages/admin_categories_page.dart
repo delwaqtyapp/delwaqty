@@ -9,6 +9,8 @@ import 'package:delwaqty/data/repositories/category_repository_impl.dart';
 import 'package:delwaqty/features/customer/home/domain/entities/platform_category.dart';
 import 'package:delwaqty/features/customer/home/domain/repositories/platform_category_repository.dart';
 import 'package:delwaqty/shared/widgets/design/premium_card.dart';
+import 'package:delwaqty/features/_shared/auth/domain/auth_state.dart';
+import 'package:delwaqty/features/_shared/auth/presentation/auth_provider.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 
 final _allCategoriesProvider =
@@ -245,6 +247,9 @@ class _AdminCategoriesPageState extends ConsumerState<AdminCategoriesPage> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final categoriesAsync = ref.watch(_allCategoriesProvider);
+    final authState = ref.watch(authStateProvider);
+    final isOwner =
+        authState is AuthAuthenticated && authState.user.role == 'owner';
 
     return Padding(
       padding: const EdgeInsets.all(32),
@@ -418,20 +423,22 @@ class _AdminCategoriesPageState extends ConsumerState<AdminCategoriesPage> {
                                   onTap: () => _editCategory(cat),
                                 ),
                                 const SizedBox(width: 4),
-                                _ActionIconButton(
-                                  icon: Icons.cloud_upload_rounded,
-                                  tooltip: 'Upload image',
-                                  color: AppColors.brandCyan,
-                                  onTap: () => _uploadImage(cat),
-                                ),
-                                if (cat.imageUrl != null) ...[
-                                  const SizedBox(width: 4),
+                                if (isOwner) ...[
                                   _ActionIconButton(
-                                    icon: Icons.image_not_supported_rounded,
-                                    tooltip: 'Remove image',
-                                    color: Colors.orange,
-                                    onTap: () => _deleteImage(cat),
+                                    icon: Icons.cloud_upload_rounded,
+                                    tooltip: 'Upload image',
+                                    color: AppColors.brandCyan,
+                                    onTap: () => _uploadImage(cat),
                                   ),
+                                  if (cat.imageUrl != null) ...[
+                                    const SizedBox(width: 4),
+                                    _ActionIconButton(
+                                      icon: Icons.image_not_supported_rounded,
+                                      tooltip: 'Remove image',
+                                      color: Colors.orange,
+                                      onTap: () => _deleteImage(cat),
+                                    ),
+                                  ],
                                 ],
                                 const SizedBox(width: 4),
                                 _ActionIconButton(

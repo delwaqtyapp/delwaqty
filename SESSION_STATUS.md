@@ -4,6 +4,37 @@
 
 ---
 
+## Current Task — SPRINT 124: RELEASE BUILD HARDENING (APK size -18x) — COMPLETE
+
+**Status:** Root cause of the ~420 MB APKs found and fixed. All four flavors now build as **release + split-per-ABI** with R8 minify. Shipped and pushed (`0bda82e`).
+
+**Root cause of bloat:** (1) the project was shipping **debug** APKs (no tree-shaking, debug symbols, uncompressed); (2) no ABI split -> one fat APK carried `armeabi-v7a + arm64-v8a + x86_64`.
+
+**Fix (`android/app/build.gradle.kts`):**
+- `splits { abi { isEnable=true; include("armeabi-v7a","arm64-v8a","x86_64"); isUniversalApk=false } }`.
+- Release signing falls back to the debug key when `KEYSTORE_PASSWORD` env is empty (so release builds are producible here without the secret); real releases set the env vars to use `release.jks`.
+- Crashlytics mapping-file upload task disabled when `CRASHLYTICS_UPLOAD=false` (the network upload returns HTTP 400 here; real CI keeps it `true` for deobfuscation).
+
+**Measured (arm64-v8a - the DNP NX9 ABI):**
+| App | Debug fat | Release arm64 | Cut |
+|---|---|---|---|
+| Customer | 451 MB | 24.6 MB | 18.3x |
+| Admin | 423 MB | 23.4 MB | 18.1x |
+| Driver | 423 MB | 22.9 MB | 18.5x |
+| Provider | 424 MB | 24.8 MB | 17.1x |
+
+**Gates:** `flutter analyze` 0 errors (67 info, baseline); `flutter test` 918/918 pass (unchanged). No Dart changed.
+
+**i18n audit (sprint 125 prep):** ARB is complete - **1,899 keys** in both `app_ar.arb`/`app_en.arb` with perfect parity, so the English locale is fully translated. The ~285 "hardcoded Arabic literals" are a *consistency* gap (widgets bypassing `S.of(context)`), not a broken locale. A scripted auto-extraction was attempted but added 111 info-lints for negligible coverage (3 files / 2 keys) -> reverted to keep the tree clean. Recommend a dedicated, review-gated i18n sweep (Text/hintText/labelText -> S.of) as its own sprint.
+
+**Remaining backlog (documented, NOT done this turn):**
+- 394 `TODO/FIXME` comments across the repo (real unfinished work / tech debt).
+- Full i18n string extraction + English proofreading of the 1,899 keys.
+- **On-device UI smoke test is BLOCKED**: DNP NX9 is MDM-locked - no developer mode, no external APK install - so interactive verification is impossible here. Builds + analyze + tests are the only available gates.
+- Dependency hygiene: `flutter pub outdated` shows 70 packages with newer incompatible versions (drift risk; bump carefully).
+
+---
+
 ## Current Task — FINAL RELEASE CANDIDATE (4-APP DEVICE INSTALL + PROD HARDENING) — COMPLETE (sprint 115)
 
 **RC verification (DNP NX9, A3SQUT5A28003808):**

@@ -362,6 +362,7 @@ class HomePage extends ConsumerWidget {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppSpacing.radiusDialog),
         ),
+        icon: Image.asset('assets/logo app/logo.png', height: 44),
         title: Text(l10n.exitAppTitle),
         content: Text(l10n.exitAppConfirm),
         actions: [

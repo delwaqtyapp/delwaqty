@@ -43,6 +43,13 @@ class SettingsPage extends ConsumerWidget {
               trailing: const Icon(Icons.chevron_right_rounded),
               onTap: () => context.push('/settings/privacy-security'),
             ),
+            const Divider(height: 1),
+            ListTile(
+              leading: const Icon(Icons.shopping_cart_rounded),
+              title: Text(l10n.cart),
+              trailing: const Icon(Icons.chevron_right_rounded),
+              onTap: () => context.push('/market/cart'),
+            ),
           ]),
         ),
         const SizedBox(height: 16),

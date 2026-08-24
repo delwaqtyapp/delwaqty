@@ -195,6 +195,16 @@ class SupabaseDeliveryDataSource {
     return _deliveryFromRow(row);
   }
 
+  Future<DeliveryOrder?> getDeliveryOrderById(String id) async {
+    final row = await _client
+        .from('rides')
+        .select()
+        .eq('id', id)
+        .maybeSingle();
+    if (row == null) return null;
+    return _deliveryFromRow(row);
+  }
+
   Future<void> driverArrivedAtPickup(String rideId, String driverId) async {
     _checkRpc(await _client.rpc('driver_arrive', params: {
       'p_ride_id': rideId,

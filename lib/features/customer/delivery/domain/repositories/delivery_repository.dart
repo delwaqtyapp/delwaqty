@@ -13,6 +13,7 @@ abstract interface class DeliveryRepository {
 
   Stream<DeliveryOrder?> watchActiveDelivery(String driverId);
   Future<DeliveryOrder?> getActiveDelivery(String driverId);
+  Future<DeliveryOrder?> getDeliveryOrderById(String id);
   Future<void> driverArrivedAtPickup(String rideId, String driverId);
   Future<void> startDelivery(String rideId, String driverId, String otp);
   Future<double> completeDelivery(String rideId, String driverId, {String? proofUrl, double? finalDistanceKm});

@@ -64,7 +64,8 @@ android {
     buildTypes {
         release {
             val keystoreFile = rootProject.file("keystore/release.jks")
-            signingConfig = if (keystoreFile.exists()) {
+            val hasReleaseKey = keystoreFile.exists() && !System.getenv("KEYSTORE_PASSWORD").isNullOrEmpty()
+            signingConfig = if (hasReleaseKey) {
                 signingConfigs.getByName("release")
             } else {
                 signingConfigs.getByName("debug")
@@ -76,6 +77,21 @@ android {
                 "proguard-rules.pro"
             )
         }
+    }
+
+    splits {
+        abi {
+            isEnable = true
+            reset()
+            include("armeabi-v7a", "arm64-v8a", "x86_64")
+            isUniversalApk = false
+        }
+    }
+}
+
+tasks.configureEach {
+    if (name.startsWith("uploadCrashlyticsMappingFile")) {
+        onlyIf { System.getenv("CRASHLYTICS_UPLOAD") != "false" }
     }
 }
 

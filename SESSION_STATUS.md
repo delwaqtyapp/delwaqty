@@ -23,6 +23,8 @@
 
 **Gates:** `flutter analyze` 0 errors (71 info baseline); `flutter test --concurrency=2` 918/918 pass; customer + driver APKs rebuilt (arm64) and installed, clean launch on DNP NX9.
 
+**Sprint 140 — checkout payment correctness:** `checkout_page.dart` now initiates Paymob auth/card flow BEFORE creating the DB order (COD path unchanged) → a missing/invalid Paymob credential (`.env.dev` has no `PAYMOB_*`) no longer leaves an orphan/pending order behind; previously the DB order was created first, then payment failed and the user was stuck. COD works end-to-end with no external secrets. `flutter analyze` 0 errors; **all four APKs rebuilt (customer/admin/driver/provider) + launched clean on DNP NX9 — full release re-certified (APK; AAB pending long build).** Note: card/wallet online payment needs real `PAYMOB_API_KEY`/`PAYMOB_INTEGRATION_ID`/`PAYMOB_IFRAME_ID` in env (credentials, not committed).
+
 **Remaining backlog (NOT done this turn):** payment/checkout runtime flow, driver live tracking map, campaigns RPC render, full i18n extraction sweep (1,899 keys have ~285 hardcoded-Arabic-literal gaps), 394 TODO/FIXME tech debt, `flutter pub outdated` (70 packages).
 
 ---

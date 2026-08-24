@@ -2655,7 +2655,7 @@ STEP 19 requires extracting Admin Delwaqty as a standalone Flutter app while pre
 Every delivered APK was ~420 MB (debug, fat ABI). That blocked internal distribution and was the single largest measurable quality gap. The repo also could not produce a release APK in this environment because `release.jks` exists but its password is not available, and the Crashlytics mapping upload fails on the network (HTTP 400), aborting the build.
 
 ### Decision
-1. `android/app/build.gradle.kts` gains `splits { abi { isEnable=true; include("armeabi-v7a","arm64-v8a","x86_64"); isUniversalApk=false } }` so `flutter build apk --release --split-per-ABI` emits one small APK per ABI instead of a ~3x fat binary.
+1. APK per-ABI sizing is produced by the `flutter build apk --release --split-per-ABI` flag (the Flutter tool injects the ABI split per APK). A hardcoded `splits { abi }` block in `build.gradle.kts` was intentionally NOT kept: it conflicts with `ndk.abiFilters` (injected by the Flutter Gradle plugin) when building an **App Bundle**, which fails the bundle task. The flag path keeps both APK and bundle builds green.
 2. Release signing uses `release.jks` only when `KEYSTORE_PASSWORD` env is set; otherwise it falls back to the debug key. This lets release builds be produced and measured here without the secret, and keeps real releases on the production keystore when the env vars are present.
 3. The `uploadCrashlyticsMappingFile*` Gradle task is gated by `onlyIf { CRASHLYTICS_UPLOAD != "false" }` so local/offline builds do not fail on the mapping upload; CI sets it `true`.
 
@@ -2668,5 +2668,6 @@ Every delivered APK was ~420 MB (debug, fat ABI). That blocked internal distribu
 - All four flavors build release arm64 APKs at ~23-25 MB (was ~420 MB). The DNP NX9 needs only `app-arm64-v8a-<app>-release.apk`.
 - Build command: `flutter build apk --release --split-per-ABI --flavor <app> --target lib/<app>/main.dart --dart-define-from-file=.env.dev`.
 - Recommended distribution upgrade: ship Android App Bundles (`flutter build appbundle --release --flavor <app>`) so Google delivers only the user's exact ABI/screen-density - even smaller than split-per-ABI APKs.
+- Verified (sprint 126): all four `.aab` build at 60-65 MB (customer 64.7 / admin 61.1 / driver 60.3 / provider 65.2); release icon tree-shaking cut `MaterialIcons` 1.6 MB -> ~30 KB (98%).
 - No Dart changed; `flutter analyze` 0 errors, `flutter test` 918/918 pass. Committed `0bda82e` + pushed master.
 

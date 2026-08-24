@@ -4,6 +4,30 @@
 
 ---
 
+## Current Task — SPRINT 126: APP BUNDLE BUILDS (distribution-size proof) — COMPLETE
+
+**Status:** Android App Bundle is now the recommended distribution path; all four flavors build release `.aab`. Committed `debeaa9`.
+
+**Finding:** the hardcoded `splits { abi }` block added in sprint 124 conflicted with the Flutter plugin's `ndk.abiFilters` when building an **App Bundle** (`Conflicting configuration: ndk abiFilters cannot be present when splits abi filters are set`). APK tolerated it; bundle failed.
+
+**Fix:** removed the gradle `splits` block. APK per-ABI sizing now comes from the `flutter build apk --release --split-per-ABI` flag (Flutter injects the split), leaving the bundle task conflict-free.
+
+**Bundle sizes (release):**
+| App | .aab |
+|---|---|
+| Customer | 64.7 MB |
+| Admin | 61.1 MB |
+| Driver | 60.3 MB |
+| Provider | 65.2 MB |
+
+Google Play / internal track delivers only the user's exact ABI + screen-density, so the on-device install is smaller than these already-small bundles. Release icon tree-shaking also cut `MaterialIcons` from 1.6 MB to ~30 KB (98%).
+
+**Recommended distribution matrix:**
+- Quick install on DNP NX9 (arm64): `app-arm64-v8a-<app>-release.apk` (~24 MB).
+- Store / distribution: `app-<app>-release.aab` (upload to Play / internal track).
+
+---
+
 ## Current Task — SPRINT 124: RELEASE BUILD HARDENING (APK size -18x) — COMPLETE
 
 **Status:** Root cause of the ~420 MB APKs found and fixed. All four flavors now build as **release + split-per-ABI** with R8 minify. Shipped and pushed (`0bda82e`).

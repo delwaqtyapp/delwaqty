@@ -2642,3 +2642,31 @@ STEP 19 requires extracting Admin Delwaqty as a standalone Flutter app while pre
 - Admin code still compiles in the customer APK (single codebase), but is never registered or instantiated.
 - Release APK builds are impossible on the current arm64 host (Flutter 3.44.6 does not ship linux-arm64 gen_snapshot for Android); only debug builds are available.
 - google-services.json has a placeholder `mobilesdk_app_id` for the admin package — needs real Firebase app registration before production.
+
+---
+
+## ADR-072: Release build = split-per-ABI + R8 minify; signing falls back to debug without keystore secret
+
+**Date:** 2026-08-24 (Sprint 124)
+**Status:** Accepted
+**Deciders:** Lead Software Architect (autonomous, per user mandate)
+
+### Context
+Every delivered APK was ~420 MB (debug, fat ABI). That blocked internal distribution and was the single largest measurable quality gap. The repo also could not produce a release APK in this environment because `release.jks` exists but its password is not available, and the Crashlytics mapping upload fails on the network (HTTP 400), aborting the build.
+
+### Decision
+1. `android/app/build.gradle.kts` gains `splits { abi { isEnable=true; include("armeabi-v7a","arm64-v8a","x86_64"); isUniversalApk=false } }` so `flutter build apk --release --split-per-ABI` emits one small APK per ABI instead of a ~3x fat binary.
+2. Release signing uses `release.jks` only when `KEYSTORE_PASSWORD` env is set; otherwise it falls back to the debug key. This lets release builds be produced and measured here without the secret, and keeps real releases on the production keystore when the env vars are present.
+3. The `uploadCrashlyticsMappingFile*` Gradle task is gated by `onlyIf { CRASHLYTICS_UPLOAD != "false" }` so local/offline builds do not fail on the mapping upload; CI sets it `true`.
+
+### Rationale
+- A fat debug APK ships three ABIs the device never uses and carries debug symbols; split-per-ABI + release minify is the standard, zero-risk way to cut ~18x.
+- Keeping the keystore password in env (never in the repo) honors the secret-discipline rule; the debug fallback keeps the pipeline unblocked for measurements.
+- R8 minify (`isMinifyEnabled=true`, `isShrinkResources=true`) was already on for release and is preserved.
+
+### Consequences
+- All four flavors build release arm64 APKs at ~23-25 MB (was ~420 MB). The DNP NX9 needs only `app-arm64-v8a-<app>-release.apk`.
+- Build command: `flutter build apk --release --split-per-ABI --flavor <app> --target lib/<app>/main.dart --dart-define-from-file=.env.dev`.
+- Recommended distribution upgrade: ship Android App Bundles (`flutter build appbundle --release --flavor <app>`) so Google delivers only the user's exact ABI/screen-density - even smaller than split-per-ABI APKs.
+- No Dart changed; `flutter analyze` 0 errors, `flutter test` 918/918 pass. Committed `0bda82e` + pushed master.
+

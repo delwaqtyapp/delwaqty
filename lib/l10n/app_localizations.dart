@@ -11383,6 +11383,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Identity'**
   String get identity;
+
+  /// No description provided for @exitAppTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to exit DelwaQty?'**
+  String get exitAppTitle;
+
+  /// No description provided for @exitAppConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to exit DelwaQty?'**
+  String get exitAppConfirm;
 }
 
 class _AppLocalizationsDelegate

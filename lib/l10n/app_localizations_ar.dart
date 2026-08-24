@@ -5905,4 +5905,10 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get identity => 'الهوية';
+
+  @override
+  String get exitAppTitle => 'خروج من التطبيق';
+
+  @override
+  String get exitAppConfirm => 'خروج من التطبيق';
 }

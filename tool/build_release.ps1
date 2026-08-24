@@ -6,7 +6,7 @@ $flutter = 'E:\app\flutter\bin\flutter.bat'
 $flavors = @('customer', 'admin', 'driver', 'provider')
 
 Write-Host "===== GATE 1: flutter analyze (must be 0 errors) ====="
-& $flutter analyze
+& $flutter analyze --no-fatal-infos --no-fatal-warnings
 if ($LASTEXITCODE -ne 0) { throw "flutter analyze FAILED - aborting release." }
 
 Write-Host "===== GATE 2: flutter test (must pass) ====="

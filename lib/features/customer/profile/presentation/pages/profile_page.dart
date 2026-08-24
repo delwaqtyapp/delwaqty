@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:delwaqty/core/extensions/context_extensions.dart';
-import 'package:delwaqty/core/auth/admin_access.dart';
 import 'package:delwaqty/core/localization/locale_provider.dart';
 import 'package:delwaqty/core/theme/app_colors.dart';
 import 'package:delwaqty/core/theme/app_spacing.dart';
@@ -32,12 +31,6 @@ class ProfilePage extends ConsumerWidget {
       return _buildGuestProfile(context, ref, l10n);
     }
 
-    final isAdmin = authState is AuthAuthenticated && authState.user.isAdmin;
-    final isDriver =
-        authState is AuthAuthenticated && authState.user.role == 'driver';
-    final isMerchant =
-        authState is AuthAuthenticated && authState.user.role == 'merchant';
-
     return Scaffold(
       appBar: AppBar(
         title: Text(l10n.profile),
@@ -65,19 +58,6 @@ class ProfilePage extends ConsumerWidget {
               delay: const Duration(milliseconds: 120),
               child: _buildOrdersAndInvoicesSection(context, l10n),
             ),
-            if (isAdmin || isDriver || isMerchant) ...[
-              const SizedBox(height: 16),
-              AnimatedFadeIn(
-                delay: const Duration(milliseconds: 150),
-                child: _buildRolePortals(
-                  context,
-                  l10n,
-                  isAdmin,
-                  isDriver,
-                  isMerchant,
-                ),
-              ),
-            ],
             const SizedBox(height: 24),
             AnimatedFadeIn(
               delay: const Duration(milliseconds: 200),
@@ -516,28 +496,6 @@ class ProfilePage extends ConsumerWidget {
     );
   }
 
-  Widget _buildRolePortals(
-    BuildContext context,
-    AppLocalizations l10n,
-    bool isAdmin,
-    bool isDriver,
-    bool isMerchant,
-  ) {
-    return _SectionCard(
-      title: l10n.rolePortals,
-      children: [
-        if (isAdmin)
-          _PortalTile(
-            icon: Icons.admin_panel_settings_outlined,
-            gradient: const [AppColors.brandPurple, AppColors.brandViolet],
-            label: l10n.admin,
-            onTap: () => context.push('/admin'),
-          ),
-
-      ],
-    );
-  }
-
   Widget _buildLogoutButton(
     BuildContext context,
     WidgetRef ref,
@@ -846,58 +804,6 @@ class _SectionTile extends StatelessWidget {
           : Text(subtitle!, style: context.textTheme.bodySmall),
       trailing: trailing ?? const Icon(Icons.chevron_right_rounded),
       onTap: onTap,
-    );
-  }
-}
-
-class _PortalTile extends StatelessWidget {
-  const _PortalTile({
-    required this.icon,
-    required this.gradient,
-    required this.label,
-    required this.onTap,
-  });
-
-  final IconData icon;
-  final List<Color> gradient;
-  final String label;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 6, 16, 6),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: gradient,
-            ),
-            borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-          ),
-          child: Row(
-            children: [
-              Icon(icon, color: Colors.white, size: 22),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Text(
-                  label,
-                  style: context.textTheme.bodyLarge?.copyWith(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ),
-              const Icon(Icons.chevron_right_rounded, color: Colors.white),
-            ],
-          ),
-        ),
-      ),
     );
   }
 }

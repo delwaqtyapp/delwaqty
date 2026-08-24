@@ -5,6 +5,14 @@ $env:CRASHLYTICS_UPLOAD = 'false'
 $flutter = 'E:\app\flutter\bin\flutter.bat'
 $flavors = @('customer', 'admin', 'driver', 'provider')
 
+Write-Host "===== GATE 1: flutter analyze (must be 0 errors) ====="
+& $flutter analyze
+if ($LASTEXITCODE -ne 0) { throw "flutter analyze FAILED - aborting release." }
+
+Write-Host "===== GATE 2: flutter test (must pass) ====="
+& $flutter test --no-pub --concurrency=2
+if ($LASTEXITCODE -ne 0) { throw "flutter test FAILED - aborting release." }
+
 foreach ($f in $flavors) {
     Write-Host "===== APK release split-per-ABI: $f ====="
     & $flutter build apk --release --split-per-abi --flavor $f --target lib/$f/main.dart --dart-define-from-file=.env.dev

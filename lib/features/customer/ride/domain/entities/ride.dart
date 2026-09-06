@@ -62,7 +62,7 @@ extension RideTypeX on RideType {
 }
 
 @freezed
-class Ride with _$Ride {
+abstract class Ride with _$Ride {
   const factory Ride({
     required String id,
     required String riderId,

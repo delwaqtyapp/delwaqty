@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/legacy.dart';
 import 'package:delwaqty/features/admin/data/datasources/remote/platform_intelligence_data_source.dart';
 import 'package:delwaqty/features/admin/domain/entities/platform_intelligence.dart';
 

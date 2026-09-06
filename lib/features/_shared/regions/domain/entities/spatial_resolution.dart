@@ -33,7 +33,7 @@ enum GeoConfidence {
 /// governorate ancestor and the confidence/distance of the match.
 /// [regionId] is null when the server returned INVALID/UNVERIFIED.
 @freezed
-class SpatialResolution with _$SpatialResolution {
+abstract class SpatialResolution with _$SpatialResolution {
   const factory SpatialResolution({
     String? regionId,
     String? code,

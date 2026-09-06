@@ -57,7 +57,7 @@ class _MerchantProductFormPageState
 
   Future<void> _loadProduct() async {
     final productAsync = ref.read(_productProvider(widget.productId!));
-    final product = productAsync.valueOrNull;
+    final product = productAsync.value;
     if (product != null) {
       _nameController.text = product['name'] as String? ?? '';
       _descriptionController.text = product['description'] as String? ?? '';

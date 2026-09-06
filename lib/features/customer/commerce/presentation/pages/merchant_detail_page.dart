@@ -1599,7 +1599,7 @@ class _StickyCartBar extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final cartAsync = ref.watch(cartProvider);
-    final cart = cartAsync.valueOrNull;
+    final cart = cartAsync.value;
 
     if (cart == null || cart.items.isEmpty) return const SizedBox.shrink();
 

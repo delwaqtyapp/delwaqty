@@ -9,7 +9,6 @@ import 'package:http/http.dart' as http;
 const _googleMapsApiKey = 'AIzaSyA9v-pk50aB3G45zIb_RQKxD5qo_CVX8GY';
 const _directionsApiUrl = 'https://maps.googleapis.com/maps/api/directions/json';
 const _placesApiUrl = 'https://maps.googleapis.com/maps/api/place/nearbysearch/json';
-const _geocodingApiUrl = 'https://maps.googleapis.com/maps/api/geocode/json';
 const _staticMapBaseUrl = 'https://maps.googleapis.com/maps/api/staticmap';
 
 class MapsServiceImpl implements MapsService {

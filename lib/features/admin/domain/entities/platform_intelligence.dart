@@ -4,7 +4,7 @@ part 'platform_intelligence.freezed.dart';
 part 'platform_intelligence.g.dart';
 
 @freezed
-class PlatformKpiSummary with _$PlatformKpiSummary {
+abstract class PlatformKpiSummary with _$PlatformKpiSummary {
   const factory PlatformKpiSummary({
     @Default(0) int totalUsers,
     @Default(0) int customers,
@@ -125,7 +125,7 @@ class PlatformKpiSummary with _$PlatformKpiSummary {
 }
 
 @freezed
-class TypeCount with _$TypeCount {
+abstract class TypeCount with _$TypeCount {
   const factory TypeCount({
     @Default('') String type,
     @Default(0) int count,
@@ -138,7 +138,7 @@ class TypeCount with _$TypeCount {
 }
 
 @freezed
-class ServicePerformance with _$ServicePerformance {
+abstract class ServicePerformance with _$ServicePerformance {
   const factory ServicePerformance({
     @Default([]) List<ServiceCategoryPerformance> homeServices,
     @Default([]) List<ServiceCategoryPerformance> rideServices,
@@ -174,7 +174,7 @@ class ServicePerformance with _$ServicePerformance {
 }
 
 @freezed
-class ServiceCategoryPerformance with _$ServiceCategoryPerformance {
+abstract class ServiceCategoryPerformance with _$ServiceCategoryPerformance {
   const factory ServiceCategoryPerformance({
     @Default('') String category,
     @Default(0) int totalBookings,
@@ -194,7 +194,7 @@ class ServiceCategoryPerformance with _$ServiceCategoryPerformance {
 }
 
 @freezed
-class DeliveryIntelligence with _$DeliveryIntelligence {
+abstract class DeliveryIntelligence with _$DeliveryIntelligence {
   const factory DeliveryIntelligence({
     @Default(0) int totalDrivers,
     @Default(0) int onlineDrivers,
@@ -241,7 +241,7 @@ class DeliveryIntelligence with _$DeliveryIntelligence {
 }
 
 @freezed
-class MerchantIntelligence with _$MerchantIntelligence {
+abstract class MerchantIntelligence with _$MerchantIntelligence {
   const factory MerchantIntelligence({
     @Default(0) int totalMerchants,
     @Default(0) int activeMerchants,
@@ -274,7 +274,7 @@ class MerchantIntelligence with _$MerchantIntelligence {
 }
 
 @freezed
-class MerchantInfo with _$MerchantInfo {
+abstract class MerchantInfo with _$MerchantInfo {
   const factory MerchantInfo({
     @Default('') String id,
     @Default('') String name,
@@ -295,7 +295,7 @@ class MerchantInfo with _$MerchantInfo {
 }
 
 @freezed
-class WalletIntelligence with _$WalletIntelligence {
+abstract class WalletIntelligence with _$WalletIntelligence {
   const factory WalletIntelligence({
     @Default(0) int walletCount,
     @Default(0) int totalTransactions,
@@ -326,7 +326,7 @@ class WalletIntelligence with _$WalletIntelligence {
 }
 
 @freezed
-class ProviderIntelligence with _$ProviderIntelligence {
+abstract class ProviderIntelligence with _$ProviderIntelligence {
   const factory ProviderIntelligence({
     @Default(0) int totalProviders,
     @Default(0) int verifiedProviders,
@@ -360,7 +360,7 @@ class ProviderIntelligence with _$ProviderIntelligence {
 }
 
 @freezed
-class CommissionSummary with _$CommissionSummary {
+abstract class CommissionSummary with _$CommissionSummary {
   const factory CommissionSummary({
     @Default(0.0) double totalCommission,
     @Default(0.0) double pendingCommission,
@@ -399,7 +399,7 @@ class CommissionSummary with _$CommissionSummary {
 }
 
 @freezed
-class CommissionRule with _$CommissionRule {
+abstract class CommissionRule with _$CommissionRule {
   const factory CommissionRule({
     @Default(0.0) double rate,
     @Default('') String currency,
@@ -417,7 +417,7 @@ class CommissionRule with _$CommissionRule {
 }
 
 @freezed
-class CommissionByRate with _$CommissionByRate {
+abstract class CommissionByRate with _$CommissionByRate {
   const factory CommissionByRate({
     @Default(0.0) double rate,
     @Default(0) int count,
@@ -433,7 +433,7 @@ class CommissionByRate with _$CommissionByRate {
 }
 
 @freezed
-class ComplaintSummary with _$ComplaintSummary {
+abstract class ComplaintSummary with _$ComplaintSummary {
   const factory ComplaintSummary({
     @Default(0) int totalComplaints,
     @Default(0) int openComplaints,
@@ -467,7 +467,7 @@ class ComplaintSummary with _$ComplaintSummary {
 }
 
 @freezed
-class StatusCount with _$StatusCount {
+abstract class StatusCount with _$StatusCount {
   const factory StatusCount({
     @Default('') String status,
     @Default(0) int count,
@@ -480,7 +480,7 @@ class StatusCount with _$StatusCount {
 }
 
 @freezed
-class TransactionLedger with _$TransactionLedger {
+abstract class TransactionLedger with _$TransactionLedger {
   const factory TransactionLedger({
     @Default(0) int total,
     @Default(0) int page,
@@ -504,7 +504,7 @@ class TransactionLedger with _$TransactionLedger {
 }
 
 @freezed
-class TransactionLedgerItem with _$TransactionLedgerItem {
+abstract class TransactionLedgerItem with _$TransactionLedgerItem {
   const factory TransactionLedgerItem({
     @Default('') String id,
     @Default('') String memberId,
@@ -539,7 +539,7 @@ class TransactionLedgerItem with _$TransactionLedgerItem {
 }
 
 @freezed
-class RevenueOverview with _$RevenueOverview {
+abstract class RevenueOverview with _$RevenueOverview {
   const factory RevenueOverview({
     String? period,
     @Default(0.0) double totalGmv,
@@ -570,7 +570,7 @@ class RevenueOverview with _$RevenueOverview {
 }
 
 @freezed
-class TimeseriesData with _$TimeseriesData {
+abstract class TimeseriesData with _$TimeseriesData {
   const factory TimeseriesData({
     @Default([]) List<DailyMetric> ordersByDay,
     @Default([]) List<DailyMetric> ridesByDay,
@@ -631,7 +631,7 @@ class TimeseriesData with _$TimeseriesData {
 }
 
 @freezed
-class DailyMetric with _$DailyMetric {
+abstract class DailyMetric with _$DailyMetric {
   const factory DailyMetric({
     DateTime? date,
     @Default(0) int count,
@@ -648,7 +648,7 @@ class DailyMetric with _$DailyMetric {
 }
 
 @freezed
-class OperationalAlert with _$OperationalAlert {
+abstract class OperationalAlert with _$OperationalAlert {
   const factory OperationalAlert({
     @Default('') String id,
     @Default('') String title,

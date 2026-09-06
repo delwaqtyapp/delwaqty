@@ -68,7 +68,7 @@ class ProfileRepositoryImpl implements ProfileRepository {
     required String fileName,
   }) async {
     try {
-      return _dataSource.uploadAvatar(
+      return await _dataSource.uploadAvatar(
         userId: userId,
         bytes: Uint8List.fromList(bytes),
         fileName: fileName,
@@ -86,7 +86,7 @@ class ProfileRepositoryImpl implements ProfileRepository {
     required String fileName,
   }) async {
     try {
-      return _dataSource.uploadFile(
+      return await _dataSource.uploadFile(
         userId: userId,
         folder: 'documents',
         bytes: Uint8List.fromList(bytes),

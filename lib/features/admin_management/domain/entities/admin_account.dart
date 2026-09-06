@@ -37,7 +37,7 @@ const List<String> adminPermissionVocabulary = [
 /// (users + admin_management + admin_region_assignments).
 /// Never uses the legacy admin_users table.
 @freezed
-class AdminAccount with _$AdminAccount {
+abstract class AdminAccount with _$AdminAccount {
   const factory AdminAccount({
     required String id,
     required String email,
@@ -84,7 +84,7 @@ class AdminAccount with _$AdminAccount {
 }
 
 @freezed
-class AdminAuditEntry with _$AdminAuditEntry {
+abstract class AdminAuditEntry with _$AdminAuditEntry {
   const factory AdminAuditEntry({
     required String id,
     required String action,

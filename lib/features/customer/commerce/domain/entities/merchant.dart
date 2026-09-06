@@ -55,7 +55,7 @@ enum MerchantType {
 }
 
 @freezed
-class Merchant with _$Merchant {
+abstract class Merchant with _$Merchant {
   const factory Merchant({
     required String id,
     required String name,

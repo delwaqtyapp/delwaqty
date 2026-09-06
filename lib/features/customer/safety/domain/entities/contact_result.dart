@@ -4,7 +4,7 @@ part 'contact_result.freezed.dart';
 part 'contact_result.g.dart';
 
 @freezed
-class ContactResult with _$ContactResult {
+abstract class ContactResult with _$ContactResult {
   const factory ContactResult({
     required bool success,
     String? contactId,

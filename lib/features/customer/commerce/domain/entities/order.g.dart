@@ -6,7 +6,7 @@ part of 'order.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-_$OrderImpl _$$OrderImplFromJson(Map<String, dynamic> json) => _$OrderImpl(
+_Order _$OrderFromJson(Map<String, dynamic> json) => _Order(
   id: json['id'] as String,
   merchantId: json['merchantId'] as String,
   merchantName: json['merchantName'] as String,
@@ -50,32 +50,31 @@ _$OrderImpl _$$OrderImplFromJson(Map<String, dynamic> json) => _$OrderImpl(
       : DateTime.parse(json['updatedAt'] as String),
 );
 
-Map<String, dynamic> _$$OrderImplToJson(_$OrderImpl instance) =>
-    <String, dynamic>{
-      'id': instance.id,
-      'merchantId': instance.merchantId,
-      'merchantName': instance.merchantName,
-      'items': instance.items.map((e) => e.toJson()).toList(),
-      'subtotal': instance.subtotal,
-      'deliveryFee': instance.deliveryFee,
-      'discount': instance.discount,
-      'total': instance.total,
-      'status': _$OrderStatusEnumMap[instance.status]!,
-      'deliveryAddress': instance.deliveryAddress,
-      'paymentMethod': instance.paymentMethod,
-      'paymentStatus': _$PaymentStatusEnumMap[instance.paymentStatus]!,
-      'paymentId': instance.paymentId,
-      'transactionId': instance.transactionId,
-      'specialInstructions': instance.specialInstructions,
-      'confirmedAt': instance.confirmedAt?.toIso8601String(),
-      'preparingAt': instance.preparingAt?.toIso8601String(),
-      'readyAt': instance.readyAt?.toIso8601String(),
-      'deliveredAt': instance.deliveredAt?.toIso8601String(),
-      'cancelledAt': instance.cancelledAt?.toIso8601String(),
-      'cancellationReason': instance.cancellationReason,
-      'createdAt': instance.createdAt.toIso8601String(),
-      'updatedAt': instance.updatedAt?.toIso8601String(),
-    };
+Map<String, dynamic> _$OrderToJson(_Order instance) => <String, dynamic>{
+  'id': instance.id,
+  'merchantId': instance.merchantId,
+  'merchantName': instance.merchantName,
+  'items': instance.items.map((e) => e.toJson()).toList(),
+  'subtotal': instance.subtotal,
+  'deliveryFee': instance.deliveryFee,
+  'discount': instance.discount,
+  'total': instance.total,
+  'status': _$OrderStatusEnumMap[instance.status]!,
+  'deliveryAddress': instance.deliveryAddress,
+  'paymentMethod': instance.paymentMethod,
+  'paymentStatus': _$PaymentStatusEnumMap[instance.paymentStatus]!,
+  'paymentId': instance.paymentId,
+  'transactionId': instance.transactionId,
+  'specialInstructions': instance.specialInstructions,
+  'confirmedAt': instance.confirmedAt?.toIso8601String(),
+  'preparingAt': instance.preparingAt?.toIso8601String(),
+  'readyAt': instance.readyAt?.toIso8601String(),
+  'deliveredAt': instance.deliveredAt?.toIso8601String(),
+  'cancelledAt': instance.cancelledAt?.toIso8601String(),
+  'cancellationReason': instance.cancellationReason,
+  'createdAt': instance.createdAt.toIso8601String(),
+  'updatedAt': instance.updatedAt?.toIso8601String(),
+};
 
 const _$OrderStatusEnumMap = {
   OrderStatus.pending: 'pending',
@@ -96,17 +95,16 @@ const _$PaymentStatusEnumMap = {
   PaymentStatus.refunded: 'refunded',
 };
 
-_$OrderItemImpl _$$OrderItemImplFromJson(Map<String, dynamic> json) =>
-    _$OrderItemImpl(
-      productId: json['productId'] as String,
-      productName: json['productName'] as String,
-      variantName: json['variantName'] as String?,
-      quantity: (json['quantity'] as num).toInt(),
-      unitPrice: (json['unitPrice'] as num).toDouble(),
-      totalPrice: (json['totalPrice'] as num).toDouble(),
-    );
+_OrderItem _$OrderItemFromJson(Map<String, dynamic> json) => _OrderItem(
+  productId: json['productId'] as String,
+  productName: json['productName'] as String,
+  variantName: json['variantName'] as String?,
+  quantity: (json['quantity'] as num).toInt(),
+  unitPrice: (json['unitPrice'] as num).toDouble(),
+  totalPrice: (json['totalPrice'] as num).toDouble(),
+);
 
-Map<String, dynamic> _$$OrderItemImplToJson(_$OrderItemImpl instance) =>
+Map<String, dynamic> _$OrderItemToJson(_OrderItem instance) =>
     <String, dynamic>{
       'productId': instance.productId,
       'productName': instance.productName,

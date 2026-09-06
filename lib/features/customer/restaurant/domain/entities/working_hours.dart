@@ -4,7 +4,7 @@ part 'working_hours.freezed.dart';
 part 'working_hours.g.dart';
 
 @freezed
-class WorkingHours with _$WorkingHours {
+abstract class WorkingHours with _$WorkingHours {
   const factory WorkingHours({
     required String id,
     required String merchantId,

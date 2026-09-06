@@ -24,7 +24,7 @@ enum CouponStatus {
 }
 
 @freezed
-class Coupon with _$Coupon {
+abstract class Coupon with _$Coupon {
   const factory Coupon({
     required String id,
     required String code,

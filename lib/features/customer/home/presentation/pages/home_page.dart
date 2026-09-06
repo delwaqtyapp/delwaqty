@@ -155,8 +155,7 @@ class HomePage extends ConsumerWidget {
     final locationAsync = ref.watch(userLocationProvider);
     final unreadCount = isGuest
         ? 0
-        : ref.watch(unreadCountProvider).valueOrNull ?? 0;
-    final bottomNavVisible = ref.watch(bottomNavVisibleProvider);
+        : ref.watch(unreadCountProvider).value ?? 0;
 
     return PopScope(
       canPop: false,

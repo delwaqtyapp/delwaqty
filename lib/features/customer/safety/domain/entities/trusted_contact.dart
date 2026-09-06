@@ -8,7 +8,7 @@ enum ContactRelationship { family, friend, colleague, other }
 enum NotificationPreference { sms, call, push, both }
 
 @freezed
-class TrustedContact with _$TrustedContact {
+abstract class TrustedContact with _$TrustedContact {
   const factory TrustedContact({
     required String id,
     required String userId,

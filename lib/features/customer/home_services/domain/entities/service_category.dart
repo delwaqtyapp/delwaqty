@@ -25,7 +25,7 @@ enum ServiceCategoryType {
 }
 
 @freezed
-class ServiceCategory with _$ServiceCategory {
+abstract class ServiceCategory with _$ServiceCategory {
   const factory ServiceCategory({
     required String id,
     required String nameAr,

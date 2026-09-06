@@ -8,7 +8,7 @@ enum SosAlertType { manual, automatic, timer }
 enum SosAlertStatus { active, escalated, resolved, falseAlarm }
 
 @freezed
-class SosAlert with _$SosAlert {
+abstract class SosAlert with _$SosAlert {
   const factory SosAlert({
     required String id,
     required String rideId,

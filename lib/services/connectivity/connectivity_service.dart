@@ -14,7 +14,7 @@ final connectivityStreamProvider = StreamProvider<ConnectivityStatus>((ref) {
 
 final connectivityStatusProvider = Provider<ConnectivityStatus>((ref) {
   final asyncStatus = ref.watch(connectivityStreamProvider);
-  return asyncStatus.valueOrNull ?? ConnectivityStatus.connected;
+  return asyncStatus.value ?? ConnectivityStatus.connected;
 });
 
 class ConnectivityService {

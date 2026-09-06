@@ -166,7 +166,7 @@ class _ProviderDocumentsPageState extends ConsumerState<ProviderDocumentsPage> {
                               if (hasDoc)
                                 IconButton(
                                   icon: const Icon(Icons.visibility_outlined),
-                                  onPressed: _busy ? null : () => _view(fileUrl!),
+                                  onPressed: _busy ? null : () => _view(fileUrl),
                                 ),
                               if (hasDoc)
                                 IconButton(

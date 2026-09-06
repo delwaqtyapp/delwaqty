@@ -4,7 +4,7 @@ part 'product_inventory.freezed.dart';
 part 'product_inventory.g.dart';
 
 @freezed
-class ProductInventory with _$ProductInventory {
+abstract class ProductInventory with _$ProductInventory {
   const factory ProductInventory({
     required String id,
     required String productId,

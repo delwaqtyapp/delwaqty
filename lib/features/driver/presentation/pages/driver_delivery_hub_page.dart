@@ -107,11 +107,11 @@ class _DeliveryHubBodyState extends ConsumerState<_DeliveryHubBody> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final onlineState = ref.watch(driverOnlineProvider(_driverId));
-    final online = onlineState.valueOrNull ?? false;
+    final online = onlineState.value ?? false;
 
     ref.listen<AsyncValue<DeliveryOrder?>>(activeDeliveryProvider(_driverId),
         (prev, next) {
-      final order = next.valueOrNull;
+      final order = next.value;
       if (order != null && order.status != 'completed' && order.status != 'cancelled') {
         context.push('/driver/delivery/${order.id}');
       }
@@ -120,7 +120,7 @@ class _DeliveryHubBodyState extends ConsumerState<_DeliveryHubBody> {
     if (online) {
       ref.listen<AsyncValue<List<RideOffer>>>(deliveryOffersProvider(_driverId),
           (prev, next) {
-        final offers = next.valueOrNull ?? const [];
+        final offers = next.value ?? const [];
         if (offers.isNotEmpty && !_offerShowing) {
           _presentOffer(offers.first);
         }
@@ -129,7 +129,6 @@ class _DeliveryHubBodyState extends ConsumerState<_DeliveryHubBody> {
 
     final statsAsync = ref.watch(driverStatsProvider(_driverId));
     final activeDeliveryAsync = ref.watch(activeDeliveryProvider(_driverId));
-    final capabilitiesAsync = ref.watch(driverCapabilitiesProvider(_driverId));
 
     return RefreshIndicator(
       onRefresh: () async {
@@ -313,7 +312,6 @@ class _ActiveDeliveryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     return Material(
       color: theme.colorScheme.primaryContainer.withValues(alpha: 0.3),
@@ -375,7 +373,6 @@ class _StatsRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final theme = Theme.of(context);
     return Row(
       children: [
         Expanded(
@@ -471,13 +468,6 @@ class _DeliveryOfferDialogState extends State<_DeliveryOfferDialog>
             AnimatedBuilder(
               animation: _timerController,
               builder: (context, _) {
-                final remaining = _timerController.isCompleted
-                    ? Duration.zero
-                    : Duration(
-                        milliseconds: (_timerController.upperBound -
-                                _timerController.value *
-                                    _timerController.upperBound)
-                            .toInt());
                 return LinearProgressIndicator(
                   value: _timerController.value,
                   backgroundColor: theme.colorScheme.surfaceContainerHighest,
@@ -560,7 +550,7 @@ class _CapabilitiesBottomSheetState
   @override
   void initState() {
     super.initState();
-    final cap = ref.read(driverCapabilitiesProvider(widget.driverId)).valueOrNull;
+    final cap = ref.read(driverCapabilitiesProvider(widget.driverId)).value;
     _selectedTypes = Set<String>.from(cap?.serviceTypes ?? const ['ride']);
     _acceptsDeliveries = cap?.acceptsDeliveries ?? false;
     _maxDistance = cap?.maxDeliveryDistanceKm ?? 15;

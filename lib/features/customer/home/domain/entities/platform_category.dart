@@ -4,7 +4,7 @@ part 'platform_category.freezed.dart';
 part 'platform_category.g.dart';
 
 @freezed
-class PlatformCategory with _$PlatformCategory {
+abstract class PlatformCategory with _$PlatformCategory {
   const factory PlatformCategory({
     required String id,
     required String name,

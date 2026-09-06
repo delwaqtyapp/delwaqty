@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/legacy.dart';
 
 import 'package:delwaqty/features/customer/search/data/cache/debouncer.dart';
 import 'package:delwaqty/features/customer/search/domain/entities/geo_point.dart';

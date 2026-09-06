@@ -4,7 +4,7 @@ part 'branch.freezed.dart';
 part 'branch.g.dart';
 
 @freezed
-class Branch with _$Branch {
+abstract class Branch with _$Branch {
   const factory Branch({
     required String id,
     required String merchantId,

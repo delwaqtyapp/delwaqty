@@ -10,7 +10,7 @@ enum DriverStatus {
 }
 
 @freezed
-class DriverProfile with _$DriverProfile {
+abstract class DriverProfile with _$DriverProfile {
   const factory DriverProfile({
     required String id,
     required String userId,

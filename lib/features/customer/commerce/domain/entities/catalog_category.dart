@@ -4,7 +4,7 @@ part 'catalog_category.freezed.dart';
 part 'catalog_category.g.dart';
 
 @freezed
-class CatalogCategory with _$CatalogCategory {
+abstract class CatalogCategory with _$CatalogCategory {
   const factory CatalogCategory({
     required String id,
     required String merchantId,

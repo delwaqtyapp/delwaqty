@@ -1,6 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/legacy.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:delwaqty/core/constants/app_constants.dart';
 import 'package:delwaqty/services/supabase/supabase_service.dart';
 import 'package:delwaqty/features/admin/financial/data/datasources/remote/supabase_admin_financial_data_source.dart';
 import 'package:delwaqty/features/admin/financial/data/repositories/admin_financial_repository_impl.dart';

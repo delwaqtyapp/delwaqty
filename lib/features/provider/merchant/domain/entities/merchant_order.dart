@@ -4,7 +4,7 @@ part 'merchant_order.freezed.dart';
 part 'merchant_order.g.dart';
 
 @freezed
-class MerchantOrder with _$MerchantOrder {
+abstract class MerchantOrder with _$MerchantOrder {
   const factory MerchantOrder({
     required String id,
     required String customerId,
@@ -22,7 +22,7 @@ class MerchantOrder with _$MerchantOrder {
 }
 
 @freezed
-class MerchantOrderItem with _$MerchantOrderItem {
+abstract class MerchantOrderItem with _$MerchantOrderItem {
   const factory MerchantOrderItem({
     required String productId,
     required String productName,

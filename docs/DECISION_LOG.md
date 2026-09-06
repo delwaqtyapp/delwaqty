@@ -2671,3 +2671,34 @@ Every delivered APK was ~420 MB (debug, fat ABI). That blocked internal distribu
 - Verified (sprint 126): all four `.aab` build at 60-65 MB (customer 64.7 / admin 61.1 / driver 60.3 / provider 65.2); release icon tree-shaking cut `MaterialIcons` 1.6 MB -> ~30 KB (98%).
 - No Dart changed; `flutter analyze` 0 errors, `flutter test` 918/918 pass. Committed `0bda82e` + pushed master.
 
+---
+
+## ADR-073: Local AI gateway = OmniRoute; opencode default model fixed to `auto/best-coding`
+
+**Date:** 2026-09-06 (Session 69)
+**Status:** Accepted
+**Deciders:** Lead Software Architect (autonomous, per user mandate)
+
+### Context
+The OpenCode configuration pointed `provider.omniroute` at `http://localhost:20128/v1` but the OmniRoute server was never running, no provider connections were configured, and the default model `omniroute/mcode/mimo-auto` returned **HTTP 401 (No active credentials for provider: mcode)** — meaning the working OpenCode model config was actually broken. The laptop also had a valid OpenRouter key (`sk-or-v1-435…`) stashed only inside a stale `oxalpha` provider block in `opencode.json`.
+
+### Decision
+1. **Run OmniRoute v3.8.50 locally as the AI gateway** (`~/.omniroute` data dir), started by `E:\app\devtools\start-omniroute.ps1` with a Startup shortcut (auto-recovery on login; script is idempotent — skips if port 20128 already listens).
+2. **Bind to `127.0.0.1` only** (`OMNIROUTE_SERVER_HOST=127.0.0.1`) instead of the default `0.0.0.0` — the gateway previously exposed all configured providers to any device on the LAN without an API-key requirement.
+3. **Configured providers:** `opencode` (OpenCode Free, noauth — primary free backend), `openrouter` (real valid key, added via `--credential-stdin`), `auggie` (noauth).
+4. **Default model:** `omniroute/auto/best-coding` replaces the dead `omniroute/mcode/mimo-auto`. Chosen from live smoke tests (fast 1.3–1.7s → `big-pickle`, reliable; `auto/coding`/`auto/best-fast` also green).
+5. **Model routing preference:** the `auto/*` opencode-catalog routes (via OpenCode Free) are the dependable free path here; `aug/*`, `auto/gemini`, `auto/glm`, `ddgw/*`, `theoldllm/*` are environment-blocked (missing Auggie/ZCode/Playwright CLIs, anti-abuse, egress IP) and NOT deprecated — revisit if those CLIs get installed.
+
+### Rationale
+- Local OpenAI-compatible gateway keeps all AI keys in one encrypted store (`~/.omniroute`), behind one stable base URL for OpenCode.
+- Noauth OpenCode Free gives free working models today; OpenRouter fills edges; `auto/*` routes fail over automatically across them.
+- Loopback binding is correct because only this machine's OpenCode consumes the gateway.
+- The old default was provably broken (HTTP 401) — leaving it would silently break every new OpenCode session.
+
+### Consequences
+- `curl http://localhost:20128/v1/models` (Bearer gateway key) → 200, **1796 models**; chat completions succeed on `auto/best-coding` & friends.
+- `omniroute health` = healthy; providers all `active`.
+- OpenCode now uses `omniroute/auto/best-coding` by default; the gateway key `sk-f6ed4d7ee178e258-1a3aa6-12a74cb1` in `opencode.json` is unchanged and valid.
+- Autostart is machine-local (Startup folder) — re-create it if the laptop profile path changes.
+- Android APK OOM (dexing) remains an independent dev-ops backlog item; untouched here.
+

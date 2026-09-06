@@ -4,7 +4,7 @@ part 'driver_document.freezed.dart';
 part 'driver_document.g.dart';
 
 @freezed
-class DriverDocument with _$DriverDocument {
+abstract class DriverDocument with _$DriverDocument {
   const factory DriverDocument({
     required String id,
     required String driverId,

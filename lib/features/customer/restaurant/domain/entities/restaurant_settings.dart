@@ -4,7 +4,7 @@ part 'restaurant_settings.freezed.dart';
 part 'restaurant_settings.g.dart';
 
 @freezed
-class RestaurantSettings with _$RestaurantSettings {
+abstract class RestaurantSettings with _$RestaurantSettings {
   const factory RestaurantSettings({
     required String id,
     required String merchantId,

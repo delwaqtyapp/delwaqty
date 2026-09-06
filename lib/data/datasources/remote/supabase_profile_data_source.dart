@@ -70,7 +70,7 @@ class SupabaseProfileDataSource {
           'p_member_id': userId,
         },
       );
-      return getProfile(userId);
+      return await getProfile(userId);
     } catch (e, stack) {
       _logger.e('Failed to update date of birth for $userId', e, stack);
       rethrow;

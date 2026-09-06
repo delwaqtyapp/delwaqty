@@ -4,7 +4,7 @@ part 'driver_capability.freezed.dart';
 part 'driver_capability.g.dart';
 
 @freezed
-class DriverCapability with _$DriverCapability {
+abstract class DriverCapability with _$DriverCapability {
   const factory DriverCapability({
     required String driverId,
     @Default(['ride']) List<String> serviceTypes,

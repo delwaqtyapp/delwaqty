@@ -6,7 +6,7 @@ part of 'review.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-_$ReviewImpl _$$ReviewImplFromJson(Map<String, dynamic> json) => _$ReviewImpl(
+_Review _$ReviewFromJson(Map<String, dynamic> json) => _Review(
   id: json['id'] as String,
   merchantId: json['merchantId'] as String,
   userId: json['userId'] as String,
@@ -26,23 +26,22 @@ _$ReviewImpl _$$ReviewImplFromJson(Map<String, dynamic> json) => _$ReviewImpl(
       : DateTime.parse(json['updatedAt'] as String),
 );
 
-Map<String, dynamic> _$$ReviewImplToJson(_$ReviewImpl instance) =>
-    <String, dynamic>{
-      'id': instance.id,
-      'merchantId': instance.merchantId,
-      'userId': instance.userId,
-      'userName': instance.userName,
-      'productId': instance.productId,
-      'orderId': instance.orderId,
-      'rating': instance.rating,
-      'comment': instance.comment,
-      'imageUrls': instance.imageUrls,
-      'createdAt': instance.createdAt?.toIso8601String(),
-      'updatedAt': instance.updatedAt?.toIso8601String(),
-    };
+Map<String, dynamic> _$ReviewToJson(_Review instance) => <String, dynamic>{
+  'id': instance.id,
+  'merchantId': instance.merchantId,
+  'userId': instance.userId,
+  'userName': instance.userName,
+  'productId': instance.productId,
+  'orderId': instance.orderId,
+  'rating': instance.rating,
+  'comment': instance.comment,
+  'imageUrls': instance.imageUrls,
+  'createdAt': instance.createdAt?.toIso8601String(),
+  'updatedAt': instance.updatedAt?.toIso8601String(),
+};
 
-_$ReviewSummaryImpl _$$ReviewSummaryImplFromJson(Map<String, dynamic> json) =>
-    _$ReviewSummaryImpl(
+_ReviewSummary _$ReviewSummaryFromJson(Map<String, dynamic> json) =>
+    _ReviewSummary(
       averageRating: (json['averageRating'] as num).toDouble(),
       totalReviews: (json['totalReviews'] as num).toInt(),
       fiveStarCount: (json['fiveStarCount'] as num?)?.toInt() ?? 0,
@@ -52,7 +51,7 @@ _$ReviewSummaryImpl _$$ReviewSummaryImplFromJson(Map<String, dynamic> json) =>
       oneStarCount: (json['oneStarCount'] as num?)?.toInt() ?? 0,
     );
 
-Map<String, dynamic> _$$ReviewSummaryImplToJson(_$ReviewSummaryImpl instance) =>
+Map<String, dynamic> _$ReviewSummaryToJson(_ReviewSummary instance) =>
     <String, dynamic>{
       'averageRating': instance.averageRating,
       'totalReviews': instance.totalReviews,

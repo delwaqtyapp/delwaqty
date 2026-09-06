@@ -40,11 +40,14 @@ class ReviewsState {
   }
 }
 
-class RestaurantReviewsNotifier extends AutoDisposeFamilyAsyncNotifier<ReviewsState, String> {
+class RestaurantReviewsNotifier extends AsyncNotifier<ReviewsState> {
+  RestaurantReviewsNotifier(this.merchantId);
+
+  final String merchantId;
   static const _limit = 10;
 
   @override
-  FutureOr<ReviewsState> build(String merchantId) async {
+  FutureOr<ReviewsState> build() async {
     final repo = ref.watch(reviewRepositoryProvider);
     final reviews = await repo.getMerchantReviews(
       merchantId,
@@ -59,7 +62,7 @@ class RestaurantReviewsNotifier extends AutoDisposeFamilyAsyncNotifier<ReviewsSt
   }
 
   Future<void> loadNextPage() async {
-    final currentState = state.valueOrNull;
+    final currentState = state.value;
     if (currentState == null || currentState.isLoadingMore || !currentState.hasMore) return;
 
     state = AsyncValue.data(currentState.copyWith(isLoadingMore: true));
@@ -67,7 +70,7 @@ class RestaurantReviewsNotifier extends AutoDisposeFamilyAsyncNotifier<ReviewsSt
     try {
       final repo = ref.read(reviewRepositoryProvider);
       final reviews = await repo.getMerchantReviews(
-        arg,
+        merchantId,
         limit: _limit,
         offset: currentState.offset,
       );
@@ -86,7 +89,7 @@ class RestaurantReviewsNotifier extends AutoDisposeFamilyAsyncNotifier<ReviewsSt
 }
 
 final restaurantReviewsProvider = AsyncNotifierProvider.autoDispose.family<RestaurantReviewsNotifier, ReviewsState, String>(
-  RestaurantReviewsNotifier.new,
+  (merchantId) => RestaurantReviewsNotifier(merchantId),
 );
 
 final _summaryProvider = FutureProvider.family<ReviewSummary, String>((ref, merchantId) async {

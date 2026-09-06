@@ -276,7 +276,7 @@ class _MemberProfileBody extends ConsumerWidget {
     final role = basicInfo['role'] as String? ?? 'customer';
 
     final accountStatus =
-        statusAsync.valueOrNull?['account_status'] as String? ?? 'active';
+        statusAsync.value?['account_status'] as String? ?? 'active';
     final statusColor = switch (accountStatus) {
       'active' => Colors.green,
       'restricted' => Colors.orange,

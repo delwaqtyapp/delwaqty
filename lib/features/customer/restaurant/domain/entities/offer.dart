@@ -4,7 +4,7 @@ part 'offer.freezed.dart';
 part 'offer.g.dart';
 
 @freezed
-class Offer with _$Offer {
+abstract class Offer with _$Offer {
   const factory Offer({
     required String id,
     required String merchantId,

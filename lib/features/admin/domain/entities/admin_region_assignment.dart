@@ -19,7 +19,7 @@ enum AdminRegionScope {
 }
 
 @freezed
-class AdminRegionAssignment with _$AdminRegionAssignment {
+abstract class AdminRegionAssignment with _$AdminRegionAssignment {
   const factory AdminRegionAssignment({
     required String adminId,
     required String regionId,

@@ -6,8 +6,8 @@ part of 'search_filter.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-_$SearchFilterImpl _$$SearchFilterImplFromJson(Map<String, dynamic> json) =>
-    _$SearchFilterImpl(
+_SearchFilter _$SearchFilterFromJson(Map<String, dynamic> json) =>
+    _SearchFilter(
       minPrice: (json['minPrice'] as num?)?.toDouble(),
       maxPrice: (json['maxPrice'] as num?)?.toDouble(),
       minRating: (json['minRating'] as num?)?.toDouble(),
@@ -21,7 +21,7 @@ _$SearchFilterImpl _$$SearchFilterImplFromJson(Map<String, dynamic> json) =>
           SortBy.distance,
     );
 
-Map<String, dynamic> _$$SearchFilterImplToJson(_$SearchFilterImpl instance) =>
+Map<String, dynamic> _$SearchFilterToJson(_SearchFilter instance) =>
     <String, dynamic>{
       'minPrice': instance.minPrice,
       'maxPrice': instance.maxPrice,

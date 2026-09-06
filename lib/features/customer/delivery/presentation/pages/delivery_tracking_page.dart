@@ -72,8 +72,8 @@ class _DeliveryTrackingPageState extends ConsumerState<DeliveryTrackingPage> {
         error: (e, _) => Center(child: Text(l10n.errorWithMessage(e.toString()))),
         data: (ride) => _TrackingBody(ride: ride, deliveryId: widget.deliveryId),
       ),
-      bottomNavigationBar: rideAsync.valueOrNull != null &&
-              rideAsync.valueOrNull!.status == RideStatus.completed
+      bottomNavigationBar: rideAsync.value != null &&
+              rideAsync.value!.status == RideStatus.completed
           ? _RatingBar(
               rating: _rating,
               onRatingChanged: (r) => setState(() => _rating = r),

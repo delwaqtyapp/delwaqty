@@ -1,6 +1,6 @@
-// coverage:ignore-file
 // GENERATED CODE - DO NOT MODIFY BY HAND
-// ignore_for_file: type=lint
+// coverage:ignore-file
+// ignore_for_file: type=lint, type=warning, deprecated_member_use, deprecated_member_use_from_same_package
 // ignore_for_file: unused_element, deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies, annotate_overrides, invalid_annotation_target, unnecessary_question_mark
 
 part of 'geo_location.dart';
@@ -9,255 +9,289 @@ part of 'geo_location.dart';
 // FreezedGenerator
 // **************************************************************************
 
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// dart format off
 T _$identity<T>(T value) => value;
-
-final _privateConstructorUsedError = UnsupportedError(
-  'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models',
-);
-
-GeoLocation _$GeoLocationFromJson(Map<String, dynamic> json) {
-  return _GeoLocation.fromJson(json);
-}
 
 /// @nodoc
 mixin _$GeoLocation {
-  double get latitude => throw _privateConstructorUsedError;
-  double get longitude => throw _privateConstructorUsedError;
-  String? get address => throw _privateConstructorUsedError;
-  String? get city => throw _privateConstructorUsedError;
-  String? get district => throw _privateConstructorUsedError;
+
+ double get latitude; double get longitude; String? get address; String? get city; String? get district;
+/// Create a copy of GeoLocation
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$GeoLocationCopyWith<GeoLocation> get copyWith => _$GeoLocationCopyWithImpl<GeoLocation>(this as GeoLocation, _$identity);
 
   /// Serializes this GeoLocation to a JSON map.
-  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
+  Map<String, dynamic> toJson();
 
-  /// Create a copy of GeoLocation
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  $GeoLocationCopyWith<GeoLocation> get copyWith =>
-      throw _privateConstructorUsedError;
+
+@override
+bool operator ==(Object other) {
+  final _this = this as GeoLocation;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is GeoLocation&&(identical(other.latitude, _this.latitude) || other.latitude == _this.latitude)&&(identical(other.longitude, _this.longitude) || other.longitude == _this.longitude)&&(identical(other.address, _this.address) || other.address == _this.address)&&(identical(other.city, _this.city) || other.city == _this.city)&&(identical(other.district, _this.district) || other.district == _this.district));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode {
+  final _this = this as GeoLocation;
+  return Object.hash(runtimeType,_this.latitude,_this.longitude,_this.address,_this.city,_this.district);
+}
+
+@override
+String toString() {
+  final _this = this as GeoLocation;
+  return 'GeoLocation(latitude: ${_this.latitude}, longitude: ${_this.longitude}, address: ${_this.address}, city: ${_this.city}, district: ${_this.district})';
+}
+
+
 }
 
 /// @nodoc
-abstract class $GeoLocationCopyWith<$Res> {
-  factory $GeoLocationCopyWith(
-    GeoLocation value,
-    $Res Function(GeoLocation) then,
-  ) = _$GeoLocationCopyWithImpl<$Res, GeoLocation>;
-  @useResult
-  $Res call({
-    double latitude,
-    double longitude,
-    String? address,
-    String? city,
-    String? district,
-  });
-}
+abstract mixin class $GeoLocationCopyWith<$Res>  {
+  factory $GeoLocationCopyWith(GeoLocation value, $Res Function(GeoLocation) _then) = _$GeoLocationCopyWithImpl;
+@useResult
+$Res call({
+ double latitude, double longitude, String? address, String? city, String? district
+});
 
+
+
+
+}
 /// @nodoc
-class _$GeoLocationCopyWithImpl<$Res, $Val extends GeoLocation>
+class _$GeoLocationCopyWithImpl<$Res>
     implements $GeoLocationCopyWith<$Res> {
-  _$GeoLocationCopyWithImpl(this._value, this._then);
+  _$GeoLocationCopyWithImpl(this._self, this._then);
 
-  // ignore: unused_field
-  final $Val _value;
-  // ignore: unused_field
-  final $Res Function($Val) _then;
+  final GeoLocation _self;
+  final $Res Function(GeoLocation) _then;
 
-  /// Create a copy of GeoLocation
-  /// with the given fields replaced by the non-null parameter values.
-  @pragma('vm:prefer-inline')
-  @override
-  $Res call({
-    Object? latitude = null,
-    Object? longitude = null,
-    Object? address = freezed,
-    Object? city = freezed,
-    Object? district = freezed,
-  }) {
-    return _then(
-      _value.copyWith(
-            latitude: null == latitude
-                ? _value.latitude
-                : latitude // ignore: cast_nullable_to_non_nullable
-                      as double,
-            longitude: null == longitude
-                ? _value.longitude
-                : longitude // ignore: cast_nullable_to_non_nullable
-                      as double,
-            address: freezed == address
-                ? _value.address
-                : address // ignore: cast_nullable_to_non_nullable
-                      as String?,
-            city: freezed == city
-                ? _value.city
-                : city // ignore: cast_nullable_to_non_nullable
-                      as String?,
-            district: freezed == district
-                ? _value.district
-                : district // ignore: cast_nullable_to_non_nullable
-                      as String?,
-          )
-          as $Val,
-    );
-  }
+/// Create a copy of GeoLocation
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? latitude = null,Object? longitude = null,Object? address = freezed,Object? city = freezed,Object? district = freezed,}) {
+  return _then(GeoLocation(
+latitude: null == latitude ? _self.latitude : latitude // ignore: cast_nullable_to_non_nullable
+as double,longitude: null == longitude ? _self.longitude : longitude // ignore: cast_nullable_to_non_nullable
+as double,address: freezed == address ? _self.address : address // ignore: cast_nullable_to_non_nullable
+as String?,city: freezed == city ? _self.city : city // ignore: cast_nullable_to_non_nullable
+as String?,district: freezed == district ? _self.district : district // ignore: cast_nullable_to_non_nullable
+as String?,
+  ));
 }
 
-/// @nodoc
-abstract class _$$GeoLocationImplCopyWith<$Res>
-    implements $GeoLocationCopyWith<$Res> {
-  factory _$$GeoLocationImplCopyWith(
-    _$GeoLocationImpl value,
-    $Res Function(_$GeoLocationImpl) then,
-  ) = __$$GeoLocationImplCopyWithImpl<$Res>;
-  @override
-  @useResult
-  $Res call({
-    double latitude,
-    double longitude,
-    String? address,
-    String? city,
-    String? district,
-  });
 }
 
-/// @nodoc
-class __$$GeoLocationImplCopyWithImpl<$Res>
-    extends _$GeoLocationCopyWithImpl<$Res, _$GeoLocationImpl>
-    implements _$$GeoLocationImplCopyWith<$Res> {
-  __$$GeoLocationImplCopyWithImpl(
-    _$GeoLocationImpl _value,
-    $Res Function(_$GeoLocationImpl) _then,
-  ) : super(_value, _then);
 
-  /// Create a copy of GeoLocation
-  /// with the given fields replaced by the non-null parameter values.
-  @pragma('vm:prefer-inline')
-  @override
-  $Res call({
-    Object? latitude = null,
-    Object? longitude = null,
-    Object? address = freezed,
-    Object? city = freezed,
-    Object? district = freezed,
-  }) {
-    return _then(
-      _$GeoLocationImpl(
-        latitude: null == latitude
-            ? _value.latitude
-            : latitude // ignore: cast_nullable_to_non_nullable
-                  as double,
-        longitude: null == longitude
-            ? _value.longitude
-            : longitude // ignore: cast_nullable_to_non_nullable
-                  as double,
-        address: freezed == address
-            ? _value.address
-            : address // ignore: cast_nullable_to_non_nullable
-                  as String?,
-        city: freezed == city
-            ? _value.city
-            : city // ignore: cast_nullable_to_non_nullable
-                  as String?,
-        district: freezed == district
-            ? _value.district
-            : district // ignore: cast_nullable_to_non_nullable
-                  as String?,
-      ),
-    );
-  }
+/// Adds pattern-matching-related methods to [GeoLocation].
+extension GeoLocationPatterns on GeoLocation {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _GeoLocation value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _GeoLocation() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _GeoLocation value)  $default,){
+final _that = this;
+switch (_that) {
+case _GeoLocation():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _GeoLocation value)?  $default,){
+final _that = this;
+switch (_that) {
+case _GeoLocation() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( double latitude,  double longitude,  String? address,  String? city,  String? district)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _GeoLocation() when $default != null:
+return $default(_that.latitude,_that.longitude,_that.address,_that.city,_that.district);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( double latitude,  double longitude,  String? address,  String? city,  String? district)  $default,) {final _that = this;
+switch (_that) {
+case _GeoLocation():
+return $default(_that.latitude,_that.longitude,_that.address,_that.city,_that.district);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( double latitude,  double longitude,  String? address,  String? city,  String? district)?  $default,) {final _that = this;
+switch (_that) {
+case _GeoLocation() when $default != null:
+return $default(_that.latitude,_that.longitude,_that.address,_that.city,_that.district);case _:
+  return null;
+
+}
+}
+
 }
 
 /// @nodoc
 @JsonSerializable()
-class _$GeoLocationImpl implements _GeoLocation {
-  const _$GeoLocationImpl({
-    required this.latitude,
-    required this.longitude,
-    this.address,
-    this.city,
-    this.district,
-  });
 
-  factory _$GeoLocationImpl.fromJson(Map<String, dynamic> json) =>
-      _$$GeoLocationImplFromJson(json);
+class _GeoLocation implements GeoLocation {
+  const _GeoLocation({required this.latitude, required this.longitude, this.address, this.city, this.district});
+  factory _GeoLocation.fromJson(Map<String, dynamic> json) => _$GeoLocationFromJson(json);
 
-  @override
-  final double latitude;
-  @override
-  final double longitude;
-  @override
-  final String? address;
-  @override
-  final String? city;
-  @override
-  final String? district;
+@override final  double latitude;
+@override final  double longitude;
+@override final  String? address;
+@override final  String? city;
+@override final  String? district;
 
-  @override
-  String toString() {
+/// Create a copy of GeoLocation
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$GeoLocationCopyWith<_GeoLocation> get copyWith => __$GeoLocationCopyWithImpl<_GeoLocation>(this, _$identity);
+
+@override
+Map<String, dynamic> toJson() {
+  return _$GeoLocationToJson(this, );
+}
+
+@override
+bool operator ==(Object other) {
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _GeoLocation&&(identical(other.latitude, latitude) || other.latitude == latitude)&&(identical(other.longitude, longitude) || other.longitude == longitude)&&(identical(other.address, address) || other.address == address)&&(identical(other.city, city) || other.city == city)&&(identical(other.district, district) || other.district == district));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode {
+    return Object.hash(runtimeType,latitude,longitude,address,city,district);
+}
+
+@override
+String toString() {
     return 'GeoLocation(latitude: $latitude, longitude: $longitude, address: $address, city: $city, district: $district)';
-  }
-
-  @override
-  bool operator ==(Object other) {
-    return identical(this, other) ||
-        (other.runtimeType == runtimeType &&
-            other is _$GeoLocationImpl &&
-            (identical(other.latitude, latitude) ||
-                other.latitude == latitude) &&
-            (identical(other.longitude, longitude) ||
-                other.longitude == longitude) &&
-            (identical(other.address, address) || other.address == address) &&
-            (identical(other.city, city) || other.city == city) &&
-            (identical(other.district, district) ||
-                other.district == district));
-  }
-
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  @override
-  int get hashCode =>
-      Object.hash(runtimeType, latitude, longitude, address, city, district);
-
-  /// Create a copy of GeoLocation
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  @override
-  @pragma('vm:prefer-inline')
-  _$$GeoLocationImplCopyWith<_$GeoLocationImpl> get copyWith =>
-      __$$GeoLocationImplCopyWithImpl<_$GeoLocationImpl>(this, _$identity);
-
-  @override
-  Map<String, dynamic> toJson() {
-    return _$$GeoLocationImplToJson(this);
-  }
 }
 
-abstract class _GeoLocation implements GeoLocation {
-  const factory _GeoLocation({
-    required final double latitude,
-    required final double longitude,
-    final String? address,
-    final String? city,
-    final String? district,
-  }) = _$GeoLocationImpl;
 
-  factory _GeoLocation.fromJson(Map<String, dynamic> json) =
-      _$GeoLocationImpl.fromJson;
-
-  @override
-  double get latitude;
-  @override
-  double get longitude;
-  @override
-  String? get address;
-  @override
-  String? get city;
-  @override
-  String? get district;
-
-  /// Create a copy of GeoLocation
-  /// with the given fields replaced by the non-null parameter values.
-  @override
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  _$$GeoLocationImplCopyWith<_$GeoLocationImpl> get copyWith =>
-      throw _privateConstructorUsedError;
 }
+
+/// @nodoc
+abstract mixin class _$GeoLocationCopyWith<$Res> implements $GeoLocationCopyWith<$Res> {
+  factory _$GeoLocationCopyWith(_GeoLocation value, $Res Function(_GeoLocation) _then) = __$GeoLocationCopyWithImpl;
+@override @useResult
+$Res call({
+ double latitude, double longitude, String? address, String? city, String? district
+});
+
+
+
+
+}
+/// @nodoc
+class __$GeoLocationCopyWithImpl<$Res>
+    implements _$GeoLocationCopyWith<$Res> {
+  __$GeoLocationCopyWithImpl(this._self, this._then);
+
+  final _GeoLocation _self;
+  final $Res Function(_GeoLocation) _then;
+
+/// Create a copy of GeoLocation
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? latitude = null,Object? longitude = null,Object? address = freezed,Object? city = freezed,Object? district = freezed,}) {
+  return _then(_GeoLocation(
+latitude: null == latitude ? _self.latitude : latitude // ignore: cast_nullable_to_non_nullable
+as double,longitude: null == longitude ? _self.longitude : longitude // ignore: cast_nullable_to_non_nullable
+as double,address: freezed == address ? _self.address : address // ignore: cast_nullable_to_non_nullable
+as String?,city: freezed == city ? _self.city : city // ignore: cast_nullable_to_non_nullable
+as String?,district: freezed == district ? _self.district : district // ignore: cast_nullable_to_non_nullable
+as String?,
+  ));
+}
+
+
+}
+
+// dart format on

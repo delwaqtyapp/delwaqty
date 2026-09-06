@@ -182,8 +182,13 @@ sprint N: <description>
 | What | Where |
 |------|-------|
 | Project root | `E:\app\delwaqty` |
-| Flutter SDK | `E:\app\flutter` (3.44.6, Dart 3.12.2) |
+| Flutter SDK | `E:\app\flutter` (3.47.2 stable, Dart 3.13.x) |
 | Node.js | `E:\app\node-v24.16.0-win-x64` |
+| OmniRoute (local AI router) | `http://localhost:20128/v1` (npm global; `~/.omniroute` data dir) |
+| OmniRoute CLI | add `E:\app\node-v24.16.0-win-x64` to `$env:PATH`, then `omniroute <cmd>` |
+| OmniRoute start script | `E:\app\devtools\start-omniroute.ps1` (autostart shortcut in Startup) |
+| OmniRoute log | `~/.omniroute\logs\serve.stdout.log` / `serve.stderr.log` |
+| Dev tool scripts | `E:\app\devtools\` |
 | Android SDK | `C:\Users\elsayed.daldal\AppData\Local\Android\sdk` |
 | Device | DNP NX9 (`A3SQUT5A28003808`) |
 | Git remote | `https://github.com/delwaqtyapp/delwaqty` |

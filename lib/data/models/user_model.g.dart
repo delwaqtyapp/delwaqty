@@ -6,42 +6,41 @@ part of 'user_model.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-_$UserModelImpl _$$UserModelImplFromJson(Map<String, dynamic> json) =>
-    _$UserModelImpl(
-      id: json['id'] as String,
-      email: json['email'] as String,
-      fullName: json['fullName'] as String?,
-      username: json['username'] as String?,
-      phone: json['phone'] as String?,
-      avatarUrl: json['avatarUrl'] as String?,
-      language: json['language'] as String? ?? 'en',
-      isOnboarded: json['isOnboarded'] as bool? ?? false,
-      isBiometricEnabled: json['isBiometricEnabled'] as bool? ?? false,
-      role: json['role'] as String? ?? 'customer',
-      userType:
-          $enumDecodeNullable(_$UserTypeEnumMap, json['userType']) ??
-          UserType.customer,
-      verificationStatus:
-          $enumDecodeNullable(
-            _$VerificationStatusEnumMap,
-            json['verificationStatus'],
-          ) ??
-          VerificationStatus.pending,
-      idCardUrl: json['idCardUrl'] as String?,
-      profilePhotoUrl: json['profilePhotoUrl'] as String?,
-      tradeLicenseUrl: json['tradeLicenseUrl'] as String?,
-      drivingLicenseUrl: json['drivingLicenseUrl'] as String?,
-      rejectionReason: json['rejectionReason'] as String?,
-      dateOfBirth: json['dateOfBirth'] == null
-          ? null
-          : DateTime.parse(json['dateOfBirth'] as String),
-      createdAt: DateTime.parse(json['createdAt'] as String),
-      updatedAt: json['updatedAt'] == null
-          ? null
-          : DateTime.parse(json['updatedAt'] as String),
-    );
+_UserModel _$UserModelFromJson(Map<String, dynamic> json) => _UserModel(
+  id: json['id'] as String,
+  email: json['email'] as String,
+  fullName: json['fullName'] as String?,
+  username: json['username'] as String?,
+  phone: json['phone'] as String?,
+  avatarUrl: json['avatarUrl'] as String?,
+  language: json['language'] as String? ?? 'en',
+  isOnboarded: json['isOnboarded'] as bool? ?? false,
+  isBiometricEnabled: json['isBiometricEnabled'] as bool? ?? false,
+  role: json['role'] as String? ?? 'customer',
+  userType:
+      $enumDecodeNullable(_$UserTypeEnumMap, json['userType']) ??
+      UserType.customer,
+  verificationStatus:
+      $enumDecodeNullable(
+        _$VerificationStatusEnumMap,
+        json['verificationStatus'],
+      ) ??
+      VerificationStatus.pending,
+  idCardUrl: json['idCardUrl'] as String?,
+  profilePhotoUrl: json['profilePhotoUrl'] as String?,
+  tradeLicenseUrl: json['tradeLicenseUrl'] as String?,
+  drivingLicenseUrl: json['drivingLicenseUrl'] as String?,
+  rejectionReason: json['rejectionReason'] as String?,
+  dateOfBirth: json['dateOfBirth'] == null
+      ? null
+      : DateTime.parse(json['dateOfBirth'] as String),
+  createdAt: DateTime.parse(json['createdAt'] as String),
+  updatedAt: json['updatedAt'] == null
+      ? null
+      : DateTime.parse(json['updatedAt'] as String),
+);
 
-Map<String, dynamic> _$$UserModelImplToJson(_$UserModelImpl instance) =>
+Map<String, dynamic> _$UserModelToJson(_UserModel instance) =>
     <String, dynamic>{
       'id': instance.id,
       'email': instance.email,

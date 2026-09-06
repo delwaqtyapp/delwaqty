@@ -9,7 +9,6 @@ import 'package:delwaqty/shared/widgets/premium_empty_state.dart';
 import 'package:delwaqty/shared/widgets/shimmer_loading.dart';
 import 'package:delwaqty/shared/widgets/stat_card.dart';
 import 'package:delwaqty/services/supabase/supabase_service.dart';
-import 'package:delwaqty/core/constants/app_constants.dart';
 import 'package:delwaqty/shared/widgets/animated_feedback.dart';
 
 class MemberDrawer extends ConsumerWidget {
@@ -2054,7 +2053,6 @@ class _AdminActionsSectionState extends ConsumerState<_AdminActionsSection> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final currentEmail = Supabase.instance.client.auth.currentUser?.email;
     final isOwner = ref.watch(adminIsOwnerProvider).value ?? false;
     final canEditProfile = isOwner ||
         (widget.permissions['can_edit_profile'] as bool? ?? false);
@@ -2704,7 +2702,6 @@ class _AdminActionsSectionState extends ConsumerState<_AdminActionsSection> {
     final basic = widget.profile['basic'] as Map<String, dynamic>? ?? {};
     final memberEmail = basic['email'] as String? ?? '';
     final memberName = basic['full_name'] as String? ?? memberEmail;
-    final currentEmail = Supabase.instance.client.auth.currentUser?.email;
     final isOwner = ref.watch(adminIsOwnerProvider).value ?? false;
 
     if (isOwner) {

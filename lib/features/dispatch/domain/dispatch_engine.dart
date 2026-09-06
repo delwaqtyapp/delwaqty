@@ -1,5 +1,3 @@
-import 'dart:math';
-
 /// Deterministic, server-authoritative-friendly delivery dispatch model.
 ///
 /// This module encodes the *decision logic* of the Smart Delivery Dispatch

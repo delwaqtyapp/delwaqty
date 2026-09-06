@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/legacy.dart';
 import 'package:geolocator/geolocator.dart';
 
 import 'package:delwaqty/features/customer/driver/data/datasources/remote/supabase_dispatch_data_source.dart';
@@ -68,7 +69,7 @@ class DriverOnlineNotifier extends StateNotifier<AsyncValue<bool>> {
           permission == LocationPermission.deniedForever) {
         return null;
       }
-      return Geolocator.getCurrentPosition(
+      return await Geolocator.getCurrentPosition(
         locationSettings: const LocationSettings(
           accuracy: LocationAccuracy.high,
           timeLimit: Duration(seconds: 10),
@@ -109,7 +110,7 @@ class DriverOnlineNotifier extends StateNotifier<AsyncValue<bool>> {
   }
 
   Future<void> toggle() async {
-    final online = state.valueOrNull ?? false;
+    final online = state.value ?? false;
     if (online) {
       await goOffline();
     } else {

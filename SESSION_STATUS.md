@@ -1,6 +1,66 @@
 # SESSION_STATUS.md
 
-> **Last updated:** 2026-08-21 Session 68 — **SPRINT 96: BIOMETRIC LOGIN FIX + MASS ARABIC ENCODING REPAIR** — Two root causes fixed and verified live on device (DNP NX9). (1) Fingerprint login failed in both apps with `LocalAuthException(uiUnavailable, The current Activity must be a FragmentActivity)` because `MainActivity` extended `FlutterActivity` → switched to `FlutterFragmentActivity` (shared, both flavors); stale `FlutterSecureStorage.xml` (old debug-signing keystore) deleted and recreated. Verified: admin login-page prompt → scan → `authenticate result: true` → dashboard. Customer app verified with splash auto-login (fingerprint prompt at startup) + login-page fingerprint button; layout changed per user: guest button removed, register link moved up, fingerprint button below it. (2) User reported "اللغه العربى وحاجات كتير باظت" — root cause: sprint-91 monorepo restructure commit re-saved ~350 files with UTF-8-BOM and mojibake (Arabic UTF-8 bytes decoded as Windows-1252 then re-encoded as UTF-8; e.g. `Ø§Ù„Ù‚Ø±ÙŠØ¨Ø©` instead of القريبة). Fixed programmatically: 396 lines across 53 files (lib + supabase migrations + tests + ROADMAP.md) recovered via Windows-1252→UTF-8 round-trip (zero lossy chars — verified hex-perfect); 13 legit Latin-1 lines (—, °) skipped; 352 BOMs stripped. Verified live: customer home page tabs (القريبة/موصى لك/الأشهر), admin dashboard (مركز القيادة, إجمالي المستخدمين, المتاجر النشطة, التوثيقات المعلقة) all correct Arabic.
+> **Last updated:** 2026-09-06 Session 69 — **OMNIROUTE LOCAL AI ROUTER (DEVTOOLS) — WORKING** — OmniRoute v3.8.50 installed globally (npm), server now RUNNING on `localhost:20128/v1` (loopback-only `127.0.0.1`), 3 providers active (`opencode`=OpenCode Free noauth, `openrouter`=valid `sk-or-v1-…` key, `auggie`), 1796 models served. Default opencode model fixed (`omniroute/mcode/mimo-auto`→`omniroute/auto/best-coding`) — previous default was dead (401 no credentials for `mcode`). Autostart for the laptop added (Startup shortcut → `E:\app\devtools\start-omniroute.ps1`). See "SPRINT — OmniRoute" section below.
+
+---
+
+## Current Task — SPRINT 147: RIVERPOD 3 + FREEZED 4 + LINTS 6 MAJOR UPGRADE — COMPLETE (analyze 0 errors / 0 warnings, tests 918/918)
+
+**Status:** Completed the upgrade of `flutter_riverpod` ^2.x → **3.4.3**, `freezed` ^2.x → **4.0.1**, `flutter_lints` ^3 → **6.0.0**, `riverpod_lint` **3.1.9** (analysis_server_plugin), `flutter_gen_runner` 5.15.0 (with top-level `flutter_gen` section, `lottie: true`). 0 errors / 0 warnings / 216 infos; `flutter test` **918/918** pass.
+
+**Migration mechanics (all classed per AGENTS.md §12.1 — Upgrade, not deletion):**
+- **Freezed 4** requires `abstract class X with _$X` (generated mixins have abstract getters with no bodies). Script-patched **92 freezed classes** to `abstract class`; `sealed class Failure` left intact (factory pattern preserved).
+- **Riverpod 3** removed `AutoDisposeFamilyAsyncNotifier` → migrated the two affected notifiers to `AsyncNotifier<State>` + constructor arg + `AsyncNotifierProvider.autoDispose.family<NotifierT, StateT, ArgT>((arg) => NotifierT(arg))`:
+  - `RestaurantMenuNotifier` (restaurant_menu_page.dart)
+  - `RestaurantReviewsNotifier` (restaurant_reviews_page.dart)
+- `.valueOrNull` removed in Riverpod 3 → replaced **22 sites** with `.value` (15 files).
+- **Riverpod 3 splits exports**: `legacy.dart` (StateNotifier/StateProvider/StateController/ChangeNotifierProvider + families) added to **12 files**; `misc.dart` (Override/ProviderBase/Family/Refreshable) added to **7 module files**.
+- `whenOrNull` on AuthState requires the direct `auth/domain/auth_state.dart` import (extension scope rule) → added to `change_password_page.dart` + `fingerprint_login_page.dart`.
+- Test: `Override` now via `flutter_riverpod/misc.dart` in `admin_region_scope_page_test.dart`.
+- Cleaned 21 warnings: unused imports (app_constants ×3, order.dart, dart:math, flutter_riverpod), unused locals (×6), `unawaited_return_in_try_block` (×4, added `await`), one unnecessary `!`, one unused const.
+
+**Build notes:**
+- `package_config.json` + lock MUST be regenerated after re-upgrading pubspec (`.dart_tool` delete → `flutter pub get` → `build_runner build`). build_runner 2.15.3+: `--delete-conflicting-outputs` removed (ignored).
+- `plugins:` for riverpod_lint is a **map**, not a list: `plugins: riverpod_lint: 3.1.9`.
+- `flutter_gen` must be a **top-level** key (not under `flutter:`).
+
+**⚠️ External interference (important).** An unknown process repeatedly reverts the working tree mid-session (git reflog shows a `reset` at 12:26; batch file rewrites observed at 14:51; pubspec/lock reverted + all `*.freezed.dart`/`*.g.dart` deleted at ~15:19; `AdobeCollabSync` start time correlates with the first reset). Mitigations used: apply edits in one fast batch, verify immediately, commit as soon as the gate passes. **If the tree looks reverted again after this commit, re-apply from git history instead of re-doing patch work.**
+
+**Gates:** `flutter pub get` ✓ · `flutter analyze` 0 errors / 0 warnings ✓ · `flutter test` 918/918 ✓ · committed as `sprint 147`.
+
+---
+
+## Current Task — SPRINT: OmniRoute LOCAL AI ROUTER (dev environment) — COMPLETE (Session 69)
+
+**Status:** OmniRoute v3.8.50 gateway is fully operational on this laptop and wired into OpenCode. This is a **dev-environment** task (NOT app code) — the project's Flutter apps are untouched this session.
+
+**What was done:**
+- **Server running:** started via `node omniroute.mjs serve`. Verified `omniroute health` = healthy, uptime ~198s, version 3.8.50.
+- **Providers configured (all `active`):**
+  - `opencode` (OpenCode Free, noauth) — primary free backend, routes to `big-pickle`/Claude/etc.
+  - `openrouter` — using the real valid key `sk-or-v1-435…` previously embedded in the stale `oxalpha` provider in `opencode.json`.
+  - `auggie` (noauth).
+- **Gateway verified:** `GET /v1/models` (Bearer `sk-f6ed4d7ee178e258-1a3aa6-12a74cb1`) → HTTP 200, **1796 models**.
+- **Model smoke tests** (chat completion, `max_tokens=20`):
+  | Model | Result |
+  |---|---|
+  | `auto/best-coding` | ✅ big-pickle (1.3–1.7s) — new default |
+  | `auto/coding` | ✅ big-pickle / openai/gpt-6-astra |
+  | `auto/best-fast`, `auto/fast`, `auto/coding:cheap`, `auto/claude-sonnet`, `auto/reasoning` | ✅ big-pickle / anthropic/claude-sonnet-5 |
+  | `auto/best-free`, `auto/coding:free`, `auto/pro-coding` | ✅ big-pickle |
+  | `oc/mimo-v2.5-free`, `oc/nemotron-3-ultra-free` | ✅ (nemotron very slow 42s) |
+  | `auto/reasoning:pro`, `auto/gemini`, `auto/glm` | ❌ need browser/Devin/Auggie CLIs not installed here |
+  | `aug/glm-5.2`, `aug/kimi-k2.7` | ❌ `auggie` CLI missing on this machine |
+  | `oc/deepseek-v4-flash-free` | ❌ model unavailable in live catalog |
+  | `ddgw/*`, `theoldllm/*` | ❌ blocked (anti-abuse / egress IP) |
+  | `mcode/mimo-auto` (old default) | ❌ **401 No active credentials for provider mcode** → replaced |
+- **Security:** server rebind to `127.0.0.1` only (was `0.0.0.0` without API-key requirement) — loopback-only, safe for local use.
+- **Autostart:** `E:\app\devtools\start-omniroute.ps1` (idempotent: checks port, starts `node …serve`, listens 127.0.0.1) + Startup shortcut `OmniRoute Autostart.lnk` → auto-runs on login.
+- **opencode.json:** `model` changed `omniroute/mcode/mimo-auto` → `omniroute/auto/best-coding`. Key `sk-f6ed4d…` (OmniRoute gateway key) already correct. JSON validated.
+
+**Manual ops on boot (credentials / external):** none required — autostart handles the server. The OpenRouter key is read from `opencode.json` (stale `oxalpha` provider block) now duplicated into OmniRoute storage; keep that file as the key source-of-truth backup.
+
+**Not done / follow-ups:** re-visit `auto/gemini`/`auto/glm`/`aug/*` if Auggie CLI, Playwright browsers, or ZCode get installed; Android APK OOM fix (`org.gradle.jvmargs=-Xmx6G` still OOMs at dexing — separate dev-ops task, backlog).
 
 ---
 

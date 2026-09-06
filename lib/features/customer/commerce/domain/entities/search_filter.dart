@@ -4,7 +4,7 @@ part 'search_filter.freezed.dart';
 part 'search_filter.g.dart';
 
 @freezed
-class SearchFilter with _$SearchFilter {
+abstract class SearchFilter with _$SearchFilter {
   const factory SearchFilter({
     double? minPrice,
     double? maxPrice,

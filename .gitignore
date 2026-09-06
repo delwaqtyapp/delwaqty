@@ -94,6 +94,7 @@ app.*.map.json
 
 # Android signing keys
 *.jks
+**/key.properties
 *.keystore
 
 # Proguard

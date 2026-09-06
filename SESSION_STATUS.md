@@ -1,6 +1,22 @@
 # SESSION_STATUS.md
 
-> **Last updated:** 2026-09-06 Session 69 — **OMNIROUTE LOCAL AI ROUTER (DEVTOOLS) — WORKING** — OmniRoute v3.8.50 installed globally (npm), server now RUNNING on `localhost:20128/v1` (loopback-only `127.0.0.1`), 3 providers active (`opencode`=OpenCode Free noauth, `openrouter`=valid `sk-or-v1-…` key, `auggie`), 1796 models served. Default opencode model fixed (`omniroute/mcode/mimo-auto`→`omniroute/auto/best-coding`) — previous default was dead (401 no credentials for `mcode`). Autostart for the laptop added (Startup shortcut → `E:\app\devtools\start-omniroute.ps1`). See "SPRINT — OmniRoute" section below.
+> **Last updated:** 2026-09-06 Session 70 — **BUILD ENV RESTORED + RELEASE SIGNING + ALL-FLAVOR REBUILD + DEVICE INSTALL** — Working tree drifted (pub get had re-resolved old deps: riverpod 2.6.1/analyzer 7.6.0 vs committed riverpod 3.4.3/freezed 4.0.1/analyzer 14.3.0), causing 237 cascading errors incl. phantom `misc.dart`/`legacy.dart` URI errors and analyzer-7.6-vs-SDK-3.47 crashes. Realigned repo to HEAD (`bcb8fed`), re-resolved, regenerated (build_runner: 163 outputs), fixed last lint info. Gate now **analyze 0/0/0 + tests 918/918 + 4-release-flavor APK builds** (release-signed via `android/key.properties`). See "Current Task — SPRINT 149" below.
+
+---
+
+## Current Task — SPRINT 149: BUILD-ENV RESTORE + RELEASE SIGNING + FULL DEVICE INSTALL — COMPLETE (verification)
+
+**Status:** Closed the environment drift that broke the build (root cause: `.dart_tool/package_config.json` + lock resolved OLD major versions — riverpod 3.4.3 had been upgraded in HEAD, but working tree/pub get resolved riverpod 2.6.1 + analyzer 7.6.0 which is incompatible with Flutter 3.47.2's Dart core; analyzer 7.6 cannot parse/visit dot-shorthand elements baked into the modern SDK, so `bundle_writer` threw `visitDotShorthandPropertyAccess` and freezed/resolution cascaded errors).
+
+**Actions:**
+- Restored `pubspec.yaml`, `pubspec.lock`, `analysis_options.yaml` to HEAD; un-staged accidental index copies; `flutter pub get` → flutter_riverpod/riverpod **3.4.3**, freezed **4.0.1**, analyzer **14.3.0**, build_runner 2.15.3.
+- `dart run build_runner build` regenerated **163 outputs** (56 freezed + 53 json_serializable + gen) in 59s — clean, no SEVERE.
+- Fixed last lint info: `location_sharing_page.dart:79` `use_build_context_synchronously` (capture `ScaffoldMessenger` before `await`).
+- **Release signing:** `android/key.properties` + `android/keystore/release.jks` now present; `build.gradle.kts` loads creds from `key.properties` (fallback env keys); `.gitignore` added `**/key.properties`.
+- Built **all 4 flavors × 3 ABIs** (customer/admin/driver/provider, arm64-v8a + armeabi-v7a + x86_64) as release-signed APKs (20.3–25.4MB) → installed + smoke-launched on DNP NX9.
+- Validate: watch for the ⚠️ external-interference process again — re-apply from git history if the tree reverts.
+
+**Gates:** `flutter pub get` ✓ · `flutter analyze` **0/0/0** ✓ · `flutter test` **918/918** ✓ · 12 release APKs built ✓ · commit `sprint 149`.
 
 ---
 

@@ -1,8 +1,17 @@
+import java.io.FileInputStream
+import java.util.Properties
+
 plugins {
     id("com.android.application")
     id("dev.flutter.flutter-gradle-plugin")
     id("com.google.gms.google-services")
     id("com.google.firebase.crashlytics")
+}
+
+val keystoreProperties = Properties()
+val keystorePropertiesFile = rootProject.file("key.properties")
+if (keystorePropertiesFile.exists()) {
+    keystoreProperties.load(FileInputStream(keystorePropertiesFile))
 }
 
 android {
@@ -21,9 +30,12 @@ android {
             val keystoreFile = rootProject.file("keystore/release.jks")
             if (keystoreFile.exists()) {
                 storeFile = keystoreFile
-                storePassword = System.getenv("KEYSTORE_PASSWORD") ?: ""
-                keyAlias = System.getenv("KEY_ALIAS") ?: ""
-                keyPassword = System.getenv("KEY_PASSWORD") ?: ""
+                storePassword = keystoreProperties.getProperty("storePassword")
+                    ?: System.getenv("KEYSTORE_PASSWORD").orEmpty()
+                keyAlias = keystoreProperties.getProperty("keyAlias")
+                    ?: System.getenv("KEY_ALIAS").orEmpty()
+                keyPassword = keystoreProperties.getProperty("keyPassword")
+                    ?: System.getenv("KEY_PASSWORD").orEmpty()
             }
         }
     }
@@ -64,7 +76,9 @@ android {
     buildTypes {
         release {
             val keystoreFile = rootProject.file("keystore/release.jks")
-            val hasReleaseKey = keystoreFile.exists() && !System.getenv("KEYSTORE_PASSWORD").isNullOrEmpty()
+            val storePass = keystoreProperties.getProperty("storePassword")
+                ?: System.getenv("KEYSTORE_PASSWORD").orEmpty()
+            val hasReleaseKey = keystoreFile.exists() && storePass.isNotEmpty()
             signingConfig = if (hasReleaseKey) {
                 signingConfigs.getByName("release")
             } else {

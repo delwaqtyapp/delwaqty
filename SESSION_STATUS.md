@@ -4,6 +4,16 @@
 
 ---
 
+## Current Task — SPRINT 148: ANALYZER 0/0/0 + APK BUILD + DEVICE SMOKE — COMPLETE (post-upgrade verification)
+
+**Status:** Closed the sprint-147 backlog. Info lints reduced **216 → 0** (`dart fix --apply` 198 fixes in 68 files + 18 manual `use_build_context_synchronously` / `strict_top_level_inference` fixes). Final gate: `flutter analyze` **0 errors / 0 warnings / 0 infos**; `flutter test` **918/918**. Debug + release APK (customer flavor) built and installed/smoke-tested on DNP NX9 — no crash, session restored (`AuthEventType.signedIn`), Firebase/Crashlytics healthy. Release R8 dexing **no OOM** — backlog resolved. Commits `4efe51a` (info cleanup), `f49f87d` (docs). Report: `docs/HANDOFF/SPRINT_148_APK_BUILD_AND_DEVICE_SMOKE.md`.
+
+**Pre-existing finding (not from upgrade):** duplicate push-notification permission request — `[firebase_messaging/unknown] A request for permissions is already running` from `push_notification_service.dart:192`. Non-fatal; single-flight `requestPermission()` as follow-up.
+
+**Device build note:** multi-app monorepo — always pass `--flavor customer --target lib/customer/main.dart` (no `lib/main.dart`); export `MAPS_API_KEY` (manifest placeholder) alongside `--dart-define-from-file=.env.dev`. Release uses debug signing until `KEYSTORE_PASSWORD`/`KEY_ALIAS`/`KEY_PASSWORD` are provided.
+
+---
+
 ## Current Task — SPRINT 147: RIVERPOD 3 + FREEZED 4 + LINTS 6 MAJOR UPGRADE — COMPLETE (analyze 0 errors / 0 warnings / 0 infos, tests 918/918)
 
 **Status:** Completed the upgrade of `flutter_riverpod` ^2.x → **3.4.3**, `freezed` ^2.x → **4.0.1**, `flutter_lints` ^3 → **6.0.0**, `riverpod_lint` **3.1.9** (analysis_server_plugin), `flutter_gen_runner` 5.15.0 (with top-level `flutter_gen` section, `lottie: true`). Full gate now **0 errors / 0 warnings / 0 infos**; `flutter test` **918/918** pass. Committed + pushed twice this sprint: `1f80550` (migration) and `4efe51a` (info cleanup).

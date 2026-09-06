@@ -1,6 +1,6 @@
 # ROADMAP.md — Delwaqty Development Roadmap
 
-> **Last updated:** 2026-09-06 (Sprint 147: Riverpod 3.4.3 + Freezed 4.0.1 + lints 6 upgrade)
+> **Last updated:** 2026-09-06 (Sprint 148: analyzer 0/0/0 + APK build verified on device)
 > **Authority:** PROJECT_CONSTITUTION.md �15 (v2.0)
 
 ---
@@ -43,7 +43,8 @@
 | Cart | ✅ Local (SharedPreferences, cross-device sync deferred) |
 | State Management | ✅ Riverpod 3.4.3 (legacy/misc export split migrated) |
 | Codegen | ✅ Freezed 4.0.1 (abstract classes) + json_serializable 6.14.1 + build_runner 2.15.3 |
-| Lints | ✅ flutter_lints 6.0.0 + riverpod_lint 3.1.9 (analysis_server_plugin) + flutter_gen_runner |
+| Lints | ✅ flutter_lints 6.0.0 + riverpod_lint 3.1.9 (analysis_server_plugin) + flutter_gen_runner; analyzer 0 errors / 0 warnings / 0 infos |
+| Android Build | ✅ debug + release APK (customer flavor) build verified on device — DEX OOM resolved |
 | Orders | ✅ Real (create, track, history) |
 | Reviews | ✅ Real (submit, list, average) |
 | Coupons | ✅ Real (validate, apply, types) |

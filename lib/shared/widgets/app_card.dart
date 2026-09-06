@@ -104,7 +104,7 @@ class AppCard extends StatelessWidget {
               header!,
               const SizedBox(height: AppSpacing.md),
             ],
-            if (child != null) child!,
+            ?child,
             if (footer != null) ...[
               const SizedBox(height: AppSpacing.md),
               footer!,

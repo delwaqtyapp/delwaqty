@@ -86,7 +86,7 @@ class _MerchantProductsPageState extends ConsumerState<MerchantProductsPage> {
               loading: () => ListView.builder(
                 padding: const EdgeInsets.all(16),
                 itemCount: 5,
-                itemBuilder: (_, __) => const Padding(
+                itemBuilder: (_, _) => const Padding(
                   padding: EdgeInsets.only(bottom: 12),
                   child: ShimmerCard(height: 80),
                 ),
@@ -255,7 +255,7 @@ class _ProductCard extends StatelessWidget {
                   ? Image.network(
                       imageUrl,
                       fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) => Icon(
+                      errorBuilder: (_, _, _) => Icon(
                         Icons.image_outlined,
                         color: theme.colorScheme.onSurfaceVariant,
                       ),

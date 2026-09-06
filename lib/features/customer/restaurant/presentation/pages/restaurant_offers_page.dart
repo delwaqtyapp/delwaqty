@@ -54,12 +54,12 @@ class RestaurantOffersPage extends ConsumerWidget {
         loading: () => ListView.builder(
           padding: const EdgeInsets.all(16),
           itemCount: 4,
-          itemBuilder: (_, __) => const Padding(
+          itemBuilder: (_, _) => const Padding(
             padding: EdgeInsets.only(bottom: 12),
             child: ShimmerCard(),
           ),
         ),
-        error: (_, __) => Center(
+        error: (_, _) => Center(
           child: ErrorState(message: l10n.errorLoading),
         ),
       ),

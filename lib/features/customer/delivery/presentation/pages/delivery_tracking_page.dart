@@ -43,7 +43,7 @@ class _DeliveryTrackingPageState extends ConsumerState<DeliveryTrackingPage> {
         actions: [
           ...rideAsync.when(
             loading: () => <Widget>[],
-            error: (_, __) => <Widget>[],
+            error: (_, _) => <Widget>[],
             data: (ride) {
               if (!ride.status.isTerminal) {
                 return [
@@ -103,9 +103,9 @@ class _DeliveryTrackingPageState extends ConsumerState<DeliveryTrackingPage> {
                 await ref
                     .read(deliveryRepositoryProvider)
                     .cancelDelivery(ride.id);
-                if (mounted) context.pop();
+                if (context.mounted) context.pop();
               } catch (e) {
-                if (mounted) {
+                if (context.mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                         content: Text(l10n.errorWithMessage(e.toString()))),

@@ -176,7 +176,7 @@ class _AdminTopupRequestsPageState
               scrollDirection: Axis.horizontal,
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
               itemCount: _statuses.length + 1,
-              separatorBuilder: (_, __) => const SizedBox(width: 8),
+              separatorBuilder: (_, _) => const SizedBox(width: 8),
               itemBuilder: (context, i) {
                 final value = i == 0 ? null : _statuses[i - 1];
                 final label = i == 0 ? 'All' : _label(value!, l10n);
@@ -216,7 +216,7 @@ class _AdminTopupRequestsPageState
                   return ListView.separated(
                     padding: const EdgeInsets.all(12),
                     itemCount: items.length,
-                    separatorBuilder: (_, __) => const SizedBox(height: 10),
+                    separatorBuilder: (_, _) => const SizedBox(height: 10),
                     itemBuilder: (context, i) {
                       final item = items[i];
                       final busy = _busyId == item.id;

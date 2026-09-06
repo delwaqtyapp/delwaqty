@@ -184,12 +184,14 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
                             );
                           }
                         } else {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(l10n.couponInvalid),
-                              backgroundColor: colorScheme.error,
-                            ),
-                          );
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(l10n.couponInvalid),
+                                backgroundColor: colorScheme.error,
+                              ),
+                            );
+                          }
                         }
                       },
                       child: Text(l10n.apply),

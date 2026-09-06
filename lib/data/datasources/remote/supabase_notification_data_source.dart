@@ -129,7 +129,7 @@ class SupabaseNotificationDataSource {
       'p_token': token,
       'p_platform': platform,
       'p_device_id': deviceId,
-      if (appVersion != null) 'p_app_version': appVersion,
+      'p_app_version': ?appVersion,
     });
   }
 

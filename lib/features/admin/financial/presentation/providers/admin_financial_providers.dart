@@ -75,7 +75,7 @@ final graceTargetProvider = StateProvider<String>((ref) => '');
 
 final graceAccountProvider = FutureProvider<GraceAccount?>((ref) {
   final target = ref.watch(graceTargetProvider).trim();
-  if (target.isEmpty) return Future.value(null);
+  if (target.isEmpty) return Future.value();
   return ref.watch(adminFinancialRepositoryProvider).getGrace(target);
 });
 

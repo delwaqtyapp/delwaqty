@@ -68,7 +68,7 @@ class DriverFinancialCenterPage extends ConsumerWidget {
                 ],
               ),
               loading: () => const Center(child: CircularProgressIndicator()),
-              error: (_, __) =>
+              error: (_, _) =>
                   const _StatCard(title: '', value: ''),
             ),
             wallet.when(
@@ -90,7 +90,7 @@ class DriverFinancialCenterPage extends ConsumerWidget {
                 ],
               ),
               loading: () => const SizedBox.shrink(),
-              error: (_, __) => const SizedBox.shrink(),
+              error: (_, _) => const SizedBox.shrink(),
             ),
             grace.when(
               data: (g) => _StatCard(
@@ -98,7 +98,7 @@ class DriverFinancialCenterPage extends ConsumerWidget {
                 value: l10n.graceUsed(g.limit, g.remaining, g.used),
               ),
               loading: () => const SizedBox.shrink(),
-              error: (_, __) => const SizedBox.shrink(),
+              error: (_, _) => const SizedBox.shrink(),
             ),
             earnings.when(
               data: (list) {
@@ -129,7 +129,7 @@ class DriverFinancialCenterPage extends ConsumerWidget {
                 );
               },
               loading: () => const SizedBox.shrink(),
-              error: (_, __) => const SizedBox.shrink(),
+              error: (_, _) => const SizedBox.shrink(),
             ),
             const SizedBox(height: 12),
             Text(
@@ -152,7 +152,7 @@ class DriverFinancialCenterPage extends ConsumerWidget {
                           .toList(),
                     ),
               loading: () => const SizedBox.shrink(),
-              error: (_, __) => const SizedBox.shrink(),
+              error: (_, _) => const SizedBox.shrink(),
             ),
             const SizedBox(height: 12),
             Text(

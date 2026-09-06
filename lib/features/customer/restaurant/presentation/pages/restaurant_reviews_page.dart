@@ -140,7 +140,7 @@ class _RestaurantReviewsPageState extends ConsumerState<RestaurantReviewsPage> {
           summaryAsync.when(
             data: (summary) => _RatingSummary(summary: summary),
             loading: () => const SkeletonListTile(),
-            error: (_, __) => const SizedBox.shrink(),
+            error: (_, _) => const SizedBox.shrink(),
           ),
           const Divider(),
           Expanded(
@@ -165,7 +165,7 @@ class _RestaurantReviewsPageState extends ConsumerState<RestaurantReviewsPage> {
                     controller: _scrollController,
                     padding: const EdgeInsets.all(16),
                     itemCount: reviews.length + (reviewsState.hasMore ? 1 : 0),
-                    separatorBuilder: (_, __) => const Divider(height: 1),
+                    separatorBuilder: (_, _) => const Divider(height: 1),
                     itemBuilder: (context, index) {
                       if (index == reviews.length) {
                         return const Padding(
@@ -185,7 +185,7 @@ class _RestaurantReviewsPageState extends ConsumerState<RestaurantReviewsPage> {
                 );
               },
               loading: () => const RestaurantReviewsSkeleton(),
-              error: (_, __) => Center(
+              error: (_, _) => Center(
                 child: ErrorState(message: l10n.errorLoading),
               ),
             ),

@@ -5,12 +5,25 @@
 /// ranking and atomic-assignment semantics can be unit-tested without a
 /// database. The actual DB boundary (FOR UPDATE guard, RLS, SECURITY DEFINER
 /// RPCs) is implemented in SQL migrations; this layer mirrors that contract.
+library;
 
 // ---------------------------------------------------------------------------
 // Models
 // ---------------------------------------------------------------------------
 
 class OrderDispatchContext {
+
+  const OrderDispatchContext({
+    required this.pickupLatitude,
+    required this.pickupLongitude,
+    required this.destinationLatitude,
+    required this.destinationLongitude,
+    required this.priority,
+    required this.ageMinutes,
+    required this.slaDeadlineMinutes,
+    required this.serviceCategory,
+    required this.deliveryZone,
+  });
   final double pickupLatitude;
   final double pickupLongitude;
   final double destinationLatitude;
@@ -27,21 +40,26 @@ class OrderDispatchContext {
 
   final String serviceCategory;
   final String deliveryZone;
-
-  const OrderDispatchContext({
-    required this.pickupLatitude,
-    required this.pickupLongitude,
-    required this.destinationLatitude,
-    required this.destinationLongitude,
-    required this.priority,
-    required this.ageMinutes,
-    required this.slaDeadlineMinutes,
-    required this.serviceCategory,
-    required this.deliveryZone,
-  });
 }
 
 class DriverCandidate {
+
+  const DriverCandidate({
+    required this.id,
+    required this.currentLatitude,
+    required this.currentLongitude,
+    required this.distanceKm,
+    required this.etaToPickupMinutes,
+    required this.etaToDestinationMinutes,
+    required this.activeOrders,
+    required this.isAvailable,
+    required this.status,
+    required this.vehicleSuitable,
+    required this.serviceCategoryMatch,
+    required this.deliveryZoneMatch,
+    required this.routeCompatibility,
+    required this.batchingCompatibility,
+  });
   final String id;
   final double currentLatitude;
   final double currentLongitude;
@@ -66,23 +84,6 @@ class DriverCandidate {
 
   /// 0..1 ability to batch with current active orders.
   final double batchingCompatibility;
-
-  const DriverCandidate({
-    required this.id,
-    required this.currentLatitude,
-    required this.currentLongitude,
-    required this.distanceKm,
-    required this.etaToPickupMinutes,
-    required this.etaToDestinationMinutes,
-    required this.activeOrders,
-    required this.isAvailable,
-    required this.status,
-    required this.vehicleSuitable,
-    required this.serviceCategoryMatch,
-    required this.deliveryZoneMatch,
-    required this.routeCompatibility,
-    required this.batchingCompatibility,
-  });
 }
 
 /// Documented, configurable scoring weights.
@@ -93,12 +94,6 @@ class DriverCandidate {
 /// proximity/ETA dominate, workload and SLA matter, zone and compatibility
 /// are tie-breakers. Change centrally — never hardcode ad-hoc weights in UI.
 class DispatchWeights {
-  final double distance;
-  final double eta;
-  final double workload;
-  final double sla;
-  final double zone;
-  final double compatibility;
 
   const DispatchWeights({
     this.distance = 0.30,
@@ -108,15 +103,21 @@ class DispatchWeights {
     this.zone = 0.10,
     this.compatibility = 0.05,
   });
+  final double distance;
+  final double eta;
+  final double workload;
+  final double sla;
+  final double zone;
+  final double compatibility;
 
   double get total => distance + eta + workload + sla + zone + compatibility;
 }
 
 class ScoredCandidate {
-  final DriverCandidate candidate;
-  final double score;
 
   const ScoredCandidate(this.candidate, this.score);
+  final DriverCandidate candidate;
+  final double score;
 }
 
 // ---------------------------------------------------------------------------
@@ -302,11 +303,11 @@ enum DispatchAssignmentResult { assigned, rejectedStale, noCandidate }
 /// against a non-PENDING order is rejected as stale, guaranteeing exactly
 /// one successful assignment even under concurrent callers.
 class DispatchAssignment {
+
+  DispatchAssignment(this.orderId, this.status);
   final String orderId;
   String? assignedDriverId;
   String status;
-
-  DispatchAssignment(this.orderId, this.status);
 
   DispatchAssignmentResult assign(String driverId) {
     if (status != kPendingDispatch) {

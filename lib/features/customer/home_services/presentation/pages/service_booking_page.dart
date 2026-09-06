@@ -157,7 +157,7 @@ class _ServiceBookingPageState extends ConsumerState<ServiceBookingPage> {
             const SizedBox(height: 12),
             providersAsync.when(
               loading: () => const ShimmerCard(height: 100),
-              error: (_, __) => const PremiumEmptyState(
+              error: (_, _) => const PremiumEmptyState(
                 icon: Icons.error_outline,
                 title: 'خطأ',
                 message: 'تعذر تحميل مزودي الخدمة',
@@ -175,7 +175,7 @@ class _ServiceBookingPageState extends ConsumerState<ServiceBookingPage> {
                   child: ListView.separated(
                     scrollDirection: Axis.horizontal,
                     itemCount: providers.length,
-                    separatorBuilder: (_, __) => const SizedBox(width: 12),
+                    separatorBuilder: (_, _) => const SizedBox(width: 12),
                     itemBuilder: (context, index) {
                       final provider = providers[index];
                       final isSelected = _selectedProviderId == provider.id;

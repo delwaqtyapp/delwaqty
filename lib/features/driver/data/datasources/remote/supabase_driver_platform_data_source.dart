@@ -37,11 +37,11 @@ class SupabaseDriverPlatformDataSource {
   }) async {
     _checkRpc(await _client.rpc('submit_driver_onboarding', params: {
       'p_driver_id': driverId,
-      if (fullName != null) 'p_full_name': fullName,
-      if (phone != null) 'p_phone': phone,
-      if (nationalId != null) 'p_national_id': nationalId,
-      if (address != null) 'p_address': address,
-      if (profilePhotoUrl != null) 'p_profile_photo_url': profilePhotoUrl,
+      'p_full_name': ?fullName,
+      'p_phone': ?phone,
+      'p_national_id': ?nationalId,
+      'p_address': ?address,
+      'p_profile_photo_url': ?profilePhotoUrl,
       'p_onboarding_step': step,
     }));
   }
@@ -130,15 +130,15 @@ class SupabaseDriverPlatformDataSource {
     _checkRpc(await _client.rpc('update_driver_vehicle', params: {
       'p_vehicle_id': vehicleId,
       'p_driver_id': driverId,
-      if (category != null) 'p_category': category,
-      if (make != null) 'p_make': make,
-      if (model != null) 'p_model': model,
-      if (year != null) 'p_year': year,
-      if (color != null) 'p_color': color,
-      if (plateNumber != null) 'p_plate_number': plateNumber,
-      if (seats != null) 'p_seats': seats,
-      if (photoUrl != null) 'p_photo_url': photoUrl,
-      if (isActive != null) 'p_is_active': isActive,
+      'p_category': ?category,
+      'p_make': ?make,
+      'p_model': ?model,
+      'p_year': ?year,
+      'p_color': ?color,
+      'p_plate_number': ?plateNumber,
+      'p_seats': ?seats,
+      'p_photo_url': ?photoUrl,
+      'p_is_active': ?isActive,
     }));
   }
 

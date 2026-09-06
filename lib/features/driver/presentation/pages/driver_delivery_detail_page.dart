@@ -49,7 +49,7 @@ class _DriverDeliveryDetailPageState
         ),
         actions: [
           TextButton(
-              onPressed: () => Navigator.of(ctx).pop(null),
+              onPressed: () => Navigator.of(ctx).pop(),
               child: const Text('إلغاء')),
           TextButton(
               onPressed: () => Navigator.of(ctx).pop(controller.text),
@@ -90,9 +90,9 @@ class _DriverDeliveryDetailPageState
         loading: () => ListView(
           padding: const EdgeInsets.all(16),
           children: const [
-            ShimmerCard(height: 120),
+            ShimmerCard(),
             SizedBox(height: 12),
-            ShimmerCard(height: 120),
+            ShimmerCard(),
           ],
         ),
         error: (e, _) => Center(child: Text('خطأ: $e')),

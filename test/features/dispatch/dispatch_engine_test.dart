@@ -61,7 +61,7 @@ void main() {
     test('excludes offline drivers', () {
       final candidates = [
         driver(id: 'online', distanceKm: 2),
-        driver(id: 'offline', distanceKm: 1, isAvailable: false),
+        driver(id: 'offline', isAvailable: false),
       ];
       final ranked = NearestDriverStrategy().rank(
         order: order(),
@@ -76,15 +76,12 @@ void main() {
       // A is closer but overloaded + wrong zone; B is farther but free + matched.
       final a = driver(
         id: 'A',
-        distanceKm: 1,
         activeOrders: 5,
         deliveryZoneMatch: false,
       );
       final b = driver(
         id: 'B',
         distanceKm: 4,
-        activeOrders: 0,
-        deliveryZoneMatch: true,
       );
       final ranked = SmartScoreStrategy().rank(
         order: order(),
@@ -106,7 +103,7 @@ void main() {
     test('proposes smart order but requires approval and is not automatic', () {
       final candidates = [
         driver(id: 'A', distanceKm: 10, activeOrders: 4),
-        driver(id: 'B', distanceKm: 2, activeOrders: 0),
+        driver(id: 'B', distanceKm: 2),
       ];
       final strategy = HybridStrategy();
       final ranked = strategy.rank(order: order(), candidates: candidates);
@@ -119,7 +116,7 @@ void main() {
   group('ManualStrategy', () {
     test('returns available drivers unsorted, not automatic', () {
       final candidates = [
-        driver(id: 'z', distanceKm: 1),
+        driver(id: 'z'),
         driver(id: 'a', distanceKm: 50),
       ];
       final strategy = ManualStrategy();

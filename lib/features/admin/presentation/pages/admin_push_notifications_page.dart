@@ -108,12 +108,12 @@ class _AdminPushNotificationsPageState
       );
       final sent = result is num ? result.toInt() : 0;
       setState(() => _lastSentDeviceCount = sent);
-      if (context.mounted) {
+      if (mounted) {
         context.showAppSnackBar(l10n.sentToDevices(sent));
       }
       ref.invalidate(adminNotificationTokensProvider);
     } catch (e) {
-      if (context.mounted) {
+      if (mounted) {
         context.showAppSnackBar(l10n.sendFailed, isError: true);
       }
     } finally {

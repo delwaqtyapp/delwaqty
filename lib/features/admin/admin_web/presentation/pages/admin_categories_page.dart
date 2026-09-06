@@ -472,7 +472,7 @@ class _AdminCategoriesPageState extends ConsumerState<AdminCategoriesPage> {
           width: 48,
           height: 48,
           fit: BoxFit.cover,
-          errorBuilder: (_, __, ___) => _fallbackIcon(cat),
+          errorBuilder: (_, _, _) => _fallbackIcon(cat),
         ),
       );
     }

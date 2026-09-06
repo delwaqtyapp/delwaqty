@@ -61,7 +61,7 @@ class _MerchantReservationsPageState
               loading: () => ListView.builder(
                 padding: const EdgeInsets.all(AppSpacing.lg),
                 itemCount: 5,
-                itemBuilder: (_, __) => const Padding(
+                itemBuilder: (_, _) => const Padding(
                   padding: EdgeInsets.only(bottom: 12),
                   child: ShimmerCard(),
                 ),
@@ -139,7 +139,7 @@ class _MerchantReservationsPageState
         ),
         scrollDirection: Axis.horizontal,
         itemCount: filters.length,
-        separatorBuilder: (_, __) => const SizedBox(width: AppSpacing.sm),
+        separatorBuilder: (_, _) => const SizedBox(width: AppSpacing.sm),
         itemBuilder: (context, index) {
           final filter = filters[index];
           final isSelected = currentFilter == filter.key;

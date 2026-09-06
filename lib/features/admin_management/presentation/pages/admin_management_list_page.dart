@@ -187,7 +187,7 @@ class _AdminManagementListPageState
                       child: ListView.separated(
                         padding: const EdgeInsets.symmetric(horizontal: 12),
                         itemCount: pageItems.length,
-                        separatorBuilder: (_, __) => const Divider(height: 1),
+                        separatorBuilder: (_, _) => const Divider(height: 1),
                         itemBuilder: (context, i) {
                           final a = pageItems[i];
                           return _AdminRow(account: a, onTap: () {
@@ -405,9 +405,11 @@ Future<void> _openCreateDialog(BuildContext context, WidgetRef ref) async {
                   );
               if (ctx.mounted) Navigator.of(ctx).pop();
               ref.invalidate(adminsListProvider);
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text(loc.adminMgmtCreateSuccess)),
-              );
+              if (ctx.mounted) {
+                ScaffoldMessenger.of(ctx).showSnackBar(
+                  SnackBar(content: Text(loc.adminMgmtCreateSuccess)),
+                );
+              }
             } catch (e) {
               if (ctx.mounted) {
                 ScaffoldMessenger.of(ctx).showSnackBar(

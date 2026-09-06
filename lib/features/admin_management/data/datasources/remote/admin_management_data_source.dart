@@ -60,7 +60,7 @@ class AdminManagementDataSource {
       params: {
         'p_admin_id': adminId,
         'p_new_role': role,
-        if (reason != null) 'p_reason': reason,
+        'p_reason': ?reason,
       },
     );
   }
@@ -90,7 +90,7 @@ class AdminManagementDataSource {
       params: {
         'p_admin_id': adminId,
         'p_new_supervisor_id': newSupervisorId,
-        if (reason != null) 'p_reason': reason,
+        'p_reason': ?reason,
       },
     );
   }
@@ -100,7 +100,7 @@ class AdminManagementDataSource {
       'deactivate_admin',
       params: {
         'p_admin_id': adminId,
-        if (reason != null) 'p_reason': reason,
+        'p_reason': ?reason,
       },
     );
   }
@@ -110,7 +110,7 @@ class AdminManagementDataSource {
       'reactivate_admin',
       params: {
         'p_admin_id': adminId,
-        if (reason != null) 'p_reason': reason,
+        'p_reason': ?reason,
       },
     );
   }
@@ -149,8 +149,8 @@ class AdminManagementDataSource {
         'email': email,
         'password': password,
         'full_name': fullName,
-        if (supervisorId != null) 'supervisor_id': supervisorId,
-        if (regionId != null) 'region_id': regionId,
+        'supervisor_id': ?supervisorId,
+        'region_id': ?regionId,
         'scope': scope,
       },
     );

@@ -329,7 +329,7 @@ class _SearchPageState extends ConsumerState<SearchPage> {
         );
       },
       loading: () => const SizedBox.shrink(),
-      error: (_, __) => const SizedBox.shrink(),
+      error: (_, _) => const SizedBox.shrink(),
     );
   }
 
@@ -455,7 +455,7 @@ class _SearchPageState extends ConsumerState<SearchPage> {
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 16),
         itemCount: filters.length,
-        separatorBuilder: (_, __) => const SizedBox(width: 8),
+        separatorBuilder: (_, _) => const SizedBox(width: 8),
         itemBuilder: (context, index) {
           final (label, icon, type) = filters[index];
           return _PremiumPill(
@@ -716,7 +716,7 @@ class _SearchMerchantCard extends StatelessWidget {
                   Image.network(
                     merchant.imageUrl!,
                     fit: BoxFit.cover,
-                    errorBuilder: (_, __, ___) => _merchantHeaderGradient(
+                    errorBuilder: (_, _, _) => _merchantHeaderGradient(
                       context,
                       color,
                       _merchantEmoji(merchant.type),

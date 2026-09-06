@@ -93,7 +93,7 @@ class _MerchantOrdersPageState extends ConsumerState<MerchantOrdersPage> {
               loading: () => ListView.builder(
                 padding: const EdgeInsets.all(16),
                 itemCount: 5,
-                itemBuilder: (_, __) => const Padding(
+                itemBuilder: (_, _) => const Padding(
                   padding: EdgeInsets.only(bottom: 12),
                   child: ShimmerCard(height: 100),
                 ),
@@ -165,7 +165,7 @@ class _MerchantOrdersPageState extends ConsumerState<MerchantOrdersPage> {
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         scrollDirection: Axis.horizontal,
         itemCount: filters.length,
-        separatorBuilder: (_, __) => const SizedBox(width: 8),
+        separatorBuilder: (_, _) => const SizedBox(width: 8),
         itemBuilder: (context, index) {
           final filter = filters[index];
           final isSelected = currentFilter == filter.key;

@@ -186,7 +186,7 @@ class ProfilePage extends ConsumerWidget {
                         ? Image.network(
                             user.avatarUrl!,
                             fit: BoxFit.cover,
-                            errorBuilder: (_, __, ___) =>
+                            errorBuilder: (_, _, _) =>
                                 _buildAvatarFallback(context, initial),
                           )
                         : _buildAvatarFallback(context, initial),
@@ -245,7 +245,7 @@ class ProfilePage extends ConsumerWidget {
               ),
               if (user.verificationStatus.isApproved) ...[
                 const SizedBox(width: 6),
-                Icon(
+                const Icon(
                   Icons.verified_rounded,
                   size: 20,
                   color: AppColors.brandPurple,

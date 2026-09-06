@@ -148,7 +148,7 @@ class _ProductDetailBottomSheetState
               ? Image.network(
                   product.imageUrl!,
                   fit: BoxFit.cover,
-                  errorBuilder: (_, __, ___) => _buildImageFallback(product),
+                  errorBuilder: (_, _, _) => _buildImageFallback(product),
                 )
               : _buildImageFallback(product),
         ),
@@ -520,7 +520,7 @@ class _ProductDetailBottomSheetState
                   merchantName: widget.merchantName,
                   item: item,
                 );
-                if (context.mounted) {
+                if (mounted) {
                   Navigator.of(context).pop();
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(

@@ -53,7 +53,7 @@ class _MerchantBranchesPageState extends ConsumerState<MerchantBranchesPage> {
         loading: () => ListView.builder(
           padding: const EdgeInsets.all(AppSpacing.lg),
           itemCount: 5,
-          itemBuilder: (_, __) => const Padding(
+          itemBuilder: (_, _) => const Padding(
             padding: EdgeInsets.only(bottom: 12),
             child: ShimmerCard(height: 100),
           ),

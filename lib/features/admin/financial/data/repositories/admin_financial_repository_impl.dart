@@ -4,8 +4,8 @@ import 'package:delwaqty/features/admin/financial/domain/entities/admin_financia
 import 'package:delwaqty/features/admin/financial/domain/repositories/admin_financial_repository.dart';
 
 class AdminFinancialRepositoryImpl implements AdminFinancialRepository {
-  final AdminFinancialDataSource _source;
   AdminFinancialRepositoryImpl(this._source);
+  final AdminFinancialDataSource _source;
 
   @override
   Future<List<AdminTopupRequest>> listTopupRequests(String? status) async {

@@ -74,10 +74,10 @@ void main() {
           }),
           upsertOverride,
         ],
-        child: MaterialApp(
-          localizationsDelegates: const [AppLocalizations.delegate],
+        child: const MaterialApp(
+          localizationsDelegates: [AppLocalizations.delegate],
           supportedLocales: AppLocalizations.supportedLocales,
-          home: const Scaffold(body: AdminRegionScopePage()),
+          home: Scaffold(body: AdminRegionScopePage()),
         ),
       ),
     );

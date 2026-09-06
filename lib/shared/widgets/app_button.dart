@@ -188,7 +188,7 @@ class AppButton extends StatelessWidget {
         leadingIcon!,
         const SizedBox(width: AppSpacing.sm),
       ],
-      if (child != null) child!,
+      ?child,
       if (trailingIcon != null) ...[
         const SizedBox(width: AppSpacing.sm),
         trailingIcon!,

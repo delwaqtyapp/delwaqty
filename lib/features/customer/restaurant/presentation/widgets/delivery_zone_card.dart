@@ -115,7 +115,7 @@ class DeliveryZoneCard extends ConsumerWidget {
         );
       },
       loading: () => const SizedBox(height: 60),
-      error: (_, __) => const SizedBox.shrink(),
+      error: (_, _) => const SizedBox.shrink(),
     );
   }
 }

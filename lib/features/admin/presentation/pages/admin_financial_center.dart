@@ -108,7 +108,7 @@ class AdminFinancialCenter extends ConsumerWidget {
                       color: const Color(0xFF34C759),
                       onTap: () => _showDirectTopupDialog(context, ref),
                     ),
-                    if ((ref.watch(adminIsOwnerProvider)).value ?? false)
+                    if (ref.watch(adminIsOwnerProvider).value ?? false)
                       _FinanceQuickAction(
                         icon: Icons.public_rounded,
                         label: 'Global Audit',
@@ -156,7 +156,7 @@ class AdminFinancialCenter extends ConsumerWidget {
                     child: AppLoaderCircular(),
                   ),
                 ),
-                error: (_, __) => const SizedBox.shrink(),
+                error: (_, _) => const SizedBox.shrink(),
                 data: (overview) => _buildRevenueOverviewCards(overview, cs, context),
               ),
               const SizedBox(height: 24),
@@ -220,7 +220,7 @@ class AdminFinancialCenter extends ConsumerWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   DropdownButtonFormField<String>(
-                    value: accountType,
+                    initialValue: accountType,
                     decoration: InputDecoration(labelText: l10n.accountType),
                     items: [
                       DropdownMenuItem(

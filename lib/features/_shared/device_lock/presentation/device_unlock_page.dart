@@ -59,6 +59,7 @@ class _DeviceUnlockPageState extends ConsumerState<DeviceUnlockPage> {
     if (_isAuthenticating) return;
     final store = ref.read(biometricAuthStoreProvider);
     final userId = _activeUserId;
+    final l10n = AppLocalizations.of(context);
     if (userId == null) {
       if (mounted) context.go('/login');
       return;
@@ -75,7 +76,6 @@ class _DeviceUnlockPageState extends ConsumerState<DeviceUnlockPage> {
       _isAuthenticating = true;
       _error = null;
     });
-    final l10n = AppLocalizations.of(context);
     try {
       final didAuth = await _localAuth.authenticate(
         localizedReason: l10n.biometricReason,

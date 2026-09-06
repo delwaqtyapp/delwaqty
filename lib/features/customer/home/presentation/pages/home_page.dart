@@ -242,7 +242,7 @@ class HomePage extends ConsumerWidget {
           ? loc!.detailedAddress
           : l10n.locationUnavailable,
       loading: () => l10n.searchingForLocation,
-      error: (_, __) => l10n.searchingForLocation,
+      error: (_, _) => l10n.searchingForLocation,
     );
     final isLocationLoading =
         locationAsync is AsyncLoading || locationAsync is AsyncError;
@@ -400,11 +400,11 @@ class _CompactCategories extends StatelessWidget {
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.fromLTRB(20, 14, 20, 0),
             itemCount: 8,
-            separatorBuilder: (_, __) => const SizedBox(width: 12),
-            itemBuilder: (_, __) => const ShimmerCard(height: 100),
+            separatorBuilder: (_, _) => const SizedBox(width: 12),
+            itemBuilder: (_, _) => const ShimmerCard(height: 100),
           ),
         ),
-        error: (_, __) => const SizedBox.shrink(),
+        error: (_, _) => const SizedBox.shrink(),
         data: (categories) {
           if (categories.isEmpty) return const SizedBox.shrink();
           return SizedBox(
@@ -413,7 +413,7 @@ class _CompactCategories extends StatelessWidget {
               scrollDirection: Axis.horizontal,
               padding: const EdgeInsets.fromLTRB(20, 14, 20, 0),
               itemCount: categories.length,
-              separatorBuilder: (_, __) => const SizedBox(width: 12),
+              separatorBuilder: (_, _) => const SizedBox(width: 12),
               itemBuilder: (context, index) {
                 final category = categories[index];
                 final merchantType = _categoryNameToMerchantType(category.name);
@@ -447,7 +447,7 @@ class _CompactCategories extends StatelessWidget {
                                 ? Image.network(
                                     category.imageUrl!,
                                     fit: BoxFit.cover,
-                                    errorBuilder: (_, __, ___) =>
+                                    errorBuilder: (_, _, _) =>
                                         _categoryFallback(
                                             typeColor, emoji),
                                   )
@@ -526,7 +526,7 @@ class _DiscoveryTabsState extends ConsumerState<_DiscoveryTabs> {
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 20),
         itemCount: _labels.length,
-        separatorBuilder: (_, __) => const SizedBox(width: 8),
+        separatorBuilder: (_, _) => const SizedBox(width: 8),
         itemBuilder: (context, index) {
           final selected = _selectedIndex == index;
           return PressableScale(
@@ -607,11 +607,11 @@ class _DiscoveryContent extends ConsumerWidget {
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
             itemCount: 4,
-            separatorBuilder: (_, __) => const SizedBox(width: 14),
-            itemBuilder: (_, __) => const ShimmerCard(height: 212),
+            separatorBuilder: (_, _) => const SizedBox(width: 14),
+            itemBuilder: (_, _) => const ShimmerCard(height: 212),
           ),
         ),
-        error: (_, __) => Padding(
+        error: (_, _) => Padding(
           key: const ValueKey('error'),
           padding: const EdgeInsets.all(20),
           child: PremiumEmptyState(
@@ -639,7 +639,7 @@ class _DiscoveryContent extends ConsumerWidget {
               scrollDirection: Axis.horizontal,
               padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
               itemCount: merchants.length,
-              separatorBuilder: (_, __) => const SizedBox(width: 14),
+              separatorBuilder: (_, _) => const SizedBox(width: 14),
               itemBuilder: (context, index) {
                 final merchant = merchants[index];
                 return _HomeMerchantCard(
@@ -703,7 +703,7 @@ class _LogoMark extends StatelessWidget {
         child: Image.asset(
           'assets/logo app/logo.png',
           fit: BoxFit.contain,
-          errorBuilder: (_, __, ___) => DecoratedBox(
+          errorBuilder: (_, _, _) => DecoratedBox(
             decoration: const BoxDecoration(
               gradient: LinearGradient(
                 begin: Alignment.topLeft,
@@ -1140,7 +1140,7 @@ class _PromoCarouselState extends ConsumerState<_PromoCarousel> {
 
     return campaignsAsync.when(
       loading: () => const _PromoCarouselLoading(),
-      error: (_, __) => const SizedBox.shrink(),
+      error: (_, _) => const SizedBox.shrink(),
       data: (campaigns) {
         if (campaigns.isEmpty) return const SizedBox.shrink();
         final count = campaigns.length;
@@ -1291,7 +1291,7 @@ class _PromoSlide extends ConsumerWidget {
             Image.network(
               imageUrl,
               fit: BoxFit.cover,
-              errorBuilder: (_, __, ___) => const SizedBox.shrink(),
+              errorBuilder: (_, _, _) => const SizedBox.shrink(),
             ),
           DecoratedBox(
             decoration: BoxDecoration(
@@ -1416,7 +1416,7 @@ class _HomeMerchantCard extends StatelessWidget {
                     Image.network(
                       merchant.imageUrl!,
                       fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) => _merchantHeaderGradient(
+                      errorBuilder: (_, _, _) => _merchantHeaderGradient(
                         context,
                         color,
                         _merchantEmoji(merchant.type),

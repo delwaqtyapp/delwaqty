@@ -353,10 +353,9 @@ class SupabaseDeliveryDataSource {
     await _client.from('merchant_profiles').upsert({
       'merchant_id': merchantId,
       'user_id': userId,
-      if (serviceTypes != null) 'service_types': serviceTypes,
-      if (averagePrepTime != null)
-        'average_prep_time_minutes': averagePrepTime,
-      if (maxRadius != null) 'max_delivery_radius_km': maxRadius,
+      'service_types': ?serviceTypes,
+      'average_prep_time_minutes': ?averagePrepTime,
+      'max_delivery_radius_km': ?maxRadius,
       'updated_at': DateTime.now().toIso8601String(),
     });
   }

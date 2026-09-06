@@ -72,7 +72,7 @@ class _AccessBody extends StatelessWidget {
               child: ListTile(
                 leading: const Icon(Icons.delivery_dining_rounded),
                 title: Text(l10n.deliveryAccessSubtitle),
-                subtitle: Text('DelwaQty Delivery'),
+                subtitle: const Text('DelwaQty Delivery'),
               ),
             ),
             const SizedBox(height: 12),

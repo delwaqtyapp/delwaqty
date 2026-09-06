@@ -2702,3 +2702,31 @@ The OpenCode configuration pointed `provider.omniroute` at `http://localhost:201
 - Autostart is machine-local (Startup folder) — re-create it if the laptop profile path changes.
 - Android APK OOM (dexing) remains an independent dev-ops backlog item; untouched here.
 
+
+---
+
+## ADR-040: Riverpod 3 + Freezed 4 + lints 6 Major Upgrade
+
+**Date:** Sprint 147
+**Status:** Accepted
+**Deciders:** Lead Software Architect
+
+### Context
+The project pinned `flutter_riverpod ^2.x`, `freezed ^2.x`, and `flutter_lints ^3` while new tooling (riverpod_lint via analysis_server_plugin, newer build_runner) and the ecosystem pushed forward. Riverpod 3 removed legacy extension classes, and Freezed 4 generates abstract getters (mixins with no bodies), so a source-level migration was forced before any future upgrade.
+
+### Decision
+Upgrade to the current stable majors in one milestone:
+- `flutter_riverpod` ^2.5.1 → **3.4.3** (`legacy.dart` / `misc.dart` split exports)
+- `freezed` ^2.5.2 → **4.0.1**, `freezed_annotation` ^2.4.1 → **3.1.0**, `json_annotation` → **4.12.0**, `json_serializable` → **6.14.1**
+- `flutter_lints` ^3.0.0 → **6.0.0**, `build_runner` >=2.15.3 <2.16.0, `riverpod_lint` **3.1.9** (map-form `plugins:` section), `flutter_gen_runner` **5.15.0** + top-level `flutter_gen` (line_length 80, lottie integration)
+
+### Rationale
+- Keeps the project on supported majors with active maintenance; unblocks future features that depend on Riverpod 3 semantics.
+- Riverpod 3's typed `AsyncValue`/`AsyncNotifier`, the new analysis_server_plugin-based lints, and Freezed 4's cleaner generated mixins reduce runtime boilerplate and improve static safety.
+
+### Consequences
+- **93 source files changed:** 92 freezed classes → `abstract class X with _$X`; `sealed class Failure` untouched; 22 `.valueOrNull` → `.value`; 19 files gained `legacy.dart`/`misc.dart` imports; two `AutoDisposeFamilyAsyncNotifier` notifiers (`RestaurantMenuNotifier`, `RestaurantReviewsNotifier`) migrated to `AsyncNotifier` + constructor-arg families via `AsyncNotifierProvider.autoDispose.family`.
+- `whenOrNull` on `AuthState` requires a direct `auth/domain/auth_state.dart` import (Dart extension visibility rule) in `change_password_page.dart` and `fingerprint_login_page.dart`.
+- `.dart_tool` + `pubspec.lock` MUST be regenerated after editing pubspec (delete `.dart_tool`, `flutter pub get`, `build_runner build`). build_runner 2.15.3 drops `--delete-conflicting-outputs`.
+- Registered workflow note: an intermittent external process reverted the working tree mid-session (git `reset` + batch rewrites + deletion of generated files). Prevented by committing as soon as the gate passes and re-applying from git history instead of redoing patch work.
+- Gate result: `flutter analyze` **0 errors / 0 warnings** (216 infos), `flutter test` **918/918** pass. Escape hatch: `git reset --hard 1f80550` re-applies this milestone.

@@ -44,7 +44,7 @@
 | State Management | ✅ Riverpod 3.4.3 (legacy/misc export split migrated) |
 | Codegen | ✅ Freezed 4.0.1 (abstract classes) + json_serializable 6.14.1 + build_runner 2.15.3 |
 | Lints | ✅ flutter_lints 6.0.0 + riverpod_lint 3.1.9 (analysis_server_plugin) + flutter_gen_runner; analyzer 0 errors / 0 warnings / 0 infos |
-| Android Build | ✅ debug + release APK (customer flavor) build verified on device — DEX OOM resolved |
+| Android Build | ✅ debug + release APK (customer flavor) build verified on device — DEX OOM resolved; release signed with real CN=Delwaqty key via key.properties |
 | Orders | ✅ Real (create, track, history) |
 | Reviews | ✅ Real (submit, list, average) |
 | Coupons | ✅ Real (validate, apply, types) |

@@ -26,6 +26,8 @@
 
 **Pre-existing finding (not from upgrade):** duplicate push-notification permission request — `[firebase_messaging/unknown] A request for permissions is already running` from `push_notification_service.dart:192`. Non-fatal; single-flight `requestPermission()` as follow-up.
 
+**Release signing — RESOLVED.** App never published to Play → replaced the lost-password keystore with a **new one** (alias `delwaqty`, CN=Delwaqty, RSA 2048, valid to 2054, SHA-256 `13:02:52:B0:...:64:ED`). Password stored only in `android/key.properties` (**gitignored** via `**/key.properties`), never committed. `build.gradle.kts` reads key.properties first (env fallback) and the release signing gate honours it. Verified with `apksigner` → `CN=Delwaqty`; signed release APK installed and ran on DNP NX9 (debug-signed copy uninstalled first). Old keystore backed up at `%TEMP%\opencode\release_old_20260722.jks`. **Before first Play upload: enable Google Play App Signing.** Signing password/fingerprint is never shown to end users on Play (only the developer sees the certificate in Console).
+
 **Device build note:** multi-app monorepo — always pass `--flavor customer --target lib/customer/main.dart` (no `lib/main.dart`); export `MAPS_API_KEY` (manifest placeholder) alongside `--dart-define-from-file=.env.dev`. Release uses debug signing until `KEYSTORE_PASSWORD`/`KEY_ALIAS`/`KEY_PASSWORD` are provided.
 
 ---

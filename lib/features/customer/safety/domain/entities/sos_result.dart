@@ -4,7 +4,7 @@ part 'sos_result.freezed.dart';
 part 'sos_result.g.dart';
 
 @freezed
-class SosResult with _$SosResult {
+abstract class SosResult with _$SosResult {
   const factory SosResult({
     required bool success,
     required String alertId,
@@ -17,7 +17,7 @@ class SosResult with _$SosResult {
 }
 
 @freezed
-class NotifiedContact with _$NotifiedContact {
+abstract class NotifiedContact with _$NotifiedContact {
   const factory NotifiedContact({
     required String id,
     required String name,

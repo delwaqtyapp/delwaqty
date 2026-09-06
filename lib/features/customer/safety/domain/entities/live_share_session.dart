@@ -4,7 +4,7 @@ part 'live_share_session.freezed.dart';
 part 'live_share_session.g.dart';
 
 @freezed
-class LiveShareSession with _$LiveShareSession {
+abstract class LiveShareSession with _$LiveShareSession {
   const factory LiveShareSession({
     required String id,
     required String rideId,

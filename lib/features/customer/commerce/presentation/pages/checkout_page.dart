@@ -7,7 +7,6 @@ import 'package:delwaqty/features/customer/commerce/commerce_module.dart';
 import 'package:delwaqty/features/customer/commerce/domain/entities/cart.dart'
     as commerce;
 import 'package:delwaqty/features/customer/commerce/domain/entities/coupon.dart';
-import 'package:delwaqty/features/customer/commerce/domain/entities/order.dart';
 import 'package:delwaqty/services/payment/paymob_service.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 import 'package:delwaqty/core/extensions/context_extensions.dart';

@@ -6,16 +6,15 @@ part of 'geo_location.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-_$GeoLocationImpl _$$GeoLocationImplFromJson(Map<String, dynamic> json) =>
-    _$GeoLocationImpl(
-      latitude: (json['latitude'] as num).toDouble(),
-      longitude: (json['longitude'] as num).toDouble(),
-      address: json['address'] as String?,
-      city: json['city'] as String?,
-      district: json['district'] as String?,
-    );
+_GeoLocation _$GeoLocationFromJson(Map<String, dynamic> json) => _GeoLocation(
+  latitude: (json['latitude'] as num).toDouble(),
+  longitude: (json['longitude'] as num).toDouble(),
+  address: json['address'] as String?,
+  city: json['city'] as String?,
+  district: json['district'] as String?,
+);
 
-Map<String, dynamic> _$$GeoLocationImplToJson(_$GeoLocationImpl instance) =>
+Map<String, dynamic> _$GeoLocationToJson(_GeoLocation instance) =>
     <String, dynamic>{
       'latitude': instance.latitude,
       'longitude': instance.longitude,

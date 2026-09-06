@@ -4,7 +4,7 @@ part 'review.freezed.dart';
 part 'review.g.dart';
 
 @freezed
-class Review with _$Review {
+abstract class Review with _$Review {
   const factory Review({
     required String id,
     required String merchantId,
@@ -23,7 +23,7 @@ class Review with _$Review {
 }
 
 @freezed
-class ReviewSummary with _$ReviewSummary {
+abstract class ReviewSummary with _$ReviewSummary {
   const factory ReviewSummary({
     required double averageRating,
     required int totalReviews,

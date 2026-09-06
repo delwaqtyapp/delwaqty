@@ -27,7 +27,7 @@ class PrimaryHeaderActions extends ConsumerWidget {
     final isGuest = authState is AuthGuest;
     final unreadCount = isGuest
         ? 0
-        : ref.watch(unreadCountProvider).valueOrNull ?? 0;
+        : ref.watch(unreadCountProvider).value ?? 0;
 
     return Row(
       mainAxisSize: MainAxisSize.min,

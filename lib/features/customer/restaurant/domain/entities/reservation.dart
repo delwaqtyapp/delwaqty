@@ -17,7 +17,7 @@ enum ReservationStatus {
 }
 
 @freezed
-class Reservation with _$Reservation {
+abstract class Reservation with _$Reservation {
   const factory Reservation({
     required String id,
     required String userId,
@@ -37,7 +37,7 @@ class Reservation with _$Reservation {
 }
 
 @freezed
-class ReservationSlot with _$ReservationSlot {
+abstract class ReservationSlot with _$ReservationSlot {
   const factory ReservationSlot({
     required DateTime time,
     required String tableNumber,

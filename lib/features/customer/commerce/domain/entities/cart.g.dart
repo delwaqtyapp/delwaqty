@@ -6,7 +6,7 @@ part of 'cart.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-_$CartImpl _$$CartImplFromJson(Map<String, dynamic> json) => _$CartImpl(
+_Cart _$CartFromJson(Map<String, dynamic> json) => _Cart(
   id: json['id'] as String,
   merchantId: json['merchantId'] as String,
   merchantName: json['merchantName'] as String,
@@ -24,41 +24,38 @@ _$CartImpl _$$CartImplFromJson(Map<String, dynamic> json) => _$CartImpl(
   updatedAt: DateTime.parse(json['updatedAt'] as String),
 );
 
-Map<String, dynamic> _$$CartImplToJson(_$CartImpl instance) =>
-    <String, dynamic>{
-      'id': instance.id,
-      'merchantId': instance.merchantId,
-      'merchantName': instance.merchantName,
-      'items': instance.items.map((e) => e.toJson()).toList(),
-      'subtotal': instance.subtotal,
-      'deliveryFee': instance.deliveryFee,
-      'discount': instance.discount,
-      'total': instance.total,
-      'couponCode': instance.couponCode,
-      'specialInstructions': instance.specialInstructions,
-      'updatedAt': instance.updatedAt.toIso8601String(),
-    };
+Map<String, dynamic> _$CartToJson(_Cart instance) => <String, dynamic>{
+  'id': instance.id,
+  'merchantId': instance.merchantId,
+  'merchantName': instance.merchantName,
+  'items': instance.items.map((e) => e.toJson()).toList(),
+  'subtotal': instance.subtotal,
+  'deliveryFee': instance.deliveryFee,
+  'discount': instance.discount,
+  'total': instance.total,
+  'couponCode': instance.couponCode,
+  'specialInstructions': instance.specialInstructions,
+  'updatedAt': instance.updatedAt.toIso8601String(),
+};
 
-_$CartItemImpl _$$CartItemImplFromJson(Map<String, dynamic> json) =>
-    _$CartItemImpl(
-      id: json['id'] as String,
-      productId: json['productId'] as String,
-      productName: json['productName'] as String,
-      variantName: json['variantName'] as String?,
-      quantity: (json['quantity'] as num).toInt(),
-      unitPrice: (json['unitPrice'] as num).toDouble(),
-      totalPrice: (json['totalPrice'] as num?)?.toDouble(),
-      specialInstructions: json['specialInstructions'] as String?,
-    );
+_CartItem _$CartItemFromJson(Map<String, dynamic> json) => _CartItem(
+  id: json['id'] as String,
+  productId: json['productId'] as String,
+  productName: json['productName'] as String,
+  variantName: json['variantName'] as String?,
+  quantity: (json['quantity'] as num).toInt(),
+  unitPrice: (json['unitPrice'] as num).toDouble(),
+  totalPrice: (json['totalPrice'] as num?)?.toDouble(),
+  specialInstructions: json['specialInstructions'] as String?,
+);
 
-Map<String, dynamic> _$$CartItemImplToJson(_$CartItemImpl instance) =>
-    <String, dynamic>{
-      'id': instance.id,
-      'productId': instance.productId,
-      'productName': instance.productName,
-      'variantName': instance.variantName,
-      'quantity': instance.quantity,
-      'unitPrice': instance.unitPrice,
-      'totalPrice': instance.totalPrice,
-      'specialInstructions': instance.specialInstructions,
-    };
+Map<String, dynamic> _$CartItemToJson(_CartItem instance) => <String, dynamic>{
+  'id': instance.id,
+  'productId': instance.productId,
+  'productName': instance.productName,
+  'variantName': instance.variantName,
+  'quantity': instance.quantity,
+  'unitPrice': instance.unitPrice,
+  'totalPrice': instance.totalPrice,
+  'specialInstructions': instance.specialInstructions,
+};

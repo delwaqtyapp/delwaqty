@@ -45,7 +45,7 @@ final providerRawCategoryProvider = FutureProvider<String>((ref) async {
 
 /// The provider's canonical category (normalized from the raw DB value).
 final providerCategoryProvider = Provider<ProviderCategory>((ref) {
-  final raw = ref.watch(providerRawCategoryProvider).valueOrNull;
+  final raw = ref.watch(providerRawCategoryProvider).value;
   return ProviderCategory.normalize(raw);
 });
 

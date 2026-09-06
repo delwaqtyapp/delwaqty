@@ -40,7 +40,7 @@ enum RegionPreferenceSource {
 }
 
 @freezed
-class Region with _$Region {
+abstract class Region with _$Region {
   const factory Region({
     required String id,
     required String code,
@@ -67,7 +67,7 @@ class Region with _$Region {
 }
 
 @freezed
-class UserRegionPreference with _$UserRegionPreference {
+abstract class UserRegionPreference with _$UserRegionPreference {
   const factory UserRegionPreference({
     required String userId,
     required String regionId,

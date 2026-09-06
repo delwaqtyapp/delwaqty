@@ -4,7 +4,7 @@ part 'delivery_zone.freezed.dart';
 part 'delivery_zone.g.dart';
 
 @freezed
-class DeliveryZone with _$DeliveryZone {
+abstract class DeliveryZone with _$DeliveryZone {
   const factory DeliveryZone({
     required String id,
     required String merchantId,

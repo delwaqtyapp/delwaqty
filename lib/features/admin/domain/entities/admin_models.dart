@@ -51,7 +51,7 @@ enum PermissionLevel { read, write, admin, superAdmin }
 // ─── Admin User ────────────────────────────────────────────
 
 @freezed
-class AdminUser with _$AdminUser {
+abstract class AdminUser with _$AdminUser {
   const factory AdminUser({
     required String id,
     required String name,
@@ -69,7 +69,7 @@ class AdminUser with _$AdminUser {
 // ─── Admin Activity Log ────────────────────────────────────
 
 @freezed
-class AdminActivityLog with _$AdminActivityLog {
+abstract class AdminActivityLog with _$AdminActivityLog {
   const factory AdminActivityLog({
     required String id,
     required String userId,
@@ -86,7 +86,7 @@ class AdminActivityLog with _$AdminActivityLog {
 // ─── Admin Permission ──────────────────────────────────────
 
 @freezed
-class AdminPermission with _$AdminPermission {
+abstract class AdminPermission with _$AdminPermission {
   const factory AdminPermission({
     required String id,
     required String name,
@@ -102,7 +102,7 @@ class AdminPermission with _$AdminPermission {
 // ─── Driver Model ──────────────────────────────────────────
 
 @freezed
-class DriverModel with _$DriverModel {
+abstract class DriverModel with _$DriverModel {
   const factory DriverModel({
     required String id,
     required String userId,
@@ -128,7 +128,7 @@ class DriverModel with _$DriverModel {
 // Deliveries use the rides table with service_type != 'ride'
 
 @freezed
-class DeliveryModel with _$DeliveryModel {
+abstract class DeliveryModel with _$DeliveryModel {
   const factory DeliveryModel({
     required String id,
     String? userId,
@@ -157,7 +157,7 @@ class DeliveryModel with _$DeliveryModel {
 // ─── Admin Dashboard Metrics ───────────────────────────────
 
 @freezed
-class AdminDashboardMetrics with _$AdminDashboardMetrics {
+abstract class AdminDashboardMetrics with _$AdminDashboardMetrics {
   const factory AdminDashboardMetrics({
     @Default(0) int totalUsers,
     @Default(0) int totalDrivers,
@@ -183,7 +183,7 @@ class AdminDashboardMetrics with _$AdminDashboardMetrics {
 // ─── Admin Quick Action ────────────────────────────────────
 
 @freezed
-class AdminQuickAction with _$AdminQuickAction {
+abstract class AdminQuickAction with _$AdminQuickAction {
   const factory AdminQuickAction({
     required String title,
     required String icon,
@@ -198,7 +198,7 @@ class AdminQuickAction with _$AdminQuickAction {
 // ─── Revenue Data ──────────────────────────────────────────
 
 @freezed
-class RevenueData with _$RevenueData {
+abstract class RevenueData with _$RevenueData {
   const factory RevenueData({
     required DateTime date,
     required double amount,
@@ -211,7 +211,7 @@ class RevenueData with _$RevenueData {
 // ─── Verification Request ──────────────────────────────────
 
 @freezed
-class VerificationRequest with _$VerificationRequest {
+abstract class VerificationRequest with _$VerificationRequest {
   const factory VerificationRequest({
     required String userId,
     required String email,

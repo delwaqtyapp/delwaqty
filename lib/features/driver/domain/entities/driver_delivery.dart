@@ -4,7 +4,7 @@ part 'driver_delivery.freezed.dart';
 part 'driver_delivery.g.dart';
 
 @freezed
-class DriverDelivery with _$DriverDelivery {
+abstract class DriverDelivery with _$DriverDelivery {
   const factory DriverDelivery({
     required String id,
     required String orderId,

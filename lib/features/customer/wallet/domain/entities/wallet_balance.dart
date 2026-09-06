@@ -4,7 +4,7 @@ part 'wallet_balance.freezed.dart';
 part 'wallet_balance.g.dart';
 
 @freezed
-class WalletBalance with _$WalletBalance {
+abstract class WalletBalance with _$WalletBalance {
   const factory WalletBalance({
     required String id,
     required String userId,

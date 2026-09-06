@@ -4,7 +4,7 @@ part 'saved_account.freezed.dart';
 part 'saved_account.g.dart';
 
 @freezed
-class SavedAccount with _$SavedAccount {
+abstract class SavedAccount with _$SavedAccount {
   const factory SavedAccount({
     @Default('') String email,
     @Default('') String displayName,

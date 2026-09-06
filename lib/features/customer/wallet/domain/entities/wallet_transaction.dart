@@ -12,7 +12,7 @@ enum TransactionType {
 }
 
 @freezed
-class WalletTransaction with _$WalletTransaction {
+abstract class WalletTransaction with _$WalletTransaction {
   const factory WalletTransaction({
     required String id,
     required String walletId,

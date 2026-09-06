@@ -89,7 +89,7 @@ class _RegionSelectionPageState extends ConsumerState<RegionSelectionPage> {
                 if (regions.isEmpty) {
                   return Center(child: Text(l10n.noResults));
                 }
-                final currentRegionId = current.valueOrNull?.regionId;
+                final currentRegionId = current.value?.regionId;
                 return ListView.separated(
                   itemCount: regions.length,
                   separatorBuilder: (context, index) => const Divider(height: 1),

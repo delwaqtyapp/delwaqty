@@ -19,7 +19,7 @@ enum DeliveryServiceType {
 enum DeliveryPriority { standard, priority, express }
 
 @freezed
-class DeliveryOrder with _$DeliveryOrder {
+abstract class DeliveryOrder with _$DeliveryOrder {
   const factory DeliveryOrder({
     required String id,
     required String serviceType,

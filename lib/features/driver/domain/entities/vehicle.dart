@@ -4,7 +4,7 @@ part 'vehicle.freezed.dart';
 part 'vehicle.g.dart';
 
 @freezed
-class Vehicle with _$Vehicle {
+abstract class Vehicle with _$Vehicle {
   const factory Vehicle({
     required String id,
     required String driverId,

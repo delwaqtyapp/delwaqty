@@ -53,11 +53,14 @@ class MenuState {
   }
 }
 
-class RestaurantMenuNotifier extends AutoDisposeFamilyAsyncNotifier<MenuState, String> {
+class RestaurantMenuNotifier extends AsyncNotifier<MenuState> {
+  RestaurantMenuNotifier(this.merchantId);
+
+  final String merchantId;
   static const _limit = 20;
 
   @override
-  FutureOr<MenuState> build(String merchantId) async {
+  FutureOr<MenuState> build() async {
     final repo = ref.watch(productRepositoryProvider);
     final products = await repo.getProducts(
       merchantId: merchantId,
@@ -70,7 +73,7 @@ class RestaurantMenuNotifier extends AutoDisposeFamilyAsyncNotifier<MenuState, S
   }
 
   Future<void> loadNextPage() async {
-    final currentState = state.valueOrNull;
+    final currentState = state.value;
     if (currentState == null || currentState.isLoadingMore || !currentState.hasMore) return;
 
     state = AsyncValue.data(currentState.copyWith(isLoadingMore: true));
@@ -78,7 +81,7 @@ class RestaurantMenuNotifier extends AutoDisposeFamilyAsyncNotifier<MenuState, S
     try {
       final repo = ref.read(productRepositoryProvider);
       final products = await repo.getProducts(
-        merchantId: arg,
+        merchantId: merchantId,
         categoryId: currentState.categoryId,
         offset: currentState.offset,
       );
@@ -96,7 +99,7 @@ class RestaurantMenuNotifier extends AutoDisposeFamilyAsyncNotifier<MenuState, S
   }
 
   Future<void> setCategory(String? categoryId) async {
-    final currentState = state.valueOrNull;
+    final currentState = state.value;
     if (currentState == null) return;
 
     state = const AsyncValue.loading();
@@ -104,7 +107,7 @@ class RestaurantMenuNotifier extends AutoDisposeFamilyAsyncNotifier<MenuState, S
     try {
       final repo = ref.read(productRepositoryProvider);
       final products = await repo.getProducts(
-        merchantId: arg,
+        merchantId: merchantId,
         categoryId: categoryId,
       );
 
@@ -121,7 +124,7 @@ class RestaurantMenuNotifier extends AutoDisposeFamilyAsyncNotifier<MenuState, S
   }
 
   Future<void> setSearchQuery(String query) async {
-    final currentState = state.valueOrNull;
+    final currentState = state.value;
     if (currentState == null) return;
 
     state = const AsyncValue.loading();
@@ -131,11 +134,11 @@ class RestaurantMenuNotifier extends AutoDisposeFamilyAsyncNotifier<MenuState, S
       List<Product> products;
       if (query.isEmpty) {
         products = await repo.getProducts(
-          merchantId: arg,
+          merchantId: merchantId,
           categoryId: currentState.categoryId,
         );
       } else {
-        products = await repo.searchProducts(query, merchantId: arg);
+        products = await repo.searchProducts(query, merchantId: merchantId);
       }
 
       state = AsyncValue.data(MenuState(
@@ -152,7 +155,7 @@ class RestaurantMenuNotifier extends AutoDisposeFamilyAsyncNotifier<MenuState, S
 }
 
 final restaurantMenuProvider = AsyncNotifierProvider.autoDispose.family<RestaurantMenuNotifier, MenuState, String>(
-  RestaurantMenuNotifier.new,
+  (merchantId) => RestaurantMenuNotifier(merchantId),
 );
 
 class RestaurantMenuPage extends ConsumerStatefulWidget {
@@ -242,7 +245,7 @@ class _RestaurantMenuPageState extends ConsumerState<RestaurantMenuPage> {
           categoriesAsync.when(
             data: (categories) {
               if (categories.isEmpty) return const SizedBox.shrink();
-              final menuState = menuStateAsync.valueOrNull;
+              final menuState = menuStateAsync.value;
               final selectedCategoryId = menuState?.categoryId;
               return SizedBox(
                 height: 40,

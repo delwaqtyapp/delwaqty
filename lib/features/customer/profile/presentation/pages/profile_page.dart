@@ -149,7 +149,7 @@ class ProfilePage extends ConsumerWidget {
       return const SizedBox.shrink();
     }
     final profileAsync = ref.watch(watchProfileUseCaseProvider(userId));
-    final user = profileAsync.valueOrNull ?? authUser;
+    final user = profileAsync.value ?? authUser;
     if (user == null) {
       return const SizedBox.shrink();
     }

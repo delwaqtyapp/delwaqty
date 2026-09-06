@@ -20,7 +20,7 @@ enum RewardStatus {
 }
 
 @freezed
-class MemberReward with _$MemberReward {
+abstract class MemberReward with _$MemberReward {
   const factory MemberReward({
     required String id,
     required String userId,

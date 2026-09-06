@@ -6,7 +6,7 @@ part of 'user.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-_$UserImpl _$$UserImplFromJson(Map<String, dynamic> json) => _$UserImpl(
+_User _$UserFromJson(Map<String, dynamic> json) => _User(
   id: json['id'] as String,
   email: json['email'] as String,
   fullName: json['fullName'] as String?,
@@ -40,30 +40,29 @@ _$UserImpl _$$UserImplFromJson(Map<String, dynamic> json) => _$UserImpl(
       : DateTime.parse(json['updatedAt'] as String),
 );
 
-Map<String, dynamic> _$$UserImplToJson(_$UserImpl instance) =>
-    <String, dynamic>{
-      'id': instance.id,
-      'email': instance.email,
-      'fullName': instance.fullName,
-      'username': instance.username,
-      'phone': instance.phone,
-      'avatarUrl': instance.avatarUrl,
-      'language': instance.language,
-      'isOnboarded': instance.isOnboarded,
-      'isBiometricEnabled': instance.isBiometricEnabled,
-      'role': instance.role,
-      'userType': _$UserTypeEnumMap[instance.userType]!,
-      'verificationStatus':
-          _$VerificationStatusEnumMap[instance.verificationStatus]!,
-      'idCardUrl': instance.idCardUrl,
-      'profilePhotoUrl': instance.profilePhotoUrl,
-      'tradeLicenseUrl': instance.tradeLicenseUrl,
-      'drivingLicenseUrl': instance.drivingLicenseUrl,
-      'rejectionReason': instance.rejectionReason,
-      'dateOfBirth': instance.dateOfBirth?.toIso8601String(),
-      'createdAt': instance.createdAt.toIso8601String(),
-      'updatedAt': instance.updatedAt?.toIso8601String(),
-    };
+Map<String, dynamic> _$UserToJson(_User instance) => <String, dynamic>{
+  'id': instance.id,
+  'email': instance.email,
+  'fullName': instance.fullName,
+  'username': instance.username,
+  'phone': instance.phone,
+  'avatarUrl': instance.avatarUrl,
+  'language': instance.language,
+  'isOnboarded': instance.isOnboarded,
+  'isBiometricEnabled': instance.isBiometricEnabled,
+  'role': instance.role,
+  'userType': _$UserTypeEnumMap[instance.userType]!,
+  'verificationStatus':
+      _$VerificationStatusEnumMap[instance.verificationStatus]!,
+  'idCardUrl': instance.idCardUrl,
+  'profilePhotoUrl': instance.profilePhotoUrl,
+  'tradeLicenseUrl': instance.tradeLicenseUrl,
+  'drivingLicenseUrl': instance.drivingLicenseUrl,
+  'rejectionReason': instance.rejectionReason,
+  'dateOfBirth': instance.dateOfBirth?.toIso8601String(),
+  'createdAt': instance.createdAt.toIso8601String(),
+  'updatedAt': instance.updatedAt?.toIso8601String(),
+};
 
 const _$UserTypeEnumMap = {
   UserType.customer: 'customer',

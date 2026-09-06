@@ -154,7 +154,7 @@ class CampaignCta {
 }
 
 @freezed
-class Campaign with _$Campaign {
+abstract class Campaign with _$Campaign {
   const factory Campaign({
     required String id,
     required String code,

@@ -4,7 +4,7 @@ part 'merchant_stats.freezed.dart';
 part 'merchant_stats.g.dart';
 
 @freezed
-class MerchantStats with _$MerchantStats {
+abstract class MerchantStats with _$MerchantStats {
   const factory MerchantStats({
     @Default(0) int todayOrders,
     @Default(0.0) double todayRevenue,

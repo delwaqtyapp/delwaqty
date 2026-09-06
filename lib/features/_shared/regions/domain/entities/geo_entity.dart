@@ -53,7 +53,7 @@ enum GeoSourceType {
 }
 
 @freezed
-class GeoPlace with _$GeoPlace {
+abstract class GeoPlace with _$GeoPlace {
   const factory GeoPlace({
     required String id,
     required GeoPlaceType type,
@@ -114,7 +114,7 @@ class GeoPlace with _$GeoPlace {
 }
 
 @freezed
-class GeoAlias with _$GeoAlias {
+abstract class GeoAlias with _$GeoAlias {
   const factory GeoAlias({
     required String entityType,
     required String entityId,

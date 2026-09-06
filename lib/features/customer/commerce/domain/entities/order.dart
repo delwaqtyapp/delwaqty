@@ -36,7 +36,7 @@ enum PaymentStatus {
 }
 
 @freezed
-class Order with _$Order {
+abstract class Order with _$Order {
   const factory Order({
     required String id,
     required String merchantId,
@@ -67,7 +67,7 @@ class Order with _$Order {
 }
 
 @freezed
-class OrderItem with _$OrderItem {
+abstract class OrderItem with _$OrderItem {
   const factory OrderItem({
     required String productId,
     required String productName,

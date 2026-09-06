@@ -18,7 +18,7 @@ enum BookingStatus {
 }
 
 @freezed
-class ServiceBooking with _$ServiceBooking {
+abstract class ServiceBooking with _$ServiceBooking {
   const factory ServiceBooking({
     required String id,
     required String userId,

@@ -4,7 +4,7 @@ part 'order_tracking.freezed.dart';
 part 'order_tracking.g.dart';
 
 @freezed
-class OrderTracking with _$OrderTracking {
+abstract class OrderTracking with _$OrderTracking {
   const factory OrderTracking({
     required String id,
     required String orderId,

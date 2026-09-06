@@ -11,7 +11,7 @@ enum FavoriteType {
 }
 
 @freezed
-class Favorite with _$Favorite {
+abstract class Favorite with _$Favorite {
   const factory Favorite({
     required String id,
     required String targetId,

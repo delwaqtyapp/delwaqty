@@ -4,7 +4,7 @@ part 'product_modifier.freezed.dart';
 part 'product_modifier.g.dart';
 
 @freezed
-class ProductModifier with _$ProductModifier {
+abstract class ProductModifier with _$ProductModifier {
   const factory ProductModifier({
     required String id,
     required String productId,

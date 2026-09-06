@@ -6,7 +6,7 @@ part of 'coupon.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-_$CouponImpl _$$CouponImplFromJson(Map<String, dynamic> json) => _$CouponImpl(
+_Coupon _$CouponFromJson(Map<String, dynamic> json) => _Coupon(
   id: json['id'] as String,
   code: json['code'] as String,
   description: json['description'] as String?,
@@ -29,25 +29,24 @@ _$CouponImpl _$$CouponImplFromJson(Map<String, dynamic> json) => _$CouponImpl(
       : DateTime.parse(json['createdAt'] as String),
 );
 
-Map<String, dynamic> _$$CouponImplToJson(_$CouponImpl instance) =>
-    <String, dynamic>{
-      'id': instance.id,
-      'code': instance.code,
-      'description': instance.description,
-      'type': _$CouponTypeEnumMap[instance.type]!,
-      'value': instance.value,
-      'minimumOrder': instance.minimumOrder,
-      'maximumDiscount': instance.maximumDiscount,
-      'merchantId': instance.merchantId,
-      'branchId': instance.branchId,
-      'productId': instance.productId,
-      'categoryId': instance.categoryId,
-      'usageLimit': instance.usageLimit,
-      'usedCount': instance.usedCount,
-      'expiresAt': instance.expiresAt?.toIso8601String(),
-      'isActive': instance.isActive,
-      'createdAt': instance.createdAt?.toIso8601String(),
-    };
+Map<String, dynamic> _$CouponToJson(_Coupon instance) => <String, dynamic>{
+  'id': instance.id,
+  'code': instance.code,
+  'description': instance.description,
+  'type': _$CouponTypeEnumMap[instance.type]!,
+  'value': instance.value,
+  'minimumOrder': instance.minimumOrder,
+  'maximumDiscount': instance.maximumDiscount,
+  'merchantId': instance.merchantId,
+  'branchId': instance.branchId,
+  'productId': instance.productId,
+  'categoryId': instance.categoryId,
+  'usageLimit': instance.usageLimit,
+  'usedCount': instance.usedCount,
+  'expiresAt': instance.expiresAt?.toIso8601String(),
+  'isActive': instance.isActive,
+  'createdAt': instance.createdAt?.toIso8601String(),
+};
 
 const _$CouponTypeEnumMap = {
   CouponType.percentage: 'percentage',

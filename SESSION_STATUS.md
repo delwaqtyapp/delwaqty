@@ -4,9 +4,9 @@
 
 ---
 
-## Current Task — SPRINT 147: RIVERPOD 3 + FREEZED 4 + LINTS 6 MAJOR UPGRADE — COMPLETE (analyze 0 errors / 0 warnings, tests 918/918)
+## Current Task — SPRINT 147: RIVERPOD 3 + FREEZED 4 + LINTS 6 MAJOR UPGRADE — COMPLETE (analyze 0 errors / 0 warnings / 0 infos, tests 918/918)
 
-**Status:** Completed the upgrade of `flutter_riverpod` ^2.x → **3.4.3**, `freezed` ^2.x → **4.0.1**, `flutter_lints` ^3 → **6.0.0**, `riverpod_lint` **3.1.9** (analysis_server_plugin), `flutter_gen_runner` 5.15.0 (with top-level `flutter_gen` section, `lottie: true`). 0 errors / 0 warnings / 216 infos; `flutter test` **918/918** pass.
+**Status:** Completed the upgrade of `flutter_riverpod` ^2.x → **3.4.3**, `freezed` ^2.x → **4.0.1**, `flutter_lints` ^3 → **6.0.0**, `riverpod_lint` **3.1.9** (analysis_server_plugin), `flutter_gen_runner` 5.15.0 (with top-level `flutter_gen` section, `lottie: true`). Full gate now **0 errors / 0 warnings / 0 infos**; `flutter test` **918/918** pass. Committed + pushed twice this sprint: `1f80550` (migration) and `4efe51a` (info cleanup).
 
 **Migration mechanics (all classed per AGENTS.md §12.1 — Upgrade, not deletion):**
 - **Freezed 4** requires `abstract class X with _$X` (generated mixins have abstract getters with no bodies). Script-patched **92 freezed classes** to `abstract class`; `sealed class Failure` left intact (factory pattern preserved).
@@ -18,6 +18,8 @@
 - `whenOrNull` on AuthState requires the direct `auth/domain/auth_state.dart` import (extension scope rule) → added to `change_password_page.dart` + `fingerprint_login_page.dart`.
 - Test: `Override` now via `flutter_riverpod/misc.dart` in `admin_region_scope_page_test.dart`.
 - Cleaned 21 warnings: unused imports (app_constants ×3, order.dart, dart:math, flutter_riverpod), unused locals (×6), `unawaited_return_in_try_block` (×4, added `await`), one unnecessary `!`, one unused const.
+- **Info cleanup (post-commit):** `dart fix --apply` fixed 198 diagnostics in 68 files (unnecessary_underscores 116, use_null_aware_elements 37, sort_constructors_first 21, avoid_redundant_argument_values 13, others). Manually fixed the remaining 18: 4 `strict_top_level_inference` (typed params in maps_service_impl `_calculateDistance`), 14 `use_build_context_synchronously` (mounted guards: moved `l10n` capture before await in device_unlock_page; `mounted` for State.context vs `context.mounted` for BuildContext params in admin_push_notifications/admin_profile/delivery_tracking; added missing guards in checkout_page/product_detail_bottom_sheet/location_sharing; `ctx` reuse in admin_management_list_page). One full-suite run was killed externally mid-run at +753 — re-run passed 918/918.
+- Suspicious `build.yaml` edit (freezed `generate_for` excludes for push_notification files) appeared in the working tree — NOT made by us → reverted, not committed.
 
 **Build notes:**
 - `package_config.json` + lock MUST be regenerated after re-upgrading pubspec (`.dart_tool` delete → `flutter pub get` → `build_runner build`). build_runner 2.15.3+: `--delete-conflicting-outputs` removed (ignored).
@@ -26,7 +28,7 @@
 
 **⚠️ External interference (important).** An unknown process repeatedly reverts the working tree mid-session (git reflog shows a `reset` at 12:26; batch file rewrites observed at 14:51; pubspec/lock reverted + all `*.freezed.dart`/`*.g.dart` deleted at ~15:19; `AdobeCollabSync` start time correlates with the first reset). Mitigations used: apply edits in one fast batch, verify immediately, commit as soon as the gate passes. **If the tree looks reverted again after this commit, re-apply from git history instead of re-doing patch work.**
 
-**Gates:** `flutter pub get` ✓ · `flutter analyze` 0 errors / 0 warnings ✓ · `flutter test` 918/918 ✓ · committed as `sprint 147`.
+**Gates:** `flutter pub get` ✓ · `flutter analyze` 0 errors / 0 warnings / 0 infos ✓ · `flutter test` 918/918 ✓ · committed as `sprint 147` (`1f80550` + `4efe51a`).
 
 ---
 

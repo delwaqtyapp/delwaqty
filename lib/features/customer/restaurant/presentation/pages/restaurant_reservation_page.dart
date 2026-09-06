@@ -85,7 +85,7 @@ class _RestaurantReservationPageState extends ConsumerState<RestaurantReservatio
                 );
               },
               loading: () => const SizedBox.shrink(),
-              error: (_, __) => const SizedBox.shrink(),
+              error: (_, _) => const SizedBox.shrink(),
             ),
             const SizedBox(height: 20),
             AnimatedFadeIn(
@@ -158,7 +158,7 @@ class _RestaurantReservationPageState extends ConsumerState<RestaurantReservatio
                   );
                 },
                 loading: () => const Center(child: AppLoaderCircular()),
-                error: (_, __) => const SizedBox.shrink(),
+                error: (_, _) => const SizedBox.shrink(),
               ),
             ),
             const SizedBox(height: 32),
@@ -205,7 +205,7 @@ class _RestaurantReservationPageState extends ConsumerState<RestaurantReservatio
           child: ListView.separated(
             scrollDirection: Axis.horizontal,
             itemCount: dates.length,
-            separatorBuilder: (_, __) => const SizedBox(width: 8),
+            separatorBuilder: (_, _) => const SizedBox(width: 8),
             itemBuilder: (context, index) {
               final date = dates[index];
               final isSelected = _isSameDay(date, _selectedDate);

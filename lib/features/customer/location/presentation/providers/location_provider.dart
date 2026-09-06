@@ -556,11 +556,11 @@ class UserLocationNotifier extends AsyncNotifier<UserLocation?> {
     final country = address['country'] as String?;
 
     final parts = <String>[
-      if (named != null) named,
-      if (road != null) road,
-      if (hierarchyPart != null) hierarchyPart,
-      if (region != null) region,
-      if (country != null) country,
+      ?named,
+      ?road,
+      ?hierarchyPart,
+      ?region,
+      ?country,
     ];
     if (parts.isEmpty) return null;
 

@@ -99,7 +99,7 @@ class _CollectionsSection extends StatelessWidget {
     final byRegion = (data['by_region'] as List?)?.cast<Map>() ?? [];
     final rows = (data['rows'] as List?)?.cast<Map>() ?? [];
     final sym = l10n.currencySymbol;
-    final fmt = (v) => '$sym ${(v is num ? v : 0).toStringAsFixed(2)}';
+    String fmt(v) => '$sym ${(v is num ? v : 0).toStringAsFixed(2)}';
 
     final cards = [
       _Stat(l10n.total, fmt(summary['total']), const Color(0xFF5B3DF0)),
@@ -191,7 +191,7 @@ class _SettlementsSection extends StatelessWidget {
     final byRegion = (data['by_region'] as List?)?.cast<Map>() ?? [];
     final rows = (data['rows'] as List?)?.cast<Map>() ?? [];
     final sym = l10n.currencySymbol;
-    final fmt = (v) => '$sym ${(v is num ? v : 0).toStringAsFixed(2)}';
+    String fmt(v) => '$sym ${(v is num ? v : 0).toStringAsFixed(2)}';
 
     final cards = [
       _Stat(l10n.total, fmt(summary['total']), const Color(0xFF5B3DF0)),

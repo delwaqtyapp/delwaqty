@@ -72,7 +72,7 @@ class SafetySettingsPage extends ConsumerWidget {
             children: [
               contactsAsync.when(
                 loading: () => const SkeletonListTile(),
-                error: (_, __) => Text(l10n.somethingWentWrong),
+                error: (_, _) => Text(l10n.somethingWentWrong),
                 data: (contacts) {
                   final activeCount = contacts.where((c) => c.notifyOnRide).length;
                   return ListTile(

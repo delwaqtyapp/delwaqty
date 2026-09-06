@@ -41,7 +41,7 @@ class SupabaseEscalationDataSource {
     try {
       final result = await _client.rpc(
         'get_escalation_events',
-        params: {if (complaintId != null) 'p_complaint_id': complaintId},
+        params: {'p_complaint_id': ?complaintId},
       );
       final rows = (result as List?) ?? const [];
       return rows

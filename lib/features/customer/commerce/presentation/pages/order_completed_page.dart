@@ -72,7 +72,7 @@ class _OrderCompletedPageState extends State<OrderCompletedPage>
                       width: 150,
                       height: 150,
                       repeat: false,
-                      errorBuilder: (_, __, ___) => Container(
+                      errorBuilder: (_, _, _) => Container(
                         width: 100,
                         height: 100,
                         decoration: BoxDecoration(

@@ -139,7 +139,7 @@ class _CommerceDiscoveryPageState extends ConsumerState<CommerceDiscoveryPage> {
                         child: ListView.separated(
                           scrollDirection: Axis.horizontal,
                           itemCount: merchants.length,
-                          separatorBuilder: (_, __) =>
+                          separatorBuilder: (_, _) =>
                               const SizedBox(width: 12),
                           itemBuilder: (context, index) {
                             final merchant = merchants[index];
@@ -164,7 +164,7 @@ class _CommerceDiscoveryPageState extends ConsumerState<CommerceDiscoveryPage> {
                 height: 180,
                 child: Center(child: CircularProgressIndicator()),
               ),
-              error: (_, __) => const SizedBox(),
+              error: (_, _) => const SizedBox(),
             ),
 
             merchantsAsync.when(
@@ -218,7 +218,7 @@ class _CommerceDiscoveryPageState extends ConsumerState<CommerceDiscoveryPage> {
                 height: 180,
                 child: Center(child: CircularProgressIndicator()),
               ),
-              error: (_, __) => const SizedBox(),
+              error: (_, _) => const SizedBox(),
             ),
 
             AnimatedFadeIn(

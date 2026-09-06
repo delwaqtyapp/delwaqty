@@ -444,7 +444,7 @@ class _LoginPageState extends ConsumerState<LoginPage>
                   child: Image.asset(
                     'assets/logo app/logo.png',
                     fit: BoxFit.contain,
-                    errorBuilder: (_, __, ___) => DecoratedBox(
+                    errorBuilder: (_, _, _) => DecoratedBox(
                       decoration: BoxDecoration(
                         gradient: const LinearGradient(
                           colors: [AppColors.brandPurple, AppColors.brandCyan],
@@ -520,7 +520,7 @@ class _LoginPageState extends ConsumerState<LoginPage>
             child: ListView.separated(
               scrollDirection: Axis.horizontal,
               itemCount: _savedAccounts.length,
-              separatorBuilder: (_, __) => const SizedBox(width: 10),
+              separatorBuilder: (_, _) => const SizedBox(width: 10),
               itemBuilder: (context, index) {
                 final account = _savedAccounts[index];
                 return _SavedAccountChip(

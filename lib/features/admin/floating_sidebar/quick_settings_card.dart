@@ -142,7 +142,7 @@ class _QuickSettingTile extends StatelessWidget {
               ],
             ),
           ),
-          if (trailing != null) trailing!,
+          ?trailing,
         ],
       ),
     );

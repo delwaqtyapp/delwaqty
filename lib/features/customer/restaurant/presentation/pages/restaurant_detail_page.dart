@@ -95,7 +95,7 @@ class _RestaurantDetailPageState extends ConsumerState<RestaurantDetailPage> {
           return _buildBody(context, l10n, theme, merchant);
         },
         loading: () => const RestaurantDetailSkeleton(),
-        error: (_, __) => Center(
+        error: (_, _) => Center(
           child: ErrorState(
             message: l10n.errorLoading,
             onRetry: _onRefresh,
@@ -137,7 +137,7 @@ class _RestaurantDetailPageState extends ConsumerState<RestaurantDetailPage> {
                       );
                     },
                     loading: () => const SizedBox.shrink(),
-                    error: (_, __) => const SizedBox.shrink(),
+                    error: (_, _) => const SizedBox.shrink(),
                   ),
                   const SizedBox(height: 16),
                   AnimatedFadeIn(
@@ -163,7 +163,7 @@ class _RestaurantDetailPageState extends ConsumerState<RestaurantDetailPage> {
                       );
                     },
                     loading: () => const SizedBox.shrink(),
-                    error: (_, __) => const SizedBox.shrink(),
+                    error: (_, _) => const SizedBox.shrink(),
                   ),
                   const SizedBox(height: 16),
                   AnimatedFadeIn(
@@ -174,7 +174,7 @@ class _RestaurantDetailPageState extends ConsumerState<RestaurantDetailPage> {
                         return WorkingHoursCard(hours: hours);
                       },
                       loading: () => const SizedBox(height: 60, child: ShimmerCard()),
-                      error: (_, __) => const SizedBox.shrink(),
+                      error: (_, _) => const SizedBox.shrink(),
                     ),
                   ),
                   const SizedBox(height: 20),
@@ -196,7 +196,7 @@ class _RestaurantDetailPageState extends ConsumerState<RestaurantDetailPage> {
                               child: ListView.separated(
                                 scrollDirection: Axis.horizontal,
                                 itemCount: offers.length,
-                                separatorBuilder: (_, __) => const SizedBox(width: 12),
+                                separatorBuilder: (_, _) => const SizedBox(width: 12),
                                 itemBuilder: (context, index) => OfferBannerCard(offer: offers[index]),
                               ),
                             ),
@@ -205,7 +205,7 @@ class _RestaurantDetailPageState extends ConsumerState<RestaurantDetailPage> {
                       );
                     },
                     loading: () => const SizedBox.shrink(),
-                    error: (_, __) => const SizedBox.shrink(),
+                    error: (_, _) => const SizedBox.shrink(),
                   ),
                   const SizedBox(height: 20),
                   AnimatedFadeIn(

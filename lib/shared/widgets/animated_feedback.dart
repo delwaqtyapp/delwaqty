@@ -90,7 +90,7 @@ Future<bool> showAnimatedConfirmDialog(
     barrierLabel: 'dismiss',
     barrierColor: Colors.black.withValues(alpha: 0.45),
     transitionDuration: const Duration(milliseconds: 380),
-    pageBuilder: (ctx, _, __) {
+    pageBuilder: (ctx, _, _) {
       final theme = Theme.of(ctx);
       final color = confirmColor ?? theme.colorScheme.error;
       return AlertDialog(

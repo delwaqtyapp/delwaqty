@@ -38,7 +38,7 @@ class HomeServicesPage extends ConsumerWidget {
         onRefresh: () async => ref.invalidate(_categoriesProvider),
         child: categoriesAsync.when(
           loading: () => _buildLoadingSkeleton(context),
-          error: (_, __) => PremiumEmptyState(
+          error: (_, _) => PremiumEmptyState(
             icon: Icons.error_outline,
             title: l10n.error,
             message: l10n.errorLoading,
@@ -69,7 +69,7 @@ class HomeServicesPage extends ConsumerWidget {
           childAspectRatio: 1.2,
         ),
         itemCount: 8,
-        itemBuilder: (_, __) => const ShimmerCard(),
+        itemBuilder: (_, _) => const ShimmerCard(),
       ),
     );
   }

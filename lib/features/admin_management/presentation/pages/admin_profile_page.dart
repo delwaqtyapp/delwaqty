@@ -352,6 +352,7 @@ class _AdminProfilePageState
   ) async {
     final reason = await _askReason(context, loc);
     if (reason == null) return;
+    if (!context.mounted) return;
     final picked = await showDialog<String>(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -399,7 +400,7 @@ class _AdminProfilePageState
     final candidates = admins
         .where((a) => a.id != account.id && a.role != 'owner')
         .toList();
-    if (!mounted) return;
+    if (!context.mounted) return;
     final picked = await showDialog<String>(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -449,7 +450,7 @@ class _AdminProfilePageState
         .from('regions')
         .select('id,name_en')
         .order('name_en');
-    if (!mounted) return;
+    if (!context.mounted) return;
     final picked = await showDialog<String>(
       context: context,
       builder: (ctx) => StatefulBuilder(

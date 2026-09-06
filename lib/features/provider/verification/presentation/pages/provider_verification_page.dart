@@ -104,7 +104,7 @@ class _ProviderVerificationPageState
                 Card(
                   color: Colors.green,
                   child: ListTile(
-                    leading: Icon(Icons.verified, color: Colors.white),
+                    leading: const Icon(Icons.verified, color: Colors.white),
                     title: Text(
                       l10n.verified,
                       style: const TextStyle(color: Colors.white),
@@ -115,7 +115,7 @@ class _ProviderVerificationPageState
                 Card(
                   color: Colors.orange,
                   child: ListTile(
-                    leading: Icon(Icons.hourglass_top, color: Colors.white),
+                    leading: const Icon(Icons.hourglass_top, color: Colors.white),
                     title: Text(
                       l10n.pendingReview,
                       style: const TextStyle(color: Colors.white),

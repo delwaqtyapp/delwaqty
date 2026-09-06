@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:delwaqty/features/admin/financial/presentation/providers/admin_financial_providers.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:delwaqty/features/admin/member_management/presentation/member_providers.dart';

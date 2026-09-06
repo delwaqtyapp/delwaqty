@@ -1,17 +1,4 @@
 class AdminTopupRequest {
-  final String id;
-  final String accountId;
-  final String? regionId;
-  final double amount;
-  final String currency;
-  final String status;
-  final String paymentMethod;
-  final String? transferReference;
-  final String? proofPath;
-  final String? message;
-  final String? createdAt;
-  final String? reviewedBy;
-  final String? rejectionReason;
 
   const AdminTopupRequest({
     required this.id,
@@ -44,19 +31,22 @@ class AdminTopupRequest {
         reviewedBy: json['reviewed_by']?.toString(),
         rejectionReason: json['rejection_reason'] as String?,
       );
+  final String id;
+  final String accountId;
+  final String? regionId;
+  final double amount;
+  final String currency;
+  final String status;
+  final String paymentMethod;
+  final String? transferReference;
+  final String? proofPath;
+  final String? message;
+  final String? createdAt;
+  final String? reviewedBy;
+  final String? rejectionReason;
 }
 
 class CollectionSummary {
-  final String? regionId;
-  final double today;
-  final double week;
-  final double month;
-  final double total;
-  final double pending;
-  final double approved;
-  final double rejected;
-  final double settled;
-  final double outstanding;
 
   const CollectionSummary({
     this.regionId,
@@ -83,22 +73,21 @@ class CollectionSummary {
         settled: _toDouble(json['settled']),
         outstanding: _toDouble(json['outstanding']),
       );
+  final String? regionId;
+  final double today;
+  final double week;
+  final double month;
+  final double total;
+  final double pending;
+  final double approved;
+  final double rejected;
+  final double settled;
+  final double outstanding;
 
   static double _toDouble(dynamic v) => (v as num?)?.toDouble() ?? 0.0;
 }
 
 class CollectionRecord {
-  final String id;
-  final String adminId;
-  final String? regionId;
-  final String accountId;
-  final String? topupRequestId;
-  final double amount;
-  final String currency;
-  final String? reference;
-  final String? receivedAt;
-  final String status;
-  final String? settlementId;
 
   const CollectionRecord({
     required this.id,
@@ -127,20 +116,20 @@ class CollectionRecord {
         status: json['status'] as String? ?? 'collected',
         settlementId: json['settlement_id']?.toString(),
       );
-}
-
-class SettlementRecord {
   final String id;
   final String adminId;
   final String? regionId;
+  final String accountId;
+  final String? topupRequestId;
   final double amount;
   final String currency;
-  final String paymentMethod;
   final String? reference;
+  final String? receivedAt;
   final String status;
-  final String? createdAt;
-  final String? reviewedBy;
-  final String? rejectionReason;
+  final String? settlementId;
+}
+
+class SettlementRecord {
 
   const SettlementRecord({
     required this.id,
@@ -169,17 +158,20 @@ class SettlementRecord {
         reviewedBy: json['reviewed_by']?.toString(),
         rejectionReason: json['rejection_reason'] as String?,
       );
+  final String id;
+  final String adminId;
+  final String? regionId;
+  final double amount;
+  final String currency;
+  final String paymentMethod;
+  final String? reference;
+  final String status;
+  final String? createdAt;
+  final String? reviewedBy;
+  final String? rejectionReason;
 }
 
 class ReceivingAccount {
-  final String id;
-  final String methodType;
-  final String displayName;
-  final String? accountName;
-  final String? accountNumber;
-  final String? walletNumber;
-  final String? instructions;
-  final bool isActive;
 
   const ReceivingAccount({
     required this.id,
@@ -202,12 +194,17 @@ class ReceivingAccount {
         instructions: json['instructions'] as String?,
         isActive: json['is_active'] as bool? ?? true,
       );
+  final String id;
+  final String methodType;
+  final String displayName;
+  final String? accountName;
+  final String? accountNumber;
+  final String? walletNumber;
+  final String? instructions;
+  final bool isActive;
 }
 
 class GraceAccount {
-  final String userId;
-  final int graceLimit;
-  final int graceUsed;
 
   const GraceAccount({
     required this.userId,
@@ -215,11 +212,14 @@ class GraceAccount {
     required this.graceUsed,
   });
 
-  int get remaining => (graceLimit - graceUsed).clamp(0, graceLimit);
-
   factory GraceAccount.fromJson(Map<String, dynamic> json) => GraceAccount(
         userId: json['user_id'].toString(),
         graceLimit: (json['grace_limit'] as num?)?.toInt() ?? 0,
         graceUsed: (json['grace_used'] as num?)?.toInt() ?? 0,
       );
+  final String userId;
+  final int graceLimit;
+  final int graceUsed;
+
+  int get remaining => (graceLimit - graceUsed).clamp(0, graceLimit);
 }

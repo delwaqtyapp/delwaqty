@@ -74,7 +74,7 @@ class RewardsPage extends ConsumerWidget {
           return ListView.separated(
             padding: const EdgeInsets.all(16),
             itemCount: rewards.length,
-            separatorBuilder: (_, __) => const SizedBox(height: 12),
+            separatorBuilder: (_, _) => const SizedBox(height: 12),
             itemBuilder: (context, index) {
               final reward = rewards[index];
               return _RewardCard(reward: reward, l10n: l10n);

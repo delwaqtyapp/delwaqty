@@ -272,7 +272,7 @@ class _RestaurantMenuPageState extends ConsumerState<RestaurantMenuPage> {
               );
             },
             loading: () => const SizedBox(height: 40),
-            error: (_, __) => const SizedBox.shrink(),
+            error: (_, _) => const SizedBox.shrink(),
           ),
           const SizedBox(height: 8),
           Expanded(
@@ -320,7 +320,7 @@ class _RestaurantMenuPageState extends ConsumerState<RestaurantMenuPage> {
                 );
               },
               loading: () => const RestaurantMenuSkeleton(),
-              error: (_, __) => Center(
+              error: (_, _) => Center(
                 child: ErrorState(message: AppLocalizations.of(context).errorLoading),
               ),
             ),

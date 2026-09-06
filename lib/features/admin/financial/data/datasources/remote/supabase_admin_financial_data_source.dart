@@ -2,8 +2,8 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:delwaqty/features/admin/financial/domain/entities/admin_financial_entities.dart';
 
 class AdminFinancialDataSource {
-  final SupabaseClient _client;
   AdminFinancialDataSource(this._client);
+  final SupabaseClient _client;
 
   Future<List<AdminTopupRequest>> listTopupRequests(String? status) async {
     final res = await _client.rpc(
@@ -46,7 +46,7 @@ class AdminFinancialDataSource {
   Future<List<CollectionRecord>> listCollections() async {
     final res = await _client
         .from('regional_collections')
-        .select('*')
+        .select()
         .order('received_at', ascending: false);
     return [
       for (final e in res as List)
@@ -57,7 +57,7 @@ class AdminFinancialDataSource {
   Future<List<SettlementRecord>> listSettlements() async {
     final res = await _client
         .from('platform_settlements')
-        .select('*')
+        .select()
         .order('created_at', ascending: false);
     return [
       for (final e in res as List)
@@ -143,7 +143,7 @@ class AdminFinancialDataSource {
   Future<List<Map<String, dynamic>>> listAdminReceivingWallets() async {
     final res = await _client
         .from('admin_receiving_wallets')
-        .select('*')
+        .select()
         .order('created_at', ascending: false);
     return [
       for (final e in res as List) Map<String, dynamic>.from(e as Map),

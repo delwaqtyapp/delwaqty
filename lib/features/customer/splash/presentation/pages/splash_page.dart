@@ -172,7 +172,7 @@ class _SplashPageState extends ConsumerState<SplashPage>
                 child: Image.asset(
                   'assets/logo app/logo.png',
                   fit: BoxFit.contain,
-                  errorBuilder: (_, __, ___) => DecoratedBox(
+                  errorBuilder: (_, _, _) => DecoratedBox(
                     decoration: BoxDecoration(
                       gradient: const LinearGradient(
                         colors: [Color(0xFF7A5CFF), Color(0xFF2DD4BF)],

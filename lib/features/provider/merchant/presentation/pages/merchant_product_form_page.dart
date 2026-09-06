@@ -156,7 +156,7 @@ class _MerchantProductFormPageState
           ? Image.network(
               url,
               fit: BoxFit.cover,
-              errorBuilder: (_, __, ___) => Column(
+              errorBuilder: (_, _, _) => Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Icon(

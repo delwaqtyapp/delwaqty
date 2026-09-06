@@ -60,10 +60,9 @@ class SupabaseInventoryDataSource {
           'product_id': productId,
           'merchant_id': merchantId,
           'stock_quantity': stockQuantity,
-          if (reservedQuantity != null) 'reserved_quantity': reservedQuantity,
-          if (lowStockThreshold != null)
-            'low_stock_threshold': lowStockThreshold,
-          if (isInStock != null) 'is_in_stock': isInStock,
+          'reserved_quantity': ?reservedQuantity,
+          'low_stock_threshold': ?lowStockThreshold,
+          'is_in_stock': ?isInStock,
           'updated_at': now,
         }, onConflict: 'product_id')
         .select()

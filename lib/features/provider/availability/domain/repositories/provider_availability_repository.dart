@@ -7,8 +7,8 @@ abstract class ProviderAvailabilityRepository {
 }
 
 class ProviderAvailabilityRepositoryImpl implements ProviderAvailabilityRepository {
-  final ProviderAvailabilityDataSource _source;
   ProviderAvailabilityRepositoryImpl(this._source);
+  final ProviderAvailabilityDataSource _source;
 
   @override
   Future<Map<String, dynamic>> getAvailability() async {

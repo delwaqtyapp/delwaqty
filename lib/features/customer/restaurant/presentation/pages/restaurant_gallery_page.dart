@@ -74,7 +74,7 @@ class RestaurantGalleryPage extends ConsumerWidget {
                         child: Image.network(
                           images[index],
                           fit: BoxFit.cover,
-                          errorBuilder: (_, __, ___) => Container(
+                          errorBuilder: (_, _, _) => Container(
                             color: theme.colorScheme.surfaceContainerHighest,
                             child: Icon(
                               Icons.image_outlined,
@@ -164,7 +164,7 @@ class _FullScreenGalleryState extends State<_FullScreenGallery> {
                 child: Image.network(
                   widget.images[index],
                   fit: BoxFit.contain,
-                  errorBuilder: (_, __, ___) => Icon(
+                  errorBuilder: (_, _, _) => Icon(
                     Icons.broken_image,
                     color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.54),
                     size: 64,

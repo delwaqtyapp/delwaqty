@@ -85,7 +85,7 @@ class _RevenueOverviewSection extends StatelessWidget {
               ),
               child: metricsAsync.when(
                 loading: () => const Center(child: CircularProgressIndicator()),
-                error: (_, __) => Center(child: Text(l10n.noDataYet)),
+                error: (_, _) => Center(child: Text(l10n.noDataYet)),
                 data: (metrics) => Center(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -163,7 +163,7 @@ class _RevenueChartSection extends StatelessWidget {
               ),
               child: revenueAsync.when(
                 loading: () => const Center(child: CircularProgressIndicator()),
-                error: (_, __) => Center(child: Text(l10n.noDataYet)),
+                error: (_, _) => Center(child: Text(l10n.noDataYet)),
                 data: (revenueList) {
                   if (revenueList.isEmpty) {
                     return Center(child: Text(l10n.zeroOrdersToday));
@@ -265,7 +265,7 @@ class _PeakHoursSection extends StatelessWidget {
               borderRadius: 20,
               child: SizedBox(height: 60, child: Center(child: CircularProgressIndicator())),
             ),
-            error: (_, __) => _PeerMetricCard(
+            error: (_, _) => _PeerMetricCard(
               label: l10n.peakHours,
               value: '00:00 - 00:00',
               icon: Icons.access_time_rounded,
@@ -331,7 +331,7 @@ class _TopMerchantsSection extends StatelessWidget {
                 height: 100,
                 child: Center(child: CircularProgressIndicator()),
               ),
-              error: (_, __) => PremiumEmptyState(
+              error: (_, _) => PremiumEmptyState(
                 icon: Icons.store_outlined,
                 title: l10n.noDataYet,
                 message: l10n.merchantPerformancePlaceholder,
@@ -424,7 +424,7 @@ class _DriverPerformanceSection extends StatelessWidget {
                 height: 100,
                 child: Center(child: CircularProgressIndicator()),
               ),
-              error: (_, __) => PremiumEmptyState(
+              error: (_, _) => PremiumEmptyState(
                 icon: Icons.speed_rounded,
                 title: l10n.noDataYet,
                 message: l10n.driverPerformancePlaceholder,

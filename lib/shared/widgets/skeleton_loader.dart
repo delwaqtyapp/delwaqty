@@ -184,7 +184,7 @@ class RestaurantMenuSkeleton extends StatelessWidget {
       physics: const NeverScrollableScrollPhysics(),
       padding: const EdgeInsets.all(16),
       itemCount: 6,
-      itemBuilder: (_, __) => const Padding(
+      itemBuilder: (_, _) => const Padding(
         padding: EdgeInsets.only(bottom: 12),
         child: Row(
           children: [
@@ -218,7 +218,7 @@ class RestaurantReviewsSkeleton extends StatelessWidget {
       physics: const NeverScrollableScrollPhysics(),
       padding: const EdgeInsets.all(16),
       itemCount: 4,
-      itemBuilder: (_, __) => const Padding(
+      itemBuilder: (_, _) => const Padding(
         padding: EdgeInsets.only(bottom: 16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,

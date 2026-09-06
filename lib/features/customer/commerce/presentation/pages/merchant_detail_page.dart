@@ -147,7 +147,7 @@ class _MerchantDetailPageState extends ConsumerState<MerchantDetailPage> {
                 Image.network(
                   merchant.imageUrl!,
                   fit: BoxFit.cover,
-                  errorBuilder: (_, __, ___) => _buildHeroFallback(merchant),
+                  errorBuilder: (_, _, _) => _buildHeroFallback(merchant),
                 )
               else
                 _buildHeroFallback(merchant),
@@ -407,7 +407,7 @@ class _MerchantDetailPageState extends ConsumerState<MerchantDetailPage> {
                 );
                 if (await canLaunchUrl(uri)) {
                   await launchUrl(uri, mode: LaunchMode.externalApplication);
-                } else if (context.mounted) {
+                } else if (mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(content: Text(l10n.somethingWentWrong)),
                   );
@@ -524,7 +524,7 @@ class _MerchantDetailPageState extends ConsumerState<MerchantDetailPage> {
                   scrollDirection: Axis.horizontal,
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   itemCount: offers.length,
-                  separatorBuilder: (_, __) => const SizedBox(width: 10),
+                  separatorBuilder: (_, _) => const SizedBox(width: 10),
                   itemBuilder: (context, index) =>
                       _OfferCard(product: offers[index], merchantId: widget.merchantId, merchant: merchant),
                 ),
@@ -552,7 +552,7 @@ class _MerchantDetailPageState extends ConsumerState<MerchantDetailPage> {
                   scrollDirection: Axis.horizontal,
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   itemCount: popular.length,
-                  separatorBuilder: (_, __) => const SizedBox(width: 10),
+                  separatorBuilder: (_, _) => const SizedBox(width: 10),
                   itemBuilder: (context, index) =>
                       _OfferCard(product: popular[index], merchantId: widget.merchantId, merchant: merchant),
                 ),
@@ -583,7 +583,7 @@ class _MerchantDetailPageState extends ConsumerState<MerchantDetailPage> {
                 scrollDirection: Axis.horizontal,
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 itemCount: categories.length + 1,
-                separatorBuilder: (_, __) => const SizedBox(width: 8),
+                separatorBuilder: (_, _) => const SizedBox(width: 8),
                 itemBuilder: (context, index) {
                   if (index == 0) {
                     final isSelected = _selectedCategoryId == null;
@@ -1016,7 +1016,7 @@ class _MerchantDetailPageState extends ConsumerState<MerchantDetailPage> {
                 scrollDirection: Axis.horizontal,
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 itemCount: similar.length.clamp(0, 5),
-                separatorBuilder: (_, __) => const SizedBox(width: 10),
+                separatorBuilder: (_, _) => const SizedBox(width: 10),
                 itemBuilder: (context, index) {
                   final m = similar[index];
                   return _SimilarMerchantCard(merchant: m);
@@ -1301,7 +1301,7 @@ class _OfferCard extends StatelessWidget {
                       ? ClipRRect(
                           borderRadius: const BorderRadius.vertical(top: Radius.circular(14)),
                           child: Image.network(product.imageUrl!, fit: BoxFit.cover,
-                            errorBuilder: (_, __, ___) => Icon(
+                            errorBuilder: (_, _, _) => Icon(
                               Icons.shopping_bag_outlined,
                               size: 28,
                               color: context.colorScheme.primary.withValues(alpha: 0.4),
@@ -1481,7 +1481,7 @@ class _SimilarMerchantCard extends StatelessWidget {
                   ? ClipRRect(
                       borderRadius: const BorderRadius.vertical(top: Radius.circular(14)),
                       child: Image.network(merchant.imageUrl!, fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) => Icon(
+                        errorBuilder: (_, _, _) => Icon(
                           _typeIcon(merchant.type),
                           size: 28,
                           color: context.colorScheme.primary.withValues(alpha: 0.5),

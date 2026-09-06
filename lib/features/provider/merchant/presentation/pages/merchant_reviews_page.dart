@@ -62,7 +62,7 @@ class _MerchantReviewsPageState extends ConsumerState<MerchantReviewsPage> {
               height: 120,
               child: Center(child: CircularProgressIndicator()),
             ),
-            error: (_, __) => const SizedBox.shrink(),
+            error: (_, _) => const SizedBox.shrink(),
             data: (summary) => _RatingSummaryCard(summary: summary),
           ),
           Expanded(
@@ -70,7 +70,7 @@ class _MerchantReviewsPageState extends ConsumerState<MerchantReviewsPage> {
               loading: () => ListView.builder(
                 padding: const EdgeInsets.all(AppSpacing.lg),
                 itemCount: 5,
-                itemBuilder: (_, __) => const Padding(
+                itemBuilder: (_, _) => const Padding(
                   padding: EdgeInsets.only(bottom: 12),
                   child: ShimmerCard(height: 140),
                 ),

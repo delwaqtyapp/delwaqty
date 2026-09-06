@@ -191,7 +191,7 @@ class MapsServiceImpl implements MapsService {
   }
 
   double _calculateDistance(
-      lat1, lon1, lat2, lon2) {
+      double lat1, double lon1, double lat2, double lon2) {
     // Haversine formula
     const r = 6371e3; // Earth radius in metres
     final dLat = (lat2 - lat1) * 3.14159 / 180;

@@ -58,7 +58,7 @@ class WalletTransactionsPage extends ConsumerWidget {
           loading: () => ListView.builder(
             padding: const EdgeInsets.all(16),
             itemCount: 8,
-            itemBuilder: (_, __) => const Padding(
+            itemBuilder: (_, _) => const Padding(
               padding: EdgeInsets.only(bottom: 8),
               child: ShimmerCard(height: 64),
             ),

@@ -46,6 +46,10 @@ android {
         versionCode = flutter.versionCode
         versionName = flutter.versionName
 
+        ndk {
+            abiFilters += listOf("arm64-v8a")
+        }
+
         val mapsApiKey = System.getenv("MAPS_API_KEY")
             ?: project.findProperty("MAPS_API_KEY") as? String
             ?: ""
@@ -84,8 +88,8 @@ android {
             } else {
                 signingConfigs.getByName("debug")
             }
-            isMinifyEnabled = true
-            isShrinkResources = true
+            isMinifyEnabled = false
+            isShrinkResources = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"

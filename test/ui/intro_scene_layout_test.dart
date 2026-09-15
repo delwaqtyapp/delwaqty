@@ -12,7 +12,7 @@ void main() {
       size: size,
       devicePixelRatio: 3,
       textScaler: TextScaler.linear(textScale),
-      padding: const EdgeInsets.only(top: 24, bottom: 16, left: 0, right: 0),
+      padding: const EdgeInsets.only(top: 24, bottom: 16),
     );
     await tester.pumpWidget(
       MaterialApp(

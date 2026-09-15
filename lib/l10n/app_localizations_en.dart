@@ -149,7 +149,28 @@ class AppLocalizationsEn extends AppLocalizations {
   String get appNameAr => 'دلوقتي';
 
   @override
-  String get splashTagline => 'Every service. One app.';
+  String get splashTagline => 'Every need. One app.';
+
+  @override
+  String get splashTaglineAlt => 'كل احتياجاتك... في تطبيق واحد';
+
+  @override
+  String get egyptStatementLead => 'Egypt.';
+
+  @override
+  String get egyptStatementBody => 'Always moving the world forward.';
+
+  @override
+  String get egyptStatementLeadAlt => 'مصر';
+
+  @override
+  String get egyptStatementBodyAlt => 'دايمًا بتقدم للعالم';
+
+  @override
+  String get madeInEgypt => 'Made in Egypt';
+
+  @override
+  String get madeInEgyptAlt => 'صنع في مصر 🇪🇬';
 
   @override
   String get splashLoading => 'Preparing your experience...';

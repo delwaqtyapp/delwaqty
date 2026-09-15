@@ -10,14 +10,17 @@ abstract final class SupabaseInitializer {
   static bool _initialized = false;
 
   /// Initializes the Supabase client with configuration from [SupabaseConfig].
+  ///
+  /// Bounded by a timeout so a slow/unreachable network can never hang
+  /// app startup. The caller decides how to surface the failure.
   static Future<void> initialize() async {
     if (_initialized) return;
 
     await Supabase.initialize(
-       url: SupabaseConfig.url,
+      url: SupabaseConfig.url,
       publishableKey: SupabaseConfig.anonKey,
       debug: kDebugMode,
-    );
+    ).timeout(const Duration(seconds: 10));
 
     _initialized = true;
   }

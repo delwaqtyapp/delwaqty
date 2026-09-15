@@ -1,6 +1,5 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'app_colors.dart';
 import 'app_spacing.dart';
 import 'app_text_styles.dart';
@@ -60,9 +59,7 @@ abstract final class AppTheme {
       useMaterial3: true,
       colorScheme: colorScheme,
       fontFamily: resolvedFamily,
-      textTheme: fontFamily == null
-          ? GoogleFonts.cairoTextTheme(baseTextTheme)
-          : baseTextTheme,
+      textTheme: baseTextTheme,
       appBarTheme: AppBarTheme(
         centerTitle: true,
         elevation: AppElevationValues.none,

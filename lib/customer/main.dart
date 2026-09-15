@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -11,6 +12,8 @@ import 'package:delwaqty/customer/app.dart';
 import 'package:delwaqty/config/app_config.dart';
 import 'package:delwaqty/config/config_validator.dart';
 import 'package:delwaqty/config/firebase_config.dart';
+import 'package:delwaqty/core/bootstrap/backend_bootstrap.dart';
+import 'package:delwaqty/core/bootstrap/startup_error_page.dart';
 import 'package:delwaqty/data/datasources/local/shared_preferences_service.dart';
 import 'package:delwaqty/data/datasources/local/hive_cache_service.dart';
 import 'package:delwaqty/data/repositories/auth_repository_impl.dart';
@@ -44,8 +47,9 @@ void main() async {
         child: Padding(
           padding: const EdgeInsets.all(24),
           child: Text(
-            '',
-            style: TextStyle(color: Colors.white.withValues(alpha: 0.5)),
+            '${details.exception}',
+            style: TextStyle(color: Colors.white.withValues(alpha: 0.9)),
+            textAlign: TextAlign.center,
           ),
         ),
       ),
@@ -59,36 +63,55 @@ void main() async {
 
   // ── Validate configuration before any service init ──────────
   if (kDebugMode) AppConfig.logConfig();
-  ConfigValidator.validateOrThrow();
-
-  // ── Initialize services ─────────────────────────────────────
-  final results = await Future.wait([
-    SharedPreferences.getInstance(),
-    _initFirebase(),
-    _initSupabase(),
-    Hive.initFlutter(),
-  ]);
-
-  final sharedPreferences = results[0] as SharedPreferences;
-
-  final sharedPrefsService = SharedPreferencesService(sharedPreferences);
-
-  final hiveCacheService = HiveCacheService(AppLogger());
-  await hiveCacheService.initialize();
-
-  final connectivityService = ConnectivityService();
-  await connectivityService.initialize();
-
-  if (FirebaseConfig.isConfigured) {
-    FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
+  final configResult = ConfigValidator.validate();
+  if (configResult.warnings.isNotEmpty && kDebugMode) {
+    for (final warning in configResult.warnings) {
+      debugPrint('⚠ Config warning: $warning');
+    }
   }
 
-  registerAllModules();
+  // Invalid config is a build-time error, not a runtime hang. Show an
+  // explicit error page instead of leaving the splash screen forever.
+  if (configResult.hasErrors) {
+    debugPrint(configResult.toString());
+    runApp(
+      ProviderScope(child: StartupErrorPage(result: configResult)),
+    );
+    return;
+  }
+
+  // ── Local services (fast, no network) ───────────────────────
+  SharedPreferencesService? sharedPrefsService;
+  final connectivityService = ConnectivityService();
+  try {
+    final sharedPreferences = await SharedPreferences.getInstance();
+    sharedPrefsService = SharedPreferencesService(sharedPreferences);
+
+    await Hive.initFlutter();
+    final hiveCacheService = HiveCacheService(AppLogger());
+    await hiveCacheService.initialize();
+  } catch (e) {
+    debugPrint('Local startup initialization failed: $e');
+  }
+
+  try {
+    registerAllModules();
+  } catch (e) {
+    debugPrint('Module registration failed: $e');
+  }
+
+  // ── Backends initialize in the background. The first frame is NOT
+  //    gated on the network, so the splash always clears and the app
+  //    can never hang on Firebase/Supabase connectivity. ─────────
+  final backendBootstrap = BackendBootstrap();
+  unawaited(_bootstrapBackends(backendBootstrap, connectivityService));
 
   runApp(
     ProviderScope(
       overrides: [
-        sharedPreferencesProvider.overrideWithValue(sharedPrefsService),
+        if (sharedPrefsService != null)
+          sharedPreferencesProvider.overrideWithValue(sharedPrefsService),
+        connectivityServiceProvider.overrideWithValue(connectivityService),
         authRepositoryProvider.overrideWith(
           (ref) => ref.watch(authRepositoryImplProvider),
         ),
@@ -100,10 +123,35 @@ void main() async {
         ),
         localeProvider.overrideWith(() => CustomerLocaleNotifier()),
         themeModeProvider.overrideWith(() => CustomerThemeModeNotifier()),
+        backendBootstrapProvider.overrideWithValue(backendBootstrap),
       ],
       child: const App(),
     ),
   );
+}
+
+/// Starts the network-dependent services with bounded timeouts.
+/// If any of them hang, this gives up (after a short wait) and
+/// completes so the app can run in offline mode.
+Future<void> _bootstrapBackends(
+  BackendBootstrap bootstrap,
+  ConnectivityService connectivityService,
+) async {
+  try {
+    if (FirebaseConfig.isConfigured) {
+      FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
+    }
+
+    await Future.wait<void>([
+      _initFirebase(),
+      _initSupabase(),
+      connectivityService.initialize().timeout(const Duration(seconds: 6)),
+    ]);
+  } catch (e) {
+    debugPrint('Backend bootstrap gave up: $e');
+  } finally {
+    bootstrap.complete();
+  }
 }
 
 Future<void> _initFirebase() async {
@@ -117,7 +165,7 @@ Future<void> _initFirebase() async {
         projectId: FirebaseConfig.projectId,
         storageBucket: FirebaseConfig.storageBucket,
       ),
-    );
+    ).timeout(const Duration(seconds: 10));
     if (FirebaseConfig.enableCrashlytics) {
       FlutterError.onError =
           FirebaseCrashlytics.instance.recordFlutterFatalError;
@@ -130,7 +178,8 @@ Future<void> _initFirebase() async {
 
 Future<void> _initSupabase() async {
   try {
-    await SupabaseInitializer.initialize();
+    await SupabaseInitializer.initialize()
+        .timeout(const Duration(seconds: 10));
   } catch (e) {
     debugPrint('Supabase initialization failed: $e');
     debugPrint('App running without backend connectivity.');

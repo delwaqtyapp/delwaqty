@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:delwaqty/core/bootstrap/backend_bootstrap.dart';
 import 'package:delwaqty/core/localization/locale_provider.dart';
 import 'package:delwaqty/core/deep_link/deep_link_resolver.dart';
 import 'package:delwaqty/driver/app_router.dart';
@@ -25,9 +26,28 @@ class _DriverAppState extends ConsumerState<DriverApp> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (!mounted) return;
-      await ref.read(deviceLockProvider.notifier).init();
+
+      try {
+        await ref.read(deviceLockProvider.notifier).init();
+      } catch (e) {
+        debugPrint('Device lock init failed: $e');
+      }
+
+      if (!mounted) return;
+
+      try {
+        await ref.read(backendBootstrapProvider).ready
+            .timeout(const Duration(seconds: 20));
+      } catch (_) {}
+
+      if (!mounted) return;
+
       final authNotifier = ref.read(authStateProvider.notifier);
-      authNotifier.startAuthListener();
+      try {
+        authNotifier.startAuthListener();
+      } catch (e) {
+        debugPrint('Auth listener start failed: $e');
+      }
       authNotifier.checkAuthStatus();
       ref.read(pushNotificationServiceProvider).initialize();
       _startDeepLinkListener();

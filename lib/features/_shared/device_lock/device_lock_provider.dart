@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:delwaqty/data/datasources/local/biometric_auth_store.dart';
 
@@ -34,13 +35,26 @@ class DeviceLockNotifier extends Notifier<DeviceLockState> {
 
   /// Called once at cold start to detect whether a device account
   /// (locally stored credentials) exists so the App Lock gate can be shown.
+  ///
+  /// Bounded by a timeout: a broken/slow secure-storage must never strand
+  /// the auth initialization or hang the app.
   Future<void> init() async {
-    final hasCreds =
-        await ref.read(biometricAuthStoreProvider).hasAnyCredentials();
-    state = DeviceLockState(
-      unlocked: false,
-      hasDeviceAccount: hasCreds,
-    );
+    try {
+      final hasCreds = await ref
+          .read(biometricAuthStoreProvider)
+          .hasAnyCredentials()
+          .timeout(const Duration(seconds: 5));
+      state = DeviceLockState(
+        unlocked: false,
+        hasDeviceAccount: hasCreds,
+      );
+    } catch (e) {
+      debugPrint('Device lock init failed, assuming no device account: $e');
+      state = const DeviceLockState(
+        unlocked: false,
+        hasDeviceAccount: false,
+      );
+    }
   }
 
   /// Marks the app as unlocked. Called after a successful device-credential

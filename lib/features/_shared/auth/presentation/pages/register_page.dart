@@ -11,6 +11,7 @@ import 'package:delwaqty/domain/enums/user_type.dart';
 import 'package:delwaqty/features/_shared/auth/domain/auth_state.dart';
 import 'package:delwaqty/features/_shared/auth/presentation/auth_provider.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
+import 'package:delwaqty/shared/widgets/pharaoh_background.dart';
 
 class RegisterPage extends ConsumerStatefulWidget {
   const RegisterPage({super.key});
@@ -239,10 +240,10 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
     });
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F6FF),
+      backgroundColor: const Color(0xFF0A0614),
       body: Stack(
         children: [
-          _buildBackground(),
+          const PharaohBackground(),
           SafeArea(
             child: Column(
               children: [
@@ -263,18 +264,6 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
     );
   }
 
-  Widget _buildBackground() {
-    return Container(
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [Color(0xFFF8F6FF), Color(0xFFEFEBFF), Color(0xFFF5F3FF)],
-        ),
-      ),
-    );
-  }
-
   Widget _buildHeader(AppLocalizations l10n) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(24, 16, 24, 0),
@@ -286,18 +275,15 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
               child: Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: Colors.white.withValues(alpha: 0.08),
                   borderRadius: BorderRadius.circular(12),
-                  boxShadow: [
-                    BoxShadow(
-                      color: const Color(0xFF1A1035).withValues(alpha: 0.05),
-                      blurRadius: 8,
-                    ),
-                  ],
+                  border: Border.all(
+                    color: Colors.white.withValues(alpha: 0.1),
+                  ),
                 ),
                 child: Icon(
                   Icons.arrow_back_ios_rounded,
-                  color: const Color(0xFF1A1035).withValues(alpha: 0.6),
+                  color: Colors.white.withValues(alpha: 0.7),
                   size: 18,
                 ),
               ),
@@ -308,18 +294,15 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
               child: Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: Colors.white.withValues(alpha: 0.08),
                   borderRadius: BorderRadius.circular(12),
-                  boxShadow: [
-                    BoxShadow(
-                      color: const Color(0xFF1A1035).withValues(alpha: 0.05),
-                      blurRadius: 8,
-                    ),
-                  ],
+                  border: Border.all(
+                    color: Colors.white.withValues(alpha: 0.1),
+                  ),
                 ),
                 child: Icon(
                   Icons.close_rounded,
-                  color: const Color(0xFF1A1035).withValues(alpha: 0.6),
+                  color: Colors.white.withValues(alpha: 0.7),
                   size: 18,
                 ),
               ),
@@ -330,7 +313,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
             style: const TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.w600,
-              color: Color(0xFF1A1035),
+              color: Colors.white,
             ),
           ),
         ],
@@ -430,7 +413,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
           style: const TextStyle(
             fontSize: 24,
             fontWeight: FontWeight.w700,
-            color: Color(0xFF1A1035),
+            color: Colors.white,
           ),
         ),
         const SizedBox(height: 8),
@@ -438,7 +421,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
           l10n.accountTypeDescription,
           style: TextStyle(
             fontSize: 14,
-            color: const Color(0xFF1A1035).withValues(alpha: 0.5),
+            color: Colors.white.withValues(alpha: 0.5),
           ),
         ),
         const SizedBox(height: 24),
@@ -513,7 +496,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
             style: const TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.w700,
-              color: Color(0xFF1A1035),
+              color: Colors.white,
             ),
           ),
           const SizedBox(height: 8),
@@ -521,7 +504,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
             'Fill in your details to get started',
             style: TextStyle(
               fontSize: 14,
-              color: const Color(0xFF1A1035).withValues(alpha: 0.5),
+              color: Colors.white.withValues(alpha: 0.5),
             ),
           ),
           const SizedBox(height: 28),
@@ -599,7 +582,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
           style: TextStyle(
             fontSize: 24,
             fontWeight: FontWeight.w700,
-            color: Color(0xFF1A1035),
+            color: Colors.white,
           ),
         ),
         const SizedBox(height: 8),
@@ -607,7 +590,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
           'Customize your experience',
           style: TextStyle(
             fontSize: 14,
-            color: const Color(0xFF1A1035).withValues(alpha: 0.5),
+            color: Colors.white.withValues(alpha: 0.5),
           ),
         ),
         const SizedBox(height: 28),
@@ -637,10 +620,10 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
     return Container(
       padding: const EdgeInsets.all(4),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Colors.white.withValues(alpha: 0.06),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: const Color(0xFF1A1035).withValues(alpha: 0.08),
+          color: Colors.white.withValues(alpha: 0.1),
         ),
       ),
       child: Row(
@@ -674,10 +657,10 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Colors.white.withValues(alpha: 0.06),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: const Color(0xFF1A1035).withValues(alpha: 0.08),
+          color: Colors.white.withValues(alpha: 0.1),
         ),
       ),
       child: Row(
@@ -685,10 +668,10 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
           Container(
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: AppColors.brandPurple.withValues(alpha: 0.1),
+              color: const Color(0xFFD4AF37).withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(12),
             ),
-            child: Icon(icon, color: AppColors.brandPurple, size: 20),
+            child: Icon(icon, color: const Color(0xFFD4AF37), size: 20),
           ),
           const SizedBox(width: 14),
           Expanded(
@@ -700,7 +683,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                   style: const TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.w600,
-                    color: Color(0xFF1A1035),
+                    color: Colors.white,
                   ),
                 ),
                 const SizedBox(height: 2),
@@ -708,7 +691,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                   subtitle,
                   style: TextStyle(
                     fontSize: 12,
-                    color: const Color(0xFF1A1035).withValues(alpha: 0.4),
+                    color: Colors.white.withValues(alpha: 0.4),
                   ),
                 ),
               ],
@@ -717,9 +700,9 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
           Switch(
             value: value,
             onChanged: onChanged,
-            activeThumbColor: AppColors.brandPurple,
-            activeTrackColor: AppColors.brandPurple.withValues(alpha: 0.3),
-            inactiveTrackColor: const Color(0xFF1A1035).withValues(alpha: 0.1),
+            activeThumbColor: const Color(0xFFD4AF37),
+            activeTrackColor: const Color(0xFFD4AF37).withValues(alpha: 0.3),
+            inactiveTrackColor: Colors.white.withValues(alpha: 0.1),
           ),
         ],
       ),
@@ -768,7 +751,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
           style: TextStyle(
             fontSize: 24,
             fontWeight: FontWeight.w700,
-            color: Color(0xFF1A1035),
+            color: Colors.white,
           ),
         ),
         const SizedBox(height: 12),
@@ -776,7 +759,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
           'Welcome to DelwaQty',
           style: TextStyle(
             fontSize: 15,
-            color: const Color(0xFF1A1035).withValues(alpha: 0.5),
+            color: Colors.white.withValues(alpha: 0.5),
           ),
         ),
         const SizedBox(height: 8),
@@ -784,7 +767,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
           'كل احتياجاتك... دلوقتي',
           style: TextStyle(
             fontSize: 14,
-            color: const Color(0xFF1A1035).withValues(alpha: 0.4),
+            color: const Color(0xFFD4AF37).withValues(alpha: 0.7),
           ),
         ),
       ],
@@ -878,12 +861,12 @@ class _RoleOption extends StatelessWidget {
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: Colors.white.withValues(alpha: 0.06),
           borderRadius: BorderRadius.circular(18),
           border: Border.all(
             color: isSelected
                 ? color
-                : const Color(0xFF1A1035).withValues(alpha: 0.08),
+                : Colors.white.withValues(alpha: 0.1),
             width: isSelected ? 2 : 1,
           ),
           boxShadow: isSelected
@@ -917,7 +900,7 @@ class _RoleOption extends StatelessWidget {
                     style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w700,
-                      color: Color(0xFF1A1035),
+                      color: Colors.white,
                     ),
                   ),
                   const SizedBox(height: 3),
@@ -925,7 +908,7 @@ class _RoleOption extends StatelessWidget {
                     subtitle,
                     style: TextStyle(
                       fontSize: 12,
-                      color: const Color(0xFF1A1035).withValues(alpha: 0.5),
+                      color: Colors.white.withValues(alpha: 0.5),
                     ),
                   ),
                 ],
@@ -942,7 +925,7 @@ class _RoleOption extends StatelessWidget {
                 border: Border.all(
                   color: isSelected
                       ? color
-                      : const Color(0xFF1A1035).withValues(alpha: 0.2),
+                      : Colors.white.withValues(alpha: 0.2),
                   width: 2,
                 ),
               ),
@@ -986,12 +969,12 @@ class _UploadTile extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: Colors.white.withValues(alpha: 0.06),
           borderRadius: BorderRadius.circular(18),
           border: Border.all(
             color: hasFile
                 ? color.withValues(alpha: 0.6)
-                : const Color(0xFF1A1035).withValues(alpha: 0.08),
+                : Colors.white.withValues(alpha: 0.1),
             width: hasFile ? 2 : 1,
           ),
         ),
@@ -1027,7 +1010,7 @@ class _UploadTile extends StatelessWidget {
                     style: const TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.w700,
-                      color: Color(0xFF1A1035),
+                      color: Colors.white,
                     ),
                   ),
                   const SizedBox(height: 3),
@@ -1035,7 +1018,7 @@ class _UploadTile extends StatelessWidget {
                     hint,
                     style: TextStyle(
                       fontSize: 12,
-                      color: const Color(0xFF1A1035).withValues(alpha: 0.5),
+                      color: Colors.white.withValues(alpha: 0.5),
                     ),
                   ),
                 ],
@@ -1046,7 +1029,7 @@ class _UploadTile extends StatelessWidget {
               hasFile ? Icons.check_circle_rounded : Icons.add_circle_outline,
               color: hasFile
                   ? color
-                  : const Color(0xFF1A1035).withValues(alpha: 0.3),
+                  : Colors.white.withValues(alpha: 0.3),
             ),
           ],
         ),
@@ -1073,19 +1056,19 @@ class _SourceOption extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 18),
         decoration: BoxDecoration(
-          color: const Color(0xFFF5F3FF),
+          color: Colors.white.withValues(alpha: 0.06),
           borderRadius: BorderRadius.circular(16),
         ),
         child: Column(
           children: [
-            Icon(icon, color: const Color(0xFF1A1035), size: 28),
+            Icon(icon, color: Colors.white.withValues(alpha: 0.7), size: 28),
             const SizedBox(height: 10),
             Text(
               label,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
-                color: Color(0xFF1A1035),
+                color: Colors.white.withValues(alpha: 0.8),
               ),
             ),
           ],
@@ -1121,37 +1104,37 @@ class _LightRegField extends StatelessWidget {
       obscureText: obscure,
       keyboardType: keyboardType,
       validator: validator,
-      style: const TextStyle(color: Color(0xFF1A1035), fontSize: 15),
+      style: const TextStyle(color: Colors.white, fontSize: 15),
       decoration: InputDecoration(
         hintText: hint,
         hintStyle: TextStyle(
-          color: const Color(0xFF1A1035).withValues(alpha: 0.3),
+          color: Colors.white.withValues(alpha: 0.3),
           fontSize: 15,
         ),
         prefixIcon: Icon(
           icon,
-          color: const Color(0xFF1A1035).withValues(alpha: 0.35),
+          color: Colors.white.withValues(alpha: 0.35),
           size: 20,
         ),
         suffixIcon: suffix,
         filled: true,
-        fillColor: Colors.white,
+        fillColor: Colors.white.withValues(alpha: 0.08),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(18),
           borderSide: BorderSide(
-            color: const Color(0xFF1A1035).withValues(alpha: 0.06),
+            color: Colors.white.withValues(alpha: 0.1),
           ),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(18),
           borderSide: BorderSide(
-            color: const Color(0xFF1A1035).withValues(alpha: 0.08),
+            color: Colors.white.withValues(alpha: 0.1),
           ),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(18),
           borderSide: const BorderSide(
-            color: AppColors.brandPurple,
+            color: Color(0xFFD4AF37),
             width: 1.5,
           ),
         ),
@@ -1189,7 +1172,7 @@ class _LanguageOption extends StatelessWidget {
         decoration: BoxDecoration(
           gradient: isSelected
               ? const LinearGradient(
-                  colors: [AppColors.brandPurple, AppColors.brandCyan],
+                  colors: [Color(0xFFD4AF37), Color(0xFF2DD4BF)],
                 )
               : null,
           color: isSelected ? null : Colors.transparent,
@@ -1202,8 +1185,8 @@ class _LanguageOption extends StatelessWidget {
               fontSize: 14,
               fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
               color: isSelected
-                  ? Colors.white
-                  : const Color(0xFF1A1035).withValues(alpha: 0.5),
+                  ? const Color(0xFF0A0614)
+                  : Colors.white.withValues(alpha: 0.5),
             ),
           ),
         ),

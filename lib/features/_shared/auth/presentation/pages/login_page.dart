@@ -15,6 +15,7 @@ import 'package:delwaqty/features/_shared/auth/domain/saved_account.dart';
 import 'package:delwaqty/features/_shared/auth/presentation/auth_provider.dart';
 import 'package:delwaqty/features/_shared/device_lock/device_lock_provider.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
+import 'package:delwaqty/shared/widgets/pharaoh_background.dart';
 
 class LoginPage extends ConsumerStatefulWidget {
   const LoginPage({super.key});
@@ -40,6 +41,7 @@ class _LoginPageState extends ConsumerState<LoginPage>
   late final AnimationController _shakeController;
   late final Animation<double> _shakeAnimation;
   late final AnimationController _fadeController;
+  late final AnimationController _wingsController;
 
   @override
   void initState() {
@@ -57,6 +59,13 @@ class _LoginPageState extends ConsumerState<LoginPage>
       vsync: this,
       duration: const Duration(milliseconds: 600),
     )..forward();
+    _wingsController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1200),
+    );
+    Future.delayed(const Duration(milliseconds: 500), () {
+      if (mounted) _wingsController.forward();
+    });
   }
 
   @override
@@ -66,6 +75,7 @@ class _LoginPageState extends ConsumerState<LoginPage>
     _passwordFocusNode.dispose();
     _shakeController.dispose();
     _fadeController.dispose();
+    _wingsController.dispose();
     super.dispose();
   }
 
@@ -138,6 +148,7 @@ class _LoginPageState extends ConsumerState<LoginPage>
   }
 
   Future<void> _handlePostLoginNavigation(User user) async {
+    if (!mounted) return;
     if (_biometricAvailable && !user.isBiometricEnabled) {
       await _offerBiometricEnrollment(user);
     }
@@ -279,8 +290,10 @@ class _LoginPageState extends ConsumerState<LoginPage>
           if (_postLoginHandled) return;
           _postLoginHandled = true;
           _pendingBiometricUserId = null;
+          final deviceLockNotifier = ref.read(deviceLockProvider.notifier);
           await _handlePostLoginSave();
-          ref.read(deviceLockProvider.notifier).markUnlocked();
+          if (!mounted) return;
+          deviceLockNotifier.markUnlocked();
           await _handlePostLoginNavigation(user);
         },
         guest: () => context.go('/home'),
@@ -303,10 +316,10 @@ class _LoginPageState extends ConsumerState<LoginPage>
     });
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F6FF),
+      backgroundColor: const Color(0xFF0A0614),
       body: Stack(
         children: [
-          _buildBackground(),
+          const PharaohBackground(),
           SafeArea(
             child: AnimatedBuilder(
               animation: _shakeAnimation,
@@ -335,7 +348,7 @@ class _LoginPageState extends ConsumerState<LoginPage>
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         const SizedBox(height: 40),
-                        _buildLogo(),
+                        _buildLogoWithWings(),
                         const SizedBox(height: 28),
                         _buildWelcome(l10n),
                         const SizedBox(height: 8),
@@ -367,103 +380,73 @@ class _LoginPageState extends ConsumerState<LoginPage>
     );
   }
 
-  Widget _buildBackground() {
-    return DecoratedBox(
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [
-            Color(0xFFF8F6FF),
-            Color(0xFFEFEBFF),
-            Color(0xFFF5F3FF),
-          ],
-        ),
-      ),
-      child: Stack(
-        children: [
-          Positioned(
-            top: -80,
-            right: -60,
-            child: _floatingCircle(180, AppColors.brandPurple, 0.06),
-          ),
-          Positioned(
-            bottom: 100,
-            left: -40,
-            child: _floatingCircle(140, AppColors.brandCyan, 0.04),
-          ),
-          Positioned(
-            top: MediaQuery.of(context).size.height * 0.3,
-            right: -30,
-            child: _floatingCircle(100, AppColors.brandPurple, 0.03),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _floatingCircle(double size, Color color, double opacity) {
-    return Container(
-      width: size,
-      height: size,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: color.withValues(alpha: opacity),
-      ),
-    );
-  }
-
-  Widget _buildLogo() {
-    return Hero(
-      tag: 'app_logo',
-      child: TweenAnimationBuilder<double>(
-        tween: Tween(begin: 0.0, end: 1.0),
-        duration: const Duration(milliseconds: 800),
-        curve: Curves.elasticOut,
-        builder: (context, value, _) {
-          return Transform.scale(
-            scale: 0.8 + value * 0.2,
-            child: Opacity(
-              opacity: value.clamp(0.0, 1.0),
-              child: Container(
-                width: 120,
-                height: 120,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(28),
-                  boxShadow: [
-                    BoxShadow(
-                      color: AppColors.brandPurple.withValues(alpha: 0.2),
-                      blurRadius: 30,
-                      spreadRadius: 4,
-                      offset: const Offset(0, 10),
-                    ),
-                  ],
+  Widget _buildLogoWithWings() {
+    return AnimatedBuilder(
+      animation: _wingsController,
+      builder: (context, _) {
+        return Stack(
+          alignment: Alignment.center,
+          children: [
+            SizedBox(
+              width: 300,
+              height: 200,
+              child: CustomPaint(
+                painter: PharaohWingsPainter(
+                  progress: _wingsController.value,
                 ),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(28),
-                  child: Image.asset(
-                    'assets/logo app/logo.png',
-                    fit: BoxFit.contain,
-                    errorBuilder: (_, _, _) => DecoratedBox(
-                      decoration: BoxDecoration(
-                        gradient: const LinearGradient(
-                          colors: [AppColors.brandPurple, AppColors.brandCyan],
+              ),
+            ),
+            Hero(
+              tag: 'app_logo',
+              child: Transform.scale(
+                scale: 0.8 + _wingsController.value * 0.2,
+                child: Opacity(
+                  opacity: _wingsController.value.clamp(0.0, 1.0),
+                  child: Container(
+                    width: 110,
+                    height: 110,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(26),
+                      boxShadow: [
+                        BoxShadow(
+                          color: const Color(0xFFD4AF37).withValues(alpha: 0.35),
+                          blurRadius: 40,
+                          spreadRadius: 8,
                         ),
-                        borderRadius: BorderRadius.circular(28),
-                      ),
-                      child: const Icon(
-                        Icons.location_on_rounded,
-                        color: Colors.white,
-                        size: 50,
+                        BoxShadow(
+                          color: const Color(0xFF7A5CFF).withValues(alpha: 0.2),
+                          blurRadius: 50,
+                          spreadRadius: 10,
+                        ),
+                      ],
+                    ),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(26),
+                      child: Image.asset(
+                        'assets/logo app/logo.png',
+                        fit: BoxFit.contain,
+                        errorBuilder: (_, _, _) => DecoratedBox(
+                          decoration: BoxDecoration(
+                            gradient: const LinearGradient(
+                              colors: [Color(0xFF7A5CFF), Color(0xFF2DD4BF)],
+                            ),
+                            borderRadius: BorderRadius.circular(26),
+                          ),
+                          child: const Icon(
+                            Icons.location_on_rounded,
+                            color: Colors.white,
+                            size: 50,
+                          ),
+                        ),
                       ),
                     ),
                   ),
                 ),
               ),
             ),
-          );
-        },
-      ),
+          ],
+        );
+      },
     );
   }
 
@@ -473,7 +456,7 @@ class _LoginPageState extends ConsumerState<LoginPage>
       style: const TextStyle(
         fontSize: 26,
         fontWeight: FontWeight.w700,
-        color: Color(0xFF1A1035),
+        color: Colors.white,
         letterSpacing: 0.3,
       ),
     );
@@ -484,7 +467,7 @@ class _LoginPageState extends ConsumerState<LoginPage>
       l10n.welcomeSubtitle,
       style: TextStyle(
         fontSize: 14,
-        color: const Color(0xFF1A1035).withValues(alpha: 0.5),
+        color: Colors.white.withValues(alpha: 0.5),
         letterSpacing: 0.3,
       ),
       textAlign: TextAlign.center,
@@ -503,7 +486,7 @@ class _LoginPageState extends ConsumerState<LoginPage>
             style: const TextStyle(
               fontSize: 15,
               fontWeight: FontWeight.w600,
-              color: Color(0xFF1A1035),
+              color: Colors.white,
             ),
           ),
           const SizedBox(height: 4),
@@ -511,7 +494,7 @@ class _LoginPageState extends ConsumerState<LoginPage>
             l10n.savedAccountsHint,
             style: TextStyle(
               fontSize: 12,
-              color: const Color(0xFF1A1035).withValues(alpha: 0.45),
+              color: Colors.white.withValues(alpha: 0.45),
             ),
           ),
           const SizedBox(height: 12),
@@ -573,7 +556,7 @@ class _LoginPageState extends ConsumerState<LoginPage>
                 _obscurePassword
                     ? Icons.visibility_off_rounded
                     : Icons.visibility_rounded,
-                color: const Color(0xFF1A1035).withValues(alpha: 0.3),
+                color: Colors.white.withValues(alpha: 0.3),
                 size: 20,
               ),
             ),
@@ -593,8 +576,7 @@ class _LoginPageState extends ConsumerState<LoginPage>
                           setState(() => _rememberMe = v ?? false),
                       activeColor: AppColors.brandPurple,
                       side: BorderSide(
-                        color:
-                            const Color(0xFF1A1035).withValues(alpha: 0.2),
+                        color: Colors.white.withValues(alpha: 0.3),
                       ),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(4),
@@ -606,17 +588,16 @@ class _LoginPageState extends ConsumerState<LoginPage>
                     l10n.saveAccount,
                     style: TextStyle(
                       fontSize: 13,
-                      color:
-                          const Color(0xFF1A1035).withValues(alpha: 0.5),
+                      color: Colors.white.withValues(alpha: 0.5),
                     ),
                   ),
                 ],
               ),
               GestureDetector(
                 onTap: () => context.push('/forgot-password'),
-                child: Text(
-                  l10n.forgotPassword,
-                  style: const TextStyle(
+                child: const Text(
+                  '',
+                  style: TextStyle(
                     fontSize: 13,
                     color: AppColors.brandPurple,
                     fontWeight: FontWeight.w500,
@@ -644,7 +625,7 @@ class _LoginPageState extends ConsumerState<LoginPage>
           l10n.dontHaveAccount,
           style: TextStyle(
             fontSize: 14,
-            color: const Color(0xFF1A1035).withValues(alpha: 0.5),
+            color: Colors.white.withValues(alpha: 0.5),
           ),
         ),
         const SizedBox(width: 4),
@@ -654,7 +635,7 @@ class _LoginPageState extends ConsumerState<LoginPage>
             l10n.register,
             style: const TextStyle(
               fontSize: 14,
-              color: AppColors.brandPurple,
+              color: Color(0xFF2DD4BF),
               fontWeight: FontWeight.w600,
             ),
           ),
@@ -693,37 +674,37 @@ class _LightTextField extends StatelessWidget {
       keyboardType: keyboardType,
       validator: validator,
       focusNode: focusNode,
-      style: const TextStyle(color: Color(0xFF1A1035), fontSize: 15),
+      style: const TextStyle(color: Colors.white, fontSize: 15),
       decoration: InputDecoration(
         hintText: hint,
         hintStyle: TextStyle(
-          color: const Color(0xFF1A1035).withValues(alpha: 0.3),
+          color: Colors.white.withValues(alpha: 0.3),
           fontSize: 15,
         ),
         prefixIcon: Icon(
           icon,
-          color: const Color(0xFF1A1035).withValues(alpha: 0.35),
+          color: Colors.white.withValues(alpha: 0.35),
           size: 20,
         ),
         suffixIcon: suffix,
         filled: true,
-        fillColor: Colors.white,
+        fillColor: Colors.white.withValues(alpha: 0.08),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(18),
           borderSide: BorderSide(
-            color: const Color(0xFF1A1035).withValues(alpha: 0.06),
+            color: Colors.white.withValues(alpha: 0.1),
           ),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(18),
           borderSide: BorderSide(
-            color: const Color(0xFF1A1035).withValues(alpha: 0.08),
+            color: Colors.white.withValues(alpha: 0.1),
           ),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(18),
           borderSide: const BorderSide(
-            color: AppColors.brandPurple,
+            color: Color(0xFFD4AF37),
             width: 1.5,
           ),
         ),
@@ -841,13 +822,13 @@ class _SavedAccountChip extends StatelessWidget {
         padding: const EdgeInsets.all(10),
         decoration: BoxDecoration(
           color: selected
-              ? AppColors.brandPurple.withValues(alpha: 0.06)
-              : Colors.white,
+              ? AppColors.brandPurple.withValues(alpha: 0.15)
+              : Colors.white.withValues(alpha: 0.08),
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
             color: selected
-                ? AppColors.brandPurple
-                : const Color(0xFF1A1035).withValues(alpha: 0.08),
+                ? const Color(0xFFD4AF37)
+                : Colors.white.withValues(alpha: 0.1),
             width: selected ? 1.5 : 1,
           ),
         ),
@@ -862,13 +843,13 @@ class _SavedAccountChip extends StatelessWidget {
                     CircleAvatar(
                       radius: 18,
                       backgroundColor:
-                          AppColors.brandPurple.withValues(alpha: 0.12),
+                          AppColors.brandPurple.withValues(alpha: 0.2),
                       child: Text(
                         initial,
                         style: const TextStyle(
                           fontWeight: FontWeight.w600,
                           fontSize: 16,
-                          color: Color(0xFF1A1035),
+                          color: Colors.white,
                         ),
                       ),
                     ),
@@ -882,7 +863,7 @@ class _SavedAccountChip extends StatelessWidget {
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 11,
-                    color: const Color(0xFF1A1035).withValues(alpha: 0.6),
+                    color: Colors.white.withValues(alpha: 0.6),
                   ),
                 ),
               ],
@@ -898,7 +879,7 @@ class _SavedAccountChip extends StatelessWidget {
                   child: Icon(
                     Icons.close_rounded,
                     size: 14,
-                    color: const Color(0xFF1A1035).withValues(alpha: 0.3),
+                    color: Colors.white.withValues(alpha: 0.3),
                   ),
                 ),
               ),
@@ -927,15 +908,15 @@ class _BiometricButton extends StatelessWidget {
               width: 56,
               height: 56,
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: Colors.white.withValues(alpha: 0.08),
                 shape: BoxShape.circle,
                 border: Border.all(
-                  color: AppColors.brandPurple.withValues(alpha: 0.15),
+                  color: const Color(0xFFD4AF37).withValues(alpha: 0.2),
                   width: 1.5,
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: AppColors.brandPurple.withValues(alpha: 0.08),
+                    color: const Color(0xFFD4AF37).withValues(alpha: 0.1),
                     blurRadius: 12,
                     offset: const Offset(0, 4),
                   ),
@@ -943,7 +924,7 @@ class _BiometricButton extends StatelessWidget {
               ),
               child: Icon(
                 Icons.fingerprint_rounded,
-                color: AppColors.brandPurple.withValues(alpha: 0.7),
+                color: const Color(0xFFD4AF37).withValues(alpha: 0.8),
                 size: 28,
               ),
             ),
@@ -952,7 +933,7 @@ class _BiometricButton extends StatelessWidget {
               AppLocalizations.of(context).fingerprintLogin,
               style: TextStyle(
                 fontSize: 12,
-                color: const Color(0xFF1A1035).withValues(alpha: 0.4),
+                color: Colors.white.withValues(alpha: 0.4),
               ),
             ),
           ],

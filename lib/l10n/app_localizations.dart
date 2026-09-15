@@ -377,8 +377,50 @@ abstract class AppLocalizations {
   /// No description provided for @splashTagline.
   ///
   /// In en, this message translates to:
-  /// **'Every service. One app.'**
+  /// **'Every need. One app.'**
   String get splashTagline;
+
+  /// No description provided for @splashTaglineAlt.
+  ///
+  /// In en, this message translates to:
+  /// **'كل احتياجاتك... في تطبيق واحد'**
+  String get splashTaglineAlt;
+
+  /// No description provided for @egyptStatementLead.
+  ///
+  /// In en, this message translates to:
+  /// **'Egypt.'**
+  String get egyptStatementLead;
+
+  /// No description provided for @egyptStatementBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Always moving the world forward.'**
+  String get egyptStatementBody;
+
+  /// No description provided for @egyptStatementLeadAlt.
+  ///
+  /// In en, this message translates to:
+  /// **'مصر'**
+  String get egyptStatementLeadAlt;
+
+  /// No description provided for @egyptStatementBodyAlt.
+  ///
+  /// In en, this message translates to:
+  /// **'دايمًا بتقدم للعالم'**
+  String get egyptStatementBodyAlt;
+
+  /// No description provided for @madeInEgypt.
+  ///
+  /// In en, this message translates to:
+  /// **'Made in Egypt'**
+  String get madeInEgypt;
+
+  /// No description provided for @madeInEgyptAlt.
+  ///
+  /// In en, this message translates to:
+  /// **'صنع في مصر 🇪🇬'**
+  String get madeInEgyptAlt;
 
   /// No description provided for @splashLoading.
   ///

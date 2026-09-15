@@ -45,26 +45,30 @@ class AuthStateNotifier extends Notifier<AuthState> {
 
   void startAuthListener() {
     _authSubscription?.cancel();
-    final authRepo = ref.read(authRepositoryProvider);
-    _authSubscription = authRepo.onAuthStateChange.listen((event) {
-      _logger.i('Auth event: ${event.type}');
-      switch (event.type) {
-        case AuthEventType.signedIn:
-          ref.read(pushNotificationServiceProvider).initialize();
-          if (!_isSignUpInProgress && !_isSignInInProgress) {
-            checkAuthStatus();
-          }
-        case AuthEventType.signedOut:
-          _isSignUpInProgress = false;
-          state = const AuthState.unauthenticated();
-        case AuthEventType.tokenRefreshed:
-          _logger.i('Token refreshed');
-        case AuthEventType.passwordRecovery:
-          _logger.i('Password recovery');
-        case AuthEventType.mfaChallenge:
-          _logger.i('MFA challenge');
-      }
-    });
+    try {
+      final authRepo = ref.read(authRepositoryProvider);
+      _authSubscription = authRepo.onAuthStateChange.listen((event) {
+        _logger.i('Auth event: ${event.type}');
+        switch (event.type) {
+          case AuthEventType.signedIn:
+            ref.read(pushNotificationServiceProvider).initialize();
+            if (!_isSignUpInProgress && !_isSignInInProgress) {
+              checkAuthStatus();
+            }
+          case AuthEventType.signedOut:
+            _isSignUpInProgress = false;
+            state = const AuthState.unauthenticated();
+          case AuthEventType.tokenRefreshed:
+            _logger.i('Token refreshed');
+          case AuthEventType.passwordRecovery:
+            _logger.i('Password recovery');
+          case AuthEventType.mfaChallenge:
+            _logger.i('MFA challenge');
+        }
+      });
+    } catch (e) {
+      _logger.e('Auth listener start failed', e);
+    }
   }
 
   void stopAuthListener() {

@@ -87,6 +87,15 @@ flutter run --dart-define-from-file=.env.dev
 
 **NEVER build APK without `--dart-define-from-file=.env.dev`** — the `ConfigValidator` will crash the app before Flutter renders.
 
+**Build APKs ONLY with the customer flavor and explicit entrypoint.** A bare `flutter build apk --debug` produces a broken/uninstallable result (no `lib/main.dart`, ambiguous flavor):
+```bash
+./build.sh                                       # debug, customer flavor — proven recipe
+flutter build apk --debug --flavor customer -t lib/customer/main.dart --dart-define-from-file=.env.dev
+```
+**Termux ARM SDK cannot AOT**: the `~`/flutter-3.47.1-test` engine publishes no arm64-host android release `gen_snapshot`, so `--release`/`--profile` fail. Debug APKs are the deployable artifact here — they must render reliably (see ADR-044: Impeller disabled, `largeHeap` on, no per-frame full-screen blur). Do NOT attempt release builds on this machine.
+
+**Intro/Splash images are bundled INSIDE the app, not read from the phone (ADR-076)**: `lib/shared/widgets/delwa_intro_cinematic.dart` renders `_IntroImage` as a pure `Image.asset` — background from `assets/egypt/intro_egypt_cinematic_background.png`, logo from `assets/egypt/delwaqty_logo_mark.png`. No storage permission / `/storage/emulated/0/Pictures/Logo/` override (removed; phone files are ignored). To change intro art: replace the asset files, then rebuild via `./build.sh`. Keep per ADR-075 the render contract for this device: Impeller disabled, `largeHeap`, gradient-only glows, RepaintBoundary; `scripts/sync_intro_assets_to_phone.sh` is legacy (no longer consumed by the app).
+
 **Never commit failing code.**
 
 ## 8. GitHub Synchronization

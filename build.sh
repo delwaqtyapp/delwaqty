@@ -75,13 +75,21 @@ mkdir -p "$RELEASES_DIR"
 # Step 5: Build
 if [ "$BUILD_RELEASE" = true ]; then
   echo "Building release APK..."
-  flutter build apk --release
-  APK_PATH="$PROJECT_DIR/build/app/outputs/flutter-apk/app-release.apk"
+
+  # IMPORTANT: On the Termux ARM host SDK (~/flutter-3.47.1-test), release/AOT
+  # builds are NOT possible: the engine does not publish an arm64-host
+  # android-arm64-release gen_snapshot ("Failed to find ...
+  # android-arm64-release/linux-x64/gen_snapshot"). See docs/DECISION_LOG.md ADR-044.
+  # Keep the required shape below anyway in case a capable SDK is used.
+  flutter build apk --release --flavor customer \
+    -t lib/customer/main.dart --dart-define-from-file=.env.dev
+  APK_PATH="$PROJECT_DIR/build/app/outputs/flutter-apk/app-customer-release.apk"
   APK_NAME="delwaqty_${VERSION}_release_${TIMESTAMP}.apk"
 else
-  echo "Building debug APK..."
-  flutter build apk --debug
-  APK_PATH="$PROJECT_DIR/build/app/outputs/flutter-apk/app-debug.apk"
+  echo "Building debug APK (customer flavor)..."
+  flutter build apk --debug --flavor customer \
+    -t lib/customer/main.dart --dart-define-from-file=.env.dev
+  APK_PATH="$PROJECT_DIR/build/app/outputs/flutter-apk/app-customer-debug.apk"
   APK_NAME="delwaqty_${VERSION}_debug_${TIMESTAMP}.apk"
 fi
 

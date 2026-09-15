@@ -2730,3 +2730,148 @@ Upgrade to the current stable majors in one milestone:
 - `.dart_tool` + `pubspec.lock` MUST be regenerated after editing pubspec (delete `.dart_tool`, `flutter pub get`, `build_runner build`). build_runner 2.15.3 drops `--delete-conflicting-outputs`.
 - Registered workflow note: an intermittent external process reverted the working tree mid-session (git `reset` + batch rewrites + deletion of generated files). Prevented by committing as soon as the gate passes and re-applying from git history instead of redoing patch work.
 - Gate result: `flutter analyze` **0 errors / 0 warnings** (216 infos), `flutter test` **918/918** pass. Escape hatch: `git reset --hard 1f80550` re-applies this milestone.
+
+---
+
+## ADR-041: OmniRoute — Programming-Only Model Catalog (Remove No-Auth Noise & AI Horde Images)
+
+**Date:** 2026-09-10 (Termux-infra session)
+**Status:** Accepted
+**Deciders:** Lead Software Architect / User
+
+### Context
+The local OmniRoute gateway (Termux, port 20128) presents a `/v1/models` catalog consumed by opencode/Cursor-style clients. It was polluted with: (a) no-auth providers (OpenRouter free plans, Gemini free, OpenCode, etc.) that are quirk-ridden or paid-tier; (b) broken `auto/*` virtual combos pointing at deleted providers; (c) 160–177 live **AI Horde image models** (`type:"image"`) auto-registered from `https://aihorde.net/api/v2/status/models?type=image`. User directive: keep the catalog **programming-only** (فقط للبرمجة) — remove what is broken or unsuitable, keep only free, working chat models.
+
+### Decision
+- Keep exactly **2 providers** as free/working chat sources: `groq` (static chat registry: `openai/gpt-oss-120b`, `openai/gpt-oss-20b`, both 131072-ctx, price 0) and `aihorde` (anonymous chat via `oai.aihorde.net`; accessed only through combos).
+- **Hide paid/no-auth noise** via settings `hidePaidModels:true` + `blockedProviders` for 12 no-auth providers (`dva, oc, ddgw, cfp, felo, tllm, pepper, veo-free, aug, zc, cxa, unc`). Groq `excludedModels` prunes non-programming/duplicate entries (llama-4-scout, llama-3.3-70b, qwen3-32b, whisper family).
+- **Remove `auto/*` virtual combos** from the catalog by persisting settings row `hideAutoCombos=true` (DB `key_value`/`settings`, not the `/api/settings` PATCH which silently ignores that key).
+- **Expose programming chat via 3 verified combos**: `coding-stable` (groq gpt-oss-120b → aihorde Impish_Bloodmoon_12B → aihorde Cydonia-24B-v4.3), `brain-stable` and `free-stable` (add aihorde Skyfall-31B-v4.2 and koboldcpp Angelic_Eclipse-12B). Round-robin/priority with upstream-fallback; combo **context limit 131072** (target-sourced), floor 32768 (combo-min).
+- **Remove AI Horde image models from the `/v1/models` projection** by patching the installed build (3 catalog-builder chunks — `/v1/models` serves `_1vsj0p2._.js`): add guard `"aihorde"===e.provider` to the `for(...getAllImageModels()...)` media loop so aihorde image rows are skipped while the chat/provider pipeline is untouched. Requested explicitly by the user (programming-only).
+
+### Rationale
+- No built-in setting can hide media/image models (`hideAutoCombos` is the only catalog filter; `hidePaidModels` only drops paid rows). Patching the listing projection is the minimal, reversible way to honour "programming only" without disabling the aihorde chat pipeline or the image executor mid-route.
+- aihorde chat real-time models are not surfaced by the sync listener in this build; combos still reach them through direct `fullModel`/model-target routing (verified live: Impish 200 in 1.3–5.7s, RR falls back on groq empty-reasoning responses).
+
+### Consequences
+- `/v1/models` is now a clean **5-model programming list**: `groq/openai/gpt-oss-120b`, `groq/openai/gpt-oss-20b`, `coding-stable`, `brain-stable`, `free-stable`. Total **182 → 5**. No aihorde images, no `auto/*`, no paid/no-auth rows.
+- The build patch lives in `dist/.build/next/server/chunks/{_1vsj0p2,_0d_fp14,_0rr54-n}._.js` (backed up to `~/omniroute-logs/backup_1vsj0p2_*.js`). **Lost on next OmniRoute upgrade** — re-apply the guard after reinstall.
+- Aihorde image generation is no longer advertised in the list; a direct image request is still possible through the provider route but yields unknown-model errors until the worker catalog survives (accepted: programming-only).
+- `groq/*` in combo mode can return 200 with reasoning-only empty content for very small `max_tokens`; RR fallback covers it. Direct `groq/openai/gpt-oss-*` calls answer correctly with adequate token budget.
+- Ancillary server-run fix: cradle startup stalls in this Termux env — launch via `setsid nohup ~/start-omniroute.sh </dev/null >> ~/omniroute-logs/restart*.log 2>&1 &` (script form; plain `nohup`/foreground hangs the shell 120s).
+
+---
+
+## ADR-042: OmniRoute — Self-Reliant (Local-Only) Inference via Ollama
+
+**Date:** 2026-09-10 (Termux infra session)
+**Status:** Accepted
+**Deciders:** Lead Software Architect / User
+
+### Context
+After the programming-only cleanup (ADR-041) the user reported every model was slow ("كل موديل ياخد وقت طويل"). Root causes were external-API pathologies: groq free-org 413/429 + 131K reasoning, AI Horde volunteer-worker queue latency, combo round-robin landing directly on the slow worker, plus OmniRoute `requestRetry:3`/`maxRetryIntervalSec:30` backoff (~90s wasted before fallback) and its default 15s "local rate-limit execution expiration" and 30s "first-byte" deadline. The user directive: keep only OmniRoute, remove the other models, make it **self-reliant** — no external groq/aihorde APIs.
+
+### Decision
+- **Deactivated external providers** (groq, aihorde → `is_active=0`), keeping the machinery intact for reactivation.
+- Registered a **custom OpenAI-compatible provider node**: `provider_connections` row `openai-compatible-chat-<uuid>` with `provider_specific_data={"baseUrl":"http://127.0.0.1:11434/v1","apiType":"chat"}` (mechanism: `open-sse/config/providers/registry/mlx` for local OpenAI-compatible + `provider_specific_data.baseUrl` override in `open-sse/services/provider.ts:296`/`executors/base.ts` `resolveBaseUrl`). Local/self-hosted URLs are SSRF-guard exempt.
+- Pointed Ollama (`qwen2.5-coder:3b`, `ollama serve` 127.0.0.1:11434, `OLLAMA_KEEP_ALIVE=30m`) as the sole backend.
+- Rewrote all 3 combos to single-model priority combos routing only to the local node (stale RR/priority targets removed).
+- **Latency/system fixes (all verified empirically):**
+  1. `requestRetry=1`, `maxRetryIntervalSec=5` (direct DB `settings` rows; `/api/settings` PATCH silently drops these keys).
+  2. Per-connection `rate_limit_overrides_json={"maxWaitMs":600000}` on the local node — the default 15s execution expiration killed long generations ("Request exceeded OmniRoute's local rate-limit execution expiration").
+  3. `~/start-omniroute.sh` exports `OMNIROUTE_DIRECT_HEADERS_TIMEOUT_MS=0` → disables the 30s "Direct response did not start within 30000ms" first-byte deadline (`open-sse/utils/directResponseStartTimeout.ts`).
+  4. Streaming confirmed: gateway emits keepalive chunks immediately; a small task shows ttfb≈2s, full response ≈10s warm.
+
+### Rationale
+- Meets the user's self-reliance requirement; zero external APIs; deterministic (no 413/429/queue variance); private (prompts never leave the device); and the catalog is a clean 3-model list.
+- The custom compatible node is the supported seam for local OpenAI-compatible backends (same family as the bundled `mlx-*` providers).
+
+### Consequences
+- **Throughput is bounded by phone CPU**: measured ≈0.4–1 tok/s for qwen2.5-coder:3b under memory pressure (cold model load 70–124s; tiny warm tasks ~10s; 200-token answers take minutes; OLLAMA_FLASH_ATTENTION/8-threads/2048-ctx did not help — hardware/memory bound). Mini tasks stream acceptably; heavy coding is slow BY DESIGN of the device, not the gateway.
+- Local stack must be launched (survives manually only): `setsid nohup env OLLAMA_KEEP_ALIVE=30m ollama serve` (log `~/omniroute-logs/ollama.log`). Not yet wired into Termux-Boot.
+- Dist image-patch (ADR-041) remains active; both infra decisions survive app sprints and are documented here.
+- Reversibility: groq/aihorde ready to reactivate via `is_active=1` if fast cloud coding is ever preferred over strict self-reliance.
+
+## ADR-075: Intro/Splash Images Served From the Phone Folder + Debug-APK Rendering Contract
+
+**Date:** 2026-09-14
+
+### Context
+After each Termux build+install the customer app appeared **stuck on the navy launch screen** ("stuck on logo"). Diagnosis found two independent problems:
+1. Only **debug (JIT)** APKs are buildable on this machine: the Flutter SDK `~/flutter-3.47.1-test` (engine `5d5317886…`, channel `[user-branch]`) publishes no **arm64-host** `android-arm64-release gen_snapshot` — `flutter_tools` hard-codes `android-arm64-release/linux-x64`, and upstream 404s the arm64 variant (`_linuxBinaryDirs` in `flutter_cache.dart`). Release/Profile (AOT) therefore always fail here.
+2. In debug/JIT the cinematic intro was a memory bomb: per-frame **full-screen `MaskFilter.blur`** drew on the raster thread, Impeller compiled shaders at runtime on the Huawei/Honor Mali GPU, and the process ballooned to **3.2 GB RSS / 32 GB VmPeak**, then looped `DartVM: Exhausted heap space` — first Flutter frame never rendered.
+
+Separately, the user required the intro's background + logo to be supplied as **files on the phone** (`/storage/emulated/0/Pictures/Logo/`) rather than only bundled assets.
+
+### Decision
+- **Render backend:** disable Impeller (Skia only) via `<meta-data io.flutter.embedding.android.EnableImpeller value=false>` and set `android:largeHeap="true"`.
+- **Intro drawing:** the Nile-light painter replaced all `MaskFilter.blur` glows with soft radial/linear gradients (rounded corners R=80 for the glow, R=90 spot) and the animated subtree + trail got `RepaintBoundary`.
+- **Image sourcing:** `DelwaIntroScene` loads, in order — (1) phone file `/storage/emulated/0/Pictures/Logo/intro_egypt_cinematic_background.png` / `delwaqty_logo_mark.png` via `FileImage` (requesting `Permission.photos` once on Android), (2) fallback to the bundled `assets/egypt/*`, (3) final themed placeholder. Logo decode bound to screen dpr via `cacheWidth/cacheHeight`.
+- **Build recipe (permanent):** `./build.sh` now always builds `--debug --flavor customer -t lib/customer/main.dart --dart-define-from-file=.env.dev`. A bare `flutter build apk --debug` is rejected (no `lib/main.dart`, ambiguous flavor). Release builds documented as impossible on this SDK.
+- **Asset sync:** `./scripts/sync_intro_assets_to_phone.sh` pushes current art into the phone folder.
+
+### Rationale
+- Debug-JIT + Skia + bounded textures + cheap gradients fit the device's memory/GPU reality; this is the only APK type this SDK can produce, so it must render reliably.
+- Phone-first image resolution satisfies the user's direct instruction while the bundled-asset fallback keeps the splash working if the folder is empty/unreadable (no network, no breakage).
+- Keeping the exact filenames (`intro_egypt_cinematic_background.png`, `delwaqty_logo_mark.png`) lets the user swap art by just placing files in `Pictures/Logo/`.
+
+### Consequences
+- Verified on DNP NX9 (adb `192.168.8.36:5555`): `Displayed com.delwaqty.app/.MainActivity … +4.4s`, RSS ≈ 640 MB stable, **zero** `DartVM: Exhausted` lines, logcat `IntroAsset …: phone file` for both images, `flutter analyze` clean, `flutter test` 918/918.
+- Debug APKs remain larger (≈219 MB) and slower to first frame than AOT would be; a future AOT-capable SDK (or remote CI) can switch to `--release` using the same flavor/target/defines.
+- The Impeller-less build trades some rendering futures for device stability; re-enable Impeller only after verifying against this device.
+
+## ADR-076: Intro Art Bundled In-App Only (Phone-Folder Override Removed)
+
+**Date:** 2026-09-14
+
+### Context
+After ADR-075 the intro read its background/logo from `/storage/emulated/0/Pictures/Logo/` first (phone folder), falling back to the bundled `assets/egypt/*`. The user wanted the **new** background (`intro egypt.png`, warm portrait 848×1855) to show, but kept seeing an unchanged/"other" background. Investigation proved:
+- The intro (customer `SplashPage` → `DelwaIntroScene`) runs **5.3 s** then auto-navigates to `/login`; the "fixed background" the user perceived was the **log-in screen / native navy splash** (`colors_splash.xml #FF241E44`), NOT the intro image. The warm art WAS rendering during the 5.3 s window (verified by color-signature screenshots with `mCurrentFocus=com.delwaqty.app`: avg RGB (69,47,43), warm 59% / blue 18%).
+- Two separate folders existed on the phone (`/storage/emulated/0/logo/` with the user's art vs `/storage/emulated/0/Pictures/Logo/` actually read by the app) — a dev-only mechanism that adds no value for a **store build** and depends on runtime storage permissions.
+
+### Decision
+- **Bundle the new art into the app and drop the phone-folder override entirely:**
+  - `assets/egypt/intro_egypt_cinematic_background.png` now ships the new warm 848×1855 RGB (old Cairo-landscape 1920×966 backed up; old file was itself a JPEG-in-PNG).
+  - `delwa_intro_cinematic.dart`: removed `IntroAssets.phoneBasePath`/`*PhonePath`, the `FileImage` branch, `_introStoragePermission()` and the `permission_handler`/`dart:io` imports; `_IntroImage` is now a pure `Image.asset` (bundle-only) with `fallbackBuilder` untouched. No storage permission is requested for the splash anymore.
+  - Also fixed all pre-existing info lints in the file (`unnecessary_underscores`, `prefer_const_constructors`, `prefer_const_declarations`, `sort_constructors_first`) → file is 0 issues.
+- Kept ADR-075's **render contract** (Impeller disabled, `largeHeap`, gradient-only glows, `RepaintBoundary`) and the `build.sh` debug recipe — those stay, only image sourcing changed.
+
+### Rationale
+- Store-ready: a published APK must never depend on untrusted/volatile device storage or runtime photo permission for its splash art.
+- Deterministic UX: the intro background is fixed at build time; identical for every install.
+- The user explicitly requested "read from the app itself so it's stable".
+- Reverts only the phone-first part of ADR-075 (still documented there); the fallback chain becomes asset → placeholder.
+
+### Consequences
+- Replacing intro art = replace `assets/egypt/intro_egypt_cinematic_background.png` (and/or `delwaqty_logo_mark.png`) and rebuild the APK. Files placed in `Pictures/Logo/` no longer affect the app.
+- `scripts/sync_intro_assets_to_phone.sh` is now legacy (no longer consumed by the app); kept for reference only.
+- Verified: `flutter analyze` (touched file 0 issues; repo 5 pre-existing info lints elsewhere), `flutter test` **918/918**, `./build.sh` built + installed debug customer APK, app launches with no FATAL/Exhausted, and on-device screenshot with the app focused matches the new warm art.
+- All four flavors share this splash; old (7 Sep) admin/driver/provider installs still carry the old bundled asset until rebuilt.
+
+## ADR-077: Intro/Splash Rebuilt to the Reference Design + Intro-1 Restore Point
+
+**Date:** 2026-09-15
+
+### Context
+DelWaQty shipped a feature-rich cinematic splash (ADR-075/076) whose composition, timing and sizes had to be aligned with the final reference design: a lighter dim layer that keeps the Pyramids/Nile/Cairo lights clearly visible, a transparent mid-screen logo (110–140 dp) with a subtle purple/blue/cyan halo, a quiet bottom→top Nile light sweep, "Delwa" in white with a "Qty" purple→blue→cyan gradient, and the "Egypt / دائمًا بتقدم للعالم / Egypt / Always moving the world forward" statement pinned top-right — all animated in a strict order (bg → Nile → halo → logo → wordmark → Arabic tagline → Egypt statement → Made in Egypt → smooth transition).
+
+### Decision
+Rebuilt `lib/shared/widgets/delwa_intro_cinematic.dart` against the reference (same single-controller architecture — no logic/Auth/routing change; `_go()` → `/login` timing preserved):
+
+- **Restore point:** previous build saved verbatim as `lib/shared/widgets/delwa_intro_cinematic_v1.dart` (class `DelwaIntroSceneV1`) — the on-disk copy referenced in this session's earlier commits. Rolling back = point `splash_page.dart` at the v1 class. Timestamped backup also in `~/tmp/opencode/backup_*`.
+- Background asset unchanged (`intro_egypt_cinematic_background.png` 848×1855, `BoxFit.cover`); dim layer lightened to alpha 0.12–0.20.
+- Top-right "Egypt" block inside `SafeArea`, RTL/LTR-aware, gold `#D8A84E` → appears late (t≈0.42) per order.
+- Logo = transparent `delwaqty_logo_mark.png` (1280×1229 RGBA), size `(screenWidth*0.30).clamp(110,140)`, Fade + Scale 0.88→1.0 `easeOutCubic`, halo = `RadialGradient` over purple `#6C3CEB` / blue `#4057D8` / cyan `#19C8C8`.
+- Nile light = translated vertical soft-gradient strip (purple/blue/cyan), bottom→top ~2.4 s, fades out, `IgnorePointer`, hidden under reduce-motion.
+- Wordmark: `Delwa` white + `Qty` gradient (stops computed from measured glyph metrics so the gradient starts exactly at `Q`); `دلوقتي` + Arabic/English taglines stacked in one `Column` (no overflow), `Made in Egypt 🇪🇬` footer in `SafeArea`.
+- Removed the CustomPainter trail (`_NileLightTrailPainter`) in favor of the cheaper translated-gradient strip.
+- Reusable `_IntroImage` kept; one `AnimationController` (t 0..1), all disposed; `disableAnimations` honored; no `Future.delayed`; deterministic stage clamps, no `setState` loops.
+
+### Rationale
+- Single source of truth for splash art stays bundled (ADR-076); this ADR only changes composition/animation.
+- The measured-gradient white-end approach fixes the "a half-white / word shifted / all-black" regressions from earlier iterations (ShaderMask `modulate` needs a white glyph, and measurement must use the device `TextScaler`).
+
+### Consequences
+- New regression test `test/ui/intro_scene_layout_test.dart` pumps the intro at 320×480, 411×900, 411×1200, 800×1280 × textScale 1.0/1.3 and fails on any overflow.
+- Verification: `flutter analyze` clean for touched files (repo has 5 pre-existing info lints elsewhere); `flutter test` **926/926**; `./build.sh` built + installed debug customer APK (release `releases/delwaqty_1.0.0+1_debug_20260915_091246.apk`); no FATAL in logcat; on-device frame shows warm bg + centered logo.
+- Iterating the intro again: edit `delwa_intro_cinematic.dart`, rebuild with `bash build.sh`. Reverting to Intro 1 = use `DelwaIntroSceneV1`.

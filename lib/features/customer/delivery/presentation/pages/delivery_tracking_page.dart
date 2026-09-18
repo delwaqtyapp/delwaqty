@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import 'package:delwaqty/core/extensions/context_extensions.dart';
 import 'package:delwaqty/features/customer/delivery/presentation/providers/delivery_providers.dart';
 import 'package:delwaqty/features/customer/ride/presentation/providers/ride_providers.dart';
 import 'package:delwaqty/features/customer/ride/presentation/widgets/ride_map.dart';
@@ -165,9 +167,16 @@ class _TrackingBody extends StatelessWidget {
           ),
         const SizedBox(height: 16),
         AnimatedFadeIn(
-          delay: const Duration(milliseconds: 100),
+          delay: const Duration(milliseconds: 150),
           child: _StatusTimeline(status: ride.status, ride: ride),
         ),
+        if (ride.status == RideStatus.searching) ...[
+          const SizedBox(height: 16),
+          AnimatedFadeIn(
+            delay: const Duration(milliseconds: 170),
+            child: _RescueDispatchCard(rideId: ride.id),
+          ),
+        ],
         const SizedBox(height: 16),
         if (ride.estimatedMinutes != null)
           AnimatedFadeIn(
@@ -258,6 +267,89 @@ class _DriverInfoCard extends StatelessWidget {
                 icon: const Icon(Icons.phone_rounded),
                 onPressed: () => launchUrl(Uri.parse('tel:${ride.driverPhone}')),
               ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _RescueDispatchCard extends ConsumerStatefulWidget {
+  const _RescueDispatchCard({required this.rideId});
+  final String rideId;
+
+  @override
+  ConsumerState<_RescueDispatchCard> createState() => _RescueDispatchCardState();
+}
+
+class _RescueDispatchCardState extends ConsumerState<_RescueDispatchCard> {
+  bool _busy = false;
+
+  Future<void> _retryDispatch() async {
+    setState(() => _busy = true);
+    try {
+      await ref.read(deliveryRepositoryProvider).dispatchDelivery(widget.rideId);
+      if (!mounted) return;
+      context.showAppSnackBar(
+        AppLocalizations.of(context).driverSearchRetried,
+      );
+    } catch (e) {
+      if (!mounted) return;
+      context.showAppSnackBar(
+        e is PostgrestException
+            ? e.message
+            : AppLocalizations.of(context).somethingWentWrong,
+        isError: true,
+      );
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    return Card(
+      elevation: 0,
+      color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.55),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(color: theme.colorScheme.outlineVariant),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: theme.colorScheme.primary.withValues(alpha: 0.12),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.sensors_rounded,
+                color: theme.colorScheme.primary,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                l10n.dispatchStuckMessage,
+                style: theme.textTheme.bodyMedium,
+              ),
+            ),
+            const SizedBox(width: 8),
+            TextButton(
+              onPressed: _busy ? null : _retryDispatch,
+              child: _busy
+                  ? const SizedBox(
+                      width: 18,
+                      height: 18,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : Text(l10n.retryNow),
+            ),
           ],
         ),
       ),

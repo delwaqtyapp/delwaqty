@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart' show MethodChannel;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
@@ -32,7 +33,7 @@ final userLocationProvider =
 const double precisionTargetMeters = 1.0;
 
 const String _androidCertSha1 =
-    '5337185A52F0B615A3388ECC03B6576D61F34EEF';
+    '63F883088459AFB138B3105AAE428B0CC65A4F09';
 
 class UserLocationNotifier extends AsyncNotifier<UserLocation?> {
   @override
@@ -282,6 +283,9 @@ class UserLocationNotifier extends AsyncNotifier<UserLocation?> {
     } catch (_) {}
   }
 
+  static const MethodChannel _nativeGeocoder =
+      MethodChannel('com.delwaqty.app/geocoder');
+
   Future<String> _reverseGeocode(double lat, double lng, String language) async {
     final logger = ref.read(loggerProvider);
     final separator = language == 'ar' ? '،' : ',';
@@ -290,6 +294,15 @@ class UserLocationNotifier extends AsyncNotifier<UserLocation?> {
     final cache = await _readGeocodeCache();
     final cached = cache[cacheKey];
     if (cached != null && cached.isNotEmpty) return cached;
+
+    // Android system Geocoder (Google backend, no API key required) — highest
+    // precision and immune to Maps API key restrictions.
+    final native = await _nativeReverseGeocode(lat, lng, language);
+    if (native != null && native.isNotEmpty) {
+      cache[cacheKey] = native;
+      await _writeGeocodeCache(cache);
+      return native;
+    }
 
     final results = await Future.wait([
       _googleStructuredAddress(lat, lng, language, logger),
@@ -331,6 +344,25 @@ class UserLocationNotifier extends AsyncNotifier<UserLocation?> {
       await _writeGeocodeCache(cache);
     }
     return result;
+  }
+
+  Future<String?> _nativeReverseGeocode(
+    double lat,
+    double lng,
+    String language,
+  ) async {
+    try {
+      final result = await _nativeGeocoder.invokeMethod<Map<Object?, Object?>>(
+        'reverseGeocode',
+        {'lat': lat, 'lng': lng, 'language': language, 'maxResults': 1},
+      );
+      final addressLine = result?['addressLine'] as String?;
+      if (addressLine == null || addressLine.isEmpty) return null;
+      return _cleanAddress(addressLine, language);
+    } catch (e) {
+      ref.read(loggerProvider).d('Native geocoder failed: $e');
+      return null;
+    }
   }
 
   Future<({String address, bool hasNamed})?> _googleStructuredAddress(

@@ -84,5 +84,11 @@ const _$MerchantTypeEnumMap = {
   MerchantType.fitness: 'fitness',
   MerchantType.gas: 'gas',
   MerchantType.carwash: 'carwash',
+  MerchantType.perfumes: 'perfumes',
+  MerchantType.spices: 'spices',
+  MerchantType.dairy: 'dairy',
+  MerchantType.accessories: 'accessories',
+  MerchantType.butcher: 'butcher',
+  MerchantType.vegetables: 'vegetables',
   MerchantType.other: 'other',
 };

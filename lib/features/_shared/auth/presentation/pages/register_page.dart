@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:delwaqty/core/constants/storage_keys.dart';
 import 'package:delwaqty/core/extensions/context_extensions.dart';
 import 'package:delwaqty/core/theme/app_colors.dart';
 import 'package:delwaqty/core/utils/validators.dart';
@@ -11,7 +13,8 @@ import 'package:delwaqty/domain/enums/user_type.dart';
 import 'package:delwaqty/features/_shared/auth/domain/auth_state.dart';
 import 'package:delwaqty/features/_shared/auth/presentation/auth_provider.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
-import 'package:delwaqty/shared/widgets/pharaoh_background.dart';
+import 'package:delwaqty/shared/widgets/cinematic_auth_background.dart';
+import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
 
 class RegisterPage extends ConsumerStatefulWidget {
   const RegisterPage({super.key});
@@ -39,6 +42,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
   XFile? _profilePhotoFile;
   XFile? _tradeLicenseFile;
   XFile? _drivingLicenseFile;
+  final Set<String> _selectedServices = {};
 
   @override
   void dispose() {
@@ -160,6 +164,20 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
 
   Future<void> _onRegister() async {
     final role = _selectedRole!;
+    // Persist the registration-time preference toggles so the notification /
+    // location preference pages reflect what the user chose at sign-up.
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool(StorageKeys.deliveryUpdates, _notificationsEnabled);
+      await prefs.setBool(StorageKeys.locationEnabled, _locationEnabled);
+      await prefs.setString(StorageKeys.customerLocale, _selectedLanguage);
+      if (role == UserType.provider) {
+        await prefs.setString(
+          StorageKeys.providerServices,
+          _selectedServices.join(','),
+        );
+      }
+    } catch (_) {}
     Uint8List? idCardBytes;
     String? idCardFileName;
     Uint8List? profilePhotoBytes;
@@ -243,7 +261,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
       backgroundColor: const Color(0xFF0A0614),
       body: Stack(
         children: [
-          const PharaohBackground(),
+          const CinematicAuthBackground(),
           SafeArea(
             child: Column(
               children: [
@@ -425,15 +443,18 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
           ),
         ),
         const SizedBox(height: 24),
-        for (final role in roles) ...[
-          _RoleOption(
-            userType: role.$1,
-            icon: role.$2,
-            title: role.$3,
-            subtitle: role.$4,
-            color: role.$5,
-            isSelected: _selectedRole == role.$1,
-            onTap: () => setState(() => _selectedRole = role.$1),
+        for (var i = 0; i < roles.length; i++) ...[
+          AnimatedFadeIn(
+            delay: Duration(milliseconds: 120 + i * 80),
+            child: _RoleOption(
+              userType: roles[i].$1,
+              icon: roles[i].$2,
+              title: roles[i].$3,
+              subtitle: roles[i].$4,
+              color: roles[i].$5,
+              isSelected: _selectedRole == roles[i].$1,
+              onTap: () => setState(() => _selectedRole = roles[i].$1),
+            ),
           ),
           const SizedBox(height: 14),
         ],
@@ -479,6 +500,15 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
             ),
           ],
         ],
+        if (_selectedRole == UserType.provider) ...[
+          const SizedBox(height: 8),
+          _ProviderServicesPicker(
+            selected: _selectedServices,
+            onToggle: (type) => setState(() {
+              if (!_selectedServices.add(type)) _selectedServices.remove(type);
+            }),
+          ),
+        ],
         const SizedBox(height: 40),
       ],
     );
@@ -501,7 +531,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
           ),
           const SizedBox(height: 8),
           Text(
-            'Fill in your details to get started',
+            l10n.fillDetailsToStart,
             style: TextStyle(
               fontSize: 14,
               color: Colors.white.withValues(alpha: 0.5),
@@ -542,7 +572,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                 _obscurePassword
                     ? Icons.visibility_off_rounded
                     : Icons.visibility_rounded,
-                color: const Color(0xFF1A1035).withValues(alpha: 0.3),
+                color: Colors.white.withValues(alpha: 0.55),
                 size: 20,
               ),
             ),
@@ -561,7 +591,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                 _obscureConfirm
                     ? Icons.visibility_off_rounded
                     : Icons.visibility_rounded,
-                color: const Color(0xFF1A1035).withValues(alpha: 0.3),
+                color: Colors.white.withValues(alpha: 0.55),
                 size: 20,
               ),
             ),
@@ -577,9 +607,9 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const SizedBox(height: 16),
-        const Text(
-          'Preferences',
-          style: TextStyle(
+        Text(
+          l10n.preferencesTitle,
+          style: const TextStyle(
             fontSize: 24,
             fontWeight: FontWeight.w700,
             color: Colors.white,
@@ -587,7 +617,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
         ),
         const SizedBox(height: 8),
         Text(
-          'Customize your experience',
+          l10n.customizeExperience,
           style: TextStyle(
             fontSize: 14,
             color: Colors.white.withValues(alpha: 0.5),
@@ -599,7 +629,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
         _buildToggleOption(
           icon: Icons.notifications_outlined,
           title: l10n.notifications,
-          subtitle: 'Receive updates and offers',
+          subtitle: l10n.receiveUpdatesOffers,
           value: _notificationsEnabled,
           onChanged: (v) => setState(() => _notificationsEnabled = v),
         ),
@@ -607,7 +637,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
         _buildToggleOption(
           icon: Icons.location_on_outlined,
           title: l10n.location,
-          subtitle: 'Find nearby services',
+          subtitle: l10n.findNearbyServices,
           value: _locationEnabled,
           onChanged: (v) => setState(() => _locationEnabled = v),
         ),
@@ -710,66 +740,99 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
   }
 
   Widget _buildStepConfirmation(AppLocalizations l10n, AuthState authState) {
+    final roleLabels = {
+      UserType.customer: l10n.userTypeCustomer,
+      UserType.merchant: l10n.userTypeMerchant,
+      UserType.driver: l10n.userTypeDriver,
+      UserType.provider: l10n.userTypeProvider,
+    };
+    final documents = [
+      if (_idCardFile != null) l10n.uploadIdCard,
+      if (_profilePhotoFile != null) l10n.uploadProfilePhoto,
+      if (_tradeLicenseFile != null) l10n.uploadTradeLicense,
+      if (_drivingLicenseFile != null) l10n.uploadDrivingLicense,
+    ];
+    final serviceNames = _ProviderServicesPicker._services
+        .where((s) => _selectedServices.contains(s.$1))
+        .map((s) => Directionality.of(context) == TextDirection.rtl ? s.$2 : s.$3)
+        .toList();
+
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const SizedBox(height: 60),
+        const SizedBox(height: 24),
         TweenAnimationBuilder<double>(
           tween: Tween(begin: 0.0, end: 1.0),
-          duration: const Duration(milliseconds: 800),
-          curve: Curves.elasticOut,
+          duration: const Duration(milliseconds: 600),
+          curve: Curves.easeOutCubic,
           builder: (context, value, _) {
-            return Transform.scale(
-              scale: 0.5 + value * 0.5,
-              child: Container(
-                width: 100,
-                height: 100,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  gradient: const LinearGradient(
-                    colors: [AppColors.brandPurple, AppColors.brandCyan],
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: AppColors.brandPurple.withValues(alpha: 0.3),
-                      blurRadius: 30,
-                      spreadRadius: 5,
+            return Opacity(
+              opacity: value,
+              child: Transform.translate(
+                offset: Offset(0, 12 * (1 - value)),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      l10n.reviewAndConfirm,
+                      style: const TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.white,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      l10n.reviewSummaryHint,
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.white.withValues(alpha: 0.5),
+                      ),
                     ),
                   ],
-                ),
-                child: const Icon(
-                  Icons.check_rounded,
-                  color: Colors.white,
-                  size: 50,
                 ),
               ),
             );
           },
         ),
-        const SizedBox(height: 32),
-        const Text(
-          'Account Created!',
-          style: TextStyle(
-            fontSize: 24,
-            fontWeight: FontWeight.w700,
-            color: Colors.white,
-          ),
+        const SizedBox(height: 24),
+        _ReviewTile(
+          icon: _selectedRole != null && _selectedRole!.requiresVerification
+              ? Icons.verified_user_outlined
+              : Icons.person_outline_rounded,
+          label: l10n.accountTypeLabel,
+          value: roleLabels[_selectedRole] ?? '',
         ),
-        const SizedBox(height: 12),
-        Text(
-          'Welcome to DelwaQty',
-          style: TextStyle(
-            fontSize: 15,
-            color: Colors.white.withValues(alpha: 0.5),
-          ),
+        _ReviewTile(
+          icon: Icons.person_outline_rounded,
+          label: l10n.fullName,
+          value: _nameController.text.trim(),
         ),
-        const SizedBox(height: 8),
-        Text(
-          'كل احتياجاتك... دلوقتي',
-          style: TextStyle(
-            fontSize: 14,
-            color: const Color(0xFFD4AF37).withValues(alpha: 0.7),
-          ),
+        _ReviewTile(
+          icon: Icons.email_outlined,
+          label: l10n.email,
+          value: _emailController.text.trim(),
         ),
+        if (_phoneController.text.trim().isNotEmpty)
+          _ReviewTile(
+            icon: Icons.phone_outlined,
+            label: l10n.phoneNumber,
+            value: _phoneController.text.trim(),
+          ),
+        _ReviewTile(
+          icon: Icons.description_outlined,
+          label: l10n.documentsAttached,
+          value: documents.isEmpty
+              ? l10n.noDocumentsRequired
+              : documents.join('، '),
+        ),
+        if (serviceNames.isNotEmpty)
+          _ReviewTile(
+            icon: Icons.handyman_outlined,
+            label: l10n.providerServices,
+            value: serviceNames.join('، '),
+          ),
+        const SizedBox(height: 40),
       ],
     );
   }
@@ -1108,27 +1171,27 @@ class _LightRegField extends StatelessWidget {
       decoration: InputDecoration(
         hintText: hint,
         hintStyle: TextStyle(
-          color: Colors.white.withValues(alpha: 0.3),
+          color: Colors.white.withValues(alpha: 0.45),
           fontSize: 15,
         ),
         prefixIcon: Icon(
           icon,
-          color: Colors.white.withValues(alpha: 0.35),
+          color: Colors.white.withValues(alpha: 0.55),
           size: 20,
         ),
         suffixIcon: suffix,
         filled: true,
-        fillColor: Colors.white.withValues(alpha: 0.08),
+        fillColor: Colors.white.withValues(alpha: 0.14),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(18),
           borderSide: BorderSide(
-            color: Colors.white.withValues(alpha: 0.1),
+            color: Colors.white.withValues(alpha: 0.2),
           ),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(18),
           borderSide: BorderSide(
-            color: Colors.white.withValues(alpha: 0.1),
+            color: Colors.white.withValues(alpha: 0.2),
           ),
         ),
         focusedBorder: OutlineInputBorder(
@@ -1146,6 +1209,181 @@ class _LightRegField extends StatelessWidget {
           horizontal: 18,
           vertical: 18,
         ),
+      ),
+    );
+  }
+}
+
+class _ProviderServicesPicker extends StatelessWidget {
+  const _ProviderServicesPicker({
+    required this.selected,
+    required this.onToggle,
+  });
+
+  final Set<String> selected;
+  final void Function(String) onToggle;
+
+  static const _services = <(String, String, String, String)>[
+    ('plumbing', 'سباكة', 'Plumbing', '🔧'),
+    ('electrical', 'كهرباء', 'Electrical', '⚡'),
+    ('carpentry', 'نجارة', 'Carpentry', '🪚'),
+    ('acMaintenance', 'صيانة تكييف', 'AC Maintenance', '❄️'),
+    ('painting', 'دهان', 'Painting', '🎨'),
+    ('cleaning', 'نظافة المنزل', 'Home Cleaning', '🧹'),
+    ('pestControl', 'مكافحة حشرات', 'Pest Control', '🐜'),
+    ('applianceRepair', 'صيانة أجهزة', 'Appliance Repair', '🔌'),
+    ('pipeChange', 'تغيير أنبوبة', 'Pipe Change', '🔩'),
+    ('plastering', 'نقاشة', 'Plastering', '🧱'),
+    ('carpetCleaning', 'غسيل السجاد', 'Carpet Cleaning', '🧼'),
+    ('dishRepair', 'إصلاح الدش', 'Dish Repair', '📡'),
+    ('teacher', 'مدرسين', 'Tutoring', '📚'),
+    ('doctor', 'حجز دكتور', 'Doctor Booking', '🩺'),
+    ('nurse', 'ممرض', 'Nursing', '💉'),
+    ('barber', 'حجز حلاق', 'Barber', '✂️'),
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    final localeIsAr =
+        Directionality.of(context) == TextDirection.rtl;
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.06),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            AppLocalizations.of(context).providerServices,
+            style: const TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.w600,
+              color: Colors.white,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            AppLocalizations.of(context).providerServicesHint,
+            style: TextStyle(
+              fontSize: 12,
+              color: Colors.white.withValues(alpha: 0.45),
+            ),
+          ),
+          const SizedBox(height: 14),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              for (final service in _services)
+                GestureDetector(
+                  onTap: () => onToggle(service.$1),
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 200),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 8,
+                    ),
+                    decoration: BoxDecoration(
+                      color: selected.contains(service.$1)
+                          ? const Color(0xFFD4AF37).withValues(alpha: 0.2)
+                          : Colors.white.withValues(alpha: 0.06),
+                      borderRadius: BorderRadius.circular(999),
+                      border: Border.all(
+                        color: selected.contains(service.$1)
+                            ? const Color(0xFFD4AF37)
+                            : Colors.white.withValues(alpha: 0.15),
+                        width: selected.contains(service.$1) ? 1.5 : 1,
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(service.$4, style: const TextStyle(fontSize: 14)),
+                        const SizedBox(width: 6),
+                        Text(
+                          localeIsAr ? service.$2 : service.$3,
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: selected.contains(service.$1)
+                                ? const Color(0xFFD4AF37)
+                                : Colors.white.withValues(alpha: 0.7),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ReviewTile extends StatelessWidget {
+  const _ReviewTile({
+    required this.icon,
+    required this.label,
+    required this.value,
+  });
+
+  final IconData icon;
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.06),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              color: const Color(0xFFD4AF37).withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(icon, color: const Color(0xFFD4AF37), size: 20),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: Colors.white.withValues(alpha: 0.45),
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  value.isEmpty ? '—' : value,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white,
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

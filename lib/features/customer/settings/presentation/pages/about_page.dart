@@ -38,12 +38,21 @@ class AboutPage extends StatelessWidget {
                 ],
               ),
               child: Center(
-                child: Text(
-                  l10n.appNameAr,
-                  style: TextStyle(
-                    fontSize: 36,
-                    fontWeight: FontWeight.w900,
-                    color: context.colorScheme.primary,
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(28),
+                  child: Image.asset(
+                    'assets/logo app/logo.png',
+                    width: 72,
+                    height: 72,
+                    fit: BoxFit.contain,
+                    errorBuilder: (_, _, _) => Text(
+                      l10n.appNameAr,
+                      style: TextStyle(
+                        fontSize: 36,
+                        fontWeight: FontWeight.w900,
+                        color: context.colorScheme.primary,
+                      ),
+                    ),
                   ),
                 ),
               ),

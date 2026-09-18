@@ -38,6 +38,12 @@ class _OrderCompletedPageState extends State<OrderCompletedPage>
     super.dispose();
   }
 
+  String _shortOrderId(String id) {
+    return id.length > 6
+        ? id.substring(id.length - 6).toUpperCase()
+        : id.toUpperCase();
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
@@ -127,7 +133,7 @@ class _OrderCompletedPageState extends State<OrderCompletedPage>
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Text(
-                      '${l10n.orderDetails}: #${widget.orderId.substring(widget.orderId.length - 6).toUpperCase()}',
+                      '${l10n.orderDetails}: #${_shortOrderId(widget.orderId)}',
                       style: textTheme.bodyMedium?.copyWith(
                         fontWeight: FontWeight.w600,
                       ),
@@ -135,27 +141,6 @@ class _OrderCompletedPageState extends State<OrderCompletedPage>
                   ),
                 ),
                 const SizedBox(height: 12),
-                AnimatedFadeIn(
-                  delay: const Duration(milliseconds: 400),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.timer_outlined,
-                        size: 18,
-                        color: colorScheme.primary,
-                      ),
-                      const SizedBox(width: 6),
-                      Text(
-                        '${l10n.estimatedArrival}: 25 ${l10n.minutes}',
-                        style: textTheme.bodyMedium?.copyWith(
-                          color: colorScheme.primary,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
                 const Spacer(flex: 2),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 32),

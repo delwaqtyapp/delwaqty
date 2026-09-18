@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:delwaqty/features/customer/service_audio_logs/presentation/service_audio_log_providers.dart';
 import 'package:delwaqty/features/customer/service_audio_logs/domain/entities/service_audio_log.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
@@ -128,10 +129,22 @@ class _AudioLogCard extends StatelessWidget {
             if (log.audioUrl != null)
               IconButton(
                 icon: Icon(Icons.play_circle_filled, color: colorScheme.primary),
-                onPressed: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Audio: ${log.audioUrl}')),
-                  );
+                onPressed: () async {
+                  final url = Uri.tryParse(log.audioUrl!);
+                  if (url == null) return;
+                  try {
+                    final ok = await launchUrl(
+                      url,
+                      mode: LaunchMode.externalApplication,
+                    );
+                    if (!ok || !context.mounted) return;
+                  } catch (_) {
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text(l10n.somethingWentWrong)),
+                      );
+                    }
+                  }
                 },
               ),
           ],

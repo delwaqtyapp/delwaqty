@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/misc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:delwaqty/core/module/feature_module.dart';
 import 'package:delwaqty/features/customer/delivery/presentation/pages/direct_delivery_page.dart';
+import 'package:delwaqty/features/customer/delivery/presentation/pages/delivery_tracking_page.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 
 class DirectDeliveryModule extends FeatureModule {
@@ -37,6 +38,13 @@ class DirectDeliveryModule extends FeatureModule {
           path: '/direct-delivery',
           name: 'direct_delivery',
           builder: (context, state) => const DirectDeliveryPage(),
+        ),
+        GoRoute(
+          path: '/delivery-tracking/:deliveryId',
+          name: 'delivery_tracking',
+          builder: (context, state) => DeliveryTrackingPage(
+            deliveryId: state.pathParameters['deliveryId']!,
+          ),
         ),
       ];
 

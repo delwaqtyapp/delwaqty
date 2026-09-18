@@ -32,15 +32,7 @@ class ProfilePage extends ConsumerWidget {
     }
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(l10n.profile),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.settings_outlined),
-            onPressed: () => context.push('/settings'),
-          ),
-        ],
-      ),
+      appBar: AppBar(title: Text(l10n.profile)),
       body: GradientBackground(
         child: ListView(
           padding: const EdgeInsets.all(16),
@@ -50,17 +42,33 @@ class ProfilePage extends ConsumerWidget {
             ),
             const SizedBox(height: 16),
             AnimatedFadeIn(
-              delay: const Duration(milliseconds: 100),
-              child: _buildSettingsSection(context, ref, l10n, themeMode, locale),
+              delay: const Duration(milliseconds: 80),
+              child: _buildAppearanceSection(
+                context,
+                ref,
+                l10n,
+                themeMode,
+                locale,
+              ),
             ),
             const SizedBox(height: 16),
             AnimatedFadeIn(
               delay: const Duration(milliseconds: 120),
+              child: _buildAccountSection(context, ref, l10n),
+            ),
+            const SizedBox(height: 16),
+            AnimatedFadeIn(
+              delay: const Duration(milliseconds: 160),
               child: _buildOrdersAndInvoicesSection(context, l10n),
+            ),
+            const SizedBox(height: 16),
+            AnimatedFadeIn(
+              delay: const Duration(milliseconds: 200),
+              child: _buildHelpAndLegalSection(context, l10n),
             ),
             const SizedBox(height: 24),
             AnimatedFadeIn(
-              delay: const Duration(milliseconds: 200),
+              delay: const Duration(milliseconds: 240),
               child: _buildLogoutButton(context, ref, l10n),
             ),
           ],
@@ -426,7 +434,7 @@ class ProfilePage extends ConsumerWidget {
     }
   }
 
-  Widget _buildSettingsSection(
+  Widget _buildAppearanceSection(
     BuildContext context,
     WidgetRef ref,
     AppLocalizations l10n,
@@ -434,8 +442,103 @@ class ProfilePage extends ConsumerWidget {
     Locale locale,
   ) {
     return _SectionCard(
-      title: l10n.settings,
+      title: l10n.appearance,
       children: [
+        ListTile(
+          leading: _IconTile(
+            icon: themeMode == ThemeMode.dark
+                ? Icons.dark_mode_outlined
+                : Icons.light_mode_outlined,
+            color: AppColors.brandViolet,
+          ),
+          title: Text(l10n.theme),
+          trailing: SegmentedButton<ThemeMode>(
+            segments: const [
+              ButtonSegment(
+                value: ThemeMode.light,
+                icon: Icon(Icons.light_mode_rounded, size: 18),
+              ),
+              ButtonSegment(
+                value: ThemeMode.dark,
+                icon: Icon(Icons.dark_mode_rounded, size: 18),
+              ),
+              ButtonSegment(
+                value: ThemeMode.system,
+                icon: Icon(Icons.brightness_auto_rounded, size: 18),
+              ),
+            ],
+            selected: {themeMode},
+            onSelectionChanged: (selected) {
+              ref.read(themeModeProvider.notifier).setThemeMode(selected.first);
+            },
+            showSelectedIcon: false,
+            style: ButtonStyle(
+              visualDensity: VisualDensity.compact,
+              shape: WidgetStateProperty.all(
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              ),
+            ),
+          ),
+        ),
+        Divider(
+          height: 1,
+          color: context.colorScheme.outlineVariant.withValues(alpha: 0.25),
+        ),
+        ListTile(
+          leading: const _IconTile(
+            icon: Icons.language_rounded,
+            color: AppColors.brandPurple,
+          ),
+          title: Text(l10n.language),
+          subtitle: Text(
+            locale.languageCode == 'ar'
+                ? l10n.arabicLanguageName
+                : l10n.englishLanguageName,
+          ),
+          trailing: SegmentedButton<String>(
+            segments: [
+              ButtonSegment(
+                value: 'en',
+                label: Text(l10n.englishAbbreviation),
+              ),
+              ButtonSegment(
+                value: 'ar',
+                label: Text(l10n.arabicAbbreviation),
+              ),
+            ],
+            selected: {locale.languageCode},
+            onSelectionChanged: (selected) {
+              ref
+                  .read(localeProvider.notifier)
+                  .setLocale(Locale(selected.first));
+            },
+            showSelectedIcon: false,
+            style: ButtonStyle(
+              visualDensity: VisualDensity.compact,
+              shape: WidgetStateProperty.all(
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildAccountSection(
+    BuildContext context,
+    WidgetRef ref,
+    AppLocalizations l10n,
+  ) {
+    return _SectionCard(
+      title: l10n.account,
+      children: [
+        _SectionTile(
+          icon: Icons.lock_outline_rounded,
+          color: AppColors.warningLight,
+          title: l10n.privacySecurity,
+          onTap: () => context.push('/settings/privacy-security'),
+        ),
         _SectionTile(
           icon: Icons.account_balance_wallet_outlined,
           color: AppColors.orderReady,
@@ -455,26 +558,47 @@ class ProfilePage extends ConsumerWidget {
           title: l10n.notifications,
           onTap: () => context.push('/notifications'),
         ),
+      ],
+    );
+  }
+
+  Widget _buildHelpAndLegalSection(
+    BuildContext context,
+    AppLocalizations l10n,
+  ) {
+    return _SectionCard(
+      title: l10n.legal,
+      children: [
         _SectionTile(
-          icon: themeMode == ThemeMode.dark
-              ? Icons.light_mode_outlined
-              : Icons.dark_mode_outlined,
-          color: AppColors.brandViolet,
-          title: l10n.darkMode,
-          trailing: Switch(
-            value: themeMode == ThemeMode.dark,
-            onChanged: (_) =>
-                ref.read(themeModeProvider.notifier).toggleTheme(),
-          ),
+          icon: Icons.help_outline_rounded,
+          color: AppColors.infoLight,
+          title: l10n.helpCenter,
+          onTap: () => context.push('/settings/help-center'),
         ),
         _SectionTile(
-          icon: Icons.language_rounded,
+          icon: Icons.support_agent_rounded,
           color: AppColors.brandPurple,
-          title: l10n.language,
-          subtitle: locale.languageCode == 'ar'
-              ? l10n.arabicLanguageName
-              : l10n.englishLanguageName,
-          onTap: () => ref.read(localeProvider.notifier).toggleLocale(),
+          title: l10n.support,
+          onTap: () => context.push('/support'),
+        ),
+        _SectionTile(
+          icon: Icons.info_outline_rounded,
+          color: AppColors.brandViolet,
+          title: l10n.about,
+          subtitle: l10n.version,
+          onTap: () => context.push('/settings/about'),
+        ),
+        _SectionTile(
+          icon: Icons.description_outlined,
+          color: AppColors.successLight,
+          title: l10n.termsOfService,
+          onTap: () => context.push('/settings/terms-of-service'),
+        ),
+        _SectionTile(
+          icon: Icons.privacy_tip_outlined,
+          color: AppColors.warningLight,
+          title: l10n.privacyPolicy,
+          onTap: () => context.push('/settings/privacy-policy'),
         ),
       ],
     );
@@ -487,13 +611,6 @@ class ProfilePage extends ConsumerWidget {
     return _SectionCard(
       title: l10n.orders,
       children: [
-        _SectionTile(
-          icon: Icons.receipt_long_rounded,
-          color: AppColors.successLight,
-          title: l10n.invoice,
-          subtitle: l10n.invoiceDetails,
-          onTap: () => context.showAppSnackBar(l10n.invoice),
-        ),
         _SectionTile(
           icon: Icons.history_rounded,
           color: AppColors.brandPurple,
@@ -787,7 +904,6 @@ class _SectionTile extends StatelessWidget {
     required this.color,
     required this.title,
     this.subtitle,
-    this.trailing,
     this.onTap,
   });
 
@@ -795,7 +911,6 @@ class _SectionTile extends StatelessWidget {
   final Color color;
   final String title;
   final String? subtitle;
-  final Widget? trailing;
   final VoidCallback? onTap;
 
   @override
@@ -811,7 +926,7 @@ class _SectionTile extends StatelessWidget {
       subtitle: subtitle == null
           ? null
           : Text(subtitle!, style: context.textTheme.bodySmall),
-      trailing: trailing ?? const Icon(Icons.chevron_right_rounded),
+      trailing: const Icon(Icons.chevron_right_rounded),
       onTap: onTap,
     );
   }

@@ -21,4 +21,6 @@ abstract final class StorageKeys {
   static const String promotions = 'promotions';
   static const String securityAlerts = 'security_alerts';
   static const String chatMessages = 'chat_messages';
+  static const String locationEnabled = 'location_enabled';
+  static const String providerServices = 'provider_services';
 }

@@ -1,11 +1,13 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:delwaqty/core/module/feature_module.dart';
 import 'package:delwaqty/core/module/feature_registry.dart';
 import 'package:delwaqty/core/theme/app_colors.dart';
 import 'package:delwaqty/core/theme/app_text_styles.dart';
+import 'package:delwaqty/l10n/app_localizations.dart';
 import 'package:delwaqty/shared/widgets/scroll_aware_nav.dart';
 
 class AppShell extends ConsumerStatefulWidget {
@@ -31,7 +33,19 @@ class _AppShellState extends ConsumerState<AppShell> {
     final navModules = registry.navModules;
     final isVisible = ref.watch(bottomNavVisibleProvider);
 
-    return Scaffold(
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, _) {
+        if (didPop) return;
+        // System back inside the shell: return to the Home tab instead of
+        // exiting the app. On Home, show the exit confirmation dialog.
+        if (widget.navigationShell.currentIndex != 0) {
+          widget.navigationShell.goBranch(0);
+        } else {
+          _showExitConfirmation(context);
+        }
+      },
+      child: Scaffold(
       body: widget.navigationShell,
       bottomNavigationBar: AnimatedSlide(
         duration: const Duration(milliseconds: 300),
@@ -47,6 +61,35 @@ class _AppShellState extends ConsumerState<AppShell> {
             navModules: navModules,
           ),
         ),
+      ),
+    ),
+    );
+  }
+
+  void _showExitConfirmation(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    showDialog<void>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(24),
+        ),
+        icon: Image.asset('assets/logo app/logo.png', height: 44),
+        title: Text(l10n.exitAppTitle),
+        content: Text(l10n.exitAppConfirm),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: Text(l10n.stayInApp),
+          ),
+          FilledButton(
+            onPressed: () {
+              Navigator.of(ctx).pop();
+              SystemNavigator.pop();
+            },
+            child: Text(l10n.exitApp),
+          ),
+        ],
       ),
     );
   }

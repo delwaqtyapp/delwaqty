@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:typed_data';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:supabase_flutter/supabase_flutter.dart' show SupabaseClient;
+import 'package:delwaqty/config/app_config.dart';
 import 'package:delwaqty/data/datasources/local/biometric_auth_store.dart';
 import 'package:delwaqty/domain/enums/user_type.dart';
 import 'package:delwaqty/domain/entities/user.dart';
@@ -9,6 +11,7 @@ import 'package:delwaqty/domain/repositories/auth_repository.dart';
 import 'package:delwaqty/domain/usecases/auth/auth_usecases.dart';
 import 'package:delwaqty/domain/usecases/user/get_user.dart';
 import 'package:delwaqty/core/errors/error_handler.dart';
+import 'package:delwaqty/core/errors/exceptions.dart';
 import 'package:delwaqty/services/logger/app_logger.dart';
 import 'package:delwaqty/services/push_notification/push_notification_service.dart';
 
@@ -80,7 +83,16 @@ class AuthStateNotifier extends Notifier<AuthState> {
     state = const AuthState.loading();
     try {
       final authRepo = ref.read(authRepositoryProvider);
-      final session = await authRepo.getCurrentSession();
+      var session = await authRepo.getCurrentSession();
+      // Persisted session exists but its access token expired (e.g. cold
+      // start after 1h): refresh it before deciding the auth state so the
+      // customer stays logged in permanently instead of being signed out.
+      if (session == null) {
+        try {
+          await authRepo.refreshSession();
+          session = await authRepo.getCurrentSession();
+        } catch (_) {}
+      }
       if (session != null) {
         final user = await ref.read(getCurrentUserUseCaseProvider).call();
         state = _resolveAuthenticated(user);
@@ -93,11 +105,18 @@ class AuthStateNotifier extends Notifier<AuthState> {
     }
   }
 
+  /// Signs in with an email OR a username. Usernames (created from inside the
+  /// app / at registration) are resolved to their auth email through the
+  /// public.users table before Supabase auth.
   Future<void> signIn({required String email, required String password}) async {
     _isSignInInProgress = true;
     state = const AuthState.loading();
     try {
-      await _signInUseCase(email: email, password: password);
+      var identifier = email.trim();
+      if (!identifier.contains('@')) {
+        identifier = await _resolveUsernameToEmail(identifier);
+      }
+      await _signInUseCase(email: identifier, password: password);
       final user = await ref.read(getCurrentUserUseCaseProvider).call();
       state = _resolveAuthenticated(user);
     } catch (e) {
@@ -107,6 +126,23 @@ class AuthStateNotifier extends Notifier<AuthState> {
     } finally {
       _isSignInInProgress = false;
     }
+  }
+
+  /// Looks up the auth email for a username through the security-definer RPC
+  /// `lookup_email_by_username` (RLS on users only allows reading your own
+  /// row, so a direct query cannot resolve other accounts). Throws the same
+  /// failure shape as a wrong password so the UI shows a single message.
+  Future<String> _resolveUsernameToEmail(String username) async {
+    final client = SupabaseClient(
+      AppConfig.supabaseUrl,
+      AppConfig.supabaseAnonKey,
+    );
+    final resolved =
+        await client.rpc('lookup_email_by_username', params: {'p_username': username}) as String?;
+    if (resolved == null || resolved.isEmpty) {
+      throw const AuthException(message: 'اسم المستخدم أو كلمة المرور غير صحيحة.');
+    }
+    return resolved;
   }
 
   Future<void> signUp({

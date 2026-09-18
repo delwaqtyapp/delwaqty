@@ -1,3 +1,4 @@
+import 'dart:io' show Platform;
 import 'package:flutter/material.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 import 'package:delwaqty/core/theme/app_colors.dart';
@@ -10,10 +11,13 @@ class LoginActivityPage extends StatelessWidget {
     final l10n = AppLocalizations.of(context);
     final cs = Theme.of(context).colorScheme;
 
+    final deviceLabel = Platform.isAndroid
+        ? 'Android'
+        : Platform.operatingSystem;
+
     final activities = [
       _LoginActivity(
-        device: 'Android — DNP NX9',
-        ip: '192.168.1.x',
+        device: deviceLabel,
         time: l10n.currentTime,
         current: true,
       ),
@@ -39,7 +43,7 @@ class LoginActivityPage extends StatelessWidget {
               color: a.current ? AppColors.successLight : cs.onSurfaceVariant,
             ),
             title: Text(a.device),
-            subtitle: Text('${a.ip} • ${a.time}'),
+            subtitle: Text('${l10n.thisDevice} • ${a.time}'),
             trailing: a.current
                 ? Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
@@ -64,12 +68,10 @@ class _LoginActivity {
 
   const _LoginActivity({
     required this.device,
-    required this.ip,
     required this.time,
     required this.current,
   });
   final String device;
-  final String ip;
   final String time;
   final bool current;
 }

@@ -17,6 +17,21 @@ abstract final class AppValidators {
     return null;
   }
 
+  /// Accepts an email OR a username (3–32 chars: letters, digits, underscore,
+  /// dot — no spaces). Usernames are resolved to their auth email at sign-in.
+  static String? loginIdentifier(String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return 'Email or username is required';
+    }
+    final v = value.trim();
+    if (v.contains('@')) return email(value);
+    final usernameRegex = RegExp(r'^[\w.]{3,32}$');
+    if (!usernameRegex.hasMatch(v)) {
+      return 'Enter a valid email or username';
+    }
+    return null;
+  }
+
   static String? phone(String? value) {
     if (value == null || value.trim().isEmpty) {
       return 'Phone number is required';

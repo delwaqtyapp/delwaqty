@@ -5,8 +5,13 @@ import 'package:delwaqty/features/customer/settings/presentation/pages/about_pag
 import 'package:delwaqty/features/customer/settings/presentation/pages/help_center_page.dart';
 import 'package:delwaqty/features/customer/settings/presentation/pages/privacy_policy_page.dart';
 import 'package:delwaqty/features/customer/settings/presentation/pages/privacy_security_page.dart';
-import 'package:delwaqty/features/customer/settings/presentation/pages/settings_page.dart';
 import 'package:delwaqty/features/customer/settings/presentation/pages/terms_of_service_page.dart';
+import 'package:delwaqty/features/customer/settings/presentation/pages/privacy/change_password_page.dart';
+import 'package:delwaqty/features/customer/settings/presentation/pages/privacy/data_privacy_page.dart';
+import 'package:delwaqty/features/customer/settings/presentation/pages/privacy/fingerprint_login_page.dart';
+import 'package:delwaqty/features/customer/settings/presentation/pages/privacy/location_sharing_page.dart';
+import 'package:delwaqty/features/customer/settings/presentation/pages/privacy/login_activity_page.dart';
+import 'package:delwaqty/features/customer/settings/presentation/pages/privacy/notification_preferences_page.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 
 class SettingsModule extends FeatureModule {
@@ -52,17 +57,37 @@ class SettingsModule extends FeatureModule {
       name: 'settings-privacy-policy',
       builder: (context, state) => const PrivacyPolicyPage(),
     ),
+    GoRoute(
+      path: '/settings/change-password',
+      name: 'settings-change-password',
+      builder: (context, state) => const ChangePasswordPage(),
+    ),
+    GoRoute(
+      path: '/settings/fingerprint-login',
+      name: 'settings-fingerprint-login',
+      builder: (context, state) => const FingerprintLoginPage(),
+    ),
+    GoRoute(
+      path: '/settings/login-activity',
+      name: 'settings-login-activity',
+      builder: (context, state) => const LoginActivityPage(),
+    ),
+    GoRoute(
+      path: '/settings/data-privacy',
+      name: 'settings-data-privacy',
+      builder: (context, state) => const DataPrivacyPage(),
+    ),
+    GoRoute(
+      path: '/settings/location-sharing',
+      name: 'settings-location-sharing',
+      builder: (context, state) => const LocationSharingPage(),
+    ),
+    GoRoute(
+      path: '/settings/notification-preferences',
+      name: 'settings-notification-preferences',
+      builder: (context, state) => const NotificationPreferencesPage(),
+    ),
   ];
 
-  @override
-  List<RouteBase> get shellSubRoutes => [
-        GoRoute(
-          path: '/settings',
-          name: 'settings',
-          builder: (context, state) => Scaffold(
-            appBar: AppBar(title: Text(AppLocalizations.of(context).settings)),
-            body: const SettingsPage(),
-          ),
-        ),
-      ];
+
 }

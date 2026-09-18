@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:delwaqty/features/_shared/auth/domain/auth_state.dart';
 import 'package:delwaqty/features/_shared/auth/presentation/auth_provider.dart';
+import 'package:delwaqty/domain/entities/user.dart';
 import 'package:delwaqty/core/theme/app_text_styles.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 import 'sidebar_theme.dart';
@@ -69,6 +70,24 @@ class _FloatingSidebarOverlayState extends State<FloatingSidebarOverlay>
     context.push(path);
   }
 
+  String? _roleBadge(User? user) {
+    if (user == null) return null;
+    switch (user.role) {
+      case 'admin':
+        return widget.l10n.admin;
+      case 'owner':
+        return widget.l10n.owner;
+      case 'merchant':
+        return widget.l10n.merchant;
+      case 'driver':
+        return widget.l10n.driver;
+      case 'provider':
+        return widget.l10n.userTypeProvider;
+      default:
+        return widget.l10n.userTypeCustomer;
+    }
+  }
+
   void _navigateReplace(String path) {
     widget.onDismiss();
     context.go(path);
@@ -114,9 +133,10 @@ class _FloatingSidebarOverlayState extends State<FloatingSidebarOverlay>
     final sidebarWidth = (screenWidth * 0.72).clamp(260.0, 300.0);
     final bool isRtl = Directionality.of(context) == TextDirection.rtl;
 
-    final userName = widget.authState is AuthAuthenticated
-        ? (widget.authState as AuthAuthenticated).user.fullName ?? widget.l10n.user
-        : widget.l10n.user;
+    final user = widget.authState is AuthAuthenticated
+        ? (widget.authState as AuthAuthenticated).user
+        : null;
+    final userName = user?.fullName ?? widget.l10n.user;
 
     return Material(
       color: Colors.transparent,
@@ -186,9 +206,13 @@ class _FloatingSidebarOverlayState extends State<FloatingSidebarOverlay>
                             children: [
                               SidebarHeader(
                                 userName: userName,
-                                userEmail: widget.authState is AuthAuthenticated
-                                    ? (widget.authState as AuthAuthenticated).user.email
+                                userEmail: (user?.username?.isNotEmpty ?? false)
+                                    ? '@${user!.username}'
                                     : null,
+                                avatarUrl: user?.avatarUrl,
+                                roleBadge: _roleBadge(user),
+                                isVerified:
+                                    user?.verificationStatus.isApproved ?? false,
                                 onEditProfile: () => _navigateReplace('/profile'),
                               ),
                               const SidebarDivider(),
@@ -196,15 +220,6 @@ class _FloatingSidebarOverlayState extends State<FloatingSidebarOverlay>
                                 title: widget.l10n.mainSection,
                                 controller: _animation,
                                 items: [
-                                  SidebarItem(
-                                    icon: Icons.home_rounded,
-                                    label: widget.l10n.appTitle,
-                                    isSelected: _selectedIndex == 0,
-                                    onTap: () {
-                                      setState(() => _selectedIndex = 0);
-                                      _navigateReplace('/home');
-                                    },
-                                  ),
                                   SidebarItem(
                                     icon: Icons.person_outline_rounded,
                                     label: widget.l10n.profile,

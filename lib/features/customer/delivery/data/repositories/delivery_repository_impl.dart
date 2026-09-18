@@ -13,6 +13,32 @@ class DeliveryRepositoryImpl implements DeliveryRepository {
   final SupabaseDeliveryDataSource _dataSource;
 
   @override
+  Future<String> requestCourierDelivery({
+    required String riderId,
+    required double pickupLatitude,
+    required double pickupLongitude,
+    required String pickupAddress,
+    required double dropoffLatitude,
+    required double dropoffLongitude,
+    required String dropoffAddress,
+    String? itemsSummary,
+    String? notes,
+    String priority = 'standard',
+  }) =>
+      _dataSource.requestCourierDelivery(
+        riderId: riderId,
+        pickupLatitude: pickupLatitude,
+        pickupLongitude: pickupLongitude,
+        pickupAddress: pickupAddress,
+        dropoffLatitude: dropoffLatitude,
+        dropoffLongitude: dropoffLongitude,
+        dropoffAddress: dropoffAddress,
+        itemsSummary: itemsSummary,
+        notes: notes,
+        priority: priority,
+      );
+
+  @override
   Future<String> dispatchDelivery(String rideId,
           {double radiusKm = 10, int limit = 5}) =>
       _dataSource.dispatchDelivery(rideId, radiusKm: radiusKm, limit: limit);

@@ -232,6 +232,27 @@
 
 ---
 
-## Technical Debt Backlog
+## Phase 12: Campaign Management + Services Expansion (planned)
+
+### Campaign Banner Pipeline (per owner decision, 2026-09-17)
+The customer home promo carousel reads `campaigns` scoped to the customer's region. Missing management UI:
+- [ ] Admin app: campaign management page (create/edit/approve/reject + schedule + region targeting)
+- [ ] Provider app: submit campaign requests (text + image upload to storage) for admin approval
+- [ ] Owner account: publish Egypt-wide campaigns (`region = null` / all-regions flag)
+- [ ] Status flow: `draft → pending_approval → approved → active → ended` (+ rejection reason)
+- [ ] Notification on approve/reject to the submitting provider
+
+### Services Expansion (priority = demand frequency + speed + commission)
+- **Commerce categories ADDED (migration 080, 2026-09-17):** عطور، عطارة، البان، إكسسوارات حريمي، جزارة، خضراوات وفواكة (+6 MerchantType values: perfumes/spices/dairy/accessories/butcher/vegetables with l10n/colors/emoji/mappings).
+- **Booking services ADDED (migration 080, 2026-09-17):** تغيير أنبوبة (pipeChange)، نقاشة (plastering)، غسيل السجاد (carpetCleaning)، إصلاح الدش (dishRepair)، مدرسين (teacher)، حجز دكتور (doctor)، ممرض (nurse)، حجز حلاق (barber) (+8 ServiceCategoryType values + colors/icons). Each appears automatically in home-services with its own booking flow.
+- **All Services page (done 2026-09-17):** `/services` — two sections: commerce categories (→ `/market?type=X`) + booking services (→ `/home-services/category/:type`); every button opens its own service. Home grid: daily-demand categories first (بقالة، خضراوات وفواكة، مطاعم، صيدلية...), rest behind "عرض الكل".
+- **Provider registration (done 2026-09-17):** provider role shows all 16 service chips; saved to SharedPreferences (`provider_services`) for the provider app onboarding.
+- **Phase 1 (launch):** مطاعم — سوبر ماركت وبقالة — صيدلية ومستلزمات طبية — مخبوزات وحلويات. Home grid shows the 6 daily-demand categories first (done client-side 2026-09-17); the rest sit behind "عرض الكل".
+- **Phase 2:** خدمات المنازل (سباكة/كهرباء/تكييف/نجارة/صيانة) — مغاسل وتنظيف (استلام وتسليم) — خضار وفاكهة ولحوم — مستلزمات الأطفال — هدايا وزهور ومناسبات
+- **Phase 3:** مستلزمات السيارات (زيوت/فلاتر/بطاريات/إطارات/تغيير إطارات/ميكانيكي متنقل) — إلكترونيات — أثاث — حيوانات أليفة — مستلزمات المدارس والمكاتب
+- Integrated supermarket sections (خضار/لحوم/مياه/منظفات/أطفال) = `category_tags` on merchants + catalog structure (migration 023 column exists; needs product taxonomy)
+- Health/medical compliance rule: NO unlicensed medicine sales or medical services without legal review + licensed partners
+
+---
 
 - **`admin_users` legacy table (sprint 97, 2026-08-21):** `admin_repository.dart` `getUsers/createUser/updateUser/deleteUser` still use the legacy `admin_users` table (dormant metadata, separate UUID PK linked to `users.id` via `user_id` FK / ADR-055). No complete behavior-preserving mapping to the modern `users`/`admin_management` RPCs (`get_all_admins`, `create_admin_account`, `assign_admin_role`, `deactivate_admin`, `owner_delete_member`) exists — admin RPCs don't return `full_name`/`status`/`last_login`; `create_admin_account` only promotes an existing `users.id`; `owner_delete_member` is owner-only and orphans the `admin_users` row. Deliberately **retained unchanged** (rules 3/8/9); documented in `SESSION_STATUS.md` + `docs/HANDOFF/08_KNOWN_ISSUES.md`. Future fix needs product decision + likely new RPCs.

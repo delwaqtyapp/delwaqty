@@ -6,6 +6,19 @@ import 'package:delwaqty/features/customer/driver/domain/entities/driver_stats.d
 import 'package:delwaqty/features/customer/driver/domain/entities/ride_offer.dart';
 
 abstract interface class DeliveryRepository {
+  Future<String> requestCourierDelivery({
+    required String riderId,
+    required double pickupLatitude,
+    required double pickupLongitude,
+    required String pickupAddress,
+    required double dropoffLatitude,
+    required double dropoffLongitude,
+    required String dropoffAddress,
+    String? itemsSummary,
+    String? notes,
+    String priority = 'standard',
+  });
+
   Future<String> dispatchDelivery(String rideId, {double radiusKm = 10, int limit = 5});
   Future<String> acceptDeliveryRequest(String rideId, String driverId);
   Future<void> rejectDeliveryRequest(String rideId, String driverId);

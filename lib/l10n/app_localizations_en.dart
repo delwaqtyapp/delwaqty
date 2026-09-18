@@ -12,6 +12,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get appTitle => 'Delwaqty';
 
   @override
+  String get home => 'Home';
+
+  @override
   String get hello => 'Hello';
 
   @override
@@ -47,6 +50,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get emailOrPhone => 'Email or Phone';
 
   @override
+  String get emailOrUsername => 'Email or username';
+
+  @override
   String get rememberMe => 'Remember Me';
 
   @override
@@ -65,6 +71,37 @@ class AppLocalizationsEn extends AppLocalizations {
   String get createAccount => 'Create Account';
 
   @override
+  String get fillDetailsToStart => 'Fill in your details to get started';
+
+  @override
+  String get preferencesTitle => 'Preferences';
+
+  @override
+  String get customizeExperience => 'Customize your experience';
+
+  @override
+  String get receiveUpdatesOffers => 'Receive updates and offers';
+
+  @override
+  String get findNearbyServices => 'Find nearby services';
+
+  @override
+  String get reviewAndConfirm => 'Review & Confirm';
+
+  @override
+  String get reviewSummaryHint =>
+      'Make sure everything is correct before creating your account';
+
+  @override
+  String get accountTypeLabel => 'Account type';
+
+  @override
+  String get documentsAttached => 'Documents attached';
+
+  @override
+  String get noDocumentsRequired => 'No documents required';
+
+  @override
   String get email => 'Email';
 
   @override
@@ -78,9 +115,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get resetPassword => 'Reset Password';
-
-  @override
-  String get home => 'Home';
 
   @override
   String get settings => 'Settings';
@@ -223,7 +257,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get welcomeTitle => 'Welcome to Delwaqty';
 
   @override
-  String get welcomeSubtitle => 'Order. Shop. Move. Book. All in Delwaqty.';
+  String get welcomeSubtitle => 'Order. Shop. All in Delwaqty.';
 
   @override
   String get welcomeLoginButton => 'I already have an account';
@@ -505,6 +539,36 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get minutes => 'min';
+
+  @override
+  String get orderStatus => 'Order status';
+
+  @override
+  String get deliveryStatus => 'Delivery status';
+
+  @override
+  String get driverAssignedPending => 'Driver will be assigned soon';
+
+  @override
+  String get driverSearchRetried => 'Searching for a driver again';
+
+  @override
+  String get dispatchStuckMessage =>
+      'No driver accepted yet. Make sure you have an internet connection and try again.';
+
+  @override
+  String get deliveryAddressNotFound =>
+      'Could not find this address. Please enter a more specific address.';
+
+  @override
+  String get loginRequired => 'Please log in first';
+
+  @override
+  String get thisDevice => 'This device';
+
+  @override
+  String get accountDeletionInfo =>
+      'You have been signed out. Account deletion is handled by support — contact support@delwaqty.com';
 
   @override
   String get emptyCart => 'Your cart is empty';
@@ -1807,9 +1871,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get changePassword => 'Change Password';
 
   @override
-  String get twoFactorAuth => 'Two-Factor Authentication';
-
-  @override
   String get loginActivity => 'Login Activity';
 
   @override
@@ -2168,6 +2229,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get codeCopied => 'Code copied!';
+
+  @override
+  String get dataExported => 'Your data has been copied to the clipboard';
 
   @override
   String get cash => 'Cash';
@@ -2933,6 +2997,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get retryLocation => 'Retry';
 
   @override
+  String get retryNow => 'Retry now';
+
+  @override
   String get safetyHub => 'Safety Center';
 
   @override
@@ -3016,7 +3083,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get aboutDescription =>
-      'Delwaqty is your all-in-one delivery and ride-hailing platform. We connect you with the best restaurants, stores, and drivers in your area for fast and reliable service.';
+      'Delwaqty is your all-in-one services and delivery platform. We connect you with the best restaurants, pharmacies, and stores in your area for fast and reliable service.';
 
   @override
   String get supportEmailAddress => 'support@delwaqty.com';
@@ -3166,6 +3233,24 @@ class AppLocalizationsEn extends AppLocalizations {
   String get typeCarwash => 'Car Wash';
 
   @override
+  String get typePerfumes => 'Perfumes';
+
+  @override
+  String get typeSpices => 'Spices';
+
+  @override
+  String get typeDairy => 'Dairy';
+
+  @override
+  String get typeAccessories => 'Women\'s Accessories';
+
+  @override
+  String get typeButcher => 'Butcher';
+
+  @override
+  String get typeVegetables => 'Vegetables & Fruits';
+
+  @override
   String get tosLastUpdated => 'Last updated: January 1, 2025';
 
   @override
@@ -3180,7 +3265,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get tosSection2Body =>
-      'Delwaqty provides an on-demand platform connecting users with local restaurants, stores, and drivers for food delivery, package delivery, and ride-hailing services. We act as an intermediary between customers and service providers and do not directly provide delivery or transportation services ourselves.';
+      'Delwaqty provides an on-demand platform connecting users with local restaurants, pharmacies, stores, and delivery providers for food delivery, order delivery, and delivery services. We act as an intermediary between customers and service providers and do not directly provide delivery services ourselves.';
 
   @override
   String get tosSection3Title => '3. User Accounts';
@@ -3197,7 +3282,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'When you place an order through Delwaqty, you agree to pay the total amount shown at checkout, including the item price, delivery fee, service fee, and any applicable taxes. Payments can be made via cash, credit/debit card, or your Delwaqty wallet. Prices may vary based on location, demand, and promotional offers. Refunds are subject to our refund policy.';
 
   @override
-  String get tosSection5Title => '5. Ride & Delivery';
+  String get tosSection5Title => '5. Delivery & Services';
 
   @override
   String get tosSection5Body =>
@@ -3208,7 +3293,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get tosSection6Body =>
-      'Your use of Delwaqty is also governed by our Privacy Policy. By using our services, you consent to the collection and use of your personal information as described in the Privacy Policy. We collect data necessary to provide and improve our services, including location data for delivery and ride services.';
+      'Your use of Delwaqty is also governed by our Privacy Policy. By using our services, you consent to the collection and use of your personal information as described in the Privacy Policy. We collect data necessary to provide and improve our services, including location data for delivery services.';
 
   @override
   String get tosSection7Title => '7. Limitation of Liability';
@@ -3239,14 +3324,14 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get ppSection3Body =>
-      'Delwaqty collects and uses your location data to provide delivery and ride-hailing services. We access your location in the foreground when you request a service and may collect approximate location in the background for service optimization. You can control location access through your device settings, but disabling location may limit the functionality of our services.';
+      'Delwaqty collects and uses your location data to provide delivery services. We access your location in the foreground when you request a service and may collect approximate location in the background for service optimization. You can control location access through your device settings, but disabling location may limit the functionality of our services.';
 
   @override
   String get ppSection4Title => '4. Data Sharing';
 
   @override
   String get ppSection4Body =>
-      'We share your information with drivers and merchants only as necessary to fulfill your orders (e.g., your name and delivery address for delivery, pickup location for rides). We may share data with payment processors, cloud service providers, and analytics services. We do not sell your personal information to third parties for their marketing purposes.';
+      'We share your information with drivers and merchants only as necessary to fulfill your orders (e.g., your name and delivery address for delivery). We may share data with payment processors, cloud service providers, and analytics services. We do not sell your personal information to third parties for their marketing purposes.';
 
   @override
   String get ppSection5Title => '5. Data Security';
@@ -3294,11 +3379,11 @@ class AppLocalizationsEn extends AppLocalizations {
       'Once your order is confirmed, you can track it in real-time from the Orders tab. You will see the driver location, estimated arrival time, and status updates at each step of the delivery.';
 
   @override
-  String get faqQuestion3 => 'How to become a driver?';
+  String get faqQuestion3 => 'How to become a delivery provider?';
 
   @override
   String get faqAnswer3 =>
-      'Tap on the Driver option in the app and complete the registration form. You will need to provide your ID, vehicle information, and driving license. After verification, you can start accepting ride and delivery requests.';
+      'Tap on the Delivery Provider option in the app and complete the registration form. You will need to provide your ID, vehicle information, and driving license. After verification, you can start accepting delivery requests.';
 
   @override
   String get faqQuestion4 => 'How to add money to wallet?';
@@ -3609,6 +3694,19 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get servicesSection => 'Services';
+
+  @override
+  String get allServices => 'All Services';
+
+  @override
+  String get providerServices => 'Services you provide';
+
+  @override
+  String get providerServicesHint =>
+      'Select one or more — your services will be shown to customers';
+
+  @override
+  String get bookingServices => 'Booking Services';
 
   @override
   String get supportSection => 'Support';
@@ -5972,8 +6070,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get identity => 'Identity';
 
   @override
-  String get exitAppTitle => 'Are you sure you want to exit DelwaQty?';
+  String get exitAppTitle => 'Exit Delwaqty';
 
   @override
-  String get exitAppConfirm => 'Are you sure you want to exit DelwaQty?';
+  String get exitAppConfirm =>
+      'Are you sure you want to exit the Delwaqty platform?';
+
+  @override
+  String get exitApp => 'Exit';
+
+  @override
+  String get stayInApp => 'Stay on the platform';
 }

@@ -80,20 +80,6 @@ abstract final class AppConfig {
     defaultValue: 'cdn.delwaqty.com',
   );
 
-  // ─── Paymob (Payment Gateway) ─────────────────────────────
-
-  static const String paymobApiKey = String.fromEnvironment(
-    'PAYMOB_API_KEY',
-  );
-
-  static const String paymobIntegrationId = String.fromEnvironment(
-    'PAYMOB_INTEGRATION_ID',
-  );
-
-  static const String paymobIframeId = String.fromEnvironment(
-    'PAYMOB_IFRAME_ID',
-  );
-
   // ─── Derived Values ────────────────────────────────────────
 
   static String get cloudflareR2BaseUrl =>
@@ -115,6 +101,9 @@ abstract final class AppConfig {
     }
     if (firebaseApiKey.isEmpty) errors.add('FIREBASE_API_KEY is missing');
     if (firebaseAppId.isEmpty) errors.add('FIREBASE_APP_ID is missing');
+    if (firebaseMessagingSenderId.isEmpty) {
+      errors.add('FIREBASE_MESSAGING_SENDER_ID is missing');
+    }
     return errors;
   }
 

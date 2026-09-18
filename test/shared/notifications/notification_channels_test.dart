@@ -28,13 +28,75 @@ void main() {
       );
     });
 
-    test('matches parameterized room routes', () {
+    test('support room route allows admin and customer (customer app registers SupportChatModule)', () {
       expect(
         NotificationChannels.isAllowed(
           '/support/room/abc-123',
           context: AppContext.customer,
         ),
         isTrue,
+      );
+      expect(
+        NotificationChannels.isAllowed(
+          '/support/room/abc-123',
+          context: AppContext.admin,
+        ),
+        isTrue,
+      );
+      expect(
+        NotificationChannels.isAllowed(
+          '/support/room/abc-123',
+          context: AppContext.driver,
+        ),
+        isFalse,
+      );
+    });
+
+    test('allows customer market order and merchant deep links', () {
+      expect(
+        NotificationChannels.isAllowed(
+          '/market/orders/order-1',
+          context: AppContext.customer,
+        ),
+        isTrue,
+      );
+      expect(
+        NotificationChannels.isAllowed(
+          '/market/merchant/merchant-1',
+          context: AppContext.customer,
+        ),
+        isTrue,
+      );
+      expect(
+        NotificationChannels.isAllowed(
+          '/market/orders/order-1',
+          context: AppContext.provider,
+        ),
+        isTrue,
+      );
+      expect(
+        NotificationChannels.isAllowed(
+          '/market/orders/order-1',
+          context: AppContext.driver,
+        ),
+        isFalse,
+      );
+    });
+
+    test('allows customer home-services deep link', () {
+      expect(
+        NotificationChannels.isAllowed(
+          '/home-services',
+          context: AppContext.customer,
+        ),
+        isTrue,
+      );
+      expect(
+        NotificationChannels.isAllowed(
+          '/home-services',
+          context: AppContext.driver,
+        ),
+        isFalse,
       );
     });
 

@@ -2875,3 +2875,94 @@ Rebuilt `lib/shared/widgets/delwa_intro_cinematic.dart` against the reference (s
 - New regression test `test/ui/intro_scene_layout_test.dart` pumps the intro at 320×480, 411×900, 411×1200, 800×1280 × textScale 1.0/1.3 and fails on any overflow.
 - Verification: `flutter analyze` clean for touched files (repo has 5 pre-existing info lints elsewhere); `flutter test` **926/926**; `./build.sh` built + installed debug customer APK (release `releases/delwaqty_1.0.0+1_debug_20260915_091246.apk`); no FATAL in logcat; on-device frame shows warm bg + centered logo.
 - Iterating the intro again: edit `delwa_intro_cinematic.dart`, rebuild with `bash build.sh`. Reverting to Intro 1 = use `DelwaIntroSceneV1`.
+
+## ADR-078: Critical Shared-Code Audit Fixes (Paymob Env, HomeServices Routes, Notification Allowlist, Maps Key/Distance Bug)
+
+**Date:** 2026-09-15
+
+### Context
+A thorough audit of the shared code the customer app depends on (router, config, auth, push notifications, deep links, splash, error handling, services, domain/data) surfaced five critical defects:
+
+1. `PAYMOB_API_KEY` / `PAYMOB_INTEGRATION_ID` / `PAYMOB_IFRAME_ID` were absent from every `.env` file while `AppConfig` and `paymob_service.dart` read them — non-cash checkout always failed at runtime.
+2. `HomeServicesModule` (customer) existed but was never registered in `lib/customer/module_registry.dart` → `/home-services` route did not exist.
+3. Notification deep-link allowlist (`notification_channels.dart`) rejected the customer routes produced by `NotificationPayload._defaultDeepLink` (`/market/orders/:orderId`, `/market/merchant/:id`, `/home-services`) and allowed `/support/room/:roomId` in the customer context although the customer app does not register that route (admin-only).
+4. `maps_service_impl.dart` hardcoded the Google Maps key (bypassing `AppConfig`) and parsed `result['icon']` (a string URL) as a double for `distanceMetres` — a guaranteed runtime `FormatException` on any `searchNearby` result.
+5. `.env.staging` / `.env.prod` were incomplete skeletons — missing Firebase keys entirely; any staging/prod build failed `ConfigValidator` immediately.
+
+### Decision
+- **Envs:** Add the three Paymob keys to `.env.dev` (empty, documented) and complete the key skeleton in `.env.staging` / `.env.prod` (all required keys present, empty until real credentials are set; headers state builds hard-fail while empty).
+- **ConfigValidator:** Add the three Paymob keys as startup **warnings** (not errors) so a missing payment config is surfaced in the debug log without bricking the app; add `FIREBASE_MESSAGING_SENDER_ID` to `AppConfig.validationErrors` for parity.
+- **Module registration:** Register `HomeServicesModule` in `lib/customer/module_registry.dart`.
+- **Allowlist:** Add `/home-services` (customer) and `/market/orders/:orderId` + `/market/merchant/:id` (customer + provider, since the provider app registers `CommerceModule`); narrow `/support/room/:roomId` to `{AppContext.admin}` (only the admin app registers `SupportChatModule`).
+- **Maps:** Replace the hardcoded key with `AppConfig.mapsApiKey` (already present in `.env.dev`); compute `distanceMetres` via the existing Haversine helper from the search origin to each place's geometry; harden `_parseInt`/`_parseDouble` to `tryParse` so malformed API values degrade to 0 instead of throwing.
+
+### Rationale
+- Fixes the consumer chain end-to-end: payload deep link → allowlist → registered route now resolve for order, merchant and service notifications in the customer app.
+- Removing customer/provider/driver from `/support/room/:roomId` prevents pushing a route that throws GoRouter "page not found" in those apps.
+- Warning (not error) Paymob validation keeps development builds runnable while making the missing-payment-config state obvious from the first debug log line.
+
+### Consequences
+- `.env.dev` unchanged behaviorally (Maps key identical to the previously hardcoded one); real Paymob credentials are still required from the Paymob dashboard before card/wallet checkout can work — manual credential step, documented in the env files.
+- Staging/prod builds continue to hard-fail (as designed) until their real credentials are filled in.
+- Tests: `test/shared/notifications/notification_channels_test.dart` updated (support-room admin-only; new market/home-services channels) plus 3 new cases. Full gate: `flutter pub get` ✓, `flutter analyze` **0 issues**, `flutter test` **928/928**.
+- Backups of every touched file: `/data/data/com.termux/files/usr/tmp/opencode/audit-backup-*`.
+
+## ADR-079: Launch Audit Fixes — Paymob Fully Removed, Settings Merged Into Profile, Real Courier Flow
+
+**Date:** 2026-09-15
+
+### Context
+The customer-app launch audit (ADR-078 follow-up) found: (1) Paymob payment integrations had to be replaced by the local **cash + InstaPay + Vodafone Cash** model requested by the owner; (2) the old Settings page behind a gear icon duplicated the Profile page — the two had to merge into one modern profile screen; (3) several customer screens showed fake/hardcoded data (order ETA '25 min', driver 'Mohamed A.' + fake phone, login-activity IP), used dead switches in Safety, claimed account deletion while only signing out, rendered hardcoded English in Search, and the Direct Delivery submit button did nothing but show a snackbar; (4) privacy/security sub-pages navigated with raw `Navigator.push` instead of the app's go_router; (5) three dead splash backup files sat in the tree.
+
+### Decision
+- **Paymob removal (complete):** delete `lib/services/payment/paymob_service.dart` + dir; strip `PAYMOB_*` from `app_config.dart`, `config_validator.dart`, and `.env.dev/.env.staging/.env.prod`; Checkout uses a `SegmentedButton` of `cash`/`instapay`/`vodafone_cash` (default `cash`) and creates the order directly (no iframe, no fire-and-forget); WalletTopUp methods = `instapay` (default)/`vodafone_cash`/`cash`. Reused existing l10n keys `paymentInstapay`/`paymentVodafoneCash`/`cashOnDelivery`.
+- **Settings → Profile:** delete `settings_page.dart`; rebuild `profile_page.dart` with Appearance (theme `SegmentedButton<ThemeMode>` + language `SegmentedButton<String>`), Account, and Help & Legal sections; profile AppBar no longer shows a settings gear.
+- **Real data over fakes:** order-completed uses `_shortOrderId` (crash-safe); order-tracking shows the live order status (pending→…→delivered) instead of fake ETA and a "driver will be assigned soon" card instead of a fake driver; login-activity shows real OS + "This device" (no fake IP); data-privacy signs out + points to support (honest, since no `delete_account` RPC exists yet); search uses `l10n.priceRange` + `l10n.currencySymbol`.
+- **Direct delivery real flow:** submit geocodes the drop-off text via the existing Google Places provider (autocomplete → details), reads the user's current location as pickup, inserts a real courier `rides` row (`service_type='courier'`, `status='searching'`), calls `dispatch_delivery`, then navigates to a newly registered `/delivery-tracking/:deliveryId` route (the fully-built `DeliveryTrackingPage` was previously unreachable).
+- **Safety prefs persist:** `safety_settings_page.dart` toggles persist via `SharedPreferences` (SOS enabled, auto SOS timer, auto share trip + 30–120 min duration cycle, pickup OTP).
+- **Go-router everywhere:** privacy/security sub-pages now `context.push()` to 7 newly registered settings routes; raw `Navigator.push` removed.
+- **Cleanup:** delete `splash_page_backup.dart`, `splash_page.dart.bak`, `splash_page_v2.dart.bak` (classified: production dead code — never referenced).
+
+### Rationale
+- The owner's payment decision was unambiguous: online card processing is out; local cash accounts (cash/InstaPay/Vodafone Cash) are in. The wallet top-up UI follows the same three options with `instapay` as default.
+- Fake data in a launch app is a trust/correctness defect; every stub was either wired to real state or converted to an honest message.
+- Reusing the existing `rides` table + `dispatch_delivery` RPC + `DeliveryTrackingPage` gives a real courier flow with no new backend migration.
+- l10n keys added: `orderStatus`, `deliveryStatus`, `driverAssignedPending`, `deliveryAddressNotFound`, `loginRequired`, `thisDevice`, `accountDeletionInfo`.
+
+### Consequences
+- Payment method stored on the order is now one of `cash`/`instapay`/`vodafone_cash`; no card/wallet iframe path remains. Existing orders with `card` values are unaffected (display-only).
+- Direct delivery inserts will fail loudly (snackbar with the Supabase error) if the live DB RLS rejects the courier insert — needs one on-device validation pass with real credentials (listed in `docs/team-plan.md` as a manual follow-up).
+- Account deletion remains a backend gap: a security-definer `delete_my_account` RPC is required before the in-app "delete account" can truly delete (documented in `docs/team-plan.md`).
+- The ride-hailing feature (`features/customer/ride/`) stays dormant — data layer/widgets only; classified as Dormant Infrastructure and explicitly NOT deleted.
+- Gate: `flutter pub get` ✓, `flutter analyze` **0 issues**, `flutter test` **928/928**.
+
+## ADR-080: Pending-Warning Resolutions — delete_my_account RPC, Dispatch Rescue Card, Ride Module Archived, build.sh --env
+
+**Date:** 2026-09-15
+
+### Context
+ADR-079 closed the launch audit gate but left four documented warnings: (1) account deletion had no DB RPC, so the app could only sign out; (2) direct-delivery dispatch had no retry path if no driver accepted (RPC failures showed only as a toast); (3) the ride-hailing module (`features/customer/ride/`) sat dormant with no booking pages/routes/registry entry and its classification was ambiguous; (4) `.env.staging`/`.env.prod` were empty skeletons with no build-script support to use them once filled.
+
+### Decision
+- **`supabase/migrations/079_delete_my_account.sql`** — new SECURITY DEFINER `delete_my_account(reason text DEFAULT 'user_requested')`:
+  - Reuses the existing moderation soft-delete `_member_exec_delete(auth.uid(), auth.uid(), reason)` so the `users` row is anonymized (PII → NULL, email → `deleted-<uuid>@anonymized.invalid`) and `account_status='deactivated'` — FK-safe for rides/orders that reference `users(id)` without cascades.
+  - Then `DELETE FROM auth.users WHERE id = auth.uid()` revokes the login immediately and releases the email.
+  - Only `auth.uid()` can be affected (no actor parameter); admins are refused by the moderation engine; `GRANT EXECUTE ... TO authenticated`.
+  - App: `data_privacy_page.dart` calls the RPC first; if it is not deployed (Postgrest error) it falls back to sign-out + the existing honest accountDeletionInfo support message. Adds l10n `accountDeleted` reuse.
+- **Dispatch rescue card** — `delivery_tracking_page.dart` renders `_RescueDispatchCard` while `RideStatus.searching`: explains "no driver accepted yet" and re-invokes `deliveryRepository.dispatchDelivery(rideId)`, surfacing the real `PostgrestException.message` on failure. Adds l10n keys `driverSearchRetried`, `dispatchStuckMessage`, `retryNow`.
+- **Ride-hailing module: classified + archived (no code change)** — verified programmatically that the module has zero consumer references (no booking pages, no routes, no `module_registry` entry, no UI dead-links). Per AGENTS.md §12.1 it is **Dormant Infrastructure**: kept deliberately, NOT deleted; activation criteria documented in `docs/team-plan.md` (product decision → build `ride_booking_page.dart` + register `/ride-booking`).
+- **`build.sh --env <dev|staging|prod>`** — the script now accepts an env file (default `.env.dev`, validates existence) and passes it to `--dart-define-from-file`; staging/prod remain empty until real credentials are inserted (manual, cannot be fabricated), after which `bash ./build.sh --env staging|prod` works as-is.
+
+### Rationale
+- Reusing `_member_exec_delete` keeps one deletion implementation (moderation + self-service) with identical anonymization semantics and avoids duplicating the D4 rules.
+- Deleting the auth row is the only reliable way to kill the client session server-side; the client gets a 401 on the next call and signs out locally.
+- A retry affordance converts a silent "searching forever" state into an actionable recovery with real error surfacing — required for the one-time live validation to be debuggable on device.
+- The ride module was never referenced by any consumer surface; building UI without a product decision would violate scope discipline, while deleting it would violate the dormant-infrastructure rule — archival with activation criteria is the constitution-compliant middle path.
+- Env skeletons are a deployment-time concern; script support is the only code-side resolution available on this machine.
+
+### Consequences
+- Account deletion is now real end-to-end once `supabase db push` applies migration 079; until then the app degrades gracefully to sign-out + support.
+- Dispatch retry uses the same RPC as first dispatch; repeated failures surface the exact Supabase error text (RLS, missing driver pool, etc.) instead of a generic toast — valuable for the live validation pass.
+- Ride booking remains unbuilt until a product decision; archived status prevents accidental deletion or half-finished UI.
+- `.env.staging`/`.env.prod` still hard-fail at runtime while empty by design (ConfigValidator) — no broken APK can ship from a skeleton.
+- Gate: `flutter analyze` **0 issues**; `flutter test` re-run required before final gate.

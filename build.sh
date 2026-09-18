@@ -33,6 +33,8 @@ for arg in "$@"; do
     --release) BUILD_RELEASE=true ;;
     --clean) CLEAN_BUILD=true ;;
     --test) RUN_TESTS=true ;;
+    --env) : ;; # value consumed below
+    --env=*) ENV_FILE=".env.${arg#*=}" ;;
     --help|-h)
       echo "Usage: ./build.sh [OPTIONS]"
       echo ""
@@ -40,11 +42,29 @@ for arg in "$@"; do
       echo "  --release    Build release APK (unsigned)"
       echo "  --clean      Clean build artifacts before building"
       echo "  --test       Run flutter test before building"
+      echo "  --env <f>    Use env file: dev (default), staging, prod"
       echo "  --help       Show this help message"
       exit 0
       ;;
   esac
 done
+
+# Resolve --env <value> (separate argument form) and verify the file exists.
+ENV_FILE_MODE=false
+for arg in "$@"; do
+  if [ "$ENV_FILE_MODE" = true ]; then
+    ENV_FILE=".env.$arg"
+    ENV_FILE_MODE=false
+  elif [ "$arg" = "--env" ]; then
+    ENV_FILE_MODE=true
+  fi
+done
+: "${ENV_FILE:=.env.dev}"
+if [ ! -f "$PROJECT_DIR/$ENV_FILE" ]; then
+  echo "ERROR: Env file '$ENV_FILE' not found. Create it first (see .env.example)."
+  exit 1
+fi
+echo "Using env file: $ENV_FILE"
 
 # Step 1: Clean if requested
 if [ "$CLEAN_BUILD" = true ]; then
@@ -82,13 +102,13 @@ if [ "$BUILD_RELEASE" = true ]; then
   # android-arm64-release/linux-x64/gen_snapshot"). See docs/DECISION_LOG.md ADR-044.
   # Keep the required shape below anyway in case a capable SDK is used.
   flutter build apk --release --flavor customer \
-    -t lib/customer/main.dart --dart-define-from-file=.env.dev
+    -t lib/customer/main.dart --dart-define-from-file=$ENV_FILE
   APK_PATH="$PROJECT_DIR/build/app/outputs/flutter-apk/app-customer-release.apk"
   APK_NAME="delwaqty_${VERSION}_release_${TIMESTAMP}.apk"
 else
   echo "Building debug APK (customer flavor)..."
   flutter build apk --debug --flavor customer \
-    -t lib/customer/main.dart --dart-define-from-file=.env.dev
+    -t lib/customer/main.dart --dart-define-from-file=$ENV_FILE
   APK_PATH="$PROJECT_DIR/build/app/outputs/flutter-apk/app-customer-debug.apk"
   APK_NAME="delwaqty_${VERSION}_debug_${TIMESTAMP}.apk"
 fi

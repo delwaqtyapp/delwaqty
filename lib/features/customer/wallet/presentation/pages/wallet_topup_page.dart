@@ -16,7 +16,7 @@ class WalletTopUpPage extends ConsumerStatefulWidget {
 
 class _WalletTopUpPageState extends ConsumerState<WalletTopUpPage> {
   final _amountController = TextEditingController();
-  String _selectedMethod = 'apple_pay';
+  String _selectedMethod = 'instapay';
   bool _loading = false;
 
   final _presetAmounts = [50.0, 100.0, 200.0, 500.0];
@@ -105,24 +105,24 @@ class _WalletTopUpPageState extends ConsumerState<WalletTopUpPage> {
           ),
           const SizedBox(height: 12),
           _PaymentMethodTile(
+            icon: Icons.account_balance_wallet_outlined,
+            title: l10n.paymentInstapay,
+            isSelected: _selectedMethod == 'instapay',
+            onTap: () => setState(() => _selectedMethod = 'instapay'),
+          ),
+          const SizedBox(height: 8),
+          _PaymentMethodTile(
             icon: Icons.phone_iphone_rounded,
-            title: l10n.applePay,
-            isSelected: _selectedMethod == 'apple_pay',
-            onTap: () => setState(() => _selectedMethod = 'apple_pay'),
+            title: l10n.paymentVodafoneCash,
+            isSelected: _selectedMethod == 'vodafone_cash',
+            onTap: () => setState(() => _selectedMethod = 'vodafone_cash'),
           ),
           const SizedBox(height: 8),
           _PaymentMethodTile(
-            icon: Icons.credit_card_rounded,
-            title: l10n.creditCard,
-            isSelected: _selectedMethod == 'credit_card',
-            onTap: () => setState(() => _selectedMethod = 'credit_card'),
-          ),
-          const SizedBox(height: 8),
-          _PaymentMethodTile(
-            icon: Icons.account_balance_rounded,
-            title: l10n.bankTransfer,
-            isSelected: _selectedMethod == 'bank_transfer',
-            onTap: () => setState(() => _selectedMethod = 'bank_transfer'),
+            icon: Icons.payments_outlined,
+            title: l10n.cashOnDelivery,
+            isSelected: _selectedMethod == 'cash',
+            onTap: () => setState(() => _selectedMethod = 'cash'),
           ),
           const SizedBox(height: 32),
           AppButton(

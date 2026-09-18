@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:delwaqty/core/extensions/context_extensions.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 import 'package:delwaqty/core/theme/app_colors.dart';
@@ -8,6 +9,10 @@ import 'package:delwaqty/core/theme/app_text_styles.dart';
 import 'package:delwaqty/features/_shared/auth/domain/auth_state.dart';
 import 'package:delwaqty/features/_shared/auth/presentation/auth_provider.dart';
 import 'package:delwaqty/features/customer/location/presentation/providers/location_provider.dart';
+import 'package:delwaqty/features/customer/delivery/presentation/providers/delivery_providers.dart';
+import 'package:delwaqty/features/customer/search/domain/entities/geo_point.dart';
+import 'package:delwaqty/features/customer/search/domain/entities/search_session.dart';
+import 'package:delwaqty/features/customer/search/presentation/providers/search_providers.dart';
 
 class DirectDeliveryPage extends ConsumerStatefulWidget {
   const DirectDeliveryPage({super.key});
@@ -28,6 +33,7 @@ class _DirectDeliveryPageState extends ConsumerState<DirectDeliveryPage> {
   final List<_ShoppingItem> _items = [];
   bool _saveNumber = true;
   bool _loadingLocation = false;
+  bool _submitting = false;
 
   String _selectedUnit = 'none';
   String _selectedWeight = 'none';
@@ -132,6 +138,99 @@ class _DirectDeliveryPageState extends ConsumerState<DirectDeliveryPage> {
     }
   }
 
+  Future<void> _submitRequest() async {
+    final l10n = AppLocalizations.of(context);
+    final dropoffText = _dropoffController.text.trim();
+    final phone = _phoneController.text.trim();
+    if (dropoffText.isEmpty) {
+      context.showAppSnackBar(l10n.deliverTo, isError: true);
+      return;
+    }
+    if (phone.isEmpty) {
+      context.showAppSnackBar(l10n.customerPhone, isError: true);
+      return;
+    }
+    final authState = ref.read(authStateProvider);
+    if (authState is! AuthAuthenticated) {
+      context.showAppSnackBar(l10n.loginRequired, isError: true);
+      return;
+    }
+    final location = ref.read(userLocationProvider).value;
+    if (location == null) {
+      context.showAppSnackBar(l10n.locationError, isError: true);
+      return;
+    }
+    setState(() => _submitting = true);
+    try {
+      final places = ref.read(placesRepositoryProvider);
+      final languageCode = ref.read(searchLanguageProvider);
+      final session = SearchSession.generate();
+      final suggestions = await places.autocomplete(
+        query: dropoffText,
+        languageCode: languageCode,
+        origin: GeoPoint(location.latitude, location.longitude),
+        session: session,
+      );
+      if (suggestions.isEmpty) {
+        if (mounted) {
+          context.showAppSnackBar(l10n.deliveryAddressNotFound, isError: true);
+        }
+        return;
+      }
+      final details = await places.details(
+        placeId: suggestions.first.placeId,
+        languageCode: languageCode,
+        session: session,
+      );
+
+      final itemsSummary = _items.isEmpty
+          ? null
+          : _items.map((i) => '${i.name} x${i.quantity}').join(', ');
+      final notes = [
+        if (_descriptionController.text.trim().isNotEmpty)
+          _descriptionController.text.trim(),
+        if (_placeDescController.text.trim().isNotEmpty)
+          _placeDescController.text.trim(),
+        phone,
+      ].join(' | ');
+
+      final deliveryId = await ref
+          .read(deliveryRepositoryProvider)
+          .requestCourierDelivery(
+            riderId: authState.user.id,
+            pickupLatitude: location.latitude,
+            pickupLongitude: location.longitude,
+            pickupAddress: location.detailedAddress,
+            dropoffLatitude: details.location.latitude,
+            dropoffLongitude: details.location.longitude,
+            dropoffAddress: details.formattedAddress,
+            itemsSummary: itemsSummary,
+            notes: notes,
+          );
+      try {
+        await ref
+            .read(deliveryRepositoryProvider)
+            .dispatchDelivery(deliveryId);
+      } catch (_) {
+        // The ride was created; driver matching can be retried from tracking.
+      }
+      if (!mounted) return;
+      if (_saveNumber) {
+        context.showAppSnackBar(l10n.numberSaved);
+      }
+      context.push('/delivery-tracking/$deliveryId');
+    } catch (e) {
+      if (mounted) {
+        context.showAppSnackBar(
+          l10n.errorWithMessage(e.toString()),
+          isError: true,
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _submitting = false);
+    }
+  }
+
   String _itemDisplayText(_ShoppingItem item, AppLocalizations l10n) {
     if (item.unit == 'kg' && item.subUnit != null && item.subUnit != 'none') {
       final label = switch (item.subUnit) {
@@ -210,32 +309,22 @@ class _DirectDeliveryPageState extends ConsumerState<DirectDeliveryPage> {
                     width: double.infinity,
                     height: 56,
                     child: FilledButton(
-                      onPressed: () {
-                        if (_dropoffController.text.trim().isEmpty) {
-                          context.showAppSnackBar(
-                            l10n.deliverTo,
-                            isError: true,
-                          );
-                          return;
-                        }
-                        if (_phoneController.text.trim().isEmpty) {
-                          context.showAppSnackBar(
-                            l10n.customerPhone,
-                            isError: true,
-                          );
-                          return;
-                        }
-                        context.showAppSnackBar(l10n.success);
-                      },
+                      onPressed: _submitting ? null : _submitRequest,
                       style: FilledButton.styleFrom(
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(16),
                         ),
                       ),
-                      child: Text(
-                        l10n.requestDelivery,
-                        style: AppTextStyles.titleMedium,
-                      ),
+                      child: _submitting
+                          ? const SizedBox(
+                              width: 24,
+                              height: 24,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : Text(
+                              l10n.requestDelivery,
+                              style: AppTextStyles.titleMedium,
+                            ),
                     ),
                   ),
                   const SizedBox(height: 100),

@@ -114,6 +114,14 @@ class _CategoryCard extends StatelessWidget {
     ServiceCategoryType.cleaning => AppColors.serviceDelivery,
     ServiceCategoryType.pestControl => AppColors.serviceGas,
     ServiceCategoryType.applianceRepair => AppColors.serviceAppliances,
+    ServiceCategoryType.pipeChange => AppColors.serviceGrocery,
+    ServiceCategoryType.plastering => AppColors.serviceFurniture,
+    ServiceCategoryType.carpetCleaning => AppColors.serviceCafe,
+    ServiceCategoryType.dishRepair => AppColors.serviceElectronics,
+    ServiceCategoryType.teacher => AppColors.infoLight,
+    ServiceCategoryType.doctor => AppColors.errorLight,
+    ServiceCategoryType.nurse => AppColors.successLight,
+    ServiceCategoryType.barber => AppColors.brandViolet,
     ServiceCategoryType.other => AppColors.serviceMore,
   };
 
@@ -126,6 +134,14 @@ class _CategoryCard extends StatelessWidget {
     ServiceCategoryType.cleaning => Icons.cleaning_services_rounded,
     ServiceCategoryType.pestControl => Icons.bug_report_rounded,
     ServiceCategoryType.applianceRepair => Icons.build_rounded,
+    ServiceCategoryType.pipeChange => Icons.settings_input_component_rounded,
+    ServiceCategoryType.plastering => Icons.format_color_fill_rounded,
+    ServiceCategoryType.carpetCleaning => Icons.local_laundry_service_rounded,
+    ServiceCategoryType.dishRepair => Icons.satellite_alt_rounded,
+    ServiceCategoryType.teacher => Icons.school_rounded,
+    ServiceCategoryType.doctor => Icons.medical_services_rounded,
+    ServiceCategoryType.nurse => Icons.health_and_safety_rounded,
+    ServiceCategoryType.barber => Icons.content_cut_rounded,
     ServiceCategoryType.other => Icons.home_repair_service_rounded,
   };
 

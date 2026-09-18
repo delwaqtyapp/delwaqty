@@ -1,13 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:url_launcher/url_launcher.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:delwaqty/features/customer/commerce/commerce_module.dart';
 import 'package:delwaqty/features/customer/commerce/domain/entities/cart.dart'
     as commerce;
 import 'package:delwaqty/features/customer/commerce/domain/entities/coupon.dart';
-import 'package:delwaqty/services/payment/paymob_service.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 import 'package:delwaqty/core/extensions/context_extensions.dart';
 import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
@@ -21,7 +18,7 @@ class CheckoutPage extends ConsumerStatefulWidget {
 }
 
 class _CheckoutPageState extends ConsumerState<CheckoutPage> {
-  String _paymentMethod = 'card';
+  String _paymentMethod = 'cash';
   final _addressController = TextEditingController();
   final _couponController = TextEditingController();
   bool _isPlacing = false;
@@ -31,6 +28,41 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
     _addressController.dispose();
     _couponController.dispose();
     super.dispose();
+  }
+
+  Future<void> _addNewAddress() async {
+    final l10n = AppLocalizations.of(context);
+    final controller = TextEditingController(text: _addressController.text);
+    final result = await showDialog<String>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Text(l10n.addNewAddress),
+        content: TextField(
+          controller: controller,
+          autofocus: true,
+          maxLines: 3,
+          minLines: 1,
+          decoration: InputDecoration(
+            hintText: l10n.selectDeliveryAddress,
+            prefixIcon: const Icon(Icons.location_on_outlined),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(),
+            child: Text(l10n.cancel),
+          ),
+          FilledButton(
+            onPressed: () =>
+                Navigator.of(dialogContext).pop(controller.text.trim()),
+            child: Text(l10n.saveChanges),
+          ),
+        ],
+      ),
+    );
+    if (result == null || result.isEmpty || !mounted) return;
+    setState(() => _addressController.text = result);
   }
 
   @override
@@ -85,7 +117,7 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
               Align(
                 alignment: Alignment.centerRight,
                 child: TextButton(
-                  onPressed: () => context.showAppSnackBar(l10n.addNewAddress),
+                  onPressed: _addNewAddress,
                   child: Text(l10n.addNewAddress),
                 ),
               ),
@@ -100,24 +132,25 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
                 child: SegmentedButton<String>(
                   segments: [
                     ButtonSegment(
-                      value: 'card',
-                      label: Text(l10n.creditCard),
-                      icon: const Icon(Icons.credit_card),
-                    ),
-                    ButtonSegment(
                       value: 'cash',
                       label: Text(l10n.cashOnDelivery),
                       icon: const Icon(Icons.payments_outlined),
                     ),
                     ButtonSegment(
-                      value: 'wallet',
-                      label: Text(l10n.digitalWallet),
+                      value: 'instapay',
+                      label: Text(l10n.paymentInstapay),
                       icon: const Icon(Icons.account_balance_wallet_outlined),
+                    ),
+                    ButtonSegment(
+                      value: 'vodafone_cash',
+                      label: Text(l10n.paymentVodafoneCash),
+                      icon: const Icon(Icons.phone_iphone_rounded),
                     ),
                   ],
                   selected: {_paymentMethod},
                   onSelectionChanged: (v) =>
                       setState(() => _paymentMethod = v.first),
+                  showSelectedIcon: false,
                 ),
               ),
               const SizedBox(height: 24),
@@ -294,23 +327,6 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
     try {
       final orderRepo = ref.read(orderRepositoryProvider);
 
-      // For card/wallet, initiate Paymob BEFORE creating the DB order so a
-      // missing/failed payment credential never leaves an orphan order behind.
-      if (_paymentMethod != 'cash') {
-        final paymentSuccess = await _initiatePayment(cart.total);
-        if (!paymentSuccess) {
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(l10n.somethingWentWrong),
-                backgroundColor: cs.error,
-              ),
-            );
-          }
-          return;
-        }
-      }
-
       final order = await orderRepo.createOrder(
         merchantId: cart.merchantId,
         merchantName: cart.merchantName,
@@ -340,41 +356,6 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
       if (mounted) {
         setState(() => _isPlacing = false);
       }
-    }
-  }
-
-  Future<bool> _initiatePayment(double amount) async {
-    try {
-      final paymobService = ref.read(paymobServiceProvider);
-      final auth = Supabase.instance.client.auth.currentUser;
-
-      final authToken = await paymobService.authenticate();
-      if (authToken == null) return false;
-
-      final paymobOrderId = await paymobService.createOrder(
-        authToken: authToken,
-        amountCents: amount,
-        merchantOrderId: DateTime.now().millisecondsSinceEpoch.toString(),
-      );
-      if (paymobOrderId == null) return false;
-
-      final paymentKey = await paymobService.getPaymentKey(
-        authToken: authToken,
-        orderId: paymobOrderId,
-        amountCents: amount,
-        email: auth?.email ?? 'customer@delwaqty.com',
-      );
-      if (paymentKey == null) return false;
-
-      final paymentUrl = paymobService.getPaymentUrl(paymentKey);
-      if (await canLaunchUrl(Uri.parse(paymentUrl))) {
-        await launchUrl(Uri.parse(paymentUrl), mode: LaunchMode.inAppWebView);
-      }
-
-      return true;
-    } catch (e) {
-      debugPrint('Payment processing error: $e');
-      return false;
     }
   }
 }

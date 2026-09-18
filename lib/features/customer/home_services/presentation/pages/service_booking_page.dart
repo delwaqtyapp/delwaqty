@@ -53,6 +53,14 @@ class _ServiceBookingPageState extends ConsumerState<ServiceBookingPage> {
     ServiceCategoryType.cleaning => 'تنظيف',
     ServiceCategoryType.pestControl => 'مكافحة حشرات',
     ServiceCategoryType.applianceRepair => 'إصلاح أجهزة',
+    ServiceCategoryType.pipeChange => 'تغيير أنبوبة',
+    ServiceCategoryType.plastering => 'نقاشة',
+    ServiceCategoryType.carpetCleaning => 'غسيل السجاد',
+    ServiceCategoryType.dishRepair => 'إصلاح الدش',
+    ServiceCategoryType.teacher => 'مدرسين',
+    ServiceCategoryType.doctor => 'حجز دكتور',
+    ServiceCategoryType.nurse => 'ممرض',
+    ServiceCategoryType.barber => 'حجز حلاق',
     ServiceCategoryType.other => 'خدمات أخرى',
   };
 

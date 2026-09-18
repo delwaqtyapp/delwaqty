@@ -50,6 +50,18 @@ enum MerchantType {
   gas,
   @JsonValue('carwash')
   carwash,
+  @JsonValue('perfumes')
+  perfumes,
+  @JsonValue('spices')
+  spices,
+  @JsonValue('dairy')
+  dairy,
+  @JsonValue('accessories')
+  accessories,
+  @JsonValue('butcher')
+  butcher,
+  @JsonValue('vegetables')
+  vegetables,
   @JsonValue('other')
   other,
 }

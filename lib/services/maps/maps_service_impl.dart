@@ -2,11 +2,12 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
 import 'package:flutter/foundation.dart';
+import 'package:delwaqty/config/app_config.dart';
 import 'package:delwaqty/features/customer/commerce/domain/entities/geo_location.dart';
 import 'package:delwaqty/services/maps/maps_service.dart';
 import 'package:http/http.dart' as http;
 
-const _googleMapsApiKey = 'AIzaSyA9v-pk50aB3G45zIb_RQKxD5qo_CVX8GY';
+String get _googleMapsApiKey => AppConfig.mapsApiKey;
 const _directionsApiUrl = 'https://maps.googleapis.com/maps/api/directions/json';
 const _placesApiUrl = 'https://maps.googleapis.com/maps/api/place/nearbysearch/json';
 const _staticMapBaseUrl = 'https://maps.googleapis.com/maps/api/staticmap';
@@ -142,7 +143,12 @@ class MapsServiceImpl implements MapsService {
               )
             : '',
         rating: _parseDouble(result['rating']),
-        distanceMetres: _parseDouble(result['icon']),
+        distanceMetres: _calculateDistance(
+          location.latitude,
+          location.longitude,
+          (geometry['lat'] as num).toDouble(),
+          (geometry['lng'] as num).toDouble(),
+        ),
         isOpenNow: result['opening_hours']?['open_now'] ?? false,
       ));
     }
@@ -204,14 +210,14 @@ class MapsServiceImpl implements MapsService {
 
   int _parseInt(dynamic value) {
     if (value == null) return 0;
-    if (value is int) return value;
-    return int.parse(value.toString());
+    if (value is num) return value.toInt();
+    return int.tryParse(value.toString()) ?? 0;
   }
 
   double _parseDouble(dynamic value) {
     if (value == null) return 0.0;
-    if (value is double) return value;
-    return double.parse(value.toString());
+    if (value is num) return value.toDouble();
+    return double.tryParse(value.toString()) ?? 0.0;
   }
 
   void dispose() {

@@ -12,6 +12,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get appTitle => 'دلوقتي';
 
   @override
+  String get home => 'الرئيسية';
+
+  @override
   String get hello => 'مرحباً';
 
   @override
@@ -47,6 +50,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get emailOrPhone => 'البريد الإلكتروني أو الهاتف';
 
   @override
+  String get emailOrUsername => 'البريد الإلكتروني أو اسم المستخدم';
+
+  @override
   String get rememberMe => 'تذكرني';
 
   @override
@@ -65,6 +71,36 @@ class AppLocalizationsAr extends AppLocalizations {
   String get createAccount => 'إنشاء حساب جديد';
 
   @override
+  String get fillDetailsToStart => 'أكمل بياناتك للبدء';
+
+  @override
+  String get preferencesTitle => 'التفصيلات';
+
+  @override
+  String get customizeExperience => 'خصّص تجربتك';
+
+  @override
+  String get receiveUpdatesOffers => 'استقبال التحديثات والعروض';
+
+  @override
+  String get findNearbyServices => 'إيجاد الخدمات القريبة';
+
+  @override
+  String get reviewAndConfirm => 'مراجعة وتأكيد';
+
+  @override
+  String get reviewSummaryHint => 'تأكد من صحة البيانات قبل إنشاء حسابك';
+
+  @override
+  String get accountTypeLabel => 'نوع الحساب';
+
+  @override
+  String get documentsAttached => 'المستندات المرفقة';
+
+  @override
+  String get noDocumentsRequired => 'لا توجد مستندات مطلوبة';
+
+  @override
   String get email => 'البريد الإلكتروني';
 
   @override
@@ -78,9 +114,6 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get resetPassword => 'إعادة تعيين كلمة المرور';
-
-  @override
-  String get home => 'الرئيسية';
 
   @override
   String get settings => 'الإعدادات';
@@ -223,7 +256,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get welcomeTitle => 'مرحباً بك في دلوقتي';
 
   @override
-  String get welcomeSubtitle => 'اطلب. تسوق. تنقل. احجز. كله في دلوقتي.';
+  String get welcomeSubtitle => 'اطلب. تسوق. كله في دلوقتي.';
 
   @override
   String get welcomeLoginButton => 'لدي حساب بالفعل';
@@ -504,6 +537,36 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get minutes => 'دقيقة';
+
+  @override
+  String get orderStatus => 'حالة الطلب';
+
+  @override
+  String get deliveryStatus => 'حالة التوصيل';
+
+  @override
+  String get driverAssignedPending => 'سيتم تعيين السائق قريباً';
+
+  @override
+  String get driverSearchRetried => 'جاري البحث عن سائق مرة أخرى';
+
+  @override
+  String get dispatchStuckMessage =>
+      'لم يقبل أي سائق حتى الآن. تأكد من اتصال الإنترنت وحاول مرة أخرى.';
+
+  @override
+  String get deliveryAddressNotFound =>
+      'تعذر العثور على هذا العنوان. الرجاء إدخال عنوان أكثر تحديداً.';
+
+  @override
+  String get loginRequired => 'الرجاء تسجيل الدخول أولاً';
+
+  @override
+  String get thisDevice => 'هذا الجهاز';
+
+  @override
+  String get accountDeletionInfo =>
+      'تم تسجيل خروجك. حذف الحساب يتم عبر فريق الدعم — تواصل مع support@delwaqty.com';
 
   @override
   String get emptyCart => 'سلتك فارغة';
@@ -1801,9 +1864,6 @@ class AppLocalizationsAr extends AppLocalizations {
   String get changePassword => 'تغيير كلمة المرور';
 
   @override
-  String get twoFactorAuth => 'المصادقة الثنائية';
-
-  @override
   String get loginActivity => 'نشاط تسجيل الدخول';
 
   @override
@@ -2159,6 +2219,9 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get codeCopied => 'تم نسخ الكود!';
+
+  @override
+  String get dataExported => 'تم نسخ بياناتك إلى الحافظة';
 
   @override
   String get cash => 'نقداً';
@@ -2916,6 +2979,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get retryLocation => 'إعادة المحاولة';
 
   @override
+  String get retryNow => 'أعد المحاولة الآن';
+
+  @override
   String get safetyHub => 'مركز الأمان';
 
   @override
@@ -2996,7 +3062,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get aboutDescription =>
-      'دلوقتي هو تطبيقك الشامل للتوصيل والنقل. نوصلك بأفضل المطاعم والمتاجر والسائقين في منطقتك لخدمة سريعة وموثوقة.';
+      'دلوقتي هو تطبيقك الشامل للخدمات والتوصيل. نوصلك بأفضل المطاعم والصيدليات والمتاجر في منطقتك لخدمة سريعة وموثوقة.';
 
   @override
   String get supportEmailAddress => 'support@delwaqty.com';
@@ -3143,6 +3209,24 @@ class AppLocalizationsAr extends AppLocalizations {
   String get typeCarwash => 'غسيل سيارات';
 
   @override
+  String get typePerfumes => 'عطور';
+
+  @override
+  String get typeSpices => 'عطارة';
+
+  @override
+  String get typeDairy => 'البان';
+
+  @override
+  String get typeAccessories => 'إكسسوارات حريمي';
+
+  @override
+  String get typeButcher => 'جزارة';
+
+  @override
+  String get typeVegetables => 'خضراوات وفواكة';
+
+  @override
   String get tosLastUpdated => 'آخر تحديث: 1 يناير 2025';
 
   @override
@@ -3157,7 +3241,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get tosSection2Body =>
-      'توفر دلوقتي منصة حسب الطلب تربط المستخدمين بالمطاعم والمتاجر والسائقين المحليين لتوصيل الطعام، وتوصيل الطرود، وخدمات النقل. نعمل كوسيط بين العملاء ومزودي الخدمات ولا نقدم خدمات التوصيل أو النقل بأنفسنا.';
+      'توفر دلوقتي منصة حسب الطلب تربط المستخدمين بالمطاعم والصيدليات والمتاجر ومزودي خدمات التوصيل المحليين لتوصيل الطعام، وتوصيل الطلبات، وخدمات التوصيل. نعمل كوسيط بين العملاء ومزودي الخدمات ولا نقدم خدمات التوصيل بأنفسنا.';
 
   @override
   String get tosSection3Title => '3. حسابات المستخدمين';
@@ -3174,18 +3258,18 @@ class AppLocalizationsAr extends AppLocalizations {
       'عند تقديم طلب عبر دلوقتي، أنت توافق على دفع المبلغ الإجمالي المعروض عند الدفع، بما في ذلك سعر المنتج ورسوم التوصيل ورسوم الخدمة والضرائب الم applicable. يمكن الدفع نقداً أو بالبطاقة أو من محفظة دلوقتي. قد تختلف الأسعار حسب الموقع والطلب والعروض الترويجية.خاضعة لسياسة الاسترداد.';
 
   @override
-  String get tosSection5Title => '5. الرحلات والتوصيل';
+  String get tosSection5Title => '5. التوصيل والخدمات';
 
   @override
   String get tosSection5Body =>
-      'تُقدَّم طلبات التوصيل والخدمات بواسطة سائقين وتجار مستقلين. تسهّل DelwaQty الربط فقط ولا تتحمّل مسؤولية جودة الخدمة أو سلامتها أو قانونيتها. أوقات التوصيل والوصول التقديرية تقريبية وغير مضمونة. يجب على المستخدمين توفير مواقع التقاط وتسليم دقيقة.';
+      'تُقدَّم طلبات التوصيل والخدمات بواسطة سائقين ومزودي خدمات مستقلين. تسهّل DelwaQty الربط فقط ولا تتحمّل مسؤولية جودة الخدمة أو سلامتها أو قانونيتها. أوقات التوصيل والوصول التقديرية تقريبية وغير مضمونة. يجب على المستخدمين توفير مواقع الاستلام والتسليم الدقيقة.';
 
   @override
   String get tosSection6Title => '6. الخصوصية';
 
   @override
   String get tosSection6Body =>
-      'استخدامك لدلوقتيخاضع أيضاً لسياسة الخصوصية الخاصة بنا. باستخدام خدماتنا، أنت توافق على جمع واستخدام معلوماتك الشخصية كما هو موضح في سياسة الخصوصية. نجمع البيانات اللازمة لتحسين خدماتنا، بما في ذلك بيانات الموقع لتوصيل خدمات النقل.';
+      'استخدامك لدلوقتي خاضع أيضاً لسياسة الخصوصية الخاصة بنا. باستخدام خدماتنا، أنت توافق على جمع واستخدام معلوماتك الشخصية كما هو موضح في سياسة الخصوصية. نجمع البيانات اللازمة لتحسين خدماتنا، بما في ذلك بيانات الموقع لتوصيل خدمات التوصيل.';
 
   @override
   String get tosSection7Title => '7. تحديد المسؤولية';
@@ -3216,14 +3300,14 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get ppSection3Body =>
-      ' collects and تجمع دلوقتي وتستخدم بيانات موقعك لتقديم خدمات التوصيل والنقل. ن الوصول إلى موقعك في المقدمة عند طلب خدمة وقد نجمع الموقع التقريبي في الخلفية لتحسين الخدمة. يمكنك التحكم في الوصول للموقع من إعدادات جهازك، لكن تعطيل الموقع قد يحد من وظائف خدماتنا.';
+      'تجمع دلوقتي وتستخدم بيانات موقعك لتقديم خدمات التوصيل. نصل إلى موقعك في المقدمة عند طلب خدمة وقد نجمع الموقع التقريبي في الخلفية لتحسين الخدمة. يمكنك التحكم في الوصول للموقع من إعدادات جهازك، لكن تعطيل الموقع قد يحد من وظائف خدماتنا.';
 
   @override
   String get ppSection4Title => '4. مشاركة البيانات';
 
   @override
   String get ppSection4Body =>
-      'نشارك معلوماتك مع السائقين والتجار فقط عند اللازم لتنفيذ طلباتك (مثل اسمك وعنوان التوصيل للتوصيل، وموقع الاستلام للرحلات). قد نشارك البيانات مع معالجات الدفع ومزودي الخدمات السحابية وخدمات التحليلات. لا نبيع معلوماتك الشخصية لأطراف ثالثة لأغراض التسويق الخاصة بهم.';
+      'نشارك معلوماتك مع السائقين والتجار فقط عند اللازم لتنفيذ طلباتك (مثل اسمك وعنوان التوصيل للتوصيل). قد نشارك البيانات مع معالجات الدفع ومزودي الخدمات السحابية وخدمات التحليلات. لا نبيع معلوماتك الشخصية لأطراف ثالثة لأغراض التسويق الخاصة بهم.';
 
   @override
   String get ppSection5Title => '5. أمان البيانات';
@@ -3271,11 +3355,11 @@ class AppLocalizationsAr extends AppLocalizations {
       'بمجرد تأكيد طلبك، يمكنك تتبعه في الوقت الحقيقي من تبويب الطلبات. سترى موقع السائق والوقت المقدر للوصول وتحديثات الحالة في كل خطوة من خطوات التوصيل.';
 
   @override
-  String get faqQuestion3 => 'كيف أصبح سائقاً؟';
+  String get faqQuestion3 => 'كيف أصبح مزود خدمة توصيل؟';
 
   @override
   String get faqAnswer3 =>
-      'اضغط على خيار السائق في أكمل نموذج التسجيل. ستحتاج إلى تقديم هوية شخصية ومعلومات المركبة ورخصة القيادة. بعد التحقق، يمكنك البدء في قبول طلبات النقل والتوصيل.';
+      'اضغط على خيار مزود الخدمة في نموذج التسجيل. ستحتاج إلى تقديم هوية شخصية ومعلومات المركبة ورخصة القيادة. بعد التحقق، يمكنك البدء في قبول طلبات التوصيل.';
 
   @override
   String get faqQuestion4 => 'كيف أضيف أموالاً إلى المحفظة؟';
@@ -3580,6 +3664,19 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get servicesSection => 'الخدمات';
+
+  @override
+  String get allServices => 'كل الخدمات';
+
+  @override
+  String get providerServices => 'الخدمات التي تقدمها';
+
+  @override
+  String get providerServicesHint =>
+      'اختر خدمة أو أكثر — سيتم عرض خدماتك للعملاء';
+
+  @override
+  String get bookingServices => 'خدمات وحجز';
 
   @override
   String get supportSection => 'الدعم';
@@ -5928,8 +6025,14 @@ class AppLocalizationsAr extends AppLocalizations {
   String get identity => 'الهوية';
 
   @override
-  String get exitAppTitle => 'خروج من التطبيق';
+  String get exitAppTitle => 'الخروج من منصة دلوقتي';
 
   @override
-  String get exitAppConfirm => 'خروج من التطبيق';
+  String get exitAppConfirm => 'هل أنت متأكد من الخروج من منصة دلوقتي؟';
+
+  @override
+  String get exitApp => 'خروج';
+
+  @override
+  String get stayInApp => 'البقاء في المنصة';
 }

@@ -20,6 +20,22 @@ enum ServiceCategoryType {
   pestControl,
   @JsonValue('applianceRepair')
   applianceRepair,
+  @JsonValue('pipeChange')
+  pipeChange,
+  @JsonValue('plastering')
+  plastering,
+  @JsonValue('carpetCleaning')
+  carpetCleaning,
+  @JsonValue('dishRepair')
+  dishRepair,
+  @JsonValue('teacher')
+  teacher,
+  @JsonValue('doctor')
+  doctor,
+  @JsonValue('nurse')
+  nurse,
+  @JsonValue('barber')
+  barber,
   @JsonValue('other')
   other,
 }

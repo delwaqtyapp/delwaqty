@@ -8,7 +8,9 @@ class SidebarHeader extends StatelessWidget {
     required this.userName,
     this.userEmail,
     this.avatarInitial,
+    this.avatarUrl,
     this.roleBadge,
+    this.isVerified = false,
     this.onEditProfile,
     this.walletBalance,
     this.membershipLevel,
@@ -17,7 +19,9 @@ class SidebarHeader extends StatelessWidget {
   final String userName;
   final String? userEmail;
   final String? avatarInitial;
+  final String? avatarUrl;
   final String? roleBadge;
+  final bool isVerified;
   final VoidCallback? onEditProfile;
   final String? walletBalance;
   final String? membershipLevel;
@@ -60,36 +64,79 @@ class SidebarHeader extends StatelessWidget {
                         ),
                       ],
                     ),
-                    child: Center(
-                      child: Text(
-                        avatarInitial ??
-                            (userName.isNotEmpty
-                                ? userName[0].toUpperCase()
-                                : 'U'),
-                        style: AppTextStyles.titleLarge.copyWith(
-                          color: cs.onPrimary,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(14),
+                      child: (avatarUrl != null && avatarUrl!.isNotEmpty)
+                          ? Image.network(
+                              avatarUrl!,
+                              fit: BoxFit.cover,
+                              errorBuilder: (_, _, _) => Center(
+                                child: Text(
+                                  avatarInitial ??
+                                      (userName.isNotEmpty
+                                          ? userName[0].toUpperCase()
+                                          : 'U'),
+                                  style: AppTextStyles.titleLarge.copyWith(
+                                    color: cs.onPrimary,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 16,
+                                  ),
+                                ),
+                              ),
+                            )
+                          : Center(
+                              child: Text(
+                                avatarInitial ??
+                                    (userName.isNotEmpty
+                                        ? userName[0].toUpperCase()
+                                        : 'U'),
+                                style: AppTextStyles.titleLarge.copyWith(
+                                  color: cs.onPrimary,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16,
+                                ),
+                              ),
+                            ),
+                    ),
+                  ),
+                  if (isVerified)
+                    Positioned(
+                      right: -2,
+                      bottom: -2,
+                      child: Container(
+                        padding: const EdgeInsets.all(2),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF34D399),
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: st.cardGradientTop,
+                            width: 2,
+                          ),
+                        ),
+                        child: const Icon(
+                          Icons.verified_rounded,
+                          size: 9,
+                          color: Colors.white,
+                        ),
+                      ),
+                    )
+                  else
+                    Positioned(
+                      right: 2,
+                      bottom: 2,
+                      child: Container(
+                        width: 12,
+                        height: 12,
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF34D399),
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: st.cardGradientTop,
+                            width: 2.5,
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                  Positioned(
-                    right: 2,
-                    bottom: 2,
-                    child: Container(
-                      width: 12,
-                      height: 12,
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF34D399),
-                        shape: BoxShape.circle,
-                        border: Border.all(
-                          color: st.cardGradientTop,
-                          width: 2.5,
-                        ),
-                      ),
-                    ),
-                  ),
                 ],
               ),
               const SizedBox(width: 12),

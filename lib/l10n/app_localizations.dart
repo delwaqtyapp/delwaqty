@@ -104,6 +104,12 @@ abstract class AppLocalizations {
   /// **'Delwaqty'**
   String get appTitle;
 
+  /// No description provided for @home.
+  ///
+  /// In en, this message translates to:
+  /// **'Home'**
+  String get home;
+
   /// No description provided for @hello.
   ///
   /// In en, this message translates to:
@@ -170,6 +176,12 @@ abstract class AppLocalizations {
   /// **'Email or Phone'**
   String get emailOrPhone;
 
+  /// No description provided for @emailOrUsername.
+  ///
+  /// In en, this message translates to:
+  /// **'Email or username'**
+  String get emailOrUsername;
+
   /// No description provided for @rememberMe.
   ///
   /// In en, this message translates to:
@@ -206,6 +218,66 @@ abstract class AppLocalizations {
   /// **'Create Account'**
   String get createAccount;
 
+  /// No description provided for @fillDetailsToStart.
+  ///
+  /// In en, this message translates to:
+  /// **'Fill in your details to get started'**
+  String get fillDetailsToStart;
+
+  /// No description provided for @preferencesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Preferences'**
+  String get preferencesTitle;
+
+  /// No description provided for @customizeExperience.
+  ///
+  /// In en, this message translates to:
+  /// **'Customize your experience'**
+  String get customizeExperience;
+
+  /// No description provided for @receiveUpdatesOffers.
+  ///
+  /// In en, this message translates to:
+  /// **'Receive updates and offers'**
+  String get receiveUpdatesOffers;
+
+  /// No description provided for @findNearbyServices.
+  ///
+  /// In en, this message translates to:
+  /// **'Find nearby services'**
+  String get findNearbyServices;
+
+  /// No description provided for @reviewAndConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Review & Confirm'**
+  String get reviewAndConfirm;
+
+  /// No description provided for @reviewSummaryHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Make sure everything is correct before creating your account'**
+  String get reviewSummaryHint;
+
+  /// No description provided for @accountTypeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Account type'**
+  String get accountTypeLabel;
+
+  /// No description provided for @documentsAttached.
+  ///
+  /// In en, this message translates to:
+  /// **'Documents attached'**
+  String get documentsAttached;
+
+  /// No description provided for @noDocumentsRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'No documents required'**
+  String get noDocumentsRequired;
+
   /// No description provided for @email.
   ///
   /// In en, this message translates to:
@@ -235,12 +307,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Reset Password'**
   String get resetPassword;
-
-  /// No description provided for @home.
-  ///
-  /// In en, this message translates to:
-  /// **'Home'**
-  String get home;
 
   /// No description provided for @settings.
   ///
@@ -515,7 +581,7 @@ abstract class AppLocalizations {
   /// No description provided for @welcomeSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Order. Shop. Move. Book. All in Delwaqty.'**
+  /// **'Order. Shop. All in Delwaqty.'**
   String get welcomeSubtitle;
 
   /// No description provided for @welcomeLoginButton.
@@ -1063,6 +1129,60 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'min'**
   String get minutes;
+
+  /// No description provided for @orderStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Order status'**
+  String get orderStatus;
+
+  /// No description provided for @deliveryStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivery status'**
+  String get deliveryStatus;
+
+  /// No description provided for @driverAssignedPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Driver will be assigned soon'**
+  String get driverAssignedPending;
+
+  /// No description provided for @driverSearchRetried.
+  ///
+  /// In en, this message translates to:
+  /// **'Searching for a driver again'**
+  String get driverSearchRetried;
+
+  /// No description provided for @dispatchStuckMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'No driver accepted yet. Make sure you have an internet connection and try again.'**
+  String get dispatchStuckMessage;
+
+  /// No description provided for @deliveryAddressNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not find this address. Please enter a more specific address.'**
+  String get deliveryAddressNotFound;
+
+  /// No description provided for @loginRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Please log in first'**
+  String get loginRequired;
+
+  /// No description provided for @thisDevice.
+  ///
+  /// In en, this message translates to:
+  /// **'This device'**
+  String get thisDevice;
+
+  /// No description provided for @accountDeletionInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'You have been signed out. Account deletion is handled by support — contact support@delwaqty.com'**
+  String get accountDeletionInfo;
 
   /// No description provided for @emptyCart.
   ///
@@ -3518,12 +3638,6 @@ abstract class AppLocalizations {
   /// **'Change Password'**
   String get changePassword;
 
-  /// No description provided for @twoFactorAuth.
-  ///
-  /// In en, this message translates to:
-  /// **'Two-Factor Authentication'**
-  String get twoFactorAuth;
-
   /// No description provided for @loginActivity.
   ///
   /// In en, this message translates to:
@@ -4213,6 +4327,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Code copied!'**
   String get codeCopied;
+
+  /// No description provided for @dataExported.
+  ///
+  /// In en, this message translates to:
+  /// **'Your data has been copied to the clipboard'**
+  String get dataExported;
 
   /// No description provided for @cash.
   ///
@@ -5678,6 +5798,12 @@ abstract class AppLocalizations {
   /// **'Retry'**
   String get retryLocation;
 
+  /// No description provided for @retryNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry now'**
+  String get retryNow;
+
   /// No description provided for @safetyHub.
   ///
   /// In en, this message translates to:
@@ -5837,7 +5963,7 @@ abstract class AppLocalizations {
   /// No description provided for @aboutDescription.
   ///
   /// In en, this message translates to:
-  /// **'Delwaqty is your all-in-one delivery and ride-hailing platform. We connect you with the best restaurants, stores, and drivers in your area for fast and reliable service.'**
+  /// **'Delwaqty is your all-in-one services and delivery platform. We connect you with the best restaurants, pharmacies, and stores in your area for fast and reliable service.'**
   String get aboutDescription;
 
   /// No description provided for @supportEmailAddress.
@@ -6128,6 +6254,42 @@ abstract class AppLocalizations {
   /// **'Car Wash'**
   String get typeCarwash;
 
+  /// No description provided for @typePerfumes.
+  ///
+  /// In en, this message translates to:
+  /// **'Perfumes'**
+  String get typePerfumes;
+
+  /// No description provided for @typeSpices.
+  ///
+  /// In en, this message translates to:
+  /// **'Spices'**
+  String get typeSpices;
+
+  /// No description provided for @typeDairy.
+  ///
+  /// In en, this message translates to:
+  /// **'Dairy'**
+  String get typeDairy;
+
+  /// No description provided for @typeAccessories.
+  ///
+  /// In en, this message translates to:
+  /// **'Women\'s Accessories'**
+  String get typeAccessories;
+
+  /// No description provided for @typeButcher.
+  ///
+  /// In en, this message translates to:
+  /// **'Butcher'**
+  String get typeButcher;
+
+  /// No description provided for @typeVegetables.
+  ///
+  /// In en, this message translates to:
+  /// **'Vegetables & Fruits'**
+  String get typeVegetables;
+
   /// No description provided for @tosLastUpdated.
   ///
   /// In en, this message translates to:
@@ -6155,7 +6317,7 @@ abstract class AppLocalizations {
   /// No description provided for @tosSection2Body.
   ///
   /// In en, this message translates to:
-  /// **'Delwaqty provides an on-demand platform connecting users with local restaurants, stores, and drivers for food delivery, package delivery, and ride-hailing services. We act as an intermediary between customers and service providers and do not directly provide delivery or transportation services ourselves.'**
+  /// **'Delwaqty provides an on-demand platform connecting users with local restaurants, pharmacies, stores, and delivery providers for food delivery, order delivery, and delivery services. We act as an intermediary between customers and service providers and do not directly provide delivery services ourselves.'**
   String get tosSection2Body;
 
   /// No description provided for @tosSection3Title.
@@ -6185,7 +6347,7 @@ abstract class AppLocalizations {
   /// No description provided for @tosSection5Title.
   ///
   /// In en, this message translates to:
-  /// **'5. Ride & Delivery'**
+  /// **'5. Delivery & Services'**
   String get tosSection5Title;
 
   /// No description provided for @tosSection5Body.
@@ -6203,7 +6365,7 @@ abstract class AppLocalizations {
   /// No description provided for @tosSection6Body.
   ///
   /// In en, this message translates to:
-  /// **'Your use of Delwaqty is also governed by our Privacy Policy. By using our services, you consent to the collection and use of your personal information as described in the Privacy Policy. We collect data necessary to provide and improve our services, including location data for delivery and ride services.'**
+  /// **'Your use of Delwaqty is also governed by our Privacy Policy. By using our services, you consent to the collection and use of your personal information as described in the Privacy Policy. We collect data necessary to provide and improve our services, including location data for delivery services.'**
   String get tosSection6Body;
 
   /// No description provided for @tosSection7Title.
@@ -6257,7 +6419,7 @@ abstract class AppLocalizations {
   /// No description provided for @ppSection3Body.
   ///
   /// In en, this message translates to:
-  /// **'Delwaqty collects and uses your location data to provide delivery and ride-hailing services. We access your location in the foreground when you request a service and may collect approximate location in the background for service optimization. You can control location access through your device settings, but disabling location may limit the functionality of our services.'**
+  /// **'Delwaqty collects and uses your location data to provide delivery services. We access your location in the foreground when you request a service and may collect approximate location in the background for service optimization. You can control location access through your device settings, but disabling location may limit the functionality of our services.'**
   String get ppSection3Body;
 
   /// No description provided for @ppSection4Title.
@@ -6269,7 +6431,7 @@ abstract class AppLocalizations {
   /// No description provided for @ppSection4Body.
   ///
   /// In en, this message translates to:
-  /// **'We share your information with drivers and merchants only as necessary to fulfill your orders (e.g., your name and delivery address for delivery, pickup location for rides). We may share data with payment processors, cloud service providers, and analytics services. We do not sell your personal information to third parties for their marketing purposes.'**
+  /// **'We share your information with drivers and merchants only as necessary to fulfill your orders (e.g., your name and delivery address for delivery). We may share data with payment processors, cloud service providers, and analytics services. We do not sell your personal information to third parties for their marketing purposes.'**
   String get ppSection4Body;
 
   /// No description provided for @ppSection5Title.
@@ -6353,13 +6515,13 @@ abstract class AppLocalizations {
   /// No description provided for @faqQuestion3.
   ///
   /// In en, this message translates to:
-  /// **'How to become a driver?'**
+  /// **'How to become a delivery provider?'**
   String get faqQuestion3;
 
   /// No description provided for @faqAnswer3.
   ///
   /// In en, this message translates to:
-  /// **'Tap on the Driver option in the app and complete the registration form. You will need to provide your ID, vehicle information, and driving license. After verification, you can start accepting ride and delivery requests.'**
+  /// **'Tap on the Delivery Provider option in the app and complete the registration form. You will need to provide your ID, vehicle information, and driving license. After verification, you can start accepting delivery requests.'**
   String get faqAnswer3;
 
   /// No description provided for @faqQuestion4.
@@ -6937,6 +7099,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Services'**
   String get servicesSection;
+
+  /// No description provided for @allServices.
+  ///
+  /// In en, this message translates to:
+  /// **'All Services'**
+  String get allServices;
+
+  /// No description provided for @providerServices.
+  ///
+  /// In en, this message translates to:
+  /// **'Services you provide'**
+  String get providerServices;
+
+  /// No description provided for @providerServicesHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Select one or more — your services will be shown to customers'**
+  String get providerServicesHint;
+
+  /// No description provided for @bookingServices.
+  ///
+  /// In en, this message translates to:
+  /// **'Booking Services'**
+  String get bookingServices;
 
   /// No description provided for @supportSection.
   ///
@@ -11429,14 +11615,26 @@ abstract class AppLocalizations {
   /// No description provided for @exitAppTitle.
   ///
   /// In en, this message translates to:
-  /// **'Are you sure you want to exit DelwaQty?'**
+  /// **'Exit Delwaqty'**
   String get exitAppTitle;
 
   /// No description provided for @exitAppConfirm.
   ///
   /// In en, this message translates to:
-  /// **'Are you sure you want to exit DelwaQty?'**
+  /// **'Are you sure you want to exit the Delwaqty platform?'**
   String get exitAppConfirm;
+
+  /// No description provided for @exitApp.
+  ///
+  /// In en, this message translates to:
+  /// **'Exit'**
+  String get exitApp;
+
+  /// No description provided for @stayInApp.
+  ///
+  /// In en, this message translates to:
+  /// **'Stay on the platform'**
+  String get stayInApp;
 }
 
 class _AppLocalizationsDelegate

@@ -105,3 +105,6 @@ app.*.map.json
 *.hmac
 .github/secrets*
 .flutter-plugins
+
+# Backup folders (timestamped pre-edit snapshots)
+.backups/

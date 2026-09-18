@@ -15,10 +15,12 @@ import 'package:delwaqty/features/customer/safety/safety_module.dart';
 import 'package:delwaqty/features/customer/search/search_module.dart';
 import 'package:delwaqty/features/customer/orders/orders_module.dart';
 import 'package:delwaqty/features/customer/service_audio_logs/service_audio_logs_module.dart';
+import 'package:delwaqty/features/customer/home_services/home_services_module.dart';
 import 'package:delwaqty/features/_shared/complaints/complaints_module.dart';
 import 'package:delwaqty/features/_shared/regions/regions_module.dart';
 import 'package:delwaqty/features/_shared/rewards/rewards_module.dart';
 import 'package:delwaqty/features/_shared/campaigns/campaigns_module.dart';
+import 'package:delwaqty/features/admin/support_chat/support_chat_module.dart';
 
 void registerAllModules() {
   final registry = FeatureRegistry.instance;
@@ -38,7 +40,9 @@ void registerAllModules() {
     NotificationsModule(),
     SafetyModule(),
     ServiceAudioLogsModule(),
+    HomeServicesModule(),
     ComplaintsModule(),
+    SupportChatModule(),
     SearchModule(),
     OrdersModule(),
     RegionsModule(),

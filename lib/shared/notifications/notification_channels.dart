@@ -39,12 +39,7 @@ class NotificationChannels {
     NotificationChannel('/notifications'),
     NotificationChannel(
       '/support/room/:roomId',
-      contexts: {
-        AppContext.customer,
-        AppContext.provider,
-        AppContext.driver,
-        AppContext.admin,
-      },
+      contexts: {AppContext.admin, AppContext.customer},
     ),
 
     // ── Customer ─────────────────────────────────────────────────────────
@@ -61,6 +56,16 @@ class NotificationChannels {
     NotificationChannel(
       '/wallet',
       contexts: {AppContext.customer, AppContext.provider, AppContext.driver},
+    ),
+    NotificationChannel('/home-services',
+        contexts: {AppContext.customer}),
+    NotificationChannel(
+      '/market/orders/:orderId',
+      contexts: {AppContext.customer, AppContext.provider},
+    ),
+    NotificationChannel(
+      '/market/merchant/:id',
+      contexts: {AppContext.customer, AppContext.provider},
     ),
 
     // ── Provider ─────────────────────────────────────────────────────────

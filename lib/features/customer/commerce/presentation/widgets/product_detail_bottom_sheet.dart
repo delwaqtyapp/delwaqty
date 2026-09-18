@@ -322,47 +322,9 @@ class _ProductDetailBottomSheetState
   }
 
   Widget _buildQuantitySelector(AppLocalizations l10n) {
-    return Row(
-      children: [
-        Text(
-          l10n.quantity,
-          style: context.textTheme.titleSmall?.copyWith(
-            fontWeight: FontWeight.w700,
-          ),
-        ),
-        const Spacer(),
-        DecoratedBox(
-          decoration: BoxDecoration(
-            color: context.colorScheme.surfaceContainerHighest.withValues(alpha: 0.4),
-            borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              IconButton(
-                icon: const Icon(Icons.remove, size: 18),
-                onPressed: _quantity > 1
-                    ? () => setState(() => _quantity--)
-                    : null,
-              ),
-              AnimatedSwitcher(
-                duration: const Duration(milliseconds: 200),
-                child: Text(
-                  '$_quantity',
-                  key: ValueKey(_quantity),
-                  style: context.textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ),
-              IconButton(
-                icon: const Icon(Icons.add, size: 18),
-                onPressed: () => setState(() => _quantity++),
-              ),
-            ],
-          ),
-        ),
-      ],
+    return _QuantitySelector(
+      initialValue: _quantity,
+      onChanged: (v) => setState(() => _quantity = v),
     );
   }
 
@@ -556,4 +518,75 @@ class _InfoItem {
   final IconData icon;
   final String label;
   final String value;
+}
+
+/// Standalone quantity stepper. Holds its own state so tapping +/- only
+/// rebuilds this tiny control instead of the whole product sheet (no page
+/// flicker at every number).
+class _QuantitySelector extends StatefulWidget {
+  const _QuantitySelector({
+    required this.initialValue,
+    required this.onChanged,
+  });
+
+  final int initialValue;
+  final ValueChanged<int> onChanged;
+
+  @override
+  State<_QuantitySelector> createState() => _QuantitySelectorState();
+}
+
+class _QuantitySelectorState extends State<_QuantitySelector> {
+  late int _qty = widget.initialValue;
+
+  void _update(int delta) {
+    setState(() => _qty = (_qty + delta).clamp(1, 99));
+    widget.onChanged(_qty);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final cs = Theme.of(context).colorScheme;
+    return Row(
+      children: [
+        Text(
+          l10n.quantity,
+          style: Theme.of(context).textTheme.titleSmall?.copyWith(
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+        const Spacer(),
+        DecoratedBox(
+          decoration: BoxDecoration(
+            color: cs.surfaceContainerHighest.withValues(alpha: 0.4),
+            borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              IconButton(
+                icon: const Icon(Icons.remove, size: 18),
+                onPressed: _qty > 1 ? () => _update(-1) : null,
+              ),
+              AnimatedSwitcher(
+                duration: const Duration(milliseconds: 200),
+                child: Text(
+                  '$_qty',
+                  key: ValueKey(_qty),
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+              IconButton(
+                icon: const Icon(Icons.add, size: 18),
+                onPressed: () => _update(1),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
 }

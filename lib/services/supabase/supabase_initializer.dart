@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:delwaqty/config/supabase_config.dart';
 
@@ -19,7 +18,9 @@ abstract final class SupabaseInitializer {
     await Supabase.initialize(
       url: SupabaseConfig.url,
       publishableKey: SupabaseConfig.anonKey,
-      debug: kDebugMode,
+      // Keep the customer permanently signed in across app restarts: the
+      // Flutter client persists the session locally (SharedPreferences) and
+      // auto-refreshes the access token on launch (both are package defaults).
     ).timeout(const Duration(seconds: 10));
 
     _initialized = true;

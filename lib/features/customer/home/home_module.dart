@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:delwaqty/core/module/feature_module.dart';
+import 'package:delwaqty/features/customer/home/presentation/pages/all_services_page.dart';
 import 'package:delwaqty/features/customer/home/presentation/pages/home_page.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 
@@ -32,6 +33,15 @@ class HomeModule extends FeatureModule {
       ],
     );
   }
+
+  @override
+  List<RouteBase> get standaloneRoutes => [
+    GoRoute(
+      path: '/services',
+      name: 'all-services',
+      builder: (context, state) => const AllServicesPage(),
+    ),
+  ];
 
   @override
   List<DrawerEntry> get drawerEntries => [

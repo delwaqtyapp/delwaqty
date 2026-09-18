@@ -7,6 +7,7 @@ import 'package:delwaqty/features/customer/commerce/domain/entities/merchant.dar
 import 'package:delwaqty/features/customer/commerce/presentation/widgets/merchant_card.dart';
 import 'package:delwaqty/features/customer/commerce/presentation/widgets/merchant_type_chip.dart';
 import 'package:delwaqty/features/customer/commerce/presentation/widgets/cart_badge.dart';
+import 'package:delwaqty/features/customer/home/presentation/widgets/category_visuals.dart';
 import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
 import 'package:delwaqty/shared/widgets/premium_empty_state.dart';
 import 'package:delwaqty/shared/widgets/shimmer_loading.dart';
@@ -396,6 +397,7 @@ class _MostRequestedCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context);
     return DecoratedBox(
       decoration: BoxDecoration(
         color: theme.colorScheme.surfaceContainerLowest,
@@ -427,7 +429,9 @@ class _MostRequestedCard extends StatelessWidget {
             ),
             child: Center(
               child: Text(
-                merchant.name.characters.first.toUpperCase(),
+                merchant.name.isNotEmpty
+                    ? merchant.name.characters.first.toUpperCase()
+                    : '؟',
                 style: theme.textTheme.headlineLarge?.copyWith(
                   color: AppColors.brandPurple,
                   fontWeight: FontWeight.bold,
@@ -472,7 +476,7 @@ class _MostRequestedCard extends StatelessWidget {
                       ),
                       const SizedBox(width: 6),
                       Text(
-                        merchant.type.name.toUpperCase(),
+                        merchantTypeLabel(merchant.type, l10n),
                         style: theme.textTheme.labelSmall?.copyWith(
                           color: theme.colorScheme.onSurfaceVariant,
                           letterSpacing: 0.5,

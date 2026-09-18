@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'package:delwaqty/features/customer/commerce/commerce_module.dart';
 import 'package:delwaqty/features/customer/commerce/domain/entities/order.dart';
 import 'package:delwaqty/features/_shared/auth/presentation/auth_provider.dart';
@@ -87,7 +86,7 @@ class _OrderTrackingPageState extends ConsumerState<OrderTrackingPage>
                   ),
                 ],
                 const SizedBox(height: 24),
-                _DriverSection(),
+                const _DriverSection(),
               ],
             ),
           );
@@ -586,6 +585,32 @@ class _EstimatedArrivalSection extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
 
+    final statusLabel = _statusLabel(l10n, order.status);
+    final IconData statusIcon;
+    final Color statusColor;
+    switch (order.status) {
+      case OrderStatus.delivered:
+        statusIcon = Icons.check_circle_outline_rounded;
+        statusColor = colorScheme.primary;
+      case OrderStatus.cancelled:
+        statusIcon = Icons.cancel_outlined;
+        statusColor = colorScheme.error;
+      case OrderStatus.pickedUp:
+      case OrderStatus.inTransit:
+        statusIcon = Icons.local_shipping_outlined;
+        statusColor = colorScheme.primary;
+      case OrderStatus.ready:
+        statusIcon = Icons.done_all_rounded;
+        statusColor = colorScheme.primary;
+      case OrderStatus.confirmed:
+      case OrderStatus.preparing:
+        statusIcon = Icons.restaurant_outlined;
+        statusColor = colorScheme.primary;
+      case OrderStatus.pending:
+        statusIcon = Icons.schedule_rounded;
+        statusColor = colorScheme.onSurfaceVariant;
+    }
+
     return AnimatedFadeIn(
       delay: const Duration(milliseconds: 200),
       child: Card(
@@ -600,7 +625,7 @@ class _EstimatedArrivalSection extends StatelessWidget {
                   color: colorScheme.primaryContainer,
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: Icon(Icons.timer_outlined, color: colorScheme.primary),
+                child: Icon(statusIcon, color: statusColor),
               ),
               const SizedBox(width: 16),
               Expanded(
@@ -608,17 +633,17 @@ class _EstimatedArrivalSection extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      l10n.estimatedArrival,
+                      l10n.orderStatus,
                       style: textTheme.bodySmall?.copyWith(
                         color: colorScheme.onSurface.withValues(alpha: 0.6),
                       ),
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      '25 ${l10n.minutes}',
+                      statusLabel,
                       style: textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.bold,
-                        color: colorScheme.primary,
+                        color: statusColor,
                       ),
                     ),
                   ],
@@ -630,9 +655,24 @@ class _EstimatedArrivalSection extends StatelessWidget {
       ),
     );
   }
+
+  String _statusLabel(AppLocalizations l10n, OrderStatus status) {
+    return switch (status) {
+      OrderStatus.pending => l10n.pending,
+      OrderStatus.confirmed => l10n.orderConfirmed,
+      OrderStatus.preparing => l10n.preparing,
+      OrderStatus.ready => l10n.ready,
+      OrderStatus.pickedUp => l10n.outForDelivery,
+      OrderStatus.inTransit => l10n.outForDelivery,
+      OrderStatus.delivered => l10n.delivered,
+      OrderStatus.cancelled => l10n.cancelled,
+    };
+  }
 }
 
 class _DriverSection extends StatelessWidget {
+  const _DriverSection();
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
@@ -649,10 +689,17 @@ class _DriverSection extends StatelessWidget {
             children: [
               Row(
                 children: [
-                  CircleAvatar(
-                    radius: 24,
-                    backgroundColor: colorScheme.primaryContainer,
-                    child: Icon(Icons.person, color: colorScheme.primary),
+                  Container(
+                    width: 48,
+                    height: 48,
+                    decoration: BoxDecoration(
+                      color: colorScheme.primaryContainer,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Icon(
+                      Icons.local_shipping_outlined,
+                      color: colorScheme.primary,
+                    ),
                   ),
                   const SizedBox(width: 16),
                   Expanded(
@@ -660,41 +707,19 @@ class _DriverSection extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Mohamed A.',
-                          style: textTheme.bodyLarge?.copyWith(
-                            fontWeight: FontWeight.bold,
+                          l10n.deliveryStatus,
+                          style: textTheme.bodySmall?.copyWith(
+                            color: colorScheme.onSurface.withValues(alpha: 0.6),
                           ),
                         ),
                         const SizedBox(height: 2),
                         Text(
-                          '••• 4521',
-                          style: textTheme.bodySmall?.copyWith(
-                            color: colorScheme.onSurface.withValues(alpha: 0.5),
+                          l10n.driverAssignedPending,
+                          style: textTheme.bodyLarge?.copyWith(
+                            fontWeight: FontWeight.bold,
                           ),
                         ),
                       ],
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-              Row(
-                children: [
-                  Expanded(
-                    child: OutlinedButton.icon(
-                      onPressed: () => launchUrl(Uri.parse('tel:+966500000000')),
-                      icon: const Icon(Icons.call, size: 18),
-                      label: Text(l10n.callDriver),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: FilledButton.tonalIcon(
-                      onPressed: () => ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text(l10n.chatDriver)),
-                      ),
-                      icon: const Icon(Icons.chat_bubble_outline, size: 18),
-                      label: Text(l10n.chatDriver),
                     ),
                   ),
                 ],

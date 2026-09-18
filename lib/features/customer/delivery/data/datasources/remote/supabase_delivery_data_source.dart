@@ -107,6 +107,38 @@ class SupabaseDeliveryDataSource {
     );
   }
 
+  // ── Customer courier request ──
+
+  Future<String> requestCourierDelivery({
+    required String riderId,
+    required double pickupLatitude,
+    required double pickupLongitude,
+    required String pickupAddress,
+    required double dropoffLatitude,
+    required double dropoffLongitude,
+    required String dropoffAddress,
+    String? itemsSummary,
+    String? notes,
+    String priority = 'standard',
+  }) async {
+    final data = await _client.from('rides').insert({
+      'rider_id': riderId,
+      'service_type': 'courier',
+      'ride_type': 'economy',
+      'status': 'searching',
+      'pickup_latitude': pickupLatitude,
+      'pickup_longitude': pickupLongitude,
+      'pickup_address': pickupAddress,
+      'dropoff_latitude': dropoffLatitude,
+      'dropoff_longitude': dropoffLongitude,
+      'dropoff_address': dropoffAddress,
+      'items_summary': itemsSummary,
+      'dropoff_notes': notes,
+      'priority': priority,
+    }).select().single();
+    return data['id'] as String;
+  }
+
   // ── Dispatch ──
 
   Future<String> dispatchDelivery(String rideId,

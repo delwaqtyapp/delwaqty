@@ -70,6 +70,18 @@ IconData merchantTypeIcon(MerchantType type) {
       return Icons.local_car_wash;
     case MerchantType.home:
       return Icons.home_repair_service;
+      case MerchantType.perfumes:
+        return Icons.spa;
+      case MerchantType.spices:
+        return Icons.rice_bowl;
+      case MerchantType.dairy:
+        return Icons.water_drop;
+      case MerchantType.accessories:
+        return Icons.diamond;
+      case MerchantType.butcher:
+        return Icons.outdoor_grill;
+      case MerchantType.vegetables:
+        return Icons.grass;
     case MerchantType.other:
       return Icons.store;
   }
@@ -123,6 +135,18 @@ Color merchantTypeColor(MerchantType type) {
       return AppColors.serviceGas;
     case MerchantType.carwash:
       return AppColors.serviceCarwash;
+      case MerchantType.perfumes:
+        return AppColors.serviceFlowers;
+      case MerchantType.spices:
+        return AppColors.serviceSupermarket;
+      case MerchantType.dairy:
+        return AppColors.serviceGrocery;
+      case MerchantType.accessories:
+        return AppColors.serviceFashion;
+      case MerchantType.butcher:
+        return AppColors.serviceMeat;
+      case MerchantType.vegetables:
+        return AppColors.serviceFruits;
     case MerchantType.other:
       return AppColors.serviceMore;
   }
@@ -153,6 +177,12 @@ String _merchantTypeLabel(MerchantType type, AppLocalizations l10n) =>
       MerchantType.fitness => l10n.typeFitness,
       MerchantType.gas => l10n.typeGas,
       MerchantType.carwash => l10n.typeCarwash,
+      MerchantType.perfumes => l10n.typePerfumes,
+      MerchantType.spices => l10n.typeSpices,
+      MerchantType.dairy => l10n.typeDairy,
+      MerchantType.accessories => l10n.typeAccessories,
+      MerchantType.butcher => l10n.typeButcher,
+      MerchantType.vegetables => l10n.typeVegetables,
       MerchantType.other => l10n.typeOther,
     };
 
@@ -180,6 +210,12 @@ String _merchantEmoji(MerchantType type) => switch (type) {
   MerchantType.fitness => '💪',
   MerchantType.gas => '⛽',
   MerchantType.carwash => '🚿',
+  MerchantType.perfumes => '🌸',
+  MerchantType.spices => '🧂',
+  MerchantType.dairy => '🥛',
+  MerchantType.accessories => '👜',
+  MerchantType.butcher => '🍖',
+  MerchantType.vegetables => '🥕',
   MerchantType.other => '🏪',
 };
 
@@ -980,7 +1016,7 @@ class _PriceFilterSheetState extends State<_PriceFilterSheet> {
           ),
           const SizedBox(height: 16),
           Text(
-            'Price Range',
+            l10n.priceRange,
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
               fontWeight: FontWeight.bold,
             ),
@@ -1068,7 +1104,7 @@ class _PriceChip extends StatelessWidget {
         borderRadius: BorderRadius.circular(10),
       ),
       child: Text(
-        '$label EGP',
+        '$label ${AppLocalizations.of(context).currencySymbol}',
         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
           fontWeight: FontWeight.w600,
           color: AppColors.brandPurple,

@@ -15,7 +15,7 @@ import 'package:delwaqty/features/_shared/auth/domain/saved_account.dart';
 import 'package:delwaqty/features/_shared/auth/presentation/auth_provider.dart';
 import 'package:delwaqty/features/_shared/device_lock/device_lock_provider.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
-import 'package:delwaqty/shared/widgets/pharaoh_background.dart';
+import 'package:delwaqty/shared/widgets/cinematic_auth_background.dart';
 
 class LoginPage extends ConsumerStatefulWidget {
   const LoginPage({super.key});
@@ -41,7 +41,6 @@ class _LoginPageState extends ConsumerState<LoginPage>
   late final AnimationController _shakeController;
   late final Animation<double> _shakeAnimation;
   late final AnimationController _fadeController;
-  late final AnimationController _wingsController;
 
   @override
   void initState() {
@@ -59,13 +58,6 @@ class _LoginPageState extends ConsumerState<LoginPage>
       vsync: this,
       duration: const Duration(milliseconds: 600),
     )..forward();
-    _wingsController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 1200),
-    );
-    Future.delayed(const Duration(milliseconds: 500), () {
-      if (mounted) _wingsController.forward();
-    });
   }
 
   @override
@@ -75,7 +67,6 @@ class _LoginPageState extends ConsumerState<LoginPage>
     _passwordFocusNode.dispose();
     _shakeController.dispose();
     _fadeController.dispose();
-    _wingsController.dispose();
     super.dispose();
   }
 
@@ -319,7 +310,7 @@ class _LoginPageState extends ConsumerState<LoginPage>
       backgroundColor: const Color(0xFF0A0614),
       body: Stack(
         children: [
-          const PharaohBackground(),
+          const CinematicAuthBackground(),
           SafeArea(
             child: AnimatedBuilder(
               animation: _shakeAnimation,
@@ -381,72 +372,47 @@ class _LoginPageState extends ConsumerState<LoginPage>
   }
 
   Widget _buildLogoWithWings() {
-    return AnimatedBuilder(
-      animation: _wingsController,
-      builder: (context, _) {
-        return Stack(
-          alignment: Alignment.center,
-          children: [
-            SizedBox(
-              width: 300,
-              height: 200,
-              child: CustomPaint(
-                painter: PharaohWingsPainter(
-                  progress: _wingsController.value,
-                ),
-              ),
+    return Hero(
+      tag: 'app_logo',
+      child: Container(
+        width: 112,
+        height: 112,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(28),
+          boxShadow: const [
+            BoxShadow(
+              color: Color(0x59D8A84E),
+              blurRadius: 44,
+              spreadRadius: 6,
             ),
-            Hero(
-              tag: 'app_logo',
-              child: Transform.scale(
-                scale: 0.8 + _wingsController.value * 0.2,
-                child: Opacity(
-                  opacity: _wingsController.value.clamp(0.0, 1.0),
-                  child: Container(
-                    width: 110,
-                    height: 110,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(26),
-                      boxShadow: [
-                        BoxShadow(
-                          color: const Color(0xFFD4AF37).withValues(alpha: 0.35),
-                          blurRadius: 40,
-                          spreadRadius: 8,
-                        ),
-                        BoxShadow(
-                          color: const Color(0xFF7A5CFF).withValues(alpha: 0.2),
-                          blurRadius: 50,
-                          spreadRadius: 10,
-                        ),
-                      ],
-                    ),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(26),
-                      child: Image.asset(
-                        'assets/logo app/logo.png',
-                        fit: BoxFit.contain,
-                        errorBuilder: (_, _, _) => DecoratedBox(
-                          decoration: BoxDecoration(
-                            gradient: const LinearGradient(
-                              colors: [Color(0xFF7A5CFF), Color(0xFF2DD4BF)],
-                            ),
-                            borderRadius: BorderRadius.circular(26),
-                          ),
-                          child: const Icon(
-                            Icons.location_on_rounded,
-                            color: Colors.white,
-                            size: 50,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
+            BoxShadow(
+              color: Color(0x337A5CFF),
+              blurRadius: 56,
+              spreadRadius: 12,
             ),
           ],
-        );
-      },
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(28),
+          child: Image.asset(
+            'assets/logo app/logo.png',
+            fit: BoxFit.contain,
+            errorBuilder: (_, _, _) => DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  colors: [Color(0xFF7A5CFF), Color(0xFF2DD4BF)],
+                ),
+                borderRadius: BorderRadius.circular(28),
+              ),
+              child: const Icon(
+                Icons.location_on_rounded,
+                color: Colors.white,
+                size: 50,
+              ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 
@@ -536,10 +502,10 @@ class _LoginPageState extends ConsumerState<LoginPage>
         children: [
           _LightTextField(
             controller: _emailController,
-            hint: l10n.emailOrPhone,
-            icon: Icons.email_outlined,
+            hint: l10n.emailOrUsername,
+            icon: Icons.alternate_email_rounded,
             keyboardType: TextInputType.emailAddress,
-            validator: (v) => AppValidators.email(v),
+            validator: (v) => AppValidators.loginIdentifier(v),
           ),
           const SizedBox(height: 14),
           _LightTextField(
@@ -595,9 +561,9 @@ class _LoginPageState extends ConsumerState<LoginPage>
               ),
               GestureDetector(
                 onTap: () => context.push('/forgot-password'),
-                child: const Text(
-                  '',
-                  style: TextStyle(
+                child: Text(
+                  l10n.forgotPassword,
+                  style: const TextStyle(
                     fontSize: 13,
                     color: AppColors.brandPurple,
                     fontWeight: FontWeight.w500,
@@ -678,34 +644,34 @@ class _LightTextField extends StatelessWidget {
       decoration: InputDecoration(
         hintText: hint,
         hintStyle: TextStyle(
-          color: Colors.white.withValues(alpha: 0.3),
+          color: Colors.white.withValues(alpha: 0.45),
           fontSize: 15,
         ),
         prefixIcon: Icon(
           icon,
-          color: Colors.white.withValues(alpha: 0.35),
+          color: Colors.white.withValues(alpha: 0.55),
           size: 20,
         ),
         suffixIcon: suffix,
         filled: true,
-        fillColor: Colors.white.withValues(alpha: 0.08),
+        fillColor: Colors.white.withValues(alpha: 0.14),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(18),
           borderSide: BorderSide(
-            color: Colors.white.withValues(alpha: 0.1),
+            color: Colors.white.withValues(alpha: 0.2),
           ),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(18),
           borderSide: BorderSide(
-            color: Colors.white.withValues(alpha: 0.1),
+            color: Colors.white.withValues(alpha: 0.2),
           ),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(18),
           borderSide: const BorderSide(
-            color: Color(0xFFD4AF37),
-            width: 1.5,
+            color: Color(0xFFD8A84E),
+            width: 1.6,
           ),
         ),
         errorBorder: OutlineInputBorder(
@@ -751,7 +717,7 @@ class _LoginButton extends StatelessWidget {
                 )
               : null,
           color: onPressed == null
-              ? const Color(0xFF1A1035).withValues(alpha: 0.08)
+              ? const Color(0xFF1A1035).withValues(alpha: 0.55)
               : null,
           borderRadius: BorderRadius.circular(22),
           boxShadow: onPressed != null

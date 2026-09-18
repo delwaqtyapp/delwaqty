@@ -1091,6 +1091,18 @@ class _MerchantDetailPageState extends ConsumerState<MerchantDetailPage> {
         return Icons.local_car_wash;
       case MerchantType.home:
         return Icons.home_repair_service;
+      case MerchantType.perfumes:
+        return Icons.spa;
+      case MerchantType.spices:
+        return Icons.rice_bowl;
+      case MerchantType.dairy:
+        return Icons.water_drop;
+      case MerchantType.accessories:
+        return Icons.diamond;
+      case MerchantType.butcher:
+        return Icons.outdoor_grill;
+      case MerchantType.vegetables:
+        return Icons.grass;
       case MerchantType.other:
         return Icons.store;
     }
@@ -1144,6 +1156,18 @@ class _MerchantDetailPageState extends ConsumerState<MerchantDetailPage> {
         return AppColors.serviceCarwash;
       case MerchantType.home:
         return AppColors.serviceHome;
+      case MerchantType.perfumes:
+        return AppColors.serviceFlowers;
+      case MerchantType.spices:
+        return AppColors.serviceSupermarket;
+      case MerchantType.dairy:
+        return AppColors.serviceGrocery;
+      case MerchantType.accessories:
+        return AppColors.serviceFashion;
+      case MerchantType.butcher:
+        return AppColors.serviceMeat;
+      case MerchantType.vegetables:
+        return AppColors.serviceFruits;
       case MerchantType.other:
         return AppColors.brandPurple;
     }
@@ -1197,6 +1221,18 @@ class _MerchantDetailPageState extends ConsumerState<MerchantDetailPage> {
         return l10n.typeCarwash;
       case MerchantType.home:
         return l10n.typeHome;
+      case MerchantType.perfumes:
+        return l10n.typePerfumes;
+      case MerchantType.spices:
+        return l10n.typeSpices;
+      case MerchantType.dairy:
+        return l10n.typeDairy;
+      case MerchantType.accessories:
+        return l10n.typeAccessories;
+      case MerchantType.butcher:
+        return l10n.typeButcher;
+      case MerchantType.vegetables:
+        return l10n.typeVegetables;
       case MerchantType.other:
         return l10n.typeOther;
     }
@@ -1585,6 +1621,18 @@ class _SimilarMerchantCard extends StatelessWidget {
         return Icons.local_car_wash;
       case MerchantType.home:
         return Icons.home_repair_service;
+      case MerchantType.perfumes:
+        return Icons.spa;
+      case MerchantType.spices:
+        return Icons.rice_bowl;
+      case MerchantType.dairy:
+        return Icons.water_drop;
+      case MerchantType.accessories:
+        return Icons.diamond;
+      case MerchantType.butcher:
+        return Icons.outdoor_grill;
+      case MerchantType.vegetables:
+        return Icons.grass;
       case MerchantType.other:
         return Icons.store;
     }

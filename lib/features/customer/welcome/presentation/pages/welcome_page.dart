@@ -27,28 +27,43 @@ class WelcomePage extends ConsumerWidget {
                 const Spacer(flex: 2),
                 AnimatedFadeIn(
                   duration: const Duration(milliseconds: 1000),
-                  child: Container(
-                    width: 120,
-                    height: 120,
-                    decoration: BoxDecoration(
-                      color: context.colorScheme.surface,
-                      borderRadius: BorderRadius.circular(30),
-                      boxShadow: [
-                        BoxShadow(
-                          color: context.colorScheme.primary.withValues(
-                            alpha: 0.3,
+                  child: Hero(
+                    tag: 'app_logo',
+                    child: Container(
+                      width: 120,
+                      height: 120,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(30),
+                        boxShadow: const [
+                          BoxShadow(
+                            color: Color(0x4D5B3DF0),
+                            blurRadius: 40,
+                            offset: Offset(0, 12),
                           ),
-                          blurRadius: 30,
-                          offset: const Offset(0, 10),
-                        ),
-                      ],
-                    ),
-                    child: Center(
-                      child: Text(
-                        l10n.appNameAr,
-                        style: AppTextStyles.headlineLarge.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: context.colorScheme.primary,
+                          BoxShadow(
+                            color: Color(0x26D8A84E),
+                            blurRadius: 24,
+                            offset: Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(30),
+                        child: Image.asset(
+                          'assets/logo app/logo.png',
+                          width: 84,
+                          height: 84,
+                          fit: BoxFit.contain,
+                          errorBuilder: (_, _, _) => Center(
+                            child: Text(
+                              l10n.appNameAr,
+                              style: AppTextStyles.headlineLarge.copyWith(
+                                fontWeight: FontWeight.bold,
+                                color: context.colorScheme.primary,
+                              ),
+                            ),
+                          ),
                         ),
                       ),
                     ),

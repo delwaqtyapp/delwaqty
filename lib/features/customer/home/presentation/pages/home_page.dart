@@ -26,6 +26,7 @@ import 'package:delwaqty/shared/widgets/design/premium_search_field.dart';
 import 'package:delwaqty/shared/widgets/design/glass_surface.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 import 'package:delwaqty/features/customer/home/domain/home_domain.dart';
+import 'package:delwaqty/features/customer/home/presentation/widgets/category_visuals.dart';
 import 'package:delwaqty/features/customer/home/domain/entities/platform_category.dart';
 import 'package:delwaqty/shared/widgets/scroll_aware_nav.dart';
 import 'package:delwaqty/core/theme/app_colors.dart';
@@ -33,116 +34,6 @@ import 'package:delwaqty/core/theme/app_text_styles.dart';
 import 'package:delwaqty/core/theme/app_spacing.dart';
 import 'package:delwaqty/core/theme/app_elevation.dart';
 import 'package:delwaqty/features/admin/floating_sidebar/floating_sidebar.dart';
-
-String _merchantTypeLabel(MerchantType type, AppLocalizations l10n) =>
-    switch (type) {
-      MerchantType.restaurant => l10n.typeRestaurant,
-      MerchantType.grocery => l10n.typeGrocery,
-      MerchantType.supermarket => l10n.typeSupermarket,
-      MerchantType.fruits => l10n.typeFruits,
-      MerchantType.meat => l10n.typeMeat,
-      MerchantType.seafood => l10n.typeSeafood,
-      MerchantType.pharmacy => l10n.typePharmacy,
-      MerchantType.bakery => l10n.typeBakery,
-      MerchantType.sweets => l10n.typeSweets,
-      MerchantType.flowers => l10n.typeFlowers,
-      MerchantType.clothing => l10n.typeClothing,
-      MerchantType.shoes => l10n.typeShoes,
-      MerchantType.electronics => l10n.typeElectronics,
-      MerchantType.mobile => l10n.typeMobile,
-      MerchantType.furniture => l10n.typeFurniture,
-      MerchantType.fashion => l10n.typeFashion,
-      MerchantType.appliances => l10n.typeAppliances,
-      MerchantType.home => l10n.typeHome,
-      MerchantType.cafe => l10n.typeCafe,
-      MerchantType.petShop => l10n.typePetShop,
-      MerchantType.fitness => l10n.typeFitness,
-      MerchantType.gas => l10n.typeGas,
-      MerchantType.carwash => l10n.typeCarwash,
-      MerchantType.other => l10n.typeOther,
-    };
-
-Color _merchantTypeColor(MerchantType type) => switch (type) {
-  MerchantType.restaurant => AppColors.serviceRestaurant,
-  MerchantType.grocery => AppColors.serviceGrocery,
-  MerchantType.supermarket => AppColors.serviceSupermarket,
-  MerchantType.fruits => AppColors.serviceFruits,
-  MerchantType.meat => AppColors.serviceMeat,
-  MerchantType.seafood => AppColors.serviceSeafood,
-  MerchantType.pharmacy => AppColors.servicePharmacy,
-  MerchantType.bakery => AppColors.serviceBakery,
-  MerchantType.sweets => AppColors.serviceSweets,
-  MerchantType.flowers => AppColors.serviceFlowers,
-  MerchantType.clothing => AppColors.serviceClothing,
-  MerchantType.shoes => AppColors.serviceShoes,
-  MerchantType.electronics => AppColors.serviceElectronics,
-  MerchantType.mobile => AppColors.serviceMobile,
-  MerchantType.furniture => AppColors.serviceFurniture,
-  MerchantType.fashion => AppColors.serviceFashion,
-  MerchantType.appliances => AppColors.serviceAppliances,
-  MerchantType.home => AppColors.serviceHome,
-  MerchantType.cafe => AppColors.serviceCafe,
-  MerchantType.petShop => AppColors.servicePetShop,
-  MerchantType.fitness => AppColors.serviceFitness,
-  MerchantType.gas => AppColors.serviceGas,
-  MerchantType.carwash => AppColors.serviceCarwash,
-  MerchantType.other => AppColors.serviceMore,
-};
-
-String _merchantEmoji(MerchantType type) => switch (type) {
-  MerchantType.restaurant => '🍽️',
-  MerchantType.grocery => '🛒',
-  MerchantType.supermarket => '🏪',
-  MerchantType.fruits => '🥬',
-  MerchantType.meat => '🥩',
-  MerchantType.seafood => '🐟',
-  MerchantType.pharmacy => '💊',
-  MerchantType.bakery => '🥐',
-  MerchantType.sweets => '🍰',
-  MerchantType.flowers => '💐',
-  MerchantType.clothing => '👔',
-  MerchantType.shoes => '👟',
-  MerchantType.electronics => '📱',
-  MerchantType.mobile => '📞',
-  MerchantType.furniture => '🛋️',
-  MerchantType.fashion => '👗',
-  MerchantType.appliances => '🔌',
-  MerchantType.home => '🔧',
-  MerchantType.cafe => '☕',
-  MerchantType.petShop => '🐾',
-  MerchantType.fitness => '💪',
-  MerchantType.gas => '⛽',
-  MerchantType.carwash => '🚿',
-  MerchantType.other => '🏪',
-};
-
-MerchantType? _categoryNameToMerchantType(String name) {
-  final lower = name.toLowerCase();
-  if (lower.contains('مطعم') || lower.contains('restaurant')) return MerchantType.restaurant;
-  if (lower.contains('بقال') || lower.contains('grocery')) return MerchantType.grocery;
-  if (lower.contains('سوبرماركت') || lower.contains('supermarket')) return MerchantType.supermarket;
-  if (lower.contains('فاكهة') || lower.contains('fruit')) return MerchantType.fruits;
-  if (lower.contains('لحوم') || lower.contains('meat')) return MerchantType.meat;
-  if (lower.contains('سمك') || lower.contains('seafood')) return MerchantType.seafood;
-  if (lower.contains('صيدل') || lower.contains('pharmacy')) return MerchantType.pharmacy;
-  if (lower.contains('مخب') || lower.contains('bakery')) return MerchantType.bakery;
-  if (lower.contains('حلوي') || lower.contains('sweet')) return MerchantType.sweets;
-  if (lower.contains('ورود') || lower.contains('flower')) return MerchantType.flowers;
-  if (lower.contains('ملابس') || lower.contains('clothing')) return MerchantType.clothing;
-  if (lower.contains('احذي') || lower.contains('shoe')) return MerchantType.shoes;
-  if (lower.contains('electronic') || lower.contains('إلكتروني')) return MerchantType.electronics;
-  if (lower.contains('جوال') || lower.contains('mobile') || lower.contains('هاتف')) return MerchantType.mobile;
-  if (lower.contains('اثاث') || lower.contains('furniture')) return MerchantType.furniture;
-  if (lower.contains('أزياء') || lower.contains('fashion') || lower.contains('mode')) return MerchantType.fashion;
-  if (lower.contains('أجهزة') || lower.contains('appliance')) return MerchantType.appliances;
-  if (lower.contains('منزل') || lower.contains('home')) return MerchantType.home;
-  if (lower.contains('كافيه') || lower.contains('قهوة') || lower.contains('cafe')) return MerchantType.cafe;
-  if (lower.contains('حيوان') || lower.contains('pet')) return MerchantType.petShop;
-  if (lower.contains('لياقة') || lower.contains('fitness')) return MerchantType.fitness;
-  if (lower.contains('بنزين') || lower.contains('gas')) return MerchantType.gas;
-  if (lower.contains('غسيل') || lower.contains('carwash')) return MerchantType.carwash;
-  return null;
-}
 
 class HomePage extends ConsumerWidget {
   const HomePage({super.key});
@@ -157,13 +48,7 @@ class HomePage extends ConsumerWidget {
         ? 0
         : ref.watch(unreadCountProvider).value ?? 0;
 
-    return PopScope(
-      canPop: false,
-      onPopInvokedWithResult: (didPop, _) {
-        if (didPop) return;
-        _showExitConfirmation(context, l10n);
-      },
-      child: Scaffold(
+    return Scaffold(
       body: SafeArea(
         child: GradientBackground(
           child: RefreshIndicator(
@@ -215,7 +100,6 @@ class HomePage extends ConsumerWidget {
           ),
         ),
       ),
-    ),
     );
   }
 
@@ -353,33 +237,6 @@ class HomePage extends ConsumerWidget {
       ),
     );
   }
-
-  void _showExitConfirmation(BuildContext context, AppLocalizations l10n) {
-    showDialog<void>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(AppSpacing.radiusDialog),
-        ),
-        icon: Image.asset('assets/logo app/logo.png', height: 44),
-        title: Text(l10n.exitAppTitle),
-        content: Text(l10n.exitAppConfirm),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(),
-            child: Text(l10n.cancel),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.of(ctx).pop();
-              SystemNavigator.pop();
-            },
-            child: Text(l10n.logout),
-          ),
-        ],
-      ),
-    );
-  }
 }
 
 class _CompactCategories extends StatelessWidget {
@@ -407,21 +264,80 @@ class _CompactCategories extends StatelessWidget {
         error: (_, _) => const SizedBox.shrink(),
         data: (categories) {
           if (categories.isEmpty) return const SizedBox.shrink();
+          // Daily/repeat demand first, the rest behind "view all".
+          final sorted = [...categories]..sort(
+              (a, b) => categoryRank(a.name).compareTo(categoryRank(b.name)),
+            );
+          const visibleCount = 6;
+          final showAllTile = sorted.length > visibleCount;
+          final visible = showAllTile
+              ? sorted.sublist(0, visibleCount)
+              : sorted;
           return SizedBox(
             height: 100,
             child: ListView.separated(
               scrollDirection: Axis.horizontal,
               padding: const EdgeInsets.fromLTRB(20, 14, 20, 0),
-              itemCount: categories.length,
+              itemCount: visible.length + (showAllTile ? 1 : 0),
               separatorBuilder: (_, _) => const SizedBox(width: 12),
               itemBuilder: (context, index) {
-                final category = categories[index];
-                final merchantType = _categoryNameToMerchantType(category.name);
+                if (index >= visible.length) {
+                  return AnimatedFadeIn(
+                    delay: Duration(
+                        milliseconds: 280 + visible.length * 40),
+                    child: PressableScale(
+                      onTap: () => context.push('/services'),
+                      child: SizedBox(
+                        width: 80,
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Container(
+                              width: 44,
+                              height: 44,
+                              decoration: BoxDecoration(
+                                gradient: const LinearGradient(
+                                  begin: Alignment.topLeft,
+                                  end: Alignment.bottomRight,
+                                  colors: [
+                                    AppColors.brandPurpleDeep,
+                                    AppColors.brandViolet,
+                                  ],
+                                ),
+                                borderRadius: BorderRadius.circular(14),
+                              ),
+                              child: const Center(
+                                child: Icon(
+                                  Icons.apps_rounded,
+                                  color: Colors.white,
+                                  size: 22,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 6),
+                            Text(
+                              AppLocalizations.of(context).viewAll,
+                              style: AppTextStyles.labelSmall.copyWith(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w600,
+                              ),
+                              textAlign: TextAlign.center,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  );
+                }
+                final category = visible[index];
+                final merchantType = categoryNameToMerchantType(category.name);
                 final typeColor = merchantType != null
-                    ? _merchantTypeColor(merchantType)
+                    ? merchantTypeColor(merchantType)
                     : AppColors.brandPurple;
                 final emoji = merchantType != null
-                    ? _merchantEmoji(merchantType)
+                    ? merchantEmoji(merchantType)
                     : '🏪';
 
                 return AnimatedFadeIn(
@@ -1395,8 +1311,8 @@ class _HomeMerchantCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final color = _merchantTypeColor(merchant.type);
-    final typeLabel = _merchantTypeLabel(merchant.type, l10n);
+    final color = merchantTypeColor(merchant.type);
+    final typeLabel = merchantTypeLabel(merchant.type, l10n);
 
     return SizedBox(
       width: 170,
@@ -1419,14 +1335,14 @@ class _HomeMerchantCard extends StatelessWidget {
                       errorBuilder: (_, _, _) => _merchantHeaderGradient(
                         context,
                         color,
-                        _merchantEmoji(merchant.type),
+                        merchantEmoji(merchant.type),
                       ),
                     )
                   else
                     _merchantHeaderGradient(
                       context,
                       color,
-                      _merchantEmoji(merchant.type),
+                      merchantEmoji(merchant.type),
                     ),
                   DecoratedBox(
                     decoration: BoxDecoration(

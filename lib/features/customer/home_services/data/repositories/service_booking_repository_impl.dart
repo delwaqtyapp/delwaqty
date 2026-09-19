@@ -134,9 +134,55 @@ class ServiceBookingRepositoryImpl implements ServiceBookingRepository {
         .from('service_bookings')
         .update({'status': 'cancelled'}).eq('id', id);
   }
+
+  @override
+  Future<String> submitDeliveryCarRequest({
+    required String pickupAddress,
+    required String dropoffAddress,
+    required String phone,
+    double? pickupLat,
+    double? pickupLng,
+    String? note,
+  }) async {
+    final uid = _client.auth.currentUser?.id;
+    if (uid == null) throw Exception('Not authenticated');
+    final res = await _client
+        .from('delivery_car_requests')
+        .insert({
+          'user_id': uid,
+          'pickup_address': pickupAddress,
+          'dropoff_address': dropoffAddress,
+          'phone': phone,
+          'pickup_lat': pickupLat,
+          'pickup_lng': pickupLng,
+          'note': note,
+        })
+        .select('id')
+        .single();
+    return res['id'] as String;
+  }
+
+  @override
+  Future<List<Map<String, dynamic>>> getMyDeliveryCarRequests() async {
+    final uid = _client.auth.currentUser?.id;
+    if (uid == null) return const [];
+    final rows = await _client
+        .from('delivery_car_requests')
+        .select()
+        .eq('user_id', uid)
+        .order('created_at')
+        .limit(50);
+    return List<Map<String, dynamic>>.from(rows);
+  }
 }
 
 final serviceBookingRepositoryProvider =
     Provider<ServiceBookingRepository>((ref) {
   return ServiceBookingRepositoryImpl(Supabase.instance.client);
+});
+
+final myDeliveryCarRequestsProvider =
+    FutureProvider<List<Map<String, dynamic>>>((ref) async {
+  final repo = ref.watch(serviceBookingRepositoryProvider);
+  return repo.getMyDeliveryCarRequests();
 });

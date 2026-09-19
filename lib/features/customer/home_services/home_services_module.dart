@@ -2,8 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:delwaqty/core/module/feature_module.dart';
 import 'package:delwaqty/features/customer/home_services/domain/entities/service_category.dart';
+import 'package:delwaqty/features/customer/home_services/domain/entities/service_provider.dart';
 import 'package:delwaqty/features/customer/home_services/presentation/pages/home_services_page.dart';
 import 'package:delwaqty/features/customer/home_services/presentation/pages/service_booking_page.dart';
+import 'package:delwaqty/features/customer/home_services/presentation/pages/delivery_car_request_page.dart';
+import 'package:delwaqty/features/customer/home_services/presentation/pages/service_providers_page.dart';
 
 class HomeServicesModule extends FeatureModule {
   HomeServicesModule();
@@ -39,7 +42,30 @@ class HomeServicesModule extends FeatureModule {
               (e) => e.name == categoryTypeName,
               orElse: () => ServiceCategoryType.other,
             );
-            return ServiceBookingPage(categoryType: categoryType);
+            final provider = state.extra is ServiceProvider
+                ? state.extra as ServiceProvider
+                : null;
+            return ServiceBookingPage(
+              categoryType: categoryType,
+              preselectedProvider: provider,
+            );
+          },
+        ),
+        GoRoute(
+          path: '/home-services/delivery-car',
+          name: 'home-services-delivery-car',
+          builder: (context, state) => const DeliveryCarRequestPage(),
+        ),
+        GoRoute(
+          path: '/home-services/providers/:categoryType',
+          name: 'home-services-providers',
+          builder: (context, state) {
+            final name = state.pathParameters['categoryType']!;
+            final type = ServiceCategoryType.values.firstWhere(
+              (e) => e.name == name,
+              orElse: () => ServiceCategoryType.plumbing,
+            );
+            return ServiceProvidersPage(initialType: type);
           },
         ),
       ];

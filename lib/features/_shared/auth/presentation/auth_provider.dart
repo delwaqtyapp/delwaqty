@@ -94,7 +94,10 @@ class AuthStateNotifier extends Notifier<AuthState> {
         } catch (_) {}
       }
       if (session != null) {
-        final user = await ref.read(getCurrentUserUseCaseProvider).call();
+        final user = await ref
+            .read(getCurrentUserUseCaseProvider)
+            .call()
+            .timeout(const Duration(seconds: 12));
         state = _resolveAuthenticated(user);
       } else {
         state = const AuthState.unauthenticated();
@@ -117,7 +120,12 @@ class AuthStateNotifier extends Notifier<AuthState> {
         identifier = await _resolveUsernameToEmail(identifier);
       }
       await _signInUseCase(email: identifier, password: password);
-      final user = await ref.read(getCurrentUserUseCaseProvider).call();
+      // Bound the profile fetch so a slow/hanging network after sign-in (e.g.
+      // right after a logout) can never leave the app stuck on "loading".
+      final user = await ref
+          .read(getCurrentUserUseCaseProvider)
+          .call()
+          .timeout(const Duration(seconds: 12));
       state = _resolveAuthenticated(user);
     } catch (e) {
       _logger.e('Sign in failed', e);

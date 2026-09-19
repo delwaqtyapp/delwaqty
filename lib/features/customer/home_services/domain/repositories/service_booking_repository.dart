@@ -24,4 +24,13 @@ abstract class ServiceBookingRepository {
   });
   Future<ServiceBooking> updateBookingStatus(String id, BookingStatus status);
   Future<void> cancelBooking(String id);
+  Future<String> submitDeliveryCarRequest({
+    required String pickupAddress,
+    required String dropoffAddress,
+    required String phone,
+    double? pickupLat,
+    double? pickupLng,
+    String? note,
+  });
+  Future<List<Map<String, dynamic>>> getMyDeliveryCarRequests();
 }

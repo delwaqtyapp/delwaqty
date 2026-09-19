@@ -102,6 +102,11 @@ final List<_AdminNavGroup> _adminGroups = [
         icon: Icons.gavel_rounded,
         label: (l) => l.adminEscalations,
       ),
+      _AdminNavItem(
+        path: '/admin/delivery-car-requests',
+        icon: Icons.local_taxi_rounded,
+        label: (l) => l.adminDeliveryCarRequests,
+      ),
     ],
   ),
   _AdminNavGroup(

@@ -6,6 +6,7 @@ import 'package:delwaqty/core/extensions/context_extensions.dart';
 import 'package:delwaqty/core/theme/app_colors.dart';
 import 'package:delwaqty/core/theme/app_text_styles.dart';
 import 'package:delwaqty/features/customer/home_services/domain/entities/service_category.dart';
+import 'package:delwaqty/features/customer/home_services/domain/entities/service_provider.dart';
 import 'package:delwaqty/features/customer/home_services/data/repositories/service_booking_repository_impl.dart';
 import 'package:delwaqty/features/_shared/auth/domain/auth_state.dart';
 import 'package:delwaqty/features/_shared/auth/presentation/auth_provider.dart';
@@ -20,9 +21,10 @@ final _providersProvider =
 });
 
 class ServiceBookingPage extends ConsumerStatefulWidget {
-  const ServiceBookingPage({super.key, required this.categoryType});
+  const ServiceBookingPage({super.key, required this.categoryType, this.preselectedProvider});
 
   final ServiceCategoryType categoryType;
+  final ServiceProvider? preselectedProvider;
 
   @override
   ConsumerState<ServiceBookingPage> createState() => _ServiceBookingPageState();
@@ -36,6 +38,16 @@ class _ServiceBookingPageState extends ConsumerState<ServiceBookingPage> {
   String? _selectedProviderId;
   String? _selectedProviderName;
   bool _isSubmitting = false;
+
+  @override
+  void initState() {
+    super.initState();
+    final p = widget.preselectedProvider;
+    if (p != null) {
+      _selectedProviderId = p.id;
+      _selectedProviderName = p.name;
+    }
+  }
 
   @override
   void dispose() {
@@ -61,6 +73,7 @@ class _ServiceBookingPageState extends ConsumerState<ServiceBookingPage> {
     ServiceCategoryType.doctor => 'حجز دكتور',
     ServiceCategoryType.nurse => 'ممرض',
     ServiceCategoryType.barber => 'حجز حلاق',
+    ServiceCategoryType.deliveryCar => 'طلب سيارة توصيل',
     ServiceCategoryType.other => 'خدمات أخرى',
   };
 

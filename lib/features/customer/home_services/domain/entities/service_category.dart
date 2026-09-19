@@ -36,6 +36,8 @@ enum ServiceCategoryType {
   nurse,
   @JsonValue('barber')
   barber,
+  @JsonValue('deliveryCar')
+  deliveryCar,
   @JsonValue('other')
   other,
 }

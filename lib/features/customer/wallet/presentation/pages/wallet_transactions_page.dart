@@ -32,7 +32,7 @@ class WalletTransactionsPage extends ConsumerWidget {
       appBar: AppBar(title: Text(l10n.transactions)),
       body: RefreshIndicator(
         onRefresh: () async => ref.invalidate(walletTransactionsProvider(userId)),
-        child: transactionsAsync.when(
+        child: transactionsAsync.when(skipLoadingOnRefresh: true, 
           data: (transactions) {
             if (transactions.isEmpty) {
               return Center(

@@ -57,7 +57,11 @@ class _CommerceDiscoveryPageState extends ConsumerState<CommerceDiscoveryPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(l10n.discover),
+        title: Text(
+          selectedType != null
+              ? merchantTypeLabel(selectedType, l10n)
+              : l10n.allMerchants,
+        ),
         actions: [CartBadge(onTap: () => context.push('/market/cart'))],
       ),
       body: RefreshIndicator(
@@ -398,10 +402,15 @@ class _MostRequestedCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final l10n = AppLocalizations.of(context);
+    final typeColor = merchantTypeColor(merchant.type);
+    final typeEmoji = merchantEmoji(merchant.type);
     return DecoratedBox(
       decoration: BoxDecoration(
         color: theme.colorScheme.surfaceContainerLowest,
         borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: theme.colorScheme.outlineVariant.withValues(alpha: 0.2),
+        ),
         boxShadow: [
           BoxShadow(
             color: AppColors.brandPurple.withValues(alpha: 0.08),
@@ -414,30 +423,34 @@ class _MostRequestedCard extends StatelessWidget {
         children: [
           Container(
             width: 100,
+            clipBehavior: Clip.antiAlias,
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
                 colors: [
-                  AppColors.brandPurple.withValues(alpha: 0.15),
-                  AppColors.brandPurple.withValues(alpha: 0.05),
+                  typeColor.withValues(alpha: 0.35),
+                  typeColor.withValues(alpha: 0.12),
                 ],
               ),
               borderRadius: const BorderRadius.horizontal(
                 left: Radius.circular(20),
               ),
             ),
-            child: Center(
-              child: Text(
-                merchant.name.isNotEmpty
-                    ? merchant.name.characters.first.toUpperCase()
-                    : '؟',
-                style: theme.textTheme.headlineLarge?.copyWith(
-                  color: AppColors.brandPurple,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
+            child: merchant.imageUrl != null && merchant.imageUrl!.isNotEmpty
+                ? Image.network(
+                    merchant.imageUrl!,
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, _, _) => Center(
+                      child: Text(typeEmoji, style: const TextStyle(fontSize: 32)),
+                    ),
+                  )
+                : Center(
+                    child: Text(
+                      typeEmoji,
+                      style: const TextStyle(fontSize: 32),
+                    ),
+                  ),
           ),
           Expanded(
             child: Padding(
@@ -448,8 +461,9 @@ class _MostRequestedCard extends StatelessWidget {
                 children: [
                   Text(
                     merchant.name,
-                    style: theme.textTheme.bodyLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w700,
+                      height: 1.2,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -479,7 +493,7 @@ class _MostRequestedCard extends StatelessWidget {
                         merchantTypeLabel(merchant.type, l10n),
                         style: theme.textTheme.labelSmall?.copyWith(
                           color: theme.colorScheme.onSurfaceVariant,
-                          letterSpacing: 0.5,
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
                     ],

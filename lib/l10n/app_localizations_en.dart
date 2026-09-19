@@ -6081,4 +6081,69 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get stayInApp => 'Stay on the platform';
+
+  @override
+  String get serviceOther => 'Other';
+
+  @override
+  String get serviceDeliveryCar => 'Delivery Car';
+
+  @override
+  String get adminDeliveryCarRequests => 'Delivery Car Requests';
+
+  @override
+  String get noRequestsYet => 'No requests yet';
+
+  @override
+  String get adminStartReview => 'Start review';
+
+  @override
+  String get statusPending => 'Pending';
+
+  @override
+  String get statusReviewing => 'Reviewing';
+
+  @override
+  String get statusApproved => 'Approved';
+
+  @override
+  String get statusRejected => 'Rejected';
+
+  @override
+  String get statusCompleted => 'Completed';
+
+  @override
+  String get statusCancelled => 'Cancelled';
+
+  @override
+  String get deliveryCarRequested => 'Delivery car requested';
+
+  @override
+  String get deliveryCar => 'Delivery Car';
+
+  @override
+  String get deliveryCarHint =>
+      'Order a delivery car to move anything between two addresses';
+
+  @override
+  String get pickupAddress => 'Pickup address';
+
+  @override
+  String get dropoffAddress => 'Drop-off address';
+
+  @override
+  String get myRequests => 'My requests';
+
+  @override
+  String get noProvidersFound => 'No providers found';
+
+  @override
+  String get noProvidersNearby =>
+      'No providers near you. Try a larger radius or check back later';
+
+  @override
+  String get searchRadius => 'Search radius';
+
+  @override
+  String get perHour => '/ hour';
 }

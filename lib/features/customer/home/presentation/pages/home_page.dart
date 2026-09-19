@@ -503,23 +503,12 @@ class _ServicesSection extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final l10n = AppLocalizations.of(context);
     final servicesAsync = ref.watch(_homeServiceCategoriesProvider);
     return AnimatedFadeIn(
       delay: const Duration(milliseconds: 300),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(20, 18, 20, 0),
-            child: Text(
-              l10n.servicesSection,
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w800,
-                    fontSize: 18,
-                  ),
-            ),
-          ),
           servicesAsync.when(
             loading: () => SizedBox(
               height: 108,

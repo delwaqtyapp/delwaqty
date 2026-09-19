@@ -29,11 +29,45 @@ import 'package:delwaqty/features/customer/home/domain/home_domain.dart';
 import 'package:delwaqty/features/customer/home/presentation/widgets/category_visuals.dart';
 import 'package:delwaqty/features/customer/home/domain/entities/platform_category.dart';
 import 'package:delwaqty/shared/widgets/scroll_aware_nav.dart';
+import 'package:delwaqty/features/customer/home_services/data/repositories/service_booking_repository_impl.dart';
+import 'package:delwaqty/features/customer/home_services/domain/entities/service_category.dart';
 import 'package:delwaqty/core/theme/app_colors.dart';
 import 'package:delwaqty/core/theme/app_text_styles.dart';
 import 'package:delwaqty/core/theme/app_spacing.dart';
 import 'package:delwaqty/core/theme/app_elevation.dart';
 import 'package:delwaqty/features/admin/floating_sidebar/floating_sidebar.dart';
+
+final _homeServiceCategoriesProvider =
+    FutureProvider<List<ServiceCategory>>((ref) async {
+  final repo = ref.watch(serviceBookingRepositoryProvider);
+  final all = await repo.getCategories();
+  const priority = [
+    ServiceCategoryType.doctor,
+    ServiceCategoryType.nurse,
+    ServiceCategoryType.teacher,
+    ServiceCategoryType.barber,
+    ServiceCategoryType.deliveryCar,
+    ServiceCategoryType.plumbing,
+    ServiceCategoryType.electrical,
+    ServiceCategoryType.carpentry,
+    ServiceCategoryType.painting,
+    ServiceCategoryType.cleaning,
+    ServiceCategoryType.acMaintenance,
+    ServiceCategoryType.pipeChange,
+    ServiceCategoryType.plastering,
+    ServiceCategoryType.carpetCleaning,
+    ServiceCategoryType.dishRepair,
+    ServiceCategoryType.pestControl,
+    ServiceCategoryType.applianceRepair,
+  ];
+  int rank(ServiceCategoryType t) {
+    final i = priority.indexOf(t);
+    return i == -1 ? priority.length : i;
+  }
+
+  final sorted = [...all]..sort((a, b) => rank(a.type).compareTo(rank(b.type)));
+  return sorted;
+});
 
 class HomePage extends ConsumerWidget {
   const HomePage({super.key});
@@ -89,6 +123,9 @@ class HomePage extends ConsumerWidget {
                   const SliverToBoxAdapter(child: _PromoCarousel()),
                   SliverToBoxAdapter(
                     child: _CompactCategories(ref: ref),
+                  ),
+                  const SliverToBoxAdapter(
+                    child: _ServicesSection(),
                   ),
                   SliverToBoxAdapter(
                     child: _buildDiscoverySection(context, ref, l10n),
@@ -415,6 +452,187 @@ class _CompactCategories extends StatelessWidget {
       ),
     );
   }
+}
+
+/// Horizontal "الخدمات" section on the home page: all booking service
+/// categories in priority order — each tile opens its own service page.
+class _ServicesSection extends ConsumerWidget {
+  const _ServicesSection();
+
+  String _label(ServiceCategoryType t) => switch (t) {
+        ServiceCategoryType.doctor => 'حجز دكتور',
+        ServiceCategoryType.nurse => 'ممرض',
+        ServiceCategoryType.teacher => 'مدرسين',
+        ServiceCategoryType.barber => 'حجز حلاق',
+        ServiceCategoryType.deliveryCar => 'سيارة توصيل',
+        ServiceCategoryType.plumbing => 'سباكة',
+        ServiceCategoryType.electrical => 'كهرباء',
+        ServiceCategoryType.carpentry => 'نجارة',
+        ServiceCategoryType.painting => 'دهان',
+        ServiceCategoryType.cleaning => 'تنظيف',
+        ServiceCategoryType.acMaintenance => 'صيانة تكييف',
+        ServiceCategoryType.pipeChange => 'تغيير أنبوبة',
+        ServiceCategoryType.plastering => 'نقاشة',
+        ServiceCategoryType.carpetCleaning => 'غسيل السجاد',
+        ServiceCategoryType.dishRepair => 'إصلاح الدش',
+        ServiceCategoryType.pestControl => 'مكافحة حشرات',
+        ServiceCategoryType.applianceRepair => 'إصلاح أجهزة',
+        ServiceCategoryType.other => 'خدمات أخرى',
+      };
+
+  IconData _icon(ServiceCategoryType t) => switch (t) {
+        ServiceCategoryType.doctor => Icons.medical_services_rounded,
+        ServiceCategoryType.nurse => Icons.health_and_safety_rounded,
+        ServiceCategoryType.teacher => Icons.school_rounded,
+        ServiceCategoryType.barber => Icons.content_cut_rounded,
+        ServiceCategoryType.deliveryCar => Icons.local_taxi_rounded,
+        ServiceCategoryType.plumbing => Icons.plumbing_rounded,
+        ServiceCategoryType.electrical => Icons.electrical_services_rounded,
+        ServiceCategoryType.carpentry => Icons.carpenter_rounded,
+        ServiceCategoryType.painting => Icons.format_paint_rounded,
+        ServiceCategoryType.cleaning => Icons.cleaning_services_rounded,
+        ServiceCategoryType.acMaintenance => Icons.ac_unit_rounded,
+        ServiceCategoryType.pipeChange => Icons.settings_input_component_rounded,
+        ServiceCategoryType.plastering => Icons.format_color_fill_rounded,
+        ServiceCategoryType.carpetCleaning => Icons.local_laundry_service_rounded,
+        ServiceCategoryType.dishRepair => Icons.satellite_alt_rounded,
+        ServiceCategoryType.pestControl => Icons.bug_report_rounded,
+        ServiceCategoryType.applianceRepair => Icons.build_rounded,
+        ServiceCategoryType.other => Icons.home_repair_service_rounded,
+      };
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+    final servicesAsync = ref.watch(_homeServiceCategoriesProvider);
+    return AnimatedFadeIn(
+      delay: const Duration(milliseconds: 300),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 18, 20, 0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  l10n.servicesSection,
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w800,
+                        fontSize: 18,
+                      ),
+                ),
+                TextButton(
+                  onPressed: () => context.push('/services'),
+                  child: Text(l10n.viewAll),
+                ),
+              ],
+            ),
+          ),
+          servicesAsync.when(
+            loading: () => SizedBox(
+              height: 108,
+              child: ListView.separated(
+                scrollDirection: Axis.horizontal,
+                padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
+                itemCount: 6,
+                separatorBuilder: (_, _) => const SizedBox(width: 12),
+                itemBuilder: (_, _) =>
+                    const ShimmerBox(width: 90, height: 100),
+              ),
+            ),
+            error: (_, _) => const SizedBox.shrink(),
+            data: (services) {
+              if (services.isEmpty) return const SizedBox.shrink();
+              return SizedBox(
+                height: 116,
+                child: ListView.separated(
+                  scrollDirection: Axis.horizontal,
+                  padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
+                  itemCount: services.length,
+                  separatorBuilder: (_, _) => const SizedBox(width: 12),
+                  itemBuilder: (context, index) {
+                    final service = services[index];
+                    final color = _serviceColor(service.type);
+                    return AnimatedFadeIn(
+                      delay: Duration(milliseconds: 320 + index * 40),
+                      child: PressableScale(
+                        onTap: () => context.push(
+                          service.type == ServiceCategoryType.deliveryCar
+                              ? '/home-services/delivery-car'
+                              : '/home-services/providers/${service.type.name}',
+                        ),
+                        child: SizedBox(
+                          width: 92,
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Container(
+                                width: 56,
+                                height: 56,
+                                decoration: BoxDecoration(
+                                  gradient: LinearGradient(
+                                    begin: Alignment.topLeft,
+                                    end: Alignment.bottomRight,
+                                    colors: [
+                                      color.withValues(alpha: 0.35),
+                                      color.withValues(alpha: 0.15),
+                                    ],
+                                  ),
+                                  borderRadius: BorderRadius.circular(16),
+                                  border: Border.all(
+                                    color: color.withValues(alpha: 0.25),
+                                  ),
+                                ),
+                                child: Icon(_icon(service.type),
+                                    color: color, size: 26),
+                              ),
+                              const SizedBox(height: 6),
+                              Text(
+                                _label(service.type),
+                                style: AppTextStyles.labelSmall.copyWith(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                                textAlign: TextAlign.center,
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              );
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  Color _serviceColor(ServiceCategoryType t) => switch (t) {
+        ServiceCategoryType.doctor => AppColors.errorLight,
+        ServiceCategoryType.nurse => AppColors.successLight,
+        ServiceCategoryType.teacher => AppColors.infoLight,
+        ServiceCategoryType.barber => AppColors.brandViolet,
+        ServiceCategoryType.deliveryCar => AppColors.serviceDelivery,
+        ServiceCategoryType.plumbing => AppColors.serviceHome,
+        ServiceCategoryType.electrical => AppColors.serviceElectronics,
+        ServiceCategoryType.carpentry => AppColors.serviceBakery,
+        ServiceCategoryType.painting => AppColors.serviceFashion,
+        ServiceCategoryType.cleaning => AppColors.serviceDelivery,
+        ServiceCategoryType.acMaintenance => AppColors.serviceSeafood,
+        ServiceCategoryType.pipeChange => AppColors.serviceGrocery,
+        ServiceCategoryType.plastering => AppColors.serviceFurniture,
+        ServiceCategoryType.carpetCleaning => AppColors.serviceCafe,
+        ServiceCategoryType.dishRepair => AppColors.serviceElectronics,
+        ServiceCategoryType.pestControl => AppColors.serviceGas,
+        ServiceCategoryType.applianceRepair => AppColors.serviceAppliances,
+        ServiceCategoryType.other => AppColors.serviceMore,
+      };
 }
 
 class _DiscoveryTabs extends ConsumerStatefulWidget {

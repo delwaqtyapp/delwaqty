@@ -6035,4 +6035,68 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get stayInApp => 'البقاء في المنصة';
+
+  @override
+  String get serviceOther => 'أخرى';
+
+  @override
+  String get serviceDeliveryCar => 'سيارة توصيل';
+
+  @override
+  String get adminDeliveryCarRequests => 'طلبات سيارة التوصيل';
+
+  @override
+  String get noRequestsYet => 'لا توجد طلبات بعد';
+
+  @override
+  String get adminStartReview => 'بدء المراجعة';
+
+  @override
+  String get statusPending => 'قيد الانتظار';
+
+  @override
+  String get statusReviewing => 'قيد المراجعة';
+
+  @override
+  String get statusApproved => 'موافق عليه';
+
+  @override
+  String get statusRejected => 'مرفوض';
+
+  @override
+  String get statusCompleted => 'مكتمل';
+
+  @override
+  String get statusCancelled => 'ملغي';
+
+  @override
+  String get deliveryCarRequested => 'تم طلب سيارة التوصيل';
+
+  @override
+  String get deliveryCar => 'سيارة توصيل';
+
+  @override
+  String get deliveryCarHint => 'اطلب سيارة توصيل لنقل أي شيء بين عنوانين';
+
+  @override
+  String get pickupAddress => 'عنوان الاستلام';
+
+  @override
+  String get dropoffAddress => 'عنوان التسليم';
+
+  @override
+  String get myRequests => 'طلباتي';
+
+  @override
+  String get noProvidersFound => 'لا يوجد مقدمي خدمة';
+
+  @override
+  String get noProvidersNearby =>
+      'لا يوجد مقدمي خدمة بالقرب منك. جرّب نطاقاً أكبر أو عد لاحقاً';
+
+  @override
+  String get searchRadius => 'نطاق البحث';
+
+  @override
+  String get perHour => '/ ساعة';
 }

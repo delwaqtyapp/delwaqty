@@ -216,7 +216,9 @@ class _BookingServicesSection extends ConsumerWidget {
                 delay: Duration(milliseconds: 140 + index * 40),
                 child: PressableScale(
                   onTap: () => context.push(
-                    '/home-services/category/${service.type.name}',
+                    service.type == ServiceCategoryType.deliveryCar
+                        ? '/home-services/delivery-car'
+                        : '/home-services/providers/${service.type.name}',
                   ),
                   child: Column(
                     mainAxisSize: MainAxisSize.min,

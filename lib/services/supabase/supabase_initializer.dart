@@ -19,8 +19,9 @@ abstract final class SupabaseInitializer {
       url: SupabaseConfig.url,
       publishableKey: SupabaseConfig.anonKey,
       // Keep the customer permanently signed in across app restarts: the
-      // Flutter client persists the session locally (SharedPreferences) and
-      // auto-refreshes the access token on launch (both are package defaults).
+      // Flutter client persists the session (SharedPreferences) and
+      // auto-refreshes the access token on launch (package defaults: PKCE
+      // flow + persistSession + autoRefreshToken).
     ).timeout(const Duration(seconds: 10));
 
     _initialized = true;

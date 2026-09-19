@@ -11635,6 +11635,132 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Stay on the platform'**
   String get stayInApp;
+
+  /// No description provided for @serviceOther.
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get serviceOther;
+
+  /// No description provided for @serviceDeliveryCar.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivery Car'**
+  String get serviceDeliveryCar;
+
+  /// No description provided for @adminDeliveryCarRequests.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivery Car Requests'**
+  String get adminDeliveryCarRequests;
+
+  /// No description provided for @noRequestsYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No requests yet'**
+  String get noRequestsYet;
+
+  /// No description provided for @adminStartReview.
+  ///
+  /// In en, this message translates to:
+  /// **'Start review'**
+  String get adminStartReview;
+
+  /// No description provided for @statusPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending'**
+  String get statusPending;
+
+  /// No description provided for @statusReviewing.
+  ///
+  /// In en, this message translates to:
+  /// **'Reviewing'**
+  String get statusReviewing;
+
+  /// No description provided for @statusApproved.
+  ///
+  /// In en, this message translates to:
+  /// **'Approved'**
+  String get statusApproved;
+
+  /// No description provided for @statusRejected.
+  ///
+  /// In en, this message translates to:
+  /// **'Rejected'**
+  String get statusRejected;
+
+  /// No description provided for @statusCompleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Completed'**
+  String get statusCompleted;
+
+  /// No description provided for @statusCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancelled'**
+  String get statusCancelled;
+
+  /// No description provided for @deliveryCarRequested.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivery car requested'**
+  String get deliveryCarRequested;
+
+  /// No description provided for @deliveryCar.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivery Car'**
+  String get deliveryCar;
+
+  /// No description provided for @deliveryCarHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Order a delivery car to move anything between two addresses'**
+  String get deliveryCarHint;
+
+  /// No description provided for @pickupAddress.
+  ///
+  /// In en, this message translates to:
+  /// **'Pickup address'**
+  String get pickupAddress;
+
+  /// No description provided for @dropoffAddress.
+  ///
+  /// In en, this message translates to:
+  /// **'Drop-off address'**
+  String get dropoffAddress;
+
+  /// No description provided for @myRequests.
+  ///
+  /// In en, this message translates to:
+  /// **'My requests'**
+  String get myRequests;
+
+  /// No description provided for @noProvidersFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No providers found'**
+  String get noProvidersFound;
+
+  /// No description provided for @noProvidersNearby.
+  ///
+  /// In en, this message translates to:
+  /// **'No providers near you. Try a larger radius or check back later'**
+  String get noProvidersNearby;
+
+  /// No description provided for @searchRadius.
+  ///
+  /// In en, this message translates to:
+  /// **'Search radius'**
+  String get searchRadius;
+
+  /// No description provided for @perHour.
+  ///
+  /// In en, this message translates to:
+  /// **'/ hour'**
+  String get perHour;
 }
 
 class _AppLocalizationsDelegate

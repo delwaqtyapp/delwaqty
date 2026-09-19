@@ -109,4 +109,28 @@ class CachedServiceBookingRepository implements ServiceBookingRepository {
   Future<void> cancelBooking(String id) {
     return inner.cancelBooking(id);
   }
+
+  @override
+  Future<String> submitDeliveryCarRequest({
+    required String pickupAddress,
+    required String dropoffAddress,
+    required String phone,
+    double? pickupLat,
+    double? pickupLng,
+    String? note,
+  }) {
+    return inner.submitDeliveryCarRequest(
+      pickupAddress: pickupAddress,
+      dropoffAddress: dropoffAddress,
+      phone: phone,
+      pickupLat: pickupLat,
+      pickupLng: pickupLng,
+      note: note,
+    );
+  }
+
+  @override
+  Future<List<Map<String, dynamic>>> getMyDeliveryCarRequests() {
+    return inner.getMyDeliveryCarRequests();
+  }
 }

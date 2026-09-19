@@ -48,7 +48,7 @@ class WalletPage extends ConsumerWidget {
           padding: const EdgeInsets.all(16),
           children: [
             AnimatedFadeIn(
-              child: balanceAsync.when(
+              child: balanceAsync.when(skipLoadingOnRefresh: true, 
                 data: (balance) => Container(
                   width: double.infinity,
                   padding: const EdgeInsets.all(24),
@@ -133,7 +133,7 @@ class WalletPage extends ConsumerWidget {
             const SizedBox(height: 8),
             AnimatedFadeIn(
               delay: const Duration(milliseconds: 300),
-              child: transactionsAsync.when(
+              child: transactionsAsync.when(skipLoadingOnRefresh: true, 
                 data: (transactions) {
                   if (transactions.isEmpty) {
                     return Padding(

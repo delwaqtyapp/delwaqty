@@ -512,21 +512,12 @@ class _ServicesSection extends ConsumerWidget {
         children: [
           Padding(
             padding: const EdgeInsets.fromLTRB(20, 18, 20, 0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  l10n.servicesSection,
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w800,
-                        fontSize: 18,
-                      ),
-                ),
-                TextButton(
-                  onPressed: () => context.push('/services'),
-                  child: Text(l10n.viewAll),
-                ),
-              ],
+            child: Text(
+              l10n.servicesSection,
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w800,
+                    fontSize: 18,
+                  ),
             ),
           ),
           servicesAsync.when(

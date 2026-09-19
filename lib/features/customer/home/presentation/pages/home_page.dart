@@ -5,7 +5,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:delwaqty/core/extensions/context_extensions.dart';
-import 'package:delwaqty/features/customer/commerce/domain/entities/merchant.dart';
 import 'package:delwaqty/features/customer/commerce/domain/entities/favorite.dart';
 import 'package:delwaqty/features/customer/commerce/presentation/widgets/favorite_button.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -89,7 +88,7 @@ class HomePage extends ConsumerWidget {
             onRefresh: () async {
               ref.invalidate(nearbyMerchantsProvider);
               ref.invalidate(activeCategoriesProvider);
-              ref.invalidate(discoveryMerchantsProvider);
+              ref.invalidate(discoveryEntriesProvider);
               ref.invalidate(activeCampaignsProvider);
               ref.read(userLocationProvider.notifier).refreshQuick();
             },
@@ -697,7 +696,7 @@ class _DiscoveryContent extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final merchantsAsync = ref.watch(discoveryMerchantsProvider);
+    final entriesAsync = ref.watch(discoveryEntriesProvider);
 
     return AnimatedSwitcher(
       duration: const Duration(milliseconds: 300),
@@ -713,7 +712,7 @@ class _DiscoveryContent extends ConsumerWidget {
           child: child,
         ),
       ),
-      child: merchantsAsync.when(
+      child: entriesAsync.when(
         loading: () => Column(
           key: const ValueKey('shimmer'),
           children: [
@@ -733,8 +732,8 @@ class _DiscoveryContent extends ConsumerWidget {
             message: AppLocalizations.of(context).errorLoading,
           ),
         ),
-        data: (merchants) {
-          if (merchants.isEmpty) {
+        data: (entries) {
+          if (entries.isEmpty) {
             return Padding(
               key: const ValueKey('empty'),
               padding: const EdgeInsets.all(20),
@@ -746,22 +745,68 @@ class _DiscoveryContent extends ConsumerWidget {
             );
           }
           return Column(
-            key: ValueKey('merchants_${merchants.length}'),
+            key: ValueKey('entries_${entries.length}'),
             children: [
-              for (var i = 0; i < merchants.length; i++)
+              for (var i = 0; i < entries.length; i++)
                 Padding(
                   padding: const EdgeInsets.fromLTRB(20, 10, 20, 0),
-                  child: _HomeMerchantListCard(
-                    merchant: merchants[i],
-                    onTap: () =>
-                        context.push('/market/merchant/${merchants[i].id}'),
-                  ),
+                  child: _buildEntryCard(context, entries[i]),
                 ),
             ],
           );
         },
       ),
     );
+  }
+
+  Widget _buildEntryCard(BuildContext context, DiscoveryEntry entry) {
+    if (entry is MerchantDiscoveryEntry) {
+      final merchant = entry.merchant;
+      return _HomeDiscoveryListCard(
+        imageUrl: merchant.imageUrl,
+        emoji: merchantEmoji(merchant.type),
+        color: merchantTypeColor(merchant.type),
+        name: merchant.name,
+        typeLabel: merchantTypeLabel(merchant.type, AppLocalizations.of(context)),
+        open: merchant.isOpenNow,
+        openLabel: merchant.isOpenNow
+            ? AppLocalizations.of(context).open
+            : AppLocalizations.of(context).closed,
+        rating: merchant.rating,
+        ratingCount: merchant.ratingCount,
+        subtitle: merchant.deliveryAvailable && (merchant.deliveryFee ?? 0) > 0
+            ? '${(merchant.deliveryFee ?? 0).toStringAsFixed(0)} ${AppLocalizations.of(context).currencySymbol}'
+            : merchant.deliveryAvailable
+                ? AppLocalizations.of(context).freeDelivery
+                : merchant.estimatedDeliveryMinutes != null
+                    ? '${merchant.estimatedDeliveryMinutes} ${AppLocalizations.of(context).minutesShort}'
+                    : null,
+        favoriteId: merchant.id,
+        onTap: () => context.push('/market/merchant/${merchant.id}'),
+      );
+    }
+    if (entry is ProviderDiscoveryEntry) {
+      final provider = entry.provider;
+      return _HomeDiscoveryListCard(
+        imageUrl: provider.profileImageUrl,
+        emoji: serviceTypeEmoji(provider.categoryType),
+        color: serviceTypeColor(provider.categoryType),
+        name: provider.name,
+        typeLabel: serviceTypeLabel(provider.categoryType),
+        open: provider.isAvailable,
+        openLabel: provider.isAvailable ? 'متاح' : 'غير متاح',
+        rating: provider.rating,
+        ratingCount: provider.ratingCount,
+        subtitle: provider.hourlyRate != null
+            ? '${provider.hourlyRate!.toStringAsFixed(0)} ${AppLocalizations.of(context).currencySymbol}/${AppLocalizations.of(context).perHour}'
+            : null,
+        onTap: () => context.push(
+          '/home-services/category/${provider.categoryType.name}',
+          extra: provider,
+        ),
+      );
+    }
+    return const SizedBox.shrink();
   }
 }
 
@@ -1520,18 +1565,37 @@ Widget merchantHeaderGradient(
   );
 }
 
-class _HomeMerchantListCard extends StatelessWidget {
-  const _HomeMerchantListCard({required this.merchant, required this.onTap});
+class _HomeDiscoveryListCard extends StatelessWidget {
+  const _HomeDiscoveryListCard({
+    required this.name,
+    required this.typeLabel,
+    required this.emoji,
+    required this.color,
+    required this.open,
+    required this.openLabel,
+    required this.rating,
+    required this.ratingCount,
+    required this.onTap,
+    this.imageUrl,
+    this.subtitle,
+    this.favoriteId,
+  });
 
-  final Merchant merchant;
+  final String name;
+  final String typeLabel;
+  final String emoji;
+  final Color color;
+  final bool open;
+  final String openLabel;
+  final double rating;
+  final int ratingCount;
   final VoidCallback onTap;
+  final String? imageUrl;
+  final String? subtitle;
+  final String? favoriteId;
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-    final color = merchantTypeColor(merchant.type);
-    final typeLabel = merchantTypeLabel(merchant.type, l10n);
-
     return PremiumCard(
       onTap: onTap,
       color: context.colorScheme.surfaceContainerLowest,
@@ -1545,19 +1609,17 @@ class _HomeMerchantListCard extends StatelessWidget {
               child: SizedBox(
                 width: 72,
                 height: 72,
-                child: merchant.imageUrl != null
+                child: imageUrl != null
                     ? Image.network(
-                        merchant.imageUrl!,
+                        imageUrl!,
                         fit: BoxFit.cover,
-                        errorBuilder: (_, _, _) =>
-                            merchantHeaderGradient(context, color,
-                                merchantEmoji(merchant.type)),
+                        errorBuilder: (_, _, _) => merchantHeaderGradient(
+                          context,
+                          color,
+                          emoji,
+                        ),
                       )
-                    : merchantHeaderGradient(
-                        context,
-                        color,
-                        merchantEmoji(merchant.type),
-                      ),
+                    : merchantHeaderGradient(context, color, emoji),
               ),
             ),
             const SizedBox(width: 12),
@@ -1570,7 +1632,7 @@ class _HomeMerchantListCard extends StatelessWidget {
                     children: [
                       Expanded(
                         child: Text(
-                          merchant.name,
+                          name,
                           style: context.textTheme.titleSmall?.copyWith(
                             fontWeight: FontWeight.w700,
                           ),
@@ -1578,10 +1640,7 @@ class _HomeMerchantListCard extends StatelessWidget {
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
-                      _StatusBadge(
-                        open: merchant.isOpenNow,
-                        label: merchant.isOpenNow ? l10n.open : l10n.closed,
-                      ),
+                      _StatusBadge(open: open, label: openLabel),
                     ],
                   ),
                   const SizedBox(height: 6),
@@ -1615,29 +1674,30 @@ class _HomeMerchantListCard extends StatelessWidget {
                       ),
                       const SizedBox(width: 2),
                       Text(
-                        merchant.rating.toStringAsFixed(1),
+                        rating.toStringAsFixed(1),
                         style: context.textTheme.bodySmall?.copyWith(
                           fontWeight: FontWeight.w700,
                         ),
                       ),
-                      if (merchant.ratingCount > 0) ...[
+                      if (ratingCount > 0) ...[
                         const SizedBox(width: 3),
                         Text(
-                          '(${merchant.ratingCount})',
+                          '($ratingCount)',
                           style: context.textTheme.bodySmall?.copyWith(
                             color: context.colorScheme.onSurfaceVariant,
                           ),
                         ),
                       ],
                       const Spacer(),
-                      FavoriteButton(
-                        targetId: merchant.id,
-                        type: FavoriteType.merchant,
-                        size: 18,
-                      ),
+                      if (favoriteId != null)
+                        FavoriteButton(
+                          targetId: favoriteId!,
+                          type: FavoriteType.merchant,
+                          size: 18,
+                        ),
                     ],
                   ),
-                  if (merchant.deliveryAvailable) ...[
+                  if (subtitle != null) ...[
                     const SizedBox(height: 8),
                     Row(
                       children: [
@@ -1649,24 +1709,13 @@ class _HomeMerchantListCard extends StatelessWidget {
                         const SizedBox(width: 4),
                         Flexible(
                           child: Text(
-                            merchant.deliveryFee == 0
-                                ? l10n.freeDelivery
-                                : '${merchant.deliveryFee!.toStringAsFixed(0)} ${l10n.currencySymbol}',
+                            subtitle!,
                             style: context.textTheme.bodySmall?.copyWith(
                               color: AppColors.brandPurple,
                               fontWeight: FontWeight.w600,
                             ),
                           ),
                         ),
-                        if (merchant.estimatedDeliveryMinutes != null) ...[
-                          const SizedBox(width: 8),
-                          Text(
-                            '${merchant.estimatedDeliveryMinutes} ${l10n.minutesShort}',
-                            style: context.textTheme.bodySmall?.copyWith(
-                              color: context.colorScheme.onSurfaceVariant,
-                            ),
-                          ),
-                        ],
                       ],
                     ),
                   ],

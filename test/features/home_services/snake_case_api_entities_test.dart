@@ -79,6 +79,32 @@ void main() {
       expect(b.status, BookingStatus.pending);
     });
 
+    test('ServiceProvider.fromJson tolerates unknown category_type', () {
+      final row = <String, dynamic>{
+        'id': 'prov-2',
+        'user_id': 'u-2',
+        'name': 'Owner',
+        'category_type': 'home_services',
+        'description': null,
+        'profile_image_url': null,
+        'rating': 0.0,
+        'rating_count': 0,
+        'is_verified': true,
+        'is_available': false,
+        'hourly_rate': null,
+        'fixed_price_min': null,
+        'fixed_price_max': null,
+        'city': null,
+        'latitude': null,
+        'longitude': null,
+        'tags': [],
+        'created_at': '2026-09-19T10:00:00.000Z',
+        'updated_at': null,
+      };
+      final p = ServiceProvider.fromJson(row);
+      expect(p.categoryType, ServiceCategoryType.other);
+    });
+
     test('CarProduct.fromJson parses real car_products row', () {
       final row = <String, dynamic>{
         'id': 'car-1',

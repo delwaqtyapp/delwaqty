@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/data/data/com.termux/files/usr/bin/bash
 # Delwaqty Platform - Build Script
 # Generates Debug APK for development and testing
 #

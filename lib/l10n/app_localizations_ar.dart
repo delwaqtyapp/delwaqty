@@ -368,7 +368,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get back => 'رجوع';
 
   @override
-  String get requiredField => 'هذا الحقل مطلوب';
+  String get requiredField => 'مطلوب';
 
   @override
   String get search => 'بحث';
@@ -559,7 +559,7 @@ class AppLocalizationsAr extends AppLocalizations {
       'تعذر العثور على هذا العنوان. الرجاء إدخال عنوان أكثر تحديداً.';
 
   @override
-  String get loginRequired => 'الرجاء تسجيل الدخول أولاً';
+  String get loginRequired => 'يرجى تسجيل الدخول أولاً';
 
   @override
   String get thisDevice => 'هذا الجهاز';
@@ -1295,7 +1295,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get mostRequested => 'الأكثر طلباً';
 
   @override
-  String get allCategories => 'جميع الفئات';
+  String get allCategories => 'الكل';
 
   @override
   String get outOfStock => 'نفذ من المخزون';
@@ -6099,4 +6099,151 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get perHour => '/ ساعة';
+
+  @override
+  String get carMarketplace => 'متجر السيارات';
+
+  @override
+  String get carMarketplaceHint =>
+      'اختر سيارة سائق مسجل. السعر يحدده السائق، وتأخذ المنصة عمولة 7%';
+
+  @override
+  String get bookTrip => 'احجز المشوار';
+
+  @override
+  String get driverPrice => 'سعر السائق';
+
+  @override
+  String get ourCommission => 'عمولة دلوقتي (7%)';
+
+  @override
+  String get totalPaid => 'الإجمالي المطلوب';
+
+  @override
+  String get commissionBreakdown =>
+      'تُحتسب عمولة 7% بدقة على قيمة كل 100 جنيه من إجمالي الطلب';
+
+  @override
+  String get scheduledTime => 'الوقت المسبق (اختياري)';
+
+  @override
+  String get chooseCar => 'اختر سيارتك';
+
+  @override
+  String get noCarsAvailable => 'لا توجد سيارات متاحة حالياً. عد لاحقاً';
+
+  @override
+  String get carVerified => 'موثّق';
+
+  @override
+  String get openInMaps => 'فتح في الخرائط';
+
+  @override
+  String get carCategoryCar => 'سيارة';
+
+  @override
+  String get carCategoryVan => 'فان';
+
+  @override
+  String get carCategoryPickup => 'بيك أب';
+
+  @override
+  String get carCategoryMicrobus => 'ميكروباص';
+
+  @override
+  String get carCategoryTukTuk => 'توك توك';
+
+  @override
+  String get carTripOrdered => 'تم طلب المشوار — السائق سيؤكد السعر';
+
+  @override
+  String get chooseDateTime => 'اختر التاريخ والوقت';
+
+  @override
+  String get editScheduleTime => 'تعديل';
+
+  @override
+  String get placeAndMap => 'المكان والخريطة';
+
+  @override
+  String get openInMapsHint => 'عرض موقع سيارة السائق على الخريطة';
+
+  @override
+  String get fillRequiredFields => 'يرجى ملء جميع الحقول المطلوبة';
+
+  @override
+  String get enterPickupHint => 'مثال: 15 شارع طلعت حرب، وسط البلد';
+
+  @override
+  String get enterDropoffHint => 'مثال: التجمع الخامس، القاهرة الجديدة';
+
+  @override
+  String get enterPhoneHint => 'مثال: 01012345678';
+
+  @override
+  String get enterNoteHint => 'ملاحظة اختيارية للسائق';
+
+  @override
+  String get seatsLabel => 'مقاعد';
+
+  @override
+  String get sellCarTitle => 'سجّل سيارتك';
+
+  @override
+  String get sellCarHint =>
+      'ستظهر كمنتج في متجر السيارات. أنت تحدّد السعر؛ وتأخذ دلوقتي عمولة 7% على كل حجز — تُحتسب بدقة على كل 100 جنيه.';
+
+  @override
+  String get sellCarAction => 'سجّل سيارة';
+
+  @override
+  String get sellCarSubmit => 'انشر السيارة';
+
+  @override
+  String get carCategoryLabel => 'نوع السيارة';
+
+  @override
+  String get carMakeLabel => 'الماركة';
+
+  @override
+  String get carMakeHint => 'مثال: تويوتا';
+
+  @override
+  String get carModelLabel => 'الموديل';
+
+  @override
+  String get carModelHint => 'مثال: كورولا';
+
+  @override
+  String get carYearLabel => 'السنة';
+
+  @override
+  String get carSeatsLabel => 'المقاعد';
+
+  @override
+  String get carColorLabel => 'اللون';
+
+  @override
+  String get carColorHint => 'مثال: فضي';
+
+  @override
+  String get carCityLabel => 'المدينة';
+
+  @override
+  String get carCityHint => 'مثال: القاهرة';
+
+  @override
+  String get carPriceLabel => 'سعرك (جنيه)';
+
+  @override
+  String get carPriceHint => 'تحدده أنت — وليس جوجل';
+
+  @override
+  String get carDescriptionLabel => 'الوصف';
+
+  @override
+  String get carDescriptionHint => 'وصف قصير للسيارة والمشاوير التي تقدمها';
+
+  @override
+  String get carProductCreated => 'تم نشر السيارة في المتجر بنجاح';
 }

@@ -3,6 +3,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../domain/entities/service_category.dart';
 import '../../domain/entities/service_provider.dart';
 import '../../domain/entities/service_booking.dart';
+import '../../domain/entities/car_product.dart';
 import '../../domain/repositories/service_booking_repository.dart';
 
 class ServiceBookingRepositoryImpl implements ServiceBookingRepository {
@@ -173,6 +174,120 @@ class ServiceBookingRepositoryImpl implements ServiceBookingRepository {
         .order('created_at')
         .limit(50);
     return List<Map<String, dynamic>>.from(rows);
+  }
+
+  @override
+  Future<List<CarProduct>> getAvailableCarProducts({
+    String? city,
+    String? category,
+  }) async {
+    var query = _client.from('car_products').select().eq('is_available', true);
+    if (city != null) {
+      query = query.eq('city', city);
+    }
+    if (category != null) {
+      query = query.eq('category', category);
+    }
+    final response = await query.order('price');
+    return (response as List)
+        .map((json) => CarProduct.fromJson(json))
+        .toList();
+  }
+
+  @override
+  Future<CarProduct?> getCarProduct(String id) async {
+    final response = await _client
+        .from('car_products')
+        .select()
+        .eq('id', id)
+        .maybeSingle();
+    if (response == null) return null;
+    return CarProduct.fromJson(response);
+  }
+
+  @override
+  Future<String> createCarProduct({
+    required String sellerId,
+    required String category,
+    required String make,
+    required String model,
+    int? year,
+    String? color,
+    int? seats,
+    String? photoUrl,
+    required String city,
+    required double price,
+    String? description,
+    double? lat,
+    double? lng,
+  }) async {
+    final response = await _client
+        .from('car_products')
+        .insert({
+          'seller_id': sellerId,
+          'category': category,
+          'make': make,
+          'model': model,
+          'year': year,
+          'color': color,
+          'seats': seats,
+          'photo_url': photoUrl,
+          'city': city,
+          'price': price,
+          'description': description,
+          'latitude': lat,
+          'longitude': lng,
+        })
+        .select('id')
+        .single();
+    return response['id'] as String;
+  }
+
+  @override
+  Future<String> submitCarTripOrder({
+    required String carProductId,
+    required String pickupAddress,
+    required String dropoffAddress,
+    required String phone,
+    double? pickupLat,
+    double? pickupLng,
+    DateTime? scheduledAt,
+    String? note,
+  }) async {
+    final uid = _client.auth.currentUser?.id;
+    if (uid == null) throw Exception('Not authenticated');
+    // Get the car product to get the driver's price
+    final carProduct = await getCarProduct(carProductId);
+    if (carProduct == null) throw Exception('Car product not found');
+    final driverPrice = carProduct.price;
+    // Calculate commission: 7% of driverPrice, precise to 2 decimals.
+    // The total is derived from the rounded commission so the breakdown the
+    // customer sees (driver price + 7% = total) always matches exactly.
+    final commissionString = (driverPrice * 7 / 100).toStringAsFixed(2);
+    final commissionAmount = double.parse(commissionString);
+    final totalString = (driverPrice + commissionAmount).toStringAsFixed(2);
+    final totalAmount = double.parse(totalString);
+    // Insert into delivery_car_requests
+    final response = await _client
+        .from('delivery_car_requests')
+        .insert({
+          'user_id': uid,
+          'car_product_id': carProductId,
+          'driver_price': driverPrice,
+          'commission_percent': 7.0,
+          'commission_amount': commissionAmount,
+          'total_amount': totalAmount,
+          'scheduled_at': scheduledAt?.toIso8601String(),
+          'pickup_address': pickupAddress,
+          'dropoff_address': dropoffAddress,
+          'phone': phone,
+          'pickup_lat': pickupLat,
+          'pickup_lng': pickupLng,
+          'note': note,
+        })
+        .select('id')
+        .single();
+    return response['id'] as String;
   }
 }
 

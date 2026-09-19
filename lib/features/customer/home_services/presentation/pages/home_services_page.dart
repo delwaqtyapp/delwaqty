@@ -74,7 +74,10 @@ class HomeServicesPage extends ConsumerWidget {
     );
   }
 
-  Widget _buildCategoryGrid(BuildContext context, List<ServiceCategory> categories) {
+  Widget _buildCategoryGrid(
+    BuildContext context,
+    List<ServiceCategory> categories,
+  ) {
     return Padding(
       padding: const EdgeInsets.all(20),
       child: GridView.builder(
@@ -88,7 +91,7 @@ class HomeServicesPage extends ConsumerWidget {
         itemBuilder: (context, index) {
           final category = categories[index];
           final route = category.type == ServiceCategoryType.deliveryCar
-              ? '/home-services/delivery-car'
+              ? '/home-services/cars'
               : '/home-services/providers/${category.type.name}';
           return _CategoryCard(
             category: category,
@@ -159,11 +162,11 @@ class _CategoryCard extends StatelessWidget {
         onTap: onTap,
         child: Container(
           decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.35),
+            color: Theme.of(
+              context,
+            ).colorScheme.surfaceContainerHighest.withValues(alpha: 0.35),
             borderRadius: BorderRadius.circular(20),
-            border: Border.all(
-              color: color.withValues(alpha: 0.2),
-            ),
+            border: Border.all(color: color.withValues(alpha: 0.2)),
           ),
           padding: const EdgeInsets.all(16),
           child: Column(

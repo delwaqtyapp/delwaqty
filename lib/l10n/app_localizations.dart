@@ -791,7 +791,7 @@ abstract class AppLocalizations {
   /// No description provided for @requiredField.
   ///
   /// In en, this message translates to:
-  /// **'This field is required'**
+  /// **'Required'**
   String get requiredField;
 
   /// No description provided for @search.
@@ -2555,7 +2555,7 @@ abstract class AppLocalizations {
   /// No description provided for @allCategories.
   ///
   /// In en, this message translates to:
-  /// **'All Categories'**
+  /// **'All'**
   String get allCategories;
 
   /// No description provided for @outOfStock.
@@ -11761,6 +11761,294 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'/ hour'**
   String get perHour;
+
+  /// No description provided for @carMarketplace.
+  ///
+  /// In en, this message translates to:
+  /// **'Car Marketplace'**
+  String get carMarketplace;
+
+  /// No description provided for @carMarketplaceHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a registered driver\'s car. The price is set by the driver, and the platform takes a 7% commission'**
+  String get carMarketplaceHint;
+
+  /// No description provided for @bookTrip.
+  ///
+  /// In en, this message translates to:
+  /// **'Book trip'**
+  String get bookTrip;
+
+  /// No description provided for @driverPrice.
+  ///
+  /// In en, this message translates to:
+  /// **'Driver\'s price'**
+  String get driverPrice;
+
+  /// No description provided for @ourCommission.
+  ///
+  /// In en, this message translates to:
+  /// **'Delwaqty commission (7%)'**
+  String get ourCommission;
+
+  /// No description provided for @totalPaid.
+  ///
+  /// In en, this message translates to:
+  /// **'Total to pay'**
+  String get totalPaid;
+
+  /// No description provided for @commissionBreakdown.
+  ///
+  /// In en, this message translates to:
+  /// **'7% commission is charged precisely on every 100 EGP of the total order'**
+  String get commissionBreakdown;
+
+  /// No description provided for @scheduledTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Scheduled time (optional)'**
+  String get scheduledTime;
+
+  /// No description provided for @chooseCar.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose your car'**
+  String get chooseCar;
+
+  /// No description provided for @noCarsAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'No cars available right now. Check back later'**
+  String get noCarsAvailable;
+
+  /// No description provided for @carVerified.
+  ///
+  /// In en, this message translates to:
+  /// **'Verified'**
+  String get carVerified;
+
+  /// No description provided for @openInMaps.
+  ///
+  /// In en, this message translates to:
+  /// **'Open in maps'**
+  String get openInMaps;
+
+  /// No description provided for @carCategoryCar.
+  ///
+  /// In en, this message translates to:
+  /// **'Car'**
+  String get carCategoryCar;
+
+  /// No description provided for @carCategoryVan.
+  ///
+  /// In en, this message translates to:
+  /// **'Van'**
+  String get carCategoryVan;
+
+  /// No description provided for @carCategoryPickup.
+  ///
+  /// In en, this message translates to:
+  /// **'Pickup'**
+  String get carCategoryPickup;
+
+  /// No description provided for @carCategoryMicrobus.
+  ///
+  /// In en, this message translates to:
+  /// **'Microbus'**
+  String get carCategoryMicrobus;
+
+  /// No description provided for @carCategoryTukTuk.
+  ///
+  /// In en, this message translates to:
+  /// **'Tuk tuk'**
+  String get carCategoryTukTuk;
+
+  /// No description provided for @carTripOrdered.
+  ///
+  /// In en, this message translates to:
+  /// **'Trip requested — the driver will confirm the price'**
+  String get carTripOrdered;
+
+  /// No description provided for @chooseDateTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose date & time'**
+  String get chooseDateTime;
+
+  /// No description provided for @editScheduleTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit'**
+  String get editScheduleTime;
+
+  /// No description provided for @placeAndMap.
+  ///
+  /// In en, this message translates to:
+  /// **'Place & map'**
+  String get placeAndMap;
+
+  /// No description provided for @openInMapsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'View the driver\'s car location on the map'**
+  String get openInMapsHint;
+
+  /// No description provided for @fillRequiredFields.
+  ///
+  /// In en, this message translates to:
+  /// **'Please fill in all required fields'**
+  String get fillRequiredFields;
+
+  /// No description provided for @enterPickupHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. 15 Talaat Harb St, Downtown'**
+  String get enterPickupHint;
+
+  /// No description provided for @enterDropoffHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. New Cairo, Fifth Settlement'**
+  String get enterDropoffHint;
+
+  /// No description provided for @enterPhoneHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. 01012345678'**
+  String get enterPhoneHint;
+
+  /// No description provided for @enterNoteHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Optional note for the driver'**
+  String get enterNoteHint;
+
+  /// No description provided for @seatsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'seats'**
+  String get seatsLabel;
+
+  /// No description provided for @sellCarTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Register your car'**
+  String get sellCarTitle;
+
+  /// No description provided for @sellCarHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Appear as a product in the car marketplace. You set the price; Delwaqty takes a 7% commission on each booking — calculated precisely on every 100 EGP.'**
+  String get sellCarHint;
+
+  /// No description provided for @sellCarAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Register car'**
+  String get sellCarAction;
+
+  /// No description provided for @sellCarSubmit.
+  ///
+  /// In en, this message translates to:
+  /// **'Publish car'**
+  String get sellCarSubmit;
+
+  /// No description provided for @carCategoryLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Car type'**
+  String get carCategoryLabel;
+
+  /// No description provided for @carMakeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Make'**
+  String get carMakeLabel;
+
+  /// No description provided for @carMakeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. Toyota'**
+  String get carMakeHint;
+
+  /// No description provided for @carModelLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Model'**
+  String get carModelLabel;
+
+  /// No description provided for @carModelHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. Corolla'**
+  String get carModelHint;
+
+  /// No description provided for @carYearLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Year'**
+  String get carYearLabel;
+
+  /// No description provided for @carSeatsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Seats'**
+  String get carSeatsLabel;
+
+  /// No description provided for @carColorLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Color'**
+  String get carColorLabel;
+
+  /// No description provided for @carColorHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. Silver'**
+  String get carColorHint;
+
+  /// No description provided for @carCityLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'City'**
+  String get carCityLabel;
+
+  /// No description provided for @carCityHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. Cairo'**
+  String get carCityHint;
+
+  /// No description provided for @carPriceLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Your price (EGP)'**
+  String get carPriceLabel;
+
+  /// No description provided for @carPriceHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Set by you — not by Google'**
+  String get carPriceHint;
+
+  /// No description provided for @carDescriptionLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Description'**
+  String get carDescriptionLabel;
+
+  /// No description provided for @carDescriptionHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Short description of the car and the trips you offer'**
+  String get carDescriptionHint;
+
+  /// No description provided for @carProductCreated.
+  ///
+  /// In en, this message translates to:
+  /// **'Car published to the marketplace successfully'**
+  String get carProductCreated;
 }
 
 class _AppLocalizationsDelegate

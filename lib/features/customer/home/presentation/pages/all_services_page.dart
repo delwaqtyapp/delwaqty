@@ -70,10 +70,34 @@ class AllServicesPage extends ConsumerWidget {
 
           return CustomScrollView(
             slivers: [
+              // 1) Booking services FIRST (visible!): doctor, nurse, teacher,
+              //    barber, car request + all home services.
               SliverToBoxAdapter(
                 child: AnimatedFadeIn(
                   child: Padding(
                     padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+                    child: Text(
+                      l10n.bookingServices,
+                      style: context.textTheme.titleSmall?.copyWith(
+                        color: context.colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              SliverToBoxAdapter(
+                child: AnimatedFadeIn(
+                  delay: const Duration(milliseconds: 60),
+                  child: _BookingServicesSection(
+                    servicesAsync: ref.watch(_bookingServicesProvider),
+                  ),
+                ),
+              ),
+              // 2) Commerce categories below.
+              SliverToBoxAdapter(
+                child: AnimatedFadeIn(
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
                     child: Text(
                       l10n.servicesSection,
                       style: context.textTheme.titleSmall?.copyWith(
@@ -143,28 +167,6 @@ class AllServicesPage extends ConsumerWidget {
                   ),
                 ),
               ),
-              SliverToBoxAdapter(
-                child: AnimatedFadeIn(
-                  delay: const Duration(milliseconds: 100),
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
-                    child: Text(
-                      l10n.bookingServices,
-                      style: context.textTheme.titleSmall?.copyWith(
-                        color: context.colorScheme.onSurfaceVariant,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-              SliverToBoxAdapter(
-                child: AnimatedFadeIn(
-                  delay: const Duration(milliseconds: 140),
-                  child: _BookingServicesSection(
-                    servicesAsync: ref.watch(_bookingServicesProvider),
-                  ),
-                ),
-              ),
               const SliverToBoxAdapter(child: SizedBox(height: 24)),
             ],
           );
@@ -217,7 +219,7 @@ class _BookingServicesSection extends ConsumerWidget {
                 child: PressableScale(
                   onTap: () => context.push(
                     service.type == ServiceCategoryType.deliveryCar
-                        ? '/home-services/delivery-car'
+                        ? '/home-services/cars'
                         : '/home-services/providers/${service.type.name}',
                   ),
                   child: Column(

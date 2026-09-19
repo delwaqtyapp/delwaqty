@@ -714,16 +714,15 @@ class _DiscoveryContent extends ConsumerWidget {
         ),
       ),
       child: merchantsAsync.when(
-        loading: () => SizedBox(
+        loading: () => Column(
           key: const ValueKey('shimmer'),
-          height: 224,
-          child: ListView.separated(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
-            itemCount: 4,
-            separatorBuilder: (_, _) => const SizedBox(width: 14),
-            itemBuilder: (_, _) => const ShimmerCard(height: 212),
-          ),
+          children: [
+            for (var i = 0; i < 5; i++)
+              const Padding(
+                padding: EdgeInsets.fromLTRB(20, 12, 20, 0),
+                child: ShimmerCard(height: 96),
+              ),
+          ],
         ),
         error: (_, _) => Padding(
           key: const ValueKey('error'),
@@ -746,23 +745,19 @@ class _DiscoveryContent extends ConsumerWidget {
               ),
             );
           }
-          return SizedBox(
+          return Column(
             key: ValueKey('merchants_${merchants.length}'),
-            height: 224,
-            child: ListView.separated(
-              scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
-              itemCount: merchants.length,
-              separatorBuilder: (_, _) => const SizedBox(width: 14),
-              itemBuilder: (context, index) {
-                final merchant = merchants[index];
-                return _HomeMerchantCard(
-                  merchant: merchant,
-                  onTap: () =>
-                      context.push('/market/merchant/${merchant.id}'),
-                );
-              },
-            ),
+            children: [
+              for (var i = 0; i < merchants.length; i++)
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 10, 20, 0),
+                  child: _HomeMerchantListCard(
+                    merchant: merchants[i],
+                    onTap: () =>
+                        context.push('/market/merchant/${merchants[i].id}'),
+                  ),
+                ),
+            ],
           );
         },
       ),
@@ -1500,8 +1495,33 @@ class _PromoSlide extends ConsumerWidget {
   }
 }
 
-class _HomeMerchantCard extends StatelessWidget {
-  const _HomeMerchantCard({required this.merchant, required this.onTap});
+Widget merchantHeaderGradient(
+  BuildContext context,
+  Color color,
+  String emoji,
+) {
+  return DecoratedBox(
+    decoration: BoxDecoration(
+      gradient: LinearGradient(
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+        colors: [
+          color.withValues(alpha: 0.55),
+          color.withValues(alpha: 0.15),
+        ],
+      ),
+    ),
+    child: Center(
+      child: Text(
+        emoji,
+        style: AppTextStyles.displaySmall.copyWith(fontSize: 44),
+      ),
+    ),
+  );
+}
+
+class _HomeMerchantListCard extends StatelessWidget {
+  const _HomeMerchantListCard({required this.merchant, required this.onTap});
 
   final Merchant merchant;
   final VoidCallback onTap;
@@ -1512,128 +1532,88 @@ class _HomeMerchantCard extends StatelessWidget {
     final color = merchantTypeColor(merchant.type);
     final typeLabel = merchantTypeLabel(merchant.type, l10n);
 
-    return SizedBox(
-      width: 170,
-      child: PremiumCard(
-        onTap: onTap,
-        color: context.colorScheme.surfaceContainerLowest,
-        borderColor: context.colorScheme.outlineVariant.withValues(alpha: 0.15),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+    return PremiumCard(
+      onTap: onTap,
+      color: context.colorScheme.surfaceContainerLowest,
+      borderColor: context.colorScheme.outlineVariant.withValues(alpha: 0.15),
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Row(
           children: [
-            SizedBox(
-              height: 96,
-              child: Stack(
-                fit: StackFit.expand,
-                children: [
-                  if (merchant.imageUrl != null)
-                    Image.network(
-                      merchant.imageUrl!,
-                      fit: BoxFit.cover,
-                      errorBuilder: (_, _, _) => _merchantHeaderGradient(
+            ClipRRect(
+              borderRadius: BorderRadius.circular(14),
+              child: SizedBox(
+                width: 72,
+                height: 72,
+                child: merchant.imageUrl != null
+                    ? Image.network(
+                        merchant.imageUrl!,
+                        fit: BoxFit.cover,
+                        errorBuilder: (_, _, _) =>
+                            merchantHeaderGradient(context, color,
+                                merchantEmoji(merchant.type)),
+                      )
+                    : merchantHeaderGradient(
                         context,
                         color,
                         merchantEmoji(merchant.type),
                       ),
-                    )
-                  else
-                    _merchantHeaderGradient(
-                      context,
-                      color,
-                      merchantEmoji(merchant.type),
-                    ),
-                  DecoratedBox(
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [
-                          Colors.transparent,
-                          Colors.black.withValues(alpha: 0.35),
-                        ],
-                      ),
-                    ),
-                  ),
-                  Align(
-                    alignment: AlignmentDirectional.topStart,
-                    child: Padding(
-                      padding: const EdgeInsets.all(10),
-                      child: _StatusBadge(
-                        open: merchant.isOpenNow,
-                        label: merchant.isOpenNow ? l10n.open : l10n.closed,
-                      ),
-                    ),
-                  ),
-                  Align(
-                    alignment: AlignmentDirectional.topEnd,
-                    child: Padding(
-                      padding: const EdgeInsets.all(10),
-                      child: Container(
-                        width: 30,
-                        height: 30,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: Colors.black.withValues(alpha: 0.25),
-                        ),
-                        child: FavoriteButton(
-                          targetId: merchant.id,
-                          type: FavoriteType.merchant,
-                          size: 18,
-                        ),
-                      ),
-                    ),
-                  ),
-                  Align(
-                    alignment: AlignmentDirectional.bottomStart,
-                    child: Padding(
-                      padding: const EdgeInsets.all(10),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 9,
-                          vertical: 3,
-                        ),
-                        decoration: BoxDecoration(
-                          color: color,
-                          borderRadius: BorderRadius.circular(999),
-                        ),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
                         child: Text(
-                          typeLabel,
-                          style: AppTextStyles.labelSmall.copyWith(
-                            fontSize: 10,
-                            color: Colors.white,
+                          merchant.name,
+                          style: context.textTheme.titleSmall?.copyWith(
                             fontWeight: FontWeight.w700,
                           ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(14, 10, 14, 12),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    merchant.name,
-                    style: context.textTheme.titleSmall?.copyWith(
-                      fontWeight: FontWeight.w700,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
+                      _StatusBadge(
+                        open: merchant.isOpenNow,
+                        label: merchant.isOpenNow ? l10n.open : l10n.closed,
+                      ),
+                    ],
                   ),
                   const SizedBox(height: 6),
                   Row(
                     children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 2,
+                        ),
+                        decoration: BoxDecoration(
+                          color: color.withValues(alpha: 0.14),
+                          borderRadius: BorderRadius.circular(999),
+                        ),
+                        child: Text(
+                          typeLabel,
+                          style: AppTextStyles.labelSmall.copyWith(
+                            fontSize: 10,
+                            color: color,
+                            fontWeight: FontWeight.w700,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
                       const Icon(
                         Icons.star_rounded,
                         size: 15,
                         color: AppColors.rating,
                       ),
-                      const SizedBox(width: 3),
+                      const SizedBox(width: 2),
                       Text(
                         merchant.rating.toStringAsFixed(1),
                         style: context.textTheme.bodySmall?.copyWith(
@@ -1641,7 +1621,7 @@ class _HomeMerchantCard extends StatelessWidget {
                         ),
                       ),
                       if (merchant.ratingCount > 0) ...[
-                        const SizedBox(width: 4),
+                        const SizedBox(width: 3),
                         Text(
                           '(${merchant.ratingCount})',
                           style: context.textTheme.bodySmall?.copyWith(
@@ -1650,18 +1630,14 @@ class _HomeMerchantCard extends StatelessWidget {
                         ),
                       ],
                       const Spacer(),
-                      if (merchant.deliveryAvailable &&
-                          merchant.estimatedDeliveryMinutes != null)
-                        Text(
-                          '${merchant.estimatedDeliveryMinutes} ${l10n.minutesShort}',
-                          style: context.textTheme.bodySmall?.copyWith(
-                            color: context.colorScheme.onSurfaceVariant,
-                          ),
-                        ),
+                      FavoriteButton(
+                        targetId: merchant.id,
+                        type: FavoriteType.merchant,
+                        size: 18,
+                      ),
                     ],
                   ),
-                  if (merchant.deliveryAvailable &&
-                      merchant.deliveryFee != null) ...[
+                  if (merchant.deliveryAvailable) ...[
                     const SizedBox(height: 8),
                     Row(
                       children: [
@@ -1680,9 +1656,17 @@ class _HomeMerchantCard extends StatelessWidget {
                               color: AppColors.brandPurple,
                               fontWeight: FontWeight.w600,
                             ),
-                            overflow: TextOverflow.ellipsis,
                           ),
                         ),
+                        if (merchant.estimatedDeliveryMinutes != null) ...[
+                          const SizedBox(width: 8),
+                          Text(
+                            '${merchant.estimatedDeliveryMinutes} ${l10n.minutesShort}',
+                            style: context.textTheme.bodySmall?.copyWith(
+                              color: context.colorScheme.onSurfaceVariant,
+                            ),
+                          ),
+                        ],
                       ],
                     ),
                   ],
@@ -1690,31 +1674,6 @@ class _HomeMerchantCard extends StatelessWidget {
               ),
             ),
           ],
-        ),
-      ),
-    );
-  }
-
-  Widget _merchantHeaderGradient(
-    BuildContext context,
-    Color color,
-    String emoji,
-  ) {
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            color.withValues(alpha: 0.55),
-            color.withValues(alpha: 0.15),
-          ],
-        ),
-      ),
-      child: Center(
-        child: Text(
-          emoji,
-          style: AppTextStyles.displaySmall.copyWith(fontSize: 44),
         ),
       ),
     );

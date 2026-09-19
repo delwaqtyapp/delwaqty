@@ -559,7 +559,7 @@ class _ServicesSection extends ConsumerWidget {
                       child: PressableScale(
                         onTap: () => context.push(
                           service.type == ServiceCategoryType.deliveryCar
-                              ? '/home-services/delivery-car'
+                              ? '/home-services/cars'
                               : '/home-services/providers/${service.type.name}',
                         ),
                         child: SizedBox(

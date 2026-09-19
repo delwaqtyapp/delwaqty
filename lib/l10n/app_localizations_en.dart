@@ -369,7 +369,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get back => 'Back';
 
   @override
-  String get requiredField => 'This field is required';
+  String get requiredField => 'Required';
 
   @override
   String get search => 'Search';
@@ -1300,7 +1300,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get mostRequested => 'Most Requested';
 
   @override
-  String get allCategories => 'All Categories';
+  String get allCategories => 'All';
 
   @override
   String get outOfStock => 'Out of Stock';
@@ -6146,4 +6146,154 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get perHour => '/ hour';
+
+  @override
+  String get carMarketplace => 'Car Marketplace';
+
+  @override
+  String get carMarketplaceHint =>
+      'Choose a registered driver\'s car. The price is set by the driver, and the platform takes a 7% commission';
+
+  @override
+  String get bookTrip => 'Book trip';
+
+  @override
+  String get driverPrice => 'Driver\'s price';
+
+  @override
+  String get ourCommission => 'Delwaqty commission (7%)';
+
+  @override
+  String get totalPaid => 'Total to pay';
+
+  @override
+  String get commissionBreakdown =>
+      '7% commission is charged precisely on every 100 EGP of the total order';
+
+  @override
+  String get scheduledTime => 'Scheduled time (optional)';
+
+  @override
+  String get chooseCar => 'Choose your car';
+
+  @override
+  String get noCarsAvailable => 'No cars available right now. Check back later';
+
+  @override
+  String get carVerified => 'Verified';
+
+  @override
+  String get openInMaps => 'Open in maps';
+
+  @override
+  String get carCategoryCar => 'Car';
+
+  @override
+  String get carCategoryVan => 'Van';
+
+  @override
+  String get carCategoryPickup => 'Pickup';
+
+  @override
+  String get carCategoryMicrobus => 'Microbus';
+
+  @override
+  String get carCategoryTukTuk => 'Tuk tuk';
+
+  @override
+  String get carTripOrdered =>
+      'Trip requested — the driver will confirm the price';
+
+  @override
+  String get chooseDateTime => 'Choose date & time';
+
+  @override
+  String get editScheduleTime => 'Edit';
+
+  @override
+  String get placeAndMap => 'Place & map';
+
+  @override
+  String get openInMapsHint => 'View the driver\'s car location on the map';
+
+  @override
+  String get fillRequiredFields => 'Please fill in all required fields';
+
+  @override
+  String get enterPickupHint => 'e.g. 15 Talaat Harb St, Downtown';
+
+  @override
+  String get enterDropoffHint => 'e.g. New Cairo, Fifth Settlement';
+
+  @override
+  String get enterPhoneHint => 'e.g. 01012345678';
+
+  @override
+  String get enterNoteHint => 'Optional note for the driver';
+
+  @override
+  String get seatsLabel => 'seats';
+
+  @override
+  String get sellCarTitle => 'Register your car';
+
+  @override
+  String get sellCarHint =>
+      'Appear as a product in the car marketplace. You set the price; Delwaqty takes a 7% commission on each booking — calculated precisely on every 100 EGP.';
+
+  @override
+  String get sellCarAction => 'Register car';
+
+  @override
+  String get sellCarSubmit => 'Publish car';
+
+  @override
+  String get carCategoryLabel => 'Car type';
+
+  @override
+  String get carMakeLabel => 'Make';
+
+  @override
+  String get carMakeHint => 'e.g. Toyota';
+
+  @override
+  String get carModelLabel => 'Model';
+
+  @override
+  String get carModelHint => 'e.g. Corolla';
+
+  @override
+  String get carYearLabel => 'Year';
+
+  @override
+  String get carSeatsLabel => 'Seats';
+
+  @override
+  String get carColorLabel => 'Color';
+
+  @override
+  String get carColorHint => 'e.g. Silver';
+
+  @override
+  String get carCityLabel => 'City';
+
+  @override
+  String get carCityHint => 'e.g. Cairo';
+
+  @override
+  String get carPriceLabel => 'Your price (EGP)';
+
+  @override
+  String get carPriceHint => 'Set by you — not by Google';
+
+  @override
+  String get carDescriptionLabel => 'Description';
+
+  @override
+  String get carDescriptionHint =>
+      'Short description of the car and the trips you offer';
+
+  @override
+  String get carProductCreated =>
+      'Car published to the marketplace successfully';
 }

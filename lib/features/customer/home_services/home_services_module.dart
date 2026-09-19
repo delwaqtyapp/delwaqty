@@ -7,6 +7,9 @@ import 'package:delwaqty/features/customer/home_services/presentation/pages/home
 import 'package:delwaqty/features/customer/home_services/presentation/pages/service_booking_page.dart';
 import 'package:delwaqty/features/customer/home_services/presentation/pages/delivery_car_request_page.dart';
 import 'package:delwaqty/features/customer/home_services/presentation/pages/service_providers_page.dart';
+import 'package:delwaqty/features/customer/home_services/presentation/pages/car_marketplace_page.dart';
+import 'package:delwaqty/features/customer/home_services/presentation/pages/car_trip_order_page.dart';
+import 'package:delwaqty/features/customer/home_services/presentation/pages/car_seller_form_page.dart';
 
 class HomeServicesModule extends FeatureModule {
   HomeServicesModule();
@@ -28,45 +31,61 @@ class HomeServicesModule extends FeatureModule {
 
   @override
   List<RouteBase> get standaloneRoutes => [
-        GoRoute(
-          path: '/home-services',
-          name: 'home-services',
-          builder: (context, state) => const HomeServicesPage(),
-        ),
-        GoRoute(
-          path: '/home-services/category/:categoryType',
-          name: 'home-services-category',
-          builder: (context, state) {
-            final categoryTypeName = state.pathParameters['categoryType']!;
-            final categoryType = ServiceCategoryType.values.firstWhere(
-              (e) => e.name == categoryTypeName,
-              orElse: () => ServiceCategoryType.other,
-            );
-            final provider = state.extra is ServiceProvider
-                ? state.extra as ServiceProvider
-                : null;
-            return ServiceBookingPage(
-              categoryType: categoryType,
-              preselectedProvider: provider,
-            );
-          },
-        ),
-        GoRoute(
-          path: '/home-services/delivery-car',
-          name: 'home-services-delivery-car',
-          builder: (context, state) => const DeliveryCarRequestPage(),
-        ),
-        GoRoute(
-          path: '/home-services/providers/:categoryType',
-          name: 'home-services-providers',
-          builder: (context, state) {
-            final name = state.pathParameters['categoryType']!;
-            final type = ServiceCategoryType.values.firstWhere(
-              (e) => e.name == name,
-              orElse: () => ServiceCategoryType.plumbing,
-            );
-            return ServiceProvidersPage(initialType: type);
-          },
-        ),
-      ];
+    GoRoute(
+      path: '/home-services',
+      name: 'home-services',
+      builder: (context, state) => const HomeServicesPage(),
+    ),
+    GoRoute(
+      path: '/home-services/category/:categoryType',
+      name: 'home-services-category',
+      builder: (context, state) {
+        final categoryTypeName = state.pathParameters['categoryType']!;
+        final categoryType = ServiceCategoryType.values.firstWhere(
+          (e) => e.name == categoryTypeName,
+          orElse: () => ServiceCategoryType.other,
+        );
+        final provider = state.extra is ServiceProvider
+            ? state.extra as ServiceProvider
+            : null;
+        return ServiceBookingPage(
+          categoryType: categoryType,
+          preselectedProvider: provider,
+        );
+      },
+    ),
+    GoRoute(
+      path: '/home-services/delivery-car',
+      name: 'home-services-delivery-car',
+      builder: (context, state) => const DeliveryCarRequestPage(),
+    ),
+    GoRoute(
+      path: '/home-services/providers/:categoryType',
+      name: 'home-services-providers',
+      builder: (context, state) {
+        final name = state.pathParameters['categoryType']!;
+        final type = ServiceCategoryType.values.firstWhere(
+          (e) => e.name == name,
+          orElse: () => ServiceCategoryType.plumbing,
+        );
+        return ServiceProvidersPage(initialType: type);
+      },
+    ),
+    GoRoute(
+      path: '/home-services/cars/sell',
+      name: 'home-services-cars-sell',
+      builder: (context, state) => const CarSellerFormPage(),
+    ),
+    GoRoute(
+      path: '/home-services/cars/:carProductId/order',
+      name: 'home-services-cars-order',
+      builder: (context, state) =>
+          CarTripOrderPage(carProductId: state.pathParameters['carProductId']!),
+    ),
+    GoRoute(
+      path: '/home-services/cars',
+      name: 'home-services-cars',
+      builder: (context, state) => const CarMarketplacePage(),
+    ),
+  ];
 }

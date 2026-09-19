@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:delwaqty/core/theme/app_colors.dart';
 import 'package:delwaqty/features/customer/commerce/domain/entities/merchant.dart';
+import 'package:delwaqty/features/customer/home_services/domain/entities/service_category.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 
 String merchantTypeLabel(MerchantType type, AppLocalizations l10n) =>
@@ -159,3 +160,66 @@ int categoryRank(String name) {
   final idx = dailyDemandPriority.indexOf(type);
   return idx == -1 ? dailyDemandPriority.length : idx;
 }
+
+String serviceTypeEmoji(ServiceCategoryType type) => switch (type) {
+      ServiceCategoryType.doctor => '🩺',
+      ServiceCategoryType.nurse => '🩹',
+      ServiceCategoryType.teacher => '📚',
+      ServiceCategoryType.barber => '💈',
+      ServiceCategoryType.deliveryCar => '🚗',
+      ServiceCategoryType.plumbing => '🔧',
+      ServiceCategoryType.electrical => '⚡',
+      ServiceCategoryType.carpentry => '🪚',
+      ServiceCategoryType.acMaintenance => '❄️',
+      ServiceCategoryType.painting => '🎨',
+      ServiceCategoryType.cleaning => '🧹',
+      ServiceCategoryType.pestControl => '🪳',
+      ServiceCategoryType.applianceRepair => '🔩',
+      ServiceCategoryType.pipeChange => '🔥',
+      ServiceCategoryType.plastering => '🧱',
+      ServiceCategoryType.carpetCleaning => '🧼',
+      ServiceCategoryType.dishRepair => '📡',
+      ServiceCategoryType.other => '🛠️',
+    };
+
+Color serviceTypeColor(ServiceCategoryType type) => switch (type) {
+      ServiceCategoryType.doctor => AppColors.brandPurple,
+      ServiceCategoryType.nurse => AppColors.brandCyan,
+      ServiceCategoryType.teacher => AppColors.brandViolet,
+      ServiceCategoryType.barber => AppColors.brandTeal,
+      ServiceCategoryType.deliveryCar => Colors.deepOrange,
+      ServiceCategoryType.plumbing => Colors.blueGrey,
+      ServiceCategoryType.electrical => Colors.amber.shade800,
+      ServiceCategoryType.carpentry => Colors.brown,
+      ServiceCategoryType.acMaintenance => Colors.cyan.shade700,
+      ServiceCategoryType.painting => Colors.deepPurple,
+      ServiceCategoryType.cleaning => Colors.teal,
+      ServiceCategoryType.pestControl => Colors.green.shade800,
+      ServiceCategoryType.applianceRepair => Colors.indigo,
+      ServiceCategoryType.pipeChange => Colors.redAccent,
+      ServiceCategoryType.plastering => Colors.orange.shade900,
+      ServiceCategoryType.carpetCleaning => Colors.lightBlue.shade800,
+      ServiceCategoryType.dishRepair => Colors.blueGrey.shade700,
+      ServiceCategoryType.other => AppColors.brandPurple,
+    };
+
+String serviceTypeLabel(ServiceCategoryType type) => switch (type) {
+      ServiceCategoryType.doctor => 'حجز دكتور',
+      ServiceCategoryType.nurse => 'ممرض',
+      ServiceCategoryType.teacher => 'مدرسين',
+      ServiceCategoryType.barber => 'حجز حلاق',
+      ServiceCategoryType.deliveryCar => 'سيارة توصيل',
+      ServiceCategoryType.plumbing => 'سباكة',
+      ServiceCategoryType.electrical => 'كهرباء',
+      ServiceCategoryType.carpentry => 'نجارة',
+      ServiceCategoryType.acMaintenance => 'صيانة تكييف',
+      ServiceCategoryType.painting => 'دهان',
+      ServiceCategoryType.cleaning => 'تنظيف',
+      ServiceCategoryType.pestControl => 'مكافحة حشرات',
+      ServiceCategoryType.applianceRepair => 'إصلاح أجهزة',
+      ServiceCategoryType.pipeChange => 'تغيير أنبوبة',
+      ServiceCategoryType.plastering => 'نقاشة',
+      ServiceCategoryType.carpetCleaning => 'غسيل السجاد',
+      ServiceCategoryType.dishRepair => 'إصلاح الدش',
+      ServiceCategoryType.other => 'خدمة منزلية',
+    };

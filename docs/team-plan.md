@@ -4,6 +4,18 @@
 > **Scope:** Customer app (com.delwaqty.app) only
 > **Gate:** flutter analyze 0/0/0 + flutter test all pass + APK builds
 
+---
+
+## ROUND 15 — Car Marketplace + All-Services booking-first (2026-09-19) ✅
+> Committed `b4a6709` (sprint 154), pushed. Gate: analyze **0** / test **928/928** / APK built + installed both devices / migration 083 applied live / QA **APPROVE**.
+
+- **Task A — All-Services reorder**: `/services` = booking services FIRST (`getCategories()`), commerce grid below.
+- **Task B — Car marketplace**: `083_car_marketplace.sql` (car_products + RLS + delivery_car_requests extended w/ driver_price/commission 7%/total) applied live, 6 cars seeded. `CarProduct` entity (freezed + manual generated files). Repository: `getAvailableCarProducts`/`getCarProduct`/`createCarProduct`/`submitCarTripOrder` (7% precise 2-decimals, total derived from rounded commission). `CarMarketplacePage` + `CarTripOrderPage` (scheduled time + geo: map + price breakdown). Routes `/home-services/cars`, `/cars/sell`, `/cars/:carProductId/order`. All deliveryCar entries → marketplace.
+- **Task C — register-as-product**: `CarSellerFormPage` (driver sets price) + route + AppBar action + 20 l10n keys (1997/1997). Auth-guarded (`is! AuthAuthenticated`).
+- Notes: coder subagent model unavailable this round (minimax free) → tasks executed by orchestrator + coder2 (reverted its unintended `dart format` of 334 files via git checkout). build_runner impossible on device (snapshot Android vs Linux) → freezed/g hand-written & force-committed.
+
+---
+
 ## Final Status
 - `flutter analyze`: **No issues found!** (0 errors / 0 warnings / 0 infos)
 - `flutter test`: **928/928 passed**

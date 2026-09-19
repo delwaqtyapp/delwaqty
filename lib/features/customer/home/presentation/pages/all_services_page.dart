@@ -14,7 +14,33 @@ import 'package:delwaqty/l10n/app_localizations.dart';
 
 final _bookingServicesProvider = FutureProvider<List<ServiceCategory>>((ref) async {
   final repo = ref.watch(cachedServiceBookingRepositoryProvider);
-  return repo.getCategories();
+  final all = await repo.getCategories();
+  const priority = [
+    ServiceCategoryType.doctor,
+    ServiceCategoryType.nurse,
+    ServiceCategoryType.teacher,
+    ServiceCategoryType.barber,
+    ServiceCategoryType.deliveryCar,
+    ServiceCategoryType.plumbing,
+    ServiceCategoryType.electrical,
+    ServiceCategoryType.carpentry,
+    ServiceCategoryType.painting,
+    ServiceCategoryType.cleaning,
+    ServiceCategoryType.acMaintenance,
+    ServiceCategoryType.pipeChange,
+    ServiceCategoryType.plastering,
+    ServiceCategoryType.carpetCleaning,
+    ServiceCategoryType.dishRepair,
+    ServiceCategoryType.pestControl,
+    ServiceCategoryType.applianceRepair,
+  ];
+  int rank(ServiceCategoryType t) {
+    final i = priority.indexOf(t);
+    return i == -1 ? priority.length : i;
+  }
+
+  final sorted = [...all]..sort((a, b) => rank(a.type).compareTo(rank(b.type)));
+  return sorted;
 });
 
 IconData _serviceIcon(ServiceCategoryType t) => switch (t) {

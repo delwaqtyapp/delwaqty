@@ -138,15 +138,15 @@ MerchantType? categoryNameToMerchantType(String name) {
 }
 
 /// Daily/repeat demand priority used for the home grid and the all-services
-/// page: grocery, vegetables & fruits, restaurants, pharmacy, home services,
+/// page: restaurants, grocery, vegetables & fruits, pharmacy, home services,
 /// bakery, sweets first.
 List<MerchantType> get dailyDemandPriority => <MerchantType>[
+  MerchantType.restaurant,
   MerchantType.grocery,
   MerchantType.vegetables,
   MerchantType.fruits,
   MerchantType.butcher,
   MerchantType.dairy,
-  MerchantType.restaurant,
   MerchantType.pharmacy,
   MerchantType.home,
   MerchantType.bakery,

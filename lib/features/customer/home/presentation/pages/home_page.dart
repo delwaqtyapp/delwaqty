@@ -29,7 +29,7 @@ import 'package:delwaqty/features/customer/home/domain/home_domain.dart';
 import 'package:delwaqty/features/customer/home/presentation/widgets/category_visuals.dart';
 import 'package:delwaqty/features/customer/home/domain/entities/platform_category.dart';
 import 'package:delwaqty/shared/widgets/scroll_aware_nav.dart';
-import 'package:delwaqty/features/customer/home_services/data/repositories/service_booking_repository_impl.dart';
+import 'package:delwaqty/data/repositories/cached_service_booking_repository.dart';
 import 'package:delwaqty/features/customer/home_services/domain/entities/service_category.dart';
 import 'package:delwaqty/core/theme/app_colors.dart';
 import 'package:delwaqty/core/theme/app_text_styles.dart';
@@ -39,7 +39,7 @@ import 'package:delwaqty/features/admin/floating_sidebar/floating_sidebar.dart';
 
 final _homeServiceCategoriesProvider =
     FutureProvider<List<ServiceCategory>>((ref) async {
-  final repo = ref.watch(serviceBookingRepositoryProvider);
+  final repo = ref.watch(cachedServiceBookingRepositoryProvider);
   final all = await repo.getCategories();
   const priority = [
     ServiceCategoryType.doctor,

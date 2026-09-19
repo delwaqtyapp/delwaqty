@@ -1,0 +1,109 @@
+import 'package:flutter_test/flutter_test.dart';
+import 'package:delwaqty/features/customer/home_services/domain/entities/service_category.dart';
+import 'package:delwaqty/features/customer/home_services/domain/entities/service_provider.dart';
+import 'package:delwaqty/features/customer/home_services/domain/entities/service_booking.dart';
+import 'package:delwaqty/features/customer/home_services/domain/entities/car_product.dart';
+
+void main() {
+  group('snake_case API rows', () {
+    test('ServiceCategory.fromJson parses real service_categories row', () {
+      final row = <String, dynamic>{
+        'id': 'cat-1',
+        'name_ar': 'سباكة',
+        'name_en': 'Plumbing',
+        'type': 'plumbing',
+        'description_ar': null,
+        'description_en': null,
+        'icon_url': null,
+        'is_active': true,
+        'created_at': '2026-07-17T21:46:03.2872+00:00',
+      };
+      final cat = ServiceCategory.fromJson(row);
+      expect(cat.nameAr, 'سباكة');
+      expect(cat.nameEn, 'Plumbing');
+      expect(cat.type, ServiceCategoryType.plumbing);
+      expect(cat.isActive, isTrue);
+    });
+
+    test('ServiceProvider.fromJson parses real service_providers row', () {
+      final row = <String, dynamic>{
+        'id': 'prov-1',
+        'user_id': 'u-1',
+        'name': 'أحمد',
+        'category_type': 'plumbing',
+        'description': null,
+        'profile_image_url': null,
+        'rating': 4.5,
+        'rating_count': 10,
+        'is_verified': true,
+        'is_available': true,
+        'hourly_rate': 50.0,
+        'fixed_price_min': null,
+        'fixed_price_max': null,
+        'city': 'القاهرة',
+        'latitude': 30.0,
+        'longitude': 31.0,
+        'tags': null,
+        'created_at': '2026-07-17T21:46:03.2872+00:00',
+        'updated_at': null,
+      };
+      final p = ServiceProvider.fromJson(row);
+      expect(p.name, 'أحمد');
+      expect(p.categoryType, ServiceCategoryType.plumbing);
+      expect(p.rating, 4.5);
+    });
+
+    test('ServiceBooking.fromJson parses real service_bookings row', () {
+      final row = <String, dynamic>{
+        'id': 'bk-1',
+        'user_id': 'u-1',
+        'provider_id': 'prov-1',
+        'provider_name': 'أحمد',
+        'category_type': 'plumbing',
+        'status': 'pending',
+        'description': null,
+        'scheduled_date': '2026-09-20T10:00:00.000Z',
+        'scheduled_time': '10:00',
+        'address': 'شارع 1',
+        'address_latitude': null,
+        'address_longitude': null,
+        'estimated_price': 100.0,
+        'final_price': null,
+        'notes': null,
+        'created_at': '2026-09-19T10:00:00.000Z',
+        'updated_at': null,
+        'completed_at': null,
+      };
+      final b = ServiceBooking.fromJson(row);
+      expect(b.providerName, 'أحمد');
+      expect(b.status, BookingStatus.pending);
+    });
+
+    test('CarProduct.fromJson parses real car_products row', () {
+      final row = <String, dynamic>{
+        'id': 'car-1',
+        'seller_id': 'u-1',
+        'driver_id': null,
+        'merchant_id': null,
+        'category': 'sedan',
+        'make': 'Toyota',
+        'model': 'Corolla',
+        'year': 2020,
+        'color': 'أبيض',
+        'seats': 4,
+        'photo_url': null,
+        'city': 'القاهرة',
+        'price': 650000.0,
+        'description': null,
+        'is_available': true,
+        'is_verified': false,
+        'latitude': null,
+        'longitude': null,
+        'created_at': '2026-09-19T10:00:00.000Z',
+      };
+      final c = CarProduct.fromJson(row);
+      expect(c.make, 'Toyota');
+      expect(c.price, 650000.0);
+    });
+  });
+}

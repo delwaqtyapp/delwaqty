@@ -5,7 +5,7 @@ import 'package:delwaqty/core/extensions/context_extensions.dart';
 import 'package:delwaqty/core/theme/app_colors.dart';
 import 'package:delwaqty/core/theme/app_text_styles.dart';
 import 'package:delwaqty/features/customer/home_services/domain/entities/service_category.dart';
-import 'package:delwaqty/features/customer/home_services/data/repositories/service_booking_repository_impl.dart';
+import 'package:delwaqty/data/repositories/cached_service_booking_repository.dart';
 import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
 import 'package:delwaqty/shared/widgets/pressable_scale.dart';
 import 'package:delwaqty/shared/widgets/premium_empty_state.dart';
@@ -13,7 +13,7 @@ import 'package:delwaqty/shared/widgets/shimmer_loading.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 
 final _bookingServicesProvider = FutureProvider<List<ServiceCategory>>((ref) async {
-  final repo = ref.watch(serviceBookingRepositoryProvider);
+  final repo = ref.watch(cachedServiceBookingRepositoryProvider);
   return repo.getCategories();
 });
 

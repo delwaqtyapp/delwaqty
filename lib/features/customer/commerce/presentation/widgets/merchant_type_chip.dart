@@ -4,10 +4,16 @@ import 'package:delwaqty/core/theme/app_colors.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 
 class MerchantTypeChip extends StatelessWidget {
-  const MerchantTypeChip({required this.type, this.onTap, super.key});
+  const MerchantTypeChip({
+    required this.type,
+    this.selected = false,
+    this.onSelected,
+    super.key,
+  });
 
   final MerchantType type;
-  final VoidCallback? onTap;
+  final bool selected;
+  final ValueChanged<bool>? onSelected;
 
   String _label(BuildContext context) {
     final l10n = AppLocalizations.of(context);
@@ -142,11 +148,19 @@ class MerchantTypeChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ActionChip(
+    return FilterChip(
       avatar: Icon(_icon(), size: 18),
       label: Text(_label(context)),
+      selected: selected,
+      onSelected: onSelected,
+      showCheckmark: true,
       backgroundColor: AppColors.primaryLight.withValues(alpha: 0.3),
-      onPressed: onTap,
+      selectedColor: AppColors.primaryLight.withValues(alpha: 0.6),
+      side: selected
+          ? null
+          : BorderSide(
+              color: Theme.of(context).colorScheme.outlineVariant.withValues(alpha: 0.4),
+            ),
     );
   }
 }

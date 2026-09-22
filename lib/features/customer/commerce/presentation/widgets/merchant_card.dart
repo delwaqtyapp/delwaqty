@@ -265,8 +265,9 @@ class MerchantCard extends StatelessWidget {
                 ),
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.all(14),
+            Flexible(
+              child: Padding(
+                padding: const EdgeInsets.all(14),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -347,6 +348,7 @@ class MerchantCard extends StatelessWidget {
                 ],
               ),
             ),
+          ),
           ],
         ),
       ),

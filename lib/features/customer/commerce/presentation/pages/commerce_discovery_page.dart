@@ -439,6 +439,8 @@ class _MostRequestedCard extends StatelessWidget {
                 ? Image.network(
                     merchant.imageUrl!,
                     fit: BoxFit.cover,
+                    cacheWidth: (MediaQuery.devicePixelRatioOf(context) * 200)
+                        .round(),
                     errorBuilder: (_, _, _) => Center(
                       child: Text(typeEmoji, style: const TextStyle(fontSize: 32)),
                     ),

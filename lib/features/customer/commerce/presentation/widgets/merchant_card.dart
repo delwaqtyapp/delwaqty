@@ -195,6 +195,8 @@ class MerchantCard extends StatelessWidget {
                       Image.network(
                         merchant.imageUrl!,
                         fit: BoxFit.cover,
+                        cacheWidth: (MediaQuery.devicePixelRatioOf(context) * 340)
+                            .round(),
                         errorBuilder: (_, _, _) => _imagePlaceholder(context, colorScheme),
                       )
                     else
@@ -265,9 +267,8 @@ class MerchantCard extends StatelessWidget {
                 ),
               ),
             ),
-            Flexible(
-              child: Padding(
-                padding: const EdgeInsets.all(14),
+            Padding(
+              padding: const EdgeInsets.all(14),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -348,7 +349,6 @@ class MerchantCard extends StatelessWidget {
                 ],
               ),
             ),
-          ),
           ],
         ),
       ),

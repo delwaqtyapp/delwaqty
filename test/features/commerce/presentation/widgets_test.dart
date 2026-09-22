@@ -10,6 +10,7 @@ import 'package:delwaqty/features/customer/commerce/presentation/widgets/price_t
 import 'package:delwaqty/features/customer/commerce/presentation/widgets/delivery_info.dart';
 import 'package:delwaqty/features/customer/commerce/presentation/widgets/merchant_type_chip.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
+import 'package:delwaqty/shared/widgets/pressable_scale.dart';
 
 Widget wrapInApp(Widget child) => MaterialApp(
       localizationsDelegates: const [
@@ -424,12 +425,12 @@ void main() {
       expect(find.text('Home'), findsOneWidget);
     });
 
-    testWidgets('renders FilterChip', (tester) async {
+    testWidgets('renders PressableScale pill', (tester) async {
       await tester.pumpWidget(wrapInApp(
         const MerchantTypeChip(type: MerchantType.restaurant),
       ));
 
-      expect(find.byType(FilterChip), findsOneWidget);
+      expect(find.byType(PressableScale), findsOneWidget);
     });
 
     testWidgets('onSelected callback fires', (tester) async {
@@ -441,7 +442,7 @@ void main() {
         ),
       ));
 
-      await tester.tap(find.byType(FilterChip));
+      await tester.tap(find.byType(PressableScale));
       expect(selected, isTrue);
     });
 
@@ -450,7 +451,7 @@ void main() {
         const MerchantTypeChip(type: MerchantType.restaurant),
       ));
 
-      expect(find.byType(FilterChip), findsOneWidget);
+      expect(find.byType(PressableScale), findsOneWidget);
     });
   });
 }

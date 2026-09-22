@@ -232,6 +232,27 @@ class _RestaurantDetailPageState extends ConsumerState<RestaurantDetailPage> {
     );
   }
 
+  Widget _headerImagePlaceholder(ThemeData theme) {
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            theme.colorScheme.primary,
+            theme.colorScheme.primary.withValues(alpha: 0.7),
+            theme.colorScheme.tertiary.withValues(alpha: 0.5),
+          ],
+        ),
+      ),
+      child: Icon(
+        Icons.restaurant_rounded,
+        size: 80,
+        color: theme.colorScheme.onPrimary.withValues(alpha: 0.3),
+      ),
+    );
+  }
+
   Widget _buildHeroImage(ThemeData theme, Merchant merchant) {
     return SliverAppBar(
       expandedHeight: 240,
@@ -246,28 +267,15 @@ class _RestaurantDetailPageState extends ConsumerState<RestaurantDetailPage> {
           tag: 'merchant-${merchant.id}',
           child: Stack(
           fit: StackFit.expand,
-          children: [
-            if (merchant.imageUrl != null)
-              Image.network(merchant.imageUrl!, fit: BoxFit.cover)
-            else
-              DecoratedBox(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [
-                      theme.colorScheme.primary,
-                      theme.colorScheme.primary.withValues(alpha: 0.7),
-                      theme.colorScheme.tertiary.withValues(alpha: 0.5),
-                    ],
-                  ),
-                ),
-                child: Icon(
-                  Icons.restaurant_rounded,
-                  size: 80,
-                  color: theme.colorScheme.onPrimary.withValues(alpha: 0.3),
-                ),
-              ),
+children: [
+              if (merchant.imageUrl != null)
+                Image.network(
+                  merchant.imageUrl!,
+                  fit: BoxFit.cover,
+                  errorBuilder: (_, _, _) => _headerImagePlaceholder(theme),
+                )
+              else
+                _headerImagePlaceholder(theme),
             DecoratedBox(
               decoration: BoxDecoration(
                 gradient: LinearGradient(

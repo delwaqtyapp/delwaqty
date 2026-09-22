@@ -143,6 +143,26 @@ class MerchantCard extends StatelessWidget {
     }
   }
 
+  Widget _imagePlaceholder(BuildContext context, ColorScheme colorScheme) {
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            colorScheme.primaryContainer.withValues(alpha: 0.55),
+            colorScheme.primaryContainer.withValues(alpha: 0.15),
+          ],
+        ),
+      ),
+      child: Icon(
+        _typeIcon(merchant.type),
+        size: 48,
+        color: colorScheme.primary,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -172,29 +192,13 @@ class MerchantCard extends StatelessWidget {
                   fit: StackFit.expand,
                   children: [
                     if (merchant.imageUrl != null)
-                      Image.network(merchant.imageUrl!, fit: BoxFit.cover)
+                      Image.network(
+                        merchant.imageUrl!,
+                        fit: BoxFit.cover,
+                        errorBuilder: (_, _, _) => _imagePlaceholder(context, colorScheme),
+                      )
                     else
-                      DecoratedBox(
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                            colors: [
-                              colorScheme.primaryContainer.withValues(
-                                alpha: 0.55,
-                              ),
-                              colorScheme.primaryContainer.withValues(
-                                alpha: 0.15,
-                              ),
-                            ],
-                          ),
-                        ),
-                        child: Icon(
-                          _typeIcon(merchant.type),
-                          size: 48,
-                          color: colorScheme.primary,
-                        ),
-                      ),
+                      _imagePlaceholder(context, colorScheme),
                     if (merchant.isVerified)
                       Positioned(
                         top: 8,
@@ -304,6 +308,8 @@ class MerchantCard extends StatelessWidget {
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: Theme.of(context).colorScheme.primary,
                     ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: 4),
                   if (merchant.deliveryAvailable)

@@ -195,9 +195,11 @@ class MerchantCard extends StatelessWidget {
                       Image.network(
                         merchant.imageUrl!,
                         fit: BoxFit.cover,
-                        cacheWidth: (MediaQuery.devicePixelRatioOf(context) * 340)
-                            .round(),
-                        errorBuilder: (_, _, _) => _imagePlaceholder(context, colorScheme),
+                        cacheWidth:
+                            (MediaQuery.devicePixelRatioOf(context) * 340)
+                                .round(),
+                        errorBuilder: (_, _, _) =>
+                            _imagePlaceholder(context, colorScheme),
                       )
                     else
                       _imagePlaceholder(context, colorScheme),
@@ -267,86 +269,88 @@ class MerchantCard extends StatelessWidget {
                 ),
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.all(14),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          merchant.name,
-                          style: theme.textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                      const SizedBox(width: 4),
-                      Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const Icon(
-                            Icons.star,
-                            size: 14,
-                            color: AppColors.rating,
-                          ),
-                          const SizedBox(width: 2),
-                          Text(
-                            merchant.rating.toStringAsFixed(1),
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    _typeLabel(context, merchant.type),
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: Theme.of(context).colorScheme.primary,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 4),
-                  if (merchant.deliveryAvailable)
+            Flexible(
+              child: Padding(
+                padding: const EdgeInsets.all(14),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
                     Row(
                       children: [
-                        Icon(
-                          Icons.delivery_dining,
-                          size: 14,
-                          color: theme.colorScheme.onSurfaceVariant,
-                        ),
-                        const SizedBox(width: 4),
-                        Flexible(
+                        Expanded(
                           child: Text(
-                            merchant.estimatedDeliveryMinutes != null
-                                ? '${merchant.estimatedDeliveryMinutes} ${l10n.minutesShort}'
-                                : l10n.delivery,
-                            style: theme.textTheme.bodySmall,
+                            merchant.name,
+                            style: theme.textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
+                            maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
-                        if (merchant.deliveryFee != null) ...[
-                          const SizedBox(width: 8),
+                        const SizedBox(width: 4),
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(
+                              Icons.star,
+                              size: 14,
+                              color: AppColors.rating,
+                            ),
+                            const SizedBox(width: 2),
+                            Text(
+                              merchant.rating.toStringAsFixed(1),
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      _typeLabel(context, merchant.type),
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 4),
+                    if (merchant.deliveryAvailable)
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.delivery_dining,
+                            size: 14,
+                            color: theme.colorScheme.onSurfaceVariant,
+                          ),
+                          const SizedBox(width: 4),
                           Flexible(
                             child: Text(
-                              '${merchant.deliveryFee!.toStringAsFixed(0)} ${l10n.currencySymbol}',
-                              style: theme.textTheme.bodySmall?.copyWith(
-                                color: Theme.of(context).colorScheme.primary,
-                              ),
+                              merchant.estimatedDeliveryMinutes != null
+                                  ? '${merchant.estimatedDeliveryMinutes} ${l10n.minutesShort}'
+                                  : l10n.delivery,
+                              style: theme.textTheme.bodySmall,
                               overflow: TextOverflow.ellipsis,
                             ),
                           ),
+                          if (merchant.deliveryFee != null) ...[
+                            const SizedBox(width: 8),
+                            Flexible(
+                              child: Text(
+                                '${merchant.deliveryFee!.toStringAsFixed(0)} ${l10n.currencySymbol}',
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                  color: Theme.of(context).colorScheme.primary,
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
                         ],
-                      ],
-                    ),
-                ],
+                      ),
+                  ],
+                ),
               ),
             ),
           ],

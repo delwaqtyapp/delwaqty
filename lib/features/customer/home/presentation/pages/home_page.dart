@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -27,7 +28,6 @@ import 'package:delwaqty/l10n/app_localizations.dart';
 import 'package:delwaqty/features/customer/home/domain/home_domain.dart';
 import 'package:delwaqty/features/customer/home/presentation/widgets/category_visuals.dart';
 import 'package:delwaqty/features/customer/home/domain/entities/platform_category.dart';
-import 'package:delwaqty/features/customer/commerce/domain/entities/merchant.dart';
 import 'package:delwaqty/shared/widgets/scroll_aware_nav.dart';
 import 'package:delwaqty/data/repositories/cached_service_booking_repository.dart';
 import 'package:delwaqty/features/customer/home_services/domain/entities/service_category.dart';
@@ -42,6 +42,10 @@ final _homeServiceCategoriesProvider =
   final repo = ref.watch(cachedServiceBookingRepositoryProvider);
   final all = await repo.getCategories();
   const priority = [
+    ServiceCategoryType.doctor,
+    ServiceCategoryType.nurse,
+    ServiceCategoryType.teacher,
+    ServiceCategoryType.barber,
     ServiceCategoryType.deliveryCar,
     ServiceCategoryType.plumbing,
     ServiceCategoryType.electrical,
@@ -138,13 +142,6 @@ const _topBookingTypes = <ServiceCategoryType>[
 List<_TopStripItem> get _topBookingItems =>
     _topBookingTypes.map((t) => _TopStripService(t)).toList(growable: false);
 
-const _movedToTop = {
-  ServiceCategoryType.doctor,
-  ServiceCategoryType.nurse,
-  ServiceCategoryType.teacher,
-  ServiceCategoryType.barber,
-};
-
 class HomePage extends ConsumerWidget {
   const HomePage({super.key});
 
@@ -199,9 +196,6 @@ class HomePage extends ConsumerWidget {
                   const SliverToBoxAdapter(child: _PromoCarousel()),
                   SliverToBoxAdapter(
                     child: _CompactCategories(ref: ref),
-                  ),
-                  const SliverToBoxAdapter(
-                    child: _ServicesSection(),
                   ),
                   SliverToBoxAdapter(
                     child: _buildDiscoverySection(context, ref, l10n),
@@ -370,6 +364,123 @@ class _TopStripShowAll extends _TopStripItem {
   const _TopStripShowAll();
 }
 
+class _InfiniteStrip extends StatefulWidget {
+  const _InfiniteStrip({required this.children});
+
+  final List<Widget> children;
+
+  @override
+  State<_InfiniteStrip> createState() => _InfiniteStripState();
+}
+
+class _InfiniteStripState extends State<_InfiniteStrip>
+    with SingleTickerProviderStateMixin {
+  static const double _speed = 40.0;
+  late final Ticker _ticker;
+  final ScrollController _scroll = ScrollController();
+  final GlobalKey _copyKey = GlobalKey();
+  double _cycleWidth = 0;
+  Duration _lastElapsed = Duration.zero;
+  bool _interacting = false;
+  bool _reduceMotion = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _ticker = createTicker(_onTick);
+    _scheduleMeasure(attempt: 0);
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _reduceMotion = MediaQuery.disableAnimationsOf(context);
+    if (_reduceMotion) {
+      if (_ticker.isActive) _ticker.stop();
+    } else if (!_ticker.isActive) {
+      _ticker.start();
+    }
+  }
+
+  @override
+  void didUpdateWidget(covariant _InfiniteStrip oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.children.length != widget.children.length) {
+      _scheduleMeasure(attempt: 0);
+    }
+  }
+
+  void _scheduleMeasure({required int attempt}) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final box = _copyKey.currentContext?.findRenderObject() as RenderBox?;
+      if (box != null && box.hasSize) {
+        _applyCycleWidth(box.size.width);
+      } else if (attempt < 2) {
+        _scheduleMeasure(attempt: attempt + 1);
+      }
+    });
+  }
+
+  void _applyCycleWidth(double width) {
+    if (!mounted) return;
+    setState(() => _cycleWidth = width);
+    if (_scroll.hasClients && _cycleWidth > 0 && _scroll.offset >= _cycleWidth) {
+      _scroll.jumpTo(_scroll.offset % _cycleWidth);
+    }
+  }
+
+  Widget _copy({Key? key}) {
+    return Row(
+      key: key,
+      children: [
+        for (final child in widget.children) ...[child, const SizedBox(width: 12)],
+      ],
+    );
+  }
+
+  void _onTick(Duration elapsed) {
+    if (!mounted || _interacting || _reduceMotion) return;
+    if (!_scroll.hasClients || _cycleWidth <= 0) return;
+    final dt = (elapsed - _lastElapsed).inMicroseconds / 1e6;
+    _lastElapsed = elapsed;
+    if (dt <= 0) return;
+    var offset = _scroll.offset + _speed * (dt > 0.25 ? 0.25 : dt);
+    if (offset >= _cycleWidth) offset -= _cycleWidth;
+    _scroll.jumpTo(offset);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Listener(
+      onPointerDown: (_) => _interacting = true,
+      onPointerUp: (_) => _interacting = false,
+      onPointerCancel: (_) => _interacting = false,
+      child: SingleChildScrollView(
+        controller: _scroll,
+        scrollDirection: Axis.horizontal,
+        physics: _reduceMotion
+            ? const AlwaysScrollableScrollPhysics()
+            : const NeverScrollableScrollPhysics(),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _copy(key: _copyKey),
+            if (!_reduceMotion) _copy(),
+          ],
+        ),
+      ),
+    );
+  }
+
+  @override
+  void dispose() {
+    _ticker.dispose();
+    _scroll.dispose();
+    super.dispose();
+  }
+}
+
 class _CompactCategories extends StatelessWidget {
   const _CompactCategories({required this.ref});
 
@@ -378,88 +489,68 @@ class _CompactCategories extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final categoriesAsync = ref.watch(activeCategoriesProvider);
+    final servicesAsync = ref.watch(_homeServiceCategoriesProvider);
 
     return AnimatedFadeIn(
       delay: const Duration(milliseconds: 250),
       child: categoriesAsync.when(
-        loading: () => SizedBox(
-          height: 100,
-          child: ListView.separated(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.fromLTRB(20, 14, 20, 0),
-            itemCount: 8,
-            separatorBuilder: (_, _) => const SizedBox(width: 12),
-            itemBuilder: (_, _) => const ShimmerCard(height: 100),
-          ),
-        ),
-        error: (_, _) => _buildStrip(_topBookingItems),
-        data: (categories) {
-          if (categories.isEmpty) return _buildStrip(_topBookingItems);
-          // Daily/repeat demand first, the rest behind "view all".
-          final sorted = [...categories]..sort(
-              (a, b) => categoryRank(a.name).compareTo(categoryRank(b.name)),
-            );
-          const visibleCount = 6;
-          final pharmacyIndex = sorted.indexWhere(
-            (c) => categoryNameToMerchantType(c.name) == MerchantType.pharmacy,
-          );
-          final end = pharmacyIndex >= visibleCount && pharmacyIndex != -1
-              ? pharmacyIndex + 1
-              : visibleCount;
-          final boundedEnd = end > sorted.length ? sorted.length : end;
-          final showAllTile = sorted.length > boundedEnd;
-          final visible = sorted.sublist(0, boundedEnd);
-
-          final items = <_TopStripItem>[];
-          bool pharmacyFound = false;
-          for (final c in visible) {
-            items.add(_TopStripCategory(c));
-            if (!pharmacyFound &&
-                categoryNameToMerchantType(c.name) == MerchantType.pharmacy) {
-              pharmacyFound = true;
-              items.addAll(_topBookingItems);
+        loading: () => _shimmerStrip(),
+        error: (_, _) => _buildStrip(context, [..._topBookingItems, const _TopStripShowAll()]),
+        data: (categories) => servicesAsync.when(
+          loading: () => _shimmerStrip(),
+          error: (_, _) => _buildStrip(context, [..._topBookingItems, const _TopStripShowAll()]),
+          data: (services) {
+            if (categories.isEmpty && services.isEmpty) {
+              return _buildStrip(context, [..._topBookingItems, const _TopStripShowAll()]);
             }
-          }
-          if (!pharmacyFound) {
-            items.addAll(_topBookingItems);
-          }
-          if (showAllTile) {
-            items.add(const _TopStripShowAll());
-          }
-
-return _buildStrip(items);
-        },
+            final sorted = [...categories]
+              ..sort((a, b) => categoryRank(a.name).compareTo(categoryRank(b.name)));
+            final items = <_TopStripItem>[
+              for (final c in sorted) _TopStripCategory(c),
+              for (final s in services) _TopStripService(s.type),
+              const _TopStripShowAll(),
+            ];
+            return _buildStrip(context, items);
+          },
+        ),
       ),
     );
   }
 
-  Widget _buildStrip(List<_TopStripItem> items) {
+  Widget _shimmerStrip() {
     return SizedBox(
       height: 100,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.fromLTRB(20, 14, 20, 0),
-        itemCount: items.length,
+        itemCount: 8,
         separatorBuilder: (_, _) => const SizedBox(width: 12),
-        itemBuilder: (context, index) {
-          final item = items[index];
-          return switch (item) {
-            _TopStripCategory(:final category) => _buildCategoryTile(
-                context,
-                category,
-                index,
-              ),
-            _TopStripService(:final type) => _buildServiceTile(
-                context,
-                type,
-                index,
-              ),
-            _TopStripShowAll() => _buildShowAllTile(context, index),
-          };
-        },
+        itemBuilder: (_, _) => const ShimmerCard(height: 100),
       ),
     );
   }
+
+  Widget _buildStrip(BuildContext context, List<_TopStripItem> items) {
+    return SizedBox(
+      height: 100,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(20, 14, 20, 0),
+        child: ClipRect(
+          child: _InfiniteStrip(
+            children: [
+              for (var i = 0; i < items.length; i++) _buildTile(context, items[i], i),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTile(BuildContext context, _TopStripItem item, int index) => switch (item) {
+    _TopStripCategory(:final category) => _buildCategoryTile(context, category, index),
+    _TopStripService(:final type) => _buildServiceTile(context, type, index),
+    _TopStripShowAll() => _buildShowAllTile(context, index),
+  };
 
   Widget _buildCategoryTile(
     BuildContext context,
@@ -534,7 +625,11 @@ return _buildStrip(items);
     return AnimatedFadeIn(
       delay: Duration(milliseconds: 280 + index * 40),
       child: PressableScale(
-        onTap: () => context.push('/home-services/providers/${type.name}'),
+        onTap: () => context.push(
+          type == ServiceCategoryType.deliveryCar
+              ? '/home-services/cars'
+              : '/home-services/providers/${type.name}',
+        ),
         child: SizedBox(
           width: 80,
           child: Column(
@@ -646,106 +741,6 @@ return _buildStrip(items);
           emoji,
           style: const TextStyle(fontSize: 22),
         ),
-      ),
-    );
-  }
-}
-
-/// Horizontal "الخدمات" section on the home page: all booking service
-/// categories in priority order — each tile opens its own service page.
-class _ServicesSection extends ConsumerWidget {
-  const _ServicesSection();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final servicesAsync = ref.watch(_homeServiceCategoriesProvider);
-    return AnimatedFadeIn(
-      delay: const Duration(milliseconds: 300),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          servicesAsync.when(
-            loading: () => SizedBox(
-              height: 108,
-              child: ListView.separated(
-                scrollDirection: Axis.horizontal,
-                padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
-                itemCount: 6,
-                separatorBuilder: (_, _) => const SizedBox(width: 12),
-                itemBuilder: (_, _) =>
-                    const ShimmerBox(width: 90, height: 100),
-              ),
-            ),
-            error: (_, _) => const SizedBox.shrink(),
-            data: (services) {
-              final remaining =
-                  services.where((s) => !_movedToTop.contains(s.type)).toList();
-              if (remaining.isEmpty) return const SizedBox.shrink();
-              return SizedBox(
-                height: 116,
-                child: ListView.separated(
-                  scrollDirection: Axis.horizontal,
-                  padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
-                  itemCount: remaining.length,
-                  separatorBuilder: (_, _) => const SizedBox(width: 12),
-                  itemBuilder: (context, index) {
-                    final service = remaining[index];
-                    final color = _serviceColor(service.type);
-                    return AnimatedFadeIn(
-                      delay: Duration(milliseconds: 320 + index * 40),
-                      child: PressableScale(
-                        onTap: () => context.push(
-                          service.type == ServiceCategoryType.deliveryCar
-                              ? '/home-services/cars'
-                              : '/home-services/providers/${service.type.name}',
-                        ),
-                        child: SizedBox(
-                          width: 92,
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Container(
-                                width: 56,
-                                height: 56,
-                                decoration: BoxDecoration(
-                                  gradient: LinearGradient(
-                                    begin: Alignment.topLeft,
-                                    end: Alignment.bottomRight,
-                                    colors: [
-                                      color.withValues(alpha: 0.35),
-                                      color.withValues(alpha: 0.15),
-                                    ],
-                                  ),
-                                  borderRadius: BorderRadius.circular(16),
-                                  border: Border.all(
-                                    color: color.withValues(alpha: 0.25),
-                                  ),
-                                ),
-                                child: Icon(_serviceIcon(service.type),
-                                    color: color, size: 26),
-                              ),
-                              const SizedBox(height: 6),
-                              Text(
-                                _serviceLabel(service.type),
-                                style: AppTextStyles.labelSmall.copyWith(
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                                textAlign: TextAlign.center,
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    );
-                  },
-                ),
-              );
-            },
-          ),
-        ],
       ),
     );
   }

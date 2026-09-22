@@ -397,7 +397,14 @@ class _ProductListTile extends StatelessWidget {
                   child: product.imageUrl != null
                       ? ClipRRect(
                           borderRadius: BorderRadius.circular(10),
-                          child: Image.network(product.imageUrl!, fit: BoxFit.cover),
+                          child: Image.network(
+                            product.imageUrl!,
+                            fit: BoxFit.cover,
+                            errorBuilder: (_, _, _) => Icon(
+                              Icons.fastfood_outlined,
+                              color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.4),
+                            ),
+                          ),
                         )
                       : Icon(
                           Icons.fastfood_outlined,

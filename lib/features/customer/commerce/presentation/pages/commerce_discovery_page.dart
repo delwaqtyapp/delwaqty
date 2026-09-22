@@ -30,7 +30,8 @@ class CommerceDiscoveryPage extends ConsumerStatefulWidget {
   const CommerceDiscoveryPage({super.key});
 
   @override
-  ConsumerState<CommerceDiscoveryPage> createState() => _CommerceDiscoveryPageState();
+  ConsumerState<CommerceDiscoveryPage> createState() =>
+      _CommerceDiscoveryPageState();
 }
 
 class _CommerceDiscoveryPageState extends ConsumerState<CommerceDiscoveryPage> {
@@ -47,7 +48,9 @@ class _CommerceDiscoveryPageState extends ConsumerState<CommerceDiscoveryPage> {
     final extra = GoRouterState.of(context).uri.queryParameters['type'];
     if (!_initialFilterSet && extra != null) {
       _initialFilterSet = true;
-      final match = MerchantType.values.where((t) => t.name == extra).firstOrNull;
+      final match = MerchantType.values
+          .where((t) => t.name == extra)
+          .firstOrNull;
       if (match != null) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           ref.read(_selectedTypeProvider.notifier).state = match;
@@ -102,9 +105,9 @@ class _CommerceDiscoveryPageState extends ConsumerState<CommerceDiscoveryPage> {
                       child: FilterChip(
                         label: Text(l10n.all),
                         selected: selectedType == null,
-                        onSelected: (_) => ref
-                            .read(_selectedTypeProvider.notifier)
-                            .state = null,
+                        onSelected: (_) =>
+                            ref.read(_selectedTypeProvider.notifier).state =
+                                null,
                       ),
                     ),
                     ...MerchantType.values.map(
@@ -113,9 +116,9 @@ class _CommerceDiscoveryPageState extends ConsumerState<CommerceDiscoveryPage> {
                         child: MerchantTypeChip(
                           type: type,
                           selected: selectedType == type,
-                          onSelected: (_) => ref
-                              .read(_selectedTypeProvider.notifier)
-                              .state = type,
+                          onSelected: (_) =>
+                              ref.read(_selectedTypeProvider.notifier).state =
+                                  type,
                         ),
                       ),
                     ),
@@ -140,31 +143,33 @@ class _CommerceDiscoveryPageState extends ConsumerState<CommerceDiscoveryPage> {
                         ),
                       ),
                       const SizedBox(height: 8),
-                      ListView.separated(
+                      SizedBox(
+                        height: 250,
+                        child: ListView.separated(
                           scrollDirection: Axis.horizontal,
                           itemCount: merchants.length,
-                          separatorBuilder: (_, _) =>
-const SizedBox(width: 12),
-                           itemBuilder: (context, index) {
-                             final merchant = merchants[index];
-                             return SizedBox(
-                               width: 260,
-                               child: MerchantCard(
-                                 merchant: merchant,
-                                 onTap: () => context.push(
-                                   '/market/merchant/${merchant.id}',
-                                 ),
-                               ),
-                             );
-                           },
-                         ),
-                       const SizedBox(height: 24),
+                          separatorBuilder: (_, _) => const SizedBox(width: 12),
+                          itemBuilder: (context, index) {
+                            final merchant = merchants[index];
+                            return SizedBox(
+                              width: 260,
+                              child: MerchantCard(
+                                merchant: merchant,
+                                onTap: () => context.push(
+                                  '/market/merchant/${merchant.id}',
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                      const SizedBox(height: 24),
                     ],
                   ),
                 );
               },
               loading: () => const SizedBox(
-                height: 180,
+                height: 250,
                 child: Center(child: CircularProgressIndicator()),
               ),
               error: (_, _) => const SizedBox(),
@@ -186,7 +191,9 @@ const SizedBox(width: 12),
                           Container(
                             padding: const EdgeInsets.all(6),
                             decoration: BoxDecoration(
-                              color: AppColors.brandPurple.withValues(alpha: 0.1),
+                              color: AppColors.brandPurple.withValues(
+                                alpha: 0.1,
+                              ),
                               borderRadius: BorderRadius.circular(8),
                             ),
                             child: const Icon(
@@ -209,7 +216,8 @@ const SizedBox(width: 12),
                         height: 180,
                         child: _AnimatedMerchantCarousel(
                           merchants: topRequested,
-                          onTap: (m) => context.push('/market/merchant/${m.id}'),
+                          onTap: (m) =>
+                              context.push('/market/merchant/${m.id}'),
                         ),
                       ),
                       const SizedBox(height: 24),
@@ -255,8 +263,7 @@ const SizedBox(width: 12),
                 return GridView.builder(
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
-                  gridDelegate:
-                      const SliverGridDelegateWithFixedCrossAxisCount(
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 2,
                     mainAxisSpacing: 12,
                     crossAxisSpacing: 12,
@@ -312,7 +319,8 @@ class _AnimatedMerchantCarousel extends StatefulWidget {
   final void Function(Merchant) onTap;
 
   @override
-  State<_AnimatedMerchantCarousel> createState() => _AnimatedMerchantCarouselState();
+  State<_AnimatedMerchantCarousel> createState() =>
+      _AnimatedMerchantCarouselState();
 }
 
 class _AnimatedMerchantCarouselState extends State<_AnimatedMerchantCarousel> {
@@ -380,7 +388,9 @@ class _AnimatedMerchantCarouselState extends State<_AnimatedMerchantCarousel> {
                 decoration: BoxDecoration(
                   color: _current == i
                       ? AppColors.brandPurple
-                      : theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.3),
+                      : theme.colorScheme.onSurfaceVariant.withValues(
+                          alpha: 0.3,
+                        ),
                   borderRadius: BorderRadius.circular(4),
                 ),
               ),
@@ -442,7 +452,10 @@ class _MostRequestedCard extends StatelessWidget {
                     cacheWidth: (MediaQuery.devicePixelRatioOf(context) * 200)
                         .round(),
                     errorBuilder: (_, _, _) => Center(
-                      child: Text(typeEmoji, style: const TextStyle(fontSize: 32)),
+                      child: Text(
+                        typeEmoji,
+                        style: const TextStyle(fontSize: 32),
+                      ),
                     ),
                   )
                 : Center(
@@ -471,7 +484,11 @@ class _MostRequestedCard extends StatelessWidget {
                   const SizedBox(height: 4),
                   Row(
                     children: [
-                      const Icon(Icons.star_rounded, color: AppColors.rating, size: 16),
+                      const Icon(
+                        Icons.star_rounded,
+                        color: AppColors.rating,
+                        size: 16,
+                      ),
                       const SizedBox(width: 2),
                       Text(
                         merchant.rating.toStringAsFixed(1),
@@ -484,7 +501,9 @@ class _MostRequestedCard extends StatelessWidget {
                         width: 4,
                         height: 4,
                         decoration: BoxDecoration(
-                          color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.4),
+                          color: theme.colorScheme.onSurfaceVariant.withValues(
+                            alpha: 0.4,
+                          ),
                           shape: BoxShape.circle,
                         ),
                       ),

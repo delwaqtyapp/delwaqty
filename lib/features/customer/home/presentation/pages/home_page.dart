@@ -27,6 +27,7 @@ import 'package:delwaqty/l10n/app_localizations.dart';
 import 'package:delwaqty/features/customer/home/domain/home_domain.dart';
 import 'package:delwaqty/features/customer/home/presentation/widgets/category_visuals.dart';
 import 'package:delwaqty/features/customer/home/domain/entities/platform_category.dart';
+import 'package:delwaqty/features/customer/commerce/domain/entities/merchant.dart';
 import 'package:delwaqty/shared/widgets/scroll_aware_nav.dart';
 import 'package:delwaqty/data/repositories/cached_service_booking_repository.dart';
 import 'package:delwaqty/features/customer/home_services/domain/entities/service_category.dart';
@@ -41,10 +42,6 @@ final _homeServiceCategoriesProvider =
   final repo = ref.watch(cachedServiceBookingRepositoryProvider);
   final all = await repo.getCategories();
   const priority = [
-    ServiceCategoryType.doctor,
-    ServiceCategoryType.nurse,
-    ServiceCategoryType.teacher,
-    ServiceCategoryType.barber,
     ServiceCategoryType.deliveryCar,
     ServiceCategoryType.plumbing,
     ServiceCategoryType.electrical,
@@ -67,6 +64,86 @@ final _homeServiceCategoriesProvider =
   final sorted = [...all]..sort((a, b) => rank(a.type).compareTo(rank(b.type)));
   return sorted;
 });
+
+String _serviceLabel(ServiceCategoryType t) => switch (t) {
+      ServiceCategoryType.doctor => 'حجز دكتور',
+      ServiceCategoryType.nurse => 'ممرض',
+      ServiceCategoryType.teacher => 'مدرسين',
+      ServiceCategoryType.barber => 'حجز حلاق',
+      ServiceCategoryType.deliveryCar => 'سيارة توصيل',
+      ServiceCategoryType.plumbing => 'سباكة',
+      ServiceCategoryType.electrical => 'كهرباء',
+      ServiceCategoryType.carpentry => 'نجارة',
+      ServiceCategoryType.painting => 'دهان',
+      ServiceCategoryType.cleaning => 'تنظيف',
+      ServiceCategoryType.acMaintenance => 'صيانة تكييف',
+      ServiceCategoryType.pipeChange => 'تغيير أنبوبة',
+      ServiceCategoryType.plastering => 'نقاشة',
+      ServiceCategoryType.carpetCleaning => 'غسيل السجاد',
+      ServiceCategoryType.dishRepair => 'إصلاح الدش',
+      ServiceCategoryType.pestControl => 'مكافحة حشرات',
+      ServiceCategoryType.applianceRepair => 'إصلاح أجهزة',
+      ServiceCategoryType.other => 'خدمات أخرى',
+    };
+
+IconData _serviceIcon(ServiceCategoryType t) => switch (t) {
+      ServiceCategoryType.doctor => Icons.medical_services_rounded,
+      ServiceCategoryType.nurse => Icons.health_and_safety_rounded,
+      ServiceCategoryType.teacher => Icons.school_rounded,
+      ServiceCategoryType.barber => Icons.content_cut_rounded,
+      ServiceCategoryType.deliveryCar => Icons.local_taxi_rounded,
+      ServiceCategoryType.plumbing => Icons.plumbing_rounded,
+      ServiceCategoryType.electrical => Icons.electrical_services_rounded,
+      ServiceCategoryType.carpentry => Icons.carpenter_rounded,
+      ServiceCategoryType.painting => Icons.format_paint_rounded,
+      ServiceCategoryType.cleaning => Icons.cleaning_services_rounded,
+      ServiceCategoryType.acMaintenance => Icons.ac_unit_rounded,
+      ServiceCategoryType.pipeChange => Icons.settings_input_component_rounded,
+      ServiceCategoryType.plastering => Icons.format_color_fill_rounded,
+      ServiceCategoryType.carpetCleaning => Icons.local_laundry_service_rounded,
+      ServiceCategoryType.dishRepair => Icons.satellite_alt_rounded,
+      ServiceCategoryType.pestControl => Icons.bug_report_rounded,
+      ServiceCategoryType.applianceRepair => Icons.build_rounded,
+      ServiceCategoryType.other => Icons.home_repair_service_rounded,
+    };
+
+Color _serviceColor(ServiceCategoryType t) => switch (t) {
+      ServiceCategoryType.doctor => AppColors.errorLight,
+      ServiceCategoryType.nurse => AppColors.successLight,
+      ServiceCategoryType.teacher => AppColors.infoLight,
+      ServiceCategoryType.barber => AppColors.brandViolet,
+      ServiceCategoryType.deliveryCar => AppColors.serviceDelivery,
+      ServiceCategoryType.plumbing => AppColors.serviceHome,
+      ServiceCategoryType.electrical => AppColors.serviceElectronics,
+      ServiceCategoryType.carpentry => AppColors.serviceBakery,
+      ServiceCategoryType.painting => AppColors.serviceFashion,
+      ServiceCategoryType.cleaning => AppColors.serviceDelivery,
+      ServiceCategoryType.acMaintenance => AppColors.serviceSeafood,
+      ServiceCategoryType.pipeChange => AppColors.serviceGrocery,
+      ServiceCategoryType.plastering => AppColors.serviceFurniture,
+      ServiceCategoryType.carpetCleaning => AppColors.serviceCafe,
+      ServiceCategoryType.dishRepair => AppColors.serviceElectronics,
+      ServiceCategoryType.pestControl => AppColors.serviceGas,
+      ServiceCategoryType.applianceRepair => AppColors.serviceAppliances,
+      ServiceCategoryType.other => AppColors.serviceMore,
+    };
+
+const _topBookingTypes = <ServiceCategoryType>[
+  ServiceCategoryType.doctor,
+  ServiceCategoryType.nurse,
+  ServiceCategoryType.teacher,
+  ServiceCategoryType.barber,
+];
+
+List<_TopStripItem> get _topBookingItems =>
+    _topBookingTypes.map((t) => _TopStripService(t)).toList(growable: false);
+
+const _movedToTop = {
+  ServiceCategoryType.doctor,
+  ServiceCategoryType.nurse,
+  ServiceCategoryType.teacher,
+  ServiceCategoryType.barber,
+};
 
 class HomePage extends ConsumerWidget {
   const HomePage({super.key});
@@ -275,6 +352,24 @@ class HomePage extends ConsumerWidget {
   }
 }
 
+sealed class _TopStripItem {
+  const _TopStripItem();
+}
+
+class _TopStripCategory extends _TopStripItem {
+  const _TopStripCategory(this.category);
+  final PlatformCategory category;
+}
+
+class _TopStripService extends _TopStripItem {
+  const _TopStripService(this.type);
+  final ServiceCategoryType type;
+}
+
+class _TopStripShowAll extends _TopStripItem {
+  const _TopStripShowAll();
+}
+
 class _CompactCategories extends StatelessWidget {
   const _CompactCategories({required this.ref});
 
@@ -297,136 +392,239 @@ class _CompactCategories extends StatelessWidget {
             itemBuilder: (_, _) => const ShimmerCard(height: 100),
           ),
         ),
-        error: (_, _) => const SizedBox.shrink(),
+        error: (_, _) => _buildStrip(_topBookingItems),
         data: (categories) {
-          if (categories.isEmpty) return const SizedBox.shrink();
+          if (categories.isEmpty) return _buildStrip(_topBookingItems);
           // Daily/repeat demand first, the rest behind "view all".
           final sorted = [...categories]..sort(
               (a, b) => categoryRank(a.name).compareTo(categoryRank(b.name)),
             );
           const visibleCount = 6;
-          final showAllTile = sorted.length > visibleCount;
-          final visible = showAllTile
-              ? sorted.sublist(0, visibleCount)
-              : sorted;
-          return SizedBox(
-            height: 100,
-            child: ListView.separated(
-              scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.fromLTRB(20, 14, 20, 0),
-              itemCount: visible.length + (showAllTile ? 1 : 0),
-              separatorBuilder: (_, _) => const SizedBox(width: 12),
-              itemBuilder: (context, index) {
-                if (index >= visible.length) {
-                  return AnimatedFadeIn(
-                    delay: Duration(
-                        milliseconds: 280 + visible.length * 40),
-                    child: PressableScale(
-                      onTap: () => context.push('/services'),
-                      child: SizedBox(
-                        width: 80,
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Container(
-                              width: 44,
-                              height: 44,
-                              decoration: BoxDecoration(
-                                gradient: const LinearGradient(
-                                  begin: Alignment.topLeft,
-                                  end: Alignment.bottomRight,
-                                  colors: [
-                                    AppColors.brandPurpleDeep,
-                                    AppColors.brandViolet,
-                                  ],
-                                ),
-                                borderRadius: BorderRadius.circular(14),
-                              ),
-                              child: const Center(
-                                child: Icon(
-                                  Icons.apps_rounded,
-                                  color: Colors.white,
-                                  size: 22,
-                                ),
-                              ),
-                            ),
-                            const SizedBox(height: 6),
-                            Text(
-                              AppLocalizations.of(context).viewAll,
-                              style: AppTextStyles.labelSmall.copyWith(
-                                fontSize: 11,
-                                fontWeight: FontWeight.w600,
-                              ),
-                              textAlign: TextAlign.center,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  );
-                }
-                final category = visible[index];
-                final merchantType = categoryNameToMerchantType(category.name);
-                final typeColor = merchantType != null
-                    ? merchantTypeColor(merchantType)
-                    : AppColors.brandPurple;
-                final emoji = merchantType != null
-                    ? merchantEmoji(merchantType)
-                    : '🏪';
-
-                return AnimatedFadeIn(
-                  delay: Duration(milliseconds: 280 + index * 40),
-                  child: PressableScale(
-                    onTap: () {
-                      final typeParam = merchantType?.name ?? 'other';
-                      context.push('/market?type=$typeParam');
-                    },
-                    child: SizedBox(
-                      width: 80,
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Container(
-                            width: 44,
-                            height: 44,
-                            clipBehavior: Clip.antiAlias,
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(14),
-                            ),
-                            child: category.imageUrl != null
-                                ? Image.network(
-                                    category.imageUrl!,
-                                    fit: BoxFit.cover,
-                                    errorBuilder: (_, _, _) =>
-                                        _categoryFallback(
-                                            typeColor, emoji),
-                                  )
-                                : _categoryFallback(typeColor, emoji),
-                          ),
-                          const SizedBox(height: 6),
-                          Text(
-                            category.displayName(
-                              Directionality.of(context) == TextDirection.rtl,
-                            ),
-                            style: AppTextStyles.labelSmall.copyWith(
-                              fontSize: 11,
-                              fontWeight: FontWeight.w600,
-                            ),
-                            textAlign: TextAlign.center,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                );
-              },
-            ),
+          final pharmacyIndex = sorted.indexWhere(
+            (c) => categoryNameToMerchantType(c.name) == MerchantType.pharmacy,
           );
+          final end = pharmacyIndex >= visibleCount && pharmacyIndex != -1
+              ? pharmacyIndex + 1
+              : visibleCount;
+          final boundedEnd = end > sorted.length ? sorted.length : end;
+          final showAllTile = sorted.length > boundedEnd;
+          final visible = sorted.sublist(0, boundedEnd);
+
+          final items = <_TopStripItem>[];
+          bool pharmacyFound = false;
+          for (final c in visible) {
+            items.add(_TopStripCategory(c));
+            if (!pharmacyFound &&
+                categoryNameToMerchantType(c.name) == MerchantType.pharmacy) {
+              pharmacyFound = true;
+              items.addAll(_topBookingItems);
+            }
+          }
+          if (!pharmacyFound) {
+            items.addAll(_topBookingItems);
+          }
+          if (showAllTile) {
+            items.add(const _TopStripShowAll());
+          }
+
+return _buildStrip(items);
         },
+      ),
+    );
+  }
+
+  Widget _buildStrip(List<_TopStripItem> items) {
+    return SizedBox(
+      height: 100,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.fromLTRB(20, 14, 20, 0),
+        itemCount: items.length,
+        separatorBuilder: (_, _) => const SizedBox(width: 12),
+        itemBuilder: (context, index) {
+          final item = items[index];
+          return switch (item) {
+            _TopStripCategory(:final category) => _buildCategoryTile(
+                context,
+                category,
+                index,
+              ),
+            _TopStripService(:final type) => _buildServiceTile(
+                context,
+                type,
+                index,
+              ),
+            _TopStripShowAll() => _buildShowAllTile(context, index),
+          };
+        },
+      ),
+    );
+  }
+
+  Widget _buildCategoryTile(
+    BuildContext context,
+    PlatformCategory category,
+    int index,
+  ) {
+    final merchantType = categoryNameToMerchantType(category.name);
+    final typeColor = merchantType != null
+        ? merchantTypeColor(merchantType)
+        : AppColors.brandPurple;
+    final emoji = merchantType != null
+        ? merchantEmoji(merchantType)
+        : '🏪';
+
+    return AnimatedFadeIn(
+      delay: Duration(milliseconds: 280 + index * 40),
+      child: PressableScale(
+        onTap: () {
+          final typeParam = merchantType?.name ?? 'other';
+          context.push('/market?type=$typeParam');
+        },
+        child: SizedBox(
+          width: 80,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 44,
+                height: 44,
+                clipBehavior: Clip.antiAlias,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: category.imageUrl != null
+                    ? Image.network(
+                        category.imageUrl!,
+                        fit: BoxFit.cover,
+                        errorBuilder: (_, _, _) =>
+                            _categoryFallback(typeColor, emoji),
+                      )
+                    : _categoryFallback(typeColor, emoji),
+              ),
+              const SizedBox(height: 6),
+              Text(
+                category.displayName(
+                  Directionality.of(context) == TextDirection.rtl,
+                ),
+                style: AppTextStyles.labelSmall.copyWith(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w600,
+                ),
+                textAlign: TextAlign.center,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildServiceTile(
+    BuildContext context,
+    ServiceCategoryType type,
+    int index,
+  ) {
+    final color = _serviceColor(type);
+    final icon = _serviceIcon(type);
+    final label = _serviceLabel(type);
+
+    return AnimatedFadeIn(
+      delay: Duration(milliseconds: 280 + index * 40),
+      child: PressableScale(
+        onTap: () => context.push('/home-services/providers/${type.name}'),
+        child: SizedBox(
+          width: 80,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      color.withValues(alpha: 0.38),
+                      color.withValues(alpha: 0.15),
+                    ],
+                  ),
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(
+                    color: color.withValues(alpha: 0.25),
+                  ),
+                ),
+                child: Center(
+                  child: Icon(icon, color: color, size: 22),
+                ),
+              ),
+              const SizedBox(height: 6),
+              Text(
+                label,
+                style: AppTextStyles.labelSmall.copyWith(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w600,
+                ),
+                textAlign: TextAlign.center,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildShowAllTile(BuildContext context, int index) {
+    return AnimatedFadeIn(
+      delay: Duration(milliseconds: 280 + index * 40),
+      child: PressableScale(
+        onTap: () => context.push('/services'),
+        child: SizedBox(
+          width: 80,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      AppColors.brandPurpleDeep,
+                      AppColors.brandViolet,
+                    ],
+                  ),
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: const Center(
+                  child: Icon(
+                    Icons.apps_rounded,
+                    color: Colors.white,
+                    size: 22,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 6),
+              Text(
+                AppLocalizations.of(context).viewAll,
+                style: AppTextStyles.labelSmall.copyWith(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w600,
+                ),
+                textAlign: TextAlign.center,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -458,48 +656,6 @@ class _CompactCategories extends StatelessWidget {
 class _ServicesSection extends ConsumerWidget {
   const _ServicesSection();
 
-  String _label(ServiceCategoryType t) => switch (t) {
-        ServiceCategoryType.doctor => 'حجز دكتور',
-        ServiceCategoryType.nurse => 'ممرض',
-        ServiceCategoryType.teacher => 'مدرسين',
-        ServiceCategoryType.barber => 'حجز حلاق',
-        ServiceCategoryType.deliveryCar => 'سيارة توصيل',
-        ServiceCategoryType.plumbing => 'سباكة',
-        ServiceCategoryType.electrical => 'كهرباء',
-        ServiceCategoryType.carpentry => 'نجارة',
-        ServiceCategoryType.painting => 'دهان',
-        ServiceCategoryType.cleaning => 'تنظيف',
-        ServiceCategoryType.acMaintenance => 'صيانة تكييف',
-        ServiceCategoryType.pipeChange => 'تغيير أنبوبة',
-        ServiceCategoryType.plastering => 'نقاشة',
-        ServiceCategoryType.carpetCleaning => 'غسيل السجاد',
-        ServiceCategoryType.dishRepair => 'إصلاح الدش',
-        ServiceCategoryType.pestControl => 'مكافحة حشرات',
-        ServiceCategoryType.applianceRepair => 'إصلاح أجهزة',
-        ServiceCategoryType.other => 'خدمات أخرى',
-      };
-
-  IconData _icon(ServiceCategoryType t) => switch (t) {
-        ServiceCategoryType.doctor => Icons.medical_services_rounded,
-        ServiceCategoryType.nurse => Icons.health_and_safety_rounded,
-        ServiceCategoryType.teacher => Icons.school_rounded,
-        ServiceCategoryType.barber => Icons.content_cut_rounded,
-        ServiceCategoryType.deliveryCar => Icons.local_taxi_rounded,
-        ServiceCategoryType.plumbing => Icons.plumbing_rounded,
-        ServiceCategoryType.electrical => Icons.electrical_services_rounded,
-        ServiceCategoryType.carpentry => Icons.carpenter_rounded,
-        ServiceCategoryType.painting => Icons.format_paint_rounded,
-        ServiceCategoryType.cleaning => Icons.cleaning_services_rounded,
-        ServiceCategoryType.acMaintenance => Icons.ac_unit_rounded,
-        ServiceCategoryType.pipeChange => Icons.settings_input_component_rounded,
-        ServiceCategoryType.plastering => Icons.format_color_fill_rounded,
-        ServiceCategoryType.carpetCleaning => Icons.local_laundry_service_rounded,
-        ServiceCategoryType.dishRepair => Icons.satellite_alt_rounded,
-        ServiceCategoryType.pestControl => Icons.bug_report_rounded,
-        ServiceCategoryType.applianceRepair => Icons.build_rounded,
-        ServiceCategoryType.other => Icons.home_repair_service_rounded,
-      };
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final servicesAsync = ref.watch(_homeServiceCategoriesProvider);
@@ -522,16 +678,18 @@ class _ServicesSection extends ConsumerWidget {
             ),
             error: (_, _) => const SizedBox.shrink(),
             data: (services) {
-              if (services.isEmpty) return const SizedBox.shrink();
+              final remaining =
+                  services.where((s) => !_movedToTop.contains(s.type)).toList();
+              if (remaining.isEmpty) return const SizedBox.shrink();
               return SizedBox(
                 height: 116,
                 child: ListView.separated(
                   scrollDirection: Axis.horizontal,
                   padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
-                  itemCount: services.length,
+                  itemCount: remaining.length,
                   separatorBuilder: (_, _) => const SizedBox(width: 12),
                   itemBuilder: (context, index) {
-                    final service = services[index];
+                    final service = remaining[index];
                     final color = _serviceColor(service.type);
                     return AnimatedFadeIn(
                       delay: Duration(milliseconds: 320 + index * 40),
@@ -563,12 +721,12 @@ class _ServicesSection extends ConsumerWidget {
                                     color: color.withValues(alpha: 0.25),
                                   ),
                                 ),
-                                child: Icon(_icon(service.type),
+                                child: Icon(_serviceIcon(service.type),
                                     color: color, size: 26),
                               ),
                               const SizedBox(height: 6),
                               Text(
-                                _label(service.type),
+                                _serviceLabel(service.type),
                                 style: AppTextStyles.labelSmall.copyWith(
                                   fontSize: 11,
                                   fontWeight: FontWeight.w600,
@@ -591,27 +749,6 @@ class _ServicesSection extends ConsumerWidget {
       ),
     );
   }
-
-  Color _serviceColor(ServiceCategoryType t) => switch (t) {
-        ServiceCategoryType.doctor => AppColors.errorLight,
-        ServiceCategoryType.nurse => AppColors.successLight,
-        ServiceCategoryType.teacher => AppColors.infoLight,
-        ServiceCategoryType.barber => AppColors.brandViolet,
-        ServiceCategoryType.deliveryCar => AppColors.serviceDelivery,
-        ServiceCategoryType.plumbing => AppColors.serviceHome,
-        ServiceCategoryType.electrical => AppColors.serviceElectronics,
-        ServiceCategoryType.carpentry => AppColors.serviceBakery,
-        ServiceCategoryType.painting => AppColors.serviceFashion,
-        ServiceCategoryType.cleaning => AppColors.serviceDelivery,
-        ServiceCategoryType.acMaintenance => AppColors.serviceSeafood,
-        ServiceCategoryType.pipeChange => AppColors.serviceGrocery,
-        ServiceCategoryType.plastering => AppColors.serviceFurniture,
-        ServiceCategoryType.carpetCleaning => AppColors.serviceCafe,
-        ServiceCategoryType.dishRepair => AppColors.serviceElectronics,
-        ServiceCategoryType.pestControl => AppColors.serviceGas,
-        ServiceCategoryType.applianceRepair => AppColors.serviceAppliances,
-        ServiceCategoryType.other => AppColors.serviceMore,
-      };
 }
 
 class _DiscoveryTabs extends ConsumerStatefulWidget {

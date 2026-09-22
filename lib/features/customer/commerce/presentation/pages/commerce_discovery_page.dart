@@ -366,7 +366,10 @@ class _AnimatedMerchantCarouselState extends State<_AnimatedMerchantCarousel>
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isRtl = Directionality.of(context) == TextDirection.rtl;
-    final page = _controller.page ?? _controller.initialPage.toDouble();
+    final page =
+        (_controller.hasClients && _controller.position.haveDimensions)
+            ? (_controller.page ?? _current.toDouble())
+            : _current.toDouble();
     return Column(
       children: [
         Expanded(

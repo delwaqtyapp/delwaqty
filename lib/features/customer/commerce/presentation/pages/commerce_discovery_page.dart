@@ -366,6 +366,7 @@ class _AnimatedMerchantCarouselState extends State<_AnimatedMerchantCarousel>
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isRtl = Directionality.of(context) == TextDirection.rtl;
+    final page = _controller.page ?? _controller.initialPage.toDouble();
     return Column(
       children: [
         Expanded(
@@ -376,11 +377,18 @@ class _AnimatedMerchantCarouselState extends State<_AnimatedMerchantCarousel>
               onPageChanged: (i) => setState(() => _current = i),
               itemBuilder: (context, index) {
                 final merchant = widget.merchants[index];
+                final distance = (page - index).abs();
+                final scale = 1.0 - (distance.clamp(0.0, 1.0) * 0.07);
                 return Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 4),
-                  child: GestureDetector(
-                    onTap: () => widget.onTap(merchant),
-                    child: _MostRequestedCard(merchant: merchant),
+                  child: AnimatedScale(
+                    scale: scale,
+                    duration: const Duration(milliseconds: 120),
+                    curve: Curves.easeOut,
+                    child: GestureDetector(
+                      onTap: () => widget.onTap(merchant),
+                      child: _MostRequestedCard(merchant: merchant),
+                    ),
                   ),
                 );
               },
@@ -462,148 +470,147 @@ class _MostRequestedCard extends StatelessWidget {
     final typeLabel = merchantTypeLabel(merchant.type, l10n);
     final hasImage = merchant.imageUrl != null && merchant.imageUrl!.isNotEmpty;
     final pixelRatio = MediaQuery.devicePixelRatioOf(context);
-    final cacheWidth = (pixelRatio * 240).round();
+    final cacheWidth = (pixelRatio * 560).round();
 
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(24),
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            typeColor.withValues(alpha: 0.14),
-            theme.colorScheme.surfaceContainerLowest,
-          ],
-        ),
-        border: Border.all(
-          color: typeColor.withValues(alpha: 0.28),
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: typeColor.withValues(alpha: 0.14),
-            blurRadius: 20,
-            offset: const Offset(0, 8),
-          ),
-        ],
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(24),
-        child: Row(
-          children: [
-            SizedBox(
-              width: 118,
-              child: Stack(
-                fit: StackFit.expand,
-                children: [
-                  if (hasImage)
-                    Image.network(
-                      merchant.imageUrl!,
-                      fit: BoxFit.cover,
-                      cacheWidth: cacheWidth,
-                      errorBuilder: (_, _, _) => _ImageFallback(
-                        typeColor: typeColor,
-                        typeEmoji: typeEmoji,
-                      ),
-                    )
-                  else
-                    _ImageFallback(
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(24),
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          Positioned.fill(
+            child: hasImage
+                ? Image.network(
+                    merchant.imageUrl!,
+                    fit: BoxFit.cover,
+                    cacheWidth: cacheWidth,
+                    errorBuilder: (_, _, _) => _ImageFallback(
                       typeColor: typeColor,
                       typeEmoji: typeEmoji,
                     ),
-                  Positioned(
-                    left: 0,
-                    right: 0,
-                    bottom: 0,
-                    height: 56,
-                    child: DecoratedBox(
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.topCenter,
-                          end: Alignment.bottomCenter,
-                          colors: [
-                            Colors.transparent,
-                            typeColor.withValues(alpha: 0.35),
-                          ],
-                        ),
-                      ),
-                    ),
+                  )
+                : _ImageFallback(
+                    typeColor: typeColor,
+                    typeEmoji: typeEmoji,
                   ),
-                  Positioned(
-                    right: 10,
-                    bottom: 12,
-                    child: Opacity(
-                      opacity: 0.55,
-                      child: Text(
-                        typeEmoji,
-                        style: const TextStyle(
-                          fontSize: 30,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ),
-                  ),
-                  if (merchant.isOpenNow)
-                    Positioned(
-                      left: 8,
-                      top: 8,
-                      child: DecoratedBox(
-                        decoration: BoxDecoration(
-                          color: AppColors.successLight,
-                          borderRadius: BorderRadius.circular(999),
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 3,
-                          ),
-                          child: Text(
-                            l10n.open,
-                            style: theme.textTheme.labelSmall?.copyWith(
-                              color: Colors.white,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  if (merchant.isVerified)
-                    const Positioned(
-                      right: 8,
-                      top: 8,
-                      child: SizedBox(
-                        width: 22,
-                        height: 22,
-                        child: DecoratedBox(
-                          decoration: BoxDecoration(
-                            color: AppColors.infoLight,
-                            shape: BoxShape.circle,
-                          ),
-                          child: Icon(
-                            Icons.check_rounded,
-                            size: 14,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ),
-                    ),
-                ],
+          ),
+          Positioned.fill(
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    typeColor.withValues(alpha: 0.30),
+                    Colors.transparent,
+                    Colors.black.withValues(alpha: 0.45),
+                    Colors.black.withValues(alpha: 0.82),
+                  ],
+                ),
               ),
             ),
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.all(14),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.center,
+          ),
+          Positioned(
+            top: 10,
+            left: 12,
+            right: 12,
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                  decoration: BoxDecoration(
+                    color: Colors.black.withValues(alpha: 0.35),
+                    borderRadius: BorderRadius.circular(999),
+                    border: Border.all(
+                      color: Colors.white.withValues(alpha: 0.25),
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        typeEmoji,
+                        style: const TextStyle(fontSize: 12),
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        typeLabel,
+                        style: theme.textTheme.labelSmall?.copyWith(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const Spacer(),
+                if (merchant.isOpenNow)
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: AppColors.successLight,
+                      borderRadius: BorderRadius.circular(999),
+                    ),
+                    child: Text(
+                      l10n.open,
+                      style: theme.textTheme.labelSmall?.copyWith(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                if (merchant.isOpenNow) const SizedBox(width: 6),
+                if (merchant.isVerified)
+                  const SizedBox(
+                    width: 24,
+                    height: 24,
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        color: AppColors.infoLight,
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        Icons.check_rounded,
+                        size: 15,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+          Positioned(
+            left: 14,
+            right: 14,
+            bottom: 12,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  merchant.name,
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w800,
+                    fontSize: 18,
+                    height: 1.15,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 6),
+                Row(
                   children: [
                     Container(
                       padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 3,
+                        horizontal: 10,
+                        vertical: 4,
                       ),
                       decoration: BoxDecoration(
-                        color: AppColors.rating.withValues(alpha: 0.14),
+                        color: Colors.white.withValues(alpha: 0.18),
                         borderRadius: BorderRadius.circular(999),
+                        border: Border.all(
+                          color: Colors.white.withValues(alpha: 0.25),
+                        ),
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
@@ -617,7 +624,7 @@ class _MostRequestedCard extends StatelessWidget {
                           Text(
                             merchant.rating.toStringAsFixed(1),
                             style: theme.textTheme.labelSmall?.copyWith(
-                              color: theme.colorScheme.onSurface,
+                              color: Colors.white,
                               fontWeight: FontWeight.w700,
                             ),
                           ),
@@ -626,66 +633,92 @@ class _MostRequestedCard extends StatelessWidget {
                             Text(
                               '(${merchant.ratingCount})',
                               style: theme.textTheme.labelSmall?.copyWith(
-                                color: theme.colorScheme.onSurfaceVariant,
+                                color: Colors.white.withValues(alpha: 0.75),
                               ),
                             ),
                           ],
                         ],
                       ),
                     ),
-                    const SizedBox(height: 6),
-                    Text(
-                      merchant.name,
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w700,
-                        height: 1.2,
+                    const SizedBox(width: 8),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 4,
                       ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: 6),
-                    Wrap(
-                      spacing: 6,
-                      runSpacing: 4,
-                      children: [
-                        _ServiceChip(
-                          label: typeLabel,
-                          backgroundColor: theme.colorScheme
-                              .surfaceContainerHighest
-                              .withValues(alpha: 0.6),
-                          textColor: theme.colorScheme.onSurfaceVariant,
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.18),
+                        borderRadius: BorderRadius.circular(999),
+                        border: Border.all(
+                          color: Colors.white.withValues(alpha: 0.25),
                         ),
-                        if (merchant.deliveryAvailable)
-                          _ServiceChip(
-                            label: merchant.estimatedDeliveryMinutes != null
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.delivery_dining_rounded,
+                            size: 13,
+                            color: Colors.white.withValues(alpha: 0.9),
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            merchant.estimatedDeliveryMinutes != null
                                 ? '${merchant.estimatedDeliveryMinutes} ${l10n.minutesShort}'
                                 : l10n.delivery,
-                            leading: const Icon(
-                              Icons.delivery_dining_rounded,
-                              size: 12,
+                            style: theme.textTheme.labelSmall?.copyWith(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w600,
                             ),
-                            backgroundColor: theme.colorScheme
-                                .surfaceContainerHighest
-                                .withValues(alpha: 0.6),
-                            textColor: theme.colorScheme.onSurfaceVariant,
                           ),
-                        if (merchant.deliveryFee != null)
-                          _ServiceChip(
-                            label:
-                                '${merchant.deliveryFee!.toStringAsFixed(0)} ${l10n.currencySymbol}',
-                            backgroundColor: theme.colorScheme
-                                .surfaceContainerHighest
-                                .withValues(alpha: 0.6),
-                            textColor: theme.colorScheme.onSurfaceVariant,
-                          ),
-                      ],
+                        ],
+                      ),
                     ),
                   ],
                 ),
-              ),
+                const SizedBox(height: 6),
+                Wrap(
+                  spacing: 6,
+                  runSpacing: 4,
+                  children: [
+                    if (merchant.deliveryFee != null)
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 4,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.18),
+                          borderRadius: BorderRadius.circular(999),
+                          border: Border.all(
+                            color: Colors.white.withValues(alpha: 0.25),
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.payments_outlined,
+                              size: 13,
+                              color: Colors.white.withValues(alpha: 0.9),
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              '${merchant.deliveryFee!.toStringAsFixed(0)} ${l10n.currencySymbol}',
+                              style: theme.textTheme.labelSmall?.copyWith(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                  ],
+                ),
+              ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -718,52 +751,6 @@ class _ImageFallback extends StatelessWidget {
           typeEmoji,
           style: const TextStyle(fontSize: 32),
         ),
-      ),
-    );
-  }
-}
-
-class _ServiceChip extends StatelessWidget {
-  const _ServiceChip({
-    required this.label,
-    this.leading,
-    required this.backgroundColor,
-    required this.textColor,
-  });
-
-  final String label;
-  final Widget? leading;
-  final Color backgroundColor;
-  final Color textColor;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-      decoration: BoxDecoration(
-        color: backgroundColor,
-        borderRadius: BorderRadius.circular(999),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          if (leading != null) ...[
-            DefaultTextStyle.merge(
-              style: TextStyle(color: textColor),
-              child: leading!,
-            ),
-            const SizedBox(width: 4),
-          ],
-          Text(
-            label,
-            style: theme.textTheme.labelSmall?.copyWith(
-              color: textColor,
-            ),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-        ],
       ),
     );
   }

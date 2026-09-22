@@ -424,33 +424,33 @@ void main() {
       expect(find.text('Home'), findsOneWidget);
     });
 
-    testWidgets('renders ActionChip', (tester) async {
+    testWidgets('renders FilterChip', (tester) async {
       await tester.pumpWidget(wrapInApp(
         const MerchantTypeChip(type: MerchantType.restaurant),
       ));
 
-      expect(find.byType(ActionChip), findsOneWidget);
+      expect(find.byType(FilterChip), findsOneWidget);
     });
 
-    testWidgets('onTap callback fires', (tester) async {
-      var tapped = false;
+    testWidgets('onSelected callback fires', (tester) async {
+      var selected = false;
       await tester.pumpWidget(wrapInApp(
         MerchantTypeChip(
           type: MerchantType.restaurant,
-          onTap: () => tapped = true,
+          onSelected: (value) => selected = value,
         ),
       ));
 
-      await tester.tap(find.byType(ActionChip));
-      expect(tapped, isTrue);
+      await tester.tap(find.byType(FilterChip));
+      expect(selected, isTrue);
     });
 
-    testWidgets('works without onTap', (tester) async {
+    testWidgets('works without onSelected', (tester) async {
       await tester.pumpWidget(wrapInApp(
         const MerchantTypeChip(type: MerchantType.restaurant),
       ));
 
-      expect(find.byType(ActionChip), findsOneWidget);
+      expect(find.byType(FilterChip), findsOneWidget);
     });
   });
 }

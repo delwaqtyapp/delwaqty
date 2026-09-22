@@ -93,7 +93,7 @@ class _CommerceDiscoveryPageState extends ConsumerState<CommerceDiscoveryPage> {
             AnimatedFadeIn(
               delay: const Duration(milliseconds: 100),
               child: SizedBox(
-                height: 40,
+                height: 48,
                 child: ListView(
                   scrollDirection: Axis.horizontal,
                   children: [
@@ -112,7 +112,8 @@ class _CommerceDiscoveryPageState extends ConsumerState<CommerceDiscoveryPage> {
                         padding: const EdgeInsets.only(right: 8),
                         child: MerchantTypeChip(
                           type: type,
-                          onTap: () => ref
+                          selected: selectedType == type,
+                          onSelected: (_) => ref
                               .read(_selectedTypeProvider.notifier)
                               .state = type,
                         ),
@@ -139,28 +140,25 @@ class _CommerceDiscoveryPageState extends ConsumerState<CommerceDiscoveryPage> {
                         ),
                       ),
                       const SizedBox(height: 8),
-                      SizedBox(
-                        height: 180,
-                        child: ListView.separated(
+                      ListView.separated(
                           scrollDirection: Axis.horizontal,
                           itemCount: merchants.length,
                           separatorBuilder: (_, _) =>
-                              const SizedBox(width: 12),
-                          itemBuilder: (context, index) {
-                            final merchant = merchants[index];
-                            return SizedBox(
-                              width: 260,
-                              child: MerchantCard(
-                                merchant: merchant,
-                                onTap: () => context.push(
-                                  '/market/merchant/${merchant.id}',
-                                ),
-                              ),
-                            );
-                          },
-                        ),
-                      ),
-                      const SizedBox(height: 24),
+const SizedBox(width: 12),
+                           itemBuilder: (context, index) {
+                             final merchant = merchants[index];
+                             return SizedBox(
+                               width: 260,
+                               child: MerchantCard(
+                                 merchant: merchant,
+                                 onTap: () => context.push(
+                                   '/market/merchant/${merchant.id}',
+                                 ),
+                               ),
+                             );
+                           },
+                         ),
+                       const SizedBox(height: 24),
                     ],
                   ),
                 );
@@ -262,7 +260,7 @@ class _CommerceDiscoveryPageState extends ConsumerState<CommerceDiscoveryPage> {
                     crossAxisCount: 2,
                     mainAxisSpacing: 12,
                     crossAxisSpacing: 12,
-                    childAspectRatio: 0.8,
+                    childAspectRatio: 0.74,
                   ),
                   itemCount: filtered.length,
                   itemBuilder: (context, index) {
@@ -281,7 +279,7 @@ class _CommerceDiscoveryPageState extends ConsumerState<CommerceDiscoveryPage> {
                 physics: const NeverScrollableScrollPhysics(),
                 mainAxisSpacing: 12,
                 crossAxisSpacing: 12,
-                childAspectRatio: 0.8,
+                childAspectRatio: 0.74,
                 children: const [
                   ShimmerCard(height: 200),
                   ShimmerCard(height: 200),

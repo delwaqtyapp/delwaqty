@@ -105,6 +105,33 @@ void main() {
       expect(p.categoryType, ServiceCategoryType.other);
     });
 
+    test('ServiceProvider.fromJson tolerates NULL user_id like seeded rows', () {
+      final row = <String, dynamic>{
+        'id': 'prov-seed-1',
+        'user_id': null,
+        'name': 'د. أحمد حسن',
+        'category_type': 'doctor',
+        'description': null,
+        'profile_image_url': null,
+        'rating': 4.2,
+        'rating_count': null,
+        'is_verified': null,
+        'is_available': null,
+        'hourly_rate': 250.0,
+        'fixed_price_min': null,
+        'fixed_price_max': null,
+        'city': null,
+        'latitude': null,
+        'longitude': null,
+        'tags': null,
+        'created_at': '2026-09-19T08:22:46.711516+00:00',
+        'updated_at': null,
+      };
+      final p = ServiceProvider.fromJson(row);
+      expect(p.userId, isEmpty);
+      expect(p.name, 'د. أحمد حسن');
+    });
+
     test('CarProduct.fromJson parses real car_products row', () {
       final row = <String, dynamic>{
         'id': 'car-1',

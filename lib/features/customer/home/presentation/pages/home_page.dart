@@ -441,7 +441,7 @@ class _InfiniteStripState extends State<_InfiniteStrip>
 
   void _onTick(Duration elapsed) {
     if (!mounted || _interacting || _reduceMotion) return;
-    if (!_scroll.hasClients || _cycleWidth <= 0) return;
+    if (!_scroll.hasClients || _cycleWidth <= 0 || _scroll.position.isScrollingNotifier.value) return;
     final dt = (elapsed - _lastElapsed).inMicroseconds / 1e6;
     _lastElapsed = elapsed;
     if (dt <= 0) return;
@@ -459,9 +459,7 @@ class _InfiniteStripState extends State<_InfiniteStrip>
       child: SingleChildScrollView(
         controller: _scroll,
         scrollDirection: Axis.horizontal,
-        physics: _reduceMotion
-            ? const AlwaysScrollableScrollPhysics()
-            : const NeverScrollableScrollPhysics(),
+        physics: const AlwaysScrollableScrollPhysics(),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [

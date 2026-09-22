@@ -323,14 +323,21 @@ class _AnimatedMerchantCarousel extends StatefulWidget {
       _AnimatedMerchantCarouselState();
 }
 
-class _AnimatedMerchantCarouselState extends State<_AnimatedMerchantCarousel> {
+class _AnimatedMerchantCarouselState extends State<_AnimatedMerchantCarousel>
+    with SingleTickerProviderStateMixin {
   late final PageController _controller;
+  late final AnimationController _progress;
   int _current = 0;
 
   @override
   void initState() {
     super.initState();
     _controller = PageController(viewportFraction: 0.88);
+    _progress = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 4),
+    );
+    _progress.forward(from: 0);
     _startAutoScroll();
   }
 
@@ -343,6 +350,7 @@ class _AnimatedMerchantCarouselState extends State<_AnimatedMerchantCarousel> {
         duration: const Duration(milliseconds: 500),
         curve: Curves.easeInOutCubic,
       );
+      _progress.forward(from: 0);
       _startAutoScroll();
     });
   }
@@ -350,48 +358,87 @@ class _AnimatedMerchantCarouselState extends State<_AnimatedMerchantCarousel> {
   @override
   void dispose() {
     _controller.dispose();
+    _progress.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isRtl = Directionality.of(context) == TextDirection.rtl;
     return Column(
       children: [
         Expanded(
-          child: PageView.builder(
-            controller: _controller,
-            itemCount: widget.merchants.length,
-            onPageChanged: (i) => setState(() => _current = i),
-            itemBuilder: (context, index) {
-              final merchant = widget.merchants[index];
-              return Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 4),
-                child: GestureDetector(
-                  onTap: () => widget.onTap(merchant),
-                  child: _MostRequestedCard(merchant: merchant),
-                ),
-              );
-            },
+          child: RepaintBoundary(
+            child: PageView.builder(
+              controller: _controller,
+              itemCount: widget.merchants.length,
+              onPageChanged: (i) => setState(() => _current = i),
+              itemBuilder: (context, index) {
+                final merchant = widget.merchants[index];
+                return Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 4),
+                  child: GestureDetector(
+                    onTap: () => widget.onTap(merchant),
+                    child: _MostRequestedCard(merchant: merchant),
+                  ),
+                );
+              },
+            ),
           ),
         ),
         const SizedBox(height: 8),
         Row(
-          mainAxisAlignment: MainAxisAlignment.center,
           children: [
             for (var i = 0; i < widget.merchants.length; i++)
-              AnimatedContainer(
-                duration: const Duration(milliseconds: 300),
-                margin: const EdgeInsets.symmetric(horizontal: 3),
-                width: _current == i ? 20 : 7,
-                height: 7,
-                decoration: BoxDecoration(
-                  color: _current == i
-                      ? AppColors.brandPurple
-                      : theme.colorScheme.onSurfaceVariant.withValues(
-                          alpha: 0.3,
-                        ),
-                  borderRadius: BorderRadius.circular(4),
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 2),
+                  child: AnimatedBuilder(
+                    animation: _progress,
+                    builder: (context, _) {
+                      final double fill;
+                      if (i < _current) {
+                        fill = 1.0;
+                      } else if (i == _current) {
+                        fill = _progress.value;
+                      } else {
+                        fill = 0.0;
+                      }
+                      final alignment = isRtl
+                          ? (i == _current
+                              ? Alignment.centerRight
+                              : Alignment.centerLeft)
+                          : (i == _current
+                              ? Alignment.centerLeft
+                              : Alignment.centerRight);
+                      return Stack(
+                        children: [
+                          Container(
+                            height: 3,
+                            decoration: BoxDecoration(
+                              color: theme.colorScheme.onSurfaceVariant
+                                  .withValues(alpha: 0.18),
+                              borderRadius: BorderRadius.circular(2),
+                            ),
+                          ),
+                          Align(
+                            alignment: alignment,
+                            child: FractionallySizedBox(
+                              widthFactor: fill,
+                              child: Container(
+                                height: 3,
+                                decoration: BoxDecoration(
+                                  color: AppColors.brandPurple,
+                                  borderRadius: BorderRadius.circular(2),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      );
+                    },
+                  ),
                 ),
               ),
           ],
@@ -412,114 +459,309 @@ class _MostRequestedCard extends StatelessWidget {
     final l10n = AppLocalizations.of(context);
     final typeColor = merchantTypeColor(merchant.type);
     final typeEmoji = merchantEmoji(merchant.type);
+    final typeLabel = merchantTypeLabel(merchant.type, l10n);
+    final hasImage = merchant.imageUrl != null && merchant.imageUrl!.isNotEmpty;
+    final pixelRatio = MediaQuery.devicePixelRatioOf(context);
+    final cacheWidth = (pixelRatio * 240).round();
+
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerLowest,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(24),
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            typeColor.withValues(alpha: 0.14),
+            theme.colorScheme.surfaceContainerLowest,
+          ],
+        ),
         border: Border.all(
-          color: theme.colorScheme.outlineVariant.withValues(alpha: 0.2),
+          color: typeColor.withValues(alpha: 0.28),
         ),
         boxShadow: [
           BoxShadow(
-            color: AppColors.brandPurple.withValues(alpha: 0.08),
-            blurRadius: 16,
-            offset: const Offset(0, 6),
+            color: typeColor.withValues(alpha: 0.14),
+            blurRadius: 20,
+            offset: const Offset(0, 8),
           ),
         ],
       ),
-      child: Row(
-        children: [
-          Container(
-            width: 100,
-            clipBehavior: Clip.antiAlias,
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  typeColor.withValues(alpha: 0.35),
-                  typeColor.withValues(alpha: 0.12),
-                ],
-              ),
-              borderRadius: const BorderRadius.horizontal(
-                left: Radius.circular(20),
-              ),
-            ),
-            child: merchant.imageUrl != null && merchant.imageUrl!.isNotEmpty
-                ? Image.network(
-                    merchant.imageUrl!,
-                    fit: BoxFit.cover,
-                    cacheWidth: (MediaQuery.devicePixelRatioOf(context) * 200)
-                        .round(),
-                    errorBuilder: (_, _, _) => Center(
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(24),
+        child: Row(
+          children: [
+            SizedBox(
+              width: 118,
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  if (hasImage)
+                    Image.network(
+                      merchant.imageUrl!,
+                      fit: BoxFit.cover,
+                      cacheWidth: cacheWidth,
+                      errorBuilder: (_, _, _) => _ImageFallback(
+                        typeColor: typeColor,
+                        typeEmoji: typeEmoji,
+                      ),
+                    )
+                  else
+                    _ImageFallback(
+                      typeColor: typeColor,
+                      typeEmoji: typeEmoji,
+                    ),
+                  Positioned(
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    height: 56,
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [
+                            Colors.transparent,
+                            typeColor.withValues(alpha: 0.35),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    right: 10,
+                    bottom: 12,
+                    child: Opacity(
+                      opacity: 0.55,
                       child: Text(
                         typeEmoji,
-                        style: const TextStyle(fontSize: 32),
-                      ),
-                    ),
-                  )
-                : Center(
-                    child: Text(
-                      typeEmoji,
-                      style: const TextStyle(fontSize: 32),
-                    ),
-                  ),
-          ),
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.all(14),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    merchant.name,
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w700,
-                      height: 1.2,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 4),
-                  Row(
-                    children: [
-                      const Icon(
-                        Icons.star_rounded,
-                        color: AppColors.rating,
-                        size: 16,
-                      ),
-                      const SizedBox(width: 2),
-                      Text(
-                        merchant.rating.toStringAsFixed(1),
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          fontWeight: FontWeight.w600,
+                        style: const TextStyle(
+                          fontSize: 30,
+                          color: Colors.white,
                         ),
                       ),
-                      const SizedBox(width: 6),
-                      Container(
-                        width: 4,
-                        height: 4,
+                    ),
+                  ),
+                  if (merchant.isOpenNow)
+                    Positioned(
+                      left: 8,
+                      top: 8,
+                      child: DecoratedBox(
                         decoration: BoxDecoration(
-                          color: theme.colorScheme.onSurfaceVariant.withValues(
-                            alpha: 0.4,
+                          color: AppColors.successLight,
+                          borderRadius: BorderRadius.circular(999),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 3,
                           ),
-                          shape: BoxShape.circle,
+                          child: Text(
+                            l10n.open,
+                            style: theme.textTheme.labelSmall?.copyWith(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
                         ),
                       ),
-                      const SizedBox(width: 6),
-                      Text(
-                        merchantTypeLabel(merchant.type, l10n),
-                        style: theme.textTheme.labelSmall?.copyWith(
-                          color: theme.colorScheme.onSurfaceVariant,
-                          fontWeight: FontWeight.w600,
+                    ),
+                  if (merchant.isVerified)
+                    const Positioned(
+                      right: 8,
+                      top: 8,
+                      child: SizedBox(
+                        width: 22,
+                        height: 22,
+                        child: DecoratedBox(
+                          decoration: BoxDecoration(
+                            color: AppColors.infoLight,
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(
+                            Icons.check_rounded,
+                            size: 14,
+                            color: Colors.white,
+                          ),
                         ),
                       ),
-                    ],
-                  ),
+                    ),
                 ],
               ),
             ),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.all(14),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 3,
+                      ),
+                      decoration: BoxDecoration(
+                        color: AppColors.rating.withValues(alpha: 0.14),
+                        borderRadius: BorderRadius.circular(999),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(
+                            Icons.star_rounded,
+                            size: 14,
+                            color: AppColors.rating,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            merchant.rating.toStringAsFixed(1),
+                            style: theme.textTheme.labelSmall?.copyWith(
+                              color: theme.colorScheme.onSurface,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                          if (merchant.ratingCount > 0) ...[
+                            const SizedBox(width: 4),
+                            Text(
+                              '(${merchant.ratingCount})',
+                              style: theme.textTheme.labelSmall?.copyWith(
+                                color: theme.colorScheme.onSurfaceVariant,
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      merchant.name,
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w700,
+                        height: 1.2,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 6),
+                    Wrap(
+                      spacing: 6,
+                      runSpacing: 4,
+                      children: [
+                        _ServiceChip(
+                          label: typeLabel,
+                          backgroundColor: theme.colorScheme
+                              .surfaceContainerHighest
+                              .withValues(alpha: 0.6),
+                          textColor: theme.colorScheme.onSurfaceVariant,
+                        ),
+                        if (merchant.deliveryAvailable)
+                          _ServiceChip(
+                            label: merchant.estimatedDeliveryMinutes != null
+                                ? '${merchant.estimatedDeliveryMinutes} ${l10n.minutesShort}'
+                                : l10n.delivery,
+                            leading: const Icon(
+                              Icons.delivery_dining_rounded,
+                              size: 12,
+                            ),
+                            backgroundColor: theme.colorScheme
+                                .surfaceContainerHighest
+                                .withValues(alpha: 0.6),
+                            textColor: theme.colorScheme.onSurfaceVariant,
+                          ),
+                        if (merchant.deliveryFee != null)
+                          _ServiceChip(
+                            label:
+                                '${merchant.deliveryFee!.toStringAsFixed(0)} ${l10n.currencySymbol}',
+                            backgroundColor: theme.colorScheme
+                                .surfaceContainerHighest
+                                .withValues(alpha: 0.6),
+                            textColor: theme.colorScheme.onSurfaceVariant,
+                          ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ImageFallback extends StatelessWidget {
+  const _ImageFallback({
+    required this.typeColor,
+    required this.typeEmoji,
+  });
+
+  final Color typeColor;
+  final String typeEmoji;
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            typeColor.withValues(alpha: 0.35),
+            typeColor.withValues(alpha: 0.12),
+          ],
+        ),
+      ),
+      child: Center(
+        child: Text(
+          typeEmoji,
+          style: const TextStyle(fontSize: 32),
+        ),
+      ),
+    );
+  }
+}
+
+class _ServiceChip extends StatelessWidget {
+  const _ServiceChip({
+    required this.label,
+    this.leading,
+    required this.backgroundColor,
+    required this.textColor,
+  });
+
+  final String label;
+  final Widget? leading;
+  final Color backgroundColor;
+  final Color textColor;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      decoration: BoxDecoration(
+        color: backgroundColor,
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (leading != null) ...[
+            DefaultTextStyle.merge(
+              style: TextStyle(color: textColor),
+              child: leading!,
+            ),
+            const SizedBox(width: 4),
+          ],
+          Text(
+            label,
+            style: theme.textTheme.labelSmall?.copyWith(
+              color: textColor,
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
         ],
       ),

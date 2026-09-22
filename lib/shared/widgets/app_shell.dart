@@ -112,9 +112,9 @@ class _FloatingGlassNav extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Container(
-      margin: const EdgeInsets.fromLTRB(20, 0, 20, 8),
+      margin: const EdgeInsets.fromLTRB(16, 0, 16, 12),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(22),
+        borderRadius: BorderRadius.circular(28),
         boxShadow: isDark
             ? [
                 BoxShadow(
@@ -138,7 +138,7 @@ class _FloatingGlassNav extends StatelessWidget {
               ],
       ),
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(22),
+        borderRadius: BorderRadius.circular(28),
         child: BackdropFilter(
           filter: ImageFilter.blur(sigmaX: 22, sigmaY: 22),
           child: DecoratedBox(
@@ -146,7 +146,7 @@ class _FloatingGlassNav extends StatelessWidget {
               color: isDark
                   ? colorScheme.surface.withValues(alpha: 0.78)
                   : Colors.white.withValues(alpha: 0.78),
-              borderRadius: BorderRadius.circular(22),
+              borderRadius: BorderRadius.circular(28),
               border: Border.all(
                 color: isDark
                     ? Colors.white.withValues(alpha: 0.1)
@@ -202,7 +202,7 @@ class _NavItem extends StatelessWidget {
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 300),
         curve: Curves.easeOutCubic,
-        height: 40,
+        height: 48,
         padding: EdgeInsets.symmetric(
           horizontal: isSelected ? 14 : 10,
         ),
@@ -214,7 +214,7 @@ class _NavItem extends StatelessWidget {
                   colors: [AppColors.brandGradientStart, AppColors.brandGradientEnd],
                 )
               : null,
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: BorderRadius.circular(999),
           boxShadow: isSelected
               ? [
                   BoxShadow(

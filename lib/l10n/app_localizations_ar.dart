@@ -26,7 +26,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get goodEvening => 'مساء الخير';
 
   @override
-  String get fastestWayToOrder => 'أسرع طريقة للطلب';
+  String get fastestWayToOrder => 'أسرع طريقة للطلب من كل خدماتك';
 
   @override
   String get places => 'مكان';
@@ -374,7 +374,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get search => 'بحث';
 
   @override
-  String get searchHint => 'بحث...';
+  String get searchHint => 'ابحث عن مطعم، منتج، خدمة أو أي شيء...';
 
   @override
   String get searchNoResults => 'لم يتم العثور على نتائج';
@@ -483,6 +483,30 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get viewAll => 'عرض الكل';
+
+  @override
+  String get mainCategories => 'الفئات الرئيسية';
+
+  @override
+  String get discoverNearby => 'اكتشف بالقرب منك';
+
+  @override
+  String get nearbySubtitle => 'أفضل الخيارات حول موقعك الحالي';
+
+  @override
+  String get closest => 'الأقرب';
+
+  @override
+  String get topRated => 'الأعلى تقييمًا';
+
+  @override
+  String get egyptStatementTitle => 'مصر';
+
+  @override
+  String get egyptStatementTagline => 'دائماً بتقدم للعالم';
+
+  @override
+  String get greetingSubtitle => 'دائماً معك ... كل احتياجاتك في مكان واحد';
 
   @override
   String get addToCart => 'أضف للسلة';

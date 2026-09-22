@@ -1,7 +1,5 @@
 import 'dart:async';
-import 'dart:math' as math;
 import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -18,12 +16,10 @@ import 'package:delwaqty/shared/notifications/notification_channels.dart';
 import 'package:delwaqty/features/customer/location/presentation/providers/location_provider.dart';
 import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
 import 'package:delwaqty/shared/widgets/pressable_scale.dart';
-import 'package:delwaqty/shared/widgets/gradient_background.dart';
 import 'package:delwaqty/shared/widgets/premium_empty_state.dart';
 import 'package:delwaqty/shared/widgets/shimmer_loading.dart';
 import 'package:delwaqty/shared/widgets/design/premium_card.dart';
 import 'package:delwaqty/shared/widgets/design/premium_search_field.dart';
-import 'package:delwaqty/shared/widgets/design/glass_surface.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 import 'package:delwaqty/features/customer/home/domain/home_domain.dart';
 import 'package:delwaqty/features/customer/home/presentation/widgets/category_visuals.dart';
@@ -35,7 +31,6 @@ import 'package:delwaqty/core/theme/app_colors.dart';
 import 'package:delwaqty/core/theme/app_text_styles.dart';
 import 'package:delwaqty/core/theme/app_spacing.dart';
 import 'package:delwaqty/core/theme/app_elevation.dart';
-import 'package:delwaqty/features/admin/floating_sidebar/floating_sidebar.dart';
 
 final _homeServiceCategoriesProvider =
     FutureProvider<List<ServiceCategory>>((ref) async {
@@ -139,8 +134,8 @@ const _topBookingTypes = <ServiceCategoryType>[
   ServiceCategoryType.barber,
 ];
 
-List<_TopStripItem> get _topBookingItems =>
-    _topBookingTypes.map((t) => _TopStripService(t)).toList(growable: false);
+List<_TileItem> get _topBookingItems =>
+    _topBookingTypes.map((t) => _ServiceTile(t)).toList(growable: false);
 
 class HomePage extends ConsumerWidget {
   const HomePage({super.key});
@@ -157,142 +152,45 @@ class HomePage extends ConsumerWidget {
 
     return Scaffold(
       body: SafeArea(
-        child: GradientBackground(
-          child: RefreshIndicator(
-            onRefresh: () async {
-              ref.invalidate(nearbyMerchantsProvider);
-              ref.invalidate(activeCategoriesProvider);
-              ref.invalidate(discoveryEntriesProvider);
-              ref.invalidate(activeCampaignsProvider);
-              ref.read(userLocationProvider.notifier).refreshQuick();
+        child: RefreshIndicator(
+          onRefresh: () async {
+            ref.invalidate(nearbyMerchantsProvider);
+            ref.invalidate(activeCategoriesProvider);
+            ref.invalidate(discoveryEntriesProvider);
+            ref.invalidate(activeCampaignsProvider);
+            ref.read(userLocationProvider.notifier).refreshQuick();
+          },
+          child: NotificationListener<ScrollNotification>(
+            onNotification: (notification) {
+              final scrollingDown =
+                  ScrollAwareNavObserver.handleScrollNotification(notification);
+              ref.read(bottomNavVisibleProvider.notifier).state =
+                  !scrollingDown;
+              return false;
             },
-            child: NotificationListener<ScrollNotification>(
-              onNotification: (notification) {
-                final scrollingDown =
-                    ScrollAwareNavObserver.handleScrollNotification(notification);
-                ref.read(bottomNavVisibleProvider.notifier).state =
-                    !scrollingDown;
-                return false;
-              },
-              child: CustomScrollView(
-                slivers: [
-                  SliverToBoxAdapter(
-                    child: _buildHeader(
-                      context,
-                      ref,
-                      l10n,
-                      authState,
-                      isGuest,
-                      locationAsync,
-                      unreadCount,
-                    ),
+            child: CustomScrollView(
+              slivers: [
+                SliverToBoxAdapter(
+                  child: _EgyptHero(
+                    l10n: l10n,
+                    authState: authState,
+                    isGuest: isGuest,
+                    locationAsync: locationAsync,
+                    unreadCount: unreadCount,
+                    onOrderTap: () => context.push('/direct-delivery'),
                   ),
-                  SliverToBoxAdapter(child: _buildSearchBar(context, l10n)),
-                  SliverToBoxAdapter(
-                    child: _HeroOrderCard(
-                      onTap: () => context.push('/direct-delivery'),
-                    ),
-                  ),
-                  const SliverToBoxAdapter(child: _PromoCarousel()),
-                  SliverToBoxAdapter(
-                    child: _CompactCategories(ref: ref),
-                  ),
-                  SliverToBoxAdapter(
-                    child: _buildDiscoverySection(context, ref, l10n),
-                  ),
-                  const SliverToBoxAdapter(child: SizedBox(height: 90)),
-                ],
-              ),
+                ),
+                const SliverToBoxAdapter(child: _PromoCarousel()),
+                SliverToBoxAdapter(
+                  child: _CompactCategories(ref: ref, l10n: l10n),
+                ),
+                SliverToBoxAdapter(
+                  child: _buildDiscoverySection(context, ref, l10n),
+                ),
+                const SliverToBoxAdapter(child: SizedBox(height: 120)),
+              ],
             ),
           ),
-        ),
-      ),
-    );
-  }
-
-  String _greeting(AppLocalizations l10n, AuthState authState) {
-    if (authState is AuthGuest) return l10n.hello;
-    if (authState is AuthAuthenticated) {
-      final name = authState.user.fullName ?? authState.user.username;
-      if (name != null && name.isNotEmpty) return l10n.helloName(name);
-    }
-    return l10n.goodEvening;
-  }
-
-  Widget _buildHeader(
-    BuildContext context,
-    WidgetRef ref,
-    AppLocalizations l10n,
-    AuthState authState,
-    bool isGuest,
-    AsyncValue<UserLocation?> locationAsync,
-    int unreadCount,
-  ) {
-    final locationText = locationAsync.when(
-      data: (loc) => loc?.detailedAddress.isNotEmpty == true
-          ? loc!.detailedAddress
-          : l10n.locationUnavailable,
-      loading: () => l10n.searchingForLocation,
-      error: (_, _) => l10n.searchingForLocation,
-    );
-    final isLocationLoading =
-        locationAsync is AsyncLoading || locationAsync is AsyncError;
-
-    return AnimatedFadeIn(
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
-        child: Row(
-          children: [
-            _GlassCircleButton(
-              icon: Icons.menu_rounded,
-              onTap: () => FloatingSidebarController.open(context, ref),
-            ),
-            const SizedBox(width: 10),
-            const _LogoMark(),
-            const SizedBox(width: 10),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    _greeting(l10n, authState),
-                    style: context.textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.w800,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 6),
-                  _LocationChip(
-                    text: locationText,
-                    loading: isLocationLoading,
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(width: 10),
-            _NotificationCircle(
-              unreadCount: unreadCount,
-              onTap: isGuest
-                  ? () => context.push('/login')
-                  : () => context.push('/notifications'),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSearchBar(BuildContext context, AppLocalizations l10n) {
-    return AnimatedFadeIn(
-      delay: const Duration(milliseconds: 100),
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(20, 10, 20, 0),
-        child: PremiumSearchField(
-          readOnly: true,
-          hint: l10n.searchHint,
-          onTap: () => context.go('/search'),
-          onFilterPressed: () => context.go('/search'),
         ),
       ),
     );
@@ -309,24 +207,40 @@ class HomePage extends ConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
-            padding: const EdgeInsets.fromLTRB(20, 18, 20, 0),
+            padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Flexible(
-                  child: Text(
-                    'اكتشف بالقرب منك',
-                    style: context.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w800,
-                      fontSize: 18,
-                    ),
-                    overflow: TextOverflow.ellipsis,
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        l10n.discoverNearby,
+                        style: AppTextStyles.titleLarge.copyWith(
+                          fontWeight: FontWeight.w800,
+                          fontSize: 20,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        l10n.nearbySubtitle,
+                        style: AppTextStyles.bodySmall.copyWith(
+                          color: context.colorScheme.onSurfaceVariant,
+                          fontSize: 13,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
                   ),
                 ),
                 TextButton(
                   onPressed: () => context.push('/market'),
                   child: Text(
-                    AppLocalizations.of(context).viewAll,
+                    l10n.viewAll,
                     style: AppTextStyles.labelLarge.copyWith(
                       color: Theme.of(context).colorScheme.primary,
                       fontWeight: FontWeight.w700,
@@ -337,7 +251,7 @@ class HomePage extends ConsumerWidget {
             ),
           ),
           const SizedBox(height: 10),
-          const _DiscoveryTabs(),
+          _DiscoveryTabs(l10n: l10n),
           const SizedBox(height: 4),
           const _DiscoveryContent(),
         ],
@@ -346,143 +260,400 @@ class HomePage extends ConsumerWidget {
   }
 }
 
-sealed class _TopStripItem {
-  const _TopStripItem();
-}
+class _EgyptHero extends StatefulWidget {
+  const _EgyptHero({
+    required this.l10n,
+    required this.authState,
+    required this.isGuest,
+    required this.locationAsync,
+    required this.unreadCount,
+    required this.onOrderTap,
+  });
 
-class _TopStripCategory extends _TopStripItem {
-  const _TopStripCategory(this.category);
-  final PlatformCategory category;
-}
-
-class _TopStripService extends _TopStripItem {
-  const _TopStripService(this.type);
-  final ServiceCategoryType type;
-}
-
-class _TopStripShowAll extends _TopStripItem {
-  const _TopStripShowAll();
-}
-
-class _InfiniteStrip extends StatefulWidget {
-  const _InfiniteStrip({required this.children});
-
-  final List<Widget> children;
+  final AppLocalizations l10n;
+  final AuthState authState;
+  final bool isGuest;
+  final AsyncValue<UserLocation?> locationAsync;
+  final int unreadCount;
+  final VoidCallback onOrderTap;
 
   @override
-  State<_InfiniteStrip> createState() => _InfiniteStripState();
+  State<_EgyptHero> createState() => _EgyptHeroState();
 }
 
-class _InfiniteStripState extends State<_InfiniteStrip>
+class _EgyptHeroState extends State<_EgyptHero>
     with SingleTickerProviderStateMixin {
-  static const double _speed = 40.0;
-  late final Ticker _ticker;
-  final ScrollController _scroll = ScrollController();
-  final GlobalKey _copyKey = GlobalKey();
-  double _cycleWidth = 0;
-  Duration _lastElapsed = Duration.zero;
-  bool _interacting = false;
-  bool _reduceMotion = false;
+  late final AnimationController _reveal = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 700),
+  );
 
   @override
   void initState() {
     super.initState();
-    _ticker = createTicker(_onTick);
-    _scheduleMeasure(attempt: 0);
+    _reveal.forward();
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _reduceMotion = MediaQuery.disableAnimationsOf(context);
-    if (_reduceMotion) {
-      if (_ticker.isActive) _ticker.stop();
-    } else if (!_ticker.isActive) {
-      _ticker.start();
+    if (MediaQuery.disableAnimationsOf(context)) {
+      _reveal.value = 1;
     }
-  }
-
-  @override
-  void didUpdateWidget(covariant _InfiniteStrip oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.children.length != widget.children.length) {
-      _scheduleMeasure(attempt: 0);
-    }
-  }
-
-  void _scheduleMeasure({required int attempt}) {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-      final box = _copyKey.currentContext?.findRenderObject() as RenderBox?;
-      if (box != null && box.hasSize) {
-        _applyCycleWidth(box.size.width);
-      } else if (attempt < 2) {
-        _scheduleMeasure(attempt: attempt + 1);
-      }
-    });
-  }
-
-  void _applyCycleWidth(double width) {
-    if (!mounted) return;
-    setState(() => _cycleWidth = width);
-    if (_scroll.hasClients && _cycleWidth > 0 && _scroll.offset >= _cycleWidth) {
-      _scroll.jumpTo(_scroll.offset % _cycleWidth);
-    }
-  }
-
-  Widget _copy({Key? key}) {
-    return Row(
-      key: key,
-      children: [
-        for (final child in widget.children) ...[child, const SizedBox(width: 12)],
-      ],
-    );
-  }
-
-  void _onTick(Duration elapsed) {
-    if (!mounted || _interacting || _reduceMotion) return;
-    if (!_scroll.hasClients || _cycleWidth <= 0 || _scroll.position.isScrollingNotifier.value) return;
-    final dt = (elapsed - _lastElapsed).inMicroseconds / 1e6;
-    _lastElapsed = elapsed;
-    if (dt <= 0) return;
-    var offset = _scroll.offset + _speed * (dt > 0.25 ? 0.25 : dt);
-    if (offset >= _cycleWidth) offset -= _cycleWidth;
-    _scroll.jumpTo(offset);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Listener(
-      onPointerDown: (_) => _interacting = true,
-      onPointerUp: (_) => _interacting = false,
-      onPointerCancel: (_) => _interacting = false,
-      child: SingleChildScrollView(
-        controller: _scroll,
-        scrollDirection: Axis.horizontal,
-        physics: const AlwaysScrollableScrollPhysics(),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _copy(key: _copyKey),
-            if (!_reduceMotion) _copy(),
-          ],
-        ),
-      ),
-    );
   }
 
   @override
   void dispose() {
-    _ticker.dispose();
-    _scroll.dispose();
+    _reveal.dispose();
     super.dispose();
+  }
+
+  String _greeting(AppLocalizations l10n, AuthState authState) {
+    if (authState is AuthGuest) return l10n.hello;
+    if (authState is AuthAuthenticated) {
+      final name = authState.user.fullName ?? authState.user.username;
+      if (name != null && name.isNotEmpty) return l10n.helloName(name);
+    }
+    return l10n.goodEvening;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final heroH = (constraints.maxHeight * 0.82)
+            .clamp(560.0, 700.0)
+            .toDouble();
+        final isRtl = Directionality.of(context) == TextDirection.rtl;
+        return SizedBox(
+          height: heroH,
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              Positioned.fill(
+                child: Image.asset(
+                  'assets/egypt/home_egypt_hero.png',
+                  fit: BoxFit.cover,
+                  gaplessPlayback: true,
+                  errorBuilder: (_, _, _) => const DecoratedBox(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          AppColors.brandPurpleDeep,
+                          AppColors.brandViolet,
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              Positioned.fill(
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        const Color(0xFF2E146F).withValues(alpha: 0.12),
+                        Colors.transparent,
+                        const Color(0xFF6C3CEB).withValues(alpha: 0.12),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              SafeArea(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 10, 20, 0),
+                  child: FadeTransition(
+                    opacity: _reveal,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        _buildTopRow(context, widget.l10n, isRtl),
+                        const SizedBox(height: 8),
+                        _buildBrandLockup(context, widget.l10n),
+                        const Spacer(),
+                        _buildGreeting(
+                          context,
+                          widget.l10n,
+                          widget.authState,
+                        ),
+                        const SizedBox(height: 10),
+                        _buildLocationPill(context),
+                        const SizedBox(height: 12),
+                        _buildHeroSearch(context, widget.l10n),
+                        const SizedBox(height: 12),
+                        _HeroOrderCard(onTap: widget.onOrderTap),
+                        const SizedBox(height: 4),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildTopRow(
+    BuildContext context,
+    AppLocalizations l10n,
+    bool isRtl,
+  ) {
+    return SizedBox(
+      height: 50,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          _NotificationCircle(
+            unreadCount: widget.unreadCount,
+            onTap: widget.isGuest
+                ? () => context.push('/login')
+                : () => context.push('/notifications'),
+          ),
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text(
+                l10n.egyptStatementTitle,
+                style: AppTextStyles.titleLarge.copyWith(
+                  color: AppColors.brandGold,
+                  fontWeight: FontWeight.w900,
+                  fontSize: 26,
+                ),
+              ),
+              Text(
+                l10n.egyptStatementTagline,
+                style: AppTextStyles.bodyMedium.copyWith(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w600,
+                  fontSize: 13,
+                  shadows: const [
+                    Shadow(color: Color(0x55000000), blurRadius: 4),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildBrandLockup(BuildContext context, AppLocalizations l10n) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        TweenAnimationBuilder<double>(
+          tween: Tween(begin: 0.96, end: 1),
+          duration: const Duration(milliseconds: 600),
+          curve: Curves.easeOutCubic,
+          builder: (context, value, child) {
+            return Opacity(
+              opacity: ((value - 0.96) * 25).clamp(0.0, 1.0).toDouble(),
+              child: Transform.scale(scale: value, child: child),
+            );
+          },
+          child: Image.asset(
+            'assets/egypt/delwaqty_logo_mark.png',
+            width: 62,
+            fit: BoxFit.contain,
+            errorBuilder: (_, _, _) => Container(
+              width: 62,
+              height: 62,
+              decoration: const BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    AppColors.brandPurpleDeep,
+                    AppColors.brandViolet,
+                  ],
+                ),
+              ),
+              child: const Icon(
+                Icons.apps_rounded,
+                color: Colors.white,
+                size: 32,
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(height: 6),
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              'Delwa',
+              style: AppTextStyles.titleLarge.copyWith(
+                color: const Color(0xFF1A1F36),
+                fontWeight: FontWeight.w800,
+                fontSize: 24,
+              ),
+            ),
+            ShaderMask(
+              blendMode: BlendMode.srcIn,
+              shaderCallback: (rect) => const LinearGradient(
+                colors: [
+                  AppColors.brandPurple,
+                  AppColors.brandBlue,
+                  AppColors.brandCyan,
+                ],
+              ).createShader(rect),
+              child: Text(
+                'Qty',
+                style: AppTextStyles.titleLarge.copyWith(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w800,
+                  fontSize: 24,
+                ),
+              ),
+            ),
+          ],
+        ),
+        Text(
+          l10n.appNameAr,
+          style: AppTextStyles.titleLarge.copyWith(
+            color: AppColors.brandPurple,
+            fontWeight: FontWeight.w700,
+            fontSize: 20,
+            shadows: const [
+              Shadow(color: Color(0x55000000), blurRadius: 3),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildGreeting(
+    BuildContext context,
+    AppLocalizations l10n,
+    AuthState authState,
+  ) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          _greeting(l10n, authState),
+          style: context.textTheme.titleLarge?.copyWith(
+            color: Colors.white,
+            fontWeight: FontWeight.w800,
+            fontSize: 26,
+            shadows: const [
+              Shadow(color: Color(0x40000000), blurRadius: 4),
+            ],
+          ),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
+        const SizedBox(height: 2),
+        Text(
+          l10n.greetingSubtitle,
+          style: AppTextStyles.bodyMedium.copyWith(
+            color: Colors.white.withValues(alpha: 0.85),
+            fontSize: 13,
+          ),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildLocationPill(BuildContext context) {
+    final locationText = widget.locationAsync.when(
+      data: (loc) => loc?.detailedAddress.isNotEmpty == true
+          ? loc!.detailedAddress
+          : widget.l10n.locationUnavailable,
+      loading: () => widget.l10n.searchingForLocation,
+      error: (_, _) => widget.l10n.searchingForLocation,
+    );
+    return Container(
+      height: 44,
+      padding: const EdgeInsets.symmetric(horizontal: 14),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.18),
+        borderRadius: BorderRadius.circular(22),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.3)),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x22000000),
+            blurRadius: 10,
+            offset: Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          const Icon(
+            Icons.location_on_rounded,
+            size: 18,
+            color: Colors.white,
+          ),
+          const SizedBox(width: 6),
+          Expanded(
+            child: Text(
+              locationText,
+              style: AppTextStyles.bodyMedium.copyWith(
+                color: Colors.white,
+                fontWeight: FontWeight.w600,
+                fontSize: 13,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+          const SizedBox(width: 4),
+          Icon(
+            Icons.expand_more_rounded,
+            size: 18,
+            color: Colors.white.withValues(alpha: 0.8),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildHeroSearch(BuildContext context, AppLocalizations l10n) {
+    return PremiumSearchField(
+      readOnly: true,
+      hint: l10n.searchHint,
+      height: 60,
+      borderRadius: 30,
+      onTap: () => context.go('/search'),
+      onFilterPressed: () => context.go('/search'),
+    );
   }
 }
 
+sealed class _TileItem {
+  const _TileItem();
+}
+
+class _CategoryTile extends _TileItem {
+  const _CategoryTile(this.category);
+  final PlatformCategory category;
+}
+
+class _ServiceTile extends _TileItem {
+  const _ServiceTile(this.type);
+  final ServiceCategoryType type;
+}
+
 class _CompactCategories extends StatelessWidget {
-  const _CompactCategories({required this.ref});
+  const _CompactCategories({required this.ref, required this.l10n});
 
   final WidgetRef ref;
+  final AppLocalizations l10n;
 
   @override
   Widget build(BuildContext context) {
@@ -491,64 +662,99 @@ class _CompactCategories extends StatelessWidget {
 
     return AnimatedFadeIn(
       delay: const Duration(milliseconds: 250),
-      child: categoriesAsync.when(
-        loading: () => _shimmerStrip(),
-        error: (_, _) => _buildStrip(context, [..._topBookingItems, const _TopStripShowAll()]),
-        data: (categories) => servicesAsync.when(
-          loading: () => _shimmerStrip(),
-          error: (_, _) => _buildStrip(context, [..._topBookingItems, const _TopStripShowAll()]),
-          data: (services) {
-            if (categories.isEmpty && services.isEmpty) {
-              return _buildStrip(context, [..._topBookingItems, const _TopStripShowAll()]);
-            }
-            final sorted = [...categories]
-              ..sort((a, b) => categoryRank(a.name).compareTo(categoryRank(b.name)));
-            final items = <_TopStripItem>[
-              for (final c in sorted) _TopStripCategory(c),
-              for (final s in services) _TopStripService(s.type),
-              const _TopStripShowAll(),
-            ];
-            return _buildStrip(context, items);
-          },
-        ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 18, 20, 0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Text(
+                    l10n.mainCategories,
+                    style: context.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w800,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                TextButton(
+                  onPressed: () => context.push('/services'),
+                  child: Text(
+                    l10n.viewAll,
+                    style: AppTextStyles.labelLarge.copyWith(
+                      color: Theme.of(context).colorScheme.primary,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 4),
+          categoriesAsync.when(
+            loading: () => _shimmerStrip(),
+            error: (_, _) => _buildStrip(context, _topBookingItems),
+            data: (categories) => servicesAsync.when(
+              loading: () => _shimmerStrip(),
+              error: (_, _) => _buildStrip(context, _topBookingItems),
+              data: (services) {
+                if (categories.isEmpty && services.isEmpty) {
+                  return _buildStrip(context, _topBookingItems);
+                }
+                final sorted = [...categories]
+                  ..sort(
+                    (a, b) =>
+                        categoryRank(a.name).compareTo(categoryRank(b.name)),
+                  );
+                final items = <_TileItem>[
+                  for (final c in sorted) _CategoryTile(c),
+                  for (final s in services) _ServiceTile(s.type),
+                ];
+                return _buildStrip(context, items);
+              },
+            ),
+          ),
+        ],
       ),
     );
   }
 
   Widget _shimmerStrip() {
     return SizedBox(
-      height: 100,
+      height: 108,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.fromLTRB(20, 14, 20, 0),
+        padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
         itemCount: 8,
         separatorBuilder: (_, _) => const SizedBox(width: 12),
-        itemBuilder: (_, _) => const ShimmerCard(height: 100),
+        itemBuilder: (_, _) => const ShimmerCard(height: 108),
       ),
     );
   }
 
-  Widget _buildStrip(BuildContext context, List<_TopStripItem> items) {
+  Widget _buildStrip(BuildContext context, List<_TileItem> items) {
     return SizedBox(
-      height: 100,
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(20, 14, 20, 0),
-        child: ClipRect(
-          child: _InfiniteStrip(
-            children: [
-              for (var i = 0; i < items.length; i++) _buildTile(context, items[i], i),
-            ],
-          ),
-        ),
+      height: 108,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
+        itemCount: items.length,
+        separatorBuilder: (_, _) => const SizedBox(width: 12),
+        itemBuilder: (context, index) =>
+            _buildTile(context, items[index], index),
       ),
     );
   }
 
-  Widget _buildTile(BuildContext context, _TopStripItem item, int index) => switch (item) {
-    _TopStripCategory(:final category) => _buildCategoryTile(context, category, index),
-    _TopStripService(:final type) => _buildServiceTile(context, type, index),
-    _TopStripShowAll() => _buildShowAllTile(context, index),
-  };
+  Widget _buildTile(BuildContext context, _TileItem item, int index) =>
+      switch (item) {
+        _CategoryTile(:final category) =>
+          _buildCategoryTile(context, category, index),
+        _ServiceTile(:final type) => _buildServiceTile(context, type, index),
+      };
 
   Widget _buildCategoryTile(
     BuildContext context,
@@ -571,25 +777,33 @@ class _CompactCategories extends StatelessWidget {
           context.push('/market?type=$typeParam');
         },
         child: SizedBox(
-          width: 80,
+          width: 76,
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               Container(
-                width: 44,
-                height: 44,
+                width: 58,
+                height: 58,
                 clipBehavior: Clip.antiAlias,
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(14),
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      typeColor.withValues(alpha: 0.38),
+                      typeColor.withValues(alpha: 0.15),
+                    ],
+                  ),
+                  borderRadius: BorderRadius.circular(18),
+                  border: Border.all(color: typeColor.withValues(alpha: 0.25)),
                 ),
                 child: category.imageUrl != null
                     ? Image.network(
                         category.imageUrl!,
                         fit: BoxFit.cover,
-                        errorBuilder: (_, _, _) =>
-                            _categoryFallback(typeColor, emoji),
+                        errorBuilder: (_, _, _) => _emojiFallback(emoji),
                       )
-                    : _categoryFallback(typeColor, emoji),
+                    : _emojiFallback(emoji),
               ),
               const SizedBox(height: 6),
               Text(
@@ -597,7 +811,7 @@ class _CompactCategories extends StatelessWidget {
                   Directionality.of(context) == TextDirection.rtl,
                 ),
                 style: AppTextStyles.labelSmall.copyWith(
-                  fontSize: 11,
+                  fontSize: 13,
                   fontWeight: FontWeight.w600,
                 ),
                 textAlign: TextAlign.center,
@@ -629,13 +843,13 @@ class _CompactCategories extends StatelessWidget {
               : '/home-services/providers/${type.name}',
         ),
         child: SizedBox(
-          width: 80,
+          width: 76,
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               Container(
-                width: 44,
-                height: 44,
+                width: 58,
+                height: 58,
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     begin: Alignment.topLeft,
@@ -645,20 +859,18 @@ class _CompactCategories extends StatelessWidget {
                       color.withValues(alpha: 0.15),
                     ],
                   ),
-                  borderRadius: BorderRadius.circular(14),
-                  border: Border.all(
-                    color: color.withValues(alpha: 0.25),
-                  ),
+                  borderRadius: BorderRadius.circular(18),
+                  border: Border.all(color: color.withValues(alpha: 0.25)),
                 ),
                 child: Center(
-                  child: Icon(icon, color: color, size: 22),
+                  child: Icon(icon, color: color, size: 24),
                 ),
               ),
               const SizedBox(height: 6),
               Text(
                 label,
                 style: AppTextStyles.labelSmall.copyWith(
-                  fontSize: 11,
+                  fontSize: 13,
                   fontWeight: FontWeight.w600,
                 ),
                 textAlign: TextAlign.center,
@@ -672,80 +884,17 @@ class _CompactCategories extends StatelessWidget {
     );
   }
 
-  Widget _buildShowAllTile(BuildContext context, int index) {
-    return AnimatedFadeIn(
-      delay: Duration(milliseconds: 280 + index * 40),
-      child: PressableScale(
-        onTap: () => context.push('/services'),
-        child: SizedBox(
-          width: 80,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                width: 44,
-                height: 44,
-                decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [
-                      AppColors.brandPurpleDeep,
-                      AppColors.brandViolet,
-                    ],
-                  ),
-                  borderRadius: BorderRadius.circular(14),
-                ),
-                child: const Center(
-                  child: Icon(
-                    Icons.apps_rounded,
-                    color: Colors.white,
-                    size: 22,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 6),
-              Text(
-                AppLocalizations.of(context).viewAll,
-                style: AppTextStyles.labelSmall.copyWith(
-                  fontSize: 11,
-                  fontWeight: FontWeight.w600,
-                ),
-                textAlign: TextAlign.center,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _categoryFallback(Color color, String emoji) {
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            color.withValues(alpha: 0.38),
-            color.withValues(alpha: 0.15),
-          ],
-        ),
-      ),
-      child: Center(
-        child: Text(
-          emoji,
-          style: const TextStyle(fontSize: 22),
-        ),
-      ),
+  Widget _emojiFallback(String emoji) {
+    return Center(
+      child: Text(emoji, style: const TextStyle(fontSize: 24)),
     );
   }
 }
 
 class _DiscoveryTabs extends ConsumerStatefulWidget {
-  const _DiscoveryTabs();
+  const _DiscoveryTabs({required this.l10n});
+
+  final AppLocalizations l10n;
 
   @override
   ConsumerState<_DiscoveryTabs> createState() => _DiscoveryTabsState();
@@ -754,11 +903,16 @@ class _DiscoveryTabs extends ConsumerStatefulWidget {
 class _DiscoveryTabsState extends ConsumerState<_DiscoveryTabs> {
   int _selectedIndex = 0;
 
-  static const _labels = ['القريبة', 'موصى لك', 'الأشهر'];
   static const _modes = [
     DiscoveryMode.nearby,
     DiscoveryMode.recommended,
     DiscoveryMode.popular,
+  ];
+
+  List<String> get _labels => [
+    widget.l10n.closest,
+    widget.l10n.topRated,
+    widget.l10n.mostRequested,
   ];
 
   @override
@@ -940,131 +1094,6 @@ class _DiscoveryContent extends ConsumerWidget {
   }
 }
 
-class _GlassCircleButton extends StatelessWidget {
-  const _GlassCircleButton({required this.icon, required this.onTap});
-
-  final IconData icon;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return PressableScale(
-      onTap: onTap,
-      child: GlassSurface(
-        borderRadius: 16,
-        blur: 16,
-        child: SizedBox(
-          width: 46,
-          height: 46,
-          child: Icon(icon, color: context.colorScheme.onSurface, size: 22),
-        ),
-      ),
-    );
-  }
-}
-
-class _LogoMark extends StatelessWidget {
-  const _LogoMark();
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 46,
-      height: 46,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(14),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x335B3DF0),
-            blurRadius: 14,
-            offset: Offset(0, 6),
-          ),
-        ],
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(14),
-        child: Image.asset(
-          'assets/logo app/logo.png',
-          fit: BoxFit.contain,
-          errorBuilder: (_, _, _) => DecoratedBox(
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [AppColors.brandPurpleDeep, AppColors.brandViolet],
-              ),
-            ),
-            child: Center(
-              child: Text(
-                AppLocalizations.of(context).appNameAr,
-                style: AppTextStyles.titleMedium.copyWith(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w900,
-                  fontSize: 17,
-                ),
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _LocationChip extends StatelessWidget {
-  const _LocationChip({required this.text, required this.loading});
-
-  final String text;
-  final bool loading;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-      decoration: BoxDecoration(
-        color: context.colorScheme.surfaceContainerHighest.withValues(
-          alpha: 0.45,
-        ),
-        borderRadius: BorderRadius.circular(999),
-        border: Border.all(
-          color: context.colorScheme.outlineVariant.withValues(alpha: 0.2),
-        ),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const Icon(
-            Icons.location_on_rounded,
-            size: 13,
-            color: AppColors.brandPurple,
-          ),
-          const SizedBox(width: 4),
-          Flexible(
-            child: loading
-                ? const SizedBox(
-                    width: 12,
-                    height: 12,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 1.5,
-                      color: AppColors.brandPurple,
-                    ),
-                  )
-                : Text(
-                    text,
-                    style: context.textTheme.bodySmall?.copyWith(
-                      color: context.colorScheme.onSurfaceVariant,
-                      fontSize: 11,
-                    ),
-                    overflow: TextOverflow.ellipsis,
-                  ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
 class _NotificationCircle extends StatelessWidget {
   const _NotificationCircle({required this.unreadCount, required this.onTap});
 
@@ -1077,51 +1106,59 @@ class _NotificationCircle extends StatelessWidget {
       delay: const Duration(milliseconds: 100),
       child: PressableScale(
         onTap: onTap,
-        child: GlassSurface(
-          borderRadius: AppSpacing.radiusFull,
-          blur: 16,
-          child: SizedBox(
-            width: 46,
-            height: 46,
-            child: Stack(
-              clipBehavior: Clip.none,
-              children: [
-                Center(
-                  child: Icon(
-                    Icons.notifications_outlined,
-                    color: context.colorScheme.onSurface,
-                    size: 22,
-                  ),
+        child: Container(
+          width: 50,
+          height: 50,
+          decoration: BoxDecoration(
+            color: Colors.white.withValues(alpha: 0.2),
+            shape: BoxShape.circle,
+            border: Border.all(color: Colors.white.withValues(alpha: 0.35)),
+            boxShadow: const [
+              BoxShadow(
+                color: Color(0x22000000),
+                blurRadius: 12,
+                offset: Offset(0, 4),
+              ),
+            ],
+          ),
+          child: Stack(
+            clipBehavior: Clip.none,
+            children: [
+              const Center(
+                child: Icon(
+                  Icons.notifications_outlined,
+                  color: Colors.white,
+                  size: 22,
                 ),
-                if (unreadCount > 0)
-                  Positioned(
-                    top: 7,
-                    right: 8,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 5,
-                        vertical: 1,
+              ),
+              if (unreadCount > 0)
+                Positioned(
+                  top: 7,
+                  right: 8,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 5,
+                      vertical: 1,
+                    ),
+                    decoration: BoxDecoration(
+                      color: context.colorScheme.error,
+                      borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
+                      border: Border.all(
+                        color: context.colorScheme.surfaceContainerLowest,
+                        width: 1.5,
                       ),
-                      decoration: BoxDecoration(
-                        color: context.colorScheme.error,
-                        borderRadius: BorderRadius.circular(999),
-                        border: Border.all(
-                          color: context.colorScheme.surfaceContainerLowest,
-                          width: 1.5,
-                        ),
-                      ),
-                      child: Text(
-                        unreadCount > 99 ? '99+' : '$unreadCount',
-                        style: AppTextStyles.labelSmall.copyWith(
-                          fontSize: 9,
-                          color: Colors.white,
-                          fontWeight: FontWeight.w700,
-                        ),
+                    ),
+                    child: Text(
+                      unreadCount > 99 ? '99+' : '$unreadCount',
+                      style: AppTextStyles.labelSmall.copyWith(
+                        fontSize: 9,
+                        color: Colors.white,
+                        fontWeight: FontWeight.w700,
                       ),
                     ),
                   ),
-              ],
-            ),
+                ),
+            ],
           ),
         ),
       ),
@@ -1138,25 +1175,8 @@ class _HeroOrderCard extends StatefulWidget {
   State<_HeroOrderCard> createState() => _HeroOrderCardState();
 }
 
-class _HeroOrderCardState extends State<_HeroOrderCard>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController _controller;
+class _HeroOrderCardState extends State<_HeroOrderCard> {
   bool _pressed = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: const Duration(seconds: 5),
-    )..repeat();
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -1165,163 +1185,84 @@ class _HeroOrderCardState extends State<_HeroOrderCard>
 
     return AnimatedFadeIn(
       delay: const Duration(milliseconds: 150),
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
-        child: GestureDetector(
-          onTapDown: (_) => setState(() => _pressed = true),
-          onTapUp: (_) => setState(() => _pressed = false),
-          onTapCancel: () => setState(() => _pressed = false),
-          onTap: widget.onTap,
-          child: AnimatedBuilder(
-            animation: _controller,
-            builder: (context, _) {
-              final v = _controller.value;
-              final bobY = math.sin(v * 2 * math.pi) * 3;
-              return AnimatedScale(
-                scale: _pressed ? 0.98 : 1,
-                duration: const Duration(milliseconds: 140),
-                curve: Curves.easeOutCubic,
-                child: Container(
-                  height: 74,
-                  clipBehavior: Clip.antiAlias,
-                  decoration: const BoxDecoration(
-                    borderRadius: AppSpacing.borderRadiusCard,
-                    gradient: LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: [AppColors.brandPurpleDeep, AppColors.brandViolet],
+      child: GestureDetector(
+        onTapDown: (_) => setState(() => _pressed = true),
+        onTapUp: (_) => setState(() => _pressed = false),
+        onTapCancel: () => setState(() => _pressed = false),
+        onTap: widget.onTap,
+        child: AnimatedScale(
+          scale: _pressed ? 0.98 : 1,
+          duration: const Duration(milliseconds: 140),
+          curve: Curves.easeOutCubic,
+          child: Container(
+            height: 104,
+            clipBehavior: Clip.antiAlias,
+            decoration: const BoxDecoration(
+              borderRadius: BorderRadius.all(Radius.circular(26)),
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [AppColors.brandPurple, AppColors.brandBlue],
+              ),
+              boxShadow: AppElevation.shadowGlow,
+            ),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: Row(
+                children: [
+                  const Icon(
+                    Icons.delivery_dining_rounded,
+                    size: 26,
+                    color: Colors.white,
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          l10n.orderDirectly,
+                          style: AppTextStyles.bodyLarge.copyWith(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w800,
+                            fontSize: 15,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          l10n.fastestWayToOrder,
+                          style: AppTextStyles.bodySmall.copyWith(
+                            color: Colors.white.withValues(alpha: 0.85),
+                            fontSize: 12,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
                     ),
-                    boxShadow: AppElevation.shadowGlow,
                   ),
-                  child: Stack(
-                    fit: StackFit.expand,
-                    children: [
-                      DecoratedBox(
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            begin: Alignment(-1.4 + 2.8 * v, -0.6),
-                            end: Alignment(-0.4 + 2.8 * v, 0.6),
-                            colors: [
-                              Colors.transparent,
-                              Colors.white.withValues(alpha: 0.12),
-                              Colors.transparent,
-                            ],
-                          ),
-                        ),
-                      ),
-                      Positioned(
-                        top: 0,
-                        left: 16,
-                        right: 16,
-                        child: Container(
-                          height: 1.5,
-                          decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.25),
-                            borderRadius: BorderRadius.circular(999),
-                          ),
-                        ),
-                      ),
-                      for (final i in [0, 1, 2]) _HeroParticle(v: v, seed: i),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 20),
-                        child: Row(
-                          children: [
-                            Transform.translate(
-                              offset: Offset(0, -bobY),
-                              child: const Icon(
-                                Icons.rocket_launch_rounded,
-                                size: 28,
-                                color: Colors.white,
-                              ),
-                            ),
-                            const SizedBox(width: 10),
-                            Expanded(
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    l10n.orderDirectly,
-                                    style: AppTextStyles.bodyLarge.copyWith(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.w800,
-                                      fontSize: 14,
-                                    ),
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                  const SizedBox(height: 1),
-                                  Text(
-                                    l10n.fastestWayToOrder,
-                                    style: AppTextStyles.bodySmall.copyWith(
-                                      color: Colors.white.withValues(alpha: 0.85),
-                                      fontSize: 11,
-                                    ),
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                ],
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-                            AnimatedSlide(
-                              duration: const Duration(milliseconds: 240),
-                              curve: Curves.easeOutCubic,
-                              offset: _pressed
-                                  ? const Offset(0.35, 0)
-                                  : Offset.zero,
-                              child: Container(
-                                width: 26,
-                                height: 26,
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  color: Colors.white.withValues(alpha: 0.18),
-                                ),
-                                child: Icon(
-                                  isRtl
-                                      ? Icons.arrow_back_rounded
-                                      : Icons.arrow_forward_rounded,
-                                  size: 15,
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
+                  const SizedBox(width: 8),
+                  Container(
+                    width: 30,
+                    height: 30,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Colors.white.withValues(alpha: 0.18),
+                    ),
+                    child: Icon(
+                      isRtl
+                          ? Icons.arrow_back_rounded
+                          : Icons.arrow_forward_rounded,
+                      size: 17,
+                      color: Colors.white,
+                    ),
                   ),
-                ),
-              );
-            },
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _HeroParticle extends StatelessWidget {
-  const _HeroParticle({required this.v, required this.seed});
-
-  final double v;
-  final int seed;
-
-  @override
-  Widget build(BuildContext context) {
-    final pv = (v * 2 + seed * 0.31) % 1.0;
-    final size = 4.0 + seed * 2.0;
-    return Positioned(
-      right: 26 + seed * 24.0,
-      bottom: -6 + pv * 58,
-      child: Opacity(
-        opacity: (0.5 * (1 - pv)).clamp(0.0, 1.0).toDouble(),
-        child: Container(
-          width: size,
-          height: size,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: Colors.white.withValues(alpha: 0.5),
+                ],
+              ),
+            ),
           ),
         ),
       ),
@@ -1436,7 +1377,7 @@ class _PromoCarouselState extends ConsumerState<_PromoCarousel> {
             child: Column(
               children: [
                 SizedBox(
-                  height: 140,
+                  height: 205,
                   child: PageView.builder(
                     controller: _controller,
                     itemCount: count,
@@ -1494,7 +1435,7 @@ class _PromoCarouselLoading extends StatelessWidget {
       padding: EdgeInsets.fromLTRB(16, 14, 16, 0),
       child: ShimmerBox(
         width: double.infinity,
-        height: 140,
+        height: 205,
         borderRadius: 24,
       ),
     );
@@ -1728,6 +1669,7 @@ class _HomeDiscoveryListCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return PremiumCard(
       onTap: onTap,
+      radius: 22,
       color: context.colorScheme.surfaceContainerLowest,
       borderColor: context.colorScheme.outlineVariant.withValues(alpha: 0.15),
       child: Padding(
@@ -1735,10 +1677,10 @@ class _HomeDiscoveryListCard extends StatelessWidget {
         child: Row(
           children: [
             ClipRRect(
-              borderRadius: BorderRadius.circular(14),
+              borderRadius: BorderRadius.circular(18),
               child: SizedBox(
-                width: 72,
-                height: 72,
+                width: 110,
+                height: 110,
                 child: imageUrl != null
                     ? Image.network(
                         imageUrl!,
@@ -1844,6 +1786,8 @@ class _HomeDiscoveryListCard extends StatelessWidget {
                               color: AppColors.brandPurple,
                               fontWeight: FontWeight.w600,
                             ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                           ),
                         ),
                       ],

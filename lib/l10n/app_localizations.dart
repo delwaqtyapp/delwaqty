@@ -1022,6 +1022,54 @@ abstract class AppLocalizations {
   /// **'View All'**
   String get viewAll;
 
+  /// No description provided for @mainCategories.
+  ///
+  /// In en, this message translates to:
+  /// **'Main Categories'**
+  String get mainCategories;
+
+  /// No description provided for @discoverNearby.
+  ///
+  /// In en, this message translates to:
+  /// **'Discover Around You'**
+  String get discoverNearby;
+
+  /// No description provided for @nearbySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Best options near your location'**
+  String get nearbySubtitle;
+
+  /// No description provided for @closest.
+  ///
+  /// In en, this message translates to:
+  /// **'Nearest'**
+  String get closest;
+
+  /// No description provided for @topRated.
+  ///
+  /// In en, this message translates to:
+  /// **'Top Rated'**
+  String get topRated;
+
+  /// No description provided for @egyptStatementTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Egypt'**
+  String get egyptStatementTitle;
+
+  /// No description provided for @egyptStatementTagline.
+  ///
+  /// In en, this message translates to:
+  /// **'Always moving the world forward'**
+  String get egyptStatementTagline;
+
+  /// No description provided for @greetingSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Always with you ... all your needs in one place'**
+  String get greetingSubtitle;
+
   /// No description provided for @addToCart.
   ///
   /// In en, this message translates to:

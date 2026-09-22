@@ -19,6 +19,9 @@ class PremiumSearchField extends StatefulWidget {
     this.leading,
     this.readOnly = false,
     this.onTap,
+    this.height,
+    this.borderRadius,
+    this.autofocus = false,
   });
 
   final TextEditingController? controller;
@@ -29,6 +32,15 @@ class PremiumSearchField extends StatefulWidget {
   final Widget? leading;
   final bool readOnly;
   final VoidCallback? onTap;
+
+  /// Optional custom height (defaults to 52).
+  final double? height;
+
+  /// Optional custom border radius (defaults to [AppSpacing.radiusSearch]).
+  final double? borderRadius;
+
+  /// Request focus and open the keyboard when this field first appears.
+  final bool autofocus;
 
   @override
   State<PremiumSearchField> createState() => _PremiumSearchFieldState();
@@ -65,6 +77,7 @@ class _PremiumSearchFieldState extends State<PremiumSearchField> {
     final field = TextField(
       controller: widget.controller,
       focusNode: _focusNode,
+      autofocus: widget.autofocus,
       onChanged: widget.onChanged,
       onSubmitted: widget.onSubmitted,
       readOnly: widget.readOnly,
@@ -116,10 +129,10 @@ class _PremiumSearchFieldState extends State<PremiumSearchField> {
     return AnimatedContainer(
       duration: const Duration(milliseconds: 260),
       curve: Curves.easeOutCubic,
-      height: 52,
+      height: widget.height ?? 52,
       decoration: BoxDecoration(
         color: base,
-        borderRadius: BorderRadius.circular(AppSpacing.radiusSearch),
+        borderRadius: BorderRadius.circular(widget.borderRadius ?? AppSpacing.radiusSearch),
         border: Border.all(
           color: _focused
               ? colorScheme.primary.withValues(alpha: 0.7)

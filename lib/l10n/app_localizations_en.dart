@@ -487,6 +487,31 @@ class AppLocalizationsEn extends AppLocalizations {
   String get viewAll => 'View All';
 
   @override
+  String get mainCategories => 'Main Categories';
+
+  @override
+  String get discoverNearby => 'Discover Around You';
+
+  @override
+  String get nearbySubtitle => 'Best options near your location';
+
+  @override
+  String get closest => 'Nearest';
+
+  @override
+  String get topRated => 'Top Rated';
+
+  @override
+  String get egyptStatementTitle => 'Egypt';
+
+  @override
+  String get egyptStatementTagline => 'Always moving the world forward';
+
+  @override
+  String get greetingSubtitle =>
+      'Always with you ... all your needs in one place';
+
+  @override
   String get addToCart => 'Add to Cart';
 
   @override

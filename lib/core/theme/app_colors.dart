@@ -45,6 +45,12 @@ abstract final class AppColors {
   /// Cyan accent for gradients and highlights.
   static const Color brandCyan = Color(0xFF06B6D4);
 
+  /// Brand blue for "Qty" wordmark gradient and CTA gradients.
+  static const Color brandBlue = Color(0xFF4057D8);
+
+  /// Gold accent reserved for Egyptian identity touches (Egypt statement).
+  static const Color brandGold = Color(0xFFD8A84E);
+
   /// Teal accent for secondary gradient endpoints.
   static const Color brandTeal = Color(0xFF14B8A6);
 

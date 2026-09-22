@@ -10,6 +10,7 @@ import 'package:delwaqty/features/customer/commerce/presentation/widgets/cart_ba
 import 'package:delwaqty/features/customer/home/presentation/widgets/category_visuals.dart';
 import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
 import 'package:delwaqty/shared/widgets/premium_empty_state.dart';
+import 'package:delwaqty/shared/widgets/pressable_scale.dart';
 import 'package:delwaqty/shared/widgets/shimmer_loading.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 import 'package:delwaqty/core/theme/app_colors.dart';
@@ -102,12 +103,50 @@ class _CommerceDiscoveryPageState extends ConsumerState<CommerceDiscoveryPage> {
                   children: [
                     Padding(
                       padding: const EdgeInsets.only(right: 8),
-                      child: FilterChip(
-                        label: Text(l10n.all),
-                        selected: selectedType == null,
-                        onSelected: (_) =>
+                      child: PressableScale(
+                        onTap: () =>
                             ref.read(_selectedTypeProvider.notifier).state =
                                 null,
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 200),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 8,
+                          ),
+                          decoration: BoxDecoration(
+                            gradient: selectedType == null
+                                ? const LinearGradient(
+                                    colors: [
+                                      AppColors.brandPurpleDeep,
+                                      AppColors.brandViolet,
+                                    ],
+                                  )
+                                : null,
+                            color: selectedType == null
+                                ? null
+                                : theme.colorScheme.surfaceContainerHighest
+                                    .withValues(alpha: 0.35),
+                            borderRadius: BorderRadius.circular(999),
+                            border: Border.all(
+                              color: selectedType == null
+                                  ? Colors.transparent
+                                  : theme.colorScheme.outlineVariant
+                                      .withValues(alpha: 0.15),
+                            ),
+                          ),
+                          child: Text(
+                            l10n.all,
+                            style: theme.textTheme.labelLarge?.copyWith(
+                              color: selectedType == null
+                                  ? Colors.white
+                                  : theme.colorScheme.onSurfaceVariant,
+                              fontWeight: selectedType == null
+                                  ? FontWeight.w700
+                                  : FontWeight.w600,
+                              fontSize: 13,
+                            ),
+                          ),
+                        ),
                       ),
                     ),
                     ...MerchantType.values.map(

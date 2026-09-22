@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:delwaqty/features/customer/commerce/domain/entities/merchant.dart';
 import 'package:delwaqty/core/theme/app_colors.dart';
+import 'package:delwaqty/core/theme/app_text_styles.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
+import 'package:delwaqty/shared/widgets/pressable_scale.dart';
 
 class MerchantTypeChip extends StatelessWidget {
   const MerchantTypeChip({
@@ -148,19 +150,53 @@ class MerchantTypeChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return FilterChip(
-      avatar: Icon(_icon(), size: 18),
-      label: Text(_label(context)),
-      selected: selected,
-      onSelected: onSelected,
-      showCheckmark: true,
-      backgroundColor: AppColors.primaryLight.withValues(alpha: 0.3),
-      selectedColor: AppColors.primaryLight.withValues(alpha: 0.6),
-      side: selected
-          ? null
-          : BorderSide(
-              color: Theme.of(context).colorScheme.outlineVariant.withValues(alpha: 0.4),
+    final theme = Theme.of(context);
+    return PressableScale(
+      onTap: () => onSelected?.call(!selected),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+        decoration: BoxDecoration(
+          gradient: selected
+              ? const LinearGradient(
+                  colors: [AppColors.brandPurpleDeep, AppColors.brandViolet],
+                )
+              : null,
+          color: selected
+              ? null
+              : theme.colorScheme.surfaceContainerHighest
+                  .withValues(alpha: 0.35),
+          borderRadius: BorderRadius.circular(999),
+          border: Border.all(
+            color: selected
+                ? Colors.transparent
+                : theme.colorScheme.outlineVariant.withValues(alpha: 0.15),
+          ),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              _icon(),
+              size: 18,
+              color: selected
+                  ? Colors.white
+                  : theme.colorScheme.onSurfaceVariant,
             ),
+            const SizedBox(width: 6),
+            Text(
+              _label(context),
+              style: AppTextStyles.labelLarge.copyWith(
+                color: selected
+                    ? Colors.white
+                    : theme.colorScheme.onSurfaceVariant,
+                fontWeight: selected ? FontWeight.w700 : FontWeight.w600,
+                fontSize: 13,
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

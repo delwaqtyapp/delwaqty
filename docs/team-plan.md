@@ -1,53 +1,45 @@
-# Team Plan — شريط واحد متحرك لكل خدمات التطبيق
+# Team Plan — Home Screen Egyptian Hero (sprint 173)
 
-## الهدف
-في تطبيق العميل (`lib/features/customer/home/presentation/pages/home_page.dart`):
-- يوجد حاليًا **شريطان**: `_CompactCategories` (العلوي: فئات تجارية + 4 أزرار حجز بعد صيدلية + عرض الكل) و`_ServicesSection` (السفلي: بقية أزرار الخدمات).
-- المطلوب من المستخدم: **شريط واحد متحرك فقط** يعرض **كل خدمات التطبيق** (الفئات التجارية بالترتيب + كل أزرار الخدمات بالترتيب)، وفي **نهايته زر «عرض الكل»** يفتح صفحة كل الخدمات (`/services` → `AllServicesPage` الموجودة).
-- `_ServicesSection` السفلي يُحذف نهائيًا (أزراره تظهر في صفحة «عرض الكل» فقط).
-- الشريط يتحرك تلقائيًا **بحركة بطيئة لا نهائية** (marquee) ما لم يلمسه العميل (يوقفها اللمس/السحب ثم يستأنف).
+> User spec (45 points): Egyptian Futurism hero based on NEW provided background `516019.png`
+> (sent in chat; NOT accessible to agents — model cannot read images, chat attachments do not
+> land on disk). Asset path wired: `assets/egypt/home_egypt_hero.png` (placeholder = intro
+> cinematic bg copy). When the user drops the real file at that exact name, the hero is live,
+> zero code change. The image itself is NEVER modified/mirrored/cropped randomly.
 
-## الملفات المملوكة
-- `lib/features/customer/home/presentation/pages/home_page.dart` (الملف الوحيد)
-- `docs/team-plan.md` (هذا الملف)
-- `SESSION_STATUS.md` (تحديث لاحق من المنسق)
+## Shared foundation (done by orchestrator — green: analyze 0, tests 937/937)
+- `assets/egypt/home_egypt_hero.png` — placeholder asset wired (user overwrites).
+- `lib/core/theme/app_colors.dart` — added `brandBlue` 0xFF4057D8, `brandGold` 0xFFD8A84E.
+- `lib/l10n/app_en.arb` + `app_ar.arb` + regenerated — new keys: `mainCategories`,
+  `discoverNearby`, `nearbySubtitle`, `closest`, `topRated`, `egyptStatementTitle`,
+  `egyptStatementTagline`, `greetingSubtitle`; AR `searchHint` →
+  "ابحث عن مطعم، منتج، خدمة أو أي شيء..."، AR `fastestWayToOrder` → "أسرع طريقة للطلب من كل خدماتك".
+- `lib/shared/widgets/design/premium_search_field.dart` — added optional `height`,
+  `borderRadius`, `autofocus` (backward compatible).
 
-## المهمة (Task 1) — coder وحيد (ملف واحد)
-**اسم المهمة:** دمج كل الخدمات في شريط علوي واحد متحرك
+## Task 1 — coder (OWNER: `lib/features/customer/home/presentation/pages/home_page.dart`)
+Full hero redesign: hero bg block + overlay, top header (notification LEFT, Egypt statement
+RIGHT, brand lockup CENTER using `assets/egypt/delwaqty_logo_mark.png` + "DelwaQty" with
+Purple→Blue→Cyan "Qty" + "دلوقتي"), greeting (real user name), location pill (real location),
+search bar (real navigation `/search`), quick-order banner (Purple→Blue, 100-110h, radius 26,
+delivery icon, arrow), promo carousel (190-220h, errorBuilder kept), categories section
+(mainCategories title + viewAll + 60px/18r pastel tiles), nearby section (3 REAL chips:
+closest/topRated/mostRequested — NO fake 4th deals chip), merchant cards (white, radius 22-24,
+image 110-120, full real data), bottom padding 90→120, subtle cinematics (fade + scale logo
+0.96→1.0, fade/slide greeting/search/CTA, NO bounce/spin), RTL/LTR same background orientation.
 
-**المعيار القياسي (يُحسب ناجحًا لو):**
-1. لا يوجد سوى شريط علوي واحد (`_CompactCategories`) يعرض: كل الفئات التجارية (مرتبة حسب `categoryRank`) + كل أزرار الخدمات (مرتبة حسب أولوية `_homeServiceCategoriesProvider` التي تبدأ doctor/nurse/teacher/barber) + زر «عرض الكل» في النهاية.
-2. `_ServicesSection` محذوف من الصفحة ومن الكود (لا شريط سفلي، لا تكرار).
-3. الشريط يتحرك تلقائيًا بسرعة بطيئة (~40px/s) بحلقة لا نهائية سلسة (تتوقف عند اللمس/السحب وتستأنف بعده).
-4. «عرض الكل» يفتح `/services` (AllServicesPage موجودة فعليًا تعرض كل الخدمات في صفحة واحدة — لا تغيير عليها).
-5. `flutter analyze` = 0 مشاكل، `flutter test` أخضر كامل.
+## Task 2 — coder2 (OWNER: `app_shell.dart` + `search_page.dart`)
+- Dock restyle to spec: margin h16/v bottom 12, radius 28, total height ~72-76 (+SafeArea), white
+  surface, soft shadow, active pill radius capsule 999. Functionality untouched.
+- Search page: pass `autofocus: true` to the PremiumSearchField → keyboard opens immediately.
 
-## التفاصيل التنفيذية (لكودر2)
-- أضف ويدجت خاص `_InfiniteStrip` (StatefulWidget مع `SingleTickerProviderStateMixin`) داخل home_page.dart:
-  - `ScrollController` + `Ticker` (`createTicker`) بدل Timer (آمن للاختبارات).
-  - المحتوى: Row = نسختان متطابقتان من التايلات (كل نسخة = تايل + `SizedBox(width: 12)` في النهاية) للالتفاف السلس.
-  - قِس عرض النسخة الواحدة بعد أول إطار بـ `GlobalKey` (`addPostFrameCallback` → `RenderBox.size.width`) في `_cycleWidth`.
-  - في `_onTick`: احسب `dt` من `elapsed` (اقطعه عند 0.25s)، `offset = (scroll.offset + speed * dt) % _cycleWidth`، ثم `scroll.jumpTo(offset)`.
-  - إيقاف مؤقت: `Listener(onPointerDown/Up/Cancel)` يضبط `_interacting`؛ واقفز في `_onTick` إذا `_interacting || scroll.position.isScrolling || _cycleWidth <= 0`.
-  - احترم تقليل الحركة: إن `MediaQuery.disableAnimationsOf(context)` فعرض نسخة واحدة فقط بدون Ticker (تمرير يدوي فقط).
-  - `dispose`: ألغِ Ticker وScrollController.
-- أعد بناء `_CompactCategories`:
-  - شاهد providerين معًا: `activeCategoriesProvider` و`_homeServiceCategoriesProvider`.
-  - اجمع النتائج: categories محسوبة بـ `categoryRank` (كلها، لا `sublist`/`visibleCount` كما الآن — احذف منطق صيدلية/`pharmacyFound`/`showAllTile` بالكامل) + services (بترتيب provider) + `_TopStripShowAll()` في النهاية دائمًا.
-  - لعرضها مرّر `items` عبر الماركي (`_InfiniteStrip`) بنفس دالة `_buildStrip` الحالية (تُعيد الآن `_InfiniteStrip` بدل ListView).
-  - الحالات: `loading` = shimmer كما هو؛ `error` على أي من الاثنين أو `categories.isEmpty` = `_buildStrip([..._topBookingItems, const _TopStripShowAll()])` (الاحتياط قائم: نقاط الدخول لا تختفي).
-- `_homeServiceCategoriesProvider`: أعد `priority` لتشمل doctor/nurse/teacher/barber أولًا (مثل all_services_page) حتى تظهر الأزرار الأربعة أولًا بين الخدمات.
-- احذف `_ServicesSection` بالكامل من slivers ومن الكود، واحذف `_movedToTop` (أصبح غير مستخدم).
-- التزم AGENTS: single quotes، trailing commas، لا تعليقات جديدة غير مطلوبة، لا تلمس ملفات أخرى.
+## Gates (orchestrator after dispatch)
+1. `flutter analyze` → 0 • 2. `flutter test` → ≥937 (fix chip/search tests if labels changed) •
+3. Build debug APK → install → relaunch clean (no unbounded/RenderFlex/assertion) •
+4. Commit sprint 173 + push + SESSION_STATUS + Arabic report to user (remind: place real image).
 
-## الاعتماديات
-- مهمة واحدة على ملف واحد — لا توازٍ.
-- بعد التنفيذ: `flutter analyze` + `flutter test` ثم تثبيت APK على الجهاز والتحقق البصري.
-
-## الترتيب
-1. DISPATCH → coder2 ينفّذ Task 1.
-2. REVIEW → فحص الـ diff.
-3. FIX LOOP إن لزم (حد أقصى 3 جولات).
-4. TEST → `flutter analyze` + `flutter test` (933) + build APK debug customer.
-5. QA → APPROVE/REJECT.
-6. تثبيت APK على الجهاز + REPORT + تحديث SESSION_STATUS.md.
+## Constraints all agents
+- ADR-044/075: NO Blur/BackdropFilter in new code, gradients only, RepaintBoundary OK.
+- No flat giant color blocks; hero overlay = soft lavender gradient 8-18% only for readability.
+- All text maxLines + ellipsis; no overflow; single quotes; trailing commas; no comments.
+- Never touch `.arb`/`app_colors`/`premium_search_field` (shared) or the other agent's files.
+- NEVER mirror/flip the background; `Alignment.center` for the image in both directions.

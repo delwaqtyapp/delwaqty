@@ -381,20 +381,21 @@ class _SearchPageState extends ConsumerState<SearchPage> {
       body: GradientBackground(
         child: Column(
           children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-              child: Column(
-                children: [
-                  PremiumSearchField(
-                    controller: _searchController,
-                    hint: l10n.searchHint,
-                    onChanged: _onSearchChanged,
-                    onSubmitted: (value) {
-                      _debounceTimer?.cancel();
-                      ref.read(_queryProvider.notifier).state = value;
-                      _addRecentSearch(value);
-                    },
-                  ),
+Padding(
+                padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+                child: Column(
+                  children: [
+                    PremiumSearchField(
+                      controller: _searchController,
+                      hint: l10n.searchHint,
+                      autofocus: true,
+                      onChanged: _onSearchChanged,
+                      onSubmitted: (value) {
+                        _debounceTimer?.cancel();
+                        ref.read(_queryProvider.notifier).state = value;
+                        _addRecentSearch(value);
+                      },
+                    ),
                   _buildAutocompleteSuggestions(l10n),
                 ],
               ),

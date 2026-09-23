@@ -188,10 +188,19 @@ class HomePage extends ConsumerWidget {
                     unreadCount: unreadCount,
                   ),
                 ),
-                const SliverToBoxAdapter(child: _PromoCarousel()),
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(20, 10, 20, 0),
+                    child: _DirectOrderButton(
+                      l10n: l10n,
+                      onTap: () => context.push('/direct-delivery'),
+                    ),
+                  ),
+                ),
                 SliverToBoxAdapter(
                   child: _CompactCategories(ref: ref, l10n: l10n),
                 ),
+                const SliverToBoxAdapter(child: _PromoCarousel()),
                 SliverToBoxAdapter(
                   child: _buildDiscoverySection(context, ref, l10n),
                 ),
@@ -319,12 +328,9 @@ class _EgyptHeroState extends State<_EgyptHero>
     final size = MediaQuery.sizeOf(context);
     final screenWidth = size.width;
     final screenHeight = size.height;
-    final isPortrait = screenHeight >= screenWidth;
 
-    final heroH = isPortrait
-        ? (screenHeight * 0.46).clamp(400.0, 540.0)
-        : (screenHeight * 0.60).clamp(300.0, 420.0);
-
+    // The hero is exactly the image's natural-fit height: the direct-order
+    // button lives right below the image bottom edge (its own sliver).
     // Natural aspect of assets/egypt/home_egypt_hero.png (1821x864).
     final heroImageH = screenWidth * (864 / 1821);
 
@@ -343,44 +349,33 @@ class _EgyptHeroState extends State<_EgyptHero>
         bottom: Radius.circular(28),
       ),
       child: SizedBox(
-        height: heroH,
+        height: heroImageH,
         child: Stack(
           fit: StackFit.expand,
           children: [
-            Positioned(
-              top: 0,
-              left: 0,
-              right: 0,
-              height: heroImageH,
-              child: Stack(
-                fit: StackFit.expand,
-                children: [
-                  const DecoratedBox(
-                    decoration: BoxDecoration(
-                      image: DecorationImage(
-                        image: AssetImage('assets/egypt/home_egypt_hero.png'),
-                        fit: BoxFit.fitWidth,
-                        alignment: Alignment.topCenter,
-                      ),
-                    ),
-                  ),
-                  Align(
-                    alignment: Alignment.bottomLeft,
-                    child: Padding(
-                      padding: EdgeInsets.fromLTRB(
-                        horizontalPadding,
-                        0,
-                        12,
-                        12,
-                      ),
-                      child: _buildLocationBadge(
-                        context,
-                        height: 28,
-                        maxWidth: 178,
-                      ),
-                    ),
-                  ),
-                ],
+            const DecoratedBox(
+              decoration: BoxDecoration(
+                image: DecorationImage(
+                  image: AssetImage('assets/egypt/home_egypt_hero.png'),
+                  fit: BoxFit.fitWidth,
+                  alignment: Alignment.topCenter,
+                ),
+              ),
+            ),
+            Align(
+              alignment: Alignment.bottomLeft,
+              child: Padding(
+                padding: EdgeInsets.fromLTRB(
+                  horizontalPadding,
+                  0,
+                  12,
+                  12,
+                ),
+                child: _buildLocationBadge(
+                  context,
+                  height: 28,
+                  maxWidth: 178,
+                ),
               ),
             ),
             Positioned.fill(
@@ -392,7 +387,6 @@ class _EgyptHeroState extends State<_EgyptHero>
                     colors: [
                       const Color(0xFF2E146F).withValues(alpha: 0.12),
                       Colors.transparent,
-                      const Color(0xFF6C3CEB).withValues(alpha: 0.12),
                     ],
                   ),
                 ),
@@ -408,67 +402,56 @@ class _EgyptHeroState extends State<_EgyptHero>
                       horizontalPadding,
                       2,
                       horizontalPadding,
-                      10,
+                      0,
                     ),
-                    child: LayoutBuilder(
-                      builder: (context, constraints) {
-                        return Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            Directionality(
-                              textDirection: TextDirection.ltr,
-                              child: Row(
-                                children: [
-                                  _NotificationCircle(
-                                    unreadCount: widget.unreadCount,
-                                    onTap: widget.isGuest
-                                        ? () => context.push('/login')
-                                        : () => context.push('/notifications'),
-                                    size: topButtonSize,
-                                    iconSize: topIconSize,
-                                  ),
-                                  const Spacer(),
-                                  _buildMiniLockup(
-                                    logoSize: logoSize,
-                                    arabicSize: arabicSize,
-                                  ),
-                                  const Spacer(),
-                                  _MenuCircleButton(
-                                    onTap: () => AppShell.scaffoldKey
-                                        .currentState
-                                        ?.openDrawer(),
-                                    size: topButtonSize,
-                                    iconSize: topIconSize,
-                                  ),
-                                ],
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Directionality(
+                          textDirection: TextDirection.ltr,
+                          child: Row(
+                            children: [
+                              _NotificationCircle(
+                                unreadCount: widget.unreadCount,
+                                onTap: widget.isGuest
+                                    ? () => context.push('/login')
+                                    : () => context.push('/notifications'),
+                                size: topButtonSize,
+                                iconSize: topIconSize,
                               ),
-                            ),
-                            SizedBox(height: zoneGap),
-                            _buildHeroSearch(
-                              context,
-                              widget.l10n,
-                              height: searchHeight,
-                            ),
-                            SizedBox(height: zoneGap),
-                            Align(
-                              alignment: Alignment.centerRight,
-                              child: _buildEgyptStatement(
-                                context,
-                                widget.l10n,
-                                titleSize: egyptTitleSize,
-                                taglineSize: egyptTaglineSize,
+                              const Spacer(),
+                              _buildMiniLockup(
+                                logoSize: logoSize,
+                                arabicSize: arabicSize,
                               ),
-                            ),
-                            SizedBox(height: zoneGap + 6),
-                            _DirectOrderButton(
-                              l10n: widget.l10n,
-                              onTap: () =>
-                                  context.push('/direct-delivery'),
-                            ),
-                            const Spacer(),
-                          ],
-                        );
-                      },
+                              const Spacer(),
+                              _MenuCircleButton(
+                                onTap: () => AppShell.scaffoldKey
+                                    .currentState
+                                    ?.openDrawer(),
+                                size: topButtonSize,
+                                iconSize: topIconSize,
+                              ),
+                            ],
+                          ),
+                        ),
+                        SizedBox(height: zoneGap),
+                        _buildHeroSearch(
+                          context,
+                          widget.l10n,
+                          height: searchHeight,
+                        ),
+                        SizedBox(height: zoneGap),
+                        Align(
+                          alignment: Alignment.centerRight,
+                          child: _buildEgyptStatement(
+                            context,
+                            widget.l10n,
+                            titleSize: egyptTitleSize,
+                            taglineSize: egyptTaglineSize,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ),

@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_riverpod/misc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:delwaqty/core/module/feature_module.dart';
 import 'package:delwaqty/features/customer/delivery/presentation/pages/direct_delivery_page.dart';
@@ -33,21 +31,31 @@ class DirectDeliveryModule extends FeatureModule {
   List<String> get dependsOn => [];
 
   @override
-  List<RouteBase> get standaloneRoutes => [
-        GoRoute(
-          path: '/direct-delivery',
-          name: 'direct_delivery',
-          builder: (context, state) => const DirectDeliveryPage(),
-        ),
-        GoRoute(
-          path: '/delivery-tracking/:deliveryId',
-          name: 'delivery_tracking',
-          builder: (context, state) => DeliveryTrackingPage(
-            deliveryId: state.pathParameters['deliveryId']!,
-          ),
-        ),
-      ];
+  List<DrawerEntry> get drawerEntries => [
+    DrawerEntry(
+      id: 'direct-delivery',
+      label: (ctx) => AppLocalizations.of(ctx).directDelivery,
+      icon: Icons.moped_rounded,
+      onTap: (ctx, ref) {
+        Navigator.of(ctx).pop();
+        ctx.go('/direct-delivery');
+      },
+    ),
+  ];
 
   @override
-  List<Override> providerOverrides(Ref ref) => [];
+  List<RouteBase> get standaloneRoutes => [
+    GoRoute(
+      path: '/direct-delivery',
+      name: 'direct-delivery',
+      builder: (context, state) => const DirectDeliveryPage(),
+    ),
+    GoRoute(
+      path: '/delivery-tracking/:deliveryId',
+      name: 'delivery_tracking',
+      builder: (context, state) => DeliveryTrackingPage(
+        deliveryId: state.pathParameters['deliveryId']!,
+      ),
+    ),
+  ];
 }

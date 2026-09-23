@@ -283,14 +283,19 @@ class _DrawerPanel extends StatelessWidget {
                     children: [
                       _buildHeader(context, cs, userName, userEmail),
                       const SizedBox(height: 8),
-                      ...bodyEntries.map(
-                        (entry) => _DrawerTile(
-                          icon: entry.icon,
-                          label: entry.label(context),
-                          onTap: () => entry.onTap(context, ref),
-                          colorScheme: cs,
-                        ),
-                      ),
+                      Expanded(
+                        child: SingleChildScrollView(
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              ...bodyEntries.map(
+                                (entry) => _DrawerTile(
+                                  icon: entry.icon,
+                                  label: entry.label(context),
+                                  onTap: () => entry.onTap(context, ref),
+                                  colorScheme: cs,
+                                ),
+                              ),
                       const SizedBox(height: 8),
                       _DrawerTile(
                         icon: themeMode == ThemeMode.dark
@@ -365,6 +370,10 @@ class _DrawerPanel extends StatelessWidget {
                             ),
                           );
                         },
+                      ),
+                            ],
+                          ),
+                        ),
                       ),
                     ],
                   ),

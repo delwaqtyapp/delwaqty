@@ -22,6 +22,19 @@ class ComplaintsModule extends FeatureModule {
   int get navPriority => 81;
 
   @override
+  List<DrawerEntry> get drawerEntries => [
+    DrawerEntry(
+      id: 'my-complaints',
+      label: (ctx) => AppLocalizations.of(ctx).complaints,
+      icon: Icons.warning_amber_rounded,
+      onTap: (ctx, ref) {
+        Navigator.of(ctx).pop();
+        ctx.go('/my-complaints');
+      },
+    ),
+  ];
+
+  @override
   List<RouteBase> get standaloneRoutes => [
     GoRoute(
       path: '/my-complaints',

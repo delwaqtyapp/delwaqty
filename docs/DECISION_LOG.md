@@ -2991,3 +2991,27 @@ The user reported: the restored glass side menu shows entries for a ride-safety 
 - Single menu trigger (hero circle); shell AppBar removed, restoring the edge-to-edge hero.
 - Tests: `test/features/safety/` deleted (−8 tests); suite now **934/934**.
 - Gate: `flutter analyze` **0 issues**; APK `releases/delwaqty_1.0.0+1_debug_20260923_1300.apk` installed + relaunched clean (pid 26144), drawer screencap saved.
+
+## ADR-082: Enrich the Glass Side Menu with Real Customer Feature Entries
+
+**Date:** Sprint 173
+**Status:** Accepted
+**Deciders:** Owner (user directive: «القائمه الجانبيه ناقصها حاجات كتير… كانت في القائمه الزجاجيه القديمه») + Lead Architect
+
+### Context
+The restored glass drawer (ADR-044 exception) looked EMPTY: forensic comparison proved the old sprint-35 `_DrawerPanel` and the restored one were identical (both filter body+footer positions), and only 3 modules (home/notifications/profile) ever registered `DrawerEntry` — at a82e652 AND today. The menu showed header + 3 tiles + dark-mode + language + logout, which the user perceived as missing "many things" from the old glass menu.
+
+### Decision
+Register the app's REAL customer screens into the glass drawer so the menu is full and useful, in a stable order:
+- Order = registerAll order in `lib/customer/module_registry.dart` (allDrawerEntries uses a stable sort by `DrawerPosition`, so same-position entries keep registration order): **الرئيسية (/home)، الخدمات (/services)، الإشعارات (badge)، الملف الشخصي (/profile)، طلباتي (/orders)، محفظتي (/wallet)، توصيلة (/direct-delivery)، الشكاوى (/my-complaints)، المكافآت (/rewards)**.
+- `drawerEntries` added to `home_module` (2nd entry `services` → `/services`), `delivery_module` (`direct-delivery` → `/direct-delivery`), `orders_module`, `wallet_module`, `complaints_module`, `rewards_module`. Labels reuse existing module-name l10n keys (zero new keys).
+- `_DrawerPanel` in `app_shell.dart`: header FIXED on top; all entries + dark-mode/language toggles + logout wrapped in `Expanded(SingleChildScrollView(Column))` so 9 entries can never clip/overflow on small screens — the likely root of the user's «ناقصها حاجات».
+- New `test/shared/generated_side_menu_test.dart` locks the 9 registered ids.
+
+### Rationale
+- All 9 entries point to EXISTING live customer routes; zero new screens, zero duplicated bottom-nav tabs beyond home/profile (which the old branded glass menu always included); `search` stays a tab-only (asserted in test).
+- Scroll wrapper is the architectural guard against future entries overflowing the 85%-height glass panel.
+
+### Consequences
+- Side menu = 9 feature entries + dark mode + language + logout with sliding glass look intact (blur 32 / width 280 / radius 28).
+- Gate: `flutter analyze` **0 issues**; `flutter test` **935/935**; APK `releases/delwaqty_1.0.0+1_debug_20260923_1400.apk` installed + relaunched clean (pid 13475, no FATAL). Device `screencap` was failing this session (adb/device glitch — 50-byte files); foreground verified via `dumpsys` (= com.delwaqty.app). Duplicate `drawerEntries` getter introduced mid-round in `orders_module.dart` was removed; unused riverpod imports in `delivery_module.dart` removed.

@@ -54,5 +54,14 @@ class HomeModule extends FeatureModule {
         ctx.go('/home');
       },
     ),
+    DrawerEntry(
+      id: 'services',
+      label: (ctx) => AppLocalizations.of(ctx).allServices,
+      icon: Icons.grid_view_rounded,
+      onTap: (ctx, ref) {
+        Navigator.of(ctx).pop();
+        ctx.go('/services');
+      },
+    ),
   ];
 }

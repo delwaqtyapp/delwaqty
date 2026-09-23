@@ -21,7 +21,20 @@ class RewardsModule extends FeatureModule {
   int get navPriority => 84;
 
   @override
-  List<RouteBase> get shellSubRoutes => [
+  List<DrawerEntry> get drawerEntries => [
+    DrawerEntry(
+      id: 'rewards',
+      label: (ctx) => AppLocalizations.of(ctx).rewards,
+      icon: Icons.card_giftcard_rounded,
+      onTap: (ctx, ref) {
+        Navigator.of(ctx).pop();
+        ctx.go('/rewards');
+      },
+    ),
+  ];
+
+  @override
+  List<RouteBase> get standaloneRoutes => [
     GoRoute(
       path: '/rewards',
       name: 'rewards',

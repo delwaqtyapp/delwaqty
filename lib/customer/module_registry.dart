@@ -28,21 +28,25 @@ void registerAllModules() {
     OnboardingModule(),
     WelcomeModule(),
     AuthModule(),
+    // Drawer order for the customer glass shell comes from registerAll
+    // order (allDrawerEntries uses a stable sort by DrawerPosition, so
+    // same-position entries keep their registration order). Keep these
+    // modular entry points in the exact drawer sequence:
     HomeModule(),
-    CommerceModule(),
-    RestaurantModule(),
+    NotificationsModule(),
+    ProfileModule(),
+    OrdersModule(),
     WalletModule(),
     DirectDeliveryModule(),
-    SettingsModule(),
-    ProfileModule(),
-    NotificationsModule(),
-    HomeServicesModule(),
     ComplaintsModule(),
+    RewardsModule(),
+    CommerceModule(),
+    RestaurantModule(),
+    HomeServicesModule(),
+    SettingsModule(),
     SupportChatModule(),
     SearchModule(),
-    OrdersModule(),
     RegionsModule(),
-    RewardsModule(),
     CampaignsModule(),
   ]);
 

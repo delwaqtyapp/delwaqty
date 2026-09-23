@@ -10,6 +10,7 @@ import 'package:delwaqty/features/customer/wallet/domain/entities/wallet_transac
 import 'package:delwaqty/features/customer/wallet/presentation/pages/wallet_page.dart';
 import 'package:delwaqty/features/customer/wallet/presentation/pages/wallet_topup_page.dart';
 import 'package:delwaqty/features/customer/wallet/presentation/pages/wallet_transactions_page.dart';
+import 'package:delwaqty/l10n/app_localizations.dart';
 
 final supabaseWalletRepositoryImplProvider = Provider<WalletRepositoryImpl>((ref) {
   return WalletRepositoryImpl(ref.watch(supabaseWalletDataSourceProvider));
@@ -47,6 +48,19 @@ class WalletModule extends FeatureModule {
 
   @override
   Set<ModuleCapability> get capabilities => {ModuleCapability.hasPayments, ModuleCapability.requiresWallet};
+
+  @override
+  List<DrawerEntry> get drawerEntries => [
+    DrawerEntry(
+      id: 'wallet',
+      label: (ctx) => AppLocalizations.of(ctx).wallet,
+      icon: Icons.account_balance_wallet_outlined,
+      onTap: (ctx, ref) {
+        Navigator.of(ctx).pop();
+        ctx.go('/wallet');
+      },
+    ),
+  ];
 
   @override
   List<RouteBase> get standaloneRoutes => [

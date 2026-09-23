@@ -177,7 +177,14 @@ class HomePage extends ConsumerWidget {
                     isGuest: isGuest,
                     locationAsync: locationAsync,
                     unreadCount: unreadCount,
-                    onOrderTap: () => context.push('/direct-delivery'),
+                  ),
+                ),
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(20, 14, 20, 0),
+                    child: _HeroOrderCard(
+                      onTap: () => context.push('/direct-delivery'),
+                    ),
                   ),
                 ),
                 const SliverToBoxAdapter(child: _PromoCarousel()),
@@ -267,7 +274,6 @@ class _EgyptHero extends StatefulWidget {
     required this.isGuest,
     required this.locationAsync,
     required this.unreadCount,
-    required this.onOrderTap,
   });
 
   final AppLocalizations l10n;
@@ -275,7 +281,6 @@ class _EgyptHero extends StatefulWidget {
   final bool isGuest;
   final AsyncValue<UserLocation?> locationAsync;
   final int unreadCount;
-  final VoidCallback onOrderTap;
 
   @override
   State<_EgyptHero> createState() => _EgyptHeroState();
@@ -319,84 +324,82 @@ class _EgyptHeroState extends State<_EgyptHero>
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final heroH = (constraints.maxHeight * 0.82)
-            .clamp(560.0, 700.0)
-            .toDouble();
-        final isRtl = Directionality.of(context) == TextDirection.rtl;
-        return SizedBox(
-          height: heroH,
-          child: Stack(
-            fit: StackFit.expand,
-            children: [
-              Positioned.fill(
-                child: Image.asset(
-                  'assets/egypt/home_egypt_hero.png',
-                  fit: BoxFit.cover,
-                  gaplessPlayback: true,
-                  errorBuilder: (_, _, _) => const DecoratedBox(
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [
-                          AppColors.brandPurpleDeep,
-                          AppColors.brandViolet,
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-              Positioned.fill(
-                child: DecoratedBox(
+    final heroH = (MediaQuery.sizeOf(context).height * 0.32)
+        .clamp(300.0, 360.0)
+        .toDouble();
+    final isRtl = Directionality.of(context) == TextDirection.rtl;
+    return ClipRRect(
+      borderRadius: const BorderRadius.vertical(
+        bottom: Radius.circular(28),
+      ),
+      child: SizedBox(
+        height: heroH,
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            Positioned.fill(
+              child: Image.asset(
+                'assets/egypt/home_egypt_hero.png',
+                fit: BoxFit.cover,
+                gaplessPlayback: true,
+                errorBuilder: (_, _, _) => const DecoratedBox(
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
                       begin: Alignment.topCenter,
                       end: Alignment.bottomCenter,
                       colors: [
-                        const Color(0xFF2E146F).withValues(alpha: 0.12),
-                        Colors.transparent,
-                        const Color(0xFF6C3CEB).withValues(alpha: 0.12),
+                        AppColors.brandPurpleDeep,
+                        AppColors.brandViolet,
                       ],
                     ),
                   ),
                 ),
               ),
-              SafeArea(
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 10, 20, 0),
-                  child: FadeTransition(
-                    opacity: _reveal,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        _buildTopRow(context, widget.l10n, isRtl),
-                        const SizedBox(height: 8),
-                        _buildBrandLockup(context, widget.l10n),
-                        const Spacer(),
-                        _buildGreeting(
-                          context,
-                          widget.l10n,
-                          widget.authState,
-                        ),
-                        const SizedBox(height: 10),
-                        _buildLocationPill(context),
-                        const SizedBox(height: 12),
-                        _buildHeroSearch(context, widget.l10n),
-                        const SizedBox(height: 12),
-                        _HeroOrderCard(onTap: widget.onOrderTap),
-                        const SizedBox(height: 4),
-                      ],
-                    ),
+            ),
+            Positioned.fill(
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      const Color(0xFF2E146F).withValues(alpha: 0.12),
+                      Colors.transparent,
+                      const Color(0xFF6C3CEB).withValues(alpha: 0.12),
+                    ],
                   ),
                 ),
               ),
-            ],
-          ),
-        );
-      },
+            ),
+            SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(20, 10, 20, 0),
+                child: FadeTransition(
+                  opacity: _reveal,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      _buildTopRow(context, widget.l10n, isRtl),
+                      const SizedBox(height: 6),
+                      _buildBrandLockup(context, widget.l10n),
+                      const Spacer(),
+                      _buildGreeting(
+                        context,
+                        widget.l10n,
+                        widget.authState,
+                      ),
+                      const SizedBox(height: 8),
+                      _buildLocationPill(context),
+                      const SizedBox(height: 10),
+                      _buildHeroSearch(context, widget.l10n),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -463,11 +466,11 @@ class _EgyptHeroState extends State<_EgyptHero>
           },
           child: Image.asset(
             'assets/egypt/delwaqty_logo_mark.png',
-            width: 62,
+            width: 42,
             fit: BoxFit.contain,
             errorBuilder: (_, _, _) => Container(
-              width: 62,
-              height: 62,
+              width: 42,
+              height: 42,
               decoration: const BoxDecoration(
                 shape: BoxShape.circle,
                 gradient: LinearGradient(
@@ -482,7 +485,7 @@ class _EgyptHeroState extends State<_EgyptHero>
               child: const Icon(
                 Icons.apps_rounded,
                 color: Colors.white,
-                size: 32,
+                size: 24,
               ),
             ),
           ),
@@ -496,7 +499,7 @@ class _EgyptHeroState extends State<_EgyptHero>
               style: AppTextStyles.titleLarge.copyWith(
                 color: const Color(0xFF1A1F36),
                 fontWeight: FontWeight.w800,
-                fontSize: 24,
+                fontSize: 18,
               ),
             ),
             ShaderMask(
@@ -513,7 +516,7 @@ class _EgyptHeroState extends State<_EgyptHero>
                 style: AppTextStyles.titleLarge.copyWith(
                   color: Colors.white,
                   fontWeight: FontWeight.w800,
-                  fontSize: 24,
+                  fontSize: 18,
                 ),
               ),
             ),
@@ -524,7 +527,7 @@ class _EgyptHeroState extends State<_EgyptHero>
           style: AppTextStyles.titleLarge.copyWith(
             color: AppColors.brandPurple,
             fontWeight: FontWeight.w700,
-            fontSize: 20,
+            fontSize: 14,
             shadows: const [
               Shadow(color: Color(0x55000000), blurRadius: 3),
             ],
@@ -547,7 +550,7 @@ class _EgyptHeroState extends State<_EgyptHero>
           style: context.textTheme.titleLarge?.copyWith(
             color: Colors.white,
             fontWeight: FontWeight.w800,
-            fontSize: 26,
+            fontSize: 24,
             shadows: const [
               Shadow(color: Color(0x40000000), blurRadius: 4),
             ],
@@ -560,7 +563,7 @@ class _EgyptHeroState extends State<_EgyptHero>
           l10n.greetingSubtitle,
           style: AppTextStyles.bodyMedium.copyWith(
             color: Colors.white.withValues(alpha: 0.85),
-            fontSize: 13,
+            fontSize: 12,
           ),
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
@@ -578,7 +581,7 @@ class _EgyptHeroState extends State<_EgyptHero>
       error: (_, _) => widget.l10n.searchingForLocation,
     );
     return Container(
-      height: 44,
+      height: 40,
       padding: const EdgeInsets.symmetric(horizontal: 14),
       decoration: BoxDecoration(
         color: Colors.white.withValues(alpha: 0.18),
@@ -627,8 +630,8 @@ class _EgyptHeroState extends State<_EgyptHero>
     return PremiumSearchField(
       readOnly: true,
       hint: l10n.searchHint,
-      height: 60,
-      borderRadius: 30,
+      height: 54,
+      borderRadius: 28,
       onTap: () => context.go('/search'),
       onFilterPressed: () => context.go('/search'),
     );

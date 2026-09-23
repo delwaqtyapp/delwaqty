@@ -333,8 +333,8 @@ class _EgyptHeroState extends State<_EgyptHero>
 
   @override
   Widget build(BuildContext context) {
-    final heroH = (MediaQuery.sizeOf(context).height * 0.62)
-        .clamp(540.0, 600.0)
+    final heroH = (MediaQuery.sizeOf(context).height * 0.42)
+        .clamp(480.0, 540.0)
         .toDouble();
     return ClipRRect(
       borderRadius: const BorderRadius.vertical(
@@ -389,16 +389,16 @@ class _EgyptHeroState extends State<_EgyptHero>
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       _buildTopControlsRow(context),
-                      const SizedBox(height: 12),
+                      const SizedBox(height: 10),
                       Align(
                         alignment: Alignment.topRight,
                         child: _buildEgyptStatement(context, widget.l10n),
                       ),
                       const Spacer(flex: 2),
                       _buildBrandLockup(context, widget.l10n),
-                      const Spacer(flex: 3),
+                      const Spacer(flex: 2),
                       ConstrainedBox(
-                        constraints: const BoxConstraints(maxHeight: 84),
+                        constraints: const BoxConstraints(maxHeight: 72),
                         child: _buildGreeting(
                           context,
                           widget.l10n,
@@ -409,7 +409,7 @@ class _EgyptHeroState extends State<_EgyptHero>
                       _buildLocationPill(context),
                       const SizedBox(height: 10),
                       _buildHeroSearch(context, widget.l10n),
-                      const SizedBox(height: 14),
+                      const SizedBox(height: 10),
                     ],
                   ),
                 ),
@@ -451,7 +451,7 @@ class _EgyptHeroState extends State<_EgyptHero>
           style: AppTextStyles.titleLarge.copyWith(
             color: AppColors.brandGold,
             fontWeight: FontWeight.w900,
-            fontSize: 24,
+            fontSize: 26,
           ),
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
@@ -461,7 +461,7 @@ class _EgyptHeroState extends State<_EgyptHero>
           style: AppTextStyles.bodyMedium.copyWith(
             color: Colors.white,
             fontWeight: FontWeight.w600,
-            fontSize: 13,
+            fontSize: 14,
             shadows: const [
               Shadow(color: Color(0x55000000), blurRadius: 4),
             ],
@@ -499,14 +499,14 @@ class _EgyptHeroState extends State<_EgyptHero>
               ],
             ),
             child: SizedBox(
-              width: 95,
-              height: 95,
+              width: 80,
+              height: 80,
               child: Image.asset(
                 'assets/egypt/delwaqty_logo_mark.png',
                 fit: BoxFit.contain,
                 errorBuilder: (_, _, _) => Container(
-                  width: 95,
-                  height: 95,
+                  width: 80,
+                  height: 80,
                   decoration: const BoxDecoration(
                     shape: BoxShape.circle,
                     gradient: LinearGradient(
@@ -521,7 +521,7 @@ class _EgyptHeroState extends State<_EgyptHero>
                   child: const Icon(
                     Icons.apps_rounded,
                     color: Colors.white,
-                    size: 32,
+                    size: 28,
                   ),
                 ),
               ),
@@ -567,7 +567,7 @@ class _EgyptHeroState extends State<_EgyptHero>
             l10n.appNameAr,
             style: const TextStyle(
               fontFamily: 'Cairo',
-              fontSize: 17,
+              fontSize: 15,
               fontWeight: FontWeight.w600,
               color: Color(0xFFF7F7FA),
               letterSpacing: 0.5,
@@ -604,7 +604,7 @@ class _EgyptHeroState extends State<_EgyptHero>
           l10n.greetingSubtitle,
           style: AppTextStyles.bodyMedium.copyWith(
             color: Colors.white.withValues(alpha: 0.85),
-            fontSize: 13,
+            fontSize: 14,
           ),
           maxLines: 2,
           overflow: TextOverflow.ellipsis,
@@ -1148,8 +1148,8 @@ class _MenuCircleButton extends StatelessWidget {
     return PressableScale(
       onTap: onTap,
       child: Container(
-        width: 40,
-        height: 40,
+        width: 54,
+        height: 54,
         decoration: BoxDecoration(
           color: Colors.white.withValues(alpha: 0.2),
           shape: BoxShape.circle,
@@ -1165,7 +1165,7 @@ class _MenuCircleButton extends StatelessWidget {
         child: const Icon(
           AppIcons.navDrawer,
           color: Colors.white,
-          size: 22,
+          size: 24,
         ),
       ),
     );
@@ -1185,8 +1185,8 @@ class _NotificationCircle extends StatelessWidget {
       child: PressableScale(
         onTap: onTap,
         child: Container(
-          width: 50,
-          height: 50,
+          width: 54,
+          height: 54,
           decoration: BoxDecoration(
             color: Colors.white.withValues(alpha: 0.2),
             shape: BoxShape.circle,
@@ -1206,7 +1206,7 @@ class _NotificationCircle extends StatelessWidget {
                 child: Icon(
                   Icons.notifications_outlined,
                   color: Colors.white,
-                  size: 22,
+                  size: 24,
                 ),
               ),
               if (unreadCount > 0)

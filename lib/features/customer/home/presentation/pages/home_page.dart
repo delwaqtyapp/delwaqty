@@ -333,8 +333,8 @@ class _EgyptHeroState extends State<_EgyptHero>
 
   @override
   Widget build(BuildContext context) {
-    final heroH = (MediaQuery.sizeOf(context).height * 0.40)
-        .clamp(370.0, 430.0)
+    final heroH = (MediaQuery.sizeOf(context).height * 0.62)
+        .clamp(540.0, 600.0)
         .toDouble();
     return ClipRRect(
       borderRadius: const BorderRadius.vertical(
@@ -388,23 +388,28 @@ class _EgyptHeroState extends State<_EgyptHero>
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      _buildTopRow(context, widget.l10n),
-                      const SizedBox(height: 3),
-                      _buildEgyptStatement(context, widget.l10n),
-                      const SizedBox(height: 5),
+                      _buildTopControlsRow(context),
+                      const SizedBox(height: 12),
+                      Align(
+                        alignment: Alignment.topRight,
+                        child: _buildEgyptStatement(context, widget.l10n),
+                      ),
+                      const Spacer(flex: 2),
                       _buildBrandLockup(context, widget.l10n),
-                      const Spacer(),
-                      Flexible(
+                      const Spacer(flex: 3),
+                      ConstrainedBox(
+                        constraints: const BoxConstraints(maxHeight: 84),
                         child: _buildGreeting(
                           context,
                           widget.l10n,
                           widget.authState,
                         ),
                       ),
-                      const SizedBox(height: 6),
+                      const Spacer(flex: 2),
                       _buildLocationPill(context),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: 10),
                       _buildHeroSearch(context, widget.l10n),
+                      const SizedBox(height: 14),
                     ],
                   ),
                 ),
@@ -416,20 +421,20 @@ class _EgyptHeroState extends State<_EgyptHero>
     );
   }
 
-  Widget _buildTopRow(BuildContext context, AppLocalizations l10n) {
-    return SizedBox(
-      height: 40,
+  Widget _buildTopControlsRow(BuildContext context) {
+    return Directionality(
+      textDirection: TextDirection.ltr,
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          _MenuCircleButton(
-            onTap: () => AppShell.scaffoldKey.currentState?.openDrawer(),
-          ),
           _NotificationCircle(
             unreadCount: widget.unreadCount,
             onTap: widget.isGuest
                 ? () => context.push('/login')
                 : () => context.push('/notifications'),
+          ),
+          _MenuCircleButton(
+            onTap: () => AppShell.scaffoldKey.currentState?.openDrawer(),
           ),
         ],
       ),
@@ -493,34 +498,37 @@ class _EgyptHeroState extends State<_EgyptHero>
                 ),
               ],
             ),
-            child: Image.asset(
-              'assets/egypt/delwaqty_logo_mark.png',
-              width: 68,
-              fit: BoxFit.contain,
-              errorBuilder: (_, _, _) => Container(
-                width: 68,
-                height: 68,
-                decoration: const BoxDecoration(
-                  shape: BoxShape.circle,
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [
-                      AppColors.brandPurpleDeep,
-                      AppColors.brandViolet,
-                    ],
+            child: SizedBox(
+              width: 95,
+              height: 95,
+              child: Image.asset(
+                'assets/egypt/delwaqty_logo_mark.png',
+                fit: BoxFit.contain,
+                errorBuilder: (_, _, _) => Container(
+                  width: 95,
+                  height: 95,
+                  decoration: const BoxDecoration(
+                    shape: BoxShape.circle,
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        AppColors.brandPurpleDeep,
+                        AppColors.brandViolet,
+                      ],
+                    ),
                   ),
-                ),
-                child: const Icon(
-                  Icons.apps_rounded,
-                  color: Colors.white,
-                  size: 24,
+                  child: const Icon(
+                    Icons.apps_rounded,
+                    color: Colors.white,
+                    size: 32,
+                  ),
                 ),
               ),
             ),
           ),
         ),
-        const SizedBox(height: 6),
+        const SizedBox(height: 2),
         Row(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -559,7 +567,7 @@ class _EgyptHeroState extends State<_EgyptHero>
             l10n.appNameAr,
             style: const TextStyle(
               fontFamily: 'Cairo',
-              fontSize: 14,
+              fontSize: 17,
               fontWeight: FontWeight.w600,
               color: Color(0xFFF7F7FA),
               letterSpacing: 0.5,
@@ -596,7 +604,7 @@ class _EgyptHeroState extends State<_EgyptHero>
           l10n.greetingSubtitle,
           style: AppTextStyles.bodyMedium.copyWith(
             color: Colors.white.withValues(alpha: 0.85),
-            fontSize: 12,
+            fontSize: 13,
           ),
           maxLines: 2,
           overflow: TextOverflow.ellipsis,
@@ -614,7 +622,7 @@ class _EgyptHeroState extends State<_EgyptHero>
       error: (_, _) => widget.l10n.searchingForLocation,
     );
     return Container(
-      height: 38,
+      height: 44,
       padding: const EdgeInsets.symmetric(horizontal: 14),
       decoration: BoxDecoration(
         color: Colors.white.withValues(alpha: 0.18),
@@ -663,7 +671,7 @@ class _EgyptHeroState extends State<_EgyptHero>
     return PremiumSearchField(
       readOnly: true,
       hint: l10n.searchHint,
-      height: 50,
+      height: 54,
       borderRadius: 28,
       onTap: () => context.go('/search'),
       onFilterPressed: () => context.go('/search'),

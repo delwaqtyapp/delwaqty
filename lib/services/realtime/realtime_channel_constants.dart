@@ -10,8 +10,6 @@ abstract final class RealtimeChannels {
   static const String activeRide = 'active-ride';
   static const String activeDelivery = 'active-delivery';
   static const String chatMessages = 'chat-messages';
-  static const String sosAlerts = 'sos-alerts';
-  static const String trustedContacts = 'trusted-contacts';
   static const String locationUpdates = 'location-updates';
   static const String profileUpdates = 'profile-updates';
   static const String merchantReviews = 'merchant-reviews';

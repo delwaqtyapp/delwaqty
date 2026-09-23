@@ -4400,30 +4400,6 @@ abstract class AppLocalizations {
   /// **'Rate your driver'**
   String get rateYourDriver;
 
-  /// No description provided for @trustedContacts.
-  ///
-  /// In en, this message translates to:
-  /// **'Trusted Contacts'**
-  String get trustedContacts;
-
-  /// No description provided for @addTrustedContact.
-  ///
-  /// In en, this message translates to:
-  /// **'Add Trusted Contact'**
-  String get addTrustedContact;
-
-  /// No description provided for @emergencySos.
-  ///
-  /// In en, this message translates to:
-  /// **'Emergency SOS'**
-  String get emergencySos;
-
-  /// No description provided for @sosActivated.
-  ///
-  /// In en, this message translates to:
-  /// **'SOS activated - contacting emergency services'**
-  String get sosActivated;
-
   /// No description provided for @complaint.
   ///
   /// In en, this message translates to:
@@ -5516,101 +5492,11 @@ abstract class AppLocalizations {
   /// **'Service'**
   String get serviceFeeLabel;
 
-  /// No description provided for @safety.
-  ///
-  /// In en, this message translates to:
-  /// **'Safety'**
-  String get safety;
-
-  /// No description provided for @safetySettings.
-  ///
-  /// In en, this message translates to:
-  /// **'Safety Settings'**
-  String get safetySettings;
-
-  /// No description provided for @sosSettings.
-  ///
-  /// In en, this message translates to:
-  /// **'SOS Settings'**
-  String get sosSettings;
-
-  /// No description provided for @sosAlertEnabled.
-  ///
-  /// In en, this message translates to:
-  /// **'SOS Alert'**
-  String get sosAlertEnabled;
-
-  /// No description provided for @sosAlertEnabledDescription.
-  ///
-  /// In en, this message translates to:
-  /// **'Enable emergency SOS alerts during rides'**
-  String get sosAlertEnabledDescription;
-
-  /// No description provided for @autoSosTimer.
-  ///
-  /// In en, this message translates to:
-  /// **'Auto SOS Timer'**
-  String get autoSosTimer;
-
-  /// No description provided for @autoSosTimerDescription.
-  ///
-  /// In en, this message translates to:
-  /// **'Automatically trigger SOS after a timer'**
-  String get autoSosTimerDescription;
-
-  /// No description provided for @tripSharing.
-  ///
-  /// In en, this message translates to:
-  /// **'Trip Sharing'**
-  String get tripSharing;
-
-  /// No description provided for @shareDuration.
-  ///
-  /// In en, this message translates to:
-  /// **'Share Duration'**
-  String get shareDuration;
-
-  /// No description provided for @emergencyContacts.
-  ///
-  /// In en, this message translates to:
-  /// **'Emergency Contacts'**
-  String get emergencyContacts;
-
-  /// No description provided for @pickupVerification.
-  ///
-  /// In en, this message translates to:
-  /// **'Pickup Verification'**
-  String get pickupVerification;
-
-  /// No description provided for @pickupOtpRequired.
-  ///
-  /// In en, this message translates to:
-  /// **'Pickup Code Required'**
-  String get pickupOtpRequired;
-
-  /// No description provided for @pickupOtpRequiredDescription.
-  ///
-  /// In en, this message translates to:
-  /// **'Require a code from the driver before starting trip'**
-  String get pickupOtpRequiredDescription;
-
   /// No description provided for @errorLoadingData.
   ///
   /// In en, this message translates to:
   /// **'Error loading data'**
   String get errorLoadingData;
-
-  /// No description provided for @noTrustedContacts.
-  ///
-  /// In en, this message translates to:
-  /// **'No trusted contacts yet'**
-  String get noTrustedContacts;
-
-  /// No description provided for @addTrustedContactsDescription.
-  ///
-  /// In en, this message translates to:
-  /// **'Add trusted contacts to be notified during your trips'**
-  String get addTrustedContactsDescription;
 
   /// No description provided for @family.
   ///
@@ -5851,132 +5737,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Retry now'**
   String get retryNow;
-
-  /// No description provided for @safetyHub.
-  ///
-  /// In en, this message translates to:
-  /// **'Safety Center'**
-  String get safetyHub;
-
-  /// No description provided for @safetyHubDesc.
-  ///
-  /// In en, this message translates to:
-  /// **'All safety tools and guidelines'**
-  String get safetyHubDesc;
-
-  /// No description provided for @driverInstructions.
-  ///
-  /// In en, this message translates to:
-  /// **'Driver Guidelines'**
-  String get driverInstructions;
-
-  /// No description provided for @driverBeforeTrip.
-  ///
-  /// In en, this message translates to:
-  /// **'Verify the OTP code. Confirm the destination.'**
-  String get driverBeforeTrip;
-
-  /// No description provided for @driverAfterTrip.
-  ///
-  /// In en, this message translates to:
-  /// **'Wait for the customer to exit safely. Check for left items. End the trip in the app.'**
-  String get driverAfterTrip;
-
-  /// No description provided for @safetyTools.
-  ///
-  /// In en, this message translates to:
-  /// **'Safety Tools'**
-  String get safetyTools;
-
-  /// No description provided for @sosAlertTool.
-  ///
-  /// In en, this message translates to:
-  /// **'Emergency SOS'**
-  String get sosAlertTool;
-
-  /// No description provided for @sosAlertDesc.
-  ///
-  /// In en, this message translates to:
-  /// **'Send immediate alert to emergency contacts and authorities'**
-  String get sosAlertDesc;
-
-  /// No description provided for @tripSharingTool.
-  ///
-  /// In en, this message translates to:
-  /// **'Trip Sharing'**
-  String get tripSharingTool;
-
-  /// No description provided for @tripSharingDesc.
-  ///
-  /// In en, this message translates to:
-  /// **'Share your live location with trusted contacts'**
-  String get tripSharingDesc;
-
-  /// No description provided for @trustedContactsTool.
-  ///
-  /// In en, this message translates to:
-  /// **'Trusted Contacts'**
-  String get trustedContactsTool;
-
-  /// No description provided for @trustedContactsDesc.
-  ///
-  /// In en, this message translates to:
-  /// **'Manage your emergency contact list'**
-  String get trustedContactsDesc;
-
-  /// No description provided for @pickupOtpTool.
-  ///
-  /// In en, this message translates to:
-  /// **'Pickup Verification'**
-  String get pickupOtpTool;
-
-  /// No description provided for @pickupOtpDesc.
-  ///
-  /// In en, this message translates to:
-  /// **'Verify driver with OTP before starting trip'**
-  String get pickupOtpDesc;
-
-  /// No description provided for @safetyTips.
-  ///
-  /// In en, this message translates to:
-  /// **'Safety Tips'**
-  String get safetyTips;
-
-  /// No description provided for @tip1.
-  ///
-  /// In en, this message translates to:
-  /// **'Always share your trip with someone you trust'**
-  String get tip1;
-
-  /// No description provided for @tip2.
-  ///
-  /// In en, this message translates to:
-  /// **'Keep your phone charged during the trip'**
-  String get tip2;
-
-  /// No description provided for @tip3.
-  ///
-  /// In en, this message translates to:
-  /// **'Verify the driver and vehicle before getting in'**
-  String get tip3;
-
-  /// No description provided for @tip4.
-  ///
-  /// In en, this message translates to:
-  /// **'Trust your instincts — if something feels wrong, use SOS'**
-  String get tip4;
-
-  /// No description provided for @tip5.
-  ///
-  /// In en, this message translates to:
-  /// **'Sit in the back seat when riding alone'**
-  String get tip5;
-
-  /// No description provided for @tripInstructions.
-  ///
-  /// In en, this message translates to:
-  /// **'Trip Instructions'**
-  String get tripInstructions;
 
   /// No description provided for @yesterday.
   ///
@@ -7099,42 +6859,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Trusted Devices'**
   String get trustedDevices;
-
-  /// No description provided for @serviceAudioLogs.
-  ///
-  /// In en, this message translates to:
-  /// **'Service Audio Logs'**
-  String get serviceAudioLogs;
-
-  /// No description provided for @startAudioRecording.
-  ///
-  /// In en, this message translates to:
-  /// **'Start Recording'**
-  String get startAudioRecording;
-
-  /// No description provided for @stopAudioRecording.
-  ///
-  /// In en, this message translates to:
-  /// **'Stop Recording'**
-  String get stopAudioRecording;
-
-  /// No description provided for @recordingConsent.
-  ///
-  /// In en, this message translates to:
-  /// **'This recording is for security purposes only and will only be used in case of disputes. Your privacy is protected.'**
-  String get recordingConsent;
-
-  /// No description provided for @noAudioRecordings.
-  ///
-  /// In en, this message translates to:
-  /// **'No audio recordings yet'**
-  String get noAudioRecordings;
-
-  /// No description provided for @audioLogsForOrder.
-  ///
-  /// In en, this message translates to:
-  /// **'Audio Logs'**
-  String get audioLogsForOrder;
 
   /// No description provided for @mainSection.
   ///

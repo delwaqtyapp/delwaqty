@@ -2257,18 +2257,6 @@ class AppLocalizationsAr extends AppLocalizations {
   String get rateYourDriver => 'قيّم سائقك';
 
   @override
-  String get trustedContacts => 'جهات الاتصال الموثوقة';
-
-  @override
-  String get addTrustedContact => 'إضافة جهة اتصال موثوقة';
-
-  @override
-  String get emergencySos => 'استغاثة طوارئ';
-
-  @override
-  String get sosActivated => 'تم تفعيل الاستغاثة - جارٍ الاتصال بخدمات الطوارئ';
-
-  @override
   String get complaint => 'شكوى';
 
   @override
@@ -2833,54 +2821,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get serviceFeeLabel => 'الخدمة';
 
   @override
-  String get safety => 'الأمان';
-
-  @override
-  String get safetySettings => 'إعدادات الأمان';
-
-  @override
-  String get sosSettings => 'إعدادات الطوارئ';
-
-  @override
-  String get sosAlertEnabled => 'تنبيه الطوارئ';
-
-  @override
-  String get sosAlertEnabledDescription =>
-      'تفعيل تنبيهات الطوارئ أثناء الرحلات';
-
-  @override
-  String get autoSosTimer => 'مؤقت الطوارئ التلقائي';
-
-  @override
-  String get autoSosTimerDescription => 'تفعيل الطوارئ تلقائياً بعد مؤقت';
-
-  @override
-  String get tripSharing => 'مشاركة الرحلة';
-
-  @override
-  String get shareDuration => 'مدة المشاركة';
-
-  @override
-  String get emergencyContacts => 'جهات الاتصال للطوارئ';
-
-  @override
-  String get pickupVerification => 'التحقق من الاستلام';
-
-  @override
-  String get pickupOtpRequired => 'رمز الاستلام مطلوب';
-
-  @override
-  String get pickupOtpRequiredDescription => 'طلب رمز من السائق قبل بدء الرحلة';
-
-  @override
   String get errorLoadingData => 'خطأ في تحميل البيانات';
-
-  @override
-  String get noTrustedContacts => 'لا توجد جهات اتصال موثوقة';
-
-  @override
-  String get addTrustedContactsDescription =>
-      'أضف جهات اتصال موثوقة لتتم إخطارها أثناء رحلاتك';
 
   @override
   String get family => 'عائلتي';
@@ -3004,70 +2945,6 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get retryNow => 'أعد المحاولة الآن';
-
-  @override
-  String get safetyHub => 'مركز الأمان';
-
-  @override
-  String get safetyHubDesc => 'كل أدوات الأمان والإرشادات';
-
-  @override
-  String get driverInstructions => 'إرشادات السائق';
-
-  @override
-  String get driverBeforeTrip => 'تحقق من رمز التحقق OTP. أكد الوجهة.';
-
-  @override
-  String get driverAfterTrip =>
-      'انتظر خروج العميل بأمان. تحقق من الأغراض المنسية. أنهِ الرحلة من التطبيق.';
-
-  @override
-  String get safetyTools => 'أدوات الأمان';
-
-  @override
-  String get sosAlertTool => 'طوارئ SOS';
-
-  @override
-  String get sosAlertDesc => 'إرسال تنبيه فوري لجهات الاتصال والسلطات';
-
-  @override
-  String get tripSharingTool => 'مشاركة الرحلة';
-
-  @override
-  String get tripSharingDesc => 'مشاركة موقعك المباشر مع جهات اتصال موثوقة';
-
-  @override
-  String get trustedContactsTool => 'جهات اتصال موثوقة';
-
-  @override
-  String get trustedContactsDesc => 'إدارة قائمة جهات الاتصال للطوارئ';
-
-  @override
-  String get pickupOtpTool => 'التحقق من الاستلام';
-
-  @override
-  String get pickupOtpDesc => 'تحقق من السائق برمز OTP قبل بدء الرحلة';
-
-  @override
-  String get safetyTips => 'نصائح الأمان';
-
-  @override
-  String get tip1 => 'شارك رحلتك دايماً مع حد تثق فيه';
-
-  @override
-  String get tip2 => 'شحن تليفونك أثناء الرحلة';
-
-  @override
-  String get tip3 => 'تأكد من السائق والعربيه قبل ما تركب';
-
-  @override
-  String get tip4 => 'ثوق في إحساسك — لو حسيت بخطر، استخدم زر الطوارئ';
-
-  @override
-  String get tip5 => 'ابعت في الخلف لوحدك';
-
-  @override
-  String get tripInstructions => 'تعليمات الرحلة';
 
   @override
   String get yesterday => 'أمس';
@@ -3663,25 +3540,6 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get trustedDevices => 'الأجهزة الموثوقة';
-
-  @override
-  String get serviceAudioLogs => 'سجل الأمان';
-
-  @override
-  String get startAudioRecording => 'بدء التسجيل';
-
-  @override
-  String get stopAudioRecording => 'إيقاف التسجيل';
-
-  @override
-  String get recordingConsent =>
-      'هذا التسجيل لأغراض أمنية فقط، ولن يُستخدم إلا في حالات النزاع. خصوصيتك محمية.';
-
-  @override
-  String get noAudioRecordings => 'لا توجد تسجيلات صوتية بعد';
-
-  @override
-  String get audioLogsForOrder => 'التسجيلات الصوتية';
 
   @override
   String get mainSection => 'الرئيسية';

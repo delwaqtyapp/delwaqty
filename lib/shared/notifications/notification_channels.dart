@@ -52,7 +52,6 @@ class NotificationChannels {
     ),
     NotificationChannel('/profile'),
     NotificationChannel('/rewards'),
-    NotificationChannel('/safety'),
     NotificationChannel(
       '/wallet',
       contexts: {AppContext.customer, AppContext.provider, AppContext.driver},

@@ -11,10 +11,8 @@ import 'package:delwaqty/features/customer/commerce/commerce_module.dart';
 import 'package:delwaqty/features/customer/restaurant/restaurant_module.dart';
 import 'package:delwaqty/features/customer/wallet/wallet_module.dart';
 import 'package:delwaqty/features/customer/delivery/delivery_module.dart';
-import 'package:delwaqty/features/customer/safety/safety_module.dart';
 import 'package:delwaqty/features/customer/search/search_module.dart';
 import 'package:delwaqty/features/customer/orders/orders_module.dart';
-import 'package:delwaqty/features/customer/service_audio_logs/service_audio_logs_module.dart';
 import 'package:delwaqty/features/customer/home_services/home_services_module.dart';
 import 'package:delwaqty/features/_shared/complaints/complaints_module.dart';
 import 'package:delwaqty/features/_shared/regions/regions_module.dart';
@@ -38,8 +36,6 @@ void registerAllModules() {
     SettingsModule(),
     ProfileModule(),
     NotificationsModule(),
-    SafetyModule(),
-    ServiceAudioLogsModule(),
     HomeServicesModule(),
     ComplaintsModule(),
     SupportChatModule(),

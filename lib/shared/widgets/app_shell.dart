@@ -10,8 +10,22 @@ import 'package:delwaqty/core/theme/app_text_styles.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 import 'package:delwaqty/shared/widgets/scroll_aware_nav.dart';
 
+final _drawerEntryBadgeProvider =
+    StreamProvider.autoDispose.family<int?, DrawerEntry>((ref, entry) async* {
+  final stream = entry.badgeStream?.call(ref);
+  if (stream == null) {
+    yield null;
+    return;
+  }
+  await for (final count in stream) {
+    yield count;
+  }
+});
+
 class AppShell extends ConsumerStatefulWidget {
   const AppShell({super.key, required this.navigationShell});
+
+  static final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
 
   final StatefulNavigationShell navigationShell;
 
@@ -46,6 +60,8 @@ class _AppShellState extends ConsumerState<AppShell> {
         }
       },
       child: Scaffold(
+      key: AppShell.scaffoldKey,
+      drawer: _buildAppDrawer(context),
       body: widget.navigationShell,
       bottomNavigationBar: AnimatedSlide(
         duration: const Duration(milliseconds: 300),
@@ -63,6 +79,106 @@ class _AppShellState extends ConsumerState<AppShell> {
         ),
       ),
     ),
+    );
+  }
+
+  Widget _buildAppDrawer(BuildContext context) {
+    final registry = FeatureRegistry.instance;
+    final entries = registry.allDrawerEntries;
+    final groups = {
+      for (final pos in DrawerPosition.values)
+        pos: entries.where((e) => e.position == pos).toList(),
+    };
+    return Drawer(
+      shape: const RoundedRectangleBorder(),
+      backgroundColor: Theme.of(context).colorScheme.surfaceContainerLowest,
+      child: SafeArea(
+        child: CustomScrollView(
+          slivers: [
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(20, 24, 20, 12),
+                child: Row(
+                  children: [
+                    Image.asset(
+                      'assets/egypt/delwaqty_logo_mark.png',
+                      width: 52,
+                      fit: BoxFit.contain,
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        'DelwaQty',
+                        style: AppTextStyles.titleLarge.copyWith(
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            _drawerSection(groups[DrawerPosition.body] ?? const []),
+            if ((groups[DrawerPosition.settings] ?? []).isNotEmpty) ...[
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 16, 20, 6),
+                  child: Text(
+                    AppLocalizations.of(context).settings,
+                    style: AppTextStyles.labelLarge.copyWith(
+                      color: Theme.of(context).colorScheme.primary,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+              ),
+              _drawerSection(groups[DrawerPosition.settings]!),
+            ],
+            const SliverToBoxAdapter(child: SizedBox(height: 24)),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _drawerSection(List<DrawerEntry> entries) {
+    return SliverList(
+      delegate: SliverChildBuilderDelegate(
+        (context, index) => _drawerTile(context, entries[index]),
+        childCount: entries.length,
+      ),
+    );
+  }
+
+  Widget _drawerTile(BuildContext context, DrawerEntry entry) {
+    return ListTile(
+      leading: Icon(entry.icon, color: Theme.of(context).colorScheme.primary),
+      title: Text(
+        entry.label(context),
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+      ),
+      trailing: _drawerBadge(context, entry),
+      onTap: () => entry.onTap(context, ref),
+    );
+  }
+
+  Widget? _drawerBadge(BuildContext context, DrawerEntry entry) {
+    final count = ref.watch(_drawerEntryBadgeProvider(entry)).value;
+    if (count == null || count <= 0) return null;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.error,
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: Text(
+        '$count',
+        style: AppTextStyles.labelSmall.copyWith(
+          color: Colors.white,
+          fontWeight: FontWeight.w700,
+        ),
+      ),
     );
   }
 

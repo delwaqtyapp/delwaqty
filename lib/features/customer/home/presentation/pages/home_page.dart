@@ -27,10 +27,12 @@ import 'package:delwaqty/features/customer/home/domain/entities/platform_categor
 import 'package:delwaqty/shared/widgets/scroll_aware_nav.dart';
 import 'package:delwaqty/data/repositories/cached_service_booking_repository.dart';
 import 'package:delwaqty/features/customer/home_services/domain/entities/service_category.dart';
+import 'package:delwaqty/core/theme/app_icons.dart';
 import 'package:delwaqty/core/theme/app_colors.dart';
 import 'package:delwaqty/core/theme/app_text_styles.dart';
 import 'package:delwaqty/core/theme/app_spacing.dart';
 import 'package:delwaqty/core/theme/app_elevation.dart';
+import 'package:delwaqty/shared/widgets/app_shell.dart';
 
 final _homeServiceCategoriesProvider =
     FutureProvider<List<ServiceCategory>>((ref) async {
@@ -331,10 +333,9 @@ class _EgyptHeroState extends State<_EgyptHero>
 
   @override
   Widget build(BuildContext context) {
-    final heroH = (MediaQuery.sizeOf(context).height * 0.38)
-        .clamp(360.0, 430.0)
+    final heroH = (MediaQuery.sizeOf(context).height * 0.40)
+        .clamp(370.0, 430.0)
         .toDouble();
-    final isRtl = Directionality.of(context) == TextDirection.rtl;
     return ClipRRect(
       borderRadius: const BorderRadius.vertical(
         bottom: Radius.circular(28),
@@ -379,25 +380,30 @@ class _EgyptHeroState extends State<_EgyptHero>
               ),
             ),
             SafeArea(
+              bottom: false,
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(20, 10, 20, 0),
+                padding: const EdgeInsets.fromLTRB(20, 2, 20, 0),
                 child: FadeTransition(
                   opacity: _reveal,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      _buildTopRow(context, widget.l10n, isRtl),
-                      const SizedBox(height: 6),
+                      _buildTopRow(context, widget.l10n),
+                      const SizedBox(height: 3),
+                      _buildEgyptStatement(context, widget.l10n),
+                      const SizedBox(height: 5),
                       _buildBrandLockup(context, widget.l10n),
                       const Spacer(),
-                      _buildGreeting(
-                        context,
-                        widget.l10n,
-                        widget.authState,
+                      Flexible(
+                        child: _buildGreeting(
+                          context,
+                          widget.l10n,
+                          widget.authState,
+                        ),
                       ),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: 6),
                       _buildLocationPill(context),
-                      const SizedBox(height: 10),
+                      const SizedBox(height: 8),
                       _buildHeroSearch(context, widget.l10n),
                     ],
                   ),
@@ -410,47 +416,14 @@ class _EgyptHeroState extends State<_EgyptHero>
     );
   }
 
-  Widget _buildTopRow(
-    BuildContext context,
-    AppLocalizations l10n,
-    bool isRtl,
-  ) {
+  Widget _buildTopRow(BuildContext context, AppLocalizations l10n) {
     return SizedBox(
-      height: 50,
+      height: 40,
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Flexible(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  l10n.egyptStatementTitle,
-                  style: AppTextStyles.titleLarge.copyWith(
-                    color: AppColors.brandGold,
-                    fontWeight: FontWeight.w900,
-                    fontSize: 26,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                Text(
-                  l10n.egyptStatementTagline,
-                  style: AppTextStyles.bodyMedium.copyWith(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w600,
-                    fontSize: 13,
-                    shadows: const [
-                      Shadow(color: Color(0x55000000), blurRadius: 4),
-                    ],
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ],
-            ),
+          _MenuCircleButton(
+            onTap: () => AppShell.scaffoldKey.currentState?.openDrawer(),
           ),
           _NotificationCircle(
             unreadCount: widget.unreadCount,
@@ -460,6 +433,38 @@ class _EgyptHeroState extends State<_EgyptHero>
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildEgyptStatement(BuildContext context, AppLocalizations l10n) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          l10n.egyptStatementTitle,
+          style: AppTextStyles.titleLarge.copyWith(
+            color: AppColors.brandGold,
+            fontWeight: FontWeight.w900,
+            fontSize: 24,
+          ),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
+        Text(
+          l10n.egyptStatementTagline,
+          style: AppTextStyles.bodyMedium.copyWith(
+            color: Colors.white,
+            fontWeight: FontWeight.w600,
+            fontSize: 13,
+            shadows: const [
+              Shadow(color: Color(0x55000000), blurRadius: 4),
+            ],
+          ),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
+      ],
     );
   }
 
@@ -524,7 +529,7 @@ class _EgyptHeroState extends State<_EgyptHero>
               style: AppTextStyles.titleLarge.copyWith(
                 color: Colors.white,
                 fontWeight: FontWeight.w800,
-                fontSize: 18,
+                fontSize: 16,
               ),
             ),
             ShaderMask(
@@ -541,21 +546,24 @@ class _EgyptHeroState extends State<_EgyptHero>
                 style: AppTextStyles.titleLarge.copyWith(
                   color: Colors.white,
                   fontWeight: FontWeight.w800,
-                  fontSize: 18,
+                  fontSize: 16,
                 ),
               ),
             ),
           ],
         ),
-        Text(
-          l10n.appNameAr,
-          style: AppTextStyles.titleLarge.copyWith(
-            color: AppColors.brandPurple,
-            fontWeight: FontWeight.w700,
-            fontSize: 14,
-            shadows: const [
-              Shadow(color: Color(0x55000000), blurRadius: 3),
-            ],
+        const SizedBox(height: 1),
+        Directionality(
+          textDirection: TextDirection.rtl,
+          child: Text(
+            l10n.appNameAr,
+            style: const TextStyle(
+              fontFamily: 'Cairo',
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+              color: Color(0xFFF7F7FA),
+              letterSpacing: 0.5,
+            ),
           ),
         ),
       ],
@@ -606,7 +614,7 @@ class _EgyptHeroState extends State<_EgyptHero>
       error: (_, _) => widget.l10n.searchingForLocation,
     );
     return Container(
-      height: 40,
+      height: 38,
       padding: const EdgeInsets.symmetric(horizontal: 14),
       decoration: BoxDecoration(
         color: Colors.white.withValues(alpha: 0.18),
@@ -655,7 +663,7 @@ class _EgyptHeroState extends State<_EgyptHero>
     return PremiumSearchField(
       readOnly: true,
       hint: l10n.searchHint,
-      height: 54,
+      height: 50,
       borderRadius: 28,
       onTap: () => context.go('/search'),
       onFilterPressed: () => context.go('/search'),
@@ -1119,6 +1127,40 @@ class _DiscoveryContent extends ConsumerWidget {
       );
     }
     return const SizedBox.shrink();
+  }
+}
+
+class _MenuCircleButton extends StatelessWidget {
+  const _MenuCircleButton({required this.onTap});
+
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return PressableScale(
+      onTap: onTap,
+      child: Container(
+        width: 40,
+        height: 40,
+        decoration: BoxDecoration(
+          color: Colors.white.withValues(alpha: 0.2),
+          shape: BoxShape.circle,
+          border: Border.all(color: Colors.white.withValues(alpha: 0.35)),
+          boxShadow: const [
+            BoxShadow(
+              color: Color(0x22000000),
+              blurRadius: 12,
+              offset: Offset(0, 4),
+            ),
+          ],
+        ),
+        child: const Icon(
+          AppIcons.navDrawer,
+          color: Colors.white,
+          size: 22,
+        ),
+      ),
+    );
   }
 }
 

@@ -3040,3 +3040,28 @@ The ROUND-33 responsive hero still looked wrong on the owner's device: the backg
 - Home hero = natural-fit banner + compact glass controls; identical language between location and search.
 - `PremiumSearchField` still used by the full search page; hero no longer imports it.
 - Gate: `flutter analyze` **0 issues**; `flutter test` **935/935**; APK `releases/delwaqty_1.0.0+1_debug_20260923_1500.apk` installed + relaunched clean (pid 3015, no FATAL), screencap `releases/screenshot_hero_1500.png`.
+
+## ADR-084: Hero Redesign — Mini Logo, Intro Arabic Name, Raised Glass Search, Image-Bottom Location, Animated Motorcycle CTA
+
+**Date:** Sprint 173
+**Status:** Accepted
+**Deciders:** Owner (detailed visual directive) + Lead Architect
+
+### Context
+The owner reshaped the hero again into a cleaner composition: tiny logo at the very top, the INTRO's Arabic wordmark instead of the English one, the search raised below the notifications row, the location pinned to the bottom-left OF THE IMAGE, the greeting box removed, and a professional animated delivery-motorcycle "اطلب طلبك مباشر" button immediately under the image.
+
+### Decision
+(1) **Mini top lockup**: logo 44dp + «دلوقتي» (intro Cairo w600 12dp near-white) centered between the notification and menu circles; English "DelwaQty" wordmark deleted (`_buildBrandLockup` removed).
+(2) **Greeting removed**: `_buildGreeting` + `_greeting` deleted (the box «فوق اطلب طلبك مباشرة»).
+(3) **Search raised**: the existing glass search pill now sits directly under the top row.
+(4) **Location badge**: new small glass `_buildLocationBadge` (28dp, maxWidth 178) overlaid bottom-LEFT inside the natural-fit hero image box (old full-width `_buildLocationPill` removed).
+(5) **`_DirectOrderButton`**: 60dp gradient CTA under the image with a LOOPING professional motorcycle animation — 2.4s repeating `AnimationController`, `math.sin` ping-pong glide (±16px) + bob + two fading trail ghosts; taps → `/direct-delivery` (same target as the mid-page order card).
+
+### Rationale
+- Follows the owner's explicit screen-by-screen specification; the intro Arabic wordmark keeps brand consistency; the looping animation uses a single lightweight controller (no external deps, test-safe — responsive suite passes with no pumpAndSettle hang).
+- The location badge lives INSIDE the image box so it always sits at the image's bottom-left regardless of phone width.
+
+### Consequences
+- Hero = top bar with mini branded lockup → glass search → small Egypt statement → animated motorcycle CTA; location badge on the image bottom-left.
+- `_HeroOrderCard` (mid-page) untouched; `/direct-delivery` remains the CTA target.
+- Gate: `flutter analyze` **0 issues**; `flutter test` **935/935**; APK `releases/delwaqty_1.0.0+1_debug_20260923_1600.apk` installed + relaunched clean (pid 23462), screencap `releases/screenshot_hero_1600.png`.

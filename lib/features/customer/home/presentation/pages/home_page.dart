@@ -333,9 +333,29 @@ class _EgyptHeroState extends State<_EgyptHero>
 
   @override
   Widget build(BuildContext context) {
-    final heroH = (MediaQuery.sizeOf(context).height * 0.42)
-        .clamp(480.0, 540.0)
-        .toDouble();
+    final size = MediaQuery.sizeOf(context);
+    final screenWidth = size.width;
+    final screenHeight = size.height;
+    final isPortrait = screenHeight >= screenWidth;
+
+    final heroH = isPortrait
+        ? (screenHeight * 0.48).clamp(430.0, 560.0)
+        : (screenHeight * 0.60).clamp(300.0, 420.0);
+
+    final horizontalPadding = (screenWidth * 0.055).clamp(16.0, 28.0);
+    final topButtonSize = (screenWidth * 0.13).clamp(48.0, 56.0);
+    final topIconSize = (topButtonSize * 0.44).clamp(20.0, 25.0);
+    final logoSize = (screenWidth * 0.20).clamp(72.0, 92.0);
+    final wordmarkSize = (logoSize * 0.22).clamp(15.0, 20.0);
+    final arabicSize = (logoSize * 0.19).clamp(13.0, 17.0);
+    final egyptTitleSize = (screenWidth * 0.062).clamp(24.0, 28.0);
+    final egyptTaglineSize = (screenWidth * 0.038).clamp(14.0, 16.0);
+    final welcomeTitleSize = (screenWidth * 0.065).clamp(24.0, 30.0);
+    final welcomeSubtitleSize = (screenWidth * 0.038).clamp(14.0, 17.0);
+    final locationHeight = (screenWidth * 0.11).clamp(44.0, 48.0);
+    final searchHeight = (screenWidth * 0.13).clamp(52.0, 56.0);
+    final zoneGap = (screenHeight * 0.014).clamp(6.0, 14.0);
+
     return ClipRRect(
       borderRadius: const BorderRadius.vertical(
         bottom: Radius.circular(28),
@@ -345,21 +365,12 @@ class _EgyptHeroState extends State<_EgyptHero>
         child: Stack(
           fit: StackFit.expand,
           children: [
-            Positioned.fill(
-              child: Image.asset(
-                'assets/egypt/home_egypt_hero.png',
-                fit: BoxFit.cover,
-                gaplessPlayback: true,
-                errorBuilder: (_, _, _) => const DecoratedBox(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      colors: [
-                        AppColors.brandPurpleDeep,
-                        AppColors.brandViolet,
-                      ],
-                    ),
+            const Positioned.fill(
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  image: DecorationImage(
+                    image: AssetImage('assets/egypt/home_egypt_hero.png'),
+                    fit: BoxFit.cover,
                   ),
                 ),
               ),
@@ -381,36 +392,69 @@ class _EgyptHeroState extends State<_EgyptHero>
             ),
             SafeArea(
               bottom: false,
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(20, 2, 20, 0),
-                child: FadeTransition(
-                  opacity: _reveal,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      _buildTopControlsRow(context),
-                      const SizedBox(height: 10),
-                      Align(
-                        alignment: Alignment.topRight,
-                        child: _buildEgyptStatement(context, widget.l10n),
-                      ),
-                      const Spacer(flex: 2),
-                      _buildBrandLockup(context, widget.l10n),
-                      const Spacer(flex: 2),
-                      ConstrainedBox(
-                        constraints: const BoxConstraints(maxHeight: 72),
-                        child: _buildGreeting(
-                          context,
-                          widget.l10n,
-                          widget.authState,
-                        ),
-                      ),
-                      const Spacer(flex: 2),
-                      _buildLocationPill(context),
-                      const SizedBox(height: 10),
-                      _buildHeroSearch(context, widget.l10n),
-                      const SizedBox(height: 10),
-                    ],
+              child: Center(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 600),
+                  child: Padding(
+                    padding: EdgeInsets.fromLTRB(
+                      horizontalPadding,
+                      2,
+                      horizontalPadding,
+                      10,
+                    ),
+                    child: LayoutBuilder(
+                      builder: (context, constraints) {
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            _buildTopControlsRow(
+                              context,
+                              buttonSize: topButtonSize,
+                              iconSize: topIconSize,
+                            ),
+                            SizedBox(height: zoneGap),
+                            Align(
+                              alignment: Alignment.topRight,
+                              child: _buildEgyptStatement(
+                                context,
+                                widget.l10n,
+                                titleSize: egyptTitleSize,
+                                taglineSize: egyptTaglineSize,
+                              ),
+                            ),
+                            const Spacer(flex: 2),
+                            _buildBrandLockup(
+                              context,
+                              widget.l10n,
+                              logoSize: logoSize,
+                              wordmarkSize: wordmarkSize,
+                              arabicSize: arabicSize,
+                            ),
+                            const Spacer(flex: 3),
+                            Flexible(
+                              child: _buildGreeting(
+                                context,
+                                widget.l10n,
+                                widget.authState,
+                                titleSize: welcomeTitleSize,
+                                subtitleSize: welcomeSubtitleSize,
+                              ),
+                            ),
+                            const Spacer(flex: 2),
+                            _buildLocationPill(
+                              context,
+                              height: locationHeight,
+                            ),
+                            SizedBox(height: zoneGap),
+                            _buildHeroSearch(
+                              context,
+                              widget.l10n,
+                              height: searchHeight,
+                            ),
+                          ],
+                        );
+                      },
+                    ),
                   ),
                 ),
               ),
@@ -421,7 +465,11 @@ class _EgyptHeroState extends State<_EgyptHero>
     );
   }
 
-  Widget _buildTopControlsRow(BuildContext context) {
+  Widget _buildTopControlsRow(
+    BuildContext context, {
+    required double buttonSize,
+    required double iconSize,
+  }) {
     return Directionality(
       textDirection: TextDirection.ltr,
       child: Row(
@@ -432,16 +480,25 @@ class _EgyptHeroState extends State<_EgyptHero>
             onTap: widget.isGuest
                 ? () => context.push('/login')
                 : () => context.push('/notifications'),
+            size: buttonSize,
+            iconSize: iconSize,
           ),
           _MenuCircleButton(
             onTap: () => AppShell.scaffoldKey.currentState?.openDrawer(),
+            size: buttonSize,
+            iconSize: iconSize,
           ),
         ],
       ),
     );
   }
 
-  Widget _buildEgyptStatement(BuildContext context, AppLocalizations l10n) {
+  Widget _buildEgyptStatement(
+    BuildContext context,
+    AppLocalizations l10n, {
+    required double titleSize,
+    required double taglineSize,
+  }) {
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -451,7 +508,7 @@ class _EgyptHeroState extends State<_EgyptHero>
           style: AppTextStyles.titleLarge.copyWith(
             color: AppColors.brandGold,
             fontWeight: FontWeight.w900,
-            fontSize: 26,
+            fontSize: titleSize,
           ),
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
@@ -461,7 +518,7 @@ class _EgyptHeroState extends State<_EgyptHero>
           style: AppTextStyles.bodyMedium.copyWith(
             color: Colors.white,
             fontWeight: FontWeight.w600,
-            fontSize: 14,
+            fontSize: taglineSize,
             shadows: const [
               Shadow(color: Color(0x55000000), blurRadius: 4),
             ],
@@ -473,7 +530,13 @@ class _EgyptHeroState extends State<_EgyptHero>
     );
   }
 
-  Widget _buildBrandLockup(BuildContext context, AppLocalizations l10n) {
+  Widget _buildBrandLockup(
+    BuildContext context,
+    AppLocalizations l10n, {
+    required double logoSize,
+    required double wordmarkSize,
+    required double arabicSize,
+  }) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
@@ -499,14 +562,14 @@ class _EgyptHeroState extends State<_EgyptHero>
               ],
             ),
             child: SizedBox(
-              width: 80,
-              height: 80,
+              width: logoSize,
+              height: logoSize,
               child: Image.asset(
                 'assets/egypt/delwaqty_logo_mark.png',
                 fit: BoxFit.contain,
                 errorBuilder: (_, _, _) => Container(
-                  width: 80,
-                  height: 80,
+                  width: logoSize,
+                  height: logoSize,
                   decoration: const BoxDecoration(
                     shape: BoxShape.circle,
                     gradient: LinearGradient(
@@ -537,7 +600,7 @@ class _EgyptHeroState extends State<_EgyptHero>
               style: AppTextStyles.titleLarge.copyWith(
                 color: Colors.white,
                 fontWeight: FontWeight.w800,
-                fontSize: 16,
+                fontSize: wordmarkSize,
               ),
             ),
             ShaderMask(
@@ -554,7 +617,7 @@ class _EgyptHeroState extends State<_EgyptHero>
                 style: AppTextStyles.titleLarge.copyWith(
                   color: Colors.white,
                   fontWeight: FontWeight.w800,
-                  fontSize: 16,
+                  fontSize: wordmarkSize,
                 ),
               ),
             ),
@@ -571,7 +634,7 @@ class _EgyptHeroState extends State<_EgyptHero>
               fontWeight: FontWeight.w600,
               color: Color(0xFFF7F7FA),
               letterSpacing: 0.5,
-            ),
+            ).copyWith(fontSize: arabicSize),
           ),
         ),
       ],
@@ -581,39 +644,46 @@ class _EgyptHeroState extends State<_EgyptHero>
   Widget _buildGreeting(
     BuildContext context,
     AppLocalizations l10n,
-    AuthState authState,
-  ) {
+    AuthState authState, {
+    required double titleSize,
+    required double subtitleSize,
+  }) {
     return Column(
+      mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          _greeting(l10n, authState),
-          style: context.textTheme.titleLarge?.copyWith(
-            color: Colors.white,
-            fontWeight: FontWeight.w800,
-            fontSize: 24,
-            shadows: const [
-              Shadow(color: Color(0x40000000), blurRadius: 4),
-            ],
+        Flexible(
+          child: Text(
+            _greeting(l10n, authState),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: context.textTheme.titleLarge?.copyWith(
+              color: Colors.white,
+              fontWeight: FontWeight.w800,
+              fontSize: titleSize,
+              shadows: const [
+                Shadow(color: Color(0x40000000), blurRadius: 4),
+              ],
+            ),
           ),
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
         ),
         const SizedBox(height: 2),
-        Text(
-          l10n.greetingSubtitle,
-          style: AppTextStyles.bodyMedium.copyWith(
-            color: Colors.white.withValues(alpha: 0.85),
-            fontSize: 14,
+        Flexible(
+          child: Text(
+            l10n.greetingSubtitle,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: AppTextStyles.bodyMedium.copyWith(
+              color: Colors.white.withValues(alpha: 0.85),
+              fontSize: subtitleSize,
+            ),
           ),
-          maxLines: 2,
-          overflow: TextOverflow.ellipsis,
         ),
       ],
     );
   }
 
-  Widget _buildLocationPill(BuildContext context) {
+  Widget _buildLocationPill(BuildContext context, {required double height}) {
     final locationText = widget.locationAsync.when(
       data: (loc) => loc?.detailedAddress.isNotEmpty == true
           ? loc!.detailedAddress
@@ -622,7 +692,7 @@ class _EgyptHeroState extends State<_EgyptHero>
       error: (_, _) => widget.l10n.searchingForLocation,
     );
     return Container(
-      height: 44,
+      height: height,
       padding: const EdgeInsets.symmetric(horizontal: 14),
       decoration: BoxDecoration(
         color: Colors.white.withValues(alpha: 0.18),
@@ -667,12 +737,16 @@ class _EgyptHeroState extends State<_EgyptHero>
     );
   }
 
-  Widget _buildHeroSearch(BuildContext context, AppLocalizations l10n) {
+  Widget _buildHeroSearch(
+    BuildContext context,
+    AppLocalizations l10n, {
+    required double height,
+  }) {
     return PremiumSearchField(
       readOnly: true,
       hint: l10n.searchHint,
-      height: 54,
-      borderRadius: 28,
+      height: height,
+      borderRadius: height / 2,
       onTap: () => context.go('/search'),
       onFilterPressed: () => context.go('/search'),
     );
@@ -774,7 +848,8 @@ class _CompactCategories extends StatelessWidget {
         padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
         itemCount: 8,
         separatorBuilder: (_, _) => const SizedBox(width: 12),
-        itemBuilder: (_, _) => const ShimmerCard(height: 108),
+        itemBuilder: (_, _) =>
+            const SizedBox(width: 150, child: ShimmerCard(height: 108)),
       ),
     );
   }
@@ -1139,17 +1214,23 @@ class _DiscoveryContent extends ConsumerWidget {
 }
 
 class _MenuCircleButton extends StatelessWidget {
-  const _MenuCircleButton({required this.onTap});
+  const _MenuCircleButton({
+    required this.onTap,
+    this.size = 54,
+    this.iconSize = 24,
+  });
 
   final VoidCallback onTap;
+  final double size;
+  final double iconSize;
 
   @override
   Widget build(BuildContext context) {
     return PressableScale(
       onTap: onTap,
       child: Container(
-        width: 54,
-        height: 54,
+        width: size,
+        height: size,
         decoration: BoxDecoration(
           color: Colors.white.withValues(alpha: 0.2),
           shape: BoxShape.circle,
@@ -1162,10 +1243,10 @@ class _MenuCircleButton extends StatelessWidget {
             ),
           ],
         ),
-        child: const Icon(
+        child: Icon(
           AppIcons.navDrawer,
           color: Colors.white,
-          size: 24,
+          size: iconSize,
         ),
       ),
     );
@@ -1173,10 +1254,17 @@ class _MenuCircleButton extends StatelessWidget {
 }
 
 class _NotificationCircle extends StatelessWidget {
-  const _NotificationCircle({required this.unreadCount, required this.onTap});
+  const _NotificationCircle({
+    required this.unreadCount,
+    required this.onTap,
+    this.size = 54,
+    this.iconSize = 24,
+  });
 
   final int unreadCount;
   final VoidCallback onTap;
+  final double size;
+  final double iconSize;
 
   @override
   Widget build(BuildContext context) {
@@ -1185,8 +1273,8 @@ class _NotificationCircle extends StatelessWidget {
       child: PressableScale(
         onTap: onTap,
         child: Container(
-          width: 54,
-          height: 54,
+          width: size,
+          height: size,
           decoration: BoxDecoration(
             color: Colors.white.withValues(alpha: 0.2),
             shape: BoxShape.circle,
@@ -1202,11 +1290,11 @@ class _NotificationCircle extends StatelessWidget {
           child: Stack(
             clipBehavior: Clip.none,
             children: [
-              const Center(
+              Center(
                 child: Icon(
                   Icons.notifications_outlined,
                   color: Colors.white,
-                  size: 24,
+                  size: iconSize,
                 ),
               ),
               if (unreadCount > 0)

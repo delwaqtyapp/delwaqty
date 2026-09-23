@@ -282,15 +282,6 @@ class _FloatingSidebarOverlayState extends State<FloatingSidebarOverlay>
                                       _navigate('/settings/privacy-security');
                                     },
                                   ),
-                                  SidebarItem(
-                                    icon: Icons.mic_rounded,
-                                    label: widget.l10n.serviceAudioLogs,
-                                    isSelected: _selectedIndex == 6,
-                                    onTap: () {
-                                      setState(() => _selectedIndex = 6);
-                                      _navigate('/service-audio-logs');
-                                    },
-                                  ),
                                   SidebarItemWithBadge(
                                     icon: Icons.wallet_outlined,
                                     label: widget.l10n.wallet,

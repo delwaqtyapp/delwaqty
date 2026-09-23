@@ -2268,18 +2268,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get rateYourDriver => 'Rate your driver';
 
   @override
-  String get trustedContacts => 'Trusted Contacts';
-
-  @override
-  String get addTrustedContact => 'Add Trusted Contact';
-
-  @override
-  String get emergencySos => 'Emergency SOS';
-
-  @override
-  String get sosActivated => 'SOS activated - contacting emergency services';
-
-  @override
   String get complaint => 'Complaint';
 
   @override
@@ -2850,56 +2838,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get serviceFeeLabel => 'Service';
 
   @override
-  String get safety => 'Safety';
-
-  @override
-  String get safetySettings => 'Safety Settings';
-
-  @override
-  String get sosSettings => 'SOS Settings';
-
-  @override
-  String get sosAlertEnabled => 'SOS Alert';
-
-  @override
-  String get sosAlertEnabledDescription =>
-      'Enable emergency SOS alerts during rides';
-
-  @override
-  String get autoSosTimer => 'Auto SOS Timer';
-
-  @override
-  String get autoSosTimerDescription =>
-      'Automatically trigger SOS after a timer';
-
-  @override
-  String get tripSharing => 'Trip Sharing';
-
-  @override
-  String get shareDuration => 'Share Duration';
-
-  @override
-  String get emergencyContacts => 'Emergency Contacts';
-
-  @override
-  String get pickupVerification => 'Pickup Verification';
-
-  @override
-  String get pickupOtpRequired => 'Pickup Code Required';
-
-  @override
-  String get pickupOtpRequiredDescription =>
-      'Require a code from the driver before starting trip';
-
-  @override
   String get errorLoadingData => 'Error loading data';
-
-  @override
-  String get noTrustedContacts => 'No trusted contacts yet';
-
-  @override
-  String get addTrustedContactsDescription =>
-      'Add trusted contacts to be notified during your trips';
 
   @override
   String get family => 'Family';
@@ -3023,73 +2962,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get retryNow => 'Retry now';
-
-  @override
-  String get safetyHub => 'Safety Center';
-
-  @override
-  String get safetyHubDesc => 'All safety tools and guidelines';
-
-  @override
-  String get driverInstructions => 'Driver Guidelines';
-
-  @override
-  String get driverBeforeTrip =>
-      'Verify the OTP code. Confirm the destination.';
-
-  @override
-  String get driverAfterTrip =>
-      'Wait for the customer to exit safely. Check for left items. End the trip in the app.';
-
-  @override
-  String get safetyTools => 'Safety Tools';
-
-  @override
-  String get sosAlertTool => 'Emergency SOS';
-
-  @override
-  String get sosAlertDesc =>
-      'Send immediate alert to emergency contacts and authorities';
-
-  @override
-  String get tripSharingTool => 'Trip Sharing';
-
-  @override
-  String get tripSharingDesc =>
-      'Share your live location with trusted contacts';
-
-  @override
-  String get trustedContactsTool => 'Trusted Contacts';
-
-  @override
-  String get trustedContactsDesc => 'Manage your emergency contact list';
-
-  @override
-  String get pickupOtpTool => 'Pickup Verification';
-
-  @override
-  String get pickupOtpDesc => 'Verify driver with OTP before starting trip';
-
-  @override
-  String get safetyTips => 'Safety Tips';
-
-  @override
-  String get tip1 => 'Always share your trip with someone you trust';
-
-  @override
-  String get tip2 => 'Keep your phone charged during the trip';
-
-  @override
-  String get tip3 => 'Verify the driver and vehicle before getting in';
-
-  @override
-  String get tip4 => 'Trust your instincts — if something feels wrong, use SOS';
-
-  @override
-  String get tip5 => 'Sit in the back seat when riding alone';
-
-  @override
-  String get tripInstructions => 'Trip Instructions';
 
   @override
   String get yesterday => 'Yesterday';
@@ -3694,25 +3566,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get trustedDevices => 'Trusted Devices';
-
-  @override
-  String get serviceAudioLogs => 'Service Audio Logs';
-
-  @override
-  String get startAudioRecording => 'Start Recording';
-
-  @override
-  String get stopAudioRecording => 'Stop Recording';
-
-  @override
-  String get recordingConsent =>
-      'This recording is for security purposes only and will only be used in case of disputes. Your privacy is protected.';
-
-  @override
-  String get noAudioRecordings => 'No audio recordings yet';
-
-  @override
-  String get audioLogsForOrder => 'Audio Logs';
 
   @override
   String get mainSection => 'Main';

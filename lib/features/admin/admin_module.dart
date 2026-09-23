@@ -15,7 +15,6 @@ import 'package:delwaqty/features/admin/presentation/pages/admin_deliveries_page
 import 'package:delwaqty/features/admin/presentation/pages/admin_push_notifications_page.dart';
 import 'package:delwaqty/features/admin/presentation/pages/admin_verifications_page.dart';
 import 'package:delwaqty/features/admin/presentation/pages/admin_financial_center.dart';
-import 'package:delwaqty/features/admin/presentation/pages/admin_emergency_page.dart';
 import 'package:delwaqty/features/admin/presentation/pages/admin_delivery_intelligence_page.dart';
 import 'package:delwaqty/features/admin/presentation/pages/admin_merchant_intelligence_page.dart';
 import 'package:delwaqty/features/admin/presentation/pages/admin_provider_intelligence_page.dart';
@@ -256,11 +255,6 @@ class AdminModule extends FeatureModule {
           path: 'owner-dashboard',
           pageBuilder: (context, state) =>
               _adminPage(const AdminOwnerDashboardPage()),
-        ),
-        GoRoute(
-          path: 'emergency',
-          pageBuilder: (context, state) =>
-              _adminPage(const AdminEmergencyPage()),
         ),
         GoRoute(
           path: 'delivery-intelligence',

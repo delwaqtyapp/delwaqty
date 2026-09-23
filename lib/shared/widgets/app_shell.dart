@@ -24,10 +24,6 @@ class AppShell extends ConsumerWidget {
     );
   }
 
-  void _openDrawer(BuildContext context, WidgetRef ref) {
-    AppShell.scaffoldKey.currentState?.openDrawer();
-  }
-
   Widget _buildGlassDrawer(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final authState = ref.read(authStateProvider);
@@ -52,7 +48,6 @@ class AppShell extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
     final registry = FeatureRegistry.instance;
@@ -62,22 +57,6 @@ class AppShell extends ConsumerWidget {
       key: AppShell.scaffoldKey,
       extendBody: true,
       drawer: _buildGlassDrawer(context, ref),
-      appBar: AppBar(
-        title: Text(
-          l10n.appTitle,
-          style: const TextStyle(fontWeight: FontWeight.bold),
-        ),
-        leading: IconButton(
-          icon: const Icon(Icons.menu_rounded),
-          onPressed: () => _openDrawer(context, ref),
-        ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.notifications_outlined),
-            onPressed: () => context.push('/notifications'),
-          ),
-        ],
-      ),
       body: navigationShell,
       bottomNavigationBar: _TransparentBottomNav(
         selectedIndex: navigationShell.currentIndex,

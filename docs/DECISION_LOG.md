@@ -2966,3 +2966,28 @@ ADR-079 closed the launch audit gate but left four documented warnings: (1) acco
 - Ride booking remains unbuilt until a product decision; archived status prevents accidental deletion or half-finished UI.
 - `.env.staging`/`.env.prod` still hard-fail at runtime while empty by design (ConfigValidator) — no broken APK can ship from a skeleton.
 - Gate: `flutter analyze` **0 issues**; `flutter test` re-run required before final gate.
+
+## ADR-081: Remove Ride-Safety & Audio-Recording Remnants (User-Ordered Permanent Removal)
+
+**Date:** Sprint 173
+**Status:** Accepted
+**Deciders:** Owner (user directive) + Lead Architect
+
+### Context
+The user reported: the restored glass side menu shows entries for a ride-safety suite ("أمان رحلات أوبر") and voice recording ("تسجيل الصوت") that belong to the previously deleted Uber-like ride feature, and asked "شيل كل ده من المنصه تماما" (remove all of it from the platform completely). The user also reported TWO menu entry points appeared after the drawer restore (a shell AppBar leading menu button was re-added from the sprint-35 scaffold alongside the hero's menu circle).
+
+### Decision
+(1) **Delete permanently** the `safety` module (`lib/features/customer/safety/`), the `service_audio_logs` module (`lib/features/customer/service_audio_logs/`), and all their wiring: module registrations in customer/provider/driver `module_registry.dart`, the `_AudioRecordingCard` + `AudioRecordingDialog` usage in `order_tracking_page.dart`, the admin `serviceAudioLogs` sidebar entry (`floating_sidebar_overlay.dart`), the admin `AdminEmergencyPage` (SOS monitor) + its `emergency` route, the realtime channels `sos-alerts`/`trusted-contacts`, and **46** ride-safety/audio l10n keys (en+ar).
+(2) **Keep** the `ride/` + `driver/` (dispatch) directories: the delivery feature legitimately depends on their infrastructure (`ride.dart` entity, `ride_map.dart`, `ride_providers.dart` used by `delivery_tracking_page` and `supabase_delivery_data_source`) — consistent with ADR-080's dormant-infrastructure classification. Deleting them would break delivery tracking.
+(3) Remove the duplicate menu entry point: restore the shell to its round-33 shape (no shell AppBar), keeping the hero's menu circle as the single drawer trigger (`AppShell.scaffoldKey.currentState?.openDrawer()`).
+
+### Rationale
+- ADR-080 archived the ride module as dormant; the safety/audio UIs are the abandoned feature's user-facing surfaces with zero consumer references after the drawers' entries were the only visible path.
+- The user explicitly ordered permanent removal; §12.1 requires documented justification, which this ADR provides (Production Dead Code of an abandoned line, user-directive).
+- Keeping ride/ + driver/ avoids breaking the active delivery-tracking experience (map + providers are shared infrastructure, not the ride booking flow).
+
+### Consequences
+- Side menu now contains only live feature entries (home/profile/notifications + settings family); no safety or voice-recording surfaces anywhere in customer, provider, driver, or admin apps.
+- Single menu trigger (hero circle); shell AppBar removed, restoring the edge-to-edge hero.
+- Tests: `test/features/safety/` deleted (−8 tests); suite now **934/934**.
+- Gate: `flutter analyze` **0 issues**; APK `releases/delwaqty_1.0.0+1_debug_20260923_1300.apk` installed + relaunched clean (pid 26144), drawer screencap saved.

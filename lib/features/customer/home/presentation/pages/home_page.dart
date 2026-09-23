@@ -150,9 +150,16 @@ class HomePage extends ConsumerWidget {
         ? 0
         : ref.watch(unreadCountProvider).value ?? 0;
 
-    return Scaffold(
-      body: SafeArea(
-        child: RefreshIndicator(
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: const SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+        statusBarIconBrightness: Brightness.light,
+        statusBarBrightness: Brightness.dark,
+        systemNavigationBarColor: Colors.transparent,
+        systemNavigationBarIconBrightness: Brightness.dark,
+      ),
+      child: Scaffold(
+        body: RefreshIndicator(
           onRefresh: () async {
             ref.invalidate(nearbyMerchantsProvider);
             ref.invalidate(activeCategoriesProvider);
@@ -324,8 +331,8 @@ class _EgyptHeroState extends State<_EgyptHero>
 
   @override
   Widget build(BuildContext context) {
-    final heroH = (MediaQuery.sizeOf(context).height * 0.32)
-        .clamp(300.0, 360.0)
+    final heroH = (MediaQuery.sizeOf(context).height * 0.38)
+        .clamp(360.0, 430.0)
         .toDouble();
     final isRtl = Directionality.of(context) == TextDirection.rtl;
     return ClipRRect(
@@ -413,37 +420,43 @@ class _EgyptHeroState extends State<_EgyptHero>
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
+          Flexible(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  l10n.egyptStatementTitle,
+                  style: AppTextStyles.titleLarge.copyWith(
+                    color: AppColors.brandGold,
+                    fontWeight: FontWeight.w900,
+                    fontSize: 26,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                Text(
+                  l10n.egyptStatementTagline,
+                  style: AppTextStyles.bodyMedium.copyWith(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 13,
+                    shadows: const [
+                      Shadow(color: Color(0x55000000), blurRadius: 4),
+                    ],
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ),
+          ),
           _NotificationCircle(
             unreadCount: widget.unreadCount,
             onTap: widget.isGuest
                 ? () => context.push('/login')
                 : () => context.push('/notifications'),
-          ),
-          Column(
-            mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Text(
-                l10n.egyptStatementTitle,
-                style: AppTextStyles.titleLarge.copyWith(
-                  color: AppColors.brandGold,
-                  fontWeight: FontWeight.w900,
-                  fontSize: 26,
-                ),
-              ),
-              Text(
-                l10n.egyptStatementTagline,
-                style: AppTextStyles.bodyMedium.copyWith(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w600,
-                  fontSize: 13,
-                  shadows: const [
-                    Shadow(color: Color(0x55000000), blurRadius: 4),
-                  ],
-                ),
-              ),
-            ],
           ),
         ],
       ),
@@ -464,28 +477,40 @@ class _EgyptHeroState extends State<_EgyptHero>
               child: Transform.scale(scale: value, child: child),
             );
           },
-          child: Image.asset(
-            'assets/egypt/delwaqty_logo_mark.png',
-            width: 42,
-            fit: BoxFit.contain,
-            errorBuilder: (_, _, _) => Container(
-              width: 42,
-              height: 42,
-              decoration: const BoxDecoration(
-                shape: BoxShape.circle,
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [
-                    AppColors.brandPurpleDeep,
-                    AppColors.brandViolet,
-                  ],
+          child: DecoratedBox(
+            decoration: const BoxDecoration(
+              shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(
+                  color: Color(0x26000000),
+                  blurRadius: 16,
+                  spreadRadius: 2,
                 ),
-              ),
-              child: const Icon(
-                Icons.apps_rounded,
-                color: Colors.white,
-                size: 24,
+              ],
+            ),
+            child: Image.asset(
+              'assets/egypt/delwaqty_logo_mark.png',
+              width: 68,
+              fit: BoxFit.contain,
+              errorBuilder: (_, _, _) => Container(
+                width: 68,
+                height: 68,
+                decoration: const BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      AppColors.brandPurpleDeep,
+                      AppColors.brandViolet,
+                    ],
+                  ),
+                ),
+                child: const Icon(
+                  Icons.apps_rounded,
+                  color: Colors.white,
+                  size: 24,
+                ),
               ),
             ),
           ),
@@ -497,7 +522,7 @@ class _EgyptHeroState extends State<_EgyptHero>
             Text(
               'Delwa',
               style: AppTextStyles.titleLarge.copyWith(
-                color: const Color(0xFF1A1F36),
+                color: Colors.white,
                 fontWeight: FontWeight.w800,
                 fontSize: 18,
               ),
@@ -565,7 +590,7 @@ class _EgyptHeroState extends State<_EgyptHero>
             color: Colors.white.withValues(alpha: 0.85),
             fontSize: 12,
           ),
-          maxLines: 1,
+          maxLines: 2,
           overflow: TextOverflow.ellipsis,
         ),
       ],

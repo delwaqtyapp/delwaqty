@@ -90,4 +90,69 @@ void main() {
       },
     );
   }
+
+  testWidgets(
+    'HomePage hero renders without overflow with a tall status-bar inset '
+    '(notch-like device 366x800, top inset 58)',
+    (tester) async {
+      tester.view.physicalSize = const Size(366, 800);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      final trapped = <FlutterErrorDetails>[];
+      final prevHandler = FlutterError.onError;
+      FlutterError.onError = (details) => trapped.add(details);
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            authStateProvider.overrideWith(_FakeAuthNotifier.new),
+            userLocationProvider.overrideWith(_FakeLocationNotifier.new),
+            nearbyMerchantsProvider.overrideWith((_) async => <Merchant>[]),
+            activeCategoriesProvider.overrideWith(
+              (_) async => <PlatformCategory>[],
+            ),
+            discoveryEntriesProvider.overrideWith(
+              (_) async => <DiscoveryEntry>[],
+            ),
+            activeCampaignsProvider.overrideWith((_) async => <Campaign>[]),
+            unreadCountProvider.overrideWith((_) async => 0),
+          ],
+          child: const MaterialApp(
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            locale: Locale('en'),
+            home: MediaQuery(
+              data: MediaQueryData(
+                padding: EdgeInsets.only(top: 58),
+                size: Size(366, 800),
+              ),
+              child: HomePage(),
+            ),
+          ),
+        ),
+      );
+      await tester.pump(const Duration(milliseconds: 500));
+
+      FlutterError.onError = prevHandler;
+
+      for (final details in trapped) {
+        debugPrint(
+          '=====DETAILS-START=====\n${details.toString()}\n'
+          '=====DETAILS-END=====',
+        );
+      }
+
+      await tester.pump(const Duration(seconds: 1));
+      await tester.pump(const Duration(seconds: 1));
+      await tester.pumpWidget(const SizedBox.shrink());
+      await tester.pump(const Duration(milliseconds: 500));
+      await tester.pump(const Duration(milliseconds: 500));
+      expect(trapped, isEmpty);
+
+      await tester.pumpWidget(const SizedBox.shrink());
+      await tester.pump(const Duration(milliseconds: 300));
+    },
+  );
 }

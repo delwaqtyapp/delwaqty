@@ -3113,3 +3113,28 @@ The owner wanted: (1) the "اطلب طلبك مباشر" button RAISED to sit di
 - Home top: image (with top bar/search/location/statement) → bordered CTA button → main categories → promos → discovery.
 - `heroH`/`isPortrait` locals removed; hero sliver exactly the image's natural height on all widths.
 - Gate: `flutter analyze` **0 issues**; `flutter test` **935/935** (responsive suite green — no overflow 360x640 → 800x1280); APK `releases/delwaqty_1.0.0+1_debug_20260923_1800.apk` installed + relaunched clean (pid 26353), screencap `releases/screenshot_hero_1800.png`.
+
+## ADR-087: Fix Hero Bottom RenderFlex Overflow (21px) on the Real Device
+
+**Date:** Sprint 176
+**Status:** Accepted
+**Deciders:** Owner (bug report) + Lead Architect
+
+### Context
+The owner saw Flutter's yellow/black "A RenderFlex overflowed by 21 pixels" stripe at the bottom of the hero image on the real device. Device metrics: 1280×2800 physical, density 3.5 → logical 366×800; the status-bar inset ≈ 58dp. The hero's fixed-height `SizedBox(heroImageH = 174)` forced its overlay Column (top bar + search + Egypt statement ≈ 145dp + inset) beyond the available space → ~21-30px bottom overflow. Existing responsive tests never reproduced it because they pump with a zero MediaQuery padding.
+
+### Decision
+(1) **Overflow-proof hero height**: `heroH = max(heroImageH, contentH)` with `contentH = MediaQuery.paddingOf(context).top + 2 + topButtonSize + zoneGap + searchHeight + zoneGap` — the hero can never be smaller than its overlay content on any device/inset.
+(2) **Compressed hero chrome** so it fits the image even with large insets: topButton `(sw*0.095).clamp(36,44)`, search `(sw*0.080).clamp(30,38)`, zoneGap `(sh*0.008).clamp(4,9)`.
+(3) **Egypt statement moved out of the image** — it was the one element that could never fit beside a 58dp inset. It now lives in its own sliver directly ABOVE the direct-order button as a right-aligned block: gold `brandGold` title + muted `AppColors.primaryLight` tagline (readable on the light page background). New `_EgyptStatement` widget; `_buildEgyptStatement` method deleted.
+(4) **Location badge** bottom padding = `(heroH − heroImageH) + 12` → stays pinned to the image's bottom edge when the hero grows.
+(5) **Regression test added**: the responsive suite now includes a notch-device case (366×800, top inset 58) that reproduces the exact failure condition and asserts zero rendering exceptions.
+
+### Rationale
+- Manual text-height estimation is fragile; deriving the hero height from the real MediaQuery padding removes the whole class of inset-dependent overflows.
+- Keeping the statement on the image was impossible without shrinking the top bar/search below usable sizes; above the CTA it reads as a natural section header.
+
+### Consequences
+- Hero = image (top bar + glass search + location badge only) → Egypt statement → direct-order button → categories → promos → discovery.
+- Slightly smaller top-bar buttons/search on narrow widths (36/30dp floors) — imperceptible.
+- Gate: `flutter analyze` **0 issues**; `flutter test` **936/936** (incl. inset-58 notch case); APK `releases/delwaqty_1.0.0+1_debug_20260923_1900.apk` installed + relaunched clean (pid 28485) — logcat shows NO RenderFlex/overflow; screencap `releases/screenshot_hero_1900.png`.

@@ -3089,3 +3089,27 @@ The owner liked the new in-hero animated "اطلب طلبك مباشر" button b
 - Home page = hero (with animated motorcycle CTA) → promo carousel directly below.
 - `l10n.orderDirectly` / `fastestWayToOrder` still used by the in-hero button (strings remain in use).
 - Gate: `flutter analyze` **0 issues**; `flutter test` **935/935**; APK `releases/delwaqty_1.0.0+1_debug_20260923_1700.apk` installed + relaunched clean (pid 14777), screencap `releases/screenshot_hero_1700.png`.
+
+## ADR-086: Direct-Order Button Under the Hero Image Edge + Categories First
+
+**Date:** Sprint 175
+**Status:** Accepted
+**Deciders:** Owner (visual directive) + Lead Architect
+
+### Context
+The owner wanted: (1) the "اطلب طلبك مباشر" button RAISED to sit directly below the image's bottom edge, (2) the purple band ("الفريم البنفسجي") under the button removed, and (3) the MAIN CATEGORIES to come immediately under the button (promotions after them).
+
+### Decision
+(1) **Hero = image height only**: `_EgyptHero` height is now exactly `heroImageH = screenWidth * (864/1821)` (natural fit, no more 46%-screen floating area). The in-hero column keeps only top bar + glass search + Egypt statement.
+(2) **Button as its own sliver**: `_DirectOrderButton` moved out of the hero into `SliverToBoxAdapter(Padding(fromLTRB(20,10,20,0)))` right after the hero → its top edge touches the image bottom edge exactly. The animated motorcycle + speed wind is untouched.
+(3) **Purple band removed**: the bottom purple tint (`Color(0xFF6C3CEB)` alpha 0.12) was dropped from the hero's overlay gradient (only the faint top tint remains).
+(4) **Categories before promos**: sliver order = hero → direct-order button → `_CompactCategories` → `_PromoCarousel` → discovery → footer.
+
+### Rationale
+- The old hero (46% of screen height) ended with ~110dp of empty purple-tinted space below the button — that was the "frame". Shrinking the hero to the image height and moving the button to its own sliver removes the void completely.
+- Categories are the conversion surface the owner wants to see first under the CTA.
+
+### Consequences
+- Home top: image (with top bar/search/location/statement) → bordered CTA button → main categories → promos → discovery.
+- `heroH`/`isPortrait` locals removed; hero sliver exactly the image's natural height on all widths.
+- Gate: `flutter analyze` **0 issues**; `flutter test` **935/935** (responsive suite green — no overflow 360x640 → 800x1280); APK `releases/delwaqty_1.0.0+1_debug_20260923_1800.apk` installed + relaunched clean (pid 26353), screencap `releases/screenshot_hero_1800.png`.

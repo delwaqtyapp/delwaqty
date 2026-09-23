@@ -3015,3 +3015,28 @@ Register the app's REAL customer screens into the glass drawer so the menu is fu
 ### Consequences
 - Side menu = 9 feature entries + dark mode + language + logout with sliding glass look intact (blur 32 / width 280 / radius 28).
 - Gate: `flutter analyze` **0 issues**; `flutter test` **935/935**; APK `releases/delwaqty_1.0.0+1_debug_20260923_1400.apk` installed + relaunched clean (pid 13475, no FATAL). Device `screencap` was failing this session (adb/device glitch — 50-byte files); foreground verified via `dumpsys` (= com.delwaqty.app). Duplicate `drawerEntries` getter introduced mid-round in `orders_module.dart` was removed; unused riverpod imports in `delivery_module.dart` removed.
+
+## ADR-083: Hero Resized — Natural-Fit Image, Compact Top Bar/Location, Glass Search
+
+**Date:** Sprint 173
+**Status:** Accepted
+**Deciders:** Owner (user feedback: «صورة البار العلوى انت مكبرها اكبر من حجمها… عايزه باستايل اللوكيشن الشفاف والجميل… خلى التطبيق يتكيف على طول هاتف تلقائيا») + Lead Architect
+
+### Context
+The ROUND-33 responsive hero still looked wrong on the owner's device: the background banner (`home_egypt_hero.png`, 1821×864) was zoom-cropped by `BoxFit.cover` (only ~43% of the width visible, perceived as "enlarged"), the top-bar circles and location pill were oversized, and the hero search used the solid-white `PremiumSearchField` capsule instead of the transparent glass pill style the user loves.
+
+### Decision
+(1) **Natural-fit background image**: render the banner in a top-anchored `Positioned` box of height `screenWidth * (864/1821)` with `BoxFit.fitWidth` + `Alignment.topCenter` — the image always displays at its true aspect scaled to the phone width (never upscaled on any real phone; extra hero height is the lavender gradient continuation). Top-anchored per «متحركهاش من فوق / فوق ثابت».
+(2) **Smaller controls**: top-bar circles `(sw*0.105).clamp(40,48)` (≈45 on 430dp), location pill `(sw*0.08).clamp(32,38)` (≈34).
+(3) **Glass hero search**: hero search rebuilt INLINE mirroring the location pill exactly (white 0.18 fill, white 0.3 border, radius 22, soft shadow, search icon + hint + circular filter, whole field `onTap → context.go('/search')`); `PremiumSearchField` import removed — the shared widget is untouched for the search page.
+(4) **Hero height** `(sh*0.46).clamp(400,540)` — smaller block that still fits all content incl. 360×640.
+
+### Rationale
+- Natural aspect + fitWidth + top anchor directly addresses «مكبّره أكبر من حجمها» and the auto-adapt requirement: every phone shows the same composition (image width-fitted, controls compact, content on gradient).
+- Reusing the location pill decoration gives pixel-identical visual language for search.
+- Verified by the 5-size responsive suite (360×640 → 800×1280) — zero overflow.
+
+### Consequences
+- Home hero = natural-fit banner + compact glass controls; identical language between location and search.
+- `PremiumSearchField` still used by the full search page; hero no longer imports it.
+- Gate: `flutter analyze` **0 issues**; `flutter test` **935/935**; APK `releases/delwaqty_1.0.0+1_debug_20260923_1500.apk` installed + relaunched clean (pid 3015, no FATAL), screencap `releases/screenshot_hero_1500.png`.

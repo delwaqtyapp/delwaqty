@@ -19,7 +19,6 @@ import 'package:delwaqty/shared/widgets/pressable_scale.dart';
 import 'package:delwaqty/shared/widgets/premium_empty_state.dart';
 import 'package:delwaqty/shared/widgets/shimmer_loading.dart';
 import 'package:delwaqty/shared/widgets/design/premium_card.dart';
-import 'package:delwaqty/shared/widgets/design/premium_search_field.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 import 'package:delwaqty/features/customer/home/domain/home_domain.dart';
 import 'package:delwaqty/features/customer/home/presentation/widgets/category_visuals.dart';
@@ -339,11 +338,14 @@ class _EgyptHeroState extends State<_EgyptHero>
     final isPortrait = screenHeight >= screenWidth;
 
     final heroH = isPortrait
-        ? (screenHeight * 0.48).clamp(430.0, 560.0)
+        ? (screenHeight * 0.46).clamp(400.0, 540.0)
         : (screenHeight * 0.60).clamp(300.0, 420.0);
 
+    // Natural aspect of assets/egypt/home_egypt_hero.png (1821x864).
+    final heroImageH = screenWidth * (864 / 1821);
+
     final horizontalPadding = (screenWidth * 0.055).clamp(16.0, 28.0);
-    final topButtonSize = (screenWidth * 0.13).clamp(48.0, 56.0);
+    final topButtonSize = (screenWidth * 0.105).clamp(40.0, 48.0);
     final topIconSize = (topButtonSize * 0.44).clamp(20.0, 25.0);
     final logoSize = (screenWidth * 0.20).clamp(72.0, 92.0);
     final wordmarkSize = (logoSize * 0.22).clamp(15.0, 20.0);
@@ -352,8 +354,8 @@ class _EgyptHeroState extends State<_EgyptHero>
     final egyptTaglineSize = (screenWidth * 0.038).clamp(14.0, 16.0);
     final welcomeTitleSize = (screenWidth * 0.065).clamp(24.0, 30.0);
     final welcomeSubtitleSize = (screenWidth * 0.038).clamp(14.0, 17.0);
-    final locationHeight = (screenWidth * 0.11).clamp(44.0, 48.0);
-    final searchHeight = (screenWidth * 0.13).clamp(52.0, 56.0);
+    final locationHeight = (screenWidth * 0.08).clamp(32.0, 38.0);
+    final searchHeight = (screenWidth * 0.095).clamp(36.0, 42.0);
     final zoneGap = (screenHeight * 0.014).clamp(6.0, 14.0);
 
     return ClipRRect(
@@ -365,12 +367,17 @@ class _EgyptHeroState extends State<_EgyptHero>
         child: Stack(
           fit: StackFit.expand,
           children: [
-            const Positioned.fill(
-              child: DecoratedBox(
+            Positioned(
+              top: 0,
+              left: 0,
+              right: 0,
+              height: heroImageH,
+              child: const DecoratedBox(
                 decoration: BoxDecoration(
                   image: DecorationImage(
                     image: AssetImage('assets/egypt/home_egypt_hero.png'),
-                    fit: BoxFit.cover,
+                    fit: BoxFit.fitWidth,
+                    alignment: Alignment.topCenter,
                   ),
                 ),
               ),
@@ -742,13 +749,60 @@ class _EgyptHeroState extends State<_EgyptHero>
     AppLocalizations l10n, {
     required double height,
   }) {
-    return PremiumSearchField(
-      readOnly: true,
-      hint: l10n.searchHint,
-      height: height,
-      borderRadius: height / 2,
+    return GestureDetector(
       onTap: () => context.go('/search'),
-      onFilterPressed: () => context.go('/search'),
+      child: Container(
+        height: height,
+        padding: const EdgeInsets.symmetric(horizontal: 14),
+        decoration: BoxDecoration(
+          color: Colors.white.withValues(alpha: 0.18),
+          borderRadius: BorderRadius.circular(22),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.3)),
+          boxShadow: const [
+            BoxShadow(
+              color: Color(0x22000000),
+              blurRadius: 10,
+              offset: Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            const Icon(
+              Icons.search_rounded,
+              size: 18,
+              color: Colors.white,
+            ),
+            const SizedBox(width: 6),
+            Expanded(
+              child: Text(
+                l10n.searchHint,
+                style: AppTextStyles.bodyMedium.copyWith(
+                  color: Colors.white.withValues(alpha: 0.85),
+                  fontWeight: FontWeight.w600,
+                  fontSize: 13,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+            const SizedBox(width: 4),
+            Container(
+              width: 30,
+              height: 30,
+              decoration: const BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.white,
+              ),
+              child: const Icon(
+                Icons.tune_rounded,
+                size: 16,
+                color: Color(0xFF3D1B8E),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

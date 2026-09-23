@@ -189,6 +189,9 @@ class HomePage extends ConsumerWidget {
                   ),
                 ),
                 SliverToBoxAdapter(
+                  child: _EgyptStatement(l10n: l10n),
+                ),
+                SliverToBoxAdapter(
                   child: Padding(
                     padding: const EdgeInsets.fromLTRB(20, 10, 20, 0),
                     child: _DirectOrderButton(
@@ -335,21 +338,28 @@ class _EgyptHeroState extends State<_EgyptHero>
     final heroImageH = screenWidth * (864 / 1821);
 
     final horizontalPadding = (screenWidth * 0.055).clamp(16.0, 28.0);
-    final topButtonSize = (screenWidth * 0.105).clamp(40.0, 48.0);
-    final topIconSize = (topButtonSize * 0.44).clamp(20.0, 25.0);
+    final topButtonSize = (screenWidth * 0.095).clamp(36.0, 44.0);
+    final topIconSize = (topButtonSize * 0.44).clamp(18.0, 22.0);
     const logoSize = 44.0;
     const arabicSize = 12.0;
-    final egyptTitleSize = (screenWidth * 0.05).clamp(18.0, 22.0);
-    final egyptTaglineSize = (screenWidth * 0.032).clamp(12.0, 14.0);
-    final searchHeight = (screenWidth * 0.095).clamp(36.0, 42.0);
-    final zoneGap = (screenHeight * 0.014).clamp(6.0, 14.0);
+    final searchHeight = (screenWidth * 0.080).clamp(30.0, 38.0);
+    final zoneGap = (screenHeight * 0.008).clamp(4.0, 9.0);
+
+    // Hero height must never be smaller than its overlay content, otherwise a
+    // tall status bar inset (notch devices) causes a bottom RenderFlex
+    // overflow. Compute both and take the max — the image keeps its natural
+    // aspect at the top, and the direct-order button sliver follows below.
+    final topInset = MediaQuery.paddingOf(context).top;
+    final contentCoreH = topButtonSize + zoneGap + searchHeight + zoneGap;
+    final contentH = topInset + 2 + contentCoreH;
+    final heroH = math.max(heroImageH, contentH);
 
     return ClipRRect(
       borderRadius: const BorderRadius.vertical(
         bottom: Radius.circular(28),
       ),
       child: SizedBox(
-        height: heroImageH,
+        height: heroH,
         child: Stack(
           fit: StackFit.expand,
           children: [
@@ -369,7 +379,7 @@ class _EgyptHeroState extends State<_EgyptHero>
                   horizontalPadding,
                   0,
                   12,
-                  12,
+                  (heroH - heroImageH) + 12,
                 ),
                 child: _buildLocationBadge(
                   context,
@@ -441,16 +451,6 @@ class _EgyptHeroState extends State<_EgyptHero>
                           widget.l10n,
                           height: searchHeight,
                         ),
-                        SizedBox(height: zoneGap),
-                        Align(
-                          alignment: Alignment.centerRight,
-                          child: _buildEgyptStatement(
-                            context,
-                            widget.l10n,
-                            titleSize: egyptTitleSize,
-                            taglineSize: egyptTaglineSize,
-                          ),
-                        ),
                       ],
                     ),
                   ),
@@ -460,43 +460,6 @@ class _EgyptHeroState extends State<_EgyptHero>
           ],
         ),
       ),
-    );
-  }
-
-  Widget _buildEgyptStatement(
-    BuildContext context,
-    AppLocalizations l10n, {
-    required double titleSize,
-    required double taglineSize,
-  }) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          l10n.egyptStatementTitle,
-          style: AppTextStyles.titleLarge.copyWith(
-            color: AppColors.brandGold,
-            fontWeight: FontWeight.w900,
-            fontSize: titleSize,
-          ),
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-        ),
-        Text(
-          l10n.egyptStatementTagline,
-          style: AppTextStyles.bodyMedium.copyWith(
-            color: Colors.white,
-            fontWeight: FontWeight.w600,
-            fontSize: taglineSize,
-            shadows: const [
-              Shadow(color: Color(0x55000000), blurRadius: 4),
-            ],
-          ),
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-        ),
-      ],
     );
   }
 
@@ -673,6 +636,52 @@ class _EgyptHeroState extends State<_EgyptHero>
                 size: 16,
                 color: Color(0xFF3D1B8E),
               ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _EgyptStatement extends StatelessWidget {
+  const _EgyptStatement({required this.l10n});
+
+  final AppLocalizations l10n;
+
+  @override
+  Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.sizeOf(context).width;
+    final titleSize = (screenWidth * 0.05).clamp(18.0, 22.0);
+    final taglineSize = (screenWidth * 0.032).clamp(12.0, 14.0);
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 18, 20, 0),
+      child: Align(
+        alignment: Alignment.centerRight,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              l10n.egyptStatementTitle,
+              style: AppTextStyles.titleLarge.copyWith(
+                color: AppColors.brandGold,
+                fontWeight: FontWeight.w900,
+                fontSize: titleSize,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+            Text(
+              l10n.egyptStatementTagline,
+              style: AppTextStyles.bodyMedium.copyWith(
+                color: AppColors.primaryLight,
+                fontWeight: FontWeight.w600,
+                fontSize: taglineSize,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             ),
           ],
         ),

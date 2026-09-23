@@ -188,14 +188,6 @@ class HomePage extends ConsumerWidget {
                     unreadCount: unreadCount,
                   ),
                 ),
-                SliverToBoxAdapter(
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(20, 14, 20, 0),
-                    child: _HeroOrderCard(
-                      onTap: () => context.push('/direct-delivery'),
-                    ),
-                  ),
-                ),
                 const SliverToBoxAdapter(child: _PromoCarousel()),
                 SliverToBoxAdapter(
                   child: _CompactCategories(ref: ref, l10n: l10n),
@@ -753,6 +745,7 @@ class _DirectOrderButtonState extends State<_DirectOrderButton>
             final ping = math.sin(t * math.pi);
             final slide = (ping * 2 - 1) * 16;
             final bob = math.sin(t * math.pi * 2) * 1.5;
+            final wind = math.cos(t * math.pi);
             return Row(
               children: [
                 const SizedBox(width: 10),
@@ -762,6 +755,33 @@ class _DirectOrderButtonState extends State<_DirectOrderButton>
                     alignment: Alignment.center,
                     clipBehavior: Clip.none,
                     children: [
+                      // Speed wind trailing behind the motorcycle — it
+                      // stretches opposite the travel direction and fades
+                      // near the turnarounds (where speed drops to zero).
+                      for (var i = 0; i < 4; i++)
+                        Opacity(
+                          opacity: (0.55 - i * 0.14).clamp(0.08, 0.55),
+                          child: Transform.translate(
+                            offset: Offset(
+                              slide - wind * (12 + 8 * i),
+                              bob,
+                            ),
+                            child: Container(
+                              width: 16 - i * 2.2,
+                              height: i >= 2 ? 2.5 : 3,
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(2),
+                                boxShadow: const [
+                                  BoxShadow(
+                                    color: Color(0x30FFFFFF),
+                                    blurRadius: 6,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
                       Opacity(
                         opacity: 0.12,
                         child: Transform.translate(
@@ -1422,110 +1442,6 @@ class _NotificationCircle extends StatelessWidget {
                   ),
                 ),
             ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _HeroOrderCard extends StatefulWidget {
-  const _HeroOrderCard({required this.onTap});
-
-  final VoidCallback onTap;
-
-  @override
-  State<_HeroOrderCard> createState() => _HeroOrderCardState();
-}
-
-class _HeroOrderCardState extends State<_HeroOrderCard> {
-  bool _pressed = false;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-    final isRtl = Directionality.of(context) == TextDirection.rtl;
-
-    return AnimatedFadeIn(
-      delay: const Duration(milliseconds: 150),
-      child: GestureDetector(
-        onTapDown: (_) => setState(() => _pressed = true),
-        onTapUp: (_) => setState(() => _pressed = false),
-        onTapCancel: () => setState(() => _pressed = false),
-        onTap: widget.onTap,
-        child: AnimatedScale(
-          scale: _pressed ? 0.98 : 1,
-          duration: const Duration(milliseconds: 140),
-          curve: Curves.easeOutCubic,
-          child: Container(
-            height: 104,
-            clipBehavior: Clip.antiAlias,
-            decoration: const BoxDecoration(
-              borderRadius: BorderRadius.all(Radius.circular(26)),
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [AppColors.brandPurple, AppColors.brandBlue],
-              ),
-              boxShadow: AppElevation.shadowGlow,
-            ),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: Row(
-                children: [
-                  const Icon(
-                    Icons.delivery_dining_rounded,
-                    size: 26,
-                    color: Colors.white,
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          l10n.orderDirectly,
-                          style: AppTextStyles.bodyLarge.copyWith(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w800,
-                            fontSize: 15,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          l10n.fastestWayToOrder,
-                          style: AppTextStyles.bodySmall.copyWith(
-                            color: Colors.white.withValues(alpha: 0.85),
-                            fontSize: 12,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Container(
-                    width: 30,
-                    height: 30,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: Colors.white.withValues(alpha: 0.18),
-                    ),
-                    child: Icon(
-                      isRtl
-                          ? Icons.arrow_back_rounded
-                          : Icons.arrow_forward_rounded,
-                      size: 17,
-                      color: Colors.white,
-                    ),
-                  ),
-                ],
-              ),
-            ),
           ),
         ),
       ),

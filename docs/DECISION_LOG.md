@@ -3065,3 +3065,27 @@ The owner reshaped the hero again into a cleaner composition: tiny logo at the v
 - Hero = top bar with mini branded lockup → glass search → small Egypt statement → animated motorcycle CTA; location badge on the image bottom-left.
 - `_HeroOrderCard` (mid-page) untouched; `/direct-delivery` remains the CTA target.
 - Gate: `flutter analyze` **0 issues**; `flutter test` **935/935**; APK `releases/delwaqty_1.0.0+1_debug_20260923_1600.apk` installed + relaunched clean (pid 23462), screencap `releases/screenshot_hero_1600.png`.
+
+## ADR-085: Motorcycle Speed-Wind Animation + Remove Mid-Page Order Card
+
+**Date:** Sprint 174
+**Status:** Accepted
+**Deciders:** Owner (visual directive) + Lead Architect
+
+### Context
+The owner liked the new in-hero animated "اطلب طلبك مباشر" button but requested (a) visible SPEED WIND trailing behind the motorcycle and (b) removal of the OLD mid-page order card (the duplicate CTA + its rounded frame), raising the following content so no empty space remains.
+
+### Decision
+(1) **Speed wind**: inside `_DirectOrderButton`'s 64px bike slot, 4 white rounded bars stretch BEHIND the bike, positioned `slide - wind * (12 + 8*i)` with `wind = cos(πt)` — when the bike is fastest (middle of the glide) the wind lines stretch farthest; at the turnarounds (speed ≈ 0) they collapse onto the bike. Fading opacity 0.55→0.13, tapered width 16→8.5, glow shadow.
+(2) **Deleted `_HeroOrderCard`** entirely: its SliverToBoxAdapter (Padding + card) and the private StatefulWidget class (`_HeroOrderCard` + `_HeroOrderCardState`).
+(3) **`_PromoCarousel` / content raised**: the sliver list now goes `_EgyptHero` → `_PromoCarousel` → `_CompactCategories` → discovery → footer; no gap under the hero.
+
+### Rationale
+- Physical wind model (zero wind at turnaround) reads as genuinely fast motion without extra controllers — reuses the single 2.4s `AnimationController`.
+- The hero now contains THE only "اطلب طلبك مباشر" CTA (user said the new button is good); the mid-page card was duplication + the "frame" the user wanted gone.
+- Removing the sliver automatically pulls the app up — zero blank space.
+
+### Consequences
+- Home page = hero (with animated motorcycle CTA) → promo carousel directly below.
+- `l10n.orderDirectly` / `fastestWayToOrder` still used by the in-hero button (strings remain in use).
+- Gate: `flutter analyze` **0 issues**; `flutter test` **935/935**; APK `releases/delwaqty_1.0.0+1_debug_20260923_1700.apk` installed + relaunched clean (pid 14777), screencap `releases/screenshot_hero_1700.png`.

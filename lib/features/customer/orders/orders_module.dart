@@ -27,6 +27,19 @@ class OrdersModule extends FeatureModule {
   List<String> get dependsOn => ['commerce'];
 
   @override
+  List<DrawerEntry> get drawerEntries => [
+    DrawerEntry(
+      id: 'orders',
+      label: (ctx) => AppLocalizations.of(ctx).orders,
+      icon: Icons.receipt_long_outlined,
+      onTap: (ctx, ref) {
+        Navigator.of(ctx).pop();
+        ctx.go('/orders');
+      },
+    ),
+  ];
+
+  @override
   StatefulShellBranch? buildBranch() {
     return StatefulShellBranch(
       routes: [

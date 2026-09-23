@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -321,15 +322,6 @@ class _EgyptHeroState extends State<_EgyptHero>
     super.dispose();
   }
 
-  String _greeting(AppLocalizations l10n, AuthState authState) {
-    if (authState is AuthGuest) return l10n.hello;
-    if (authState is AuthAuthenticated) {
-      final name = authState.user.fullName ?? authState.user.username;
-      if (name != null && name.isNotEmpty) return l10n.helloName(name);
-    }
-    return l10n.goodEvening;
-  }
-
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.sizeOf(context);
@@ -347,14 +339,10 @@ class _EgyptHeroState extends State<_EgyptHero>
     final horizontalPadding = (screenWidth * 0.055).clamp(16.0, 28.0);
     final topButtonSize = (screenWidth * 0.105).clamp(40.0, 48.0);
     final topIconSize = (topButtonSize * 0.44).clamp(20.0, 25.0);
-    final logoSize = (screenWidth * 0.20).clamp(72.0, 92.0);
-    final wordmarkSize = (logoSize * 0.22).clamp(15.0, 20.0);
-    final arabicSize = (logoSize * 0.19).clamp(13.0, 17.0);
-    final egyptTitleSize = (screenWidth * 0.062).clamp(24.0, 28.0);
-    final egyptTaglineSize = (screenWidth * 0.038).clamp(14.0, 16.0);
-    final welcomeTitleSize = (screenWidth * 0.065).clamp(24.0, 30.0);
-    final welcomeSubtitleSize = (screenWidth * 0.038).clamp(14.0, 17.0);
-    final locationHeight = (screenWidth * 0.08).clamp(32.0, 38.0);
+    const logoSize = 44.0;
+    const arabicSize = 12.0;
+    final egyptTitleSize = (screenWidth * 0.05).clamp(18.0, 22.0);
+    final egyptTaglineSize = (screenWidth * 0.032).clamp(12.0, 14.0);
     final searchHeight = (screenWidth * 0.095).clamp(36.0, 42.0);
     final zoneGap = (screenHeight * 0.014).clamp(6.0, 14.0);
 
@@ -372,14 +360,35 @@ class _EgyptHeroState extends State<_EgyptHero>
               left: 0,
               right: 0,
               height: heroImageH,
-              child: const DecoratedBox(
-                decoration: BoxDecoration(
-                  image: DecorationImage(
-                    image: AssetImage('assets/egypt/home_egypt_hero.png'),
-                    fit: BoxFit.fitWidth,
-                    alignment: Alignment.topCenter,
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  const DecoratedBox(
+                    decoration: BoxDecoration(
+                      image: DecorationImage(
+                        image: AssetImage('assets/egypt/home_egypt_hero.png'),
+                        fit: BoxFit.fitWidth,
+                        alignment: Alignment.topCenter,
+                      ),
+                    ),
                   ),
-                ),
+                  Align(
+                    alignment: Alignment.bottomLeft,
+                    child: Padding(
+                      padding: EdgeInsets.fromLTRB(
+                        horizontalPadding,
+                        0,
+                        12,
+                        12,
+                      ),
+                      child: _buildLocationBadge(
+                        context,
+                        height: 28,
+                        maxWidth: 178,
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
             Positioned.fill(
@@ -414,43 +423,33 @@ class _EgyptHeroState extends State<_EgyptHero>
                         return Column(
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
-                            _buildTopControlsRow(
-                              context,
-                              buttonSize: topButtonSize,
-                              iconSize: topIconSize,
-                            ),
-                            SizedBox(height: zoneGap),
-                            Align(
-                              alignment: Alignment.topRight,
-                              child: _buildEgyptStatement(
-                                context,
-                                widget.l10n,
-                                titleSize: egyptTitleSize,
-                                taglineSize: egyptTaglineSize,
+                            Directionality(
+                              textDirection: TextDirection.ltr,
+                              child: Row(
+                                children: [
+                                  _NotificationCircle(
+                                    unreadCount: widget.unreadCount,
+                                    onTap: widget.isGuest
+                                        ? () => context.push('/login')
+                                        : () => context.push('/notifications'),
+                                    size: topButtonSize,
+                                    iconSize: topIconSize,
+                                  ),
+                                  const Spacer(),
+                                  _buildMiniLockup(
+                                    logoSize: logoSize,
+                                    arabicSize: arabicSize,
+                                  ),
+                                  const Spacer(),
+                                  _MenuCircleButton(
+                                    onTap: () => AppShell.scaffoldKey
+                                        .currentState
+                                        ?.openDrawer(),
+                                    size: topButtonSize,
+                                    iconSize: topIconSize,
+                                  ),
+                                ],
                               ),
-                            ),
-                            const Spacer(flex: 2),
-                            _buildBrandLockup(
-                              context,
-                              widget.l10n,
-                              logoSize: logoSize,
-                              wordmarkSize: wordmarkSize,
-                              arabicSize: arabicSize,
-                            ),
-                            const Spacer(flex: 3),
-                            Flexible(
-                              child: _buildGreeting(
-                                context,
-                                widget.l10n,
-                                widget.authState,
-                                titleSize: welcomeTitleSize,
-                                subtitleSize: welcomeSubtitleSize,
-                              ),
-                            ),
-                            const Spacer(flex: 2),
-                            _buildLocationPill(
-                              context,
-                              height: locationHeight,
                             ),
                             SizedBox(height: zoneGap),
                             _buildHeroSearch(
@@ -458,6 +457,23 @@ class _EgyptHeroState extends State<_EgyptHero>
                               widget.l10n,
                               height: searchHeight,
                             ),
+                            SizedBox(height: zoneGap),
+                            Align(
+                              alignment: Alignment.centerRight,
+                              child: _buildEgyptStatement(
+                                context,
+                                widget.l10n,
+                                titleSize: egyptTitleSize,
+                                taglineSize: egyptTaglineSize,
+                              ),
+                            ),
+                            SizedBox(height: zoneGap + 6),
+                            _DirectOrderButton(
+                              l10n: widget.l10n,
+                              onTap: () =>
+                                  context.push('/direct-delivery'),
+                            ),
+                            const Spacer(),
                           ],
                         );
                       },
@@ -468,34 +484,6 @@ class _EgyptHeroState extends State<_EgyptHero>
             ),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _buildTopControlsRow(
-    BuildContext context, {
-    required double buttonSize,
-    required double iconSize,
-  }) {
-    return Directionality(
-      textDirection: TextDirection.ltr,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          _NotificationCircle(
-            unreadCount: widget.unreadCount,
-            onTap: widget.isGuest
-                ? () => context.push('/login')
-                : () => context.push('/notifications'),
-            size: buttonSize,
-            iconSize: iconSize,
-          ),
-          _MenuCircleButton(
-            onTap: () => AppShell.scaffoldKey.currentState?.openDrawer(),
-            size: buttonSize,
-            iconSize: iconSize,
-          ),
-        ],
       ),
     );
   }
@@ -537,160 +525,11 @@ class _EgyptHeroState extends State<_EgyptHero>
     );
   }
 
-  Widget _buildBrandLockup(
-    BuildContext context,
-    AppLocalizations l10n, {
-    required double logoSize,
-    required double wordmarkSize,
-    required double arabicSize,
+  Widget _buildLocationBadge(
+    BuildContext context, {
+    required double height,
+    required double maxWidth,
   }) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        TweenAnimationBuilder<double>(
-          tween: Tween(begin: 0.96, end: 1),
-          duration: const Duration(milliseconds: 600),
-          curve: Curves.easeOutCubic,
-          builder: (context, value, child) {
-            return Opacity(
-              opacity: ((value - 0.96) * 25).clamp(0.0, 1.0).toDouble(),
-              child: Transform.scale(scale: value, child: child),
-            );
-          },
-          child: DecoratedBox(
-            decoration: const BoxDecoration(
-              shape: BoxShape.circle,
-              boxShadow: [
-                BoxShadow(
-                  color: Color(0x26000000),
-                  blurRadius: 16,
-                  spreadRadius: 2,
-                ),
-              ],
-            ),
-            child: SizedBox(
-              width: logoSize,
-              height: logoSize,
-              child: Image.asset(
-                'assets/egypt/delwaqty_logo_mark.png',
-                fit: BoxFit.contain,
-                errorBuilder: (_, _, _) => Container(
-                  width: logoSize,
-                  height: logoSize,
-                  decoration: const BoxDecoration(
-                    shape: BoxShape.circle,
-                    gradient: LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: [
-                        AppColors.brandPurpleDeep,
-                        AppColors.brandViolet,
-                      ],
-                    ),
-                  ),
-                  child: const Icon(
-                    Icons.apps_rounded,
-                    color: Colors.white,
-                    size: 28,
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ),
-        const SizedBox(height: 2),
-        Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              'Delwa',
-              style: AppTextStyles.titleLarge.copyWith(
-                color: Colors.white,
-                fontWeight: FontWeight.w800,
-                fontSize: wordmarkSize,
-              ),
-            ),
-            ShaderMask(
-              blendMode: BlendMode.srcIn,
-              shaderCallback: (rect) => const LinearGradient(
-                colors: [
-                  AppColors.brandPurple,
-                  AppColors.brandBlue,
-                  AppColors.brandCyan,
-                ],
-              ).createShader(rect),
-              child: Text(
-                'Qty',
-                style: AppTextStyles.titleLarge.copyWith(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w800,
-                  fontSize: wordmarkSize,
-                ),
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 1),
-        Directionality(
-          textDirection: TextDirection.rtl,
-          child: Text(
-            l10n.appNameAr,
-            style: const TextStyle(
-              fontFamily: 'Cairo',
-              fontSize: 15,
-              fontWeight: FontWeight.w600,
-              color: Color(0xFFF7F7FA),
-              letterSpacing: 0.5,
-            ).copyWith(fontSize: arabicSize),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildGreeting(
-    BuildContext context,
-    AppLocalizations l10n,
-    AuthState authState, {
-    required double titleSize,
-    required double subtitleSize,
-  }) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Flexible(
-          child: Text(
-            _greeting(l10n, authState),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: context.textTheme.titleLarge?.copyWith(
-              color: Colors.white,
-              fontWeight: FontWeight.w800,
-              fontSize: titleSize,
-              shadows: const [
-                Shadow(color: Color(0x40000000), blurRadius: 4),
-              ],
-            ),
-          ),
-        ),
-        const SizedBox(height: 2),
-        Flexible(
-          child: Text(
-            l10n.greetingSubtitle,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            style: AppTextStyles.bodyMedium.copyWith(
-              color: Colors.white.withValues(alpha: 0.85),
-              fontSize: subtitleSize,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildLocationPill(BuildContext context, {required double height}) {
     final locationText = widget.locationAsync.when(
       data: (loc) => loc?.detailedAddress.isNotEmpty == true
           ? loc!.detailedAddress
@@ -698,49 +537,109 @@ class _EgyptHeroState extends State<_EgyptHero>
       loading: () => widget.l10n.searchingForLocation,
       error: (_, _) => widget.l10n.searchingForLocation,
     );
-    return Container(
-      height: height,
-      padding: const EdgeInsets.symmetric(horizontal: 14),
-      decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.18),
-        borderRadius: BorderRadius.circular(22),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.3)),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x22000000),
-            blurRadius: 10,
-            offset: Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          const Icon(
-            Icons.location_on_rounded,
-            size: 18,
-            color: Colors.white,
-          ),
-          const SizedBox(width: 6),
-          Expanded(
-            child: Text(
-              locationText,
-              style: AppTextStyles.bodyMedium.copyWith(
-                color: Colors.white,
-                fontWeight: FontWeight.w600,
-                fontSize: 13,
+    return ConstrainedBox(
+      constraints: BoxConstraints(maxWidth: maxWidth),
+      child: Container(
+        height: height,
+        padding: const EdgeInsets.symmetric(horizontal: 12),
+        decoration: BoxDecoration(
+          color: Colors.white.withValues(alpha: 0.18),
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.3)),
+          boxShadow: const [
+            BoxShadow(
+              color: Color(0x22000000),
+              blurRadius: 10,
+              offset: Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            const Icon(
+              Icons.location_on_rounded,
+              size: 15,
+              color: Colors.white,
+            ),
+            const SizedBox(width: 5),
+            Expanded(
+              child: Text(
+                locationText,
+                style: AppTextStyles.bodyMedium.copyWith(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w600,
+                  fontSize: 11,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
               ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
+            ),
+            Icon(
+              Icons.expand_more_rounded,
+              size: 14,
+              color: Colors.white.withValues(alpha: 0.8),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMiniLockup({
+    required double logoSize,
+    required double arabicSize,
+  }) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        ClipOval(
+          child: SizedBox(
+            width: logoSize,
+            height: logoSize,
+            child: Image.asset(
+              'assets/egypt/delwaqty_logo_mark.png',
+              fit: BoxFit.contain,
+              errorBuilder: (_, _, _) => const DecoratedBox(
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      AppColors.brandPurpleDeep,
+                      AppColors.brandViolet,
+                    ],
+                  ),
+                ),
+                child: Center(
+                  child: Icon(
+                    Icons.apps_rounded,
+                    color: Colors.white,
+                    size: 16,
+                  ),
+                ),
+              ),
             ),
           ),
-          const SizedBox(width: 4),
-          Icon(
-            Icons.expand_more_rounded,
-            size: 18,
-            color: Colors.white.withValues(alpha: 0.8),
+        ),
+        const SizedBox(height: 1),
+        Directionality(
+          textDirection: TextDirection.rtl,
+          child: Text(
+            widget.l10n.appNameAr,
+            style: TextStyle(
+              fontFamily: 'Cairo',
+              fontSize: arabicSize,
+              fontWeight: FontWeight.w600,
+              color: const Color(0xFFF7F7FA),
+              letterSpacing: 0.5,
+              shadows: const [
+                Shadow(color: Color(0x55000000), blurRadius: 3),
+              ],
+            ),
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
@@ -801,6 +700,150 @@ class _EgyptHeroState extends State<_EgyptHero>
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class _DirectOrderButton extends StatefulWidget {
+  const _DirectOrderButton({required this.l10n, required this.onTap});
+
+  final AppLocalizations l10n;
+  final VoidCallback onTap;
+
+  @override
+  State<_DirectOrderButton> createState() => _DirectOrderButtonState();
+}
+
+class _DirectOrderButtonState extends State<_DirectOrderButton>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 2400),
+  )..repeat();
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isRtl = Directionality.of(context) == TextDirection.rtl;
+    return GestureDetector(
+      onTap: widget.onTap,
+      child: Container(
+        height: 60,
+        clipBehavior: Clip.antiAlias,
+        decoration: const BoxDecoration(
+          borderRadius: BorderRadius.all(Radius.circular(30)),
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [AppColors.brandPurple, AppColors.brandBlue],
+          ),
+          boxShadow: AppElevation.shadowGlow,
+        ),
+        child: AnimatedBuilder(
+          animation: _controller,
+          builder: (context, _) {
+            final t = _controller.value;
+            final ping = math.sin(t * math.pi);
+            final slide = (ping * 2 - 1) * 16;
+            final bob = math.sin(t * math.pi * 2) * 1.5;
+            return Row(
+              children: [
+                const SizedBox(width: 10),
+                SizedBox(
+                  width: 64,
+                  child: Stack(
+                    alignment: Alignment.center,
+                    clipBehavior: Clip.none,
+                    children: [
+                      Opacity(
+                        opacity: 0.12,
+                        child: Transform.translate(
+                          offset: Offset(-slide * 2.4, bob * 2),
+                          child: const Icon(
+                            Icons.two_wheeler_rounded,
+                            size: 26,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                      Opacity(
+                        opacity: 0.3,
+                        child: Transform.translate(
+                          offset: Offset(-slide * 1.4, bob * 1.4),
+                          child: const Icon(
+                            Icons.two_wheeler_rounded,
+                            size: 30,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                      Transform.translate(
+                        offset: Offset(slide, bob),
+                        child: const Icon(
+                          Icons.two_wheeler_rounded,
+                          size: 34,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 6),
+                Expanded(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        widget.l10n.orderDirectly,
+                        style: AppTextStyles.bodyLarge.copyWith(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w800,
+                          fontSize: 15,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        widget.l10n.fastestWayToOrder,
+                        style: AppTextStyles.bodySmall.copyWith(
+                          color: Colors.white.withValues(alpha: 0.85),
+                          fontSize: 12,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Container(
+                  width: 30,
+                  height: 30,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Colors.white.withValues(alpha: 0.18),
+                  ),
+                  child: Icon(
+                    isRtl
+                        ? Icons.arrow_back_rounded
+                        : Icons.arrow_forward_rounded,
+                    size: 17,
+                    color: Colors.white,
+                  ),
+                ),
+                const SizedBox(width: 12),
+              ],
+            );
+          },
         ),
       ),
     );

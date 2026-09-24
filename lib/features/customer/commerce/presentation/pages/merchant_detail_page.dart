@@ -134,6 +134,11 @@ class _MerchantDetailPageState extends ConsumerState<MerchantDetailPage> {
         onPressed: () => Navigator.of(context).pop(),
       ),
       actions: [
+        IconButton(
+          tooltip: l10n.reviews,
+          icon: const Icon(Icons.star_rounded, color: AppColors.rating, size: 26),
+          onPressed: () => context.push('/restaurant/${merchant.id}/reviews'),
+        ),
         CartBadge(onTap: () => context.push('/market/cart')),
         const SizedBox(width: 4),
       ],

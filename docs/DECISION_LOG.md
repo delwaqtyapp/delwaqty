@@ -3266,6 +3266,28 @@ The owner wants customers to be able to review and rate EVERY service category i
 ### Consequences
 - Migration **084 applied live** on `bttnlkmwhorjamzemwda` (POST `/database/query` → 201) once the working 90-day PAT (`sbp_fc832a…588`, recovered from stored OpenCode chat logs) replaced the invalid stored token. Verified: 5 RLS policies, `get_service_rating_summary('doctor')` → `{avg_rating:4.5, total_reviews:2, five_star:1, four_star:1,…}` (keys match the Dart entity), 6 seed reviews. UI is build-verified (`flutter analyze` **0 issues**, `flutter test` **940/940** incl. 4 new entity tests) and the app relaunches clean (pid 15712, no FATAL/RenderFlex).
 
+## ADR-096: Reviews Completed for EVERY Merchant Type + 8 Home-Labor Categories (sprint 185)
+
+**Date:** Sprint 185
+**Status:** Accepted
+**Deciders:** Owner (finish round-49 gaps) + Lead Architect
+
+### Context
+Round 49 rated provider cards and restaurants, but a live audit (DB + code) found two remaining gaps: (1) generic merchants (pharmacy, grocery, bakery, food, butcher) could NOT write reviews — `merchant_detail_page.dart` showed a READ-ONLY reviews block that is hidden entirely when empty (`SizedBox.shrink()`) and had no star entry; (2) eight home-labor categories (pestControl, painting, dishRepair, applianceRepair, carpetCleaning, pipeChange, plastering, acMaintenance) exist in `service_categories` (17 total) but have NO providers and NO seeded reviews, so their category reviews pages were empty.
+
+### Decision
+(1) **Star on every merchant detail page.** `merchant_detail_page.dart` SliverAppBar gained a gold star action (tooltip `l10n.reviews`) before the `CartBadge` that pushes `/restaurant/{merchantId}/reviews` — the existing generic merchant reviews page (paginated list + 5-star write sheet + summary), reused from ADR-093/095. Every merchant type now has a write-capable rating entry.
+(2) **Migration 086 applied LIVE.** (a) Eight category-level `service_reviews` seeds — one per home-labor category, named reviewers, `provider_id` NULL, `user_id` NULL (anonymous, like the existing demo seeds). Postgres UNIQUE treats NULLs as distinct, so multiple category-level anonymous rows for the same category never conflict under `uq_service_reviews_user`. (b) One real merchant review per remaining type (pharmacy, grocery, bakery, food) inserted into the commerce `reviews` table.
+
+### Rationale
+- Reuse > rebuild: the merchant reviews page, repository, and write sheet already existed and are merchant-generic (keyed only by merchantId) — only the entry point was missing on the generic merchant page.
+- The unique index decision in ADR-095 naturally supports category-level anonymous seeds; no schema change was needed to cover the 8 provider-less categories.
+
+### Consequences
+- Coverage is now complete and verified live: **17/17** service categories have reviews rows and a reachable reviews UI; **all 6** merchant types (restaurant ×2, pharmacy ×1, grocery ×1, bakery ×1, food ×1, butcher ×1) show real merchant reviews.
+- A reviewer can still rate a home-labor category at category level (providerId NULL scope); per-provider ratings will become available automatically the moment a provider is added for those categories.
+- Gate: `flutter analyze` **0 issues**; `flutter test` **941/941**; APK `releases/delwaqty_1.0.0+1_debug_20260924_1940.apk` installed + relaunched clean (pid 28397) — logcat NO RenderFlex/FATAL.
+
 ## ADR-095: Per-Provider Reviews + Merchant Ratings — Real Ratings on Every Provider Card and Every Restaurant (sprint 184)
 
 **Date:** Sprint 184

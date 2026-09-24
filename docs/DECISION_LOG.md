@@ -3223,3 +3223,22 @@ After ADR-090 the per-user greeting rendered left of center because of a hard `C
 ### Consequences
 - The greeting reads from the far right edge with a smaller full-visible subtitle; long names wrap to a second line instead of suspicious «…». Hero grows if the greeting wraps (badge stays pinned to the image bottom via `(heroH − heroImageH) + 12`).
 - Gate: `flutter analyze` **0 issues**; `flutter test` **936/936** (6 responsive incl. notch inset-58 — no overflow/exception); APK `releases/delwaqty_1.0.0+1_debug_20260923_2300.apk` installed + relaunched clean (pid 10105) — logcat shows NO RenderFlex/FATAL; screencap `releases/screenshot_hero_2300.png`.
+
+## ADR-092: Fix Greeting Word Order — «أهلاً» First, Then the User Name (RTL Paragraph)
+
+**Date:** Sprint 181
+**Status:** Accepted
+**Deciders:** Owner (order report) + Lead Architect
+
+### Context
+The owner saw the greeting with the user name BEFORE «أهلاً» — «الترتيب الاول فى رساله الترحيب على الصوره الاول بنقول اهلا وبعيدين اسم المستخدم انت عكستها ف صلحها». The logical string was already `l10n.welcome + '، ' + name` (welcome first), but the Text renders inside the hero's LTR-wrapped row (ADR-089). With the paragraph direction resolving to LTR, the bidi algorithm could place the (possibly Latin) name run to the RIGHT of the Arabic «أهلاً» run, so reading right-to-left showed the name first.
+
+### Decision
+Wrap each `_UserGreeting` line in its own `Directionality(textDirection: TextDirection.rtl)` and use `textAlign: TextAlign.right`. The greeting paragraph is now explicitly RTL: «أهلاً» is always the rightmost (first-read) word and the name follows to its left — independent of whether the name is Arabic or Latin. Column `crossAxisAlignment.end` is still evaluated under the row's outer LTR wrapper → the block stays pinned to the image's right edge.
+
+### Rationale
+- Forcing RTL at the text level guarantees a single correct reading order everywhere the greeting is used, without re-designing the row-level LTR spacing wrapper.
+
+### Consequences
+- Reading right-to-left the greeting now reads «أهلاً، [username]» as intended; guests still get «أهلاً».
+- Gate: `flutter analyze` **0 issues**; `flutter test` **936/936** (6 responsive incl. notch inset-58 — no overflow/exception); APK `releases/delwaqty_1.0.0+1_debug_20260924_0000.apk` installed + relaunched clean (pid 14183) — logcat shows NO RenderFlex/FATAL; screencap `releases/screenshot_hero_0000.png`.

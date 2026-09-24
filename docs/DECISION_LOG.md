@@ -3266,6 +3266,32 @@ The owner wants customers to be able to review and rate EVERY service category i
 ### Consequences
 - Migration **084 applied live** on `bttnlkmwhorjamzemwda` (POST `/database/query` → 201) once the working 90-day PAT (`sbp_fc832a…588`, recovered from stored OpenCode chat logs) replaced the invalid stored token. Verified: 5 RLS policies, `get_service_rating_summary('doctor')` → `{avg_rating:4.5, total_reviews:2, five_star:1, four_star:1,…}` (keys match the Dart entity), 6 seed reviews. UI is build-verified (`flutter analyze` **0 issues**, `flutter test` **940/940** incl. 4 new entity tests) and the app relaunches clean (pid 15712, no FATAL/RenderFlex).
 
+## ADR-099: Admin Settings Menu — Copy of Customer Profile Adapted for Admin-Only Use (sprint 188)
+
+**Date:** Sprint 188
+**Status:** Accepted
+**Deciders:** Owner (requested a settings list for the admin app) + Lead Architect
+
+### Context
+The owner asked to copy the customer app profile page into the admin app and adapt it — NO customer-profile features (wallet, rewards, orders, invoices, customer privacy-security) and everything must serve the admin.
+
+### Decision
+New `AdminSettingsMenuPage` at `/admin/settings-menu` (navigable from the admin Settings group, `Icons.tune_rounded`). It borrows the customer profile's structure (GradientBackground + AnimatedFadeIn section cards) but every tile is admin-only:
+- Admin identity header from `get_admin_profile` RPC (owner/admin avatar, role label, email, assigned-region chip).
+- Appearance: theme (shared `themeModeProvider`) + admin language (`adminLocaleProvider`).
+- Administration card → merchants, reviews-moderation, orders, drivers, members, support-chat.
+- Platform card → financial-center, transaction-ledger, push-notifications, analytics, settings.
+- Account card → my admin profile, About (dialog + version); bottom logout with confirm (`authStateProvider`).
+New shared l10n key `adminSettingsMenu`. Stacked/enriched the existing `/admin/profile` page is left as-is behind the «my profile» tile.
+
+### Rationale
+- Single curated entry point for common admin tasks matches the customer's profile-as-settings-menu UX.
+- No customer routes leaked into the admin app (all destinations exist under `/admin`); nothing customer-specific was carried over.
+- Theme/language persistence is reused, not duplicated.
+
+### Consequences
+- Admin now has a discoverable settings list; the nav rail also surfaced it under Settings. Gate: analyze 0 issues, 941/941 tests, admin APK `releases/delwaqty_admin_1.0.0+1_debug_20260924_2040.apk` relaunched clean (pid 9654).
+
 ## ADR-098: Owner Content Moderation — SECURITY DEFINER RPCs for Deleting Reviews, Products, and Merchants (sprint 187)
 
 **Date:** Sprint 187

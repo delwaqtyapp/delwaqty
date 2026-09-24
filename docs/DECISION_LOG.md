@@ -3202,3 +3202,24 @@ The owner asked to remove «مصر دائما بتقدم للعالم» from und
 ### Consequences
 - Hero right side now greets the logged-in user by name; guests get a generic «أهلاً». The Egypt slogan no longer appears on the customer home.
 - Gate: `flutter analyze` **0 issues**; `flutter test` **936/936** (6 responsive incl. notch inset-58 — no overflow/exception); APK `releases/delwaqty_1.0.0+1_debug_20260923_2200.apk` installed + relaunched clean (pid 29668) — logcat shows NO RenderFlex/FATAL; screencap `releases/screenshot_hero_2200.png`.
+
+## ADR-091: Greeting Starts at the Image's Far-Right Edge — Small, Non-Truncated Subtitle
+
+**Date:** Sprint 180
+**Status:** Accepted
+**Deciders:** Owner (design request) + Lead Architect
+
+### Context
+After ADR-090 the per-user greeting rendered left of center because of a hard `ConstrainedBox(maxWidth: 200)` on its box, and both lines were `maxLines: 1` + ellipsis — so a long name or the long tagline sentence could be visibly cut. The owner asked: «خلى الكلام يبدء من اقصى يمين الصوره للترحيب والكلام تحته يكون صغير وظاهر ومفيش جمله مقطوعه» — the greeting must start at the far right edge of the image, the subtitle below must be small and visible, and no sentence may be truncated.
+
+### Decision
+(1) Dropped the `ConstrainedBox(200)` — the greeting box is now just `Flexible` + `Align(alignment: Alignment.topRight)`, so its right edge is flush with the image's right padding and Arabic text begins at the far right.
+(2) `_UserGreeting` uses `crossAxisAlignment: CrossAxisAlignment.end` + `TextAlign.end` on both lines; title keeps `(sw*0.05).clamp(18,22)`; subtitle reduced to `(sw*0.030).clamp(11,13)` so it stays visually secondary. Both lines are now `maxLines: 2` with ellipsis as a safety net only — long content wraps instead of being cut mid-sentence.
+(3) `contentCoreH` second-row estimate raised 60 → 88dp so a two-line wrap can never overflow the fixed hero box (`heroH = max(heroImageH, contentH)` absorbs it).
+
+### Rationale
+- A fixed box width fights RTL/Arabic right-start text; flush-right alignment + wrap gives the reading order the owner wants with zero truncation risk.
+
+### Consequences
+- The greeting reads from the far right edge with a smaller full-visible subtitle; long names wrap to a second line instead of suspicious «…». Hero grows if the greeting wraps (badge stays pinned to the image bottom via `(heroH − heroImageH) + 12`).
+- Gate: `flutter analyze` **0 issues**; `flutter test` **936/936** (6 responsive incl. notch inset-58 — no overflow/exception); APK `releases/delwaqty_1.0.0+1_debug_20260923_2300.apk` installed + relaunched clean (pid 10105) — logcat shows NO RenderFlex/FATAL; screencap `releases/screenshot_hero_2300.png`.

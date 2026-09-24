@@ -6174,4 +6174,7 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get carProductCreated =>
       'Car published to the marketplace successfully';
+
+  @override
+  String get rateService => 'Rate this service';
 }

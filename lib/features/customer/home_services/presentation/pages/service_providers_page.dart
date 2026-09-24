@@ -62,7 +62,17 @@ class _ServiceProvidersPageState extends ConsumerState<ServiceProvidersPage> {
     final providersAsync = ref.watch(_providersForTypeProvider(_type));
 
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.servicesSection)),
+      appBar: AppBar(
+        title: Text(l10n.servicesSection),
+        actions: [
+          IconButton(
+            tooltip: l10n.rateService,
+            icon: const Icon(Icons.rate_review_rounded),
+            onPressed: () =>
+                context.push('/home-services/reviews/${_type.name}'),
+          ),
+        ],
+      ),
       body: Column(
         children: [
           _buildCategoryBar(l10n),

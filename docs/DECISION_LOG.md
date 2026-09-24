@@ -3266,6 +3266,29 @@ The owner wants customers to be able to review and rate EVERY service category i
 ### Consequences
 - Migration **084 applied live** on `bttnlkmwhorjamzemwda` (POST `/database/query` → 201) once the working 90-day PAT (`sbp_fc832a…588`, recovered from stored OpenCode chat logs) replaced the invalid stored token. Verified: 5 RLS policies, `get_service_rating_summary('doctor')` → `{avg_rating:4.5, total_reviews:2, five_star:1, four_star:1,…}` (keys match the Dart entity), 6 seed reviews. UI is build-verified (`flutter analyze` **0 issues**, `flutter test` **940/940** incl. 4 new entity tests) and the app relaunches clean (pid 15712, no FATAL/RenderFlex).
 
+## ADR-100: Admin Settings — Menu Owns /admin/settings + platform_settings INSERT RLS Fix (sprint 188, hotfix)
+
+**Date:** Sprint 188
+**Status:** Accepted
+**Deciders:** Owner (reported the menu "not visible" + save "فشل") + Lead Architect
+
+### Context
+Two user-reported defects after ADR-099:
+1. Tapping «الإعدادات» still opened the OLD platform-config form — the new menu was only reachable via a separate `/admin/settings-menu` nav entry, so it looked "not added".
+2. Changing the support email (or any setting) and pressing Save always failed.
+
+### Decision / Root causes
+1. **Save failure**: RLS on `platform_settings` had only SELECT + UPDATE policies (verified via `pg_policies`). `AdminRepository.updateSettings` uses `.upsert({id:'default', ...})`, and Postgres RLS blocks the INSERT step of `INSERT ... ON CONFLICT` when no FOR INSERT policy exists → every save threw → `settingsFailed`. **Fix (migration 088, applied live)**: add `platform_settings admin insert` (`FOR INSERT WITH CHECK (public.is_admin())`) and `platform_settings admin delete` (`FOR DELETE USING (public.is_admin())`).
+2. **Discoverability**: the settings-menu was a separate nav entry; the natural «الإعدادات» destination still showed the legacy form. **Fix**: the new `AdminSettingsMenuPage` now owns route `/admin/settings` (title = adminSettingsMenu), and the legacy form page moves to `/admin/platform-config` (title = adminPlatformConfig); the settings nav group becomes [قائمة الإعدادات, إعدادات المنصة, ملف المسؤول] and the menu's platform tile points to `/admin/platform-config`. New l10n key `adminPlatformConfig`.
+
+### Rationale
+- Route ownership by the NEW menu matches the mental model: whats shown when tapping "تعدات" IS the settings menu; platform form is a sub-page.
+- The INSERT/UPDATE mix for upsert under RLS is a classic Supabase pitfall — the FOR INSERT policy (not just UPDATE) is the required complement.
+
+### Consequences
+- Owner can now save platform settings (support email, app name, max drivers/zone, maintenance) — INSERT+UPDATE+DELETE locked to admins, SELECT stays public-read.
+- Device verified to run the new code by auditing kernel_blob strings of the pulled APK. Gate: analyze 0, 941/941, admin APK `releases/delwaqty_admin_1.0.0+1_debug_20260924_2052.apk` relaunched clean (pid 31646).
+
 ## ADR-099: Admin Settings Menu — Copy of Customer Profile Adapted for Admin-Only Use (sprint 188)
 
 **Date:** Sprint 188

@@ -1390,6 +1390,7 @@
   "adminEmergency": "Emergency",
   "adminSettingsPage": "Settings",
   "adminSettingsMenu": "Settings Menu",
+  "adminPlatformConfig": "Platform Settings",
   "adminMore": "Actions",
   "adminQuickActions": "Quick Actions",
   "adminOperationsSection": "Operations",

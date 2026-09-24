@@ -8270,6 +8270,12 @@ abstract class AppLocalizations {
   /// **'Settings Menu'**
   String get adminSettingsMenu;
 
+  /// No description provided for @adminPlatformConfig.
+  ///
+  /// In en, this message translates to:
+  /// **'Platform Settings'**
+  String get adminPlatformConfig;
+
   /// No description provided for @adminMore.
   ///
   /// In en, this message translates to:

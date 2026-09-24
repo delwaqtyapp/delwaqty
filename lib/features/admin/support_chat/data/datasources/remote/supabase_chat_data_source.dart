@@ -16,10 +16,11 @@ class SupabaseChatDataSource {
     return rows.map((r) => ChatRoom.fromJson(r)).toList();
   }
 
-  Future<List<ChatRoom>> getAllRooms() async {
+  Future<List<ChatRoom>> getActiveRooms() async {
     final rows = await _client
         .from('chat_rooms')
         .select()
+        .eq('is_active', true)
         .order('last_message_at', ascending: false);
     return rows.map((r) => ChatRoom.fromJson(r)).toList();
   }
@@ -39,9 +40,12 @@ class SupabaseChatDataSource {
   }
 
   Future<void> closeRoom(String id) async {
+    final now = DateTime.now();
+    final oneWeekLater = now.add(const Duration(days: 7));
     await _client.from('chat_rooms').update({
       'is_active': false,
-      'updated_at': DateTime.now().toIso8601String(),
+      'auto_delete_at': oneWeekLater.toIso8601String(),
+      'updated_at': now.toIso8601String(),
     }).eq('id', id);
   }
 

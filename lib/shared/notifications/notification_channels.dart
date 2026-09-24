@@ -87,9 +87,9 @@ class NotificationChannels {
     NotificationChannel('/admin/complaints', adminOnly: true),
     NotificationChannel('/admin/live-tracking', adminOnly: true),
     NotificationChannel('/admin/support-chat/room/:roomId', adminOnly: true),
-    NotificationChannel('/admin/financial', adminOnly: true),
-    NotificationChannel('/financial', contexts: {AppContext.admin}),
-    NotificationChannel('/owner-financial', contexts: {AppContext.admin}),
+    NotificationChannel('/admin/financial-center', adminOnly: true),
+    NotificationChannel('/admin/owner-dashboard', contexts: {AppContext.admin}),
+    NotificationChannel('/admin/emergency', adminOnly: true),
   ];
 
   static bool isAllowed(String route, {required AppContext context}) {

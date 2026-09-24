@@ -754,6 +754,30 @@ final response = await _supabase
   }
 
   @override
+  Future<bool> upsertProduct(Map<String, dynamic> product) async {
+    try {
+      final response = await _supabase.rpc(
+        'admin_upsert_product',
+        params: {
+          'p_id': product['id'],
+          'p_merchant_id': product['merchant_id'],
+          'p_name': product['name'],
+          'p_description': product['description'],
+          'p_price': product['price'],
+          'p_compare_at_price': product['compare_at_price'],
+          'p_category': product['category'],
+          'p_image_url': product['image_url'],
+          'p_is_available': product['is_available'] ?? true,
+          'p_stock_quantity': product['stock_quantity'] ?? 0,
+        },
+      );
+      return (response as Map<String, dynamic>)['success'] == true;
+    } catch (e) {
+      throw AdminException('Failed to save product: $e');
+    }
+  }
+
+  @override
   Future<bool> deleteMerchant(String merchantId) async {
     try {
       return await _supabase.rpc<bool>(
@@ -1048,5 +1072,41 @@ final response = await _supabase
       dropoffLongitude: (json['dropoff_longitude'] as num).toDouble(),
       createdAt: DateTime.parse(json['created_at'] as String),
     );
+  }
+
+  // ─── Emergency / SOS ──────────────────────────────────────
+
+  @override
+  Future<List<Map<String, dynamic>>> getSosAlerts({String? status}) async {
+    try {
+      final response = await _supabase.rpc(
+        'admin_list_sos_alerts',
+        params: {'p_status': status},
+      );
+      return (response as List).cast<Map<String, dynamic>>();
+    } catch (e) {
+      throw AdminException('Failed to load SOS alerts: $e');
+    }
+  }
+
+  @override
+  Future<bool> resolveSosAlert(
+    String alertId, {
+    String status = 'resolved',
+    String? note,
+  }) async {
+    try {
+      final response = await _supabase.rpc(
+        'admin_resolve_sos_alert',
+        params: {
+          'p_alert_id': alertId,
+          'p_status': status,
+          'p_note': note ?? '',
+        },
+      );
+      return (response as Map<String, dynamic>)['success'] == true;
+    } catch (e) {
+      throw AdminException('Failed to resolve SOS alert: $e');
+    }
   }
 }

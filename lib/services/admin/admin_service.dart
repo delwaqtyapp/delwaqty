@@ -175,6 +175,16 @@ class AdminService {
     }
   }
 
+  Future<bool> upsertProduct(Map<String, dynamic> product) async {
+    if (!await isOwner) return false;
+    try {
+      return await _repository.upsertProduct(product);
+    } catch (e) {
+      debugPrint('AdminService.upsertProduct error: $e');
+      return false;
+    }
+  }
+
   Future<bool> deleteMerchant(String merchantId) async {
     if (!await isOwner) return false;
     try {
@@ -212,6 +222,34 @@ class AdminService {
       return true;
     } catch (e) {
       debugPrint('AdminService.updateOrderStatus error: $e');
+      return false;
+    }
+  }
+
+  // ─── Emergency / SOS ──────────────────────────────────────
+
+  Future<List<Map<String, dynamic>>> getSosAlerts({String? status}) async {
+    try {
+      return await _repository.getSosAlerts(status: status);
+    } catch (e) {
+      debugPrint('AdminService.getSosAlerts error: $e');
+      return [];
+    }
+  }
+
+  Future<bool> resolveSosAlert(
+    String alertId, {
+    String status = 'resolved',
+    String? note,
+  }) async {
+    try {
+      return await _repository.resolveSosAlert(
+        alertId,
+        status: status,
+        note: note,
+      );
+    } catch (e) {
+      debugPrint('AdminService.resolveSosAlert error: $e');
       return false;
     }
   }

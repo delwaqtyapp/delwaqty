@@ -11,6 +11,7 @@ import 'package:delwaqty/features/admin/presentation/pages/admin_orders_page.dar
 import 'package:delwaqty/features/admin/presentation/pages/admin_settings_page.dart';
 import 'package:delwaqty/features/admin/presentation/pages/admin_settings_menu_page.dart';
 import 'package:delwaqty/features/admin/presentation/pages/admin_drivers_page.dart';
+import 'package:delwaqty/features/admin/presentation/pages/admin_emergency_page.dart';
 import 'package:delwaqty/features/admin/presentation/pages/admin_analytics_page.dart';
 import 'package:delwaqty/features/admin/presentation/pages/service_performance_page.dart';
 import 'package:delwaqty/features/admin/presentation/pages/admin_deliveries_page.dart';
@@ -181,6 +182,11 @@ class AdminModule extends FeatureModule {
           path: 'complaints',
           pageBuilder: (context, state) =>
               _adminPage(const AdminComplaintsPage()),
+        ),
+        GoRoute(
+          path: 'emergency',
+          pageBuilder: (context, state) =>
+              _adminPage(const AdminEmergencyPage()),
         ),
         GoRoute(
           path: 'delivery-car-requests',

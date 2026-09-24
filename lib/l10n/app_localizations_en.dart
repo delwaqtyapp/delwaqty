@@ -1538,6 +1538,36 @@ class AppLocalizationsEn extends AppLocalizations {
   String get addProduct => 'Add Product';
 
   @override
+  String get productPrice => 'Price';
+
+  @override
+  String get comparePrice => 'Old price (compare-at)';
+
+  @override
+  String get productDescription => 'Description';
+
+  @override
+  String get productCategory => 'Category';
+
+  @override
+  String get productStock => 'Stock quantity';
+
+  @override
+  String get productAvailable => 'Available to customers';
+
+  @override
+  String get productImageUrl => 'Image URL (optional)';
+
+  @override
+  String get saveProduct => 'Save Product';
+
+  @override
+  String get productSaved => 'Product saved';
+
+  @override
+  String get productSaveFailed => 'Save failed, try again';
+
+  @override
   String get saveChanges => 'Save Changes';
 
   @override
@@ -4306,6 +4336,67 @@ class AppLocalizationsEn extends AppLocalizations {
   String get adminEmergency => 'Emergency';
 
   @override
+  String get emergencyActive => 'Active';
+
+  @override
+  String get emergencyResolved => 'Resolved';
+
+  @override
+  String get emergencyEscalated => 'Escalated';
+
+  @override
+  String get emergencyFalseAlarm => 'False alarm';
+
+  @override
+  String get emergencyAll => 'All';
+
+  @override
+  String get emergencyOnlyActive => 'Active only';
+
+  @override
+  String get sosUser => 'Member';
+
+  @override
+  String get sosDriver => 'Driver';
+
+  @override
+  String get sosAlertTypeManual => 'Manual';
+
+  @override
+  String get sosAlertType => 'Alert type';
+
+  @override
+  String get sosAlertTypeAutomatic => 'Automatic';
+
+  @override
+  String get sosAlertTypeTimer => 'Timer';
+
+  @override
+  String get resolveSosAlert => 'Close alert';
+
+  @override
+  String get markSosFalseAlarm => 'Mark false alarm';
+
+  @override
+  String get sosResolved => 'Alert closed';
+
+  @override
+  String get sosActionFailed => 'Action failed, try again';
+
+  @override
+  String get sosNoteHint => 'Note (optional)';
+
+  @override
+  String get sosNoAlerts => 'No alerts right now';
+
+  @override
+  String get sosNoAlertsHint => 'Customer emergency alerts will appear here.';
+
+  @override
+  String get confirmSosFalseAlarm =>
+      'Confirm marking this alert as a false alarm?';
+
+  @override
   String get adminSettingsPage => 'Settings';
 
   @override
@@ -4982,11 +5073,6 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String sosRideInfo(Object rideId, Object time) {
     return 'Delivery: $rideId • $time';
-  }
-
-  @override
-  String sosAlertType(Object type) {
-    return 'SOS $type';
   }
 
   @override

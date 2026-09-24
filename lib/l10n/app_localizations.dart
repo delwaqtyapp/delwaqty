@@ -3020,6 +3020,66 @@ abstract class AppLocalizations {
   /// **'Add Product'**
   String get addProduct;
 
+  /// No description provided for @productPrice.
+  ///
+  /// In en, this message translates to:
+  /// **'Price'**
+  String get productPrice;
+
+  /// No description provided for @comparePrice.
+  ///
+  /// In en, this message translates to:
+  /// **'Old price (compare-at)'**
+  String get comparePrice;
+
+  /// No description provided for @productDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Description'**
+  String get productDescription;
+
+  /// No description provided for @productCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Category'**
+  String get productCategory;
+
+  /// No description provided for @productStock.
+  ///
+  /// In en, this message translates to:
+  /// **'Stock quantity'**
+  String get productStock;
+
+  /// No description provided for @productAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Available to customers'**
+  String get productAvailable;
+
+  /// No description provided for @productImageUrl.
+  ///
+  /// In en, this message translates to:
+  /// **'Image URL (optional)'**
+  String get productImageUrl;
+
+  /// No description provided for @saveProduct.
+  ///
+  /// In en, this message translates to:
+  /// **'Save Product'**
+  String get saveProduct;
+
+  /// No description provided for @productSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Product saved'**
+  String get productSaved;
+
+  /// No description provided for @productSaveFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Save failed, try again'**
+  String get productSaveFailed;
+
   /// No description provided for @saveChanges.
   ///
   /// In en, this message translates to:
@@ -8258,6 +8318,126 @@ abstract class AppLocalizations {
   /// **'Emergency'**
   String get adminEmergency;
 
+  /// No description provided for @emergencyActive.
+  ///
+  /// In en, this message translates to:
+  /// **'Active'**
+  String get emergencyActive;
+
+  /// No description provided for @emergencyResolved.
+  ///
+  /// In en, this message translates to:
+  /// **'Resolved'**
+  String get emergencyResolved;
+
+  /// No description provided for @emergencyEscalated.
+  ///
+  /// In en, this message translates to:
+  /// **'Escalated'**
+  String get emergencyEscalated;
+
+  /// No description provided for @emergencyFalseAlarm.
+  ///
+  /// In en, this message translates to:
+  /// **'False alarm'**
+  String get emergencyFalseAlarm;
+
+  /// No description provided for @emergencyAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get emergencyAll;
+
+  /// No description provided for @emergencyOnlyActive.
+  ///
+  /// In en, this message translates to:
+  /// **'Active only'**
+  String get emergencyOnlyActive;
+
+  /// No description provided for @sosUser.
+  ///
+  /// In en, this message translates to:
+  /// **'Member'**
+  String get sosUser;
+
+  /// No description provided for @sosDriver.
+  ///
+  /// In en, this message translates to:
+  /// **'Driver'**
+  String get sosDriver;
+
+  /// No description provided for @sosAlertTypeManual.
+  ///
+  /// In en, this message translates to:
+  /// **'Manual'**
+  String get sosAlertTypeManual;
+
+  /// No description provided for @sosAlertType.
+  ///
+  /// In en, this message translates to:
+  /// **'Alert type'**
+  String get sosAlertType;
+
+  /// No description provided for @sosAlertTypeAutomatic.
+  ///
+  /// In en, this message translates to:
+  /// **'Automatic'**
+  String get sosAlertTypeAutomatic;
+
+  /// No description provided for @sosAlertTypeTimer.
+  ///
+  /// In en, this message translates to:
+  /// **'Timer'**
+  String get sosAlertTypeTimer;
+
+  /// No description provided for @resolveSosAlert.
+  ///
+  /// In en, this message translates to:
+  /// **'Close alert'**
+  String get resolveSosAlert;
+
+  /// No description provided for @markSosFalseAlarm.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark false alarm'**
+  String get markSosFalseAlarm;
+
+  /// No description provided for @sosResolved.
+  ///
+  /// In en, this message translates to:
+  /// **'Alert closed'**
+  String get sosResolved;
+
+  /// No description provided for @sosActionFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Action failed, try again'**
+  String get sosActionFailed;
+
+  /// No description provided for @sosNoteHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Note (optional)'**
+  String get sosNoteHint;
+
+  /// No description provided for @sosNoAlerts.
+  ///
+  /// In en, this message translates to:
+  /// **'No alerts right now'**
+  String get sosNoAlerts;
+
+  /// No description provided for @sosNoAlertsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Customer emergency alerts will appear here.'**
+  String get sosNoAlertsHint;
+
+  /// No description provided for @confirmSosFalseAlarm.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm marking this alert as a false alarm?'**
+  String get confirmSosFalseAlarm;
+
   /// No description provided for @adminSettingsPage.
   ///
   /// In en, this message translates to:
@@ -9559,12 +9739,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Delivery: {rideId} • {time}'**
   String sosRideInfo(Object rideId, Object time);
-
-  /// No description provided for @sosAlertType.
-  ///
-  /// In en, this message translates to:
-  /// **'SOS {type}'**
-  String sosAlertType(Object type);
 
   /// No description provided for @timeNow.
   ///

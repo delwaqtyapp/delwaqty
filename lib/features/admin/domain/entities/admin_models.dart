@@ -164,8 +164,6 @@ abstract class AdminDashboardMetrics with _$AdminDashboardMetrics {
     @Default(0) int totalMerchants,
     @Default(0) int activeDrivers,
     @Default(0) int pendingVerifications,
-    @Default(0) int totalRides,
-    @Default(0) int activeRides,
     @Default(0) int totalDeliveries,
     @Default(0) int pendingOrders,
     @Default(0) int completedDeliveries,

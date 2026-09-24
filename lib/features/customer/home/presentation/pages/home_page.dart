@@ -43,7 +43,6 @@ final _homeServiceCategoriesProvider =
     ServiceCategoryType.nurse,
     ServiceCategoryType.teacher,
     ServiceCategoryType.barber,
-    ServiceCategoryType.deliveryCar,
     ServiceCategoryType.plumbing,
     ServiceCategoryType.electrical,
     ServiceCategoryType.carpentry,
@@ -71,7 +70,6 @@ String _serviceLabel(ServiceCategoryType t) => switch (t) {
       ServiceCategoryType.nurse => 'ممرض',
       ServiceCategoryType.teacher => 'مدرسين',
       ServiceCategoryType.barber => 'حجز حلاق',
-      ServiceCategoryType.deliveryCar => 'سيارة توصيل',
       ServiceCategoryType.plumbing => 'سباكة',
       ServiceCategoryType.electrical => 'كهرباء',
       ServiceCategoryType.carpentry => 'نجارة',
@@ -92,7 +90,6 @@ IconData _serviceIcon(ServiceCategoryType t) => switch (t) {
       ServiceCategoryType.nurse => Icons.health_and_safety_rounded,
       ServiceCategoryType.teacher => Icons.school_rounded,
       ServiceCategoryType.barber => Icons.content_cut_rounded,
-      ServiceCategoryType.deliveryCar => Icons.local_taxi_rounded,
       ServiceCategoryType.plumbing => Icons.plumbing_rounded,
       ServiceCategoryType.electrical => Icons.electrical_services_rounded,
       ServiceCategoryType.carpentry => Icons.carpenter_rounded,
@@ -113,7 +110,6 @@ Color _serviceColor(ServiceCategoryType t) => switch (t) {
       ServiceCategoryType.nurse => AppColors.successLight,
       ServiceCategoryType.teacher => AppColors.infoLight,
       ServiceCategoryType.barber => AppColors.brandViolet,
-      ServiceCategoryType.deliveryCar => AppColors.serviceDelivery,
       ServiceCategoryType.plumbing => AppColors.serviceHome,
       ServiceCategoryType.electrical => AppColors.serviceElectronics,
       ServiceCategoryType.carpentry => AppColors.serviceBakery,
@@ -1069,9 +1065,7 @@ class _CompactCategories extends StatelessWidget {
       delay: Duration(milliseconds: 280 + index * 40),
       child: PressableScale(
         onTap: () => context.push(
-          type == ServiceCategoryType.deliveryCar
-              ? '/home-services/cars'
-              : '/home-services/providers/${type.name}',
+          '/home-services/providers/${type.name}',
         ),
         child: SizedBox(
           width: 76,

@@ -91,12 +91,11 @@ class HomeServicesPage extends ConsumerWidget {
         itemCount: categories.length,
         itemBuilder: (context, index) {
           final category = categories[index];
-          final route = category.type == ServiceCategoryType.deliveryCar
-              ? '/home-services/cars'
-              : '/home-services/providers/${category.type.name}';
           return _CategoryCard(
             category: category,
-            onTap: () => context.push(route),
+            onTap: () => context.push(
+              '/home-services/providers/${category.type.name}',
+            ),
           );
         },
       ),
@@ -127,7 +126,6 @@ class _CategoryCard extends StatelessWidget {
     ServiceCategoryType.doctor => AppColors.errorLight,
     ServiceCategoryType.nurse => AppColors.successLight,
     ServiceCategoryType.barber => AppColors.brandViolet,
-    ServiceCategoryType.deliveryCar => AppColors.serviceDelivery,
     ServiceCategoryType.other => AppColors.serviceMore,
   };
 
@@ -148,7 +146,6 @@ class _CategoryCard extends StatelessWidget {
     ServiceCategoryType.doctor => Icons.medical_services_rounded,
     ServiceCategoryType.nurse => Icons.health_and_safety_rounded,
     ServiceCategoryType.barber => Icons.content_cut_rounded,
-    ServiceCategoryType.deliveryCar => Icons.local_taxi_rounded,
     ServiceCategoryType.other => Icons.home_repair_service_rounded,
   };
 

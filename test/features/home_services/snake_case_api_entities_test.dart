@@ -2,7 +2,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:delwaqty/features/customer/home_services/domain/entities/service_category.dart';
 import 'package:delwaqty/features/customer/home_services/domain/entities/service_provider.dart';
 import 'package:delwaqty/features/customer/home_services/domain/entities/service_booking.dart';
-import 'package:delwaqty/features/customer/home_services/domain/entities/car_product.dart';
 
 void main() {
   group('snake_case API rows', () {
@@ -130,33 +129,6 @@ void main() {
       final p = ServiceProvider.fromJson(row);
       expect(p.userId, isEmpty);
       expect(p.name, 'د. أحمد حسن');
-    });
-
-    test('CarProduct.fromJson parses real car_products row', () {
-      final row = <String, dynamic>{
-        'id': 'car-1',
-        'seller_id': 'u-1',
-        'driver_id': null,
-        'merchant_id': null,
-        'category': 'sedan',
-        'make': 'Toyota',
-        'model': 'Corolla',
-        'year': 2020,
-        'color': 'أبيض',
-        'seats': 4,
-        'photo_url': null,
-        'city': 'القاهرة',
-        'price': 650000.0,
-        'description': null,
-        'is_available': true,
-        'is_verified': false,
-        'latitude': null,
-        'longitude': null,
-        'created_at': '2026-09-19T10:00:00.000Z',
-      };
-      final c = CarProduct.fromJson(row);
-      expect(c.make, 'Toyota');
-      expect(c.price, 650000.0);
     });
   });
 }

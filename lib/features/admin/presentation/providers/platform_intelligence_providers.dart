@@ -179,15 +179,6 @@ final ordersTimeseriesProvider = FutureProvider<TimeseriesData>((ref) async {
   return ds.getOrdersTimeseries(from: from, to: to);
 });
 
-// ─── Rides Timeseries ─────────────────────────────────────
-
-final ridesTimeseriesProvider = FutureProvider<TimeseriesData>((ref) async {
-  final ds = ref.watch(platformIntelligenceDataSourceProvider);
-  final filter = ref.watch(adminTimeFilterProvider);
-  final (from, to) = filter.dateRange;
-  return ds.getRidesTimeseries(from: from, to: to);
-});
-
 // ─── Operational Alerts ───────────────────────────────────
 
 final operationalAlertsProvider = FutureProvider<List<OperationalAlert>>((ref) async {

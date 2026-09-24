@@ -299,9 +299,9 @@ class _PlatformIntelligenceDashboardState
             '/admin/orders',
           ),
           _KpiItem(
-            l10n.kpiActiveRides,
-            kpi.activeRides.toString(),
-            Icons.directions_car_rounded,
+            l10n.kpiActiveDeliveries,
+            kpi.activeDeliveries.toString(),
+            Icons.directions_bike_rounded,
             const Color(0xFF00C7BE),
             '/admin/deliveries',
           ),
@@ -469,11 +469,6 @@ class _PlatformIntelligenceDashboardState
         l10n.revenuePlatformCommission,
         revenue.totalCommission,
         const Color(0xFF34C759),
-      ),
-      _RevenueItem(
-        l10n.revenueRideGmv,
-        revenue.commission7pct,
-        const Color(0xFF00C7BE),
       ),
       _RevenueItem(
         l10n.revenueDeliveryGmv,

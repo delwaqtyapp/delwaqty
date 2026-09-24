@@ -159,18 +159,6 @@ class PlatformIntelligenceDataSource {
     return TimeseriesData.fromJson(data);
   }
 
-  Future<TimeseriesData> getRidesTimeseries({
-    DateTime? from,
-    DateTime? to,
-  }) async {
-    final response = await _supabase.rpc('platform_rides_timeseries', params: {
-      'p_from': from?.toIso8601String(),
-      'p_to': to?.toIso8601String(),
-    });
-    final data = _unwrapResponse(response, 'platform_rides_timeseries');
-    return TimeseriesData.fromJson(data);
-  }
-
   Future<List<OperationalAlert>> getOperationalAlerts() async {
     try {
       final response = await _supabase.rpc('platform_operational_alerts');

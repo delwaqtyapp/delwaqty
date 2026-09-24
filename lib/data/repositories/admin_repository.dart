@@ -43,16 +43,6 @@ class AdminRepository implements admin.AdminRepository {
         _supabase
             .from('rides')
             .select('id')
-            .eq('service_type', 'ride')
-            .count(),
-        _supabase
-            .from('rides')
-            .select('id')
-            .inFilter('status', ['searching', 'matched', 'arrived', 'inTrip'])
-            .count(),
-        _supabase
-            .from('rides')
-            .select('id')
             .neq('service_type', 'ride')
             .count(),
         _supabase
@@ -113,25 +103,16 @@ class AdminRepository implements admin.AdminRepository {
       ]);
 
       double totalRevenue = 0;
-      for (final ride in revenueResults[0] as List) {
-        totalRevenue += (ride['fare'] as num?)?.toDouble() ?? 0;
-      }
       for (final delivery in revenueResults[1] as List) {
         totalRevenue += (delivery['fare'] as num?)?.toDouble() ?? 0;
       }
 
       double revenueToday = 0;
-      for (final ride in revenueResults[2] as List) {
-        revenueToday += (ride['fare'] as num?)?.toDouble() ?? 0;
-      }
       for (final delivery in revenueResults[3] as List) {
         revenueToday += (delivery['fare'] as num?)?.toDouble() ?? 0;
       }
 
       double revenueThisMonth = 0;
-      for (final ride in revenueResults[4] as List) {
-        revenueThisMonth += (ride['fare'] as num?)?.toDouble() ?? 0;
-      }
       for (final delivery in revenueResults[5] as List) {
         revenueThisMonth += (delivery['fare'] as num?)?.toDouble() ?? 0;
       }
@@ -142,16 +123,14 @@ class AdminRepository implements admin.AdminRepository {
         totalMerchants: countResults[2],
         activeDrivers: metrics[0].count,
         pendingVerifications: metrics[1].count,
-        totalRides: metrics[2].count,
-        activeRides: metrics[3].count,
-        totalDeliveries: metrics[4].count,
-        pendingOrders: metrics[5].count,
-        completedDeliveries: metrics[6].count,
+        totalDeliveries: metrics[2].count,
+        pendingOrders: metrics[3].count,
+        completedDeliveries: metrics[4].count,
         totalRevenue: totalRevenue,
         revenueToday: revenueToday,
         revenueThisMonth: revenueThisMonth,
-        newUsersToday: metrics[7].count,
-        newUsersThisMonth: metrics[8].count,
+        newUsersToday: metrics[5].count,
+        newUsersThisMonth: metrics[6].count,
       );
     } catch (e) {
       throw AdminException('Failed to fetch dashboard metrics: $e');

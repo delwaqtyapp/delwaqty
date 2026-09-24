@@ -3138,3 +3138,27 @@ The owner saw Flutter's yellow/black "A RenderFlex overflowed by 21 pixels" stri
 - Hero = image (top bar + glass search + location badge only) → Egypt statement → direct-order button → categories → promos → discovery.
 - Slightly smaller top-bar buttons/search on narrow widths (36/30dp floors) — imperceptible.
 - Gate: `flutter analyze` **0 issues**; `flutter test` **936/936** (incl. inset-58 notch case); APK `releases/delwaqty_1.0.0+1_debug_20260923_1900.apk` installed + relaunched clean (pid 28485) — logcat shows NO RenderFlex/overflow; screencap `releases/screenshot_hero_1900.png`.
+
+## ADR-088: Egypt Statement On-Image Under the Menu + Search As a Small Circle Under the Notification
+
+**Date:** Sprint 177
+**Status:** Accepted
+**Deciders:** Owner (design request) + Lead Architect
+
+### Context
+Round 41 moved «مصر دائما بتقدم للعالم» off the hero to fix the inset overflow. The owner then asked to bring it back INSIDE the image directly below the side-menu (drawer) circle — «ارفع كلمه مصر دائما بتقدم للعالم اسفل زر القائمه الجانبيه» — and to shrink the full-width glass search bar into a small circle the size of the notification button, placed below the notification button — «وشريط البحث صغرة ل علامه بحث صغيره بحجم زر الاشعارات وخليها تبقى تحت زر الاشعارات».
+
+### Decision
+(1) The hero's second row (below the top bar) is now `Row[ _SearchCircleButton, Flexible(Align topRight → _EgyptStatement) ]` with `mainAxisAlignment: spaceBetween`. The search is a NEW compact glass circle (`_SearchCircleButton`: topButtonSize/topIconSize, white .2 fill + .35 border + soft shadow, `AppIcons.actionSearch`, tap → `context.push('/search')`) sitting under the notification button (left); the gold/white Egypt statement sits under the menu circle (right). Its old standalone sliver above the CTA and the old `_buildHeroSearch` full-width pill were deleted (no duplication).
+(2) **Unbounded-Text hardening**: the statement is inside `Flexible`+`ConstrainedBox(maxWidth 200)`+`Align(topRight)` so a long locale string can only ellipsize (`maxLines: 1`) — the initial `[circle, Spacer, statement]` version overflowed by 92px under the EN test locale (Text in a Row gets unbounded width → ellipsis never triggers). Mid-edit the class's closing brace was consumed by a bulk python removal → repaired immediately.
+(3) Location badge `maxWidth` 178→150 so the pinned bottom-left badge never kisses the statement's left edge at 366dp widths.
+(4) Hero sizing stays `heroH = max(heroImageH, contentH)`; contentCoreH now `topButtonSize + zoneGap + 60` (the second row ≈ statement height).
+
+### Rationale
+- One compact circle matches the existing top-bar language (consistency) and honors the owner's exact placement; the full-width pill didn't fit the new on-image layout.
+- Bounding the statement width gives a permanent no-overflow guarantee regardless of locale string length or font scaling.
+
+### Consequences
+- Hero = top bar (notification | mini-lockup | menu) → search circle + Egypt statement row → location badge bottom-left.
+- `/search` becomes book/app flow unchanged; search still reachable one tap away.
+- Gate: `flutter analyze` **0 issues**; `flutter test` **936/936** (6 responsive incl. notch inset-58 — no overflow/exception); APK `releases/delwaqty_1.0.0+1_debug_20260923_2000.apk` installed + relaunched clean (pid 29263) — logcat shows NO RenderFlex/FATAL; screencap `releases/screenshot_hero_2000.png`.

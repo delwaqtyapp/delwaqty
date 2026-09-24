@@ -3162,3 +3162,23 @@ Round 41 moved «مصر دائما بتقدم للعالم» off the hero to fix
 - Hero = top bar (notification | mini-lockup | menu) → search circle + Egypt statement row → location badge bottom-left.
 - `/search` becomes book/app flow unchanged; search still reachable one tap away.
 - Gate: `flutter analyze` **0 issues**; `flutter test` **936/936** (6 responsive incl. notch inset-58 — no overflow/exception); APK `releases/delwaqty_1.0.0+1_debug_20260923_2000.apk` installed + relaunched clean (pid 29263) — logcat shows NO RenderFlex/FATAL; screencap `releases/screenshot_hero_2000.png`.
+
+## ADR-089: Fix Search-Circle / Egypt-Statement Side Placement — LTR Row for the Hero's Second Row
+
+**Date:** Sprint 178
+**Status:** Accepted
+**Deciders:** Owner (placement report) + Lead Architect
+
+### Context
+Round 42 put the new search circle and the Egypt statement in a `Row(mainAxisAlignment: spaceBetween)` with NO explicit text direction. The customer app is Arabic (RTL), so the Row reversed: the search circle (first child) rendered on the RIGHT and the statement on the LEFT — exactly the opposite of the owner's request: search between the location badge and the notification (LEFT), statement below the side-menu button (RIGHT).
+
+### Decision
+Wrap the hero's second row in `Directionality(textDirection: TextDirection.ltr)` — the same pattern already used by the top-bar row (notification LEFT / mini-lockup center / menu RIGHT). Under LTR the `spaceBetween` Row now places the `_SearchCircleButton` (first child) on the LEFT under the notification and the `_EgyptStatement` (Flexible + Align topRight + maxWidth 200) on the RIGHT under the menu.
+
+### Rationale
+- One explicit LTR wrapper (instead of reordering children for the RTL default) keeps the code reading LEFT→RIGHT like the layout it produces and matches the existing top-bar convention, so a future editor won't re-break it.
+- The statement keeps its width bound → long strings ellipsize, never overflow.
+
+### Consequences
+- Hero rows now: (1) top bar [notification | mini-lockup | menu] under LTR; (2) [search circle | Egypt statement] under LTR — search left (between notification and location badge), statement right (below menu). Both rendered as the owner requested on the physical 366dp device.
+- Gate: `flutter analyze` **0 issues**; `flutter test` **936/936** (6 responsive incl. notch inset-58 — no overflow/exception); APK `releases/delwaqty_1.0.0+1_debug_20260923_2100.apk` installed + relaunched clean (pid 14958) — logcat shows NO RenderFlex/FATAL; screencap `releases/screenshot_hero_2100.png`.

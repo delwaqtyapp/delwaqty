@@ -442,27 +442,30 @@ class _EgyptHeroState extends State<_EgyptHero>
                           ),
                         ),
                         SizedBox(height: zoneGap),
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            _SearchCircleButton(
-                              onTap: () => context.push('/search'),
-                              size: topButtonSize,
-                              iconSize: topIconSize,
-                            ),
-                            Flexible(
-                              child: Align(
-                                alignment: Alignment.topRight,
-                                child: ConstrainedBox(
-                                  constraints: const BoxConstraints(
-                                    maxWidth: 200,
+                        Directionality(
+                          textDirection: TextDirection.ltr,
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              _SearchCircleButton(
+                                onTap: () => context.push('/search'),
+                                size: topButtonSize,
+                                iconSize: topIconSize,
+                              ),
+                              Flexible(
+                                child: Align(
+                                  alignment: Alignment.topRight,
+                                  child: ConstrainedBox(
+                                    constraints: const BoxConstraints(
+                                      maxWidth: 200,
+                                    ),
+                                    child: _EgyptStatement(l10n: widget.l10n),
                                   ),
-                                  child: _EgyptStatement(l10n: widget.l10n),
                                 ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
                       ],
                     ),

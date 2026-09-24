@@ -13,6 +13,7 @@ import 'package:delwaqty/features/customer/home_services/domain/entities/service
 class ServiceReviewsButton extends StatelessWidget {
   const ServiceReviewsButton({
     required this.categoryType,
+    this.onPressedOverride,
     this.visualDensity = VisualDensity.compact,
     this.iconSize = 22,
     this.color = AppColors.rating,
@@ -21,6 +22,7 @@ class ServiceReviewsButton extends StatelessWidget {
   });
 
   final ServiceCategoryType categoryType;
+  final VoidCallback? onPressedOverride;
   final VisualDensity visualDensity;
   final double iconSize;
   final Color color;
@@ -35,7 +37,10 @@ class ServiceReviewsButton extends StatelessWidget {
       color: color,
       iconSize: iconSize,
       icon: const Icon(Icons.rate_review_rounded),
-      onPressed: () => context.push('/home-services/reviews/${categoryType.name}'),
+      onPressed: onPressedOverride ??
+          () => context.push(
+                '/home-services/reviews/${categoryType.name}',
+              ),
     );
   }
 }

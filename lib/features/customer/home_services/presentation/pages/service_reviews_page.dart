@@ -6,6 +6,7 @@ import 'package:delwaqty/features/customer/home/presentation/widgets/category_vi
 import 'package:delwaqty/features/customer/home_services/domain/entities/service_category.dart';
 import 'package:delwaqty/features/customer/home_services/domain/entities/service_review.dart';
 import 'package:delwaqty/features/customer/home_services/data/repositories/service_review_repository_impl.dart';
+import 'package:delwaqty/features/customer/home_services/domain/repositories/service_review_repository.dart';
 import 'package:delwaqty/features/_shared/auth/domain/auth_state.dart';
 import 'package:delwaqty/features/_shared/auth/presentation/auth_provider.dart';
 import 'package:delwaqty/features/customer/commerce/presentation/widgets/rating_stars.dart';
@@ -17,40 +18,62 @@ class ServiceReviewsPage extends ConsumerWidget {
   const ServiceReviewsPage({
     required this.categoryType,
     this.providerId,
+    this.providerName,
     super.key,
   });
 
   final String categoryType;
   final String? providerId;
+  final String? providerName;
+
+  ServiceReviewScope get _scope =>
+      (categoryType: categoryType, providerId: providerId);
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final type = _parseType(categoryType);
-    final summaryAsync = ref.watch(serviceReviewSummaryProvider(categoryType));
-    final myReviewAsync = ref.watch(myServiceReviewProvider(categoryType));
-    final reviewsAsync = ref.watch(serviceReviewsProvider(categoryType));
+    final scope = _scope;
+    final summaryAsync = ref.watch(serviceReviewSummaryProvider(scope));
+    final myReviewAsync = ref.watch(myServiceReviewProvider(scope));
+    final reviewsAsync = ref.watch(serviceReviewsProvider(scope));
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          '${l10n.reviews} — ${serviceTypeLabel(type)}',
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              '${l10n.reviews} — ${serviceTypeLabel(type)}',
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+            if (providerName != null)
+              Text(
+                providerName!,
+                style: Theme.of(context)
+                    .textTheme
+                    .bodySmall
+                    ?.copyWith(fontWeight: FontWeight.w600),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+          ],
         ),
       ),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 12, 16, 32),
         children: [
           summaryAsync.when(
-            data: (summary) => _SummaryCard(summary: summary),
+            data: (summary) => SummaryCard(summary: summary),
             loading: () => Padding(
               padding: const EdgeInsets.symmetric(vertical: 24),
               child: Center(child: AppLoader.circular()),
             ),
             error: (e, _) => ErrorState(
               message: l10n.error,
-              onRetry: () => ref.invalidate(serviceReviewSummaryProvider(categoryType)),
+              onRetry: () =>
+                  ref.invalidate(serviceReviewSummaryProvider(scope)),
             ),
           ),
           const SizedBox(height: 16),
@@ -93,7 +116,7 @@ class ServiceReviewsPage extends ConsumerWidget {
             ),
             error: (e, _) => ErrorState(
               message: l10n.error,
-              onRetry: () => ref.invalidate(serviceReviewsProvider(categoryType)),
+              onRetry: () => ref.invalidate(serviceReviewsProvider(scope)),
             ),
           ),
         ],
@@ -109,8 +132,8 @@ ServiceCategoryType _parseType(String name) {
   return ServiceCategoryType.other;
 }
 
-class _SummaryCard extends StatelessWidget {
-  const _SummaryCard({required this.summary});
+class SummaryCard extends StatelessWidget {
+  const SummaryCard({required this.summary, super.key});
 
   final ServiceReviewSummary summary;
 
@@ -444,9 +467,13 @@ class _WriteServiceReviewSheetState
       );
       if (mounted) {
         final l10n = AppLocalizations.of(context);
-        ref.invalidate(serviceReviewsProvider(widget.categoryType));
-        ref.invalidate(serviceReviewSummaryProvider(widget.categoryType));
-        ref.invalidate(myServiceReviewProvider(widget.categoryType));
+        final scope = (
+          categoryType: widget.categoryType,
+          providerId: widget.providerId,
+        );
+        ref.invalidate(serviceReviewsProvider(scope));
+        ref.invalidate(serviceReviewSummaryProvider(scope));
+        ref.invalidate(myServiceReviewProvider(scope));
         AppSnackbar.success(context, message: l10n.reviewSubmitted);
         Navigator.pop(context);
       }

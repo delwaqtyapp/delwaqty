@@ -3266,6 +3266,28 @@ The owner wants customers to be able to review and rate EVERY service category i
 ### Consequences
 - Migration **084 applied live** on `bttnlkmwhorjamzemwda` (POST `/database/query` → 201) once the working 90-day PAT (`sbp_fc832a…588`, recovered from stored OpenCode chat logs) replaced the invalid stored token. Verified: 5 RLS policies, `get_service_rating_summary('doctor')` → `{avg_rating:4.5, total_reviews:2, five_star:1, four_star:1,…}` (keys match the Dart entity), 6 seed reviews. UI is build-verified (`flutter analyze` **0 issues**, `flutter test` **940/940** incl. 4 new entity tests) and the app relaunches clean (pid 15712, no FATAL/RenderFlex).
 
+## ADR-097: Labeled "قيمنا" Button Next to "الاتجاهات" — From Bare Star to Visible CTA (sprint 186)
+
+**Date:** Sprint 186
+**Status:** Accepted
+**Deciders:** Owner (visibility request) + Lead Architect
+
+### Context
+After ADR-093/095/096 the ratings entry was the compact gold STAR icon (AppBar + provider cards + quick actions). The owner found the bare icon too subtle: «بدل نجمه بس نضيف زر كمان جمب كل كلمه الاتجاهات نكتب عليه قيمنا» — next to each «الاتجاهات» (Directions) entry there must be a real, labeled button that reads «قيمنا» (Rate Us).
+
+### Decision
+(1) New l10n key `rateUs` (ar: قيمنا / en: Rate Us).
+(2) `merchant_detail_page.dart` `_buildActionButtons`: a `_ActionButton(Icons.star_rounded, l10n.rateUs)` is inserted directly BEFORE the directions chip (share → قيمنا → الاتجاهات → favorite) and pushes `/restaurant/{merchantId}/reviews` (the generic write-capable reviews page).
+(3) `restaurant_detail_page.dart` `_buildQuickActions`: the reviews quick-action cell becomes a gold star + «قيمنا» label (replacing reviews_outlined + l10n.reviews) on the same route.
+
+### Rationale
+- A labeled CTA converts ratings from a discoverable-but-subtle icon into a first-class action sitting exactly where the user expects both commerce actions (directions + rating) to live side by side.
+- Reuses the existing reviews pipeline and routes — zero new navigation, one new localized string.
+
+### Consequences
+- Every detail page (restaurant and every generic merchant) now shows an explicit gold «قيمنا» button adjacent to «الاتجاهات», plus the existing AppBar star/star entries from rounds 48-50.
+- Gate: `flutter analyze` **0 issues**; `flutter test` **941/941**; APK `releases/delwaqty_1.0.0+1_debug_20260924_2004.apk` installed + relaunched clean (pid 26027) — logcat NO RenderFlex/FATAL.
+
 ## ADR-096: Reviews Completed for EVERY Merchant Type + 8 Home-Labor Categories (sprint 185)
 
 **Date:** Sprint 185

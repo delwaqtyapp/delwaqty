@@ -469,7 +469,7 @@ children: [
     final actions = [
       (Icons.restaurant_menu_rounded, l10n.fullMenu, '/restaurant/${widget.merchantId}/menu'),
       (Icons.local_offer_outlined, l10n.offers, '/restaurant/${widget.merchantId}/offers'),
-      (Icons.reviews_outlined, l10n.reviews, '/restaurant/${widget.merchantId}/reviews'),
+      (Icons.star_rounded, l10n.rateUs, '/restaurant/${widget.merchantId}/reviews'),
       (Icons.calendar_today_outlined, l10n.reserveATable, '/restaurant/${widget.merchantId}/reservation'),
       (Icons.photo_library_outlined, l10n.gallery, '/restaurant/${widget.merchantId}/gallery'),
     ];

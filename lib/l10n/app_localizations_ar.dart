@@ -6131,4 +6131,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get rateService => 'قيم الخدمة';
+
+  @override
+  String get rateUs => 'قيمنا';
 }

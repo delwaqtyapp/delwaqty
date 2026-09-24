@@ -11827,6 +11827,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Rate this service'**
   String get rateService;
+
+  /// No description provided for @rateUs.
+  ///
+  /// In en, this message translates to:
+  /// **'Rate Us'**
+  String get rateUs;
 }
 
 class _AppLocalizationsDelegate

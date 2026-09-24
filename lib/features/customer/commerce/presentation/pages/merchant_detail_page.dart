@@ -404,6 +404,12 @@ class _MerchantDetailPageState extends ConsumerState<MerchantDetailPage> {
             ),
             const SizedBox(width: 8),
             _ActionButton(
+              icon: Icons.star_rounded,
+              label: l10n.rateUs,
+              onTap: () => context.push('/restaurant/${merchant.id}/reviews'),
+            ),
+            const SizedBox(width: 8),
+            _ActionButton(
               icon: Icons.directions_outlined,
               label: l10n.directions,
               onTap: () async {

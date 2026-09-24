@@ -1982,5 +1982,6 @@
   "carDescriptionLabel": "Description",
   "carDescriptionHint": "Short description of the car and the trips you offer",
   "carProductCreated": "Car published to the marketplace successfully",
-  "rateService": "Rate this service"
+  "rateService": "Rate this service",
+  "rateUs": "Rate Us"
 }

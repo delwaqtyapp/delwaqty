@@ -349,7 +349,7 @@ class _EgyptHeroState extends State<_EgyptHero>
     // overflow. The second row holds the search circle + the user greeting
     // (~60dp worst case); take the max against the image height.
     final topInset = MediaQuery.paddingOf(context).top;
-    final contentCoreH = topButtonSize + zoneGap + 60.0;
+    final contentCoreH = topButtonSize + zoneGap + 88.0;
     final contentH = topInset + 2 + contentCoreH;
     final heroH = math.max(heroImageH, contentH);
 
@@ -459,14 +459,9 @@ class _EgyptHeroState extends State<_EgyptHero>
                               Flexible(
                                 child: Align(
                                   alignment: Alignment.topRight,
-                                  child: ConstrainedBox(
-                                    constraints: const BoxConstraints(
-                                      maxWidth: 200,
-                                    ),
-                                    child: _UserGreeting(
-                                      l10n: widget.l10n,
-                                      name: greetingName,
-                                    ),
+                                  child: _UserGreeting(
+                                    l10n: widget.l10n,
+                                    name: greetingName,
                                   ),
                                 ),
                               ),
@@ -654,13 +649,13 @@ class _UserGreeting extends StatelessWidget {
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.sizeOf(context).width;
     final titleSize = (screenWidth * 0.05).clamp(18.0, 22.0);
-    final taglineSize = (screenWidth * 0.032).clamp(12.0, 14.0);
+    final taglineSize = (screenWidth * 0.030).clamp(11.0, 13.0);
     final hasName = name != null && name!.isNotEmpty;
     final greeting = hasName ? '${l10n.welcome}، $name' : l10n.welcome;
 
     return Column(
       mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.end,
       children: [
         Text(
           greeting,
@@ -669,7 +664,8 @@ class _UserGreeting extends StatelessWidget {
             fontWeight: FontWeight.w900,
             fontSize: titleSize,
           ),
-          maxLines: 1,
+          textAlign: TextAlign.end,
+          maxLines: 2,
           overflow: TextOverflow.ellipsis,
         ),
         Text(
@@ -682,7 +678,8 @@ class _UserGreeting extends StatelessWidget {
               Shadow(color: Color(0x55000000), blurRadius: 4),
             ],
           ),
-          maxLines: 1,
+          textAlign: TextAlign.end,
+          maxLines: 2,
           overflow: TextOverflow.ellipsis,
         ),
       ],

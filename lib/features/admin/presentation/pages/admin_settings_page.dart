@@ -65,7 +65,7 @@ class _AdminSettingsPageState extends ConsumerState<AdminSettingsPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(l10n.adminSettingsPage),
+        title: Text(l10n.adminPlatformConfig),
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),

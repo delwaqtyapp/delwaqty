@@ -136,12 +136,12 @@ class AdminModule extends FeatureModule {
         GoRoute(
           path: 'settings',
           pageBuilder: (context, state) =>
-              _adminPage(const AdminSettingsPage()),
+              _adminPage(const AdminSettingsMenuPage()),
         ),
         GoRoute(
-          path: 'settings-menu',
+          path: 'platform-config',
           pageBuilder: (context, state) =>
-              _adminPage(const AdminSettingsMenuPage()),
+              _adminPage(const AdminSettingsPage()),
         ),
         GoRoute(
           path: 'drivers',

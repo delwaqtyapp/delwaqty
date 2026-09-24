@@ -364,8 +364,8 @@ class _AdminSettingsMenuPageState extends ConsumerState<AdminSettingsMenuPage> {
         _SectionTile(
           icon: Icons.settings_rounded,
           color: AppColors.warningLight,
-          title: l10n.adminSettingsPage,
-          onTap: () => context.go('/admin/settings'),
+          title: l10n.adminPlatformConfig,
+          onTap: () => context.go('/admin/platform-config'),
         ),
       ],
     );

@@ -4312,6 +4312,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get adminSettingsMenu => 'Settings Menu';
 
   @override
+  String get adminPlatformConfig => 'Platform Settings';
+
+  @override
   String get adminMore => 'Actions';
 
   @override

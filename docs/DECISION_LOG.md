@@ -3266,6 +3266,29 @@ The owner wants customers to be able to review and rate EVERY service category i
 ### Consequences
 - Migration **084 applied live** on `bttnlkmwhorjamzemwda` (POST `/database/query` → 201) once the working 90-day PAT (`sbp_fc832a…588`, recovered from stored OpenCode chat logs) replaced the invalid stored token. Verified: 5 RLS policies, `get_service_rating_summary('doctor')` → `{avg_rating:4.5, total_reviews:2, five_star:1, four_star:1,…}` (keys match the Dart entity), 6 seed reviews. UI is build-verified (`flutter analyze` **0 issues**, `flutter test` **940/940** incl. 4 new entity tests) and the app relaunches clean (pid 15712, no FATAL/RenderFlex).
 
+## ADR-101: Admin Gap-Fix Batch 1 — Emergency SOS Page + Notification-Link Fix + Product Management (sprint 189)
+
+**Date:** Sprint 189
+**Status:** Accepted
+**Deciders:** Lead Architect (audit overflow — owner asked «ناقص ايه معانا فى تطبيق الادمن»; batch 1 chosen as the recommended first batch)
+
+### Context
+Gap audit of the admin app vs the customer app surfaced a dead menu entry («الاستغاثة», no route), stale notification deep links pointing at removed routes (`/admin/financial`), and there was no way to add/edit products — only delete.
+
+### Decision / Implementation
+1. **Emergency SOS page** — migration 089 (applied live): RPCs `admin_list_sos_alerts(p_status)` and `admin_resolve_sos_alert(alert_id, status, note)`, both SECURITY DEFINER gated by `public.is_admin()`, GRANT EXECUTE to `authenticated` + `service_role`. New page `AdminEmergencyPage` on `/admin/emergency` (Ops group, `Icons.sos_rounded`): status filter chips (active/resolved/escalated/false_alarm), tiles joining user + driver info, resolve sheet with status picker + optional note; on success → invalidate `adminSosAlertsProvider`. 20 new `sos*` l10n keys; removed a stale duplicate `sosAlertType` ARB entry that carried a `{type}` placeholder and forced the label getter to generate as a function (breaking the compile).
+2. **Stale notification links** — `notification_channels.dart`: `/admin/financial` → `/admin/financial-center`; `/financial`, `/owner-financial` → `/admin/owner-dashboard`; added `/admin/emergency`.
+3. **Product management (add/edit)** — migration 090 (applied live): `admin_upsert_product(...)` upserts a product row and keeps `product_inventory` in sync (`is_in_stock = stock_quantity > 0`). Android/domain/data + `AdminService.upsertProduct`; `_showManageProductsSheet` upgraded from delete-only to Add-Product toolbar button + tap-to-edit `_ProductEditorDialog` (name, price, compare-at, category, stock, image URL, description, availability switch) → upsert → snackbar → auto-reopen provider-refreshed sheet; delete preserved. 11 new l10n keys.
+
+### Rationale
+- Admin-table writes must go through SECURITY DEFINER RPCs because direct table RLS grants on core tables to admins would widen merchant data exposure; the RPC layer keeps the is_admin() gate in one place.
+- Tapping notification channels must never land on a dead route — remap to the real pages that exist after consolidation.
+
+### Consequences
+- Admin can now monitor/resolve SOS alerts, notification links always resolve, and products can be added/edited/stocked from the merchants page.
+- Remaining audit gaps deferred to later batches: service-provider edit, categories/coupons/branch-edit/refunds/team-member editing.
+- Gate: analyze 0, 941/941, admin APK `releases/delwaqty_admin_1.0.0+1_debug_20260924_2337.apk` installed + relaunched clean (pid 1918).
+
 ## ADR-100: Admin Settings — Menu Owns /admin/settings + platform_settings INSERT RLS Fix (sprint 188, hotfix)
 
 **Date:** Sprint 188

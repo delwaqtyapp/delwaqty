@@ -24,6 +24,7 @@ abstract class AdminRepository {
   Future<bool> deleteMerchantReview(String reviewId);
   Future<bool> deleteServiceReview(String reviewId);
   Future<bool> deleteProduct(String productId);
+  Future<bool> upsertProduct(Map<String, dynamic> product);
   Future<bool> deleteMerchant(String merchantId);
   Future<List<Map<String, dynamic>>> getOrders({String? search, String? status, int limit = 50, int offset = 0});
   Future<void> updateOrderStatus(String orderId, String status);
@@ -36,4 +37,10 @@ abstract class AdminRepository {
   Future<List<VerificationRequest>> getVerificationRequests();
   Future<void> approveVerification(String userId);
   Future<void> rejectVerification(String userId, {required String reason});
+  Future<List<Map<String, dynamic>>> getSosAlerts({String? status});
+  Future<bool> resolveSosAlert(
+    String alertId, {
+    String status = 'resolved',
+    String? note,
+  });
 }

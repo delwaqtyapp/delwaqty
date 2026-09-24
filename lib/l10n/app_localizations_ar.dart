@@ -1531,6 +1531,36 @@ class AppLocalizationsAr extends AppLocalizations {
   String get addProduct => 'إضافة منتج';
 
   @override
+  String get productPrice => 'السعر';
+
+  @override
+  String get comparePrice => 'السعر القديم (قبل الخصم)';
+
+  @override
+  String get productDescription => 'الوصف';
+
+  @override
+  String get productCategory => 'الفئة';
+
+  @override
+  String get productStock => 'الكمية المتاحة';
+
+  @override
+  String get productAvailable => 'متاح للعملاء';
+
+  @override
+  String get productImageUrl => 'رابط الصورة (اختياري)';
+
+  @override
+  String get saveProduct => 'حفظ المنتج';
+
+  @override
+  String get productSaved => 'تم حفظ المنتج';
+
+  @override
+  String get productSaveFailed => 'فشل الحفظ، حاول مرة أخرى';
+
+  @override
   String get saveChanges => 'حفظ التغييرات';
 
   @override
@@ -4272,6 +4302,67 @@ class AppLocalizationsAr extends AppLocalizations {
   String get adminEmergency => 'الطوارئ';
 
   @override
+  String get emergencyActive => 'نشطة';
+
+  @override
+  String get emergencyResolved => 'مُعالجة';
+
+  @override
+  String get emergencyEscalated => 'مُصعّدة';
+
+  @override
+  String get emergencyFalseAlarm => 'إنذار خاطئ';
+
+  @override
+  String get emergencyAll => 'الكل';
+
+  @override
+  String get emergencyOnlyActive => 'النشطة فقط';
+
+  @override
+  String get sosUser => 'المستعمل';
+
+  @override
+  String get sosDriver => 'السائق';
+
+  @override
+  String get sosAlertTypeManual => 'يدوي';
+
+  @override
+  String get sosAlertType => 'نوع الإنذار';
+
+  @override
+  String get sosAlertTypeAutomatic => 'تلقائي';
+
+  @override
+  String get sosAlertTypeTimer => 'مؤقّت';
+
+  @override
+  String get resolveSosAlert => 'إغلاق الإنذار';
+
+  @override
+  String get markSosFalseAlarm => 'إنذار خاطئ';
+
+  @override
+  String get sosResolved => 'تم إغلاق الإنذار';
+
+  @override
+  String get sosActionFailed => 'فشل تنفيذ الإجراء، حاول مرة أخرى';
+
+  @override
+  String get sosNoteHint => 'ملاحظة (اختياري)';
+
+  @override
+  String get sosNoAlerts => 'لا توجد إنذارات حالية';
+
+  @override
+  String get sosNoAlertsHint => 'ستظهر هنا إنذارات الطوارئ الخاصة بالعملاء.';
+
+  @override
+  String get confirmSosFalseAlarm =>
+      'تأكيد تعليم هذا الإنذار على أنه إنذار خاطئ؟';
+
+  @override
   String get adminSettingsPage => 'الإعدادات';
 
   @override
@@ -4946,11 +5037,6 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String sosRideInfo(Object rideId, Object time) {
     return 'توصيلة: $rideId • $time';
-  }
-
-  @override
-  String sosAlertType(Object type) {
-    return 'نداء استغاثة $type';
   }
 
   @override

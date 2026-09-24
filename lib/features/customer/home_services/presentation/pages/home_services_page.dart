@@ -10,6 +10,7 @@ import 'package:delwaqty/features/customer/home_services/data/repositories/servi
 import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
 import 'package:delwaqty/shared/widgets/premium_empty_state.dart';
 import 'package:delwaqty/shared/widgets/shimmer_loading.dart';
+import 'package:delwaqty/features/customer/home_services/presentation/widgets/service_reviews_button.dart';
 
 final _categoriesProvider = FutureProvider<List<ServiceCategory>>((ref) async {
   final repo = ref.watch(serviceBookingRepositoryProvider);
@@ -157,50 +158,65 @@ class _CategoryCard extends StatelessWidget {
     final isRtl = Directionality.of(context) == TextDirection.rtl;
     final name = isRtl ? category.nameAr : category.nameEn;
 
-    return AnimatedFadeIn(
+return AnimatedFadeIn(
       child: GestureDetector(
         onTap: onTap,
-        child: Container(
-          decoration: BoxDecoration(
-            color: Theme.of(
-              context,
-            ).colorScheme.surfaceContainerHighest.withValues(alpha: 0.35),
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: color.withValues(alpha: 0.2)),
-          ),
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Container(
-                width: 56,
-                height: 56,
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [
-                      color.withValues(alpha: 0.38),
-                      color.withValues(alpha: 0.15),
-                    ],
+        child: Stack(
+          children: [
+            Container(
+              decoration: BoxDecoration(
+                color: Theme.of(
+                  context,
+                ).colorScheme.surfaceContainerHighest.withValues(alpha: 0.35),
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: color.withValues(alpha: 0.2)),
+              ),
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    width: 56,
+                    height: 56,
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [
+                          color.withValues(alpha: 0.38),
+                          color.withValues(alpha: 0.15),
+                        ],
+                      ),
+                      borderRadius: BorderRadius.circular(18),
+                      border: Border.all(color: color.withValues(alpha: 0.25)),
+                    ),
+                    child: Icon(_categoryIcon(), color: color, size: 28),
                   ),
-                  borderRadius: BorderRadius.circular(18),
-                  border: Border.all(color: color.withValues(alpha: 0.25)),
-                ),
-                child: Icon(_categoryIcon(), color: color, size: 28),
+                  const SizedBox(height: 12),
+                  Text(
+                    name,
+                    style: AppTextStyles.labelLarge.copyWith(
+                      fontWeight: FontWeight.w700,
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
               ),
-              const SizedBox(height: 12),
-              Text(
-                name,
-                style: AppTextStyles.labelLarge.copyWith(
-                  fontWeight: FontWeight.w700,
-                ),
-                textAlign: TextAlign.center,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
+            ),
+            Positioned(
+              top: 4,
+              right: 4,
+              child: ServiceReviewsButton(
+                categoryType: category.type,
+                iconSize: 20,
+                tooltipLabel: AppLocalizations.of(
+                  context,
+                ).rateService,
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

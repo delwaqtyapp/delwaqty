@@ -7,6 +7,7 @@ import 'package:delwaqty/core/theme/app_text_styles.dart';
 import 'package:delwaqty/features/customer/home_services/domain/entities/service_category.dart';
 import 'package:delwaqty/features/customer/home_services/domain/entities/service_provider.dart';
 import 'package:delwaqty/features/customer/home_services/data/repositories/service_booking_repository_impl.dart';
+import 'package:delwaqty/features/customer/home_services/presentation/widgets/service_reviews_button.dart';
 import 'package:delwaqty/features/customer/location/presentation/providers/location_provider.dart';
 import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
 import 'package:delwaqty/shared/widgets/premium_empty_state.dart';
@@ -65,12 +66,7 @@ class _ServiceProvidersPageState extends ConsumerState<ServiceProvidersPage> {
       appBar: AppBar(
         title: Text(l10n.servicesSection),
         actions: [
-          IconButton(
-            tooltip: l10n.rateService,
-            icon: const Icon(Icons.rate_review_rounded),
-            onPressed: () =>
-                context.push('/home-services/reviews/${_type.name}'),
-          ),
+          ServiceReviewsButton(categoryType: _type),
         ],
       ),
       body: Column(

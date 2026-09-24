@@ -4,6 +4,8 @@ import 'package:go_router/go_router.dart';
 import 'package:delwaqty/core/theme/app_colors.dart';
 import 'package:delwaqty/core/theme/app_text_styles.dart';
 import 'package:delwaqty/features/customer/home_services/domain/entities/car_product.dart';
+import 'package:delwaqty/features/customer/home_services/domain/entities/service_category.dart';
+import 'package:delwaqty/features/customer/home_services/presentation/widgets/service_reviews_button.dart';
 import 'package:delwaqty/features/customer/home_services/data/repositories/service_booking_repository_impl.dart';
 import 'package:delwaqty/shared/widgets/premium_empty_state.dart';
 import 'package:delwaqty/shared/widgets/shimmer_loading.dart';
@@ -58,6 +60,7 @@ class _CarMarketplacePageState extends ConsumerState<CarMarketplacePage> {
       appBar: AppBar(
         title: Text(l10n.carMarketplace),
         actions: [
+          const ServiceReviewsButton(categoryType: ServiceCategoryType.deliveryCar),
           TextButton.icon(
             onPressed: () => context.push('/home-services/cars/sell'),
             icon: const Icon(Icons.add_circle_outline, size: 18),

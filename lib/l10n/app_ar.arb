@@ -1982,5 +1982,6 @@
   "carDescriptionLabel": "الوصف",
   "carDescriptionHint": "وصف قصير للسيارة والمشاوير التي تقدمها",
   "carProductCreated": "تم نشر السيارة في المتجر بنجاح",
-  "rateService": "قيم الخدمة"
+  "rateService": "قيم الخدمة",
+  "rateUs": "قيمنا"
 }

@@ -6177,4 +6177,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get rateService => 'Rate this service';
+
+  @override
+  String get rateUs => 'Rate Us';
 }

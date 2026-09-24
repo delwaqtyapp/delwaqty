@@ -8264,6 +8264,12 @@ abstract class AppLocalizations {
   /// **'Settings'**
   String get adminSettingsPage;
 
+  /// No description provided for @adminSettingsMenu.
+  ///
+  /// In en, this message translates to:
+  /// **'Settings Menu'**
+  String get adminSettingsMenu;
+
   /// No description provided for @adminMore.
   ///
   /// In en, this message translates to:

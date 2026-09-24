@@ -213,6 +213,11 @@ final List<_AdminNavGroup> _adminGroups = [
     label: (l) => l.adminSettingsGroupSection,
     items: [
       _AdminNavItem(
+        path: '/admin/settings-menu',
+        icon: Icons.tune_rounded,
+        label: (l) => l.adminSettingsMenu,
+      ),
+      _AdminNavItem(
         path: '/admin/profile',
         icon: Icons.person_rounded,
         label: (l) => l.adminProfile,

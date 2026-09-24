@@ -1981,5 +1981,6 @@
   "carPriceHint": "تحدده أنت — وليس جوجل",
   "carDescriptionLabel": "الوصف",
   "carDescriptionHint": "وصف قصير للسيارة والمشاوير التي تقدمها",
-  "carProductCreated": "تم نشر السيارة في المتجر بنجاح"
+  "carProductCreated": "تم نشر السيارة في المتجر بنجاح",
+  "rateService": "قيم الخدمة"
 }

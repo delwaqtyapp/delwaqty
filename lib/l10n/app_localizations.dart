@@ -11821,6 +11821,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Car published to the marketplace successfully'**
   String get carProductCreated;
+
+  /// No description provided for @rateService.
+  ///
+  /// In en, this message translates to:
+  /// **'Rate this service'**
+  String get rateService;
 }
 
 class _AppLocalizationsDelegate

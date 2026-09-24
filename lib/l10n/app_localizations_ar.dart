@@ -6128,4 +6128,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get carProductCreated => 'تم نشر السيارة في المتجر بنجاح';
+
+  @override
+  String get rateService => 'قيم الخدمة';
 }

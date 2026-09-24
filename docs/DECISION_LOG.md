@@ -3242,3 +3242,26 @@ Wrap each `_UserGreeting` line in its own `Directionality(textDirection: TextDir
 ### Consequences
 - Reading right-to-left the greeting now reads «أهلاً، [username]» as intended; guests still get «أهلاً».
 - Gate: `flutter analyze` **0 issues**; `flutter test` **936/936** (6 responsive incl. notch inset-58 — no overflow/exception); APK `releases/delwaqty_1.0.0+1_debug_20260924_0000.apk` installed + relaunched clean (pid 14183) — logcat shows NO RenderFlex/FATAL; screencap `releases/screenshot_hero_0000.png`.
+
+## ADR-093: Customer Service Reviews — per-Category Rating Engine (sprint 182)
+
+**Date:** Sprint 182
+**Status:** Accepted
+**Deciders:** Owner (feature request) + Lead Architect
+
+### Context
+The owner wants customers to be able to review and rate EVERY service category in the app («عايز انا كعميل اقدر اعمل ريفيو على كل خدمه فى التطبيق وتقييم... على كل الخدمات ايا كانت هيه اى»). The existing reviews infra is merchant-level only (`reviews` table inside the commerce module). Booking services (doctor/nurse/teacher/barber/plumbing/electrician/carpentry/cleaning/deliveryCar) have NO review surface for customers.
+
+### Decision
+(1) Add a category-level review table `service_reviews` (migration **084**): `id`, `user_id TEXT NULL` (anonymous seeds), `user_name TEXT` (denormalized — `users` RLS exposes only the caller's own profile, so a plain JOIN on `users.name` would leak nothing but also be impossible for other readers), `category_type`, `provider_id TEXT NULL`, `booking_id TEXT NULL`, `rating INT CHECK 1..5`, `comment TEXT`, `created_at`, `updated_at`. Index on `(category_type, created_at desc)` for the feed and `(category_type, user_id)` for the my-review lookup + unique constraint so one customer = one review per category.
+(2) RLS: 5 policies — anonymous/user select (anyone reads), authenticated insert/update/delete restricted to own rows, admins ALL via `is_admin()`.
+(3) Aggregate: RPC `get_service_rating_summary(p_category_type)` returns `avg_rating` (numeric), `total_reviews`, and per-star `five_star…one_star` (converted via `count(*) filter`).
+(4) Optional per-provider ratings: when `provider_id` is set, trigger `sync_service_provider_rating` recomputes `service_providers.rating/rating_count` for that provider (kept generic for future drilled-down use; the customer UI today submits at the category level).
+(5) Dart: hand-written `ServiceReview`/`ServiceReviewSummary` entities (one customer may review once per category), `ServiceReviewRepository` interface + Supabase data source + implementation with 3 family providers (`serviceReviewsProvider`, `serviceReviewSummaryProvider`, `myServiceReviewProvider`); `ServiceReviewsPage` (summary card with per-star `LinearProgressIndicator`, my-review card + write sheet with 5 tappable stars + optional comment, latest-reviews feed), routed at `/home-services/reviews/:categoryType`, entry = star `IconButton` in the per-service `ServiceProvidersPage` AppBar. New l10n key `rateService` («Rate this service» / «قيم الخدمة»).
+
+### Rationale
+- Category-level reviews keep the model simple and instantly useful for every service, while the nullable `provider_id` + trigger future-proofs per-provider drill-down without a schema change later.
+- Denormalized `user_name` + policy allowing any reader to select rows sidesteps the `users` table's own-profile-only RLS cleanly.
+
+### Consequences
+- Page is data-driven: until migration 084 is applied live (blocked: the stored Supabase PAT `~/.supabase/access_token` returns 401 «JWT could not be decoded»), the page shows the summary/list empty states and the write flow submits nothing — the UI is build-verified (`flutter analyze` **0 issues**, `flutter test` **940/940** incl. 4 new entity tests). Applying the live migration needs a fresh Supabase PAT from the owner or running `supabase/migrations/084_service_reviews.sql` in the SQL Editor.

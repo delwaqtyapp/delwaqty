@@ -10,6 +10,7 @@ import 'package:delwaqty/features/customer/home_services/presentation/pages/serv
 import 'package:delwaqty/features/customer/home_services/presentation/pages/car_marketplace_page.dart';
 import 'package:delwaqty/features/customer/home_services/presentation/pages/car_trip_order_page.dart';
 import 'package:delwaqty/features/customer/home_services/presentation/pages/car_seller_form_page.dart';
+import 'package:delwaqty/features/customer/home_services/presentation/pages/service_reviews_page.dart';
 
 class HomeServicesModule extends FeatureModule {
   HomeServicesModule();
@@ -86,6 +87,16 @@ class HomeServicesModule extends FeatureModule {
       path: '/home-services/cars',
       name: 'home-services-cars',
       builder: (context, state) => const CarMarketplacePage(),
+    ),
+    GoRoute(
+      path: '/home-services/reviews/:categoryType',
+      name: 'home-services-reviews',
+      builder: (context, state) => ServiceReviewsPage(
+        categoryType: state.pathParameters['categoryType']!,
+        providerId: state.extra is ServiceProvider
+            ? (state.extra as ServiceProvider).id
+            : null,
+      ),
     ),
   ];
 }

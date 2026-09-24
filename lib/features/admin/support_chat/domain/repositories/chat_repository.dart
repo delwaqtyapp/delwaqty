@@ -3,7 +3,7 @@ import 'package:delwaqty/features/admin/support_chat/domain/entities/chat_messag
 
 abstract class ChatRepository {
   Future<List<ChatRoom>> getMyRooms(String userId);
-  Future<List<ChatRoom>> getAllRooms();
+  Future<List<ChatRoom>> getActiveRooms();
   Future<ChatRoom> createRoom(ChatRoom room);
   Future<ChatRoom> getRoomById(String id);
   Future<void> closeRoom(String id);

@@ -23,7 +23,7 @@ final chatRoomsProvider = FutureProvider<List<ChatRoom>>((ref) async {
   final user = authState is AuthAuthenticated ? authState.user : null;
   if (user == null) return [];
   if (user.isAdmin) {
-    return repo.getAllRooms();
+    return repo.getActiveRooms();
   }
   return repo.getMyRooms(user.id);
 });

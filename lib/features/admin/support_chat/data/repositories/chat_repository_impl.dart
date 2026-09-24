@@ -14,8 +14,13 @@ class ChatRepositoryImpl implements ChatRepository {
   }
 
   @override
+  Future<List<ChatRoom>> getActiveRooms() {
+    return _dataSource.getActiveRooms();
+  }
+
+  @override
   Future<List<ChatRoom>> getAllRooms() {
-    return _dataSource.getAllRooms();
+    return _dataSource.getActiveRooms();
   }
 
   @override

@@ -7,6 +7,9 @@ class ChatMessage {
     required this.message,
     this.messageType = 'text',
     this.attachmentUrl,
+    this.fileUrl,
+    this.audioUrl,
+    this.isFromAdmin = false,
     this.isRead = false,
     this.readAt,
     required this.createdAt,
@@ -20,6 +23,9 @@ class ChatMessage {
       message: json['message'] as String,
       messageType: json['message_type'] as String? ?? 'text',
       attachmentUrl: json['attachment_url'] as String?,
+      fileUrl: json['file_url'] as String?,
+      audioUrl: json['audio_url'] as String?,
+      isFromAdmin: json['is_from_admin'] as bool? ?? false,
       isRead: json['is_read'] as bool? ?? false,
       readAt: json['read_at'] != null ? DateTime.parse(json['read_at'] as String) : null,
       createdAt: DateTime.parse(json['created_at'] as String),
@@ -31,6 +37,9 @@ class ChatMessage {
   final String message;
   final String messageType;
   final String? attachmentUrl;
+  final String? fileUrl;
+  final String? audioUrl;
+  final bool isFromAdmin;
   final bool isRead;
   final DateTime? readAt;
   final DateTime createdAt;
@@ -42,6 +51,9 @@ class ChatMessage {
     'message': message,
     'message_type': messageType,
     'attachment_url': attachmentUrl,
+    'file_url': fileUrl,
+    'audio_url': audioUrl,
+    'is_from_admin': isFromAdmin,
     'is_read': isRead,
     'read_at': readAt?.toIso8601String(),
     'created_at': createdAt.toIso8601String(),

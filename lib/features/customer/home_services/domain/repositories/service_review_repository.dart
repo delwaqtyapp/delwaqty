@@ -1,11 +1,22 @@
 import 'package:delwaqty/features/customer/home_services/domain/entities/service_review.dart';
 
+typedef ServiceReviewScope = ({String categoryType, String? providerId});
+
 abstract class ServiceReviewRepository {
-  Future<List<ServiceReview>> getServiceReviews(String categoryType);
+  Future<List<ServiceReview>> getServiceReviews(
+    String categoryType, {
+    String? providerId,
+  });
 
-  Future<ServiceReviewSummary> getServiceRatingSummary(String categoryType);
+  Future<ServiceReviewSummary> getServiceRatingSummary(
+    String categoryType, {
+    String? providerId,
+  });
 
-  Future<ServiceReview?> getMyServiceReview(String categoryType);
+  Future<ServiceReview?> getMyServiceReview(
+    String categoryType, {
+    String? providerId,
+  });
 
   Future<void> submitServiceReview({
     required String userId,

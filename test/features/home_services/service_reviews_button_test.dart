@@ -8,10 +8,10 @@ void main() {
   group('ServiceReviewsButton (unified reviews entry)', () {
     Future<void> pump(WidgetTester tester) async {
       await tester.pumpWidget(
-        MaterialApp(
+        const MaterialApp(
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
-          home: const Scaffold(
+          home: Scaffold(
             body: Center(
               child: ServiceReviewsButton(
                 categoryType: ServiceCategoryType.doctor,

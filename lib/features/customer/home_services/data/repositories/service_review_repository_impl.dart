@@ -10,9 +10,15 @@ class ServiceReviewRepositoryImpl implements ServiceReviewRepository {
   final SupabaseServiceReviewDataSource _dataSource;
 
   @override
-  Future<List<ServiceReview>> getServiceReviews(String categoryType) async {
+  Future<List<ServiceReview>> getServiceReviews(
+    String categoryType, {
+    String? providerId,
+  }) async {
     try {
-      return await _dataSource.getServiceReviews(categoryType);
+      return await _dataSource.getServiceReviews(
+        categoryType,
+        providerId: providerId,
+      );
     } catch (e) {
       throw ServerException(message: 'getServiceReviews failed: $e');
     }
@@ -20,19 +26,29 @@ class ServiceReviewRepositoryImpl implements ServiceReviewRepository {
 
   @override
   Future<ServiceReviewSummary> getServiceRatingSummary(
-    String categoryType,
-  ) async {
+    String categoryType, {
+    String? providerId,
+  }) async {
     try {
-      return await _dataSource.getServiceRatingSummary(categoryType);
+      return await _dataSource.getServiceRatingSummary(
+        categoryType,
+        providerId: providerId,
+      );
     } catch (e) {
       throw ServerException(message: 'getServiceRatingSummary failed: $e');
     }
   }
 
   @override
-  Future<ServiceReview?> getMyServiceReview(String categoryType) async {
+  Future<ServiceReview?> getMyServiceReview(
+    String categoryType, {
+    String? providerId,
+  }) async {
     try {
-      return await _dataSource.getMyServiceReview(categoryType);
+      return await _dataSource.getMyServiceReview(
+        categoryType,
+        providerId: providerId,
+      );
     } catch (e) {
       throw ServerException(message: 'getMyServiceReview failed: $e');
     }
@@ -75,23 +91,23 @@ final serviceReviewRepositoryProvider = Provider<ServiceReviewRepository>(
   (ref) => ref.watch(serviceReviewRepositoryImplProvider),
 );
 
-final serviceReviewsProvider =
-    FutureProvider.family<List<ServiceReview>, String>(
-  (ref, categoryType) => ref
+final serviceReviewsProvider = FutureProvider.family<List<ServiceReview>,
+    ServiceReviewScope>(
+  (ref, scope) => ref
       .watch(serviceReviewRepositoryProvider)
-      .getServiceReviews(categoryType),
+      .getServiceReviews(scope.categoryType, providerId: scope.providerId),
 );
 
 final serviceReviewSummaryProvider =
-    FutureProvider.family<ServiceReviewSummary, String>(
-  (ref, categoryType) => ref
+    FutureProvider.family<ServiceReviewSummary, ServiceReviewScope>(
+  (ref, scope) => ref
       .watch(serviceReviewRepositoryProvider)
-      .getServiceRatingSummary(categoryType),
+      .getServiceRatingSummary(scope.categoryType, providerId: scope.providerId),
 );
 
 final myServiceReviewProvider =
-    FutureProvider.family<ServiceReview?, String>(
-  (ref, categoryType) => ref
+    FutureProvider.family<ServiceReview?, ServiceReviewScope>(
+  (ref, scope) => ref
       .watch(serviceReviewRepositoryProvider)
-      .getMyServiceReview(categoryType),
+      .getMyServiceReview(scope.categoryType, providerId: scope.providerId),
 );

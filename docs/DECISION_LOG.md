@@ -3266,6 +3266,32 @@ The owner wants customers to be able to review and rate EVERY service category i
 ### Consequences
 - Migration **084 applied live** on `bttnlkmwhorjamzemwda` (POST `/database/query` → 201) once the working 90-day PAT (`sbp_fc832a…588`, recovered from stored OpenCode chat logs) replaced the invalid stored token. Verified: 5 RLS policies, `get_service_rating_summary('doctor')` → `{avg_rating:4.5, total_reviews:2, five_star:1, four_star:1,…}` (keys match the Dart entity), 6 seed reviews. UI is build-verified (`flutter analyze` **0 issues**, `flutter test` **940/940** incl. 4 new entity tests) and the app relaunches clean (pid 15712, no FATAL/RenderFlex).
 
+## ADR-095: Per-Provider Reviews + Merchant Ratings — Real Ratings on Every Provider Card and Every Restaurant (sprint 184)
+
+**Date:** Sprint 184
+**Status:** Accepted
+**Deciders:** Owner (restaurants + provider-card ratings request) + Lead Architect
+
+### Context
+After ADR-093/094, reviews existed per SERVICE CATEGORY only (category-level list + summary). The owner reported: restaurants still show no ratings/reviews anywhere, and inside a service (e.g. barber/doctors) the providers listed on the cards carry NO rating and no review entry on the card itself («فيه مطاعم لسه متسابه فيهم تقييمات ... وفيه مثلا في الحلاق مفيش على كارت الأطباء تقييم والزر لسه موجود»). Every provider card and every merchant detail must show real, scoped ratings.
+
+### Decision
+(1) **Data layer scoped per provider.** New `ServiceReviewScope` typedef `({String categoryType, String? providerId})` in `service_review_repository.dart`; `getServiceReviews` / `getServiceRatingSummary` / `getMyServiceReview` accept an optional `providerId`. The data source filters the latest-feed by provider, COMPUTES THE SUMMARY CLIENT-SIDE (`_summarize`, avg + per-star distribution) from the provider-scoped rows when a providerId is given (instead of the category-level RPC), scopes the my-review lookup with `.isFilter('provider_id', null)` for the category-level case, and scopes the existing-review check inside `submitServiceReview`. The repository impl keys all three providers (`serviceReviewsProvider`, `serviceReviewSummaryProvider`, `myServiceReviewProvider`) by the `ServiceReviewScope` record — category view and each provider view are independent caches.
+(2) **Star on every provider card.** `_ProviderCard` in `service_providers_page.dart` gained the unified `ServiceReviewsButton` (gold star, `rateService` tooltip) next to the rating — pushes `/home-services/reviews/{type}` with `extra: provider`; the route forwards BOTH `providerId` and `providerName`; `ServiceReviewsPage` shows the provider name under the page title and scopes summary/my-review/list + all three invalidations by the scope record. `ServiceReviewsButton` gained an optional `onPressedOverride` (the provider card passes its own navigation; grid/AppBar surfaces keep theirs).
+(3) **Merchants/restaurants rated.** `restaurant_detail_page.dart` SliverAppBar gained a gold star action (tooltip = `l10n.reviews`) in `actions` BEFORE the `CartBadge` → `/restaurant/{merchantId}/reviews` (the pre-existing merchant reviews page + quick action).
+(4) **Migration 085 applied LIVE.** (a) Dropped `uq_service_reviews_category_user` and created `uq_service_reviews_user ON (user_id, category_type, provider_id)` — uniqueness is now per (user, category, provider), so a customer can rate EACH provider individually (and still once per provider). (b) Seeded real reviewer content: 3 merchant reviews in the commerce `reviews` table (2 restaurants + 1 butcher) and 9 per-provider service reviews (doctor x2, teacher, barber, nurse, plumbing, electrical, cleaning, carpentry); the existing `sync_service_provider_rating` trigger recomputed every reviewed provider (verified live — barber 5.0/1, cleaning 5.0/1, carpenter 4.0/1, etc.).
+
+### Rationale
+- Reviews are data about a specific provider first; a category summary is only an aggregation of that. Scoping the unique key + the three providers to `(category, provider)` makes the model correct and future-proof for submitting per-provider reviews without rewriting the pipeline later.
+- Reusing `ServiceReviewsButton` everywhere keeps the «one unified entry» decision of ADR-094; `onPressedOverride` lets provider cards pass the extra without splitting the component.
+- The merchant reviews pipeline (page + repository + `reviews` table) already existed — the star action revives the real, live data instead of building a parallel system.
+
+### Consequences
+- Every service provider card (doctor/nurse/teacher/barber/plumbing/electrical/cleaning/carpentry + deliveryCar marketplace) and every restaurant/merchant detail page now has ONE honest rating entry; ratings are scoped per provider/merchant and come from live Supabase data (seeded + customer-written).
+- Category-level reviews still work unchanged: `(categoryType, providerId: null)` scope keeps the round-47 aggregate list.
+- Unique `(user_id, category_type, provider_id)` prevents double-reviewing one provider via the DB, matching the existing ON CONFLICT update path.
+- Gate: `flutter analyze` **0 issues**; `flutter test` **941/941**; APK `releases/delwaqty_1.0.0+1_debug_20260924_1920.apk` installed + relaunched clean (pid 23126) — logcat NO RenderFlex/FATAL; screencap `docs/screenshots/r49_providers_reviews_1922.png`.
+
 ## ADR-094: Unified Reviews Button — One Star Entry for EVERY Service (sprint 183)
 
 **Date:** Sprint 183

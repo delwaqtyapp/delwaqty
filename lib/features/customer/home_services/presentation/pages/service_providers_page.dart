@@ -116,6 +116,10 @@ class _ServiceProvidersPageState extends ConsumerState<ServiceProvidersPage> {
                           '/home-services/category/${_type.name}',
                           extra: provider,
                         ),
+                        onReviewsTap: () => context.push(
+                          '/home-services/reviews/${_type.name}',
+                          extra: provider,
+                        ),
                       ),
                     );
                   },
@@ -229,11 +233,13 @@ class _ProviderCard extends StatelessWidget {
     required this.provider,
     required this.distanceKm,
     required this.onTap,
+    required this.onReviewsTap,
   });
 
   final ServiceProvider provider;
   final double distanceKm;
   final VoidCallback onTap;
+  final VoidCallback onReviewsTap;
 
   @override
   Widget build(BuildContext context) {
@@ -335,7 +341,12 @@ class _ProviderCard extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 8),
-              const Icon(Icons.chevron_right_rounded),
+              ServiceReviewsButton(
+                categoryType: provider.categoryType,
+                tooltipLabel:
+                    AppLocalizations.of(context).rateService,
+                onPressedOverride: onReviewsTap,
+              ),
             ],
           ),
         ),

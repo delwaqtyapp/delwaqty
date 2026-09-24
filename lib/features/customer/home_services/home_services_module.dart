@@ -96,6 +96,9 @@ class HomeServicesModule extends FeatureModule {
         providerId: state.extra is ServiceProvider
             ? (state.extra as ServiceProvider).id
             : null,
+        providerName: state.extra is ServiceProvider
+            ? (state.extra as ServiceProvider).name
+            : null,
       ),
     ),
   ];

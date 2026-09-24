@@ -116,7 +116,7 @@ class _RestaurantDetailPageState extends ConsumerState<RestaurantDetailPage> {
       child: CustomScrollView(
         key: _refreshKey,
         slivers: [
-          _buildHeroImage(theme, merchant),
+          _buildHeroImage(context, theme, merchant),
           SliverToBoxAdapter(
             child: Padding(
               padding: const EdgeInsets.all(16),
@@ -253,7 +253,11 @@ class _RestaurantDetailPageState extends ConsumerState<RestaurantDetailPage> {
     );
   }
 
-  Widget _buildHeroImage(ThemeData theme, Merchant merchant) {
+  Widget _buildHeroImage(
+    BuildContext context,
+    ThemeData theme,
+    Merchant merchant,
+  ) {
     return SliverAppBar(
       expandedHeight: 240,
       pinned: true,
@@ -261,7 +265,15 @@ class _RestaurantDetailPageState extends ConsumerState<RestaurantDetailPage> {
         icon: const Icon(Icons.arrow_back_ios_new),
         onPressed: () => context.pop(),
       ),
-      actions: [CartBadge(onTap: () => context.push('/market/cart'))],
+      actions: [
+        IconButton(
+          tooltip: AppLocalizations.of(context).reviews,
+          icon: const Icon(Icons.star_rounded, color: AppColors.rating, size: 26),
+          onPressed: () =>
+              context.push('/restaurant/${widget.merchantId}/reviews'),
+        ),
+        CartBadge(onTap: () => context.push('/market/cart')),
+      ],
       flexibleSpace: FlexibleSpaceBar(
         background: Hero(
           tag: 'merchant-${merchant.id}',

@@ -3266,6 +3266,30 @@ The owner wants customers to be able to review and rate EVERY service category i
 ### Consequences
 - Migration **084 applied live** on `bttnlkmwhorjamzemwda` (POST `/database/query` → 201) once the working 90-day PAT (`sbp_fc832a…588`, recovered from stored OpenCode chat logs) replaced the invalid stored token. Verified: 5 RLS policies, `get_service_rating_summary('doctor')` → `{avg_rating:4.5, total_reviews:2, five_star:1, four_star:1,…}` (keys match the Dart entity), 6 seed reviews. UI is build-verified (`flutter analyze` **0 issues**, `flutter test` **940/940** incl. 4 new entity tests) and the app relaunches clean (pid 15712, no FATAL/RenderFlex).
 
+## ADR-102: Remove the Delivery-Car Service Completely (round 56, sprint 190)
+
+**Date:** Sprint 190
+**Status:** Accepted
+**Deciders:** Owner («احنا شغالين بالدليفرى بس مش عندنا عربيات توصيل زى اوبر») + Lead Architect
+
+### Context
+The platform physically operates motorbike/bike courier deliveries only. The customer home-services «سيارة توصيل» marketplace (car request + car marketplace + car trip order + car seller form), its admin delivery-car-requests page, and the two DB tables behind them (`car_products`, `delivery_car_requests`) shipped as dormant product surface that was never used. The owner decided to remove the delivery-car service permanently without breaking the app.
+
+### Decision / Implementation
+1. **Customer app** — dropped the four pages (`delivery_car_request_page`, `car_marketplace_page`, `car_trip_order_page`, `car_seller_form_page`), the `CarProduct` entity, the five booking-repository car methods + `myDeliveryCarRequestsProvider`, the `ServiceCategoryType.deliveryCar` enum value, and every deliveryCar mention in `home_domain`, `home_page`, `all_services_page`, `home_services_page`, `service_booking_page`, `service_providers_page`, `category_visuals` and the module routes `/home-services/delivery-car`, `/home-services/cars`, `/home-services/cars/sell`, `/home-services/cars/:carProductId/order`. Removed 41 car-only l10n keys from both ARBs. Car `CarProduct.fromJson` test removed.
+2. **Admin app** — deleted `admin_delivery_car_requests_page.dart` + its route/nav entry; removed dead `ridesTimeseriesProvider`/`getRidesTimeseries`; dashboard KPI card rewired to `activeDeliveries` (icon `directions_bike_rounded`); removed the "Ride GMV" revenue card and the 7% commission card; stripped `totalRides`/`activeRides` from `AdminDashboardMetrics`, ride metrics from the platform-intelligence entity (`totalRides`, `completedRides`, `activeRides`, `rideGmv`, `commission7pct`), and the two ride-count queries + ride revenue sums from `admin_repository.getDashboardMetrics` (delivery-only sums now: results[1]/[3]/[5]). l10n: `kpiActiveRides` renamed → `kpiActiveDeliveries`; `revenueRideGmv`/`commissionRate7` removed.
+3. **Database (migration 091, applied live)** — dropped `delivery_car_requests` then `car_products` (FK `car_product_id` was ON DELETE SET NULL), removed the `deliveryCar` row from `service_categories`, and changed `drivers.service_types` default from `ARRAY['ride']` to `ARRAY[]::TEXT[]`. Verified live: both tables gone, category rows 0, default is the empty array, no car RPCs remain.
+
+### Rationale
+- Classified per project rules: the car marketplace is **production dead code** (never referenced by real customers / never used), so it is safe to delete; the schema must not keep seeds/categories that no longer exist in the enum, otherwise `service_categories` parsing would break.
+- **Kept shared ride infrastructure**: the shared `rides` and `vehicles` tables, `rides.service_type='ride'` historical rows, the realtime `active-ride` channel, `RideMap`/`rideStreamProvider` and the dormant `lib/features/customer/ride/` module — the courier delivery tracking page uses the same ride plumbing, so deleting it would break deliveries.
+- `platform_kpi_summary` keeps computing ride fields (now always 0) but the app no longer displays them.
+
+### Consequences
+- No delivery-car surface anywhere in customer/admin apps or DB. Apps remain delivery/courier-focused.
+- Shared courier ride plumbing untouched → delivery tracking intact.
+- Gates: analyze 0; **flutter test 940/940** (car test removed); customer + admin debug APKs built (`releases/delwaqty_customer_..._0010.apk`, `releases/delwaqty_admin_..._0010.apk`), installed on DNP NX9, smoke-launched clean — customer pid 21158, admin pid 21258, no fatal exceptions, no stale `car*`/`deliveryCar` references in logcat.
+
 ## ADR-101: Admin Gap-Fix Batch 1 — Emergency SOS Page + Notification-Link Fix + Product Management (sprint 189)
 
 **Date:** Sprint 189

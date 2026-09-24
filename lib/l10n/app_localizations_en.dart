@@ -4731,9 +4731,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get revenuePlatformCommission => 'Platform commission';
 
   @override
-  String get revenueRideGmv => 'Delivery GMV';
-
-  @override
   String get revenueDeliveryGmv => 'Deliveries GMV';
 
   @override
@@ -5129,9 +5126,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get returnsLabel => 'Returns';
-
-  @override
-  String get commissionRate7 => '7% commission';
 
   @override
   String get commissionRate3 => '3% commission';
@@ -5834,7 +5828,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get completedTrips => 'Completed Deliveries';
 
   @override
-  String get kpiActiveRides => 'Active Deliveries';
+  String get kpiActiveDeliveries => 'Active Deliveries';
 
   @override
   String get driverDuringTrip => 'During the delivery';
@@ -6059,12 +6053,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get serviceOther => 'Other';
 
   @override
-  String get serviceDeliveryCar => 'Delivery Car';
-
-  @override
-  String get adminDeliveryCarRequests => 'Delivery Car Requests';
-
-  @override
   String get noRequestsYet => 'No requests yet';
 
   @override
@@ -6089,16 +6077,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get statusCancelled => 'Cancelled';
 
   @override
-  String get deliveryCarRequested => 'Delivery car requested';
-
-  @override
-  String get deliveryCar => 'Delivery Car';
-
-  @override
-  String get deliveryCarHint =>
-      'Order a delivery car to move anything between two addresses';
-
-  @override
   String get pickupAddress => 'Pickup address';
 
   @override
@@ -6121,61 +6099,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get perHour => '/ hour';
 
   @override
-  String get carMarketplace => 'Car Marketplace';
-
-  @override
-  String get carMarketplaceHint =>
-      'Choose a registered driver\'s car. The price is set by the driver, and the platform takes a 7% commission';
-
-  @override
-  String get bookTrip => 'Book trip';
-
-  @override
-  String get driverPrice => 'Driver\'s price';
-
-  @override
-  String get ourCommission => 'Delwaqty commission (7%)';
-
-  @override
-  String get totalPaid => 'Total to pay';
-
-  @override
-  String get commissionBreakdown =>
-      '7% commission is charged precisely on every 100 EGP of the total order';
-
-  @override
   String get scheduledTime => 'Scheduled time (optional)';
 
   @override
-  String get chooseCar => 'Choose your car';
-
-  @override
-  String get noCarsAvailable => 'No cars available right now. Check back later';
-
-  @override
-  String get carVerified => 'Verified';
-
-  @override
   String get openInMaps => 'Open in maps';
-
-  @override
-  String get carCategoryCar => 'Car';
-
-  @override
-  String get carCategoryVan => 'Van';
-
-  @override
-  String get carCategoryPickup => 'Pickup';
-
-  @override
-  String get carCategoryMicrobus => 'Microbus';
-
-  @override
-  String get carCategoryTukTuk => 'Tuk tuk';
-
-  @override
-  String get carTripOrdered =>
-      'Trip requested — the driver will confirm the price';
 
   @override
   String get chooseDateTime => 'Choose date & time';
@@ -6206,69 +6133,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get seatsLabel => 'seats';
-
-  @override
-  String get sellCarTitle => 'Register your car';
-
-  @override
-  String get sellCarHint =>
-      'Appear as a product in the car marketplace. You set the price; Delwaqty takes a 7% commission on each booking — calculated precisely on every 100 EGP.';
-
-  @override
-  String get sellCarAction => 'Register car';
-
-  @override
-  String get sellCarSubmit => 'Publish car';
-
-  @override
-  String get carCategoryLabel => 'Car type';
-
-  @override
-  String get carMakeLabel => 'Make';
-
-  @override
-  String get carMakeHint => 'e.g. Toyota';
-
-  @override
-  String get carModelLabel => 'Model';
-
-  @override
-  String get carModelHint => 'e.g. Corolla';
-
-  @override
-  String get carYearLabel => 'Year';
-
-  @override
-  String get carSeatsLabel => 'Seats';
-
-  @override
-  String get carColorLabel => 'Color';
-
-  @override
-  String get carColorHint => 'e.g. Silver';
-
-  @override
-  String get carCityLabel => 'City';
-
-  @override
-  String get carCityHint => 'e.g. Cairo';
-
-  @override
-  String get carPriceLabel => 'Your price (EGP)';
-
-  @override
-  String get carPriceHint => 'Set by you — not by Google';
-
-  @override
-  String get carDescriptionLabel => 'Description';
-
-  @override
-  String get carDescriptionHint =>
-      'Short description of the car and the trips you offer';
-
-  @override
-  String get carProductCreated =>
-      'Car published to the marketplace successfully';
 
   @override
   String get rateService => 'Rate this service';

@@ -374,7 +374,6 @@ class AdminFinancialCenter extends ConsumerWidget {
       _MetricData(l10n.kpiTotalGmv, overview.totalGmv, const Color(0xFF5B3DF0)),
       _MetricData(l10n.kpiPlatformCommission, overview.totalCommission, const Color(0xFF34C759)),
       _MetricData(l10n.returnsLabel, overview.refundCount.toDouble(), const Color(0xFFFF3B30)),
-      _MetricData(l10n.commissionRate7, overview.commission7pct, const Color(0xFF00C7BE)),
       _MetricData(l10n.commissionRate3, overview.commission3pct, const Color(0xFFFF9500)),
     ];
 

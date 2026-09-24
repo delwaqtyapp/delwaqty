@@ -5,11 +5,7 @@ import 'package:delwaqty/features/customer/home_services/domain/entities/service
 import 'package:delwaqty/features/customer/home_services/domain/entities/service_provider.dart';
 import 'package:delwaqty/features/customer/home_services/presentation/pages/home_services_page.dart';
 import 'package:delwaqty/features/customer/home_services/presentation/pages/service_booking_page.dart';
-import 'package:delwaqty/features/customer/home_services/presentation/pages/delivery_car_request_page.dart';
 import 'package:delwaqty/features/customer/home_services/presentation/pages/service_providers_page.dart';
-import 'package:delwaqty/features/customer/home_services/presentation/pages/car_marketplace_page.dart';
-import 'package:delwaqty/features/customer/home_services/presentation/pages/car_trip_order_page.dart';
-import 'package:delwaqty/features/customer/home_services/presentation/pages/car_seller_form_page.dart';
 import 'package:delwaqty/features/customer/home_services/presentation/pages/service_reviews_page.dart';
 
 class HomeServicesModule extends FeatureModule {
@@ -56,11 +52,6 @@ class HomeServicesModule extends FeatureModule {
       },
     ),
     GoRoute(
-      path: '/home-services/delivery-car',
-      name: 'home-services-delivery-car',
-      builder: (context, state) => const DeliveryCarRequestPage(),
-    ),
-    GoRoute(
       path: '/home-services/providers/:categoryType',
       name: 'home-services-providers',
       builder: (context, state) {
@@ -71,22 +62,6 @@ class HomeServicesModule extends FeatureModule {
         );
         return ServiceProvidersPage(initialType: type);
       },
-    ),
-    GoRoute(
-      path: '/home-services/cars/sell',
-      name: 'home-services-cars-sell',
-      builder: (context, state) => const CarSellerFormPage(),
-    ),
-    GoRoute(
-      path: '/home-services/cars/:carProductId/order',
-      name: 'home-services-cars-order',
-      builder: (context, state) =>
-          CarTripOrderPage(carProductId: state.pathParameters['carProductId']!),
-    ),
-    GoRoute(
-      path: '/home-services/cars',
-      name: 'home-services-cars',
-      builder: (context, state) => const CarMarketplacePage(),
     ),
     GoRoute(
       path: '/home-services/reviews/:categoryType',

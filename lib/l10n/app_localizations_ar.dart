@@ -4696,9 +4696,6 @@ class AppLocalizationsAr extends AppLocalizations {
   String get revenuePlatformCommission => 'عمولة المنصة';
 
   @override
-  String get revenueRideGmv => 'إجمالي التوصيل GMV';
-
-  @override
   String get revenueDeliveryGmv => 'GMV التوصيل';
 
   @override
@@ -5093,9 +5090,6 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get returnsLabel => 'المرتجعات';
-
-  @override
-  String get commissionRate7 => 'عمولة 7%';
 
   @override
   String get commissionRate3 => 'عمولة 3%';
@@ -5796,7 +5790,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get completedTrips => 'التوصيلات المكتملة';
 
   @override
-  String get kpiActiveRides => 'التوصيلات النشطة';
+  String get kpiActiveDeliveries => 'التوصيلات النشطة';
 
   @override
   String get driverDuringTrip => 'أثناء التوصيل';
@@ -6017,12 +6011,6 @@ class AppLocalizationsAr extends AppLocalizations {
   String get serviceOther => 'أخرى';
 
   @override
-  String get serviceDeliveryCar => 'سيارة توصيل';
-
-  @override
-  String get adminDeliveryCarRequests => 'طلبات سيارة التوصيل';
-
-  @override
   String get noRequestsYet => 'لا توجد طلبات بعد';
 
   @override
@@ -6047,15 +6035,6 @@ class AppLocalizationsAr extends AppLocalizations {
   String get statusCancelled => 'ملغي';
 
   @override
-  String get deliveryCarRequested => 'تم طلب سيارة التوصيل';
-
-  @override
-  String get deliveryCar => 'سيارة توصيل';
-
-  @override
-  String get deliveryCarHint => 'اطلب سيارة توصيل لنقل أي شيء بين عنوانين';
-
-  @override
   String get pickupAddress => 'عنوان الاستلام';
 
   @override
@@ -6078,60 +6057,10 @@ class AppLocalizationsAr extends AppLocalizations {
   String get perHour => '/ ساعة';
 
   @override
-  String get carMarketplace => 'متجر السيارات';
-
-  @override
-  String get carMarketplaceHint =>
-      'اختر سيارة سائق مسجل. السعر يحدده السائق، وتأخذ المنصة عمولة 7%';
-
-  @override
-  String get bookTrip => 'احجز المشوار';
-
-  @override
-  String get driverPrice => 'سعر السائق';
-
-  @override
-  String get ourCommission => 'عمولة دلوقتي (7%)';
-
-  @override
-  String get totalPaid => 'الإجمالي المطلوب';
-
-  @override
-  String get commissionBreakdown =>
-      'تُحتسب عمولة 7% بدقة على قيمة كل 100 جنيه من إجمالي الطلب';
-
-  @override
   String get scheduledTime => 'الوقت المسبق (اختياري)';
 
   @override
-  String get chooseCar => 'اختر سيارتك';
-
-  @override
-  String get noCarsAvailable => 'لا توجد سيارات متاحة حالياً. عد لاحقاً';
-
-  @override
-  String get carVerified => 'موثّق';
-
-  @override
   String get openInMaps => 'فتح في الخرائط';
-
-  @override
-  String get carCategoryCar => 'سيارة';
-
-  @override
-  String get carCategoryVan => 'فان';
-
-  @override
-  String get carCategoryPickup => 'بيك أب';
-
-  @override
-  String get carCategoryMicrobus => 'ميكروباص';
-
-  @override
-  String get carCategoryTukTuk => 'توك توك';
-
-  @override
-  String get carTripOrdered => 'تم طلب المشوار — السائق سيؤكد السعر';
 
   @override
   String get chooseDateTime => 'اختر التاريخ والوقت';
@@ -6162,67 +6091,6 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get seatsLabel => 'مقاعد';
-
-  @override
-  String get sellCarTitle => 'سجّل سيارتك';
-
-  @override
-  String get sellCarHint =>
-      'ستظهر كمنتج في متجر السيارات. أنت تحدّد السعر؛ وتأخذ دلوقتي عمولة 7% على كل حجز — تُحتسب بدقة على كل 100 جنيه.';
-
-  @override
-  String get sellCarAction => 'سجّل سيارة';
-
-  @override
-  String get sellCarSubmit => 'انشر السيارة';
-
-  @override
-  String get carCategoryLabel => 'نوع السيارة';
-
-  @override
-  String get carMakeLabel => 'الماركة';
-
-  @override
-  String get carMakeHint => 'مثال: تويوتا';
-
-  @override
-  String get carModelLabel => 'الموديل';
-
-  @override
-  String get carModelHint => 'مثال: كورولا';
-
-  @override
-  String get carYearLabel => 'السنة';
-
-  @override
-  String get carSeatsLabel => 'المقاعد';
-
-  @override
-  String get carColorLabel => 'اللون';
-
-  @override
-  String get carColorHint => 'مثال: فضي';
-
-  @override
-  String get carCityLabel => 'المدينة';
-
-  @override
-  String get carCityHint => 'مثال: القاهرة';
-
-  @override
-  String get carPriceLabel => 'سعرك (جنيه)';
-
-  @override
-  String get carPriceHint => 'تحدده أنت — وليس جوجل';
-
-  @override
-  String get carDescriptionLabel => 'الوصف';
-
-  @override
-  String get carDescriptionHint => 'وصف قصير للسيارة والمشاوير التي تقدمها';
-
-  @override
-  String get carProductCreated => 'تم نشر السيارة في المتجر بنجاح';
 
   @override
   String get rateService => 'قيم الخدمة';

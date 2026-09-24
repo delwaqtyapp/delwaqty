@@ -45,7 +45,6 @@ const _bookingPriority = [
   ServiceCategoryType.nurse,
   ServiceCategoryType.teacher,
   ServiceCategoryType.barber,
-  ServiceCategoryType.deliveryCar,
   ServiceCategoryType.plumbing,
   ServiceCategoryType.electrical,
   ServiceCategoryType.carpentry,

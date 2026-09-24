@@ -103,7 +103,7 @@ class _RevenueOverviewSection extends StatelessWidget {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        '${l10n.revenueChart} • ${metrics.completedDeliveries + metrics.totalRides} ${l10n.orders}',
+                        '${l10n.revenueChart} • ${metrics.totalDeliveries} ${l10n.orders}',
                         style: AppTextStyles.bodySmall.copyWith(
                           color: Theme.of(context).colorScheme.onPrimary.withValues(alpha: 0.7),
                         ),

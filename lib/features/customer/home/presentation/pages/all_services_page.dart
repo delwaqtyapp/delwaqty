@@ -21,7 +21,6 @@ final _bookingServicesProvider = FutureProvider<List<ServiceCategory>>((ref) asy
     ServiceCategoryType.nurse,
     ServiceCategoryType.teacher,
     ServiceCategoryType.barber,
-    ServiceCategoryType.deliveryCar,
     ServiceCategoryType.plumbing,
     ServiceCategoryType.electrical,
     ServiceCategoryType.carpentry,
@@ -49,7 +48,6 @@ IconData _serviceIcon(ServiceCategoryType t) => switch (t) {
       ServiceCategoryType.nurse => Icons.health_and_safety_rounded,
       ServiceCategoryType.teacher => Icons.school_rounded,
       ServiceCategoryType.barber => Icons.content_cut_rounded,
-      ServiceCategoryType.deliveryCar => Icons.local_taxi_rounded,
       ServiceCategoryType.plumbing => Icons.plumbing_rounded,
       ServiceCategoryType.electrical => Icons.electrical_services_rounded,
       ServiceCategoryType.carpentry => Icons.carpenter_rounded,
@@ -70,7 +68,6 @@ Color _serviceColor(ServiceCategoryType t) => switch (t) {
       ServiceCategoryType.nurse => AppColors.successLight,
       ServiceCategoryType.teacher => AppColors.infoLight,
       ServiceCategoryType.barber => AppColors.brandViolet,
-      ServiceCategoryType.deliveryCar => AppColors.serviceDelivery,
       ServiceCategoryType.plumbing => AppColors.serviceHome,
       ServiceCategoryType.electrical => AppColors.serviceElectronics,
       ServiceCategoryType.carpentry => AppColors.serviceBakery,
@@ -157,12 +154,10 @@ class AllServicesPage extends ConsumerWidget {
                       final color = _serviceColor(service.type);
                       return AnimatedFadeIn(
                         delay: Duration(milliseconds: 120 + index * 40),
-                        child: PressableScale(
-                          onTap: () => context.push(
-                            service.type == ServiceCategoryType.deliveryCar
-                                ? '/home-services/cars'
-                                : '/home-services/providers/${service.type.name}',
-                          ),
+child: PressableScale(
+                        onTap: () => context.push(
+                          '/home-services/providers/${service.type.name}',
+                        ),
                           child: Stack(
                             children: [
                               Column(

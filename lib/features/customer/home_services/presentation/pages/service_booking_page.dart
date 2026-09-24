@@ -73,7 +73,6 @@ class _ServiceBookingPageState extends ConsumerState<ServiceBookingPage> {
     ServiceCategoryType.doctor => 'حجز دكتور',
     ServiceCategoryType.nurse => 'ممرض',
     ServiceCategoryType.barber => 'حجز حلاق',
-    ServiceCategoryType.deliveryCar => 'طلب سيارة توصيل',
     ServiceCategoryType.other => 'خدمات أخرى',
   };
 

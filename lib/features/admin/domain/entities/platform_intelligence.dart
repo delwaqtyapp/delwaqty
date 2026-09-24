@@ -31,22 +31,17 @@ abstract class PlatformKpiSummary with _$PlatformKpiSummary {
     @Default(0) int completedOrders,
     @Default(0) int pendingOrders,
     @Default(0) int cancelledOrders,
-    @Default(0) int totalRides,
-    @Default(0) int completedRides,
-    @Default(0) int activeRides,
     @Default(0) int totalDeliveries,
     @Default(0) int completedDeliveries,
     @Default(0) int activeDeliveries,
     @Default(0) int totalServiceBookings,
     @Default(0) int completedServiceBookings,
     @Default(0.0) double totalGmv,
-    @Default(0.0) double rideGmv,
     @Default(0.0) double deliveryGmv,
     @Default(0.0) double serviceGmv,
     @Default(0.0) double platformCommission,
     @Default(0.0) double driverEarningsTotal,
     @Default(0.0) double totalWalletLiability,
-    @Default(0.0) double commission7pct,
     @Default(0.0) double commission3pct,
     @Default(0) int openComplaints,
     @Default(0) int escalatedComplaints,
@@ -88,9 +83,6 @@ abstract class PlatformKpiSummary with _$PlatformKpiSummary {
         completedOrders: json['completed_orders'] as int? ?? 0,
         pendingOrders: json['pending_orders'] as int? ?? 0,
         cancelledOrders: json['cancelled_orders'] as int? ?? 0,
-        totalRides: json['total_rides'] as int? ?? 0,
-        completedRides: json['completed_rides'] as int? ?? 0,
-        activeRides: json['active_rides'] as int? ?? 0,
         totalDeliveries: json['total_deliveries'] as int? ?? 0,
         completedDeliveries: json['completed_deliveries'] as int? ?? 0,
         activeDeliveries: json['active_deliveries'] as int? ?? 0,
@@ -98,7 +90,6 @@ abstract class PlatformKpiSummary with _$PlatformKpiSummary {
         completedServiceBookings:
             json['completed_service_bookings'] as int? ?? 0,
         totalGmv: (json['total_gmv'] as num?)?.toDouble() ?? 0.0,
-        rideGmv: (json['ride_gmv'] as num?)?.toDouble() ?? 0.0,
         deliveryGmv: (json['delivery_gmv'] as num?)?.toDouble() ?? 0.0,
         serviceGmv: (json['service_gmv'] as num?)?.toDouble() ?? 0.0,
         platformCommission:
@@ -107,7 +98,6 @@ abstract class PlatformKpiSummary with _$PlatformKpiSummary {
             (json['driver_earnings_total'] as num?)?.toDouble() ?? 0.0,
         totalWalletLiability:
             (json['total_wallet_liability'] as num?)?.toDouble() ?? 0.0,
-        commission7pct: (json['commission_7pct'] as num?)?.toDouble() ?? 0.0,
         commission3pct: (json['commission_3pct'] as num?)?.toDouble() ?? 0.0,
         openComplaints: json['open_complaints'] as int? ?? 0,
         escalatedComplaints: json['escalated_complaints'] as int? ?? 0,
@@ -545,7 +535,6 @@ abstract class RevenueOverview with _$RevenueOverview {
     @Default(0.0) double totalGmv,
     @Default(0) int refundCount,
     @Default(0.0) double commission3pct,
-    @Default(0.0) double commission7pct,
     @Default(0.0) double totalCommission,
     DateTime? dateFrom,
     DateTime? dateTo,
@@ -557,7 +546,6 @@ abstract class RevenueOverview with _$RevenueOverview {
         totalGmv: (json['total_gmv'] as num?)?.toDouble() ?? 0.0,
         refundCount: json['refund_count'] as int? ?? 0,
         commission3pct: (json['commission_3pct'] as num?)?.toDouble() ?? 0.0,
-        commission7pct: (json['commission_7pct'] as num?)?.toDouble() ?? 0.0,
         totalCommission:
             (json['total_commission'] as num?)?.toDouble() ?? 0.0,
         dateFrom: json['date_from'] != null
@@ -573,10 +561,8 @@ abstract class RevenueOverview with _$RevenueOverview {
 abstract class TimeseriesData with _$TimeseriesData {
   const factory TimeseriesData({
     @Default([]) List<DailyMetric> ordersByDay,
-    @Default([]) List<DailyMetric> ridesByDay,
     @Default([]) List<DailyMetric> deliveriesByDay,
     @Default([]) List<StatusCount> ordersByStatus,
-    @Default([]) List<StatusCount> ridesByStatus,
     @Default([]) List<StatusCount> deliveriesByStatus,
     @Default([]) List<StatusCount> serviceBookingsByStatus,
     DateTime? dateFrom,
@@ -590,22 +576,12 @@ abstract class TimeseriesData with _$TimeseriesData {
                     DailyMetric.fromJson(e as Map<String, dynamic>))
                 .toList() ??
             const [],
-        ridesByDay: (json['rides_by_day'] as List<dynamic>?)
-                ?.map((e) =>
-                    DailyMetric.fromJson(e as Map<String, dynamic>))
-                .toList() ??
-            const [],
         deliveriesByDay: (json['deliveries_by_day'] as List<dynamic>?)
                 ?.map((e) =>
                     DailyMetric.fromJson(e as Map<String, dynamic>))
                 .toList() ??
             const [],
         ordersByStatus: (json['orders_by_status'] as List<dynamic>?)
-                ?.map((e) =>
-                    StatusCount.fromJson(e as Map<String, dynamic>))
-                .toList() ??
-            const [],
-        ridesByStatus: (json['rides_by_status'] as List<dynamic>?)
                 ?.map((e) =>
                     StatusCount.fromJson(e as Map<String, dynamic>))
                 .toList() ??

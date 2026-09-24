@@ -202,7 +202,6 @@ class _ServiceProvidersPageState extends ConsumerState<ServiceProvidersPage> {
         ServiceCategoryType.doctor => 'حجز دكتور',
         ServiceCategoryType.nurse => 'ممرض',
         ServiceCategoryType.barber => 'حجز حلاق',
-        ServiceCategoryType.deliveryCar => 'سيارة توصيل',
         ServiceCategoryType.other => 'أخرى',
       };
 
@@ -223,7 +222,6 @@ class _ServiceProvidersPageState extends ConsumerState<ServiceProvidersPage> {
         ServiceCategoryType.doctor => Icons.medical_services_rounded,
         ServiceCategoryType.nurse => Icons.health_and_safety_rounded,
         ServiceCategoryType.barber => Icons.content_cut_rounded,
-        ServiceCategoryType.deliveryCar => Icons.local_taxi_rounded,
         ServiceCategoryType.other => Icons.home_repair_service_rounded,
       };
 }

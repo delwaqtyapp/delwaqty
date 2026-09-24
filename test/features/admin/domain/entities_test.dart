@@ -490,8 +490,6 @@ void main() {
         'totalMerchants': 50,
         'activeDrivers': 30,
         'pendingVerifications': 10,
-        'totalRides': 5000,
-        'activeRides': 15,
         'totalDeliveries': 2000,
         'pendingOrders': 25,
         'completedDeliveries': 1975,
@@ -508,8 +506,6 @@ void main() {
       expect(metrics.totalMerchants, 50);
       expect(metrics.activeDrivers, 30);
       expect(metrics.pendingVerifications, 10);
-      expect(metrics.totalRides, 5000);
-      expect(metrics.activeRides, 15);
       expect(metrics.totalDeliveries, 2000);
       expect(metrics.pendingOrders, 25);
       expect(metrics.completedDeliveries, 1975);
@@ -540,8 +536,6 @@ void main() {
         totalMerchants: 50,
         activeDrivers: 30,
         pendingVerifications: 10,
-        totalRides: 5000,
-        activeRides: 15,
         totalDeliveries: 2000,
         pendingOrders: 25,
         completedDeliveries: 1975,
@@ -564,8 +558,6 @@ void main() {
       expect(metrics.totalMerchants, 0);
       expect(metrics.activeDrivers, 0);
       expect(metrics.pendingVerifications, 0);
-      expect(metrics.totalRides, 0);
-      expect(metrics.activeRides, 0);
       expect(metrics.totalDeliveries, 0);
       expect(metrics.pendingOrders, 0);
       expect(metrics.completedDeliveries, 0);

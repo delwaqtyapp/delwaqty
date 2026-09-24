@@ -3265,3 +3265,28 @@ The owner wants customers to be able to review and rate EVERY service category i
 
 ### Consequences
 - Migration **084 applied live** on `bttnlkmwhorjamzemwda` (POST `/database/query` → 201) once the working 90-day PAT (`sbp_fc832a…588`, recovered from stored OpenCode chat logs) replaced the invalid stored token. Verified: 5 RLS policies, `get_service_rating_summary('doctor')` → `{avg_rating:4.5, total_reviews:2, five_star:1, four_star:1,…}` (keys match the Dart entity), 6 seed reviews. UI is build-verified (`flutter analyze` **0 issues**, `flutter test` **940/940** incl. 4 new entity tests) and the app relaunches clean (pid 15712, no FATAL/RenderFlex).
+
+## ADR-094: Unified Reviews Button — One Star Entry for EVERY Service (sprint 183)
+
+**Date:** Sprint 183
+**Status:** Accepted
+**Deciders:** Owner (unification request) + Lead Architect
+
+### Context
+Round 47 delivered the per-category reviews engine + a star AppBar button, but only inside `ServiceProvidersPage`. The owner wants reviews available on ALL services («عايز باقى كل خدمات التطبيق مهما كانت الخدمه يكون فيها تقييم») and the star entry control itself unified everywhere («وحد الزر الى انت عملته ل عرض القائمه الكامله فى كل شئ فى المشروع بحيث انه يكون كله موحد وشغال حقيقي»).
+
+### Decision
+(1) New shared widget `ServiceReviewsButton` (`lib/features/customer/home_services/presentation/widgets/service_reviews_button.dart`): a single gold-star `IconButton` (compact density, `rateService` tooltip) that pushes `/home-services/reviews/{categoryType.name}`. Every entry point in the app uses EXACTLY this widget — no duplicate button code.
+(2) Wired into FOUR surfaces so every service is reachable for ratings:
+   - `ServiceProvidersPage` AppBar (per-service page) — replaced the round-47 inline IconButton with the widget.
+   - `HomeServicesPage` `/services` category grid — each tile now overlays the same star (Positioned top-right) → one-tap reviews for that category from the overview.
+   - `AllServicesPage` (`/services` «عرض الكل») — same per-tile star overlay.
+   - `CarMarketplacePage` (deliveryCar) AppBar — the unified star sits next to «سجّل سيارة».
+(3) All categories share the same live pipeline (migration 084 applied): summary RPC + latest-feed + my-review, seeded with 6 demo reviews.
+
+### Rationale
+- One control component guarantees a consistent, discoverable rating entry on every service page/grid, and makes future surfaces cheap to add (one widget call).
+
+### Consequences
+- Every service in the app is now one tap from its full reviews list (`عرض القائمة الكاملة`) and can be rated/reviewed for real (data already live on Supabase).
+- Gate: `flutter analyze` **0 issues**; `flutter test` **941/941** (940 + new `service_reviews_button_test.dart`); APK `releases/delwaqty_1.0.0+1_debug_20260924_1834.apk` installed + relaunched clean (pid 14250) — logcat NO RenderFlex/FATAL.

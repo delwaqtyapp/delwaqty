@@ -62,7 +62,7 @@ void main() {
     });
 
     test('countFor ignores unsupported star count', () {
-      final s = const ServiceReviewSummary(fiveStar: 1, oneStar: 2);
+      const s = ServiceReviewSummary(fiveStar: 1, oneStar: 2);
       expect(s.countFor(5), 1);
       expect(s.countFor(1), 2);
       expect(s.countFor(0), 2);

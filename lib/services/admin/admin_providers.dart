@@ -46,6 +46,20 @@ final adminMerchantsProvider = FutureProvider<List<Map<String, dynamic>>>((
   return adminService.getMerchants();
 });
 
+// ─── Content Moderation ───────────────────────────────────
+
+final adminMerchantReviewsProvider =
+    FutureProvider<List<Map<String, dynamic>>>((ref) async {
+  final adminService = ref.watch(adminServiceProvider);
+  return adminService.getRecentMerchantReviews();
+});
+
+final adminServiceReviewsProvider =
+    FutureProvider<List<Map<String, dynamic>>>((ref) async {
+  final adminService = ref.watch(adminServiceProvider);
+  return adminService.getRecentServiceReviews();
+});
+
 // ─── Orders ────────────────────────────────────────────────
 
 final adminOrdersProvider = FutureProvider<List<Map<String, dynamic>>>((

@@ -445,6 +445,7 @@
   "ratingBreakdown": "Rating Breakdown",
   "basedOnReviews": "Based on {count} reviews",
   "noReviewsYet": "No reviews yet",
+  "noComment": "No comment",
   "beTheFirst": "Be the first to review!",
   "yourRating": "Your Rating",
   "yourReview": "Your Review",
@@ -1983,5 +1984,16 @@
   "carDescriptionHint": "Short description of the car and the trips you offer",
   "carProductCreated": "Car published to the marketplace successfully",
   "rateService": "Rate this service",
-  "rateUs": "Rate Us"
+  "rateUs": "Rate Us",
+  "moderationSection": "Content Moderation",
+  "adminReviewsModeration": "Reviews Moderation",
+  "merchantReviews": "Merchant Reviews",
+  "serviceReviews": "Service Reviews",
+  "deleteReviewAction": "Delete Review",
+  "confirmDeleteReview": "Delete this review and its comment permanently?",
+  "deleteMerchant": "Delete Merchant",
+  "confirmDeleteMerchant": "Deleting the merchant permanently removes all its products and reviews. Continue?",
+  "deleted": "Deleted successfully",
+  "deleteFailed": "Delete failed, try again",
+  "deleteSoftFailed": "Cannot hard-delete (referenced by past orders); item was hidden instead"
 }

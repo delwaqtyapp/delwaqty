@@ -114,6 +114,16 @@ class AdminMerchantsPage extends ConsumerWidget {
                           );
                           ref.invalidate(adminMerchantsProvider);
                         },
+                        onManageProducts: () => _showManageProductsSheet(
+                          context,
+                          ref,
+                          merchant,
+                        ),
+                        onDeleteMerchant: () => _confirmDeleteMerchant(
+                          context,
+                          ref,
+                          merchant,
+                        ),
                       ),
                     );
                   },
@@ -125,6 +135,181 @@ class AdminMerchantsPage extends ConsumerWidget {
       ),
     );
   }
+
+  Future<void> _showManageProductsSheet(
+    BuildContext context,
+    WidgetRef ref,
+    Map<String, dynamic> merchant,
+  ) async {
+    final l10n = AppLocalizations.of(context);
+    final merchantId = merchant['id'] as String;
+    final merchantName = merchant['name'] as String? ?? '';
+    final adminService = ref.read(adminServiceProvider);
+
+    await showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      showDragHandle: true,
+      builder: (ctx) => SizedBox(
+        height: MediaQuery.of(ctx).size.height * 0.6,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+              child: Text(
+                '${l10n.manageProducts} — $merchantName',
+                style: Theme.of(ctx)
+                    .textTheme
+                    .titleMedium
+                    ?.copyWith(fontWeight: FontWeight.bold),
+              ),
+            ),
+            Expanded(
+              child: FutureBuilder<List<Map<String, dynamic>>>(
+                future: adminService.getMerchantProducts(merchantId),
+                builder: (ctx, snap) {
+                  if (snap.connectionState == ConnectionState.waiting) {
+                    return const Center(child: AppLoaderCircular());
+                  }
+                  final products = snap.data ?? [];
+                  if (products.isEmpty) {
+                    return Center(
+                      child: PremiumEmptyState(
+                        icon: Icons.inventory_2_outlined,
+                        title: l10n.noData,
+                        message: l10n.noData,
+                      ),
+                    );
+                  }
+                  return ListView.builder(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    itemCount: products.length,
+                    itemBuilder: (listCtx, index) {
+                      final p = products[index];
+                      final available = p['is_available'] == true;
+                      return Card(
+                        margin: const EdgeInsets.only(bottom: 8),
+                        child: ListTile(
+                          leading: CircleAvatar(
+                            backgroundColor: available
+                                ? AppColors.successLight.withValues(alpha: 0.1)
+                                : AppColors.warningLight.withValues(alpha: 0.1),
+                            child: Icon(
+                              Icons.inventory_2_outlined,
+                              size: 20,
+                              color: available
+                                  ? AppColors.successLight
+                                  : AppColors.warningLight,
+                            ),
+                          ),
+                          title: Text(p['name'] as String? ?? ''),
+                          subtitle: Text(
+                            '${p['price'] ?? ''}'
+                            '${available ? '' : ' • ${l10n.suspended}'}',
+                          ),
+                          trailing: IconButton(
+                            tooltip: l10n.deleteProduct,
+                            icon: const Icon(Icons.delete_outline_rounded),
+                            color: Theme.of(listCtx).colorScheme.error,
+                            onPressed: () async {
+                              final messenger = ScaffoldMessenger.of(listCtx);
+                              final ok = await showDialog<bool>(
+                                context: listCtx,
+                                builder: (dCtx) => AlertDialog(
+                                  title: Text(l10n.deleteProduct),
+                                  content: Text(l10n.confirmDeleteReview),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () => Navigator.pop(dCtx, false),
+                                      child: Text(l10n.cancel),
+                                    ),
+                                    FilledButton(
+                                      style: FilledButton.styleFrom(
+                                        backgroundColor:
+                                            Theme.of(dCtx).colorScheme.error,
+                                      ),
+                                      onPressed: () => Navigator.pop(dCtx, true),
+                                      child: Text(l10n.delete),
+                                    ),
+                                  ],
+                                ),
+                              );
+                              if (ok != true) return;
+                              final done = await adminService
+                                  .deleteProduct(p['id'] as String);
+                              messenger.showSnackBar(
+                                SnackBar(
+                                  content: Text(done
+                                      ? l10n.deleted
+                                      : l10n.deleteSoftFailed),
+                                  behavior: SnackBarBehavior.floating,
+                                ),
+                              );
+                              if (ctx.mounted) {
+                                Navigator.pop(ctx);
+                                _showManageProductsSheet(
+                                  context,
+                                  ref,
+                                  merchant,
+                                );
+                              }
+                            },
+                          ),
+                        ),
+                      );
+                    },
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _confirmDeleteMerchant(
+    BuildContext context,
+    WidgetRef ref,
+    Map<String, dynamic> merchant,
+  ) async {
+    final l10n = AppLocalizations.of(context);
+    final merchantName = merchant['name'] as String? ?? '';
+    final messenger = ScaffoldMessenger.of(context);
+
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text('${l10n.deleteMerchant} — $merchantName'),
+        content: Text(l10n.confirmDeleteMerchant),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text(l10n.cancel),
+          ),
+          FilledButton(
+            style: FilledButton.styleFrom(
+              backgroundColor: Theme.of(ctx).colorScheme.error,
+            ),
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text(l10n.delete),
+          ),
+        ],
+      ),
+    );
+    if (ok != true) return;
+
+    final done =
+        await ref.read(adminServiceProvider).deleteMerchant(merchant['id'] as String);
+    ref.invalidate(adminMerchantsProvider);
+    messenger.showSnackBar(
+      SnackBar(
+        content: Text(done ? l10n.deleted : l10n.deleteFailed),
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
+  }
 }
 
 class _MerchantTile extends StatelessWidget {
@@ -132,11 +317,15 @@ class _MerchantTile extends StatelessWidget {
     required this.merchant,
     required this.l10n,
     required this.onStatusChanged,
+    required this.onManageProducts,
+    required this.onDeleteMerchant,
   });
 
   final Map<String, dynamic> merchant;
   final AppLocalizations l10n;
   final Function(String) onStatusChanged;
+  final VoidCallback onManageProducts;
+  final VoidCallback onDeleteMerchant;
 
   @override
   Widget build(BuildContext context) {
@@ -187,7 +376,15 @@ class _MerchantTile extends StatelessWidget {
               ),
             ),
             PopupMenuButton<String>(
-              onSelected: (value) => onStatusChanged(value),
+              onSelected: (value) {
+                if (value == '__products') {
+                  onManageProducts();
+                } else if (value == '__delete') {
+                  onDeleteMerchant();
+                } else {
+                  onStatusChanged(value);
+                }
+              },
               itemBuilder: (context) => [
                 if (!isVerified)
                   PopupMenuItem(
@@ -204,6 +401,20 @@ class _MerchantTile extends StatelessWidget {
                     value: 'pending',
                     child: Text(l10n.setPending),
                   ),
+                const PopupMenuDivider(),
+                PopupMenuItem(
+                  value: '__products',
+                  child: Text(l10n.manageProducts),
+                ),
+                PopupMenuItem(
+                  value: '__delete',
+                  child: Text(
+                    l10n.deleteMerchant,
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.error,
+                    ),
+                  ),
+                ),
               ],
             ),
           ],

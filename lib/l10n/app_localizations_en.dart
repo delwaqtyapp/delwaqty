@@ -1348,6 +1348,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noReviewsYet => 'No reviews yet';
 
   @override
+  String get noComment => 'No comment';
+
+  @override
   String get beTheFirst => 'Be the first to review!';
 
   @override
@@ -6180,4 +6183,40 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get rateUs => 'Rate Us';
+
+  @override
+  String get moderationSection => 'Content Moderation';
+
+  @override
+  String get adminReviewsModeration => 'Reviews Moderation';
+
+  @override
+  String get merchantReviews => 'Merchant Reviews';
+
+  @override
+  String get serviceReviews => 'Service Reviews';
+
+  @override
+  String get deleteReviewAction => 'Delete Review';
+
+  @override
+  String get confirmDeleteReview =>
+      'Delete this review and its comment permanently?';
+
+  @override
+  String get deleteMerchant => 'Delete Merchant';
+
+  @override
+  String get confirmDeleteMerchant =>
+      'Deleting the merchant permanently removes all its products and reviews. Continue?';
+
+  @override
+  String get deleted => 'Deleted successfully';
+
+  @override
+  String get deleteFailed => 'Delete failed, try again';
+
+  @override
+  String get deleteSoftFailed =>
+      'Cannot hard-delete (referenced by past orders); item was hidden instead';
 }

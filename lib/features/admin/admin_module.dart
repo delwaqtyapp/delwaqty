@@ -6,6 +6,7 @@ import 'package:delwaqty/features/admin/presentation/pages/platform_intelligence
 import 'package:delwaqty/features/admin_management/presentation/pages/admin_management_list_page.dart';
 import 'package:delwaqty/features/admin_management/presentation/pages/admin_profile_page.dart';
 import 'package:delwaqty/features/admin/presentation/pages/admin_merchants_page.dart';
+import 'package:delwaqty/features/admin/presentation/pages/admin_reviews_moderation_page.dart';
 import 'package:delwaqty/features/admin/presentation/pages/admin_orders_page.dart';
 import 'package:delwaqty/features/admin/presentation/pages/admin_settings_page.dart';
 import 'package:delwaqty/features/admin/presentation/pages/admin_drivers_page.dart';
@@ -121,6 +122,11 @@ class AdminModule extends FeatureModule {
           path: 'merchants',
           pageBuilder: (context, state) =>
               _adminPage(const AdminMerchantsPage()),
+        ),
+        GoRoute(
+          path: 'reviews-moderation',
+          pageBuilder: (context, state) =>
+              _adminPage(const AdminReviewsModerationPage()),
         ),
         GoRoute(
           path: 'orders',

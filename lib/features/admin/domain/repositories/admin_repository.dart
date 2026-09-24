@@ -18,6 +18,13 @@ abstract class AdminRepository {
   Future<void> deleteUser(String userId);
   Future<List<Map<String, dynamic>>> getMerchants({String? search, String? status});
   Future<void> updateMerchantStatus(String merchantId, String status);
+  Future<List<Map<String, dynamic>>> getMerchantProducts(String merchantId);
+  Future<List<Map<String, dynamic>>> getRecentMerchantReviews({int limit = 50});
+  Future<List<Map<String, dynamic>>> getRecentServiceReviews({int limit = 50});
+  Future<bool> deleteMerchantReview(String reviewId);
+  Future<bool> deleteServiceReview(String reviewId);
+  Future<bool> deleteProduct(String productId);
+  Future<bool> deleteMerchant(String merchantId);
   Future<List<Map<String, dynamic>>> getOrders({String? search, String? status, int limit = 50, int offset = 0});
   Future<void> updateOrderStatus(String orderId, String status);
   Future<Map<String, dynamic>> getSettings();

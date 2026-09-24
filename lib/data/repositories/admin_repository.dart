@@ -667,6 +667,104 @@ final response = await _supabase
     }
   }
 
+  // ─── Content moderation ─────────────────────────────────
+
+  @override
+  Future<List<Map<String, dynamic>>> getMerchantProducts(
+    String merchantId,
+  ) async {
+    try {
+      final response = await _supabase
+          .from('products')
+          .select()
+          .eq('merchant_id', merchantId)
+          .order('created_at', ascending: false);
+      return List<Map<String, dynamic>>.from(response as List);
+    } catch (e) {
+      throw AdminException('Failed to fetch merchant products: $e');
+    }
+  }
+
+  @override
+  Future<List<Map<String, dynamic>>> getRecentMerchantReviews({
+    int limit = 50,
+  }) async {
+    try {
+      final response = await _supabase
+          .from('reviews')
+          .select('id, rating, comment, created_at, merchant_id, product_id, user_id')
+          .order('created_at', ascending: false)
+          .limit(limit);
+      return List<Map<String, dynamic>>.from(response as List);
+    } catch (e) {
+      throw AdminException('Failed to fetch merchant reviews: $e');
+    }
+  }
+
+  @override
+  Future<List<Map<String, dynamic>>> getRecentServiceReviews({
+    int limit = 50,
+  }) async {
+    try {
+      final response = await _supabase
+          .from('service_reviews')
+          .select('id, rating, comment, created_at, category_type, provider_id, user_name')
+          .order('created_at', ascending: false)
+          .limit(limit);
+      return List<Map<String, dynamic>>.from(response as List);
+    } catch (e) {
+      throw AdminException('Failed to fetch service reviews: $e');
+    }
+  }
+
+  @override
+  Future<bool> deleteMerchantReview(String reviewId) async {
+    try {
+      return await _supabase.rpc<bool>(
+        'admin_delete_merchant_review',
+        params: {'p_review_id': reviewId},
+      );
+    } catch (e) {
+      throw AdminException('Failed to delete merchant review: $e');
+    }
+  }
+
+  @override
+  Future<bool> deleteServiceReview(String reviewId) async {
+    try {
+      return await _supabase.rpc<bool>(
+        'admin_delete_service_review',
+        params: {'p_review_id': reviewId},
+      );
+    } catch (e) {
+      throw AdminException('Failed to delete service review: $e');
+    }
+  }
+
+  @override
+  Future<bool> deleteProduct(String productId) async {
+    try {
+      return await _supabase.rpc<bool>(
+        'admin_delete_product',
+        params: {'p_product_id': productId},
+      );
+    } catch (e) {
+      throw AdminException('Failed to delete product: $e');
+    }
+  }
+
+  @override
+  Future<bool> deleteMerchant(String merchantId) async {
+    try {
+      return await _supabase.rpc<bool>(
+        'admin_delete_merchant',
+        params: {'p_merchant_id': merchantId},
+      );
+    } catch (e) {
+      throw AdminException('Failed to delete merchant: $e');
+    }
+  }
+
   // ─── Orders ───────────────────────────────────────────────
 
   @override

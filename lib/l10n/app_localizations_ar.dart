@@ -1342,6 +1342,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get noReviewsYet => 'لا توجد تقييمات بعد';
 
   @override
+  String get noComment => 'بدون تعليق';
+
+  @override
   String get beTheFirst => 'كن أول من يقيّم!';
 
   @override
@@ -6134,4 +6137,40 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get rateUs => 'قيمنا';
+
+  @override
+  String get moderationSection => 'الإشراف على المحتوى';
+
+  @override
+  String get adminReviewsModeration => 'إدارة المراجعات';
+
+  @override
+  String get merchantReviews => 'تقييمات المتاجر';
+
+  @override
+  String get serviceReviews => 'تقييمات الخدمات';
+
+  @override
+  String get deleteReviewAction => 'حذف التقييم';
+
+  @override
+  String get confirmDeleteReview =>
+      'هل أنت متأكد من حذف هذا التقييم والتعليق نهائيًا؟';
+
+  @override
+  String get deleteMerchant => 'حذف المتجر';
+
+  @override
+  String get confirmDeleteMerchant =>
+      'حذف المتجر سيحذف كل منتجاته وتقييماته نهائيًا. متابعة؟';
+
+  @override
+  String get deleted => 'تم الحذف بنجاح';
+
+  @override
+  String get deleteFailed => 'تعذر الحذف، حاول مرة أخرى';
+
+  @override
+  String get deleteSoftFailed =>
+      'لا يمكن الحذف نهائيًا لارتباطه بطلبات قديمة؛ تم إخفاؤه';
 }

@@ -110,6 +110,81 @@ class AdminService {
     }
   }
 
+  // ─── Content moderation (owner-only) ─────────────────────
+
+  Future<List<Map<String, dynamic>>> getMerchantProducts(
+    String merchantId,
+  ) async {
+    try {
+      return await _repository.getMerchantProducts(merchantId);
+    } catch (e) {
+      debugPrint('AdminService.getMerchantProducts error: $e');
+      return [];
+    }
+  }
+
+  Future<List<Map<String, dynamic>>> getRecentMerchantReviews({
+    int limit = 50,
+  }) async {
+    try {
+      return await _repository.getRecentMerchantReviews(limit: limit);
+    } catch (e) {
+      debugPrint('AdminService.getRecentMerchantReviews error: $e');
+      return [];
+    }
+  }
+
+  Future<List<Map<String, dynamic>>> getRecentServiceReviews({
+    int limit = 50,
+  }) async {
+    try {
+      return await _repository.getRecentServiceReviews(limit: limit);
+    } catch (e) {
+      debugPrint('AdminService.getRecentServiceReviews error: $e');
+      return [];
+    }
+  }
+
+  Future<bool> deleteMerchantReview(String reviewId) async {
+    if (!await isOwner) return false;
+    try {
+      return await _repository.deleteMerchantReview(reviewId);
+    } catch (e) {
+      debugPrint('AdminService.deleteMerchantReview error: $e');
+      return false;
+    }
+  }
+
+  Future<bool> deleteServiceReview(String reviewId) async {
+    if (!await isOwner) return false;
+    try {
+      return await _repository.deleteServiceReview(reviewId);
+    } catch (e) {
+      debugPrint('AdminService.deleteServiceReview error: $e');
+      return false;
+    }
+  }
+
+  Future<bool> deleteProduct(String productId) async {
+    if (!await isOwner) return false;
+    try {
+      return await _repository.deleteProduct(productId);
+    } catch (e) {
+      debugPrint('AdminService.deleteProduct error: $e');
+      return false;
+    }
+  }
+
+  Future<bool> deleteMerchant(String merchantId) async {
+    if (!await isOwner) return false;
+    try {
+      return await _repository.deleteMerchant(merchantId);
+    } catch (e) {
+      debugPrint('AdminService.deleteMerchant error: $e');
+      return false;
+    }
+  }
+
   // ─── Orders ───────────────────────────────────────────────
 
   Future<List<Map<String, dynamic>>> getOrders({

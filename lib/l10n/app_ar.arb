@@ -441,6 +441,7 @@
   "ratingBreakdown": "توزيع التقييمات",
   "basedOnReviews": "بناءً على {count} تقييم",
   "noReviewsYet": "لا توجد تقييمات بعد",
+  "noComment": "بدون تعليق",
   "beTheFirst": "كن أول من يقيّم!",
   "yourRating": "تقييمك",
   "yourReview": "تعليقك",
@@ -1983,5 +1984,16 @@
   "carDescriptionHint": "وصف قصير للسيارة والمشاوير التي تقدمها",
   "carProductCreated": "تم نشر السيارة في المتجر بنجاح",
   "rateService": "قيم الخدمة",
-  "rateUs": "قيمنا"
+  "rateUs": "قيمنا",
+  "moderationSection": "الإشراف على المحتوى",
+  "adminReviewsModeration": "إدارة المراجعات",
+  "merchantReviews": "تقييمات المتاجر",
+  "serviceReviews": "تقييمات الخدمات",
+  "deleteReviewAction": "حذف التقييم",
+  "confirmDeleteReview": "هل أنت متأكد من حذف هذا التقييم والتعليق نهائيًا؟",
+  "deleteMerchant": "حذف المتجر",
+  "confirmDeleteMerchant": "حذف المتجر سيحذف كل منتجاته وتقييماته نهائيًا. متابعة؟",
+  "deleted": "تم الحذف بنجاح",
+  "deleteFailed": "تعذر الحذف، حاول مرة أخرى",
+  "deleteSoftFailed": "لا يمكن الحذف نهائيًا لارتباطه بطلبات قديمة؛ تم إخفاؤه"
 }

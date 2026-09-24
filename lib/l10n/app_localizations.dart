@@ -2642,6 +2642,12 @@ abstract class AppLocalizations {
   /// **'No reviews yet'**
   String get noReviewsYet;
 
+  /// No description provided for @noComment.
+  ///
+  /// In en, this message translates to:
+  /// **'No comment'**
+  String get noComment;
+
   /// No description provided for @beTheFirst.
   ///
   /// In en, this message translates to:
@@ -11833,6 +11839,72 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Rate Us'**
   String get rateUs;
+
+  /// No description provided for @moderationSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Content Moderation'**
+  String get moderationSection;
+
+  /// No description provided for @adminReviewsModeration.
+  ///
+  /// In en, this message translates to:
+  /// **'Reviews Moderation'**
+  String get adminReviewsModeration;
+
+  /// No description provided for @merchantReviews.
+  ///
+  /// In en, this message translates to:
+  /// **'Merchant Reviews'**
+  String get merchantReviews;
+
+  /// No description provided for @serviceReviews.
+  ///
+  /// In en, this message translates to:
+  /// **'Service Reviews'**
+  String get serviceReviews;
+
+  /// No description provided for @deleteReviewAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Review'**
+  String get deleteReviewAction;
+
+  /// No description provided for @confirmDeleteReview.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete this review and its comment permanently?'**
+  String get confirmDeleteReview;
+
+  /// No description provided for @deleteMerchant.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Merchant'**
+  String get deleteMerchant;
+
+  /// No description provided for @confirmDeleteMerchant.
+  ///
+  /// In en, this message translates to:
+  /// **'Deleting the merchant permanently removes all its products and reviews. Continue?'**
+  String get confirmDeleteMerchant;
+
+  /// No description provided for @deleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Deleted successfully'**
+  String get deleted;
+
+  /// No description provided for @deleteFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete failed, try again'**
+  String get deleteFailed;
+
+  /// No description provided for @deleteSoftFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Cannot hard-delete (referenced by past orders); item was hidden instead'**
+  String get deleteSoftFailed;
 }
 
 class _AppLocalizationsDelegate

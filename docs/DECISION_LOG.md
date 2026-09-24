@@ -3266,6 +3266,35 @@ The owner wants customers to be able to review and rate EVERY service category i
 ### Consequences
 - Migration **084 applied live** on `bttnlkmwhorjamzemwda` (POST `/database/query` → 201) once the working 90-day PAT (`sbp_fc832a…588`, recovered from stored OpenCode chat logs) replaced the invalid stored token. Verified: 5 RLS policies, `get_service_rating_summary('doctor')` → `{avg_rating:4.5, total_reviews:2, five_star:1, four_star:1,…}` (keys match the Dart entity), 6 seed reviews. UI is build-verified (`flutter analyze` **0 issues**, `flutter test` **940/940** incl. 4 new entity tests) and the app relaunches clean (pid 15712, no FATAL/RenderFlex).
 
+## ADR-098: Owner Content Moderation — SECURITY DEFINER RPCs for Deleting Reviews, Products, and Merchants (sprint 187)
+
+**Date:** Sprint 187
+**Status:** Accepted
+**Deciders:** Owner (moderation capability request) + Lead Architect
+
+### Context
+The owner wants, inside the admin app: remove a rating/comment, delete a service/product from a merchant, and delete a merchant entirely. Direct table deletes from the client would hit RLS (own-user-only policies) and could destroy order history — the existing `reviews`/`service_reviews`/`products`/`order_items` FKs have no uniform cascade.
+
+### Decision
+(1) **Migration 087** adds four SECURITY DEFINER RPCs, each gated by `public.is_admin()` (role IN admin/owner + active):
+   - `admin_delete_merchant_review` — `DELETE FROM reviews WHERE id`.
+   - `admin_delete_service_review` — `DELETE FROM service_reviews WHERE id`; the existing AFTER-DELETE trigger recomputes provider rating/rating_count automatically.
+   - `admin_delete_product` — removes product reviews first, hard-deletes the product; on `foreign_key_violation` (referenced by `order_items`) it soft-hides (`is_available=false`) and reports the distinction to the caller instead of failing.
+   - `admin_delete_merchant` — deletes merchant reviews, soft-hides order-referenced products, hard-deletes the rest (favorites cascade), then deletes the merchant.
+   EXECUTE granted only to `authenticated` + `service_role`; revoked from PUBLIC.
+(2) **Repository/Service**: `AdminRepository` + `SupabaseAdminRepository` gain listing (products, latest merchant reviews, latest service reviews) and the four delete calls via `rpc`; `AdminService` gates every delete behind its existing `isOwner` check (client-side companion to the server-side `is_admin()` guard). New providers for the moderation lists.
+(3) **UI**: new `AdminReviewsModerationPage` (`/admin/reviews-moderation`, tabbed merchant/service reviews with delete + confirm + pull-refresh) added to the admin nav; `AdminMerchantsPage` per-merchant menu adds «إدارة المنتجات» sheet (product delete with confirm + soft-fail explanation) and «حذف المتجر» (confirm -> rpc -> snackbar).
+
+### Rationale
+- Server-side enforcement via SECURITY DEFINER + `is_admin()` keeps the DB as the source of truth (a client bypassing the UI still cannot delete), matching the platform's existing admin-authorization pattern (migration 034 `is_admin`, 018 broadcast, 083 car_products).
+- Hard-delete-when-possible / soft-hide-when-referenced protects order integrity: financial history rows are never auto-deleted, only hidden from shoppers.
+- Reuses the existing single db write model (AdminRepository) — no parallel data access layer.
+
+### Consequences
+- The owner can now, from the admin app: remove any merchant or service review/comment, delete any product (soft-hide fallback), and delete a merchant entirely (reviews + products + merchant). All destructive paths require the owner/admin role both client-side (`isOwner`) and server-side (`is_admin()`).
+- Deleting a service review automatically recomputes the provider's displayed rating via the round-48 trigger.
+- Gate: `flutter analyze` **0 issues**; `flutter test` **941/941**; admin APK `releases/delwaqty_admin_1.0.0+1_debug_20260924_2026.apk` installed + relaunched clean (pid 19812) — logcat NO app FATAL/RenderFlex; customer flavor rebuilt clean.
+
 ## ADR-097: Labeled "قيمنا" Button Next to "الاتجاهات" — From Bare Star to Visible CTA (sprint 186)
 
 **Date:** Sprint 186

@@ -657,30 +657,36 @@ class _UserGreeting extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.end,
       children: [
-        Text(
-          greeting,
-          style: AppTextStyles.titleLarge.copyWith(
-            color: AppColors.brandGold,
-            fontWeight: FontWeight.w900,
-            fontSize: titleSize,
+        Directionality(
+          textDirection: TextDirection.rtl,
+          child: Text(
+            greeting,
+            style: AppTextStyles.titleLarge.copyWith(
+              color: AppColors.brandGold,
+              fontWeight: FontWeight.w900,
+              fontSize: titleSize,
+            ),
+            textAlign: TextAlign.right,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
           ),
-          textAlign: TextAlign.end,
-          maxLines: 2,
-          overflow: TextOverflow.ellipsis,
         ),
-        Text(
-          l10n.greetingSubtitle,
-          style: AppTextStyles.bodyMedium.copyWith(
-            color: Colors.white,
-            fontWeight: FontWeight.w600,
-            fontSize: taglineSize,
-            shadows: const [
-              Shadow(color: Color(0x55000000), blurRadius: 4),
-            ],
+        Directionality(
+          textDirection: TextDirection.rtl,
+          child: Text(
+            l10n.greetingSubtitle,
+            style: AppTextStyles.bodyMedium.copyWith(
+              color: Colors.white,
+              fontWeight: FontWeight.w600,
+              fontSize: taglineSize,
+              shadows: const [
+                Shadow(color: Color(0x55000000), blurRadius: 4),
+              ],
+            ),
+            textAlign: TextAlign.right,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
           ),
-          textAlign: TextAlign.end,
-          maxLines: 2,
-          overflow: TextOverflow.ellipsis,
         ),
       ],
     );

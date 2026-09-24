@@ -27,6 +27,9 @@ CREATE TABLE IF NOT EXISTS service_reviews (
 CREATE INDEX IF NOT EXISTS idx_service_reviews_category_type ON service_reviews (category_type);
 CREATE INDEX IF NOT EXISTS idx_service_reviews_user_id ON service_reviews (user_id);
 CREATE INDEX IF NOT EXISTS idx_service_reviews_provider_id ON service_reviews (provider_id);
+CREATE UNIQUE INDEX IF NOT EXISTS uq_service_reviews_category_user
+  ON service_reviews (category_type, user_id)
+  WHERE user_id IS NOT NULL;
 
 ALTER TABLE service_reviews ENABLE ROW LEVEL SECURITY;
 

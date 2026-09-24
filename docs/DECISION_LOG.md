@@ -3182,3 +3182,23 @@ Wrap the hero's second row in `Directionality(textDirection: TextDirection.ltr)`
 ### Consequences
 - Hero rows now: (1) top bar [notification | mini-lockup | menu] under LTR; (2) [search circle | Egypt statement] under LTR — search left (between notification and location badge), statement right (below menu). Both rendered as the owner requested on the physical 366dp device.
 - Gate: `flutter analyze` **0 issues**; `flutter test` **936/936** (6 responsive incl. notch inset-58 — no overflow/exception); APK `releases/delwaqty_1.0.0+1_debug_20260923_2100.apk` installed + relaunched clean (pid 14958) — logcat shows NO RenderFlex/FATAL; screencap `releases/screenshot_hero_2100.png`.
+
+## ADR-090: Remove the Egypt Statement From the Hero — Per-User Greeting in Its Place
+
+**Date:** Sprint 179
+**Status:** Accepted
+**Deciders:** Owner (design request) + Lead Architect
+
+### Context
+The owner asked to remove «مصر دائما بتقدم للعالم» from under the side-menu button and put a per-user greeting there instead — «شيل كلمه مصر بتقدم دايما للعالم من تخت زر القائمه ومكانها حط الترحيب لكل مستخدم».
+
+### Decision
+(1) Deleted the `_EgyptStatement` widget and its hero usage (`egyptStatementTitle`/`egyptStatementTagline` no longer rendered on the home page).
+(2) Added `_UserGreeting`: title = `welcome l10n key + '، ' + fullName` when `authState` is `AuthAuthenticated` («أهلاً، محمد» / "Welcome, Mohamed"), or just the `welcome` key for guests; subtitle = the previously-unused `greetingSubtitle` key («دائماً معك ... كل احتياجاتك في مكان واحد»). Same visual language (gold w900 title + white w600 shadowed subtitle) and the same overflow guard (Flexible + Align topRight + maxWidth 200 → safe ellipsis).
+
+### Rationale
+- The user identity is already available on `AuthState` (passed into `_EgyptHero`), so no new provider/async work; greeting renders instantly and updates with auth state.
+
+### Consequences
+- Hero right side now greets the logged-in user by name; guests get a generic «أهلاً». The Egypt slogan no longer appears on the customer home.
+- Gate: `flutter analyze` **0 issues**; `flutter test` **936/936** (6 responsive incl. notch inset-58 — no overflow/exception); APK `releases/delwaqty_1.0.0+1_debug_20260923_2200.apk` installed + relaunched clean (pid 29668) — logcat shows NO RenderFlex/FATAL; screencap `releases/screenshot_hero_2200.png`.

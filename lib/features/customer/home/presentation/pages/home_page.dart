@@ -340,11 +340,14 @@ class _EgyptHeroState extends State<_EgyptHero>
     const logoSize = 44.0;
     const arabicSize = 12.0;
     final zoneGap = (screenHeight * 0.008).clamp(4.0, 9.0);
+    final greetingName = widget.authState is AuthAuthenticated
+        ? (widget.authState as AuthAuthenticated).user.fullName
+        : null;
 
     // Hero height must never be smaller than its overlay content, otherwise a
     // tall status bar inset (notch devices) causes a bottom RenderFlex
-    // overflow. The second row holds either the search circle or the Egypt
-    // statement (~60dp worst case); take the max against the image height.
+    // overflow. The second row holds the search circle + the user greeting
+    // (~60dp worst case); take the max against the image height.
     final topInset = MediaQuery.paddingOf(context).top;
     final contentCoreH = topButtonSize + zoneGap + 60.0;
     final contentH = topInset + 2 + contentCoreH;
@@ -460,7 +463,10 @@ class _EgyptHeroState extends State<_EgyptHero>
                                     constraints: const BoxConstraints(
                                       maxWidth: 200,
                                     ),
-                                    child: _EgyptStatement(l10n: widget.l10n),
+                                    child: _UserGreeting(
+                                      l10n: widget.l10n,
+                                      name: greetingName,
+                                    ),
                                   ),
                                 ),
                               ),
@@ -638,23 +644,26 @@ class _SearchCircleButton extends StatelessWidget {
   }
 }
 
-class _EgyptStatement extends StatelessWidget {
-  const _EgyptStatement({required this.l10n});
+class _UserGreeting extends StatelessWidget {
+  const _UserGreeting({required this.l10n, this.name});
 
   final AppLocalizations l10n;
+  final String? name;
 
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.sizeOf(context).width;
     final titleSize = (screenWidth * 0.05).clamp(18.0, 22.0);
     final taglineSize = (screenWidth * 0.032).clamp(12.0, 14.0);
+    final hasName = name != null && name!.isNotEmpty;
+    final greeting = hasName ? '${l10n.welcome}، $name' : l10n.welcome;
 
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          l10n.egyptStatementTitle,
+          greeting,
           style: AppTextStyles.titleLarge.copyWith(
             color: AppColors.brandGold,
             fontWeight: FontWeight.w900,
@@ -664,7 +673,7 @@ class _EgyptStatement extends StatelessWidget {
           overflow: TextOverflow.ellipsis,
         ),
         Text(
-          l10n.egyptStatementTagline,
+          l10n.greetingSubtitle,
           style: AppTextStyles.bodyMedium.copyWith(
             color: Colors.white,
             fontWeight: FontWeight.w600,

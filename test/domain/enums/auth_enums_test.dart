@@ -10,8 +10,10 @@ void main() {
       expect(UserType.delivery.code, 'delivery');
     });
 
-    test('requiresVerification is true only for non-customers', () {
+    test('requiresVerification is true only for non-admins/customers', () {
       expect(UserType.customer.requiresVerification, isFalse);
+      expect(UserType.admin.requiresVerification, isFalse);
+      expect(UserType.owner.requiresVerification, isFalse);
       expect(UserType.provider.requiresVerification, isTrue);
       expect(UserType.delivery.requiresVerification, isTrue);
     });
@@ -20,10 +22,11 @@ void main() {
       expect(UserType.fromCode('customer'), UserType.customer);
       expect(UserType.fromCode('provider'), UserType.provider);
       expect(UserType.fromCode('delivery'), UserType.delivery);
+      expect(UserType.fromCode('admin'), UserType.admin);
     });
 
     test('fromCode falls back to customer for unknown or null', () {
-      expect(UserType.fromCode('admin'), UserType.customer);
+      expect(UserType.fromCode('banned'), UserType.customer);
       expect(UserType.fromCode(null), UserType.customer);
     });
   });

@@ -4,6 +4,7 @@ class ChatMessage {
     required this.id,
     required this.roomId,
     required this.senderId,
+    required this.senderType,
     required this.message,
     this.messageType = 'text',
     this.attachmentUrl,
@@ -13,6 +14,7 @@ class ChatMessage {
     this.isRead = false,
     this.readAt,
     required this.createdAt,
+    this.metaData,
   });
 
   factory ChatMessage.fromJson(Map<String, dynamic> json) {
@@ -20,6 +22,7 @@ class ChatMessage {
       id: json['id'] as String,
       roomId: json['room_id'] as String,
       senderId: json['sender_id'] as String,
+      senderType: json['sender_type'] as String? ?? 'user',
       message: json['message'] as String,
       messageType: json['message_type'] as String? ?? 'text',
       attachmentUrl: json['attachment_url'] as String?,
@@ -29,11 +32,13 @@ class ChatMessage {
       isRead: json['is_read'] as bool? ?? false,
       readAt: json['read_at'] != null ? DateTime.parse(json['read_at'] as String) : null,
       createdAt: DateTime.parse(json['created_at'] as String),
+      metaData: json['meta_data'] as Map<String, dynamic>?,
     );
   }
   final String id;
   final String roomId;
   final String senderId;
+  final String senderType; // 'admin', 'provider', 'customer', 'driver'
   final String message;
   final String messageType;
   final String? attachmentUrl;
@@ -43,11 +48,13 @@ class ChatMessage {
   final bool isRead;
   final DateTime? readAt;
   final DateTime createdAt;
+  final Map<String, dynamic>? metaData;
 
   Map<String, dynamic> toJson() => {
     'id': id,
     'room_id': roomId,
     'sender_id': senderId,
+    'sender_type': senderType,
     'message': message,
     'message_type': messageType,
     'attachment_url': attachmentUrl,
@@ -57,5 +64,6 @@ class ChatMessage {
     'is_read': isRead,
     'read_at': readAt?.toIso8601String(),
     'created_at': createdAt.toIso8601String(),
+    'meta_data': metaData,
   };
 }

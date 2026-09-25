@@ -19,7 +19,7 @@ class _AdminSupportChatPageState extends ConsumerState<AdminSupportChatPage> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final roomsAsync = ref.watch(chatRoomsProvider);
+    final roomsAsync = ref.watch(adminAllRoomsProvider);
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.supportChat)),
@@ -60,7 +60,7 @@ class _AdminSupportChatPageState extends ConsumerState<AdminSupportChatPage> {
                         ),
                       ),
                       title: Text('${l10n.chatRoom} ${room.id.substring(0, 8)}', maxLines: 1),
-                      subtitle: Text('${room.roomType} Â· ${room.participantIds.length} ${l10n.participants}'),
+                      subtitle: Text('${room.roomType} · ${room.participantIds.length} ${l10n.participants}'),
                       trailing: room.isActive
                           ? Container(
                               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),

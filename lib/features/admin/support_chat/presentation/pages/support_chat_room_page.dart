@@ -50,7 +50,6 @@ class _SupportChatRoomPageState extends ConsumerState<SupportChatRoomPage> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    if (l10n == null) return const SizedBox.shrink();
     final cs = Theme.of(context).colorScheme;
     final authState = ref.watch(authStateProvider);
     final user = authState is AuthAuthenticated ? authState.user : null;
@@ -64,7 +63,7 @@ class _SupportChatRoomPageState extends ConsumerState<SupportChatRoomPage> {
     });
 
     // Build message card based on sender
-    Widget _buildMessageCard(ChatMessage msg) {
+    Widget buildMessageCard(ChatMessage msg) {
       final isMe = msg.senderId == user?.id;
       final isAdminMsg = msg.isFromAdmin;
 
@@ -113,7 +112,6 @@ class _SupportChatRoomPageState extends ConsumerState<SupportChatRoomPage> {
                 color: isMe ? cs.onPrimary : cs.onSurface,
               ),
               softWrap: true,
-              maxLines: null,
             ),
 
             // Attachment indicator
@@ -162,7 +160,7 @@ if (messages.isEmpty) {
                   itemCount: messages.length,
                   itemBuilder: (context, index) {
                     final msg = messages[index];
-                    return _buildMessageCard(msg);
+                    return buildMessageCard(msg);
                   },
                 );
               },
@@ -217,19 +215,29 @@ if (messages.isEmpty) {
     final user = authState is AuthAuthenticated ? authState.user : null;
     if (user == null) return;
 
+    final isAdminOrOwner = user.role == 'admin' || user.role == 'owner';
     final message = ChatMessage(
       id: '',
       roomId: widget.roomId,
       senderId: user.id,
+      senderType: isAdminOrOwner ? 'admin' : user.role,
       message: text,
-      isFromAdmin: false,
+      isFromAdmin: isAdminOrOwner,
       createdAt: DateTime.now(),
     );
 
     final repo = ref.read(chatRepositoryProvider);
-    await repo.sendMessage(message);
-    _messageController.clear();
-    ref.invalidate(chatMessagesProvider(widget.roomId));
-    _scrollToBottom();
+    try {
+      await repo.sendMessage(message);
+      _messageController.clear();
+      ref.invalidate(chatMessagesProvider(widget.roomId));
+      _scrollToBottom();
+    } catch (e) {
+      if (!mounted) return;
+      final errorCode = AppLocalizations.of(context).error;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('$errorCode: $e')),
+      );
+    }
   }
 }

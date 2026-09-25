@@ -23,7 +23,7 @@ class _ClientSupportPageState extends ConsumerState<ClientSupportPage> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final cs = Theme.of(context).colorScheme;
-    final roomsAsync = ref.watch(chatRoomsProvider);
+    final roomsAsync = ref.watch(customerMyRoomsProvider);
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.support)),
@@ -102,6 +102,6 @@ class _ClientSupportPageState extends ConsumerState<ClientSupportPage> {
 
     final repo = ref.read(chatRepositoryProvider);
     await repo.createRoom(room);
-    ref.invalidate(chatRoomsProvider);
+    ref.invalidate(customerMyRoomsProvider);
   }
 }

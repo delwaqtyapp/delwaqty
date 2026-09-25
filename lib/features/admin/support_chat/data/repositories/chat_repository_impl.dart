@@ -1,3 +1,4 @@
+import 'dart:typed_data';
 import 'package:delwaqty/features/admin/support_chat/domain/entities/chat_room.dart';
 import 'package:delwaqty/features/admin/support_chat/domain/entities/chat_message.dart';
 import 'package:delwaqty/features/admin/support_chat/domain/repositories/chat_repository.dart';
@@ -39,6 +40,31 @@ class ChatRepositoryImpl implements ChatRepository {
   }
 
   @override
+  Future<Map<String, dynamic>> getRoomUser(String userId) {
+    return _dataSource.getRoomUser(userId);
+  }
+
+  @override
+  Future<String> uploadAttachment({
+    required String roomId,
+    required String fileName,
+    required Uint8List bytes,
+    String contentType = 'application/octet-stream',
+  }) {
+    return _dataSource.uploadAttachment(
+      roomId: roomId,
+      fileName: fileName,
+      bytes: bytes,
+      contentType: contentType,
+    );
+  }
+
+  @override
+  Future<String> signedUrl(String path) {
+    return _dataSource.signedUrl(path);
+  }
+
+  @override
   Future<List<ChatMessage>> getMessages(String roomId, {int limit = 50}) {
     return _dataSource.getMessages(roomId, limit: limit);
   }
@@ -51,6 +77,19 @@ class ChatRepositoryImpl implements ChatRepository {
   @override
   Future<void> markAsRead(String messageId) {
     return _dataSource.markAsRead(messageId);
+  }
+
+  @override
+  Future<void> setAssignedAdmin({
+    required String roomId,
+    required String adminId,
+    required String welcomeMessage,
+  }) {
+    return _dataSource.setAssignedAdmin(
+      roomId: roomId,
+      adminId: adminId,
+      welcomeMessage: welcomeMessage,
+    );
   }
 
   @override

@@ -1,3 +1,4 @@
+import 'dart:typed_data';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:delwaqty/features/admin/support_chat/domain/entities/chat_room.dart';
 import 'package:delwaqty/features/admin/support_chat/domain/entities/chat_message.dart';
@@ -6,6 +7,41 @@ class SupabaseChatDataSource {
 
   SupabaseChatDataSource(this._client);
   final SupabaseClient _client;
+  static const _bucket = 'chat_attachments';
+
+  Future<Map<String, dynamic>> getRoomUser(String userId) async {
+    try {
+      final row = await _client
+          .from('users')
+          .select('id,full_name,phone,avatar_url,role')
+          .eq('id', userId)
+          .maybeSingle();
+      return row ?? <String, dynamic>{};
+    } catch (_) {
+      return <String, dynamic>{};
+    }
+  }
+
+  Future<String> uploadAttachment({
+    required String roomId,
+    required String fileName,
+    required Uint8List bytes,
+    String contentType = 'application/octet-stream',
+  }) async {
+    final safeName = fileName.replaceAll(RegExp(r'[^a-zA-Z0-9._-]'), '_');
+    final path = '$roomId/${DateTime.now().millisecondsSinceEpoch}_$safeName';
+    await _client.storage.from(_bucket).uploadBinary(
+      path,
+      bytes,
+      fileOptions: FileOptions(contentType: contentType, upsert: true),
+    );
+    return path;
+  }
+
+  Future<String> signedUrl(String path) async {
+    final res = await _client.storage.from(_bucket).createSignedUrl(path, 3600);
+    return res;
+  }
 
   Future<List<ChatRoom>> getRoomsForParticipant(String userId) async {
     final rows = await _client
@@ -81,6 +117,18 @@ class SupabaseChatDataSource {
       'is_read': true,
       'read_at': DateTime.now().toIso8601String(),
     }).eq('id', messageId);
+  }
+
+  Future<void> setAssignedAdmin({
+    required String roomId,
+    required String adminId,
+    required String welcomeMessage,
+  }) async {
+    await _client.from('chat_rooms').update({
+      'assigned_admin_id': adminId,
+      'welcome_message': welcomeMessage,
+      'updated_at': DateTime.now().toIso8601String(),
+    }).eq('id', roomId);
   }
 
   Stream<ChatMessage> messageStream(String roomId) {

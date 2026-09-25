@@ -1,10 +1,10 @@
+import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:record/record.dart';
-import 'package:audioplayers/audioplayers.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:delwaqty/features/admin/support_chat/presentation/chat_providers.dart';
@@ -17,7 +17,6 @@ import 'package:delwaqty/shared/widgets/app_loader.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 
 class SupportChatRoomPage extends ConsumerStatefulWidget {
-
   const SupportChatRoomPage({super.key, required this.roomId});
   final String roomId;
 
@@ -31,7 +30,7 @@ class _SupportChatRoomPageState extends ConsumerState<SupportChatRoomPage> {
   final _scrollController = ScrollController();
   final _picker = ImagePicker();
   final _recorder = AudioRecorder();
-  final _audioPlayer = AudioPlayer();
+  Timer? _typingDebounce;
   bool _isRecording = false;
   bool _isSendingMedia = false;
 
@@ -46,11 +45,11 @@ class _SupportChatRoomPageState extends ConsumerState<SupportChatRoomPage> {
 
   @override
   void dispose() {
+    _typingDebounce?.cancel();
     _messageController.dispose();
     _focusNode.dispose();
     _scrollController.dispose();
     _recorder.dispose();
-    _audioPlayer.dispose();
     super.dispose();
   }
 
@@ -69,15 +68,39 @@ class _SupportChatRoomPageState extends ConsumerState<SupportChatRoomPage> {
   bool _isAdmin(User? user) =>
       user != null && (user.role == 'admin' || user.role == 'owner');
 
+  Future<void> _notifyTyping(AppLocalizations l10n) {
+    _typingDebounce?.cancel();
+    final user = _currentUser();
+    if (user == null) return Future.value();
+    final repo = ref.read(chatRepositoryProvider);
+    final t = repo.setTyping(
+      roomId: widget.roomId,
+      userId: user.id,
+      isTyping: true,
+    );
+    _typingDebounce = Timer(const Duration(milliseconds: 1200), () {
+      final users2 = _currentUser();
+      if (users2 == null) return;
+      ref.read(chatRepositoryProvider).setTyping(
+            roomId: widget.roomId,
+            userId: users2.id,
+            isTyping: false,
+          );
+    });
+    return t;
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final cs = Theme.of(context).colorScheme;
     final authState = ref.watch(authStateProvider);
     final user = authState is AuthAuthenticated ? authState.user : null;
-    final isAdmin = user != null && (user.role == 'admin' || user.role == 'owner');
+    final isAdmin = _isAdmin(user);
+    final isOwner = user?.role == 'owner';
     final messagesAsync = ref.watch(chatMessagesProvider(widget.roomId));
     final roomAsync = ref.watch(chatRoomProvider(widget.roomId));
+    final peerTyping = ref.watch(chatPeerTypingProvider(widget.roomId));
 
     ref.listen(chatMessageStreamProvider(widget.roomId), (prev, next) {
       next.whenData((_) {
@@ -86,15 +109,44 @@ class _SupportChatRoomPageState extends ConsumerState<SupportChatRoomPage> {
       });
     });
 
+    final referenceNumber = roomAsync.asData?.value.referenceNumber;
+
     return Scaffold(
       appBar: AppBar(
-        title: Text('${l10n.chatRoom} #${widget.roomId.substring(0, 6)}'),
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              referenceNumber?.isEmpty ?? true
+                  ? '${l10n.chatRoom} #${widget.roomId.substring(0, 6)}'
+                  : referenceNumber ?? '',
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            ),
+            if (referenceNumber?.isNotEmpty ?? false)
+              Text(
+                l10n.chatRoom,
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+          ],
+        ),
         actions: [
+          if (roomAsync.asData?.value.isActive ?? true)
+            IconButton(
+              icon: const Icon(Icons.call_rounded),
+              tooltip: l10n.voiceCall,
+              onPressed: () => _sendCallMessage(),
+            ),
           if (isAdmin)
             IconButton(
               icon: const Icon(Icons.close_rounded),
               tooltip: l10n.closeChat,
               onPressed: () => _confirmCloseChat(),
+            ),
+          if (isOwner)
+            IconButton(
+              icon: const Icon(Icons.delete_outline_rounded),
+              tooltip: l10n.deleteChat,
+              onPressed: () => _confirmDeleteChat(),
             ),
         ],
       ),
@@ -137,12 +189,27 @@ class _SupportChatRoomPageState extends ConsumerState<SupportChatRoomPage> {
                     ],
                   );
                 }
-                return _messagesSection(messagesAsync, cs, l10n, user?.id ?? '');
+                return _messagesSection(
+                  messagesAsync, cs, l10n, user?.id ?? '');
               },
               loading: () => const Center(child: AppLoaderCircular()),
               error: (e, _) => Center(child: Text('${l10n.error}: $e')),
             ),
           ),
+
+          // Typing indicator above input
+          if ((roomAsync.asData?.value.isActive ?? true) && (peerTyping.asData?.value ?? false))
+            Padding(
+              padding: const EdgeInsets.only(top: 6),
+              child: Text(
+                l10n.someoneIsTyping,
+                style: TextStyle(
+                  fontSize: 12,
+                  fontStyle: FontStyle.italic,
+                  color: cs.primary,
+                ),
+              ),
+            ),
 
           if (roomAsync.asData?.value.isActive ?? true)
             _buildInputArea(cs, l10n, user),
@@ -190,7 +257,11 @@ class _SupportChatRoomPageState extends ConsumerState<SupportChatRoomPage> {
     );
   }
 
-  // Bubble ordering: sent by me -> right; received -> left.
+  // Bubble positioning rule (mirrored viewer-side):
+  // - From the customer's view: customer's own bubbles on the RIGHT, admin LEFT.
+  // - From the admin's view: the admin's own bubbles on the RIGHT, customer LEFT.
+  // So: isMe -> right; peer -> left. Colors identify the ROLE:
+  // customer bubbles (role) = tertiary container; admin bubbles = primary.
   Widget _buildMessageCard(ChatMessage msg, String currentUserId) {
     final l10n = AppLocalizations.of(context);
     final cs = Theme.of(context).colorScheme;
@@ -201,7 +272,7 @@ class _SupportChatRoomPageState extends ConsumerState<SupportChatRoomPage> {
       margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
-        color: isMe ? cs.primary : cs.surfaceContainerHighest,
+        color: isAdminMsg ? cs.primaryContainer : cs.tertiaryContainer,
         borderRadius: BorderRadius.only(
           topLeft: const Radius.circular(16),
           topRight: const Radius.circular(16),
@@ -218,20 +289,38 @@ class _SupportChatRoomPageState extends ConsumerState<SupportChatRoomPage> {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
+                Icon(
+                  isAdminMsg ? Icons.support_agent_rounded : Icons.person_rounded,
+                  size: 12,
+                  color: isAdminMsg
+                      ? (isMe ? cs.onPrimaryContainer : cs.primary)
+                      : (isMe ? cs.onTertiaryContainer : cs.tertiary),
+                ),
+                const SizedBox(width: 4),
                 Text(
-                  isAdminMsg ? 'Admin' : 'Customer',
-                  style: const TextStyle(
-                      fontSize: 10, fontWeight: FontWeight.bold),
+                  isAdminMsg ? l10n.adminLabel : l10n.customerLabel,
+                  style: TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.bold,
+                    color: isAdminMsg
+                        ? (isMe ? cs.onPrimaryContainer : cs.primary)
+                        : (isMe ? cs.onTertiaryContainer : cs.tertiary),
+                  ),
                 ),
                 const Spacer(),
                 Text(
                   '${msg.createdAt.hour}:${msg.createdAt.minute.toString().padLeft(2, '0')}',
-                  style: const TextStyle(fontSize: 10),
+                  style: TextStyle(
+                    fontSize: 10,
+                    color: isMe
+                        ? (isAdminMsg ? cs.onPrimaryContainer : cs.onTertiaryContainer)
+                        : cs.onSurfaceVariant,
+                  ),
                 ),
               ],
             ),
           ),
-          _buildMessageContent(msg, isMe, l10n),
+          _buildMessageContent(msg, isMe, isAdminMsg, l10n),
         ],
       ),
     );
@@ -245,19 +334,30 @@ class _SupportChatRoomPageState extends ConsumerState<SupportChatRoomPage> {
   Widget _buildMessageContent(
     ChatMessage msg,
     bool isMe,
+    bool isAdminMsg,
     AppLocalizations l10n,
   ) {
     final cs = Theme.of(context).colorScheme;
-    final textStyle = TextStyle(color: isMe ? cs.onPrimary : cs.onSurface);
+    final fg = isAdminMsg
+        ? (isMe ? cs.onPrimaryContainer : cs.primary)
+        : (isMe ? cs.onTertiaryContainer : cs.tertiary);
+    final bg = isAdminMsg ? cs.primaryContainer : cs.tertiaryContainer;
 
     // Image attachment
     if (msg.messageType == 'image' || (msg.attachmentUrl != null && msg.messageType == 'file' && _looksLikeImage(msg.attachmentUrl!))) {
-      return ChatAttachmentImage(path: msg.attachmentUrl ?? msg.fileUrl ?? '', isMe: isMe);
+      return ChatAttachmentImage(
+        path: msg.attachmentUrl ?? msg.fileUrl ?? '',
+        fgColor: fg,
+        bgColor: bg,
+      );
     }
 
     // Video attachment
     if (msg.messageType == 'video' || (msg.fileUrl != null && _looksLikeVideo(msg.fileUrl!))) {
-      return ChatAttachmentVideo(path: msg.fileUrl ?? msg.attachmentUrl ?? '', isMe: isMe);
+      return ChatAttachmentVideo(
+        path: msg.fileUrl ?? msg.attachmentUrl ?? '',
+        isMe: isMe,
+      );
     }
 
     // Voice message
@@ -265,25 +365,58 @@ class _SupportChatRoomPageState extends ConsumerState<SupportChatRoomPage> {
       return ChatAudioMessage(
         path: msg.audioUrl ?? msg.fileUrl ?? '',
         isMe: isMe,
-        audioPlayer: _audioPlayer,
       );
     }
 
-    // Call message
+    // Call request bubble
     if (msg.messageType == 'call' || (msg.metaData?['call_type'] != null)) {
+      final isIncoming = !isMe;
       return Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Icons.call_rounded, size: 16, color: isMe ? cs.onPrimary : cs.onSurface),
+          Icon(
+            isIncoming ? Icons.call_received_rounded : Icons.call_made_rounded,
+            size: 16,
+            color: isIncoming ? cs.error : cs.primary,
+          ),
           const SizedBox(width: 6),
-          Flexible(child: Text(msg.message, style: textStyle)),
+          Flexible(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  msg.message,
+                  style: TextStyle(
+                    color: fg,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                if (isIncoming)
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      IconButton(
+                        visualDensity: VisualDensity.compact,
+                        icon: Icon(Icons.call_rounded, color: cs.primary),
+                        onPressed: () => _acceptCall(msg),
+                      ),
+                      IconButton(
+                        visualDensity: VisualDensity.compact,
+                        icon: Icon(Icons.call_end_rounded, color: cs.error),
+                        onPressed: () => _declineCall(msg),
+                      ),
+                    ],
+                  ),
+              ],
+            ),
+          ),
         ],
       );
     }
 
     return Text(
       msg.message,
-      style: textStyle,
+      style: TextStyle(color: fg),
       softWrap: true,
     );
   }
@@ -300,6 +433,62 @@ class _SupportChatRoomPageState extends ConsumerState<SupportChatRoomPage> {
   bool _looksLikeVideo(String path) {
     final p = path.toLowerCase();
     return p.endsWith('.mp4') || p.endsWith('.webm');
+  }
+
+  Future<void> _acceptCall(ChatMessage incoming) async {
+    final user = _currentUser();
+    if (user == null) return;
+    final l10n = AppLocalizations.of(context);
+    final repo = ref.read(chatRepositoryProvider);
+    try {
+      await repo.sendMessage(ChatMessage(
+        id: '',
+        roomId: widget.roomId,
+        senderId: user.id,
+        senderType: _isAdmin(user) ? 'admin' : user.role,
+        message: l10n.callAccepted,
+        messageType: 'call',
+        isFromAdmin: _isAdmin(user),
+        createdAt: DateTime.now(),
+        metaData: {
+          'call_type': 'voice',
+          'status': 'accepted',
+          'requested_by': incoming.senderId,
+          'accepted_by': user.id,
+          'accepted_at': DateTime.now().toIso8601String(),
+        },
+      ));
+      ref.invalidate(chatMessagesProvider(widget.roomId));
+      _scrollToBottom();
+    } catch (_) {}
+  }
+
+  Future<void> _declineCall(ChatMessage incoming) async {
+    final user = _currentUser();
+    if (user == null) return;
+    final l10n = AppLocalizations.of(context);
+    final repo = ref.read(chatRepositoryProvider);
+    try {
+      await repo.sendMessage(ChatMessage(
+        id: '',
+        roomId: widget.roomId,
+        senderId: user.id,
+        senderType: _isAdmin(user) ? 'admin' : user.role,
+        message: l10n.callDeclined,
+        messageType: 'call',
+        isFromAdmin: _isAdmin(user),
+        createdAt: DateTime.now(),
+        metaData: {
+          'call_type': 'voice',
+          'status': 'declined',
+          'requested_by': incoming.senderId,
+          'declined_by': user.id,
+          'declined_at': DateTime.now().toIso8601String(),
+        },
+      ));
+      ref.invalidate(chatMessagesProvider(widget.roomId));
+      _scrollToBottom();
+    } catch (_) {}
   }
 
   Widget _buildInputArea(ColorScheme cs, AppLocalizations l10n, User? user) {
@@ -343,6 +532,7 @@ class _SupportChatRoomPageState extends ConsumerState<SupportChatRoomPage> {
                         horizontal: 16, vertical: 8),
                   ),
                   textInputAction: TextInputAction.send,
+                  onChanged: (_) => _notifyTyping(l10n),
                   onSubmitted: (_) => _sendMessage(user),
                 ),
               ),
@@ -400,7 +590,7 @@ class _SupportChatRoomPageState extends ConsumerState<SupportChatRoomPage> {
           child: Row(children: [
             Icon(Icons.call_outlined, color: cs.primary),
             const SizedBox(width: 8),
-            Text(l10n.sendVoiceMessage),
+            Text(l10n.voiceCall),
           ]),
         ),
       ],
@@ -589,7 +779,7 @@ class _SupportChatRoomPageState extends ConsumerState<SupportChatRoomPage> {
       roomId: widget.roomId,
       senderId: user.id,
       senderType: isAdminOrOwner ? 'admin' : user.role,
-      message: l10n.sendVoiceMessage,
+      message: l10n.voiceCallRequest,
       messageType: 'call',
       isFromAdmin: isAdminOrOwner,
       createdAt: DateTime.now(),
@@ -633,7 +823,9 @@ class _SupportChatRoomPageState extends ConsumerState<SupportChatRoomPage> {
     final repo = ref.read(chatRepositoryProvider);
     try {
       await repo.sendMessage(message);
+      if (!mounted) return;
       _messageController.clear();
+      _notifyTyping(AppLocalizations.of(context));
       ref.invalidate(chatMessagesProvider(widget.roomId));
       _scrollToBottom();
     } catch (e) {
@@ -669,6 +861,44 @@ class _SupportChatRoomPageState extends ConsumerState<SupportChatRoomPage> {
     try {
       await repo.closeRoom(widget.roomId);
       ref.invalidate(adminAllRoomsProvider);
+      ref.invalidate(customerMyRoomsProvider);
+      ref.invalidate(chatRoomProvider(widget.roomId));
+      ref.invalidate(chatMessagesProvider(widget.roomId));
+      if (mounted) Navigator.of(context).pop();
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('${l10n.error}: $e')),
+        );
+      }
+    }
+  }
+
+  Future<void> _confirmDeleteChat() async {
+    final l10n = AppLocalizations.of(context);
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(l10n.deleteChatConfirmTitle),
+        content: Text(l10n.deleteChatConfirm),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: Text(l10n.cancel),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: Text(l10n.deleteChat),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+    final repo = ref.read(chatRepositoryProvider);
+    try {
+      await repo.deleteChatRoom(widget.roomId);
+      ref.invalidate(adminAllRoomsProvider);
+      ref.invalidate(customerMyRoomsProvider);
       ref.invalidate(chatRoomProvider(widget.roomId));
       ref.invalidate(chatMessagesProvider(widget.roomId));
       if (mounted) Navigator.of(context).pop();

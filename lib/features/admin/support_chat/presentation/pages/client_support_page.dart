@@ -45,12 +45,14 @@ class _ClientSupportPageState extends ConsumerState<ClientSupportPage> {
                     title: l10n.noSupportRooms,
                     message: l10n.startSupportChatDescription,
                   ),
-                  const SizedBox(height: 16),
-                  ElevatedButton.icon(
-                    icon: const Icon(Icons.add_comment_rounded),
-                    label: Text(l10n.startChat),
-                    onPressed: _startNewChat,
-                  ),
+                  if (!roomsAsync.isLoading && !roomsAsync.hasError) ...[
+                    const SizedBox(height: 16),
+                    ElevatedButton.icon(
+                      icon: const Icon(Icons.add_comment_rounded),
+                      label: Text(l10n.startChat),
+                      onPressed: _startNewChat,
+                    ),
+                  ],
                 ],
               ),
             );
@@ -60,6 +62,7 @@ class _ClientSupportPageState extends ConsumerState<ClientSupportPage> {
             itemCount: rooms.length,
             itemBuilder: (context, index) {
               final room = rooms[index];
+              final refNum = room.referenceNumber;
               return Padding(
                 padding: const EdgeInsets.only(bottom: 8),
                 child: AnimatedFadeIn(
@@ -73,8 +76,14 @@ class _ClientSupportPageState extends ConsumerState<ClientSupportPage> {
                         ),
                         child: Icon(Icons.chat_bubble_rounded, color: cs.primary),
                       ),
-                      title: Text('${l10n.chatRoom} ${room.id.substring(0, 8)}', maxLines: 1),
-                      subtitle: Text(room.roomType),
+                      title: Text(
+                        refNum == null ? '${l10n.chatRoom} ${room.id.substring(0, 8)}' : '${l10n.complaintNo}: $refNum',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      subtitle: Text(
+                        room.isActive ? room.roomType : l10n.chatClosedLabel,
+                      ),
                       trailing: const Icon(Icons.chevron_right),
                       onTap: () => context.push('/support/room/${room.id}'),
                     ),
@@ -84,6 +93,11 @@ class _ClientSupportPageState extends ConsumerState<ClientSupportPage> {
             },
           );
         },
+      ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: _startNewChat,
+        icon: const Icon(Icons.add_comment_rounded),
+        label: Text(l10n.startChat),
       ),
     );
   }
@@ -101,7 +115,18 @@ class _ClientSupportPageState extends ConsumerState<ClientSupportPage> {
     );
 
     final repo = ref.read(chatRepositoryProvider);
-    await repo.createRoom(room);
-    ref.invalidate(customerMyRoomsProvider);
+    try {
+      final created = await repo.createRoom(room);
+      ref.invalidate(customerMyRoomsProvider);
+      if (!mounted) return;
+      // Open the new room immediately (shows its complaint reference number).
+      context.push('/support/room/${created.id}');
+    } catch (e) {
+      if (!mounted) return;
+      final errorCode = AppLocalizations.of(context).error;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('$errorCode: $e')),
+      );
+    }
   }
 }

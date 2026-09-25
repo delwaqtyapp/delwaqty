@@ -14,6 +14,7 @@ class ChatRoom {
     this.closedAt,
     this.autoDeleteAt,
     this.welcomeMessage,
+    this.referenceNumber,
     required this.createdAt,
     this.updatedAt,
   });
@@ -39,6 +40,7 @@ class ChatRoom {
           ? DateTime.parse(json['auto_delete_at'] as String)
           : null,
       welcomeMessage: json['welcome_message'] as String?,
+      referenceNumber: json['reference_number'] as String?,
       createdAt: DateTime.parse(json['created_at'] as String),
       updatedAt: json['updated_at'] != null
           ? DateTime.parse(json['updated_at'] as String)
@@ -59,6 +61,7 @@ class ChatRoom {
   final DateTime? closedAt;
   final DateTime? autoDeleteAt;
   final String? welcomeMessage;
+  final String? referenceNumber;
   final DateTime createdAt;
   final DateTime? updatedAt;
 
@@ -76,6 +79,7 @@ class ChatRoom {
     'closed_at': closedAt?.toIso8601String(),
     'auto_delete_at': autoDeleteAt?.toIso8601String(),
     'welcome_message': welcomeMessage,
+    'reference_number': referenceNumber,
     'created_at': createdAt.toIso8601String(),
     'updated_at': updatedAt?.toIso8601String(),
   };

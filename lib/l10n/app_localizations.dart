@@ -7346,6 +7346,96 @@ abstract class AppLocalizations {
   /// **'Release to cancel'**
   String get releaseToCancel;
 
+  /// No description provided for @voiceCall.
+  ///
+  /// In en, this message translates to:
+  /// **'Voice Call'**
+  String get voiceCall;
+
+  /// No description provided for @voiceCallRequest.
+  ///
+  /// In en, this message translates to:
+  /// **'Voice call request'**
+  String get voiceCallRequest;
+
+  /// No description provided for @callAccepted.
+  ///
+  /// In en, this message translates to:
+  /// **'Call accepted'**
+  String get callAccepted;
+
+  /// No description provided for @callDeclined.
+  ///
+  /// In en, this message translates to:
+  /// **'Call declined'**
+  String get callDeclined;
+
+  /// No description provided for @deleteChat.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Chat'**
+  String get deleteChat;
+
+  /// No description provided for @deleteChatConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete chat?'**
+  String get deleteChatConfirmTitle;
+
+  /// No description provided for @deleteChatConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'This chat and all its messages will be permanently deleted.'**
+  String get deleteChatConfirm;
+
+  /// No description provided for @someoneIsTyping.
+  ///
+  /// In en, this message translates to:
+  /// **'Typing...'**
+  String get someoneIsTyping;
+
+  /// No description provided for @openImage.
+  ///
+  /// In en, this message translates to:
+  /// **'Open image'**
+  String get openImage;
+
+  /// No description provided for @downloadImage.
+  ///
+  /// In en, this message translates to:
+  /// **'Download'**
+  String get downloadImage;
+
+  /// No description provided for @imageDownloaded.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved to'**
+  String get imageDownloaded;
+
+  /// No description provided for @tapToStop.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap to stop'**
+  String get tapToStop;
+
+  /// No description provided for @adminLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Support'**
+  String get adminLabel;
+
+  /// No description provided for @customerLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Customer'**
+  String get customerLabel;
+
+  /// No description provided for @complaintNo.
+  ///
+  /// In en, this message translates to:
+  /// **'Complaint No.'**
+  String get complaintNo;
+
   /// No description provided for @startChat.
   ///
   /// In en, this message translates to:

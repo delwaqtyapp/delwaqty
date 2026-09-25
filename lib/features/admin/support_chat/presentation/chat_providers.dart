@@ -22,6 +22,8 @@ final adminAllRoomsProvider = FutureProvider<List<ChatRoom>>((ref) async {
   final authState = ref.watch(authStateProvider);
   final user = authState is AuthAuthenticated ? authState.user : null;
   if (user == null) return [];
+  // Auto-purge expired (closed >7 days ago) chats first.
+  await repo.purgeExpiredChats();
   // Admins see all active rooms
   return repo.getActiveRooms();
 });
@@ -50,6 +52,7 @@ final customerMyRoomsProvider = FutureProvider<List<ChatRoom>>((ref) async {
   final authState = ref.watch(authStateProvider);
   final user = authState is AuthAuthenticated ? authState.user : null;
   if (user == null) return [];
+  await repo.purgeExpiredChats();
   return repo.getRoomsForParticipant(user.id);
 });
 
@@ -69,6 +72,12 @@ final chatMessageStreamProvider = StreamProvider.family<ChatMessage, String>((re
 final chatRoomProvider = FutureProvider.family<ChatRoom, String>((ref, roomId) async {
   final repo = ref.read(chatRepositoryProvider);
   return repo.getRoomById(roomId);
+});
+
+// Whether the peer (non-self participant) is currently typing.
+final chatPeerTypingProvider = StreamProvider.family<bool, String>((ref, roomId) {
+  final repo = ref.read(chatRepositoryProvider);
+  return repo.typingStream(roomId);
 });
 
 // New chat room creation - returns room ID

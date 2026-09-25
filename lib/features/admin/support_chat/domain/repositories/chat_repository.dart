@@ -9,6 +9,14 @@ abstract class ChatRepository {
   Future<ChatRoom> createRoom(ChatRoom room);
   Future<ChatRoom> getRoomById(String id);
   Future<void> closeRoom(String id);
+  Future<void> deleteChatRoom(String roomId);
+  Future<int> purgeExpiredChats();
+  Future<void> setTyping({
+    required String roomId,
+    required String userId,
+    required bool isTyping,
+  });
+  Stream<bool> typingStream(String roomId);
   Future<Map<String, dynamic>> getRoomUser(String userId);
   Future<String> uploadAttachment({
     required String roomId,

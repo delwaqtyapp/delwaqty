@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:delwaqty/features/admin/support_chat/domain/entities/chat_message.dart';
+import 'package:delwaqty/features/admin/support_chat/domain/entities/chat_room.dart';
 
 void main() {
   group('ChatMessage media fields', () {
@@ -73,6 +74,34 @@ void main() {
       final restored = ChatMessage.fromJson(msg.toJson());
       expect(restored.messageType, 'call');
       expect(restored.metaData?['call_type'], 'voice');
+    });
+  });
+
+  group('ChatRoom referenceNumber', () {
+    test('referenceNumber round-trips as reference_number', () {
+      final room = ChatRoom(
+        id: 'r1',
+        roomType: 'support',
+        participantIds: ['u1'],
+        createdAt: DateTime.parse('2026-09-25T21:00:00Z'),
+        referenceNumber: 'DWQ-1001',
+      );
+      final json = room.toJson();
+      expect(json['reference_number'], 'DWQ-1001');
+      expect(json['room_type'], 'support');
+      final restored = ChatRoom.fromJson(json);
+      expect(restored.referenceNumber, 'DWQ-1001');
+    });
+
+    test('referenceNumber stays null when absent', () {
+      final room = ChatRoom(
+        id: 'r2',
+        roomType: 'support',
+        participantIds: ['u1'],
+        createdAt: DateTime.parse('2026-09-25T21:00:00Z'),
+      );
+      final restored = ChatRoom.fromJson(room.toJson());
+      expect(restored.referenceNumber, isNull);
     });
   });
 }

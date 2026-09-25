@@ -3790,6 +3790,52 @@ class AppLocalizationsAr extends AppLocalizations {
   String get releaseToCancel => 'ارفع إصبعك للإلغاء';
 
   @override
+  String get voiceCall => 'اتصال صوتي';
+
+  @override
+  String get voiceCallRequest => 'طلب اتصال صوتي';
+
+  @override
+  String get callAccepted => 'تم قبول الاتصال';
+
+  @override
+  String get callDeclined => 'تم رفض الاتصال';
+
+  @override
+  String get deleteChat => 'حذف المحادثة';
+
+  @override
+  String get deleteChatConfirmTitle => 'حذف المحادثة؟';
+
+  @override
+  String get deleteChatConfirm =>
+      'سيتم حذف هذه المحادثة وجميع رسائلها نهائياً.';
+
+  @override
+  String get someoneIsTyping => 'يكتب الآن...';
+
+  @override
+  String get openImage => 'فتح الصورة';
+
+  @override
+  String get downloadImage => 'تحميل';
+
+  @override
+  String get imageDownloaded => 'تم الحفظ في';
+
+  @override
+  String get tapToStop => 'اضغط للإيقاف';
+
+  @override
+  String get adminLabel => 'الدعم';
+
+  @override
+  String get customerLabel => 'العميل';
+
+  @override
+  String get complaintNo => 'رقم الشكوى';
+
+  @override
   String get startChat => 'بدء محادثة';
 
   @override

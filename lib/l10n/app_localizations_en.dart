@@ -3820,6 +3820,52 @@ class AppLocalizationsEn extends AppLocalizations {
   String get releaseToCancel => 'Release to cancel';
 
   @override
+  String get voiceCall => 'Voice Call';
+
+  @override
+  String get voiceCallRequest => 'Voice call request';
+
+  @override
+  String get callAccepted => 'Call accepted';
+
+  @override
+  String get callDeclined => 'Call declined';
+
+  @override
+  String get deleteChat => 'Delete Chat';
+
+  @override
+  String get deleteChatConfirmTitle => 'Delete chat?';
+
+  @override
+  String get deleteChatConfirm =>
+      'This chat and all its messages will be permanently deleted.';
+
+  @override
+  String get someoneIsTyping => 'Typing...';
+
+  @override
+  String get openImage => 'Open image';
+
+  @override
+  String get downloadImage => 'Download';
+
+  @override
+  String get imageDownloaded => 'Saved to';
+
+  @override
+  String get tapToStop => 'Tap to stop';
+
+  @override
+  String get adminLabel => 'Support';
+
+  @override
+  String get customerLabel => 'Customer';
+
+  @override
+  String get complaintNo => 'Complaint No.';
+
+  @override
   String get startChat => 'Start Chat';
 
   @override

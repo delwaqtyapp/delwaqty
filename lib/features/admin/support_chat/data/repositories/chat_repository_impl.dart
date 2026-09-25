@@ -40,6 +40,34 @@ class ChatRepositoryImpl implements ChatRepository {
   }
 
   @override
+  Future<void> deleteChatRoom(String roomId) {
+    return _dataSource.deleteChatRoom(roomId);
+  }
+
+  @override
+  Future<int> purgeExpiredChats() {
+    return _dataSource.purgeExpiredChats();
+  }
+
+  @override
+  Future<void> setTyping({
+    required String roomId,
+    required String userId,
+    required bool isTyping,
+  }) {
+    return _dataSource.setTyping(
+      roomId: roomId,
+      userId: userId,
+      isTyping: isTyping,
+    );
+  }
+
+  @override
+  Stream<bool> typingStream(String roomId) {
+    return _dataSource.typingStream(roomId);
+  }
+
+  @override
   Future<Map<String, dynamic>> getRoomUser(String userId) {
     return _dataSource.getRoomUser(userId);
   }

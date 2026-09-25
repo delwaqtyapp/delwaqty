@@ -66,6 +66,9 @@ class SupabaseChatDataSource {
     if (payload['id'] == null || (payload['id'] as String).isEmpty) {
       payload.remove('id');
     }
+    if (payload['reference_number'] == null) {
+      payload.remove('reference_number');
+    }
     final row = await _client.from('chat_rooms').insert(payload).select().single();
     return ChatRoom.fromJson(row);
   }
@@ -83,6 +86,46 @@ class SupabaseChatDataSource {
       'auto_delete_at': oneWeekLater.toIso8601String(),
       'updated_at': now.toIso8601String(),
     }).eq('id', id);
+  }
+
+  // Owner-only hard delete of a chat (room + messages + attachments).
+  Future<void> deleteChatRoom(String roomId) async {
+    await _client.rpc('admin_delete_chat', params: {'p_room_id': roomId});
+  }
+
+  // Auto-purge of chats past auto_delete_at. Returns number removed.
+  Future<int> purgeExpiredChats() async {
+    final res = await _client.rpc('admin_purge_expired_chats');
+    return (res as num?)?.toInt() ?? 0;
+  }
+
+  // Typing indicator ----------------------------------------------
+  Future<void> setTyping({
+    required String roomId,
+    required String userId,
+    required bool isTyping,
+  }) async {
+    await _client.from('chat_typing').upsert({
+      'room_id': roomId,
+      'user_id': userId,
+      'is_typing': isTyping,
+      'updated_at': DateTime.now().toIso8601String(),
+    }, onConflict: 'room_id,user_id');
+  }
+
+  Stream<bool> typingStream(String roomId) {
+    return _client
+        .from('chat_typing')
+        .stream(primaryKey: ['room_id', 'user_id']).eq('room_id', roomId)
+        .map((rows) {
+      final me = _client.auth.currentUser?.id;
+      final rowsList = (rows as List).cast<Map<String, dynamic>>();
+      if (rowsList.isEmpty) return false;
+      final latest = rowsList
+          .where((r) => r['user_id'] != me && r['is_typing'] == true)
+          .isNotEmpty;
+      return latest;
+    });
   }
 
   Future<List<ChatMessage>> getMessages(String roomId, {int limit = 50}) async {

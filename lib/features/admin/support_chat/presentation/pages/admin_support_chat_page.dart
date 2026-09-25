@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:delwaqty/features/admin/support_chat/presentation/chat_providers.dart';
-import 'package:delwaqty/features/_shared/auth/presentation/auth_provider.dart';
-import 'package:delwaqty/features/_shared/auth/domain/auth_state.dart';
 import 'package:delwaqty/shared/widgets/glass_card.dart';
 import 'package:delwaqty/shared/widgets/app_loader.dart';
 import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
@@ -22,12 +20,18 @@ class _AdminSupportChatPageState extends ConsumerState<AdminSupportChatPage> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final roomsAsync = ref.watch(adminAllRoomsProvider);
-    final authState = ref.watch(authStateProvider);
-    final user = authState is AuthAuthenticated ? authState.user : null;
-    final isOwner = user?.role == 'owner';
 
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.supportChat)),
+      appBar: AppBar(
+        title: Text(l10n.supportChat),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.verified_user_rounded),
+            tooltip: l10n.chatPermissions,
+            onPressed: () => context.push('/admin/chat-permissions'),
+          ),
+        ],
+      ),
       body: roomsAsync.when(
         loading: () => const Center(child: AppLoaderCircular()),
         error: (e, _) => PremiumEmptyState(
@@ -83,12 +87,11 @@ class _AdminSupportChatPageState extends ConsumerState<AdminSupportChatPage> {
                               ),
                               child: Text(l10n.active, style: const TextStyle(fontSize: 11, color: Colors.green)),
                             ),
-                          if (isOwner)
-                            IconButton(
-                              icon: const Icon(Icons.delete_outline_rounded, size: 20),
-                              tooltip: l10n.deleteChat,
-                              onPressed: () => _confirmDelete(room.id),
-                            ),
+                          IconButton(
+                            icon: const Icon(Icons.delete_outline_rounded, size: 20),
+                            tooltip: l10n.deleteChat,
+                            onPressed: () => _confirmDelete(room.id),
+                          ),
                         ],
                       ),
                       onTap: () => context.push('/admin/support-chat/room/${room.id}'),

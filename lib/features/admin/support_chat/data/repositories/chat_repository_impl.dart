@@ -83,6 +83,34 @@ class ChatRepositoryImpl implements ChatRepository {
   }
 
   @override
+  Future<Map<String, dynamic>> getChatPermissions() {
+    return _dataSource.getChatPermissions();
+  }
+
+  @override
+  Future<void> setChatPermissions({
+    required bool calls,
+    required bool voice,
+    required bool media,
+  }) {
+    return _dataSource.setChatPermissions(
+      calls: calls,
+      voice: voice,
+      media: media,
+    );
+  }
+
+  @override
+  Future<bool> canReceiveCalls(String userId) {
+    return _dataSource.canReceiveCalls(userId);
+  }
+
+  @override
+  Future<void> setReceiveCalls(String userId, bool enabled) {
+    return _dataSource.setReceiveCalls(userId, enabled);
+  }
+
+  @override
   Future<Map<String, dynamic>> getRoomUser(String userId) {
     return _dataSource.getRoomUser(userId);
   }

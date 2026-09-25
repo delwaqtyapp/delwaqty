@@ -200,4 +200,61 @@ class SupabaseChatDataSource {
             .toList())
         .expand((list) => list);
   }
+
+  // Global chat permissions (on the shared platform_settings row).
+  Future<Map<String, dynamic>> getChatPermissions() async {
+    try {
+      final row = await _client
+          .from('platform_settings')
+          .select('chat_calls_enabled,chat_voice_enabled,chat_media_enabled')
+          .eq('id', 'default')
+          .maybeSingle();
+      return row ?? <String, dynamic>{
+        'chat_calls_enabled': true,
+        'chat_voice_enabled': true,
+        'chat_media_enabled': true,
+      };
+    } catch (_) {
+      return <String, dynamic>{
+        'chat_calls_enabled': true,
+        'chat_voice_enabled': true,
+        'chat_media_enabled': true,
+      };
+    }
+  }
+
+  // Enable/disable chat features GLOBALLY for all users (admin panel only —
+  // RLS on platform_settings update is admin-gated).
+  Future<void> setChatPermissions({
+    required bool calls,
+    required bool voice,
+    required bool media,
+  }) async {
+    await _client.from('platform_settings').update({
+      'chat_calls_enabled': calls,
+      'chat_voice_enabled': voice,
+      'chat_media_enabled': media,
+      'updated_at': DateTime.now().toIso8601String(),
+    }).eq('id', 'default');
+  }
+
+  // Per-user preference: may this user receive incoming calls?
+  Future<bool> canReceiveCalls(String userId) async {
+    try {
+      final row = await _client
+          .from('users')
+          .select('chat_calls_enabled')
+          .eq('id', userId)
+          .maybeSingle();
+      return row?['chat_calls_enabled'] as bool? ?? true;
+    } catch (_) {
+      return true;
+    }
+  }
+
+  Future<void> setReceiveCalls(String userId, bool enabled) async {
+    await _client.from('users').update({
+      'chat_calls_enabled': enabled,
+    }).eq('id', userId);
+  }
 }

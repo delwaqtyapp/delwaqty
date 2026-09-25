@@ -7,6 +7,9 @@ import 'package:delwaqty/features/admin/support_chat/data/datasources/remote/sup
 import 'package:delwaqty/features/admin/support_chat/data/repositories/chat_repository_impl.dart';
 import 'package:delwaqty/features/_shared/auth/presentation/auth_provider.dart';
 import 'package:delwaqty/features/_shared/auth/domain/auth_state.dart';
+import 'package:delwaqty/features/admin/support_chat/services/chat_call_alert_service.dart';
+import 'package:delwaqty/services/logger/app_logger.dart';
+import 'package:delwaqty/services/realtime/realtime_service.dart';
 
 final supabaseChatDataSourceProvider = Provider<SupabaseChatDataSource>((ref) {
   return SupabaseChatDataSource(Supabase.instance.client);
@@ -14,6 +17,31 @@ final supabaseChatDataSourceProvider = Provider<SupabaseChatDataSource>((ref) {
 
 final chatRepositoryProvider = Provider<ChatRepository>((ref) {
   return ChatRepositoryImpl(ref.read(supabaseChatDataSourceProvider));
+});
+
+// Global chat feature flags (admin panel): calls / voice / media for ALL users.
+final chatPermissionsProvider = FutureProvider<Map<String, dynamic>>((ref) async {
+  final repo = ref.read(chatRepositoryProvider);
+  return repo.getChatPermissions();
+});
+
+// Per-user "receive incoming calls" switch (customer + admin apps).
+final chatReceiveCallsProvider = FutureProvider.family<bool, String>((ref, userId) async {
+  final repo = ref.read(chatRepositoryProvider);
+  return repo.canReceiveCalls(userId);
+});
+
+// App-wide incoming-call alert notification (fires even when the room screen
+// isn't open). Listens on chat_messages INSERT with message_type='call'.
+final chatCallAlertServiceProvider = Provider<ChatCallAlertService>((ref) {
+  final service = ChatCallAlertService(
+    ref,
+    ref.watch(realtimeServiceProvider),
+    ref.watch(loggerProvider),
+  );
+  service.start();
+  ref.onDispose(service.dispose);
+  return service;
 });
 
 // Admin sees all active rooms across all types

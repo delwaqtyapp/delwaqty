@@ -3857,6 +3857,51 @@ class AppLocalizationsAr extends AppLocalizations {
   String get customerLabel => 'العميل';
 
   @override
+  String get chatPermissions => 'صلاحيات الشات';
+
+  @override
+  String get chatPermissionsAdminSubtitle =>
+      'التحكم في الاتصال والصوت والوسائط لكل المستخدمين';
+
+  @override
+  String get receiveIncomingCalls => 'استقبال الاتصالات';
+
+  @override
+  String get receiveIncomingCallsHint =>
+      'أطفئها حتى لا يتم مقاطعتك بطلبات الاتصال في شات الدعم.';
+
+  @override
+  String get chatGlobalPermissions => 'ميزات الشات العامة (لكل المستخدمين)';
+
+  @override
+  String get chatGlobalPermissionsHint =>
+      'عند إيقاف أي ميزة، يختفي زرها من كل محادثات الدعم.';
+
+  @override
+  String get chatCallsEnabled => 'الاتصالات الصوتية';
+
+  @override
+  String get chatCallsEnabledHint =>
+      'السماح للمستخدمين بإرسال واستقبال طلبات الاتصال الصوتي.';
+
+  @override
+  String get chatVoiceEnabled => 'الرسائل الصوتية';
+
+  @override
+  String get chatVoiceEnabledHint =>
+      'السماح بإرسال التسجيلات الصوتية في المحادثات.';
+
+  @override
+  String get chatMediaEnabled => 'الصور والفيديو';
+
+  @override
+  String get chatMediaEnabledHint =>
+      'السماح بإرسال الصور والفيديوهات في المحادثات.';
+
+  @override
+  String get chatSaved => 'تم الحفظ';
+
+  @override
   String get complaintNo => 'رقم الشكوى';
 
   @override

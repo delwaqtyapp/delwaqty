@@ -8,6 +8,7 @@ import 'package:delwaqty/core/theme/theme_mode_provider.dart';
 import 'package:delwaqty/features/_shared/auth/presentation/auth_provider.dart';
 import 'package:delwaqty/features/_shared/device_lock/device_lock_provider.dart';
 import 'package:delwaqty/core/localization/admin_locale_provider.dart';
+import 'package:delwaqty/features/admin/support_chat/presentation/chat_providers.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 
 class AppAdmin extends ConsumerStatefulWidget {
@@ -46,6 +47,7 @@ class _AppAdminState extends ConsumerState<AppAdmin> {
         debugPrint('Auth listener start failed: $e');
       }
       authNotifier.checkAuthStatus();
+      ref.read(chatCallAlertServiceProvider);
     });
   }
 

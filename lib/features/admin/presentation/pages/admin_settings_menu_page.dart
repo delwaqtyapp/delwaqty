@@ -326,6 +326,13 @@ class _AdminSettingsMenuPageState extends ConsumerState<AdminSettingsMenuPage> {
           title: l10n.support,
           onTap: () => context.go('/admin/support-chat'),
         ),
+        _SectionTile(
+          icon: Icons.verified_user_rounded,
+          color: AppColors.brandPurple,
+          title: l10n.chatPermissions,
+          subtitle: l10n.chatPermissionsAdminSubtitle,
+          onTap: () => context.go('/admin/chat-permissions'),
+        ),
       ],
     );
   }

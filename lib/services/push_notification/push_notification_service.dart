@@ -7,6 +7,7 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:delwaqty/core/config/app_mode_provider.dart';
 import 'package:delwaqty/core/router/app_router.dart';
 import 'package:delwaqty/domain/entities/app_notification.dart';
 import 'package:delwaqty/features/_shared/notifications/notifications_module.dart';
@@ -108,7 +109,50 @@ Future<void> _showLocalNotification({
   );
 }
 
+/// Raised app-wide when a NEW incoming voice-call message arrives on any of the
+/// current user's rooms (used by ChatCallAlertService). The notification tap
+/// deep-links into that chat room.
+Future<void> showChatCallNotification({
+  required String roomId,
+  required String callerLabel,
+  required String message,
+}) async {
+  try {
+    await _initLocalNotifications();
+    await _localNotifications.show(
+      id: DateTime.now().millisecondsSinceEpoch.remainder(1 << 31),
+      title: '📞 مكالمة صوتية واردة',
+      body: '$callerLabel — ${message.isEmpty ? 'اضغط للرد' : message}',
+      notificationDetails: const NotificationDetails(
+        android: AndroidNotificationDetails(
+          _notificationChannelId,
+          _notificationChannelName,
+          channelDescription: _notificationChannelDescription,
+          importance: Importance.max,
+          priority: Priority.high,
+        ),
+      ),
+      payload: jsonEncode({'chat_room_id': roomId}),
+    );
+  } catch (e) {
+    debugPrint('Failed to show chat call notification: $e');
+  }
+}
+
 void _handleNotificationTap(Map<String, dynamic> data) {
+  final chatRoomId = data['chat_room_id'] as String?;
+  if (chatRoomId != null && chatRoomId.isNotEmpty) {
+    final context = rootNavigatorKey.currentContext;
+    if (context == null) return;
+    final isAdminPanel =
+        ProviderScope.containerOf(context).read(isAdminAppProvider);
+    final path = isAdminPanel
+        ? '/admin/support-chat/room/$chatRoomId'
+        : '/support/room/$chatRoomId';
+    GoRouter.of(context).push(path);
+    return;
+  }
+
   final payload = NotificationPayload.fromMap(data);
   final deepLink = NotificationRouteResolver.safePayload(payload);
   if (rootNavigatorKey.currentContext == null) return;

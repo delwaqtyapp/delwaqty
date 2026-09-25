@@ -101,10 +101,14 @@ class _SupportChatRoomPageState extends ConsumerState<SupportChatRoomPage> {
     final authState = ref.watch(authStateProvider);
     final user = authState is AuthAuthenticated ? authState.user : null;
     final isAdminPanel = _sessionIsAdminPanel();
-    final isOwner = user?.role == 'owner';
     final messagesAsync = ref.watch(chatMessagesProvider(widget.roomId));
     final roomAsync = ref.watch(chatRoomProvider(widget.roomId));
     final peerTyping = ref.watch(chatPeerTypingProvider(widget.roomId));
+    final permissionsAsync = ref.watch(chatPermissionsProvider);
+    final permissions = permissionsAsync.asData?.value ?? <String, dynamic>{};
+    final callEnabled = permissions['chat_calls_enabled'] as bool? ?? true;
+    final voiceEnabled = permissions['chat_voice_enabled'] as bool? ?? true;
+    final mediaEnabled = permissions['chat_media_enabled'] as bool? ?? true;
 
     ref.listen(chatMessageStreamProvider(widget.roomId), (prev, next) {
       next.whenData((msg) {
@@ -136,7 +140,7 @@ class _SupportChatRoomPageState extends ConsumerState<SupportChatRoomPage> {
           ],
         ),
         actions: [
-          if (roomAsync.asData?.value.isActive ?? true)
+          if ((roomAsync.asData?.value.isActive ?? true) && callEnabled)
             IconButton(
               icon: const Icon(Icons.call_rounded),
               tooltip: l10n.voiceCall,
@@ -148,7 +152,7 @@ class _SupportChatRoomPageState extends ConsumerState<SupportChatRoomPage> {
               tooltip: l10n.closeChat,
               onPressed: () => _confirmCloseChat(),
             ),
-          if (isOwner)
+          if (isAdminPanel)
             IconButton(
               icon: const Icon(Icons.delete_outline_rounded),
               tooltip: l10n.deleteChat,
@@ -218,7 +222,14 @@ class _SupportChatRoomPageState extends ConsumerState<SupportChatRoomPage> {
             ),
 
           if (roomAsync.asData?.value.isActive ?? true)
-            _buildInputArea(cs, l10n, user),
+            _buildInputArea(
+              cs,
+              l10n,
+              user,
+              callEnabled: callEnabled,
+              voiceEnabled: voiceEnabled,
+              mediaEnabled: mediaEnabled,
+            ),
         ],
       ),
     );
@@ -640,7 +651,14 @@ class _SupportChatRoomPageState extends ConsumerState<SupportChatRoomPage> {
     ).whenComplete(() => _callSheetOpen = false);
   }
 
-  Widget _buildInputArea(ColorScheme cs, AppLocalizations l10n, User? user) {
+  Widget _buildInputArea(
+    ColorScheme cs,
+    AppLocalizations l10n,
+    User? user, {
+    required bool callEnabled,
+    required bool voiceEnabled,
+    required bool mediaEnabled,
+  }) {
     return Container(
       padding: const EdgeInsets.fromLTRB(12, 8, 12, 16),
       decoration: BoxDecoration(
@@ -667,8 +685,14 @@ class _SupportChatRoomPageState extends ConsumerState<SupportChatRoomPage> {
             ),
           Row(
             children: [
-              _attachMenu(l10n),
-              const SizedBox(width: 4),
+              if (mediaEnabled || callEnabled) ...[
+                _attachMenu(
+                  l10n,
+                  callEnabled: callEnabled,
+                  mediaEnabled: mediaEnabled,
+                ),
+                const SizedBox(width: 4),
+              ],
               Expanded(
                 child: TextField(
                   controller: _messageController,
@@ -686,7 +710,7 @@ class _SupportChatRoomPageState extends ConsumerState<SupportChatRoomPage> {
                 ),
               ),
               const SizedBox(width: 8),
-              _voiceButton(cs, l10n, user),
+              if (voiceEnabled) _voiceButton(cs, l10n, user),
               const SizedBox(width: 4),
               IconButton.filled(
                 icon: const Icon(Icons.send_rounded),
@@ -699,7 +723,11 @@ class _SupportChatRoomPageState extends ConsumerState<SupportChatRoomPage> {
     );
   }
 
-  Widget _attachMenu(AppLocalizations l10n) {
+  Widget _attachMenu(
+    AppLocalizations l10n, {
+    required bool callEnabled,
+    required bool mediaEnabled,
+  }) {
     final cs = Theme.of(context).colorScheme;
     return PopupMenuButton<String>(
       icon: Icon(Icons.add_circle_outline_rounded, color: cs.primary),
@@ -718,30 +746,33 @@ class _SupportChatRoomPageState extends ConsumerState<SupportChatRoomPage> {
         }
       },
       itemBuilder: (context) => [
-        PopupMenuItem(
-          value: 'image',
-          child: Row(children: [
-            Icon(Icons.image_outlined, color: cs.primary),
-            const SizedBox(width: 8),
-            Text(l10n.sendImage),
-          ]),
-        ),
-        PopupMenuItem(
-          value: 'video',
-          child: Row(children: [
-            Icon(Icons.videocam_outlined, color: cs.primary),
-            const SizedBox(width: 8),
-            Text(l10n.sendVideo),
-          ]),
-        ),
-        PopupMenuItem(
-          value: 'call',
-          child: Row(children: [
-            Icon(Icons.call_outlined, color: cs.primary),
-            const SizedBox(width: 8),
-            Text(l10n.voiceCall),
-          ]),
-        ),
+        if (mediaEnabled) ...[
+          PopupMenuItem(
+            value: 'image',
+            child: Row(children: [
+              Icon(Icons.image_outlined, color: cs.primary),
+              const SizedBox(width: 8),
+              Text(l10n.sendImage),
+            ]),
+          ),
+          PopupMenuItem(
+            value: 'video',
+            child: Row(children: [
+              Icon(Icons.videocam_outlined, color: cs.primary),
+              const SizedBox(width: 8),
+              Text(l10n.sendVideo),
+            ]),
+          ),
+        ],
+        if (callEnabled)
+          PopupMenuItem(
+            value: 'call',
+            child: Row(children: [
+              Icon(Icons.call_outlined, color: cs.primary),
+              const SizedBox(width: 8),
+              Text(l10n.voiceCall),
+            ]),
+          ),
       ],
     );
   }

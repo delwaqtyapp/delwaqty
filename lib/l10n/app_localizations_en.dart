@@ -3832,6 +3832,30 @@ class AppLocalizationsEn extends AppLocalizations {
   String get callDeclined => 'Call declined';
 
   @override
+  String get acceptCall => 'Accept';
+
+  @override
+  String get declineCall => 'Decline';
+
+  @override
+  String get endCall => 'End call';
+
+  @override
+  String get incomingVoiceCall => 'Incoming voice call';
+
+  @override
+  String get callingLabel => 'Calling...';
+
+  @override
+  String get callInProgress => 'Call in progress';
+
+  @override
+  String get callDeclinedLabel => 'Call declined';
+
+  @override
+  String get callEndedLabel => 'Call ended';
+
+  @override
   String get deleteChat => 'Delete Chat';
 
   @override

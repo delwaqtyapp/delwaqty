@@ -68,6 +68,21 @@ class ChatRepositoryImpl implements ChatRepository {
   }
 
   @override
+  Future<void> setCallStatus({
+    required String messageId,
+    required String status,
+    String? responderId,
+    String? responderType,
+  }) {
+    return _dataSource.setCallStatus(
+      messageId: messageId,
+      status: status,
+      responderId: responderId,
+      responderType: responderType,
+    );
+  }
+
+  @override
   Future<Map<String, dynamic>> getRoomUser(String userId) {
     return _dataSource.getRoomUser(userId);
   }

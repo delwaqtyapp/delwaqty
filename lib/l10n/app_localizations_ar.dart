@@ -3802,6 +3802,30 @@ class AppLocalizationsAr extends AppLocalizations {
   String get callDeclined => 'تم رفض الاتصال';
 
   @override
+  String get acceptCall => 'قبول';
+
+  @override
+  String get declineCall => 'رفض';
+
+  @override
+  String get endCall => 'إنهاء المكالمة';
+
+  @override
+  String get incomingVoiceCall => 'مكالمة صوتية واردة';
+
+  @override
+  String get callingLabel => 'جارٍ الاتصال...';
+
+  @override
+  String get callInProgress => 'المكالمة جارية';
+
+  @override
+  String get callDeclinedLabel => 'تم رفض المكالمة';
+
+  @override
+  String get callEndedLabel => 'انتهت المكالمة';
+
+  @override
   String get deleteChat => 'حذف المحادثة';
 
   @override

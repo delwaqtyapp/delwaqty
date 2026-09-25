@@ -7370,6 +7370,54 @@ abstract class AppLocalizations {
   /// **'Call declined'**
   String get callDeclined;
 
+  /// No description provided for @acceptCall.
+  ///
+  /// In en, this message translates to:
+  /// **'Accept'**
+  String get acceptCall;
+
+  /// No description provided for @declineCall.
+  ///
+  /// In en, this message translates to:
+  /// **'Decline'**
+  String get declineCall;
+
+  /// No description provided for @endCall.
+  ///
+  /// In en, this message translates to:
+  /// **'End call'**
+  String get endCall;
+
+  /// No description provided for @incomingVoiceCall.
+  ///
+  /// In en, this message translates to:
+  /// **'Incoming voice call'**
+  String get incomingVoiceCall;
+
+  /// No description provided for @callingLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Calling...'**
+  String get callingLabel;
+
+  /// No description provided for @callInProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'Call in progress'**
+  String get callInProgress;
+
+  /// No description provided for @callDeclinedLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Call declined'**
+  String get callDeclinedLabel;
+
+  /// No description provided for @callEndedLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Call ended'**
+  String get callEndedLabel;
+
   /// No description provided for @deleteChat.
   ///
   /// In en, this message translates to:

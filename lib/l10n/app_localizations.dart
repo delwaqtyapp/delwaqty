@@ -7478,6 +7478,84 @@ abstract class AppLocalizations {
   /// **'Customer'**
   String get customerLabel;
 
+  /// No description provided for @chatPermissions.
+  ///
+  /// In en, this message translates to:
+  /// **'Chat Permissions'**
+  String get chatPermissions;
+
+  /// No description provided for @chatPermissionsAdminSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Calls, voice and media for all users'**
+  String get chatPermissionsAdminSubtitle;
+
+  /// No description provided for @receiveIncomingCalls.
+  ///
+  /// In en, this message translates to:
+  /// **'Receive incoming calls'**
+  String get receiveIncomingCalls;
+
+  /// No description provided for @receiveIncomingCallsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Turn off to avoid being disturbed by support chat call requests.'**
+  String get receiveIncomingCallsHint;
+
+  /// No description provided for @chatGlobalPermissions.
+  ///
+  /// In en, this message translates to:
+  /// **'Global chat features (for all users)'**
+  String get chatGlobalPermissions;
+
+  /// No description provided for @chatGlobalPermissionsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'When a feature is off, its button disappears from every support chat.'**
+  String get chatGlobalPermissionsHint;
+
+  /// No description provided for @chatCallsEnabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Voice calls'**
+  String get chatCallsEnabled;
+
+  /// No description provided for @chatCallsEnabledHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow users to send and receive voice call requests.'**
+  String get chatCallsEnabledHint;
+
+  /// No description provided for @chatVoiceEnabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Voice messages'**
+  String get chatVoiceEnabled;
+
+  /// No description provided for @chatVoiceEnabledHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow sending voice recordings in chat.'**
+  String get chatVoiceEnabledHint;
+
+  /// No description provided for @chatMediaEnabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Photos & videos'**
+  String get chatMediaEnabled;
+
+  /// No description provided for @chatMediaEnabledHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow sending images and videos in chat.'**
+  String get chatMediaEnabledHint;
+
+  /// No description provided for @chatSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved'**
+  String get chatSaved;
+
   /// No description provided for @complaintNo.
   ///
   /// In en, this message translates to:

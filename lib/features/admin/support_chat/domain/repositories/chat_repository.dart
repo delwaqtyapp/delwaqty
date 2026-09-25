@@ -23,6 +23,14 @@ abstract class ChatRepository {
     String? responderId,
     String? responderType,
   });
+  Future<Map<String, dynamic>> getChatPermissions();
+  Future<void> setChatPermissions({
+    required bool calls,
+    required bool voice,
+    required bool media,
+  });
+  Future<bool> canReceiveCalls(String userId);
+  Future<void> setReceiveCalls(String userId, bool enabled);
   Future<Map<String, dynamic>> getRoomUser(String userId);
   Future<String> uploadAttachment({
     required String roomId,

@@ -3887,6 +3887,49 @@ class AppLocalizationsEn extends AppLocalizations {
   String get customerLabel => 'Customer';
 
   @override
+  String get chatPermissions => 'Chat Permissions';
+
+  @override
+  String get chatPermissionsAdminSubtitle =>
+      'Calls, voice and media for all users';
+
+  @override
+  String get receiveIncomingCalls => 'Receive incoming calls';
+
+  @override
+  String get receiveIncomingCallsHint =>
+      'Turn off to avoid being disturbed by support chat call requests.';
+
+  @override
+  String get chatGlobalPermissions => 'Global chat features (for all users)';
+
+  @override
+  String get chatGlobalPermissionsHint =>
+      'When a feature is off, its button disappears from every support chat.';
+
+  @override
+  String get chatCallsEnabled => 'Voice calls';
+
+  @override
+  String get chatCallsEnabledHint =>
+      'Allow users to send and receive voice call requests.';
+
+  @override
+  String get chatVoiceEnabled => 'Voice messages';
+
+  @override
+  String get chatVoiceEnabledHint => 'Allow sending voice recordings in chat.';
+
+  @override
+  String get chatMediaEnabled => 'Photos & videos';
+
+  @override
+  String get chatMediaEnabledHint => 'Allow sending images and videos in chat.';
+
+  @override
+  String get chatSaved => 'Saved';
+
+  @override
   String get complaintNo => 'Complaint No.';
 
   @override

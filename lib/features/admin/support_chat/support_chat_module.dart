@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:delwaqty/core/module/feature_module.dart';
 import 'package:delwaqty/features/admin/support_chat/presentation/pages/client_support_page.dart';
+import 'package:delwaqty/features/admin/support_chat/presentation/pages/chat_permissions_page.dart';
 import 'package:delwaqty/features/admin/support_chat/presentation/pages/support_chat_room_page.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 
@@ -33,6 +34,10 @@ class SupportChatModule extends FeatureModule {
         final roomId = state.pathParameters['roomId']!;
         return SupportChatRoomPage(roomId: roomId);
       },
+    ),
+    GoRoute(
+      path: '/support/chat-permissions',
+      builder: (context, state) => const ChatPermissionsPage(),
     ),
   ];
 }

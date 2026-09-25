@@ -26,7 +26,16 @@ class _ClientSupportPageState extends ConsumerState<ClientSupportPage> {
     final roomsAsync = ref.watch(customerMyRoomsProvider);
 
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.support)),
+      appBar: AppBar(
+        title: Text(l10n.support),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.verified_user_rounded),
+            tooltip: l10n.chatPermissions,
+            onPressed: () => context.push('/support/chat-permissions'),
+          ),
+        ],
+      ),
       body: roomsAsync.when(
         loading: () => const Center(child: AppLoaderCircular()),
         error: (e, _) => PremiumEmptyState(

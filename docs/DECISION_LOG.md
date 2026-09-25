@@ -3556,3 +3556,24 @@ User feedback after sprint 192: (1) a voice call only emitted a request bubble w
 - Identity is now consistent with the user's requirement: the same account appears as عميل in the customer app and الإدارة in the admin app simultaneously.
 - Real media transport (WebRTC) remains out of scope — the call is a Realtime-driven message handshake with full in-app call screens (consistent with ADR-103/104).
 - Gate: `flutter analyze` **0 new issues** (only the 7 pre-existing warnings/infos); `flutter test` **946/946**; 4 APKs rebuilt + installed Success (TS 20260925_2330); admin + customer relaunched clean (customer top activity; logcat no FATAL/RenderFlex). Commit `sprint 193` pushed.
+
+## ADR-106: Chat permissions panel, incoming-call notification, and admin delete/close for resolved chats
+
+**Date:** 2026-09-26 · **Sprint 194** · **Status:** Accepted
+
+### Context
+User feedback after sprint 193: (1) an incoming voice call produces NO notification in the admin app — the alert only appears inside the open room; (2) there is no per-user control to receive incoming calls or not, in the customer OR the admin app; (3) there is no admin panel to enable/disable chat features for ALL users (voice calls, voice messages, media attachments); (4) deleting/closing a chat permanently after the customer's issue is resolved was absent in the admin app (the delete icon was owner-only, so regular admins never saw it).
+
+### Decision
+- **Global chat feature flags** on the single `platform_settings` row (`id='default'`): `chat_calls_enabled`, `chat_voice_enabled`, `chat_media_enabled` (bool, default true) — public-readable (existing RLS), writable by admins (migration 097, applied & verified LIVE).
+- **Per-user receiving control**: `users.chat_calls_enabled` (bool, default true); each user can update their own row via the existing `Users can update own profile` policy. Same choice available in BOTH apps.
+- **`ChatPermissionsPage`** shared by both apps (route `/support/chat-permissions` for the customer app, `/admin/chat-permissions` for the admin app): a «استقبال الاتصالات» switch (everyone) plus a global admin-only section with the three switches; data via `chatPermissionsProvider` / `chatReceiveCallsProvider(myId)`; entry points = admin settings tile + AppBar icon on both the admin and customer support list pages.
+- **App-wide incoming-call notification**: new `ChatCallAlertService` (Riverpod provider, started in `customer/app.dart` AND `admin/app.dart` initState) subscribes to Realtime `chat_messages` INSERT filtered `message_type=eq.call`, ignores own sends / non-ringing / receivers that opted out, and raises a local notification (payload carries `chat_room_id`); tapping the notification deep-links into the room, routing via `isAdminAppProvider` (`/admin/support-chat/room/$id` vs `/support/room/$id`).
+- **Permission-aware room UI**: call button, voice button and attach menu hidden when the matching global flag is off.
+- **Admin delete/close**: the room AppBar delete icon is now shown to ANY admin-panel user (`isAdminPanel`) instead of only the owner, so resolved chats can be closed or permanently deleted by the handling admin.
+
+### Consequences
+- Admins get a real-time incoming-call alert even when the chat list/room is not open; callers know the receiver is only alerted if they opted in.
+- Feature roll-out (calls / voice / media) is controlled centrally, instantly, without redeploying the apps.
+- Notification is a LOCAL push (works while the app runs); true FCM background delivery and real WebRTC audio remain out of scope for this environment (consistent with ADR-103/104/105).
+- Gate: `flutter analyze` **0 new issues** (7 pre-existing); `flutter test` **946/946**; 4 APKs rebuilt + installed Success; admin relaunched clean (pid 8944; logcat no FATAL/RenderFlex). Commit `sprint 194` pushed.

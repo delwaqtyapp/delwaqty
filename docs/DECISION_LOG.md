@@ -3577,3 +3577,26 @@ User feedback after sprint 193: (1) an incoming voice call produces NO notificat
 - Feature roll-out (calls / voice / media) is controlled centrally, instantly, without redeploying the apps.
 - Notification is a LOCAL push (works while the app runs); true FCM background delivery and real WebRTC audio remain out of scope for this environment (consistent with ADR-103/104/105).
 - Gate: `flutter analyze` **0 new issues** (7 pre-existing); `flutter test` **946/946**; 4 APKs rebuilt + installed Success; admin relaunched clean (pid 8944; logcat no FATAL/RenderFlex). Commit `sprint 194` pushed.
+
+## ADR-107: Live propagation of chat closure + actionable app-wide incoming calls (LIVE fixes for 194)
+
+**Date:** 2026-09-26 · **Sprint 195** · **Status:** Accepted
+
+### Context
+User retested sprint 194 and reported two real bugs: (1) closing a chat from the ADMIN app gave the CUSTOMER zero indication — the room stayed open on his side and he could still send messages; (2) making a voice call only showed a "جارٍ الاتصال" bubble — no actionable accept/decline UI appeared in the admin panel.
+
+### Root causes
+- **Closure not live**: `support_chat_room_page.dart` read `is_active` once via `chatRoomProvider` (FutureProvider). There was NO Realtime subscription on `chat_rooms`, so the customer's page never learned the room closed; `_sendMessage` ignored room state entirely (nothing stopped the send client-side or server-side).
+- **Call alerts were dead on a cold start**: `ChatCallAlertService` read `Supabase.client.auth.currentUser?.id` the moment `chatCallAlertServiceProvider` was first read in `admin/app.dart`/`customer/app.dart` initState. Because the session is restored asynchronously, `meId` was still null → the service logged "no auth user, skipping" and NEVER subscribed. Even when it did work it only raised a local notification — it never opened the room or surfaced an accept/decline sheet on its own.
+
+### Decision
+- **Migration 098 (applied & verified LIVE)**: `REPLICA IDENTITY FULL` on `chat_rooms` + `chat_messages` (Supabase Realtime needs the full row for filtered UPDATE/DELETE streams) + a `BEFORE INSERT` trigger `chat_ensure_room_active()` on `chat_messages` that rejects any send into a closed room (`RAISE 'chat room is closed'`). Verified live: insert into an inactive room → `P0001 chat room is closed`; the active room still accepted inserts.
+- **Live room state**: new `chatRoomStreamProvider` (StreamProvider.family on `chat_rooms` `.eq('id', roomId)`); the room page now derives active state from the LIVE stream (fallback to the fetched room), so the closed banner + input lock flip instantly on BOTH sides. `_sendMessage`/`_sendBytes`/`_sendCallMessage` guard on `_isRoomActive()` with a `chatClosed` SnackBar; the DB trigger enforces it server-side regardless of client behavior.
+- **Actionable incoming calls**: `ChatCallAlertService` now waits on `authStateProvider` and subscribes only when a real authenticated session exists (fixing the dead-silent-no-op); on a ringing peer call it navigates STRAIGHT INTO the room (`/admin/support-chat/room/$id` vs `/support/room/$id` via `isAdminAppProvider`) so the accept/decline sheet appears at once, with a local-notification fallback when the room is already open.
+- **Catch-up on room open**: `_maybeHandlePendingIncomingCall()` re-scans the loaded history (≤60s freshness) so a call that arrived just before the page subscribed still surfaces the incoming-call sheet; `_handleIncomingCall` freshness relaxed 10s→60s.
+
+### Consequences
+- Closing a chat is now instantly visible and enforceable: the customer sees the «تم إغلاق هذه الدردشة بواسطة فريق الدعم» banner, the input disappears, and the server rejects any late message.
+- An incoming call now SEES an action: the receiving app jumps into the room with accept/decline, even from the admin list/home screen.
+- Notification remains a LOCAL push (works while the app runs; no FCM background delivery); real WebRTC audio stays out of scope (consistent with ADR-103/104/105/106).
+- Gate: `flutter analyze` **0 new issues** (7 pre-existing); `flutter test` **946/946**; 4 APKs rebuilt + installed Success; admin relaunched clean (pid 31130; logcat no FATAL/RenderFlex). Commit `sprint 195` pushed.

@@ -3766,6 +3766,60 @@ class AppLocalizationsEn extends AppLocalizations {
   String get typeMessage => 'Type a message...';
 
   @override
+  String get closeChat => 'Close Chat';
+
+  @override
+  String get closeChatConfirm =>
+      'Are you sure you want to close this chat? The conversation history will be deleted after 7 days.';
+
+  @override
+  String get closeChatConfirmTitle => 'Close chat';
+
+  @override
+  String get chatClosed => 'This chat has been closed by the support team.';
+
+  @override
+  String get chatClosedLabel => 'Closed';
+
+  @override
+  String get sendingMedia => 'Sending media...';
+
+  @override
+  String get sendImage => 'Send Image';
+
+  @override
+  String get sendVideo => 'Send Video';
+
+  @override
+  String get sendVoiceMessage => 'Send Voice Message';
+
+  @override
+  String get voiceRecording => 'Recording... release to send';
+
+  @override
+  String get attachment => 'Attachment';
+
+  @override
+  String get voiceMessage => 'Voice message';
+
+  @override
+  String welcomeCustomerMessage(Object name) {
+    return 'Welcome to Delwaqty support! I am $name from the support team and I will assist you in resolving your issue.';
+  }
+
+  @override
+  String get welcomeSection => 'Support department';
+
+  @override
+  String get tapToPlay => 'Tap to play';
+
+  @override
+  String get tapToRecord => 'Hold to record';
+
+  @override
+  String get releaseToCancel => 'Release to cancel';
+
+  @override
   String get startChat => 'Start Chat';
 
   @override

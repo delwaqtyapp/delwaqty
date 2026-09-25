@@ -3266,6 +3266,32 @@ The owner wants customers to be able to review and rate EVERY service category i
 ### Consequences
 - Migration **084 applied live** on `bttnlkmwhorjamzemwda` (POST `/database/query` → 201) once the working 90-day PAT (`sbp_fc832a…588`, recovered from stored OpenCode chat logs) replaced the invalid stored token. Verified: 5 RLS policies, `get_service_rating_summary('doctor')` → `{avg_rating:4.5, total_reviews:2, five_star:1, four_star:1,…}` (keys match the Dart entity), 6 seed reviews. UI is build-verified (`flutter analyze` **0 issues**, `flutter test` **940/940** incl. 4 new entity tests) and the app relaunches clean (pid 15712, no FATAL/RenderFlex).
 
+## ADR-103: Chat Media, Close-Chat, Auto-Welcome, and Bubble Ordering (round 56c, sprint 191)
+
+**Date:** Sprint 191
+
+### Context
+After the chat send-path fix (round 56b / sprint 190), the user requested four chat upgrades: **(1)** send media inside the chat (images, videos, voice messages, and a voice-call request), **(2)** an admin Close-Chat action, **(3)** an automatic welcome message that identifies which admin is handling the chat, and **(4)** correct bubble ordering (customer's bubble right / admin's bubble left for the customer, mirrored for the admin). The chat already used private storage (`chat_attachments`, 10 MB, non-public) and `chat_messages.message_type` was constrained to `text|image|file`.
+
+### Decision
+1. **Data/schema (`migration 093`, applied live)** — expand `chat_messages.message_type` CHECK to `text|image|file|video|audio|call`, and broaden `chat_attachments.allowed_mime_types` to images (png/jpeg/webp/gif) + video (mp4/webm) + audio (mpeg/mp4/m4a/ogg) + pdf/text. The bucket stays private, so all media reading goes through `createSignedUrl` (3600s).
+2. **Repository/data-source** — add `getRoomUser`, `uploadAttachment` (uploads bytes to `chat_attachments/{roomId}/{millis}_{safeName}` via `uploadBinary` + `FileOptions(contentType, upsert)`), `signedUrl(path)`, and `setAssignedAdmin(roomId, adminId, welcomeMessage)`. Wired through `ChatRepository` interface + impl.
+3. **UI (`support_chat_room_page.dart` rebuilt)** — bubbles `Align` right for `isMe` / left for the peer (both customer and admin see their own on the right). Media rendering: `ChatAttachmentImage` (signed-url `Image.network` thumb), `ChatAttachmentVideo` (icon + filename row), `ChatAudioMessage` (play/pause via `audioplayers`), and a call-row icon. Input area gains an attach menu (image / video / call-request) + hold-to-record mic (via `record` `AudioRecorder` → temp `.m4a` → upload → `messageType='audio'`) + a sending-progress line. Admin AppBar has a Close-Chat action (confirm dialog → `closeRoom` → auto-pop) and the room renders a closed banner + locks input when `is_active=false`.
+4. **Auto welcome** — fired once from `initState` when the room has no `assigned_admin_id`: sends `welcomeCustomerMessage(name)` (admin's `fullName`/`username`/email prefix) and calls `setAssignedAdmin` to claim the room, so it never repeats.
+5. **Dependencies** — `audioplayers ^6.8.1` (voice playback) and `path_provider` (voice temp path) added.
+6. **i18n** — 14 new ARB keys (en+ar): `closeChat`, `closeChatConfirm`, prompts, `sendingMedia`, `sendImage/Video/VoiceMessage`, `voiceRecording`, `voiceMessage`, `attachment`, `welcomeCustomerMessage(name)`, `tapToPlay`, `tapToRecord`, `releaseToCancel`, `chatClosed`, `chatClosedLabel`.
+7. **Tests** — `chat_message_media_test.dart` covers image/video/audio/call field round-trips.
+
+### Rationale
+- Private bucket + signed URLs keep participant-only RLS intact while still letting media render in-app.
+- A `message_type` value per kind (image/video/audio/call) keeps the schema queryable and the UI branch cheap inside one bubble-builder.
+- The call feature is implemented honestly as an in-chat **call-request message** (`messageType='call'`, `meta_data.call_type='voice'`); a real-time WebRTC channel is out of scope for this Termux/ARM environment and is flagged for a future decision rather than faked.
+
+### Consequences
+- Migration **093 applied live** and verified (`pg_constraint` shows the expanded CHECK; `storage.buckets` shows the new MIME list).
+- Gates: `flutter analyze` **0 issues**, `flutter test` **944/944** (940 + 4 new), all 4 APKs rebuilt + installed (customer/admin/driver/provider all Success), admin + customer relaunched clean (pids 1790 / 2402, logcat NO FATAL/RenderFlex/PostgREST).
+- Auth/identity: welcome text uses the admin's `fullName`/`username`/email; no `users.department`/`role` field exists, so region/scope info is intentionally not asserted in the welcome text for now.
+
 ## ADR-102: Remove the Delivery-Car Service Completely (round 56, sprint 190)
 
 **Date:** Sprint 190

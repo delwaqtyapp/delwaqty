@@ -65,4 +65,10 @@ final chatMessageStreamProvider = StreamProvider.family<ChatMessage, String>((re
   return repo.messageStream(roomId);
 });
 
+// Single room lookup (for closed/active state, assigned admin, etc.)
+final chatRoomProvider = FutureProvider.family<ChatRoom, String>((ref, roomId) async {
+  final repo = ref.read(chatRepositoryProvider);
+  return repo.getRoomById(roomId);
+});
+
 // New chat room creation - returns room ID

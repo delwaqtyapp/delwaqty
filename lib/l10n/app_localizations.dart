@@ -7244,6 +7244,108 @@ abstract class AppLocalizations {
   /// **'Type a message...'**
   String get typeMessage;
 
+  /// No description provided for @closeChat.
+  ///
+  /// In en, this message translates to:
+  /// **'Close Chat'**
+  String get closeChat;
+
+  /// No description provided for @closeChatConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to close this chat? The conversation history will be deleted after 7 days.'**
+  String get closeChatConfirm;
+
+  /// No description provided for @closeChatConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Close chat'**
+  String get closeChatConfirmTitle;
+
+  /// No description provided for @chatClosed.
+  ///
+  /// In en, this message translates to:
+  /// **'This chat has been closed by the support team.'**
+  String get chatClosed;
+
+  /// No description provided for @chatClosedLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Closed'**
+  String get chatClosedLabel;
+
+  /// No description provided for @sendingMedia.
+  ///
+  /// In en, this message translates to:
+  /// **'Sending media...'**
+  String get sendingMedia;
+
+  /// No description provided for @sendImage.
+  ///
+  /// In en, this message translates to:
+  /// **'Send Image'**
+  String get sendImage;
+
+  /// No description provided for @sendVideo.
+  ///
+  /// In en, this message translates to:
+  /// **'Send Video'**
+  String get sendVideo;
+
+  /// No description provided for @sendVoiceMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Send Voice Message'**
+  String get sendVoiceMessage;
+
+  /// No description provided for @voiceRecording.
+  ///
+  /// In en, this message translates to:
+  /// **'Recording... release to send'**
+  String get voiceRecording;
+
+  /// No description provided for @attachment.
+  ///
+  /// In en, this message translates to:
+  /// **'Attachment'**
+  String get attachment;
+
+  /// No description provided for @voiceMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Voice message'**
+  String get voiceMessage;
+
+  /// No description provided for @welcomeCustomerMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Welcome to Delwaqty support! I am {name} from the support team and I will assist you in resolving your issue.'**
+  String welcomeCustomerMessage(Object name);
+
+  /// No description provided for @welcomeSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Support department'**
+  String get welcomeSection;
+
+  /// No description provided for @tapToPlay.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap to play'**
+  String get tapToPlay;
+
+  /// No description provided for @tapToRecord.
+  ///
+  /// In en, this message translates to:
+  /// **'Hold to record'**
+  String get tapToRecord;
+
+  /// No description provided for @releaseToCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Release to cancel'**
+  String get releaseToCancel;
+
   /// No description provided for @startChat.
   ///
   /// In en, this message translates to:

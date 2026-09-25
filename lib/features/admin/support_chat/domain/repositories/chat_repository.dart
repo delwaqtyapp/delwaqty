@@ -17,6 +17,12 @@ abstract class ChatRepository {
     required bool isTyping,
   });
   Stream<bool> typingStream(String roomId);
+  Future<void> setCallStatus({
+    required String messageId,
+    required String status,
+    String? responderId,
+    String? responderType,
+  });
   Future<Map<String, dynamic>> getRoomUser(String userId);
   Future<String> uploadAttachment({
     required String roomId,

@@ -12,6 +12,7 @@ import 'package:delwaqty/features/admin/support_chat/presentation/widgets/chat_m
 import 'package:delwaqty/features/admin/support_chat/domain/entities/chat_message.dart';
 import 'package:delwaqty/features/_shared/auth/presentation/auth_provider.dart';
 import 'package:delwaqty/features/_shared/auth/domain/auth_state.dart';
+import 'package:delwaqty/core/config/app_mode_provider.dart';
 import 'package:delwaqty/domain/entities/user.dart';
 import 'package:delwaqty/shared/widgets/app_loader.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
@@ -33,6 +34,10 @@ class _SupportChatRoomPageState extends ConsumerState<SupportChatRoomPage> {
   Timer? _typingDebounce;
   bool _isRecording = false;
   bool _isSendingMedia = false;
+  String? _lastHandledCallMsgId;
+  bool _callSheetOpen = false;
+  BuildContext? _callSheetContext;
+  String? _activeCallMessageId;
 
   @override
   void initState() {
@@ -65,8 +70,7 @@ class _SupportChatRoomPageState extends ConsumerState<SupportChatRoomPage> {
     });
   }
 
-  bool _isAdmin(User? user) =>
-      user != null && (user.role == 'admin' || user.role == 'owner');
+  bool _sessionIsAdminPanel() => ref.read(isAdminAppProvider);
 
   Future<void> _notifyTyping(AppLocalizations l10n) {
     _typingDebounce?.cancel();
@@ -96,16 +100,18 @@ class _SupportChatRoomPageState extends ConsumerState<SupportChatRoomPage> {
     final cs = Theme.of(context).colorScheme;
     final authState = ref.watch(authStateProvider);
     final user = authState is AuthAuthenticated ? authState.user : null;
-    final isAdmin = _isAdmin(user);
+    final isAdminPanel = _sessionIsAdminPanel();
     final isOwner = user?.role == 'owner';
     final messagesAsync = ref.watch(chatMessagesProvider(widget.roomId));
     final roomAsync = ref.watch(chatRoomProvider(widget.roomId));
     final peerTyping = ref.watch(chatPeerTypingProvider(widget.roomId));
 
     ref.listen(chatMessageStreamProvider(widget.roomId), (prev, next) {
-      next.whenData((_) {
+      next.whenData((msg) {
         ref.invalidate(chatMessagesProvider(widget.roomId));
         _scrollToBottom();
+        _handleIncomingCall(msg, user?.id);
+        _closeOutgoingCallOnAnswer(msg, user?.id);
       });
     });
 
@@ -136,7 +142,7 @@ class _SupportChatRoomPageState extends ConsumerState<SupportChatRoomPage> {
               tooltip: l10n.voiceCall,
               onPressed: () => _sendCallMessage(),
             ),
-          if (isAdmin)
+          if (isAdminPanel)
             IconButton(
               icon: const Icon(Icons.close_rounded),
               tooltip: l10n.closeChat,
@@ -368,48 +374,112 @@ class _SupportChatRoomPageState extends ConsumerState<SupportChatRoomPage> {
       );
     }
 
-    // Call request bubble
+    // Call request bubble — full state machine on the SAME message:
+    // ringing -> accepted/declined (via chat_set_call_status) -> ended.
     if (msg.messageType == 'call' || (msg.metaData?['call_type'] != null)) {
+      final status = (msg.metaData?['status'] as String?) ?? 'ringing';
       final isIncoming = !isMe;
-      return Row(
+      final callActive = status == 'accepted';
+      final callDeclined = status == 'declined';
+      final callEnded = status == 'ended';
+      final callRinging = status == 'ringing';
+
+      final Color statusColor = callActive
+          ? Colors.green
+          : (callDeclined || callEnded) ? cs.error : cs.primary;
+      final IconData statusIcon = callActive
+          ? Icons.call_rounded
+          : (callDeclined || callEnded) ? Icons.call_end_rounded : Icons.call_rounded;
+
+      final String statusLabel;
+      if (callActive) {
+        statusLabel = l10n.callInProgress;
+      } else if (callDeclined) {
+        statusLabel = l10n.callDeclinedLabel;
+      } else if (callEnded) {
+        statusLabel = l10n.callEndedLabel;
+      } else {
+        statusLabel = isIncoming ? l10n.incomingVoiceCall : l10n.callingLabel;
+      }
+
+      return Column(
         mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(
-            isIncoming ? Icons.call_received_rounded : Icons.call_made_rounded,
-            size: 16,
-            color: isIncoming ? cs.error : cs.primary,
-          ),
-          const SizedBox(width: 6),
-          Flexible(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  msg.message,
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(statusIcon, size: 18, color: statusColor),
+              const SizedBox(width: 6),
+              Flexible(
+                child: Text(
+                  statusLabel,
                   style: TextStyle(
-                    color: fg,
+                    color: statusColor,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                if (isIncoming)
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      IconButton(
-                        visualDensity: VisualDensity.compact,
-                        icon: Icon(Icons.call_rounded, color: cs.primary),
-                        onPressed: () => _acceptCall(msg),
-                      ),
-                      IconButton(
-                        visualDensity: VisualDensity.compact,
-                        icon: Icon(Icons.call_end_rounded, color: cs.error),
-                        onPressed: () => _declineCall(msg),
-                      ),
-                    ],
+              ),
+            ],
+          ),
+          if (msg.message.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(top: 2),
+              child: Text(
+                msg.message,
+                style: TextStyle(color: fg, fontSize: 12),
+              ),
+            ),
+          if (callRinging && isIncoming) ...[
+            const SizedBox(height: 6),
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                FilledButton.icon(
+                  style: FilledButton.styleFrom(
+                    backgroundColor: Colors.green,
+                    foregroundColor: Colors.white,
+                    visualDensity: VisualDensity.compact,
+                    padding: const EdgeInsets.symmetric(horizontal: 10),
                   ),
+                  icon: const Icon(Icons.call_rounded, size: 16),
+                  label: Text(l10n.acceptCall),
+                  onPressed: () => _acceptCall(msg),
+                ),
+                const SizedBox(width: 8),
+                FilledButton.icon(
+                  style: FilledButton.styleFrom(
+                    backgroundColor: cs.error,
+                    foregroundColor: cs.onError,
+                    visualDensity: VisualDensity.compact,
+                    padding: const EdgeInsets.symmetric(horizontal: 10),
+                  ),
+                  icon: const Icon(Icons.call_end_rounded, size: 16),
+                  label: Text(l10n.declineCall),
+                  onPressed: () => _declineCall(msg),
+                ),
               ],
             ),
-          ),
+          ],
+          if (callActive) ...[
+            const SizedBox(height: 6),
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                FilledButton.icon(
+                  style: FilledButton.styleFrom(
+                    backgroundColor: cs.error,
+                    foregroundColor: cs.onError,
+                    visualDensity: VisualDensity.compact,
+                    padding: const EdgeInsets.symmetric(horizontal: 10),
+                  ),
+                  icon: const Icon(Icons.call_end_rounded, size: 16),
+                  label: Text(l10n.endCall),
+                  onPressed: () => _endCall(msg),
+                ),
+              ],
+            ),
+          ],
         ],
       );
     }
@@ -438,26 +508,14 @@ class _SupportChatRoomPageState extends ConsumerState<SupportChatRoomPage> {
   Future<void> _acceptCall(ChatMessage incoming) async {
     final user = _currentUser();
     if (user == null) return;
-    final l10n = AppLocalizations.of(context);
     final repo = ref.read(chatRepositoryProvider);
     try {
-      await repo.sendMessage(ChatMessage(
-        id: '',
-        roomId: widget.roomId,
-        senderId: user.id,
-        senderType: _isAdmin(user) ? 'admin' : user.role,
-        message: l10n.callAccepted,
-        messageType: 'call',
-        isFromAdmin: _isAdmin(user),
-        createdAt: DateTime.now(),
-        metaData: {
-          'call_type': 'voice',
-          'status': 'accepted',
-          'requested_by': incoming.senderId,
-          'accepted_by': user.id,
-          'accepted_at': DateTime.now().toIso8601String(),
-        },
-      ));
+      await repo.setCallStatus(
+        messageId: incoming.id,
+        status: 'accepted',
+        responderId: user.id,
+        responderType: _sessionIsAdminPanel() ? 'admin' : 'customer',
+      );
       ref.invalidate(chatMessagesProvider(widget.roomId));
       _scrollToBottom();
     } catch (_) {}
@@ -466,29 +524,120 @@ class _SupportChatRoomPageState extends ConsumerState<SupportChatRoomPage> {
   Future<void> _declineCall(ChatMessage incoming) async {
     final user = _currentUser();
     if (user == null) return;
-    final l10n = AppLocalizations.of(context);
     final repo = ref.read(chatRepositoryProvider);
     try {
-      await repo.sendMessage(ChatMessage(
-        id: '',
-        roomId: widget.roomId,
-        senderId: user.id,
-        senderType: _isAdmin(user) ? 'admin' : user.role,
-        message: l10n.callDeclined,
-        messageType: 'call',
-        isFromAdmin: _isAdmin(user),
-        createdAt: DateTime.now(),
-        metaData: {
-          'call_type': 'voice',
-          'status': 'declined',
-          'requested_by': incoming.senderId,
-          'declined_by': user.id,
-          'declined_at': DateTime.now().toIso8601String(),
-        },
-      ));
+      await repo.setCallStatus(
+        messageId: incoming.id,
+        status: 'declined',
+        responderId: user.id,
+        responderType: _sessionIsAdminPanel() ? 'admin' : 'customer',
+      );
       ref.invalidate(chatMessagesProvider(widget.roomId));
       _scrollToBottom();
     } catch (_) {}
+  }
+
+  // Hang up a call in progress — clears status to 'ended' on the same bubble.
+  Future<void> _endCall(ChatMessage msg) async {
+    final user = _currentUser();
+    if (user == null) return;
+    final repo = ref.read(chatRepositoryProvider);
+    try {
+      await repo.setCallStatus(
+        messageId: msg.id,
+        status: 'ended',
+        responderId: user.id,
+        responderType: _sessionIsAdminPanel() ? 'admin' : 'customer',
+      );
+      ref.invalidate(chatMessagesProvider(widget.roomId));
+    } catch (_) {}
+  }
+
+  // Opens a full-screen call sheet when a REAL-TIME ringing call arrives from
+  // the peer (fresh message, not my own, not already handled). Shows the same
+  // accept/decline actions; once answered the bubble itself flips to live state.
+  void _handleIncomingCall(ChatMessage msg, String? meId) {
+    final isCall = msg.messageType == 'call' ||
+        (msg.metaData?['call_type'] != null);
+    if (!isCall) return;
+    final status = (msg.metaData?['status'] as String?) ?? 'ringing';
+    if (status != 'ringing') return;
+    if (msg.senderId == meId) return;
+    final fresh = DateTime.now().difference(msg.createdAt).inSeconds.abs() < 10;
+    if (!fresh) return;
+    if (msg.id == _lastHandledCallMsgId || _callSheetOpen) return;
+    _lastHandledCallMsgId = msg.id;
+    _callSheetOpen = true;
+
+    final l10n = AppLocalizations.of(context);
+    final cs = Theme.of(context).colorScheme;
+    showModalBottomSheet<void>(
+      context: context,
+      isDismissible: false,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (sheetContext) {
+        return Padding(
+          padding: EdgeInsets.only(
+            left: 24,
+            right: 24,
+            top: 24,
+            bottom: MediaQuery.of(sheetContext).viewInsets.bottom + 24,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.phone_in_talk_rounded, size: 56, color: cs.primary),
+              const SizedBox(height: 12),
+              Text(
+                l10n.incomingVoiceCall,
+                style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 4),
+              Text(msg.message, style: TextStyle(color: cs.onSurfaceVariant)),
+              const SizedBox(height: 24),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  FilledButton.icon(
+                    style: FilledButton.styleFrom(
+                      backgroundColor: Colors.green,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 20, vertical: 12),
+                    ),
+                    icon: const Icon(Icons.call_rounded),
+                    label: Text(l10n.acceptCall),
+                    onPressed: () {
+                      Navigator.of(sheetContext).pop();
+                      _callSheetOpen = false;
+                      _acceptCall(msg);
+                    },
+                  ),
+                  FilledButton.icon(
+                    style: FilledButton.styleFrom(
+                      backgroundColor: cs.error,
+                      foregroundColor: cs.onError,
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 20, vertical: 12),
+                    ),
+                    icon: const Icon(Icons.call_end_rounded),
+                    label: Text(l10n.declineCall),
+                    onPressed: () {
+                      Navigator.of(sheetContext).pop();
+                      _callSheetOpen = false;
+                      _declineCall(msg);
+                    },
+                  ),
+                ],
+              ),
+            ],
+          ),
+        );
+      },
+    ).whenComplete(() => _callSheetOpen = false);
   }
 
   Widget _buildInputArea(ColorScheme cs, AppLocalizations l10n, User? user) {
@@ -740,12 +889,12 @@ class _SupportChatRoomPageState extends ConsumerState<SupportChatRoomPage> {
         bytes: bytes,
         contentType: contentType,
       );
-      final isAdminOrOwner = _isAdmin(user);
+      final isAdminOrOwner = _sessionIsAdminPanel();
       final message = ChatMessage(
         id: '',
         roomId: widget.roomId,
         senderId: user.id,
-        senderType: isAdminOrOwner ? 'admin' : user.role,
+        senderType: isAdminOrOwner ? 'admin' : 'customer',
         message: mediaCaption == l10n.voiceMessage ? l10n.voiceMessage : mediaCaption,
         messageType: messageType,
         attachmentUrl: messageType == 'image' ? path : null,
@@ -773,27 +922,29 @@ class _SupportChatRoomPageState extends ConsumerState<SupportChatRoomPage> {
     final user = authState is AuthAuthenticated ? authState.user : null;
     if (user == null) return;
     final l10n = AppLocalizations.of(context);
-    final isAdminOrOwner = _isAdmin(user);
+    final isAdminOrOwner = _sessionIsAdminPanel();
     final message = ChatMessage(
       id: '',
       roomId: widget.roomId,
       senderId: user.id,
-      senderType: isAdminOrOwner ? 'admin' : user.role,
+      senderType: isAdminOrOwner ? 'admin' : 'customer',
       message: l10n.voiceCallRequest,
       messageType: 'call',
       isFromAdmin: isAdminOrOwner,
       createdAt: DateTime.now(),
       metaData: {
         'call_type': 'voice',
+        'status': 'ringing',
         'requested_by': user.id,
         'requested_at': DateTime.now().toIso8601String(),
       },
     );
     final repo = ref.read(chatRepositoryProvider);
     try {
-      await repo.sendMessage(message);
+      final sent = await repo.sendMessage(message);
       ref.invalidate(chatMessagesProvider(widget.roomId));
       _scrollToBottom();
+      await _openOutgoingCallSheet(sent.id);
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -803,18 +954,110 @@ class _SupportChatRoomPageState extends ConsumerState<SupportChatRoomPage> {
     }
   }
 
+  // Caller sheet: shows "calling..." until the peer answers/declines/hangs up,
+  // then closes automatically (driven by the live message stream).
+  Future<void> _openOutgoingCallSheet(String callMessageId) async {
+    if (!mounted || _callSheetOpen) return;
+    _callSheetOpen = true;
+    _activeCallMessageId = callMessageId;
+    final l10n = AppLocalizations.of(context);
+    final cs = Theme.of(context).colorScheme;
+    final navCtx = context;
+    await showModalBottomSheet<void>(
+      context: navCtx,
+      isDismissible: false,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (sheetContext) {
+        _callSheetContext = sheetContext;
+        return Padding(
+          padding: EdgeInsets.only(
+            left: 24,
+            right: 24,
+            top: 24,
+            bottom: MediaQuery.of(sheetContext).viewInsets.bottom + 24,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const SizedBox(
+                width: 48,
+                height: 48,
+                child: CircularProgressIndicator(strokeWidth: 3),
+              ),
+              const SizedBox(height: 12),
+              Icon(Icons.phone_in_talk_rounded, size: 56, color: cs.primary),
+              const SizedBox(height: 12),
+              Text(
+                l10n.callingLabel,
+                style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 24),
+              FilledButton.icon(
+                style: FilledButton.styleFrom(
+                  backgroundColor: cs.error,
+                  foregroundColor: cs.onError,
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 20, vertical: 12),
+                ),
+                icon: const Icon(Icons.call_end_rounded),
+                label: Text(l10n.endCall),
+                onPressed: () async {
+                  final repo = ref.read(chatRepositoryProvider);
+                  await repo.setCallStatus(
+                    messageId: callMessageId,
+                    status: 'ended',
+                    responderId: _currentUser()?.id,
+                    responderType: _sessionIsAdminPanel() ? 'admin' : 'customer',
+                  );
+                  if (sheetContext.mounted) Navigator.of(sheetContext).pop();
+                  _callSheetOpen = false;
+                  _activeCallMessageId = null;
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    ).whenComplete(() {
+      _callSheetOpen = false;
+      _activeCallMessageId = null;
+    });
+  }
+
+  // Auto-close the caller sheet the instant the peer flips the call to any
+  // terminal state (accepted / declined / ended) via a live stream event.
+  void _closeOutgoingCallOnAnswer(ChatMessage msg, String? meId) {
+    final isCall = msg.messageType == 'call' ||
+        (msg.metaData?['call_type'] != null);
+    if (!isCall) return;
+    if (msg.id != _activeCallMessageId) return;
+    final status = (msg.metaData?['status'] as String?) ?? 'ringing';
+    if (status == 'ringing') return;
+    final sheetCtx = _callSheetContext;
+    if (sheetCtx != null && sheetCtx.mounted) {
+      Navigator.of(sheetCtx).pop();
+    }
+    _callSheetOpen = false;
+    _activeCallMessageId = null;
+    _lastHandledCallMsgId = msg.id;
+    _scrollToBottom();
+  }
+
   void _sendMessage(User? user) async {
     final text = _messageController.text.trim();
     if (text.isEmpty) return;
 
     if (user == null) return;
 
-    final isAdminOrOwner = _isAdmin(user);
+    final isAdminOrOwner = _sessionIsAdminPanel();
     final message = ChatMessage(
       id: '',
       roomId: widget.roomId,
       senderId: user.id,
-      senderType: isAdminOrOwner ? 'admin' : user.role,
+      senderType: isAdminOrOwner ? 'admin' : 'customer',
       message: text,
       isFromAdmin: isAdminOrOwner,
       createdAt: DateTime.now(),
@@ -915,7 +1158,7 @@ class _SupportChatRoomPageState extends ConsumerState<SupportChatRoomPage> {
     final authState = ref.read(authStateProvider);
     final user = authState is AuthAuthenticated ? authState.user : null;
     if (user == null) return;
-    if (!_isAdmin(user)) return;
+    if (!_sessionIsAdminPanel()) return;
 
     final l10n = AppLocalizations.of(context);
     final repo = ref.read(chatRepositoryProvider);

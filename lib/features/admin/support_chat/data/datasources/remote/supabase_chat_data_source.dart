@@ -93,6 +93,20 @@ class SupabaseChatDataSource {
     await _client.rpc('admin_delete_chat', params: {'p_room_id': roomId});
   }
 
+  Future<void> setCallStatus({
+    required String messageId,
+    required String status,
+    String? responderId,
+    String? responderType,
+  }) async {
+    await _client.rpc('chat_set_call_status', params: {
+      'p_message_id': messageId,
+      'p_status': status,
+      'p_responder_id': responderId,
+      'p_responder_type': responderType,
+    });
+  }
+
   // Auto-purge of chats past auto_delete_at. Returns number removed.
   Future<int> purgeExpiredChats() async {
     final res = await _client.rpc('admin_purge_expired_chats');

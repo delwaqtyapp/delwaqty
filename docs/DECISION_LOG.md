@@ -3536,3 +3536,23 @@ One sprint after the media-enabled chat (ADR-103), the user requested a second c
 - A real-time voice stream (WebRTC-style) is still NOT in scope; the top-of-chat button requests a call and the peer can accept/decline, but actual media transport remains a message-layer handshake (consistent with ADR-103).
 - New chats automatically show a unique `DWQ-xxxx` complaint number; deleted rooms and their attachments are hard-removed; closed rooms are hard-purged once `auto_delete_at` passes.
 - Gate: `flutter analyze` **0 issues** (only the 7 pre-existing warnings/infos); `flutter test` **946/946** (944 + 2 new ChatRoom.referenceNumber round-trip tests); 4 APKs built + installed Success (customer/admin/driver/provider); app relaunched clean — logcat no FATAL/RenderFlex/PostgREST. Commit `sprint 192` pushed.
+
+---
+
+## ADR-105: Chat voice-call UX — accept/decline confirmation, direct calling flow, and app-driven sender identity
+
+**Date:** 2026-09-25 · **Sprint 193** · **Status:** Accepted
+
+### Context
+User feedback after sprint 192: (1) a voice call only emitted a request bubble with no visible accept/decline confirmation from the other side; (2) calling from the admin app did not feel like it connected directly to the customer; (3) the sender identity must be determined by the RUNNING app, not the account role — an account that is an admin/owner, when using the customer app, must appear as a regular customer there, while the same account using the admin app appears as الإدارة.
+
+### Decision
+- **Same-message status handshake.** Accepting/declining/ending no longer appends new messages; the RPC `chat_set_call_status(p_message_id, p_status, p_responder_id, p_responder_type)` (migration 096, SECURITY DEFINER, participant-or-admin/owner gated, GRANT EXECUTE to authenticated + service_role) updates `meta_data` on the SAME call message — the Realtime stream flips the bubble state live for both sides (ringing → accepted/declined/ended).
+- **Full call UI.** The incoming side gets a full incoming-call bottom sheet (accept/decline); the caller side gets a "جارٍ الاتصال…" sheet with End-call that auto-closes the instant the peer answers/declines/hangs up.
+- **App-driven identity.** `isAdminAppProvider` (lib/core/config/app_mode_provider.dart) now drives `senderType`/`isFromAdmin` in every send path (`_sendBytes`, `_sendCallMessage`, `_sendMessage`, `_maybeSendWelcome`): `'admin'` + `true` only from the admin app, `'customer'` + `false` otherwise — regardless of `user.role`.
+
+### Consequences
+- Both sides see one live bubble: receiver gets accept/decline buttons, caller sees ringing → accepted/declined/ended in place; no duplicated request/result messages.
+- Identity is now consistent with the user's requirement: the same account appears as عميل in the customer app and الإدارة in the admin app simultaneously.
+- Real media transport (WebRTC) remains out of scope — the call is a Realtime-driven message handshake with full in-app call screens (consistent with ADR-103/104).
+- Gate: `flutter analyze` **0 new issues** (only the 7 pre-existing warnings/infos); `flutter test` **946/946**; 4 APKs rebuilt + installed Success (TS 20260925_2330); admin + customer relaunched clean (customer top activity; logcat no FATAL/RenderFlex). Commit `sprint 193` pushed.

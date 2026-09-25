@@ -102,6 +102,23 @@ final chatRoomProvider = FutureProvider.family<ChatRoom, String>((ref, roomId) a
   return repo.getRoomById(roomId);
 });
 
+// LIVE room stream: reflects is_active / assigned_admin changes in real time
+// on BOTH sides (admin closing the chat flips the customer's UI instantly).
+// Requires the chat_rooms REPLICA IDENTITY FULL (migration 098).
+final chatRoomStreamProvider = StreamProvider.family<ChatRoom, String>((ref, roomId) {
+  return Supabase.instance.client
+      .from('chat_rooms')
+      .stream(primaryKey: ['id'])
+      .eq('id', roomId)
+      .map((rows) {
+    final list = (rows as List).cast<Map<String, dynamic>>();
+    if (list.isEmpty) {
+      throw StateError('chat room not found: $roomId');
+    }
+    return ChatRoom.fromJson(list.last);
+  });
+});
+
 // Whether the peer (non-self participant) is currently typing.
 final chatPeerTypingProvider = StreamProvider.family<bool, String>((ref, roomId) {
   final repo = ref.read(chatRepositoryProvider);

@@ -45,6 +45,7 @@ class _SupportChatRoomPageState extends ConsumerState<SupportChatRoomPage> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _scrollToBottom();
       _maybeSendWelcome();
+      _maybeHandlePendingIncomingCall();
     });
   }
 
@@ -71,6 +72,44 @@ class _SupportChatRoomPageState extends ConsumerState<SupportChatRoomPage> {
   }
 
   bool _sessionIsAdminPanel() => ref.read(isAdminAppProvider);
+
+  // When the room opens after the call alert routed us here, the ringing call
+  // message may already be in the history (the live stream event fired before
+  // this page subscribed). Scan the loaded messages once and surface a
+  // ringing, peer-originated, unhandled call as the incoming-call sheet.
+  Future<void> _maybeHandlePendingIncomingCall() async {
+    final user = _currentUser();
+    if (user == null) return;
+    await Future<void>.delayed(const Duration(milliseconds: 400));
+    if (!mounted) return;
+    final messagesAsync = ref.read(chatMessagesProvider(widget.roomId));
+    final messages = messagesAsync.asData?.value;
+    if (messages == null || messages.isEmpty) return;
+    final candidate = messages.where((m) {
+      final isCall = m.messageType == 'call' ||
+          (m.metaData?['call_type'] != null);
+      if (!isCall) return false;
+      final status = (m.metaData?['status'] as String?) ?? 'ringing';
+      if (status != 'ringing') return false;
+      if (m.senderId == user.id) return false;
+      return true;
+    }).toList();
+    if (candidate.isEmpty || _callSheetOpen) return;
+    final latest = candidate.last;
+    // Only auto-surface calls still fresh (within ~60s) to avoid nagging on
+    // old abandoned requests after reopening an old room.
+    final age = DateTime.now().difference(latest.createdAt).inSeconds.abs();
+    if (age > 60) return;
+    if (latest.id == _lastHandledCallMsgId) return;
+    _handleIncomingCall(latest, user.id);
+  }
+
+  bool _isRoomActive() {
+    final live = ref.read(chatRoomStreamProvider(widget.roomId));
+    if (live.hasValue) return live.value?.isActive ?? true;
+    final fetched = ref.read(chatRoomProvider(widget.roomId));
+    return fetched.asData?.value.isActive ?? true;
+  }
 
   Future<void> _notifyTyping(AppLocalizations l10n) {
     _typingDebounce?.cancel();
@@ -103,6 +142,9 @@ class _SupportChatRoomPageState extends ConsumerState<SupportChatRoomPage> {
     final isAdminPanel = _sessionIsAdminPanel();
     final messagesAsync = ref.watch(chatMessagesProvider(widget.roomId));
     final roomAsync = ref.watch(chatRoomProvider(widget.roomId));
+    final roomLiveAsync = ref.watch(chatRoomStreamProvider(widget.roomId));
+    final isRoomActive =
+        roomLiveAsync.asData?.value.isActive ?? roomAsync.asData?.value.isActive ?? true;
     final peerTyping = ref.watch(chatPeerTypingProvider(widget.roomId));
     final permissionsAsync = ref.watch(chatPermissionsProvider);
     final permissions = permissionsAsync.asData?.value ?? <String, dynamic>{};
@@ -140,7 +182,7 @@ class _SupportChatRoomPageState extends ConsumerState<SupportChatRoomPage> {
           ],
         ),
         actions: [
-          if ((roomAsync.asData?.value.isActive ?? true) && callEnabled)
+          if (isRoomActive && callEnabled)
             IconButton(
               icon: const Icon(Icons.call_rounded),
               tooltip: l10n.voiceCall,
@@ -165,7 +207,7 @@ class _SupportChatRoomPageState extends ConsumerState<SupportChatRoomPage> {
           Expanded(
             child: roomAsync.when(
               data: (room) {
-                if (!room.isActive) {
+                if (!isRoomActive || !room.isActive) {
                   return Column(
                     children: [
                       Padding(
@@ -208,7 +250,7 @@ class _SupportChatRoomPageState extends ConsumerState<SupportChatRoomPage> {
           ),
 
           // Typing indicator above input
-          if ((roomAsync.asData?.value.isActive ?? true) && (peerTyping.asData?.value ?? false))
+          if (isRoomActive && (peerTyping.asData?.value ?? false))
             Padding(
               padding: const EdgeInsets.only(top: 6),
               child: Text(
@@ -221,7 +263,7 @@ class _SupportChatRoomPageState extends ConsumerState<SupportChatRoomPage> {
               ),
             ),
 
-          if (roomAsync.asData?.value.isActive ?? true)
+          if (isRoomActive)
             _buildInputArea(
               cs,
               l10n,
@@ -574,7 +616,7 @@ class _SupportChatRoomPageState extends ConsumerState<SupportChatRoomPage> {
     final status = (msg.metaData?['status'] as String?) ?? 'ringing';
     if (status != 'ringing') return;
     if (msg.senderId == meId) return;
-    final fresh = DateTime.now().difference(msg.createdAt).inSeconds.abs() < 10;
+    final fresh = DateTime.now().difference(msg.createdAt).inSeconds.abs() < 60;
     if (!fresh) return;
     if (msg.id == _lastHandledCallMsgId || _callSheetOpen) return;
     _lastHandledCallMsgId = msg.id;
@@ -911,6 +953,13 @@ class _SupportChatRoomPageState extends ConsumerState<SupportChatRoomPage> {
     required String mediaCaption,
   }) async {
     if (user == null) return;
+    if (!_isRoomActive() && mounted) {
+      final l10n = AppLocalizations.of(context);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.chatClosed)),
+      );
+      return;
+    }
     setState(() => _isSendingMedia = true);
     final repo = ref.read(chatRepositoryProvider);
     try {
@@ -952,6 +1001,13 @@ class _SupportChatRoomPageState extends ConsumerState<SupportChatRoomPage> {
     final authState = ref.read(authStateProvider);
     final user = authState is AuthAuthenticated ? authState.user : null;
     if (user == null) return;
+    if (!_isRoomActive() && mounted) {
+      final l10n = AppLocalizations.of(context);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.chatClosed)),
+      );
+      return;
+    }
     final l10n = AppLocalizations.of(context);
     final isAdminOrOwner = _sessionIsAdminPanel();
     final message = ChatMessage(
@@ -1080,8 +1136,16 @@ class _SupportChatRoomPageState extends ConsumerState<SupportChatRoomPage> {
   void _sendMessage(User? user) async {
     final text = _messageController.text.trim();
     if (text.isEmpty) return;
-
     if (user == null) return;
+    if (!_isRoomActive()) {
+      if (mounted) {
+        final l10n = AppLocalizations.of(context);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n.chatClosed)),
+        );
+      }
+      return;
+    }
 
     final isAdminOrOwner = _sessionIsAdminPanel();
     final message = ChatMessage(

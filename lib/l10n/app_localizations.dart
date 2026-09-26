@@ -12151,6 +12151,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Cannot hard-delete (referenced by past orders); item was hidden instead'**
   String get deleteSoftFailed;
+
+  /// No description provided for @checkForUpdate.
+  ///
+  /// In en, this message translates to:
+  /// **'Check for update'**
+  String get checkForUpdate;
+
+  /// No description provided for @checkingForUpdate.
+  ///
+  /// In en, this message translates to:
+  /// **'Checking for update…'**
+  String get checkingForUpdate;
+
+  /// No description provided for @youAreUpToDate.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'re on the latest version'**
+  String get youAreUpToDate;
+
+  /// No description provided for @updateAvailableNow.
+  ///
+  /// In en, this message translates to:
+  /// **'A new version is available'**
+  String get updateAvailableNow;
 }
 
 class _AppLocalizationsDelegate

@@ -2038,5 +2038,9 @@
   "confirmDeleteMerchant": "Deleting the merchant permanently removes all its products and reviews. Continue?",
   "deleted": "Deleted successfully",
   "deleteFailed": "Delete failed, try again",
-  "deleteSoftFailed": "Cannot hard-delete (referenced by past orders); item was hidden instead"
+  "deleteSoftFailed": "Cannot hard-delete (referenced by past orders); item was hidden instead",
+  "checkForUpdate": "Check for update",
+  "checkingForUpdate": "Checking for update…",
+  "youAreUpToDate": "You're on the latest version",
+  "updateAvailableNow": "A new version is available"
 }

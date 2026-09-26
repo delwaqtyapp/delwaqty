@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:delwaqty/core/config/app_mode_provider.dart';
 import 'package:delwaqty/core/constants/app_constants.dart';
 import 'package:delwaqty/core/extensions/context_extensions.dart';
 import 'package:delwaqty/core/localization/admin_locale_provider.dart';
@@ -10,9 +11,12 @@ import 'package:delwaqty/core/theme/app_spacing.dart';
 import 'package:delwaqty/core/theme/theme_mode_provider.dart';
 import 'package:delwaqty/features/_shared/auth/presentation/auth_provider.dart';
 import 'package:delwaqty/features/admin/financial/presentation/providers/admin_financial_providers.dart';
+import 'package:delwaqty/services/ota/ota_update_dialog.dart';
+import 'package:delwaqty/services/ota/ota_update_manager.dart';
 import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
 import 'package:delwaqty/shared/widgets/gradient_background.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 
 class AdminSettingsMenuPage extends ConsumerStatefulWidget {
   const AdminSettingsMenuPage({super.key});
@@ -452,8 +456,27 @@ class _AdminSettingsMenuPageState extends ConsumerState<AdminSettingsMenuPage> {
     }
   }
 
-  void _showAboutDialog(BuildContext context, AppLocalizations l10n) {
+  Future<void> _showAboutDialog(BuildContext context, AppLocalizations l10n) async {
     final isOwner = _profile!['is_owner'] as bool? ?? false;
+    const flavor = AppFlavor.admin;
+    var needsUpdate = false;
+    OtaCheckResult? checkResult;
+    try {
+      final pkg = await PackageInfo.fromPlatform();
+      final m = await fetchOtaManifest();
+      final channel = m?.forFlavor(flavor);
+      final current = int.tryParse(pkg.buildNumber) ?? 0;
+      final latest = channel?.version ?? current;
+      checkResult = OtaCheckResult(
+        current: current,
+        latest: latest,
+        needsUpdate: latest > current,
+      );
+      needsUpdate = checkResult.needsUpdate;
+    } catch (_) {
+      needsUpdate = false;
+    }
+    if (!context.mounted) return;
     showAboutDialog(
       context: context,
       applicationName: AppConstants.appName,
@@ -470,6 +493,21 @@ class _AdminSettingsMenuPageState extends ConsumerState<AdminSettingsMenuPage> {
           l10n.adminSettingsMenu,
           style: Theme.of(context).textTheme.bodySmall?.copyWith(
             color: Theme.of(context).colorScheme.onSurfaceVariant,
+          ),
+        ),
+        const SizedBox(height: 12),
+        FilledButton.icon(
+          onPressed: () async {
+            Navigator.of(context).pop();
+            await showUpdateAvailableAndDownload(
+              context: context,
+              flavor: flavor,
+              result: checkResult!,
+            );
+          },
+          icon: const Icon(Icons.system_update_alt_rounded),
+          label: Text(
+            needsUpdate ? l10n.updateAvailableNow : l10n.checkForUpdate,
           ),
         ),
       ],

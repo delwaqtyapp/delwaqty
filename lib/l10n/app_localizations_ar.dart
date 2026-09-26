@@ -6302,4 +6302,16 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get deleteSoftFailed =>
       'لا يمكن الحذف نهائيًا لارتباطه بطلبات قديمة؛ تم إخفاؤه';
+
+  @override
+  String get checkForUpdate => 'البحث عن تحديث';
+
+  @override
+  String get checkingForUpdate => 'جاري البحث عن التحديث…';
+
+  @override
+  String get youAreUpToDate => 'أنت على أحدث إصدار';
+
+  @override
+  String get updateAvailableNow => 'يتوفر إصدار أحدث';
 }

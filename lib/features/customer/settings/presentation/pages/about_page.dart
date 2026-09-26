@@ -1,10 +1,47 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:delwaqty/core/config/app_mode_provider.dart';
 import 'package:delwaqty/core/extensions/context_extensions.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
+import 'package:delwaqty/services/ota/ota_update_dialog.dart';
+import 'package:delwaqty/services/ota/ota_update_manager.dart';
 
-class AboutPage extends StatelessWidget {
+class AboutPage extends ConsumerStatefulWidget {
   const AboutPage({super.key});
+
+  @override
+  ConsumerState<AboutPage> createState() => _AboutPageState();
+}
+
+class _AboutPageState extends ConsumerState<AboutPage> {
+  bool _checking = false;
+
+  Future<void> _checkForUpdate() async {
+    if (_checking) return;
+    final messenger = ScaffoldMessenger.of(context);
+    final l10n = AppLocalizations.of(context);
+    setState(() => _checking = true);
+    try {
+      final flavor = ref.read(appFlavorProvider);
+      final result = await checkForOtaUpdate(flavor);
+      if (!mounted) return;
+      if (result.needsUpdate) {
+        await showUpdateAvailableAndDownload(
+          context: context,
+          flavor: flavor,
+          result: result,
+        );
+      } else {
+        messenger.showSnackBar(SnackBar(content: Text(l10n.youAreUpToDate)));
+      }
+    } catch (_) {
+      if (!mounted) return;
+      messenger.showSnackBar(SnackBar(content: Text(l10n.checkingForUpdate)));
+    } finally {
+      if (mounted) setState(() => _checking = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -81,6 +118,21 @@ class AboutPage extends StatelessWidget {
               color: context.colorScheme.onSurfaceVariant,
             ),
             textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 16),
+          FilledButton.icon(
+            onPressed: _checking ? null : _checkForUpdate,
+            icon: _checking
+                ? const SizedBox(
+                    width: 18,
+                    height: 18,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : const Icon(Icons.system_update_alt_rounded),
+            label: Text(_checking ? l10n.checkingForUpdate : l10n.checkForUpdate),
+            style: FilledButton.styleFrom(
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+            ),
           ),
           const SizedBox(height: 32),
           DecoratedBox(

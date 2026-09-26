@@ -38,6 +38,25 @@ Future<bool> showOtaUpdateIfAvailable({
   return true;
 }
 
+/// Shows the update dialog for an ALREADY-verified [result] (the caller has
+/// already run [checkForOtaUpdate] and confirmed `needsUpdate`). Unlike
+/// [showOtaUpdateIfAvailable] this does not re-fetch the manifest, so it runs
+/// instantly from the About page.
+Future<void> showUpdateAvailableAndDownload({
+  required BuildContext context,
+  required AppFlavor flavor,
+  required OtaCheckResult result,
+}) async {
+  final dialogContext =
+      _navigatorFor(flavor)?.context ?? context;
+  if (!dialogContext.mounted) return;
+  await showDialog<void>(
+    context: dialogContext,
+    barrierDismissible: false,
+    builder: (_) => _OtaUpdateDialog(flavor: flavor, result: result),
+  );
+}
+
 NavigatorState? _navigatorFor(AppFlavor flavor) {
   switch (flavor) {
     case AppFlavor.admin:
@@ -90,10 +109,55 @@ class _OtaUpdateDialogState extends State<_OtaUpdateDialog> {
         mainAxisSize: MainAxisSize.min,
         children: [
           if (_downloading) ...[
-            LinearProgressIndicator(value: _progress),
-            const SizedBox(height: 12),
-            Text(
-              isAr ? 'جاري تحميل التحديث…' : 'Downloading…',
+            DecoratedBox(
+              decoration: BoxDecoration(
+                color: Theme.of(context)
+                    .colorScheme
+                    .surfaceContainerHighest
+                    .withValues(alpha: 0.5),
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(
+                  color: Theme.of(context).colorScheme.outlineVariant,
+                ),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.cloud_download_rounded,
+                          size: 20,
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(isAr ? 'جاري تحميل التحديث…' : 'Downloading…'),
+                        ),
+                        Text(
+                          '${(_progress * 100).clamp(0, 100).round()}%',
+                          style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                            fontWeight: FontWeight.w700,
+                            color: Theme.of(context).colorScheme.primary,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(6),
+                      child: LinearProgressIndicator(
+                        value: _progress,
+                        minHeight: 8,
+                        backgroundColor:
+                            Theme.of(context).colorScheme.surfaceContainerHighest,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ),
           ] else if (_downloadFailed) ...[
             Text(

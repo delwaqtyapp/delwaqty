@@ -93,19 +93,16 @@ class AllServicesPage extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(title: Text(l10n.allServices)),
       body: servicesAsync.when(
-        loading: () => GridView.count(
-          crossAxisCount: 3,
+        loading: () => GridView.builder(
           padding: const EdgeInsets.all(16),
-          mainAxisSpacing: 12,
-          crossAxisSpacing: 12,
-          children: const [
-            ShimmerCard(height: 100),
-            ShimmerCard(height: 100),
-            ShimmerCard(height: 100),
-            ShimmerCard(height: 100),
-            ShimmerCard(height: 100),
-            ShimmerCard(height: 100),
-          ],
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 3,
+            mainAxisSpacing: 14,
+            crossAxisSpacing: 12,
+            mainAxisExtent: 132,
+          ),
+          itemCount: 6,
+          itemBuilder: (_, _) => const ShimmerCard(height: 100),
         ),
         error: (_, _) => PremiumEmptyState(
           icon: Icons.error_outline_rounded,

@@ -3893,3 +3893,30 @@ readable text.
 - Text is clamped to one line with ellipsis (long English names may truncate).
 - Visual confirmation of the new tiles on the physical device is left to the
   user.
+
+---
+
+## ADR-117: Overflow-proof loading skeletons + device-exact responsive test suite
+
+**Date:** Sprint 204 (ROUND 64)
+**Status:** Accepted
+**Deciders:** Lead Software Architect (after user report «لسه المشكله موجوده افحص ودقق اكتر»)
+
+### Context
+ROUND 62/63 made the reworked grids (home strip, `/services`, home-services) overflow-free "by construction" with fixed extents, yet the user still reported a transient visual glitch. Investigation surfaced a DIFFERENT, previously-uninstrumented surface: the loading shimmer skeleton. `ShimmerCard`'s interior Column (natural height ≈ 60px) sat inside a `GridView.count` square cell (default `childAspectRatio: 1.0`) which on narrow phones (≤~380dp logical) yields ~53px → `RenderFlex overflowed by 6.7px` — a real flash on every open of `/services`. It was invisible to the whole existing suite because responsive tests pumped empty data and sized the test view as logical pixels instead of physical (`tester.view.physicalSize` is physical px; earlier «430x941» setups rendered 145dp logical).
+
+### Decision
+1. **`ShimmerCard` is rendered overflow-proof for ANY cell size**: replace fixed box widths (120 / 200 / double.infinity) with `LayoutBuilder`-derived fractional widths and wrap the inner `Column` in `FittedBox(fit: BoxFit.scaleDown, alignment: centerStart)`. On roomy cells the scale is exactly 1.0 (visual unchanged); on tight cells the whole skeleton shrinks uniformly instead of overflowing. Applies to every usage across all four apps at once.
+2. **Alignment of skeleton and data grids**: the `/services` loading branch now uses the SAME `SliverGridDelegateWithFixedCrossAxisCount(mainAxisExtent: 132, ...)` as the data grid, so skeleton→data swaps without a reflow jump and share the same guarantees.
+3. **Regression harness recreates the physical device**: `test/features/customer/home/all_services_page_responsive_test.dart`, `test/features/customer/home_services/home_services_page_responsive_test.dart` (mocktail-mocked repositories, shared `service_samples.dart` fixture), and a real-data Arabic case added to `home_page_responsive_test.dart` — covering logical 145→800dp, textScale 1.0 and 1.3, Locale en and ar, with the device notch inset. The physical `1280x2800 @ dpr 2.975 = 430.25x941.2 dp` configuration is tested both directly and via the logical form-factor suite.
+
+### Rationale
+- A shared skeleton widget must tolerate the constraints ANY placement gives it; fixed natural sizes in a flex child are the classic overflow source (matches Flutter guidance: clip or scale when content can exceed the box).
+- Duplicating the delegate between loading and data branches is the only way "shimmer cannot overflow if data cannot".
+- Device-accurate tests turn a user's intermittent sighting into a deterministic regression check.
+
+### Consequences
+- `flutter analyze` clean; `flutter test` 978/978 (959 + 19 new). The newly-added AllServices 360x640/360x800 cases FAILED against the ROUND-63 build (catching the shipped defect) and now pass.
+- With `temperature` fixed placeholder geometry: on devices narrower than ~330dp logical, the skeleton self-scales (slightly denser shimmer) instead of flashing a yellow overflow band.
+- Any future grid must mirror its skeleton delegate + keep skeleton content within the cell (this ADR's rule of thumb: mainAxisExtent ≥ content + margins + 40px).
+- Physical device verified after build: `releases/delwaqty_1.0.1+2_debug_20260927_011219.apk` installed, relaunch clean, zero `overflowed by|RenderFlex|FATAL` in logcat.

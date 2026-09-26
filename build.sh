@@ -94,15 +94,12 @@ mkdir -p "$RELEASES_DIR"
 
 # Step 5: Build
 if [ "$BUILD_RELEASE" = true ]; then
-  echo "Building release APK..."
-
-  # IMPORTANT: On the Termux ARM host SDK (~/flutter-3.47.1-test), release/AOT
-  # builds are NOT possible: the engine does not publish an arm64-host
-  # android-arm64-release gen_snapshot ("Failed to find ...
-  # android-arm64-release/linux-x64/gen_snapshot"). See docs/DECISION_LOG.md ADR-044.
-  # Keep the required shape below anyway in case a capable SDK is used.
-  flutter build apk --release --flavor customer \
-    -t lib/customer/main.dart --dart-define-from-file=$ENV_FILE
+  echo "ERROR: Release/AOT build NOT possible on this Termux ARM host."
+  echo "The engine ships no android-arm64 gen_snapshot for linux-arm64; the"
+  echo "linux-arm64/gen_snapshot produces a Linux-target AOT that the Android"
+  echo "engine rejects at runtime ('Could not create root isolate' - verified"
+  echo "on device, sprint 198). Use the debug pipeline instead. See ADR-044."
+  exit 1
   APK_PATH="$PROJECT_DIR/build/app/outputs/flutter-apk/app-customer-release.apk"
   APK_NAME="delwaqty_${VERSION}_release_${TIMESTAMP}.apk"
 else

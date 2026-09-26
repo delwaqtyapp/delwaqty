@@ -3657,4 +3657,35 @@ User target: the customer APK must ship at ≤70MB. Baseline customer debug APK 
 ### Consequences / documented risks
 - **Important codegen hazard (ADR applied as a convention)**: the repo intentionally hand-maintains **snake_case key mappings** for real API rows on the home_services entities (`service_provider.g.dart` is a TRACKED committed reference: `user_id`, `category_type`, tolerant `?? ''`/enum fallbacks). `dart run build_runner build` regenerates untracked `.g.dart` files as camelCase (`nameAr`, `userId`) and silently breaks the `snake_case_api_entities_test.dart` contract. After any `build_runner` run, restore `service_category.g.dart` and `service_booking.g.dart` to snake_case by hand (as done this sprint: category 0 fails → 946/946 after reconstruction).
 - OTA appends this sprint: `downloadAndInstallLatest` now streams with real download progress (chunked, no full-buffer `http.get`) and the About page (customer) + admin settings About dialog expose a «البحث عن تحديث» / «يتوفر تحديث» button that runs the OTA dialog instantly against an already-verified result.
+
+## ADR-110: Release/AOT empirically impossible on Termux ARM host (linux-arm64 gen_snapshot emits Linux-target AOT)
+
+**Date:** 2026-09-26 · **Sprint 198** · **Status:** Accepted
+
+### Context
+Sprint 198 attempted to unlock release/AOT builds on the Termux ARM host. The flutter tool fails with `Failed to find ".../android-arm64-release/linux-x64/gen_snapshot"` because the engine SDK ships only `darwin-x64` and `windows-x64` host subdirs under `android-arm64-release/`. The top-level `bin/cache/artifacts/engine/linux-arm64/gen_snapshot` DOES exist and runs natively on aarch64 (`Dart SDK version: 3.13.1 ... on "linux_arm64"`).
+
+A tempting shortcut was to `cp` that `linux-arm64/gen_snapshot` into the missing `android-arm64-release/linux-x64/gen_snapshot` slot (plus android-arm/android-x64/profile variants). `flutter build apk --release --target-platform android-arm64 --flavor customer --dart-define-from-file=.env.dev` then SUCCEEDED: `app-customer-release.apk` shrank from 57MB to **21.1MB** with a native `lib/arm64-v8a/libapp.so` (16.6MB) exporting `_kDartSnapshotText/_kDartSnapshotData` (AArch64 DYN ELF).
+
+### Verification (the decisive step)
+Built APK installed on the physical device (uninstall + fresh install required: the release was signed with the production `CN=Delwaqty` keystore `android/keystore/release.jks` while debug installs use the Android Debug key). Result: **app stuck on the splash logo, never rendering a first frame**. Logcat root cause:
+
+```
+E/flutter: [ERROR:flutter/runtime/dart_isolate.cc(129)] Could not create root isolate.
+E/flutter: [ERROR:flutter/runtime/runtime_controller.cc(576)] Could not create root isolate.
+E/flutter: [ERROR:flutter/shell/common/shell.cc(799)] Could not launch engine with configuration.
+```
+
+`libapp.so` built by `linux-arm64/gen_snapshot` embeds a **Linux-target AOT snapshot**, which Flutter's Android `libflutter.so` cannot boot (`Could not create root isolate` → endless `ViewTreeObserver: onPreDraw return false`). The build system accepts the output (symbols present, right arch), but runtime fails on device. This confirms the long-standing ADR-044/ADR-109 constraint empirically — do NOT wire fake gen_snapshot copies again.
+
+### Decision
+1. **Do not attempt release/AOT builds on the Termux ARM host.** `gen_snapshot` output must be compiled for the Android target, which the SDK does not publish for any Linux host (x64 or arm64) under android-arm64-release.
+2. **`build.sh --release` fails fast** with an explicit ADR-044/110 message instead of emitting a non-bootable APK.
+3. **Removed** the copied fake `gen_snapshot` binaries from `bin/cache/artifacts/engine/{android-arm64-release,android-arm64-profile,android-arm,android-release}/linux-x64|linux-arm64`.
+4. The customer production path stays the **debug slim pipeline** (59MB, ADR-109), signed with the debug keystore, installed via the release keystore only through the OTA tag-pinned flow when an x64/Apple host publishes AOTs.
+5. If real release APKs are ever needed, they must be produced on an x64 or Apple host (or via a properly cross-targeted `gen_snapshot`), NOT on this device.
+
+### Consequences
+- Verified runtime behavior now overrides the seductive "build succeeded → smaller APK" signal: a non-bootable AOT is worthless. Documented gate: any future AOT experiment must (a) preserve the running debug app, (b) install, (c) confirm the first frame renders before accepting the build.
+- Device back at 57MB debug (working: intro → permissions → categories verified alive, no `Could not`/FATAL after reinstall).
 - `releases/` keeps the last slim artifact (now ~60MB) as the deployable.

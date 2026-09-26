@@ -16,6 +16,7 @@ import 'package:delwaqty/features/provider/merchant/merchant_module.dart';
 import 'package:delwaqty/features/provider/financial/financial_module.dart';
 import 'package:delwaqty/features/customer/delivery/delivery_module.dart';
 import 'package:delwaqty/features/customer/wallet/wallet_module.dart';
+import 'package:delwaqty/features/admin/support_chat/support_chat_module.dart';
 
 void registerProviderModules() {
   final registry = FeatureRegistry.instance;
@@ -38,6 +39,7 @@ void registerProviderModules() {
     FinancialModule(),
     DirectDeliveryModule(),
     WalletModule(),
+    SupportChatModule(),
   ]);
 
   registry.freeze();

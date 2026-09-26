@@ -7568,6 +7568,54 @@ abstract class AppLocalizations {
   /// **'Start Chat'**
   String get startChat;
 
+  /// No description provided for @newChat.
+  ///
+  /// In en, this message translates to:
+  /// **'New Chat'**
+  String get newChat;
+
+  /// No description provided for @selectRecipient.
+  ///
+  /// In en, this message translates to:
+  /// **'Select a member to chat with'**
+  String get selectRecipient;
+
+  /// No description provided for @noMembersFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No members found'**
+  String get noMembersFound;
+
+  /// No description provided for @chatOriginCustomer.
+  ///
+  /// In en, this message translates to:
+  /// **'From customer'**
+  String get chatOriginCustomer;
+
+  /// No description provided for @chatOriginDriver.
+  ///
+  /// In en, this message translates to:
+  /// **'From delivery'**
+  String get chatOriginDriver;
+
+  /// No description provided for @chatOriginAdmin.
+  ///
+  /// In en, this message translates to:
+  /// **'From management'**
+  String get chatOriginAdmin;
+
+  /// No description provided for @chatOriginProvider.
+  ///
+  /// In en, this message translates to:
+  /// **'Service provider'**
+  String get chatOriginProvider;
+
+  /// No description provided for @originTag.
+  ///
+  /// In en, this message translates to:
+  /// **'Opened by'**
+  String get originTag;
+
   /// No description provided for @noSupportRooms.
   ///
   /// In en, this message translates to:
@@ -10357,12 +10405,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Failed to load members'**
   String get failedToLoadMembers;
-
-  /// No description provided for @noMembersFound.
-  ///
-  /// In en, this message translates to:
-  /// **'No members found'**
-  String get noMembersFound;
 
   /// No description provided for @tryAdjustingSearch.
   ///

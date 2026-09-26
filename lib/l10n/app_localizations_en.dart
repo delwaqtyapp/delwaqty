@@ -3936,6 +3936,30 @@ class AppLocalizationsEn extends AppLocalizations {
   String get startChat => 'Start Chat';
 
   @override
+  String get newChat => 'New Chat';
+
+  @override
+  String get selectRecipient => 'Select a member to chat with';
+
+  @override
+  String get noMembersFound => 'No members found';
+
+  @override
+  String get chatOriginCustomer => 'From customer';
+
+  @override
+  String get chatOriginDriver => 'From delivery';
+
+  @override
+  String get chatOriginAdmin => 'From management';
+
+  @override
+  String get chatOriginProvider => 'Service provider';
+
+  @override
+  String get originTag => 'Opened by';
+
+  @override
   String get noSupportRooms => 'No support chats';
 
   @override
@@ -5405,9 +5429,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get failedToLoadMembers => 'Failed to load members';
-
-  @override
-  String get noMembersFound => 'No members found';
 
   @override
   String get tryAdjustingSearch => 'Try adjusting your search or filters.';

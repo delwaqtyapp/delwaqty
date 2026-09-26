@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -7,6 +8,8 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:delwaqty/core/config/app_mode_provider.dart';
 import 'package:delwaqty/core/router/admin_router.dart';
 import 'package:delwaqty/core/router/app_router.dart';
+import 'package:delwaqty/driver/app_router.dart';
+import 'package:delwaqty/provider/app_router.dart';
 import 'package:delwaqty/features/admin/support_chat/presentation/chat_providers.dart';
 import 'package:delwaqty/features/_shared/auth/presentation/auth_provider.dart';
 import 'package:delwaqty/features/_shared/auth/domain/auth_state.dart' as auth;
@@ -116,10 +119,15 @@ class ChatCallAlertService {
       }
 
       final senderType = record['sender_type'] as String? ?? 'customer';
-      final isAdminSender = senderType == 'admin';
+      final callerLabel = switch (senderType) {
+        'driver' => 'مندوب توصيل',
+        'provider' => 'مزود خدمة',
+        'admin' => 'الإدارة',
+        _ => 'عميل',
+      };
       await showChatCallNotification(
         roomId: roomId,
-        callerLabel: isAdminSender ? 'الإدارة' : 'عميل',
+        callerLabel: callerLabel,
         message: record['message'] as String? ?? '',
       );
     } catch (e) {
@@ -128,9 +136,7 @@ class ChatCallAlertService {
   }
 
   bool _isRoomOpen(String roomId) {
-    final adminCtx = adminNavigatorKey.currentContext;
-    final appCtx = rootNavigatorKey.currentContext;
-    final ctx = adminCtx ?? appCtx;
+    final ctx = _activeNavigatorContext();
     if (ctx == null) return false;
     try {
       final uri = GoRouter.of(ctx).state.uri.path;
@@ -140,10 +146,24 @@ class ChatCallAlertService {
     }
   }
 
+  // The flutter for this app is whatever navigator key is currently mounted:
+  // admin / customer / driver / provider. Returns the first non-null context.
+  BuildContext? _activeNavigatorContext() {
+    final flavor = _ref.read(appFlavorProvider);
+    switch (flavor) {
+      case AppFlavor.admin:
+        return adminNavigatorKey.currentContext;
+      case AppFlavor.driver:
+        return driverRootNavigatorKey.currentContext;
+      case AppFlavor.provider:
+        return providerRootNavigatorKey.currentContext;
+      case AppFlavor.customer:
+        return rootNavigatorKey.currentContext;
+    }
+  }
+
   void _openRoom(String roomId) {
-    final adminCtx = adminNavigatorKey.currentContext;
-    final appCtx = rootNavigatorKey.currentContext;
-    final ctx = adminCtx ?? appCtx;
+    final ctx = _activeNavigatorContext();
     if (ctx == null) return;
     final isAdminPanel = _ref.read(isAdminAppProvider);
     final path = isAdminPanel

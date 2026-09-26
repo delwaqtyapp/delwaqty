@@ -3908,6 +3908,30 @@ class AppLocalizationsAr extends AppLocalizations {
   String get startChat => 'بدء محادثة';
 
   @override
+  String get newChat => 'محادثة جديدة';
+
+  @override
+  String get selectRecipient => 'اختر عضوًا للدردشة معه';
+
+  @override
+  String get noMembersFound => 'لا يوجد أعضاء';
+
+  @override
+  String get chatOriginCustomer => 'من عميل';
+
+  @override
+  String get chatOriginDriver => 'من مندوب توصيل';
+
+  @override
+  String get chatOriginAdmin => 'من الإدارة';
+
+  @override
+  String get chatOriginProvider => 'مزود خدمة';
+
+  @override
+  String get originTag => 'افتح بواسطة';
+
+  @override
   String get noSupportRooms => 'لا توجد محادثات دعم';
 
   @override
@@ -5371,9 +5395,6 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get failedToLoadMembers => 'فشل في تحميل الأعضاء';
-
-  @override
-  String get noMembersFound => 'لا يوجد أعضاء';
 
   @override
   String get tryAdjustingSearch => 'حاول تعديل البحث أو الفلاتر.';

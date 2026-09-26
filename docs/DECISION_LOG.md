@@ -3769,3 +3769,49 @@ A single localized helper removes 3 duplicated hardcoded switches (DRY), follows
 - Every Home-services button now displays the app's active language end-to-end (categories via data, service categories via l10n).
 - The Arabic strings for these labels live in exactly one place (the arb files) instead of 4 hardcoded switches, so future rewording/localization is a single-key edit.
 - Minor English name choices (Nursing, Tutoring) match the existing provider-registration vocabulary for consistency.
+
+## ADR-114: Chat Origin Identity + Chat in All 4 Apps (sprint 201)
+
+### Context
+The user needs every chat instantly understood in the admin panel: WHO opened it
+(customer / driver / admin-to-admin / service provider WITH the service type),
+a FRESH reference number for each new chat (even right after the previous chat
+was closed), and the direct-chat + emergency-call feature available in ALL four
+apps (customer, admin, driver, provider) — not just customer + admin.
+
+### Decision
+1. **Server-authoritative origin** — chat_rooms gained `origin_type`
+   (`customer|driver|provider|admin`) + `origin_label` (provider's
+   service-category or merchant-type key). A SECURITY DEFINER BEFORE INSERT
+   trigger (`chat_room_origin()`) recomputes both from `auth.uid()` →
+   `users.role` (+ `service_providers.category_type` / `merchants.type` for
+   providers), so a client can never spoof its own role.
+2. **Fresh number guaranteed** — `reference_number DEFAULT next_chat_reference()`
+   pinned in-repo (already live); every new room row automatically gets the next
+   `DWQ-<seq>` even immediately after the admin closes the previous chat.
+3. **Origin visible on every surface** — room list tiles in the admin panel get
+   an origin badge; the room page gets a top banner (`originTag: <label>`); both
+   resolve localized labels via one helper (`chat_origin_helpers.dart`) that maps
+   service/merchant type keys through the existing `serviceTypeLabel` /
+   `merchantTypeLabel` l10n helpers.
+4. **Sender identity = running app flavor** — `_selfSenderType()` derives
+   `driver`/`provider`/`admin`/`customer` from `appFlavorProvider` instead of the
+   hardcoded admin/customer split.
+5. **Chat + calls everywhere** — `SupportChatModule` registered in the driver and
+   provider registries; `ChatCallAlertService` started in those apps and made
+   flavor-aware (correct navigator key + caller label per origin).
+
+### Rationale
+- The trigger keeps identity trustworthy for a support/operations panel.
+- One shared origin-label function + arb keys avoids re-localizing in each page.
+- Adding the module to existing registries ships full chat + in-chat emergency
+  call to driver/provider at zero new page code (the shared `/support` route and
+  profile help tile already exist).
+
+### Consequences
+- Existing admin-created test rooms backfilled to `origin_type='admin'`.
+- Driver/provider apps now boot the realtime chat-call listener (one extra
+  realtime channel) and expose `/support` routes.
+- Emergency call remains the in-chat voice-call handshake (Realtime + in-room
+  accept/decline); FCM background delivery and WebRTC audio stay out of scope for
+  this environment (consistent with ADR-105/106/107).

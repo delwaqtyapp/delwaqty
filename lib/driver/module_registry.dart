@@ -9,6 +9,7 @@ import 'package:delwaqty/features/_shared/notifications/notifications_module.dar
 import 'package:delwaqty/features/_shared/regions/regions_module.dart';
 import 'package:delwaqty/features/_shared/complaints/complaints_module.dart';
 import 'package:delwaqty/features/driver/driver_module.dart';
+import 'package:delwaqty/features/admin/support_chat/support_chat_module.dart';
 
 void registerDriverModules() {
   final registry = FeatureRegistry.instance;
@@ -24,6 +25,7 @@ void registerDriverModules() {
     ProfileModule(),
     NotificationsModule(),
     DriverModule(),
+    SupportChatModule(),
   ]);
 
   registry.freeze();

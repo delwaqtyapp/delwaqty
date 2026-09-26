@@ -8,8 +8,10 @@ import 'package:record/record.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:delwaqty/features/admin/support_chat/presentation/chat_providers.dart';
+import 'package:delwaqty/features/admin/support_chat/presentation/chat_origin_helpers.dart';
 import 'package:delwaqty/features/admin/support_chat/presentation/widgets/chat_media_bubbles.dart';
 import 'package:delwaqty/features/admin/support_chat/domain/entities/chat_message.dart';
+import 'package:delwaqty/features/admin/support_chat/domain/entities/chat_room.dart';
 import 'package:delwaqty/features/_shared/auth/presentation/auth_provider.dart';
 import 'package:delwaqty/features/_shared/auth/domain/auth_state.dart';
 import 'package:delwaqty/core/config/app_mode_provider.dart';
@@ -72,6 +74,41 @@ class _SupportChatRoomPageState extends ConsumerState<SupportChatRoomPage> {
   }
 
   bool _sessionIsAdminPanel() => ref.read(isAdminAppProvider);
+
+  // Sender identity is the RUNNING APP flavor: the admin panel is always
+  // 'admin'; the driver/provider apps report 'driver'/'provider' instead of the
+  // old generic 'customer', so the admin panel knows exactly who is talking.
+  String _selfSenderType() {
+    if (_sessionIsAdminPanel()) return 'admin';
+    final flavor = ref.read(appFlavorProvider);
+    return switch (flavor) {
+      AppFlavor.driver => 'driver',
+      AppFlavor.provider => 'provider',
+      AppFlavor.admin => 'admin',
+      AppFlavor.customer => 'customer',
+    };
+  }
+
+  // Per-bubble role label: prefers the message's own sender_type when present,
+  // falling back to the legacy isFromAdmin/admin-vs-customer split.
+  String _senderRoleLabel(
+    ChatMessage msg,
+    bool isAdminMsg,
+    AppLocalizations l10n,
+  ) {
+    switch (msg.senderType) {
+      case 'admin':
+        return l10n.adminLabel;
+      case 'driver':
+        return l10n.chatOriginDriver;
+      case 'provider':
+        return l10n.chatOriginProvider;
+      case 'customer':
+        return l10n.customerLabel;
+      default:
+        return isAdminMsg ? l10n.adminLabel : l10n.customerLabel;
+    }
+  }
 
   // When the room opens after the call alert routed us here, the ringing call
   // message may already be in the history (the live stream event fired before
@@ -204,6 +241,7 @@ class _SupportChatRoomPageState extends ConsumerState<SupportChatRoomPage> {
       ),
       body: Column(
         children: [
+          if (roomAsync.asData?.value != null) _originBanner(roomAsync.asData!.value, l10n, cs),
           Expanded(
             child: roomAsync.when(
               data: (room) {
@@ -277,6 +315,43 @@ class _SupportChatRoomPageState extends ConsumerState<SupportChatRoomPage> {
     );
   }
 
+  // Prominent banner at the top of every room: WHO opened this chat, from
+  // which platform (customer / driver / provider+service / admin). Kept for
+  // ALL viewers so support staff and participants both see it clearly.
+  Widget _originBanner(ChatRoom room, AppLocalizations l10n, ColorScheme cs) {
+    final (IconData icon, Color color) = switch (room.originType) {
+      'driver' => (Icons.local_shipping_outlined, Colors.blue),
+      'provider' => (Icons.storefront_outlined, Colors.deepOrange),
+      'admin' => (Icons.support_agent_rounded, Colors.teal),
+      _ => (Icons.person_outline_rounded, cs.primary),
+    };
+    final label = chatOriginLabel(l10n, room);
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.fromLTRB(12, 10, 12, 0),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: color.withValues(alpha: 0.4)),
+      ),
+      child: Row(
+        children: [
+          Icon(icon, size: 18, color: color),
+          const SizedBox(width: 8),
+          Text(
+            '${l10n.originTag}: $label',
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              color: color,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _messagesSection(
     AsyncValue<List<ChatMessage>> messagesAsync,
     ColorScheme cs,
@@ -326,6 +401,7 @@ class _SupportChatRoomPageState extends ConsumerState<SupportChatRoomPage> {
     final cs = Theme.of(context).colorScheme;
     final isMe = msg.senderId == currentUserId;
     final isAdminMsg = msg.isFromAdmin;
+    final roleLabel = _senderRoleLabel(msg, isAdminMsg, l10n);
 
     final bubble = Container(
       margin: const EdgeInsets.only(bottom: 8),
@@ -357,7 +433,7 @@ class _SupportChatRoomPageState extends ConsumerState<SupportChatRoomPage> {
                 ),
                 const SizedBox(width: 4),
                 Text(
-                  isAdminMsg ? l10n.adminLabel : l10n.customerLabel,
+                  roleLabel,
                   style: TextStyle(
                     fontSize: 10,
                     fontWeight: FontWeight.bold,
@@ -567,7 +643,7 @@ class _SupportChatRoomPageState extends ConsumerState<SupportChatRoomPage> {
         messageId: incoming.id,
         status: 'accepted',
         responderId: user.id,
-        responderType: _sessionIsAdminPanel() ? 'admin' : 'customer',
+        responderType: _selfSenderType(),
       );
       ref.invalidate(chatMessagesProvider(widget.roomId));
       _scrollToBottom();
@@ -583,7 +659,7 @@ class _SupportChatRoomPageState extends ConsumerState<SupportChatRoomPage> {
         messageId: incoming.id,
         status: 'declined',
         responderId: user.id,
-        responderType: _sessionIsAdminPanel() ? 'admin' : 'customer',
+        responderType: _selfSenderType(),
       );
       ref.invalidate(chatMessagesProvider(widget.roomId));
       _scrollToBottom();
@@ -600,7 +676,7 @@ class _SupportChatRoomPageState extends ConsumerState<SupportChatRoomPage> {
         messageId: msg.id,
         status: 'ended',
         responderId: user.id,
-        responderType: _sessionIsAdminPanel() ? 'admin' : 'customer',
+        responderType: _selfSenderType(),
       );
       ref.invalidate(chatMessagesProvider(widget.roomId));
     } catch (_) {}
@@ -974,7 +1050,7 @@ class _SupportChatRoomPageState extends ConsumerState<SupportChatRoomPage> {
         id: '',
         roomId: widget.roomId,
         senderId: user.id,
-        senderType: isAdminOrOwner ? 'admin' : 'customer',
+        senderType: _selfSenderType(),
         message: mediaCaption == l10n.voiceMessage ? l10n.voiceMessage : mediaCaption,
         messageType: messageType,
         attachmentUrl: messageType == 'image' ? path : null,
@@ -1014,7 +1090,7 @@ class _SupportChatRoomPageState extends ConsumerState<SupportChatRoomPage> {
       id: '',
       roomId: widget.roomId,
       senderId: user.id,
-      senderType: isAdminOrOwner ? 'admin' : 'customer',
+      senderType: _selfSenderType(),
       message: l10n.voiceCallRequest,
       messageType: 'call',
       isFromAdmin: isAdminOrOwner,
@@ -1097,7 +1173,7 @@ class _SupportChatRoomPageState extends ConsumerState<SupportChatRoomPage> {
                     messageId: callMessageId,
                     status: 'ended',
                     responderId: _currentUser()?.id,
-                    responderType: _sessionIsAdminPanel() ? 'admin' : 'customer',
+                    responderType: _selfSenderType(),
                   );
                   if (sheetContext.mounted) Navigator.of(sheetContext).pop();
                   _callSheetOpen = false;
@@ -1152,7 +1228,7 @@ class _SupportChatRoomPageState extends ConsumerState<SupportChatRoomPage> {
       id: '',
       roomId: widget.roomId,
       senderId: user.id,
-      senderType: isAdminOrOwner ? 'admin' : 'customer',
+      senderType: _selfSenderType(),
       message: text,
       isFromAdmin: isAdminOrOwner,
       createdAt: DateTime.now(),

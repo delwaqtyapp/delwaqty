@@ -182,6 +182,11 @@ final List<_AdminNavGroup> _adminGroups = [
         icon: Icons.storefront_rounded,
         label: (l) => l.adminMerchants,
       ),
+      _AdminNavItem(
+        path: '/admin/categories',
+        icon: Icons.category_rounded,
+        label: (l) => l.adminCategories,
+      ),
     ],
   ),
   _AdminNavGroup(

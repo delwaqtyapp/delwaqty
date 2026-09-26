@@ -162,7 +162,9 @@ class SupabaseCategoryDataSource {
     required String fileName,
   }) async {
     try {
-      final path = 'categories/$categoryId/$fileName';
+      final stamp = DateTime.now().millisecondsSinceEpoch;
+      final uniqueName = '${stamp}_$fileName';
+      final path = 'categories/$categoryId/$uniqueName';
       await _client.storage.from(_bucketName).uploadBinary(
             path,
             imageBytes,

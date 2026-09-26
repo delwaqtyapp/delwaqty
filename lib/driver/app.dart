@@ -10,6 +10,7 @@ import 'package:delwaqty/core/theme/app_theme.dart';
 import 'package:delwaqty/core/theme/theme_mode_provider.dart';
 import 'package:delwaqty/features/_shared/auth/presentation/auth_provider.dart';
 import 'package:delwaqty/features/_shared/device_lock/device_lock_provider.dart';
+import 'package:delwaqty/features/admin/support_chat/presentation/chat_providers.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 import 'package:delwaqty/services/deep_link/deep_link_service.dart';
 import 'package:delwaqty/services/ota/ota_update_dialog.dart';
@@ -52,6 +53,7 @@ class _DriverAppState extends ConsumerState<DriverApp> {
       }
       authNotifier.checkAuthStatus();
       ref.read(pushNotificationServiceProvider).initialize();
+      ref.read(chatCallAlertServiceProvider);
       _startDeepLinkListener();
       _checkOtaUpdate();
     });

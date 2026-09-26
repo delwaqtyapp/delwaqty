@@ -3920,3 +3920,32 @@ ROUND 62/63 made the reworked grids (home strip, `/services`, home-services) ove
 - With `temperature` fixed placeholder geometry: on devices narrower than ~330dp logical, the skeleton self-scales (slightly denser shimmer) instead of flashing a yellow overflow band.
 - Any future grid must mirror its skeleton delegate + keep skeleton content within the cell (this ADR's rule of thumb: mainAxisExtent ≥ content + margins + 40px).
 - Physical device verified after build: `releases/delwaqty_1.0.1+2_debug_20260927_011219.apk` installed, relaunch clean, zero `overflowed by|RenderFlex|FATAL` in logcat.
+
+---
+
+## ADR-118: Bottom-nav pill system reused for the Services top bars (kills the 309px right-overflow Row)
+
+**Date:** Sprint 204 (ROUND 65)
+**Status:** Accepted
+**Deciders:** Lead Software Architect (after user fix-request «فى صفحه ال Services فيها الازرار العلويه فيها المشكله لل right overload By 128 pixels وكمان الازرار العلويه مختفيه اعملها بنفس نظام القائمه السفليه»)
+
+### Context
+The user's «صفحه ال Services» is the providers page (`ServiceProvidersPage`, AppBar title `servicesSection` = «الخدمات»), not the `/services` grid. Its top area held two `ChoiceChip` bars:
+- **Category bar** (16 service types, horizontal ListView): chips matched nothing else in the app and the off-screen ones were "hidden" (مختفيه) — exactly the complaint.
+- **Radius bar** («نطاق البحث» + 4 chips): a NON-scrollable `Row`. Reproduced with a device-geometry test: `RenderFlex overflowed by 309 pixels on the right` (384/430/360dp logical widths; the user read it as 128px at larger text scales). It was the only non-scrollable Row in the whole services flow, which is why every earlier responsive suite (fixed-extent grids, horizontal-ListView strips) stayed green: the defect lived in the one surface we had not instrumented.
+
+### Decision
+1. Extract the bottom navigation's private `_NavIconButton` pill visual into a **shared, reusable `NavPillButton`** (`lib/shared/widgets/nav_pill_button.dart`): rounded-16 `AnimatedContainer`, selected = `primary` 12% tint + primary 13px-w600 icon+label, idle = transparent + `onSurfaceVariant`; `labelVisible` (preserves the bottom nav's icon-only idle identity) and nullable `icon`.
+2. Render the bottom nav itself from `NavPillButton` (pure dedup; the exact Material visuals move 1:1, zero user-visible change).
+3. Rebuild BOTH Services top bars from `NavPillButton` in the same pill language: category pills (active = the selected-bottom-nav-tab treatment) and radius pills.
+4. Put the radius pills (+ label) inside a **horizontal `SingleChildScrollView`** — the durable anti-overflow fix (a scrollable can never hit "overflvisible beyond right edge"), instead of chasing padding values that differ per width/text-scale.
+
+### Rationale
+- The user asked literally to "make them with the same system as the bottom bar": the fastest honest way to guarantee consistency is ONE shared widget serving both surfaces.
+- Any width/text-scale regression is now impossible on the radius row by construction; the category pills remain scrollable (16 items cannot fit horizontally), but now look like consecutive bottom-nav tabs with the chosen one highlighted.
+
+### Consequences
+- `flutter analyze` clean; `flutter test` **987/987** (978 + the 9 new `service_providers_page_responsive_test.dart` cases that flipped 8 RED→GREEN, pinning the 309px overflow before the fix).
+- The top bar of the Services page now speaks the exact same visual language as the bottom navigation (primary pill on the active item); the duplicate chip-aesthetic is gone app-wide.
+- Radius row scrolls when content exceeds width (e.g. large text scales or narrow devices) instead of flashing the striped overflow band.
+- Built + installed `releases/delwaqty_1.0.1+2_debug_20260927_012128.apk` (57M); force-stop + relaunch clean; logcat shows zero `overflowed by|RenderFlex|FATAL`.

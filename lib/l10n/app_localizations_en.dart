@@ -6342,4 +6342,16 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get deleteSoftFailed =>
       'Cannot hard-delete (referenced by past orders); item was hidden instead';
+
+  @override
+  String get checkForUpdate => 'Check for update';
+
+  @override
+  String get checkingForUpdate => 'Checking for update…';
+
+  @override
+  String get youAreUpToDate => 'You\'re on the latest version';
+
+  @override
+  String get updateAvailableNow => 'A new version is available';
 }

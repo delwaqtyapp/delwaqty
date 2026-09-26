@@ -2038,5 +2038,9 @@
   "confirmDeleteMerchant": "حذف المتجر سيحذف كل منتجاته وتقييماته نهائيًا. متابعة؟",
   "deleted": "تم الحذف بنجاح",
   "deleteFailed": "تعذر الحذف، حاول مرة أخرى",
-  "deleteSoftFailed": "لا يمكن الحذف نهائيًا لارتباطه بطلبات قديمة؛ تم إخفاؤه"
+  "deleteSoftFailed": "لا يمكن الحذف نهائيًا لارتباطه بطلبات قديمة؛ تم إخفاؤه",
+  "checkForUpdate": "البحث عن تحديث",
+  "checkingForUpdate": "جاري البحث عن التحديث…",
+  "youAreUpToDate": "أنت على أحدث إصدار",
+  "updateAvailableNow": "يتوفر إصدار أحدث"
 }

@@ -141,6 +141,8 @@ Future<OtaCheckResult> checkForOtaUpdate(AppFlavor flavor) async {
 /// side to launch Android's package installer. Returns the download file's
 /// size, or null on failure — the second element surfaces the native error
 /// code (e.g. `needs_install_permission`) when installation could not start.
+///
+/// [onProgress] reports the actual download fraction (0..1) as chunks arrive.
 Future<(int?, String?)> downloadAndInstallLatest(
   AppFlavor flavor, {
   void Function(double fraction)? onProgress,
@@ -156,10 +158,29 @@ Future<(int?, String?)> downloadAndInstallLatest(
     final target = File('${dir.path}/${channel.apk}');
     if (!target.existsSync() || target.lengthSync() == 0) {
       final uri = Uri.parse('$kOtaDownloadBaseUrl$tag/${channel.apk}');
-      final response = await http.get(uri).timeout(const Duration(seconds: 180));
-      if (response.statusCode != 200) return (null, null);
+      final streamed = await http.Client()
+          .send(http.Request('GET', uri))
+          .timeout(const Duration(seconds: 30));
+      if (streamed.statusCode != 200) {
+        streamed.stream.drain<void>();
+        return (null, null);
+      }
 
-      await target.writeAsBytes(response.bodyBytes, flush: true);
+      final total = streamed.contentLength;
+      final sink = target.openWrite();
+      var received = 0;
+      try {
+        await for (final chunk in streamed.stream) {
+          sink.add(chunk);
+          received += chunk.length;
+          if (total != null && total > 0 && onProgress != null) {
+            onProgress((received / total).clamp(0.0, 1.0));
+          }
+        }
+      } finally {
+        await sink.flush();
+        await sink.close();
+      }
     }
 
     final size = target.lengthSync();

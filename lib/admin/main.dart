@@ -107,6 +107,7 @@ void main() async {
     ProviderScope(
       overrides: [
         isAdminAppProvider.overrideWithValue(true),
+        appFlavorProvider.overrideWithValue(AppFlavor.admin),
         if (sharedPrefsService != null)
           sharedPreferencesProvider.overrideWithValue(sharedPrefsService),
         connectivityServiceProvider.overrideWithValue(connectivityService),

@@ -1,28 +1,28 @@
 {
   "channels": {
     "customer": {
-      "version": 3,
-      "versionName": "1.0.2+3",
+      "version": 2,
+      "versionName": "1.0.1+2",
       "apk": "delwaqty-customer.apk",
-      "notes": "تحديث جديد: نظام التحديث الهوائي"
+      "notes": "تحديث العروض وتحسينات الأداء"
     },
     "admin": {
-      "version": 3,
-      "versionName": "1.0.2+3",
+      "version": 2,
+      "versionName": "1.0.1+2",
       "apk": "delwaqty-admin.apk",
-      "notes": "تحديث جديد: نظام التحديث الهوائي"
+      "notes": "تحديث العروض وتحسينات الأداء"
     },
     "driver": {
-      "version": 3,
-      "versionName": "1.0.2+3",
+      "version": 2,
+      "versionName": "1.0.1+2",
       "apk": "delwaqty-driver.apk",
-      "notes": "تحديث جديد: نظام التحديث الهوائي"
+      "notes": "تحديث العروض وتحسينات الأداء"
     },
     "provider": {
-      "version": 3,
-      "versionName": "1.0.2+3",
+      "version": 2,
+      "versionName": "1.0.1+2",
       "apk": "delwaqty-provider.apk",
-      "notes": "تحديث جديد: نظام التحديث الهوائي"
+      "notes": "تحديث العروض وتحسينات الأداء"
     }
   }
 }

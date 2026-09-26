@@ -3600,3 +3600,29 @@ User retested sprint 194 and reported two real bugs: (1) closing a chat from the
 - An incoming call now SEES an action: the receiving app jumps into the room with accept/decline, even from the admin list/home screen.
 - Notification remains a LOCAL push (works while the app runs; no FCM background delivery); real WebRTC audio stays out of scope (consistent with ADR-103/104/105/106).
 - Gate: `flutter analyze` **0 new issues** (7 pre-existing); `flutter test` **946/946**; 4 APKs rebuilt + installed Success; admin relaunched clean (pid 31130; logcat no FATAL/RenderFlex). Commit `sprint 195` pushed.
+
+## ADR-108: In-app OTA self-update for all 4 apps (APK download + system installer)
+
+**Date:** 2026-09-26 · **Sprint 196** · **Status:** Accepted
+
+### Context
+User ships the app to testers and each new change currently means they must reinstall a fresh APK manually. He asked: «لو عملنا أي تعديل أو تحديث… يكون فيه OTA لكل واحد من الـ 4 تطبيقات… يتم تنزيله كإضافة بدون إعادة تثبيت كل مرة — هل هذا ممكن أم صعب؟ وما الأفضل؟»
+
+### Options considered
+- **Shorebird / code push**: the golden OTA solution — BUT it requires building an AOT release (`--release`) so the code module can be hot-swapped. This Termux ARM SDK ships no arm64-host Android `gen_snapshot`, so release/profile builds are impossible here (ADR-044/AOT constraint). REJECTED.
+- **Play Console / store channels**: irrelevant — apps are distributed as raw debug APKs, not via stores.
+- **In-app self-update (CHOSEN)**: every launch the app checks a remote manifest; if a newer build exists it downloads the APK and launches Android's own package installer (FileProvider + `ACTION_VIEW`). This is an upgrade install — same signature, user data preserved, exactly one tap. Fully feasible with debug APKs.
+
+### Decision
+- **Distribution/hosting = GitHub releases (cache-proof)**: the app first calls `https://api.github.com/repos/delwaqtyapp/delwaqty/releases/latest` (uncached) for the newest `tag_name`, then reads the manifest and APK from immutable **tag-pinned** URLs: `https://github.com/delwaqtyapp/delwaqty/releases/download/<tag>/versions.json` and `... /<tag>/<flavor>.apk`. Verified live that `latest/download` and `raw.githubusercontent.com` served stale bytes right after an asset update, while the tag-pinned URL was fresh — this is why the flow resolves the tag via the API instead, and why each publish creates a NEW tag.
+- **Manifest format** (`ota/versions.json`, a release asset): `{"channels": {customer|admin|driver|provider: {version, versionName, apk, notes}}}`. `version` is an int build number compared against `PackageInfo.buildNumber`.
+- **Native install**: AndroidManifest gains `REQUEST_INSTALL_PACKAGES`; a FileProvider (`res/xml/file_paths.xml` → `cache-path`) exposes the downloaded APK; `MainActivity` registers `MethodChannel com.delwaqty.app/ota` with `installApk(path)` — checks `packageManager.canRequestPackageInstalls()`, and if the app is not yet allowed to install unknown sources it opens `ACTION_MANAGE_UNKNOWN_APP_SOURCES` and surfaces error `needs_install_permission`, then fires `ACTION_VIEW` (`application/vnd.android.package-archive` + `FLAG_GRANT_READ_URI_PERMISSION`) → the user confirms on the system screen, data preserved.
+- **Flavor identity**: `AppModeProvider` is generalized to `AppFlavor {customer, admin, driver, provider}` (`appFlavorProvider`); `isAdminAppProvider` now derives from it. All 4 `main.dart` override the flavor.
+- **UI/flow**: `_checkOtaUpdate()` runs ~4s after each launch (skips while a download is in progress); `showOtaUpdateIfAvailable` resolves the per-flavor navigator key (`rootNavigatorKey` cust / `adminNavigatorKey` adm / `driverRootNavigatorKey` / `providerRootNavigatorKey`) because the root app BuildContext has NO Navigator under go_router — discovered live when the dialog never rendered; `AlertDialog` «يـتـوفـر تـحـديـث جـديـد» with «تحديث الآن» (download + linear progress) and «لاحقًا».
+- **Publishing** = `scripts/publish_ota.sh`: bump pubspec version → build 4 debug APKs → `gh release create v<version>` → upload 4 APKs + `versions.json`; every publish is a fresh tag so tag-pinned URLs are never stale.
+
+### Consequences
+- Any build you ship can be upgraded over the air with one tap on a system install screen; the tester never manually replaces the APK.
+- Real limits, honestly documented: user must confirm the system install dialog (no silent background install); only the NEXT launch re-checks (no live hot-swap of already-running code); new apps still need unknown-sources permission ONCE (the flow opens settings for it); each APK is a full ~185MB debug download.
+- First release wired: `v1.0.1` (5 assets). E2E proof on device: manifest bumped to version 3 → dialog «يتوفر تحديث جديد» + «جاري تحميل التحديث…» rendered (uiautomator), the 187MB APK downloaded fully into `cache/`, then manifest restored to version 2 (== installed) → no phantom prompt.
+- Gate: `flutter analyze` **0 issues**; `flutter test` **946/946**; 4 APKs rebuilt (1.0.1+2) + installed; relaunch clean, no FATAL/RenderFlex.

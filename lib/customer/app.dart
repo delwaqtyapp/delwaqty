@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:delwaqty/core/bootstrap/backend_bootstrap.dart';
+import 'package:delwaqty/core/config/app_mode_provider.dart';
 import 'package:delwaqty/core/localization/locale_provider.dart';
 import 'package:delwaqty/core/deep_link/deep_link_resolver.dart';
 import 'package:delwaqty/core/router/app_router.dart';
@@ -12,6 +13,7 @@ import 'package:delwaqty/features/_shared/device_lock/device_lock_provider.dart'
 import 'package:delwaqty/features/admin/support_chat/presentation/chat_providers.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 import 'package:delwaqty/services/deep_link/deep_link_service.dart';
+import 'package:delwaqty/services/ota/ota_update_dialog.dart';
 import 'package:delwaqty/services/push_notification/push_notification_service.dart';
 
 class App extends ConsumerStatefulWidget {
@@ -57,7 +59,20 @@ class _AppState extends ConsumerState<App> {
       ref.read(pushNotificationServiceProvider).initialize();
       ref.read(chatCallAlertServiceProvider);
       _startDeepLinkListener();
+      _checkOtaUpdate();
     });
+  }
+
+  Future<void> _checkOtaUpdate() async {
+    if (!mounted) return;
+    await Future<void>.delayed(const Duration(seconds: 4));
+    if (!mounted) return;
+    try {
+      final flavor = ref.read(appFlavorProvider);
+      await showOtaUpdateIfAvailable(flavor: flavor);
+    } catch (e) {
+      debugPrint('OTA check failed: $e');
+    }
   }
 
   void _startDeepLinkListener() {

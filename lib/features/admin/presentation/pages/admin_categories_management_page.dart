@@ -78,6 +78,9 @@ class _AdminCategoriesManagementPageState
 
     setState(() => _busy = true);
     try {
+      if (cat.imageUrl != null && cat.imageUrl!.isNotEmpty) {
+        await _repo.deleteCategoryImage(cat.imageUrl!);
+      }
       final bytes = await picked.readAsBytes();
       await _repo.uploadCategoryImage(
         categoryId: cat.id,
@@ -158,6 +161,9 @@ class _AdminCategoriesManagementPageState
         sortOrder: result.sortOrder,
       );
       if (_isOwner && result.imageBytes != null) {
+        if (cat.imageUrl != null && cat.imageUrl!.isNotEmpty) {
+          await _repo.deleteCategoryImage(cat.imageUrl!);
+        }
         await _repo.uploadCategoryImage(
           categoryId: cat.id,
           imageBytes: result.imageBytes!,

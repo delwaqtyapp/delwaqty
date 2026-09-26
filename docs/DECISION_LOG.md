@@ -3952,6 +3952,32 @@ The user's «صفحه ال Services» is the providers page (`ServiceProvidersPa
 
 ---
 
+## ADR-120: Admin-managed Main Categories images with instant customer-app reflection
+
+**Date:** Sprint 204 (ROUND 67)
+**Status:** Accepted
+**Deciders:** Lead Software Architect (after user request «عايز فى ال Main Categories اغير صور ليها من داخل لوحه الادمن... وتسمع مباشرة فى تطبيق العميل»)
+
+### Context
+`AdminCategoriesManagementPage` (route `/admin/categories`) already existed with full CRUD + 512px `ImagePicker` image upload (owner-gated), and the storage pipeline was complete (`uploadCategoryImage` → public bucket URL → `categories.image_url` persisted → customer `getActiveCategories`). Three gaps hid the feature from the user: (1) the route was registered but NEVER LINKED — neither the admin drawer/rail `_adminGroups` nor the Quick Actions page had an entry, so the page was unreachable; (2) uploads reused the gallery filename → same storage path (upsert) → same public URL → Flutter's `NetworkImage` cache kept serving the OLD image in the customer app forever; (3) `activeCategoriesProvider` is a kept-alive `FutureProvider`, so even after the DB updated, the running customer app showed stale categories until a pull-to-refresh/restart.
+
+### Decision
+1. **Expose the page**: add `_AdminNavItem('/admin/categories', Icons.category_rounded, l10n.adminCategories)` to the Platform group in `admin_shell.dart` and a Quick-Actions `_ActionData` tile (route `/admin/categories`) in the platform section of `admin_quick_actions_page.dart`.
+2. **Cache-bust every upload**: `SupabaseCategoryDataSource.uploadCategoryImage` now writes to a unique path `categories/<categoryId>/<epochMs>_<fileName>` → each upload produces a brand-new public URL = brand-new `ImageCache` key in the customer app → the new photo renders immediately without restart. `FileOptions.upsert` kept for collision safety.
+3. **Keep the bucket clean**: the admin page deletes the previous `imageUrl` before re-uploading (`_uploadImage` and the edit-dialog path).
+4. **Refresh on app resume**: new shared `AppLifecycleCategoryRefresh` widget (`AppLifecycleListener.onResume` → `ref.invalidate(activeCategoriesProvider)`) mounted around `MaterialApp.router` in `customer/app.dart`. The home page's existing `ref.listen` precache then fetches the new URLs, so the change is visible the moment the user returns to the customer app.
+
+### Rationale
+- A URL that changes per upload defeats the image cache by construction and avoids fragile cache-eviction logic.
+- Reusing the exact customer data source (`activeCategoriesProvider`) for both admin list and customer display keeps «تسمع مباشرة» end-to-end with one invalidation point.
+- Putting the link in both the drawer/rail and the Quick Actions gives the phone-first owner two easy paths.
+
+### Consequences
+- The owner can now: Admin app → «المنصة» → «التصنيفات» (or More → الفئات) → a cloud-upload action → pick a photo → open/return to the customer app and see it instantly. Pull-to-refresh remains as a secondary refresh path.
+- Every upload leaves the previous file removed from storage; a unique path per upload also removes the `upsert` overwrite hazard.
+- `flutter analyze` clean; `flutter test` **990/990** (988 + 2: `admin_quick_actions_page_test.dart` Categories-tile presence on a taller-than-default test surface — the last platform section is beyond the lazy ListView's 800×600 viewport; `app_lifecycle_category_refresh_test.dart` counting-fake resume test driving the valid paused→hidden→inactive→resumed state machine).
+- Built/installed `releases/delwaqty_1.0.1+2_debug_20260927_014550.apk`; relaunch clean (logcat: zero FATAL/overflow/RenderFlex).
+
 ## ADR-119: All Services = every Main Category + neutral simple tile
 
 **Date:** Sprint 204 (ROUND 66)

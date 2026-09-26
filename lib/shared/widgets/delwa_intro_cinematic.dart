@@ -4,7 +4,7 @@
 // Bundled reference design:
 //   * full-screen Pyramids / Nile background (BoxFit.cover) + light dim layer
 //   * "Egypt" statement block pinned top-right inside SafeArea
-//   * transparent logo (assets/egypt/delwaqty_logo_mark.png) centered with a
+//   * transparent logo (assets/egypt/delwaqty_logo_mark.webp) centered with a
 //     soft purple/blue/cyan halo and a Fade + Scale (0.88 -> 1.0) reveal
 //   * a quiet vertical light strip sweeping the Nile bottom -> top
 //   * "DelwaQty" wordmark (Delwa white, Qty purple/blue/cyan gradient)
@@ -27,7 +27,7 @@ import 'package:go_router/go_router.dart';
 class IntroAssets {
   IntroAssets._();
 
-  static const String logo = 'assets/egypt/delwaqty_logo_mark.png';
+  static const String logo = 'assets/egypt/delwaqty_logo_mark.webp';
   static const String background =
       'assets/egypt/intro_egypt_cinematic_background.webp';
 }

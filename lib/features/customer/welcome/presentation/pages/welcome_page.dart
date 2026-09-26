@@ -51,7 +51,7 @@ class WelcomePage extends ConsumerWidget {
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(30),
                         child: Image.asset(
-                          'assets/logo app/logo.png',
+                          'assets/logo app/logo.webp',
                           width: 84,
                           height: 84,
                           fit: BoxFit.contain,

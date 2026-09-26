@@ -548,7 +548,7 @@ class _EgyptHeroState extends State<_EgyptHero>
             width: logoSize,
             height: logoSize,
             child: Image.asset(
-              'assets/egypt/delwaqty_logo_mark.png',
+              'assets/egypt/delwaqty_logo_mark.webp',
               fit: BoxFit.contain,
               errorBuilder: (_, _, _) => const DecoratedBox(
                 decoration: BoxDecoration(

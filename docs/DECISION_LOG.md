@@ -3949,3 +3949,30 @@ The user's «صفحه ال Services» is the providers page (`ServiceProvidersPa
 - The top bar of the Services page now speaks the exact same visual language as the bottom navigation (primary pill on the active item); the duplicate chip-aesthetic is gone app-wide.
 - Radius row scrolls when content exceeds width (e.g. large text scales or narrow devices) instead of flashing the striped overflow band.
 - Built + installed `releases/delwaqty_1.0.1+2_debug_20260927_012128.apk` (57M); force-stop + relaunch clean; logcat shows zero `overflowed by|RenderFlex|FATAL`.
+
+---
+
+## ADR-119: All Services = every Main Category + neutral simple tile
+
+**Date:** Sprint 204 (ROUND 66)
+**Status:** Accepted
+**Deciders:** Lead Software Architect (after user request «مفيش فيها غير بعض الخدمات ومتحطش فيها كل الى فى Main Categories... خلى الزر سيمبل بدون الوان حواليه»)
+
+### Context
+The `/services` (All Services) page rendered only the 16 booking categories via `cachedServiceBookingRepositoryProvider.getCategories()` — a data set completely separate from the home «الفئات الرئيسية» strip, which merges `activeCategoriesProvider` (platform categories: restaurants, grocery, bakery, pharmacy, produce, cafe…) with the booking services. The page therefore looked like a partial list and never contained the Main Categories the user sees on Home. Additionally, the ROUND-63 vivid-gradient tile (colored rounded-square with a white icon circle + star overlay) read as «colored square / not the best shape», and the user asked for a plain button.
+
+### Decision
+1. **One merged provider** `_allCategoriesProvider` in `all_services_page.dart`: awaits `activeCategoriesProvider.future` first (sorted by the shared `categoryRank` daily-demand order) and then the booking repo list (sorted by the fixed priority) — with graceful degradation (platform failure → services-only, so the page still works fully offline for booking). The provider therefore stays in `loading` until BOTH sources settle; no "partial-then-full" flash.
+2. **Two sections** under the home page's own l10n headers («الفئات الرئيسية»/mainCategories then «خدمات وحجز»/bookingServices), each rendered with the SAME `mainAxisExtent: 132` 3-column grid delegate the shimmer uses (keeps the ROUND-64 overflow-free-by-construction rule).
+3. **Platform tiles navigate exactly like the home strip** (`/market?type=<merchantType>`); booking tiles keep `/home-services/providers/<type>`.
+4. **New neutral `_SimpleGridTile`**: flat `surfaceContainerHighest` card, rounded-18, thin `outlineVariant` border, 48px soft neutral circle (emoji fallback or 26px `onSurfaceVariant` icon; `Image.network` for categories with emoji fallback), one-line 12px `onSurface` label. Removed `_serviceColor`/gradients and the rating-star overlay from the grid (reviews remain reachable via the providers pages).
+
+### Rationale
+- Reusing `activeCategoriesProvider` (the exact home strip source) guarantees «كل اللي في Main Categories» by construction — no divergent category definition.
+- A grid shared delegate + scrollable sections preserves ROUND 62-65 overflow guarantees.
+- Neutral surfaces satisfy "بسيط من غير ألوان" without inventing a new visual language (same material surfaces as the rest of the app).
+
+### Consequences
+- The All Services page now mirrors the home categories section 1:1 and every tile on it is reachable; the page stays overflow-free (tested) and offline-degrades to booking services.
+- `flutter analyze` clean; `flutter test` **988/988** (987 + the new Arabic both-sections assertion group in `all_services_page_responsive_test.dart`, which also now mocks `platformCategoryRepositoryProvider`).
+- Built/installed `releases/delwaqty_1.0.1+2_debug_20260927_013408.apk`; relaunch clean (logcat: zero overflow/RenderFlex/FATAL).

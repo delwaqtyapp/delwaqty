@@ -34,8 +34,9 @@ import 'package:delwaqty/core/theme/app_spacing.dart';
 import 'package:delwaqty/core/theme/app_elevation.dart';
 import 'package:delwaqty/shared/widgets/app_shell.dart';
 
-final _homeServiceCategoriesProvider =
-    FutureProvider<List<ServiceCategory>>((ref) async {
+final _homeServiceCategoriesProvider = FutureProvider<List<ServiceCategory>>((
+  ref,
+) async {
   final repo = ref.watch(cachedServiceBookingRepositoryProvider);
   final all = await repo.getCategories();
   const priority = [
@@ -66,44 +67,44 @@ final _homeServiceCategoriesProvider =
 });
 
 IconData _serviceIcon(ServiceCategoryType t) => switch (t) {
-      ServiceCategoryType.doctor => Icons.medical_services_rounded,
-      ServiceCategoryType.nurse => Icons.health_and_safety_rounded,
-      ServiceCategoryType.teacher => Icons.school_rounded,
-      ServiceCategoryType.barber => Icons.content_cut_rounded,
-      ServiceCategoryType.plumbing => Icons.plumbing_rounded,
-      ServiceCategoryType.electrical => Icons.electrical_services_rounded,
-      ServiceCategoryType.carpentry => Icons.carpenter_rounded,
-      ServiceCategoryType.painting => Icons.format_paint_rounded,
-      ServiceCategoryType.cleaning => Icons.cleaning_services_rounded,
-      ServiceCategoryType.acMaintenance => Icons.ac_unit_rounded,
-      ServiceCategoryType.pipeChange => Icons.settings_input_component_rounded,
-      ServiceCategoryType.plastering => Icons.format_color_fill_rounded,
-      ServiceCategoryType.carpetCleaning => Icons.local_laundry_service_rounded,
-      ServiceCategoryType.dishRepair => Icons.satellite_alt_rounded,
-      ServiceCategoryType.pestControl => Icons.bug_report_rounded,
-      ServiceCategoryType.applianceRepair => Icons.build_rounded,
-      ServiceCategoryType.other => Icons.home_repair_service_rounded,
-    };
+  ServiceCategoryType.doctor => Icons.medical_services_rounded,
+  ServiceCategoryType.nurse => Icons.health_and_safety_rounded,
+  ServiceCategoryType.teacher => Icons.school_rounded,
+  ServiceCategoryType.barber => Icons.content_cut_rounded,
+  ServiceCategoryType.plumbing => Icons.plumbing_rounded,
+  ServiceCategoryType.electrical => Icons.electrical_services_rounded,
+  ServiceCategoryType.carpentry => Icons.carpenter_rounded,
+  ServiceCategoryType.painting => Icons.format_paint_rounded,
+  ServiceCategoryType.cleaning => Icons.cleaning_services_rounded,
+  ServiceCategoryType.acMaintenance => Icons.ac_unit_rounded,
+  ServiceCategoryType.pipeChange => Icons.settings_input_component_rounded,
+  ServiceCategoryType.plastering => Icons.format_color_fill_rounded,
+  ServiceCategoryType.carpetCleaning => Icons.local_laundry_service_rounded,
+  ServiceCategoryType.dishRepair => Icons.satellite_alt_rounded,
+  ServiceCategoryType.pestControl => Icons.bug_report_rounded,
+  ServiceCategoryType.applianceRepair => Icons.build_rounded,
+  ServiceCategoryType.other => Icons.home_repair_service_rounded,
+};
 
 Color _serviceColor(ServiceCategoryType t) => switch (t) {
-      ServiceCategoryType.doctor => AppColors.errorLight,
-      ServiceCategoryType.nurse => AppColors.successLight,
-      ServiceCategoryType.teacher => AppColors.infoLight,
-      ServiceCategoryType.barber => AppColors.brandViolet,
-      ServiceCategoryType.plumbing => AppColors.serviceHome,
-      ServiceCategoryType.electrical => AppColors.serviceElectronics,
-      ServiceCategoryType.carpentry => AppColors.serviceBakery,
-      ServiceCategoryType.painting => AppColors.serviceFashion,
-      ServiceCategoryType.cleaning => AppColors.serviceDelivery,
-      ServiceCategoryType.acMaintenance => AppColors.serviceSeafood,
-      ServiceCategoryType.pipeChange => AppColors.serviceGrocery,
-      ServiceCategoryType.plastering => AppColors.serviceFurniture,
-      ServiceCategoryType.carpetCleaning => AppColors.serviceCafe,
-      ServiceCategoryType.dishRepair => AppColors.serviceElectronics,
-      ServiceCategoryType.pestControl => AppColors.serviceGas,
-      ServiceCategoryType.applianceRepair => AppColors.serviceAppliances,
-      ServiceCategoryType.other => AppColors.serviceMore,
-    };
+  ServiceCategoryType.doctor => AppColors.errorLight,
+  ServiceCategoryType.nurse => AppColors.successLight,
+  ServiceCategoryType.teacher => AppColors.infoLight,
+  ServiceCategoryType.barber => AppColors.brandViolet,
+  ServiceCategoryType.plumbing => AppColors.serviceHome,
+  ServiceCategoryType.electrical => AppColors.serviceElectronics,
+  ServiceCategoryType.carpentry => AppColors.serviceBakery,
+  ServiceCategoryType.painting => AppColors.serviceFashion,
+  ServiceCategoryType.cleaning => AppColors.serviceDelivery,
+  ServiceCategoryType.acMaintenance => AppColors.serviceSeafood,
+  ServiceCategoryType.pipeChange => AppColors.serviceGrocery,
+  ServiceCategoryType.plastering => AppColors.serviceFurniture,
+  ServiceCategoryType.carpetCleaning => AppColors.serviceCafe,
+  ServiceCategoryType.dishRepair => AppColors.serviceElectronics,
+  ServiceCategoryType.pestControl => AppColors.serviceGas,
+  ServiceCategoryType.applianceRepair => AppColors.serviceAppliances,
+  ServiceCategoryType.other => AppColors.serviceMore,
+};
 
 const _topBookingTypes = <ServiceCategoryType>[
   ServiceCategoryType.doctor,
@@ -111,6 +112,16 @@ const _topBookingTypes = <ServiceCategoryType>[
   ServiceCategoryType.teacher,
   ServiceCategoryType.barber,
 ];
+
+const _stripHeight = 120.0;
+const _tileLabelHeight = 22.0;
+
+void _precacheImageUrls(BuildContext context, Iterable<String> urls) {
+  for (final url in urls) {
+    if (url.isEmpty) continue;
+    unawaited(precacheImage(NetworkImage(url), context));
+  }
+}
 
 List<_TileItem> get _topBookingItems =>
     _topBookingTypes.map((t) => _ServiceTile(t)).toList(growable: false);
@@ -124,9 +135,7 @@ class HomePage extends ConsumerWidget {
     final authState = ref.watch(authStateProvider);
     final isGuest = authState is AuthGuest;
     final locationAsync = ref.watch(userLocationProvider);
-    final unreadCount = isGuest
-        ? 0
-        : ref.watch(unreadCountProvider).value ?? 0;
+    final unreadCount = isGuest ? 0 : ref.watch(unreadCountProvider).value ?? 0;
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: const SystemUiOverlayStyle(
@@ -136,57 +145,87 @@ class HomePage extends ConsumerWidget {
         systemNavigationBarColor: Colors.transparent,
         systemNavigationBarIconBrightness: Brightness.dark,
       ),
-      child: Scaffold(
-        body: RefreshIndicator(
-          onRefresh: () async {
-            ref.invalidate(nearbyMerchantsProvider);
-            ref.invalidate(activeCategoriesProvider);
-            ref.invalidate(discoveryEntriesProvider);
-            ref.invalidate(activeCampaignsProvider);
-            ref.read(userLocationProvider.notifier).refreshQuick();
-          },
-          child: NotificationListener<ScrollNotification>(
-            onNotification: (notification) {
-              final scrollingDown =
-                  ScrollAwareNavObserver.handleScrollNotification(notification);
-              ref.read(bottomNavVisibleProvider.notifier).state =
-                  !scrollingDown;
-              return false;
-            },
-            child: CustomScrollView(
-              slivers: [
-                SliverToBoxAdapter(
-                  child: _EgyptHero(
-                    l10n: l10n,
-                    authState: authState,
-                    isGuest: isGuest,
-                    locationAsync: locationAsync,
-                    unreadCount: unreadCount,
-                  ),
-                ),
-                SliverToBoxAdapter(
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(20, 10, 20, 0),
-                    child: _DirectOrderButton(
-                      l10n: l10n,
-                      onTap: () => context.push('/direct-delivery'),
+      child: Stack(
+        children: [
+          _precacheSection(context, ref),
+          Scaffold(
+            body: RefreshIndicator(
+              onRefresh: () async {
+                ref.invalidate(nearbyMerchantsProvider);
+                ref.invalidate(activeCategoriesProvider);
+                ref.invalidate(discoveryEntriesProvider);
+                ref.invalidate(activeCampaignsProvider);
+                ref.read(userLocationProvider.notifier).refreshQuick();
+              },
+              child: NotificationListener<ScrollNotification>(
+                onNotification: (notification) {
+                  final scrollingDown =
+                      ScrollAwareNavObserver.handleScrollNotification(
+                        notification,
+                      );
+                  ref.read(bottomNavVisibleProvider.notifier).state =
+                      !scrollingDown;
+                  return false;
+                },
+                child: CustomScrollView(
+                  slivers: [
+                    SliverToBoxAdapter(
+                      child: _EgyptHero(
+                        l10n: l10n,
+                        authState: authState,
+                        isGuest: isGuest,
+                        locationAsync: locationAsync,
+                        unreadCount: unreadCount,
+                      ),
                     ),
-                  ),
+                    SliverToBoxAdapter(
+                      child: Padding(
+                        padding: const EdgeInsets.fromLTRB(20, 10, 20, 0),
+                        child: _DirectOrderButton(
+                          l10n: l10n,
+                          onTap: () => context.push('/direct-delivery'),
+                        ),
+                      ),
+                    ),
+                    SliverToBoxAdapter(
+                      child: _CompactCategories(ref: ref, l10n: l10n),
+                    ),
+                    const SliverToBoxAdapter(child: _PromoCarousel()),
+                    SliverToBoxAdapter(
+                      child: _buildDiscoverySection(context, ref, l10n),
+                    ),
+                    const SliverToBoxAdapter(child: SizedBox(height: 120)),
+                  ],
                 ),
-                SliverToBoxAdapter(
-                  child: _CompactCategories(ref: ref, l10n: l10n),
-                ),
-                const SliverToBoxAdapter(child: _PromoCarousel()),
-                SliverToBoxAdapter(
-                  child: _buildDiscoverySection(context, ref, l10n),
-                ),
-                const SliverToBoxAdapter(child: SizedBox(height: 120)),
-              ],
+              ),
             ),
           ),
-        ),
+        ],
       ),
     );
+  }
+
+  /// Eagerly loads the network images used by the Main Categories strip and
+  /// the discovery cards so scrolling never shows an empty white placeholder.
+  Widget _precacheSection(BuildContext context, WidgetRef ref) {
+    ref.listen(activeCategoriesProvider, (_, next) {
+      final categories = next.value;
+      if (categories != null) {
+        _precacheImageUrls(context, categories.map((c) => c.imageUrl ?? ''));
+      }
+    });
+    ref.listen(discoveryEntriesProvider, (_, next) {
+      final entries = next.value;
+      if (entries == null) return;
+      _precacheImageUrls(context, [
+        for (final e in entries)
+          if (e is MerchantDiscoveryEntry)
+            e.merchant.imageUrl ?? ''
+          else if (e is ProviderDiscoveryEntry)
+            e.provider.profileImageUrl ?? '',
+      ]);
+    });
+    return const SizedBox.shrink();
   }
 
   Widget _buildDiscoverySection(
@@ -330,9 +369,7 @@ class _EgyptHeroState extends State<_EgyptHero>
     final heroH = math.max(heroImageH, contentH);
 
     return ClipRRect(
-      borderRadius: const BorderRadius.vertical(
-        bottom: Radius.circular(28),
-      ),
+      borderRadius: const BorderRadius.vertical(bottom: Radius.circular(28)),
       child: SizedBox(
         height: heroH,
         child: Stack(
@@ -356,11 +393,7 @@ class _EgyptHeroState extends State<_EgyptHero>
                   12,
                   (heroH - heroImageH) + 12,
                 ),
-                child: _buildLocationBadge(
-                  context,
-                  height: 28,
-                  maxWidth: 150,
-                ),
+                child: _buildLocationBadge(context, height: 28, maxWidth: 150),
               ),
             ),
             Positioned.fill(
@@ -411,8 +444,7 @@ class _EgyptHeroState extends State<_EgyptHero>
                               ),
                               const Spacer(),
                               _MenuCircleButton(
-                                onTap: () => AppShell.scaffoldKey
-                                    .currentState
+                                onTap: () => AppShell.scaffoldKey.currentState
                                     ?.openDrawer(),
                                 size: topButtonSize,
                                 iconSize: topIconSize,
@@ -536,10 +568,7 @@ class _EgyptHeroState extends State<_EgyptHero>
                   gradient: LinearGradient(
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
-                    colors: [
-                      AppColors.brandPurpleDeep,
-                      AppColors.brandViolet,
-                    ],
+                    colors: [AppColors.brandPurpleDeep, AppColors.brandViolet],
                   ),
                 ),
                 child: Center(
@@ -564,9 +593,7 @@ class _EgyptHeroState extends State<_EgyptHero>
               fontWeight: FontWeight.w600,
               color: const Color(0xFFF7F7FA),
               letterSpacing: 0.5,
-              shadows: const [
-                Shadow(color: Color(0x55000000), blurRadius: 3),
-              ],
+              shadows: const [Shadow(color: Color(0x55000000), blurRadius: 3)],
             ),
           ),
         ),
@@ -605,11 +632,7 @@ class _SearchCircleButton extends StatelessWidget {
             ),
           ],
         ),
-        child: Icon(
-          AppIcons.actionSearch,
-          color: Colors.white,
-          size: iconSize,
-        ),
+        child: Icon(AppIcons.actionSearch, color: Colors.white, size: iconSize),
       ),
     );
   }
@@ -655,9 +678,7 @@ class _UserGreeting extends StatelessWidget {
               color: Colors.white,
               fontWeight: FontWeight.w600,
               fontSize: taglineSize,
-              shadows: const [
-                Shadow(color: Color(0x55000000), blurRadius: 4),
-              ],
+              shadows: const [Shadow(color: Color(0x55000000), blurRadius: 4)],
             ),
             textAlign: TextAlign.right,
             maxLines: 2,
@@ -733,10 +754,7 @@ class _DirectOrderButtonState extends State<_DirectOrderButton>
                         Opacity(
                           opacity: (0.55 - i * 0.14).clamp(0.08, 0.55),
                           child: Transform.translate(
-                            offset: Offset(
-                              slide - wind * (12 + 8 * i),
-                              bob,
-                            ),
+                            offset: Offset(slide - wind * (12 + 8 * i), bob),
                             child: Container(
                               width: 16 - i * 2.2,
                               height: i >= 2 ? 2.5 : 3,
@@ -930,169 +948,153 @@ class _CompactCategories extends StatelessWidget {
 
   Widget _shimmerStrip() {
     return SizedBox(
-      height: 108,
+      height: _stripHeight,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
         itemCount: 8,
         separatorBuilder: (_, _) => const SizedBox(width: 12),
-        itemBuilder: (_, _) =>
-            const SizedBox(width: 150, child: ShimmerCard(height: 108)),
+        itemBuilder: (_, _) => const SizedBox(width: 150, child: ShimmerCard()),
       ),
     );
   }
 
   Widget _buildStrip(BuildContext context, List<_TileItem> items) {
     return SizedBox(
-      height: 108,
+      height: _stripHeight,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
         itemCount: items.length,
         separatorBuilder: (_, _) => const SizedBox(width: 12),
-        itemBuilder: (context, index) =>
-            _buildTile(context, items[index], index),
+        itemBuilder: (context, index) => _buildTile(context, items[index]),
       ),
     );
   }
 
-  Widget _buildTile(BuildContext context, _TileItem item, int index) =>
-      switch (item) {
-        _CategoryTile(:final category) =>
-          _buildCategoryTile(context, category, index),
-        _ServiceTile(:final type) => _buildServiceTile(context, type, index),
-      };
+  Widget _buildTile(BuildContext context, _TileItem item) => switch (item) {
+    _CategoryTile(:final category) => _buildCategoryTile(context, category),
+    _ServiceTile(:final type) => _buildServiceTile(context, type),
+  };
 
-  Widget _buildCategoryTile(
-    BuildContext context,
-    PlatformCategory category,
-    int index,
-  ) {
+  Widget _buildCategoryTile(BuildContext context, PlatformCategory category) {
     final merchantType = categoryNameToMerchantType(category.name);
     final typeColor = merchantType != null
         ? merchantTypeColor(merchantType)
         : AppColors.brandPurple;
-    final emoji = merchantType != null
-        ? merchantEmoji(merchantType)
-        : '🏪';
+    final emoji = merchantType != null ? merchantEmoji(merchantType) : '🏪';
 
-    return AnimatedFadeIn(
-      delay: Duration(milliseconds: 280 + index * 40),
-      child: PressableScale(
-        onTap: () {
-          final typeParam = merchantType?.name ?? 'other';
-          context.push('/market?type=$typeParam');
-        },
-        child: SizedBox(
-          width: 76,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                width: 58,
-                height: 58,
-                clipBehavior: Clip.antiAlias,
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [
-                      typeColor.withValues(alpha: 0.38),
-                      typeColor.withValues(alpha: 0.15),
-                    ],
+    return PressableScale(
+      onTap: () {
+        final typeParam = merchantType?.name ?? 'other';
+        context.push('/market?type=$typeParam');
+      },
+      child: SizedBox(
+        width: 76,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 58,
+              height: 58,
+              clipBehavior: Clip.antiAlias,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    typeColor.withValues(alpha: 0.38),
+                    typeColor.withValues(alpha: 0.15),
+                  ],
+                ),
+                borderRadius: BorderRadius.circular(18),
+                border: Border.all(color: typeColor.withValues(alpha: 0.25)),
+              ),
+              child: category.imageUrl != null
+                  ? Image.network(
+                      category.imageUrl!,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, _, _) => _emojiFallback(emoji),
+                    )
+                  : _emojiFallback(emoji),
+            ),
+            const SizedBox(height: 6),
+            SizedBox(
+              height: _tileLabelHeight,
+              child: Center(
+                child: Text(
+                  category.displayName(
+                    Directionality.of(context) == TextDirection.rtl,
                   ),
-                  borderRadius: BorderRadius.circular(18),
-                  border: Border.all(color: typeColor.withValues(alpha: 0.25)),
+                  style: AppTextStyles.labelSmall.copyWith(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                  ),
+                  textAlign: TextAlign.center,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
-                child: category.imageUrl != null
-                    ? Image.network(
-                        category.imageUrl!,
-                        fit: BoxFit.cover,
-                        errorBuilder: (_, _, _) => _emojiFallback(emoji),
-                      )
-                    : _emojiFallback(emoji),
               ),
-              const SizedBox(height: 6),
-              Text(
-                category.displayName(
-                  Directionality.of(context) == TextDirection.rtl,
-                ),
-                style: AppTextStyles.labelSmall.copyWith(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
-                ),
-                textAlign: TextAlign.center,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
   }
 
-  Widget _buildServiceTile(
-    BuildContext context,
-    ServiceCategoryType type,
-    int index,
-  ) {
+  Widget _buildServiceTile(BuildContext context, ServiceCategoryType type) {
     final color = _serviceColor(type);
     final icon = _serviceIcon(type);
     final label = serviceTypeLabel(type, AppLocalizations.of(context));
 
-    return AnimatedFadeIn(
-      delay: Duration(milliseconds: 280 + index * 40),
-      child: PressableScale(
-        onTap: () => context.push(
-          '/home-services/providers/${type.name}',
-        ),
-        child: SizedBox(
-          width: 76,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                width: 58,
-                height: 58,
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [
-                      color.withValues(alpha: 0.38),
-                      color.withValues(alpha: 0.15),
-                    ],
+    return PressableScale(
+      onTap: () => context.push('/home-services/providers/${type.name}'),
+      child: SizedBox(
+        width: 76,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 58,
+              height: 58,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    color.withValues(alpha: 0.38),
+                    color.withValues(alpha: 0.15),
+                  ],
+                ),
+                borderRadius: BorderRadius.circular(18),
+                border: Border.all(color: color.withValues(alpha: 0.25)),
+              ),
+              child: Center(child: Icon(icon, color: color, size: 24)),
+            ),
+            const SizedBox(height: 6),
+            SizedBox(
+              height: _tileLabelHeight,
+              child: Center(
+                child: Text(
+                  label,
+                  style: AppTextStyles.labelSmall.copyWith(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
                   ),
-                  borderRadius: BorderRadius.circular(18),
-                  border: Border.all(color: color.withValues(alpha: 0.25)),
-                ),
-                child: Center(
-                  child: Icon(icon, color: color, size: 24),
+                  textAlign: TextAlign.center,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
-              const SizedBox(height: 6),
-              Text(
-                label,
-                style: AppTextStyles.labelSmall.copyWith(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
-                ),
-                textAlign: TextAlign.center,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
   }
 
   Widget _emojiFallback(String emoji) {
-    return Center(
-      child: Text(emoji, style: const TextStyle(fontSize: 24)),
-    );
+    return Center(child: Text(emoji, style: const TextStyle(fontSize: 24)));
   }
 }
 
@@ -1143,23 +1145,23 @@ class _DiscoveryTabsState extends ConsumerState<_DiscoveryTabs> {
               decoration: BoxDecoration(
                 gradient: selected
                     ? const LinearGradient(
-                        colors: [AppColors.brandPurpleDeep, AppColors.brandViolet],
+                        colors: [
+                          AppColors.brandPurpleDeep,
+                          AppColors.brandViolet,
+                        ],
                       )
                     : null,
                 color: selected
                     ? null
-                    : Theme.of(context)
-                        .colorScheme
-                        .surfaceContainerHighest
-                        .withValues(alpha: 0.35),
+                    : Theme.of(context).colorScheme.surfaceContainerHighest
+                          .withValues(alpha: 0.35),
                 borderRadius: BorderRadius.circular(999),
                 border: Border.all(
                   color: selected
                       ? Colors.transparent
-                      : Theme.of(context)
-                          .colorScheme
-                          .outlineVariant
-                          .withValues(alpha: 0.15),
+                      : Theme.of(
+                          context,
+                        ).colorScheme.outlineVariant.withValues(alpha: 0.15),
                 ),
               ),
               child: Text(
@@ -1256,7 +1258,10 @@ class _DiscoveryContent extends ConsumerWidget {
         emoji: merchantEmoji(merchant.type),
         color: merchantTypeColor(merchant.type),
         name: merchant.name,
-        typeLabel: merchantTypeLabel(merchant.type, AppLocalizations.of(context)),
+        typeLabel: merchantTypeLabel(
+          merchant.type,
+          AppLocalizations.of(context),
+        ),
         open: merchant.isOpenNow,
         openLabel: merchant.isOpenNow
             ? AppLocalizations.of(context).open
@@ -1266,10 +1271,10 @@ class _DiscoveryContent extends ConsumerWidget {
         subtitle: merchant.deliveryAvailable && (merchant.deliveryFee ?? 0) > 0
             ? '${(merchant.deliveryFee ?? 0).toStringAsFixed(0)} ${AppLocalizations.of(context).currencySymbol}'
             : merchant.deliveryAvailable
-                ? AppLocalizations.of(context).freeDelivery
-                : merchant.estimatedDeliveryMinutes != null
-                    ? '${merchant.estimatedDeliveryMinutes} ${AppLocalizations.of(context).minutesShort}'
-                    : null,
+            ? AppLocalizations.of(context).freeDelivery
+            : merchant.estimatedDeliveryMinutes != null
+            ? '${merchant.estimatedDeliveryMinutes} ${AppLocalizations.of(context).minutesShort}'
+            : null,
         favoriteId: merchant.id,
         onTap: () => context.push('/market/merchant/${merchant.id}'),
       );
@@ -1332,11 +1337,7 @@ class _MenuCircleButton extends StatelessWidget {
             ),
           ],
         ),
-        child: Icon(
-          AppIcons.navDrawer,
-          color: Colors.white,
-          size: iconSize,
-        ),
+        child: Icon(AppIcons.navDrawer, color: Colors.white, size: iconSize),
       ),
     );
   }
@@ -1397,7 +1398,9 @@ class _NotificationCircle extends StatelessWidget {
                     ),
                     decoration: BoxDecoration(
                       color: context.colorScheme.error,
-                      borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
+                      borderRadius: BorderRadius.circular(
+                        AppSpacing.radiusFull,
+                      ),
                       border: Border.all(
                         color: context.colorScheme.surfaceContainerLowest,
                         width: 1.5,
@@ -1498,7 +1501,10 @@ class _PromoCarouselState extends ConsumerState<_PromoCarousel> {
         case CampaignCtaType.internalRoute:
           final route = cta.route;
           if (route != null &&
-              NotificationChannels.isAllowed(route, context: AppContext.customer)) {
+              NotificationChannels.isAllowed(
+                route,
+                context: AppContext.customer,
+              )) {
             context.push(route);
           }
           return;
@@ -1561,8 +1567,9 @@ class _PromoCarouselState extends ConsumerState<_PromoCarousel> {
                             borderRadius: BorderRadius.circular(999),
                             color: _current == i
                                 ? AppColors.brandPurple
-                                : context.colorScheme.outlineVariant
-                                    .withValues(alpha: 0.5),
+                                : context.colorScheme.outlineVariant.withValues(
+                                    alpha: 0.5,
+                                  ),
                           ),
                         ),
                     ],
@@ -1584,11 +1591,7 @@ class _PromoCarouselLoading extends StatelessWidget {
   Widget build(BuildContext context) {
     return const Padding(
       padding: EdgeInsets.fromLTRB(16, 14, 16, 0),
-      child: ShimmerBox(
-        width: double.infinity,
-        height: 205,
-        borderRadius: 24,
-      ),
+      child: ShimmerBox(width: double.infinity, height: 205, borderRadius: 24),
     );
   }
 }
@@ -1762,20 +1765,13 @@ class _PromoSlide extends ConsumerWidget {
   }
 }
 
-Widget merchantHeaderGradient(
-  BuildContext context,
-  Color color,
-  String emoji,
-) {
+Widget merchantHeaderGradient(BuildContext context, Color color, String emoji) {
   return DecoratedBox(
     decoration: BoxDecoration(
       gradient: LinearGradient(
         begin: Alignment.topLeft,
         end: Alignment.bottomRight,
-        colors: [
-          color.withValues(alpha: 0.55),
-          color.withValues(alpha: 0.15),
-        ],
+        colors: [color.withValues(alpha: 0.55), color.withValues(alpha: 0.15)],
       ),
     ),
     child: Center(
@@ -1836,11 +1832,8 @@ class _HomeDiscoveryListCard extends StatelessWidget {
                     ? Image.network(
                         imageUrl!,
                         fit: BoxFit.cover,
-                        errorBuilder: (_, _, _) => merchantHeaderGradient(
-                          context,
-                          color,
-                          emoji,
-                        ),
+                        errorBuilder: (_, _, _) =>
+                            merchantHeaderGradient(context, color, emoji),
                       )
                     : merchantHeaderGradient(context, color, emoji),
               ),
@@ -1962,7 +1955,9 @@ class _StatusBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bg = open ? AppColors.successLight : Colors.black.withValues(alpha: 0.45);
+    final bg = open
+        ? AppColors.successLight
+        : Colors.black.withValues(alpha: 0.45);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
       decoration: BoxDecoration(

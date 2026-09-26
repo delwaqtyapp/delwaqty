@@ -395,7 +395,7 @@ class _LoginPageState extends ConsumerState<LoginPage>
         child: ClipRRect(
           borderRadius: BorderRadius.circular(28),
           child: Image.asset(
-            'assets/logo app/logo.png',
+            'assets/logo app/logo.webp',
             fit: BoxFit.contain,
             errorBuilder: (_, _, _) => DecoratedBox(
               decoration: BoxDecoration(

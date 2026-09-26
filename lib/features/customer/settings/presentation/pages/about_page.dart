@@ -78,7 +78,7 @@ class _AboutPageState extends ConsumerState<AboutPage> {
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(28),
                   child: Image.asset(
-                    'assets/logo app/logo.png',
+                    'assets/logo app/logo.webp',
                     width: 72,
                     height: 72,
                     fit: BoxFit.contain,

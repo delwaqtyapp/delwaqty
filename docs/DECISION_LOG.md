@@ -3854,3 +3854,42 @@ each button loads and appears one at a time.
 - Slightly more first-frame network work for category images (5-15 small WebP),
   warm cached thereafter; pull-to-refresh precaches again on new data.
 - Visual confirmation of the strip on the physical device is left to the user.
+
+## ADR-116: Vivid Bottom-Nav-Style Service Buttons + Overflow-Proof Grids (sprint 203)
+
+### Context
+On the Services page (`/services`) the user reported the buttons looked
+COLORLESS (colors "gone") and a transient «Bottom overflow by 128 pixels» error.
+They asked for buttons styled like the app's bottom navigation bar: clearly
+colored, with a visible distinct highlight when any button is selected, and
+readable text.
+
+### Decision
+1. **Solid vivid tile** — service buttons are now rounded cards filled with a
+   `[color → color·0.78]` gradient (the palette colors are already deep, so the
+   fill is clearly saturated), a white icon on a translucent circle and a white
+   bold label (fixed 20px box, single line, ellipsis). Colors are always
+   visible and readable regardless of theme.
+2. **Bottom-nav-like selection feedback** — a stateful tile (AnimatedContainer +
+   AnimatedScale) brightens the fill toward white and re-colors icon/text dark
+   on tap-down: exactly the pattern of the bottom nav's selected chip.
+3. **Overflow-proof grids** — both `/services` (3-col) and the Home Services
+   landing (2-col) now use a fixed `mainAxisExtent` cell (132 / 140) instead of
+   `childAspectRatio`. Content is ~≤90px inside 132-140px cells, so a
+   RenderFlex bottom overflow is mathematically impossible at any device
+   geometry or text scale — including the reported 128px case.
+4. Review star keeps contrast via a white circle backdrop on the vivid card.
+
+### Rationale
+- Faint alpha-gradients (0.15-0.35) caused the "colors disappeared" reading on
+  a bright panel; solid fills match the bottom-nav visual language the user
+  referenced.
+- Ratio-based grid cells shrink with screen width; the fixed extent preserves
+  headroom on every device (the durable fix for the overflow flashes).
+
+### Consequences
+- The Services grid looks livelier (vivid colored chips) and identical in size
+  across devices; rows are taller than the old faint-icon rows on wide screens.
+- Text is clamped to one line with ellipsis (long English names may truncate).
+- Visual confirmation of the new tiles on the physical device is left to the
+  user.

@@ -1,0 +1,28 @@
+{
+  "channels": {
+    "customer": {
+      "version": 2,
+      "versionName": "1.0.1+2",
+      "apk": "delwaqty-customer.apk",
+      "notes": "تحديث جديد: نظام التحديث الهوائي"
+    },
+    "admin": {
+      "version": 2,
+      "versionName": "1.0.1+2",
+      "apk": "delwaqty-admin.apk",
+      "notes": "تحديث جديد: نظام التحديث الهوائي"
+    },
+    "driver": {
+      "version": 2,
+      "versionName": "1.0.1+2",
+      "apk": "delwaqty-driver.apk",
+      "notes": "تحديث جديد: نظام التحديث الهوائي"
+    },
+    "provider": {
+      "version": 2,
+      "versionName": "1.0.1+2",
+      "apk": "delwaqty-provider.apk",
+      "notes": "تحديث جديد: نظام التحديث الهوائي"
+    }
+  }
+}

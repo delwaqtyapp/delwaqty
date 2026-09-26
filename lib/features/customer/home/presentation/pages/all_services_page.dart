@@ -7,7 +7,6 @@ import 'package:delwaqty/core/theme/app_text_styles.dart';
 import 'package:delwaqty/features/customer/home_services/domain/entities/service_category.dart';
 import 'package:delwaqty/data/repositories/cached_service_booking_repository.dart';
 import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
-import 'package:delwaqty/shared/widgets/pressable_scale.dart';
 import 'package:delwaqty/shared/widgets/premium_empty_state.dart';
 import 'package:delwaqty/shared/widgets/shimmer_loading.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
@@ -146,63 +145,36 @@ class AllServicesPage extends ConsumerWidget {
                     crossAxisCount: 3,
                     mainAxisSpacing: 14,
                     crossAxisSpacing: 12,
-                    childAspectRatio: 0.92,
+                    mainAxisExtent: 132,
                   ),
                   delegate: SliverChildBuilderDelegate(
                     (context, index) {
                       final service = services[index];
                       final color = _serviceColor(service.type);
-                      return PressableScale(
-                        onTap: () => context.push(
-                          '/home-services/providers/${service.type.name}',
-                        ),
-                        child: Stack(
-                          children: [
-                            Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Container(
-                                  width: 56,
-                                  height: 56,
-                                  decoration: BoxDecoration(
-                                    gradient: LinearGradient(
-                                      begin: Alignment.topLeft,
-                                      end: Alignment.bottomRight,
-                                      colors: [
-                                        color.withValues(alpha: 0.35),
-                                        color.withValues(alpha: 0.15),
-                                      ],
-                                    ),
-                                    borderRadius: BorderRadius.circular(16),
-                                    border: Border.all(
-                                      color: color.withValues(alpha: 0.25),
-                                    ),
-                                  ),
-                                  child: Icon(
-                                    _serviceIcon(service.type),
-                                    color: color,
-                                    size: 26,
-                                  ),
-                                ),
-                                const SizedBox(height: 8),
-                                Text(
-                                  Directionality.of(context) ==
-                                          TextDirection.rtl
-                                      ? service.nameAr
-                                      : service.nameEn,
-                                  style: AppTextStyles.labelSmall.copyWith(
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                  textAlign: TextAlign.center,
-                                  maxLines: 2,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ],
+                      final label =
+                          Directionality.of(context) == TextDirection.rtl
+                              ? service.nameAr
+                              : service.nameEn;
+                      return Stack(
+                        children: [
+                          Positioned.fill(
+                            child: _ServiceButtonTile(
+                              color: color,
+                              icon: _serviceIcon(service.type),
+                              label: label,
+                              onTap: () => context.push(
+                                '/home-services/providers/${service.type.name}',
+                              ),
                             ),
-                            Positioned(
-                              top: 0,
-                              right: 0,
+                          ),
+                          Positioned(
+                            top: 2,
+                            right: 2,
+                            child: DecoratedBox(
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: Colors.white.withValues(alpha: 0.88),
+                              ),
                               child: ServiceReviewsButton(
                                 categoryType: service.type,
                                 iconSize: 18,
@@ -210,8 +182,8 @@ class AllServicesPage extends ConsumerWidget {
                                     AppLocalizations.of(context).rateService,
                               ),
                             ),
-                          ],
-                        ),
+                          ),
+                        ],
                       );
                     },
                     childCount: services.length,
@@ -222,6 +194,107 @@ class AllServicesPage extends ConsumerWidget {
             ],
           );
         },
+      ),
+    );
+  }
+}
+
+class _ServiceButtonTile extends StatefulWidget {
+  const _ServiceButtonTile({
+    required this.color,
+    required this.icon,
+    required this.label,
+    required this.onTap,
+  });
+
+  final Color color;
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+
+  @override
+  State<_ServiceButtonTile> createState() => _ServiceButtonTileState();
+}
+
+class _ServiceButtonTileState extends State<_ServiceButtonTile> {
+  bool _pressed = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final color = widget.color;
+    final highlightBg = Color.lerp(color, Colors.white, 0.55)!;
+    return GestureDetector(
+      onTap: widget.onTap,
+      onTapDown: (_) => setState(() => _pressed = true),
+      onTapUp: (_) => setState(() => _pressed = false),
+      onTapCancel: () => setState(() => _pressed = false),
+      child: AnimatedScale(
+        scale: _pressed ? 0.95 : 1,
+        duration: const Duration(milliseconds: 140),
+        curve: Curves.easeOutCubic,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 160),
+          curve: Curves.easeOut,
+          margin: const EdgeInsets.all(2),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(20),
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: _pressed
+                  ? [highlightBg, color.withValues(alpha: 0.65)]
+                  : [color, Color.lerp(color, Colors.black, 0.22)!],
+            ),
+            boxShadow: const [
+              BoxShadow(
+                color: Color(0x33000000),
+                blurRadius: 10,
+                offset: Offset(0, 4),
+              ),
+            ],
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                width: 48,
+                height: 48,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Colors.white.withValues(
+                    alpha: _pressed ? 0.9 : 0.22,
+                  ),
+                ),
+                child: Icon(
+                  widget.icon,
+                  size: 26,
+                  color: _pressed
+                      ? Color.lerp(color, Colors.black, 0.35)
+                      : Colors.white,
+                ),
+              ),
+              const SizedBox(height: 6),
+              SizedBox(
+                height: 20,
+                child: Center(
+                  child: Text(
+                    widget.label,
+                    style: AppTextStyles.labelSmall.copyWith(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                      color: _pressed
+                          ? Color.lerp(color, Colors.black, 0.55)
+                          : Colors.white,
+                    ),
+                    textAlign: TextAlign.center,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

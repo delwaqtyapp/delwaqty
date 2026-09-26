@@ -67,7 +67,7 @@ class HomeServicesPage extends ConsumerWidget {
           crossAxisCount: 2,
           mainAxisSpacing: 14,
           crossAxisSpacing: 14,
-          childAspectRatio: 1.2,
+          mainAxisExtent: 140,
         ),
         itemCount: 8,
         itemBuilder: (_, _) => const ShimmerCard(),
@@ -86,7 +86,7 @@ class HomeServicesPage extends ConsumerWidget {
           crossAxisCount: 2,
           mainAxisSpacing: 14,
           crossAxisSpacing: 14,
-          childAspectRatio: 1.2,
+          mainAxisExtent: 140,
         ),
         itemCount: categories.length,
         itemBuilder: (context, index) {
@@ -190,14 +190,19 @@ return AnimatedFadeIn(
                     child: Icon(_categoryIcon(), color: color, size: 28),
                   ),
                   const SizedBox(height: 12),
-                  Text(
-                    name,
-                    style: AppTextStyles.labelLarge.copyWith(
-                      fontWeight: FontWeight.w700,
-                      color: Theme.of(context).colorScheme.onSurface,
+                  SizedBox(
+                    height: 20,
+                    child: Center(
+                      child: Text(
+                        name,
+                        style: AppTextStyles.labelLarge.copyWith(
+                          fontWeight: FontWeight.w700,
+                          color: Theme.of(context).colorScheme.onSurface,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
                   ),
                 ],
               ),

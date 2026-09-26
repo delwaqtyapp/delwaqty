@@ -11885,13 +11885,13 @@ abstract class AppLocalizations {
   /// No description provided for @exitAppTitle.
   ///
   /// In en, this message translates to:
-  /// **'Exit Delwaqty'**
+  /// **'Exit app'**
   String get exitAppTitle;
 
   /// No description provided for @exitAppConfirm.
   ///
   /// In en, this message translates to:
-  /// **'Are you sure you want to exit the Delwaqty platform?'**
+  /// **'Are you sure you want to exit the app?'**
   String get exitAppConfirm;
 
   /// No description provided for @exitApp.

@@ -6165,10 +6165,10 @@ class AppLocalizationsAr extends AppLocalizations {
   String get identity => 'الهوية';
 
   @override
-  String get exitAppTitle => 'الخروج من منصة دلوقتي';
+  String get exitAppTitle => 'الخروج من التطبيق';
 
   @override
-  String get exitAppConfirm => 'هل أنت متأكد من الخروج من منصة دلوقتي؟';
+  String get exitAppConfirm => 'هل أنت متأكد أنك تريد الخروج من التطبيق؟';
 
   @override
   String get exitApp => 'خروج';

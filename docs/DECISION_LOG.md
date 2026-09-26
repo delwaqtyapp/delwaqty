@@ -3689,3 +3689,29 @@ E/flutter: [ERROR:flutter/shell/common/shell.cc(799)] Could not launch engine wi
 - Verified runtime behavior now overrides the seductive "build succeeded → smaller APK" signal: a non-bootable AOT is worthless. Documented gate: any future AOT experiment must (a) preserve the running debug app, (b) install, (c) confirm the first frame renders before accepting the build.
 - Device back at 57MB debug (working: intro → permissions → categories verified alive, no `Could not`/FATAL after reinstall).
 - `releases/` keeps the last slim artifact (now ~60MB) as the deployable.
+
+## ADR-111: Back returns to home tab from any tab; app exits only via confirmation dialog (AppShell PopScope)
+
+**Date:** 2026-09-26 · **Sprint 199** · **Status:** Accepted
+
+### Context
+The user requested: «التطبيق عايزين نعمل فيه زى ماكانا عاملين سابقا انه ميخرجش الا لما يظهر رساله تاكيد خروج من البرنامج واى رجوع من اى تبويب يرجع للقائمه الرئيسيه» — (1) the app must NEVER exit silently on the Android back button; an explicit exit-confirmation dialog must appear first, (2) pressing back from ANY tab must return to the home/main tab (القائمة الرئيسية) instead of exiting.
+
+### Decision
+Wrap the shared `AppShell` (the single `StatefulShellRoute.indexedStack` builder used by ALL flavors — customer/admin/driver/provider) in `PopScope(canPop: false)` with `onPopInvokedWithResult`. Back handling, in order:
+1. If `GoRouter.canPop()` — a leaf page is stacked above the shell (/market, /services, /notifications, a pageless route such as an open dialog or the glass drawer) → `GoRouter.pop()` so normal in-tab/nested back behavior is preserved.
+2. If `navigationShell.currentIndex != 0` (non-home tab) → `navigationShell.goBranch(0)` → back from any tab returns to the home tab.
+3. Only on the HOME tab root → `AlertDialog` «الخروج من التطبيق» / «هل أنت متأكد أنك تريد الخروج من التطبيق؟» with `Cancel` and `Exit` (destructively colored). Confirm calls `SystemNavigator.pop()` (not `dart:io exit()`, which would bypass Android lifecycle).
+
+New l10n keys `exitAppTitle`/`exitAppConfirm` en+ar; l10n regenerated. A stale pre-existing "Exit Delwaqty" wording in generated files was superseded by regeneration.
+
+### Rationale
+A single change in the shared shell covers all four flavors, matching the user ask exactly. `goBranch(0)` relies on home being first in `navModules` (sorted by `navPriority`; home=10 is always index 0). `SystemNavigator.pop()` is the idiomatic app-exit for Android popscope-guarded exits.
+
+### Verification
+NEW `test/shared/widgets/app_shell_test.dart` (4 tests): a real GoRouter + 2-branch fake `StatefulShellRoute` pumping `AppShell` proves (1) back on a non-home tab lands on home, (2) back on home tab shows the exit dialog, (3) Cancel keeps the app alive on home, (4) confirm triggers `SystemNavigator.pop` (recorded via a mocked `SystemChannels.platform`). Gates: `flutter analyze` 0 issues, `flutter test` 950/950. Built artifact `delwaqty_1.0.1+2_debug_20260926_195421.apk` (57MB) installed on device 192.168.8.36:5555; app launched (pid 25298) with no fatal/root-isolate errors; `input keyevent BACK` on the home tab did NOT terminate the app (pid remained 25298) — the exit-dialog path works. (Screen was then on AOD/lock PIN, so the dialog's visual was left for the user to confirm.)
+
+### Consequences
+- App no longer exits on a stray back press from any tab; users must deliberately confirm exit on the home tab.
+- Nested pages, dialogs, and the drawer keep standard back behavior via the `GoRouter.canPop()` guard.
+- The behavior is consistent across all four flavors with zero per-flavor duplication.

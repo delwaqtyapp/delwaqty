@@ -1,5 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:delwaqty/core/localization/locale_provider.dart';
@@ -46,6 +47,41 @@ class AppShell extends ConsumerWidget {
     );
   }
 
+  void _handlePop(BuildContext context, WidgetRef ref) {
+    if (GoRouter.of(context).canPop()) {
+      GoRouter.of(context).pop();
+      return;
+    }
+    if (navigationShell.currentIndex != 0) {
+      navigationShell.goBranch(0);
+      return;
+    }
+    showDialog<void>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(AppLocalizations.of(ctx).exitAppTitle),
+        content: Text(AppLocalizations.of(ctx).exitAppConfirm),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: Text(AppLocalizations.of(ctx).cancel),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.of(ctx).pop(true);
+              SystemNavigator.pop();
+            },
+            child: Text(
+              AppLocalizations.of(ctx).exitAppTitle,
+              style: TextStyle(color: Theme.of(ctx).colorScheme.error),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
@@ -53,16 +89,23 @@ class AppShell extends ConsumerWidget {
     final registry = FeatureRegistry.instance;
     final navModules = registry.navModules;
 
-    return Scaffold(
-      key: AppShell.scaffoldKey,
-      extendBody: true,
-      drawer: _buildGlassDrawer(context, ref),
-      body: navigationShell,
-      bottomNavigationBar: _TransparentBottomNav(
-        selectedIndex: navigationShell.currentIndex,
-        onDestinationSelected: _onTap,
-        navModules: navModules,
-        colorScheme: cs,
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) return;
+        _handlePop(context, ref);
+      },
+      child: Scaffold(
+        key: AppShell.scaffoldKey,
+        extendBody: true,
+        drawer: _buildGlassDrawer(context, ref),
+        body: navigationShell,
+        bottomNavigationBar: _TransparentBottomNav(
+          selectedIndex: navigationShell.currentIndex,
+          onDestinationSelected: _onTap,
+          navModules: navModules,
+          colorScheme: cs,
+        ),
       ),
     );
   }

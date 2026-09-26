@@ -2042,5 +2042,7 @@
   "checkForUpdate": "Check for update",
   "checkingForUpdate": "Checking for update…",
   "youAreUpToDate": "You're on the latest version",
-  "updateAvailableNow": "A new version is available"
+  "updateAvailableNow": "A new version is available",
+  "exitAppTitle": "Exit app",
+  "exitAppConfirm": "Are you sure you want to exit the app?"
 }

@@ -3,6 +3,7 @@ import 'package:delwaqty/core/config/app_mode_provider.dart';
 import 'package:delwaqty/core/router/admin_router.dart';
 import 'package:delwaqty/core/router/app_router.dart';
 import 'package:delwaqty/driver/app_router.dart';
+import 'package:delwaqty/gen/assets.gen.dart';
 import 'package:delwaqty/provider/app_router.dart';
 import 'package:delwaqty/services/ota/ota_update_manager.dart';
 
@@ -94,8 +95,25 @@ class _OtaUpdateDialogState extends State<_OtaUpdateDialog> {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       title: Row(
         children: [
-          Icon(Icons.system_update_alt,
-              color: Theme.of(context).colorScheme.primary),
+          Container(
+            padding: const EdgeInsets.all(6),
+            decoration: BoxDecoration(
+              color: Theme.of(context)
+                  .colorScheme
+                  .surfaceContainerHighest
+                  .withValues(alpha: 0.5),
+              shape: BoxShape.circle,
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(18),
+              child: Image(
+                image: Assets.egypt.delwaqtyLogoMark.provider(),
+                width: 36,
+                height: 36,
+                fit: BoxFit.contain,
+              ),
+            ),
+          ),
           const SizedBox(width: 10),
           Expanded(
             child: Text(
@@ -108,6 +126,26 @@ class _OtaUpdateDialogState extends State<_OtaUpdateDialog> {
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Theme.of(context)
+                  .colorScheme
+                  .surfaceContainerHighest
+                  .withValues(alpha: 0.5),
+              shape: BoxShape.circle,
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(22),
+              child: Image(
+                image: Assets.egypt.delwaqtyLogoMark.provider(),
+                width: 80,
+                height: 80,
+                fit: BoxFit.contain,
+              ),
+            ),
+          ),
+          const SizedBox(height: 14),
           if (_downloading) ...[
             DecoratedBox(
               decoration: BoxDecoration(

@@ -3626,3 +3626,35 @@ User ships the app to testers and each new change currently means they must rein
 - Real limits, honestly documented: user must confirm the system install dialog (no silent background install); only the NEXT launch re-checks (no live hot-swap of already-running code); new apps still need unknown-sources permission ONCE (the flow opens settings for it); each APK is a full ~185MB debug download.
 - First release wired: `v1.0.1` (5 assets). E2E proof on device: manifest bumped to version 3 → dialog «يتوفر تحديث جديد» + «جاري تحميل التحديث…» rendered (uiautomator), the 187MB APK downloaded fully into `cache/`, then manifest restored to version 2 (== installed) → no phantom prompt.
 - Gate: `flutter analyze` **0 issues**; `flutter test` **946/946**; 4 APKs rebuilt (1.0.1+2) + installed; relaunch clean, no FATAL/RenderFlex.
+
+## ADR-109: Slim debug APK to ~60MB (arm64-only, Vulkan layer off, WebP assets, padding repack)
+
+**Date:** 2026-09-26 · **Sprint 197** · **Status:** Accepted
+
+### Context
+User target: the customer APK must ship at ≤70MB. Baseline customer debug APK was **220.6MB on disk**. Debug builds cannot be AOTed on this Termux ARM SDK (ADR-044: no arm64-host `android-arm64 gen_snapshot`), so every shrink had to live inside a debug APK.
+
+### Historical baseline decomposition (customer debug, pre-Chrome/Gradle tweaks)
+- **3 ABIs packaged** (arm64-v8a + armeabi-v7a + x86_64): Flutter engine `.so`s duplicated across ABIs.
+- **`libVkLayer_khronos_validation.so`** ~15MB of Vulkan validation layer — DEBUG-ONLY diagnostic, never used at runtime.
+- **`zipalign` padding void ~92MB** of NUL padding inside the APK (needed so uncompressed store blocks are page-aligned).
+- **Deep debug floor** even after everything: `kernel_blob.bin` 33.4MB (JIT debug kernel), `libflutter.so` 15.7MB, isolate snapshot 4.4MB, dex ~8.5MB.
+- **Dead assets** (cairo/giza hero JPGs ~2.4MB) + oversized PNG hero/intro (~4.7MB combined) referenced only by the cinematic background.
+
+### Decision
+1. **arm64-v8a only**: Native `.so` filtering required `flutter build apk ... --target-platform android-arm64` — the Gradle `abiFilters("arm64-v8a")` alone did NOT filter Flutter engine libs. Baked into `build.sh` (customer) and `scripts/publish_ota.sh` (all 4 flavors). (−~33MB)
+2. **Vulkan validation layer excluded** via `packaging { jniLibs { excludes += "**/libVkLayer_khronos_validation.so" } }`. (−~15MB)
+3. **`useLegacyPackaging = true`**: store native libs compressed (extract-at-install) instead of the uncompressed/mmap path; also enables a tight repack. (−~24MB)
+4. **Delete dead code/assets**: `pharaoh_background.dart`, `delwa_intro_cinematic_v1.dart`, 5 JPGs; regenerate `lib/gen/assets.gen.dart` (10 entries). Backups in `/data/data/com.termux/files/usr/tmp/opencode/deadbackup/`.
+5. **PNG→WebP q80**: intro bg 2.46MB→0.26MB, home hero 2.23MB→0.17MB; 3 code refs updated to `.webp`.
+6. **`scripts/slim_apk.sh` repack**: unzip → `zip -X -r -n .arsc` (**`.arsc` must stay uncompressed**: compressed `.arsc` fails install `[-124]: resources.arsc ... uncompressed and aligned on a 4-byte boundary`) → `zipalign -f -P 4 4` (page-size + align positions both required) → `apksigner sign` with `~/.android/debug.keystore` (alias `androiddebugkey` / pass `android`). Also tried storing `.so` uncompressed with 16KB alignment (89.4MB — rejected) and fully compressed `.so` (install `res=-110` — rejected). `build.sh` slims in place by default (`SKIP_SLIM=true` bypasses).
+
+### Result
+- Customer: **220.6MB → 72.1MB base → 60.4MB slim repack** (60,370,917 B). Admin/driver/provider end at 66.6 / 65.8 / 67.7MB pre-slim (arm64-only + legacy packaging).
+- Install verified ON DEVICE: `adb install -r` of the slim APK succeeds (debug keystore signature), app launches, intro WebP renders (avg color (35,25,40)), no Flutter/image logcat errors.
+- Gate: `flutter analyze` **No issues**; `flutter test` **946/946**.
+
+### Consequences / documented risks
+- **Important codegen hazard (ADR applied as a convention)**: the repo intentionally hand-maintains **snake_case key mappings** for real API rows on the home_services entities (`service_provider.g.dart` is a TRACKED committed reference: `user_id`, `category_type`, tolerant `?? ''`/enum fallbacks). `dart run build_runner build` regenerates untracked `.g.dart` files as camelCase (`nameAr`, `userId`) and silently breaks the `snake_case_api_entities_test.dart` contract. After any `build_runner` run, restore `service_category.g.dart` and `service_booking.g.dart` to snake_case by hand (as done this sprint: category 0 fails → 946/946 after reconstruction).
+- OTA appends this sprint: `downloadAndInstallLatest` now streams with real download progress (chunked, no full-buffer `http.get`) and the About page (customer) + admin settings About dialog expose a «البحث عن تحديث» / «يتوفر تحديث» button that runs the OTA dialog instantly against an already-verified result.
+- `releases/` keeps the last slim artifact (now ~60MB) as the deployable.

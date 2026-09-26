@@ -44,7 +44,7 @@ class ServiceReviewsPage extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              '${l10n.reviews} — ${serviceTypeLabel(type)}',
+              '${l10n.reviews} — ${serviceTypeLabel(type, l10n)}',
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
@@ -379,7 +379,7 @@ class _WriteServiceReviewSheetState
             ),
             const SizedBox(height: 4),
             Text(
-              serviceTypeLabel(_parseType(widget.categoryType)),
+              serviceTypeLabel(_parseType(widget.categoryType), l10n),
               style: theme.textTheme.bodyMedium
                   ?.copyWith(color: theme.colorScheme.onSurfaceVariant),
             ),

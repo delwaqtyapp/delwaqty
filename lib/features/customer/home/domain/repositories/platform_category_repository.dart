@@ -21,6 +21,7 @@ abstract interface class PlatformCategoryRepository {
     String? icon,
     int? sortOrder,
     bool? isActive,
+    String? imageUrl,
   });
   Future<void> deleteCategory(String id);
   Future<String?> uploadCategoryImage({

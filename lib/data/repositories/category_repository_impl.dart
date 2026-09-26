@@ -85,6 +85,7 @@ class CategoryRepositoryImpl implements PlatformCategoryRepository {
     String? icon,
     int? sortOrder,
     bool? isActive,
+    String? imageUrl,
   }) async {
     try {
       return await _dataSource.updateCategory(
@@ -95,6 +96,7 @@ class CategoryRepositoryImpl implements PlatformCategoryRepository {
         icon: icon,
         sortOrder: sortOrder,
         isActive: isActive,
+        imageUrl: imageUrl,
       );
     } catch (e) {
       _logger.e('Failed to update category: $id', e);

@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:delwaqty/core/theme/app_colors.dart';
 import 'package:delwaqty/core/theme/app_text_styles.dart';
+import 'package:delwaqty/features/customer/home/presentation/widgets/category_visuals.dart';
 import 'package:delwaqty/features/customer/home_services/domain/entities/service_category.dart';
 import 'package:delwaqty/features/customer/home_services/domain/entities/service_provider.dart';
 import 'package:delwaqty/features/customer/home_services/data/repositories/service_booking_repository_impl.dart';
@@ -149,7 +150,7 @@ class _ServiceProvidersPageState extends ConsumerState<ServiceProvidersPage> {
           return AnimatedContainer(
             duration: const Duration(milliseconds: 200),
             child: ChoiceChip(
-              label: Text(_categoryLabel(type)),
+              label: Text(serviceTypeLabel(type, l10n)),
               selected: selected,
               onSelected: (_) => setState(() => _type = type),
               avatar: Icon(_categoryIcon(type), size: 16),
@@ -184,26 +185,6 @@ class _ServiceProvidersPageState extends ConsumerState<ServiceProvidersPage> {
       ),
     );
   }
-
-  String _categoryLabel(ServiceCategoryType type) => switch (type) {
-        ServiceCategoryType.plumbing => 'سباكة',
-        ServiceCategoryType.electrical => 'كهرباء',
-        ServiceCategoryType.carpentry => 'نجارة',
-        ServiceCategoryType.acMaintenance => 'صيانة تكييف',
-        ServiceCategoryType.painting => 'دهان',
-        ServiceCategoryType.cleaning => 'تنظيف',
-        ServiceCategoryType.pestControl => 'مكافحة حشرات',
-        ServiceCategoryType.applianceRepair => 'إصلاح أجهزة',
-        ServiceCategoryType.pipeChange => 'تغيير أنبوبة',
-        ServiceCategoryType.plastering => 'نقاشة',
-        ServiceCategoryType.carpetCleaning => 'غسيل السجاد',
-        ServiceCategoryType.dishRepair => 'إصلاح الدش',
-        ServiceCategoryType.teacher => 'مدرسين',
-        ServiceCategoryType.doctor => 'حجز دكتور',
-        ServiceCategoryType.nurse => 'ممرض',
-        ServiceCategoryType.barber => 'حجز حلاق',
-        ServiceCategoryType.other => 'أخرى',
-      };
 
   IconData _categoryIcon(ServiceCategoryType type) => switch (type) {
         ServiceCategoryType.plumbing => Icons.plumbing_rounded,

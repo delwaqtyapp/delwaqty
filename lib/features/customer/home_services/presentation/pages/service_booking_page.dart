@@ -5,6 +5,7 @@ import 'package:delwaqty/l10n/app_localizations.dart';
 import 'package:delwaqty/core/extensions/context_extensions.dart';
 import 'package:delwaqty/core/theme/app_colors.dart';
 import 'package:delwaqty/core/theme/app_text_styles.dart';
+import 'package:delwaqty/features/customer/home/presentation/widgets/category_visuals.dart';
 import 'package:delwaqty/features/customer/home_services/domain/entities/service_category.dart';
 import 'package:delwaqty/features/customer/home_services/domain/entities/service_provider.dart';
 import 'package:delwaqty/features/customer/home_services/data/repositories/service_booking_repository_impl.dart';
@@ -56,25 +57,8 @@ class _ServiceBookingPageState extends ConsumerState<ServiceBookingPage> {
     super.dispose();
   }
 
-  String _categoryName(AppLocalizations l10n) => switch (widget.categoryType) {
-    ServiceCategoryType.plumbing => 'سباكة',
-    ServiceCategoryType.electrical => 'كهرباء',
-    ServiceCategoryType.carpentry => 'نجارة',
-    ServiceCategoryType.acMaintenance => 'صيانة تكييف',
-    ServiceCategoryType.painting => 'دهان',
-    ServiceCategoryType.cleaning => 'تنظيف',
-    ServiceCategoryType.pestControl => 'مكافحة حشرات',
-    ServiceCategoryType.applianceRepair => 'إصلاح أجهزة',
-    ServiceCategoryType.pipeChange => 'تغيير أنبوبة',
-    ServiceCategoryType.plastering => 'نقاشة',
-    ServiceCategoryType.carpetCleaning => 'غسيل السجاد',
-    ServiceCategoryType.dishRepair => 'إصلاح الدش',
-    ServiceCategoryType.teacher => 'مدرسين',
-    ServiceCategoryType.doctor => 'حجز دكتور',
-    ServiceCategoryType.nurse => 'ممرض',
-    ServiceCategoryType.barber => 'حجز حلاق',
-    ServiceCategoryType.other => 'خدمات أخرى',
-  };
+  String _categoryName(AppLocalizations l10n) =>
+      serviceTypeLabel(widget.categoryType, l10n);
 
   Future<void> _pickDate() async {
     final picked = await showDatePicker(

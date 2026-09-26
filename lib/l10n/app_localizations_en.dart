@@ -5968,6 +5968,18 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get adminCategories => 'Categories';
+
+  @override
+  String get editCategory => 'Edit category';
+
+  @override
+  String get uploadImage => 'Upload image';
+
+  @override
+  String get removeImage => 'Remove image';
+
+  @override
   String get cancelReservationConfirm =>
       'Are you sure you want to cancel this reservation?';
 
@@ -6353,4 +6365,52 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get updateAvailableNow => 'A new version is available';
+
+  @override
+  String get serviceCategoryDoctor => 'Doctor Booking';
+
+  @override
+  String get serviceCategoryNurse => 'Nursing';
+
+  @override
+  String get serviceCategoryTeacher => 'Tutoring';
+
+  @override
+  String get serviceCategoryBarber => 'Barber';
+
+  @override
+  String get serviceCategoryPlumbing => 'Plumbing';
+
+  @override
+  String get serviceCategoryElectrical => 'Electrical';
+
+  @override
+  String get serviceCategoryCarpentry => 'Carpentry';
+
+  @override
+  String get serviceCategoryPainting => 'Painting';
+
+  @override
+  String get serviceCategoryCleaning => 'Cleaning';
+
+  @override
+  String get serviceCategoryAcMaintenance => 'AC Maintenance';
+
+  @override
+  String get serviceCategoryPipeChange => 'Pipe Change';
+
+  @override
+  String get serviceCategoryPlastering => 'Plastering';
+
+  @override
+  String get serviceCategoryCarpetCleaning => 'Carpet Cleaning';
+
+  @override
+  String get serviceCategoryDishRepair => 'Dish Repair';
+
+  @override
+  String get serviceCategoryPestControl => 'Pest Control';
+
+  @override
+  String get serviceCategoryApplianceRepair => 'Appliance Repair';
 }

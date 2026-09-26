@@ -319,6 +319,12 @@ class _AdminSettingsMenuPageState extends ConsumerState<AdminSettingsMenuPage> {
           onTap: () => context.go('/admin/drivers'),
         ),
         _SectionTile(
+          icon: Icons.category_rounded,
+          color: AppColors.brandPurple,
+          title: l10n.adminCategories,
+          onTap: () => context.go('/admin/categories'),
+        ),
+        _SectionTile(
           icon: Icons.group_rounded,
           color: AppColors.warningLight,
           title: l10n.adminMembersSection,

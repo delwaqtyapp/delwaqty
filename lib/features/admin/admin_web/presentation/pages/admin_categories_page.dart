@@ -189,6 +189,18 @@ class _AdminCategoriesPageState extends ConsumerState<AdminCategoriesPage> {
         nameEn: result.nameEn,
         sortOrder: result.sortOrder,
       );
+
+      final authState = ref.read(authStateProvider);
+      final isOwner =
+          authState is AuthAuthenticated && authState.user.role == 'owner';
+      if (isOwner && result.imageBytes != null) {
+        await _repo.uploadCategoryImage(
+          categoryId: cat.id,
+          imageBytes: result.imageBytes!,
+          fileName: result.fileName ?? 'category.png',
+        );
+      }
+
       await _refresh();
     } catch (e) {
       if (mounted) {

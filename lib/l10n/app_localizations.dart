@@ -11450,6 +11450,30 @@ abstract class AppLocalizations {
   /// **'Delete \"{name}\"? This cannot be undone.'**
   String deleteCategoryConfirm(Object name);
 
+  /// No description provided for @adminCategories.
+  ///
+  /// In en, this message translates to:
+  /// **'Categories'**
+  String get adminCategories;
+
+  /// No description provided for @editCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit category'**
+  String get editCategory;
+
+  /// No description provided for @uploadImage.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload image'**
+  String get uploadImage;
+
+  /// No description provided for @removeImage.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove image'**
+  String get removeImage;
+
   /// No description provided for @cancelReservationConfirm.
   ///
   /// In en, this message translates to:
@@ -12175,6 +12199,102 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'A new version is available'**
   String get updateAvailableNow;
+
+  /// No description provided for @serviceCategoryDoctor.
+  ///
+  /// In en, this message translates to:
+  /// **'Doctor Booking'**
+  String get serviceCategoryDoctor;
+
+  /// No description provided for @serviceCategoryNurse.
+  ///
+  /// In en, this message translates to:
+  /// **'Nursing'**
+  String get serviceCategoryNurse;
+
+  /// No description provided for @serviceCategoryTeacher.
+  ///
+  /// In en, this message translates to:
+  /// **'Tutoring'**
+  String get serviceCategoryTeacher;
+
+  /// No description provided for @serviceCategoryBarber.
+  ///
+  /// In en, this message translates to:
+  /// **'Barber'**
+  String get serviceCategoryBarber;
+
+  /// No description provided for @serviceCategoryPlumbing.
+  ///
+  /// In en, this message translates to:
+  /// **'Plumbing'**
+  String get serviceCategoryPlumbing;
+
+  /// No description provided for @serviceCategoryElectrical.
+  ///
+  /// In en, this message translates to:
+  /// **'Electrical'**
+  String get serviceCategoryElectrical;
+
+  /// No description provided for @serviceCategoryCarpentry.
+  ///
+  /// In en, this message translates to:
+  /// **'Carpentry'**
+  String get serviceCategoryCarpentry;
+
+  /// No description provided for @serviceCategoryPainting.
+  ///
+  /// In en, this message translates to:
+  /// **'Painting'**
+  String get serviceCategoryPainting;
+
+  /// No description provided for @serviceCategoryCleaning.
+  ///
+  /// In en, this message translates to:
+  /// **'Cleaning'**
+  String get serviceCategoryCleaning;
+
+  /// No description provided for @serviceCategoryAcMaintenance.
+  ///
+  /// In en, this message translates to:
+  /// **'AC Maintenance'**
+  String get serviceCategoryAcMaintenance;
+
+  /// No description provided for @serviceCategoryPipeChange.
+  ///
+  /// In en, this message translates to:
+  /// **'Pipe Change'**
+  String get serviceCategoryPipeChange;
+
+  /// No description provided for @serviceCategoryPlastering.
+  ///
+  /// In en, this message translates to:
+  /// **'Plastering'**
+  String get serviceCategoryPlastering;
+
+  /// No description provided for @serviceCategoryCarpetCleaning.
+  ///
+  /// In en, this message translates to:
+  /// **'Carpet Cleaning'**
+  String get serviceCategoryCarpetCleaning;
+
+  /// No description provided for @serviceCategoryDishRepair.
+  ///
+  /// In en, this message translates to:
+  /// **'Dish Repair'**
+  String get serviceCategoryDishRepair;
+
+  /// No description provided for @serviceCategoryPestControl.
+  ///
+  /// In en, this message translates to:
+  /// **'Pest Control'**
+  String get serviceCategoryPestControl;
+
+  /// No description provided for @serviceCategoryApplianceRepair.
+  ///
+  /// In en, this message translates to:
+  /// **'Appliance Repair'**
+  String get serviceCategoryApplianceRepair;
 }
 
 class _AppLocalizationsDelegate

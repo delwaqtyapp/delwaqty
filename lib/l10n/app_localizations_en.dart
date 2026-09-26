@@ -6204,11 +6204,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get identity => 'Identity';
 
   @override
-  String get exitAppTitle => 'Exit Delwaqty';
+  String get exitAppTitle => 'Exit app';
 
   @override
-  String get exitAppConfirm =>
-      'Are you sure you want to exit the Delwaqty platform?';
+  String get exitAppConfirm => 'Are you sure you want to exit the app?';
 
   @override
   String get exitApp => 'Exit';

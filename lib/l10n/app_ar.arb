@@ -2042,5 +2042,7 @@
   "checkForUpdate": "البحث عن تحديث",
   "checkingForUpdate": "جاري البحث عن التحديث…",
   "youAreUpToDate": "أنت على أحدث إصدار",
-  "updateAvailableNow": "يتوفر إصدار أحدث"
+  "updateAvailableNow": "يتوفر إصدار أحدث",
+  "exitAppTitle": "الخروج من التطبيق",
+  "exitAppConfirm": "هل أنت متأكد أنك تريد الخروج من التطبيق؟"
 }

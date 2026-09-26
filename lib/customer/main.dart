@@ -12,6 +12,7 @@ import 'package:delwaqty/customer/app.dart';
 import 'package:delwaqty/config/app_config.dart';
 import 'package:delwaqty/config/config_validator.dart';
 import 'package:delwaqty/config/firebase_config.dart';
+import 'package:delwaqty/core/config/app_mode_provider.dart';
 import 'package:delwaqty/core/bootstrap/backend_bootstrap.dart';
 import 'package:delwaqty/core/bootstrap/startup_error_page.dart';
 import 'package:delwaqty/data/datasources/local/shared_preferences_service.dart';
@@ -122,6 +123,7 @@ void main() async {
           (ref) => ref.watch(profileRepositoryImplProvider),
         ),
         localeProvider.overrideWith(() => CustomerLocaleNotifier()),
+        appFlavorProvider.overrideWithValue(AppFlavor.customer),
         themeModeProvider.overrideWith(() => CustomerThemeModeNotifier()),
         backendBootstrapProvider.overrideWithValue(backendBootstrap),
       ],

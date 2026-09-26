@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:delwaqty/core/bootstrap/backend_bootstrap.dart';
+import 'package:delwaqty/core/config/app_mode_provider.dart';
 import 'package:delwaqty/core/router/admin_router.dart';
 import 'package:delwaqty/core/theme/app_theme.dart';
 import 'package:delwaqty/core/theme/theme_mode_provider.dart';
@@ -10,6 +11,7 @@ import 'package:delwaqty/features/_shared/device_lock/device_lock_provider.dart'
 import 'package:delwaqty/core/localization/admin_locale_provider.dart';
 import 'package:delwaqty/features/admin/support_chat/presentation/chat_providers.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
+import 'package:delwaqty/services/ota/ota_update_dialog.dart';
 
 class AppAdmin extends ConsumerStatefulWidget {
   const AppAdmin({super.key});
@@ -48,7 +50,21 @@ class _AppAdminState extends ConsumerState<AppAdmin> {
       }
       authNotifier.checkAuthStatus();
       ref.read(chatCallAlertServiceProvider);
+
+      _checkOtaUpdate();
     });
+  }
+
+  Future<void> _checkOtaUpdate() async {
+    if (!mounted) return;
+    await Future<void>.delayed(const Duration(seconds: 4));
+    if (!mounted) return;
+    try {
+      final flavor = ref.read(appFlavorProvider);
+      await showOtaUpdateIfAvailable(flavor: flavor);
+    } catch (e) {
+      debugPrint('OTA check failed: $e');
+    }
   }
 
   @override

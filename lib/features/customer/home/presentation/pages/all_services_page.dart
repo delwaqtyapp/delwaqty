@@ -152,68 +152,65 @@ class AllServicesPage extends ConsumerWidget {
                     (context, index) {
                       final service = services[index];
                       final color = _serviceColor(service.type);
-                      return AnimatedFadeIn(
-                        delay: Duration(milliseconds: 120 + index * 40),
-child: PressableScale(
+                      return PressableScale(
                         onTap: () => context.push(
                           '/home-services/providers/${service.type.name}',
                         ),
-                          child: Stack(
-                            children: [
-                              Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Container(
-                                    width: 56,
-                                    height: 56,
-                                    decoration: BoxDecoration(
-                                      gradient: LinearGradient(
-                                        begin: Alignment.topLeft,
-                                        end: Alignment.bottomRight,
-                                        colors: [
-                                          color.withValues(alpha: 0.35),
-                                          color.withValues(alpha: 0.15),
-                                        ],
-                                      ),
-                                      borderRadius: BorderRadius.circular(16),
-                                      border: Border.all(
-                                        color: color.withValues(alpha: 0.25),
-                                      ),
+                        child: Stack(
+                          children: [
+                            Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Container(
+                                  width: 56,
+                                  height: 56,
+                                  decoration: BoxDecoration(
+                                    gradient: LinearGradient(
+                                      begin: Alignment.topLeft,
+                                      end: Alignment.bottomRight,
+                                      colors: [
+                                        color.withValues(alpha: 0.35),
+                                        color.withValues(alpha: 0.15),
+                                      ],
                                     ),
-                                    child: Icon(
-                                      _serviceIcon(service.type),
-                                      color: color,
-                                      size: 26,
+                                    borderRadius: BorderRadius.circular(16),
+                                    border: Border.all(
+                                      color: color.withValues(alpha: 0.25),
                                     ),
                                   ),
-                                  const SizedBox(height: 8),
-                                  Text(
-                                    Directionality.of(context) ==
-                                            TextDirection.rtl
-                                        ? service.nameAr
-                                        : service.nameEn,
-                                    style: AppTextStyles.labelSmall.copyWith(
-                                      fontSize: 11,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                    textAlign: TextAlign.center,
-                                    maxLines: 2,
-                                    overflow: TextOverflow.ellipsis,
+                                  child: Icon(
+                                    _serviceIcon(service.type),
+                                    color: color,
+                                    size: 26,
                                   ),
-                                ],
-                              ),
-                              Positioned(
-                                top: 0,
-                                right: 0,
-                                child: ServiceReviewsButton(
-                                  categoryType: service.type,
-                                  iconSize: 18,
-                                  tooltipLabel:
-                                      AppLocalizations.of(context).rateService,
                                 ),
+                                const SizedBox(height: 8),
+                                Text(
+                                  Directionality.of(context) ==
+                                          TextDirection.rtl
+                                      ? service.nameAr
+                                      : service.nameEn,
+                                  style: AppTextStyles.labelSmall.copyWith(
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                  textAlign: TextAlign.center,
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ],
+                            ),
+                            Positioned(
+                              top: 0,
+                              right: 0,
+                              child: ServiceReviewsButton(
+                                categoryType: service.type,
+                                iconSize: 18,
+                                tooltipLabel:
+                                    AppLocalizations.of(context).rateService,
                               ),
-                            ],
-                          ),
+                            ),
+                          ],
                         ),
                       );
                     },

@@ -3815,3 +3815,42 @@ apps (customer, admin, driver, provider) — not just customer + admin.
 - Emergency call remains the in-chat voice-call handshake (Realtime + in-room
   accept/decline); FCM background delivery and WebRTC audio stay out of scope for
   this environment (consistent with ADR-105/106/107).
+
+## ADR-115: Overflow-Proof Categories Strip + Eager Image Precache (sprint 202)
+
+### Context
+The user reported a transient «Bottom overflow by 8.0 pixels» inside the
+Main Categories (الفئات الرئيسية) buttons on the home page for a fraction of a
+second, plus a UX complaint: the interface must open and the buttons must be
+already loaded and ready when scrolling fast — no white placeholder area while
+each button loads and appears one at a time.
+
+### Decision
+1. **Layout with guaranteed headroom** — the strip height is now pinned at
+   `_stripHeight = 120` and every tile label lives in a fixed
+   `SizedBox(height: 22)`; a tile's maximum possible height is therefore
+   `58 + 6 + 22 = 86` against `112` available pixels. A RenderFlex bottom
+   overflow is mathematically impossible for any font metric / device text
+   scale / first-frame font swap.
+2. **No staggered reveal** — per-tile `AnimatedFadeIn(delay: 280 + 40*index)`
+   wrappers removed from the home strip and the `/services` grid. All buttons
+   appear together as soon as their data resolves.
+3. **Eager image preloading** — `HomePage` listens to the category and
+   discovery providers and calls `precacheImage` on every category/merchant/
+   provider image the instant data arrives, so scrolling hits warm cache and
+   never shows a white box waiting for `Image.network`.
+
+### Rationale
+- The 8px overflow survives only transiently (font-load swap on first frame),
+  which is why a defensive layout (not a pixel-chase) is the durable fix.
+- Staggered in-animations are the direct cause of the "white until the button
+  loads and appears" feel; removing them makes the section feel instant.
+- Prewarming the flutter `ImageCache` is dependency-free and covers both the
+  Main Categories circles and the discovery cards.
+
+### Consequences
+- The home strip shows slightly more vertical space (120 vs 108) — imperceptible
+  on the hero-led layout.
+- Slightly more first-frame network work for category images (5-15 small WebP),
+  warm cached thereafter; pull-to-refresh precaches again on new data.
+- Visual confirmation of the strip on the physical device is left to the user.

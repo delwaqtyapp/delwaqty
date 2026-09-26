@@ -2,17 +2,42 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:delwaqty/core/extensions/context_extensions.dart';
-import 'package:delwaqty/core/theme/app_colors.dart';
 import 'package:delwaqty/core/theme/app_text_styles.dart';
+import 'package:delwaqty/features/customer/home/domain/entities/platform_category.dart';
+import 'package:delwaqty/features/customer/home/domain/home_domain.dart';
+import 'package:delwaqty/features/customer/home/presentation/widgets/category_visuals.dart';
 import 'package:delwaqty/features/customer/home_services/domain/entities/service_category.dart';
 import 'package:delwaqty/data/repositories/cached_service_booking_repository.dart';
 import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
 import 'package:delwaqty/shared/widgets/premium_empty_state.dart';
+import 'package:delwaqty/shared/widgets/pressable_scale.dart';
 import 'package:delwaqty/shared/widgets/shimmer_loading.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
-import 'package:delwaqty/features/customer/home_services/presentation/widgets/service_reviews_button.dart';
 
-final _bookingServicesProvider = FutureProvider<List<ServiceCategory>>((ref) async {
+sealed class _GridItem {
+  const _GridItem();
+}
+
+class _PlatformGridItem extends _GridItem {
+  const _PlatformGridItem(this.category);
+  final PlatformCategory category;
+}
+
+class _BookingGridItem extends _GridItem {
+  const _BookingGridItem(this.service);
+  final ServiceCategory service;
+}
+
+final _allCategoriesProvider = FutureProvider<List<_GridItem>>((ref) async {
+  List<PlatformCategory> platformCategories = const [];
+  try {
+    platformCategories = await ref.watch(activeCategoriesProvider.future);
+  } catch (_) {
+    platformCategories = const [];
+  }
+  final sortedPlatform = [...platformCategories]
+    ..sort((a, b) => categoryRank(a.name).compareTo(categoryRank(b.name)));
+
   final repo = ref.watch(cachedServiceBookingRepositoryProvider);
   final all = await repo.getCategories();
   const priority = [
@@ -38,8 +63,12 @@ final _bookingServicesProvider = FutureProvider<List<ServiceCategory>>((ref) asy
     return i == -1 ? priority.length : i;
   }
 
-  final sorted = [...all]..sort((a, b) => rank(a.type).compareTo(rank(b.type)));
-  return sorted;
+  final sortedServices = [...all]..sort((a, b) => rank(a.type).compareTo(rank(b.type)));
+
+  return [
+    for (final c in sortedPlatform) _PlatformGridItem(c),
+    for (final s in sortedServices) _BookingGridItem(s),
+  ];
 });
 
 IconData _serviceIcon(ServiceCategoryType t) => switch (t) {
@@ -62,33 +91,13 @@ IconData _serviceIcon(ServiceCategoryType t) => switch (t) {
       ServiceCategoryType.other => Icons.home_repair_service_rounded,
     };
 
-Color _serviceColor(ServiceCategoryType t) => switch (t) {
-      ServiceCategoryType.doctor => AppColors.errorLight,
-      ServiceCategoryType.nurse => AppColors.successLight,
-      ServiceCategoryType.teacher => AppColors.infoLight,
-      ServiceCategoryType.barber => AppColors.brandViolet,
-      ServiceCategoryType.plumbing => AppColors.serviceHome,
-      ServiceCategoryType.electrical => AppColors.serviceElectronics,
-      ServiceCategoryType.carpentry => AppColors.serviceBakery,
-      ServiceCategoryType.painting => AppColors.serviceFashion,
-      ServiceCategoryType.cleaning => AppColors.serviceDelivery,
-      ServiceCategoryType.acMaintenance => AppColors.serviceSeafood,
-      ServiceCategoryType.pipeChange => AppColors.serviceGrocery,
-      ServiceCategoryType.plastering => AppColors.serviceFurniture,
-      ServiceCategoryType.carpetCleaning => AppColors.serviceCafe,
-      ServiceCategoryType.dishRepair => AppColors.serviceElectronics,
-      ServiceCategoryType.pestControl => AppColors.serviceGas,
-      ServiceCategoryType.applianceRepair => AppColors.serviceAppliances,
-      ServiceCategoryType.other => AppColors.serviceMore,
-    };
-
 class AllServicesPage extends ConsumerWidget {
   const AllServicesPage({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
-    final servicesAsync = ref.watch(_bookingServicesProvider);
+    final servicesAsync = ref.watch(_allCategoriesProvider);
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.allServices)),
@@ -109,10 +118,12 @@ class AllServicesPage extends ConsumerWidget {
           title: l10n.error,
           message: l10n.errorLoading,
           actionLabel: l10n.retry,
-          onAction: () => ref.invalidate(_bookingServicesProvider),
+          onAction: () => ref.invalidate(_allCategoriesProvider),
         ),
-        data: (services) {
-          if (services.isEmpty) {
+        data: (items) {
+          final platformItems = items.whereType<_PlatformGridItem>().toList();
+          final bookingItems = items.whereType<_BookingGridItem>().toList();
+          if (platformItems.isEmpty && bookingItems.isEmpty) {
             return PremiumEmptyState(
               icon: Icons.apps_outlined,
               title: l10n.noResults,
@@ -121,178 +132,182 @@ class AllServicesPage extends ConsumerWidget {
           }
           return CustomScrollView(
             slivers: [
-              SliverToBoxAdapter(
-                child: AnimatedFadeIn(
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
-                    child: Text(
-                      l10n.bookingServices,
-                      style: context.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w800,
-                        fontSize: 18,
-                      ),
+              if (platformItems.isNotEmpty) ...[
+                _sectionHeader(context, l10n.mainCategories),
+                _gridSliver(platformItems, (index) {
+                  final item = platformItems[index];
+                  return _buildPlatformTile(context, item.category);
+                }),
+                const SliverToBoxAdapter(child: SizedBox(height: 8)),
+              ],
+              if (bookingItems.isNotEmpty) ...[
+                _sectionHeader(context, l10n.bookingServices),
+                _gridSliver(bookingItems, (index) {
+                  final item = bookingItems[index];
+                  final rtl = Directionality.of(context) == TextDirection.rtl;
+                  final label = rtl ? item.service.nameAr : item.service.nameEn;
+                  return _buildServiceTile(
+                    context,
+                    icon: _serviceIcon(item.service.type),
+                    label: label,
+                    onTap: () => context.push(
+                      '/home-services/providers/${item.service.type.name}',
                     ),
-                  ),
-                ),
-              ),
-              SliverPadding(
-                padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
-                sliver: SliverGrid(
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 3,
-                    mainAxisSpacing: 14,
-                    crossAxisSpacing: 12,
-                    mainAxisExtent: 132,
-                  ),
-                  delegate: SliverChildBuilderDelegate(
-                    (context, index) {
-                      final service = services[index];
-                      final color = _serviceColor(service.type);
-                      final label =
-                          Directionality.of(context) == TextDirection.rtl
-                              ? service.nameAr
-                              : service.nameEn;
-                      return Stack(
-                        children: [
-                          Positioned.fill(
-                            child: _ServiceButtonTile(
-                              color: color,
-                              icon: _serviceIcon(service.type),
-                              label: label,
-                              onTap: () => context.push(
-                                '/home-services/providers/${service.type.name}',
-                              ),
-                            ),
-                          ),
-                          Positioned(
-                            top: 2,
-                            right: 2,
-                            child: DecoratedBox(
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: Colors.white.withValues(alpha: 0.88),
-                              ),
-                              child: ServiceReviewsButton(
-                                categoryType: service.type,
-                                iconSize: 18,
-                                tooltipLabel:
-                                    AppLocalizations.of(context).rateService,
-                              ),
-                            ),
-                          ),
-                        ],
-                      );
-                    },
-                    childCount: services.length,
-                  ),
-                ),
-              ),
-              const SliverToBoxAdapter(child: SizedBox(height: 24)),
+                  );
+                }),
+                const SliverToBoxAdapter(child: SizedBox(height: 8)),
+              ],
+              const SliverToBoxAdapter(child: SizedBox(height: 16)),
             ],
           );
         },
       ),
     );
   }
-}
 
-class _ServiceButtonTile extends StatefulWidget {
-  const _ServiceButtonTile({
-    required this.color,
-    required this.icon,
-    required this.label,
-    required this.onTap,
-  });
-
-  final Color color;
-  final IconData icon;
-  final String label;
-  final VoidCallback onTap;
-
-  @override
-  State<_ServiceButtonTile> createState() => _ServiceButtonTileState();
-}
-
-class _ServiceButtonTileState extends State<_ServiceButtonTile> {
-  bool _pressed = false;
-
-  @override
-  Widget build(BuildContext context) {
-    final color = widget.color;
-    final highlightBg = Color.lerp(color, Colors.white, 0.55)!;
-    return GestureDetector(
-      onTap: widget.onTap,
-      onTapDown: (_) => setState(() => _pressed = true),
-      onTapUp: (_) => setState(() => _pressed = false),
-      onTapCancel: () => setState(() => _pressed = false),
-      child: AnimatedScale(
-        scale: _pressed ? 0.95 : 1,
-        duration: const Duration(milliseconds: 140),
-        curve: Curves.easeOutCubic,
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 160),
-          curve: Curves.easeOut,
-          margin: const EdgeInsets.all(2),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(20),
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: _pressed
-                  ? [highlightBg, color.withValues(alpha: 0.65)]
-                  : [color, Color.lerp(color, Colors.black, 0.22)!],
+  Widget _sectionHeader(BuildContext context, String title) {
+    return SliverToBoxAdapter(
+      child: AnimatedFadeIn(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
+          child: Text(
+            title,
+            style: context.textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.w800,
+              fontSize: 18,
             ),
-            boxShadow: const [
-              BoxShadow(
-                color: Color(0x33000000),
-                blurRadius: 10,
-                offset: Offset(0, 4),
-              ),
-            ],
-          ),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Container(
-                width: 48,
-                height: 48,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: Colors.white.withValues(
-                    alpha: _pressed ? 0.9 : 0.22,
-                  ),
-                ),
-                child: Icon(
-                  widget.icon,
-                  size: 26,
-                  color: _pressed
-                      ? Color.lerp(color, Colors.black, 0.35)
-                      : Colors.white,
-                ),
-              ),
-              const SizedBox(height: 6),
-              SizedBox(
-                height: 20,
-                child: Center(
-                  child: Text(
-                    widget.label,
-                    style: AppTextStyles.labelSmall.copyWith(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w700,
-                      color: _pressed
-                          ? Color.lerp(color, Colors.black, 0.55)
-                          : Colors.white,
-                    ),
-                    textAlign: TextAlign.center,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-              ),
-            ],
           ),
         ),
       ),
     );
+  }
+
+  Widget _gridSliver(
+    List<_GridItem> items,
+    Widget Function(int index) builder,
+  ) {
+    return SliverPadding(
+      padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
+      sliver: SliverGrid(
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 3,
+          mainAxisSpacing: 14,
+          crossAxisSpacing: 12,
+          mainAxisExtent: 132,
+        ),
+        delegate: SliverChildBuilderDelegate(
+          (context, index) => builder(index),
+          childCount: items.length,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPlatformTile(BuildContext context, PlatformCategory category) {
+    final merchantType = categoryNameToMerchantType(category.name);
+    final emoji = merchantType != null ? merchantEmoji(merchantType) : '🏪';
+    final label = category.displayName(
+      Directionality.of(context) == TextDirection.rtl,
+    );
+    return _SimpleGridTile(
+      label: label,
+      imageUrl: category.imageUrl,
+      emoji: emoji,
+      onTap: () {
+        final typeParam = merchantType?.name ?? 'other';
+        context.push('/market?type=$typeParam');
+      },
+    );
+  }
+
+  Widget _buildServiceTile(
+    BuildContext context, {
+    required IconData icon,
+    required String label,
+    required VoidCallback onTap,
+  }) {
+    return _SimpleGridTile(label: label, icon: icon, onTap: onTap);
+  }
+}
+
+class _SimpleGridTile extends StatelessWidget {
+  const _SimpleGridTile({
+    required this.label,
+    required this.onTap,
+    this.icon,
+    this.imageUrl,
+    this.emoji,
+  });
+
+  final String label;
+  final VoidCallback onTap;
+  final IconData? icon;
+  final String? imageUrl;
+  final String? emoji;
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return PressableScale(
+      onTap: onTap,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: cs.surfaceContainerHighest.withValues(alpha: 0.6),
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(color: cs.outlineVariant.withValues(alpha: 0.4)),
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              width: 48,
+              height: 48,
+              clipBehavior: Clip.antiAlias,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: cs.surfaceContainerLow.withValues(alpha: 0.6),
+              ),
+              child: _buildIcon(context),
+            ),
+            const SizedBox(height: 6),
+            SizedBox(
+              height: 20,
+              child: Center(
+                child: Text(
+                  label,
+                  style: AppTextStyles.labelSmall.copyWith(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                    color: cs.onSurface,
+                  ),
+                  textAlign: TextAlign.center,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildIcon(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    if (icon != null) {
+      return Center(child: Icon(icon, size: 26, color: cs.onSurfaceVariant));
+    }
+    if (imageUrl != null) {
+      return Image.network(
+        imageUrl!,
+        fit: BoxFit.cover,
+        errorBuilder: (_, _, _) => _emojiWidget(),
+      );
+    }
+    return _emojiWidget();
+  }
+
+  Widget _emojiWidget() {
+    return Center(child: Text(emoji ?? '🏪', style: const TextStyle(fontSize: 22)));
   }
 }

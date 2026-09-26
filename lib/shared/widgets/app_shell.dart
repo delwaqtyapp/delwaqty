@@ -9,6 +9,7 @@ import 'package:delwaqty/core/module/feature_registry.dart';
 import 'package:delwaqty/core/theme/theme_mode_provider.dart';
 import 'package:delwaqty/features/_shared/auth/domain/auth_state.dart';
 import 'package:delwaqty/features/_shared/auth/presentation/auth_provider.dart';
+import 'package:delwaqty/gen/assets.gen.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 
 class AppShell extends ConsumerWidget {
@@ -58,27 +59,117 @@ class AppShell extends ConsumerWidget {
     }
     showDialog<void>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(AppLocalizations.of(ctx).exitAppTitle),
-        content: Text(AppLocalizations.of(ctx).exitAppConfirm),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(false),
-            child: Text(AppLocalizations.of(ctx).cancel),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.of(ctx).pop(true);
-              SystemNavigator.pop();
-            },
-            child: Text(
-              AppLocalizations.of(ctx).exitAppTitle,
-              style: TextStyle(color: Theme.of(ctx).colorScheme.error),
+      barrierColor: Colors.black.withValues(alpha: 0.28),
+      builder: (ctx) {
+        final cs = Theme.of(ctx).colorScheme;
+        final isDark = Theme.of(ctx).brightness == Brightness.dark;
+        return Dialog(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          insetPadding: const EdgeInsets.symmetric(horizontal: 32),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(32),
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 28, sigmaY: 28),
+              child: Container(
+                constraints: const BoxConstraints(maxWidth: 280),
+                padding: const EdgeInsets.fromLTRB(20, 20, 20, 12),
+                decoration: BoxDecoration(
+                  color: isDark
+                      ? Colors.black.withValues(alpha: 0.55)
+                      : Colors.white.withValues(alpha: 0.78),
+                  borderRadius: BorderRadius.circular(32),
+                  border: Border.all(
+                    color: isDark
+                        ? Colors.white.withValues(alpha: 0.14)
+                        : Colors.black.withValues(alpha: 0.06),
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: isDark ? 0.5 : 0.14),
+                      blurRadius: 32,
+                      offset: const Offset(0, 12),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: cs.surfaceContainerHighest.withValues(alpha: 0.55),
+                        shape: BoxShape.circle,
+                      ),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(14),
+                        child: Image(
+                          image: Assets.egypt.delwaqtyLogoMark.provider(),
+                          width: 52,
+                          height: 52,
+                          fit: BoxFit.contain,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    Text(
+                      AppLocalizations.of(ctx).exitAppTitle,
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w700,
+                        color: cs.onSurface,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      AppLocalizations.of(ctx).exitAppConfirm,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: cs.onSurfaceVariant,
+                      ),
+                    ),
+                    const SizedBox(height: 14),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: OutlinedButton(
+                            onPressed: () => Navigator.of(ctx).pop(false),
+                            style: OutlinedButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(vertical: 10),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(14),
+                              ),
+                            ),
+                            child: Text(AppLocalizations.of(ctx).cancel),
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: FilledButton(
+                            onPressed: () {
+                              Navigator.of(ctx).pop(true);
+                              SystemNavigator.pop();
+                            },
+                            style: FilledButton.styleFrom(
+                              backgroundColor: cs.error,
+                              padding: const EdgeInsets.symmetric(vertical: 10),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(14),
+                              ),
+                            ),
+                            child: Text(AppLocalizations.of(ctx).exitAppTitle),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
             ),
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 

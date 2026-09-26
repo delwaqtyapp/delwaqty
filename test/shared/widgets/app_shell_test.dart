@@ -8,6 +8,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:delwaqty/data/datasources/local/shared_preferences_service.dart';
 import 'package:delwaqty/features/_shared/auth/domain/auth_state.dart';
 import 'package:delwaqty/features/_shared/auth/presentation/auth_provider.dart';
+import 'package:delwaqty/gen/assets.gen.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 import 'package:delwaqty/shared/widgets/app_shell.dart';
 
@@ -105,6 +106,16 @@ void main() {
       findsOneWidget,
     );
     expect(find.text('Cancel'), findsOneWidget);
+    final logoFinder = find.descendant(
+      of: find.byType(Dialog),
+      matching: find.byType(Image),
+    );
+    expect(logoFinder, findsOneWidget);
+    final logoImage = tester.widget<Image>(logoFinder);
+    expect(
+      (logoImage.image as AssetImage).assetName,
+      Assets.egypt.delwaqtyLogoMark.path,
+    );
   });
 
   testWidgets('cancelling the exit dialog keeps the app open on home', (
@@ -119,7 +130,7 @@ void main() {
     await tester.tap(find.text('Cancel'));
     await tester.pumpAndSettle();
 
-    expect(find.byType(AlertDialog), findsNothing);
+    expect(find.byType(Dialog), findsNothing);
     expect(find.text(_homeLabel), findsOneWidget);
   });
 

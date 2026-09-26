@@ -11,6 +11,7 @@ import 'package:delwaqty/features/customer/home_services/data/repositories/servi
 import 'package:delwaqty/features/customer/home_services/presentation/widgets/service_reviews_button.dart';
 import 'package:delwaqty/features/customer/location/presentation/providers/location_provider.dart';
 import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
+import 'package:delwaqty/shared/widgets/nav_pill_button.dart';
 import 'package:delwaqty/shared/widgets/premium_empty_state.dart';
 import 'package:delwaqty/shared/widgets/shimmer_loading.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
@@ -138,24 +139,21 @@ class _ServiceProvidersPageState extends ConsumerState<ServiceProvidersPage> {
         .where((t) => t != ServiceCategoryType.other)
         .toList();
     return SizedBox(
-      height: 46,
+      height: 48,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 16),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
         itemCount: categories.length,
-        separatorBuilder: (_, _) => const SizedBox(width: 8),
+        separatorBuilder: (_, _) => const SizedBox(width: 6),
         itemBuilder: (context, index) {
           final type = categories[index];
           final selected = type == _type;
-          return AnimatedContainer(
-            duration: const Duration(milliseconds: 200),
-            child: ChoiceChip(
-              label: Text(serviceTypeLabel(type, l10n)),
-              selected: selected,
-              onSelected: (_) => setState(() => _type = type),
-              avatar: Icon(_categoryIcon(type), size: 16),
-              selectedColor: Theme.of(context).colorScheme.primaryContainer,
-            ),
+          return NavPillButton(
+            icon: _categoryIcon(type),
+            label: serviceTypeLabel(type, l10n),
+            isSelected: selected,
+            onTap: () => setState(() => _type = type),
+            colorScheme: Theme.of(context).colorScheme,
           );
         },
       ),
@@ -163,25 +161,32 @@ class _ServiceProvidersPageState extends ConsumerState<ServiceProvidersPage> {
   }
 
   Widget _buildRadiusBar(AppLocalizations l10n) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
-      child: Row(
-        children: [
-          Text(
-            l10n.searchRadius,
-            style: AppTextStyles.labelLarge,
-          ),
-          const SizedBox(width: 8),
-          for (final r in _radiusOptions)
-            Padding(
-              padding: const EdgeInsets.only(right: 6),
-              child: ChoiceChip(
-                label: Text('$r ${l10n.km}'),
-                selected: _radiusKm == r,
-                onSelected: (_) => setState(() => _radiusKm = r),
-              ),
+    return SizedBox(
+      height: 48,
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.fromLTRB(16, 4, 16, 4),
+        child: Row(
+          children: [
+            Text(
+              l10n.searchRadius,
+              style: AppTextStyles.labelLarge,
             ),
-        ],
+            const SizedBox(width: 10),
+            for (final r in _radiusOptions) ...[
+              NavPillButton(
+                icon: r == _radiusKm
+                    ? Icons.my_location_rounded
+                    : Icons.circle_outlined,
+                label: '$r ${l10n.km}',
+                isSelected: _radiusKm == r,
+                onTap: () => setState(() => _radiusKm = r),
+                colorScheme: Theme.of(context).colorScheme,
+              ),
+              const SizedBox(width: 6),
+            ],
+          ],
+        ),
       ),
     );
   }

@@ -11,6 +11,7 @@ import 'package:delwaqty/features/_shared/auth/domain/auth_state.dart';
 import 'package:delwaqty/features/_shared/auth/presentation/auth_provider.dart';
 import 'package:delwaqty/gen/assets.gen.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
+import 'package:delwaqty/shared/widgets/nav_pill_button.dart';
 
 class AppShell extends ConsumerWidget {
   const AppShell({super.key, required this.navigationShell});
@@ -256,10 +257,11 @@ class _TransparentBottomNav extends StatelessWidget {
                   children: List.generate(navModules.length, (index) {
                     final module = navModules[index];
                     final isSelected = index == selectedIndex;
-                    return _NavIconButton(
+                    return NavPillButton(
                       icon: module.icon!,
                       label: module.name(context),
                       isSelected: isSelected,
+                      labelVisible: false,
                       onTap: () => onDestinationSelected(index),
                       colorScheme: colorScheme,
                     );
@@ -268,67 +270,6 @@ class _TransparentBottomNav extends StatelessWidget {
               ),
             ),
           ),
-        ),
-      ),
-    );
-  }
-}
-
-class _NavIconButton extends StatelessWidget {
-  const _NavIconButton({
-    required this.icon,
-    required this.label,
-    required this.isSelected,
-    required this.onTap,
-    required this.colorScheme,
-  });
-
-  final IconData icon;
-  final String label;
-  final bool isSelected;
-  final VoidCallback onTap;
-  final ColorScheme colorScheme;
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      behavior: HitTestBehavior.opaque,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 280),
-        curve: Curves.easeOutCubic,
-        padding: EdgeInsets.symmetric(
-          horizontal: isSelected ? 16 : 12,
-          vertical: 8,
-        ),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(16),
-          color: isSelected
-              ? colorScheme.primary.withValues(alpha: 0.12)
-              : Colors.transparent,
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              icon,
-              size: 24,
-              color: isSelected
-                  ? colorScheme.primary
-                  : colorScheme.onSurfaceVariant,
-            ),
-            if (isSelected) ...[
-              const SizedBox(width: 8),
-              Text(
-                label,
-                style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
-                  color: colorScheme.primary,
-                ),
-              ),
-            ],
-          ],
         ),
       ),
     );

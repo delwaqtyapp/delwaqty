@@ -46,7 +46,7 @@ class _CinematicAuthBackgroundState extends State<CinematicAuthBackground>
           child: Transform.scale(
             scale: 1.05,
             child: Image.asset(
-              'assets/egypt/intro_egypt_cinematic_background.png',
+              'assets/egypt/intro_egypt_cinematic_background.webp',
               fit: BoxFit.cover,
               alignment: const Alignment(0.0, -0.05),
               gaplessPlayback: true,

@@ -29,7 +29,7 @@ class IntroAssets {
 
   static const String logo = 'assets/egypt/delwaqty_logo_mark.png';
   static const String background =
-      'assets/egypt/intro_egypt_cinematic_background.png';
+      'assets/egypt/intro_egypt_cinematic_background.webp';
 }
 
 class DelwaIntroScene extends StatefulWidget {

@@ -56,6 +56,18 @@ android {
         manifestPlaceholders["MAPS_API_KEY"] = mapsApiKey
     }
 
+    packaging {
+        jniLibs {
+            // Vulkan validation layer is a DEBUG-ONLY diagnostic shipped by the
+            // Flutter/NDK toolchain. It is never needed at runtime; excluding it
+            // removes ~15 MB from every debug APK.
+            excludes += setOf("**/libVkLayer_khronos_validation.so")
+            // Store native libs compressed (extract-at-install) instead of
+            // uncompressed/mmap path. Removes ~24MB and allows a tight repack.
+            useLegacyPackaging = true
+        }
+    }
+
     flavorDimensions += "app"
 
     productFlavors {

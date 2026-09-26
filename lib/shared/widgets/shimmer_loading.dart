@@ -117,18 +117,30 @@ class ShimmerCard extends StatelessWidget {
           color: Theme.of(context).colorScheme.surfaceContainerHighest,
           borderRadius: AppSpacing.borderRadiusXl,
         ),
-        child: const Padding(
-          padding: EdgeInsets.all(AppSpacing.lg),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              ShimmerBox(width: 120),
-              SizedBox(height: AppSpacing.md),
-              ShimmerBox(width: double.infinity, height: 12),
-              SizedBox(height: AppSpacing.sm),
-              ShimmerBox(width: 200, height: 12),
-            ],
-          ),
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final maxWidth = constraints.maxWidth.isFinite
+                ? constraints.maxWidth
+                : 120.0;
+            final titleWidth = (maxWidth * 0.6).clamp(0.0, 120.0);
+            final lineWidth = maxWidth * 0.9;
+            final lineShortWidth = maxWidth * 0.55;
+            return FittedBox(
+              fit: BoxFit.scaleDown,
+              alignment: AlignmentDirectional.centerStart,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  ShimmerBox(width: titleWidth),
+                  const SizedBox(height: AppSpacing.md),
+                  ShimmerBox(width: lineWidth, height: 12),
+                  const SizedBox(height: AppSpacing.sm),
+                  ShimmerBox(width: lineShortWidth, height: 12),
+                ],
+              ),
+            );
+          },
         ),
       ),
     );

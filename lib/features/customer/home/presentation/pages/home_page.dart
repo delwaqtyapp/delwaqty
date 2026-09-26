@@ -65,26 +65,6 @@ final _homeServiceCategoriesProvider =
   return sorted;
 });
 
-String _serviceLabel(ServiceCategoryType t) => switch (t) {
-      ServiceCategoryType.doctor => 'حجز دكتور',
-      ServiceCategoryType.nurse => 'ممرض',
-      ServiceCategoryType.teacher => 'مدرسين',
-      ServiceCategoryType.barber => 'حجز حلاق',
-      ServiceCategoryType.plumbing => 'سباكة',
-      ServiceCategoryType.electrical => 'كهرباء',
-      ServiceCategoryType.carpentry => 'نجارة',
-      ServiceCategoryType.painting => 'دهان',
-      ServiceCategoryType.cleaning => 'تنظيف',
-      ServiceCategoryType.acMaintenance => 'صيانة تكييف',
-      ServiceCategoryType.pipeChange => 'تغيير أنبوبة',
-      ServiceCategoryType.plastering => 'نقاشة',
-      ServiceCategoryType.carpetCleaning => 'غسيل السجاد',
-      ServiceCategoryType.dishRepair => 'إصلاح الدش',
-      ServiceCategoryType.pestControl => 'مكافحة حشرات',
-      ServiceCategoryType.applianceRepair => 'إصلاح أجهزة',
-      ServiceCategoryType.other => 'خدمات أخرى',
-    };
-
 IconData _serviceIcon(ServiceCategoryType t) => switch (t) {
       ServiceCategoryType.doctor => Icons.medical_services_rounded,
       ServiceCategoryType.nurse => Icons.health_and_safety_rounded,
@@ -1059,7 +1039,7 @@ class _CompactCategories extends StatelessWidget {
   ) {
     final color = _serviceColor(type);
     final icon = _serviceIcon(type);
-    final label = _serviceLabel(type);
+    final label = serviceTypeLabel(type, AppLocalizations.of(context));
 
     return AnimatedFadeIn(
       delay: Duration(milliseconds: 280 + index * 40),
@@ -1301,7 +1281,10 @@ class _DiscoveryContent extends ConsumerWidget {
         emoji: serviceTypeEmoji(provider.categoryType),
         color: serviceTypeColor(provider.categoryType),
         name: provider.name,
-        typeLabel: serviceTypeLabel(provider.categoryType),
+        typeLabel: serviceTypeLabel(
+          provider.categoryType,
+          AppLocalizations.of(context),
+        ),
         open: provider.isAvailable,
         openLabel: provider.isAvailable ? 'متاح' : 'غير متاح',
         rating: provider.rating,

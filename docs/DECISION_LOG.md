@@ -3715,3 +3715,57 @@ NEW `test/shared/widgets/app_shell_test.dart` (4 tests): a real GoRouter + 2-bra
 - App no longer exits on a stray back press from any tab; users must deliberately confirm exit on the home tab.
 - Nested pages, dialogs, and the drawer keep standard back behavior via the `GoRouter.canPop()` guard.
 - The behavior is consistent across all four flavors with zero per-flavor duplication.
+
+## ADR-112: Main Categories follow the app language; owner-only category image control in the admin app
+
+**Date:** 2026-09-26 · **Sprint 200** · **Status:** Accepted
+
+### Context
+The user requested: «اظبط الترجمه فى ازرار ال Main Categories العربى فى اثناء اللغه الانجليزى تكون انجليزى والعكس والازرار دى يكون ليها تحكم فى وضع صور لها من داخل تطبيق الادمن لحساب الاونر فقط» — (1) the home Main Categories buttons must show Arabic when the app is in Arabic and English when it is in English (currently several always showed Arabic in English mode), and (2) the owner must be able to set an image for those buttons from inside the admin app (owner account only).
+
+Root cause for (1): the buttons are built from `categories.name_ar/name_en` via `PlatformCategory.displayName(isArabic)` in `home_page.dart:1037`, which is correct, but the LIVE `categories` table had **6 rows with `name_en IS NULL`** (خضراوات وفواكه, عطور, عطارة, البان, اكسسوارات حريمي, جزارة) whose generic `name` was Arabic — so `displayName(false)` fell back to the Arabic `name` in English mode. For (2): the feature existed only in the **web** admin (`AdminWebShell` → `AdminCategoriesPage`) which is not used on this Android device, and its edit dialog collected a picked image but **never uploaded it** (dead code path).
+
+### Decision
+- **Data fix (applied live via the Supabase Management API `database/query`, HTTP 201):** one UPDATE backfilled `name_en` for the 6 rows: `Fruits & Vegetables`, `Perfumes`, `Herbs & Spices`, `Dairy`, `Women's Accessories`, `Butcher`. `name`/`name_ar` untouched (home ranking `categoryRank(a.name)` only depends on `name`, which still resolves to vegetables/perfumes/spices/dairy/accessories/butcher merchant types). Every category now has both localized names → the existing `displayName` logic shows the correct language for both locales with no code change on the home side.
+- **Owner-only image control, on-device:** NEW mobile admin page `lib/features/admin/presentation/pages/admin_categories_management_page.dart` (`AdminCategoriesManagementPage`), registered as `/admin/categories` in `AdminModule` + added to the admin settings menu (Administration section). It reuses the existing `platformCategoryRepositoryProvider` and marks `isOwner = role == 'owner'` (from `authStateProvider`): the **Upload image / Remove image** controls are rendered ONLY for the owner; any admin can manage names/order/active state. Images are persisted to the existing private `category-images` bucket (`uploadCategoryImage` → public URL → `updateCategory(imageUrl:)`), and the home strip already renders `imageUrl` when present (`_buildCategoryTile`), so setting an image in the admin page shows up on the customer home buttons.
+- **Interface fix:** `PlatformCategoryRepository.updateCategory` gained an `imageUrl` parameter (implementation already wrote `image_url`);
+- **Web-admin bug fix:** `AdminCategoriesPage._editCategory` now actually uploads the dialog-picked image (was silently dropped), gated by the same owner check.
+- **l10n:** new keys `adminCategories`, `editCategory`, `uploadImage`, `removeImage` en+ar; gen-l10n regenerated.
+- NEW test `test/features/admin/presentation/pages/admin_categories_management_page_test.dart` (3 widget tests): admin (non-owner) sees the category row but NO upload/remove image controls; owner sees both.
+
+### Rationale
+The `displayName` code and data mapping (`_fromRow` snake_case→camelCase) were already correct — the Arabic-in-English symptom was pure DATA, and backfilling `name_en` fixes it permanently while keeping the admin UI as the maintenance channel for everything else. Image control for the main categories is owner-only by construction at the UI layer (consistent with the web admin's existing `if (isOwner)` row actions) and remains fully governed by backend RLS (categories writes require `public.is_admin()`; storage bucket is private with admin upload/delete policies — the owner role passes `is_admin()`).
+
+### Verification
+Gates: `flutter analyze` NO issues; `flutter test` **953/953** (950 + 3 new). Live DB re-query confirmed zero remaining `name_en IS NULL` rows. Built `releases/delwaqty_1.0.1+2_debug_20260926_212840.apk` (57MB, `./build.sh`) → `adb install -r` SUCCESS on 192.168.8.36:5555 → app relaunched clean (com.delwaqty.app pid 11840, no FATAL/root-isolate in logcat). Device was in active human use (Gmail foreground), so visual confirmation of the translated buttons/admin page left to the user.
+
+### Consequences
+- Main Categories now always show the app's active language (data layer complete; no remaining NULL localized names).
+- The owner can upload/remove a category image directly from the on-device admin app; the button image appears on the customer home strip immediately after cache refresh.
+- Non-owner admins cannot alter category images; backend RLS is the authoritative gate.
+- Editing category names in the web admin now also persists a picked image (was a silent no-op).
+
+## ADR-113: All Home-services category buttons follow the app language (localized service-category labels)
+
+**Date:** 2026-09-26 · **Sprint 200** · **Status:** Accepted
+
+### Context
+User follow-up: «لسه فيه حجز دكتور وممرض والى بعده من ازرار لسه عربى فى الانجليزى» — after the Main Categories (`PlatformCategory`) translation fix, the Home-services buttons (Doctor booking / Nurse / Teacher / Barber / Plumbing / Electrical / Carpentry / AC / Painting / Cleaning / Pest control / Appliance repair / Pipe change / Plastering / Carpet cleaning / Dish repair) **still showed Arabic in English mode**.
+
+Root cause: the 16 `ServiceCategoryType` labels were hardcoded Arabic `switch` expressions duplicated in 4 files — `home_page.dart` (`_serviceLabel`), `category_visuals.dart` (`serviceTypeLabel`), `service_providers_page.dart` (`_categoryLabel`), `service_booking_page.dart` (`_categoryName`) — and the same hardcoded function fed 3 more render sites (reviews page app-bar ×2, home discovery provider card). Unlike the categories, there was no data-driven name column to backfill — the labels are enum-derived, so they must go through l10n.
+
+### Decision
+- Add 16 l10n keys (en+ar): `serviceCategoryDoctor` "Doctor Booking"/«حجز دكتور», `serviceCategoryNurse` "Nursing"/«ممرض», `serviceCategoryTeacher` "Tutoring"/«مدرسين», `serviceCategoryBarber` "Barber"/«حجز حلاق», `serviceCategoryPlumbing` "Plumbing"/«سباكة», `serviceCategoryElectrical` "Electrical"/«كهرباء», `serviceCategoryCarpentry` "Carpentry"/«نجارة», `serviceCategoryAcMaintenance` "AC Maintenance"/«صيانة تكييف», `serviceCategoryPainting` "Painting"/«دهان», `serviceCategoryCleaning` "Cleaning"/«تنظيف», `serviceCategoryPestControl` "Pest Control"/«مكافحة حشرات», `serviceCategoryApplianceRepair` "Appliance Repair"/«إصلاح أجهزة», `serviceCategoryPipeChange` "Pipe Change"/«تغيير أنبوبة», `serviceCategoryPlastering` "Plastering"/«نقاشة», `serviceCategoryCarpetCleaning` "Carpet Cleaning"/«غسيل السجاد», `serviceCategoryDishRepair` "Dish Repair"/«إصلاح الدش». English naming follows the existing bilingual `register_page.dart` provider-type tuples (Doctor Booking / Nursing / Tutoring). `other` reuses the existing `serviceOther` key.
+- Make the single shared `serviceTypeLabel` in `category_visuals.dart` localized (`serviceTypeLabel(ServiceCategoryType type, AppLocalizations l10n)`) — mirroring the established `merchantTypeLabel(type, l10n)` pattern in the same file — and delete the three private Arabic switches (`_serviceLabel` in home_page, `_categoryLabel` in service_providers_page, `_categoryName` switch in service_booking_page).
+- Update all 7 call sites to pass `AppLocalizations` (which were already in scope at each widget/function): home service strip tile `_buildServiceTile`, home discovery provider card, service-providers choice chips, service-booking category name, service-reviews app-bar + tile. Add the missing `category_visuals.dart` import in `service_providers_page.dart` and `service_booking_page.dart`.
+
+### Rationale
+A single localized helper removes 3 duplicated hardcoded switches (DRY), follows the file's existing localized merchant-label pattern, and makes every enum-derived service label language-aware. No data migration needed — labels are pure UI strings. Consistency: the same `serviceTypeLabel` now yields the same localized text across home strip, discovery feed, filters, booking, and reviews.
+
+### Verification
+`flutter gen-l10n` regenerated; `flutter analyze` NO issues (also fixed a stray `avoid_redundant_argument_values` info from the ROUND-59 test fixture, removed redundant `isActive: true`); `flutter test` **953/953**. Built `releases/delwaqty_1.0.1+2_debug_20260926_213755.apk` via `./build.sh` → `adb install -r` SUCCESS on device 192.168.8.36:5555 → relaunched clean (pid 27596, no FATAL / Could not create root isolate). Visual confirmation of the English-mode labels left to the user (device in active human use).
+
+### Consequences
+- Every Home-services button now displays the app's active language end-to-end (categories via data, service categories via l10n).
+- The Arabic strings for these labels live in exactly one place (the arb files) instead of 4 hardcoded switches, so future rewording/localization is a single-key edit.
+- Minor English name choices (Nursing, Tutoring) match the existing provider-registration vocabulary for consistency.

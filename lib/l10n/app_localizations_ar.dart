@@ -5933,6 +5933,18 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
+  String get adminCategories => 'التصنيفات';
+
+  @override
+  String get editCategory => 'تعديل التصنيف';
+
+  @override
+  String get uploadImage => 'رفع صورة';
+
+  @override
+  String get removeImage => 'إزالة الصورة';
+
+  @override
   String get cancelReservationConfirm => 'هل أنت متأكد من إلغاء هذا الحجز؟';
 
   @override
@@ -6314,4 +6326,52 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get updateAvailableNow => 'يتوفر إصدار أحدث';
+
+  @override
+  String get serviceCategoryDoctor => 'حجز دكتور';
+
+  @override
+  String get serviceCategoryNurse => 'ممرض';
+
+  @override
+  String get serviceCategoryTeacher => 'مدرسين';
+
+  @override
+  String get serviceCategoryBarber => 'حجز حلاق';
+
+  @override
+  String get serviceCategoryPlumbing => 'سباكة';
+
+  @override
+  String get serviceCategoryElectrical => 'كهرباء';
+
+  @override
+  String get serviceCategoryCarpentry => 'نجارة';
+
+  @override
+  String get serviceCategoryPainting => 'دهان';
+
+  @override
+  String get serviceCategoryCleaning => 'تنظيف';
+
+  @override
+  String get serviceCategoryAcMaintenance => 'صيانة تكييف';
+
+  @override
+  String get serviceCategoryPipeChange => 'تغيير أنبوبة';
+
+  @override
+  String get serviceCategoryPlastering => 'نقاشة';
+
+  @override
+  String get serviceCategoryCarpetCleaning => 'غسيل السجاد';
+
+  @override
+  String get serviceCategoryDishRepair => 'إصلاح الدش';
+
+  @override
+  String get serviceCategoryPestControl => 'مكافحة حشرات';
+
+  @override
+  String get serviceCategoryApplianceRepair => 'إصلاح أجهزة';
 }

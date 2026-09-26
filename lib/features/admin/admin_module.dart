@@ -41,6 +41,7 @@ import 'package:delwaqty/features/admin/financial/presentation/pages/admin_settl
 import 'package:delwaqty/features/admin/financial/presentation/pages/admin_grace_management_page.dart';
 import 'package:delwaqty/features/admin/financial/presentation/pages/admin_receiving_wallets_page.dart';
 import 'package:delwaqty/features/admin/financial/presentation/pages/admin_owner_dashboard_page.dart';
+import 'package:delwaqty/features/admin/presentation/pages/admin_categories_management_page.dart';
 
 /// Smooth page transition for the admin module: quick fade + subtle rise.
 Page<void> _adminPage(
@@ -135,6 +136,12 @@ class AdminModule extends FeatureModule {
           path: 'settings',
           pageBuilder: (context, state) =>
               _adminPage(const AdminSettingsMenuPage()),
+        ),
+        GoRoute(
+          path: 'categories',
+          pageBuilder: (context, state) => _adminPage(
+            const AdminCategoriesManagementPage(),
+          ),
         ),
         GoRoute(
           path: 'platform-config',

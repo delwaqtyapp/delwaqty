@@ -361,7 +361,7 @@ class _EgyptHeroState extends State<_EgyptHero>
             const DecoratedBox(
               decoration: BoxDecoration(
                 image: DecorationImage(
-                  image: AssetImage('assets/egypt/home_egypt_hero.png'),
+                  image: AssetImage('assets/egypt/home_egypt_hero.webp'),
                   fit: BoxFit.fitWidth,
                   alignment: Alignment.topCenter,
                 ),

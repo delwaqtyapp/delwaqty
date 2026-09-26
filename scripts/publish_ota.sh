@@ -72,13 +72,16 @@ declare -A RENAMES=( [customer]=delwaqty-customer [admin]=delwaqty-admin [driver
 for flavor in "${!FLAVORS[@]}"; do
   echo ""
   echo "── Building $flavor ────────────────────────────"
-  flutter build apk --debug --flavor "$flavor" \
+  flutter build apk --debug --target-platform android-arm64 --flavor "$flavor" \
     -t "lib/$flavor/main.dart" --dart-define-from-file="$ENV_FILE" \
     --build-name "${BASE}" --build-number "${NEW_BUILD}"
   SRC="build/app/outputs/flutter-apk/app-${flavor}-debug.apk"
   if [ ! -f "$SRC" ]; then
     echo "ERROR: expected $SRC not found"; exit 1
   fi
+  # Slim the padded debug APK (drops the zipalign padding void); keeps the
+  # debug keystore signature so the system installer accepts it.
+  scripts/slim_apk.sh "$SRC" "$SRC"
 done
 
 # ── 3. Create GitHub release (overwrite if the tag already exists) ──

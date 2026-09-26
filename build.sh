@@ -107,8 +107,13 @@ if [ "$BUILD_RELEASE" = true ]; then
   APK_NAME="delwaqty_${VERSION}_release_${TIMESTAMP}.apk"
 else
   echo "Building debug APK (customer flavor)..."
-  flutter build apk --debug --flavor customer \
+  flutter build apk --debug --target-platform android-arm64 --flavor customer \
     -t lib/customer/main.dart --dart-define-from-file=$ENV_FILE
+  if [ "${SKIP_SLIM:-false}" != "true" ] && command -v scripts/slim_apk.sh >/dev/null 2>&1; then
+    # Drops the ~4MB+ zipalign padding void; re-signs in place with the debug keystore.
+    APK="$PROJECT_DIR/build/app/outputs/flutter-apk/app-customer-debug.apk"
+    scripts/slim_apk.sh "$APK" "$APK"
+  fi
   APK_PATH="$PROJECT_DIR/build/app/outputs/flutter-apk/app-customer-debug.apk"
   APK_NAME="delwaqty_${VERSION}_debug_${TIMESTAMP}.apk"
 fi

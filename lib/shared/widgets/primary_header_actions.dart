@@ -4,10 +4,10 @@ import 'package:go_router/go_router.dart';
 import 'package:delwaqty/features/_shared/auth/domain/auth_state.dart';
 import 'package:delwaqty/features/_shared/auth/presentation/auth_provider.dart';
 import 'package:delwaqty/features/customer/commerce/presentation/widgets/cart_badge.dart';
-import 'package:delwaqty/features/admin/floating_sidebar/floating_sidebar.dart';
 import 'package:delwaqty/features/_shared/notifications/notifications_module.dart';
+import 'package:delwaqty/shared/widgets/glass_side_menu.dart';
 
-class PrimaryHeaderActions extends ConsumerWidget {
+class PrimaryHeaderActions extends ConsumerStatefulWidget {
   const PrimaryHeaderActions({
     super.key,
     this.showMenu = true,
@@ -22,7 +22,23 @@ class PrimaryHeaderActions extends ConsumerWidget {
   final VoidCallback? onCartTap;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<PrimaryHeaderActions> createState() =>
+      _PrimaryHeaderActionsState();
+}
+
+class _PrimaryHeaderActionsState extends ConsumerState<PrimaryHeaderActions> {
+  final GlobalKey _menuKey = GlobalKey();
+
+  void _openMenu() {
+    final box = _menuKey.currentContext?.findRenderObject() as RenderBox?;
+    final anchor = box == null
+        ? null
+        : box.localToGlobal(Offset.zero) & box.size;
+    GlassSideMenuController.open(context, ref, anchor: anchor);
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final authState = ref.watch(authStateProvider);
     final isGuest = authState is AuthGuest;
     final unreadCount = isGuest
@@ -32,13 +48,14 @@ class PrimaryHeaderActions extends ConsumerWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        if (showMenu)
+        if (widget.showMenu)
           IconButton(
+            key: _menuKey,
             icon: const Icon(Icons.menu_rounded),
             tooltip: 'Menu',
-            onPressed: () => FloatingSidebarController.open(context, ref),
+            onPressed: _openMenu,
           ),
-        if (showNotifications)
+        if (widget.showNotifications)
           IconButton(
             tooltip: 'Notifications',
             onPressed: isGuest
@@ -51,8 +68,8 @@ class PrimaryHeaderActions extends ConsumerWidget {
               child: const Icon(Icons.notifications_outlined),
             ),
           ),
-        if (showCart)
-          CartBadge(onTap: onCartTap ?? () => context.push('/market/cart')),
+        if (widget.showCart)
+          CartBadge(onTap: widget.onCartTap ?? () => context.push('/market/cart')),
       ],
     );
   }

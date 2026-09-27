@@ -1413,6 +1413,8 @@
   "verificationDecisionFailed": "حدث خطأ ما. يرجى المحاولة مرة أخرى.",
   "idCard": "بطاقة الرقم القومي",
   "emailConfirmationTitle": "تحقق من بريدك الإلكتروني",
+  "emailNotConfirmed": "حسابك غير مفعّل بعد. تحقق من بريدك الإلكتروني واضغط على رابط التفعيل الذي أرسلناه. تحتاج إرساله مرة أخرى؟",
+  "resendActivationEmail": "إعادة إرسال بريد التفعيل",
   "documentsSectionTitle": "أكمل توثيق حسابك",
   "documentsSectionMessage": "ارفع مستنداتك ليتم إرسال حسابك للمراجعة.",
   "submitDocuments": "إرسال المستندات",

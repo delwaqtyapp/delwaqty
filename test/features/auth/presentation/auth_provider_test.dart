@@ -403,5 +403,38 @@ void main() {
         expect(await biometricStore.activeCredentials(), isNull);
       });
     });
+
+    group('resendEmailConfirmation', () {
+      test('delegates to the repository with the email', () async {
+        when(
+          () => mockAuthRepo.resendEmailConfirmation(email: 'a@b.com'),
+        ).thenAnswer((_) async {});
+
+        final container = buildTestContainer();
+
+        await container
+            .read(authStateProvider.notifier)
+            .resendEmailConfirmation(email: 'a@b.com');
+
+        verify(
+          () => mockAuthRepo.resendEmailConfirmation(email: 'a@b.com'),
+        ).called(1);
+      });
+
+      test('rethrows repository failures', () async {
+        when(
+          () => mockAuthRepo.resendEmailConfirmation(email: 'a@b.com'),
+        ).thenThrow(Exception('boom'));
+
+        final container = buildTestContainer();
+
+        expect(
+          () => container
+              .read(authStateProvider.notifier)
+              .resendEmailConfirmation(email: 'a@b.com'),
+          throwsA(isA<Exception>()),
+        );
+      });
+    });
   });
 }

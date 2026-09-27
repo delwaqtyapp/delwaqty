@@ -240,6 +240,20 @@ class AuthStateNotifier extends Notifier<AuthState> {
     }
   }
 
+  /// Resends the signup confirmation email through GoTrue (works for any
+  /// account still in the unconfirmed state, e.g. after a missed activation
+  /// link). Re-throws so callers can surface the outcome in the UI.
+  Future<void> resendEmailConfirmation({required String email}) async {
+    try {
+      await ref
+          .read(resendEmailConfirmationUseCaseProvider)
+          .call(email: email);
+    } catch (e, stack) {
+      _logger.e('Resend confirmation failed', e, stack);
+      rethrow;
+    }
+  }
+
   Future<void> signOut() async {
     state = const AuthState.loading();
     try {

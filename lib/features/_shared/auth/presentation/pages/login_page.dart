@@ -100,6 +100,46 @@ class _LoginPageState extends ConsumerState<LoginPage>
         );
   }
 
+  static bool _isConfirmationRequiredError(String msg) {
+    final lower = msg.toLowerCase();
+    return lower.contains('not confirmed') ||
+        lower.contains('confirm your email') ||
+        lower.contains('email_not_confirmed') ||
+        lower.contains('email not confirmed');
+  }
+
+  Future<void> _offerConfirmationResend() async {
+    final l10n = AppLocalizations.of(context);
+    final email = _emailController.text.trim();
+    final resend = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Text(l10n.emailConfirmationTitle),
+        content: Text(l10n.emailNotConfirmed),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text(l10n.ok),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: Text(l10n.resendActivationEmail),
+          ),
+        ],
+      ),
+    );
+    if (resend != true || !mounted) return;
+    try {
+      await ref.read(authStateProvider.notifier).resendEmailConfirmation(
+            email: email,
+          );
+      if (mounted) context.showAppSnackBar(l10n.emailConfirmationSent(email));
+    } catch (_) {
+      if (mounted) context.showAppSnackBar(l10n.tryAgain);
+    }
+  }
+
   Future<void> _handlePostLoginSave() async {
     final l10n = AppLocalizations.of(context);
     final messenger = ScaffoldMessenger.of(context);
@@ -299,6 +339,8 @@ class _LoginPageState extends ConsumerState<LoginPage>
                 .invalidateBiometricCredentials(userId: pendingBiometricUserId);
             _checkBiometric();
             context.showAppSnackBar(l10n.biometricStaleCredentials);
+          } else if (_isConfirmationRequiredError(msg)) {
+            _offerConfirmationResend();
           } else {
             context.showAppSnackBar(msg);
           }

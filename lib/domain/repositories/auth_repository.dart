@@ -32,6 +32,7 @@ abstract class AuthRepository {
   Future<AuthResult> signInAnonymously();
   Future<void> signOut();
   Future<void> resetPassword({required String email});
+  Future<void> resendEmailConfirmation({required String email});
   Future<void> deleteAccount();
   Future<void> updateBiometricEnabled({
     required String userId,

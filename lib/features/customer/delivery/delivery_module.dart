@@ -37,7 +37,7 @@ class DirectDeliveryModule extends FeatureModule {
       label: (ctx) => AppLocalizations.of(ctx).directDelivery,
       icon: Icons.moped_rounded,
       onTap: (ctx, ref) {
-        Navigator.of(ctx).pop();
+        Navigator.of(ctx).maybePop();
         ctx.go('/direct-delivery');
       },
     ),

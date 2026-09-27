@@ -14,7 +14,6 @@ void main() {
     expect(
       ids,
       containsAll([
-        'home',
         'services',
         'notifications',
         'profile',
@@ -26,5 +25,6 @@ void main() {
       ]),
     );
     expect(ids, isNot(contains('search')));
+    expect(ids, isNot(contains('home')));
   });
 }

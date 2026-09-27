@@ -56,7 +56,7 @@ class WalletModule extends FeatureModule {
       label: (ctx) => AppLocalizations.of(ctx).wallet,
       icon: Icons.account_balance_wallet_outlined,
       onTap: (ctx, ref) {
-        Navigator.of(ctx).pop();
+        Navigator.of(ctx).maybePop();
         ctx.go('/wallet');
       },
     ),

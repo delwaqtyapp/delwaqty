@@ -4359,6 +4359,16 @@ class AppLocalizationsAr extends AppLocalizations {
   String get emailConfirmationTitle => 'تحقق من بريدك الإلكتروني';
 
   @override
+  String get emailVerifiedTitle => 'تم تفعيل بريدك الإلكتروني';
+
+  @override
+  String get emailVerifiedBody =>
+      'شكرًا لك! تم تأكيد بريدك الإلكتروني وتفعيل حسابك بنجاح في دلوقتي. يمكنك الآن تسجيل الدخول والاستمتاع بجميع الخدمات.';
+
+  @override
+  String get emailVerifiedOk => 'حسنًا، المتابعة';
+
+  @override
   String get emailNotConfirmed =>
       'حسابك غير مفعّل بعد. تحقق من بريدك الإلكتروني واضغط على رابط التفعيل الذي أرسلناه. تحتاج إرساله مرة أخرى؟';
 

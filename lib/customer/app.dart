@@ -9,6 +9,7 @@ import 'package:delwaqty/core/router/app_router.dart';
 import 'package:delwaqty/core/theme/app_theme.dart';
 import 'package:delwaqty/core/theme/theme_mode_provider.dart';
 import 'package:delwaqty/features/_shared/auth/presentation/auth_provider.dart';
+import 'package:delwaqty/features/_shared/auth/presentation/email_verified_dialog.dart';
 import 'package:delwaqty/features/_shared/device_lock/device_lock_provider.dart';
 import 'package:delwaqty/features/admin/support_chat/presentation/chat_providers.dart';
 import 'package:delwaqty/features/customer/home/presentation/widgets/app_lifecycle_category_refresh.dart';
@@ -81,9 +82,7 @@ class _AppState extends ConsumerState<App> {
     service.start();
     service.routes.listen((route) {
       if (route == DeepLinkRoute.loginCallback) {
-        // supabase_flutter already exchanges the PKCE code; re-resolve the
-        // session so the router lands the user on the correct page.
-        ref.read(authStateProvider.notifier).checkAuthStatus();
+        _handleLoginCallback();
       }
     });
     // Cold start: the platform delivers the launching URI through the stream
@@ -91,9 +90,13 @@ class _AppState extends ConsumerState<App> {
     Future<void>.delayed(const Duration(milliseconds: 800), () async {
       final route = await service.initialRoute;
       if (route == DeepLinkRoute.loginCallback && mounted) {
-        ref.read(authStateProvider.notifier).checkAuthStatus();
+        _handleLoginCallback();
       }
     });
+  }
+
+  Future<void> _handleLoginCallback() async {
+    await handleEmailConfirmedDeepLink(ref, navigatorKey: rootNavigatorKey);
   }
 
   @override

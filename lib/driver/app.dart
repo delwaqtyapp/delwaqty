@@ -9,6 +9,7 @@ import 'package:delwaqty/driver/app_router.dart';
 import 'package:delwaqty/core/theme/app_theme.dart';
 import 'package:delwaqty/core/theme/theme_mode_provider.dart';
 import 'package:delwaqty/features/_shared/auth/presentation/auth_provider.dart';
+import 'package:delwaqty/features/_shared/auth/presentation/email_verified_dialog.dart';
 import 'package:delwaqty/features/_shared/device_lock/device_lock_provider.dart';
 import 'package:delwaqty/features/admin/support_chat/presentation/chat_providers.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
@@ -76,15 +77,22 @@ class _DriverAppState extends ConsumerState<DriverApp> {
     service.start();
     service.routes.listen((route) {
       if (route == DeepLinkRoute.loginCallback) {
-        ref.read(authStateProvider.notifier).checkAuthStatus();
+        _handleLoginCallback();
       }
     });
     Future<void>.delayed(const Duration(milliseconds: 800), () async {
       final route = await service.initialRoute;
       if (route == DeepLinkRoute.loginCallback && mounted) {
-        ref.read(authStateProvider.notifier).checkAuthStatus();
+        _handleLoginCallback();
       }
     });
+  }
+
+  Future<void> _handleLoginCallback() async {
+    await handleEmailConfirmedDeepLink(
+      ref,
+      navigatorKey: driverRootNavigatorKey,
+    );
   }
 
   @override

@@ -4392,6 +4392,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get emailConfirmationTitle => 'Check your email';
 
   @override
+  String get emailVerifiedTitle => 'Your email is confirmed';
+
+  @override
+  String get emailVerifiedBody =>
+      'Thank you! Your email has been successfully confirmed and your account is now activated. You can now sign in and enjoy all DelwaQty services.';
+
+  @override
+  String get emailVerifiedOk => 'Continue';
+
+  @override
   String get emailNotConfirmed =>
       'Your email is not confirmed yet. Check your inbox and tap the activation link we sent. Need it again?';
 

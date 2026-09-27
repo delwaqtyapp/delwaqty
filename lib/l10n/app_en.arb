@@ -1415,6 +1415,8 @@
   "verificationDecisionFailed": "Something went wrong. Please try again.",
   "idCard": "National ID",
   "emailConfirmationTitle": "Check your email",
+  "emailNotConfirmed": "Your email is not confirmed yet. Check your inbox and tap the activation link we sent. Need it again?",
+  "resendActivationEmail": "Resend activation email",
   "documentsSectionTitle": "Complete your verification",
   "documentsSectionMessage": "Upload your documents to submit your account for review.",
   "submitDocuments": "Submit Documents",

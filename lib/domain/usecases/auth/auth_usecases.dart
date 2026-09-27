@@ -174,6 +174,21 @@ class ResetPasswordUseCase {
   }
 }
 
+final resendEmailConfirmationUseCaseProvider =
+    Provider<ResendEmailConfirmationUseCase>((ref) {
+  return ResendEmailConfirmationUseCase(ref.watch(authRepositoryProvider));
+});
+
+class ResendEmailConfirmationUseCase {
+  ResendEmailConfirmationUseCase(this._repository);
+
+  final AuthRepository _repository;
+
+  Future<void> call({required String email}) {
+    return _repository.resendEmailConfirmation(email: email);
+  }
+}
+
 final deleteAccountUseCaseProvider = Provider<DeleteAccountUseCase>((ref) {
   return DeleteAccountUseCase(ref.watch(authRepositoryProvider));
 });

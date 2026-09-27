@@ -166,6 +166,16 @@ class SupabaseAuthDataSource {
     }
   }
 
+  Future<void> resendEmailConfirmation({required String email}) async {
+    try {
+      await _auth.resend(email: email, type: OtpType.signup);
+      _logger.i('Confirmation email resent to $email');
+    } catch (e, stack) {
+      _logger.e('Confirmation email resend failed', e, stack);
+      rethrow;
+    }
+  }
+
   Future<void> refreshSession() async {
     try {
       await _auth.refreshSession();

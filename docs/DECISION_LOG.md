@@ -4078,3 +4078,30 @@ The provider-services picker on the shared register page (`register_page.dart`) 
 - `flutter gen-l10n` regenerated (`selectAll`/`selectedCount`); `flutter analyze` clean; `flutter test` **995/995** (992 + 3).
 - Riverpod 3 note captured: FutureProvider overrides in tests use `overrideWith((ref) async => …)` (not `overrideWithValue(list)`).
 - Built/installed `releases/delwaqty_1.0.1+2_debug_20260927_140028.apk`; relaunched clean (logcat: zero Flutter FATAL/overflow/RenderFlex).
+
+## ADR-124: Real activation emails (Gmail SMTP) + in-app resend-confirmation
+
+**Date:** Sprint 207 (ROUND 71)
+**Status:** Accepted
+**Deciders:** Lead Software Architect (after user request «اظبط فى التسجيل انه يبعت ايميل فعلى لتفعيل الاكونت وشوف المنظومه دى فعلا بشكل حقيقى فى التطبيق للعميل والادارة وشوف اى الى معطل الميزه دى لانى سجلت حساب عميل جديد وللاسف مجاش ميل لتفعيل الحساب»)
+
+### Context
+The app already owns the full activation flow: GoTrue `signUp` with confirm-email enabled (`mailer_autoconfirm=false`), the register «Check your email» state + `/login`, and the `io.delwaqty://login-callback` deep-link exchange (DeepLinkResolver loginCallback + supabase_flutter deepLink). But auditing the live project config (ref `bttnlkmwhorjamzemwda`) showed `smtp_*` all NULL — GoTrue has no built-in sender on new projects, so NO confirmation email was ever delivered for any registration, for any app flavor. This was the blocker behind the user's missing activation email.
+
+### Decision
+1. **Provide a real sender** on the live project via the Management API (`PATCH /v1/projects/{ref}/config/auth`, Bearer from `~/.supabase/access_token`): `smtp_host=smtp.gmail.com`, `smtp_port="587"` (STRING — an int is rejected `400 "expected string"`), `smtp_user=delwaqty.app@gmail.com`, `smtp_admin_email=delwaqty.app@gmail.com`, `smtp_sender_name="Delwaqty Team"`, `smtp_pass` = a Gmail App Password (API stores it hashed; the raw value lives only at `/data/data/com.termux/files/usr/tmp/opencode/dwq_smtp.txt`, out of the repo). Raised `rate_limit_email_sent` 2→30 (INT — a string is rejected `400 "expected number"`).
+2. **Prove delivery**, not assume it: signups probed end-to-end against disposable mail.tm inboxes — each returned GoTrue 200 with `confirmation_sent_at` and the message actually arrived from `delwaqty.app@gmail.com` (subject "Confirm your email address"; link `/auth/v1/verify?token=…&type=signup&redirect_to=io.delwaqty://login-callback`).
+3. **Resend affordance for missed links**: `resendEmailConfirmation` added down the stack — `AuthRepository` + `AuthRepositoryImpl` (`AuthException` rethrown, network/other → `ServerException`), `SupabaseAuthDataSource` (`_auth.resend(email:, type: OtpType.signup)`, gotrue 2.26.0), `resendEmailConfirmationUseCaseProvider` in `auth_usecases.dart`, and `AuthStateNotifier.resendEmailConfirmation` (rethrows). `login_page.dart` routes confirmation errors («not confirmed» / confirm-your-email / `email_not_confirmed`) to a resend dialog (`emailNotConfirmed` + `resendActivationEmail` l10n, actions OK + Resend) with `emailConfirmationSent(email)` / `tryAgain` feedback.
+4. **Shared surface, all apps**: because register/login and the deep link are shared modules, the resend dialog + live SMTP cover customer, admin, driver and provider in one change; the separate admin `verification_status` approval layer (migrations 020/034) is untouched.
+
+### Rationale
+- The defect was operational config, not code — unblocking SMTP restores the flow the app already implemented, and the disposable-inbox proof verifies the entire chain before shipping.
+- API quirks pinned (port-as-string, int rate-limit) so future config edits via this machine reuse working JSON.
+- A resend button is the minimal UI that closes the "missed or expired link" loop without touching the auth/verification architecture.
+
+### Consequences
+- New registrations now receive a real activation email from `delwaqty.app@gmail.com` in all 4 apps.
+- Accounts registered BEFORE the SMTP fix were never emailed and cannot be retro-activated; the path is re-registering the same email (GoTrue re-sends confirmation for unconfirmed users) or the new resend button — called out to the user.
+- `flutter gen-l10n` regenerated (`emailNotConfirmed`, `resendActivationEmail`); `flutter analyze` clean; `flutter test` **998/998** (995 + 3: provider delegate/rethrow ×2, login-page resend-dialog widget test).
+- Built/installed `releases/delwaqty_1.0.1+2_debug_20260927_144245.apk`; relaunched clean (logcat zero Flutter FATAL/RenderFlex/overflow).
+- Operational: do not revoke/rotate the Gmail App Password without re-PATCHing `smtp_pass`; the raw credential is not in the repository.

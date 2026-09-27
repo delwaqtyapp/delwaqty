@@ -8420,6 +8420,18 @@ abstract class AppLocalizations {
   /// **'Check your email'**
   String get emailConfirmationTitle;
 
+  /// No description provided for @emailNotConfirmed.
+  ///
+  /// In en, this message translates to:
+  /// **'Your email is not confirmed yet. Check your inbox and tap the activation link we sent. Need it again?'**
+  String get emailNotConfirmed;
+
+  /// No description provided for @resendActivationEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Resend activation email'**
+  String get resendActivationEmail;
+
   /// No description provided for @documentsSectionTitle.
   ///
   /// In en, this message translates to:

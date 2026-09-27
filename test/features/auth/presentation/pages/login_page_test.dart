@@ -15,13 +15,31 @@ class _FakeAuthNotifier extends AuthStateNotifier {
   AuthState build() => const AuthState.unauthenticated();
 }
 
+class _ConfirmResendAuthNotifier extends AuthStateNotifier {
+  String? lastResendEmail;
+
+  @override
+  AuthState build() => const AuthState.unauthenticated();
+
+  @override
+  Future<void> signIn({required String email, required String password}) async {
+    state = const AuthState.error(message: 'Email not confirmed.');
+  }
+
+  @override
+  Future<void> resendEmailConfirmation({required String email}) async {
+    lastResendEmail = email;
+  }
+}
+
 Widget _buildTestApp({
   required BiometricAuthStore store,
   required SharedPreferencesService prefsService,
+  AuthStateNotifier Function()? notifier,
 }) {
   return ProviderScope(
     overrides: [
-      authStateProvider.overrideWith(_FakeAuthNotifier.new),
+      authStateProvider.overrideWith(notifier ?? _FakeAuthNotifier.new),
       biometricAuthStoreProvider.overrideWithValue(store),
       sharedPreferencesProvider.overrideWithValue(prefsService),
     ],
@@ -65,4 +83,43 @@ void main() {
     expect(find.byIcon(Icons.fingerprint_rounded), findsNothing);
     expect(find.text('Login with Fingerprint'), findsNothing);
   });
+
+  testWidgets(
+    'offers a resend-activation dialog when sign-in says the email is not confirmed',
+    (tester) async {
+      await tester.pumpWidget(
+        _buildTestApp(
+          store: store,
+          prefsService: prefsService,
+          notifier: _ConfirmResendAuthNotifier.new,
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.enterText(
+        find.widgetWithText(TextFormField, 'Email or username'),
+        'a@b.com',
+      );
+      await tester.enterText(
+        find.widgetWithText(TextFormField, 'Password'),
+        '12345678',
+      );
+
+      await tester.tap(find.text('Sign In'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Check your email'), findsOneWidget);
+      expect(find.text('Resend activation email'), findsOneWidget);
+
+      await tester.tap(find.text('Resend activation email'));
+      await tester.pumpAndSettle();
+
+      final notifier = ProviderScope.containerOf(
+        tester.element(find.byType(LoginPage)),
+      ).read(authStateProvider.notifier) as _ConfirmResendAuthNotifier;
+      expect(notifier.lastResendEmail, 'a@b.com');
+      expect(find.textContaining('We sent a confirmation link to a@b.com'),
+          findsOneWidget);
+    },
+  );
 }

@@ -299,6 +299,16 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
+  Future<void> resendEmailConfirmation({required String email}) async {
+    try {
+      await _dataSource.resendEmailConfirmation(email: email);
+    } catch (e) {
+      _logger.e('Resend confirmation email error', e);
+      throw ServerException(message: e.toString());
+    }
+  }
+
+  @override
   Future<void> deleteAccount() async {
     try {
       await _dataSource.deleteAccount();

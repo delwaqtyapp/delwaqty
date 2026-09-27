@@ -4392,6 +4392,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get emailConfirmationTitle => 'Check your email';
 
   @override
+  String get emailNotConfirmed =>
+      'Your email is not confirmed yet. Check your inbox and tap the activation link we sent. Need it again?';
+
+  @override
+  String get resendActivationEmail => 'Resend activation email';
+
+  @override
   String get documentsSectionTitle => 'Complete your verification';
 
   @override

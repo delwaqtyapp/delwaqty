@@ -135,6 +135,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get lightMode => 'Light Mode';
 
   @override
+  String get systemMode => 'System';
+
+  @override
   String get save => 'Save';
 
   @override

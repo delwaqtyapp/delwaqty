@@ -134,6 +134,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get lightMode => 'الوضع الفاتح';
 
   @override
+  String get systemMode => 'تلقائي';
+
+  @override
   String get save => 'حفظ';
 
   @override

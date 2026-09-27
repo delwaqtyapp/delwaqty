@@ -6,6 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'package:delwaqty/core/theme/theme_mode_provider.dart';
 import 'package:delwaqty/data/datasources/local/shared_preferences_service.dart';
 import 'package:delwaqty/domain/entities/user.dart';
 import 'package:delwaqty/domain/enums/verification_status.dart';
@@ -16,6 +17,7 @@ import 'package:delwaqty/features/_shared/auth/presentation/auth_provider.dart';
 import 'package:delwaqty/features/customer/profile/presentation/pages/profile_page.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 import 'package:delwaqty/shared/widgets/app_shell.dart';
+import 'package:delwaqty/shared/widgets/appearance_segmented.dart';
 
 class _MockProfileRepository extends Mock implements ProfileRepository {}
 
@@ -217,4 +219,41 @@ void main() {
       expect(logoutRect.dy, lessThan(navTop));
     },
   );
+
+  testWidgets('appearance segmented control switches the active theme mode', (
+    tester,
+  ) async {
+    final oldHandler = FlutterError.onError;
+    FlutterError.onError = ignoreVisualAssertions(oldHandler);
+    addTearDown(() => FlutterError.onError = oldHandler);
+
+    await tester.pumpWidget(_buildTestApp(mockRepo, prefs));
+    await tester.pump(const Duration(milliseconds: 800));
+
+    // No saved theme mode -> provider defaults to light; the subtitle shows the
+    // current mode in addition to the matching segment label.
+    expect(find.text('Light Mode'), findsNWidgets(2));
+    expect(find.text('Dark Mode'), findsOneWidget);
+    expect(find.text('System'), findsOneWidget);
+
+    await tester.ensureVisible(find.text('Theme'));
+    await tester.pump(const Duration(milliseconds: 300));
+
+    await tester.tap(
+      find.descendant(
+        of: find.byType(AppearanceSegmented<ThemeMode>),
+        matching: find.text('Dark Mode'),
+      ),
+    );
+    await tester.pump(const Duration(milliseconds: 400));
+
+    expect(find.text('Dark Mode'), findsNWidgets(2));
+    expect(find.text('Light Mode'), findsOneWidget);
+
+    final container = ProviderScope.containerOf(
+      tester.element(find.byType(ProfilePage)),
+    );
+    expect(container.read(themeModeProvider), ThemeMode.dark);
+    await tester.pumpAndSettle();
+  });
 }

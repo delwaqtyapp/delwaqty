@@ -4026,3 +4026,29 @@ The `/services` (All Services) page rendered only the 16 booking categories via 
 - The profile logout is always reachable and visible above the floating nav. Other `extendBody` pages with end-of-list content can adopt the same constant per their own padding.
 - `flutter analyze` clean; `flutter test` **991/991** (990 + 1).
 - Built/installed `releases/delwaqty_1.0.1+2_debug_20260927_132135.apk`; relaunched clean (logcat: zero FATAL/overflow/RenderFlex).
+
+## ADR-122: Modern Appearance segmented control replaces the primitive SegmentedButton rows
+
+**Date:** Sprint 205 (ROUND 69)
+**Status:** Accepted
+**Deciders:** Lead Software Architect (after user request «ظبطلى ازرار الى موجوده فى صندوق ال Appearance فى الملف الشخصى انه يبقى شكلها مودرن واحترافيه اكتر من الشكل البدائى الحالى»)
+
+### Context
+The Appearance card in the customer `ProfilePage` (and the admin settings-menu, which copied it in ROUND 53) rendered each setting as a `ListTile` with a squeezed Material `SegmentedButton` in the trailing slot — the theme one icon-only (light/dark/system), the language one bare «EN/عربي» abbreviations. Visually this reads as the Flutter stock control: tiny, cramped, dated — «الشكل البدائى». Justify a shared replacement: the same Appearance section exists verbatim in TWO apps, so a one-off inline redesign would duplicate the new code twice.
+
+### Decision
+1. New reusable widget `lib/shared/widgets/appearance_segmented.dart`: `AppearanceSegmented<T>` (options / selected / onChanged) + `AppearanceSegmentOption<T>` (value / icon / label). Visual contract — a soft rounded-18 TRACK (52px tall, `surfaceContainerHighest` @55% over a 4px-padded `outlineVariant` @35% border) holding equal `Expanded` segments; each segment is a `PressableScale`(0.94) + `AnimatedContainer` (260ms easeOutCubic): SELECTED = filled vertical `primary → primaryContainer` gradient pill (rounded-14) with a soft `primary` @28% shadow (0,4/12) and `onPrimary` 20px icon (`AnimatedSwitcher`) + 13px w700 label; UNSELECTED = transparent + `onSurfaceVariant`. Labels wrapped in `Flexible` + `FittedBox(scaleDown)` so the pills can never overflow at any width or text scale.
+2. Section layout redesigned: each setting becomes a two-line block — header (`_IconTile` + bold title + live current-value subtitle) above the full-width segmented control (14px gap) — replacing the one-line `ListTile` + trailing design. The theme icon/subtitle now switch per active mode (light/dark/system).
+3. New l10n key `systemMode` ("System" / «تلقائي») since no auto/system label existed; full language names (`englishLanguageName`/`arabicLanguageName`) replace the abbreviations.
+4. Applied in BOTH consumers: `ProfilePage._buildAppearanceSection` (theme → `themeModeProvider`, language → `localeProvider`) and `admin_settings_menu_page._buildAppearanceSection` (theme → `themeModeProvider`, language → `adminLocaleProvider`).
+
+### Rationale
+- A single widget gives the same premium look across customer + admin apps (modularity/reuse per AGENTS.md §6) and keeps future Appearance additions trivial.
+- The pill track matches the app's established floating-nav design language (`NavPillButton` pills, soft rounded `PremiumCard` surfaces) rather than the alien Material segmented button.
+- `FittedBox(scaleDown)` makes overflow geometrically impossible — the same class of guarantee proven in ROUND 64/66.
+
+### Consequences
+- Appearance toggles look modern/professional in both apps; language pills now show clear full names; System mode is finally labelled.
+- New widget/widget test covers the control + provider wiring: default (light) shows 'Light Mode' ×2 (subtitle + pill); tapping the Dark pill flips the subtitle and `themeModeProvider` to `ThemeMode.dark`.
+- `flutter analyze` clean; `flutter test` **992/992** (991 + 1).
+- Built/installed `releases/delwaqty_1.0.1+2_debug_20260927_133426.apk`; relaunched clean (logcat: zero FATAL/overflow/RenderFlex).

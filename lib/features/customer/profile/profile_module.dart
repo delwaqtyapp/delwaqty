@@ -40,7 +40,6 @@ class ProfileModule extends FeatureModule {
       label: (ctx) => AppLocalizations.of(ctx).profile,
       icon: Icons.person_outline_rounded,
       onTap: (ctx, ref) {
-        Navigator.of(ctx).maybePop();
         ctx.go('/profile');
       },
     ),

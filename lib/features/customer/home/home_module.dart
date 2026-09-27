@@ -50,8 +50,7 @@ class HomeModule extends FeatureModule {
       label: (ctx) => AppLocalizations.of(ctx).allServices,
       icon: Icons.grid_view_rounded,
       onTap: (ctx, ref) {
-        Navigator.of(ctx).maybePop();
-        ctx.go('/services');
+        ctx.push('/services');
       },
     ),
   ];

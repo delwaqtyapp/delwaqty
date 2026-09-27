@@ -28,8 +28,7 @@ class ComplaintsModule extends FeatureModule {
       label: (ctx) => AppLocalizations.of(ctx).complaints,
       icon: Icons.warning_amber_rounded,
       onTap: (ctx, ref) {
-        Navigator.of(ctx).maybePop();
-        ctx.go('/my-complaints');
+        ctx.push('/my-complaints');
       },
     ),
   ];

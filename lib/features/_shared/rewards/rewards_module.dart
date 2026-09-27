@@ -27,8 +27,7 @@ class RewardsModule extends FeatureModule {
       label: (ctx) => AppLocalizations.of(ctx).rewards,
       icon: Icons.card_giftcard_rounded,
       onTap: (ctx, ref) {
-        Navigator.of(ctx).maybePop();
-        ctx.go('/rewards');
+        ctx.push('/rewards');
       },
     ),
   ];

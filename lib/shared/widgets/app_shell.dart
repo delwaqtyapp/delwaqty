@@ -346,20 +346,12 @@ class GlassMenuPanel extends StatelessWidget {
                           ),
                         ),
                 const SizedBox(height: 8),
-                GlassMenuItemTile(
-                  icon: themeMode == ThemeMode.dark
-                      ? Icons.light_mode_outlined
-                      : Icons.dark_mode_outlined,
+                _AnimatedDarkModeTile(
+                  active: themeMode == ThemeMode.dark,
                   label: l10n.darkMode,
                   onTap: () =>
                       ref.read(themeModeProvider.notifier).toggleTheme(),
                   colorScheme: cs,
-                  trailing: Switch(
-                    value: themeMode == ThemeMode.dark,
-                    onChanged: (_) => ref
-                        .read(themeModeProvider.notifier)
-                        .toggleTheme(),
-                  ),
                 ),
                 GlassMenuItemTile(
                   icon: Icons.language_rounded,
@@ -775,6 +767,183 @@ class GlassMenuItemTile extends StatelessWidget {
             ),
           ),
         ),
+      ),
+    );
+  }
+}
+
+/// A modern, animated dark-mode row: the leading icon morphs (sun / moon)
+/// with a rotational pop while the trailing control is a glowing, sliding
+/// pill switch. The tile keeps the exact same height as a normal menu tile.
+class _AnimatedDarkModeTile extends StatelessWidget {
+  const _AnimatedDarkModeTile({
+    required this.active,
+    required this.label,
+    required this.onTap,
+    required this.colorScheme,
+  });
+
+  final bool active;
+  final String label;
+  final VoidCallback onTap;
+  final ColorScheme colorScheme;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(14),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(14),
+          onTap: onTap,
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 320),
+            curve: Curves.easeOutCubic,
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(14),
+              gradient: active
+                  ? LinearGradient(
+                      colors: [
+                        colorScheme.primary.withValues(alpha: 0.16),
+                        colorScheme.tertiary.withValues(alpha: 0.10),
+                      ],
+                    )
+                  : null,
+            ),
+            child: Row(
+              children: [
+                AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 360),
+                  switchInCurve: Curves.easeOutBack,
+                  switchOutCurve: Curves.easeInCubic,
+                  transitionBuilder: (child, anim) => RotationTransition(
+                    turns: anim,
+                    child: ScaleTransition(
+                      scale: anim.drive(
+                        Tween(begin: 0.2, end: 1.0)
+                            .chain(CurveTween(curve: Curves.easeOutBack)),
+                      ),
+                      child: child,
+                    ),
+                  ),
+                  child: Icon(
+                    active
+                        ? Icons.light_mode_rounded
+                        : Icons.dark_mode_rounded,
+                    key: ValueKey(active),
+                    size: 22,
+                    color: colorScheme.onSurface,
+                  ),
+                ),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Text(
+                    label,
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                      color: colorScheme.onSurface,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                _AnimatedThemeSwitch(
+                  active: active,
+                  onChanged: (_) => onTap(),
+                  colorScheme: colorScheme,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// A compact glowing slide switch whose knob is a sun / moon that changes
+/// color, with an animated halo when dark mode is turned on. All transitions
+/// are finite, so tests using pumpAndSettle stay stable.
+class _AnimatedThemeSwitch extends StatelessWidget {
+  const _AnimatedThemeSwitch({
+    required this.active,
+    required this.onChanged,
+    required this.colorScheme,
+  });
+
+  final bool active;
+  final ValueChanged<bool> onChanged;
+  final ColorScheme colorScheme;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () => onChanged(!active),
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          AnimatedContainer(
+            duration: const Duration(milliseconds: 340),
+            curve: Curves.easeOutCubic,
+            width: 52,
+            height: 28,
+            padding: const EdgeInsets.all(2),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(14),
+              gradient: LinearGradient(
+                colors: active
+                    ? const [Color(0xFF3A2E6E), Color(0xFF6D5AE0)]
+                    : [
+                        colorScheme.surfaceContainerHighest,
+                        colorScheme.surfaceContainerHighest
+                            .withValues(alpha: 0.7),
+                      ],
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: active
+                      ? colorScheme.primary.withValues(alpha: 0.55)
+                      : Colors.transparent,
+                  blurRadius: 10,
+                  spreadRadius: active ? 1 : 0,
+                ),
+              ],
+            ),
+          ),
+          AnimatedAlign(
+            duration: const Duration(milliseconds: 340),
+            curve: Curves.easeOutBack,
+            alignment:
+                active ? Alignment.centerRight : Alignment.centerLeft,
+            child: Container(
+              width: 24,
+              height: 24,
+              margin: const EdgeInsets.all(2),
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: active ? const Color(0xFF2A214F) : Colors.white,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.18),
+                    blurRadius: 6,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: Icon(
+                active
+                    ? Icons.dark_mode_rounded
+                    : Icons.wb_sunny_rounded,
+                size: 14,
+                color:
+                    active ? const Color(0xFFFFD54F) : const Color(0xFFF6A107),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

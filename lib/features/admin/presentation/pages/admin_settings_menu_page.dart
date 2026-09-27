@@ -14,6 +14,7 @@ import 'package:delwaqty/features/admin/financial/presentation/providers/admin_f
 import 'package:delwaqty/services/ota/ota_update_dialog.dart';
 import 'package:delwaqty/services/ota/ota_update_manager.dart';
 import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
+import 'package:delwaqty/shared/widgets/appearance_segmented.dart';
 import 'package:delwaqty/shared/widgets/gradient_background.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 import 'package:package_info_plus/package_info_plus.dart';
@@ -203,84 +204,127 @@ class _AdminSettingsMenuPageState extends ConsumerState<AdminSettingsMenuPage> {
     ThemeMode themeMode,
     Locale locale,
   ) {
+    final themeLabel = switch (themeMode) {
+      ThemeMode.light => l10n.lightMode,
+      ThemeMode.dark => l10n.darkMode,
+      ThemeMode.system => l10n.systemMode,
+    };
+    final themeIcon = switch (themeMode) {
+      ThemeMode.light => Icons.light_mode_outlined,
+      ThemeMode.dark => Icons.dark_mode_outlined,
+      ThemeMode.system => Icons.brightness_auto_outlined,
+    };
     return _SectionCard(
       title: l10n.appearance,
       children: [
-        ListTile(
-          leading: _IconTile(
-            icon: themeMode == ThemeMode.dark
-                ? Icons.dark_mode_rounded
-                : Icons.light_mode_rounded,
-            color: AppColors.brandViolet,
-          ),
-          title: Text(l10n.theme),
-          trailing: SegmentedButton<ThemeMode>(
-            segments: const [
-              ButtonSegment(
-                value: ThemeMode.light,
-                icon: Icon(Icons.light_mode_rounded, size: 18),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  _IconTile(icon: themeIcon, color: AppColors.brandViolet),
+                  const SizedBox(width: 12),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        l10n.theme,
+                        style: context.textTheme.bodyLarge?.copyWith(
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        themeLabel,
+                        style: context.textTheme.bodySmall?.copyWith(
+                          color: context.colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
               ),
-              ButtonSegment(
-                value: ThemeMode.dark,
-                icon: Icon(Icons.dark_mode_rounded, size: 18),
-              ),
-              ButtonSegment(
-                value: ThemeMode.system,
-                icon: Icon(Icons.brightness_auto_rounded, size: 18),
-              ),
-            ],
-            selected: {themeMode},
-            onSelectionChanged: (selected) {
-              ref.read(themeModeProvider.notifier).setThemeMode(selected.first);
-            },
-            showSelectedIcon: false,
-            style: ButtonStyle(
-              visualDensity: VisualDensity.compact,
-              shape: WidgetStateProperty.all(
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-              ),
-            ),
-          ),
-        ),
-        Divider(
-          height: 1,
-          color: context.colorScheme.outlineVariant.withValues(alpha: 0.25),
-        ),
-        ListTile(
-          leading: const _IconTile(
-            icon: Icons.language_rounded,
-            color: AppColors.brandPurple,
-          ),
-          title: Text(l10n.language),
-          subtitle: Text(
-            locale.languageCode == 'ar'
-                ? l10n.arabicLanguageName
-                : l10n.englishLanguageName,
-          ),
-          trailing: SegmentedButton<String>(
-            segments: [
-              ButtonSegment(
-                value: 'en',
-                label: Text(l10n.englishAbbreviation),
-              ),
-              ButtonSegment(
-                value: 'ar',
-                label: Text(l10n.arabicAbbreviation),
+              const SizedBox(height: 14),
+              AppearanceSegmented<ThemeMode>(
+                options: [
+                  AppearanceSegmentOption(
+                    ThemeMode.light,
+                    Icons.light_mode_rounded,
+                    l10n.lightMode,
+                  ),
+                  AppearanceSegmentOption(
+                    ThemeMode.dark,
+                    Icons.dark_mode_rounded,
+                    l10n.darkMode,
+                  ),
+                  AppearanceSegmentOption(
+                    ThemeMode.system,
+                    Icons.brightness_auto_rounded,
+                    l10n.systemMode,
+                  ),
+                ],
+                selected: themeMode,
+                onChanged: ref.read(themeModeProvider.notifier).setThemeMode,
               ),
             ],
-            selected: {locale.languageCode},
-            onSelectionChanged: (selected) {
-              ref
-                  .read(adminLocaleProvider.notifier)
-                  .setAdminLocale(Locale(selected.first));
-            },
-            showSelectedIcon: false,
-            style: ButtonStyle(
-              visualDensity: VisualDensity.compact,
-              shape: WidgetStateProperty.all(
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 4, 16, 16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  const _IconTile(
+                    icon: Icons.language_rounded,
+                    color: AppColors.brandPurple,
+                  ),
+                  const SizedBox(width: 12),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        l10n.language,
+                        style: context.textTheme.bodyLarge?.copyWith(
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        locale.languageCode == 'ar'
+                            ? l10n.arabicLanguageName
+                            : l10n.englishLanguageName,
+                        style: context.textTheme.bodySmall?.copyWith(
+                          color: context.colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
               ),
-            ),
+              const SizedBox(height: 14),
+              AppearanceSegmented<String>(
+                options: [
+                  AppearanceSegmentOption(
+                    'en',
+                    Icons.translate_rounded,
+                    l10n.englishLanguageName,
+                  ),
+                  AppearanceSegmentOption(
+                    'ar',
+                    Icons.language_rounded,
+                    l10n.arabicLanguageName,
+                  ),
+                ],
+                selected: locale.languageCode,
+                onChanged: (code) => ref
+                    .read(adminLocaleProvider.notifier)
+                    .setAdminLocale(Locale(code)),
+              ),
+            ],
           ),
         ),
       ],

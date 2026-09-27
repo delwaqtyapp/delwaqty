@@ -344,6 +344,12 @@ abstract class AppLocalizations {
   /// **'Light Mode'**
   String get lightMode;
 
+  /// No description provided for @systemMode.
+  ///
+  /// In en, this message translates to:
+  /// **'System'**
+  String get systemMode;
+
   /// No description provided for @save.
   ///
   /// In en, this message translates to:

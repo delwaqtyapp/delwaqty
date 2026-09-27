@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:delwaqty/core/localization/locale_provider.dart';
+import 'package:delwaqty/core/module/feature_module.dart';
 import 'package:delwaqty/core/module/feature_registry.dart';
 import 'package:delwaqty/core/theme/theme_mode_provider.dart';
 import 'package:delwaqty/features/_shared/auth/domain/auth_state.dart';
@@ -20,14 +21,25 @@ class GlassSideMenuController {
 
   static bool get isOpen => _entry != null;
 
-  static void open(BuildContext context, WidgetRef ref, {Rect? anchor}) {
+  @visibleForTesting
+  static void resetForTesting() {
+    _entry?.remove();
+    _entry = null;
+  }
+
+  static void open(
+    BuildContext context,
+    WidgetRef ref, {
+    Rect? anchor,
+    List<DrawerEntry>? drawerEntries,
+  }) {
     if (_entry != null) return;
 
     final l10n = AppLocalizations.of(context);
     final authState = ref.read(authStateProvider);
     final themeMode = ref.read(themeModeProvider);
     final locale = ref.read(localeProvider);
-    final drawerEntries = FeatureRegistry.instance.allDrawerEntries;
+    final entries = drawerEntries ?? FeatureRegistry.instance.allDrawerEntries;
 
     final overlay = Overlay.of(context, rootOverlay: true);
 
@@ -39,7 +51,7 @@ class GlassSideMenuController {
         themeMode: themeMode,
         locale: locale,
         ref: ref,
-        drawerEntries: drawerEntries,
+        drawerEntries: entries,
         anchor: anchor,
         onDismiss: () {
           entry.remove();
@@ -136,7 +148,10 @@ class _GlassSideMenuOverlayState extends State<GlassSideMenuOverlay>
       top = safeTop + 8;
     }
 
-    final maxPanelHeight = (size.height - top - 14).clamp(220.0, size.height);
+    final maxPanelHeight = (size.height - top - size.height * 0.14).clamp(
+      240.0,
+      size.height,
+    );
 
     final anchorCenterX = anchor?.center.dx;
     final alignX = anchorCenterX == null

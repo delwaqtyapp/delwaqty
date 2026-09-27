@@ -6,7 +6,9 @@ import 'package:go_router/go_router.dart';
 import 'package:delwaqty/core/localization/locale_provider.dart';
 import 'package:delwaqty/core/module/feature_module.dart';
 import 'package:delwaqty/core/module/feature_registry.dart';
+import 'package:delwaqty/core/theme/app_colors.dart';
 import 'package:delwaqty/core/theme/theme_mode_provider.dart';
+import 'package:delwaqty/domain/entities/user.dart';
 import 'package:delwaqty/features/_shared/auth/domain/auth_state.dart';
 import 'package:delwaqty/features/_shared/auth/presentation/auth_provider.dart';
 import 'package:delwaqty/gen/assets.gen.dart';
@@ -305,12 +307,9 @@ class _DrawerPanel extends StatelessWidget {
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
     final isDark = theme.brightness == Brightness.dark;
-    final userName = authState is AuthAuthenticated
-        ? (authState as AuthAuthenticated).user.fullName ?? 'User'
-        : 'User';
-    final userEmail = authState is AuthAuthenticated
-        ? (authState as AuthAuthenticated).user.email
-        : '';
+    final user = authState is AuthAuthenticated
+        ? (authState as AuthAuthenticated).user
+        : null;
 
     final bodyEntries = drawerEntries
         .where((e) => e.position == DrawerPosition.body)
@@ -331,16 +330,16 @@ class _DrawerPanel extends StatelessWidget {
               bottomEnd: Radius.circular(28),
             ),
             child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 32, sigmaY: 32),
+              filter: ImageFilter.blur(sigmaX: 40, sigmaY: 40),
               child: Container(
                 width: 280,
                 constraints: BoxConstraints(
                   maxHeight: MediaQuery.of(context).size.height * 0.85,
                 ),
                 decoration: BoxDecoration(
-                  color: isDark
-                      ? Colors.white.withValues(alpha: 0.08)
-                      : Colors.white.withValues(alpha: 0.82),
+color: isDark
+                                      ? Colors.white.withValues(alpha: 0.30)
+                                      : Colors.white.withValues(alpha: 0.62),
                   borderRadius: const BorderRadiusDirectional.only(
                     topEnd: Radius.circular(28),
                     bottomEnd: Radius.circular(28),
@@ -363,7 +362,7 @@ class _DrawerPanel extends StatelessWidget {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      _buildHeader(context, cs, userName, userEmail),
+                      _buildHeader(context, cs, user, l10n),
                       const SizedBox(height: 8),
                       Expanded(
                         child: SingleChildScrollView(
@@ -471,62 +470,84 @@ class _DrawerPanel extends StatelessWidget {
   Widget _buildHeader(
     BuildContext context,
     ColorScheme cs,
-    String userName,
-    String userEmail,
+    User? user,
+    AppLocalizations l10n,
   ) {
+    final name = (user?.fullName?.isNotEmpty ?? false)
+        ? user!.fullName!
+        : (user?.username?.isNotEmpty ?? false)
+        ? user!.username!
+        : l10n.user;
+    final initial = name.isNotEmpty ? name[0].toUpperCase() : 'U';
+    final roleLabel = user == null ? null : _roleLabel(user.role, l10n);
+    final badge = user == null ? null : _verificationBadge(user, l10n, cs);
+
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.fromLTRB(20, 16, 20, 12),
       child: Row(
         children: [
-          Container(
-            width: 48,
-            height: 48,
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [cs.primary, cs.tertiary],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-              shape: BoxShape.circle,
-            ),
-            child: Center(
-              child: Text(
-                userName.isNotEmpty ? userName[0].toUpperCase() : 'U',
-                style: TextStyle(
-                  color: cs.onPrimary,
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-          ),
+          _buildAvatarRing(context, cs, user, initial),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text(
-                  userName,
-                  style: TextStyle(
-                    fontWeight: FontWeight.w600,
-                    fontSize: 15,
-                    color: cs.onSurface,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Flexible(
+                      child: Text(
+                        name,
+                        style: TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 15,
+                          color: cs.onSurface,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    if (user?.verificationStatus.isApproved == true) ...[
+                      const SizedBox(width: 4),
+                      const Icon(
+                        Icons.verified_rounded,
+                        size: 16,
+                        color: AppColors.brandPurple,
+                      ),
+                    ],
+                  ],
                 ),
-                if (userEmail.isNotEmpty) ...[
+                if (user?.username?.isNotEmpty == true) ...[
                   const SizedBox(height: 2),
                   Text(
-                    userEmail,
-                    style: TextStyle(
+                    '@${user!.username}',
+                    style: const TextStyle(
                       fontSize: 12,
-                      color: cs.onSurfaceVariant,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.brandPurple,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+                if (roleLabel != null || badge != null) ...[
+                  const SizedBox(height: 6),
+                  Wrap(
+                    spacing: 6,
+                    runSpacing: 6,
+                    children: [
+                      if (roleLabel != null)
+                        _buildChip(
+                          cs,
+                          label: roleLabel,
+                          icon: _roleIcon(user!.role),
+                          color: _roleColor(user.role, cs),
+                        ),
+                      if (badge != null)
+                        _buildChip(cs, label: badge.$1, icon: badge.$2, color: badge.$3),
+                    ],
                   ),
                 ],
               ],
@@ -535,6 +556,168 @@ class _DrawerPanel extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  Widget _buildAvatarRing(
+    BuildContext context,
+    ColorScheme cs,
+    User? user,
+    String initial,
+  ) {
+    return Container(
+      width: 50,
+      height: 50,
+      padding: const EdgeInsets.all(2.5),
+      decoration: const BoxDecoration(
+        shape: BoxShape.circle,
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [AppColors.brandPurple, AppColors.brandViolet],
+        ),
+      ),
+      child: ClipOval(
+        child: SizedBox(
+          width: double.infinity,
+          height: double.infinity,
+          child: (user?.avatarUrl?.isNotEmpty ?? false)
+              ? Image.network(
+                  user!.avatarUrl!,
+                  fit: BoxFit.cover,
+                  errorBuilder: (_, _, _) =>
+                      _buildAvatarFallback(context, cs, initial),
+                )
+              : _buildAvatarFallback(context, cs, initial),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAvatarFallback(BuildContext context, ColorScheme cs, String initial) {
+    return Container(
+      color: cs.primary,
+      alignment: Alignment.center,
+      child: Text(
+        initial,
+        style: TextStyle(
+          color: cs.onPrimary,
+          fontSize: 20,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildChip(
+    ColorScheme cs, {
+    required String label,
+    required IconData icon,
+    required Color color,
+  }) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 3),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.14),
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: color.withValues(alpha: 0.4), width: 0.5),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 13, color: color),
+          const SizedBox(width: 4),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.w700,
+              color: color,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  String? _roleLabel(String role, AppLocalizations l10n) {
+    switch (role) {
+      case 'admin':
+        return l10n.admin;
+      case 'owner':
+        return l10n.owner;
+      case 'merchant':
+        return l10n.merchant;
+      case 'provider':
+        return l10n.provider;
+      case 'driver':
+        return l10n.driver;
+      case 'delivery':
+        return l10n.delivery;
+      case 'customer':
+        return l10n.customer;
+      default:
+        return null;
+    }
+  }
+
+  IconData _roleIcon(String role) {
+    switch (role) {
+      case 'admin':
+      case 'owner':
+        return Icons.shield_rounded;
+      case 'merchant':
+        return Icons.storefront_rounded;
+      case 'provider':
+        return Icons.handyman_rounded;
+      case 'driver':
+      case 'delivery':
+        return Icons.delivery_dining_rounded;
+      default:
+        return Icons.person_rounded;
+    }
+  }
+
+  Color _roleColor(String role, ColorScheme cs) {
+    switch (role) {
+      case 'admin':
+      case 'owner':
+        return AppColors.brandPurple;
+      case 'merchant':
+        return const Color(0xFF0D9488);
+      case 'provider':
+        return const Color(0xFF06B6D4);
+      case 'driver':
+      case 'delivery':
+        return const Color(0xFFEA580C);
+      default:
+        return cs.onSurfaceVariant;
+    }
+  }
+
+  (String, IconData, Color)? _verificationBadge(
+    User user,
+    AppLocalizations l10n,
+    ColorScheme cs,
+  ) {
+    final status = user.verificationStatus;
+    if (status.isApproved) {
+      return (l10n.verified, Icons.verified_rounded, const Color(0xFF16A34A));
+    }
+    if (status.isRejected) {
+      return (
+        l10n.verificationRejectedTitle,
+        Icons.error_outline_rounded,
+        cs.error,
+      );
+    }
+    if (user.userType.requiresVerification) {
+      return (
+        l10n.verificationPending,
+        Icons.hourglass_top_rounded,
+        const Color(0xFFD97706),
+      );
+    }
+    return null;
   }
 }
 

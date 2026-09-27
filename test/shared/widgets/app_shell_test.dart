@@ -6,6 +6,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:delwaqty/data/datasources/local/shared_preferences_service.dart';
+import 'package:delwaqty/domain/entities/user.dart';
+import 'package:delwaqty/domain/enums/user_type.dart';
+import 'package:delwaqty/domain/enums/verification_status.dart';
 import 'package:delwaqty/features/_shared/auth/domain/auth_state.dart';
 import 'package:delwaqty/features/_shared/auth/presentation/auth_provider.dart';
 import 'package:delwaqty/gen/assets.gen.dart';
@@ -15,6 +18,37 @@ import 'package:delwaqty/shared/widgets/app_shell.dart';
 class _FakeAuthNotifier extends AuthStateNotifier {
   @override
   AuthState build() => const AuthState.unauthenticated();
+}
+
+class _AuthenticatedAuthNotifier extends AuthStateNotifier {
+  _AuthenticatedAuthNotifier(this.user);
+
+  final User user;
+
+  @override
+  AuthState build() => AuthState.authenticated(user: user);
+}
+
+User _userFixture({
+  String? username,
+  String? avatarUrl,
+  String? fullName,
+  String email = 'user@example.com',
+  String role = 'customer',
+  UserType userType = UserType.customer,
+  VerificationStatus verificationStatus = VerificationStatus.pending,
+}) {
+  return User(
+    id: 'u1',
+    email: email,
+    fullName: fullName,
+    username: username,
+    avatarUrl: avatarUrl,
+    role: role,
+    userType: userType,
+    verificationStatus: verificationStatus,
+    createdAt: DateTime(2024),
+  );
 }
 
 const _homeLabel = 'HOME_STUB';
@@ -61,10 +95,10 @@ void main() {
     );
   });
 
-  Widget buildTestApp() {
+  Widget buildTestApp([AuthStateNotifier? notifier]) {
     return ProviderScope(
       overrides: [
-        authStateProvider.overrideWith(_FakeAuthNotifier.new),
+        authStateProvider.overrideWith(() => notifier ?? _FakeAuthNotifier()),
         sharedPreferencesProvider.overrideWithValue(prefsService),
       ],
       child: MaterialApp.router(
@@ -75,6 +109,65 @@ void main() {
       ),
     );
   }
+
+  Future<void> openDrawer(WidgetTester tester) async {
+    final shellScaffold = find.descendant(
+      of: find.byType(AppShell),
+      matching: find.byType(Scaffold),
+    );
+    tester.state<ScaffoldState>(shellScaffold.first).openDrawer();
+    await tester.pumpAndSettle();
+  }
+
+  testWidgets('drawer header shows username and hides email', (tester) async {
+    final notifier = _AuthenticatedAuthNotifier(
+      _userFixture(
+        fullName: 'John Doe',
+        username: 'johndoe',
+        email: 'john@example.com',
+      ),
+    );
+    await tester.pumpWidget(buildTestApp(notifier));
+    await openDrawer(tester);
+
+    expect(find.text('John Doe'), findsOneWidget);
+    expect(find.text('@johndoe'), findsOneWidget);
+    expect(find.text('john@example.com'), findsNothing);
+    expect(find.text('Customer'), findsOneWidget);
+  });
+
+  testWidgets('drawer renders empty instead of email when no username', (
+    tester,
+  ) async {
+    final notifier = _AuthenticatedAuthNotifier(
+      _userFixture(email: 'sara@example.com'),
+    );
+    await tester.pumpWidget(buildTestApp(notifier));
+    await openDrawer(tester);
+
+    expect(find.text('sara@example.com'), findsNothing);
+    expect(find.text('User'), findsOneWidget);
+    expect(find.text('Customer'), findsOneWidget);
+  });
+
+  testWidgets('drawer shows provider rank and verification badge', (
+    tester,
+  ) async {
+    final notifier = _AuthenticatedAuthNotifier(
+      _userFixture(
+        fullName: 'Ali',
+        username: 'ali',
+        role: 'provider',
+        userType: UserType.provider,
+        verificationStatus: VerificationStatus.approved,
+      ),
+    );
+    await tester.pumpWidget(buildTestApp(notifier));
+    await openDrawer(tester);
+
+    expect(find.text('Provider'), findsOneWidget);
+    expect(find.text('Verified'), findsOneWidget);
+  });
 
   testWidgets('back on a non-home tab returns to the home tab', (
     tester,

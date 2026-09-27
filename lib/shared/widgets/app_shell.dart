@@ -25,36 +25,12 @@ const double kFloatingNavClearance = 84;
 class AppShell extends ConsumerWidget {
   const AppShell({super.key, required this.navigationShell});
 
-  static final scaffoldKey = GlobalKey<ScaffoldState>();
-
   final StatefulNavigationShell navigationShell;
 
   void _onTap(int index) {
     navigationShell.goBranch(
       index,
       initialLocation: index == navigationShell.currentIndex,
-    );
-  }
-
-  Widget _buildGlassDrawer(BuildContext context, WidgetRef ref) {
-    final l10n = AppLocalizations.of(context);
-    final authState = ref.read(authStateProvider);
-    final themeMode = ref.read(themeModeProvider);
-    final locale = ref.read(localeProvider);
-    final registry = FeatureRegistry.instance;
-    final drawerEntries = registry.allDrawerEntries;
-
-    return Drawer(
-      backgroundColor: Colors.transparent,
-      elevation: 0,
-      child: _DrawerPanel(
-        authState: authState,
-        l10n: l10n,
-        themeMode: themeMode,
-        locale: locale,
-        ref: ref,
-        drawerEntries: drawerEntries,
-      ),
     );
   }
 
@@ -197,9 +173,7 @@ class AppShell extends ConsumerWidget {
         _handlePop(context, ref);
       },
       child: Scaffold(
-        key: AppShell.scaffoldKey,
         extendBody: true,
-        drawer: _buildGlassDrawer(context, ref),
         body: navigationShell,
         bottomNavigationBar: _TransparentBottomNav(
           selectedIndex: navigationShell.currentIndex,
@@ -285,14 +259,17 @@ class _TransparentBottomNav extends StatelessWidget {
   }
 }
 
-class _DrawerPanel extends StatelessWidget {
-  const _DrawerPanel({
+class GlassMenuPanel extends StatelessWidget {
+  const GlassMenuPanel({
+    super.key,
     required this.authState,
     required this.l10n,
     required this.themeMode,
     required this.locale,
     required this.ref,
     required this.drawerEntries,
+    this.width = 264,
+    this.onRequestClose,
   });
 
   final AuthState authState;
@@ -301,6 +278,8 @@ class _DrawerPanel extends StatelessWidget {
   final Locale locale;
   final WidgetRef ref;
   final List drawerEntries;
+  final double width;
+  final VoidCallback? onRequestClose;
 
   @override
   Widget build(BuildContext context) {
@@ -318,153 +297,141 @@ class _DrawerPanel extends StatelessWidget {
         .where((e) => e.position == DrawerPosition.footer)
         .toList();
 
-    return GestureDetector(
-      onTap: () => Navigator.of(context).pop(),
-      child: GestureDetector(
-        onTap: () {},
-        child: Align(
-          alignment: AlignmentDirectional.centerStart,
-          child: ClipRRect(
-            borderRadius: const BorderRadiusDirectional.only(
-              topEnd: Radius.circular(28),
-              bottomEnd: Radius.circular(28),
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(26),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 40, sigmaY: 40),
+        child: Container(
+          width: width,
+          constraints: BoxConstraints(
+            maxHeight: MediaQuery.of(context).size.height * 0.72,
+          ),
+          decoration: BoxDecoration(
+            color: isDark
+                ? Colors.white.withValues(alpha: 0.34)
+                : Colors.white.withValues(alpha: 0.58),
+            borderRadius: BorderRadius.circular(26),
+            border: Border.all(
+              color: isDark
+                  ? Colors.white.withValues(alpha: 0.12)
+                  : Colors.black.withValues(alpha: 0.05),
+              width: 0.5,
             ),
-            child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 40, sigmaY: 40),
-              child: Container(
-                width: 280,
-                constraints: BoxConstraints(
-                  maxHeight: MediaQuery.of(context).size.height * 0.85,
-                ),
-                decoration: BoxDecoration(
-color: isDark
-                                      ? Colors.white.withValues(alpha: 0.30)
-                                      : Colors.white.withValues(alpha: 0.62),
-                  borderRadius: const BorderRadiusDirectional.only(
-                    topEnd: Radius.circular(28),
-                    bottomEnd: Radius.circular(28),
-                  ),
-                  border: Border.all(
-                    color: isDark
-                        ? Colors.white.withValues(alpha: 0.1)
-                        : Colors.black.withValues(alpha: 0.06),
-                    width: 0.5,
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: isDark ? 0.5 : 0.12),
-                      blurRadius: 40,
-                      offset: const Offset(8, 0),
-                    ),
-                  ],
-                ),
-                child: SafeArea(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      _buildHeader(context, cs, user, l10n),
-                      const SizedBox(height: 8),
-                      Expanded(
-                        child: SingleChildScrollView(
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              ...bodyEntries.map(
-                                (entry) => _DrawerTile(
-                                  icon: entry.icon,
-                                  label: entry.label(context),
-                                  onTap: () => entry.onTap(context, ref),
-                                  colorScheme: cs,
-                                ),
-                              ),
-                      const SizedBox(height: 8),
-                      _DrawerTile(
-                        icon: themeMode == ThemeMode.dark
-                            ? Icons.light_mode_outlined
-                            : Icons.dark_mode_outlined,
-                        label: l10n.darkMode,
-                        onTap: () =>
-                            ref.read(themeModeProvider.notifier).toggleTheme(),
-                        colorScheme: cs,
-                        trailing: Switch(
-                          value: themeMode == ThemeMode.dark,
-                          onChanged: (_) => ref
-                              .read(themeModeProvider.notifier)
-                              .toggleTheme(),
-                        ),
-                      ),
-                      _DrawerTile(
-                        icon: Icons.language_rounded,
-                        label: l10n.language,
-                        subtitle: locale.languageCode == 'ar'
-                            ? 'العربية'
-                            : 'English',
-                        onTap: () =>
-                            ref.read(localeProvider.notifier).toggleLocale(),
-                        colorScheme: cs,
-                      ),
-                      if (footerEntries.isNotEmpty) ...[
-                        const SizedBox(height: 8),
-                        ...footerEntries.map(
-                          (entry) => _DrawerTile(
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: isDark ? 0.4 : 0.14),
+                blurRadius: 44,
+                offset: const Offset(0, 14),
+              ),
+            ],
+          ),
+          child: SafeArea(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                _buildHeader(context, cs, user, l10n),
+                const SizedBox(height: 6),
+                Expanded(
+                  child: SingleChildScrollView(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        ...bodyEntries.map(
+                          (entry) => GlassMenuItemTile(
                             icon: entry.icon,
                             label: entry.label(context),
-                            onTap: () => entry.onTap(context, ref),
+                            onTap: () => _onEntryTap(context, ref, entry),
                             colorScheme: cs,
                           ),
                         ),
-                      ],
-                      const SizedBox(height: 8),
-                      _DrawerTile(
-                        icon: Icons.logout_rounded,
-                        label: l10n.logout,
-                        colorScheme: cs,
-                        isDestructive: true,
-                        onTap: () {
-                          Navigator.of(context).pop();
-                          showDialog<void>(
-                            context: context,
-                            builder: (ctx) => AlertDialog(
-                              title: Text(l10n.logout),
-                              content: Text(l10n.areYouSureYouWantToLogout),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(20),
-                              ),
-                              actions: [
-                                TextButton(
-                                  onPressed: () => Navigator.of(ctx).pop(),
-                                  child: Text(l10n.cancel),
-                                ),
-                                TextButton(
-                                  onPressed: () {
-                                    Navigator.of(ctx).pop();
-                                    ref
-                                        .read(authStateProvider.notifier)
-                                        .signOut();
-                                  },
-                                  child: Text(
-                                    l10n.logout,
-                                    style: TextStyle(color: cs.error),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          );
-                        },
-                      ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ],
+                const SizedBox(height: 8),
+                GlassMenuItemTile(
+                  icon: themeMode == ThemeMode.dark
+                      ? Icons.light_mode_outlined
+                      : Icons.dark_mode_outlined,
+                  label: l10n.darkMode,
+                  onTap: () =>
+                      ref.read(themeModeProvider.notifier).toggleTheme(),
+                  colorScheme: cs,
+                  trailing: Switch(
+                    value: themeMode == ThemeMode.dark,
+                    onChanged: (_) => ref
+                        .read(themeModeProvider.notifier)
+                        .toggleTheme(),
                   ),
                 ),
-              ),
+                GlassMenuItemTile(
+                  icon: Icons.language_rounded,
+                  label: l10n.language,
+                  subtitle: locale.languageCode == 'ar' ? 'العربية' : 'English',
+                  onTap: () =>
+                      ref.read(localeProvider.notifier).toggleLocale(),
+                  colorScheme: cs,
+                ),
+                if (footerEntries.isNotEmpty) ...[
+                  const SizedBox(height: 8),
+                  ...footerEntries.map(
+                    (entry) => GlassMenuItemTile(
+                      icon: entry.icon,
+                      label: entry.label(context),
+                      onTap: () => _onEntryTap(context, ref, entry),
+                      colorScheme: cs,
+                    ),
+                  ),
+                ],
+                const SizedBox(height: 8),
+                GlassMenuItemTile(
+                  icon: Icons.logout_rounded,
+                  label: l10n.logout,
+                  colorScheme: cs,
+                  isDestructive: true,
+                  onTap: () {
+                    onRequestClose?.call();
+                    showDialog<void>(
+                      context: context,
+                      builder: (ctx) => AlertDialog(
+                        title: Text(l10n.logout),
+                        content: Text(l10n.areYouSureYouWantToLogout),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.of(ctx).pop(),
+                            child: Text(l10n.cancel),
+                          ),
+                          TextButton(
+                            onPressed: () {
+                              Navigator.of(ctx).pop();
+                              ref
+                                  .read(authStateProvider.notifier)
+                                  .signOut();
+                            },
+                            child: Text(
+                              l10n.logout,
+                              style: TextStyle(color: cs.error),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
         ),
       ),
     );
+  }
+
+  void _onEntryTap(BuildContext context, WidgetRef ref, DrawerEntry entry) {
+    onRequestClose?.call();
+    entry.onTap(context, ref);
   }
 
   Widget _buildHeader(
@@ -484,7 +451,7 @@ color: isDark
 
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.fromLTRB(20, 16, 20, 12),
+      padding: const EdgeInsets.fromLTRB(18, 10, 18, 10),
       child: Row(
         children: [
           _buildAvatarRing(context, cs, user, initial),
@@ -721,8 +688,9 @@ color: isDark
   }
 }
 
-class _DrawerTile extends StatelessWidget {
-  const _DrawerTile({
+class GlassMenuItemTile extends StatelessWidget {
+  const GlassMenuItemTile({
+    super.key,
     required this.icon,
     required this.label,
     required this.onTap,

@@ -32,7 +32,7 @@ import 'package:delwaqty/core/theme/app_colors.dart';
 import 'package:delwaqty/core/theme/app_text_styles.dart';
 import 'package:delwaqty/core/theme/app_spacing.dart';
 import 'package:delwaqty/core/theme/app_elevation.dart';
-import 'package:delwaqty/shared/widgets/app_shell.dart';
+import 'package:delwaqty/shared/widgets/glass_side_menu.dart';
 
 final _homeServiceCategoriesProvider = FutureProvider<List<ServiceCategory>>((
   ref,
@@ -444,8 +444,6 @@ class _EgyptHeroState extends State<_EgyptHero>
                               ),
                               const Spacer(),
                               _MenuCircleButton(
-                                onTap: () => AppShell.scaffoldKey.currentState
-                                    ?.openDrawer(),
                                 size: topButtonSize,
                                 iconSize: topIconSize,
                               ),
@@ -1307,24 +1305,38 @@ class _DiscoveryContent extends ConsumerWidget {
   }
 }
 
-class _MenuCircleButton extends StatelessWidget {
+class _MenuCircleButton extends ConsumerStatefulWidget {
   const _MenuCircleButton({
-    required this.onTap,
     this.size = 54,
     this.iconSize = 24,
   });
 
-  final VoidCallback onTap;
   final double size;
   final double iconSize;
 
   @override
+  ConsumerState<_MenuCircleButton> createState() => _MenuCircleButtonState();
+}
+
+class _MenuCircleButtonState extends ConsumerState<_MenuCircleButton> {
+  final GlobalKey _key = GlobalKey();
+
+  void _openMenu() {
+    final box = _key.currentContext?.findRenderObject() as RenderBox?;
+    final anchor = box == null
+        ? null
+        : box.localToGlobal(Offset.zero) & box.size;
+    GlassSideMenuController.open(context, ref, anchor: anchor);
+  }
+
+  @override
   Widget build(BuildContext context) {
     return PressableScale(
-      onTap: onTap,
+      key: _key,
+      onTap: _openMenu,
       child: Container(
-        width: size,
-        height: size,
+        width: widget.size,
+        height: widget.size,
         decoration: BoxDecoration(
           color: Colors.white.withValues(alpha: 0.2),
           shape: BoxShape.circle,
@@ -1337,7 +1349,7 @@ class _MenuCircleButton extends StatelessWidget {
             ),
           ],
         ),
-        child: Icon(AppIcons.navDrawer, color: Colors.white, size: iconSize),
+        child: Icon(AppIcons.navDrawer, color: Colors.white, size: widget.iconSize),
       ),
     );
   }

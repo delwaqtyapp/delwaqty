@@ -4136,3 +4136,29 @@ The app already owns the full activation flow: GoTrue `signUp` with confirm-emai
 - `flutter analyze` NO issues; `flutter test` **1003/1003** (1000 + 3 new `app_shell_test.dart` cases: username shown/email hidden, no-username blank fallback, provider + Verified badges).
 - Built `releases/delwaqty_1.0.1+2_debug_20260927_195135.apk` → install Success on `192.168.8.36:5555` (real package `com.delwaqty.app`) → relaunched clean (pid alive; logcat zero Flutter FATAL/RenderFlex/overflow).
 - Visual confirmation of the new glass drawer on the physical device left to the user.
+
+## ADR-126: Customer menu as a floating frosted-glass bubble animating from the menu button (side drawer removed)
+
+**Date:** Sprint 210 (ROUND 73)
+
+### Context
+- User (Arabic): the customer drawer darkens the screen, has a top gap above the photo, is too big, and slides from the side — they want an iPhone-style transparent frosted-glass floating panel, smaller, with a nice pop animation that makes it burst out of the menu button like a bubble, never a side slide.
+- The old `Scaffold.drawer` necessarily draws a modal barrier (darkens), starts at the screen edge (side slide + top gap), and was 280dp wide. A standard `Drawer` cannot do an anchor-origin bubble animation.
+
+### Decision
+1. **Delete the shell `Drawer` channel** (`AppShell.scaffoldKey`, `_buildGlassDrawer`, `drawer:` on the shell Scaffold) and route the customer menu through a new shared Bubble: `GlassSideMenuController` + `GlassSideMenuOverlay` in `lib/shared/widgets/glass_side_menu.dart`. The controller inserts a root `OverlayEntry` holding a fully transparent Material/Stack — the page behind stays bright (no scrim, no background blur), only a hit-test-translucent full-screen tap-catcher sits under the panel (tap anywhere closes).
+2. **Anchor-origin pop animation**: callers measure the menu button's screen rect (`RenderBox.localToGlobal`) and pass it as `anchor`; the overlay positions the panel just below/at the button, clamps it to screen bounds, and animates `Transform.scale` (0.35→1, `easeOutBack`) from the anchor's fractional alignment plus a short opacity/slide-up — a genuine "bursts out of the button" bubble. Reverse (200ms) on dismiss.
+3. **Smaller + tighter iPhone glass**: panel width `(screen·0.66).clamp(204,244)` (was 280), maxHeight 0.72 (was 0.85), rounded 26 all corners, blur 40 with white 0.58 (light) / 0.34 (dark), 0.5px border, soft symmetric shadow; header top padding 16→10 so the avatar sits at the panel's top edge (no dead space above the photo).
+4. **One panel for all entry points**: the identity header + registry-driven tiles from ROUND 72 are repackaged as public `GlassMenuPanel` (+ `GlassMenuItemTile`), reused by the bubble; home `_MenuCircleButton` and `PrimaryHeaderActions` both became stateful buttons that measure their own rect and call the controller. `onRequestClose` dismisses the bubble before a tile's `DrawerEntry.onTap` runs (preserving the drawer's pop→go semantics).
+5. The dormant admin `floating_sidebar/` feature is left untouched (Dormant Infrastructure, not deleted).
+
+### Rationale
+- An overlay can be fully transparent (user requirement) and can scale from an arbitrary screen point — a `Drawer` cannot; deleting the drawer avoids shipping two competing side menus.
+- Keeping the ROUND-72 identity header and the registry-driven tiles means zero loss of menu contents and no duplication of routing knowledge.
+
+### Consequences
+- Opening the menu no longer darkens the page; the panel pops from the button, is visibly frosted/translucent, smaller, and has no top gap above the avatar.
+- Support pages with `PrimaryHeaderActions` inherit the same bubble (anchored to their menu icon).
+- `flutter analyze` NO issues; `flutter test` **1005/1005** (1000 + 5 new `glass_side_menu_test.dart` cases; `app_shell_test.dart` slimmed back to its 4 shell/exit tests). Test lessons: en label is «Dark Mode»; `tapAt` on the surface edge (y=600) misses hit-testing — use y=550.
+- Built/installed `releases/delwaqty_1.0.1+2_debug_20260927_201147.apk` (57M) on `192.168.8.36:5555` (`com.delwaqty.app`), pid alive, logcat zero Flutter FATAL/RenderFlex/overflow.
+- Visual confirmation of the new bubble left to the user on the physical device.

@@ -328,10 +328,11 @@ class GlassMenuPanel extends StatelessWidget {
           child: SafeArea(
             top: false,
             child: Column(
+              mainAxisSize: MainAxisSize.min,
               children: [
                 _buildHeader(context, cs, user, l10n),
                 const SizedBox(height: 6),
-                Expanded(
+                Flexible(
                   child: SingleChildScrollView(
                     child: Column(
                       mainAxisSize: MainAxisSize.min,

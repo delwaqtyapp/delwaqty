@@ -130,11 +130,13 @@ class _GlassSideMenuOverlayState extends State<GlassSideMenuOverlay>
               size.width - margin - panelWidth,
             )
           : anchor.left.clamp(margin, size.width - margin - panelWidth);
-      top = (anchor.bottom + 6).clamp(safeTop + 8, size.height * 0.55);
+      top = (anchor.bottom + 4).clamp(safeTop + 8, size.height * 0.55);
     } else {
       left = isRtl ? size.width - margin - panelWidth : margin;
       top = safeTop + 8;
     }
+
+    final maxPanelHeight = (size.height - top - 14).clamp(220.0, size.height);
 
     final anchorCenterX = anchor?.center.dx;
     final alignX = anchorCenterX == null
@@ -161,6 +163,7 @@ class _GlassSideMenuOverlayState extends State<GlassSideMenuOverlay>
               ref: widget.ref,
               drawerEntries: widget.drawerEntries,
               width: panelWidth,
+              maxHeight: maxPanelHeight,
               onRequestClose: _close,
             ),
             builder: (_, child) {

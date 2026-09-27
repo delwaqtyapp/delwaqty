@@ -4110,3 +4110,29 @@ The app already owns the full activation flow: GoTrue `signUp` with confirm-emai
 - Arabic-template delivery verified end-to-end against a mail.tm disposable inbox (subject «فعّل حسابك في دلوقتي», brand CTA + deep-link present). The template is GoTrue-level config, NOT app code: changing it means re-PATCHing the two `mailer_*` keys, not rebuilding the app. Recovery/reset-password and invite templates still use default English — flagged as an easy follow-up.
 - The logo/wordmark PNGs are fetched by the email client from GitHub raw (`raw.githubusercontent.com`); serving them from Supabase Storage instead would need a service key or bucket policy — deferred. If GitHub raw ever became unavailable the images would fall back to alt text, so keep the assets in-repo.
 - In-app confirmation: `flutter analyze` clean, `flutter test` **1000/1000**, APK `delwaqty_1.0.1+2_debug_20260927_180902.apk` installed + relaunched clean; E2E + image-URL delivery proven via mail.tm.
+
+## ADR-125: Glass side drawer with identity header (avatar, rank/role chip, verification badge, username instead of email)
+
+**Date:** Sprint 209 (ROUND 72)
+
+### Context
+- User (Arabic): «اجعل القائمه الجانبيه فى تطبيق العميل تكون زجاجيه شفافه فلوتنج... حط الصوره الشخصيه بتاعت العميل من البروفايل... اظهار رتبته وتوثيقه ايا كان هو ادمن ولا عميل ولا مزود... الميل يبقى اليوزر ويتشال الايميل من القائمه ولو معندهوش يوزر تظهر فارغه من غير اى مشكله» — the customer app's side drawer should be glass/transparent/floating, show the customer's profile photo, show their rank + verification whatever the role (admin/customer/provider), replace the email with the username, and render an empty value safely when there is no username.
+- The drawer already used a BackdropFilter glass panel (blur 32, white 0.82 light / 0.08 dark) — technically glass but visually near-solid (0.82 white), so it read as a plain opaque drawer. Its header only showed the first-initial circle + full name + email.
+- Rank/verification data already exists on the `User` domain entity (`role`, `userType`, `verificationStatus`, `avatarUrl`, `username`) — the profile page already had the presentation pattern (gradient avatar ring, role label, verified check); the drawer simply didn't use it.
+
+### Decision
+1. **More glass, more floating**: reduce fill alpha (light 0.82→0.62, dark 0.08→0.30) and raise the backdrop blur 32→40 so the panel is visibly translucent/frosted while staying readable, keeping the existing floating 280px pill (rounded-28 end corners, border, soft side shadow).
+2. **Identity header**: the drawer header now renders the `User` from `AuthAuthenticated` — (a) the profile **avatar photo** (`avatarUrl`, `Image.network` with a brand-purple→violet gradient ring + first-letter fallback, same visual language as the profile page); (b) the **name** (`fullName ?? username ?? l10n.user`) with the purple verified check when `verificationStatus.isApproved`; (c) the **username** as `@username` in brand purple — the email line is GONE; (d) a chip row with the **rank (role)** chip (admin مدير / owner مالك / merchant تاجر / provider مقدم الخدمة / driver سائق / delivery توصيل / customer عميل — the existing `l10n.*` keys, color-coded) and a **verification badge** only when meaningful: approved → «موثق» green check, rejected → error red «التوثيق مرفوض», pending only for roles that actually require verification (`userType.requiresVerification` → amber «قيد المراجعة»); customers/admins carry no verification chip (their pending default is not a real review state).
+3. **Empty-safe username**: when `username` is null/empty the line is simply omitted (`if (user?.username?.isNotEmpty == true)`), so nothing renders and nothing throws — the header degrades gracefully to name + chips.
+4. **Scope**: only the customer `AppShell` drawer is touched (shared widget, so any flavor wrapping the same shell inherits the identical behavior by role).
+
+### Rationale
+- The drawer is the app's identity surface; surfacing the same verified role/verification data the profile already shows, with the profile photo, makes it consistent and professional.
+- Reusing existing l10n keys and the profile-page visual language avoids new strings/divergence.
+- Hiding the verification chip for non-reviewable roles (customer/admin) prevents a permanently misleading «قيد المراجعة» state.
+
+### Consequences
+- Drawer header now shows profile image + name + verified check + username (email removed) + rank chip + verification badge (when applicable); missing username renders empty without errors.
+- `flutter analyze` NO issues; `flutter test` **1003/1003** (1000 + 3 new `app_shell_test.dart` cases: username shown/email hidden, no-username blank fallback, provider + Verified badges).
+- Built `releases/delwaqty_1.0.1+2_debug_20260927_195135.apk` → install Success on `192.168.8.36:5555` (real package `com.delwaqty.app`) → relaunched clean (pid alive; logcat zero Flutter FATAL/RenderFlex/overflow).
+- Visual confirmation of the new glass drawer on the physical device left to the user.

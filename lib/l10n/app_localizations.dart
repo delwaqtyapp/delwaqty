@@ -8420,6 +8420,24 @@ abstract class AppLocalizations {
   /// **'Check your email'**
   String get emailConfirmationTitle;
 
+  /// No description provided for @emailVerifiedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your email is confirmed'**
+  String get emailVerifiedTitle;
+
+  /// No description provided for @emailVerifiedBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Thank you! Your email has been successfully confirmed and your account is now activated. You can now sign in and enjoy all DelwaQty services.'**
+  String get emailVerifiedBody;
+
+  /// No description provided for @emailVerifiedOk.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue'**
+  String get emailVerifiedOk;
+
   /// No description provided for @emailNotConfirmed.
   ///
   /// In en, this message translates to:

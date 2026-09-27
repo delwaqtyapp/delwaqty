@@ -148,7 +148,7 @@ class _GlassSideMenuOverlayState extends State<GlassSideMenuOverlay>
       top = safeTop + 8;
     }
 
-    final maxPanelHeight = (size.height - top - size.height * 0.14).clamp(
+    final maxPanelHeight = (size.height - top - size.height * 0.18).clamp(
       240.0,
       size.height,
     );

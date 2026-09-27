@@ -269,6 +269,7 @@ class GlassMenuPanel extends StatelessWidget {
     required this.ref,
     required this.drawerEntries,
     this.width = 264,
+    this.maxHeight = 620,
     this.onRequestClose,
   });
 
@@ -279,6 +280,7 @@ class GlassMenuPanel extends StatelessWidget {
   final WidgetRef ref;
   final List drawerEntries;
   final double width;
+  final double maxHeight;
   final VoidCallback? onRequestClose;
 
   @override
@@ -303,9 +305,7 @@ class GlassMenuPanel extends StatelessWidget {
         filter: ImageFilter.blur(sigmaX: 40, sigmaY: 40),
         child: Container(
           width: width,
-          constraints: BoxConstraints(
-            maxHeight: MediaQuery.of(context).size.height * 0.72,
-          ),
+          constraints: BoxConstraints(maxHeight: maxHeight),
           decoration: BoxDecoration(
             color: isDark
                 ? Colors.white.withValues(alpha: 0.34)
@@ -326,8 +326,8 @@ class GlassMenuPanel extends StatelessWidget {
             ],
           ),
           child: SafeArea(
+            top: false,
             child: Column(
-              mainAxisSize: MainAxisSize.min,
               children: [
                 _buildHeader(context, cs, user, l10n),
                 const SizedBox(height: 6),
@@ -451,7 +451,7 @@ class GlassMenuPanel extends StatelessWidget {
 
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.fromLTRB(18, 10, 18, 10),
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
       child: Row(
         children: [
           _buildAvatarRing(context, cs, user, initial),

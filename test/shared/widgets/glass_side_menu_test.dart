@@ -213,7 +213,7 @@ void main() {
     expect(find.byType(GlassMenuPanel), findsOneWidget);
     expect(find.text('Dark Mode'), findsOneWidget);
 
-    await tester.tapAt(const Offset(20, 550));
+    await tester.tapAt(const Offset(500, 300));
     await tester.pumpAndSettle();
 
     expect(find.byType(GlassMenuPanel), findsNothing);

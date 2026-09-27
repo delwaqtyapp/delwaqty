@@ -13,6 +13,13 @@ import 'package:delwaqty/gen/assets.gen.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 import 'package:delwaqty/shared/widgets/nav_pill_button.dart';
 
+/// Vertical space (in logical pixels) reserved below the shell's body so pages
+/// scrolled to their end never hide their last item behind the floating bottom
+/// navigation pill (edge bottom margin 12 + pill vertical padding 8 + the
+/// 40px NavPillButton min height + a comfortable 24px breathing gap).
+/// Callers add their own system bottom inset on top.
+const double kFloatingNavClearance = 84;
+
 class AppShell extends ConsumerWidget {
   const AppShell({super.key, required this.navigationShell});
 

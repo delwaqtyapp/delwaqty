@@ -4002,3 +4002,27 @@ The `/services` (All Services) page rendered only the 16 booking categories via 
 - The All Services page now mirrors the home categories section 1:1 and every tile on it is reachable; the page stays overflow-free (tested) and offline-degrades to booking services.
 - `flutter analyze` clean; `flutter test` **988/988** (987 + the new Arabic both-sections assertion group in `all_services_page_responsive_test.dart`, which also now mocks `platformCategoryRepositoryProvider`).
 - Built/installed `releases/delwaqty_1.0.1+2_debug_20260927_013408.apk`; relaunch clean (logcat: zero overflow/RenderFlex/FATAL).
+
+## ADR-121: Profile logout clears the floating bottom nav (shared clearance constant)
+
+**Date:** Sprint 204 (ROUND 68)
+**Status:** Accepted
+**Deciders:** Lead Software Architect (after user request «فى صفحه ال Profile زر تسجيل الخروج بالاسفل محطوط تحت القائمه السفليه للتطبيق ف اظهرة وميكونش مختفى تحت الشريط للازرار السفليه»)
+
+### Context
+`AppShell` renders every tab under `Scaffold(extendBody: true, bottomNavigationBar: _TransparentBottomNav(...))`. The floating rounded pill nav (edge bottom margin 12 + pill vertical padding 8 + the 40px `NavPillButton` min height ≈ 60px plus the system inset) therefore OVERLAYS the bottom of the body, and any page scrolled to its end leaves its final item visually stuck behind the translucent pill. `ProfilePage` exposed it: the «تسجيل الخروج» (Logout) button is the last ListView child, and the ListView used `EdgeInsets.all(16)` — effectively zero clearance — so the button hid under the bottom bar, exactly as the user reported.
+
+### Decision
+1. Add a public, documented shared constant `kFloatingNavClearance = 84` in `app_shell.dart` — the reserved vertical space below the shell body: 12 (nav bottom margin) + 8 (pill vertical padding) + 40 (`NavPillButton` min height) + 24 breathing gap. It is the single source of truth for the floating-nav footprint; callers add the system bottom inset themselves.
+2. `ProfilePage`'s ListView padding becomes `EdgeInsets.fromLTRB(16, 16, 16, kFloatingNavClearance + MediaQuery.paddingOf(context).bottom)`, so at max scroll the logout button settles fully ABOVE the nav bar on every device/font scale.
+3. Regression test that mirrors the real shell shape (`Scaffold(extendBody: true, body: ProfilePage(), bottomNavigationBar: SizedBox(height: 72))` on an 800×700 surface) asserting (a) ListView bottom padding ≥ `kFloatingNavClearance` and (b) after a full `fling` + `pumpAndSettle` (settled scroll), the `Logout` text bottom < nav top.
+
+### Rationale
+- Least-invasive: no change to the shared shell layout or the nav geometry — only the page that reported the defect compensates, via a named constant instead of a magic number.
+- The two assertions together lock BOTH the mechanism (padding rule) and the outcome (button visibly above the bar at max scroll) — proven RED (padding `16` → `Expected >= 84, Actual 16`) then GREEN.
+- Settling the scroll before the geometry check is required: a raw `drag` + fixed pump can measure mid-ballistic (observed `pixels 958 > maxScrollExtent 874` from clamping overshoot), which would flake the assertion.
+
+### Consequences
+- The profile logout is always reachable and visible above the floating nav. Other `extendBody` pages with end-of-list content can adopt the same constant per their own padding.
+- `flutter analyze` clean; `flutter test` **991/991** (990 + 1).
+- Built/installed `releases/delwaqty_1.0.1+2_debug_20260927_132135.apk`; relaunched clean (logcat: zero FATAL/overflow/RenderFlex).

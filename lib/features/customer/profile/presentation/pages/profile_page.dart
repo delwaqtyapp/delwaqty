@@ -12,6 +12,7 @@ import 'package:delwaqty/domain/usecases/profile/profile_usecases.dart';
 import 'package:delwaqty/features/_shared/auth/domain/auth_state.dart';
 import 'package:delwaqty/features/_shared/auth/presentation/auth_provider.dart';
 import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
+import 'package:delwaqty/shared/widgets/app_shell.dart';
 import 'package:delwaqty/shared/widgets/gradient_background.dart';
 import 'package:delwaqty/shared/widgets/design/premium_card.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
@@ -35,7 +36,12 @@ class ProfilePage extends ConsumerWidget {
       appBar: AppBar(title: Text(l10n.profile)),
       body: GradientBackground(
         child: ListView(
-          padding: const EdgeInsets.all(16),
+          padding: EdgeInsets.fromLTRB(
+            16,
+            16,
+            16,
+            kFloatingNavClearance + MediaQuery.paddingOf(context).bottom,
+          ),
           children: [
             AnimatedFadeIn(
               child: _buildProfileHeader(context, ref, authState, l10n),

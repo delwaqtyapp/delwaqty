@@ -15,6 +15,7 @@ import 'package:delwaqty/features/_shared/auth/domain/auth_state.dart';
 import 'package:delwaqty/features/_shared/auth/presentation/auth_provider.dart';
 import 'package:delwaqty/features/customer/profile/presentation/pages/profile_page.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
+import 'package:delwaqty/shared/widgets/app_shell.dart';
 
 class _MockProfileRepository extends Mock implements ProfileRepository {}
 
@@ -45,6 +46,30 @@ Widget _buildTestApp(ProfileRepository repo, SharedPreferencesService prefs) {
       supportedLocales: AppLocalizations.supportedLocales,
       locale: Locale('en'),
       home: ProfilePage(),
+    ),
+  );
+}
+
+Widget _buildTestAppWithBottomNav(
+  ProfileRepository repo,
+  SharedPreferencesService prefs,
+) {
+  const navHeight = 72.0;
+  return ProviderScope(
+    overrides: [
+      profileRepositoryProvider.overrideWithValue(repo),
+      sharedPreferencesProvider.overrideWithValue(prefs),
+      authStateProvider.overrideWith(_FakeAuthNotifier.new),
+    ],
+    child: const MaterialApp(
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
+      locale: Locale('en'),
+      home: Scaffold(
+        extendBody: true,
+        body: ProfilePage(),
+        bottomNavigationBar: SizedBox(height: navHeight),
+      ),
     ),
   );
 }
@@ -160,4 +185,36 @@ void main() {
     ).called(1);
     expect(tester.takeException(), isNull);
   });
+
+  testWidgets(
+    'logout button stays above the bottom navigation bar when scrolled to the end',
+    (tester) async {
+      final oldHandler = FlutterError.onError;
+      FlutterError.onError = ignoreVisualAssertions(oldHandler);
+      addTearDown(() => FlutterError.onError = oldHandler);
+
+      tester.view.physicalSize = const Size(800, 700);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+
+      await tester.pumpWidget(_buildTestAppWithBottomNav(mockRepo, prefs));
+      await tester.pump(const Duration(milliseconds: 800));
+
+      const navHeight = 72.0;
+      final navTop =
+          tester.view.physicalSize.height /
+              tester.view.devicePixelRatio -
+          navHeight;
+
+      final listView = tester.widget<ListView>(find.byType(ListView));
+      final bottomPadding = (listView.padding as EdgeInsets).bottom;
+      expect(bottomPadding, greaterThanOrEqualTo(kFloatingNavClearance));
+
+      await tester.fling(find.byType(ListView), const Offset(0, -3000), 3000);
+      await tester.pumpAndSettle();
+
+      final logoutRect = tester.getBottomRight(find.text('Logout'));
+      expect(logoutRect.dy, lessThan(navTop));
+    },
+  );
 }

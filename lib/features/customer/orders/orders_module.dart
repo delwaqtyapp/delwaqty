@@ -33,7 +33,6 @@ class OrdersModule extends FeatureModule {
       label: (ctx) => AppLocalizations.of(ctx).orders,
       icon: Icons.receipt_long_outlined,
       onTap: (ctx, ref) {
-        Navigator.of(ctx).maybePop();
         ctx.go('/orders');
       },
     ),

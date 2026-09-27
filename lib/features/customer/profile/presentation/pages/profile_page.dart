@@ -919,28 +919,31 @@ class _SectionCard extends StatelessWidget {
           padding: const EdgeInsets.symmetric(vertical: 6),
           color: context.colorScheme.surfaceContainerLowest,
           borderColor: context.colorScheme.outlineVariant.withValues(alpha: 0.15),
-          child: Column(
-            children: List.generate(children.length, (index) {
-              final tile = children[index];
-              return Column(
-                children: [
-                  if (index > 0)
-                    Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                      ),
-                      child: Divider(
-                        height: 1,
-                        color: context.colorScheme.outlineVariant.withValues(
-                          alpha: 0.25,
+          child: Material(
+            type: MaterialType.transparency,
+            child: Column(
+              children: List.generate(children.length, (index) {
+                final tile = children[index];
+                return Column(
+                  children: [
+                    if (index > 0)
+                      Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
                         ),
-                      ),
+                        child: Divider(
+                          height: 1,
+                          color: context.colorScheme.outlineVariant.withValues(
+                            alpha: 0.25,
+                          ),
+                        ),
                     ),
                   tile,
                 ],
               );
             }),
           ),
+        ),
         ),
       ],
     );

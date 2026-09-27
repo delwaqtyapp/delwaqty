@@ -123,7 +123,6 @@ class NotificationsModule extends FeatureModule {
         return controller.stream;
       },
       onTap: (ctx, ref) {
-        Navigator.of(ctx).maybePop();
         ctx.push('/notifications');
       },
     ),

@@ -4052,3 +4052,29 @@ The Appearance card in the customer `ProfilePage` (and the admin settings-menu, 
 - New widget/widget test covers the control + provider wiring: default (light) shows 'Light Mode' ×2 (subtitle + pill); tapping the Dark pill flips the subtitle and `themeModeProvider` to `ThemeMode.dark`.
 - `flutter analyze` clean; `flutter test` **992/992** (991 + 1).
 - Built/installed `releases/delwaqty_1.0.1+2_debug_20260927_133426.apk`; relaunched clean (logcat: zero FATAL/overflow/RenderFlex).
+
+## ADR-123: Register page redesigned and linked to the real service catalogue
+
+**Date:** Sprint 206 (ROUND 70)
+**Status:** Accepted
+**Deciders:** Lead Software Architect (after user request «الخدمات فى انشاء حساب مش محطوطه كلها ضيف كل الخدمات فى انشاء حساب واربطها مع الخدمات الحقيقيه فى التطبيق وغير شكل انشاء حساب كليا لسكل اكتر احترافيه ومودرن لاقصى درجه»)
+
+### Context
+The provider-services picker on the shared register page (`register_page.dart`) enumerated a STATIC, hand-copied list of 16 records `(id, ar, en, emoji)`. It was a second, drift-prone copy of the real domain: the booking catalogue (`service_categories` + the `ServiceCategoryType` enum — 17 types incl. `other`) is the same data shown by the customer Home Services / All Services pages, can grow over time, and any service added there would silently never appear on registration. The old wizard also used the platform stock form look, which the user called out as needing a full professional redesign. `StorageKeys.providerServices` (`provider_services`) stores the picked selection as comma-joined type-name ids (write-only today — dormant, keep).
+
+### Decision
+1. **Real catalogue as the single source**: new `providerServicesCatalogProvider` (FutureProvider `List<ServiceCategory>`) → `cachedServiceBookingRepositoryProvider.getCategories()`, the exact repository backing the customer Home/all-services screens. The picker renders every active service with its real `ServiceCategoryType.name` id, localized Ar/En names, `serviceTypeEmoji` + `serviceTypeColor`; loading → shimmer chips, failure → retry (`ref.invalidate`). Selection persists under the same `provider_services` key.
+2. **Chip UX**: `_ServiceChip` (emoji dot + label, type-color tint) with a gold gradient when selected; a "Select all" pill and a live `selectedCount` badge (`selectAll` / `selectedCount` l10n keys).
+3. **Full premium redesign** of the shared wizard, kept inside `register_page.dart` (local private widgets — one consumer today): glass `_GlassCard` surfaces, gold `#D4AF37` accent over the existing `0xFF0A0614` cinematic background, animated `_StepDot` stepper (`stepOf` pill), `_StepHeading` eyebrow/title/subtitle, 2×2 animated role cards, gold-focused `_PremiumField`, upload tiles with success state, glass language segmented + gold toggle cards, `_ReviewTile` confirmation, gradient CTA (keys `registerStepNext`/`registerSubmit`) + Back. RTL-aware, keeps `CinematicAuthBackground`.
+4. **Tests at the physical device geometry** (1280×2800 @ dpr 2.975, Arabic, textScale 1.3, narrow 360×800): catalog presence, select-all counter, full-wizard reach to «مراجعة وتأكيد», zero overflow — new file `test/features/_shared/auth/presentation/pages/register_page_test.dart`.
+
+### Rationale
+- One source of truth: registration can no longer drift from the app's actual services; future catalogue additions appear automatically. Reuses the offline Hive cache and the existing connectivity guard at no extra cost.
+- The picker remains a private widget owned by the single register consumer (feature-config per AGENTS §6), while the catalog provider is the shared contract.
+- Redesign stays self-contained (no shared-widget API churn) yet upgrades the whole registration flow the user actually sees.
+
+### Consequences
+- Create Account now lists the complete real service stack with a professional glass/gold wizard look; all 4 apps inherit it via the shared `/register` route.
+- `flutter gen-l10n` regenerated (`selectAll`/`selectedCount`); `flutter analyze` clean; `flutter test` **995/995** (992 + 3).
+- Riverpod 3 note captured: FutureProvider overrides in tests use `overrideWith((ref) async => …)` (not `overrideWithValue(list)`).
+- Built/installed `releases/delwaqty_1.0.1+2_debug_20260927_140028.apk`; relaunched clean (logcat: zero Flutter FATAL/overflow/RenderFlex).

@@ -2068,5 +2068,18 @@
   "serviceCategoryCarpetCleaning": "غسيل السجاد",
   "serviceCategoryDishRepair": "إصلاح الدش",
   "serviceCategoryPestControl": "مكافحة حشرات",
-  "serviceCategoryApplianceRepair": "إصلاح أجهزة"
+  "serviceCategoryApplianceRepair": "إصلاح أجهزة",
+  "@selectAll": {
+    "description": "Button to select every service."
+  },
+  "selectAll": "اختيار الكل",
+  "@selectedCount": {
+    "description": "How many services selected.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "selectedCount": "{count} مختارة"
 }

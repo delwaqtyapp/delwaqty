@@ -12343,6 +12343,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Appliance Repair'**
   String get serviceCategoryApplianceRepair;
+
+  /// Button to select every service.
+  ///
+  /// In en, this message translates to:
+  /// **'Select all'**
+  String get selectAll;
+
+  /// How many services selected.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} selected'**
+  String selectedCount(int count);
 }
 
 class _AppLocalizationsDelegate

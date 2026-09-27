@@ -6398,4 +6398,12 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get serviceCategoryApplianceRepair => 'إصلاح أجهزة';
+
+  @override
+  String get selectAll => 'اختيار الكل';
+
+  @override
+  String selectedCount(int count) {
+    return '$count مختارة';
+  }
 }

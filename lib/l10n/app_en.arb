@@ -2068,5 +2068,18 @@
   "serviceCategoryCarpetCleaning": "Carpet Cleaning",
   "serviceCategoryDishRepair": "Dish Repair",
   "serviceCategoryPestControl": "Pest Control",
-  "serviceCategoryApplianceRepair": "Appliance Repair"
+  "serviceCategoryApplianceRepair": "Appliance Repair",
+  "@selectAll": {
+    "description": "Button to select every service."
+  },
+  "selectAll": "Select all",
+  "@selectedCount": {
+    "description": "How many services selected.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "selectedCount": "{count} selected"
 }

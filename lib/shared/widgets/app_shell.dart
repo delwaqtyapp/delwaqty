@@ -451,74 +451,90 @@ class GlassMenuPanel extends StatelessWidget {
 
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
-      child: Row(
+      padding: const EdgeInsets.fromLTRB(16, 6, 16, 8),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          _buildAvatarRing(context, cs, user, initial),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Row(
+          Row(
+            children: [
+              _buildAvatarRing(context, cs, user, initial, size: 58),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Flexible(
-                      child: Text(
-                        name,
-                        style: TextStyle(
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Flexible(
+                          child: Text(
+                            name,
+                            style: TextStyle(
+                              fontWeight: FontWeight.w700,
+                              fontSize: 17,
+                              color: cs.onSurface,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        if (user?.verificationStatus.isApproved == true) ...[
+                          const SizedBox(width: 4),
+                          const Icon(
+                            Icons.verified_rounded,
+                            size: 18,
+                            color: AppColors.brandPurple,
+                          ),
+                        ],
+                      ],
+                    ),
+                    if (user?.username?.isNotEmpty == true) ...[
+                      const SizedBox(height: 2),
+                      Text(
+                        '@${user!.username}',
+                        style: const TextStyle(
+                          fontSize: 13,
                           fontWeight: FontWeight.w600,
-                          fontSize: 15,
-                          color: cs.onSurface,
+                          color: AppColors.brandPurple,
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
-                    ),
-                    if (user?.verificationStatus.isApproved == true) ...[
-                      const SizedBox(width: 4),
-                      const Icon(
-                        Icons.verified_rounded,
-                        size: 16,
-                        color: AppColors.brandPurple,
+                    ],
+                    if (roleLabel != null || badge != null) ...[
+                      const SizedBox(height: 6),
+                      Wrap(
+                        spacing: 6,
+                        runSpacing: 6,
+                        children: [
+                          if (roleLabel != null)
+                            _buildChip(
+                              cs,
+                              label: roleLabel,
+                              icon: _roleIcon(user!.role),
+                              color: _roleColor(user.role, cs),
+                            ),
+                          if (badge != null)
+                            _buildChip(
+                              cs,
+                              label: badge.$1,
+                              icon: badge.$2,
+                              color: badge.$3,
+                            ),
+                        ],
                       ),
                     ],
                   ],
                 ),
-                if (user?.username?.isNotEmpty == true) ...[
-                  const SizedBox(height: 2),
-                  Text(
-                    '@${user!.username}',
-                    style: const TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.brandPurple,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ],
-                if (roleLabel != null || badge != null) ...[
-                  const SizedBox(height: 6),
-                  Wrap(
-                    spacing: 6,
-                    runSpacing: 6,
-                    children: [
-                      if (roleLabel != null)
-                        _buildChip(
-                          cs,
-                          label: roleLabel,
-                          icon: _roleIcon(user!.role),
-                          color: _roleColor(user.role, cs),
-                        ),
-                      if (badge != null)
-                        _buildChip(cs, label: badge.$1, icon: badge.$2, color: badge.$3),
-                    ],
-                  ),
-                ],
-              ],
-            ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Divider(
+            height: 1,
+            thickness: 0.5,
+            color: cs.outlineVariant.withValues(alpha: 0.4),
           ),
         ],
       ),
@@ -529,11 +545,12 @@ class GlassMenuPanel extends StatelessWidget {
     BuildContext context,
     ColorScheme cs,
     User? user,
-    String initial,
-  ) {
+    String initial, {
+    double size = 50,
+  }) {
     return Container(
-      width: 50,
-      height: 50,
+      width: size,
+      height: size,
       padding: const EdgeInsets.all(2.5),
       decoration: const BoxDecoration(
         shape: BoxShape.circle,

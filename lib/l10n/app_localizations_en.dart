@@ -6437,4 +6437,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get serviceCategoryApplianceRepair => 'Appliance Repair';
+
+  @override
+  String get selectAll => 'Select all';
+
+  @override
+  String selectedCount(int count) {
+    return '$count selected';
+  }
 }

@@ -12463,6 +12463,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{count} selected'**
   String selectedCount(int count);
+
+  /// No description provided for @adminManagementMode.
+  ///
+  /// In en, this message translates to:
+  /// **'Management Mode'**
+  String get adminManagementMode;
 }
 
 class _AppLocalizationsDelegate

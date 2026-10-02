@@ -6466,4 +6466,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String selectedCount(int count) {
     return '$count مختارة';
   }
+
+  @override
+  String get adminManagementMode => 'وضع الإدارة';
 }

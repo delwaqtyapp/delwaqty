@@ -6506,4 +6506,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String selectedCount(int count) {
     return '$count selected';
   }
+
+  @override
+  String get adminManagementMode => 'Management Mode';
 }

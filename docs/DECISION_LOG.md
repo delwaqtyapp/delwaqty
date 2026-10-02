@@ -4249,3 +4249,26 @@ User (Arabic): «الاماكن للمحافظات هل تدعم المراكز 
 **Rationale:** One visual language across the whole admin app; hard-coded Material accent colors no longer leak into the surfaces users actually see; const-correctness restores a fully clean analyzer.
 
 **Consequences:** `flutter analyze` clean; `flutter test` 1023/1023; admin debug APK `releases/delwaqty_admin_1.0.1+2_debug_20261002_2303.apk` installed Success on 192.168.8.36:5555 and relaunched clean (pid 21410). Remaining raw `Colors.grey` usages sit in dormant web-only admin modules and are left untouched. The `admin_web_*` suite remains mobile-`dormant` infrastructure (kept; not deleted).
+
+## ADR-131: Admin premium UI restructure — premium shell + theme-level component modernization
+
+**Date:** 2026-10-02
+**Status:** Accepted
+**Deciders:** Lead Software Architect (user directive: «هيكله شامله… كل الأزرار والواجهات والاستايل… احترافي ومودرن»)
+
+### Context
+The phone-admin suite still carried a flat, angular shell and stock Material component chrome, so the admin app didn't read as «professional & modern» next to the customer app's glass/gradient design language.
+
+### Decision
+- **Rewrite the admin shell** (`lib/features/admin/admin_shell.dart`) as a premium shell: brand-gradient top bar + tinted canvas backdrop for every page; a gradient 256px sidebar with masthead, section labels, animated gradient-active nav tiles and a Management-Mode footer on wide layouts (≥1100dp); a floating frosted-glass pill bottom navigation (BackdropFilter + AnimatedSize 60↔92px tile) and a premium drawer on narrow ones. Nav data (`_adminGroups`) unchanged — pure presentation re-skin.
+- **Modernize the app's shared component themes** in `app_theme.dart` (listTile, switch, checkbox, radio, segmented button, popup menu, tooltip, progress indicator, badge, scrollbar) — one source, inherited by admin and customer alike.
+- Add the `adminManagementMode` ARB key (en/ar) for the shell footer.
+- Lock the shell with a widget-test suite (`test/features/admin/admin_shell_test.dart`) at both phone and wide geometries incl. GoRouter navigation.
+
+### Rationale
+- Least-invasive premiumization: no domain/route/data changes, no QuickActions rework (already PremiumCard-based) — the shell + theme already carry a full visual transformation.
+- Sidebar-only-on-wide + bottom-bar-only-on-narrow removes redundant navigation (both were previously rendered together).
+- Test hardening caught real defects (Ahem-font pill overflow, lazy-ListView scroll assertions) before the APK shipped.
+
+### Consequences
+`flutter analyze` clean; `flutter test` **1026/1026**; admin debug APK `releases/delwaqty_admin_1.0.1+2_debug_20261002_2325.apk` installed Success on 192.168.8.36:5555, relaunched clean (pid 21319), zero Flutter FATAL/RenderFlex in logcat. Known pre-existing backend defect surfaced by the launch (not introduced here): `AdminService.getOrders` → `users!inner(id, name, email)` references a non-existent `users.name` column (PostgREST 42703) — diagnosed, logged, deferred to a data-layer fix (authoritative column list required; not guessed). In-flight binary screenshots are not readable by the coding model — device visual review stays with the user.

@@ -2099,5 +2099,6 @@
       }
     }
   },
-  "selectedCount": "{count} مختارة"
+  "selectedCount": "{count} مختارة",
+  "adminManagementMode": "وضع الإدارة"
 }

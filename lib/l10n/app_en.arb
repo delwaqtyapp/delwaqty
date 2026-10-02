@@ -2099,5 +2099,6 @@
       }
     }
   },
-  "selectedCount": "{count} selected"
+  "selectedCount": "{count} selected",
+  "adminManagementMode": "Management Mode"
 }

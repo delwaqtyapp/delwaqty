@@ -30,6 +30,15 @@ final regionChildrenProvider = FutureProvider.family<List<Region>, String>((
   return ref.watch(regionRepositoryProvider).getChildren(parentId);
 });
 
+/// Resolves a single region by id (any depth), swallowing missing-row errors so
+/// stale admin assignments degrade to a placeholder instead of a red screen.
+final regionByIdProvider = FutureProvider.family<Region?, String>((ref, id) {
+  return ref.watch(regionRepositoryProvider).getRegion(id).then<Region?>(
+    (region) => region,
+    onError: (Object _) => null,
+  );
+});
+
 final regionSearchProvider = FutureProvider.family<List<Region>, String>((
   ref,
   query,

@@ -31,6 +31,7 @@ void main() {
   Future<void> pumpPage(
     WidgetTester tester, {
     required Override upsertOverride,
+    Future<List<Region>> Function(Ref ref, String parentId)? childOverride,
   }) async {
     final view = tester.view;
     view.physicalSize = const Size(1600, 900);
@@ -59,6 +60,15 @@ void main() {
           governoratesProvider.overrideWith(
             (ref) => Future.value([cairo, alex]),
           ),
+          regionChildrenProvider.overrideWith(
+            childOverride ??
+                (ref, parentId) => Future.value(<Region>[]),
+          ),
+          regionByIdProvider.overrideWith((ref, id) async {
+            if (id == cairo.id) return cairo;
+            if (id == alex.id) return alex;
+            return null;
+          }),
           adminRegionAssignmentsProvider.overrideWith((ref, adminId) async {
             if (adminId == 'a1') {
               return [
@@ -155,9 +165,9 @@ void main() {
 
     expect(find.text('Cairo'), findsOneWidget);
 
-    await tester.tap(find.byKey(const Key('region-select')));
+    await tester.tap(find.byKey(const Key('region-picker')));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Alexandria').last);
+    await tester.tap(find.text('Alexandria'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Add'));
     await tester.pumpAndSettle();
@@ -165,5 +175,54 @@ void main() {
     expect(capturedAdminId, 'a1');
     expect(capturedRegionId, 'r2');
     expect(capturedScope, AdminRegionScope.descendants);
+  });
+
+  testWidgets('assigns a deep region chosen through the cascade', (
+    tester,
+  ) async {
+    final dokki = Region(
+      id: 'r3',
+      code: 'EG-C-DK',
+      type: RegionType.markaz,
+      nameAr: 'الدقي',
+      nameEn: 'Dokki',
+      createdAt: now,
+    );
+    String? capturedRegionId;
+
+    await pumpPage(
+      tester,
+      upsertOverride: upsertAdminRegionAssignmentProvider.overrideWith(
+        (ref) => ({
+          required String adminId,
+          required String regionId,
+          required AdminRegionScope scope,
+        }) async {
+          capturedRegionId = regionId;
+        },
+      ),
+      childOverride: (ref, parentId) async {
+        if (parentId == cairo.id) return [dokki];
+        return <Region>[];
+      },
+    );
+
+    await tester.tap(find.text('Owner One'));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const Key('region-picker')));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Cairo').last);
+    await tester.pumpAndSettle();
+    expect(find.text('Dokki'), findsOneWidget);
+
+    await tester.tap(find.text('Dokki'));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Add'));
+    await tester.pumpAndSettle();
+
+    expect(capturedRegionId, dokki.id);
   });
 }

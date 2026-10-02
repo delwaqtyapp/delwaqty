@@ -4194,3 +4194,27 @@ User (Arabic): «بين ازرار الفئات الرئيسيه وبين اكت
 
 ### GATES
 - SQL reviewed line-by-line (parentheses fixed mid-file for the `AND/OR` precedence bug; multi-row `INSERT` / unique code conflict / target-join precedence verified). No Flutter code changed; existing `flutter analyze` NO issues and `flutter test` **1017/1017** remain valid. APK `delwaqty_1.0.1+2_debug_20260927_214123.apk` still installed on device.
+
+## ADR-128: Cascading region drill-down picker for customer + admin (markaz/district/village selectable anywhere)
+
+### Context
+User (Arabic): «الاماكن للمحافظات هل تدعم المراكز والقرى والنجوع» then «اعمل كده وكمان ادعمها فى اماكن تطبيق الادمن وكل التطبيقات اذا لزم ذلك» — the regions table already held a full 27-governorate hierarchy (165 markaz, 173 district, 4580 village, 1132 area, 52 new city, 27 city; hamlets stored as village/area rows), and the data layer (`getChildren`, `searchRegions`, `setUserRegion`) was complete — but the UI could only ever pick a GOVERNORATE: `RegionSelectionPage` showed a flat governorates list + search and selected directly, `regionChildrenProvider` was consumed by nobody, and `AdminRegionScopePage` used a flat governorates dropdown (deep assignments would only display a raw UUID, since the panel resolved names against the governorates list alone).
+
+### Decision
+1. **Reusable `RegionBrowser` widget** (`lib/features/_shared/regions/presentation/widgets/region_browser.dart`): a breadcrumb trail («كل مصر» root chip + drill path) over a list at the current depth fed by `governoratesProvider` (root) / `regionChildrenProvider` (drill). Per-row UX: tap the row BODY → probe children → drill in if any, otherwise select; the trailing check button always selects the current node (icon shows `check_circle_rounded` when it equals the current selection); an inline spinner marks the probing row. Node/type shown via existing + new l10n (governorate/markaz/district/city/new city/village/area/country). The widget is outcome-agnostic — it calls `onSelected(Region)` and the caller persists.
+2. **Customer page** (`RegionSelectionPage`): now hosts the browser under the search field; a full-text search overlays the browser (via `Offstage` to keep browse state alive) and searches every region by name (any level selectable directly). Saving still flows through `selectRegionProvider` (manual/verified) with the existing snackbars + pop. The home location badge is now TAPPABLE and navigates to `/region-selection` — the first real caller of the route.
+3. **Admin page** (`AdminRegionScopePage`): the flat governorates dropdown is replaced by a `_RegionPickerField` that opens a bottom sheet with the same `RegionBrowser`; any node (governorate…village…) can be assigned, matching the existing RLS `is_admin_for_region` parent-walk. Assigned rows resolve names through a new `regionByIdProvider` family (swallows missing rows → raw id fallback) instead of the governorates-only lookup.
+4. **Data ordering**: `getChildren` orders children by `name_ar` (markaz/village/area rows have NULL `name_en`, so the old `name_en` order was effectively undefined for deep levels; `name_ar` is NOT NULL for every row).
+5. **Wiring**: `verified`-source callers unchanged; deep region ids persist into `user_region_preferences.region_id` / `admin_region_assignments` exactly like before (both are child-aware server-side).
+
+### Rationale
+- One shared picker reused by both apps (and any future surface) keeps the drill model and its locale labels in a single place (feature-module rule).
+- Drill-then-auto-select on leaf, plus an always-available explicit check, is the least surprising picker for a 6,129-node tree; the probe pattern avoids guessing leaf-ness from a missing `has_children` flag on the entity.
+
+### Consequences
+- The customer can now target a village/نجع; admins can assign scope below the governorate with the correct display name.
+- Brand-new files: `region_browser.dart`; changed: `region_selection_page.dart`, `admin_region_scope_page.dart`, `region_providers.dart` (regionByIdProvider), `supabase_region_data_source.dart` (name_ar order), `home_page.dart` (tappable badge), ARB sources + generated l10n.
+- Tests: `test/features/regions/presentation/pages/region_selection_page_test.dart` (+drill-in and breadcrumb-back tests; failure case now taps the trailing check), `test/features/admin_web/admin_region_scope_page_test.dart` (picker flow + new deep-assignment cascade test), mock repo gained `childrenByParent` + deep `getRegion`.
+
+### GATES
+- `flutter analyze` NO issues; `flutter test` **1020/1020** (1017 + 3 new, replacement failure-test). `./build.sh` → `releases/delwaqty_1.0.1+2_debug_20261002_183023.apk` (57M). Device verification PENDING: Wi-Fi ADB `192.168.8.36:5555` refused connection during this round (`adb devices` empty) — install/on-device smoke must be re-run when the phone is reachable.

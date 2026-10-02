@@ -8489,7 +8489,7 @@ abstract class AppLocalizations {
   /// No description provided for @regionSearchHint.
   ///
   /// In en, this message translates to:
-  /// **'Search governorates'**
+  /// **'Search governorates, centers, villages'**
   String get regionSearchHint;
 
   /// No description provided for @regions.
@@ -8509,6 +8509,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Could not save region'**
   String get regionSelectionFailed;
+
+  /// No description provided for @selectPlace.
+  ///
+  /// In en, this message translates to:
+  /// **'Select this place'**
+  String get selectPlace;
+
+  /// No description provided for @allOfEgypt.
+  ///
+  /// In en, this message translates to:
+  /// **'All Egypt'**
+  String get allOfEgypt;
+
+  /// No description provided for @subRegionsEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'There are no sub-regions under this place'**
+  String get subRegionsEmpty;
+
+  /// No description provided for @regionDistrict.
+  ///
+  /// In en, this message translates to:
+  /// **'District'**
+  String get regionDistrict;
+
+  /// No description provided for @regionCity.
+  ///
+  /// In en, this message translates to:
+  /// **'City'**
+  String get regionCity;
+
+  /// No description provided for @regionNewCity.
+  ///
+  /// In en, this message translates to:
+  /// **'New city'**
+  String get regionNewCity;
+
+  /// No description provided for @regionArea.
+  ///
+  /// In en, this message translates to:
+  /// **'Area'**
+  String get regionArea;
 
   /// No description provided for @notificationToday.
   ///

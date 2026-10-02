@@ -9,15 +9,18 @@ class MockRegionRepository implements RegionRepository {
   MockRegionRepository({
     List<Region>? governorates,
     List<Region>? children,
+    Map<String, List<Region>>? childrenByParent,
     this._preference,
     List<GeoPlace>? geoPlaces,
     this._spatialResolution,
   }) : _governorates = governorates ?? [],
        _children = children ?? [],
+       _childrenByParent = childrenByParent ?? {},
        _geoPlaces = geoPlaces ?? [];
 
   final List<Region> _governorates;
   final List<Region> _children;
+  final Map<String, List<Region>> _childrenByParent;
   final List<GeoPlace> _geoPlaces;
   SpatialResolution? _spatialResolution;
   UserRegionPreference? _preference;
@@ -41,14 +44,23 @@ class MockRegionRepository implements RegionRepository {
   @override
   Future<List<Region>> getChildren(String parentRegionId) async {
     _maybeThrow();
-    return _children;
+    return _childrenByParent[parentRegionId] ?? _children;
   }
 
   @override
   Future<Region> getRegion(String regionId) async {
     _maybeThrow();
-    return _governorates.firstWhere((r) => r.id == regionId);
+    for (final region in _allRegions) {
+      if (region.id == regionId) return region;
+    }
+    throw StateError('Unknown region: $regionId');
   }
+
+  List<Region> get _allRegions => [
+    ..._governorates,
+    ..._children,
+    for (final regions in _childrenByParent.values) ...regions,
+  ];
 
   @override
   Future<Region?> getRegionByCode(String code) async {

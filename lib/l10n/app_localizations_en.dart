@@ -4429,7 +4429,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get selectRegion => 'Select your region';
 
   @override
-  String get regionSearchHint => 'Search governorates';
+  String get regionSearchHint => 'Search governorates, centers, villages';
 
   @override
   String get regions => 'Regions';
@@ -4439,6 +4439,27 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get regionSelectionFailed => 'Could not save region';
+
+  @override
+  String get selectPlace => 'Select this place';
+
+  @override
+  String get allOfEgypt => 'All Egypt';
+
+  @override
+  String get subRegionsEmpty => 'There are no sub-regions under this place';
+
+  @override
+  String get regionDistrict => 'District';
+
+  @override
+  String get regionCity => 'City';
+
+  @override
+  String get regionNewCity => 'New city';
+
+  @override
+  String get regionArea => 'Area';
 
   @override
   String get notificationToday => 'Today';

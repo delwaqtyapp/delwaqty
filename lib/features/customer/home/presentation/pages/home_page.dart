@@ -500,7 +500,12 @@ class _EgyptHeroState extends State<_EgyptHero>
     );
     return ConstrainedBox(
       constraints: BoxConstraints(maxWidth: maxWidth),
-      child: Container(
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(14),
+          onTap: () => context.go('/region-selection'),
+          child: Container(
         height: height,
         padding: const EdgeInsets.symmetric(horizontal: 12),
         decoration: BoxDecoration(
@@ -541,6 +546,8 @@ class _EgyptHeroState extends State<_EgyptHero>
               color: Colors.white.withValues(alpha: 0.8),
             ),
           ],
+        ),
+          ),
         ),
       ),
     );

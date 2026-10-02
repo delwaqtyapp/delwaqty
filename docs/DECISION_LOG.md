@@ -4217,4 +4217,4 @@ User (Arabic): «الاماكن للمحافظات هل تدعم المراكز 
 - Tests: `test/features/regions/presentation/pages/region_selection_page_test.dart` (+drill-in and breadcrumb-back tests; failure case now taps the trailing check), `test/features/admin_web/admin_region_scope_page_test.dart` (picker flow + new deep-assignment cascade test), mock repo gained `childrenByParent` + deep `getRegion`.
 
 ### GATES
-- `flutter analyze` NO issues; `flutter test` **1020/1020** (1017 + 3 new, replacement failure-test). `./build.sh` → `releases/delwaqty_1.0.1+2_debug_20261002_183023.apk` (57M). Device verification PENDING: Wi-Fi ADB `192.168.8.36:5555` refused connection during this round (`adb devices` empty) — install/on-device smoke must be re-run when the phone is reachable.
+- `flutter analyze` NO issues; `flutter test` **1020/1020** (1017 + 3 new, replacement failure-test). `./build.sh` → `releases/delwaqty_1.0.1+2_debug_20261002_183023.apk` (57M). Device verification PASSED this follow-up: Wi-Fi ADB reconnected; `install -r` Success; fresh launch pid 16885 stable; forward MainActivity; logcat zero Flutter FATAL/RenderFlex/overflow.

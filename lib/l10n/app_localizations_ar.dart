@@ -5998,6 +5998,16 @@ class AppLocalizationsAr extends AppLocalizations {
   String get adminCategories => 'التصنيفات';
 
   @override
+  String get adminCategoriesSubtitle =>
+      'إدارة تصنيفات المتجر والصور وترتيب العرض';
+
+  @override
+  String get adminCategoriesEmpty => 'لا توجد تصنيفات بعد';
+
+  @override
+  String get adminCategoriesEmptyHint => 'أضف أول تصنيف للبدء';
+
+  @override
   String get editCategory => 'تعديل التصنيف';
 
   @override

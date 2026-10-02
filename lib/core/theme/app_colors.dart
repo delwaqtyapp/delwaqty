@@ -54,6 +54,15 @@ abstract final class AppColors {
   /// Teal accent for secondary gradient endpoints.
   static const Color brandTeal = Color(0xFF14B8A6);
 
+  /// Deep indigo text used for headlines / titles on light admin surfaces.
+  static const Color textPrimary = Color(0xFF1A1035);
+
+  /// Muted slate used for secondary / helper text.
+  static const Color textMuted = Color(0xFF6B7280);
+
+  /// Subtle border used on light input / card outlines.
+  static const Color borderSubtle = Color(0xFFE5E7EB);
+
   // ---------------------------------------------------------------------------
   // Core Brand Colors
   // ---------------------------------------------------------------------------

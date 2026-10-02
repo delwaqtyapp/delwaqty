@@ -61,7 +61,7 @@ class SupabaseRegionDataSource implements RegionDataSource {
           .from('regions')
           .select()
           .eq('parent_region_id', parentRegionId)
-          .order('name_en');
+          .order('name_ar');
       return rows.map(_fromRow).toList();
     } catch (e) {
       throw RegionException('Failed to load region children: $e');

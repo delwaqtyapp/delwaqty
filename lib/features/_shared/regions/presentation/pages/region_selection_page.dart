@@ -2,8 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:delwaqty/features/_shared/regions/domain/entities/region.dart';
 import 'package:delwaqty/features/_shared/regions/presentation/providers/region_providers.dart';
+import 'package:delwaqty/features/_shared/regions/presentation/widgets/region_browser.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 
+/// Customer region picker backed by the cascading [RegionBrowser].
+///
+/// Surfaced levels: governorates, then markaz / district / city and below
+/// (village / area / hamlet-style places). A full-text search box also runs
+/// against every region in Egypt, so a place can be reached directly by name.
 class RegionSelectionPage extends ConsumerStatefulWidget {
   const RegionSelectionPage({
     super.key,
@@ -55,12 +61,40 @@ class _RegionSelectionPageState extends ConsumerState<RegionSelectionPage> {
     }
   }
 
+  Widget _buildSearchResults(AppLocalizations l10n) {
+    final resultsAsync = ref.watch(regionSearchProvider(_query));
+    final current = ref.watch(currentUserRegionProvider);
+    return resultsAsync.when(
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (_, _) => Center(child: Text(l10n.noResults)),
+      data: (regions) {
+        if (regions.isEmpty) {
+          return Center(child: Text(l10n.noResults));
+        }
+        final currentRegionId = current.value?.regionId;
+        return ListView.separated(
+          itemCount: regions.length,
+          separatorBuilder: (context, index) => const Divider(height: 1),
+          itemBuilder: (context, index) {
+            final region = regions[index];
+            final isCurrent = region.id == currentRegionId;
+            return ListTile(
+              leading: const Icon(Icons.location_on_outlined),
+              title: Text(_displayName(region)),
+              trailing: isCurrent
+                  ? const Icon(Icons.check_circle_rounded)
+                  : null,
+              onTap: () => _select(region),
+            );
+          },
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final regionsAsync = _query.isEmpty
-        ? ref.watch(governoratesProvider)
-        : ref.watch(regionSearchProvider(_query));
     final current = ref.watch(currentUserRegionProvider);
 
     return Scaffold(
@@ -75,6 +109,15 @@ class _RegionSelectionPageState extends ConsumerState<RegionSelectionPage> {
               decoration: InputDecoration(
                 hintText: l10n.regionSearchHint,
                 prefixIcon: const Icon(Icons.search_rounded),
+                suffixIcon: _query.isEmpty
+                    ? null
+                    : IconButton(
+                        icon: const Icon(Icons.close_rounded),
+                        onPressed: () {
+                          _searchController.clear();
+                          setState(() => _query = '');
+                        },
+                      ),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
@@ -82,31 +125,20 @@ class _RegionSelectionPageState extends ConsumerState<RegionSelectionPage> {
             ),
           ),
           Expanded(
-            child: regionsAsync.when(
-              loading: () => const Center(child: CircularProgressIndicator()),
-              error: (e, _) => Center(child: Text(l10n.noResults)),
-              data: (regions) {
-                if (regions.isEmpty) {
-                  return Center(child: Text(l10n.noResults));
-                }
-                final currentRegionId = current.value?.regionId;
-                return ListView.separated(
-                  itemCount: regions.length,
-                  separatorBuilder: (context, index) => const Divider(height: 1),
-                  itemBuilder: (context, index) {
-                    final region = regions[index];
-                    final isCurrent = region.id == currentRegionId;
-                    return ListTile(
-                      leading: const Icon(Icons.location_on_outlined),
-                      title: Text(_displayName(region)),
-                      trailing: isCurrent
-                          ? const Icon(Icons.check_circle_rounded)
-                          : null,
-                      onTap: () => _select(region),
-                    );
-                  },
-                );
-              },
+            child: Stack(
+              children: [
+                Offstage(
+                  offstage: _query.trim().isNotEmpty,
+                  child: RegionBrowser(
+                    selectedRegionId: current.value?.regionId,
+                    onSelected: _select,
+                  ),
+                ),
+                Offstage(
+                  offstage: _query.trim().isEmpty,
+                  child: _buildSearchResults(l10n),
+                ),
+              ],
             ),
           ),
         ],

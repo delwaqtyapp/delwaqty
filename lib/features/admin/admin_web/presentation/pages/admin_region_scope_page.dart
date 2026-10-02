@@ -5,6 +5,7 @@ import 'package:delwaqty/features/admin/domain/entities/admin_region_assignment.
 import 'package:delwaqty/features/admin/presentation/providers/admin_region_providers.dart';
 import 'package:delwaqty/features/_shared/regions/domain/entities/region.dart';
 import 'package:delwaqty/features/_shared/regions/presentation/providers/region_providers.dart';
+import 'package:delwaqty/features/_shared/regions/presentation/widgets/region_browser.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 
 class AdminRegionScopePage extends ConsumerStatefulWidget {
@@ -77,7 +78,6 @@ class _AdminRegionScopePageState extends ConsumerState<AdminRegionScopePage> {
   @override
   Widget build(BuildContext context) {
     final usersAsync = ref.watch(adminTierUsersProvider);
-    final governoratesAsync = ref.watch(governoratesProvider);
     final assignmentsAsync = _selectedAdminId == null
         ? null
         : ref.watch(adminRegionAssignmentsProvider(_selectedAdminId));
@@ -97,7 +97,8 @@ class _AdminRegionScopePageState extends ConsumerState<AdminRegionScopePage> {
           ),
           const SizedBox(height: 4),
           Text(
-            'Assign governorate scope to admin-tier users. An admin with no '
+            'Assign region scope to admin-tier users at any level '
+            '(governorate, markaz, district, village, …). An admin with no '
             'assignments is global.',
             style: TextStyle(color: Colors.grey[600]),
           ),
@@ -119,7 +120,6 @@ class _AdminRegionScopePageState extends ConsumerState<AdminRegionScopePage> {
                   child: _AssignmentsPanel(
                     selectedAdminId: _selectedAdminId,
                     assignmentsAsync: assignmentsAsync,
-                    governoratesAsync: governoratesAsync,
                     pendingRegionId: _pendingRegionId,
                     pendingScope: _pendingScope,
                     saving: _saving,
@@ -223,11 +223,122 @@ class _UsersPanel extends StatelessWidget {
   }
 }
 
-class _AssignmentsPanel extends StatelessWidget {
+/// Resolves a possibly deep region assignment to its display name.
+class _AssignedRegionName extends ConsumerWidget {
+  const _AssignedRegionName({required this.regionId});
+
+  final String regionId;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final region = ref.watch(regionByIdProvider(regionId)).value;
+    return Text(region?.displayName('en') ?? regionId);
+  }
+}
+
+/// Picker field that opens the cascading [RegionBrowser] bottom sheet.
+class _RegionPickerField extends ConsumerWidget {
+  const _RegionPickerField({
+    required this.onPendingRegionChanged,
+    required this.pendingRegionId,
+    this.enabled = true,
+  });
+
+  final String? pendingRegionId;
+  final void Function(String?) onPendingRegionChanged;
+  final bool enabled;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+    final pending = pendingRegionId;
+    final selectedRegion = pending == null
+        ? null
+        : ref.watch(regionByIdProvider(pending)).value;
+
+    return InkWell(
+      key: const Key('region-picker'),
+      onTap: enabled
+          ? () {
+              showModalBottomSheet<Region>(
+                context: context,
+                isScrollControlled: true,
+                showDragHandle: true,
+                builder: (sheetContext) {
+                  return SizedBox(
+                    height: MediaQuery.of(sheetContext).size.height * 0.7,
+                    child: Column(
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.all(16),
+                          child: Text(
+                            l10n.selectRegion,
+                            style: const TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ),
+                        Expanded(
+                          child: RegionBrowser(
+                            selectedRegionId: pendingRegionId,
+                            onSelected: (region) {
+                              Navigator.of(sheetContext).pop(region);
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              ).then(
+                (region) {
+                  if (region is Region) {
+                    onPendingRegionChanged(region.id);
+                  }
+                },
+              );
+            }
+          : null,
+      borderRadius: BorderRadius.circular(8),
+      child: InputDecorator(
+        decoration: const InputDecoration(
+          labelText: 'Region',
+          border: OutlineInputBorder(),
+          contentPadding: EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        ),
+        child: selectedRegion == null
+            ? Text(
+                pendingRegionId == null
+                    ? 'Select region (any level)'
+                    : '…',
+                style: const TextStyle(color: Colors.black54),
+              )
+            : Row(
+                children: [
+                  const Icon(Icons.location_on_rounded, size: 18),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      selectedRegion.displayName('en'),
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w600,
+                        color: Color(0xFF1A1035),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+      ),
+    );
+  }
+}
+
+class _AssignmentsPanel extends ConsumerWidget {
   const _AssignmentsPanel({
     required this.selectedAdminId,
     required this.assignmentsAsync,
-    required this.governoratesAsync,
     required this.pendingRegionId,
     required this.pendingScope,
     required this.saving,
@@ -239,7 +350,6 @@ class _AssignmentsPanel extends StatelessWidget {
 
   final String? selectedAdminId;
   final AsyncValue<List<AdminRegionAssignment>>? assignmentsAsync;
-  final AsyncValue<List<Region>> governoratesAsync;
   final String? pendingRegionId;
   final AdminRegionScope pendingScope;
   final bool saving;
@@ -248,25 +358,14 @@ class _AssignmentsPanel extends StatelessWidget {
   final Future<void> Function(String adminId) onAdd;
   final Future<void> Function(String adminId, String regionId) onRemove;
 
-  Region? _findRegion(List<Region> governorates, String regionId) {
-    for (final region in governorates) {
-      if (region.id == regionId) return region;
-    }
-    return null;
-  }
-
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     if (selectedAdminId == null) {
       return const _EmptyPanel(message: 'Select an admin user to manage scope');
     }
-    final governorates = governoratesAsync.value ?? const <Region>[];
     final assignments = assignmentsAsync?.value ?? const <AdminRegionAssignment>[];
     final assignedIds = assignments.map((a) => a.regionId).toSet();
-    final available = governorates
-        .where((r) => !assignedIds.contains(r.id))
-        .toList();
 
     return Container(
       padding: const EdgeInsets.all(24),
@@ -303,23 +402,17 @@ class _AssignmentsPanel extends StatelessWidget {
                       )
                     : ListView.separated(
                         itemCount: assignments.length,
-                        separatorBuilder: (_, _) =>
-                            const Divider(height: 1),
+                        separatorBuilder: (_, _) => const Divider(height: 1),
                         itemBuilder: (context, index) {
                           final assignment = assignments[index];
-                          final region = _findRegion(
-                            governorates,
-                            assignment.regionId,
-                          );
                           return ListTile(
                             contentPadding: EdgeInsets.zero,
                             leading: const Icon(
                               Icons.location_city_rounded,
                               color: AppColors.brandPurple,
                             ),
-                            title: Text(
-                              region?.displayName('en') ??
-                                  assignment.regionId,
+                            title: _AssignedRegionName(
+                              regionId: assignment.regionId,
                             ),
                             subtitle: Text(
                               assignment.scope == AdminRegionScope.self
@@ -346,22 +439,10 @@ class _AssignmentsPanel extends StatelessWidget {
             children: [
               Expanded(
                 flex: 2,
-                child: DropdownButtonFormField<String?>(
-                  key: const Key('region-select'),
-                  initialValue: pendingRegionId,
-                  decoration: const InputDecoration(
-                    labelText: 'Governorate',
-                    border: OutlineInputBorder(),
-                  ),
-                  items: available
-                      .map(
-                        (r) => DropdownMenuItem(
-                          value: r.id,
-                          child: Text(r.displayName('en')),
-                        ),
-                      )
-                      .toList(),
-                  onChanged: saving ? null : onPendingRegionChanged,
+                child: _RegionPickerField(
+                  pendingRegionId: pendingRegionId,
+                  enabled: !saving,
+                  onPendingRegionChanged: onPendingRegionChanged,
                 ),
               ),
               const SizedBox(width: 12),
@@ -396,9 +477,12 @@ class _AssignmentsPanel extends StatelessWidget {
           Align(
             alignment: Alignment.centerRight,
             child: FilledButton.icon(
-              onPressed: (saving || pendingRegionId == null)
-                  ? null
-                  : () => onAdd(selectedAdminId!),
+              onPressed:
+                  (saving ||
+                          pendingRegionId == null ||
+                          assignedIds.contains(pendingRegionId))
+                      ? null
+                      : () => onAdd(selectedAdminId!),
               style: FilledButton.styleFrom(
                 backgroundColor: AppColors.brandPurple,
               ),

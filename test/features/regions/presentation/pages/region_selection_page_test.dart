@@ -42,6 +42,15 @@ void main() {
     createdAt: now,
   );
 
+  final markazDokki = Region(
+    id: 'r-dokki',
+    code: 'EG-C-DK',
+    type: RegionType.markaz,
+    nameAr: 'الدقي',
+    nameEn: 'Dokki',
+    createdAt: now,
+  );
+
   Widget buildTestApp(MockRegionRepository repository) {
     return ProviderScope(
       overrides: [
@@ -162,7 +171,7 @@ void main() {
     await tester.pumpAndSettle();
 
     repository.throwOnNextCall(Exception('db down'));
-    await tester.tap(find.text('Cairo'));
+    await tester.tap(find.byIcon(Icons.check_circle_outline).first);
     await tester.pumpAndSettle();
 
     expect(find.byType(SnackBar), findsOneWidget);
@@ -180,5 +189,93 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('No results found'), findsOneWidget);
+  });
+
+  testWidgets('drills into a governorate and selects a deeper region', (
+    tester,
+  ) async {
+    final repository = MockRegionRepository(
+      governorates: [cairo],
+      childrenByParent: {
+        'r-cairo': [markazDokki],
+      },
+    );
+    Region? popped;
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          authStateProvider.overrideWith(_FakeAuthNotifier.new),
+          regionRepositoryProvider.overrideWithValue(repository),
+        ],
+        child: MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          locale: const Locale('en'),
+          home: Builder(
+            builder: (context) => Scaffold(
+              body: Center(
+                child: ElevatedButton(
+                  onPressed: () async {
+                    popped = await Navigator.of(context).push<Region>(
+                      MaterialPageRoute(
+                        builder: (_) => const RegionSelectionPage(),
+                      ),
+                    );
+                  },
+                  child: const Text('open'),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('open'));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Cairo'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Dokki'), findsOneWidget);
+    expect(find.text('All Egypt'), findsOneWidget);
+    expect(find.byIcon(Icons.chevron_right_rounded), findsNWidgets(2));
+
+    await tester.tap(find.text('Dokki'));
+    await tester.pumpAndSettle();
+
+    expect(repository.preference?.regionId, 'r-dokki');
+    expect(popped, markazDokki);
+    expect(find.byType(RegionSelectionPage), findsNothing);
+  });
+
+  testWidgets('breadcrumb navigates back to the governorate level', (
+    tester,
+  ) async {
+    final repository = MockRegionRepository(
+      governorates: [cairo],
+      childrenByParent: {
+        'r-cairo': [markazDokki],
+      },
+    );
+
+    await tester.pumpWidget(buildTestApp(repository));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Cairo'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Dokki'), findsOneWidget);
+
+    await tester.tap(find.text('All Egypt'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Giza'), findsNothing);
+    expect(
+      find.descendant(of: find.byType(ListView), matching: find.text('Cairo')),
+      findsOneWidget,
+    );
+    expect(find.text('Dokki'), findsNothing);
   });
 }

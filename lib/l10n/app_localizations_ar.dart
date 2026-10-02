@@ -4396,7 +4396,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get selectRegion => 'اختر منطقتك';
 
   @override
-  String get regionSearchHint => 'ابحث عن المحافظات';
+  String get regionSearchHint => 'ابحث عن المحافظات والمراكز والقرى';
 
   @override
   String get regions => 'المناطق';
@@ -4406,6 +4406,27 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get regionSelectionFailed => 'تعذر حفظ المنطقة';
+
+  @override
+  String get selectPlace => 'اختر هذا المكان';
+
+  @override
+  String get allOfEgypt => 'كل مصر';
+
+  @override
+  String get subRegionsEmpty => 'لا توجد مناطق فرعية أسفل هذا المكان';
+
+  @override
+  String get regionDistrict => 'قسم';
+
+  @override
+  String get regionCity => 'مدينة';
+
+  @override
+  String get regionNewCity => 'مدينة جديدة';
+
+  @override
+  String get regionArea => 'منطقة';
 
   @override
   String get notificationToday => 'اليوم';

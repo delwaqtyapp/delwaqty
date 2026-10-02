@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:delwaqty/core/theme/app_colors.dart';
+import 'package:delwaqty/features/admin/presentation/widgets/admin_page_header.dart';
+import 'package:delwaqty/features/admin/presentation/widgets/admin_states.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 
 class AdminVerificationsWebPage extends StatefulWidget {
@@ -15,6 +17,7 @@ class _AdminVerificationsWebPageState extends State<AdminVerificationsWebPage> {
   final _client = Supabase.instance.client;
   List<Map<String, dynamic>> _requests = [];
   bool _loading = true;
+  String? _error;
   String? _processingId;
 
   @override
@@ -34,10 +37,16 @@ class _AdminVerificationsWebPageState extends State<AdminVerificationsWebPage> {
         setState(() {
           _requests = List<Map<String, dynamic>>.from(response);
           _loading = false;
+          _error = null;
         });
       }
     } catch (e) {
-      if (mounted) setState(() => _loading = false);
+      if (mounted) {
+        setState(() {
+          _loading = false;
+          _error = '$e';
+        });
+      }
     }
   }
 
@@ -53,7 +62,7 @@ class _AdminVerificationsWebPageState extends State<AdminVerificationsWebPage> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(l10n.userApproved),
-            backgroundColor: const Color(0xFF2E7D32),
+            backgroundColor: AppColors.successLight,
           ),
         );
       }
@@ -83,7 +92,7 @@ class _AdminVerificationsWebPageState extends State<AdminVerificationsWebPage> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(l10n.userRejected),
-            backgroundColor: const Color(0xFFF57C00),
+            backgroundColor: AppColors.warningLight,
           ),
         );
       }
@@ -103,82 +112,73 @@ class _AdminVerificationsWebPageState extends State<AdminVerificationsWebPage> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Padding(
       padding: const EdgeInsets.all(32),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              const Expanded(
-                child: Text(
-                  'Verification Requests',
-                  style: TextStyle(
-                    fontSize: 28,
-                    fontWeight: FontWeight.w800,
-                    color: Color(0xFF1A1035),
-                  ),
-                ),
-              ),
+          AdminPageHeader(
+            title: l10n.adminVerifications,
+            subtitle: l10n.adminVerificationsSubtitle,
+            actions: [
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFF57C00).withValues(alpha: 0.1),
+                  color: AppColors.warningLight.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(
-                  '${_requests.length} pending',
+                  _loading
+                      ? ''
+                      : l10n.adminPendingCount(_requests.length),
                   style: const TextStyle(
-                    color: Color(0xFFF57C00),
+                    color: AppColors.warningLight,
                     fontWeight: FontWeight.w700,
                   ),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 8),
-          Text(
-            'Review and approve or reject merchant and driver registrations',
-            style: TextStyle(fontSize: 14, color: Colors.grey[600]),
-          ),
           const SizedBox(height: 24),
           Expanded(
             child: _loading
-                ? const Center(child: CircularProgressIndicator())
-                : _requests.isEmpty
-                    ? Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(Icons.verified_rounded,
-                                size: 64, color: Colors.grey[300]),
-                            const SizedBox(height: 16),
-                            Text(
-                              'No pending requests',
-                              style: TextStyle(
-                                fontSize: 18,
-                                color: Colors.grey[500],
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ],
-                        ),
+                ? const AdminLoadingState()
+                : _error != null
+                    ? AdminErrorState(
+                        message: '${l10n.failedToLoad} $_error',
+                        onRetry: _loadRequests,
                       )
-                    : ListView.builder(
-                        itemCount: _requests.length,
-                        itemBuilder: (context, index) {
-                          final request = _requests[index];
-                          return _VerificationCard(
-                            request: request,
-                            isProcessing: _processingId == request['id'],
-                            onApprove: () => _approve(request['id']),
-                            onReject: () => _reject(request['id']),
-                          );
-                        },
-                      ),
+                    : _requests.isEmpty
+                        ? AdminEmptyState(
+                            message: l10n.adminVerificationsEmpty,
+                            icon: Icons.verified_rounded,
+                          )
+                        : _buildList(l10n),
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildList(AppLocalizations l10n) {
+    return ListView.builder(
+      itemCount: _requests.length,
+      itemBuilder: (context, index) {
+        final request = _requests[index];
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 8),
+          child: _VerificationCard(
+            request: request,
+            isProcessing: _processingId == request['id'],
+            onApprove: () => _approve(request['id']),
+            onReject: () => _reject(request['id']),
+          ),
+        );
+      },
     );
   }
 }
@@ -251,7 +251,7 @@ class _VerificationCard extends StatelessWidget {
                 const SizedBox(height: 4),
                 Text(
                   email,
-                  style: TextStyle(color: Colors.grey[600], fontSize: 13),
+                  style: const TextStyle(color: AppColors.textMuted, fontSize: 13),
                 ),
                 const SizedBox(height: 8),
                 Row(
@@ -310,7 +310,7 @@ class _VerificationCard extends StatelessWidget {
                 OutlinedButton(
                   onPressed: onReject,
                   style: OutlinedButton.styleFrom(
-                    foregroundColor: const Color(0xFFC62828),
+                    foregroundColor: AppColors.errorLight,
                     side: const BorderSide(color: Color(0xFFC62828)),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10),
@@ -322,7 +322,7 @@ class _VerificationCard extends StatelessWidget {
                 FilledButton(
                   onPressed: onApprove,
                   style: FilledButton.styleFrom(
-                    backgroundColor: const Color(0xFF2E7D32),
+                    backgroundColor: AppColors.successLight,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10),
                     ),

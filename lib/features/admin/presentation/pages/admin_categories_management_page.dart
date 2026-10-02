@@ -123,7 +123,7 @@ class _AdminCategoriesManagementPageState
           ),
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(true),
-            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            style: TextButton.styleFrom(foregroundColor: AppColors.errorLight),
             child: Text(l10n.delete),
           ),
         ],
@@ -245,10 +245,13 @@ class _AdminCategoriesManagementPageState
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.error_outline_rounded,
-                  size: 48, color: Colors.red[300]),
+              Icon(
+                Icons.error_outline_rounded,
+                size: 48,
+                color: AppColors.errorLight.withValues(alpha: 0.8),
+              ),
               const SizedBox(height: 12),
-              Text('Failed to load categories: $e'),
+              Text('${l10n.failedToLoad} $e'),
               const SizedBox(height: 12),
               OutlinedButton(
                 onPressed: _refresh,
@@ -263,14 +266,17 @@ class _AdminCategoriesManagementPageState
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.category_rounded,
-                      size: 64, color: Colors.grey[300]),
+                  Icon(
+                    Icons.category_rounded,
+                    size: 64,
+                    color: AppColors.textMuted.withValues(alpha: 0.25),
+                  ),
                   const SizedBox(height: 16),
                   Text(
-                    'No categories yet',
-                    style: TextStyle(
+                    l10n.adminCategoriesEmpty,
+                    style: const TextStyle(
                       fontSize: 18,
-                      color: Colors.grey[500],
+                      color: AppColors.textMuted,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -331,9 +337,9 @@ class _AdminCategoriesManagementPageState
                     const SizedBox(height: 2),
                     Text(
                       cat.nameEn ?? '',
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontSize: 13,
-                        color: Colors.grey[600],
+                        color: AppColors.textMuted,
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
@@ -343,9 +349,9 @@ class _AdminCategoriesManagementPageState
                       children: [
                         Text(
                           '${l10n.sequence}: ${cat.sortOrder}',
-                          style: TextStyle(
+                          style: const TextStyle(
                             fontSize: 12,
-                            color: Colors.grey[500],
+                            color: AppColors.textMuted,
                           ),
                         ),
                         const SizedBox(width: 8),
@@ -370,7 +376,7 @@ class _AdminCategoriesManagementPageState
                 _IconActionButton(
                   icon: Icons.remove_rounded,
                   tooltip: l10n.sequence,
-                  color: Colors.grey,
+                  color: AppColors.textMuted,
                   onTap: _busy
                       ? null
                       : () => _updateSortOrder(cat, cat.sortOrder - 1),
@@ -379,7 +385,7 @@ class _AdminCategoriesManagementPageState
               _IconActionButton(
                 icon: Icons.add_rounded,
                 tooltip: l10n.sequence,
-                color: Colors.grey,
+                color: AppColors.textMuted,
                 onTap: _busy
                     ? null
                     : () => _updateSortOrder(cat, cat.sortOrder + 1),
@@ -404,7 +410,7 @@ class _AdminCategoriesManagementPageState
                   _IconActionButton(
                     icon: Icons.image_not_supported_rounded,
                     tooltip: l10n.removeImage,
-                    color: Colors.orange,
+                    color: AppColors.warningLight,
                     onTap: _busy ? null : () => _removeImage(cat),
                   ),
                 ],
@@ -413,7 +419,7 @@ class _AdminCategoriesManagementPageState
               _IconActionButton(
                 icon: Icons.delete_rounded,
                 tooltip: l10n.deleteCategory,
-                color: Colors.red,
+                color: AppColors.errorLight,
                 onTap: _busy ? null : () => _deleteCategory(cat),
               ),
             ],
@@ -580,9 +586,9 @@ class _CategoryEditDialogState extends State<_CategoryEditDialog> {
                       width: 96,
                       height: 96,
                       decoration: BoxDecoration(
-                        color: Colors.grey[100],
+                        color: AppColors.brandSoftGray,
                         borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: Colors.grey[300]!),
+                        border: Border.all(color: AppColors.borderSubtle),
                         image: _imageBytes != null
                             ? DecorationImage(
                                 image: MemoryImage(_imageBytes!),
@@ -600,13 +606,16 @@ class _CategoryEditDialogState extends State<_CategoryEditDialog> {
                           ? Column(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Icon(Icons.cloud_upload_rounded,
-                                    color: Colors.grey[400], size: 32),
+                                const Icon(
+                                        Icons.cloud_upload_rounded,
+                                        color: AppColors.textMuted,
+                                        size: 32,
+                                      ),
                                 const SizedBox(height: 4),
                                 Text(
                                   l10n.uploadImage,
-                                  style: TextStyle(
-                                    color: Colors.grey[500],
+                                  style: const TextStyle(
+                                    color: AppColors.textMuted,
                                     fontSize: 11,
                                   ),
                                 ),
@@ -620,8 +629,9 @@ class _CategoryEditDialogState extends State<_CategoryEditDialog> {
                                   color: Colors.white,
                                   shape: BoxShape.circle,
                                 ),
-                                child: Icon(Icons.camera_alt_rounded,
-                                    size: 16, color: Colors.grey[600]),
+                                child: const Icon(Icons.camera_alt_rounded,
+                                        size: 16,
+                                        color: AppColors.textMuted),
                               ),
                             ),
                     ),

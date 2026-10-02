@@ -6008,6 +6008,18 @@ class AppLocalizationsAr extends AppLocalizations {
   String get adminCategoriesEmptyHint => 'أضف أول تصنيف للبدء';
 
   @override
+  String get adminVerificationsSubtitle =>
+      'مراجعة الموافقة على تسجيلات التجار والمناديب أو رفضها';
+
+  @override
+  String get adminVerificationsEmpty => 'لا توجد طلبات قيد الانتظار';
+
+  @override
+  String adminPendingCount(Object count) {
+    return '$count قيد الانتظار';
+  }
+
+  @override
   String get editCategory => 'تعديل التصنيف';
 
   @override

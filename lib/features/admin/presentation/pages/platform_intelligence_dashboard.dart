@@ -480,14 +480,14 @@ class _PlatformIntelligenceDashboardState
     return LayoutBuilder(
       builder: (context, constraints) {
         final crossAxisCount = constraints.maxWidth > 600 ? 4 : 2;
-        return GridView.count(
-          crossAxisCount: crossAxisCount,
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          mainAxisSpacing: 10,
-          crossAxisSpacing: 10,
-          childAspectRatio: 1.6,
-          children: items
+return GridView.count(
+              crossAxisCount: crossAxisCount,
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              mainAxisSpacing: 10,
+              crossAxisSpacing: 10,
+              mainAxisExtent: crossAxisCount >= 3 ? 120 : 136,
+              children: items
               .map(
                 (item) => PremiumCard(
                   padding: const EdgeInsets.all(12),
@@ -610,7 +610,7 @@ class _KpiGroup extends StatelessWidget {
               physics: const NeverScrollableScrollPhysics(),
               mainAxisSpacing: 10,
               crossAxisSpacing: 10,
-              childAspectRatio: 1.4,
+              mainAxisExtent: crossAxisCount >= 3 ? 128 : 140,
               children: [
                 for (int i = 0; i < items.length; i++)
                   AnimatedFadeIn(

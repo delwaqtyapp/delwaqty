@@ -11594,6 +11594,24 @@ abstract class AppLocalizations {
   /// **'Add your first category to get started'**
   String get adminCategoriesEmptyHint;
 
+  /// No description provided for @adminVerificationsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Review and approve or reject merchant and driver registrations'**
+  String get adminVerificationsSubtitle;
+
+  /// No description provided for @adminVerificationsEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No pending requests'**
+  String get adminVerificationsEmpty;
+
+  /// No description provided for @adminPendingCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} pending'**
+  String adminPendingCount(Object count);
+
   /// No description provided for @editCategory.
   ///
   /// In en, this message translates to:

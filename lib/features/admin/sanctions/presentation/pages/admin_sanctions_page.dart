@@ -1,3 +1,4 @@
+import 'package:delwaqty/core/theme/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:delwaqty/features/admin/sanctions/presentation/sanctions_providers.dart';
@@ -77,8 +78,8 @@ class _AdminSanctionsPageState extends ConsumerState<AdminSanctionsPage> {
                         padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
                           color: s.sanctionType == 'permanent_ban'
-                              ? Colors.red.withValues(alpha: 0.15)
-                              : Colors.orange.withValues(alpha: 0.15),
+                              ? AppColors.errorLight.withValues(alpha: 0.15)
+                              : AppColors.warningLight.withValues(alpha: 0.15),
                           borderRadius: BorderRadius.circular(10),
                         ),
                         child: Icon(
@@ -87,8 +88,8 @@ class _AdminSanctionsPageState extends ConsumerState<AdminSanctionsPage> {
                               ? Icons.block
                               : Icons.warning_amber_rounded,
                           color: s.sanctionType == 'permanent_ban'
-                              ? Colors.red
-                              : Colors.orange,
+                              ? AppColors.errorLight
+                              : AppColors.warningLight,
                         ),
                       ),
                       title: Text('${s.sanctionType} — ${s.targetRole}',
@@ -100,12 +101,12 @@ class _AdminSanctionsPageState extends ConsumerState<AdminSanctionsPage> {
                               padding: const EdgeInsets.symmetric(
                                   horizontal: 8, vertical: 4),
                               decoration: BoxDecoration(
-                                color: Colors.green.withValues(alpha: 0.15),
+                                color: AppColors.successLight.withValues(alpha: 0.15),
                                 borderRadius: BorderRadius.circular(8),
                               ),
                               child: Text(l10n.active,
                                   style: const TextStyle(
-                                      fontSize: 11, color: Colors.green)),
+                                      fontSize: 11, color: AppColors.successLight)),
                             )
                           : null,
                       onTap: () => _showSanctionDetail(s),
@@ -251,7 +252,7 @@ class _SanctionDetailSheetState extends ConsumerState<_SanctionDetailSheet> {
                   width: 40,
                   height: 4,
                   decoration: BoxDecoration(
-                    color: Colors.grey[400],
+                    color: AppColors.textMuted.withValues(alpha: 0.5),
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),

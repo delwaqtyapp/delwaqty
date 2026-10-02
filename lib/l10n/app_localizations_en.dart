@@ -6033,6 +6033,17 @@ class AppLocalizationsEn extends AppLocalizations {
   String get adminCategories => 'Categories';
 
   @override
+  String get adminCategoriesSubtitle =>
+      'Manage store categories, images, and display order';
+
+  @override
+  String get adminCategoriesEmpty => 'No categories yet';
+
+  @override
+  String get adminCategoriesEmptyHint =>
+      'Add your first category to get started';
+
+  @override
   String get editCategory => 'Edit category';
 
   @override

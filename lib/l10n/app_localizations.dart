@@ -11576,6 +11576,24 @@ abstract class AppLocalizations {
   /// **'Categories'**
   String get adminCategories;
 
+  /// No description provided for @adminCategoriesSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage store categories, images, and display order'**
+  String get adminCategoriesSubtitle;
+
+  /// No description provided for @adminCategoriesEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No categories yet'**
+  String get adminCategoriesEmpty;
+
+  /// No description provided for @adminCategoriesEmptyHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Add your first category to get started'**
+  String get adminCategoriesEmptyHint;
+
   /// No description provided for @editCategory.
   ///
   /// In en, this message translates to:

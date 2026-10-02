@@ -3,11 +3,12 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:delwaqty/core/theme/app_colors.dart';
 import 'package:delwaqty/data/repositories/category_repository_impl.dart';
 import 'package:delwaqty/features/customer/home/domain/entities/platform_category.dart';
 import 'package:delwaqty/features/customer/home/domain/repositories/platform_category_repository.dart';
+import 'package:delwaqty/features/admin/presentation/widgets/admin_page_header.dart';
+import 'package:delwaqty/features/admin/presentation/widgets/admin_states.dart';
 import 'package:delwaqty/shared/widgets/design/premium_card.dart';
 import 'package:delwaqty/features/_shared/auth/domain/auth_state.dart';
 import 'package:delwaqty/features/_shared/auth/presentation/auth_provider.dart';
@@ -113,9 +114,7 @@ class _AdminCategoriesPageState extends ConsumerState<AdminCategoriesPage> {
     setState(() => _saving = true);
     try {
       await _repo.deleteCategoryImage(cat.imageUrl!);
-      await Supabase.instance.client
-          .from('categories')
-          .update({'image_url': null}).eq('id', cat.id);
+      await _repo.updateCategory(id: cat.id);
       await _refresh();
     } catch (e) {
       if (mounted) {
@@ -268,18 +267,10 @@ class _AdminCategoriesPageState extends ConsumerState<AdminCategoriesPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              const Expanded(
-                child: Text(
-                  'Categories',
-                  style: TextStyle(
-                    fontSize: 28,
-                    fontWeight: FontWeight.w800,
-                    color: Color(0xFF1A1035),
-                  ),
-                ),
-              ),
+          AdminPageHeader(
+            title: l10n.adminCategories,
+            subtitle: l10n.adminCategoriesSubtitle,
+            actions: [
               if (_saving)
                 const SizedBox(
                   width: 20,
@@ -300,56 +291,20 @@ class _AdminCategoriesPageState extends ConsumerState<AdminCategoriesPage> {
               ),
             ],
           ),
-          const SizedBox(height: 8),
-          Text(
-            'Manage store categories, images, and display order',
-            style: TextStyle(fontSize: 14, color: Colors.grey[600]),
-          ),
           const SizedBox(height: 24),
           Expanded(
             child: categoriesAsync.when(
-              loading: () =>
-                  const Center(child: CircularProgressIndicator()),
-              error: (e, _) => Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.error_outline_rounded,
-                        size: 48, color: Colors.red[300]),
-                    const SizedBox(height: 12),
-                    Text('Failed to load categories: $e'),
-                    const SizedBox(height: 12),
-                    OutlinedButton(
-                      onPressed: _refresh,
-                      child: Text(l10n.retry),
-                    ),
-                  ],
-                ),
+              loading: () => const AdminLoadingState(),
+              error: (e, _) => AdminErrorState(
+                message: '${l10n.failedToLoad} $e',
+                onRetry: _refresh,
               ),
               data: (categories) {
                 if (categories.isEmpty) {
-                  return Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(Icons.category_rounded,
-                            size: 64, color: Colors.grey[300]),
-                        const SizedBox(height: 16),
-                        Text(
-                          'No categories yet',
-                          style: TextStyle(
-                            fontSize: 18,
-                            color: Colors.grey[500],
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          'Add your first category to get started',
-                          style: TextStyle(color: Colors.grey[400]),
-                        ),
-                      ],
-                    ),
+                  return AdminEmptyState(
+                    message:
+                        '${l10n.adminCategoriesEmpty}\n${l10n.adminCategoriesEmptyHint}',
+                    icon: Icons.category_rounded,
                   );
                 }
 
@@ -430,7 +385,7 @@ class _AdminCategoriesPageState extends ConsumerState<AdminCategoriesPage> {
                               children: [
                                 _ActionIconButton(
                                   icon: Icons.edit_rounded,
-                                  tooltip: 'Edit',
+                                  tooltip: l10n.editCategory,
                                   color: AppColors.brandViolet,
                                   onTap: () => _editCategory(cat),
                                 ),
@@ -438,7 +393,7 @@ class _AdminCategoriesPageState extends ConsumerState<AdminCategoriesPage> {
                                 if (isOwner) ...[
                                   _ActionIconButton(
                                     icon: Icons.cloud_upload_rounded,
-                                    tooltip: 'Upload image',
+                                    tooltip: l10n.uploadImage,
                                     color: AppColors.brandCyan,
                                     onTap: () => _uploadImage(cat),
                                   ),
@@ -446,8 +401,8 @@ class _AdminCategoriesPageState extends ConsumerState<AdminCategoriesPage> {
                                     const SizedBox(width: 4),
                                     _ActionIconButton(
                                       icon: Icons.image_not_supported_rounded,
-                                      tooltip: 'Remove image',
-                                      color: Colors.orange,
+                                      tooltip: l10n.removeImage,
+                                      color: AppColors.warningLight,
                                       onTap: () => _deleteImage(cat),
                                     ),
                                   ],
@@ -455,8 +410,8 @@ class _AdminCategoriesPageState extends ConsumerState<AdminCategoriesPage> {
                                 const SizedBox(width: 4),
                                 _ActionIconButton(
                                   icon: Icons.delete_rounded,
-                                  tooltip: 'Delete',
-                                  color: Colors.red,
+                                  tooltip: l10n.deleteCategory,
+                                  color: AppColors.errorLight,
                                   onTap: () => _deleteCategory(cat),
                                 ),
                               ],
@@ -621,7 +576,7 @@ class _EditableTextFieldState extends State<_EditableTextField> {
           widget.value.isEmpty ? '-' : widget.value,
           style: TextStyle(
             fontSize: 13,
-            color: widget.value.isEmpty ? Colors.grey[400] : null,
+            color: widget.value.isEmpty ? AppColors.textMuted : null,
           ),
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
@@ -645,7 +600,7 @@ class _SortOrderSpinner extends StatelessWidget {
     return Container(
       width: 80,
       decoration: BoxDecoration(
-        border: Border.all(color: Colors.grey[300]!),
+        border: Border.all(color: AppColors.borderSubtle),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Row(
@@ -661,7 +616,9 @@ class _SortOrderSpinner extends StatelessWidget {
               child: Icon(
                 Icons.remove_rounded,
                 size: 16,
-                color: value > 0 ? Colors.grey[600] : Colors.grey[300],
+                color: value > 0
+                    ? AppColors.textMuted
+                    : AppColors.textMuted.withValues(alpha: 0.4),
               ),
             ),
           ),
@@ -681,10 +638,10 @@ class _SortOrderSpinner extends StatelessWidget {
               width: 28,
               height: 32,
               alignment: Alignment.center,
-              child: Icon(
+              child: const Icon(
                 Icons.add_rounded,
                 size: 16,
-                color: Colors.grey[600],
+                color: AppColors.textMuted,
               ),
             ),
           ),
@@ -767,7 +724,7 @@ class _CategoryDialogState extends State<_CategoryDialog> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     return AlertDialog(
-      title: Text(_isEditing ? 'Edit Category' : l10n.addCategory),
+      title: Text(_isEditing ? l10n.editCategory : l10n.addCategory),
       content: SizedBox(
         width: 420,
         child: SingleChildScrollView(
@@ -782,10 +739,10 @@ class _CategoryDialogState extends State<_CategoryDialog> {
                     width: 100,
                     height: 100,
                     decoration: BoxDecoration(
-                      color: Colors.grey[100],
+                      color: AppColors.brandSoftGray,
                       borderRadius: BorderRadius.circular(16),
                       border: Border.all(
-                        color: Colors.grey[300]!,
+                        color: AppColors.borderSubtle,
                       ),
                       image: _imageBytes != null
                           ? DecorationImage(
@@ -803,13 +760,15 @@ class _CategoryDialogState extends State<_CategoryDialog> {
                         ? Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Icon(Icons.cloud_upload_rounded,
-                                  color: Colors.grey[400], size: 32),
+                              const Icon(
+                                  Icons.cloud_upload_rounded,
+                                  color: AppColors.textMuted,
+                                  size: 32),
                               const SizedBox(height: 4),
                               Text(
-                                'Upload',
-                                style: TextStyle(
-                                  color: Colors.grey[500],
+                                l10n.upload,
+                                style: const TextStyle(
+                                  color: AppColors.textMuted,
                                   fontSize: 12,
                                 ),
                               ),
@@ -823,8 +782,8 @@ class _CategoryDialogState extends State<_CategoryDialog> {
                                 color: Colors.white,
                                 shape: BoxShape.circle,
                               ),
-                              child: Icon(Icons.camera_alt_rounded,
-                                  size: 16, color: Colors.grey[600]),
+                              child: const Icon(Icons.camera_alt_rounded,
+                                  size: 16, color: AppColors.textMuted),
                             ),
                           ),
                   ),
@@ -892,7 +851,7 @@ class _CategoryDialogState extends State<_CategoryDialog> {
           style: FilledButton.styleFrom(
             backgroundColor: AppColors.brandPurple,
           ),
-          child: Text(_isEditing ? 'Save' : 'Create'),
+          child: Text(_isEditing ? l10n.save : l10n.create),
         ),
       ],
     );

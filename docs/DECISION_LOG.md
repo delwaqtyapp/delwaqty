@@ -4188,7 +4188,7 @@ User (Arabic): «بين ازرار الفئات الرئيسيه وبين اكت
 - Seeding real banner rows (instead of hardcoding a Flutter fallback) preserves the STEP-5/042 DB-driven design and lets the owner administer content from the dashboard later.
 
 ### Consequences
-- After the owner applies migration 100 (SQL editor or `supabase db push` with the DB password — not available on this Termux machine): guests see 5 national banners; a Cairo/Giza/Alexandria member additionally sees their governorate banner; others see only national.
+- **APPLIED LIVE 2026-10-02 (ROUND 81)** via the Supabase Management API SQL-runner (`POST /v1/projects/bttnlkmwhorjamzemwda/database/query` — no DB password needed; the ~/.supabase access token + project ref already on the machine suffice). Verified: all 8 campaigns `published` (5 national `region_id IS NULL` + Cairo/Giza/Alexandria), the rewritten feed keeps the open-schedule NULL guards, and a live **anon** postgREST call returns exactly the 5 national banners (no governorate rows leak to guests). Guests see 5 national banners; a Cairo/Giza/Alexandria member additionally sees their governorate banner; others see only national. Customer app relaunch (pid 23734) re-fetched the feed — slides now render between Main Categories and Discover.
 - The feed now returns banners for guests, removing the silent postgREST-error path.
 - Existing campaigns are untouched (`DO NOTHING`); new published campaigns with a national target will now also be visible to guests — intended.
 

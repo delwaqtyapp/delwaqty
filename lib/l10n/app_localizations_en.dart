@@ -6044,6 +6044,18 @@ class AppLocalizationsEn extends AppLocalizations {
       'Add your first category to get started';
 
   @override
+  String get adminVerificationsSubtitle =>
+      'Review and approve or reject merchant and driver registrations';
+
+  @override
+  String get adminVerificationsEmpty => 'No pending requests';
+
+  @override
+  String adminPendingCount(Object count) {
+    return '$count pending';
+  }
+
+  @override
   String get editCategory => 'Edit category';
 
   @override

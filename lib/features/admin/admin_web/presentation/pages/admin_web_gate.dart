@@ -196,15 +196,15 @@ class _AdminWebLoginPageState extends State<AdminWebLoginPage> {
                 const Text(
                   'Delwaqty Admin',
                   style: TextStyle(
-                    color: Color(0xFF1A1035),
+                    color: AppColors.textPrimary,
                     fontSize: 24,
                     fontWeight: FontWeight.w800,
                   ),
                 ),
                 const SizedBox(height: 4),
-                Text(
+                const Text(
                   'Sign in with an admin account',
-                  style: TextStyle(color: Colors.grey[600]),
+                  style: TextStyle(color: AppColors.textMuted),
                 ),
                 const SizedBox(height: 24),
                 TextField(
@@ -287,16 +287,16 @@ class AdminWebDeniedPage extends StatelessWidget {
                 const Text(
                   'Access Denied',
                   style: TextStyle(
-                    color: Color(0xFF1A1035),
+                    color: AppColors.textPrimary,
                     fontSize: 24,
                     fontWeight: FontWeight.w800,
                   ),
                 ),
                 const SizedBox(height: 8),
-                Text(
+                const Text(
                   'Your account does not have admin privileges.',
                   textAlign: TextAlign.center,
-                  style: TextStyle(color: Colors.grey[600]),
+                  style: TextStyle(color: AppColors.textMuted),
                 ),
                 const SizedBox(height: 24),
                 OutlinedButton.icon(

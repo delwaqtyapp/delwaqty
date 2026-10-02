@@ -1,3 +1,4 @@
+import 'package:delwaqty/core/theme/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:delwaqty/features/admin/member_management/presentation/member_providers.dart';
@@ -155,7 +156,7 @@ class _IssueSanctionSheetState extends ConsumerState<_IssueSanctionSheet> {
                 width: 40,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: Colors.grey[400],
+                  color: AppColors.borderSubtle,
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -278,11 +279,11 @@ class _MemberProfileBody extends ConsumerWidget {
     final accountStatus =
         statusAsync.value?['account_status'] as String? ?? 'active';
     final statusColor = switch (accountStatus) {
-      'active' => Colors.green,
-      'restricted' => Colors.orange,
-      'suspended' => Colors.red,
-      'banned' => Colors.red.shade900,
-      _ => Colors.grey,
+      'active' => AppColors.successLight,
+      'restricted' => AppColors.warningLight,
+      'suspended' => AppColors.errorLight,
+      'banned' => AppColors.errorLight,
+      _ => AppColors.textMuted,
     };
 
     return ListView(
@@ -537,7 +538,7 @@ class _SanctionsSectionState extends ConsumerState<_SanctionsSection> {
                   child: Row(
                     children: [
                       const Icon(Icons.gavel_rounded,
-                          size: 14, color: Colors.orange),
+                          size: 14, color: AppColors.warningLight),
                       const SizedBox(width: 6),
                       Expanded(
                         child: Text(
@@ -657,9 +658,9 @@ class _TimelineSection extends ConsumerWidget {
   }
 
   Color _timelineColor(String type) {
-    if (type.contains('ban')) return Colors.red;
-    if (type.contains('sanction')) return Colors.orange;
-    if (type.contains('reward')) return Colors.green;
-    return Colors.grey;
+    if (type.contains('ban')) return AppColors.errorLight;
+    if (type.contains('sanction')) return AppColors.warningLight;
+    if (type.contains('reward')) return AppColors.successLight;
+    return AppColors.textMuted;
   }
 }

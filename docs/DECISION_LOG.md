@@ -4233,3 +4233,19 @@ User (Arabic): «الاماكن للمحافظات هل تدعم المراكز 
 5. **Verification gate**: `flutter analyze` clean, `flutter test` 1023/1023 (+3 `admin_overview_page_test.dart`: live counters, loading, error+retry), admin debug APK built (flavor flag + explicit entrypoint + dart-define), installed on the live device, fresh launch clean.
 
 **Consequences:** Admin dashboard and categories now match the platform's design system and are independently testable; failing loads surface a Retry instead of a silent blank; tab switches no longer reset work-in-progress; the phone form factor gets a compact rail. Remaining series work (verifications page and any left-over admin_web token/label sweep) is tracked as a deferred phase. Raw-`Supabase.instance` reads inside reusable pages are eliminated in favor of repository methods.
+
+## ADR-130: Admin polish series Phase 6 — token sweep + web verifications page rewrite
+
+**Status:** Accepted (2026-10-02)
+
+**Context:** After the ROUND 82 design-system/dashboard/token phases, the user asked to continue all improvements («كمل على كل التحسينات»). Audit showed the phone admin app runs the OLD suite (`AdminModule`/`AdminShell`, `/admin` = `PlatformIntelligenceDashboard`), while the polished `admin_web_*` pages are only wired into the Flutter-web target — so the sweep had to target the real surfaces plus finish the dormant web verifications page.
+
+**Decision:**
+1. Rewrite `admin_verifications_page.dart` on the shared design system: `AdminPageHeader` + subtitle + live `adminPendingCount` chip + `AdminLoadingState`/`AdminErrorState`/`AdminEmptyState` + extracted `_buildList`, and swap snackbar colors to `successLight`/`warningLight`.
+2. Remove the last `Colors.grey/red/orange/green` literals from the ACTIVE admin pages and replace them with the semantic `AppColors` tokens (`textMuted`, `textPrimary`, `borderSubtle`, `successLight`, `warningLight`, `errorLight`), adding the missing `app_colors.dart` imports in `member_detail_page.dart` and `admin_sanctions_page.dart`.
+3. Replace the two overflow-prone `GridView.count( childAspectRatio …)` delegates on `PlatformIntelligenceDashboard` with `mainAxisExtent` so KPI/revenue cells can never overflow at any screen width.
+4. Add `adminVerificationsSubtitle`, `adminVerificationsEmpty`, `adminPendingCount({count})` ARB keys (en + ar) and regenerate with `flutter gen-l10n`, reusing the existing `adminVerifications` key.
+
+**Rationale:** One visual language across the whole admin app; hard-coded Material accent colors no longer leak into the surfaces users actually see; const-correctness restores a fully clean analyzer.
+
+**Consequences:** `flutter analyze` clean; `flutter test` 1023/1023; admin debug APK `releases/delwaqty_admin_1.0.1+2_debug_20261002_2303.apk` installed Success on 192.168.8.36:5555 and relaunched clean (pid 21410). Remaining raw `Colors.grey` usages sit in dormant web-only admin modules and are left untouched. The `admin_web_*` suite remains mobile-`dormant` infrastructure (kept; not deleted).

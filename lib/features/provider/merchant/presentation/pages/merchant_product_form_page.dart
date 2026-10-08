@@ -56,20 +56,18 @@ class _MerchantProductFormPageState
   }
 
   Future<void> _loadProduct() async {
-    final productAsync = ref.read(_productProvider(widget.productId!));
-    final product = productAsync.value;
-    if (product != null) {
-      _nameController.text = product['name'] as String? ?? '';
-      _descriptionController.text = product['description'] as String? ?? '';
-      _priceController.text =
-          (product['price'] as num?)?.toString() ?? '';
-      _categoryController.text = product['category'] as String? ?? '';
-      _imageUrlController.text = product['image_url'] as String? ?? '';
-      setState(() {
-        _isAvailable = product['is_available'] as bool? ?? true;
-        _isFeatured = product['is_featured'] as bool? ?? false;
-      });
-    }
+    final product = await ref.read(_productProvider(widget.productId!).future);
+    if (!mounted || product == null) return;
+    _nameController.text = product['name'] as String? ?? '';
+    _descriptionController.text = product['description'] as String? ?? '';
+    _priceController.text =
+        (product['price'] as num?)?.toString() ?? '';
+    _categoryController.text = product['category'] as String? ?? '';
+    _imageUrlController.text = product['image_url'] as String? ?? '';
+    setState(() {
+      _isAvailable = product['is_available'] as bool? ?? true;
+      _isFeatured = product['is_featured'] as bool? ?? false;
+    });
   }
 
   @override

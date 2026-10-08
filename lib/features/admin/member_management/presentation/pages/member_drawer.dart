@@ -1,3 +1,4 @@
+import 'package:delwaqty/core/utils/avatar_initial.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:delwaqty/features/admin/financial/presentation/providers/admin_financial_providers.dart';
@@ -183,7 +184,7 @@ class _DrawerHeader extends StatelessWidget {
                     avatarUrl != null ? NetworkImage(avatarUrl) : null,
                 child: avatarUrl == null
                     ? Text(
-                        name.substring(0, 1).toUpperCase(),
+                        safeInitial(name),
                         style: TextStyle(
                           fontSize: 22,
                           color: statusColor,
@@ -507,7 +508,7 @@ class _VerificationSection extends ConsumerWidget {
                         Expanded(
                           child: OutlinedButton.icon(
                             onPressed: () =>
-                                _showVerificationDecision(context, ref, true),
+                                _runVerificationDecision(context, ref, true),
                             icon: const Icon(Icons.check_rounded, size: 16),
                             label: Text(l10n.approve),
                           ),
@@ -516,7 +517,7 @@ class _VerificationSection extends ConsumerWidget {
                         Expanded(
                           child: OutlinedButton.icon(
                             onPressed: () =>
-                                _showVerificationDecision(context, ref, false),
+                                _runVerificationDecision(context, ref, false),
                             icon: const Icon(Icons.close_rounded, size: 16),
                             label: Text(l10n.reject),
                           ),
@@ -533,61 +534,85 @@ class _VerificationSection extends ConsumerWidget {
     );
   }
 
-  void _showVerificationDecision(
+  /// Approve / reject a member verification through the moderation RPC.
+  ///
+  /// The previous implementation only showed a success snackbar and
+  /// invalidated the providers: no RPC was ever called, so the buttons
+  /// reported success while changing nothing in the database.
+  Future<void> _runVerificationDecision(
     BuildContext context,
     WidgetRef ref,
     bool approve,
   ) async {
     final l10n = AppLocalizations.of(context);
-    final reason = await showDialog<String>(
+    final reasonController = TextEditingController();
+
+    final decision = await showDialog<String>(
       context: context,
-      builder: (ctx) {
-        final controller = TextEditingController();
-        return AlertDialog(
-          title: Text(
-            approve ? l10n.approveVerification : l10n.rejectVerification,
-          ),
-          content: TextField(
-            controller: controller,
-            decoration: InputDecoration(
-              labelText: l10n.reason,
-              hintText: approve
-                  ? l10n.approvalNote
-                  : l10n.rejectionReasonRequired,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-            ),
-            maxLines: 3,
-          ),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(ctx).pop(),
-              child: Text(l10n.cancel),
-            ),
-            TextButton(
-              onPressed: () => Navigator.of(ctx).pop(controller.text),
-              child: Text(approve ? l10n.approve : l10n.reject),
-            ),
-          ],
-        );
-      },
-    );
-    if (reason == null) return;
-    if (!approve && reason.trim().isEmpty) return;
-    if (context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            approve ? l10n.verificationApproved : l10n.verificationRejected,
-          ),
+      builder: (ctx) => AlertDialog(
+        title: Text(
+          approve ? l10n.approveVerification : l10n.rejectVerification,
         ),
+        content: TextField(
+          controller: reasonController,
+          decoration: InputDecoration(
+            labelText: l10n.reason,
+            hintText: approve
+                ? l10n.approvalNote
+                : l10n.rejectionReasonRequired,
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+          ),
+          maxLines: 3,
+        ),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: Text(l10n.cancel),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(ctx).pop('ok'),
+            child: Text(approve ? l10n.approve : l10n.reject),
+          ),
+        ],
+      ),
+    );
+
+    if (decision != 'ok' || !context.mounted) return;
+
+    final reason = reasonController.text.trim();
+    if (!approve && reason.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.rejectionReasonRequired)),
       );
+      return;
+    }
+
+    try {
+      final client = ref.read(supabaseClientProvider);
+      await client.rpc('decide_user_verification', params: {
+        'p_user_id': memberId,
+        'p_decision': approve ? 'approve' : 'reject',
+        'p_reason': reason.isEmpty ? null : reason,
+      });
+      if (!context.mounted) return;
       ref.invalidate(memberVerificationProvider(memberId));
       ref.invalidate(memberOpsProfileProvider(memberId));
+      showAnimatedSuccessToast(
+        context,
+        message: approve
+            ? l10n.verificationApproved
+            : l10n.verificationRejected,
+      );
+    } catch (e) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.verificationDecisionFailed)),
+      );
     }
   }
 }
@@ -1050,22 +1075,53 @@ class _WalletFinancialsSection extends ConsumerWidget {
                 );
               }
               final wallet = data['wallet'] as Map<String, dynamic>? ?? {};
-              final balance =
-                  (wallet['balance'] as num?)?.toDouble() ?? 0;
-              final available =
-                  (wallet['available'] as num?)?.toDouble() ?? 0;
-              final pending =
-                  (wallet['pending'] as num?)?.toDouble() ?? 0;
-              final totalEarned =
-                  (data['total_earned'] as num?)?.toDouble() ?? 0;
-              final totalWithdrawn =
-                  (data['total_withdrawn'] as num?)?.toDouble() ?? 0;
-              final totalCommissions =
-                  (data['total_commissions'] as num?)?.toDouble() ?? 0;
-              final totalRefunds =
-                  (data['total_refunds'] as num?)?.toDouble() ?? 0;
-              final transactions =
-                  data['recent_transactions'] as List? ?? [];
+              // The live member_financial_summary RPC returns only
+              // wallet{balance,currency} + ledger[] + commissions[] +
+              // riders_driver{}. It never returned available/pending/
+              // total_earned/total_withdrawn/total_commissions/
+              // total_refunds/recent_transactions, so ten of the figures
+              // below silently rendered 0.00 and the transaction list
+              // never appeared. Everything is now DERIVED from the shapes
+              // the function actually returns.
+              final balance = (wallet['balance'] as num?)?.toDouble() ?? 0;
+              final ledger = (data['ledger'] as List<dynamic>?) ?? const [];
+              final commissions =
+                  (data['commissions'] as List<dynamic>?) ?? const [];
+
+              double totalOf(String kind) => ledger
+                  .where((e) => (e['type'] as String? ?? '') == kind)
+                  .fold<double>(
+                    0,
+                    (sum, e) => sum + ((e['amount'] as num?)?.toDouble() ?? 0),
+                  );
+
+              final credited = totalOf('credit');
+              final debited = totalOf('debit');
+              final available = balance;
+              final pending = commissions
+                  .where((e) => (e['status'] as String?) == 'pending')
+                  .fold<double>(
+                    0,
+                    (sum, e) =>
+                        sum + ((e['net_amount'] as num?)?.toDouble() ?? 0),
+                  );
+              final totalEarned = credited;
+              final totalWithdrawn = debited;
+              final totalRefunds = ledger
+                  .where(
+                    (e) =>
+                        (e['reference_type'] as String? ?? '') == 'refund',
+                  )
+                  .fold<double>(
+                    0,
+                    (sum, e) => sum + ((e['amount'] as num?)?.toDouble() ?? 0),
+                  );
+              final totalCommissions = commissions.fold<double>(
+                0,
+                (sum, e) =>
+                    sum + ((e['commission_amount'] as num?)?.toDouble() ?? 0),
+              );
+              final transactions = ledger;
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -1130,7 +1186,7 @@ class _WalletFinancialsSection extends ConsumerWidget {
                       final txType = t['type'] as String? ?? 'unknown';
                       final amount = (t['amount'] as num?)?.toDouble() ?? 0;
                       final txTimestamp = t['created_at'] as String? ?? '';
-                      final source = t['source'] as String? ?? '';
+                      final source = t['reference_type'] as String? ?? '';
                       return ListTile(
                         dense: true,
                         contentPadding: EdgeInsets.zero,
@@ -1216,18 +1272,41 @@ class _EarningsCommissionsSection extends ConsumerWidget {
                   style: Theme.of(context).textTheme.bodySmall,
                 );
               }
-              final grossEarnings =
-                  (data['gross_earnings'] as num?)?.toDouble() ?? 0;
-              final commissionRate =
-                  (data['commission_rate'] as num?)?.toDouble() ?? 0;
-              final commissionAmount =
-                  (data['commission_amount'] as num?)?.toDouble() ?? 0;
-              final netEarnings =
-                  (data['net_earnings'] as num?)?.toDouble() ?? 0;
-              final pendingEarnings =
-                  (data['pending_earnings'] as num?)?.toDouble() ?? 0;
-              final paidEarnings =
-                  (data['paid_earnings'] as num?)?.toDouble() ?? 0;
+              // Derived from the commissions[] array the RPC really
+              // returns (gross_amount / commission_rate /
+              // commission_amount / net_amount / status) instead of the
+              // flat top-level keys that were never in the response.
+              final commissions =
+                  (data['commissions'] as List<dynamic>?) ?? const [];
+              double sumOf(String field) => commissions.fold<double>(
+                    0,
+                    (sum, e) => sum + ((e[field] as num?)?.toDouble() ?? 0),
+                  );
+
+              final grossEarnings = sumOf('gross_amount');
+              final commissionAmount = sumOf('commission_amount');
+              final netEarnings = sumOf('net_amount');
+              final paidEarnings = commissions
+                  .where((e) => (e['status'] as String?) == 'paid')
+                  .fold<double>(
+                    0,
+                    (sum, e) => sum + ((e['net_amount'] as num?)?.toDouble() ?? 0),
+                  );
+              final pendingEarnings = commissions
+                  .where((e) => (e['status'] as String?) == 'pending')
+                  .fold<double>(
+                    0,
+                    (sum, e) => sum + ((e['net_amount'] as num?)?.toDouble() ?? 0),
+                  );
+              final avgRate = commissions.isEmpty
+                  ? 0.0
+                  : commissions.fold<double>(
+                        0,
+                        (sum, e) =>
+                            sum + ((e['commission_rate'] as num?)?.toDouble() ?? 0),
+                      ) /
+                      commissions.length;
+              final commissionRate = avgRate;
               return Wrap(
                 spacing: 8,
                 runSpacing: 8,

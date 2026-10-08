@@ -1,3 +1,4 @@
+import 'package:delwaqty/features/driver/driver_module.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -23,7 +24,16 @@ class DriverFinancialCenterPage extends ConsumerWidget {
         body: Center(child: Text(l10n.pleaseLogInFinances)),
       );
     }
-    final driverId = userId;
+    final profileAsync = ref.watch(driverProfileProvider(userId));
+    final driverId = profileAsync.asData?.value?.id;
+    if (driverId == null) {
+      return Scaffold(
+        appBar: AppBar(title: Text(l10n.financialCenter)),
+        body: profileAsync.isLoading
+            ? const Center(child: CircularProgressIndicator())
+            : Center(child: Text(l10n.pleaseLogInFinances)),
+      );
+    }
 
     final summary = ref.watch(financialSummaryProvider);
     final grace = ref.watch(graceProvider);

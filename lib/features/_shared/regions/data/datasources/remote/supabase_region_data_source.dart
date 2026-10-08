@@ -103,7 +103,14 @@ class SupabaseRegionDataSource implements RegionDataSource {
           .from('regions')
           .select()
           .eq('is_active', true)
-          .or('name_ar.ilike.%$query%,name_en.ilike.%$query%')
+          // The raw query used to be interpolated straight into the
+          // PostgREST `or` filter, so a comma/parenthesis in the user's
+          // text broke the filter grammar (guaranteed 400) and could
+          // widen it into an unintended filter.
+          .or(
+            'name_ar.ilike.%${_escapeLike(query)}%,'
+            'name_en.ilike.%${_escapeLike(query)}%',
+          )
           .limit(20);
       return rows.map(_fromRow).toList();
     } catch (e) {
@@ -227,3 +234,12 @@ class SupabaseRegionDataSource implements RegionDataSource {
     );
   }
 }
+
+/// Escapes the characters PostgREST's `or(...)` grammar treats specially
+/// so a user-typed comma, parenthesis or percent cannot alter the filter.
+String _escapeLike(String value) => value
+    .replaceAll('%', r'\%')
+    .replaceAll('_', r'\_')
+    .replaceAll(',', r'\,')
+    .replaceAll('(', r'\(')
+    .replaceAll(')', r'\)');

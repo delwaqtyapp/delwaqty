@@ -232,7 +232,9 @@ class _DeliveryHubBodyState extends ConsumerState<_DeliveryHubBody> {
         await ref
             .read(deliveryRepositoryProvider)
             .acceptDeliveryRequest(offer.rideId, offer.driverId);
-        if (mounted) context.push('/driver/delivery/${offer.rideId}');
+        if (mounted) {
+          unawaited(context.push('/driver/delivery/${offer.rideId}'));
+        }
       } catch (e) {
         messenger.showSnackBar(
           SnackBar(content: Text(l10n.somethingWentWrong)),
@@ -538,7 +540,7 @@ class _CapabilitiesBottomSheetState
     ('courier', Icons.local_shipping_rounded),
     ('package_delivery', Icons.inventory_2_rounded),
     ('document_delivery', Icons.description_rounded),
-    ('flowerDelivery', Icons.local_florist_rounded),
+    ('flower_delivery', Icons.local_florist_rounded),
     ('retail_delivery', Icons.shopping_bag_rounded),
   ];
 

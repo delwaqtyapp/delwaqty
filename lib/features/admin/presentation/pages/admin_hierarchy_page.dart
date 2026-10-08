@@ -6,6 +6,7 @@ import 'package:delwaqty/l10n/app_localizations.dart';
 import 'package:delwaqty/core/constants/app_constants.dart';
 import 'package:delwaqty/features/admin/domain/entities/admin_models.dart';
 import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
+import 'dart:async';
 
 class AdminHierarchyPage extends ConsumerStatefulWidget {
   const AdminHierarchyPage({super.key});
@@ -301,7 +302,7 @@ class _AdminHierarchyPageState extends ConsumerState<AdminHierarchyPage> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text(l10n.adminAssigned)),
           );
-          _loadData();
+          unawaited(_loadData());
         }
       } catch (e) {
         if (mounted) {
@@ -373,7 +374,7 @@ class _AdminHierarchyPageState extends ConsumerState<AdminHierarchyPage> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text(l10n.roleUpdated)),
           );
-          _loadData();
+          unawaited(_loadData());
         }
       } catch (e) {
         if (mounted) {
@@ -433,7 +434,7 @@ class _AdminHierarchyPageState extends ConsumerState<AdminHierarchyPage> {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('Region assigned')),
           );
-          _loadData();
+          unawaited(_loadData());
         }
       } catch (e) {
         if (mounted) {

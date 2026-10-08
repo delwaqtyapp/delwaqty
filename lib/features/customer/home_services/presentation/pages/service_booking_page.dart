@@ -1,3 +1,4 @@
+import 'package:delwaqty/core/utils/avatar_initial.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -14,6 +15,7 @@ import 'package:delwaqty/features/_shared/auth/presentation/auth_provider.dart';
 import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
 import 'package:delwaqty/shared/widgets/premium_empty_state.dart';
 import 'package:delwaqty/shared/widgets/shimmer_loading.dart';
+import 'dart:async';
 
 final _providersProvider =
     FutureProvider.family<List<dynamic>, ServiceCategoryType>((ref, type) async {
@@ -84,7 +86,7 @@ class _ServiceBookingPageState extends ConsumerState<ServiceBookingPage> {
 
     final authState = ref.read(authStateProvider);
     if (authState is! AuthAuthenticated) {
-      context.push('/login');
+      unawaited(context.push('/login'));
       return;
     }
 
@@ -217,7 +219,7 @@ class _ServiceBookingPageState extends ConsumerState<ServiceBookingPage> {
                                 backgroundColor:
                                     AppColors.brandPurple.withValues(alpha: 0.12),
                                 child: Text(
-                                  provider.name.substring(0, 1),
+                                  safeInitial(provider.name),
                                   style: AppTextStyles.titleMedium.copyWith(
                                     color: AppColors.brandPurple,
                                     fontWeight: FontWeight.w700,

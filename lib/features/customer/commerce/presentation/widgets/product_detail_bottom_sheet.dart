@@ -1,10 +1,10 @@
+import 'package:delwaqty/features/customer/commerce/presentation/providers/cart_providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:delwaqty/features/customer/commerce/domain/entities/product.dart';
 import 'package:delwaqty/features/customer/commerce/domain/entities/cart.dart';
 import 'package:delwaqty/features/customer/commerce/domain/entities/merchant.dart';
-import 'package:delwaqty/features/customer/commerce/commerce_module.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 import 'package:delwaqty/core/extensions/context_extensions.dart';
 import 'package:delwaqty/core/theme/app_colors.dart';
@@ -464,9 +464,8 @@ class _ProductDetailBottomSheetState
       child: FilledButton.icon(
         onPressed: widget.product.isAvailable
             ? () async {
-                final cartRepo = ref.read(cartRepositoryProvider);
                 final item = CartItem(
-                  id: '',
+                  id: 'ci_${DateTime.now().microsecondsSinceEpoch}',
                   productId: widget.product.id,
                   productName: widget.product.name,
                   variantName: _selectedVariant?.name,
@@ -477,7 +476,7 @@ class _ProductDetailBottomSheetState
                       ? null
                       : _instructionsController.text,
                 );
-                await cartRepo.addToCart(
+                await ref.read(cartProvider.notifier).addToCart(
                   merchantId: widget.merchantId,
                   merchantName: widget.merchantName,
                   item: item,

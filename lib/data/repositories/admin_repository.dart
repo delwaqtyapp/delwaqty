@@ -223,6 +223,10 @@ class AdminRepository implements admin.AdminRepository {
             query = query.eq('is_verified', false);
           case 'pending':
             query = query.eq('verification_status', 'pending');
+          case 'suspended':
+            query = query.eq('is_active', false);
+          case 'active':
+            query = query.eq('is_active', true);
         }
       }
 
@@ -268,6 +272,7 @@ class AdminRepository implements admin.AdminRepository {
           .from('drivers')
           .update({
             'is_online': isActive,
+            'is_active': isActive,
             'status': isActive ? 'online' : 'offline',
             'updated_at': DateTime.now().toIso8601String(),
           })
@@ -512,7 +517,7 @@ class AdminRepository implements admin.AdminRepository {
 @override
   Future<List<AdminUser>> getUsers({String? search}) async {
      try {
-       var query = _supabase.from('admin_users').select('full_name as name, email, role, status, last_login, created_at');
+       var query = _supabase.from('admin_users').select('id, full_name, email, role, status, last_login, created_at');
  
        if (search != null && search.isNotEmpty) {
          query = query.or('full_name.ilike.%$search%,email.ilike.%$search%');
@@ -780,7 +785,7 @@ final response = await _supabase
     try {
       var query = _supabase.from('orders').select('''
         id, total_amount, status, created_at,
-        users!inner(id, name, email),
+        users!inner(id, full_name, email),
         merchants!inner(id, name)
       ''');
 
@@ -982,7 +987,10 @@ final response = await _supabase
         'decide_user_verification',
         params: {
           'p_user_id': userId,
-          'p_decision': 'approved',
+          // decide_user_verification accepts ONLY 'approve' / 'reject'.
+          // The database enum for users.verification_status is
+          // approved/rejected, and the RPC translates it internally.
+          'p_decision': 'approve',
         },
       );
     } catch (e) {
@@ -997,7 +1005,7 @@ final response = await _supabase
         'decide_user_verification',
         params: {
           'p_user_id': userId,
-          'p_decision': 'rejected',
+          'p_decision': 'reject',
           'p_reason': reason,
         },
       );

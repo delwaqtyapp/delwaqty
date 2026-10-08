@@ -67,7 +67,7 @@ class DataPrivacyPage extends StatelessWidget {
       final profile = await client.from('users').select().eq('id', uid).maybeSingle();
       final orders = await client
           .from('orders')
-          .select('id, status, total, payment_method, created_at')
+          .select('id, status, total_amount, payment_method, created_at')
           .eq('user_id', uid)
           .order('created_at', ascending: false)
           .limit(50);

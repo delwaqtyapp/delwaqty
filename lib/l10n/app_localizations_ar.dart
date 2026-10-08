@@ -800,7 +800,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get itemCountOther => 'منتجات';
 
   @override
-  String get sar => 'ر.س';
+  String get sar => 'ج.م';
 
   @override
   String get searchRestaurants => 'ابحث عن مطاعم...';
@@ -831,6 +831,9 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get enterCouponCode => 'أدخل كود الخصم';
+
+  @override
+  String get resolved => 'تم الحل';
 
   @override
   String get pending => 'قيد الانتظار';
@@ -1525,6 +1528,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get reject => 'رفض';
 
   @override
+  String get startPreparing => 'بدء التحضير';
+
+  @override
   String get markReady => 'تعيين كجاهز';
 
   @override
@@ -2206,6 +2212,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get rejected => 'مرفوض';
 
   @override
+  String get deliveryHub => 'طلبات التوصيل';
+
+  @override
   String get vehicleManagement => 'إدارة المركبة';
 
   @override
@@ -2548,6 +2557,12 @@ class AppLocalizationsAr extends AppLocalizations {
   String get networkError => 'خطأ في الشبكة. تحقق من اتصالك.';
 
   @override
+  String get replySent => 'تم إرسال الرد';
+
+  @override
+  String get updatedSuccessfully => 'تم التحديث بنجاح';
+
+  @override
   String get tryAgain => 'إعادة المحاولة';
 
   @override
@@ -2573,6 +2588,9 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get searchPlaceholderCity => 'ابحث عن مكان أو عنوان';
+
+  @override
+  String get onboardingCompleted => 'تم إتمام التسجيل';
 
   @override
   String get onboardingTitle => 'تسجيل التوصيل';

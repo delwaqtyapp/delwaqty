@@ -4,6 +4,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
 import 'package:delwaqty/shared/widgets/premium_empty_state.dart';
+import 'dart:async';
 
 class AdminPendingDeletionsPage extends ConsumerStatefulWidget {
   const AdminPendingDeletionsPage({super.key});
@@ -202,7 +203,7 @@ class _AdminPendingDeletionsPageState
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(l10n.deletionApproved)),
         );
-        _loadPendingDeletions();
+        unawaited(_loadPendingDeletions());
       }
     } catch (e) {
       if (mounted) {
@@ -229,7 +230,7 @@ class _AdminPendingDeletionsPageState
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(l10n.deletionRejected)),
         );
-        _loadPendingDeletions();
+        unawaited(_loadPendingDeletions());
       }
     } catch (e) {
       if (mounted) {

@@ -1,3 +1,4 @@
+import 'package:delwaqty/core/utils/avatar_initial.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -241,9 +242,11 @@ class _MemberTile extends StatelessWidget {
         leading: CircleAvatar(
           backgroundColor: statusColor.withAlpha(38),
           child: Text(
-            (member.fullName ?? member.email ?? member.username ?? '?')
-                .substring(0, 1)
-                .toUpperCase(),
+            safeInitialFrom([
+              member.fullName,
+              member.email,
+              member.username,
+            ]),
             style: TextStyle(
               color: statusColor,
               fontWeight: FontWeight.w700,

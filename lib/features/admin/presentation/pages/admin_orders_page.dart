@@ -8,13 +8,25 @@ import 'package:delwaqty/shared/widgets/app_loader.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 import 'package:delwaqty/core/theme/app_colors.dart';
 
-class AdminOrdersPage extends ConsumerWidget {
+class AdminOrdersPage extends ConsumerStatefulWidget {
   const AdminOrdersPage({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<AdminOrdersPage> createState() => _AdminOrdersPageState();
+}
+
+class _AdminOrdersPageState extends ConsumerState<AdminOrdersPage> {
+  String? _status;
+
+  @override
+  Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final ordersAsync = ref.watch(adminOrdersProvider);
+    final search = ref.watch(adminOrdersSearchProvider);
+    final query = AdminOrdersQuery(
+      search: search.trim().isEmpty ? null : search.trim(),
+      status: _status,
+    );
+    final ordersAsync = ref.watch(adminOrdersProvider(query));
 
     return Scaffold(
       appBar: AppBar(
@@ -22,7 +34,7 @@ class AdminOrdersPage extends ConsumerWidget {
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),
-            onPressed: () => ref.invalidate(adminOrdersProvider),
+            onPressed: () => ref.invalidate(adminOrdersProvider(query)),
           ),
         ],
       ),
@@ -75,7 +87,9 @@ class AdminOrdersPage extends ConsumerWidget {
                       ),
                     ),
                     onChanged: (value) {
-                      ref.invalidate(adminOrdersProvider);
+                      ref
+                          .read(adminOrdersSearchProvider.notifier)
+                          .update(value);
                     },
                   ),
                 ),
@@ -90,19 +104,59 @@ class AdminOrdersPage extends ConsumerWidget {
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             ListTile(
+                              leading: const Icon(Icons.list_alt_rounded),
+                              title: Text(l10n.all),
+                              trailing: _status == null
+                                  ? const Icon(Icons.check_rounded)
+                                  : null,
+                              onTap: () {
+                                setState(() => _status = null);
+                                Navigator.pop(ctx);
+                              },
+                            ),
+                            ListTile(
                               leading: const Icon(Icons.pending_outlined),
                               title: Text(l10n.pending),
-                              onTap: () => Navigator.pop(ctx),
+                              trailing: _status == 'pending'
+                                  ? const Icon(Icons.check_rounded)
+                                  : null,
+                              onTap: () {
+                                setState(() => _status = 'pending');
+                                Navigator.pop(ctx);
+                              },
                             ),
                             ListTile(
                               leading: const Icon(Icons.local_shipping_outlined),
                               title: Text(l10n.inTransit),
-                              onTap: () => Navigator.pop(ctx),
+                              trailing: _status == 'delivering'
+                                  ? const Icon(Icons.check_rounded)
+                                  : null,
+                              onTap: () {
+                                setState(() => _status = 'delivering');
+                                Navigator.pop(ctx);
+                              },
                             ),
                             ListTile(
                               leading: const Icon(Icons.check_circle_outline),
                               title: Text(l10n.delivered),
-                              onTap: () => Navigator.pop(ctx),
+                              trailing: _status == 'delivered'
+                                  ? const Icon(Icons.check_rounded)
+                                  : null,
+                              onTap: () {
+                                setState(() => _status = 'delivered');
+                                Navigator.pop(ctx);
+                              },
+                            ),
+                            ListTile(
+                              leading: const Icon(Icons.cancel_outlined),
+                              title: Text(l10n.cancelled),
+                              trailing: _status == 'cancelled'
+                                  ? const Icon(Icons.check_rounded)
+                                  : null,
+                              onTap: () {
+                                setState(() => _status = 'cancelled');
+                                Navigator.pop(ctx);
+                              },
                             ),
                           ],
                         ),
@@ -125,7 +179,7 @@ class AdminOrdersPage extends ConsumerWidget {
                   title: l10n.error,
                   message: l10n.errorLoading,
                   actionLabel: l10n.retry,
-                  onAction: () => ref.invalidate(adminOrdersProvider),
+                  onAction: () => ref.invalidate(adminOrdersProvider(query)),
                 ),
               ),
               data: (orders) {
@@ -153,7 +207,7 @@ class AdminOrdersPage extends ConsumerWidget {
                             order['id'] as String,
                             status,
                           );
-                          ref.invalidate(adminOrdersProvider);
+                          ref.invalidate(adminOrdersProvider(query));
                         },
                       ),
                     );
@@ -187,7 +241,7 @@ class _OrderTile extends StatelessWidget {
     final status = order['status'] as String? ?? 'pending';
     final users = order['users'] as Map<String, dynamic>?;
     final merchants = order['merchants'] as Map<String, dynamic>?;
-    final customerName = users?['name'] as String? ?? '';
+    final customerName = users?['full_name'] as String? ?? '';
     final merchantName = merchants?['name'] as String? ?? '';
 
     final statusColor = switch (status) {

@@ -49,24 +49,28 @@ class LocalCartRepository implements CartRepository {
     required String merchantName,
     required CartItem item,
   }) async {
+    final normalizedItem = item.id.isEmpty
+        ? item.copyWith(id: 'ci_${DateTime.now().microsecondsSinceEpoch}')
+        : item;
+    final item0 = normalizedItem;
     if (_cart != null && _cart!.merchantId != merchantId) {
-      _cart = _createNewCart(merchantId, merchantName, item);
+      _cart = _createNewCart(merchantId, merchantName, item0);
     } else if (_cart == null) {
-      _cart = _createNewCart(merchantId, merchantName, item);
+      _cart = _createNewCart(merchantId, merchantName, item0);
     } else {
       final existingIndex = _cart!.items.indexWhere(
-        (i) => i.productId == item.productId,
+        (i) => i.productId == item0.productId,
       );
       if (existingIndex >= 0) {
         final existing = _cart!.items[existingIndex];
         final updated = existing.copyWith(
-          quantity: existing.quantity + item.quantity,
+          quantity: existing.quantity + item0.quantity,
         );
         final items = List<CartItem>.from(_cart!.items);
         items[existingIndex] = updated;
         _cart = _rebuildCart(items);
       } else {
-        _cart = _rebuildCart([..._cart!.items, item]);
+        _cart = _rebuildCart([..._cart!.items, item0]);
       }
     }
     await _saveCart();

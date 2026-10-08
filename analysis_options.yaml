@@ -42,3 +42,10 @@ linter:
     prefer_if_elements_to_conditional_expressions: true
     use_enums: true
     public_member_api_docs: false
+    use_build_context_synchronously: true
+    unawaited_futures: true
+    cancel_subscriptions: true
+    close_sinks: true
+    always_declare_return_types: true
+    avoid_slow_async_io: true
+

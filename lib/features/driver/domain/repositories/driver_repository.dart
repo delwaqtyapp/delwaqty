@@ -7,7 +7,14 @@ import 'package:delwaqty/features/driver/domain/entities/driver_performance.dart
 
 abstract interface class DriverRepository {
   Future<DriverProfile?> getProfile(String userId);
-  Future<DriverProfile> registerProfile(String userId, {String? vehicleType, String? vehiclePlate, String? vehicleColor});
+  Future<DriverProfile> registerProfile(
+    String userId, {
+    required String fullName,
+    String? phone,
+    String? vehicleType,
+    String? vehiclePlate,
+    String? vehicleColor,
+  });
   Future<void> updateStatus(String profileId, DriverStatus status);
   Future<void> updateLocation(String profileId, double lat, double lng);
   Future<List<DriverDelivery>> getAvailableDeliveries();

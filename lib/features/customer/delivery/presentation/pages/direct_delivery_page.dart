@@ -13,6 +13,7 @@ import 'package:delwaqty/features/customer/delivery/presentation/providers/deliv
 import 'package:delwaqty/features/customer/search/domain/entities/geo_point.dart';
 import 'package:delwaqty/features/customer/search/domain/entities/search_session.dart';
 import 'package:delwaqty/features/customer/search/presentation/providers/search_providers.dart';
+import 'dart:async';
 
 class DirectDeliveryPage extends ConsumerStatefulWidget {
   const DirectDeliveryPage({super.key});
@@ -218,7 +219,7 @@ class _DirectDeliveryPageState extends ConsumerState<DirectDeliveryPage> {
       if (_saveNumber) {
         context.showAppSnackBar(l10n.numberSaved);
       }
-      context.push('/delivery-tracking/$deliveryId');
+      unawaited(context.push('/delivery-tracking/$deliveryId'));
     } catch (e) {
       if (mounted) {
         context.showAppSnackBar(

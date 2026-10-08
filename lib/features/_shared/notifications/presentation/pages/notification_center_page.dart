@@ -12,6 +12,7 @@ import 'package:delwaqty/shared/widgets/premium_empty_state.dart';
 import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 import 'package:delwaqty/core/theme/app_colors.dart';
+import 'dart:async';
 
 const _pageSize = 20;
 
@@ -179,7 +180,7 @@ class _NotificationCenterPageState extends ConsumerState<NotificationCenterPage>
                                 ? AppContext.admin
                                 : NotificationRouteResolver.appContext,
                           );
-                          context.push(route);
+                          unawaited(context.push(route));
                         }
                       },
                       onDelete: () async {

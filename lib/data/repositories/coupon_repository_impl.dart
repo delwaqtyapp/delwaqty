@@ -58,33 +58,6 @@ class CouponRepositoryImpl implements CouponRepository {
   }
 
   @override
-  Future<List<Coupon>> getBranchCoupons(String branchId) async {
-    try {
-      return await _dataSource.getBranchCoupons(branchId);
-    } catch (e) {
-      throw ServerException(message: e.toString());
-    }
-  }
-
-  @override
-  Future<List<Coupon>> getProductCoupons(String productId) async {
-    try {
-      return await _dataSource.getProductCoupons(productId);
-    } catch (e) {
-      throw ServerException(message: e.toString());
-    }
-  }
-
-  @override
-  Future<List<Coupon>> getCategoryCoupons(String categoryId) async {
-    try {
-      return await _dataSource.getCategoryCoupons(categoryId);
-    } catch (e) {
-      throw ServerException(message: e.toString());
-    }
-  }
-
-  @override
   Future<CouponStatus> getCouponStatus(String code) async {
     try {
       final coupon = await _dataSource.getCouponByCode(code);

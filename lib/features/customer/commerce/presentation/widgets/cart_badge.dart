@@ -2,14 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:delwaqty/core/theme/app_colors.dart';
 import 'package:delwaqty/core/theme/app_text_styles.dart';
-import 'package:delwaqty/features/customer/commerce/commerce_module.dart';
-import 'package:delwaqty/features/customer/commerce/domain/entities/cart.dart';
+import 'package:delwaqty/features/customer/commerce/presentation/providers/cart_providers.dart';
 
-final cartProvider = StreamProvider<Cart?>((ref) async* {
-  final repo = ref.watch(cartRepositoryProvider);
-  final cart = await repo.getCurrentCart();
-  yield cart;
-});
+export 'package:delwaqty/features/customer/commerce/presentation/providers/cart_providers.dart'
+    show cartProvider, currentCartProvider;
 
 class CartBadge extends ConsumerWidget {
   const CartBadge({required this.onTap, super.key});

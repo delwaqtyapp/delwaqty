@@ -1,3 +1,5 @@
+import 'package:delwaqty/core/config/app_mode_provider.dart';
+import 'package:delwaqty/core/router/post_auth_route.dart';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -270,7 +272,8 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
 
     ref.listen<AuthState>(authStateProvider, (prev, next) {
       next.whenOrNull(
-        authenticated: (_) => context.go('/home'),
+        authenticated: (_) =>
+            context.go(postAuthRoute(ref.read(appFlavorProvider))),
         pendingVerification: () => context.go('/pending-verification'),
         emailConfirmationRequired: (email) {
           showDialog(

@@ -132,8 +132,23 @@ class _MerchantOrdersPageState extends ConsumerState<MerchantOrdersPage> {
                             final repo = ref.read(
                               merchantDashboardRepositoryProvider,
                             );
-                            await repo.updateOrderStatus(order.id, status);
-                            ref.invalidate(_ordersProvider);
+                            final messenger = ScaffoldMessenger.of(context);
+                            messenger.hideCurrentSnackBar();
+                            try {
+                              await repo.updateOrderStatus(order.id, status);
+                              ref.invalidate(_ordersProvider);
+                              messenger.showSnackBar(
+                                SnackBar(content: Text(l10n.updatedSuccessfully)),
+                              );
+                            } catch (e) {
+                              // Without this the failure was invisible and
+                              // the row kept its old state with no feedback.
+                              messenger.showSnackBar(
+                                SnackBar(
+                                  content: Text(l10n.somethingWentWrong),
+                                ),
+                              );
+                            }
                           },
                         ),
                       );
@@ -153,8 +168,10 @@ class _MerchantOrdersPageState extends ConsumerState<MerchantOrdersPage> {
     final filters = <MapEntry<String?, String?>>[
       MapEntry(null, l10n.all),
       MapEntry('pending', l10n.pending),
+      MapEntry('confirmed', l10n.confirmed),
       MapEntry('preparing', l10n.preparing),
       MapEntry('ready', l10n.ready),
+      MapEntry('delivering', l10n.inTransit),
       MapEntry('delivered', l10n.delivered),
       MapEntry('cancelled', l10n.cancelled),
     ];
@@ -280,13 +297,24 @@ class _OrderCard extends StatelessWidget {
                     _ActionButton(
                       label: l10n.accept,
                       color: AppColors.successLight,
-                      onPressed: () => onStatusChanged('preparing'),
+                      // The lifecycle is pending -> confirmed -> preparing
+                      // -> ready -> delivering -> delivered. Jumping
+                      // straight to 'preparing' skipped 'confirmed',
+                      // which the DB CHECK allows and the filter chips
+                      // expect.
+                      onPressed: () => onStatusChanged('confirmed'),
                     ),
                     const SizedBox(width: 8),
                     _ActionButton(
                       label: l10n.reject,
                       color: theme.colorScheme.error,
                       onPressed: () => onStatusChanged('cancelled'),
+                    ),
+                  ] else if (order.status == 'confirmed') ...[
+                    _ActionButton(
+                      label: l10n.startPreparing,
+                      color: AppColors.orderPreparing,
+                      onPressed: () => onStatusChanged('preparing'),
                     ),
                   ] else if (order.status == 'preparing') ...[
                     _ActionButton(

@@ -1,3 +1,4 @@
+import 'package:delwaqty/core/utils/avatar_initial.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -13,6 +14,7 @@ import 'package:delwaqty/shared/widgets/app_loader.dart';
 import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
 import 'package:delwaqty/shared/widgets/premium_empty_state.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
+import 'dart:async';
 
 class AdminSupportChatPage extends ConsumerStatefulWidget {
   const AdminSupportChatPage({super.key});
@@ -186,7 +188,7 @@ class _AdminSupportChatPageState extends ConsumerState<AdminSupportChatPage> {
       final created = await repo.createRoom(room);
       ref.invalidate(adminAllRoomsProvider);
       if (!mounted) return;
-      context.push('/admin/support-chat/room/${created.id}');
+      unawaited(context.push('/admin/support-chat/room/${created.id}'));
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -275,9 +277,11 @@ class _AdminSupportChatPageState extends ConsumerState<AdminSupportChatPage> {
                             return ListTile(
                               leading: CircleAvatar(
                                 child: Text(
-                                  (m.fullName ?? m.username ?? m.email ?? '?')
-                                      .substring(0, 1)
-                                      .toUpperCase(),
+                                  safeInitialFrom([
+                                    m.fullName,
+                                    m.username,
+                                    m.email,
+                                  ]),
                                 ),
                               ),
                               title: Text(m.fullName ?? m.username ?? m.email ?? '—'),

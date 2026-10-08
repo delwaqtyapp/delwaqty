@@ -36,7 +36,10 @@ class SupabaseDriverDataSource {
       status: status,
       currentLatitude: (row['current_latitude'] as num?)?.toDouble(),
       currentLongitude: (row['current_longitude'] as num?)?.toDouble(),
-      totalEarnings: (row['total_earnings'] as num?)?.toDouble() ?? 0.0,
+      // drivers has `earnings_balance`; `total_earnings` exists only as a
+      // key inside RPC JSON payloads, never as a column, so the dashboard
+      // always rendered EGP 0.
+      totalEarnings: (row['earnings_balance'] as num?)?.toDouble() ?? 0.0,
       totalDeliveries: row['total_deliveries'] as int? ?? 0,
       rating: (row['rating'] as num?)?.toDouble() ?? 4.5,
       createdAt: DateTime.parse(row['created_at'] as String),
@@ -81,19 +84,38 @@ class SupabaseDriverDataSource {
     }
   }
 
-  Future<DriverProfile> registerProfile(String userId, {String? vehicleType, String? vehiclePlate, String? vehicleColor}) async {
+  /// Registers the driver through the authoritative RPC.
+  ///
+  /// The previous implementation upserted `drivers` directly WITHOUT
+  /// `full_name` (NOT NULL -> the insert always threw) and never set
+  /// `is_verified` or `active_vehicle_id`, so even on success the driver
+  /// could never satisfy `dispatch_delivery`'s filter. The RPC
+  /// (migration 107) creates or repairs the row, verifies the driver and
+  /// links an active vehicle in one transaction.
+  Future<DriverProfile> registerProfile(
+    String userId, {
+    required String fullName,
+    String? phone,
+    String? vehicleType,
+    String? vehiclePlate,
+    String? vehicleColor,
+  }) async {
     try {
+      final res = await _client.rpc(
+        'driver_complete_registration',
+        params: {
+          'p_full_name': fullName,
+          'p_phone': phone,
+          'p_vehicle_type': vehicleType,
+          'p_vehicle_plate': vehiclePlate,
+          'p_vehicle_color': vehicleColor,
+        },
+      );
+      final driverId = (res as Map)['driver_id'] as String;
       final data = await _client
           .from(_driversTable)
-          .upsert({
-            'user_id': userId,
-            'vehicle_type': vehicleType,
-            'vehicle_plate': vehiclePlate,
-            'vehicle_color': vehicleColor,
-            'status': 'offline',
-            'created_at': DateTime.now().toIso8601String(),
-          })
           .select()
+          .eq('id', driverId)
           .single();
       return _profileFromRow(data);
     } catch (e, stack) {

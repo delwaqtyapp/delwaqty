@@ -950,7 +950,7 @@ class _SupportChatRoomPageState extends ConsumerState<SupportChatRoomPage> {
     if (path == null) return;
 
     final file = File(path);
-    if (!await file.exists() || (await file.length()) == 0) return;
+    if (!file.existsSync() || file.lengthSync() == 0) return;
 
     await _sendMedia(
       l10n: l10n,
@@ -1239,7 +1239,7 @@ class _SupportChatRoomPageState extends ConsumerState<SupportChatRoomPage> {
       await repo.sendMessage(message);
       if (!mounted) return;
       _messageController.clear();
-      _notifyTyping(AppLocalizations.of(context));
+      unawaited(_notifyTyping(AppLocalizations.of(context)));
       ref.invalidate(chatMessagesProvider(widget.roomId));
       _scrollToBottom();
     } catch (e) {

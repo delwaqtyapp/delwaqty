@@ -23,8 +23,8 @@ class SupabaseCatalogCategoryDataSource {
   CatalogCategory _fromRow(Map<String, dynamic> row) {
     return CatalogCategory(
       id: row['id'] as String,
-      merchantId: row['merchant_id'] as String,
-      name: row['name'] as String,
+      merchantId: row['merchant_id'] as String? ?? '',
+      name: (row['name_ar'] as String?) ?? (row['name'] as String? ?? ''),
       description: row['description'] as String?,
       icon: row['icon'] as String?,
       imageUrl: row['image_url'] as String?,

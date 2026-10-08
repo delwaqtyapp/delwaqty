@@ -528,6 +528,7 @@ class _BranchFormSheetState extends ConsumerState<_BranchFormSheet> {
       createdAt: widget.branch?.createdAt ?? DateTime.now(),
     );
 
+    try {
     if (widget.branch != null) {
       await repo.updateBranch(branch);
     } else {
@@ -535,6 +536,15 @@ class _BranchFormSheetState extends ConsumerState<_BranchFormSheet> {
     }
 
     setState(() => _saving = false);
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _saving = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(AppLocalizations.of(context).somethingWentWrong)),
+      );
+      return;
+    }
+    if (mounted) setState(() => _saving = false);
     widget.onSaved();
   }
 }

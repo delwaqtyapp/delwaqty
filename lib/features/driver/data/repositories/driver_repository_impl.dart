@@ -18,8 +18,22 @@ class DriverRepositoryImpl implements DriverRepository {
   Future<DriverProfile?> getProfile(String userId) => _dataSource.getProfile(userId);
 
   @override
-  Future<DriverProfile> registerProfile(String userId, {String? vehicleType, String? vehiclePlate, String? vehicleColor}) =>
-      _dataSource.registerProfile(userId, vehicleType: vehicleType, vehiclePlate: vehiclePlate, vehicleColor: vehicleColor);
+  Future<DriverProfile> registerProfile(
+    String userId, {
+    required String fullName,
+    String? phone,
+    String? vehicleType,
+    String? vehiclePlate,
+    String? vehicleColor,
+  }) =>
+      _dataSource.registerProfile(
+        userId,
+        fullName: fullName,
+        phone: phone,
+        vehicleType: vehicleType,
+        vehiclePlate: vehiclePlate,
+        vehicleColor: vehicleColor,
+      );
 
   @override
   Future<void> updateStatus(String profileId, DriverStatus status) => _dataSource.updateStatus(profileId, status);

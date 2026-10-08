@@ -256,7 +256,9 @@ class _AdminShellState extends ConsumerState<AdminShell> {
 
   void _navigateTo(BuildContext context, String path) {
     context.go(path);
-    Navigator.of(context).pop();
+    if (_scaffoldKey.currentState?.isDrawerOpen ?? false) {
+      Navigator.of(context).pop();
+    }
   }
 
   int _currentBottomIndex(BuildContext context) {

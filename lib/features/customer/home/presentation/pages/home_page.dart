@@ -155,7 +155,7 @@ class HomePage extends ConsumerWidget {
                 ref.invalidate(activeCategoriesProvider);
                 ref.invalidate(discoveryEntriesProvider);
                 ref.invalidate(activeCampaignsProvider);
-                ref.read(userLocationProvider.notifier).refreshQuick();
+                unawaited(ref.read(userLocationProvider.notifier).refreshQuick());
               },
               child: NotificationListener<ScrollNotification>(
                 onNotification: (notification) {
@@ -1524,7 +1524,7 @@ class _PromoCarouselState extends ConsumerState<_PromoCarousel> {
                 route,
                 context: AppContext.customer,
               )) {
-            context.push(route);
+            unawaited(context.push(route));
           }
           return;
         case CampaignCtaType.entity:
@@ -1532,7 +1532,9 @@ class _PromoCarouselState extends ConsumerState<_PromoCarousel> {
           break;
       }
     }
-    if (context.mounted) context.push('/campaign/${campaign.id}');
+    if (context.mounted) {
+      unawaited(context.push('/campaign/${campaign.id}'));
+    }
   }
 
   @override

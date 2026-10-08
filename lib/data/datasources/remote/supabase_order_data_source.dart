@@ -80,7 +80,7 @@ class SupabaseOrderDataSource {
       cancelledAt: row['cancelled_at'] != null
           ? DateTime.parse(row['cancelled_at'] as String)
           : null,
-      cancellationReason: row['cancellation_reason'] as String?,
+      cancellationReason: row['cancelled_reason'] as String?,
       createdAt: DateTime.parse(row['created_at'] as String),
       updatedAt: row['updated_at'] != null
           ? DateTime.parse(row['updated_at'] as String)
@@ -89,6 +89,24 @@ class SupabaseOrderDataSource {
   }
 
   OrderStatus _parseStatus(String status) {
+    // The database CHECK on orders.status allows:
+    //   pending, confirmed, preparing, ready, delivering, delivered, cancelled
+    // The Dart enum also has pickedUp ('picked_up') and inTransit
+    // ('in_transit'), which the DB never stores. Map the DB vocabulary
+    // onto the enum so a shipped order is not displayed as "pending".
+    const dbToEnum = <String, OrderStatus>{
+      'pending': OrderStatus.pending,
+      'confirmed': OrderStatus.confirmed,
+      'preparing': OrderStatus.preparing,
+      'ready': OrderStatus.ready,
+      'delivering': OrderStatus.inTransit,
+      'picked_up': OrderStatus.pickedUp,
+      'in_transit': OrderStatus.inTransit,
+      'delivered': OrderStatus.delivered,
+      'cancelled': OrderStatus.cancelled,
+    };
+    final mapped = dbToEnum[status];
+    if (mapped != null) return mapped;
     return OrderStatus.values.firstWhere(
       (s) => s.name == status,
       orElse: () => OrderStatus.pending,
@@ -111,7 +129,12 @@ class SupabaseOrderDataSource {
       final userId = _userId;
       if (userId == null) return [];
 
-      var query = _client.from(_ordersTable).select().eq('user_id', userId);
+      // One round trip: the item lines are embedded through the
+      // order_items foreign key instead of one query per order (N+1).
+      var query = _client
+          .from(_ordersTable)
+          .select('*, order_items(*)')
+          .eq('user_id', userId);
 
       if (status != null) {
         query = query.eq('status', status.name);
@@ -124,11 +147,7 @@ class SupabaseOrderDataSource {
       final orders = <Order>[];
       for (final row in data as List) {
         final rowMap = row as Map<String, dynamic>;
-        final itemsData = await _client
-            .from(_itemsTable)
-            .select()
-            .eq('order_id', rowMap['id']);
-        final items = (itemsData as List)
+        final items = (rowMap['order_items'] as List<dynamic>? ?? const [])
             .map((i) => i as Map<String, dynamic>)
             .toList();
         orders.add(_fromRow(rowMap, items));
@@ -142,18 +161,20 @@ class SupabaseOrderDataSource {
 
   Future<Order?> getOrderById(String id) async {
     try {
+      final userId = _userId;
+      if (userId == null) return null;
+
+      // Scope by owner in the query as defence in depth: RLS already
+      // filters, but an IDOR must not depend on a single control.
       final data = await _client
           .from(_ordersTable)
-          .select()
+          .select('*, order_items(*)')
           .eq('id', id)
+          .eq('user_id', userId)
           .maybeSingle();
       if (data == null) return null;
 
-      final itemsData = await _client
-          .from(_itemsTable)
-          .select()
-          .eq('order_id', id);
-      final items = (itemsData as List)
+      final items = (data['order_items'] as List<dynamic>? ?? const [])
           .map((i) => i as Map<String, dynamic>)
           .toList();
       return _fromRow(data, items);
@@ -186,12 +207,13 @@ class SupabaseOrderDataSource {
             'merchant_id': merchantId,
             'merchant_name': merchantName,
             'status': OrderStatus.pending.name,
+            'subtotal': subtotal,
             'total_amount': total,
             'delivery_fee': deliveryFee,
             'tax': 0,
             'discount': discount,
             'delivery_address': deliveryAddress,
-            'payment_method': paymentMethod,
+            'payment_method': paymentMethod ?? 'cash',
             'special_instructions': specialInstructions,
           })
           .select()
@@ -239,7 +261,7 @@ class SupabaseOrderDataSource {
           .from(_ordersTable)
           .update({
             'status': OrderStatus.cancelled.name,
-            'cancellation_reason': reason,
+            'cancelled_reason': reason,
             'cancelled_at': DateTime.now().toIso8601String(),
             'updated_at': DateTime.now().toIso8601String(),
           })

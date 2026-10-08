@@ -127,12 +127,27 @@ class _MerchantReviewsPageState extends ConsumerState<MerchantReviewsPage> {
     );
   }
 
+  /// Saves a merchant reply through the dedicated RPC.
+  ///
+  /// This used to call `updateReview(comment:)`, which writes the
+  /// customer's own review text: the reply box was pre-filled with the
+  /// review body and saving replaced the review. The RPC writes only
+  /// `merchant_reply` and is scoped to the merchant who owns the store.
   Future<void> _saveReply(Review review, String reply) async {
+    if (reply.trim().isEmpty) return;
     final repo = ref.read(reviewRepositoryProvider);
-    await repo.updateReview(reviewId: review.id, comment: reply);
-    ref.invalidate(_reviewsProvider);
-    if (mounted) {
-      context.showAppSnackBar('Reply saved');
+    try {
+      await repo.replyToReview(reviewId: review.id, reply: reply.trim());
+      ref.invalidate(_reviewsProvider);
+      if (mounted) {
+        context.showAppSnackBar(AppLocalizations.of(context).replySent);
+      }
+    } catch (e) {
+      if (!mounted) return;
+      context.showAppSnackBar(
+        AppLocalizations.of(context).failedToLoad,
+        isError: true,
+      );
     }
   }
 }

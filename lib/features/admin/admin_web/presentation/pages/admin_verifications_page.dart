@@ -1,3 +1,4 @@
+import 'package:delwaqty/core/utils/avatar_initial.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:delwaqty/core/theme/app_colors.dart';
@@ -227,7 +228,7 @@ class _VerificationCard extends StatelessWidget {
                 profilePhotoUrl != null ? NetworkImage(profilePhotoUrl) : null,
             child: profilePhotoUrl == null
                 ? Text(
-                    name.substring(0, 1).toUpperCase(),
+                    safeInitial(name),
                     style: const TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.w700,

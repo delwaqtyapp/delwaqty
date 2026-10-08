@@ -806,7 +806,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get itemCountOther => 'items';
 
   @override
-  String get sar => 'ج.م';
+  String get sar => 'EGP';
 
   @override
   String get searchRestaurants => 'Search restaurants...';
@@ -837,6 +837,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get enterCouponCode => 'Enter coupon code';
+
+  @override
+  String get resolved => 'Resolved';
 
   @override
   String get pending => 'Pending';
@@ -1532,6 +1535,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get reject => 'Reject';
 
   @override
+  String get startPreparing => 'Start preparing';
+
+  @override
   String get markReady => 'Mark Ready';
 
   @override
@@ -2217,6 +2223,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get rejected => 'Rejected';
 
   @override
+  String get deliveryHub => 'Delivery Hub';
+
+  @override
   String get vehicleManagement => 'Vehicle Management';
 
   @override
@@ -2561,6 +2570,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get networkError => 'Network error. Check your connection.';
 
   @override
+  String get replySent => 'Reply sent';
+
+  @override
+  String get updatedSuccessfully => 'Updated successfully';
+
+  @override
   String get tryAgain => 'Try again';
 
   @override
@@ -2586,6 +2601,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get searchPlaceholderCity => 'Search for a place or address';
+
+  @override
+  String get onboardingCompleted => 'Onboarding completed';
 
   @override
   String get onboardingTitle => 'Delivery Registration';

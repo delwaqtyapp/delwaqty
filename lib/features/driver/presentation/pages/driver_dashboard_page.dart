@@ -133,8 +133,17 @@ class DriverDashboardPage extends ConsumerWidget {
             FilledButton.icon(
               onPressed: () async {
                 final repo = ref.read(driverRepositoryProvider);
-                await repo.registerProfile(userId,
-                    vehicleType: 'motorcycle');
+                await repo.registerProfile(
+                  userId,
+                  fullName: ref.read(authStateProvider).maybeWhen(
+                        authenticated: (u) =>
+                            u.fullName?.trim().isNotEmpty == true
+                                ? u.fullName!
+                                : 'Driver',
+                        orElse: () => 'Driver',
+                      ),
+                  vehicleType: 'motorcycle',
+                );
                 ref.invalidate(driverProfileProvider(userId));
               },
               icon: const Icon(Icons.app_registration_rounded),
@@ -476,6 +485,14 @@ class _ActionGrid extends StatelessWidget {
       children: [
         Row(
           children: [
+            Expanded(
+              child: _ActionCard(
+                icon: Icons.local_shipping_rounded,
+                label: l10n.deliveryHub,
+                onTap: () => context.push('/driver/hub'),
+              ),
+            ),
+            const SizedBox(width: 12),
             Expanded(
               child: _ActionCard(
                 icon: Icons.account_balance_wallet_rounded,

@@ -18,6 +18,7 @@ import 'package:delwaqty/shared/widgets/appearance_segmented.dart';
 import 'package:delwaqty/shared/widgets/gradient_background.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'dart:async';
 
 class AdminSettingsMenuPage extends ConsumerStatefulWidget {
   const AdminSettingsMenuPage({super.key});
@@ -502,7 +503,7 @@ class _AdminSettingsMenuPageState extends ConsumerState<AdminSettingsMenuPage> {
       ),
     );
     if (confirmed == true && mounted) {
-      ref.read(authStateProvider.notifier).signOut();
+      unawaited(ref.read(authStateProvider.notifier).signOut());
     }
   }
 
@@ -525,6 +526,12 @@ class _AdminSettingsMenuPageState extends ConsumerState<AdminSettingsMenuPage> {
       needsUpdate = checkResult.needsUpdate;
     } catch (_) {
       needsUpdate = false;
+      // Keep the result non-null: the update button force-unwraps it.
+      checkResult = const OtaCheckResult(
+        current: 0,
+        latest: 0,
+        needsUpdate: false,
+      );
     }
     if (!context.mounted) return;
     showAboutDialog(

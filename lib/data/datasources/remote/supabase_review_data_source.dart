@@ -15,8 +15,8 @@ class SupabaseReviewDataSource {
 
   Review _fromRow(Map<String, dynamic> row) => Review(
     id: row['id'] as String,
-    merchantId: row['merchant_id'] as String,
-    userId: row['user_id'] as String,
+    merchantId: row['merchant_id'] as String? ?? '',
+    userId: row['user_id'] as String? ?? '',
     userName: row['user_name'] as String?,
     productId: row['product_id'] as String?,
     orderId: row['order_id'] as String?,
@@ -114,11 +114,29 @@ class SupabaseReviewDataSource {
           'order_id': orderId,
           'rating': rating.round(),
           'comment': comment,
-          'image_urls': imageUrls ?? [],
         })
         .select()
         .single();
     return _fromRow(data);
+  }
+
+  /// Merchant reply to a customer review.
+  ///
+  /// Deliberately separate from [updateReview]: that method writes the
+  /// `comment` column, which is the CUSTOMER'S text. Using it for a
+  /// reply overwrote the review itself (and was rejected by RLS anyway,
+  /// because reviews_update_own is scoped to the review's author).
+  Future<void> replyToReview({
+    required String reviewId,
+    required String reply,
+  }) async {
+    await _client.rpc(
+      'reply_to_merchant_review',
+      params: {
+        'p_review_id': reviewId,
+        'p_reply': reply,
+      },
+    );
   }
 
   Future<Review> updateReview({
@@ -130,7 +148,6 @@ class SupabaseReviewDataSource {
     final update = <String, dynamic>{};
     if (rating != null) update['rating'] = rating.round();
     if (comment != null) update['comment'] = comment;
-    if (imageUrls != null) update['image_urls'] = imageUrls;
     update['updated_at'] = DateTime.now().toIso8601String();
     final data = await _client
         .from('reviews')
@@ -172,13 +189,20 @@ class SupabaseReviewDataSource {
     return ReviewSummary(averageRating: avg, totalReviews: reviews.length);
   }
 
-  Stream<Review> watchMerchantReviews(String merchantId) {
+  /// Emits the most recent review of a merchant, or null when the last
+  /// one is deleted.
+  ///
+  /// The previous version mapped `rows.first` unguarded, so an empty
+  /// emission (e.g. the newest review being deleted) threw a StateError
+  /// inside the stream and broke the listener.
+  Stream<Review?> watchMerchantReviews(String merchantId) {
     return _client
         .from('reviews')
         .stream(primaryKey: ['id'])
         .eq('merchant_id', merchantId)
+        // Newest first, so rows.first is the latest review.
         .order('created_at')
         .limit(1)
-        .map((rows) => _fromRow(rows.first));
+        .map((rows) => rows.isEmpty ? null : _fromRow(rows.first));
   }
 }

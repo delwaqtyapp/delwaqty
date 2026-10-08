@@ -25,7 +25,7 @@ class _DriverCapabilitiesPageState
     ('courier', Icons.local_shipping_rounded, 'courier'),
     ('package_delivery', Icons.inventory_2_rounded, 'package'),
     ('document_delivery', Icons.description_rounded, 'document'),
-    ('flowerDelivery', Icons.local_florist_rounded, 'flower'),
+    ('flower_delivery', Icons.local_florist_rounded, 'flower'),
     ('retail_delivery', Icons.shopping_bag_rounded, 'retail'),
   ];
 

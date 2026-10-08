@@ -1,3 +1,4 @@
+import 'package:delwaqty/core/router/post_auth_route.dart';
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -16,6 +17,7 @@ import 'package:delwaqty/features/_shared/auth/presentation/auth_provider.dart';
 import 'package:delwaqty/features/_shared/device_lock/device_lock_provider.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 import 'package:delwaqty/shared/widgets/cinematic_auth_background.dart';
+import 'dart:async';
 
 class LoginPage extends ConsumerStatefulWidget {
   const LoginPage({super.key});
@@ -94,10 +96,12 @@ class _LoginPageState extends ConsumerState<LoginPage>
     }
     _postLoginHandled = false;
     _pendingSaveAccount = _rememberMe;
-    ref.read(authStateProvider.notifier).signIn(
-          email: _emailController.text.trim(),
-          password: _passwordController.text,
-        );
+    unawaited(
+      ref.read(authStateProvider.notifier).signIn(
+            email: _emailController.text.trim(),
+            password: _passwordController.text,
+          ),
+    );
   }
 
   static bool _isConfirmationRequiredError(String msg) {
@@ -207,10 +211,12 @@ class _LoginPageState extends ConsumerState<LoginPage>
       ),
     );
     if (confirmed != true || !mounted) return;
-    ref
-        .read(authStateProvider.notifier)
-        .updateBiometricEnabled(enabled: true)
-        .catchError((_) {});
+    unawaited(
+      ref
+          .read(authStateProvider.notifier)
+          .updateBiometricEnabled(enabled: true)
+          .catchError((_) {}),
+    );
     if (mounted) {
       messenger.showSnackBar(
         SnackBar(
@@ -254,10 +260,12 @@ class _LoginPageState extends ConsumerState<LoginPage>
       _passwordController.text = credentials.password;
       _postLoginHandled = false;
       _pendingBiometricUserId = credentials.userId;
-      ref.read(authStateProvider.notifier).signIn(
-            email: credentials.email,
-            password: credentials.password,
-          );
+      unawaited(
+        ref.read(authStateProvider.notifier).signIn(
+              email: credentials.email,
+              password: credentials.password,
+            ),
+      );
     } on Exception catch (e) {
       if (!mounted) return;
       final isNotEnrolled = e.toString().contains('noAvailableEnrollment') ||
@@ -327,7 +335,8 @@ class _LoginPageState extends ConsumerState<LoginPage>
           deviceLockNotifier.markUnlocked();
           await _handlePostLoginNavigation(user);
         },
-        guest: () => context.go('/home'),
+        guest: () =>
+            context.go(postAuthRoute(ref.read(appFlavorProvider))),
         error: (msg) {
           _postLoginHandled = false;
           _pendingSaveAccount = false;

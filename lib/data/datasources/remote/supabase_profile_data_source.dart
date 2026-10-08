@@ -6,6 +6,11 @@ import 'package:delwaqty/services/supabase/supabase_service.dart';
 import 'package:delwaqty/services/logger/app_logger.dart';
 import 'package:delwaqty/data/models/user_model.dart';
 
+/// Signed-URL lifetime for private identity documents: long enough for the
+/// admin verification console to open the file, short enough that a leaked
+/// link expires on its own.
+const int _signedUrlSeconds = 3600;
+
 final supabaseProfileDataSourceProvider = Provider<SupabaseProfileDataSource>((
   ref,
 ) {
@@ -124,20 +129,56 @@ class SupabaseProfileDataSource {
     }
   }
 
-  Future<String> uploadFile({
+  /// Folders that hold legally sensitive identity documents. They MUST go to
+/// the private `identity-documents` bucket (migration 103) and are served
+/// through short-lived signed URLs, never `getPublicUrl`. Uploading them to
+/// the public `profiles` bucket made every national ID card, trade licence
+/// and driving licence readable by anyone holding the URL.
+static const Set<String> _privateDocumentFolders = {
+  'id_cards',
+  'trade_licenses',
+  'driving_licenses',
+  'verification',
+};
+
+static const String _publicBucket = 'profile-photos';
+static const String _privateBucket = 'identity-documents';
+
+/// Public (non-sensitive) assets keep returning a plain URL so `Image.network`
+/// and existing avatar widgets continue to work unchanged.
+Future<String> uploadFile({
     required String userId,
     required String folder,
     required Uint8List bytes,
     required String fileName,
   }) async {
     try {
-      final path = '$folder/$userId/$fileName';
-      await _client.storage.from('profiles').uploadBinary(path, bytes);
-      return _client.storage.from('profiles').getPublicUrl(path);
+      final isPrivate = _privateDocumentFolders.contains(folder);
+      final bucket = isPrivate ? _privateBucket : _publicBucket;
+      // Both buckets are owner-scoped: the first path segment is the uid.
+      final path = '$userId/${folder.split('/').last}/$fileName';
+
+      await _client.storage.from(bucket).uploadBinary(path, bytes);
+
+      if (!isPrivate) {
+        return _client.storage.from(bucket).getPublicUrl(path);
+      }
+
+      return await _signedUrl(bucket, path);
     } catch (e, stack) {
       _logger.e('Failed to upload file to $folder for $userId', e, stack);
       rethrow;
     }
+  }
+
+  /// Signed URL for a private object. Signature lasts long enough for the
+  /// admin verification console to open it, without making it permanent.
+  Future<String> _signedUrl(String bucket, String path) async {
+    final signed = await _client.storage.from(bucket).createSignedUrl(
+      path,
+      _signedUrlSeconds,
+    );
+    return signed;
   }
 
   Future<void> deleteProfile(String userId) async {

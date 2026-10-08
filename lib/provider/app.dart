@@ -16,6 +16,7 @@ import 'package:delwaqty/l10n/app_localizations.dart';
 import 'package:delwaqty/services/deep_link/deep_link_service.dart';
 import 'package:delwaqty/services/ota/ota_update_dialog.dart';
 import 'package:delwaqty/services/push_notification/push_notification_service.dart';
+import 'dart:async';
 
 class ProviderApp extends ConsumerStatefulWidget {
   const ProviderApp({super.key});
@@ -52,11 +53,11 @@ class _ProviderAppState extends ConsumerState<ProviderApp> {
       } catch (e) {
         debugPrint('Auth listener start failed: $e');
       }
-      authNotifier.checkAuthStatus();
-      ref.read(pushNotificationServiceProvider).initialize();
+      unawaited(authNotifier.checkAuthStatus());
+      unawaited(ref.read(pushNotificationServiceProvider).initialize());
       ref.read(chatCallAlertServiceProvider);
       _startDeepLinkListener();
-      _checkOtaUpdate();
+      unawaited(_checkOtaUpdate());
     });
   }
 
@@ -83,7 +84,7 @@ class _ProviderAppState extends ConsumerState<ProviderApp> {
     Future<void>.delayed(const Duration(milliseconds: 800), () async {
       final route = await service.initialRoute;
       if (route == DeepLinkRoute.loginCallback && mounted) {
-        _handleLoginCallback();
+        unawaited(_handleLoginCallback());
       }
     });
   }

@@ -154,7 +154,7 @@ class _NewComplaintPageState extends ConsumerState<NewComplaintPage> {
         );
       }
     } finally {
-      setState(() => _submitting = false);
+      if (mounted) setState(() => _submitting = false);
     }
   }
 }

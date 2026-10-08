@@ -10,6 +10,7 @@ import 'package:delwaqty/shared/widgets/app_loader.dart';
 import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
 import 'package:delwaqty/shared/widgets/premium_empty_state.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
+import 'dart:async';
 
 class ClientSupportPage extends ConsumerStatefulWidget {
   const ClientSupportPage({super.key});
@@ -129,7 +130,7 @@ class _ClientSupportPageState extends ConsumerState<ClientSupportPage> {
       ref.invalidate(customerMyRoomsProvider);
       if (!mounted) return;
       // Open the new room immediately (shows its complaint reference number).
-      context.push('/support/room/${created.id}');
+      unawaited(context.push('/support/room/${created.id}'));
     } catch (e) {
       if (!mounted) return;
       final errorCode = AppLocalizations.of(context).error;

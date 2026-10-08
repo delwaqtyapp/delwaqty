@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:delwaqty/features/admin/domain/entities/admin_models.dart';
 import 'package:delwaqty/data/repositories/admin_repository.dart';
@@ -46,12 +47,53 @@ final adminUsersProvider = FutureProvider<List<AdminUser>>((ref) async {
 
 // ─── Merchants ─────────────────────────────────────────────
 
-final adminMerchantsProvider = FutureProvider<List<Map<String, dynamic>>>((
-  ref,
-) async {
-  final adminService = ref.watch(adminServiceProvider);
-  return adminService.getMerchants();
-});
+final adminMerchantsProvider =
+    FutureProvider.family<List<Map<String, dynamic>>, AdminMerchantsQuery>((
+      ref,
+      query,
+    ) async {
+      final adminService = ref.watch(adminServiceProvider);
+      return adminService.getMerchants(
+        search: query.search,
+        status: query.status,
+      );
+    });
+
+/// Query parameters for the admin merchants list.
+class AdminMerchantsQuery {
+  const AdminMerchantsQuery({this.search, this.status});
+
+  final String? search;
+  final String? status;
+
+  @override
+  bool operator ==(Object other) =>
+      other is AdminMerchantsQuery &&
+      other.search == search &&
+      other.status == status;
+
+  @override
+  int get hashCode => Object.hash(search, status);
+}
+
+final adminMerchantsSearchProvider =
+    NotifierProvider<AdminMerchantsSearchNotifier, String>(
+      AdminMerchantsSearchNotifier.new,
+    );
+
+class AdminMerchantsSearchNotifier extends Notifier<String> {
+  Timer? _debounce;
+
+  @override
+  String build() => '';
+
+  void update(String value) {
+    _debounce?.cancel();
+    _debounce = Timer(const Duration(milliseconds: 400), () {
+      state = value;
+    });
+  }
+}
 
 // ─── Content Moderation ───────────────────────────────────
 
@@ -69,12 +111,53 @@ final adminServiceReviewsProvider =
 
 // ─── Orders ────────────────────────────────────────────────
 
-final adminOrdersProvider = FutureProvider<List<Map<String, dynamic>>>((
-  ref,
-) async {
-  final adminService = ref.watch(adminServiceProvider);
-  return adminService.getOrders();
-});
+final adminOrdersProvider =
+    FutureProvider.family<List<Map<String, dynamic>>, AdminOrdersQuery>((
+      ref,
+      query,
+    ) async {
+      final adminService = ref.watch(adminServiceProvider);
+      return adminService.getOrders(
+        search: query.search,
+        status: query.status,
+      );
+    });
+
+/// Query parameters for the admin orders list (search + status filter).
+/// Previously the page re-fetched with no arguments at all, so typing in
+/// the search box only re-ran the same unfiltered query and the filter
+/// sheet did nothing at all.
+class AdminOrdersQuery {
+  const AdminOrdersQuery({this.search, this.status});
+
+  final String? search;
+  final String? status;
+
+  @override
+  bool operator ==(Object other) =>
+      other is AdminOrdersQuery && other.search == search && other.status == status;
+
+  @override
+  int get hashCode => Object.hash(search, status);
+}
+
+/// Debounces the free-text search so every keystroke does not fire an RPC.
+final adminOrdersSearchProvider =
+    NotifierProvider<AdminOrdersSearchNotifier, String>(AdminOrdersSearchNotifier.new);
+
+class AdminOrdersSearchNotifier extends Notifier<String> {
+  Timer? _debounce;
+
+  @override
+  String build() => '';
+
+  void update(String value) {
+    _debounce?.cancel();
+    _debounce = Timer(const Duration(milliseconds: 400), () {
+      state = value;
+    });
+  }
+}
 
 // ─── Platform Settings ─────────────────────────────────────
 

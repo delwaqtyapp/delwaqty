@@ -63,9 +63,10 @@ class OrdersPage extends ConsumerWidget {
                     child: _OrderCard(
                       order: order,
                       canTrack: canTrack,
-                      onTap: canTrack
-                          ? () => context.push('/market/orders/${order.id}')
-                          : null,
+                      // Completed and cancelled orders must stay openable:
+                      // the detail page carries the timeline, the invoice
+                      // and the help / reorder actions.
+                      onTap: () => context.push('/market/orders/${order.id}'),
                     ),
                   );
                 },
@@ -142,7 +143,7 @@ class _OrderCard extends StatelessWidget {
                   child: Text(
                     order.merchantName.isNotEmpty
                         ? order.merchantName
-                        : 'Order #${order.id.substring(order.id.length - 6)}',
+                        : 'Order #${_shortOrderId(order.id)}',
                     style: textTheme.titleSmall?.copyWith(
                       fontWeight: FontWeight.w700,
                     ),
@@ -445,4 +446,9 @@ class _OrderSkeletonCard extends StatelessWidget {
       ),
     );
   }
+}
+
+String _shortOrderId(String id) {
+  if (id.length <= 6) return id;
+  return id.substring(id.length - 6).toUpperCase();
 }

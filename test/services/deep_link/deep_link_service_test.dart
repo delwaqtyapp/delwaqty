@@ -39,7 +39,7 @@ void main() {
     service.start();
     controller.add(Uri.parse('io.delwaqty://login-callback'));
     await Future<void>.delayed(Duration.zero);
-    controller.close();
+    unawaited(controller.close());
     await sub.cancel();
     service.dispose();
 
@@ -59,7 +59,7 @@ void main() {
       ..add(Uri.parse('io.delwaqty://profile'))
       ..add(Uri.parse('https://delwaqty.app/login'));
     await Future<void>.delayed(Duration.zero);
-    controller.close();
+    unawaited(controller.close());
     await sub.cancel();
     service.dispose();
 
@@ -80,7 +80,7 @@ void main() {
       ..add(null)
       ..add(Uri.parse('io.delwaqty://login-callback?code=abc'));
     await Future<void>.delayed(Duration.zero);
-    controller.close();
+    unawaited(controller.close());
     await sub.cancel();
     service.dispose();
 

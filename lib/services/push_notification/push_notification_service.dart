@@ -8,6 +8,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:delwaqty/core/config/app_mode_provider.dart';
+import 'package:delwaqty/core/router/active_navigator.dart';
+import 'package:delwaqty/core/router/admin_router.dart';
+import 'package:delwaqty/driver/app_router.dart';
+import 'package:delwaqty/provider/app_router.dart';
 import 'package:delwaqty/core/router/app_router.dart';
 import 'package:delwaqty/domain/entities/app_notification.dart';
 import 'package:delwaqty/features/_shared/notifications/notifications_module.dart';
@@ -142,7 +146,17 @@ Future<void> showChatCallNotification({
 void _handleNotificationTap(Map<String, dynamic> data) {
   final chatRoomId = data['chat_room_id'] as String?;
   if (chatRoomId != null && chatRoomId.isNotEmpty) {
-    final context = rootNavigatorKey.currentContext;
+    // Resolve the ACTIVE flavor navigator: rootNavigatorKey only exists
+    // in the customer app, so notification taps were dead in admin,
+    // driver and provider.
+    final anyContext = rootNavigatorKey.currentContext ??
+        adminNavigatorKey.currentContext ??
+        driverRootNavigatorKey.currentContext ??
+        providerRootNavigatorKey.currentContext;
+    if (anyContext == null) return;
+    final flavor =
+        ProviderScope.containerOf(anyContext).read(appFlavorProvider);
+    final context = activeNavigatorContext(flavor);
     if (context == null) return;
     final isAdminPanel =
         ProviderScope.containerOf(context).read(isAdminAppProvider);
@@ -155,9 +169,16 @@ void _handleNotificationTap(Map<String, dynamic> data) {
 
   final payload = NotificationPayload.fromMap(data);
   final deepLink = NotificationRouteResolver.safePayload(payload);
-  if (rootNavigatorKey.currentContext == null) return;
+  final anyContext = rootNavigatorKey.currentContext ??
+      adminNavigatorKey.currentContext ??
+      driverRootNavigatorKey.currentContext ??
+      providerRootNavigatorKey.currentContext;
+  if (anyContext == null) return;
 
-  final context = rootNavigatorKey.currentContext!;
+  final flavor = ProviderScope.containerOf(anyContext).read(appFlavorProvider);
+  final activeContext = activeNavigatorContext(flavor);
+  if (activeContext == null) return;
+  final context = activeContext;
   final router = GoRouter.of(context);
   router.push(deepLink);
 
@@ -333,8 +354,15 @@ class PushNotificationService {
     final payload = NotificationPayload.fromMap(message.data);
     final deepLink = NotificationRouteResolver.safePayload(payload);
 
-    if (rootNavigatorKey.currentContext != null) {
-      final context = rootNavigatorKey.currentContext!;
+    final anyCtx = rootNavigatorKey.currentContext ??
+        adminNavigatorKey.currentContext ??
+        driverRootNavigatorKey.currentContext ??
+        providerRootNavigatorKey.currentContext;
+    if (anyCtx != null) {
+      final flavor = ProviderScope.containerOf(anyCtx).read(appFlavorProvider);
+      final navContext = activeNavigatorContext(flavor);
+      if (navContext == null) return;
+      final context = navContext;
       GoRouter.of(context).push(deepLink);
     }
 

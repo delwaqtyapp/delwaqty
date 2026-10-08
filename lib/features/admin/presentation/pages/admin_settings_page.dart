@@ -23,6 +23,7 @@ class _AdminSettingsPageState extends ConsumerState<AdminSettingsPage> {
   late TextEditingController _maxDriversPerZoneController;
   bool _maintenanceMode = false;
   bool _isLoading = false;
+  bool _hydrated = false;
 
   @override
   void initState() {
@@ -33,19 +34,20 @@ class _AdminSettingsPageState extends ConsumerState<AdminSettingsPage> {
     _loadSettings();
   }
 
+  void _hydrate(Map<String, dynamic> data) {
+    if (_hydrated || data.isEmpty) return;
+    _hydrated = true;
+    _appNameController.text =
+        data['app_name'] as String? ?? AppConstants.appName;
+    _supportEmailController.text = data['support_email'] as String? ?? '';
+    _maxDriversPerZoneController.text =
+        (data['max_drivers_per_zone'] as num?)?.toString() ?? '10';
+    _maintenanceMode = data['maintenance_mode'] as bool? ?? false;
+  }
+
   Future<void> _loadSettings() async {
-    final settings = ref.read(platformSettingsProvider);
-    settings.whenData((data) {
-      if (data.isNotEmpty) {
-        setState(() {
-          _appNameController.text = data['app_name'] as String? ?? AppConstants.appName;
-          _supportEmailController.text = data['support_email'] as String? ?? '';
-          _maxDriversPerZoneController.text =
-              (data['max_drivers_per_zone'] as int?)?.toString() ?? '10';
-          _maintenanceMode = data['maintenance_mode'] as bool? ?? false;
-        });
-      }
-    });
+    final settings = await ref.read(platformSettingsProvider.future);
+    _hydrate(settings);
   }
 
   @override
@@ -62,6 +64,7 @@ class _AdminSettingsPageState extends ConsumerState<AdminSettingsPage> {
     final settingsAsync = ref.watch(platformSettingsProvider);
     final adminLocale = ref.watch(adminLocaleProvider);
     final themeMode = ref.watch(themeModeProvider);
+    settingsAsync.whenData(_hydrate);
 
     return Scaffold(
       appBar: AppBar(
@@ -256,12 +259,20 @@ class _AdminSettingsPageState extends ConsumerState<AdminSettingsPage> {
 
   Future<void> _saveSettings() async {
     final l10n = AppLocalizations.of(context);
+    if (!_hydrated) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.failedToLoad)),
+      );
+      return;
+    }
     setState(() => _isLoading = true);
 
     final adminService = ref.read(adminServiceProvider);
     final success = await adminService.updateSettings({
-      'app_name': _appNameController.text,
-      'support_email': _supportEmailController.text,
+      'app_name': _appNameController.text.trim().isEmpty
+          ? AppConstants.appName
+          : _appNameController.text.trim(),
+      'support_email': _supportEmailController.text.trim(),
       'max_drivers_per_zone':
           int.tryParse(_maxDriversPerZoneController.text) ?? 10,
       'maintenance_mode': _maintenanceMode,

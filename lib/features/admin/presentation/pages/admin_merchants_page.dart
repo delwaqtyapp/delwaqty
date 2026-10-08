@@ -6,14 +6,27 @@ import 'package:delwaqty/shared/widgets/premium_empty_state.dart';
 import 'package:delwaqty/shared/widgets/app_loader.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 import 'package:delwaqty/core/theme/app_colors.dart';
+import 'dart:async';
 
-class AdminMerchantsPage extends ConsumerWidget {
+class AdminMerchantsPage extends ConsumerStatefulWidget {
   const AdminMerchantsPage({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<AdminMerchantsPage> createState() => _AdminMerchantsPageState();
+}
+
+class _AdminMerchantsPageState extends ConsumerState<AdminMerchantsPage> {
+  String? _status;
+
+  @override
+  Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final merchantsAsync = ref.watch(adminMerchantsProvider);
+    final search = ref.watch(adminMerchantsSearchProvider);
+    final query = AdminMerchantsQuery(
+      search: search.trim().isEmpty ? null : search.trim(),
+      status: _status,
+    );
+    final merchantsAsync = ref.watch(adminMerchantsProvider(query));
 
     return Scaffold(
       appBar: AppBar(
@@ -29,19 +42,48 @@ class AdminMerchantsPage extends ConsumerWidget {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       ListTile(
+                        leading: const Icon(Icons.list_alt_rounded),
+                        title: Text(l10n.all),
+                        trailing: _status == null
+                            ? const Icon(Icons.check_rounded)
+                            : null,
+                        onTap: () {
+                          setState(() => _status = null);
+                          Navigator.pop(ctx);
+                        },
+                      ),
+                      ListTile(
                         leading: const Icon(Icons.check_circle_outline),
-                        title: Text(l10n.verified),
-                        onTap: () => Navigator.pop(ctx),
+                        title: Text(l10n.active),
+                        trailing: _status == 'active'
+                            ? const Icon(Icons.check_rounded)
+                            : null,
+                        onTap: () {
+                          setState(() => _status = 'active');
+                          Navigator.pop(ctx);
+                        },
                       ),
                       ListTile(
                         leading: const Icon(Icons.pending_outlined),
                         title: Text(l10n.pending),
-                        onTap: () => Navigator.pop(ctx),
+                        trailing: _status == 'pending'
+                            ? const Icon(Icons.check_rounded)
+                            : null,
+                        onTap: () {
+                          setState(() => _status = 'pending');
+                          Navigator.pop(ctx);
+                        },
                       ),
                       ListTile(
                         leading: const Icon(Icons.block),
                         title: Text(l10n.suspended),
-                        onTap: () => Navigator.pop(ctx),
+                        trailing: _status == 'suspended'
+                            ? const Icon(Icons.check_rounded)
+                            : null,
+                        onTap: () {
+                          setState(() => _status = 'suspended');
+                          Navigator.pop(ctx);
+                        },
                       ),
                     ],
                   ),
@@ -52,7 +94,7 @@ class AdminMerchantsPage extends ConsumerWidget {
           ),
           IconButton(
             icon: const Icon(Icons.refresh),
-            onPressed: () => ref.invalidate(adminMerchantsProvider),
+            onPressed: () => ref.invalidate(adminMerchantsProvider(query)),
           ),
         ],
       ),
@@ -69,7 +111,9 @@ class AdminMerchantsPage extends ConsumerWidget {
                 ),
               ),
               onChanged: (value) {
-                ref.invalidate(adminMerchantsProvider);
+                ref
+                    .read(adminMerchantsSearchProvider.notifier)
+                    .update(value);
               },
             ),
           ),
@@ -84,7 +128,7 @@ class AdminMerchantsPage extends ConsumerWidget {
                   title: l10n.error,
                   message: l10n.errorLoading,
                   actionLabel: l10n.retry,
-                  onAction: () => ref.invalidate(adminMerchantsProvider),
+                  onAction: () => ref.invalidate(adminMerchantsProvider(query)),
                 ),
               ),
               data: (merchants) {
@@ -112,7 +156,7 @@ class AdminMerchantsPage extends ConsumerWidget {
                             merchant['id'] as String,
                             status,
                           );
-                          ref.invalidate(adminMerchantsProvider);
+                          ref.invalidate(adminMerchantsProvider(query));
                         },
                         onManageProducts: () => _showManageProductsSheet(
                           context,
@@ -268,10 +312,12 @@ class AdminMerchantsPage extends ConsumerWidget {
                               );
                               if (ctx.mounted) {
                                 Navigator.pop(ctx);
-                                _showManageProductsSheet(
-                                  context,
-                                  ref,
-                                  merchant,
+                                unawaited(
+                                  _showManageProductsSheet(
+                                    context,
+                                    ref,
+                                    merchant,
+                                  ),
                                 );
                               }
                             },
@@ -316,7 +362,7 @@ class AdminMerchantsPage extends ConsumerWidget {
     if (result == null) {
       if (context.mounted) {
         Navigator.pop(context);
-        _showManageProductsSheet(context, ref, merchant);
+        unawaited(_showManageProductsSheet(context, ref, merchant));
       }
       return;
     }
@@ -334,7 +380,7 @@ class AdminMerchantsPage extends ConsumerWidget {
       );
       if (done) {
         Navigator.pop(context);
-        _showManageProductsSheet(context, ref, merchant);
+        unawaited(_showManageProductsSheet(context, ref, merchant));
       }
     }
   }

@@ -710,14 +710,25 @@ class _OfferFormSheetState extends ConsumerState<_OfferFormSheet> {
       createdAt: widget.offer?.createdAt ?? DateTime.now(),
     );
 
-    if (widget.offer != null) {
-      await repo.updateOffer(offer);
-    } else {
-      await repo.createOffer(offer);
+    try {
+      if (widget.offer != null) {
+        await repo.updateOffer(offer);
+      } else {
+        await repo.createOffer(offer);
+      }
+      if (!mounted) return;
+      widget.onSaved();
+    } catch (e) {
+      // Previously an exception skipped setState, leaving _saving = true
+      // so the Save button stayed permanently disabled with no message.
+      if (!mounted) return;
+      setState(() => _saving = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(AppLocalizations.of(context).somethingWentWrong)),
+      );
+      return;
     }
-
-    setState(() => _saving = false);
-    widget.onSaved();
+    if (mounted) setState(() => _saving = false);
   }
 }
 

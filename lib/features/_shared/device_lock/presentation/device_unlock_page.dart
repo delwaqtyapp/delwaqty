@@ -1,3 +1,4 @@
+import 'package:delwaqty/core/router/post_auth_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -116,7 +117,7 @@ class _DeviceUnlockPageState extends ConsumerState<DeviceUnlockPage> {
           );
       final target = isAdminApp
           ? (userIsAdmin ? '/admin' : '/login')
-          : '/home';
+          : postAuthRoute(ref.read(appFlavorProvider));
       if (mounted) context.go(target);
     } on Exception catch (e) {
       final msg = e.toString();

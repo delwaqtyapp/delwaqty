@@ -94,6 +94,7 @@ dependencies:
   audioplayers: ^6.8.1
   path_provider: ^2.1.6
   package_info_plus: ^10.2.1
+  crypto: ^3.0.7
 
 dev_dependencies:
   flutter_test:

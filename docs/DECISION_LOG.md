@@ -4272,3 +4272,88 @@ The phone-admin suite still carried a flat, angular shell and stock Material com
 
 ### Consequences
 `flutter analyze` clean; `flutter test` **1026/1026**; admin debug APK `releases/delwaqty_admin_1.0.1+2_debug_20261002_2325.apk` installed Success on 192.168.8.36:5555, relaunched clean (pid 21319), zero Flutter FATAL/RenderFlex in logcat. Known pre-existing backend defect surfaced by the launch (not introduced here): `AdminService.getOrders` → `users!inner(id, name, email)` references a non-existent `users.name` column (PostgREST 42703) — diagnosed, logged, deferred to a data-layer fix (authoritative column list required; not guessed). In-flight binary screenshots are not readable by the coding model — device visual review stays with the user.
+
+## ADR-132: Admin/merchant orders queries — replace non-existent `users.name` with the live `users.full_name` (verified against the database)
+
+**Date:** 2026-10-07
+**Status:** Accepted
+**Deciders:** Lead Software Architect (user directive: «متابعة شغل التطبيق Flutter» — continue the app work)
+
+### Context
+ADR-131 left an open backend defect: `AdminService.getOrders` (`lib/data/repositories/admin_repository.dart:783`) selected `users!inner(id, name, email)` from `orders`, but the live `users` table has no `name` column, so PostgREST rejected the whole query with `42703 column users_1.name does not exist` and the admin Orders surface rendered an error state. The same wrong pattern existed in the merchant dashboard datasource. The defect was explicitly deferred because the correct column list had to be obtained authoritatively rather than guessed.
+
+### Decision
+- **Obtain the authoritative column list from the live database**, not from code or memory: migration `001_initial_schema.sql` created `users(name)`, but `002_complete_schema.sql` does `DROP TABLE users CASCADE` and recreates it with `full_name TEXT` (no `name`). Confirmed live with anonymous-key PostgREST probes (no secrets used):
+  - `users?select=id,full_name,email` → **200**
+  - `users?select=id,name,email` → **400** (`column users_1.name does not exist`)
+  - `orders?select=id,users!inner(id,name,email)` → **400** (the defect)
+  - `orders?select=id,users!inner(id,full_name,email),merchants!inner(id,name)` → **200**
+  - `merchants` **does** have `name` (200) and has no `full_name` (400) → `merchants!inner(id, name)` stays as-is.
+- **Fix every affected read site** (3 files, 4 lines):
+  1. `lib/data/repositories/admin_repository.dart:783` → `users!inner(id, full_name, email)`
+  2. `lib/features/admin/presentation/pages/admin_orders_page.dart:190` → `users?['full_name']`
+  3. `lib/features/provider/merchant/data/datasources/remote/supabase_merchant_dashboard_data_source.dart:117,132` → `.select('*, users(full_name)')` + `usersData?['full_name']` (feeds `MerchantOrder.customerName`)
+- Timestamped backups kept at `delwaqty/.backups/ordersfix-20261007-235624/` (gitignored).
+
+### Rationale
+- The database is the source of truth for a PostgREST column contract; migrations 001→002 explain *why* the code drifted (a dropped-and-recreated table), so guessing would risk "fixing" it to another wrong column.
+- Probing with the anon key returns the HTTP status only — it exercises the exact same query parser that the app uses, so a 200 proves the shipped query is well-formed without needing a device.
+- Fixing the consumer keys in the same change avoids a silent "column returned but UI reads the old key" regression.
+
+### Consequences
+`flutter analyze` → **No issues found**; `flutter test` → **1026/1026 (All tests passed)**. Device verification (admin Orders page + merchant Orders list rendering customer names) is **still pending**: the phone's wireless-debugging adbd drops every connection (`offline`, server log shows `read failed` immediately after TCP accept), so `adb install`/logcat could not run this session — `bin/adb-auto.sh` (Termux:Boot service) was restarted and left running, but needs the user to toggle **Wireless debugging off→on** on the phone before on-device verification can proceed. Changes are committed only on explicit user request.
+
+## ADR-133: Read-only PostgREST contract sweeps (selects + filters) → 4 more defects found & fixed, 1 dead API removed
+
+**Date:** 2026-10-08
+**Status:** Accepted
+**Deciders:** Lead Software Architect (continuation of «متابعة شغل التطبيق Flutter» — finish platform problems without leaving known breakage)
+
+### Context
+ADR-132 fixed the one defect ADR-131 had flagged, but that defect came from a *launch-time observation*. A single instance proved nothing about the rest of the data layer: any `select(...)` or filter referencing a column that doesn't exist live is a hard PostgREST `42703` that kills the whole query, and several such bugs had already shipped once (sprint 190, sprint 213). Without a device we could not read logcat, so the contract had to be verified another way.
+
+### Decision
+- **Two read-only sweep scripts** (kept outside the repo in `usr/tmp/opencode/`) that parse every `.from('t').select('…')` / `.eq|.neq|.gte|.like|.or('col'…)` in `lib/` and probe it against the live REST endpoint with the **anon key**, recording only HTTP status + PostgREST message (never the key):
+  - `sweep_selects.py` — 36 distinct `(table, select)` pairs
+  - `sweep_filters.py` — 124 distinct `(table, column)` filter pairs (probed with `col=is.null`, a type-agnostic predicate that is read-only and safe for every column type)
+- **Findings → fixes:**
+  1. `admin_repository.dart:515` `admin_users` used `select('full_name as name, …')` — **PostgREST has no `as` aliasing**, so the query 400'd (`column admin_users.full_name as name does not exist`) and, even had it parsed, `json['id']` was never selected. → `select('id, full_name, email, role, status, last_login, created_at')`, which is exactly what the mapping below it already reads (`id`, `full_name`).
+  2. `data_privacy_page.dart:70` exported the user's orders with `select('…, total, …')` — the column is `total_amount`, so «تصدير بياناتي» always fell into its `catch` and reported failure. → `total_amount`.
+  3. `supabase_coupon_data_source.dart` `getBranchCoupons` / `getProductCoupons` / `getCategoryCoupons` filtered on `coupons.branch_id` / `product_id` / `category_id`, none of which exist live (probed: all 400; `id/code/description/discount_type/discount_value/minimum_order/maximum_discount/merchant_id/usage_limit/used_count/expires_at/is_active/created_at` all 200). **No caller exists anywhere** (interface + impl + data source only). → removed all three from `CouponRepository`, `CouponRepositoryImpl` and the data source, per the project's own NEXT_TASKS precedent of deleting unused-but-broken API instead of building it speculatively. The `Coupon` entity keeps its nullable `branchId/productId/categoryId` (rows return `null`, `_fromRow` never throws), so re-adding them later is a pure additive change.
+- **False positives explicitly ruled out (not "fixed"):**
+  - `notification_tokens` (401), `complaints`, `user_region_preferences`, `admin_region_assignments` (401) → anon has no grant; these run authenticated.
+  - `admin_repository.dart:929/932` `rides.date_from` / `date_to` → **RPC named arguments** on `.rpc('get_admin_analytics').eq(...)`, not table filters; the function exists (anon → `42501 permission denied for function`, i.e. admin-gated).
+  - `profiles` (404) → the script matched `.storage.from('profiles')` (a storage **bucket**); the profile data source's `_tableName` is `users`.
+
+### Rationale
+- A status-code probe exercises the *exact* parser the app uses, so a 200 is proof the shipped query is well-formed — no device, no credentials beyond the public anon key, and no writes ever issued.
+- `col=is.null` avoids the value-type false alarms of `col=eq.<value>` (uuid/timestamp columns would 400 on a malformed literal).
+- Deleting dead broken API beats leaving a landmine: the next caller would have hit a 400 with no way to know why.
+
+### Consequences
+`flutter analyze` → **No issues found**; `flutter test` → **1026/1026**; both sweeps now report **zero real defects** (selects 35/36 OK + 1 auth-gated; filters 11 non-200, all ruled out above). Backups: `.backups/usersexportfix-20261008-0004*` and `.backups/couponcleanup-*`. Still pending: on-device verification (adb `offline`) and the commit itself — both await the user.
+
+## ADR-132: Full-platform integrity audit — code/database contract repair + atomic money + private identity documents
+
+**Date:** 2026-10-08
+**Status:** Accepted
+**Deciders:** Lead Software Architect (user directive: «راجع منصه دلوقتى كلها … كل حاجه المفروض انه يكون ليها اساس للوحه الادمن ولوحه التاجر ولوحه الدليفرى»)
+
+### Context
+The app and the database had drifted apart badly enough that several core flows could not succeed at all, and money/identity handling was unsafe. Every defect below was verified against the LIVE Supabase project (PostgREST OpenAPI, `pg_proc`, `pg_policies`, `pg_constraint`, `storage.buckets`), not inferred from the migration files.
+
+### Decision
+1. **The migrations are now the source of truth.** Migrations 101–108 declare every column/constraint the app writes (`merchant_name` existed only on the live DB, declared nowhere), give the admin console real data access on `orders`/`drivers`/`rides`, add the missing `provider_delete_document`/`orders.cancelled_at`, and document the checksum for the OTA channel.
+2. **All money moves behind atomic `SECURITY DEFINER` RPCs** (`wallet_topup` idempotent + `wallet_pay` non-negative), and the client's direct `UPDATE (balance)` is revoked. Client-authoritative balance math is a data-integrity bug, not a design choice.
+3. **Identity documents are private.** Public-bucket URLs for national ID cards, trade and driving licences are replaced with owner-scoped storage policies plus short-lived signed URLs; avatars keep a dedicated public bucket.
+4. **Driver dispatch becomes reachable.** A single `driver_set_online_state` flips `status`, `is_online`, `active_vehicle_id` and coordinates together because `dispatch_delivery` requires all of them; registration and vehicle linking are server-side.
+5. **Merchant replies can never overwrite customer text** — a dedicated `merchant_reply` column and an owner-scoped RPC.
+6. **Presentation code verifies against the server contract**, and the Dart lints that catch async/lifecycle defects are enabled so they cannot accumulate silently again.
+
+### Rationale
+- Cross-checking code against the live database proved the failures objectively and ruled out the plausible-looking alternatives (e.g. `users.name` turned out to be a stale, uncommitted working-tree change, not a live defect).
+- Wallet, order totals and coupon redemption were client-authoritative, which is exploitable and unauditable; the server must own every amount.
+- `INTERNET` living only in the debug manifest is the kind of defect that only appears in a release build — invisible to a debug-only workflow.
+
+### Consequences
+`flutter analyze` clean (with `use_build_context_synchronously`, `unawaited_futures`, `cancel_subscriptions`, `close_sinks`, `always_declare_return_types`, `avoid_slow_async_io` now on — they exposed 53 latent issues, all fixed); `flutter test` **1059/1059**; all four flavors build (`releases/delwaqty_{admin,driver,provider}_1.0.1+2_debug_20261008_1459.apk`). Two new hermetic regression suites assert the code/database contract, the manifest, the OTA digest, the EN/AR key parity and the currency, and both were proven to fail when a fix is reverted. Remaining known gaps (documented, not hidden): inventory/stock and storefront-editing UIs for the merchant panel, `working_hours` editing, an admin SOS console, an audit-log page, and several dormant dispatch/data-layer modules that still need an explicit archive-or-wire decision per `AGENTS.md` §12.1.

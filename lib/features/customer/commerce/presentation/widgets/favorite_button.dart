@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:delwaqty/features/_shared/auth/domain/auth_state.dart';
 import 'package:delwaqty/features/_shared/auth/presentation/auth_provider.dart';
@@ -7,6 +8,7 @@ import 'package:delwaqty/features/customer/commerce/domain/entities/favorite.dar
 import 'package:delwaqty/l10n/app_localizations.dart';
 import 'package:delwaqty/core/theme/app_icons.dart';
 import 'package:delwaqty/shared/widgets/app_snackbar.dart';
+import 'dart:async';
 
 class FavoriteButton extends ConsumerStatefulWidget {
   const FavoriteButton({
@@ -64,12 +66,15 @@ class _FavoriteButtonState extends ConsumerState<FavoriteButton> {
   Future<void> _toggle() async {
     try {
       final auth = ref.read(authStateProvider);
-      if (auth is! AuthAuthenticated && auth is! AuthGuest) {
+      if (auth is! AuthAuthenticated) {
+        // Guests have no user id, so the write would fail and the heart
+        // would silently roll back. Send them to sign in instead.
         if (mounted) {
           AppSnackbar.info(
             context,
             message: AppLocalizations.of(context).login,
           );
+          unawaited(context.push('/login'));
         }
         return;
       }
@@ -86,7 +91,12 @@ class _FavoriteButtonState extends ConsumerState<FavoriteButton> {
         );
       }
     } catch (_) {
-      if (mounted) setState(() => _isFav = !_isFav);
+      if (!mounted) return;
+      setState(() => _isFav = !_isFav);
+      AppSnackbar.error(
+        context,
+        message: AppLocalizations.of(context).failedToLoad,
+      );
     }
   }
 

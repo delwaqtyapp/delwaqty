@@ -18,12 +18,19 @@ class NotificationChannel {
   /// Null means the route is valid in every app context.
   final Set<AppContext>? contexts;
 
+  /// Matches the exact path OR any deeper path beneath it.
+  ///
+  /// The previous implementation required an EXACT segment count, so
+  /// `/orders/123`, `/wallet/topup`, `/admin/members/42` and
+  /// '/region-selection' never matched any channel and every such
+  /// notification silently fell back to '/notifications'.
   bool matches(String route) {
-    final routeSegments = route.split('/');
-    final patternSegments = pattern.split('/');
-    if (routeSegments.length != patternSegments.length) return false;
+    final patternSegments = pattern.split('/').where((e) => e.isNotEmpty).toList();
+    final routeSegments = route.split('/').where((e) => e.isNotEmpty).toList();
+    if (routeSegments.length < patternSegments.length) return false;
     for (var i = 0; i < patternSegments.length; i++) {
       final segment = patternSegments[i];
+      if (segment == '*') continue;
       if (segment.startsWith(':')) continue;
       if (segment != routeSegments[i]) return false;
     }
@@ -43,18 +50,33 @@ class NotificationChannels {
     ),
 
     // ── Customer ─────────────────────────────────────────────────────────
-    NotificationChannel('/campaign/:id'),
+    NotificationChannel('/campaign/:id',
+        contexts: {
+          AppContext.customer,
+          AppContext.admin,
+          AppContext.provider,
+        }),
     NotificationChannel('/my-complaints',
-        contexts: {AppContext.customer, AppContext.provider, AppContext.driver}),
+        contexts: {
+          AppContext.customer,
+          AppContext.provider,
+          AppContext.driver,
+        }),
     NotificationChannel(
       '/orders',
-      contexts: {AppContext.customer, AppContext.provider, AppContext.driver},
+      contexts: {AppContext.customer, AppContext.provider},
     ),
-    NotificationChannel('/profile'),
-    NotificationChannel('/rewards'),
+    NotificationChannel('/profile',
+        contexts: {
+          AppContext.customer,
+          AppContext.driver,
+          AppContext.provider,
+        }),
+    NotificationChannel('/rewards',
+        contexts: {AppContext.customer, AppContext.provider}),
     NotificationChannel(
       '/wallet',
-      contexts: {AppContext.customer, AppContext.provider, AppContext.driver},
+      contexts: {AppContext.customer, AppContext.provider},
     ),
     NotificationChannel('/home-services',
         contexts: {AppContext.customer}),
@@ -80,8 +102,15 @@ class NotificationChannels {
     ),
 
     // ── Driver ───────────────────────────────────────────────────────────
-    NotificationChannel('/earnings', contexts: {AppContext.driver}),
-    NotificationChannel('/deliveries', contexts: {AppContext.driver}),
+    // The driver registry has no '/earnings' or '/deliveries' route at all
+    // (they are '/driver/earnings' and '/driver/hub'), so those taps used
+    // to land in the router's unrecoverable error page.
+    NotificationChannel('/driver/earnings', contexts: {AppContext.driver}),
+    NotificationChannel('/driver/hub', contexts: {AppContext.driver}),
+    NotificationChannel(
+      '/driver/delivery/:id',
+      contexts: {AppContext.driver},
+    ),
 
     // ── Admin / Owner ────────────────────────────────────────────────────
     NotificationChannel('/admin/complaints', adminOnly: true),

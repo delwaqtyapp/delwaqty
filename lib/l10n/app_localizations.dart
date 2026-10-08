@@ -1631,7 +1631,7 @@ abstract class AppLocalizations {
   /// No description provided for @sar.
   ///
   /// In en, this message translates to:
-  /// **'ج.م'**
+  /// **'EGP'**
   String get sar;
 
   /// No description provided for @searchRestaurants.
@@ -1693,6 +1693,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Enter coupon code'**
   String get enterCouponCode;
+
+  /// No description provided for @resolved.
+  ///
+  /// In en, this message translates to:
+  /// **'Resolved'**
+  String get resolved;
 
   /// No description provided for @pending.
   ///
@@ -3008,6 +3014,12 @@ abstract class AppLocalizations {
   /// **'Reject'**
   String get reject;
 
+  /// No description provided for @startPreparing.
+  ///
+  /// In en, this message translates to:
+  /// **'Start preparing'**
+  String get startPreparing;
+
   /// No description provided for @markReady.
   ///
   /// In en, this message translates to:
@@ -4298,6 +4310,12 @@ abstract class AppLocalizations {
   /// **'Rejected'**
   String get rejected;
 
+  /// No description provided for @deliveryHub.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivery Hub'**
+  String get deliveryHub;
+
   /// No description provided for @vehicleManagement.
   ///
   /// In en, this message translates to:
@@ -4952,6 +4970,18 @@ abstract class AppLocalizations {
   /// **'Network error. Check your connection.'**
   String get networkError;
 
+  /// No description provided for @replySent.
+  ///
+  /// In en, this message translates to:
+  /// **'Reply sent'**
+  String get replySent;
+
+  /// No description provided for @updatedSuccessfully.
+  ///
+  /// In en, this message translates to:
+  /// **'Updated successfully'**
+  String get updatedSuccessfully;
+
   /// No description provided for @tryAgain.
   ///
   /// In en, this message translates to:
@@ -5005,6 +5035,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Search for a place or address'**
   String get searchPlaceholderCity;
+
+  /// No description provided for @onboardingCompleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Onboarding completed'**
+  String get onboardingCompleted;
 
   /// No description provided for @onboardingTitle.
   ///

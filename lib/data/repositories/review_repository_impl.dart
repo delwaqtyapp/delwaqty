@@ -76,6 +76,13 @@ class ReviewRepositoryImpl implements ReviewRepository {
   }
 
   @override
+  Future<void> replyToReview({
+    required String reviewId,
+    required String reply,
+  }) =>
+      _dataSource.replyToReview(reviewId: reviewId, reply: reply);
+
+  @override
   Future<Review> updateReview({
     required String reviewId,
     double? rating,
@@ -122,7 +129,7 @@ class ReviewRepositoryImpl implements ReviewRepository {
   }
 
   @override
-  Stream<Review> watchMerchantReviews(String merchantId) {
+  Stream<Review?> watchMerchantReviews(String merchantId) {
     return _dataSource.watchMerchantReviews(merchantId);
   }
 }

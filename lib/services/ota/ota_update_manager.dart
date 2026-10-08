@@ -1,3 +1,4 @@
+import 'package:crypto/crypto.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'dart:io';
@@ -5,6 +6,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:flutter/services.dart';
 import 'package:delwaqty/core/config/app_mode_provider.dart';
+import 'dart:async';
 
 /// OTA update channel backed by GitHub Releases.
 ///
@@ -26,12 +28,18 @@ class OtaChannelConfig {
     required this.versionName,
     required this.apk,
     required this.notes,
+    this.sha256,
   });
 
   final int version;
   final String versionName;
   final String apk;
   final String notes;
+
+  /// SHA-256 of the published APK, hex-encoded. Optional so an older
+  /// manifest without the field still parses, but [downloadAndInstallLatest]
+  /// refuses to install when it is absent.
+  final String? sha256;
 }
 
 class OtaManifest {
@@ -51,6 +59,7 @@ class OtaManifest {
           versionName: v['versionName'] as String? ?? '',
           apk: v['apk'] as String? ?? '',
           notes: v['notes'] as String? ?? '',
+          sha256: v['sha256'] as String?,
         );
       });
     }
@@ -156,13 +165,20 @@ Future<(int?, String?)> downloadAndInstallLatest(
 
     final dir = await getApplicationCacheDirectory();
     final target = File('${dir.path}/${channel.apk}');
+    final expectedHash = channel.sha256?.trim().toLowerCase() ?? '';
+    if (expectedHash.isEmpty) {
+      // A release without a published digest cannot be trusted: installing
+      // it would let anyone who can poison the CDN or the release asset run
+      // code inside this app.
+      return (null, 'missing_checksum');
+    }
     if (!target.existsSync() || target.lengthSync() == 0) {
       final uri = Uri.parse('$kOtaDownloadBaseUrl$tag/${channel.apk}');
       final streamed = await http.Client()
           .send(http.Request('GET', uri))
           .timeout(const Duration(seconds: 30));
       if (streamed.statusCode != 200) {
-        streamed.stream.drain<void>();
+        unawaited(streamed.stream.drain<void>());
         return (null, null);
       }
 
@@ -183,6 +199,16 @@ Future<(int?, String?)> downloadAndInstallLatest(
       }
     }
 
+    if (!await verifyArtifactChecksum(target, expectedHash)) {
+      // Tampered or truncated artifact: delete it and refuse.
+      if (target.existsSync()) {
+        try {
+          await target.delete();
+        } catch (_) {}
+      }
+      return (null, 'checksum_mismatch');
+    }
+
     final size = target.lengthSync();
     onProgress?.call(1.0);
     try {
@@ -193,5 +219,16 @@ Future<(int?, String?)> downloadAndInstallLatest(
     return (size, null);
   } catch (_) {
     return (null, null);
-  }
+  }}
+
+/// Streams [file] through SHA-256 and compares it with [expected].
+///
+/// The OTA channel downloads an APK over the network and hands it to the
+/// platform installer. Without this check a compromised CDN, release asset
+/// or man-in-the-middle could execute code inside the app, so the digest
+/// published alongside the release must match before installation.
+Future<bool> verifyArtifactChecksum(File file, String expected) async {
+  if (expected.length != 64) return false;
+  final digest = await sha256.bind(file.openRead()).first;
+  return digest.toString().toLowerCase() == expected;
 }

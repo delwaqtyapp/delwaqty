@@ -264,10 +264,16 @@ class SupabaseDeliveryDataSource {
     return (map['fare'] as num?)?.toDouble() ?? 0.0;
   }
 
-  Future<void> cancelDelivery(String rideId, {String? reason}) async {
+  Future<void> cancelDelivery(
+    String rideId, {
+    String? reason,
+    bool byDriver = false,
+  }) async {
     _checkRpc(await _client.rpc('cancel_ride_lifecycle', params: {
       'p_ride_id': rideId,
-      'p_by': 'driver',
+      // The actor must be explicit: hard-coding 'driver' mis-attributed
+      // (or outright rejected) the customer's own cancel action.
+      'p_by': byDriver ? 'driver' : 'rider',
       'p_reason': reason,
     }));
   }

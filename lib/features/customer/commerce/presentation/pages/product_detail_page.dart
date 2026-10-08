@@ -378,8 +378,8 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage> {
               child: FilledButton.icon(
                 onPressed: product.isAvailable
                     ? () async {
-                        final cartRepo = ref.read(cartRepositoryProvider);
-                        await cartRepo.addToCart(
+                        final cartNotifier = ref.read(cartProvider.notifier);
+                        await cartNotifier.addToCart(
                           merchantId: widget.merchantId,
                           merchantName: widget.merchantName,
                           item: commerce.CartItem(

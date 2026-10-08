@@ -1,3 +1,5 @@
+import 'package:delwaqty/core/config/app_mode_provider.dart';
+import 'package:delwaqty/core/router/post_auth_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -117,7 +119,9 @@ class WelcomePage extends ConsumerWidget {
                   child: TextButton(
                     onPressed: () {
                       ref.read(authStateProvider.notifier).enterGuestMode();
-                      context.go('/home');
+                      context.go(
+                        postAuthRoute(ref.read(appFlavorProvider)),
+                      );
                     },
                     child: Text(
                       l10n.welcomeGuestButton,

@@ -21,6 +21,10 @@ abstract interface class ReviewRepository {
     String? comment,
     List<String>? imageUrls,
   });
+  /// Merchant reply. Writes only `merchant_reply`, never the customer's
+  /// `comment`.
+  Future<void> replyToReview({required String reviewId, required String reply});
+
   Future<Review> updateReview({
     required String reviewId,
     double? rating,
@@ -30,5 +34,5 @@ abstract interface class ReviewRepository {
   Future<void> deleteReview(String reviewId);
   Future<ReviewSummary> getMerchantRatingSummary(String merchantId);
   Future<ReviewSummary> getProductRatingSummary(String productId);
-  Stream<Review> watchMerchantReviews(String merchantId);
+  Stream<Review?> watchMerchantReviews(String merchantId);
 }

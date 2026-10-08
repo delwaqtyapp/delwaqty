@@ -110,17 +110,25 @@ class SupabaseDispatchDataSource {
     return map['driver_id'] as String;
   }
 
+  /// Flips the whole dispatch precondition set in one atomic call.
+  ///
+  /// `driver_set_online` (008) only wrote `is_online` + coordinates, but
+  /// `dispatch_delivery` selects on `status = 'online' AND is_verified
+  /// AND active_vehicle_id IS NOT NULL`. Since nothing else moved `status`
+  /// or linked an active vehicle, no driver was ever eligible for an
+  /// offer. `driver_set_online_state` (migration 107) updates status,
+  /// is_online, active_vehicle_id and the coordinates together.
   Future<void> setOnline(
     String driverId,
     bool online, {
     double? lat,
     double? lng,
   }) async {
-    _checkRpc(await _client.rpc('driver_set_online', params: {
-      'p_driver_id': driverId,
+    _checkRpc(await _client.rpc('driver_set_online_state', params: {
       'p_online': online,
       'p_lat': lat,
-      'p_lon': lng,
+      'p_lng': lng,
+      'p_driver_id': driverId,
     }));
   }
 

@@ -83,8 +83,8 @@ class DeliveryRepositoryImpl implements DeliveryRepository {
           proofUrl: proofUrl, finalDistanceKm: finalDistanceKm);
 
   @override
-  Future<void> cancelDelivery(String rideId, {String? reason}) =>
-      _dataSource.cancelDelivery(rideId, reason: reason);
+  Future<void> cancelDelivery(String rideId, {String? reason, bool byDriver = false}) =>
+      _dataSource.cancelDelivery(rideId, reason: reason, byDriver: byDriver);
 
 
   @override

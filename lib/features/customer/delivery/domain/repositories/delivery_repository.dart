@@ -30,7 +30,7 @@ abstract interface class DeliveryRepository {
   Future<void> driverArrivedAtPickup(String rideId, String driverId);
   Future<void> startDelivery(String rideId, String driverId, String otp);
   Future<double> completeDelivery(String rideId, String driverId, {String? proofUrl, double? finalDistanceKm});
-  Future<void> cancelDelivery(String rideId, {String? reason});
+  Future<void> cancelDelivery(String rideId, {String? reason, bool byDriver});
 
 
   Future<DeliveryPricingModel> getDeliveryPricing(String serviceType);

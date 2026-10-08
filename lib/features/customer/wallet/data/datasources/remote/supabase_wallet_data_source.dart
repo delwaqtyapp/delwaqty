@@ -107,71 +107,118 @@ class SupabaseWalletDataSource {
     }
   }
 
-  Future<WalletTransaction> topUp(String userId, double amount, String method) async {
+  /// Credits the wallet through the server-side atomic RPC.
+  ///
+  /// The previous implementation read the balance, added the amount in
+  /// Dart and wrote it back — so a retry or two concurrent calls could
+  /// credit twice, and there was no audit row if the ledger insert was
+  /// rejected. `wallet_topup` locks the wallet row, is idempotent on
+  /// p_idempotency_key and always writes the ledger entry.
+  Future<WalletTransaction> topUp(
+    String userId,
+    double amount,
+    String method, {
+    String? idempotencyKey,
+  }) async {
     try {
-      final balance = await getBalance(userId);
+      final res = await _client.rpc(
+        'wallet_topup',
+        params: {
+          'p_amount': amount,
+          'p_method': method,
+          'p_reference': userId,
+          'p_idempotency_key':
+              idempotencyKey ?? 'topup_${DateTime.now().microsecondsSinceEpoch}',
+        },
+      );
+      final map = Map<String, dynamic>.from(res as Map);
+      final txId = map['transaction_id'] as String?;
 
-      await _client.from(_walletsTable).update({
-        'balance': balance.balance + amount,
-        'updated_at': DateTime.now().toIso8601String(),
-      }).eq('id', balance.id);
+      if (txId != null) {
+        final row = await _client
+            .from(_transactionsTable)
+            .select()
+            .eq('id', txId)
+            .maybeSingle();
+        if (row != null) return _transactionFromRow(row);
+      }
 
-      final tx = await _client
-          .from(_transactionsTable)
-          .insert({
-            'wallet_id': balance.id,
-            'type': 'topup',
-            'amount': amount,
-            'description': 'Top up via $method',
-            'created_at': DateTime.now().toIso8601String(),
-          })
-          .select()
-          .single();
-
-      return _transactionFromRow(tx);
+      final walletRow = await _client
+          .from(_walletsTable)
+          .select('id')
+          .eq('user_id', userId)
+          .maybeSingle();
+      return WalletTransaction(
+        id: txId ?? 'local_${DateTime.now().microsecondsSinceEpoch}',
+        walletId: (walletRow?['id'] as String?) ?? '',
+        type: TransactionType.topup,
+        amount: amount,
+        description: 'Top up via $method',
+        createdAt: DateTime.now(),
+      );
     } catch (e, stack) {
       _logger.e('Failed to top up wallet', e, stack);
       rethrow;
     }
   }
 
+  /// Debits the wallet through the server-side atomic RPC, which locks
+  /// the row and refuses to go negative — no more double spend from two
+  /// concurrent taps.
   Future<WalletTransaction> pay(
     String userId,
     double amount,
     String description, {
     String? referenceId,
+    String? referenceType,
   }) async {
     try {
-      final balance = await getBalance(userId);
-
-      if (balance.balance < amount) {
-        throw Exception('Insufficient balance');
+      final res = await _client.rpc(
+        'wallet_pay',
+        params: {
+          'p_amount': amount,
+          'p_description': description,
+          'p_reference_type': referenceType,
+          'p_reference_id': referenceId,
+        },
+      );
+      final map = Map<String, dynamic>.from(res as Map);
+      if (map['ok'] != true) {
+        throw StateError(
+          map['code'] == 'INSUFFICIENT_BALANCE'
+              ? 'Insufficient balance'
+              : 'Wallet payment failed',
+        );
+      }
+      final txId = map['transaction_id'] as String?;
+      if (txId != null) {
+        final row = await _client
+            .from(_transactionsTable)
+            .select()
+            .eq('id', txId)
+            .maybeSingle();
+        if (row != null) return _transactionFromRow(row);
       }
 
-      await _client.from(_walletsTable).update({
-        'balance': balance.balance - amount,
-        'updated_at': DateTime.now().toIso8601String(),
-      }).eq('id', balance.id);
-
-      final tx = await _client
-          .from(_transactionsTable)
-          .insert({
-            'wallet_id': balance.id,
-            'type': 'payment',
-            'amount': amount,
-            'description': description,
-            'reference_id': referenceId,
-            'created_at': DateTime.now().toIso8601String(),
-          })
-          .select()
-          .single();
-
-      return _transactionFromRow(tx);
+      final walletRow = await _client
+          .from(_walletsTable)
+          .select('id')
+          .eq('user_id', userId)
+          .maybeSingle();
+      return WalletTransaction(
+        id: txId ?? 'local_${DateTime.now().microsecondsSinceEpoch}',
+        walletId: (walletRow?['id'] as String?) ?? '',
+        type: TransactionType.payment,
+        amount: amount,
+        description: description,
+        createdAt: DateTime.now(),
+      );
     } catch (e, stack) {
       _logger.e('Failed to pay from wallet', e, stack);
       rethrow;
     }
   }
+
 
   Future<WalletTransaction?> getTransactionById(String transactionId) async {
     try {

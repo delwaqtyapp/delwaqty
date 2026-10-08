@@ -26,7 +26,7 @@ class SupabaseFavoriteDataSource {
   Favorite _fromRow(Map<String, dynamic> row) {
     return Favorite(
       id: row['id'] as String,
-      targetId: row['product_id'] as String? ?? row['merchant_id'] as String,
+      targetId: row['product_id'] as String? ?? row['merchant_id'] as String? ?? '',
       type: row['product_id'] != null
           ? FavoriteType.product
           : FavoriteType.merchant,
@@ -47,7 +47,9 @@ class SupabaseFavoriteDataSource {
         query = query.not('merchant_id', 'is', null);
       }
 
-      final data = await query.order('created_at', ascending: false);
+      final data = await query
+          .order('created_at', ascending: false)
+          .limit(200);
       return (data as List)
           .map((row) => _fromRow(row as Map<String, dynamic>))
           .toList();

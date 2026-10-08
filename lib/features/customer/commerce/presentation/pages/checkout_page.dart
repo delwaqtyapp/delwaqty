@@ -1,3 +1,4 @@
+import 'package:delwaqty/features/customer/commerce/presentation/providers/cart_providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -200,12 +201,10 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
                               discount = cart.deliveryFee;
                               break;
                           }
-                          final cartRepo = ref.read(cartRepositoryProvider);
-                          await cartRepo.applyCoupon(
-                            coupon.code,
-                            discount: discount,
-                          );
-                          ref.invalidate(_cartFutureProvider);
+                          await ref.read(cartProvider.notifier).applyCoupon(
+                                coupon.code,
+                                discount: discount,
+                              );
                           if (context.mounted) {
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
@@ -339,8 +338,7 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
         paymentMethod: _paymentMethod,
       );
 
-      await ref.read(cartRepositoryProvider).clearCart();
-      ref.invalidate(_cartFutureProvider);
+      await ref.read(cartProvider.notifier).clear();
 
       if (!mounted) return;
       context.go('/market/order-completed/${order.id}');
@@ -360,11 +358,8 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
   }
 }
 
-final _cartFutureProvider = FutureProvider.autoDispose<commerce.Cart?>((
-  ref,
-) async {
-  final repo = ref.watch(cartRepositoryProvider);
-  return repo.getCurrentCart();
+final _cartFutureProvider = Provider<AsyncValue<commerce.Cart?>>((ref) {
+  return ref.watch(cartProvider);
 });
 
 class _SectionTitle extends StatelessWidget {

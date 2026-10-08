@@ -1,3 +1,4 @@
+import 'package:delwaqty/features/driver/driver_module.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -81,8 +82,27 @@ class _DriverDeliveryDetailPageState
   Widget build(BuildContext context) {
     final orderAsync = ref.watch(deliveryOrderByIdProvider(widget.id));
     final authState = ref.watch(authStateProvider);
-    final driverId =
-        authState is AuthAuthenticated ? authState.user.id : '';
+    final userId =
+        authState is AuthAuthenticated ? authState.user.id : null;
+
+    // Every lifecycle RPC (accept_ride_request / driver_arrive /
+    // start_trip / complete_delivery) opens with
+    //   SELECT user_id INTO v_owner FROM drivers WHERE id = p_driver_id
+    // and rejects the call when p_driver_id is not a drivers.id.
+    // Passing the auth uid made Accept / Arrive / Start / Complete all
+    // fail with 'forbidden', so the whole delivery loop was dead from
+    // this page.
+    final profileAsync = userId == null
+        ? null
+        : ref.watch(driverProfileProvider(userId));
+    final driverId = profileAsync?.asData?.value?.id ?? '';
+
+    if (userId != null && driverId.isEmpty) {
+      return Scaffold(
+        appBar: AppBar(title: const Text('تفاصيل التوصيل')),
+        body: const Center(child: CircularProgressIndicator()),
+      );
+    }
 
     return Scaffold(
       appBar: AppBar(title: const Text('تفاصيل التوصيل')),
@@ -175,7 +195,8 @@ class _DriverDeliveryDetailPageState
                       : () => _run(() => ref
                           .read(deliveryRepositoryProvider)
                           .cancelDelivery(order.id,
-                              reason: 'cancelled_by_driver')),
+                              reason: 'cancelled_by_driver',
+                              byDriver: true)),
                   child: const Text('إلغاء'),
                 ),
               ],

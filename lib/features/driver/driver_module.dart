@@ -1,3 +1,4 @@
+import 'package:delwaqty/features/driver/presentation/pages/driver_delivery_hub_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -108,6 +109,10 @@ class DriverModule extends FeatureModule {
           builder: (context, state) => const DriverTopupRequestPage(),
         ),
       ],
+    ),
+    GoRoute(
+      path: '/driver/hub',
+      builder: (context, state) => const DriverDeliveryHubPage(),
     ),
     GoRoute(
       path: '/driver/delivery/:id',

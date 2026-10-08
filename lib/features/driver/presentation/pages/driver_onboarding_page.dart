@@ -1,17 +1,19 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:delwaqty/features/driver/driver_module.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-class DriverOnboardingPage extends StatefulWidget {
+class DriverOnboardingPage extends ConsumerStatefulWidget {
   const DriverOnboardingPage({super.key});
 
   @override
-  State<DriverOnboardingPage> createState() => _DriverOnboardingPageState();
+  ConsumerState<DriverOnboardingPage> createState() => _DriverOnboardingPageState();
 }
 
-class _DriverOnboardingPageState extends State<DriverOnboardingPage> {
+class _DriverOnboardingPageState extends ConsumerState<DriverOnboardingPage> {
   final SupabaseClient _supabase = Supabase.instance.client;
   File? _licenseImage;
   File? _vehicleImage;
@@ -51,17 +53,39 @@ class _DriverOnboardingPageState extends State<DriverOnboardingPage> {
     if (_licenseImage == null) return;
     setState(() => _isUploading = true);
     try {
-      final userId = _supabase.auth.currentUser!.id;
-      final fileName = 'driver_licenses/$userId/${DateTime.now().millisecondsSinceEpoch}.jpg';
+      final authId = _supabase.auth.currentUser?.id;
+      if (authId == null) return;
+      // upsert_driver_document keys on driver_documents.driver_id which
+      // REFERENCES drivers(id) — NOT the auth uid. Passing the uid made
+      // every upload fail with a foreign-key violation.
+      final profileAsync = await ref.read(driverProfileProvider(authId).future);
+      final driverId = profileAsync?.id;
+      if (driverId == null) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(l10n.failedToLoad)),
+          );
+        }
+        return;
+      }
+      // Storage RLS requires the SECOND path segment to be the driver id
+      // (064_driver_documents.sql), so the key is <folder>/<drivers.id>/…
+      final fileName =
+          'driver_licenses/$driverId/${DateTime.now().millisecondsSinceEpoch}.jpg';
       final fileBytes = await _licenseImage!.readAsBytes();
-      await _supabase.storage.from('driver-documents').uploadBinary(fileName, fileBytes);
-      final filePath = 'driver-documents/$fileName';
-      final fileUrl = _supabase.storage.from('driver-documents').getPublicUrl(filePath);
+      await _supabase.storage
+          .from('driver-documents')
+          .uploadBinary(fileName, fileBytes);
+      // The bucket is PRIVATE, so a public URL cannot be read by anyone;
+      // store a signed URL that the admin console can open.
+      final fileUrl = await _supabase.storage
+          .from('driver-documents')
+          .createSignedUrl(fileName, 3600);
 
       await _supabase
           .rpc('upsert_driver_document', params: {
-        'p_driver_id': userId,
-        'p_doc_type': 'license',
+        'p_driver_id': driverId,
+        'p_doc_type': 'driving_license',
         'p_file_url': fileUrl,
         'p_file_name': 'license.jpg',
         'p_file_size': _licenseImage!.lengthSync(),
@@ -93,17 +117,39 @@ class _DriverOnboardingPageState extends State<DriverOnboardingPage> {
     if (_vehicleImage == null) return;
     setState(() => _isUploading = true);
     try {
-      final userId = _supabase.auth.currentUser!.id;
-      final fileName = 'driver_vehicles/$userId/${DateTime.now().millisecondsSinceEpoch}.jpg';
+      final authId = _supabase.auth.currentUser?.id;
+      if (authId == null) return;
+      // upsert_driver_document keys on driver_documents.driver_id which
+      // REFERENCES drivers(id) — NOT the auth uid. Passing the uid made
+      // every upload fail with a foreign-key violation.
+      final profileAsync = await ref.read(driverProfileProvider(authId).future);
+      final driverId = profileAsync?.id;
+      if (driverId == null) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(l10n.failedToLoad)),
+          );
+        }
+        return;
+      }
+      // Storage RLS requires the SECOND path segment to be the driver id
+      // (064_driver_documents.sql), so the key is <folder>/<drivers.id>/…
+      final fileName =
+          'driver_vehicles/$driverId/${DateTime.now().millisecondsSinceEpoch}.jpg';
       final fileBytes = await _vehicleImage!.readAsBytes();
-      await _supabase.storage.from('driver-documents').uploadBinary(fileName, fileBytes);
-      final filePath = 'driver-documents/$fileName';
-      final fileUrl = _supabase.storage.from('driver-documents').getPublicUrl(filePath);
+      await _supabase.storage
+          .from('driver-documents')
+          .uploadBinary(fileName, fileBytes);
+      // The bucket is PRIVATE, so a public URL cannot be read by anyone;
+      // store a signed URL that the admin console can open.
+      final fileUrl = await _supabase.storage
+          .from('driver-documents')
+          .createSignedUrl(fileName, 3600);
 
       await _supabase
           .rpc('upsert_driver_document', params: {
-        'p_driver_id': userId,
-        'p_doc_type': 'vehicle',
+        'p_driver_id': driverId,
+        'p_doc_type': 'vehicle_registration',
         'p_file_url': fileUrl,
         'p_file_name': 'vehicle.jpg',
         'p_file_size': _vehicleImage!.lengthSync(),
@@ -127,6 +173,42 @@ class _DriverOnboardingPageState extends State<DriverOnboardingPage> {
       }
     } finally {
       if (mounted) setState(() => _isUploading = false);
+    }
+  }
+
+  /// Finishes onboarding for real.
+  ///
+  /// The button used to be a bare `Navigator.pop()`, so
+  /// `complete_driver_onboarding` was never called and
+  /// drivers.onboarding_completed stayed false for every driver who
+  /// onboarded through the app.
+  Future<void> _completeOnboarding() async {
+    final l10n = AppLocalizations.of(context);
+    final authId = _supabase.auth.currentUser?.id;
+    if (authId == null) return;
+
+    setState(() => _isUploading = true);
+    try {
+      final profile =
+          await ref.read(driverProfileProvider(authId).future);
+      final driverId = profile?.id;
+      if (driverId != null) {
+        await ref
+            .read(driverRepositoryProvider)
+            .completeOnboarding(driverId);
+        ref.invalidate(driverProfileProvider(authId));
+      }
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.onboardingCompleted)),
+      );
+      Navigator.of(context).pop();
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _isUploading = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.somethingWentWrong)),
+      );
     }
   }
 
@@ -172,12 +254,13 @@ class _DriverOnboardingPageState extends State<DriverOnboardingPage> {
               _uploadVehicle,
             ),
             const SizedBox(height: 40),
-            if (_isUploading) const Center(child: CircularProgressIndicator()) else ElevatedButton(
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                    },
-                    child: Text(l10n.complete),
-                  ),
+            if (_isUploading)
+              const Center(child: CircularProgressIndicator())
+            else
+              ElevatedButton(
+                onPressed: _completeOnboarding,
+                child: Text(l10n.complete),
+              ),
           ],
         ),
       ),

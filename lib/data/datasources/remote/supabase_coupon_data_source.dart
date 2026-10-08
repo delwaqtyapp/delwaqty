@@ -89,7 +89,11 @@ class SupabaseCouponDataSource {
 
   Future<void> incrementUsage(String code) async {
     await _client
-        .rpc('increment_coupon_usage', params: {'coupon_code': code})
+        // The live function signature is increment_coupon_usage(p_coupon_code).
+        // The app was sending "coupon_code", so every redemption failed with
+        // PGRST202 and silently fell through to the non-atomic read/modify
+        // write below — which means limited-use coupons never incremented.
+        .rpc('increment_coupon_usage', params: {'p_coupon_code': code})
         .catchError((_) async {
           final coupon = await getCouponByCode(code);
           if (coupon != null && coupon.usedCount != null) {
@@ -106,39 +110,6 @@ class SupabaseCouponDataSource {
         .from('coupons')
         .select()
         .eq('merchant_id', merchantId)
-        .order('created_at', ascending: false);
-    return (data as List)
-        .map((r) => _fromRow(r as Map<String, dynamic>))
-        .toList();
-  }
-
-  Future<List<Coupon>> getBranchCoupons(String branchId) async {
-    final data = await _client
-        .from('coupons')
-        .select()
-        .eq('branch_id', branchId)
-        .order('created_at', ascending: false);
-    return (data as List)
-        .map((r) => _fromRow(r as Map<String, dynamic>))
-        .toList();
-  }
-
-  Future<List<Coupon>> getProductCoupons(String productId) async {
-    final data = await _client
-        .from('coupons')
-        .select()
-        .eq('product_id', productId)
-        .order('created_at', ascending: false);
-    return (data as List)
-        .map((r) => _fromRow(r as Map<String, dynamic>))
-        .toList();
-  }
-
-  Future<List<Coupon>> getCategoryCoupons(String categoryId) async {
-    final data = await _client
-        .from('coupons')
-        .select()
-        .eq('category_id', categoryId)
         .order('created_at', ascending: false);
     return (data as List)
         .map((r) => _fromRow(r as Map<String, dynamic>))

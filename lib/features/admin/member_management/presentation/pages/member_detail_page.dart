@@ -1,3 +1,4 @@
+import 'package:delwaqty/core/utils/avatar_initial.dart';
 import 'package:delwaqty/core/theme/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -294,7 +295,7 @@ class _MemberProfileBody extends ConsumerWidget {
             radius: 40,
             backgroundColor: statusColor.withValues(alpha: 0.15),
             child: Text(
-              name.substring(0, 1).toUpperCase(),
+              safeInitial(name),
               style: TextStyle(
                 fontSize: 32,
                 color: statusColor,

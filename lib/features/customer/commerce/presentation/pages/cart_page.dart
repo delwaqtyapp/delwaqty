@@ -1,7 +1,7 @@
+import 'package:delwaqty/features/customer/commerce/presentation/providers/cart_providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:delwaqty/features/customer/commerce/commerce_module.dart';
 import 'package:delwaqty/features/customer/commerce/domain/entities/cart.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 import 'package:delwaqty/core/extensions/context_extensions.dart';
@@ -10,9 +10,8 @@ import 'package:delwaqty/shared/widgets/empty_state.dart';
 import 'package:delwaqty/shared/widgets/app_loader.dart';
 import 'package:delwaqty/shared/widgets/error_state.dart';
 
-final _cartFutureProvider = FutureProvider<Cart?>((ref) async {
-  final repo = ref.watch(cartRepositoryProvider);
-  return repo.getCurrentCart();
+final _cartFutureProvider = Provider<AsyncValue<Cart?>>((ref) {
+  return ref.watch(cartProvider);
 });
 
 class CartPage extends ConsumerWidget {
@@ -31,8 +30,7 @@ class CartPage extends ConsumerWidget {
         actions: [
           TextButton(
             onPressed: () async {
-              await ref.read(cartRepositoryProvider).clearCart();
-              ref.invalidate(_cartFutureProvider);
+              await ref.read(cartProvider.notifier).clear();
             },
             child: Text(l10n.clearCart),
           ),
@@ -78,9 +76,8 @@ class CartPage extends ConsumerWidget {
                         ),
                         onDismissed: (_) async {
                           await ref
-                              .read(cartRepositoryProvider)
-                              .removeFromCart(cartItemId: item.id);
-                          ref.invalidate(_cartFutureProvider);
+                              .read(cartProvider.notifier)
+                              .removeItem(item.id);
                         },
                         child: Card(
                           margin: const EdgeInsets.only(bottom: 8),
@@ -124,19 +121,16 @@ class CartPage extends ConsumerWidget {
                                       onPressed: () async {
                                         if (item.quantity <= 1) {
                                           await ref
-                                              .read(cartRepositoryProvider)
-                                              .removeFromCart(
-                                                cartItemId: item.id,
-                                              );
+                                              .read(cartProvider.notifier)
+                                              .removeItem(item.id);
                                         } else {
                                           await ref
-                                              .read(cartRepositoryProvider)
-                                              .updateCartItem(
+                                              .read(cartProvider.notifier)
+                                              .updateQuantity(
                                                 cartItemId: item.id,
                                                 quantity: item.quantity - 1,
                                               );
                                         }
-                                        ref.invalidate(_cartFutureProvider);
                                       },
                                     ),
                                     const SizedBox(width: 16),
@@ -151,12 +145,11 @@ class CartPage extends ConsumerWidget {
                                       icon: Icons.add_circle_outline,
                                       onPressed: () async {
                                         await ref
-                                            .read(cartRepositoryProvider)
-                                            .updateCartItem(
+                                            .read(cartProvider.notifier)
+                                            .updateQuantity(
                                               cartItemId: item.id,
                                               quantity: item.quantity + 1,
                                             );
-                                        ref.invalidate(_cartFutureProvider);
                                       },
                                     ),
                                   ],

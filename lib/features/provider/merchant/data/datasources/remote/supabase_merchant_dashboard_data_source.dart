@@ -19,23 +19,34 @@ class SupabaseMerchantDashboardDataSource {
   final AppLogger _logger;
 
   MerchantOrder _orderFromRow(Map<String, dynamic> row) {
-    final itemsData = row['items'] as List<dynamic>? ?? [];
+    final itemsData = row['order_items'] as List<dynamic>? ?? [];
     final items = itemsData.map((item) {
       final data = item as Map<String, dynamic>;
-      final modifiersData = data['modifiers'] as List<dynamic>? ?? [];
+      final modifiersData = data['modifiers'];
+      final modifierNames = modifiersData is List
+          ? modifiersData.map((e) => e.toString()).toList()
+          : <String>[];
+      final product = data['products'];
+      final productName = (product is Map && product['name'] != null)
+          ? product['name'] as String
+          : (data['product_name'] as String? ?? '');
       return MerchantOrderItem(
-        productId: data['product_id'] as String,
-        productName: data['product_name'] as String,
-        quantity: data['quantity'] as int,
-        unitPrice: (data['unit_price'] as num).toDouble(),
-        modifiers: List<String>.from(modifiersData),
+        productId: data['product_id'] as String? ?? '',
+        productName: productName,
+        quantity: (data['quantity'] as num?)?.toInt() ?? 1,
+        unitPrice: (data['unit_price'] as num?)?.toDouble() ?? 0,
+        modifiers: modifierNames,
       );
     }).toList();
 
+    final user = row['users'];
+
     return MerchantOrder(
       id: row['id'] as String,
-      customerId: row['customer_id'] as String,
-      customerName: row['customer_name'] as String?,
+      customerId: row['user_id'] as String? ?? '',
+      customerName: (user is Map && user['full_name'] != null)
+          ? user['full_name'] as String
+          : null,
       items: items,
       totalAmount: (row['total_amount'] as num).toDouble(),
       status: row['status'] as String,
@@ -50,51 +61,59 @@ class SupabaseMerchantDashboardDataSource {
       final now = DateTime.now();
       final todayStart = DateTime(now.year, now.month, now.day);
 
-      final ordersData = await _client
+      // Every one of these used to download the merchant's WHOLE orders /
+      // products / reviews history and aggregate it in Dart, which fails on
+      // real data volumes. PostgREST's count() returns the exact row count
+      // in a header without transferring a single row.
+      final todayRes = await _client
           .from('orders')
-          .select('id, status, total_amount, created_at')
-          .eq('merchant_id', merchantId);
+          .count()
+          .eq('merchant_id', merchantId)
+          .gte('created_at', todayStart.toIso8601String());
 
-      final allOrders = ordersData as List<dynamic>;
-      final todayOrders = allOrders.where((o) {
-        final createdAt = DateTime.parse(o['created_at'] as String);
-        return createdAt.isAfter(todayStart);
-      }).toList();
+      final pendingRes = await _client
+          .from('orders')
+          .count()
+          .eq('merchant_id', merchantId)
+          .eq('status', 'pending');
 
-      final todayRevenue = todayOrders.fold<double>(
+      final revenueRes = await _client
+          .from('orders')
+          .select('total_amount')
+          .eq('merchant_id', merchantId)
+          .gte('created_at', todayStart.toIso8601String());
+      final todayRevenue = (revenueRes as List<dynamic>).fold<double>(
         0,
-        (sum, o) => sum + (o['total_amount'] as num).toDouble(),
+        (sum, o) => sum + ((o['total_amount'] as num?)?.toDouble() ?? 0),
       );
 
-      final pendingOrders =
-          allOrders.where((o) => o['status'] == 'pending').length;
-
-      final productsData = await _client
+      final totalProducts = await _client
           .from('products')
-          .select('id')
+          .count()
           .eq('merchant_id', merchantId);
 
-      final totalProducts = (productsData as List<dynamic>).length;
+      final totalReviews = await _client
+          .from('reviews')
+          .count()
+          .eq('merchant_id', merchantId);
 
-      final reviewsData = await _client
+      final ratingRes = await _client
           .from('reviews')
           .select('rating')
           .eq('merchant_id', merchantId);
-
-      final reviews = reviewsData as List<dynamic>;
-      final totalReviews = reviews.length;
-      final averageRating = totalReviews > 0
-          ? reviews.fold<double>(
-              0,
-              (sum, r) => sum + (r['rating'] as num).toDouble(),
-            ) /
-              totalReviews
-          : 0.0;
+      final reviews = ratingRes as List<dynamic>;
+      final averageRating = reviews.isEmpty
+          ? 0.0
+          : reviews.fold<double>(
+                0,
+                (sum, r) => sum + ((r['rating'] as num?)?.toDouble() ?? 0),
+              ) /
+              reviews.length;
 
       return MerchantStats(
-        todayOrders: todayOrders.length,
+        todayOrders: todayRes,
         todayRevenue: todayRevenue,
-        pendingOrders: pendingOrders,
+        pendingOrders: pendingRes,
         averageRating: averageRating,
         totalProducts: totalProducts,
         totalReviews: totalReviews,
@@ -114,7 +133,11 @@ class SupabaseMerchantDashboardDataSource {
     try {
       var query = _client
           .from('orders')
-          .select('*, users(name)')
+          .select(
+            'id, user_id, status, total_amount, created_at, delivery_address, notes, '
+            'users(full_name), '
+            'order_items(product_id, product_name, quantity, unit_price, modifiers, products(name))',
+          )
           .eq('merchant_id', merchantId);
 
       if (status != null) {
@@ -129,7 +152,7 @@ class SupabaseMerchantDashboardDataSource {
         final map = row as Map<String, dynamic>;
         final usersData = map['users'] as Map<String, dynamic>?;
         final orderMap = Map<String, dynamic>.from(map);
-        orderMap['customer_name'] = usersData?['name'] as String?;
+        orderMap['customer_name'] = usersData?['full_name'] as String?;
         return _orderFromRow(orderMap);
       }).toList();
     } catch (e) {

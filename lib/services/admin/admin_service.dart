@@ -11,12 +11,10 @@ class AdminService {
   // ─── Dashboard ────────────────────────────────────────────
 
   Future<AdminDashboardMetrics> getDashboardMetrics() async {
-    try {
-      return await _repository.getDashboardMetrics();
-    } catch (e) {
-      debugPrint('AdminService.getDashboardMetrics error: $e');
-      return const AdminDashboardMetrics();
-    }
+    // Deliberately NOT swallowing: returning an all-zero metrics object
+    // made the analytics page render a confident "EGP 0.00" revenue
+    // figure whenever the RPC failed, hiding a real outage.
+    return _repository.getDashboardMetrics();
   }
 
   Future<List<AdminActivityLog>> getRecentActivity({int limit = 20}) async {

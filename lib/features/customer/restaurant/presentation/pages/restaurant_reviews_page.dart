@@ -1,3 +1,4 @@
+import 'package:delwaqty/core/utils/avatar_initial.dart';
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -340,7 +341,7 @@ class _ReviewTile extends StatelessWidget {
                 radius: 16,
                 backgroundColor: theme.colorScheme.primaryContainer,
                 child: Text(
-                  (review.userName ?? 'U').substring(0, 1).toUpperCase(),
+                  safeInitial(review.userName, fallback: 'U'),
                   style: theme.textTheme.labelMedium?.copyWith(fontWeight: FontWeight.bold),
                 ),
               ),

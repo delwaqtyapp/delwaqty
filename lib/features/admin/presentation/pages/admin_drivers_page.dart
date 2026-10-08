@@ -1,3 +1,4 @@
+import 'package:delwaqty/core/theme/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:delwaqty/services/admin/admin_providers.dart';
@@ -50,6 +51,23 @@ class _AdminDriversPageState extends ConsumerState<AdminDriversPage> {
     final l10n = AppLocalizations.of(context);
     final cs = Theme.of(context).colorScheme;
     final driversAsync = ref.watch(_adminDriversProvider);
+    final drivers = driversAsync.asData?.value ?? const <Map<String, dynamic>>[];
+    final totalDrivers = drivers.length;
+    final activeDrivers =
+        drivers.where((d) => (d['is_active'] as bool?) ?? false).length;
+    final pendingDrivers = drivers
+        .where((d) => (d['verification_status'] as String?) == 'pending')
+        .length;
+    final ratedDrivers = drivers
+        .where((d) => ((d['rating'] as num?) ?? 0) > 0)
+        .toList();
+    final avgRating = ratedDrivers.isEmpty
+        ? '--'
+        : (ratedDrivers
+                    .map((d) => (d['rating'] as num).toDouble())
+                    .reduce((a, b) => a + b) /
+                ratedDrivers.length)
+              .toStringAsFixed(1);
 
     return Scaffold(
       appBar: AppBar(
@@ -70,10 +88,10 @@ class _AdminDriversPageState extends ConsumerState<AdminDriversPage> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
-                  _StatItem(label: l10n.total, value: '--', icon: Icons.people_outline_rounded, color: cs.primary, cs: cs),
-                  _StatItem(label: l10n.active, value: '--', icon: Icons.check_circle_outline_rounded, color: Colors.green, cs: cs),
-                  _StatItem(label: l10n.pending, value: '--', icon: Icons.pending_outlined, color: Colors.orange, cs: cs),
-                  _StatItem(label: l10n.rating, value: '--', icon: Icons.star_outline_rounded, color: Colors.amber, cs: cs),
+                  _StatItem(label: l10n.total, value: '$totalDrivers', icon: Icons.people_outline_rounded, color: cs.primary, cs: cs),
+                  _StatItem(label: l10n.active, value: '$activeDrivers', icon: Icons.check_circle_outline_rounded, color: AppColors.successLight, cs: cs),
+                  _StatItem(label: l10n.pending, value: '$pendingDrivers', icon: Icons.pending_outlined, color: AppColors.warningLight, cs: cs),
+                  _StatItem(label: l10n.rating, value: avgRating, icon: Icons.star_outline_rounded, color: AppColors.brandGold, cs: cs),
                 ],
               ),
             ),
@@ -150,9 +168,9 @@ class _AdminDriversPageState extends ConsumerState<AdminDriversPage> {
                           },
                           onSuspend: () async {
                             final adminService = ref.read(adminServiceProvider);
-                            await adminService.verifyDriver(
+                            await adminService.updateDriverOnlineStatus(
                               driverId: driver['id'] as String,
-                              isVerified: false,
+                              isActive: false,
                             );
                             ref.invalidate(_adminDriversProvider);
                           },

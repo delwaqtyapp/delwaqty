@@ -23,7 +23,7 @@ final _reservationsFilterProvider = StateProvider<ReservationStatus?>(
 final _reservationsProvider =
     FutureProvider<List<Reservation>>((ref) async {
   final repo = ref.watch(reservationRepositoryProvider);
-  final merchantId = ref.watch(_merchantIdProvider);
+  final merchantId = await ref.watch(_merchantIdProvider.future);
   final status = ref.watch(_reservationsFilterProvider);
   return repo.getReservations(merchantId, status: status);
 });

@@ -21,7 +21,7 @@ final _ordersFilterProvider = StateProvider<String?>((ref) => null);
 
 final _ordersProvider = FutureProvider<List<MerchantOrder>>((ref) async {
   final repo = ref.watch(merchantDashboardRepositoryProvider);
-  final merchantId = ref.watch(_merchantIdProvider);
+  final merchantId = await ref.watch(_merchantIdProvider.future);
   final status = ref.watch(_ordersFilterProvider);
   return repo.getMerchantOrders(merchantId, status: status);
 });

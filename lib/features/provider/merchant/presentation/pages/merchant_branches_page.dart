@@ -16,7 +16,7 @@ final _merchantIdProvider = providerMerchantIdProvider;
 
 final _branchesProvider = FutureProvider<List<Branch>>((ref) async {
   final repo = ref.watch(branchRepositoryProvider);
-  final merchantId = ref.watch(_merchantIdProvider);
+  final merchantId = await ref.watch(_merchantIdProvider.future);
   return repo.getBranches(merchantId);
 });
 
@@ -45,7 +45,7 @@ class _MerchantBranchesPageState extends ConsumerState<MerchantBranchesPage> {
         ],
       ),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => _showBranchForm(context),
+        onPressed: () => _showBranchForm(context, ref),
         icon: const Icon(Icons.add),
         label: Text(l10n.addBranch),
       ),
@@ -75,7 +75,7 @@ class _MerchantBranchesPageState extends ConsumerState<MerchantBranchesPage> {
                 title: l10n.noBranches,
                 message: l10n.noBranches,
                 actionLabel: l10n.addBranch,
-                onAction: () => _showBranchForm(context),
+                onAction: () => _showBranchForm(context, ref),
               ),
             );
           }
@@ -95,7 +95,7 @@ class _MerchantBranchesPageState extends ConsumerState<MerchantBranchesPage> {
                   delay: Duration(milliseconds: index * 50),
                   child: _BranchCard(
                     branch: branch,
-                    onTap: () => _showBranchForm(context, branch: branch),
+                    onTap: () => _showBranchForm(context, ref, branch: branch),
                     onDelete: () => _confirmDelete(context, branch),
                     onToggleActive: () => _toggleActive(branch),
                   ),
@@ -108,13 +108,17 @@ class _MerchantBranchesPageState extends ConsumerState<MerchantBranchesPage> {
     );
   }
 
-  void _showBranchForm(BuildContext context, {Branch? branch}) {
+  void _showBranchForm(
+    BuildContext context,
+    WidgetRef ref, {Branch? branch}) {
+    final merchantId =
+        ref.read(providerMerchantIdProvider).value ?? '';
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       useSafeArea: true,
       builder: (_) => _BranchFormSheet(
-        merchantId: ref.read(_merchantIdProvider),
+        merchantId: merchantId,
         branch: branch,
         onSaved: () {
           ref.invalidate(_branchesProvider);

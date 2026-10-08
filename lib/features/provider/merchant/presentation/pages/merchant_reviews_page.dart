@@ -17,13 +17,13 @@ final _merchantIdProvider = providerMerchantIdProvider;
 
 final _reviewsProvider = FutureProvider<List<Review>>((ref) async {
   final repo = ref.watch(reviewRepositoryProvider);
-  final merchantId = ref.watch(_merchantIdProvider);
+  final merchantId = await ref.watch(_merchantIdProvider.future);
   return repo.getMerchantReviews(merchantId);
 });
 
 final _reviewSummaryProvider = FutureProvider<ReviewSummary>((ref) async {
   final repo = ref.watch(reviewRepositoryProvider);
-  final merchantId = ref.watch(_merchantIdProvider);
+  final merchantId = await ref.watch(_merchantIdProvider.future);
   return repo.getMerchantRatingSummary(merchantId);
 });
 

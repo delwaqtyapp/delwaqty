@@ -6487,4 +6487,98 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get adminManagementMode => 'وضع الإدارة';
+
+  @override
+  String get inventory => 'المخزون';
+
+  @override
+  String get noInventoryItems => 'لا يوجد مخزون بعد';
+
+  @override
+  String get noInventoryItemsDescription =>
+      'أضف منتجات وحدد كمياتها لبدء تتبع المخزون.';
+
+  @override
+  String get products => 'المنتجات';
+
+  @override
+  String get lowStock => 'مخزون منخفض';
+
+  @override
+  String get stockQuantity => 'الكمية';
+
+  @override
+  String get lowStockThreshold => 'تنبيه عند وصول الكمية إلى';
+
+  @override
+  String get availableLabel => 'متاح';
+
+  @override
+  String get noMerchantAccount => 'لا يوجد حساب متجر';
+
+  @override
+  String get noMerchantAccountDescription => 'هذا الحساب غير مرتبط بمتجر بعد.';
+
+  @override
+  String get refresh => 'تحديث';
+
+  @override
+  String get storefront => 'بيانات المتجر';
+
+  @override
+  String get storeIdentity => 'هوية المتجر';
+
+  @override
+  String get storeName => 'اسم المتجر';
+
+  @override
+  String get logoUrl => 'رابط الشعار';
+
+  @override
+  String get deliveryPolicy => 'سياسة التوصيل';
+
+  @override
+  String get deliveryTimeMinutes => 'مدة التوصيل (دقائق)';
+
+  @override
+  String get openAlerts => 'مفتوحة';
+
+  @override
+  String get markResolved => 'تم الحل';
+
+  @override
+  String get noEmergencies => 'لا توجد تنبيهات طوارئ';
+
+  @override
+  String get noEmergenciesDescription => 'لم يتم رفع أي تنبيه استغاثة.';
+
+  @override
+  String get dismiss => 'تجاهل';
+
+  @override
+  String get auditLog => 'سجل التدقيق';
+
+  @override
+  String get noAuditEntries => 'لا توجد سجلات';
+
+  @override
+  String get noAuditEntriesDescription => 'ستظهر هنا الإجراءات الإدارية.';
+
+  @override
+  String get searchAudit => 'ابحث في الإجراءات أو الموارد';
+
+  @override
+  String get assignToMe => 'إسناد إليّ';
+
+  @override
+  String get complaintAssignedToYou => 'تم إسناد الشكوى إليك.';
+
+  @override
+  String get bookings => 'حجز';
+
+  @override
+  String get slaCompliance => 'مستوى الخدمة';
+
+  @override
+  String get deliveryRides => 'الرحلات';
 }

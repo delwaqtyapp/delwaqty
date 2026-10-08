@@ -6527,4 +6527,100 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get adminManagementMode => 'Management Mode';
+
+  @override
+  String get inventory => 'Inventory';
+
+  @override
+  String get noInventoryItems => 'No inventory yet';
+
+  @override
+  String get noInventoryItemsDescription =>
+      'Add products and set their stock to start tracking inventory.';
+
+  @override
+  String get products => 'Products';
+
+  @override
+  String get lowStock => 'Low stock';
+
+  @override
+  String get stockQuantity => 'Stock quantity';
+
+  @override
+  String get lowStockThreshold => 'Low stock alert at';
+
+  @override
+  String get availableLabel => 'available';
+
+  @override
+  String get noMerchantAccount => 'No merchant account';
+
+  @override
+  String get noMerchantAccountDescription =>
+      'This account is not linked to a merchant store yet.';
+
+  @override
+  String get refresh => 'Refresh';
+
+  @override
+  String get storefront => 'Storefront';
+
+  @override
+  String get storeIdentity => 'Store identity';
+
+  @override
+  String get storeName => 'Store name';
+
+  @override
+  String get logoUrl => 'Logo URL';
+
+  @override
+  String get deliveryPolicy => 'Delivery policy';
+
+  @override
+  String get deliveryTimeMinutes => 'Delivery time (minutes)';
+
+  @override
+  String get openAlerts => 'Open';
+
+  @override
+  String get markResolved => 'Resolve';
+
+  @override
+  String get noEmergencies => 'No emergency alerts';
+
+  @override
+  String get noEmergenciesDescription => 'No SOS alerts have been raised.';
+
+  @override
+  String get dismiss => 'Dismiss';
+
+  @override
+  String get auditLog => 'Audit log';
+
+  @override
+  String get noAuditEntries => 'No audit entries';
+
+  @override
+  String get noAuditEntriesDescription =>
+      'Administrative actions will appear here.';
+
+  @override
+  String get searchAudit => 'Search actions or resources';
+
+  @override
+  String get assignToMe => 'Assign to me';
+
+  @override
+  String get complaintAssignedToYou => 'The complaint is now assigned to you.';
+
+  @override
+  String get bookings => 'bookings';
+
+  @override
+  String get slaCompliance => 'SLA';
+
+  @override
+  String get deliveryRides => 'Rides';
 }

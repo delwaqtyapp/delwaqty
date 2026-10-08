@@ -14,7 +14,7 @@ final _merchantIdProvider = providerMerchantIdProvider;
 
 final _productsProvider = FutureProvider<List<Map<String, dynamic>>>((ref) async {
   final repo = ref.watch(merchantDashboardRepositoryProvider);
-  final merchantId = ref.watch(_merchantIdProvider);
+  final merchantId = await ref.watch(_merchantIdProvider.future);
   return repo.getMerchantProducts(merchantId);
 });
 
@@ -45,6 +45,11 @@ class _MerchantProductsPageState extends ConsumerState<MerchantProductsPage> {
       appBar: AppBar(
         title: Text(l10n.manageProducts),
         actions: [
+          IconButton(
+            tooltip: l10n.inventory,
+            icon: const Icon(Icons.inventory_2_outlined),
+            onPressed: () => context.push('/merchant-dashboard/inventory'),
+          ),
           IconButton(
             icon: const Icon(Icons.refresh),
             onPressed: () => ref.invalidate(_productsProvider),

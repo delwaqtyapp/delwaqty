@@ -4357,3 +4357,28 @@ The app and the database had drifted apart badly enough that several core flows 
 
 ### Consequences
 `flutter analyze` clean (with `use_build_context_synchronously`, `unawaited_futures`, `cancel_subscriptions`, `close_sinks`, `always_declare_return_types`, `avoid_slow_async_io` now on — they exposed 53 latent issues, all fixed); `flutter test` **1059/1059**; all four flavors build (`releases/delwaqty_{admin,driver,provider}_1.0.1+2_debug_20261008_1459.apk`). Two new hermetic regression suites assert the code/database contract, the manifest, the OTA digest, the EN/AR key parity and the currency, and both were proven to fail when a fix is reverted. Remaining known gaps (documented, not hidden): inventory/stock and storefront-editing UIs for the merchant panel, `working_hours` editing, an admin SOS console, an audit-log page, and several dormant dispatch/data-layer modules that still need an explicit archive-or-wire decision per `AGENTS.md` §12.1.
+
+## ADR-133: Closing the documented capability gaps (merchant inventory/storefront/hours, admin SOS/audit/claim) + the merchant-id root cause
+
+**Date:** 2026-10-08
+**Status:** Accepted
+**Deciders:** Lead Software Architect (user directive: «نعمل الفجوات المتبقية … لوحة التاجر تحتاج: مخزون/كميات، تعديل بيانات المتجر، محرّر أوقات العمل. الأدمن يحتاج: لوحة SOS، سجل تدقيق، إسناد الشكاوى»)
+
+### Context
+Six capabilities existed as schema + RLS policy + repository method but had no page and no writer, so they were unreachable for a merchant or an admin. Underneath them sat a single root cause: the provider panel treated `auth.uid()` as `merchant_id`.
+
+### Decision
+- **`resolve_my_merchant()` (migration 109)** is the only sanctioned way for a client to learn its own `merchants.id`. The owned merchant wins; an un-owned seeded merchant is returned only when unambiguous; otherwise NULL. `merchant_id` is never derived on the client.
+- **Inventory, storefront and opening hours become writable** through `update_my_storefront` (COALESCE patch semantics) and `provider_set_working_hours` (atomic replace + input validation). Inventory writes also sync the denormalised `products.stock_quantity`/`is_available`.
+- **SOS, audit and complaint claiming become visible surfaces** rather than invisible server capabilities.
+- **Dead code is decided per item, not in bulk**: the three providers bound to the non-existent `deliveries` table are deleted; `dispatch_repository_impl` is retained because it is the live path for `requestWithdrawal` (the audit's "9 dead methods" claim was wrong).
+- **The Firebase placeholder is corrected** in `google-services.json`: a literal `admin_placeholder` app id made every Firebase call from the admin flavor return 404.
+
+### Rationale
+- A capability without a writer is indistinguishable from a missing one; the honest unit of delivery is the surface an operator can actually use.
+- Resolving the merchant id server-side fixes the whole class of "my data is empty" bugs at once instead of per query, and keeps ownership enforced by the database rather than by a client string.
+- Atomic week replacement avoids the partial-schedule state a delete-then-insert could leave behind if one row failed.
+- Keeping `dispatch_repository_impl` on evidence rather than on the audit's summary is exactly why each item was re-verified before deletion.
+
+### Consequences
+`flutter analyze` clean; `flutter test` **1070/1070**; all four flavors build. The Firebase admin 404s disappear once the corrected config is installed; the residual `open file error`/`GamesAware`/`ashmem` lines are OS-level and out of the app's control. A new hermetic suite (`test/contract/capability_contract_test.dart`) asserts each capability is wired, the merchant id is never the auth uid, the schedule writer validates its input, and no flavor ships a placeholder app id. Device installation of the admin/driver/provider APKs remains a manual step this round (the wireless-debugging transport dropped on a network change).

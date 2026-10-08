@@ -17,7 +17,7 @@ final _merchantIdProvider = providerMerchantIdProvider;
 
 final _statsProvider = FutureProvider<MerchantStats>((ref) async {
   final repo = ref.watch(merchantDashboardRepositoryProvider);
-  final merchantId = ref.watch(_merchantIdProvider);
+  final merchantId = await ref.watch(_merchantIdProvider.future);
   return repo.getMerchantStats(merchantId);
 });
 
@@ -179,6 +179,20 @@ class _MerchantDashboardPageState
             title: Text(AppLocalizations.of(context).manageProducts),
             trailing: const Icon(Icons.chevron_right_rounded),
             onTap: () => context.push('/merchant-dashboard/products'),
+          ),
+          const Divider(height: 1),
+          ListTile(
+            leading: const Icon(Icons.warehouse_outlined),
+            title: Text(l10n.inventory),
+            trailing: const Icon(Icons.chevron_right_rounded),
+            onTap: () => context.push('/merchant-dashboard/inventory'),
+          ),
+          const Divider(height: 1),
+          ListTile(
+            leading: const Icon(Icons.storefront_outlined),
+            title: Text(l10n.storefront),
+            trailing: const Icon(Icons.chevron_right_rounded),
+            onTap: () => context.push('/merchant-dashboard/storefront'),
           ),
           const Divider(height: 1),
           ListTile(

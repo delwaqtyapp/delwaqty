@@ -12505,6 +12505,192 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Management Mode'**
   String get adminManagementMode;
+
+  /// No description provided for @inventory.
+  ///
+  /// In en, this message translates to:
+  /// **'Inventory'**
+  String get inventory;
+
+  /// No description provided for @noInventoryItems.
+  ///
+  /// In en, this message translates to:
+  /// **'No inventory yet'**
+  String get noInventoryItems;
+
+  /// No description provided for @noInventoryItemsDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Add products and set their stock to start tracking inventory.'**
+  String get noInventoryItemsDescription;
+
+  /// No description provided for @products.
+  ///
+  /// In en, this message translates to:
+  /// **'Products'**
+  String get products;
+
+  /// No description provided for @lowStock.
+  ///
+  /// In en, this message translates to:
+  /// **'Low stock'**
+  String get lowStock;
+
+  /// No description provided for @stockQuantity.
+  ///
+  /// In en, this message translates to:
+  /// **'Stock quantity'**
+  String get stockQuantity;
+
+  /// No description provided for @lowStockThreshold.
+  ///
+  /// In en, this message translates to:
+  /// **'Low stock alert at'**
+  String get lowStockThreshold;
+
+  /// No description provided for @availableLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'available'**
+  String get availableLabel;
+
+  /// No description provided for @noMerchantAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'No merchant account'**
+  String get noMerchantAccount;
+
+  /// No description provided for @noMerchantAccountDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'This account is not linked to a merchant store yet.'**
+  String get noMerchantAccountDescription;
+
+  /// No description provided for @refresh.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh'**
+  String get refresh;
+
+  /// No description provided for @storefront.
+  ///
+  /// In en, this message translates to:
+  /// **'Storefront'**
+  String get storefront;
+
+  /// No description provided for @storeIdentity.
+  ///
+  /// In en, this message translates to:
+  /// **'Store identity'**
+  String get storeIdentity;
+
+  /// No description provided for @storeName.
+  ///
+  /// In en, this message translates to:
+  /// **'Store name'**
+  String get storeName;
+
+  /// No description provided for @logoUrl.
+  ///
+  /// In en, this message translates to:
+  /// **'Logo URL'**
+  String get logoUrl;
+
+  /// No description provided for @deliveryPolicy.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivery policy'**
+  String get deliveryPolicy;
+
+  /// No description provided for @deliveryTimeMinutes.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivery time (minutes)'**
+  String get deliveryTimeMinutes;
+
+  /// No description provided for @openAlerts.
+  ///
+  /// In en, this message translates to:
+  /// **'Open'**
+  String get openAlerts;
+
+  /// No description provided for @markResolved.
+  ///
+  /// In en, this message translates to:
+  /// **'Resolve'**
+  String get markResolved;
+
+  /// No description provided for @noEmergencies.
+  ///
+  /// In en, this message translates to:
+  /// **'No emergency alerts'**
+  String get noEmergencies;
+
+  /// No description provided for @noEmergenciesDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'No SOS alerts have been raised.'**
+  String get noEmergenciesDescription;
+
+  /// No description provided for @dismiss.
+  ///
+  /// In en, this message translates to:
+  /// **'Dismiss'**
+  String get dismiss;
+
+  /// No description provided for @auditLog.
+  ///
+  /// In en, this message translates to:
+  /// **'Audit log'**
+  String get auditLog;
+
+  /// No description provided for @noAuditEntries.
+  ///
+  /// In en, this message translates to:
+  /// **'No audit entries'**
+  String get noAuditEntries;
+
+  /// No description provided for @noAuditEntriesDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Administrative actions will appear here.'**
+  String get noAuditEntriesDescription;
+
+  /// No description provided for @searchAudit.
+  ///
+  /// In en, this message translates to:
+  /// **'Search actions or resources'**
+  String get searchAudit;
+
+  /// No description provided for @assignToMe.
+  ///
+  /// In en, this message translates to:
+  /// **'Assign to me'**
+  String get assignToMe;
+
+  /// No description provided for @complaintAssignedToYou.
+  ///
+  /// In en, this message translates to:
+  /// **'The complaint is now assigned to you.'**
+  String get complaintAssignedToYou;
+
+  /// No description provided for @bookings.
+  ///
+  /// In en, this message translates to:
+  /// **'bookings'**
+  String get bookings;
+
+  /// No description provided for @slaCompliance.
+  ///
+  /// In en, this message translates to:
+  /// **'SLA'**
+  String get slaCompliance;
+
+  /// No description provided for @deliveryRides.
+  ///
+  /// In en, this message translates to:
+  /// **'Rides'**
+  String get deliveryRides;
 }
 
 class _AppLocalizationsDelegate

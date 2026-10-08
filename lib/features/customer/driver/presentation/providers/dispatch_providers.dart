@@ -7,25 +7,11 @@ import 'package:geolocator/geolocator.dart';
 import 'package:delwaqty/features/customer/driver/data/datasources/remote/supabase_dispatch_data_source.dart';
 import 'package:delwaqty/features/customer/driver/data/repositories/dispatch_repository_impl.dart';
 import 'package:delwaqty/features/customer/driver/domain/entities/driver_stats.dart';
-import 'package:delwaqty/features/customer/driver/domain/entities/ride_offer.dart';
 import 'package:delwaqty/features/customer/driver/domain/repositories/dispatch_repository.dart';
-import 'package:delwaqty/features/customer/ride/domain/entities/ride.dart';
 import 'package:delwaqty/services/logger/app_logger.dart';
 
 final dispatchRepositoryProvider = Provider<DispatchRepository>((ref) {
   return DispatchRepositoryImpl(ref.watch(supabaseDispatchDataSourceProvider));
-});
-
-/// Streams live ride offers to the given driver.
-final rideOffersProvider =
-    StreamProvider.family<List<RideOffer>, String>((ref, driverId) {
-  return ref.watch(dispatchRepositoryProvider).watchOffers(driverId);
-});
-
-/// Streams the driver's active ride (matched/arrived/inTrip) in realtime.
-final activeDriverRideProvider =
-    StreamProvider.family<Ride?, String>((ref, driverId) {
-  return ref.watch(dispatchRepositoryProvider).watchActiveDriverRide(driverId);
 });
 
 /// Aggregated dashboard performance metrics.

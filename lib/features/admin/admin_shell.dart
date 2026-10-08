@@ -135,6 +135,11 @@ final List<_AdminNavGroup> _adminGroups = [
         label: (l) => l.adminEmergency,
       ),
       _AdminNavItem(
+        path: '/admin/audit-log',
+        icon: Icons.history_rounded,
+        label: (l) => l.auditLog,
+      ),
+      _AdminNavItem(
         path: '/admin/support-chat',
         icon: Icons.chat_bubble_rounded,
         label: (l) => l.supportChat,

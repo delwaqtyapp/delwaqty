@@ -59,6 +59,31 @@ class _AdminTopupRequestsPageState
   }
 
   Future<void> _approve(AdminTopupRequest item) async {
+    final l10n = AppLocalizations.of(context);
+    final amount = item.amount;
+    final symbol = l10n.currencySymbol;
+    // Approving credits a real wallet balance, so it must be an explicit
+    // decision rather than a single tap.
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(l10n.areYouSure),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        content: Text(l10n.topupConfirmBody(amount.toStringAsFixed(2), symbol)),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: Text(l10n.cancel),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: Text(l10n.approve),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) return;
+
     setState(() => _busyId = item.id);
     try {
       final res = await ref
@@ -68,7 +93,7 @@ class _AdminTopupRequestsPageState
       if (code == 'OK') {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Top-up approved')),
+            SnackBar(content: Text(l10n.topupApproved)),
           );
         }
         ref.invalidate(adminTopupRequestsProvider);
@@ -91,6 +116,7 @@ class _AdminTopupRequestsPageState
   }
 
   Future<void> _reject(AdminTopupRequest item) async {
+    final l10n = AppLocalizations.of(context);
     final reasonController = TextEditingController();
     final confirmed = await showDialog<bool>(
       context: context,
@@ -106,14 +132,14 @@ class _AdminTopupRequestsPageState
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(false),
-            child: const Text('Cancel'),
+            child:  Text(l10n.cancel),
           ),
           ElevatedButton(
             onPressed: () {
               if (reasonController.text.trim().isEmpty) return;
               Navigator.of(ctx).pop(true);
             },
-            child: const Text('Reject'),
+            child:  Text(l10n.reject),
           ),
         ],
       ),
@@ -128,7 +154,7 @@ class _AdminTopupRequestsPageState
       if (code == 'OK') {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Top-up rejected')),
+            SnackBar(content: Text(l10n.topupRejected)),
           );
         }
         ref.invalidate(adminTopupRequestsProvider);
@@ -162,6 +188,7 @@ class _AdminTopupRequestsPageState
         title: const Text('Top-Up Requests'),
         actions: [
           IconButton(
+            tooltip: l10n.refresh,
             icon: const Icon(Icons.refresh_rounded),
             onPressed: () =>
                 ref.invalidate(adminTopupRequestsProvider),
@@ -289,7 +316,7 @@ class _AdminTopupRequestsPageState
                                               ),
                                             )
                                           : const Icon(Icons.check),
-                                      label: const Text('Approve'),
+                                      label:  Text(l10n.approve),
                                     ),
                                   ),
                                   const SizedBox(width: 10),
@@ -298,7 +325,7 @@ class _AdminTopupRequestsPageState
                                       onPressed:
                                           busy ? null : () => _reject(item),
                                       icon: const Icon(Icons.close),
-                                      label: const Text('Reject'),
+                                      label:  Text(l10n.reject),
                                     ),
                                   ),
                                 ],

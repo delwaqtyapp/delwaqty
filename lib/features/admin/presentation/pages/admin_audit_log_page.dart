@@ -33,6 +33,7 @@ class _AdminAuditLogPageState extends ConsumerState<AdminAuditLogPage> {
         title: Text(l10n.auditLog),
         actions: [
           IconButton(
+            tooltip: l10n.refresh,
             icon: const Icon(Icons.refresh_rounded),
             onPressed: () => ref.invalidate(recentActivityProvider),
           ),

@@ -6623,4 +6623,190 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get deliveryRides => 'Rides';
+
+  @override
+  String get deliveryDetails => 'Delivery details';
+
+  @override
+  String get otpPrompt => 'Enter the confirmation code';
+
+  @override
+  String get arriveAtPickup => 'Arrived at pickup';
+
+  @override
+  String get startDelivery => 'Start delivery';
+
+  @override
+  String get completeDelivery => 'Complete delivery';
+
+  @override
+  String get orderNotFound => 'Order not found';
+
+  @override
+  String get items => 'Items';
+
+  @override
+  String get fare => 'Fare';
+
+  @override
+  String expectedMinutes(Object minutes) {
+    return '$minutes min';
+  }
+
+  @override
+  String expectedKm(Object km) {
+    return '$km km';
+  }
+
+  @override
+  String get selectServiceProvider => 'Choose a service provider';
+
+  @override
+  String get noProvidersDescription =>
+      'No service providers were found for this category.';
+
+  @override
+  String get bookingDateTime => 'Booking date and time';
+
+  @override
+  String get problemDescriptionHint => 'Describe the problem in detail...';
+
+  @override
+  String get additionalNotes => 'Additional notes (optional)';
+
+  @override
+  String get submitSettlement => 'Submit Settlement';
+
+  @override
+  String get instapay => 'InstaPay';
+
+  @override
+  String get settlementSubmitted => 'Settlement submitted';
+
+  @override
+  String get settlements => 'Settlements';
+
+  @override
+  String get addPlatformReceivingAccount => 'Add Platform Receiving Account';
+
+  @override
+  String get receivingAccountAdded => 'Receiving account added';
+
+  @override
+  String get addReceivingWallet => 'Add Receiving Wallet';
+
+  @override
+  String get receivingWalletAdded => 'Receiving wallet added';
+
+  @override
+  String get receivingAccounts => 'Receiving Accounts';
+
+  @override
+  String get globalFinancialAudit => 'Global Financial Audit';
+
+  @override
+  String get byRegion => 'By region';
+
+  @override
+  String get recentCollections => 'Recent collections';
+
+  @override
+  String get recentSettlements => 'Recent settlements';
+
+  @override
+  String get graceLimitUpdated => 'Grace limit updated';
+
+  @override
+  String get graceManagement => 'Grace Management';
+
+  @override
+  String get fetch => 'Fetch';
+
+  @override
+  String get updateGraceLimit => 'Update Grace Limit';
+
+  @override
+  String get regionalCollections => 'Regional Collections';
+
+  @override
+  String get settlementApproved => 'Settlement approved';
+
+  @override
+  String get settlementRejected => 'Settlement rejected';
+
+  @override
+  String get confirmApprove => 'Approve';
+
+  @override
+  String get confirmReject => 'Reject';
+
+  @override
+  String get areYouSure => 'Are you sure?';
+
+  @override
+  String get topupApproved => 'Top-up approved';
+
+  @override
+  String get topupRejected => 'Top-up rejected';
+
+  @override
+  String get rejectReason => 'Rejection reason';
+
+  @override
+  String get reviewedByAdmin => 'Reviewed by admin';
+
+  @override
+  String topupConfirmBody(Object amount, Object symbol) {
+    return 'Approve the top-up of $amount $symbol? It will be credited to the member wallet immediately.';
+  }
+
+  @override
+  String get approveConfirmBody =>
+      'Approve this settlement? The amount will be released.';
+
+  @override
+  String get rejectConfirmBody =>
+      'Reject this settlement? This cannot be undone from this screen.';
+
+  @override
+  String get approveDeletionTitle => 'Approve account deletion?';
+
+  @override
+  String get approveDeletionBody =>
+      'This permanently deletes the member account and its data. It cannot be undone.';
+
+  @override
+  String get rejectDeletionTitle => 'Reject this deletion request?';
+
+  @override
+  String get permanentActionWarning => 'This action is permanent';
+
+  @override
+  String suspendDriverBody(Object name) {
+    return 'Suspend $name? They will stop receiving delivery offers until reactivated.';
+  }
+
+  @override
+  String get operationFailed => 'Operation failed';
+
+  @override
+  String get nameInArabic => 'Name in Arabic';
+
+  @override
+  String get categoryName => 'Category name';
+
+  @override
+  String get increase => 'Increase';
+
+  @override
+  String get decrease => 'Decrease';
+
+  @override
+  String get showPassword => 'Show password';
+
+  @override
+  String get moveUp => 'Move up';
+
+  @override
+  String get openDetails => 'Open details';
 }

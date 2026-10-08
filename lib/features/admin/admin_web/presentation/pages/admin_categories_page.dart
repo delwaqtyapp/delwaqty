@@ -47,7 +47,7 @@ class _AdminCategoriesPageState extends ConsumerState<AdminCategoriesPage> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error: $e'),
+            content: Text(AppLocalizations.of(context).operationFailed),
             backgroundColor: Theme.of(context).colorScheme.error,
           ),
         );
@@ -66,7 +66,7 @@ class _AdminCategoriesPageState extends ConsumerState<AdminCategoriesPage> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error: $e'),
+            content: Text(AppLocalizations.of(context).operationFailed),
             backgroundColor: Theme.of(context).colorScheme.error,
           ),
         );
@@ -99,7 +99,7 @@ class _AdminCategoriesPageState extends ConsumerState<AdminCategoriesPage> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error: $e'),
+            content: Text(AppLocalizations.of(context).operationFailed),
             backgroundColor: Theme.of(context).colorScheme.error,
           ),
         );
@@ -120,7 +120,7 @@ class _AdminCategoriesPageState extends ConsumerState<AdminCategoriesPage> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error: $e'),
+            content: Text(AppLocalizations.of(context).operationFailed),
             backgroundColor: Theme.of(context).colorScheme.error,
           ),
         );
@@ -163,7 +163,7 @@ class _AdminCategoriesPageState extends ConsumerState<AdminCategoriesPage> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error: $e'),
+            content: Text(AppLocalizations.of(context).operationFailed),
             backgroundColor: Theme.of(context).colorScheme.error,
           ),
         );
@@ -205,7 +205,7 @@ class _AdminCategoriesPageState extends ConsumerState<AdminCategoriesPage> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error: $e'),
+            content: Text(AppLocalizations.of(context).operationFailed),
             backgroundColor: Theme.of(context).colorScheme.error,
           ),
         );
@@ -244,7 +244,7 @@ class _AdminCategoriesPageState extends ConsumerState<AdminCategoriesPage> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error: $e'),
+            content: Text(AppLocalizations.of(context).operationFailed),
             backgroundColor: Theme.of(context).colorScheme.error,
           ),
         );
@@ -794,8 +794,8 @@ class _CategoryDialogState extends State<_CategoryDialog> {
                 controller: _nameArController,
                 textDirection: TextDirection.rtl,
                 decoration: InputDecoration(
-                  labelText: 'الاسم بالعربي',
-                  hintText: 'اسم التصنيف',
+                  labelText: AppLocalizations.of(context).nameInArabic,
+                  hintText: AppLocalizations.of(context).categoryName,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),

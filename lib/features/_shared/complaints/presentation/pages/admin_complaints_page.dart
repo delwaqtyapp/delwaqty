@@ -129,6 +129,7 @@ class _AdminComplaintsPageState extends ConsumerState<AdminComplaintsPage> {
           ),
           const SizedBox(width: 8),
           IconButton(
+            tooltip: l10n.refresh,
             icon: const Icon(Icons.refresh_rounded),
             onPressed: () => ref.invalidate(complaintsProvider),
           ),

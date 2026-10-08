@@ -168,7 +168,7 @@ class _AdminManagementListPageState
             child: asyncAdmins.when(
               loading: () => const Center(child: CircularProgressIndicator()),
               error: (e, _) => Center(
-                child: Text('${loc.adminMgmtFailed}: $e'),
+                child: Text(loc.adminMgmtFailed),
               ),
               data: (all) {
                 final filtered = _applyFilters(all);
@@ -292,9 +292,14 @@ class _Pager extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          IconButton(onPressed: page > 0 ? onPrev : null, icon: const Icon(Icons.navigate_before)),
+          IconButton(
+            tooltip: loc.previous,
+            onPressed: page > 0 ? onPrev : null,
+            icon: const Icon(Icons.navigate_before),
+          ),
           Text('${loc.adminMgmtPage} ${page + 1} / $pageCount  •  $total'),
           IconButton(
+            tooltip: loc.next,
               onPressed: page < pageCount - 1 ? onNext : null,
               icon: const Icon(Icons.navigate_next)),
         ],
@@ -413,7 +418,7 @@ Future<void> _openCreateDialog(BuildContext context, WidgetRef ref) async {
             } catch (e) {
               if (ctx.mounted) {
                 ScaffoldMessenger.of(ctx).showSnackBar(
-                  SnackBar(content: Text('${loc.adminMgmtFailed}: $e')),
+                  SnackBar(content: Text(loc.adminMgmtFailed)),
                 );
               }
             }

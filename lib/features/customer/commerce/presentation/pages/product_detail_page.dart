@@ -77,6 +77,14 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage> {
             body: const SkeletonCard(),
           );
         }
+        if (snapshot.hasError) {
+          // Previously a failure fell through to the "product not found"
+          // branch, which looks like an empty product rather than an error.
+          return Scaffold(
+            appBar: AppBar(title: Text(l10n.loading)),
+            body: ErrorState(message: l10n.somethingWentWrong),
+          );
+        }
 
         final product = snapshot.data;
         if (product == null) {
@@ -303,6 +311,7 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage> {
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             IconButton(
+                              tooltip: l10n.decrease,
                               onPressed: _quantity > 1
                                   ? () => setState(() => _quantity--)
                                   : null,
@@ -325,6 +334,7 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage> {
                               ),
                             ),
                             IconButton(
+                              tooltip: l10n.add,
                               onPressed: () => setState(() => _quantity++),
                               icon: Icon(
                                 Icons.add_circle_outline,

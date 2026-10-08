@@ -80,6 +80,7 @@ class _MerchantOrdersPageState extends ConsumerState<MerchantOrdersPage> {
         title: Text(l10n.orders),
         actions: [
           IconButton(
+            tooltip: l10n.refresh,
             icon: const Icon(Icons.refresh),
             onPressed: () => ref.invalidate(_ordersProvider),
           ),

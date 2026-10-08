@@ -39,6 +39,7 @@ class _NotificationPreferencesPageState extends State<NotificationPreferencesPag
       appBar: AppBar(
         title: Text(l10n.notificationPreferences),
         leading: IconButton(
+          tooltip: l10n.back,
           icon: const Icon(Icons.arrow_back_rounded),
           onPressed: () => Navigator.of(context).pop(),
         ),

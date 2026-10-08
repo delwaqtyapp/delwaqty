@@ -47,6 +47,7 @@ class _MerchantReviewsPageState extends ConsumerState<MerchantReviewsPage> {
         title: Text(l10n.reviews),
         actions: [
           IconButton(
+            tooltip: l10n.refresh,
             icon: const Icon(Icons.refresh),
             onPressed: () {
               ref.invalidate(_reviewsProvider);

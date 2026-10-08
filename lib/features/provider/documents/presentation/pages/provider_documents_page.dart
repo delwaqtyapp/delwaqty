@@ -122,7 +122,7 @@ class _ProviderDocumentsPageState extends ConsumerState<ProviderDocumentsPage> {
       appBar: AppBar(title: Text(l10n.documents)),
       body: state.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('Failed to load: $e')),
+        error: (e, _) => Center(child: Text(l10n.failedToLoad)),
         data: (docs) {
           final byType = {
             for (final d in docs) d['doc_type'] as String: d,
@@ -165,11 +165,13 @@ class _ProviderDocumentsPageState extends ConsumerState<ProviderDocumentsPage> {
                             children: [
                               if (hasDoc)
                                 IconButton(
+                                  tooltip: l10n.delete,
                                   icon: const Icon(Icons.visibility_outlined),
                                   onPressed: _busy ? null : () => _view(fileUrl),
                                 ),
                               if (hasDoc)
                                 IconButton(
+                                  tooltip: l10n.delete,
                                   icon: const Icon(Icons.delete_outline),
                                   onPressed: _busy
                                       ? null

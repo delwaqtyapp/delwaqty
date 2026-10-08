@@ -33,6 +33,7 @@ class _AdminOrdersPageState extends ConsumerState<AdminOrdersPage> {
         title: Text(l10n.orderManagement),
         actions: [
           IconButton(
+            tooltip: l10n.refresh,
             icon: const Icon(Icons.refresh),
             onPressed: () => ref.invalidate(adminOrdersProvider(query)),
           ),
@@ -95,6 +96,7 @@ class _AdminOrdersPageState extends ConsumerState<AdminOrdersPage> {
                 ),
                 const SizedBox(width: 8),
                 IconButton(
+                  tooltip: l10n.filter,
                   icon: const Icon(Icons.filter_list_outlined),
                   onPressed: () {
                     showModalBottomSheet(
@@ -163,7 +165,6 @@ class _AdminOrdersPageState extends ConsumerState<AdminOrdersPage> {
                       ),
                     );
                   },
-                  tooltip: l10n.filterOrders,
                 ),
               ],
             ),

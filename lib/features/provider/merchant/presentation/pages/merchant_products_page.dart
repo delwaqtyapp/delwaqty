@@ -51,6 +51,7 @@ class _MerchantProductsPageState extends ConsumerState<MerchantProductsPage> {
             onPressed: () => context.push('/merchant-dashboard/inventory'),
           ),
           IconButton(
+            tooltip: l10n.refresh,
             icon: const Icon(Icons.refresh),
             onPressed: () => ref.invalidate(_productsProvider),
           ),
@@ -75,6 +76,7 @@ class _MerchantProductsPageState extends ConsumerState<MerchantProductsPage> {
                 ),
                 suffixIcon: _searchQuery.isNotEmpty
                     ? IconButton(
+                        tooltip: l10n.clear,
                         icon: const Icon(Icons.clear),
                         onPressed: () {
                           _searchController.clear();

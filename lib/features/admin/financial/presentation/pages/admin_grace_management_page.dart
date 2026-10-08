@@ -22,6 +22,7 @@ class _AdminGraceManagementPageState
   bool _busy = false;
 
   Future<void> _set() async {
+    final l10n = AppLocalizations.of(context);
     final target = ref.read(graceTargetProvider).trim();
     final limit = int.tryParse(_limitController.text.trim());
     if (target.isEmpty || limit == null || limit < 0) return;
@@ -38,7 +39,7 @@ class _AdminGraceManagementPageState
       if (code == 'OK') {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Grace limit updated')),
+            SnackBar(content: Text(l10n.graceLimitUpdated)),
           );
         }
         ref.invalidate(graceAccountProvider);
@@ -67,7 +68,7 @@ class _AdminGraceManagementPageState
     final accountAsync = ref.watch(graceAccountProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Grace Management')),
+      appBar: AppBar(title:  Text(l10n.graceManagement)),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
@@ -99,7 +100,7 @@ class _AdminGraceManagementPageState
                       onPressed: () =>
                           ref.read(graceTargetProvider.notifier).state =
                               _targetController.text.trim(),
-                      child: const Text('Fetch'),
+                      child:  Text(l10n.fetch),
                     ),
                   ],
                 ),
@@ -184,7 +185,7 @@ class _AdminGraceManagementPageState
                                 height: 16,
                                 child: CircularProgressIndicator(strokeWidth: 2),
                               )
-                            : const Text('Update Grace Limit'),
+                            :  Text(l10n.updateGraceLimit),
                       ),
                     ),
                   ],

@@ -112,6 +112,7 @@ class _AdminVerificationsPageState
   }
 
   void _showDocument({required String url, required String label}) {
+    final l10n = AppLocalizations.of(context);
     showDialog(
       context: context,
       builder: (context) => Dialog(
@@ -122,6 +123,7 @@ class _AdminVerificationsPageState
             Align(
               alignment: Alignment.topRight,
               child: IconButton(
+                tooltip: l10n.close,
                 icon: const Icon(Icons.close_rounded, color: Colors.white),
                 onPressed: () => Navigator.of(context).pop(),
               ),
@@ -171,6 +173,7 @@ class _AdminVerificationsPageState
         title: Text(l10n.verificationRequests),
         actions: [
           IconButton(
+            tooltip: l10n.refresh,
             icon: const Icon(Icons.refresh_rounded),
             onPressed: () => ref.invalidate(verificationRequestsProvider),
           ),

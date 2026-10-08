@@ -154,7 +154,7 @@ class _ServiceBookingPageState extends ConsumerState<ServiceBookingPage> {
           children: [
             AnimatedFadeIn(
               child: Text(
-                'اختر مزود الخدمة',
+                l10n.selectServiceProvider,
                 style: context.textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.w700,
                 ),
@@ -163,17 +163,19 @@ class _ServiceBookingPageState extends ConsumerState<ServiceBookingPage> {
             const SizedBox(height: 12),
             providersAsync.when(
               loading: () => const ShimmerCard(height: 100),
-              error: (_, _) => const PremiumEmptyState(
+              error: (_, _) => PremiumEmptyState(
                 icon: Icons.error_outline,
-                title: 'خطأ',
-                message: 'تعذر تحميل مزودي الخدمة',
+                title: l10n.error,
+                message: l10n.failedToLoadProviders,
+                actionLabel: l10n.retry,
+                onAction: () => ref.invalidate(_providersProvider(widget.categoryType)),
               ),
               data: (providers) {
                 if (providers.isEmpty) {
-                  return const PremiumEmptyState(
+                  return PremiumEmptyState(
                     icon: Icons.person_off_outlined,
-                    title: 'لا يوجد مزودين',
-                    message: 'لم يتم العثور على مزودي خدمة متاحين',
+                    title: l10n.noProvidersAvailable,
+                    message: l10n.noProvidersDescription,
                   );
                 }
                 return SizedBox(
@@ -265,7 +267,7 @@ class _ServiceBookingPageState extends ConsumerState<ServiceBookingPage> {
             AnimatedFadeIn(
               delay: const Duration(milliseconds: 100),
               child: Text(
-                'تاريخ ووقت الحجز',
+                l10n.bookingDateTime,
                 style: context.textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.w700,
                 ),
@@ -298,7 +300,7 @@ class _ServiceBookingPageState extends ConsumerState<ServiceBookingPage> {
             AnimatedFadeIn(
               delay: const Duration(milliseconds: 200),
               child: Text(
-                'وصف المشكلة',
+                l10n.problemDescription,
                 style: context.textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.w700,
                 ),
@@ -311,7 +313,7 @@ class _ServiceBookingPageState extends ConsumerState<ServiceBookingPage> {
                 controller: _descriptionController,
                 maxLines: 3,
                 decoration: InputDecoration(
-                  hintText: 'اشرح المشكلة بالتفصيل...',
+                  hintText: l10n.problemDescriptionHint,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(14),
                   ),
@@ -324,7 +326,7 @@ class _ServiceBookingPageState extends ConsumerState<ServiceBookingPage> {
               child: TextField(
                 controller: _notesController,
                 decoration: InputDecoration(
-                  hintText: 'ملاحظات إضافية (اختياري)',
+                  hintText: l10n.additionalNotes,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(14),
                   ),
@@ -357,7 +359,7 @@ class _ServiceBookingPageState extends ConsumerState<ServiceBookingPage> {
                           ),
                         )
                       : Text(
-                          'تأكيد الحجز',
+                          l10n.confirmBooking,
                           style: AppTextStyles.labelLarge.copyWith(
                             color: Colors.white,
                             fontWeight: FontWeight.w700,

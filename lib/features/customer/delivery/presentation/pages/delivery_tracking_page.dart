@@ -50,6 +50,7 @@ class _DeliveryTrackingPageState extends ConsumerState<DeliveryTrackingPage> {
               if (!ride.status.isTerminal) {
                 return [
                   IconButton(
+                    tooltip: l10n.close,
                     icon: const Icon(Icons.close_rounded),
                     onPressed: () => _showCancelDialog(context, ref, ride),
                   ),
@@ -264,6 +265,7 @@ class _DriverInfoCard extends StatelessWidget {
             ),
             if (ride.driverPhone != null)
               IconButton(
+                tooltip: AppLocalizations.of(context).callDriver,
                 icon: const Icon(Icons.phone_rounded),
                 onPressed: () => launchUrl(Uri.parse('tel:${ride.driverPhone}')),
               ),
@@ -595,6 +597,7 @@ class _RatingBar extends StatelessWidget {
               children: List.generate(5, (i) {
                 final star = i + 1;
                 return IconButton(
+                  tooltip: AppLocalizations.of(context).call,
                   icon: Icon(
                     star <= rating
                         ? Icons.star_rounded

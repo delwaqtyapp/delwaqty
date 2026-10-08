@@ -145,7 +145,7 @@ class _AdminCommissionManagementPageState
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('${l10n.commissionRateFailed}: $e')),
+          SnackBar(content: Text(l10n.commissionRateFailed)),
         );
       }
     } finally {
@@ -166,6 +166,7 @@ class _AdminCommissionManagementPageState
         title: Text(l10n.adminCommissionManagement),
         actions: [
           IconButton(
+            tooltip: l10n.refresh,
             icon: const Icon(Icons.refresh),
             onPressed: () => ref.invalidate(commissionRulesProvider),
           ),

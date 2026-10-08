@@ -123,6 +123,7 @@ class _MerchantDetailPageState extends ConsumerState<MerchantDetailPage> {
       pinned: true,
       stretch: true,
       leading: IconButton(
+        tooltip: l10n.back,
         icon: Container(
           padding: const EdgeInsets.all(6),
           decoration: BoxDecoration(
@@ -473,6 +474,7 @@ class _MerchantDetailPageState extends ConsumerState<MerchantDetailPage> {
             prefixIcon: const Icon(Icons.search, size: 20),
             suffixIcon: _searchQuery.isNotEmpty
                 ? IconButton(
+                    tooltip: l10n.clear,
                     icon: const Icon(Icons.clear, size: 18),
                     onPressed: () {
                       _searchController.clear();

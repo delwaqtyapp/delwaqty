@@ -33,6 +33,7 @@ class _AdminMerchantsPageState extends ConsumerState<AdminMerchantsPage> {
         title: Text(l10n.merchantManagement),
         actions: [
           IconButton(
+            tooltip: l10n.filter,
             icon: const Icon(Icons.filter_list_outlined),
             onPressed: () {
               showModalBottomSheet(
@@ -90,9 +91,9 @@ class _AdminMerchantsPageState extends ConsumerState<AdminMerchantsPage> {
                 ),
               );
             },
-            tooltip: l10n.filter,
           ),
           IconButton(
+            tooltip: l10n.refresh,
             icon: const Icon(Icons.refresh),
             onPressed: () => ref.invalidate(adminMerchantsProvider(query)),
           ),
@@ -232,6 +233,9 @@ class _AdminMerchantsPageState extends ConsumerState<AdminMerchantsPage> {
                 builder: (ctx, snap) {
                   if (snap.connectionState == ConnectionState.waiting) {
                     return const Center(child: AppLoaderCircular());
+                  }
+                  if (snap.hasError) {
+                    return PremiumEmptyState(icon: Icons.error_outline, title: AppLocalizations.of(ctx).error, message: AppLocalizations.of(ctx).failedToLoad);
                   }
                   final products = snap.data ?? [];
                   if (products.isEmpty) {

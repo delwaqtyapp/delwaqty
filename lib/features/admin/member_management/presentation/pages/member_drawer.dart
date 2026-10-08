@@ -220,6 +220,7 @@ class _DrawerHeader extends StatelessWidget {
               ),
               if (onDismiss != null)
                 IconButton(
+                  tooltip: l10n.close,
                   icon: const Icon(Icons.close_rounded),
                   onPressed: onDismiss,
                 ),
@@ -2090,6 +2091,7 @@ class _DocumentsSection extends StatelessWidget {
               style: const TextStyle(fontSize: 11),
             ),
             trailing: IconButton(
+              tooltip: l10n.openDetails,
               icon: const Icon(Icons.open_in_new_rounded, size: 16),
               onPressed: () async {
                 final url = doc['url'] as String?;

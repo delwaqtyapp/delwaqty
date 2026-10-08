@@ -46,6 +46,7 @@ class _AdminDeliveriesPageState extends ConsumerState<AdminDeliveriesPage> {
         title: Text(l10n.deliveryManagement),
         actions: [
           IconButton(
+            tooltip: l10n.refresh,
             icon: const Icon(Icons.refresh_rounded),
             onPressed: () => ref.invalidate(_adminDeliveriesProvider),
           ),

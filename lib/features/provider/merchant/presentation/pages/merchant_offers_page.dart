@@ -45,6 +45,7 @@ class _MerchantOffersPageState extends ConsumerState<MerchantOffersPage> {
         title: Text(l10n.manageOffers),
         actions: [
           IconButton(
+            tooltip: l10n.refresh,
             icon: const Icon(Icons.refresh),
             onPressed: () => ref.invalidate(_offersProvider),
           ),
@@ -69,6 +70,7 @@ class _MerchantOffersPageState extends ConsumerState<MerchantOffersPage> {
                 ),
                 suffixIcon: _searchQuery.isNotEmpty
                     ? IconButton(
+                        tooltip: l10n.clear,
                         icon: const Icon(Icons.clear),
                         onPressed: () {
                           _searchController.clear();
@@ -373,13 +375,13 @@ class _OfferCard extends StatelessWidget {
                         tooltip: l10n.editOffer,
                       ),
                       IconButton(
+                        tooltip: l10n.delete,
                         onPressed: onDelete,
                         icon: Icon(
                           Icons.delete_outline,
                           size: 20,
                           color: theme.colorScheme.error,
                         ),
-                        tooltip: l10n.deleteOffer,
                       ),
                     ],
                   ),
@@ -516,6 +518,7 @@ class _OfferFormSheetState extends ConsumerState<_OfferFormSheet> {
                   ),
                 ),
                 IconButton(
+                  tooltip: l10n.close,
                   onPressed: () => Navigator.of(context).pop(),
                   icon: const Icon(Icons.close),
                 ),

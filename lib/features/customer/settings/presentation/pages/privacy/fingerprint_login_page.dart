@@ -244,6 +244,7 @@ class _FingerprintLoginPageState extends ConsumerState<FingerprintLoginPage> {
                   ),
                   title: Text(cred.email),
                   trailing: IconButton(
+                    tooltip: l10n.delete,
                     icon: const Icon(Icons.delete_outline),
                     onPressed: () => _removeCredential(cred),
                   ),

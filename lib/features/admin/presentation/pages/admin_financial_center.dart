@@ -27,6 +27,7 @@ class AdminFinancialCenter extends ConsumerWidget {
         title: Text(l10n.adminFinancialCenter),
         actions: [
           IconButton(
+            tooltip: l10n.refresh,
             icon: const Icon(Icons.refresh_rounded),
             onPressed: () {
               ref.invalidate(revenueBreakdownProvider);

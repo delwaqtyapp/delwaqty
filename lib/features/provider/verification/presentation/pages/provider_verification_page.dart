@@ -86,7 +86,7 @@ class _ProviderVerificationPageState
       body: state.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => Center(
-          child: Text('Failed to load verification: $e'),
+          child: Text(l10n.failedToLoad),
         ),
         data: (data) {
           final status = data['verification_status'] as String?;

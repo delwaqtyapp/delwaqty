@@ -17,6 +17,7 @@ class AdminReceivingWalletsPage extends ConsumerStatefulWidget {
 class _AdminReceivingWalletsPageState
     extends ConsumerState<AdminReceivingWalletsPage> {
   Future<void> _addPlatform() async {
+    final l10n = AppLocalizations.of(context);
     final methodController = TextEditingController(text: 'bank_transfer');
     final nameController = TextEditingController();
     final accountController = TextEditingController();
@@ -26,7 +27,7 @@ class _AdminReceivingWalletsPageState
     final ok = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Add Platform Receiving Account'),
+        title:  Text(l10n.addPlatformReceivingAccount),
         content: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -61,7 +62,7 @@ class _AdminReceivingWalletsPageState
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(false),
-            child: const Text('Cancel'),
+            child:  Text(l10n.cancel),
           ),
           ElevatedButton(
             onPressed: () {
@@ -85,7 +86,7 @@ class _AdminReceivingWalletsPageState
           );
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Receiving account added')),
+          SnackBar(content: Text(l10n.receivingAccountAdded)),
         );
       }
       ref.invalidate(adminReceivingAccountsProvider);
@@ -114,6 +115,7 @@ class _AdminReceivingWalletsPageState
   }
 
   Future<void> _addWallet() async {
+    final l10n = AppLocalizations.of(context);
     final regionController = TextEditingController();
     final methodController = TextEditingController(text: 'bank_transfer');
     final walletController = TextEditingController();
@@ -122,7 +124,7 @@ class _AdminReceivingWalletsPageState
     final ok = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Add Receiving Wallet'),
+        title:  Text(l10n.addReceivingWallet),
         content: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -153,7 +155,7 @@ class _AdminReceivingWalletsPageState
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(false),
-            child: const Text('Cancel'),
+            child:  Text(l10n.cancel),
           ),
           ElevatedButton(
             onPressed: () {
@@ -176,7 +178,7 @@ class _AdminReceivingWalletsPageState
           );
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Receiving wallet added')),
+          SnackBar(content: Text(l10n.receivingWalletAdded)),
         );
       }
       ref.invalidate(adminReceivingWalletsProvider);
@@ -198,9 +200,10 @@ class _AdminReceivingWalletsPageState
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Receiving Accounts'),
+        title:  Text(l10n.receivingAccounts),
         actions: [
           IconButton(
+            tooltip: l10n.refresh,
             icon: const Icon(Icons.refresh_rounded),
             onPressed: () {
               ref.invalidate(adminReceivingAccountsProvider);
@@ -223,7 +226,7 @@ class _AdminReceivingWalletsPageState
             heroTag: 'wallet',
             onPressed: _addWallet,
             icon: const Icon(Icons.add),
-            label: const Text('Wallet'),
+            label:  Text(l10n.wallet),
           ),
         ],
       ),

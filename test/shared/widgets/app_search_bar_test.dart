@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:delwaqty/l10n/app_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:delwaqty/shared/widgets/app_search_bar.dart';
 
@@ -7,6 +9,14 @@ void main() {
     testWidgets('displays hint text', (tester) async {
       await tester.pumpWidget(
         MaterialApp(
+          // AppSearchBar labels its clear button through the localizations,
+          // so the harness must provide the delegates.
+          localizationsDelegates: const [
+            AppLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+          ],
+          supportedLocales: const [Locale('en')],
           home: Scaffold(
             body: AppSearchBar(
               hint: 'Search expenses',

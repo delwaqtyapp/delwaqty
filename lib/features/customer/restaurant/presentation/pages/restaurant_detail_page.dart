@@ -262,6 +262,7 @@ class _RestaurantDetailPageState extends ConsumerState<RestaurantDetailPage> {
       expandedHeight: 240,
       pinned: true,
       leading: IconButton(
+        tooltip: AppLocalizations.of(context).back,
         icon: const Icon(Icons.arrow_back_ios_new),
         onPressed: () => context.pop(),
       ),

@@ -431,6 +431,7 @@ class _DirectDeliveryPageState extends ConsumerState<DirectDeliveryPage> {
                     ),
                     const SizedBox(width: 4),
                     IconButton(
+                      tooltip: l10n.close,
                       onPressed: () => _removeItem(i),
                       icon: Icon(
                         Icons.close_rounded,

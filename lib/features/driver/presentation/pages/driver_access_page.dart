@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:delwaqty/shared/widgets/premium_empty_state.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:delwaqty/features/_shared/auth/presentation/auth_provider.dart';
@@ -55,8 +56,20 @@ class _AccessBody extends StatelessWidget {
     return FutureBuilder<Map<String, dynamic>?>(
       future: _load(),
       builder: (context, snap) {
-        if (snap.connectionState != ConnectionState.done) {
+        if (snap.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
+        }
+        if (snap.hasError) {
+          // Previously any failure rendered the same fabricated defaults
+          // ('delivery' role, 'active' status) as a successful load, so an
+          // admin with a flaky connection saw a wrong answer confidently.
+          return Center(
+            child: PremiumEmptyState(
+              icon: Icons.error_outline,
+              title: AppLocalizations.of(context).error,
+              message: AppLocalizations.of(context).failedToLoad,
+            ),
+          );
         }
         final data = snap.data;
         final role = (data?['role_key'] as String?) ??

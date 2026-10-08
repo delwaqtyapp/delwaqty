@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:delwaqty/l10n/app_localizations.dart';
 import 'package:delwaqty/core/theme/app_colors.dart';
 import 'package:delwaqty/core/theme/app_text_styles.dart';
 import 'package:delwaqty/features/customer/commerce/presentation/providers/cart_providers.dart';
@@ -21,6 +22,7 @@ class CartBadge extends ConsumerWidget {
       clipBehavior: Clip.none,
       children: [
         IconButton(
+          tooltip: AppLocalizations.of(context).viewCart,
           icon: const Icon(Icons.shopping_cart_outlined),
           onPressed: onTap,
         ),

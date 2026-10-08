@@ -27,6 +27,7 @@ class AdminReviewsModerationPage extends ConsumerWidget {
           ),
           actions: [
             IconButton(
+              tooltip: l10n.refresh,
               icon: const Icon(Icons.refresh),
               onPressed: () {
                 ref.invalidate(adminMerchantReviewsProvider);

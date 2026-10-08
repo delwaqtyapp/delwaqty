@@ -22,6 +22,7 @@ class AdminDeliveryIntelligencePage extends ConsumerWidget {
         title: Text(l10n.adminDeliveryIntelligence),
         actions: [
           IconButton(
+            tooltip: l10n.refresh,
             icon: const Icon(Icons.refresh_rounded),
             onPressed: () => ref.invalidate(deliveryIntelligenceProvider),
           ),

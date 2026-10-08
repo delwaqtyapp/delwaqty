@@ -74,6 +74,7 @@ class _AdminDriversPageState extends ConsumerState<AdminDriversPage> {
         title: Text(l10n.driverManagement),
         actions: [
           IconButton(
+            tooltip: l10n.refresh,
             icon: const Icon(Icons.refresh_rounded),
             onPressed: () => ref.invalidate(_adminDriversProvider),
           ),
@@ -167,12 +168,48 @@ class _AdminDriversPageState extends ConsumerState<AdminDriversPage> {
                             ref.invalidate(_adminDriversProvider);
                           },
                           onSuspend: () async {
+                            final l10n = AppLocalizations.of(context);
+                            final messenger = ScaffoldMessenger.of(context);
+                            final confirmed = await showDialog<bool>(
+                              context: context,
+                              builder: (ctx) => AlertDialog(
+                                title: Text(l10n.areYouSure),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                                content: Text(l10n.suspendDriverBody(
+                                  driver['name'] as String? ?? '',
+                                )),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () => Navigator.of(ctx).pop(false),
+                                    child: Text(l10n.cancel),
+                                  ),
+                                  FilledButton(
+                                    onPressed: () => Navigator.of(ctx).pop(true),
+                                    child: Text(l10n.suspend),
+                                  ),
+                                ],
+                              ),
+                            );
+                            if (confirmed != true || !context.mounted) return;
+
                             final adminService = ref.read(adminServiceProvider);
-                            await adminService.updateDriverOnlineStatus(
+                            final ok =
+                                await adminService.updateDriverOnlineStatus(
                               driverId: driver['id'] as String,
                               isActive: false,
                             );
                             ref.invalidate(_adminDriversProvider);
+                            messenger.showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  ok
+                                      ? l10n.updatedSuccessfully
+                                      : l10n.somethingWentWrong,
+                                ),
+                              ),
+                            );
                           },
                         ),
                       ),

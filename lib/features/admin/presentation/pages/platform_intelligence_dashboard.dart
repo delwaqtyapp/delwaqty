@@ -40,6 +40,7 @@ class _PlatformIntelligenceDashboardState
             onPressed: () => context.push('/admin/members'),
           ),
             IconButton(
+              tooltip: l10n.refresh,
               icon: const Icon(Icons.refresh_rounded),
               onPressed: () {
                 ref.invalidate(platformKpiProvider);

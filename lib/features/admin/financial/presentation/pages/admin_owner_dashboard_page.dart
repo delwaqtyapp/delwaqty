@@ -18,9 +18,10 @@ class AdminOwnerDashboardPage extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Global Financial Audit'),
+        title:  Text(l10n.globalFinancialAudit),
         actions: [
           IconButton(
+            tooltip: l10n.refresh,
             icon: const Icon(Icons.refresh_rounded),
             onPressed: () {
               ref.invalidate(platformCollectionAuditProvider);
@@ -95,6 +96,7 @@ class _CollectionsSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final summary = (data['summary'] as Map?)?.cast<String, dynamic>() ?? {};
     final byRegion = (data['by_region'] as List?)?.cast<Map>() ?? [];
     final rows = (data['rows'] as List?)?.cast<Map>() ?? [];
@@ -115,7 +117,7 @@ class _CollectionsSection extends StatelessWidget {
         _StatGrid(cards: cards),
         const SizedBox(height: 12),
         if (byRegion.isNotEmpty) ...[
-          Text('By region', style: Theme.of(context).textTheme.titleSmall),
+          Text(l10n.byRegion, style: Theme.of(context).textTheme.titleSmall),
           const SizedBox(height: 8),
           PremiumCard(
             padding: const EdgeInsets.all(12),
@@ -145,7 +147,7 @@ class _CollectionsSection extends StatelessWidget {
           const SizedBox(height: 12),
         ],
         if (rows.isNotEmpty) ...[
-          Text('Recent collections', style: Theme.of(context).textTheme.titleSmall),
+          Text(l10n.recentCollections, style: Theme.of(context).textTheme.titleSmall),
           const SizedBox(height: 8),
           PremiumCard(
             padding: const EdgeInsets.all(12),
@@ -187,6 +189,7 @@ class _SettlementsSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final summary = (data['summary'] as Map?)?.cast<String, dynamic>() ?? {};
     final byRegion = (data['by_region'] as List?)?.cast<Map>() ?? [];
     final rows = (data['rows'] as List?)?.cast<Map>() ?? [];
@@ -207,7 +210,7 @@ class _SettlementsSection extends StatelessWidget {
         _StatGrid(cards: cards),
         const SizedBox(height: 12),
         if (byRegion.isNotEmpty) ...[
-          Text('By region', style: Theme.of(context).textTheme.titleSmall),
+          Text(l10n.byRegion, style: Theme.of(context).textTheme.titleSmall),
           const SizedBox(height: 8),
           PremiumCard(
             padding: const EdgeInsets.all(12),
@@ -237,7 +240,7 @@ class _SettlementsSection extends StatelessWidget {
           const SizedBox(height: 12),
         ],
         if (rows.isNotEmpty) ...[
-          Text('Recent settlements', style: Theme.of(context).textTheme.titleSmall),
+          Text(l10n.recentSettlements, style: Theme.of(context).textTheme.titleSmall),
           const SizedBox(height: 8),
           PremiumCard(
             padding: const EdgeInsets.all(12),

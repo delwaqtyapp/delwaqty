@@ -12,6 +12,8 @@ import 'package:delwaqty/features/admin/presentation/pages/admin_settings_page.d
 import 'package:delwaqty/features/admin/presentation/pages/admin_settings_menu_page.dart';
 import 'package:delwaqty/features/admin/support_chat/presentation/pages/chat_permissions_page.dart';
 import 'package:delwaqty/features/admin/presentation/pages/admin_drivers_page.dart';
+import 'package:delwaqty/features/admin/presentation/pages/admin_emergency_page.dart';
+import 'package:delwaqty/features/admin/presentation/pages/admin_audit_log_page.dart';
 import 'package:delwaqty/features/admin/sanctions/presentation/pages/admin_sanctions_page.dart';
 import 'package:delwaqty/features/admin/location_tracking/presentation/pages/admin_live_tracking_page.dart';
 import 'package:delwaqty/features/admin/presentation/pages/admin_analytics_page.dart';
@@ -158,6 +160,16 @@ class AdminModule extends FeatureModule {
         GoRoute(
           path: 'drivers',
           pageBuilder: (context, state) => _adminPage(const AdminDriversPage()),
+        ),
+        GoRoute(
+          path: 'audit-log',
+          pageBuilder: (context, state) =>
+              _adminPage(const AdminAuditLogPage(), showFab: false),
+        ),
+        GoRoute(
+          path: 'emergency',
+          pageBuilder: (context, state) =>
+              _adminPage(const AdminEmergencyPage(), showFab: false),
         ),
         GoRoute(
           path: 'sanctions',

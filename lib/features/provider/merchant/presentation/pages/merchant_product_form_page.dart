@@ -14,7 +14,7 @@ final _productProvider =
     FutureProvider.family<Map<String, dynamic>?, String>((ref, productId) async {
   if (productId == 'new') return null;
   final repo = ref.watch(merchantDashboardRepositoryProvider);
-  final merchantId = ref.watch(_merchantIdProvider);
+  final merchantId = await ref.watch(_merchantIdProvider.future);
   final products = await repo.getMerchantProducts(merchantId);
   try {
     return products.firstWhere((p) => p['id'] == productId);
@@ -320,7 +320,10 @@ class _MerchantProductFormPageState
 
     try {
       final repo = ref.read(merchantDashboardRepositoryProvider);
-      final merchantId = ref.read(_merchantIdProvider);
+      // Read through the future so a still-resolving id can never
+      // silently become an empty string and write the product with a null
+      // merchant.
+      final merchantId = await ref.read(providerMerchantIdProvider.future);
 
       final productData = {
         'name': _nameController.text.trim(),
@@ -357,6 +360,6 @@ class _MerchantProductFormPageState
 
 final _productsProvider = FutureProvider<List<Map<String, dynamic>>>((ref) async {
   final repo = ref.watch(merchantDashboardRepositoryProvider);
-  final merchantId = ref.watch(_merchantIdProvider);
+  final merchantId = await ref.watch(_merchantIdProvider.future);
   return repo.getMerchantProducts(merchantId);
 });

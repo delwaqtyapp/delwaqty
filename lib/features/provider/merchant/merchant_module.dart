@@ -9,6 +9,8 @@ import 'package:delwaqty/features/provider/merchant/domain/repositories/merchant
 import 'package:delwaqty/features/provider/merchant/presentation/pages/merchant_dashboard_page.dart';
 import 'package:delwaqty/features/provider/merchant/presentation/pages/merchant_orders_page.dart';
 import 'package:delwaqty/features/provider/merchant/presentation/pages/merchant_products_page.dart';
+import 'package:delwaqty/features/provider/merchant/presentation/pages/merchant_inventory_page.dart';
+import 'package:delwaqty/features/provider/merchant/presentation/pages/merchant_storefront_page.dart';
 import 'package:delwaqty/features/provider/merchant/presentation/pages/merchant_product_form_page.dart';
 import 'package:delwaqty/features/provider/merchant/presentation/pages/merchant_offers_page.dart';
 import 'package:delwaqty/features/provider/merchant/presentation/pages/merchant_branches_page.dart';
@@ -61,6 +63,14 @@ class MerchantModule extends FeatureModule {
             GoRoute(
               path: 'orders',
               builder: (context, state) => const MerchantOrdersPage(),
+            ),
+            GoRoute(
+              path: 'storefront',
+              builder: (context, state) => const MerchantStorefrontPage(),
+            ),
+            GoRoute(
+              path: 'inventory',
+              builder: (context, state) => const MerchantInventoryPage(),
             ),
             GoRoute(
               path: 'products',

@@ -14,7 +14,7 @@ final _merchantIdProvider = providerMerchantIdProvider;
 
 final _offersProvider = FutureProvider<List<Offer>>((ref) async {
   final repo = ref.watch(offerRepositoryProvider);
-  final merchantId = ref.watch(_merchantIdProvider);
+  final merchantId = await ref.watch(_merchantIdProvider.future);
   return repo.getOffers(merchantId);
 });
 
@@ -51,7 +51,7 @@ class _MerchantOffersPageState extends ConsumerState<MerchantOffersPage> {
         ],
       ),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => _showOfferForm(context),
+        onPressed: () => _showOfferForm(context, ref),
         icon: const Icon(Icons.add),
         label: Text(l10n.addOffer),
       ),
@@ -117,7 +117,7 @@ class _MerchantOffersPageState extends ConsumerState<MerchantOffersPage> {
                           : l10n.noOffersMessage,
                       actionLabel: _searchQuery.isEmpty ? l10n.addOffer : null,
                       onAction: _searchQuery.isEmpty
-                          ? () => _showOfferForm(context)
+                          ? () => _showOfferForm(context, ref)
                           : null,
                     ),
                   );
@@ -133,7 +133,7 @@ class _MerchantOffersPageState extends ConsumerState<MerchantOffersPage> {
                         delay: Duration(milliseconds: index * 50),
                         child: _OfferCard(
                           offer: offer,
-                          onEdit: () => _showOfferForm(context, offer: offer),
+                          onEdit: () => _showOfferForm(context, ref, offer: offer),
                           onDelete: () => _confirmDelete(context, offer),
                           onToggleActive: () => _toggleActive(offer),
                         ),
@@ -149,13 +149,17 @@ class _MerchantOffersPageState extends ConsumerState<MerchantOffersPage> {
     );
   }
 
-  void _showOfferForm(BuildContext context, {Offer? offer}) {
+  void _showOfferForm(
+    BuildContext context,
+    WidgetRef ref, {Offer? offer}) {
+    final merchantId =
+        ref.read(providerMerchantIdProvider).value ?? '';
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       useSafeArea: true,
       builder: (_) => _OfferFormSheet(
-        merchantId: ref.read(_merchantIdProvider),
+        merchantId: merchantId,
         offer: offer,
         onSaved: () {
           ref.invalidate(_offersProvider);

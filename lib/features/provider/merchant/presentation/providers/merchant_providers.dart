@@ -1,16 +1,23 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'package:delwaqty/features/_shared/auth/presentation/auth_provider.dart';
-import 'package:delwaqty/features/_shared/auth/domain/auth_state.dart';
+import 'package:delwaqty/services/supabase/supabase_service.dart';
 
 /// Resolves the Provider app's merchant/provider account id.
 ///
-/// Backend contract (migrations 005/003): the `merchants` row `id` equals the
-/// authenticated user's `id` (`get_user_merchant_id(uid)` = `SELECT id FROM
-/// merchants WHERE id = uid`). RLS then restricts every query to the caller's
-/// own merchant, so ownership is enforced server-side and never trusted from a
-/// client-supplied id.
-final providerMerchantIdProvider = Provider<String>((ref) {
-  final authState = ref.watch(authStateProvider);
-  return authState is AuthAuthenticated ? authState.user.id : '';
+/// The caller's real `merchants.id`.
+///
+/// The old comment here claimed the merchants row id equals the auth uid, and
+/// the old provider did exactly that. It is false: `merchants` is keyed by its
+/// own id and linked to the owner through `owner_user_id`, so passing
+/// `auth.uid()` as `merchant_id` filtered every merchant-scoped query on a
+/// uuid that can never match a `merchants.id`. The id is now resolved
+/// server-side (migration 109) and RLS still enforces ownership.
+final providerMerchantIdProvider = FutureProvider<String>((ref) async {
+  final client = ref.watch(supabaseClientProvider);
+  // merchants.id is NOT auth.uid(): the merchants table is keyed by its own
+  // id and linked to the owner through owner_user_id, so passing the auth
+  // uid as merchant_id made every merchant-scoped query return nothing.
+  // The server resolves the real id (109_resolve_my_merchant).
+  final id = await client.rpc('resolve_my_merchant');
+  return id as String? ?? '';
 });

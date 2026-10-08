@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:delwaqty/features/_shared/auth/presentation/auth_provider.dart';
+import 'package:delwaqty/features/_shared/auth/domain/auth_state.dart';
 import 'package:delwaqty/features/_shared/complaints/presentation/complaints_providers.dart';
+import 'package:delwaqty/features/admin/escalation/presentation/escalation_providers.dart';
 import 'package:delwaqty/features/_shared/complaints/domain/entities/complaint.dart';
 import 'package:delwaqty/shared/widgets/glass_card.dart';
 import 'package:delwaqty/shared/widgets/app_loader.dart';
@@ -252,6 +255,38 @@ class _ComplaintDetailSheetState extends ConsumerState<_ComplaintDetailSheet> {
   final _noteController = TextEditingController();
   String _selectedStatus = '';
 
+  /// Claims the complaint for the signed-in admin.
+  ///
+  /// `assign_complaint(p_complaint_id, p_admin_id)` and its provider already
+  /// existed but nothing in the console called them, so no admin could take
+  /// ownership of a complaint.
+  Future<void> _assignToMe(Complaint complaint) async {
+    final l10n = AppLocalizations.of(context);
+    final messenger = ScaffoldMessenger.of(context);
+    final auth = ref.read(authStateProvider);
+    final adminId = auth is AuthAuthenticated ? auth.user.id : null;
+    if (adminId == null) {
+      messenger.showSnackBar(SnackBar(content: Text(l10n.pleaseLogIn)));
+      return;
+    }
+
+    try {
+      await ref.read(assignComplaintProvider)(
+            complaintId: complaint.id,
+            adminId: adminId,
+          );
+      ref.invalidate(escalationEventsProvider);
+      widget.onStatusChanged();
+      messenger.showSnackBar(
+        SnackBar(content: Text(l10n.complaintAssignedToYou)),
+      );
+    } catch (e) {
+      messenger.showSnackBar(
+        SnackBar(content: Text(l10n.somethingWentWrong)),
+      );
+    }
+  }
+
   Future<void> _escalateWithReason(Complaint c) async {
     final l10n = AppLocalizations.of(context);
     final reasonController = TextEditingController();
@@ -399,6 +434,13 @@ class _ComplaintDetailSheetState extends ConsumerState<_ComplaintDetailSheet> {
                   icon: const Icon(Icons.swap_vert_circle_rounded),
                   label: Text(AppLocalizations.of(context).escalationEscalate),
                 ),
+              const SizedBox(height: 8),
+              if (!c.isClosed)
+                OutlinedButton.icon(
+                  onPressed: () => _assignToMe(c),
+                  icon: const Icon(Icons.assignment_ind_outlined),
+                  label: Text(AppLocalizations.of(context).assignToMe),
+                ),
               const SizedBox(height: 16),
               TextField(
                 controller: _noteController,
@@ -415,9 +457,24 @@ class _ComplaintDetailSheetState extends ConsumerState<_ComplaintDetailSheet> {
                 onPressed: () async {
                   if (_noteController.text.trim().isEmpty) return;
                   final repo = ref.read(complaintsRepositoryProvider);
-                  await repo.addAdminNote(c.id, _noteController.text.trim());
-                  _noteController.clear();
-                  widget.onStatusChanged();
+                  // Resolve both the messenger and the message BEFORE the
+                  // await: this is a StatelessWidget sheet, so there is no
+                  // State.mounted to check afterwards.
+                  final messenger = ScaffoldMessenger.of(context);
+                  final errorText =
+                      AppLocalizations.of(context).somethingWentWrong;
+                  try {
+                    await repo.addAdminNote(
+                      c.id,
+                      _noteController.text.trim(),
+                    );
+                    _noteController.clear();
+                    widget.onStatusChanged();
+                  } catch (e) {
+                    messenger.showSnackBar(
+                      SnackBar(content: Text(errorText)),
+                    );
+                  }
                 },
                 child: Text(AppLocalizations.of(context).addNote),
               ),

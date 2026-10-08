@@ -7,7 +7,6 @@ import 'package:delwaqty/core/module/feature_module.dart';
 import 'package:delwaqty/core/auth/platform_capabilities.dart';
 import 'package:delwaqty/features/driver/domain/repositories/driver_repository.dart';
 import 'package:delwaqty/features/driver/domain/entities/driver_profile.dart';
-import 'package:delwaqty/features/driver/domain/entities/driver_delivery.dart';
 import 'package:delwaqty/features/driver/data/datasources/remote/supabase_driver_data_source.dart';
 import 'package:delwaqty/features/driver/data/datasources/remote/supabase_driver_platform_data_source.dart';
 import 'package:delwaqty/features/driver/data/repositories/driver_repository_impl.dart';
@@ -52,11 +51,6 @@ final driverProfileProvider = FutureProvider.family<DriverProfile?, String>((ref
     );
   }
   return null;
-});
-
-final availableDeliveriesProvider = FutureProvider<List<DriverDelivery>>((ref) async {
-  final repo = ref.watch(driverRepositoryProvider);
-  return repo.getAvailableDeliveries();
 });
 
 class DriverModule extends FeatureModule {

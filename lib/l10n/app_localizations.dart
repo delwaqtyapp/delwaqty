@@ -12691,6 +12691,354 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Rides'**
   String get deliveryRides;
+
+  /// No description provided for @deliveryDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivery details'**
+  String get deliveryDetails;
+
+  /// No description provided for @otpPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the confirmation code'**
+  String get otpPrompt;
+
+  /// No description provided for @arriveAtPickup.
+  ///
+  /// In en, this message translates to:
+  /// **'Arrived at pickup'**
+  String get arriveAtPickup;
+
+  /// No description provided for @startDelivery.
+  ///
+  /// In en, this message translates to:
+  /// **'Start delivery'**
+  String get startDelivery;
+
+  /// No description provided for @completeDelivery.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete delivery'**
+  String get completeDelivery;
+
+  /// No description provided for @orderNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'Order not found'**
+  String get orderNotFound;
+
+  /// No description provided for @items.
+  ///
+  /// In en, this message translates to:
+  /// **'Items'**
+  String get items;
+
+  /// No description provided for @fare.
+  ///
+  /// In en, this message translates to:
+  /// **'Fare'**
+  String get fare;
+
+  /// No description provided for @expectedMinutes.
+  ///
+  /// In en, this message translates to:
+  /// **'{minutes} min'**
+  String expectedMinutes(Object minutes);
+
+  /// No description provided for @expectedKm.
+  ///
+  /// In en, this message translates to:
+  /// **'{km} km'**
+  String expectedKm(Object km);
+
+  /// No description provided for @selectServiceProvider.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a service provider'**
+  String get selectServiceProvider;
+
+  /// No description provided for @noProvidersDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'No service providers were found for this category.'**
+  String get noProvidersDescription;
+
+  /// No description provided for @bookingDateTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Booking date and time'**
+  String get bookingDateTime;
+
+  /// No description provided for @problemDescriptionHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Describe the problem in detail...'**
+  String get problemDescriptionHint;
+
+  /// No description provided for @additionalNotes.
+  ///
+  /// In en, this message translates to:
+  /// **'Additional notes (optional)'**
+  String get additionalNotes;
+
+  /// No description provided for @submitSettlement.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit Settlement'**
+  String get submitSettlement;
+
+  /// No description provided for @instapay.
+  ///
+  /// In en, this message translates to:
+  /// **'InstaPay'**
+  String get instapay;
+
+  /// No description provided for @settlementSubmitted.
+  ///
+  /// In en, this message translates to:
+  /// **'Settlement submitted'**
+  String get settlementSubmitted;
+
+  /// No description provided for @settlements.
+  ///
+  /// In en, this message translates to:
+  /// **'Settlements'**
+  String get settlements;
+
+  /// No description provided for @addPlatformReceivingAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Platform Receiving Account'**
+  String get addPlatformReceivingAccount;
+
+  /// No description provided for @receivingAccountAdded.
+  ///
+  /// In en, this message translates to:
+  /// **'Receiving account added'**
+  String get receivingAccountAdded;
+
+  /// No description provided for @addReceivingWallet.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Receiving Wallet'**
+  String get addReceivingWallet;
+
+  /// No description provided for @receivingWalletAdded.
+  ///
+  /// In en, this message translates to:
+  /// **'Receiving wallet added'**
+  String get receivingWalletAdded;
+
+  /// No description provided for @receivingAccounts.
+  ///
+  /// In en, this message translates to:
+  /// **'Receiving Accounts'**
+  String get receivingAccounts;
+
+  /// No description provided for @globalFinancialAudit.
+  ///
+  /// In en, this message translates to:
+  /// **'Global Financial Audit'**
+  String get globalFinancialAudit;
+
+  /// No description provided for @byRegion.
+  ///
+  /// In en, this message translates to:
+  /// **'By region'**
+  String get byRegion;
+
+  /// No description provided for @recentCollections.
+  ///
+  /// In en, this message translates to:
+  /// **'Recent collections'**
+  String get recentCollections;
+
+  /// No description provided for @recentSettlements.
+  ///
+  /// In en, this message translates to:
+  /// **'Recent settlements'**
+  String get recentSettlements;
+
+  /// No description provided for @graceLimitUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Grace limit updated'**
+  String get graceLimitUpdated;
+
+  /// No description provided for @graceManagement.
+  ///
+  /// In en, this message translates to:
+  /// **'Grace Management'**
+  String get graceManagement;
+
+  /// No description provided for @fetch.
+  ///
+  /// In en, this message translates to:
+  /// **'Fetch'**
+  String get fetch;
+
+  /// No description provided for @updateGraceLimit.
+  ///
+  /// In en, this message translates to:
+  /// **'Update Grace Limit'**
+  String get updateGraceLimit;
+
+  /// No description provided for @regionalCollections.
+  ///
+  /// In en, this message translates to:
+  /// **'Regional Collections'**
+  String get regionalCollections;
+
+  /// No description provided for @settlementApproved.
+  ///
+  /// In en, this message translates to:
+  /// **'Settlement approved'**
+  String get settlementApproved;
+
+  /// No description provided for @settlementRejected.
+  ///
+  /// In en, this message translates to:
+  /// **'Settlement rejected'**
+  String get settlementRejected;
+
+  /// No description provided for @confirmApprove.
+  ///
+  /// In en, this message translates to:
+  /// **'Approve'**
+  String get confirmApprove;
+
+  /// No description provided for @confirmReject.
+  ///
+  /// In en, this message translates to:
+  /// **'Reject'**
+  String get confirmReject;
+
+  /// No description provided for @areYouSure.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure?'**
+  String get areYouSure;
+
+  /// No description provided for @topupApproved.
+  ///
+  /// In en, this message translates to:
+  /// **'Top-up approved'**
+  String get topupApproved;
+
+  /// No description provided for @topupRejected.
+  ///
+  /// In en, this message translates to:
+  /// **'Top-up rejected'**
+  String get topupRejected;
+
+  /// No description provided for @rejectReason.
+  ///
+  /// In en, this message translates to:
+  /// **'Rejection reason'**
+  String get rejectReason;
+
+  /// No description provided for @reviewedByAdmin.
+  ///
+  /// In en, this message translates to:
+  /// **'Reviewed by admin'**
+  String get reviewedByAdmin;
+
+  /// No description provided for @topupConfirmBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Approve the top-up of {amount} {symbol}? It will be credited to the member wallet immediately.'**
+  String topupConfirmBody(Object amount, Object symbol);
+
+  /// No description provided for @approveConfirmBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Approve this settlement? The amount will be released.'**
+  String get approveConfirmBody;
+
+  /// No description provided for @rejectConfirmBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Reject this settlement? This cannot be undone from this screen.'**
+  String get rejectConfirmBody;
+
+  /// No description provided for @approveDeletionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Approve account deletion?'**
+  String get approveDeletionTitle;
+
+  /// No description provided for @approveDeletionBody.
+  ///
+  /// In en, this message translates to:
+  /// **'This permanently deletes the member account and its data. It cannot be undone.'**
+  String get approveDeletionBody;
+
+  /// No description provided for @rejectDeletionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Reject this deletion request?'**
+  String get rejectDeletionTitle;
+
+  /// No description provided for @permanentActionWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'This action is permanent'**
+  String get permanentActionWarning;
+
+  /// No description provided for @suspendDriverBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Suspend {name}? They will stop receiving delivery offers until reactivated.'**
+  String suspendDriverBody(Object name);
+
+  /// No description provided for @operationFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Operation failed'**
+  String get operationFailed;
+
+  /// No description provided for @nameInArabic.
+  ///
+  /// In en, this message translates to:
+  /// **'Name in Arabic'**
+  String get nameInArabic;
+
+  /// No description provided for @categoryName.
+  ///
+  /// In en, this message translates to:
+  /// **'Category name'**
+  String get categoryName;
+
+  /// No description provided for @increase.
+  ///
+  /// In en, this message translates to:
+  /// **'Increase'**
+  String get increase;
+
+  /// No description provided for @decrease.
+  ///
+  /// In en, this message translates to:
+  /// **'Decrease'**
+  String get decrease;
+
+  /// No description provided for @showPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Show password'**
+  String get showPassword;
+
+  /// No description provided for @moveUp.
+  ///
+  /// In en, this message translates to:
+  /// **'Move up'**
+  String get moveUp;
+
+  /// No description provided for @openDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Open details'**
+  String get openDetails;
 }
 
 class _AppLocalizationsDelegate

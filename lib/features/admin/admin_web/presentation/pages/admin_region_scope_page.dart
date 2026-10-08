@@ -420,6 +420,7 @@ class _AssignmentsPanel extends ConsumerWidget {
                                   : 'This region + descendants',
                             ),
                             trailing: IconButton(
+                              tooltip: l10n.delete,
                               icon: const Icon(Icons.delete_outline_rounded),
                               onPressed: saving
                                   ? null

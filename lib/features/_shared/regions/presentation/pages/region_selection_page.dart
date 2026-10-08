@@ -112,6 +112,7 @@ class _RegionSelectionPageState extends ConsumerState<RegionSelectionPage> {
                 suffixIcon: _query.isEmpty
                     ? null
                     : IconButton(
+                      tooltip: l10n.close,
                         icon: const Icon(Icons.close_rounded),
                         onPressed: () {
                           _searchController.clear();

@@ -14,6 +14,7 @@ class TermsOfServicePage extends StatelessWidget {
       appBar: AppBar(
         title: Text(l10n.termsOfService),
         leading: IconButton(
+          tooltip: l10n.back,
           icon: const Icon(Icons.arrow_back_rounded),
           onPressed: () => context.pop(),
         ),

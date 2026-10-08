@@ -310,6 +310,7 @@ class _VehicleCard extends StatelessWidget {
                       ),
                       const Spacer(),
                       IconButton(
+                        tooltip: l10n.edit,
                         onPressed: onEdit,
                         icon: const Icon(Icons.edit_rounded, size: 20),
                       ),

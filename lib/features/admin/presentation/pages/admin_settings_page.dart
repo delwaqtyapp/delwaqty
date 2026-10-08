@@ -71,6 +71,7 @@ class _AdminSettingsPageState extends ConsumerState<AdminSettingsPage> {
         title: Text(l10n.adminPlatformConfig),
         actions: [
           IconButton(
+            tooltip: l10n.refresh,
             icon: const Icon(Icons.refresh),
             onPressed: () => ref.invalidate(platformSettingsProvider),
           ),

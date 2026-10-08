@@ -6581,4 +6581,188 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get deliveryRides => 'الرحلات';
+
+  @override
+  String get deliveryDetails => 'تفاصيل التوصيل';
+
+  @override
+  String get otpPrompt => 'ادخل رمز التأكيد';
+
+  @override
+  String get arriveAtPickup => 'وصلت لنقطة الاستلام';
+
+  @override
+  String get startDelivery => 'بدء التوصيل';
+
+  @override
+  String get completeDelivery => 'إتمام التوصيل';
+
+  @override
+  String get orderNotFound => 'الطلب غير موجود';
+
+  @override
+  String get items => 'العناصر';
+
+  @override
+  String get fare => 'الأجرة';
+
+  @override
+  String expectedMinutes(Object minutes) {
+    return '$minutes دقيقة';
+  }
+
+  @override
+  String expectedKm(Object km) {
+    return '$km كم';
+  }
+
+  @override
+  String get selectServiceProvider => 'اختر مزود الخدمة';
+
+  @override
+  String get noProvidersDescription => 'لم يتم العثور على مزودي خدمة متاحين.';
+
+  @override
+  String get bookingDateTime => 'تاريخ ووقت الحجز';
+
+  @override
+  String get problemDescriptionHint => 'اشرح المشكلة بالتفصيل...';
+
+  @override
+  String get additionalNotes => 'ملاحظات إضافية (اختياري)';
+
+  @override
+  String get submitSettlement => 'طلب تسوية';
+
+  @override
+  String get instapay => 'إنستا باي';
+
+  @override
+  String get settlementSubmitted => 'تم إرسال طلب التسوية';
+
+  @override
+  String get settlements => 'التسويات';
+
+  @override
+  String get addPlatformReceivingAccount => 'إضافة حساب استلام للمنصة';
+
+  @override
+  String get receivingAccountAdded => 'تمت إضافة حساب الاستلام';
+
+  @override
+  String get addReceivingWallet => 'إضافة محفظة استلام';
+
+  @override
+  String get receivingWalletAdded => 'تمت إضافة محفظة الاستلام';
+
+  @override
+  String get receivingAccounts => 'حسابات الاستلام';
+
+  @override
+  String get globalFinancialAudit => 'التدقيق المالي الشامل';
+
+  @override
+  String get byRegion => 'حسب المنطقة';
+
+  @override
+  String get recentCollections => 'التحصيلات الأخيرة';
+
+  @override
+  String get recentSettlements => 'التسويات الأخيرة';
+
+  @override
+  String get graceLimitUpdated => 'تم تحديث حد المهلة';
+
+  @override
+  String get graceManagement => 'إدارة المهلة';
+
+  @override
+  String get fetch => 'جلب';
+
+  @override
+  String get updateGraceLimit => 'تحديث حد المهلة';
+
+  @override
+  String get regionalCollections => 'التحصيلات الإقليمية';
+
+  @override
+  String get settlementApproved => 'تمت الموافقة على التسوية';
+
+  @override
+  String get settlementRejected => 'تم رفض التسوية';
+
+  @override
+  String get confirmApprove => 'موافقة';
+
+  @override
+  String get confirmReject => 'رفض';
+
+  @override
+  String get areYouSure => 'هل أنت متأكد؟';
+
+  @override
+  String get topupApproved => 'تمت الموافقة على الشحن';
+
+  @override
+  String get topupRejected => 'تم رفض الشحن';
+
+  @override
+  String get rejectReason => 'سبب الرفض';
+
+  @override
+  String get reviewedByAdmin => 'تمت المراجعة من قبل الإدارة';
+
+  @override
+  String topupConfirmBody(Object amount, Object symbol) {
+    return 'الموافقة على شحن بمبلغ $amount $symbol؟ سيُضاف فورًا إلى محفظة العضو.';
+  }
+
+  @override
+  String get approveConfirmBody => 'الموافقة على هذه التسوية؟ سيتم صرف المبلغ.';
+
+  @override
+  String get rejectConfirmBody =>
+      'رفض هذه التسوية؟ لا يمكن التراجع عن ذلك من هذه الشاشة.';
+
+  @override
+  String get approveDeletionTitle => 'الموافقة على حذف الحساب؟';
+
+  @override
+  String get approveDeletionBody =>
+      'سيؤدي هذا إلى حذف حساب العضو وبياناته نهائيًا، ولا يمكن التراجع عنه.';
+
+  @override
+  String get rejectDeletionTitle => 'رفض طلب الحذف؟';
+
+  @override
+  String get permanentActionWarning => 'هذا الإجراء نهائي';
+
+  @override
+  String suspendDriverBody(Object name) {
+    return 'إيقاف $name؟ سيتوقف عن استلام طلبات التوصيل حتى إعادة التفعيل.';
+  }
+
+  @override
+  String get operationFailed => 'فشلت العملية';
+
+  @override
+  String get nameInArabic => 'الاسم بالعربي';
+
+  @override
+  String get categoryName => 'اسم التصنيف';
+
+  @override
+  String get increase => 'زيادة';
+
+  @override
+  String get decrease => 'إنقاص';
+
+  @override
+  String get showPassword => 'إظهار كلمة المرور';
+
+  @override
+  String get moveUp => 'تحريك لأعلى';
+
+  @override
+  String get openDetails => 'فتح التفاصيل';
 }

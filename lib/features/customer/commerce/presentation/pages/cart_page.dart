@@ -118,6 +118,7 @@ class CartPage extends ConsumerWidget {
                                   children: [
                                     _QuantityButton(
                                       icon: Icons.remove_circle_outline,
+                                      tooltip: AppLocalizations.of(context).decrease,
                                       onPressed: () async {
                                         if (item.quantity <= 1) {
                                           await ref
@@ -143,6 +144,8 @@ class CartPage extends ConsumerWidget {
                                     const SizedBox(width: 16),
                                     _QuantityButton(
                                       icon: Icons.add_circle_outline,
+                                      tooltip:
+                                          AppLocalizations.of(context).increase,
                                       onPressed: () async {
                                         await ref
                                             .read(cartProvider.notifier)
@@ -231,15 +234,23 @@ class CartPage extends ConsumerWidget {
 }
 
 class _QuantityButton extends StatelessWidget {
-  const _QuantityButton({required this.icon, required this.onPressed});
+  const _QuantityButton({
+    required this.icon,
+    required this.onPressed,
+    required this.tooltip,
+  });
 
   final IconData icon;
   final VoidCallback onPressed;
+
+  /// Required so the +/- controls stay readable to a screen reader.
+  final String tooltip;
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = context.colorScheme;
     return IconButton(
+      tooltip: tooltip,
       onPressed: onPressed,
       icon: Icon(icon),
       style: IconButton.styleFrom(foregroundColor: colorScheme.primary),

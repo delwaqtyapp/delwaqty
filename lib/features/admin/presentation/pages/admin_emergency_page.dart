@@ -86,6 +86,7 @@ class _AdminEmergencyPageState extends ConsumerState<AdminEmergencyPage> {
         title: Text(l10n.adminEmergency),
         actions: [
           IconButton(
+            tooltip: l10n.refresh,
             icon: const Icon(Icons.refresh_rounded),
             onPressed: () => ref.invalidate(adminSosAlertsProvider),
           ),

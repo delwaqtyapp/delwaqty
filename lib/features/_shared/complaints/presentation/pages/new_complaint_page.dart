@@ -150,7 +150,7 @@ class _NewComplaintPageState extends ConsumerState<NewComplaintPage> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('${AppLocalizations.of(context).error}: $e')),
+          SnackBar(content: Text(AppLocalizations.of(context).error)),
         );
       }
     } finally {

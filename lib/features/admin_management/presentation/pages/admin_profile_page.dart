@@ -43,7 +43,7 @@ class _AdminProfilePageState
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text('${loc.adminMgmtFailed}: $e')));
+            .showSnackBar(SnackBar(content: Text(loc.adminMgmtFailed)));
       }
     }
   }
@@ -82,13 +82,14 @@ class _AdminProfilePageState
       appBar: AppBar(
         title: Text(loc.adminMgmtProfile),
         leading: IconButton(
+          tooltip: loc.back,
           icon: const Icon(Icons.arrow_back),
           onPressed: () => context.pop(),
         ),
       ),
       body: detail.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('${loc.adminMgmtFailed}: $e')),
+        error: (e, _) => Center(child: Text(loc.adminMgmtFailed)),
         data: (account) {
           if (account == null) {
             return Center(child: Text(loc.adminMgmtNotFound));
@@ -180,7 +181,7 @@ class _AdminProfilePageState
                 perms.when(
                   loading: () =>
                       const LinearProgressIndicator(),
-                  error: (e, _) => Text('${loc.adminMgmtFailed}: $e'),
+                  error: (e, _) => Text(loc.adminMgmtFailed),
                   data: (p) {
                     final effective =
                         List<String>.from(p['effective'] as List? ?? []);
@@ -236,7 +237,7 @@ class _AdminProfilePageState
                 [
                   audit.when(
                     loading: () => const LinearProgressIndicator(),
-                    error: (e, _) => Text('${loc.adminMgmtFailed}: $e'),
+                    error: (e, _) => Text(loc.adminMgmtFailed),
                     data: (entries) {
                       if (entries.isEmpty) {
                         return Text(loc.adminMgmtNoAudit);

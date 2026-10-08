@@ -1,6 +1,7 @@
 import 'package:delwaqty/features/driver/driver_module.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:delwaqty/l10n/app_localizations.dart';
 
 import 'package:delwaqty/features/_shared/auth/presentation/auth_provider.dart';
 import 'package:delwaqty/features/_shared/auth/domain/auth_state.dart';
@@ -30,7 +31,9 @@ class _DriverDeliveryDetailPageState
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text('خطأ: $e')));
+            .showSnackBar(
+              SnackBar(content: Text(AppLocalizations.of(context).error)),
+            );
       }
     } finally {
       if (mounted) setState(() => _busy = false);
@@ -42,7 +45,7 @@ class _DriverDeliveryDetailPageState
     final otp = await showDialog<String>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('ادخل رمز التأكيد OTP'),
+        title: Text(AppLocalizations.of(context).otpPrompt),
         content: TextField(
           controller: controller,
           keyboardType: TextInputType.number,
@@ -51,10 +54,10 @@ class _DriverDeliveryDetailPageState
         actions: [
           TextButton(
               onPressed: () => Navigator.of(ctx).pop(),
-              child: const Text('إلغاء')),
+              child: Text(AppLocalizations.of(context).cancel)),
           TextButton(
               onPressed: () => Navigator.of(ctx).pop(controller.text),
-              child: const Text('تأكيد')),
+              child: Text(AppLocalizations.of(context).confirm)),
         ],
       ),
     );
@@ -80,6 +83,7 @@ class _DriverDeliveryDetailPageState
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final orderAsync = ref.watch(deliveryOrderByIdProvider(widget.id));
     final authState = ref.watch(authStateProvider);
     final userId =
@@ -99,13 +103,13 @@ class _DriverDeliveryDetailPageState
 
     if (userId != null && driverId.isEmpty) {
       return Scaffold(
-        appBar: AppBar(title: const Text('تفاصيل التوصيل')),
+        appBar: AppBar(title: Text(l10n.deliveryDetails)),
         body: const Center(child: CircularProgressIndicator()),
       );
     }
 
     return Scaffold(
-      appBar: AppBar(title: const Text('تفاصيل التوصيل')),
+      appBar: AppBar(title: Text(l10n.deliveryDetails)),
       body: orderAsync.when(
         loading: () => ListView(
           padding: const EdgeInsets.all(16),
@@ -115,10 +119,10 @@ class _DriverDeliveryDetailPageState
             ShimmerCard(),
           ],
         ),
-        error: (e, _) => Center(child: Text('خطأ: $e')),
+        error: (e, _) => Center(child: Text(l10n.error)),
         data: (order) {
           if (order == null) {
-            return const Center(child: Text('الطلب غير موجود'));
+            return Center(child: Text(l10n.orderNotFound));
           }
           final status = order.status;
           final canCancel =
@@ -132,20 +136,20 @@ class _DriverDeliveryDetailPageState
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      _row('الحالة', status),
-                      _row('النوع', order.serviceType),
+                      _row(l10n.status, status),
+                      _row(l10n.type, order.serviceType),
                       if (order.merchantName != null)
-                        _row('التاجر', order.merchantName!),
-                      _row('الاستلام', order.pickupAddress),
-                      _row('التسليم', order.dropoffAddress),
+                        _row(l10n.merchant, order.merchantName!),
+                      _row(l10n.pickup, order.pickupAddress),
+                      _row(l10n.dropoff, order.dropoffAddress),
                       if (order.itemsSummary != null)
-                        _row('العناصر', order.itemsSummary!),
+                        _row(l10n.items, order.itemsSummary!),
                       if (order.fare != null)
-                        _row('الأجرة', '${order.fare} ${order.currency}'),
+                        _row(l10n.fare, '${order.fare} ${order.currency}'),
                       if (order.distance != null)
-                        _row('المسافة', '${order.distance} كم'),
+                        _row(l10n.distance, l10n.expectedKm(order.distance?.toStringAsFixed(1) ?? '0')),
                       if (order.estimatedMinutes != null)
-                        _row('الوقت المتوقع',
+                        _row(l10n.estimatedTime,
                             '${order.estimatedMinutes} دقيقة'),
                     ],
                   ),
@@ -160,7 +164,7 @@ class _DriverDeliveryDetailPageState
                       : () => _run(() => ref
                           .read(deliveryRepositoryProvider)
                           .acceptDeliveryRequest(order.id, driverId)),
-                  child: const Text('قبول الطلب'),
+                  child: Text(l10n.accept),
                 ),
               if (status == 'matched')
                 FilledButton(
@@ -169,14 +173,14 @@ class _DriverDeliveryDetailPageState
                       : () => _run(() => ref
                           .read(deliveryRepositoryProvider)
                           .driverArrivedAtPickup(order.id, driverId)),
-                  child: const Text('وصلت لنقطة الاستلام'),
+                  child: Text(l10n.arriveAtPickup),
                 ),
               if (status == 'arrived')
                 FilledButton(
                   onPressed: _busy
                       ? null
                       : () => _startWithOtp(driverId, order.id),
-                  child: const Text('بدء التوصيل'),
+                  child: Text(l10n.startDelivery),
                 ),
               if (status == 'inTrip')
                 FilledButton(
@@ -185,7 +189,7 @@ class _DriverDeliveryDetailPageState
                       : () => _run(() => ref
                           .read(deliveryRepositoryProvider)
                           .completeDelivery(order.id, driverId)),
-                  child: const Text('إتمام التوصيل'),
+                  child: Text(l10n.completeDelivery),
                 ),
               if (canCancel) ...[
                 const SizedBox(height: 8),
@@ -197,7 +201,7 @@ class _DriverDeliveryDetailPageState
                           .cancelDelivery(order.id,
                               reason: 'cancelled_by_driver',
                               byDriver: true)),
-                  child: const Text('إلغاء'),
+                  child: Text(AppLocalizations.of(context).cancel),
                 ),
               ],
             ],

@@ -41,6 +41,7 @@ class _MemberOperationsCenterState
         title: Text(AppLocalizations.of(context).memberOperationsCenter),
         actions: [
           IconButton(
+            tooltip: l10n.refresh,
             icon: const Icon(Icons.refresh_rounded),
             onPressed: () {
               ref.invalidate(memberOpsProvider);

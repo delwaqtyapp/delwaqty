@@ -44,18 +44,44 @@ class _AdminSettlementsPageState extends ConsumerState<AdminSettlementsPage> {
   }
 
   Future<void> _act(String id, bool approve) async {
+    final l10n = AppLocalizations.of(context);
+    // A settlement approval moves money, so it needs a deliberate confirm.
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(l10n.areYouSure),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        content: Text(
+          approve ? l10n.approveConfirmBody : l10n.rejectConfirmBody,
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: Text(l10n.cancel),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: Text(approve ? l10n.approve : l10n.reject),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) return;
+
     setState(() => _busyId = id);
     try {
       final repo = ref.read(adminFinancialRepositoryProvider);
       final res = approve
           ? await repo.approveSettlement(id)
-          : await repo.rejectSettlement(id, 'Reviewed by admin');
+          : await repo.rejectSettlement(id, l10n.reviewedByAdmin);
       final code = res['code'] as String?;
       if (code == 'OK') {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(approve ? 'Settlement approved' : 'Settlement rejected'),
+              content: Text(
+                approve ? l10n.settlementApproved : l10n.settlementRejected,
+              ),
             ),
           );
         }
@@ -79,6 +105,7 @@ class _AdminSettlementsPageState extends ConsumerState<AdminSettlementsPage> {
   }
 
   Future<void> _submit() async {
+    final l10n = AppLocalizations.of(context);
     final amountController = TextEditingController();
     final referenceController = TextEditingController();
     final messageController = TextEditingController();
@@ -87,7 +114,7 @@ class _AdminSettlementsPageState extends ConsumerState<AdminSettlementsPage> {
       context: context,
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setStateDialog) => AlertDialog(
-          title: const Text('Submit Settlement'),
+          title:  Text(l10n.submitSettlement),
           content: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -100,15 +127,15 @@ class _AdminSettlementsPageState extends ConsumerState<AdminSettlementsPage> {
                 const SizedBox(height: 8),
                 DropdownButtonFormField<String>(
                   initialValue: method,
-                  items: const [
+                  items: [
                     DropdownMenuItem(
                       value: 'bank_transfer',
-                      child: Text('Bank Transfer'),
+                      child: Text(l10n.bankTransfer),
                     ),
-                    DropdownMenuItem(value: 'cash', child: Text('Cash')),
+                    DropdownMenuItem(value: 'cash', child: Text(l10n.cash)),
                     DropdownMenuItem(
                       value: 'instapay',
-                      child: Text('InstaPay'),
+                      child: Text(l10n.instapay),
                     ),
                   ],
                   onChanged: (v) => setStateDialog(() => method = v!),
@@ -130,7 +157,7 @@ class _AdminSettlementsPageState extends ConsumerState<AdminSettlementsPage> {
           actions: [
             TextButton(
               onPressed: () => Navigator.of(ctx).pop(false),
-              child: const Text('Cancel'),
+              child:  Text(l10n.cancel),
             ),
             ElevatedButton(
               onPressed: () {
@@ -138,7 +165,7 @@ class _AdminSettlementsPageState extends ConsumerState<AdminSettlementsPage> {
                 if (amt == null || amt <= 0) return;
                 Navigator.of(ctx).pop(true);
               },
-              child: const Text('Submit'),
+              child:  Text(l10n.submit),
             ),
           ],
         ),
@@ -160,7 +187,7 @@ class _AdminSettlementsPageState extends ConsumerState<AdminSettlementsPage> {
       if (code == 'OK') {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Settlement submitted')),
+            SnackBar(content: Text(l10n.settlementSubmitted)),
           );
         }
         ref.invalidate(adminSettlementsProvider);
@@ -188,9 +215,10 @@ class _AdminSettlementsPageState extends ConsumerState<AdminSettlementsPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Settlements'),
+        title:  Text(l10n.settlements),
         actions: [
           IconButton(
+            tooltip: l10n.refresh,
             icon: const Icon(Icons.refresh_rounded),
             onPressed: () => ref.invalidate(adminSettlementsProvider),
           ),
@@ -199,7 +227,7 @@ class _AdminSettlementsPageState extends ConsumerState<AdminSettlementsPage> {
       floatingActionButton: FloatingActionButton.extended(
         onPressed: _submit,
         icon: const Icon(Icons.add),
-        label: const Text('Submit'),
+        label:  Text(l10n.submit),
       ),
       body: RefreshIndicator(
         onRefresh: () async => ref.invalidate(adminSettlementsProvider),
@@ -288,7 +316,7 @@ class _AdminSettlementsPageState extends ConsumerState<AdminSettlementsPage> {
                                         ),
                                       )
                                     : const Icon(Icons.check),
-                                label: const Text('Approve'),
+                                label:  Text(l10n.approve),
                               ),
                             ),
                             const SizedBox(width: 10),
@@ -296,7 +324,7 @@ class _AdminSettlementsPageState extends ConsumerState<AdminSettlementsPage> {
                               child: OutlinedButton.icon(
                                 onPressed: busy ? null : () => _act(s.id, false),
                                 icon: const Icon(Icons.close),
-                                label: const Text('Reject'),
+                                label:  Text(l10n.reject),
                               ),
                             ),
                           ],

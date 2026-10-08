@@ -4382,3 +4382,31 @@ Six capabilities existed as schema + RLS policy + repository method but had no p
 
 ### Consequences
 `flutter analyze` clean; `flutter test` **1070/1070**; all four flavors build. The Firebase admin 404s disappear once the corrected config is installed; the residual `open file error`/`GamesAware`/`ashmem` lines are OS-level and out of the app's control. A new hermetic suite (`test/contract/capability_contract_test.dart`) asserts each capability is wired, the merchant id is never the auth uid, the schedule writer validates its input, and no flavor ships a placeholder app id. Device installation of the admin/driver/provider APKs remains a manual step this round (the wireless-debugging transport dropped on a network change).
+
+---
+
+## ADR-134: Full-platform UI / interaction sweep — scanners over eyeballs, confirmation on irreversible actions, and failure never rendered as a value
+
+**Date:** 2026-10-08
+**Status:** Accepted
+**Deciders:** Lead Software Architect (user directive: «راجع اى تصحيحات للواجهات والازرار لكل شئ فى المنصه واى مشكله تتحل مهما كانت» — review every screen and button on the platform and fix whatever is wrong, however small)
+
+### Context
+Five prior rounds had repaired contracts, money and capabilities, but the presentation layer had been swept only opportunistically. No single artefact recorded which screens were localized, which buttons were reachable by a screen reader, or which admin actions could destroy state on a single tap. A visual pass over a codebase this size is not verifiable and does not repeat.
+
+### Decision
+- **The sweep is mechanical, not editorial.** Five objective detectors run over `lib/`: hard-coded UI literals by Unicode range, `FutureBuilder` without `hasError`, `AsyncValue.when` without an `error:` branch, `IconButton` without `tooltip:`, and raw-exception interpolation reaching a widget. Destructive RPC surfaces (wallet credit, settlement approve/reject, account deletion, driver suspension) are audited by hand because "did it ask first?" is a semantic question.
+- **Localization is the first-class defect class, not a polish item.** `driver_delivery_detail_page.dart` was Arabic-only end to end — 24 literals including the OTP dialog, the lifecycle buttons and the page title — so an English driver was served an Arabic screen. Every user-visible literal in the four admin financial consoles (32 across six pages) was English inside an otherwise Arabic console. Raw `Error: $e` — Postgres and RLS text — was rendered to operators in seven pages.
+- **Every irreversible action asks for confirmation before it fires.** Approving a top-up credits a real wallet balance; approving a settlement moves money; approving a pending deletion permanently destroys a member account; suspending a driver removes them from dispatch. The deletion dialog additionally states that the effect is permanent.
+- **A failed request is never rendered as if it were a successful one.** `driver_access_page` fabricated `delivery` / `active` defaults when the role lookup failed, so a flaky network produced a confident wrong answer; `product_detail_page` reported "not found" on a network error; the merchant products sheet collapsed its error into an empty list. All three branch on the error state, and the booking provider picker gained a retry instead of a dead end.
+- **The contract suite is tuned against its own false positives.** Interpolated domain values (`Order #123`), the language selector's own labels and user-defined widget names (`_glassIconButton(`, `Widget _glassIconButton({`) are correct UI, not defects; the accessibility scanner matches Material's `IconButton` only when it starts the expression.
+- **Where a shared widget already required localizations for a hint, a failing test means the harness is wrong, not the widget.** `app_search_bar_test.dart` lacked localization delegates; the fix was the test.
+
+### Rationale
+- A defect class that is only ever found by looking is never provably closed. Turning "did we check?" into a command that can fail is what makes the sweep auditable and repeatable — it is the same reasoning that produced the earlier PostgREST contract sweeps.
+- Rendering fabricated defaults on failure is worse than showing an error: a wrong answer that looks right is acted upon, while an error message is merely inconvenient. This is the general rule behind all three fixes.
+- A one-tap wallet credit is indistinguishable from a bug report later; the confirmation dialog is the cheapest possible control against an irreversible action.
+- Screen-reader users cannot see an icon. An unlabeled `IconButton` is a control that does not exist for them, so the tooltip is functional UI rather than decoration.
+
+### Consequences
+`flutter analyze` **No issues found**; `flutter test` **1081/1081** (+11 in `test/contract/ui_quality_contract_test.dart`, which asserts no raw exception text reaches a widget, no unlocalized Arabic literal survives in a page, every icon-only button carries a label, every destructive action asks first, and the new keys exist in both locales — locale parity is checked so Arabic cannot silently fall back to a key name). All four flavors build and were installed on the device (customer pid 32121, admin 11100, driver 11707, provider 12141) with **FATAL=0, RenderFlex overflow=0, Firebase 404=0**. Known limits, stated rather than hidden: the detectors are lexical, so a literal assembled at runtime or a tooltip that duplicates adjacent visible text still passes; `AsyncValue.when` was already complete (0 hits), so no work was needed there; and 11 `FutureBuilder` sites that resolve to non-nullable dropdown/option data carry no separate error branch because a failure there yields an empty selector rather than a wrong value.

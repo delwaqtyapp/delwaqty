@@ -210,9 +210,10 @@ class _AdminCategoriesManagementPageState
 
   void _showError(Object e) {
     if (!mounted) return;
+    final l10n = AppLocalizations.of(context);
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('Error: $e'),
+        content: Text(l10n.operationFailed),
         backgroundColor: Theme.of(context).colorScheme.error,
       ),
     );
@@ -228,6 +229,7 @@ class _AdminCategoriesManagementPageState
         title: Text(l10n.adminCategories),
         actions: [
           IconButton(
+            tooltip: l10n.refresh,
             icon: const Icon(Icons.refresh_rounded),
             onPressed: _busy ? null : _refresh,
           ),
@@ -251,7 +253,7 @@ class _AdminCategoriesManagementPageState
                 color: AppColors.errorLight.withValues(alpha: 0.8),
               ),
               const SizedBox(height: 12),
-              Text('${l10n.failedToLoad} $e'),
+              Text(l10n.operationFailed),
               const SizedBox(height: 12),
               OutlinedButton(
                 onPressed: _refresh,
@@ -665,6 +667,7 @@ class _CategoryEditDialogState extends State<_CategoryEditDialog> {
                   Text('${l10n.sortOrder}: '),
                   const SizedBox(width: 8),
                   IconButton(
+                    tooltip: l10n.moveUp,
                     onPressed: _sortOrder > 0
                         ? () => setState(() => _sortOrder -= 1)
                         : null,
@@ -674,6 +677,7 @@ class _CategoryEditDialogState extends State<_CategoryEditDialog> {
                   Text('$_sortOrder',
                       style: const TextStyle(fontWeight: FontWeight.w600)),
                   IconButton(
+                    tooltip: l10n.add,
                     onPressed: () => setState(() => _sortOrder += 1),
                     icon: const Icon(Icons.add_rounded),
                     visualDensity: VisualDensity.compact,

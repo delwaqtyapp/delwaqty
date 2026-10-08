@@ -24,6 +24,7 @@ class AdminProviderIntelligencePage extends ConsumerWidget {
         title: Text(l10n.adminProviderIntelligence),
         actions: [
           IconButton(
+            tooltip: l10n.refresh,
             icon: const Icon(Icons.refresh),
             onPressed: () => ref.invalidate(providerIntelligenceProvider),
           ),

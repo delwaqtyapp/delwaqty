@@ -26,6 +26,7 @@ class _AdminLiveTrackingPageState extends ConsumerState<AdminLiveTrackingPage> {
         title: Text(l10n.liveTracking),
         actions: [
           IconButton(
+            tooltip: l10n.refresh,
             icon: const Icon(Icons.refresh_rounded),
             onPressed: () => ref.invalidate(activeDriversLocationProvider),
           ),

@@ -132,6 +132,7 @@ class _DestinationSearchPageState extends ConsumerState<DestinationSearchPage> {
                 prefixIcon: const Icon(Icons.search_rounded),
                 suffixIcon: state.query.isNotEmpty
                     ? IconButton(
+                      tooltip: l10n.close,
                         icon: const Icon(Icons.close_rounded),
                         onPressed: () {
                           _controller.clear();

@@ -50,6 +50,7 @@ class _AdminTransactionLedgerPageState
         title: Text(l10n.adminTransactionLedger),
         actions: [
           IconButton(
+            tooltip: l10n.refresh,
             icon: const Icon(Icons.refresh),
             onPressed: () {
               ref.invalidate(transactionLedgerProvider);
@@ -222,6 +223,7 @@ class _AdminTransactionLedgerPageState
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             IconButton(
+              tooltip: l10n.previous,
               onPressed: _currentPage > 0
                   ? () => setState(() => _currentPage--)
                   : null,
@@ -245,6 +247,7 @@ class _AdminTransactionLedgerPageState
             ),
             const SizedBox(width: 8),
             IconButton(
+              tooltip: l10n.next,
               onPressed: _currentPage < ledger.totalPages - 1
                   ? () => setState(() => _currentPage++)
                   : null,

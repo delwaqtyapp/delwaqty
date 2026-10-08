@@ -225,6 +225,7 @@ class _RestaurantMenuPageState extends ConsumerState<RestaurantMenuPage> {
                 prefixIcon: const Icon(Icons.search, size: 20),
                 suffixIcon: _searchController.text.isNotEmpty
                     ? IconButton(
+                        tooltip: l10n.clear,
                         icon: const Icon(Icons.clear, size: 18),
                         onPressed: () {
                           _searchController.clear();

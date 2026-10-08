@@ -68,6 +68,7 @@ class _ChangePasswordPageState extends ConsumerState<ChangePasswordPage> {
       appBar: AppBar(
         title: Text(l10n.changePassword),
         leading: IconButton(
+          tooltip: l10n.back,
           icon: const Icon(Icons.arrow_back_rounded),
           onPressed: () => Navigator.of(context).pop(),
         ),
@@ -93,6 +94,7 @@ class _ChangePasswordPageState extends ConsumerState<ChangePasswordPage> {
                     labelText: l10n.newPassword,
                     prefixIcon: const Icon(Icons.lock_outline),
                     suffixIcon: IconButton(
+                      tooltip: l10n.showPassword,
                       icon: Icon(_obscureNew ? Icons.visibility_off : Icons.visibility),
                       onPressed: () => setState(() => _obscureNew = !_obscureNew),
                     ),
@@ -111,6 +113,7 @@ class _ChangePasswordPageState extends ConsumerState<ChangePasswordPage> {
                     labelText: l10n.confirmPassword,
                     prefixIcon: const Icon(Icons.lock_outline),
                     suffixIcon: IconButton(
+                      tooltip: l10n.showPassword,
                       icon: Icon(_obscureConfirm ? Icons.visibility_off : Icons.visibility),
                       onPressed: () => setState(() => _obscureConfirm = !_obscureConfirm),
                     ),

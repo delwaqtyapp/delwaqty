@@ -37,6 +37,7 @@ class _LocationSharingPageState extends State<LocationSharingPage> {
       appBar: AppBar(
         title: Text(l10n.locationSharing),
         leading: IconButton(
+          tooltip: l10n.back,
           icon: const Icon(Icons.arrow_back_rounded),
           onPressed: () => Navigator.of(context).pop(),
         ),

@@ -18,9 +18,10 @@ class AdminCollectionsPage extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Regional Collections'),
+        title:  Text(l10n.regionalCollections),
         actions: [
           IconButton(
+            tooltip: l10n.refresh,
             icon: const Icon(Icons.refresh_rounded),
             onPressed: () {
               ref.invalidate(adminCollectionSummaryProvider);

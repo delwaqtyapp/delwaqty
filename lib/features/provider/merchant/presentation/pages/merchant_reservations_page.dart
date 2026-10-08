@@ -48,6 +48,7 @@ class _MerchantReservationsPageState
         title: Text(l10n.reservations),
         actions: [
           IconButton(
+            tooltip: l10n.refresh,
             icon: const Icon(Icons.refresh),
             onPressed: () => ref.invalidate(_reservationsProvider),
           ),

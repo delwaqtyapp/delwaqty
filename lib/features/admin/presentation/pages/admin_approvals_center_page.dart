@@ -132,6 +132,7 @@ class _AdminApprovalsCenterPageState
         title: Text(l10n.adminApprovalsCenter),
         actions: [
           IconButton(
+            tooltip: l10n.refresh,
             icon: const Icon(Icons.refresh),
             onPressed: () => ref.invalidate(pendingApprovalsProvider),
           ),

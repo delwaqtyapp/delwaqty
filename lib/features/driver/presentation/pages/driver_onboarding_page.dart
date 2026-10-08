@@ -220,6 +220,7 @@ class _DriverOnboardingPageState extends ConsumerState<DriverOnboardingPage> {
       appBar: AppBar(
         title: Text(l10n.onboardingTitle),
         leading: IconButton(
+          tooltip: l10n.back,
           icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.of(context).pop(),
         ),

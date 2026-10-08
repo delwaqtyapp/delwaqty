@@ -39,6 +39,7 @@ class _MerchantBranchesPageState extends ConsumerState<MerchantBranchesPage> {
         title: Text(l10n.branches),
         actions: [
           IconButton(
+            tooltip: l10n.refresh,
             icon: const Icon(Icons.refresh),
             onPressed: () => ref.invalidate(_branchesProvider),
           ),
@@ -392,6 +393,7 @@ class _BranchFormSheetState extends ConsumerState<_BranchFormSheet> {
                   ),
                 ),
                 IconButton(
+                  tooltip: l10n.close,
                   onPressed: () => Navigator.of(context).pop(),
                   icon: const Icon(Icons.close),
                 ),

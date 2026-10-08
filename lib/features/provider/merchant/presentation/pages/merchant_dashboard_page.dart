@@ -41,6 +41,7 @@ class _MerchantDashboardPageState
         title: Text(l10n.merchantDashboard),
         actions: [
           IconButton(
+            tooltip: l10n.refresh,
             icon: const Icon(Icons.refresh),
             onPressed: () => ref.invalidate(_statsProvider),
           ),

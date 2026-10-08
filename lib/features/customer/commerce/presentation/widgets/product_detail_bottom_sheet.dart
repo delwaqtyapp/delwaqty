@@ -565,6 +565,7 @@ class _QuantitySelectorState extends State<_QuantitySelector> {
             mainAxisSize: MainAxisSize.min,
             children: [
               IconButton(
+                tooltip: l10n.decrease,
                 icon: const Icon(Icons.remove, size: 18),
                 onPressed: _qty > 1 ? () => _update(-1) : null,
               ),
@@ -579,6 +580,7 @@ class _QuantitySelectorState extends State<_QuantitySelector> {
                 ),
               ),
               IconButton(
+                tooltip: l10n.add,
                 icon: const Icon(Icons.add, size: 18),
                 onPressed: () => _update(1),
               ),

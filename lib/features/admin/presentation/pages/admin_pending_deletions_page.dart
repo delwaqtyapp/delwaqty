@@ -59,6 +59,7 @@ class _AdminPendingDeletionsPageState
         title: Text(l10n.pendingDeletions),
         actions: [
           IconButton(
+            tooltip: l10n.refresh,
             icon: const Icon(Icons.refresh),
             onPressed: _loadPendingDeletions,
           ),
@@ -194,6 +195,53 @@ class _AdminPendingDeletionsPageState
     final deletionId = deletion['id'] as String?;
     if (deletionId == null) return;
 
+    // Approving this PERMANENTLY deletes the member account. It must never
+    // be a single tap.
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(l10n.approveDeletionTitle),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(l10n.approveDeletionBody),
+            const SizedBox(height: 10),
+            Row(
+              children: [
+                Icon(Icons.warning_amber_rounded, size: 18, color: Theme.of(ctx).colorScheme.error),
+                const SizedBox(width: 6),
+                Flexible(
+                  child: Text(
+                    l10n.permanentActionWarning,
+                    style: TextStyle(
+                      color: Theme.of(ctx).colorScheme.error,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: Text(l10n.cancel),
+          ),
+          FilledButton(
+            style: FilledButton.styleFrom(
+              backgroundColor: Theme.of(ctx).colorScheme.error,
+            ),
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: Text(l10n.approve),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) return;
+
     try {
       final client = Supabase.instance.client;
       await client.rpc('approve_member_deletion', params: {
@@ -208,7 +256,7 @@ class _AdminPendingDeletionsPageState
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e')),
+          SnackBar(content: Text(l10n.operationFailed)),
         );
       }
     }
@@ -235,7 +283,7 @@ class _AdminPendingDeletionsPageState
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e')),
+          SnackBar(content: Text(l10n.operationFailed)),
         );
       }
     }

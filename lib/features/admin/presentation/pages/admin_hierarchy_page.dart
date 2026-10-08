@@ -73,6 +73,7 @@ class _AdminHierarchyPageState extends ConsumerState<AdminHierarchyPage> {
         actions: [
           if (_currentRole != null && _currentRole!.hierarchyLevel < 4)
             IconButton(
+              tooltip: l10n.profile,
               icon: const Icon(Icons.person_add_rounded),
               onPressed: () => _showAssignDialog(l10n),
             ),

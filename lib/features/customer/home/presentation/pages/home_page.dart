@@ -1296,7 +1296,9 @@ class _DiscoveryContent extends ConsumerWidget {
           AppLocalizations.of(context),
         ),
         open: provider.isAvailable,
-        openLabel: provider.isAvailable ? 'متاح' : 'غير متاح',
+        openLabel: provider.isAvailable
+            ? AppLocalizations.of(context).available
+            : AppLocalizations.of(context).unavailable,
         rating: provider.rating,
         ratingCount: provider.ratingCount,
         subtitle: provider.hourlyRate != null

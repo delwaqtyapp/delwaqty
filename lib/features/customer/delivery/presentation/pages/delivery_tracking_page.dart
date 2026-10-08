@@ -14,6 +14,7 @@ import 'package:delwaqty/l10n/app_localizations.dart';
 import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
 import 'package:delwaqty/shared/widgets/shimmer_loading.dart';
 import 'package:delwaqty/core/theme/app_colors.dart';
+import 'package:delwaqty/core/errors/app_error_text.dart';
 
 class DeliveryTrackingPage extends ConsumerStatefulWidget {
   const DeliveryTrackingPage({required this.deliveryId, super.key});
@@ -72,7 +73,7 @@ class _DeliveryTrackingPageState extends ConsumerState<DeliveryTrackingPage> {
             ShimmerCard(height: 160),
           ],
         ),
-        error: (e, _) => Center(child: Text(l10n.errorWithMessage(e.toString()))),
+        error: (e, _) => Center(child: Text(appErrorText(context, e))),
         data: (ride) => _TrackingBody(ride: ride, deliveryId: widget.deliveryId),
       ),
       bottomNavigationBar: rideAsync.value != null &&
@@ -111,7 +112,7 @@ class _DeliveryTrackingPageState extends ConsumerState<DeliveryTrackingPage> {
                 if (context.mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
-                        content: Text(l10n.errorWithMessage(e.toString()))),
+                        content: Text(appErrorText(context, e))),
                   );
                 }
               }
@@ -141,7 +142,7 @@ class _DeliveryTrackingPageState extends ConsumerState<DeliveryTrackingPage> {
       );
     } catch (e) {
       messenger.showSnackBar(
-        SnackBar(content: Text(l10n.errorWithMessage(e.toString()))),
+        SnackBar(content: Text(appErrorMessage(l10n, e))),
       );
     }
   }

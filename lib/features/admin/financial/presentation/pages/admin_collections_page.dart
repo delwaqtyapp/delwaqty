@@ -5,6 +5,7 @@ import 'package:delwaqty/shared/widgets/app_loader.dart';
 import 'package:delwaqty/shared/widgets/premium_empty_state.dart';
 import 'package:delwaqty/shared/widgets/design/premium_card.dart';
 import 'package:delwaqty/features/admin/financial/presentation/providers/admin_financial_providers.dart';
+import 'package:delwaqty/core/errors/app_error_text.dart';
 
 class AdminCollectionsPage extends ConsumerWidget {
   const AdminCollectionsPage({super.key});
@@ -48,7 +49,7 @@ class AdminCollectionsPage extends ConsumerWidget {
               error: (e, _) => PremiumEmptyState(
                 icon: Icons.error_outline_rounded,
                 title: l10n.error,
-                message: e.toString(),
+                message: appErrorText(context, e),
                 actionLabel: l10n.retry,
                 onAction: () =>
                     ref.invalidate(adminCollectionSummaryProvider),
@@ -114,7 +115,7 @@ class AdminCollectionsPage extends ConsumerWidget {
               error: (e, _) => PremiumEmptyState(
                 icon: Icons.error_outline_rounded,
                 title: l10n.error,
-                message: e.toString(),
+                message: appErrorText(context, e),
                 actionLabel: l10n.retry,
                 onAction: () => ref.invalidate(adminCollectionsProvider),
               ),

@@ -7,6 +7,7 @@ import 'package:delwaqty/features/_shared/regions/domain/entities/region.dart';
 import 'package:delwaqty/features/_shared/regions/presentation/providers/region_providers.dart';
 import 'package:delwaqty/features/_shared/regions/presentation/widgets/region_browser.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
+import 'package:delwaqty/core/errors/app_error_text.dart';
 
 class AdminRegionScopePage extends ConsumerStatefulWidget {
   const AdminRegionScopePage({super.key});
@@ -44,7 +45,7 @@ class _AdminRegionScopePageState extends ConsumerState<AdminRegionScopePage> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error saving assignment: $e'),
+            content: Text(appErrorText(context, e)),
             backgroundColor: Theme.of(context).colorScheme.error,
           ),
         );
@@ -65,7 +66,7 @@ class _AdminRegionScopePageState extends ConsumerState<AdminRegionScopePage> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error removing assignment: $e'),
+            content: Text(appErrorText(context, e)),
             backgroundColor: Theme.of(context).colorScheme.error,
           ),
         );
@@ -165,7 +166,7 @@ class _UsersPanel extends StatelessWidget {
       ),
       child: usersAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('Error: $e')),
+        error: (e, _) => Center(child: Text(appErrorText(context, e))),
         data: (users) {
           if (users.isEmpty) {
             return const Center(child: Text('No admin-tier users'));

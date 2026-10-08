@@ -9,6 +9,7 @@ import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
 import 'package:delwaqty/shared/widgets/empty_state.dart';
 import 'package:delwaqty/shared/widgets/app_loader.dart';
 import 'package:delwaqty/shared/widgets/error_state.dart';
+import 'package:delwaqty/core/errors/app_error_text.dart';
 
 final _cartFutureProvider = Provider<AsyncValue<Cart?>>((ref) {
   return ref.watch(cartProvider);
@@ -224,7 +225,7 @@ class CartPage extends ConsumerWidget {
         loading: () => Center(child: AppLoader.circular()),
         error: (e, _) => ErrorState(
           title: l10n.error,
-          message: e.toString(),
+          message: appErrorText(context, e),
           onRetry: () => ref.invalidate(_cartFutureProvider),
           retryLabel: l10n.retry,
         ),

@@ -5,6 +5,7 @@ import 'package:delwaqty/features/driver/driver_module.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:delwaqty/core/errors/app_error_text.dart';
 
 class DriverOnboardingPage extends ConsumerStatefulWidget {
   const DriverOnboardingPage({super.key});
@@ -102,9 +103,9 @@ class _DriverOnboardingPageState extends ConsumerState<DriverOnboardingPage> {
       }
     } catch (e) {
       if (mounted) {
-        setState(() => _licenseError = 'Upload failed: $e');
+        setState(() => _licenseError = appErrorText(context, e));
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Upload failed: $e')),
+          SnackBar(content: Text(appErrorText(context, e))),
         );
       }
     } finally {
@@ -166,9 +167,9 @@ class _DriverOnboardingPageState extends ConsumerState<DriverOnboardingPage> {
       }
     } catch (e) {
       if (mounted) {
-        setState(() => _vehicleError = 'Upload failed: $e');
+        setState(() => _vehicleError = appErrorText(context, e));
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Upload failed: $e')),
+          SnackBar(content: Text(appErrorText(context, e))),
         );
       }
     } finally {

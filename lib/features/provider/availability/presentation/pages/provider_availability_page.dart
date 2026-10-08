@@ -5,6 +5,7 @@ import 'package:delwaqty/shared/widgets/app_loader.dart';
 import 'package:delwaqty/shared/widgets/design/premium_card.dart';
 import 'package:delwaqty/shared/widgets/premium_empty_state.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
+import 'package:delwaqty/core/errors/app_error_text.dart';
 
 class ProviderAvailabilityPage extends ConsumerStatefulWidget {
   const ProviderAvailabilityPage({super.key});
@@ -33,7 +34,7 @@ class _ProviderAvailabilityPageState
       }
       ref.invalidate(providerAvailabilityProvider);
     } catch (e) {
-      setState(() => _error = e.toString());
+      setState(() => appErrorText(context, e));
     } finally {
       if (mounted) setState(() => _saving = false);
     }
@@ -63,7 +64,7 @@ class _ProviderAvailabilityPageState
               child: PremiumEmptyState(
                 icon: Icons.error_outline_rounded,
                 title: l10n.error,
-                message: e.toString(),
+                message: appErrorText(context, e),
                 actionLabel: l10n.retry,
                 onAction: () => ref.invalidate(providerAvailabilityProvider),
               ),

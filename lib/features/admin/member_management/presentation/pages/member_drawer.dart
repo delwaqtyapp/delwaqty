@@ -10,6 +10,7 @@ import 'package:delwaqty/shared/widgets/shimmer_loading.dart';
 import 'package:delwaqty/shared/widgets/stat_card.dart';
 import 'package:delwaqty/services/supabase/supabase_service.dart';
 import 'package:delwaqty/shared/widgets/animated_feedback.dart';
+import 'package:delwaqty/core/errors/app_error_text.dart';
 
 class MemberDrawer extends ConsumerWidget {
   const MemberDrawer({
@@ -31,7 +32,7 @@ class MemberDrawer extends ConsumerWidget {
       error: (e, _) => PremiumEmptyState(
         icon: Icons.error_outline,
         title: l10n.error,
-        message: e.toString(),
+        message: appErrorText(context, e),
       ),
       data: (profile) {
         if (profile == null) {
@@ -1840,7 +1841,7 @@ class _SanctionsSectionState extends ConsumerState<_SanctionsSection> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.failedWithError(e.toString()))),
+          SnackBar(content: Text(appErrorText(context, e))),
         );
       }
     } finally {
@@ -2005,7 +2006,7 @@ class _SanctionTileState extends ConsumerState<_SanctionTile> {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(l10n.failedWithError(e.toString())),
+              content: Text(appErrorText(context, e)),
             ),
           );
         }
@@ -2381,7 +2382,7 @@ class _AdminActionsSectionState extends ConsumerState<_AdminActionsSection> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.failedWithError(e.toString()))),
+          SnackBar(content: Text(appErrorText(context, e))),
         );
       }
     }
@@ -2464,7 +2465,7 @@ class _AdminActionsSectionState extends ConsumerState<_AdminActionsSection> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.failedWithError(e.toString()))),
+          SnackBar(content: Text(appErrorText(context, e))),
         );
       }
     }
@@ -2685,7 +2686,7 @@ class _AdminActionsSectionState extends ConsumerState<_AdminActionsSection> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.failedToIssueSanction(e.toString()))),
+          SnackBar(content: Text(appErrorText(context, e))),
         );
       }
     }
@@ -2769,7 +2770,7 @@ class _AdminActionsSectionState extends ConsumerState<_AdminActionsSection> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.failedWithError(e.toString()))),
+          SnackBar(content: Text(appErrorText(context, e))),
         );
       }
     }
@@ -2816,7 +2817,7 @@ class _AdminActionsSectionState extends ConsumerState<_AdminActionsSection> {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(l10n.failedWithError(e.toString())),
+              content: Text(appErrorText(context, e)),
               duration: const Duration(seconds: 5),
             ),
           );
@@ -2898,7 +2899,7 @@ class _AdminActionsSectionState extends ConsumerState<_AdminActionsSection> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(l10n.failedWithError(e.toString())),
+            content: Text(appErrorText(context, e)),
             duration: const Duration(seconds: 5),
           ),
         );

@@ -13039,6 +13039,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Open details'**
   String get openDetails;
+
+  /// No description provided for @errorTimeout.
+  ///
+  /// In en, this message translates to:
+  /// **'The request took too long. Please try again.'**
+  String get errorTimeout;
+
+  /// No description provided for @errorUnauthenticated.
+  ///
+  /// In en, this message translates to:
+  /// **'Your session has expired. Please sign in again.'**
+  String get errorUnauthenticated;
+
+  /// No description provided for @errorForbidden.
+  ///
+  /// In en, this message translates to:
+  /// **'You do not have permission to do that.'**
+  String get errorForbidden;
+
+  /// No description provided for @errorNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'That item is no longer available.'**
+  String get errorNotFound;
+
+  /// No description provided for @errorConflict.
+  ///
+  /// In en, this message translates to:
+  /// **'Something changed while you were working. Refresh and try again.'**
+  String get errorConflict;
+
+  /// No description provided for @errorServerIssue.
+  ///
+  /// In en, this message translates to:
+  /// **'A server error occurred. Please try again shortly.'**
+  String get errorServerIssue;
 }
 
 class _AppLocalizationsDelegate

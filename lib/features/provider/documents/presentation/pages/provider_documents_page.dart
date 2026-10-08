@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 
 import '../providers/provider_documents_providers.dart';
+import 'package:delwaqty/core/errors/app_error_text.dart';
 
 class ProviderDocumentsPage extends ConsumerStatefulWidget {
   const ProviderDocumentsPage({super.key});
@@ -45,7 +46,7 @@ class _ProviderDocumentsPageState extends ConsumerState<ProviderDocumentsPage> {
         );
       }
     } catch (e) {
-      if (mounted) setState(() => _error = e.toString());
+      if (mounted) setState(() => appErrorText(context, e));
     } finally {
       if (mounted) setState(() => _busy = false);
     }
@@ -70,7 +71,7 @@ class _ProviderDocumentsPageState extends ConsumerState<ProviderDocumentsPage> {
         );
       }
     } catch (e) {
-      if (mounted) setState(() => _error = e.toString());
+      if (mounted) setState(() => appErrorText(context, e));
     } finally {
       if (mounted) setState(() => _busy = false);
     }
@@ -83,7 +84,7 @@ class _ProviderDocumentsPageState extends ConsumerState<ProviderDocumentsPage> {
           .getDocumentUrl(path);
       if (mounted) setState(() => _viewUrl = url);
     } catch (e) {
-      if (mounted) setState(() => _error = e.toString());
+      if (mounted) setState(() => appErrorText(context, e));
     }
   }
 

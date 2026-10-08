@@ -14,6 +14,7 @@ import 'package:delwaqty/features/customer/search/domain/entities/geo_point.dart
 import 'package:delwaqty/features/customer/search/domain/entities/search_session.dart';
 import 'package:delwaqty/features/customer/search/presentation/providers/search_providers.dart';
 import 'dart:async';
+import 'package:delwaqty/core/errors/app_error_text.dart';
 
 class DirectDeliveryPage extends ConsumerStatefulWidget {
   const DirectDeliveryPage({super.key});
@@ -223,7 +224,7 @@ class _DirectDeliveryPageState extends ConsumerState<DirectDeliveryPage> {
     } catch (e) {
       if (mounted) {
         context.showAppSnackBar(
-          l10n.errorWithMessage(e.toString()),
+          appErrorText(context, e),
           isError: true,
         );
       }

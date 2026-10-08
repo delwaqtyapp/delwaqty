@@ -6765,4 +6765,22 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get openDetails => 'فتح التفاصيل';
+
+  @override
+  String get errorTimeout => 'استغرق الطلب وقتًا طويلًا. حاول مرة أخرى.';
+
+  @override
+  String get errorUnauthenticated => 'انتهت جلستك. يرجى تسجيل الدخول مرة أخرى.';
+
+  @override
+  String get errorForbidden => 'ليس لديك صلاحية للقيام بذلك.';
+
+  @override
+  String get errorNotFound => 'هذا العنصر لم يعد متاحًا.';
+
+  @override
+  String get errorConflict => 'تغيّر شيء أثناء عملك. حدّث وحاول مرة أخرى.';
+
+  @override
+  String get errorServerIssue => 'حدث خطأ في الخادم. يرجى المحاولة بعد قليل.';
 }

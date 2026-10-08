@@ -7,6 +7,7 @@ import 'package:delwaqty/features/driver/domain/entities/vehicle.dart';
 import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
 import 'package:delwaqty/shared/widgets/shimmer_loading.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
+import 'package:delwaqty/core/errors/app_error_text.dart';
 
 final _vehiclesProvider = FutureProvider.family<List<Vehicle>, String>((ref, driverId) async {
   final repo = ref.watch(driverRepositoryProvider);
@@ -106,7 +107,7 @@ class VehicleManagementPage extends ConsumerWidget {
             ShimmerCard(),
           ],
         ),
-        error: (e, _) => Center(child: Text(l10n.errorWithMessage(e.toString()))),
+        error: (e, _) => Center(child: Text(appErrorText(context, e))),
         data: (profile) {
           if (profile == null) {
             return Center(child: Text(l10n.noVehicles));
@@ -157,7 +158,7 @@ class _VehicleListBody extends ConsumerWidget {
             ShimmerCard(),
           ],
         ),
-        error: (e, _) => Center(child: Text(l10n.errorWithMessage(e.toString()))),
+        error: (e, _) => Center(child: Text(appErrorText(context, e))),
         data: (vehicles) {
           if (vehicles.isEmpty) {
             return Center(

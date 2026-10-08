@@ -18,6 +18,7 @@ import 'package:delwaqty/core/config/app_mode_provider.dart';
 import 'package:delwaqty/domain/entities/user.dart';
 import 'package:delwaqty/shared/widgets/app_loader.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
+import 'package:delwaqty/core/errors/app_error_text.dart';
 
 class SupportChatRoomPage extends ConsumerStatefulWidget {
   const SupportChatRoomPage({super.key, required this.roomId});
@@ -283,7 +284,7 @@ class _SupportChatRoomPageState extends ConsumerState<SupportChatRoomPage> {
                   messagesAsync, cs, l10n, user?.id ?? '');
               },
               loading: () => const Center(child: AppLoaderCircular()),
-              error: (e, _) => Center(child: Text('${l10n.error}: $e')),
+              error: (e, _) => Center(child: Text(appErrorText(context, e))),
             ),
           ),
 
@@ -387,7 +388,7 @@ class _SupportChatRoomPageState extends ConsumerState<SupportChatRoomPage> {
         );
       },
       loading: () => const Center(child: AppLoaderCircular()),
-      error: (e, _) => Center(child: Text('${l10n.error}: $e')),
+      error: (e, _) => Center(child: Text(appErrorText(context, e))),
     );
   }
 
@@ -1065,7 +1066,7 @@ class _SupportChatRoomPageState extends ConsumerState<SupportChatRoomPage> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('${l10n.error}: $e')),
+          SnackBar(content: Text(appErrorText(context, e))),
         );
       }
     } finally {
@@ -1111,7 +1112,7 @@ class _SupportChatRoomPageState extends ConsumerState<SupportChatRoomPage> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('${l10n.error}: $e')),
+          SnackBar(content: Text(appErrorText(context, e))),
         );
       }
     }
@@ -1244,9 +1245,8 @@ class _SupportChatRoomPageState extends ConsumerState<SupportChatRoomPage> {
       _scrollToBottom();
     } catch (e) {
       if (!mounted) return;
-      final errorCode = AppLocalizations.of(context).error;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('$errorCode: $e')),
+        SnackBar(content: Text(appErrorText(context, e))),
       );
     }
   }
@@ -1282,7 +1282,7 @@ class _SupportChatRoomPageState extends ConsumerState<SupportChatRoomPage> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('${l10n.error}: $e')),
+          SnackBar(content: Text(appErrorText(context, e))),
         );
       }
     }
@@ -1319,7 +1319,7 @@ class _SupportChatRoomPageState extends ConsumerState<SupportChatRoomPage> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('${l10n.error}: $e')),
+          SnackBar(content: Text(appErrorText(context, e))),
         );
       }
     }

@@ -7,6 +7,7 @@ import 'package:delwaqty/features/admin/sanctions/presentation/sanctions_provide
 import 'package:delwaqty/shared/widgets/premium_empty_state.dart';
 import 'package:delwaqty/shared/widgets/shimmer_loading.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
+import 'package:delwaqty/core/errors/app_error_text.dart';
 
 class MemberDetailPage extends ConsumerWidget {
   const MemberDetailPage({super.key, required this.memberId});
@@ -25,7 +26,7 @@ class MemberDetailPage extends ConsumerWidget {
         error: (e, _) => PremiumEmptyState(
           icon: Icons.error_outline,
           title: l10n.error,
-          message: e.toString(),
+          message: appErrorText(context, e),
         ),
         data: (profile) {
           if (profile == null) {
@@ -128,7 +129,7 @@ class _IssueSanctionSheetState extends ConsumerState<_IssueSanctionSheet> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(l10n.failedToIssueSanction(e.toString())),
+            content: Text(appErrorText(context, e)),
           ),
         );
       }
@@ -498,7 +499,7 @@ class _SanctionsSectionState extends ConsumerState<_SanctionsSection> {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(l10n.failedToRevoke(e.toString())),
+              content: Text(appErrorText(context, e)),
             ),
           );
         }

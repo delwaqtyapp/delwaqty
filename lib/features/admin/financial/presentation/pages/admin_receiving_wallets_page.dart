@@ -5,6 +5,7 @@ import 'package:delwaqty/shared/widgets/app_loader.dart';
 import 'package:delwaqty/shared/widgets/premium_empty_state.dart';
 import 'package:delwaqty/shared/widgets/design/premium_card.dart';
 import 'package:delwaqty/features/admin/financial/presentation/providers/admin_financial_providers.dart';
+import 'package:delwaqty/core/errors/app_error_text.dart';
 
 class AdminReceivingWalletsPage extends ConsumerStatefulWidget {
   const AdminReceivingWalletsPage({super.key});
@@ -93,7 +94,7 @@ class _AdminReceivingWalletsPageState
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e')),
+          SnackBar(content: Text(appErrorText(context, e))),
         );
       }
     }
@@ -108,7 +109,7 @@ class _AdminReceivingWalletsPageState
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e')),
+          SnackBar(content: Text(appErrorText(context, e))),
         );
       }
     }
@@ -185,7 +186,7 @@ class _AdminReceivingWalletsPageState
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e')),
+          SnackBar(content: Text(appErrorText(context, e))),
         );
       }
     }
@@ -246,7 +247,7 @@ class _AdminReceivingWalletsPageState
             error: (e, _) => PremiumEmptyState(
               icon: Icons.error_outline_rounded,
               title: l10n.error,
-              message: e.toString(),
+              message: appErrorText(context, e),
             ),
             data: (accounts) {
               if (accounts.isEmpty) {
@@ -306,7 +307,7 @@ class _AdminReceivingWalletsPageState
             error: (e, _) => PremiumEmptyState(
               icon: Icons.error_outline_rounded,
               title: l10n.error,
-              message: e.toString(),
+              message: appErrorText(context, e),
             ),
             data: (wallets) {
               if (wallets.isEmpty) {

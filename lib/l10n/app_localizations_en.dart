@@ -6809,4 +6809,25 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get openDetails => 'Open details';
+
+  @override
+  String get errorTimeout => 'The request took too long. Please try again.';
+
+  @override
+  String get errorUnauthenticated =>
+      'Your session has expired. Please sign in again.';
+
+  @override
+  String get errorForbidden => 'You do not have permission to do that.';
+
+  @override
+  String get errorNotFound => 'That item is no longer available.';
+
+  @override
+  String get errorConflict =>
+      'Something changed while you were working. Refresh and try again.';
+
+  @override
+  String get errorServerIssue =>
+      'A server error occurred. Please try again shortly.';
 }

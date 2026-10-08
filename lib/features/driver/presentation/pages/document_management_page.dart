@@ -7,6 +7,7 @@ import 'package:delwaqty/features/driver/driver_module.dart';
 import 'package:delwaqty/features/driver/domain/entities/driver_document.dart';
 import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
+import 'package:delwaqty/core/errors/app_error_text.dart';
 
 final _documentsProvider = FutureProvider.family<List<DriverDocument>, String>((ref, driverId) async {
   final repo = ref.watch(driverRepositoryProvider);
@@ -73,7 +74,7 @@ class DocumentManagementPage extends ConsumerWidget {
       appBar: AppBar(title: Text(l10n.documentManagement)),
       body: profileAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text(l10n.errorWithMessage(e.toString()))),
+        error: (e, _) => Center(child: Text(appErrorText(context, e))),
         data: (profile) {
           if (profile == null) {
             return Center(child: Text(l10n.noDocuments));
@@ -92,14 +93,13 @@ class _DocumentListBody extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final l10n = AppLocalizations.of(context);
     final documentsAsync = ref.watch(_documentsProvider(driverId));
 
     return RefreshIndicator(
       onRefresh: () async => ref.invalidate(_documentsProvider(driverId)),
       child: documentsAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text(l10n.errorWithMessage(e.toString()))),
+        error: (e, _) => Center(child: Text(appErrorText(context, e))),
         data: (documents) {
           final docMap = <String, DriverDocument>{};
           for (final doc in documents) {

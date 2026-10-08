@@ -13,6 +13,7 @@ import 'package:delwaqty/shared/widgets/gradient_background.dart';
 import 'package:delwaqty/shared/widgets/premium_empty_state.dart';
 import 'package:delwaqty/shared/widgets/shimmer_loading.dart';
 import 'package:delwaqty/shared/widgets/design/premium_card.dart';
+import 'package:delwaqty/core/errors/app_error_text.dart';
 
 final _ordersFutureProvider = FutureProvider<List<Order>>((ref) async {
   final repo = ref.watch(orderRepositoryProvider);
@@ -88,7 +89,7 @@ class OrdersPage extends ConsumerWidget {
                   child: PremiumEmptyState(
                     icon: Icons.error_outline_rounded,
                     title: l10n.error,
-                    message: e.toString(),
+                    message: appErrorText(context, e),
                     actionLabel: l10n.retry,
                     onAction: () => ref.invalidate(_ordersFutureProvider),
                   ),

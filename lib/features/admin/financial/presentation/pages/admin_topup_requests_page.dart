@@ -6,6 +6,7 @@ import 'package:delwaqty/shared/widgets/premium_empty_state.dart';
 import 'package:delwaqty/shared/widgets/design/premium_card.dart';
 import 'package:delwaqty/features/admin/financial/domain/entities/admin_financial_entities.dart';
 import 'package:delwaqty/features/admin/financial/presentation/providers/admin_financial_providers.dart';
+import 'package:delwaqty/core/errors/app_error_text.dart';
 
 class AdminTopupRequestsPage extends ConsumerStatefulWidget {
   const AdminTopupRequestsPage({super.key});
@@ -107,7 +108,7 @@ class _AdminTopupRequestsPageState
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e')),
+          SnackBar(content: Text(appErrorText(context, e))),
         );
       }
     } finally {
@@ -168,7 +169,7 @@ class _AdminTopupRequestsPageState
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e')),
+          SnackBar(content: Text(appErrorText(context, e))),
         );
       }
     } finally {
@@ -227,7 +228,7 @@ class _AdminTopupRequestsPageState
                 error: (e, _) => PremiumEmptyState(
                   icon: Icons.error_outline_rounded,
                   title: l10n.error,
-                  message: e.toString(),
+                  message: appErrorText(context, e),
                   actionLabel: l10n.retry,
                   onAction: () =>
                       ref.invalidate(adminTopupRequestsProvider),

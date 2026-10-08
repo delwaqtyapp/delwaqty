@@ -15,6 +15,7 @@ import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
 import 'package:delwaqty/shared/widgets/shimmer_loading.dart';
 import 'package:delwaqty/core/theme/app_colors.dart';
 import 'package:delwaqty/features/driver/driver_module.dart';
+import 'package:delwaqty/core/errors/app_error_text.dart';
 
 class DriverDeliveryHubPage extends ConsumerWidget {
   const DriverDeliveryHubPage({super.key});
@@ -47,7 +48,7 @@ class DriverDeliveryHubPage extends ConsumerWidget {
             ShimmerCard(height: 100),
           ],
         ),
-        error: (e, _) => Center(child: Text(l10n.errorWithMessage(e.toString()))),
+        error: (e, _) => Center(child: Text(appErrorText(context, e))),
         data: (profile) {
           if (profile == null || profile.vehicleType == null) {
             return _RegisterPrompt(userId: userId);

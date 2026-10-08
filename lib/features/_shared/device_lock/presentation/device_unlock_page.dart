@@ -10,6 +10,7 @@ import 'package:delwaqty/features/_shared/auth/domain/auth_state.dart';
 import 'package:delwaqty/features/_shared/auth/presentation/auth_provider.dart';
 import 'package:delwaqty/features/_shared/device_lock/device_lock_provider.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
+import 'package:delwaqty/core/errors/app_error_text.dart';
 
 class DeviceUnlockPage extends ConsumerStatefulWidget {
   const DeviceUnlockPage({super.key});
@@ -120,15 +121,19 @@ class _DeviceUnlockPageState extends ConsumerState<DeviceUnlockPage> {
           : postAuthRoute(ref.read(appFlavorProvider));
       if (mounted) context.go(target);
     } on Exception catch (e) {
-      final msg = e.toString();
+      // Branch on the technical text (never rendered), then show a localized
+      // sentence: the two failure modes a member can act on differently are
+      // "locked out" and "not enrolled", everything else is generic.
+      final detail = appErrorDetail(e);
+      final message = appErrorMessage(l10n, e);
       if (!mounted) return;
       setState(() {
         _isAuthenticating = false;
-        _error = msg.contains('LockedOut') || msg.contains('Too many')
+        _error = detail.contains('LockedOut') || detail.contains('Too many')
             ? l10n.deviceUnlockLockedOut
-            : msg.contains('NotEnrolled')
+            : detail.contains('NotEnrolled')
                 ? l10n.deviceUnlockNotEnrolled
-                : l10n.deviceUnlockFailed;
+                : message;
       });
     }
   }

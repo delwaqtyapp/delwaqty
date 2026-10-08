@@ -6,6 +6,7 @@ import 'package:delwaqty/features/customer/ride/domain/entities/fare_quote.dart'
 import 'package:delwaqty/features/customer/ride/domain/repositories/ride_repository.dart';
 import 'package:delwaqty/features/customer/ride/data/datasources/remote/supabase_ride_data_source.dart';
 import 'package:delwaqty/features/customer/ride/data/repositories/ride_repository_impl.dart';
+import 'package:delwaqty/core/errors/app_error_text.dart';
 
 final rideRepositoryImplProvider = Provider<RideRepositoryImpl>((ref) {
   return RideRepositoryImpl(
@@ -193,7 +194,7 @@ class RideBookingNotifier extends StateNotifier<RideBookingState> {
       );
       await _revalidatePromo();
     } catch (e) {
-      state = state.copyWith(isEstimating: false, error: e.toString());
+      state = state.copyWith(isEstimating: false, error: appErrorDetail(e));
     }
   }
 
@@ -219,7 +220,7 @@ class RideBookingNotifier extends StateNotifier<RideBookingState> {
         );
       }
     } catch (e) {
-      state = state.copyWith(promoError: e.toString());
+      state = state.copyWith(promoError: appErrorDetail(e));
     }
   }
 
@@ -258,7 +259,7 @@ class RideBookingNotifier extends StateNotifier<RideBookingState> {
       _ref.invalidate(activeRideProvider);
       return ride;
     } catch (e) {
-      state = state.copyWith(isRequesting: false, error: e.toString());
+      state = state.copyWith(isRequesting: false, error: appErrorDetail(e));
       return null;
     }
   }

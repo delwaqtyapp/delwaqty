@@ -7,6 +7,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:http/http.dart' as http;
 import 'package:delwaqty/features/admin/support_chat/presentation/chat_providers.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
+import 'package:delwaqty/core/errors/app_error_text.dart';
 
 class ChatAttachmentImage extends ConsumerStatefulWidget {
   const ChatAttachmentImage({
@@ -65,7 +66,7 @@ class _ChatAttachmentImageState extends ConsumerState<ChatAttachmentImage> {
         SnackBar(content: Text('${l10n.imageDownloaded}: ${file.path}')),
       );
     } catch (e) {
-      messenger.showSnackBar(SnackBar(content: Text('${l10n.error}: $e')));
+      messenger.showSnackBar(SnackBar(content: Text(appErrorMessage(l10n, e))));
     }
   }
 

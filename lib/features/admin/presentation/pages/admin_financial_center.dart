@@ -10,6 +10,7 @@ import 'package:delwaqty/shared/widgets/app_loader.dart';
 import 'package:delwaqty/shared/widgets/design/premium_card.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 import 'package:delwaqty/core/theme/app_spacing.dart';
+import 'package:delwaqty/core/errors/app_error_text.dart';
 
 class AdminFinancialCenter extends ConsumerWidget {
   const AdminFinancialCenter({super.key});
@@ -309,7 +310,7 @@ class AdminFinancialCenter extends ConsumerWidget {
                       } catch (e) {
                         setState(() {
                           submitting = false;
-                          resultMsg = l10n.directTopupFailed(e.toString());
+                          resultMsg = appErrorText(context, e);
                         });
                       }
                     },

@@ -5,6 +5,7 @@ import 'package:delwaqty/shared/widgets/app_loader.dart';
 import 'package:delwaqty/shared/widgets/design/premium_card.dart';
 import 'package:delwaqty/shared/widgets/premium_empty_state.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
+import 'package:delwaqty/core/errors/app_error_text.dart';
 
 class AdminOwnerDashboardPage extends ConsumerWidget {
   const AdminOwnerDashboardPage({super.key});
@@ -50,7 +51,7 @@ class AdminOwnerDashboardPage extends ConsumerWidget {
                   child: PremiumEmptyState(
                     icon: Icons.error_outline_rounded,
                     title: l10n.error,
-                    message: e.toString(),
+                    message: appErrorText(context, e),
                   ),
                 ),
                 data: (data) => _CollectionsSection(data: data, cs: cs, l10n: l10n),
@@ -65,7 +66,7 @@ class AdminOwnerDashboardPage extends ConsumerWidget {
                   child: PremiumEmptyState(
                     icon: Icons.error_outline_rounded,
                     title: l10n.error,
-                    message: e.toString(),
+                    message: appErrorText(context, e),
                   ),
                 ),
                 data: (data) => _SettlementsSection(data: data, cs: cs, l10n: l10n),

@@ -15,6 +15,7 @@ import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
 import 'package:delwaqty/shared/widgets/premium_empty_state.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 import 'dart:async';
+import 'package:delwaqty/core/errors/app_error_text.dart';
 
 class AdminSupportChatPage extends ConsumerStatefulWidget {
   const AdminSupportChatPage({super.key});
@@ -45,7 +46,7 @@ class _AdminSupportChatPageState extends ConsumerState<AdminSupportChatPage> {
         error: (e, _) => PremiumEmptyState(
           icon: Icons.error_outline,
           title: l10n.error,
-          message: e.toString(),
+          message: appErrorText(context, e),
         ),
         data: (rooms) {
           if (rooms.isEmpty) {
@@ -192,7 +193,7 @@ class _AdminSupportChatPageState extends ConsumerState<AdminSupportChatPage> {
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('${l10n.error}: $e')),
+        SnackBar(content: Text(appErrorText(context, e))),
       );
     }
   }
@@ -356,9 +357,8 @@ class _AdminSupportChatPageState extends ConsumerState<AdminSupportChatPage> {
       ref.invalidate(adminAllRoomsProvider);
     } catch (e) {
       if (!mounted) return;
-      final errorCode = AppLocalizations.of(context).error;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('$errorCode: $e')),
+        SnackBar(content: Text(appErrorText(context, e))),
       );
     }
   }

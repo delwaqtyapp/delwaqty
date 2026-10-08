@@ -5,6 +5,7 @@ import 'package:delwaqty/core/theme/app_colors.dart';
 import 'package:delwaqty/features/admin/presentation/widgets/admin_page_header.dart';
 import 'package:delwaqty/features/admin/presentation/widgets/admin_states.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
+import 'package:delwaqty/core/errors/app_error_text.dart';
 
 class AdminVerificationsWebPage extends StatefulWidget {
   const AdminVerificationsWebPage({super.key});
@@ -45,7 +46,7 @@ class _AdminVerificationsWebPageState extends State<AdminVerificationsWebPage> {
       if (mounted) {
         setState(() {
           _loading = false;
-          _error = '$e';
+          _error = appErrorText(context, e);
         });
       }
     }
@@ -71,7 +72,7 @@ class _AdminVerificationsWebPageState extends State<AdminVerificationsWebPage> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error: $e'),
+            content: Text(appErrorText(context, e)),
             backgroundColor: Theme.of(context).colorScheme.error,
           ),
         );
@@ -101,7 +102,7 @@ class _AdminVerificationsWebPageState extends State<AdminVerificationsWebPage> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error: $e'),
+            content: Text(appErrorText(context, e)),
             backgroundColor: Theme.of(context).colorScheme.error,
           ),
         );
@@ -150,7 +151,7 @@ class _AdminVerificationsWebPageState extends State<AdminVerificationsWebPage> {
                 ? const AdminLoadingState()
                 : _error != null
                     ? AdminErrorState(
-                        message: '${l10n.failedToLoad} $_error',
+                        message: appErrorText(context, _error),
                         onRetry: _loadRequests,
                       )
                     : _requests.isEmpty

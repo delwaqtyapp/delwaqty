@@ -6,6 +6,7 @@ import 'package:delwaqty/shared/widgets/app_loader.dart';
 import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
 import 'package:delwaqty/shared/widgets/premium_empty_state.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
+import 'package:delwaqty/core/errors/app_error_text.dart';
 
 class AdminLiveTrackingPage extends ConsumerStatefulWidget {
   const AdminLiveTrackingPage({super.key});
@@ -37,7 +38,7 @@ class _AdminLiveTrackingPageState extends ConsumerState<AdminLiveTrackingPage> {
         error: (e, _) => PremiumEmptyState(
           icon: Icons.error_outline,
           title: l10n.error,
-          message: e.toString(),
+          message: appErrorText(context, e),
         ),
         data: (drivers) {
           if (drivers.isEmpty) {

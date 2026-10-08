@@ -7,6 +7,7 @@ import 'package:delwaqty/features/admin/member_management/presentation/member_pr
 import 'package:delwaqty/features/admin/member_management/presentation/pages/member_drawer.dart';
 import 'package:delwaqty/shared/widgets/premium_empty_state.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
+import 'package:delwaqty/core/errors/app_error_text.dart';
 
 class MemberOperationsCenter extends ConsumerStatefulWidget {
   const MemberOperationsCenter({super.key});
@@ -394,7 +395,7 @@ class _MemberListPanelState extends ConsumerState<_MemberListPanel> {
                   return PremiumEmptyState(
                     icon: Icons.error_outline_rounded,
                     title: l10n.failedToLoadMembers,
-                    message: '${notifier.lastError}',
+                    message: appErrorText(context, notifier.lastError),
                     actionLabel: l10n.retryLabel,
                     onAction: () => notifier.refresh(),
                   );

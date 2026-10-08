@@ -7,6 +7,7 @@ import 'package:delwaqty/shared/widgets/app_loader.dart';
 import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
 import 'package:delwaqty/shared/widgets/premium_empty_state.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
+import 'package:delwaqty/core/errors/app_error_text.dart';
 
 class AdminEscalationsPage extends ConsumerStatefulWidget {
   const AdminEscalationsPage({super.key});
@@ -30,7 +31,7 @@ class _AdminEscalationsPageState extends ConsumerState<AdminEscalationsPage> {
         error: (e, _) => PremiumEmptyState(
           icon: Icons.error_outline,
           title: l10n.error,
-          message: e.toString(),
+          message: appErrorText(context, e),
         ),
         data: (events) {
           if (events.isEmpty) {

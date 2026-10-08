@@ -11,6 +11,7 @@ import 'package:delwaqty/shared/widgets/shimmer_loading.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 import 'package:delwaqty/features/driver/presentation/pages/driver_access_page.dart';
 import 'package:delwaqty/core/auth/platform_capabilities.dart';
+import 'package:delwaqty/core/errors/app_error_text.dart';
 
 final _performanceProvider =
     FutureProvider.family<DriverPerformance, String>((ref, driverId) async {
@@ -89,7 +90,7 @@ class DriverDashboardPage extends ConsumerWidget {
             ],
           ),
           error: (e, _) => Center(
-              child: Text(l10n.errorWithMessage(e.toString()))),
+              child: Text(appErrorText(context, e))),
         ),
       ),
     );

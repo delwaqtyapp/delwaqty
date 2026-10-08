@@ -2195,5 +2195,11 @@
   "decrease": "Decrease",
   "showPassword": "Show password",
   "moveUp": "Move up",
-  "openDetails": "Open details"
+  "openDetails": "Open details",
+  "errorTimeout": "The request took too long. Please try again.",
+  "errorUnauthenticated": "Your session has expired. Please sign in again.",
+  "errorForbidden": "You do not have permission to do that.",
+  "errorNotFound": "That item is no longer available.",
+  "errorConflict": "Something changed while you were working. Refresh and try again.",
+  "errorServerIssue": "A server error occurred. Please try again shortly."
 }

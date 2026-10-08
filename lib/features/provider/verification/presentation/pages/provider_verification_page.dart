@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 
 import '../providers/provider_verification_providers.dart';
+import 'package:delwaqty/core/errors/app_error_text.dart';
 
 class ProviderVerificationPage extends ConsumerStatefulWidget {
   const ProviderVerificationPage({super.key});
@@ -71,7 +72,7 @@ class _ProviderVerificationPageState
         );
       }
     } catch (e) {
-      if (mounted) setState(() => _error = e.toString());
+      if (mounted) setState(() => appErrorText(context, e));
     } finally {
       if (mounted) setState(() => _busy = false);
     }

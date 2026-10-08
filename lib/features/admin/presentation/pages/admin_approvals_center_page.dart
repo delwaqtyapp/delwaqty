@@ -8,6 +8,7 @@ import 'package:delwaqty/shared/widgets/confirm_dialog.dart';
 import 'package:delwaqty/shared/widgets/premium_empty_state.dart';
 import 'package:delwaqty/shared/widgets/app_loader.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
+import 'package:delwaqty/core/errors/app_error_text.dart';
 
 class AdminApprovalsCenterPage extends ConsumerStatefulWidget {
   const AdminApprovalsCenterPage({super.key});
@@ -112,7 +113,7 @@ class _AdminApprovalsCenterPageState
       }
     } catch (e) {
       if (mounted) {
-        context.showAppSnackBar('${l10n.approvalDecisionFailed}: $e');
+        context.showAppSnackBar(appErrorText(context, e));
       }
     } finally {
       if (mounted) {

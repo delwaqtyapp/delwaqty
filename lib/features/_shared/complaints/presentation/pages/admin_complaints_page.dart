@@ -10,6 +10,7 @@ import 'package:delwaqty/shared/widgets/app_loader.dart';
 import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
 import 'package:delwaqty/shared/widgets/premium_empty_state.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
+import 'package:delwaqty/core/errors/app_error_text.dart';
 
 class AdminComplaintsPage extends ConsumerStatefulWidget {
   const AdminComplaintsPage({super.key});
@@ -40,7 +41,7 @@ class _AdminComplaintsPageState extends ConsumerState<AdminComplaintsPage> {
               error: (e, _) => PremiumEmptyState(
                 icon: Icons.error_outline,
                 title: l10n.error,
-                message: e.toString(),
+                message: appErrorText(context, e),
               ),
               data: (complaints) {
                 final filtered = _applyFilters(complaints);

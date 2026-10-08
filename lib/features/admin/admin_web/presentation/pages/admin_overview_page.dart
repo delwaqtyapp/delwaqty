@@ -6,6 +6,7 @@ import 'package:delwaqty/features/admin/presentation/providers/admin_overview_pr
 import 'package:delwaqty/features/admin/presentation/widgets/admin_kpi_card.dart';
 import 'package:delwaqty/features/admin/presentation/widgets/admin_page_header.dart';
 import 'package:delwaqty/features/admin/presentation/widgets/admin_states.dart';
+import 'package:delwaqty/core/errors/app_error_text.dart';
 
 class AdminOverviewPage extends ConsumerWidget {
   const AdminOverviewPage({super.key});
@@ -28,7 +29,7 @@ class AdminOverviewPage extends ConsumerWidget {
             child: statsAsync.when(
               loading: () => const AdminLoadingState(label: 'Loading live stats…'),
               error: (error, _) => AdminErrorState(
-                message: 'Could not load dashboard stats.\n$error',
+                message: appErrorText(context, error),
                 onRetry: () => ref.invalidate(adminOverviewStatsProvider),
               ),
               data: (stats) => RefreshIndicator(

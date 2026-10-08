@@ -5,6 +5,7 @@ import 'package:delwaqty/features/customer/delivery/presentation/providers/deliv
 import 'package:delwaqty/l10n/app_localizations.dart';
 import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
 import 'package:delwaqty/shared/widgets/shimmer_loading.dart';
+import 'package:delwaqty/core/errors/app_error_text.dart';
 
 class DriverCapabilitiesPage extends ConsumerStatefulWidget {
   const DriverCapabilitiesPage({required this.driverId, super.key});
@@ -53,7 +54,7 @@ class _DriverCapabilitiesPageState
             ShimmerCard(),
           ],
         ),
-        error: (e, _) => Center(child: Text(l10n.errorWithMessage(e.toString()))),
+        error: (e, _) => Center(child: Text(appErrorText(context, e))),
         data: (cap) {
           if (!_initialized) {
             _selectedTypes = Set<String>.from(cap.serviceTypes);
@@ -223,7 +224,7 @@ class _CapabilitiesBody extends ConsumerWidget {
       navigator.pop();
     } catch (e) {
       messenger.showSnackBar(
-        SnackBar(content: Text(l10n.errorWithMessage(e.toString()))),
+        SnackBar(content: Text(appErrorMessage(l10n, e))),
       );
     }
   }

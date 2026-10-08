@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:delwaqty/core/errors/app_error_text.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 /// Guards the UI conventions fixed in ROUND 90.
@@ -22,28 +23,100 @@ void main() {
   String read(String p) => File(p).readAsStringSync();
 
   group('no raw exception text reaches the UI', () {
-    test('no page renders e.toString() or an interpolated error', () {
+    // The display boundary is the only place that must be safe: data and domain
+    // layers may keep the Postgres text (ServerException(message: e.toString()))
+    // because that is what a log wants. What no presentation file may do is
+    // hand that text to a widget.
+    //
+    // Sinks are the parameters a person reads. Sources are the ways a raw error
+    // travels. Every combination of the two is a defect, which is what this test
+    // asserts - the previous version only looked inside Text('...') with a
+    // leading literal, so `message: e.toString()`, `SnackBar(...)`, and
+    // '$errorCode: $e' all passed. That gap is how a full Postgres error reached
+    // the admin Operations Center.
+    final sink = RegExp(
+      r'(Text\(|SnackBar\(|showAppSnackBar\(|message\s*:|title\s*:|subtitle\s*:'
+      r'content\s*:|(?:_|\w)*Error\s*=|(?:promo)?[Ee]rror\s*:)',
+    );
+    final source = RegExp(
+      r'(\$\{?(e|err|error|ex|exception|stack)\}?\b'
+      r'|\b(e|err|error|ex|exception)\.toString\(\)'
+      r'|\$\{?\w+\.lastError\}?)',
+    );
+    final allowed = RegExp(
+      r'(appErrorText\(|appErrorMessage\(|appErrorDetail\(|'
+      r'logger\.|_logger|debugPrint|print\()',
+    );
+
+    bool isPresentation(String path) =>
+        path.contains('/presentation/') || path.contains('/shared/widgets/');
+
+    test('no presentation file renders an exception into a widget', () {
       final offenders = <String>[];
       for (final f in dartFiles()) {
-        final lines = f.path.split('/').contains('pages')
-            ? read(f.path).split('\n')
-            : const <String>[];
+        if (!isPresentation(f.path)) continue;
+        final lines = read(f.path).split('\n');
         for (var i = 0; i < lines.length; i++) {
-          final l = lines[i];
-          if (!l.contains('Text(')) continue;
-          if (!RegExp('Text\\(\\s*[\'\u0022]').hasMatch(l)) continue;
-          if (l.contains('_logger') || l.contains('debugPrint')) continue;
-          // Only an EXCEPTION is forbidden. Interpolating a domain value into
-          // a localized label ("Order #X", "Role: admin") is correct UI.
-          if (!RegExp(r'\$(e|err|error|exception|stack)\\b').hasMatch(l)) continue;
-          offenders.add('${f.path}:${i + 1}: ${l.trim()}');
+          final l = lines[i].trim();
+          if (l.startsWith('//')) continue;
+          if (!sink.hasMatch(l)) continue;
+          if (!source.hasMatch(l)) continue;
+          if (allowed.hasMatch(l)) continue;
+          offenders.add('${f.path}:${i + 1}: $l');
         }
       }
       expect(
         offenders,
         isEmpty,
-        reason: 'raw exception text must be mapped to a localized message',
+        reason:
+            'raw exception text must be mapped through appErrorText()/appErrorMessage()',
       );
+    });
+
+    test('the safe mapping helpers are used, not bypassed', () {
+      // Guards against someone reintroducing a raw renderer behind a new name:
+      // every user-visible error must come from the shared classifier.
+      final offenders = <String>[];
+      for (final f in dartFiles()) {
+        if (!isPresentation(f.path)) continue;
+        if (f.path.contains('app_error_text.dart')) continue;
+        for (final line in read(f.path).split('\n')) {
+          final l = line.trim();
+          if (l.startsWith('//')) continue;
+          if (l.contains('appErrorDetail(') &&
+              !RegExp(r'(\w+\s*=|error\s*:|promoError\s*:)').hasMatch(l)) {
+            offenders.add('${f.path}: appErrorDetail() outside a technical field: $l');
+          }
+        }
+      }
+      expect(offenders, isEmpty);
+    });
+
+    test('the classifier itself never returns the raw error', () {
+      final src = read('lib/core/errors/app_error_text.dart');
+      // Every branch of the switch must resolve to a localized getter.
+      final branches = RegExp(r'case AppErrorKind\.\w+:\s*\n\s*return l10n\.(\w+);')
+          .allMatches(src)
+          .map((m) => m.group(1)!)
+          .toList();
+      expect(branches.length, AppErrorKind.values.length);
+      expect(
+        branches.toSet().length,
+        greaterThanOrEqualTo(AppErrorKind.values.length - 1),
+        reason: 'several failure kinds must not share one sentence',
+      );
+      for (final key in [
+        'noConnection',
+        'errorTimeout',
+        'errorUnauthenticated',
+        'errorForbidden',
+        'errorNotFound',
+        'errorConflict',
+        'errorServerIssue',
+        'somethingWentWrong',
+      ]) {
+        expect(branches, contains(key));
+      }
     });
   });
 

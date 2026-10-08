@@ -13,6 +13,7 @@ import 'package:delwaqty/shared/widgets/design/premium_card.dart';
 import 'package:delwaqty/features/_shared/auth/domain/auth_state.dart';
 import 'package:delwaqty/features/_shared/auth/presentation/auth_provider.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
+import 'package:delwaqty/core/errors/app_error_text.dart';
 
 final _allCategoriesProvider =
     FutureProvider.autoDispose<List<PlatformCategory>>((ref) async {
@@ -296,7 +297,7 @@ class _AdminCategoriesPageState extends ConsumerState<AdminCategoriesPage> {
             child: categoriesAsync.when(
               loading: () => const AdminLoadingState(),
               error: (e, _) => AdminErrorState(
-                message: '${l10n.failedToLoad} $e',
+                message: appErrorText(context, e),
                 onRetry: _refresh,
               ),
               data: (categories) {

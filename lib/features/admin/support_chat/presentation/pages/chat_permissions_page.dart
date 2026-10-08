@@ -6,6 +6,7 @@ import 'package:delwaqty/features/_shared/auth/presentation/auth_provider.dart';
 import 'package:delwaqty/features/_shared/auth/domain/auth_state.dart';
 import 'package:delwaqty/features/admin/support_chat/presentation/chat_providers.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
+import 'package:delwaqty/core/errors/app_error_text.dart';
 
 /// Chat permissions panel.
 ///
@@ -177,7 +178,7 @@ class _ChatPermissionsPageState extends ConsumerState<ChatPermissionsPage> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('${l10n.error}: $e')),
+          SnackBar(content: Text(appErrorText(context, e))),
         );
       }
     } finally {

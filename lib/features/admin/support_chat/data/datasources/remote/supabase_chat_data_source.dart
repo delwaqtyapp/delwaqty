@@ -147,7 +147,7 @@ class SupabaseChatDataSource {
         .from('chat_messages')
         .select()
         .eq('room_id', roomId)
-        .order('created_at', ascending: false)
+        .order('created_at')
         .limit(limit);
     return rows.reversed.map((r) => ChatMessage.fromJson(r)).toList();
   }
@@ -188,17 +188,17 @@ class SupabaseChatDataSource {
     }).eq('id', roomId);
   }
 
-  Stream<ChatMessage> messageStream(String roomId) {
+  Stream<List<ChatMessage>> messageStream(String roomId) {
     return _client
         .from('chat_messages')
         .stream(primaryKey: ['id'])
         .eq('room_id', roomId)
         .order('created_at')
-        .map((rows) => rows
-            .reversed
-            .map((r) => ChatMessage.fromJson(r))
-            .toList())
-        .expand((list) => list);
+        .limit(50)
+        .map((rows) {
+      final list = (rows as List).cast<Map<String, dynamic>>();
+      return list.reversed.map((r) => ChatMessage.fromJson(r)).toList();
+    });
   }
 
   // Global chat permissions (on the shared platform_settings row).

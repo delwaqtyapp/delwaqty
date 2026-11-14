@@ -84,14 +84,8 @@ final customerMyRoomsProvider = FutureProvider<List<ChatRoom>>((ref) async {
   return repo.getRoomsForParticipant(user.id);
 });
 
-// All messages for a room
-final chatMessagesProvider = FutureProvider.family<List<ChatMessage>, String>((ref, roomId) async {
-  final repo = ref.read(chatRepositoryProvider);
-  return repo.getMessages(roomId);
-});
-
-// Message stream for a room
-final chatMessageStreamProvider = StreamProvider.family<ChatMessage, String>((ref, roomId) {
+// All messages for a room (realtime stream; no loading flicker on send).
+final chatMessagesProvider = StreamProvider.family<List<ChatMessage>, String>((ref, roomId) {
   final repo = ref.read(chatRepositoryProvider);
   return repo.messageStream(roomId);
 });

@@ -47,5 +47,5 @@ abstract class ChatRepository {
     required String adminId,
     required String welcomeMessage,
   });
-  Stream<ChatMessage> messageStream(String roomId);
+  Stream<List<ChatMessage>> messageStream(String roomId);
 }

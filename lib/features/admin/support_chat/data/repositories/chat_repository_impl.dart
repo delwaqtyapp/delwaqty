@@ -164,7 +164,7 @@ class ChatRepositoryImpl implements ChatRepository {
   }
 
   @override
-  Stream<ChatMessage> messageStream(String roomId) {
+  Stream<List<ChatMessage>> messageStream(String roomId) {
     return _dataSource.messageStream(roomId);
   }
 }

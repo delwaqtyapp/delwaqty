@@ -190,12 +190,20 @@ class _SupportChatRoomPageState extends ConsumerState<SupportChatRoomPage> {
     final voiceEnabled = permissions['chat_voice_enabled'] as bool? ?? true;
     final mediaEnabled = permissions['chat_media_enabled'] as bool? ?? true;
 
-    ref.listen(chatMessageStreamProvider(widget.roomId), (prev, next) {
-      next.whenData((msg) {
-        ref.invalidate(chatMessagesProvider(widget.roomId));
+    ref.listen(chatMessagesProvider(widget.roomId), (prev, next) {
+      next.whenData((msgs) {
         _scrollToBottom();
-        _handleIncomingCall(msg, user?.id);
-        _closeOutgoingCallOnAnswer(msg, user?.id);
+        if (msgs.isNotEmpty) {
+          final msg = msgs.last;
+          final prevMsgs = prev?.asData?.value;
+          final isNew = prevMsgs == null ||
+              prevMsgs.length != msgs.length ||
+              (prevMsgs.isNotEmpty && prevMsgs.last.id != msg.id);
+          if (isNew) {
+            _handleIncomingCall(msg, user?.id);
+            _closeOutgoingCallOnAnswer(msg, user?.id);
+          }
+        }
       });
     });
 
@@ -646,7 +654,6 @@ class _SupportChatRoomPageState extends ConsumerState<SupportChatRoomPage> {
         responderId: user.id,
         responderType: _selfSenderType(),
       );
-      ref.invalidate(chatMessagesProvider(widget.roomId));
       _scrollToBottom();
     } catch (_) {}
   }
@@ -662,7 +669,6 @@ class _SupportChatRoomPageState extends ConsumerState<SupportChatRoomPage> {
         responderId: user.id,
         responderType: _selfSenderType(),
       );
-      ref.invalidate(chatMessagesProvider(widget.roomId));
       _scrollToBottom();
     } catch (_) {}
   }
@@ -679,7 +685,6 @@ class _SupportChatRoomPageState extends ConsumerState<SupportChatRoomPage> {
         responderId: user.id,
         responderType: _selfSenderType(),
       );
-      ref.invalidate(chatMessagesProvider(widget.roomId));
     } catch (_) {}
   }
 
@@ -1061,7 +1066,6 @@ class _SupportChatRoomPageState extends ConsumerState<SupportChatRoomPage> {
         createdAt: DateTime.now(),
       );
       await repo.sendMessage(message);
-      ref.invalidate(chatMessagesProvider(widget.roomId));
       _scrollToBottom();
     } catch (e) {
       if (mounted) {
@@ -1106,7 +1110,6 @@ class _SupportChatRoomPageState extends ConsumerState<SupportChatRoomPage> {
     final repo = ref.read(chatRepositoryProvider);
     try {
       final sent = await repo.sendMessage(message);
-      ref.invalidate(chatMessagesProvider(widget.roomId));
       _scrollToBottom();
       await _openOutgoingCallSheet(sent.id);
     } catch (e) {
@@ -1241,7 +1244,6 @@ class _SupportChatRoomPageState extends ConsumerState<SupportChatRoomPage> {
       if (!mounted) return;
       _messageController.clear();
       unawaited(_notifyTyping(AppLocalizations.of(context)));
-      ref.invalidate(chatMessagesProvider(widget.roomId));
       _scrollToBottom();
     } catch (e) {
       if (!mounted) return;
@@ -1277,7 +1279,6 @@ class _SupportChatRoomPageState extends ConsumerState<SupportChatRoomPage> {
       ref.invalidate(adminAllRoomsProvider);
       ref.invalidate(customerMyRoomsProvider);
       ref.invalidate(chatRoomProvider(widget.roomId));
-      ref.invalidate(chatMessagesProvider(widget.roomId));
       if (mounted) Navigator.of(context).pop();
     } catch (e) {
       if (mounted) {
@@ -1314,7 +1315,6 @@ class _SupportChatRoomPageState extends ConsumerState<SupportChatRoomPage> {
       ref.invalidate(adminAllRoomsProvider);
       ref.invalidate(customerMyRoomsProvider);
       ref.invalidate(chatRoomProvider(widget.roomId));
-      ref.invalidate(chatMessagesProvider(widget.roomId));
       if (mounted) Navigator.of(context).pop();
     } catch (e) {
       if (mounted) {
@@ -1357,7 +1357,6 @@ class _SupportChatRoomPageState extends ConsumerState<SupportChatRoomPage> {
         adminId: user.id,
         welcomeMessage: welcomeText,
       );
-      ref.invalidate(chatMessagesProvider(widget.roomId));
       _scrollToBottom();
     } catch (_) {}
   }

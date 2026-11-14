@@ -351,16 +351,37 @@ Future<void> _openCreateDialog(BuildContext context, WidgetRef ref) async {
               FutureBuilder<List<AdminAccount>>(
                 future: ref.read(adminsListProvider.future),
                 builder: (c, snap) {
+                  final hasError = snap.hasError;
+                  final isLoading =
+                      snap.connectionState == ConnectionState.waiting;
                   final admins = snap.data ?? [];
                   return DropdownButtonFormField<String?>(
                     initialValue: supervisorId,
-                    decoration:
-                        InputDecoration(labelText: loc.adminMgmtSelectSupervisor),
+                    decoration: InputDecoration(
+                      labelText: loc.adminMgmtSelectSupervisor,
+                      helperText: hasError ? loc.error : null,
+                      suffixIcon: isLoading
+                          ? const SizedBox(
+                              width: 16,
+                              height: 16,
+                              child: Center(
+                                child: SizedBox(
+                                  width: 14,
+                                  height: 14,
+                                  child:
+                                      CircularProgressIndicator(strokeWidth: 2),
+                                ),
+                              ),
+                            )
+                          : null,
+                    ),
                     items: [
                       DropdownMenuItem(child: Text(loc.adminMgmtNone)),
                       for (final a in admins)
                         DropdownMenuItem(
-                            value: a.id, child: Text(a.fullName ?? a.email)),
+                          value: a.id,
+                          child: Text(a.fullName ?? a.email),
+                        ),
                     ],
                     onChanged: (v) => supervisorId = v,
                   );
@@ -373,17 +394,37 @@ Future<void> _openCreateDialog(BuildContext context, WidgetRef ref) async {
                     .select('id,name_en')
                     .order('name_en'),
                 builder: (c, snap) {
+                  final hasError = snap.hasError;
+                  final isLoading =
+                      snap.connectionState == ConnectionState.waiting;
                   final regions = snap.data ?? [];
                   return DropdownButtonFormField<String?>(
                     initialValue: regionId,
-                    decoration:
-                        InputDecoration(labelText: loc.adminMgmtSelectRegion),
+                    decoration: InputDecoration(
+                      labelText: loc.adminMgmtSelectRegion,
+                      helperText: hasError ? loc.error : null,
+                      suffixIcon: isLoading
+                          ? const SizedBox(
+                              width: 16,
+                              height: 16,
+                              child: Center(
+                                child: SizedBox(
+                                  width: 14,
+                                  height: 14,
+                                  child:
+                                      CircularProgressIndicator(strokeWidth: 2),
+                                ),
+                              ),
+                            )
+                          : null,
+                    ),
                     items: [
                       DropdownMenuItem(child: Text(loc.adminMgmtNone)),
                       for (final r in regions)
                         DropdownMenuItem(
-                            value: r['id'] as String,
-                            child: Text((r['name_en'] as String?) ?? '')),
+                          value: r['id'] as String,
+                          child: Text((r['name_en'] as String?) ?? ''),
+                        ),
                     ],
                     onChanged: (v) => regionId = v,
                   );

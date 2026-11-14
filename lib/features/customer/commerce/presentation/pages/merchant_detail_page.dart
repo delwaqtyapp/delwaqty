@@ -22,6 +22,7 @@ import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
 import 'package:delwaqty/shared/widgets/app_loader.dart';
 import 'package:delwaqty/shared/widgets/error_state.dart';
 import 'package:delwaqty/shared/widgets/premium_empty_state.dart';
+import 'package:delwaqty/core/errors/app_error_text.dart';
 import 'package:delwaqty/core/extensions/context_extensions.dart';
 import 'package:delwaqty/core/theme/app_colors.dart';
 import 'package:delwaqty/core/theme/app_spacing.dart';
@@ -70,11 +71,24 @@ class _MerchantDetailPageState extends ConsumerState<MerchantDetailPage> {
           );
         }
 
+        if (merchantSnap.hasError) {
+          return Scaffold(
+            appBar: AppBar(title: Text(l10n.error)),
+            body: ErrorState(
+              message: appErrorMessage(l10n, merchantSnap.error),
+              onRetry: () => setState(() => _refreshKey = UniqueKey()),
+            ),
+          );
+        }
+
         final merchant = merchantSnap.data;
         if (merchant == null) {
           return Scaffold(
             appBar: AppBar(title: Text(l10n.error)),
-            body: ErrorState(message: l10n.noData),
+            body: ErrorState(
+              message: l10n.noData,
+              onRetry: () => setState(() => _refreshKey = UniqueKey()),
+            ),
           );
         }
 
@@ -658,6 +672,16 @@ class _MerchantDetailPageState extends ConsumerState<MerchantDetailPage> {
               child: Padding(
                 padding: EdgeInsets.all(32),
                 child: AppLoaderCircular(),
+              ),
+            );
+          }
+
+          if (prodSnap.hasError) {
+            return Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+              child: ErrorState(
+                message: appErrorMessage(l10n, prodSnap.error),
+                onRetry: () => setState(() => _refreshKey = UniqueKey()),
               ),
             );
           }

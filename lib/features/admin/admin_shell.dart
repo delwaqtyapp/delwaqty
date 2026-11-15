@@ -101,7 +101,7 @@ final List<_AdminNavGroup> _adminGroups = [
       ),
       _AdminNavItem(
         path: '/admin/escalations',
-        icon: Icons.gavel_rounded,
+        icon: Icons.priority_high_rounded,
         label: (l) => l.adminEscalations,
       ),
       _AdminNavItem(

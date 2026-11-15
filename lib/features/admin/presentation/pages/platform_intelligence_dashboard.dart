@@ -490,26 +490,51 @@ class _PlatformIntelligenceDashboardState
     return LayoutBuilder(
       builder: (context, constraints) {
         final crossAxisCount = constraints.maxWidth > 600 ? 4 : 2;
-return GridView.count(
-              crossAxisCount: crossAxisCount,
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              mainAxisSpacing: 10,
-              crossAxisSpacing: 10,
-              mainAxisExtent: crossAxisCount >= 3 ? 120 : 136,
-              children: items
+        return GridView.count(
+          crossAxisCount: crossAxisCount,
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          mainAxisSpacing: 10,
+          crossAxisSpacing: 10,
+          mainAxisExtent: crossAxisCount >= 3 ? 120 : 136,
+          children: items
               .map(
-                (item) => PremiumCard(
+                (item) => Container(
                   padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(
+                      color: item.color.withValues(alpha: 0.22),
+                      width: 1.2,
+                    ),
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        item.color.withValues(alpha: 0.12),
+                        cs.surfaceContainerLow.withValues(alpha: 0.9),
+                      ],
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: item.color.withValues(alpha: 0.05),
+                        blurRadius: 10,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Container(
-                        padding: const EdgeInsets.all(6),
+                        padding: const EdgeInsets.all(7),
                         decoration: BoxDecoration(
-                          color: item.color.withValues(alpha: 0.15),
+                          color: item.color.withValues(alpha: 0.18),
                           borderRadius: BorderRadius.circular(10),
+                          border: Border.all(
+                            color: item.color.withValues(alpha: 0.28),
+                          ),
                         ),
                         child: Icon(
                           Icons.account_balance_wallet_rounded,
@@ -527,7 +552,10 @@ return GridView.count(
                               style: Theme.of(context)
                                   .textTheme
                                   .titleMedium
-                                  ?.copyWith(fontWeight: FontWeight.bold),
+                                  ?.copyWith(
+                                    fontWeight: FontWeight.w800,
+                                    letterSpacing: -0.3,
+                                  ),
                             ),
                           ),
                           const SizedBox(height: 2),
@@ -536,7 +564,10 @@ return GridView.count(
                             style: Theme.of(context)
                                 .textTheme
                                 .labelSmall
-                                ?.copyWith(color: cs.onSurfaceVariant),
+                                ?.copyWith(
+                                  color: cs.onSurfaceVariant,
+                                  fontWeight: FontWeight.w500,
+                                ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                           ),
@@ -643,56 +674,95 @@ class _KpiCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () => context.push(item.route),
-      child: PremiumCard(
-        padding: const EdgeInsets.all(12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: item.color.withValues(alpha: 0.15),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Icon(item.icon, color: item.color, size: 20),
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(16),
+        onTap: () => context.push(item.route),
+        child: Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: item.color.withValues(alpha: 0.22),
+              width: 1.2,
             ),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                FittedBox(
-                  fit: BoxFit.scaleDown,
-                  child: Text(
-                    item.value,
-                    style: Theme.of(context)
-                        .textTheme
-                        .titleLarge
-                        ?.copyWith(fontWeight: FontWeight.bold),
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  item.label,
-                  style: Theme.of(context)
-                      .textTheme
-                      .labelSmall
-                      ?.copyWith(color: cs.onSurfaceVariant),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                item.color.withValues(alpha: 0.12),
+                cs.surfaceContainerLow.withValues(alpha: 0.9),
               ],
             ),
-            Align(
-              alignment: AlignmentDirectional.centerEnd,
-              child: Icon(
-                Icons.open_in_new_rounded,
-                size: 12,
-                color: cs.onSurfaceVariant.withValues(alpha: 0.5),
+            boxShadow: [
+              BoxShadow(
+                color: item.color.withValues(alpha: 0.06),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
               ),
-            ),
-          ],
+            ],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: item.color.withValues(alpha: 0.18),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: item.color.withValues(alpha: 0.3),
+                      ),
+                    ),
+                    child: Icon(item.icon, color: item.color, size: 20),
+                  ),
+                  Container(
+                    padding: const EdgeInsets.all(4),
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: item.color.withValues(alpha: 0.12),
+                    ),
+                    child: Icon(
+                      Icons.arrow_forward_rounded,
+                      size: 13,
+                      color: item.color,
+                    ),
+                  ),
+                ],
+              ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text(
+                      item.value,
+                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: -0.5,
+                            color: cs.onSurface,
+                          ),
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    item.label,
+                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                          color: cs.onSurfaceVariant,
+                          fontWeight: FontWeight.w500,
+                        ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );

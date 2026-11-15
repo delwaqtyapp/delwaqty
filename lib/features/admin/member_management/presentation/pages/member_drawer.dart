@@ -2801,6 +2801,7 @@ class _AdminActionsSectionState extends ConsumerState<_AdminActionsSection> {
         final client = ref.read(supabaseClientProvider);
         await client.rpc('owner_delete_member', params: {
           'p_member_id': widget.memberId,
+          'p_reason': 'Deleted by owner from Admin Console',
         });
         if (!mounted) return;
         showAnimatedSuccessToast(
@@ -2885,7 +2886,7 @@ class _AdminActionsSectionState extends ConsumerState<_AdminActionsSection> {
       final client = ref.read(supabaseClientProvider);
       await client.rpc('request_member_deletion', params: {
         'p_member_id': widget.memberId,
-        'p_confirmation_email': memberEmail,
+        'p_confirmation_email': memberEmail.isNotEmpty ? memberEmail : '',
         'p_reason': reason,
       });
       if (mounted) {

@@ -151,7 +151,7 @@ class _AdminCategoriesPageState extends ConsumerState<AdminCategoriesPage> {
         ],
       ),
     );
-    if (confirm != true) return;
+    if (!mounted || confirm != true) return;
 
     setState(() => _saving = true);
     try {

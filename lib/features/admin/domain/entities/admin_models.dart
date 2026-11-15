@@ -15,7 +15,7 @@ enum AdminRole {
   admin;
 
   static AdminRole fromDb(String? value) => switch (value) {
-    'super_admin' => AdminRole.owner,
+    'owner' || 'super_admin' => AdminRole.owner,
     'country_admin' => AdminRole.countryAdmin,
     'governorate_admin' => AdminRole.governorateAdmin,
     'center_admin' => AdminRole.centerAdmin,
@@ -24,7 +24,7 @@ enum AdminRole {
   };
 
   String toDb() => switch (this) {
-    AdminRole.owner => 'super_admin',
+    AdminRole.owner => 'owner',
     AdminRole.countryAdmin => 'country_admin',
     AdminRole.governorateAdmin => 'governorate_admin',
     AdminRole.centerAdmin => 'center_admin',

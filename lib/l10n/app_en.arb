@@ -2201,5 +2201,13 @@
   "errorForbidden": "You do not have permission to do that.",
   "errorNotFound": "That item is no longer available.",
   "errorConflict": "Something changed while you were working. Refresh and try again.",
-  "errorServerIssue": "A server error occurred. Please try again shortly."
+  "errorServerIssue": "A server error occurred. Please try again shortly.",
+  "adminDashboardOverview": "Dashboard Overview",
+  "adminDashboardOverviewSubtitle": "Live platform counters at a glance",
+  "adminLoadingLiveStats": "Loading live stats…",
+  "adminTotalUsers": "Total Users",
+  "adminTotalMerchants": "Total Merchants",
+  "adminTotalOrders": "Total Orders",
+  "adminActiveDrivers": "Active Drivers",
+  "adminServiceBookings": "Service Bookings"
 }

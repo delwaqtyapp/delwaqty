@@ -2201,5 +2201,13 @@
   "errorForbidden": "ليس لديك صلاحية للقيام بذلك.",
   "errorNotFound": "هذا العنصر لم يعد متاحًا.",
   "errorConflict": "تغيّر شيء أثناء عملك. حدّث وحاول مرة أخرى.",
-  "errorServerIssue": "حدث خطأ في الخادم. يرجى المحاولة بعد قليل."
+  "errorServerIssue": "حدث خطأ في الخادم. يرجى المحاولة بعد قليل.",
+  "adminDashboardOverview": "نظرة عامة على لوحة التحكم",
+  "adminDashboardOverviewSubtitle": "مؤشرات حية للمنصة في لمحة",
+  "adminLoadingLiveStats": "جاري تحميل الإحصائيات المباشرة…",
+  "adminTotalUsers": "إجمالي المستخدمين",
+  "adminTotalMerchants": "إجمالي المتاجر",
+  "adminTotalOrders": "إجمالي الطلبات",
+  "adminActiveDrivers": "السائقون النشطون",
+  "adminServiceBookings": "حجوزات الخدمات"
 }

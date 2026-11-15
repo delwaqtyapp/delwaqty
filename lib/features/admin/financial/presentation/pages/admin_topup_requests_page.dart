@@ -30,15 +30,15 @@ class _AdminTopupRequestsPageState
   String _label(String status, AppLocalizations l10n) {
     switch (status) {
       case 'pending':
-        return 'Pending';
+        return l10n.statusPending;
       case 'under_review':
-        return 'Under Review';
+        return l10n.statusReviewing;
       case 'approved':
-        return 'Approved';
+        return l10n.statusApproved;
       case 'rejected':
-        return 'Rejected';
+        return l10n.statusRejected;
       case 'cancelled':
-        return 'Cancelled';
+        return l10n.statusCancelled;
       default:
         return status;
     }
@@ -122,11 +122,11 @@ class _AdminTopupRequestsPageState
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Reject Top-Up'),
+        title: Text(l10n.rejectTopUpTitle),
         content: TextField(
           controller: reasonController,
-          decoration: const InputDecoration(
-            labelText: 'Reason (required)',
+          decoration: InputDecoration(
+            labelText: l10n.rejectTopUpReasonHint,
           ),
           maxLines: 3,
         ),
@@ -186,7 +186,7 @@ class _AdminTopupRequestsPageState
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Top-Up Requests'),
+        title: Text(l10n.pendingTopups),
         actions: [
           IconButton(
             tooltip: l10n.refresh,
@@ -207,7 +207,7 @@ class _AdminTopupRequestsPageState
               separatorBuilder: (_, _) => const SizedBox(width: 8),
               itemBuilder: (context, i) {
                 final value = i == 0 ? null : _statuses[i - 1];
-                final label = i == 0 ? 'All' : _label(value!, l10n);
+                final label = i == 0 ? l10n.all : _label(value!, l10n);
                 final selected = filter == value;
                 return ChoiceChip(
                   label: Text(label),
@@ -235,10 +235,10 @@ class _AdminTopupRequestsPageState
                 ),
                 data: (items) {
                   if (items.isEmpty) {
-                    return const PremiumEmptyState(
+                    return PremiumEmptyState(
                       icon: Icons.inbox_rounded,
-                      title: 'No requests',
-                      message: 'There are no top-up requests in this scope.',
+                      title: l10n.noTopUpRequests,
+                      message: l10n.noTopUpRequestsScope,
                     );
                   }
                   return ListView.separated(
@@ -286,17 +286,17 @@ class _AdminTopupRequestsPageState
                             ),
                             const SizedBox(height: 6),
                             Text(
-                              'Account: ${item.accountId}',
+                              '${l10n.account}: ${item.accountId}',
                               style: Theme.of(context).textTheme.bodySmall,
                             ),
                             if (item.transferReference != null)
                               Text(
-                                'Reference: ${item.transferReference}',
+                                '${l10n.transferReference}: ${item.transferReference}',
                                 style: Theme.of(context).textTheme.bodySmall,
                               ),
                             if (item.message != null)
                               Text(
-                                'Note: ${item.message}',
+                                '${l10n.note}: ${item.message}',
                                 style: Theme.of(context).textTheme.bodySmall,
                               ),
                             if (item.status == 'pending') ...[
@@ -334,7 +334,7 @@ class _AdminTopupRequestsPageState
                             ] else if (item.rejectionReason != null) ...[
                               const SizedBox(height: 6),
                               Text(
-                                'Reason: ${item.rejectionReason}',
+                                '${l10n.rejectReason}: ${item.rejectionReason}',
                                 style: Theme.of(context)
                                     .textTheme
                                     .bodySmall

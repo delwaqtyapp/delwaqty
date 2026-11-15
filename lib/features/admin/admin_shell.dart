@@ -155,6 +155,31 @@ final List<_AdminNavGroup> _adminGroups = [
         label: (l) => l.adminFinancialCenter,
       ),
       _AdminNavItem(
+        path: '/admin/topup-requests',
+        icon: Icons.swap_horiz_rounded,
+        label: (l) => l.pendingTopups,
+      ),
+      _AdminNavItem(
+        path: '/admin/settlements',
+        icon: Icons.payments_rounded,
+        label: (l) => l.settlements,
+      ),
+      _AdminNavItem(
+        path: '/admin/collections',
+        icon: Icons.receipt_long_rounded,
+        label: (l) => l.regionalCollections,
+      ),
+      _AdminNavItem(
+        path: '/admin/grace-management',
+        icon: Icons.shield_rounded,
+        label: (l) => l.graceManagement,
+      ),
+      _AdminNavItem(
+        path: '/admin/receiving-wallets',
+        icon: Icons.wallet_rounded,
+        label: (l) => l.receivingAccounts,
+      ),
+      _AdminNavItem(
         path: '/admin/transaction-ledger',
         icon: Icons.menu_book_rounded,
         label: (l) => l.adminTransactionLedger,
@@ -214,6 +239,11 @@ final List<_AdminNavGroup> _adminGroups = [
         icon: Icons.account_tree_rounded,
         label: (l) => l.permissionDelegation,
       ),
+      _AdminNavItem(
+        path: '/admin/chat-permissions',
+        icon: Icons.security_rounded,
+        label: (l) => l.chatPermissions,
+      ),
     ],
   ),
   _AdminNavGroup(
@@ -245,6 +275,40 @@ const _bottomNavPaths = [
   '/admin/financial-center',
   '/admin/actions',
 ];
+
+class AdminShellScope extends InheritedWidget {
+  const AdminShellScope({
+    super.key,
+    required this.openDrawer,
+    required super.child,
+  });
+
+  final VoidCallback openDrawer;
+
+  static AdminShellScope? of(BuildContext context) =>
+      context.dependOnInheritedWidgetOfExactType<AdminShellScope>();
+
+  @override
+  bool updateShouldNotify(covariant InheritedWidget oldWidget) => false;
+}
+
+/// Global burger / menu button that opens the admin navigation drawer.
+class AdminMenuButton extends StatelessWidget {
+  const AdminMenuButton({super.key, this.color});
+
+  final Color? color;
+
+  @override
+  Widget build(BuildContext context) {
+    return IconButton(
+      tooltip: MaterialLocalizations.of(context).openAppDrawerTooltip,
+      icon: Icon(Icons.menu_rounded, color: color),
+      onPressed: () {
+        AdminShellScope.of(context)?.openDrawer();
+      },
+    );
+  }
+}
 
 class AdminShell extends ConsumerStatefulWidget {
   const AdminShell({super.key, required this.child, this.showFab = true});
@@ -299,44 +363,47 @@ class _AdminShellState extends ConsumerState<AdminShell> {
       ],
       child: Directionality(
         textDirection: isRtl ? TextDirection.rtl : TextDirection.ltr,
-        child: Builder(
-          builder: (context) {
-            final showBottomBar = widget.showFab &&
-                MediaQuery.sizeOf(context).width < 1100;
-            return Scaffold(
-              key: _scaffoldKey,
-              drawer: _AdminDrawer(
-                isRtl: isRtl,
-                onNavigate: (path) => _navigateTo(context, path),
-              ),
-              bottomNavigationBar: showBottomBar
-                  ? _AdminBottomNavBar(
-                      currentIndex: _currentBottomIndex(context),
-                      onTap: _onBottomNavTap,
-                      isRtl: isRtl,
-                    )
-                  : null,
-              body: LayoutBuilder(
-                builder: (context, constraints) {
-                  final wide = constraints.maxWidth >= 1100;
-                  final content = _AdminCanvas(child: widget.child);
-                  if (!wide) {
-                    return content;
-                  }
-                  return Row(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      _AdminSidebar(
+        child: AdminShellScope(
+          openDrawer: () => _scaffoldKey.currentState?.openDrawer(),
+          child: Builder(
+            builder: (context) {
+              final showBottomBar = widget.showFab &&
+                  MediaQuery.sizeOf(context).width < 1100;
+              return Scaffold(
+                key: _scaffoldKey,
+                drawer: _AdminDrawer(
+                  isRtl: isRtl,
+                  onNavigate: (path) => _navigateTo(context, path),
+                ),
+                bottomNavigationBar: showBottomBar
+                    ? _AdminBottomNavBar(
+                        currentIndex: _currentBottomIndex(context),
+                        onTap: _onBottomNavTap,
                         isRtl: isRtl,
-                        onNavigate: (path) => _navigateTo(context, path),
-                      ),
-                      Expanded(child: content),
-                    ],
-                  );
-                },
-              ),
-            );
-          },
+                      )
+                    : null,
+                body: LayoutBuilder(
+                  builder: (context, constraints) {
+                    final wide = constraints.maxWidth >= 1100;
+                    final content = _AdminCanvas(child: widget.child);
+                    if (!wide) {
+                      return content;
+                    }
+                    return Row(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        _AdminSidebar(
+                          isRtl: isRtl,
+                          onNavigate: (path) => _navigateTo(context, path),
+                        ),
+                        Expanded(child: content),
+                      ],
+                    );
+                  },
+                ),
+              );
+            },
+          ),
         ),
       ),
     );
@@ -497,74 +564,82 @@ class _BottomNavTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      behavior: HitTestBehavior.opaque,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 240),
-        curve: Curves.easeOutCubic,
-        width: isActive ? 92 : 60,
-        padding: const EdgeInsets.symmetric(vertical: 5),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(18),
-          gradient: isActive
-              ? const LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [AppColors.brandPurple, AppColors.brandViolet],
-                )
-              : null,
-          boxShadow: isActive
-              ? [
-                  BoxShadow(
-                    color: AppColors.brandPurple.withValues(alpha: 0.35),
-                    blurRadius: 14,
-                    spreadRadius: -2,
-                    offset: const Offset(0, 5),
-                  ),
-                ]
-              : null,
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              entry.icon,
-              size: 20,
-              color: isActive
-                  ? Colors.white
-                  : isDark
-                      ? Colors.white.withValues(alpha: 0.55)
-                      : Theme.of(context)
-                          .colorScheme
-                          .onSurface
-                          .withValues(alpha: 0.5),
-            ),
-            AnimatedSize(
-              duration: const Duration(milliseconds: 240),
-              curve: Curves.easeOutCubic,
-              alignment: AlignmentDirectional.centerStart,
-              child: isActive
-                  ? Padding(
-                      padding: const EdgeInsetsDirectional.only(start: 7),
-                      child: ConstrainedBox(
-                        constraints: const BoxConstraints(maxWidth: 64),
-                        child: Text(
-                          entry.label,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 12,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                      ),
+    return Semantics(
+      label: entry.label,
+      button: true,
+      selected: isActive,
+      child: Tooltip(
+        message: entry.label,
+        child: GestureDetector(
+          onTap: onTap,
+          behavior: HitTestBehavior.opaque,
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 240),
+            curve: Curves.easeOutCubic,
+            width: isActive ? 92 : 60,
+            padding: const EdgeInsets.symmetric(vertical: 5),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(18),
+              gradient: isActive
+                  ? const LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [AppColors.brandPurple, AppColors.brandViolet],
                     )
-                  : const SizedBox.shrink(),
+                  : null,
+              boxShadow: isActive
+                  ? [
+                      BoxShadow(
+                        color: AppColors.brandPurple.withValues(alpha: 0.35),
+                        blurRadius: 14,
+                        spreadRadius: -2,
+                        offset: const Offset(0, 5),
+                      ),
+                    ]
+                  : null,
             ),
-          ],
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  entry.icon,
+                  size: 20,
+                  color: isActive
+                      ? Colors.white
+                      : isDark
+                          ? Colors.white.withValues(alpha: 0.55)
+                          : Theme.of(context)
+                              .colorScheme
+                              .onSurface
+                              .withValues(alpha: 0.5),
+                ),
+                AnimatedSize(
+                  duration: const Duration(milliseconds: 240),
+                  curve: Curves.easeOutCubic,
+                  alignment: AlignmentDirectional.centerStart,
+                  child: isActive
+                      ? Padding(
+                          padding: const EdgeInsetsDirectional.only(start: 7),
+                          child: ConstrainedBox(
+                            constraints: const BoxConstraints(maxWidth: 64),
+                            child: Text(
+                              entry.label,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 12,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ),
+                        )
+                      : const SizedBox.shrink(),
+                ),
+              ],
+            ),
+          ),
         ),
       ),
     );
@@ -934,17 +1009,83 @@ class _AdminSidebarFooter extends StatelessWidget {
   }
 }
 
-class _AdminDrawer extends ConsumerWidget {
+class _AdminDrawer extends ConsumerStatefulWidget {
   const _AdminDrawer({required this.isRtl, required this.onNavigate});
 
   final bool isRtl;
   final void Function(String path) onNavigate;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<_AdminDrawer> createState() => _AdminDrawerState();
+}
+
+class _AdminDrawerState extends ConsumerState<_AdminDrawer> {
+  final TextEditingController _searchController = TextEditingController();
+  String _query = '';
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final sth = Theme.of(context).extension<SidebarTheme>() ?? SidebarTheme.light;
     final currentPath = GoRouterState.of(context).matchedLocation;
+    final trimmed = _query.trim().toLowerCase();
+
+    final List<Widget> navTiles = [];
+    if (trimmed.isEmpty) {
+      for (final group in _adminGroups) {
+        navTiles.add(_AdminSectionLabel(label: group.label(l10n), sth: sth));
+        for (final item in group.items) {
+          navTiles.add(
+            _PremiumNavTile(
+              item: item,
+              isActive: currentPath == item.path,
+              sth: sth,
+              onTap: () => widget.onNavigate(item.path),
+            ),
+          );
+        }
+      }
+    } else {
+      var foundCount = 0;
+      for (final group in _adminGroups) {
+        final matches = group.items
+            .where((i) => i.label(l10n).toLowerCase().contains(trimmed))
+            .toList();
+        if (matches.isNotEmpty) {
+          navTiles.add(_AdminSectionLabel(label: group.label(l10n), sth: sth));
+          for (final item in matches) {
+            foundCount++;
+            navTiles.add(
+              _PremiumNavTile(
+                item: item,
+                isActive: currentPath == item.path,
+                sth: sth,
+                onTap: () => widget.onNavigate(item.path),
+              ),
+            );
+          }
+        }
+      }
+      if (foundCount == 0) {
+        navTiles.add(
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 16),
+            child: Center(
+              child: Text(
+                l10n.noResults,
+                style: TextStyle(color: sth.textSecondary, fontSize: 13),
+              ),
+            ),
+          ),
+        );
+      }
+    }
 
     return SafeArea(
       child: Drawer(
@@ -961,25 +1102,51 @@ class _AdminDrawer extends ConsumerWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Padding(
-                padding: const EdgeInsets.fromLTRB(16, 18, 16, 10),
+                padding: const EdgeInsets.fromLTRB(16, 18, 16, 8),
                 child: _AdminMasthead(sth: sth, l10n: l10n),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
+                child: TextField(
+                  controller: _searchController,
+                  onChanged: (v) => setState(() => _query = v),
+                  style: TextStyle(fontSize: 13, color: sth.textPrimary),
+                  decoration: InputDecoration(
+                    hintText: l10n.search,
+                    hintStyle: TextStyle(
+                      fontSize: 12.5,
+                      color: sth.textSecondary.withValues(alpha: 0.7),
+                    ),
+                    prefixIcon: Icon(Icons.search_rounded, size: 18, color: sth.iconColor),
+                    suffixIcon: _query.isNotEmpty
+                        ? IconButton(
+                            icon: const Icon(Icons.clear_rounded, size: 16),
+                            onPressed: () {
+                              _searchController.clear();
+                              setState(() => _query = '');
+                            },
+                          )
+                        : null,
+                    isDense: true,
+                    filled: true,
+                    fillColor: sth.quickSettingsBackground,
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(color: sth.dividerColor),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(color: sth.dividerColor),
+                    ),
+                  ),
+                ),
               ),
               const Divider(height: 1, color: Colors.transparent),
               Expanded(
                 child: ListView(
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                  children: [
-                    for (final group in _adminGroups) ...[
-                      _AdminSectionLabel(label: group.label(l10n), sth: sth),
-                      for (final item in group.items)
-                        _PremiumNavTile(
-                          item: item,
-                          isActive: currentPath == item.path,
-                          sth: sth,
-                          onTap: () => onNavigate(item.path),
-                        ),
-                    ],
-                  ],
+                  children: navTiles,
                 ),
               ),
               Padding(

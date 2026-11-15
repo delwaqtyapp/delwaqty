@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:delwaqty/features/admin/admin_shell.dart';
 import 'package:delwaqty/services/admin/admin_providers.dart';
 import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
 import 'package:delwaqty/shared/widgets/premium_empty_state.dart';
@@ -30,6 +32,9 @@ class _AdminMerchantsPageState extends ConsumerState<AdminMerchantsPage> {
 
     return Scaffold(
       appBar: AppBar(
+        leading: MediaQuery.sizeOf(context).width < 1100
+            ? const AdminMenuButton()
+            : null,
         title: Text(l10n.merchantManagement),
         actions: [
           IconButton(
@@ -284,7 +289,9 @@ class _AdminMerchantsPageState extends ConsumerState<AdminMerchantsPage> {
                                 context: listCtx,
                                 builder: (dCtx) => AlertDialog(
                                   title: Text(l10n.deleteProduct),
-                                  content: Text(l10n.confirmDeleteReview),
+                                  content: Text(
+                                    '${l10n.areYouSureYouWantToDelete} ${p['name']}?',
+                                  ),
                                   actions: [
                                     TextButton(
                                       onPressed: () =>
@@ -539,29 +546,230 @@ class _MerchantTile extends StatelessWidget {
             ),
           ],
         ),
-        onTap: () {
-          showDialog(
-            context: context,
-            builder: (ctx) => AlertDialog(
-              title: Text(name),
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
+        onTap: () => _showMerchantDetailsSheet(
+          context,
+          merchant,
+          l10n,
+          isVerified,
+          status,
+          statusLabel,
+          onManageProducts,
+          onStatusChanged,
+          onDeleteMerchant,
+        ),
+      ),
+    );
+  }
+
+  void _showMerchantDetailsSheet(
+    BuildContext context,
+    Map<String, dynamic> merchant,
+    AppLocalizations l10n,
+    bool isVerified,
+    String status,
+    String statusLabel,
+    VoidCallback onManageProducts,
+    Function(String) onStatusChanged,
+    VoidCallback onDeleteMerchant,
+  ) {
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+    final name = merchant['name'] as String? ?? '';
+    final type = merchant['type'] as String? ?? '';
+    final address = merchant['address'] as String? ?? '';
+    final phone = merchant['phone'] as String? ?? '';
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      showDragHandle: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (ctx) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
                 children: [
-                  Text('${l10n.typeLabel}: $type'),
-                  const SizedBox(height: 4),
-                  Text('${l10n.statusLabel}: $statusLabel'),
+                  CircleAvatar(
+                    radius: 26,
+                    backgroundColor: isVerified
+                        ? AppColors.successLight.withValues(alpha: 0.15)
+                        : AppColors.warningLight.withValues(alpha: 0.15),
+                    child: Icon(
+                      Icons.storefront_rounded,
+                      color: isVerified ? AppColors.successLight : AppColors.warningLight,
+                      size: 28,
+                    ),
+                  ),
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          name,
+                          style: theme.textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          type,
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: cs.onSurfaceVariant,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: isVerified
+                          ? AppColors.successLight.withValues(alpha: 0.15)
+                          : AppColors.warningLight.withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Text(
+                      statusLabel,
+                      style: theme.textTheme.labelMedium?.copyWith(
+                        color: isVerified ? AppColors.successLight : AppColors.warningLight,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
                 ],
               ),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.pop(ctx),
-                  child: Text(l10n.cancel),
+              if (address.isNotEmpty || phone.isNotEmpty) ...[
+                const SizedBox(height: 16),
+                Card(
+                  elevation: 0,
+                  color: cs.surfaceContainerHighest.withValues(alpha: 0.35),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    side: BorderSide(color: cs.outlineVariant.withValues(alpha: 0.3)),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(14),
+                    child: Column(
+                      children: [
+                        if (address.isNotEmpty)
+                          Row(
+                            children: [
+                              Icon(Icons.location_on_outlined, size: 18, color: cs.primary),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Text(address, style: theme.textTheme.bodySmall),
+                              ),
+                            ],
+                          ),
+                        if (address.isNotEmpty && phone.isNotEmpty)
+                          const Divider(height: 16),
+                        if (phone.isNotEmpty)
+                          Row(
+                            children: [
+                              Icon(Icons.phone_outlined, size: 18, color: cs.primary),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Text(phone, style: theme.textTheme.bodySmall),
+                              ),
+                            ],
+                          ),
+                      ],
+                    ),
+                  ),
                 ),
               ],
-            ),
-          );
-        },
+              const SizedBox(height: 20),
+              Text(
+                l10n.adminQuickActions,
+                style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 10),
+              FilledButton.icon(
+                style: FilledButton.styleFrom(
+                  minimumSize: const Size.fromHeight(46),
+                ),
+                icon: const Icon(Icons.inventory_2_outlined, size: 20),
+                label: Text(l10n.manageProducts),
+                onPressed: () {
+                  Navigator.pop(ctx);
+                  onManageProducts();
+                },
+              ),
+              const SizedBox(height: 10),
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      icon: const Icon(Icons.receipt_long_rounded, size: 18),
+                      label: Text(l10n.orders),
+                      onPressed: () {
+                        Navigator.pop(ctx);
+                        context.push('/admin/orders');
+                      },
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      icon: const Icon(Icons.rate_review_outlined, size: 18),
+                      label: Text(l10n.reviews),
+                      onPressed: () {
+                        Navigator.pop(ctx);
+                        context.push('/admin/reviews-moderation');
+                      },
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 10),
+              Row(
+                children: [
+                  if (!isVerified)
+                    Expanded(
+                      child: TextButton.icon(
+                        icon: const Icon(Icons.verified_rounded, size: 18, color: Colors.green),
+                        label: Text(l10n.verify, style: const TextStyle(color: Colors.green)),
+                        onPressed: () {
+                          Navigator.pop(ctx);
+                          onStatusChanged('verified');
+                        },
+                      ),
+                    ),
+                  if (status != 'suspended')
+                    Expanded(
+                      child: TextButton.icon(
+                        icon: const Icon(Icons.block_rounded, size: 18, color: Colors.orange),
+                        label: Text(l10n.suspend, style: const TextStyle(color: Colors.orange)),
+                        onPressed: () {
+                          Navigator.pop(ctx);
+                          onStatusChanged('suspended');
+                        },
+                      ),
+                    ),
+                  Expanded(
+                    child: TextButton.icon(
+                      icon: Icon(Icons.delete_outline_rounded, size: 18, color: cs.error),
+                      label: Text(l10n.delete, style: TextStyle(color: cs.error)),
+                      onPressed: () {
+                        Navigator.pop(ctx);
+                        onDeleteMerchant();
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

@@ -7511,7 +7511,7 @@ abstract class AppLocalizations {
   /// No description provided for @adminLabel.
   ///
   /// In en, this message translates to:
-  /// **'Support'**
+  /// **'Admin'**
   String get adminLabel;
 
   /// No description provided for @customerLabel.
@@ -13123,6 +13123,132 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Service Bookings'**
   String get adminServiceBookings;
+
+  /// No description provided for @noSettlementsYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No settlements yet.'**
+  String get noSettlementsYet;
+
+  /// No description provided for @submitSettlementHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit a settlement to move collected funds.'**
+  String get submitSettlementHint;
+
+  /// No description provided for @lookupAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Lookup Account'**
+  String get lookupAccount;
+
+  /// No description provided for @noGraceAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'No account'**
+  String get noGraceAccount;
+
+  /// No description provided for @graceAccountHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a valid account UUID to manage its grace limit.'**
+  String get graceAccountHint;
+
+  /// No description provided for @currentGrace.
+  ///
+  /// In en, this message translates to:
+  /// **'Current Grace'**
+  String get currentGrace;
+
+  /// No description provided for @platformReceivingAccounts.
+  ///
+  /// In en, this message translates to:
+  /// **'Platform Receiving Accounts'**
+  String get platformReceivingAccounts;
+
+  /// No description provided for @methodType.
+  ///
+  /// In en, this message translates to:
+  /// **'Method type'**
+  String get methodType;
+
+  /// No description provided for @displayNameLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Display name'**
+  String get displayNameLabel;
+
+  /// No description provided for @accountNameLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Account name'**
+  String get accountNameLabel;
+
+  /// No description provided for @accountNumberLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Account number'**
+  String get accountNumberLabel;
+
+  /// No description provided for @walletNumberLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Wallet number'**
+  String get walletNumberLabel;
+
+  /// No description provided for @instructionsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Instructions'**
+  String get instructionsLabel;
+
+  /// No description provided for @regionIdLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Region ID (UUID)'**
+  String get regionIdLabel;
+
+  /// No description provided for @rejectTopUpTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Reject Top-Up'**
+  String get rejectTopUpTitle;
+
+  /// No description provided for @rejectTopUpReasonHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Reason (required)'**
+  String get rejectTopUpReasonHint;
+
+  /// No description provided for @noTopUpRequestsScope.
+  ///
+  /// In en, this message translates to:
+  /// **'There are no top-up requests in this scope.'**
+  String get noTopUpRequestsScope;
+
+  /// No description provided for @settlementsGraceLimit.
+  ///
+  /// In en, this message translates to:
+  /// **'New grace limit'**
+  String get settlementsGraceLimit;
+
+  /// No description provided for @settlementsGraceLimitHint.
+  ///
+  /// In en, this message translates to:
+  /// **'0, 1, 2, 3, 4, 5, 6, 10 ...'**
+  String get settlementsGraceLimitHint;
+
+  /// No description provided for @adminOwnerGlobalAudit.
+  ///
+  /// In en, this message translates to:
+  /// **'Owner Global Audit'**
+  String get adminOwnerGlobalAudit;
+
+  /// No description provided for @chatPermissionsShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Chat Access'**
+  String get chatPermissionsShort;
 }
 
 class _AppLocalizationsDelegate

@@ -3902,7 +3902,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get tapToStop => 'Tap to stop';
 
   @override
-  String get adminLabel => 'Support';
+  String get adminLabel => 'Admin';
 
   @override
   String get customerLabel => 'Customer';
@@ -6855,4 +6855,70 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get adminServiceBookings => 'Service Bookings';
+
+  @override
+  String get noSettlementsYet => 'No settlements yet.';
+
+  @override
+  String get submitSettlementHint =>
+      'Submit a settlement to move collected funds.';
+
+  @override
+  String get lookupAccount => 'Lookup Account';
+
+  @override
+  String get noGraceAccount => 'No account';
+
+  @override
+  String get graceAccountHint =>
+      'Enter a valid account UUID to manage its grace limit.';
+
+  @override
+  String get currentGrace => 'Current Grace';
+
+  @override
+  String get platformReceivingAccounts => 'Platform Receiving Accounts';
+
+  @override
+  String get methodType => 'Method type';
+
+  @override
+  String get displayNameLabel => 'Display name';
+
+  @override
+  String get accountNameLabel => 'Account name';
+
+  @override
+  String get accountNumberLabel => 'Account number';
+
+  @override
+  String get walletNumberLabel => 'Wallet number';
+
+  @override
+  String get instructionsLabel => 'Instructions';
+
+  @override
+  String get regionIdLabel => 'Region ID (UUID)';
+
+  @override
+  String get rejectTopUpTitle => 'Reject Top-Up';
+
+  @override
+  String get rejectTopUpReasonHint => 'Reason (required)';
+
+  @override
+  String get noTopUpRequestsScope =>
+      'There are no top-up requests in this scope.';
+
+  @override
+  String get settlementsGraceLimit => 'New grace limit';
+
+  @override
+  String get settlementsGraceLimitHint => '0, 1, 2, 3, 4, 5, 6, 10 ...';
+
+  @override
+  String get adminOwnerGlobalAudit => 'Owner Global Audit';
+
+  @override
+  String get chatPermissionsShort => 'Chat Access';
 }

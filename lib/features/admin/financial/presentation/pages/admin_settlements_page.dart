@@ -32,15 +32,16 @@ class _AdminSettlementsPageState extends ConsumerState<AdminSettlementsPage> {
   }
 
   String _label(String status) {
+    final l10n = AppLocalizations.of(context);
     switch (status) {
       case 'approved':
-        return 'Approved';
+        return l10n.statusApproved;
       case 'rejected':
-        return 'Rejected';
+        return l10n.statusRejected;
       case 'under_review':
-        return 'Under Review';
+        return l10n.statusReviewing;
       default:
-        return 'Pending';
+        return l10n.statusPending;
     }
   }
 
@@ -122,7 +123,7 @@ class _AdminSettlementsPageState extends ConsumerState<AdminSettlementsPage> {
               children: [
                 TextField(
                   controller: amountController,
-                  decoration: const InputDecoration(labelText: 'Amount'),
+                  decoration: InputDecoration(labelText: l10n.amount),
                   keyboardType: TextInputType.number,
                 ),
                 const SizedBox(height: 8),
@@ -140,17 +141,17 @@ class _AdminSettlementsPageState extends ConsumerState<AdminSettlementsPage> {
                     ),
                   ],
                   onChanged: (v) => setStateDialog(() => method = v!),
-                  decoration: const InputDecoration(labelText: 'Method'),
+                  decoration: InputDecoration(labelText: l10n.paymentMethod),
                 ),
                 const SizedBox(height: 8),
                 TextField(
                   controller: referenceController,
-                  decoration: const InputDecoration(labelText: 'Reference'),
+                  decoration: InputDecoration(labelText: l10n.transferReference),
                 ),
                 const SizedBox(height: 8),
                 TextField(
                   controller: messageController,
-                  decoration: const InputDecoration(labelText: 'Message'),
+                  decoration: InputDecoration(labelText: l10n.note),
                 ),
               ],
             ),
@@ -243,10 +244,10 @@ class _AdminSettlementsPageState extends ConsumerState<AdminSettlementsPage> {
           ),
           data: (items) {
             if (items.isEmpty) {
-              return const PremiumEmptyState(
+              return PremiumEmptyState(
                 icon: Icons.account_balance_wallet_rounded,
-                title: 'No settlements',
-                message: 'Submit a settlement to move collected funds.',
+                title: l10n.noSettlementsYet,
+                message: l10n.submitSettlementHint,
               );
             }
             return ListView.separated(
@@ -293,12 +294,12 @@ class _AdminSettlementsPageState extends ConsumerState<AdminSettlementsPage> {
                       ),
                       const SizedBox(height: 6),
                       Text(
-                        'Admin: ${s.adminId}',
+                        '${l10n.adminLabel}: ${s.adminId}',
                         style: Theme.of(context).textTheme.bodySmall,
                       ),
                       if (s.reference != null)
                         Text(
-                          'Reference: ${s.reference}',
+                          '${l10n.transferReference}: ${s.reference}',
                           style: Theme.of(context).textTheme.bodySmall,
                         ),
                       if (s.status == 'pending' && isOwner) ...[
@@ -333,7 +334,7 @@ class _AdminSettlementsPageState extends ConsumerState<AdminSettlementsPage> {
                       ] else if (s.rejectionReason != null) ...[
                         const SizedBox(height: 6),
                         Text(
-                          'Reason: ${s.rejectionReason}',
+                          '${l10n.rejectReason}: ${s.rejectionReason}',
                           style: Theme.of(context)
                               .textTheme
                               .bodySmall

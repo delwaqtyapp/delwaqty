@@ -2925,7 +2925,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get notificationsDisabled => 'معطل';
 
   @override
-  String get addLabel => 'اضافة';
+  String get addLabel => 'إضافة';
 
   @override
   String get editLabel => 'تعديل';
@@ -3872,7 +3872,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get tapToStop => 'اضغط للإيقاف';
 
   @override
-  String get adminLabel => 'الدعم';
+  String get adminLabel => 'المشرف';
 
   @override
   String get customerLabel => 'العميل';
@@ -6807,4 +6807,67 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get adminServiceBookings => 'حجوزات الخدمات';
+
+  @override
+  String get noSettlementsYet => 'لا توجد تسويات حتى الآن.';
+
+  @override
+  String get submitSettlementHint => 'أرسل تسوية لتحريك الأموال المُحصَّلة.';
+
+  @override
+  String get lookupAccount => 'بحث عن حساب';
+
+  @override
+  String get noGraceAccount => 'لا يوجد حساب';
+
+  @override
+  String get graceAccountHint => 'أدخل UUID صالحًا للحساب لإدارة حد المهلة.';
+
+  @override
+  String get currentGrace => 'المهلة الحالية';
+
+  @override
+  String get platformReceivingAccounts => 'حسابات استلام المنصة';
+
+  @override
+  String get methodType => 'نوع الطريقة';
+
+  @override
+  String get displayNameLabel => 'الاسم المعروض';
+
+  @override
+  String get accountNameLabel => 'اسم الحساب';
+
+  @override
+  String get accountNumberLabel => 'رقم الحساب';
+
+  @override
+  String get walletNumberLabel => 'رقم المحفظة';
+
+  @override
+  String get instructionsLabel => 'التعليمات';
+
+  @override
+  String get regionIdLabel => 'معرّف المنطقة (UUID)';
+
+  @override
+  String get rejectTopUpTitle => 'رفض الشحن';
+
+  @override
+  String get rejectTopUpReasonHint => 'السبب (مطلوب)';
+
+  @override
+  String get noTopUpRequestsScope => 'لا توجد طلبات شحن في هذا النطاق.';
+
+  @override
+  String get settlementsGraceLimit => 'حد المهلة الجديد';
+
+  @override
+  String get settlementsGraceLimitHint => '0، 1، 2، 3، 4، 5، 6، 10 ...';
+
+  @override
+  String get adminOwnerGlobalAudit => 'التدقيق الشامل للمالك';
+
+  @override
+  String get chatPermissionsShort => 'صلاحيات الدردشة';
 }

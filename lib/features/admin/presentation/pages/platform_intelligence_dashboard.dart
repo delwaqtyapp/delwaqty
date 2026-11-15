@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:delwaqty/features/admin/admin_shell.dart';
 import 'package:delwaqty/features/admin/presentation/providers/platform_intelligence_providers.dart';
 import 'package:delwaqty/features/admin/domain/entities/platform_intelligence.dart';
 import 'package:delwaqty/features/_shared/regions/presentation/providers/region_providers.dart';
@@ -32,21 +33,29 @@ class _PlatformIntelligenceDashboardState
 
     return Scaffold(
       appBar: AppBar(
+        leading: MediaQuery.sizeOf(context).width < 1100
+            ? const AdminMenuButton()
+            : null,
         title: Text(l10n.adminCommandCenter),
         actions: [
+          IconButton(
+            tooltip: l10n.adminQuickActions,
+            icon: const Icon(Icons.grid_view_rounded),
+            onPressed: () => context.push('/admin/actions'),
+          ),
           IconButton(
             tooltip: l10n.search,
             icon: const Icon(Icons.search_rounded),
             onPressed: () => context.push('/admin/members'),
           ),
-            IconButton(
-              tooltip: l10n.refresh,
-              icon: const Icon(Icons.refresh_rounded),
-              onPressed: () {
-                ref.invalidate(platformKpiProvider);
-                ref.invalidate(operationalAlertsProvider);
-                ref.invalidate(revenueBreakdownProvider);
-              },
+          IconButton(
+            tooltip: l10n.refresh,
+            icon: const Icon(Icons.refresh_rounded),
+            onPressed: () {
+              ref.invalidate(platformKpiProvider);
+              ref.invalidate(operationalAlertsProvider);
+              ref.invalidate(revenueBreakdownProvider);
+            },
           ),
         ],
       ),
@@ -702,69 +711,110 @@ class _AlertCard extends StatelessWidget {
   final OperationalAlert alert;
   final ColorScheme cs;
 
+  String _targetRoute() {
+    final cat = alert.category.toLowerCase();
+    final title = alert.title.toLowerCase();
+    if (cat.contains('sos') || cat.contains('emerg') || title.contains('sos') || title.contains('emerg')) {
+      return '/admin/emergency';
+    }
+    if (cat.contains('complaint') || title.contains('complaint') || cat.contains('dispute') || title.contains('dispute')) {
+      return '/admin/complaints';
+    }
+    if (cat.contains('verif') || title.contains('verif') || cat.contains('kyc') || title.contains('kyc')) {
+      return '/admin/verifications';
+    }
+    if (cat.contains('sanction') || title.contains('sanction') || cat.contains('penalty') || title.contains('penalty')) {
+      return '/admin/sanctions';
+    }
+    if (cat.contains('order') || title.contains('order')) {
+      return '/admin/orders';
+    }
+    if (cat.contains('deliver') || title.contains('deliver')) {
+      return '/admin/deliveries';
+    }
+    if (cat.contains('driver') || title.contains('driver') || cat.contains('courier') || title.contains('courier')) {
+      return '/admin/drivers';
+    }
+    if (cat.contains('wallet') || cat.contains('financ') || cat.contains('payment') || title.contains('wallet') || title.contains('financ') || title.contains('pay')) {
+      return '/admin/financial-center';
+    }
+    return '/admin/actions';
+  }
+
   @override
   Widget build(BuildContext context) {
     final severityColor = _severityColor(alert.severity);
     final severityIcon = _severityIcon(alert.severity);
+    final route = _targetRoute();
 
-    return PremiumCard(
-      padding: const EdgeInsets.all(12),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: severityColor.withValues(alpha: 0.15),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Icon(severityIcon, color: severityColor, size: 18),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  alert.title,
-                  style: Theme.of(context)
-                      .textTheme
-                      .bodyMedium
-                      ?.copyWith(fontWeight: FontWeight.w600),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  alert.description,
-                  style: Theme.of(context)
-                      .textTheme
-                      .bodySmall
-                      ?.copyWith(color: cs.onSurfaceVariant),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ],
-            ),
-          ),
-          if (alert.count > 0) ...[
-            const SizedBox(width: 8),
+    return InkWell(
+      onTap: () => context.push(route),
+      borderRadius: BorderRadius.circular(16),
+      child: PremiumCard(
+        padding: const EdgeInsets.all(12),
+        child: Row(
+          children: [
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+              padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
                 color: severityColor.withValues(alpha: 0.15),
-                borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
+                borderRadius: BorderRadius.circular(12),
               ),
-              child: Text(
-                alert.count.toString(),
-                style: TextStyle(
-                  color: severityColor,
-                  fontSize: 11,
-                  fontWeight: FontWeight.bold,
-                ),
+              child: Icon(severityIcon, color: severityColor, size: 18),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    alert.title,
+                    style: Theme.of(context)
+                        .textTheme
+                        .bodyMedium
+                        ?.copyWith(fontWeight: FontWeight.w600),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    alert.description,
+                    style: Theme.of(context)
+                        .textTheme
+                        .bodySmall
+                        ?.copyWith(color: cs.onSurfaceVariant),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
               ),
             ),
+            if (alert.count > 0) ...[
+              const SizedBox(width: 8),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                decoration: BoxDecoration(
+                  color: severityColor.withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
+                ),
+                child: Text(
+                  alert.count.toString(),
+                  style: TextStyle(
+                    color: severityColor,
+                    fontSize: 11,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ],
+            const SizedBox(width: 6),
+            Icon(
+              Icons.chevron_right_rounded,
+              size: 20,
+              color: cs.onSurfaceVariant.withValues(alpha: 0.5),
+            ),
           ],
-        ],
+        ),
       ),
     );
   }

@@ -35,27 +35,27 @@ class _AdminReceivingWalletsPageState
             children: [
               TextField(
                 controller: methodController,
-                decoration: const InputDecoration(labelText: 'Method Type'),
+                decoration: InputDecoration(labelText: l10n.methodType),
               ),
               TextField(
                 controller: nameController,
-                decoration: const InputDecoration(labelText: 'Display Name'),
+                decoration: InputDecoration(labelText: l10n.displayNameLabel),
               ),
               TextField(
                 controller: accountController,
-                decoration: const InputDecoration(labelText: 'Account Name'),
+                decoration: InputDecoration(labelText: l10n.accountNameLabel),
               ),
               TextField(
                 controller: numberController,
-                decoration: const InputDecoration(labelText: 'Account Number'),
+                decoration: InputDecoration(labelText: l10n.accountNumberLabel),
               ),
               TextField(
                 controller: walletController,
-                decoration: const InputDecoration(labelText: 'Wallet Number'),
+                decoration: InputDecoration(labelText: l10n.walletNumberLabel),
               ),
               TextField(
                 controller: instrController,
-                decoration: const InputDecoration(labelText: 'Instructions'),
+                decoration: InputDecoration(labelText: l10n.instructionsLabel),
               ),
             ],
           ),
@@ -70,7 +70,7 @@ class _AdminReceivingWalletsPageState
               if (nameController.text.trim().isEmpty) return;
               Navigator.of(ctx).pop(true);
             },
-            child: const Text('Add'),
+            child: Text(l10n.addLabel),
           ),
         ],
       ),
@@ -132,23 +132,23 @@ class _AdminReceivingWalletsPageState
             children: [
               TextField(
                 controller: regionController,
-                decoration: const InputDecoration(labelText: 'Region ID (UUID)'),
+                decoration: InputDecoration(labelText: l10n.regionIdLabel),
               ),
               TextField(
                 controller: methodController,
-                decoration: const InputDecoration(labelText: 'Method Type'),
+                decoration: InputDecoration(labelText: l10n.methodType),
               ),
               TextField(
                 controller: walletController,
-                decoration: const InputDecoration(labelText: 'Wallet Number'),
+                decoration: InputDecoration(labelText: l10n.walletNumberLabel),
               ),
               TextField(
                 controller: accountController,
-                decoration: const InputDecoration(labelText: 'Account Name'),
+                decoration: InputDecoration(labelText: l10n.accountNameLabel),
               ),
               TextField(
                 controller: providerController,
-                decoration: const InputDecoration(labelText: 'Provider'),
+                decoration: InputDecoration(labelText: l10n.provider),
               ),
             ],
           ),
@@ -163,7 +163,7 @@ class _AdminReceivingWalletsPageState
               if (regionController.text.trim().isEmpty) return;
               Navigator.of(ctx).pop(true);
             },
-            child: const Text('Add'),
+            child: Text(l10n.addLabel),
           ),
         ],
       ),
@@ -235,7 +235,7 @@ class _AdminReceivingWalletsPageState
         padding: const EdgeInsets.all(12),
         children: [
           Text(
-            'Platform Receiving Accounts',
+            l10n.platformReceivingAccounts,
             style: Theme.of(context)
                 .textTheme
                 .titleMedium
@@ -251,10 +251,10 @@ class _AdminReceivingWalletsPageState
             ),
             data: (accounts) {
               if (accounts.isEmpty) {
-                return const PremiumEmptyState(
+                return PremiumEmptyState(
                   icon: Icons.account_balance_rounded,
-                  title: 'No platform accounts',
-                  message: 'Owner can configure global receiving accounts.',
+                  title: l10n.addPlatformReceivingAccount,
+                  message: l10n.receivingAccountAdded,
                 );
               }
               return Column(
@@ -295,7 +295,7 @@ class _AdminReceivingWalletsPageState
           ),
           const SizedBox(height: 16),
           Text(
-            'Regional Admin Receiving Wallets',
+            l10n.receivingAccounts,
             style: Theme.of(context)
                 .textTheme
                 .titleMedium
@@ -311,10 +311,10 @@ class _AdminReceivingWalletsPageState
             ),
             data: (wallets) {
               if (wallets.isEmpty) {
-                return const PremiumEmptyState(
+                return PremiumEmptyState(
                   icon: Icons.wallet_rounded,
-                  title: 'No receiving wallets',
-                  message: 'Add a receiving wallet for your region.',
+                  title: l10n.addReceivingWallet,
+                  message: l10n.receivingWalletAdded,
                 );
               }
               return Column(
@@ -329,17 +329,17 @@ class _AdminReceivingWalletsPageState
                             style: const TextStyle(fontWeight: FontWeight.bold),
                           ),
                           Text(
-                            'Region: ${w['region_id']}',
+                            '${l10n.regionIdLabel}: ${w['region_id']}',
                             style: Theme.of(context).textTheme.bodySmall,
                           ),
                           if (w['wallet_number'] != null)
                             Text(
-                              'Wallet: ${w['wallet_number']}',
+                              '${l10n.walletNumberLabel}: ${w['wallet_number']}',
                               style: Theme.of(context).textTheme.bodySmall,
                             ),
                           if (w['account_name'] != null)
                             Text(
-                              'Account: ${w['account_name']}',
+                              '${l10n.accountNameLabel}: ${w['account_name']}',
                               style: Theme.of(context).textTheme.bodySmall,
                             ),
                         ],

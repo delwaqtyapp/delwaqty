@@ -109,3 +109,4 @@ app.*.map.json
 # Backup folders (timestamped pre-edit snapshots)
 .backups/
 dwq_ui.xml
+tools/db_functions.json

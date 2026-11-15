@@ -7,12 +7,14 @@ import 'package:delwaqty/features/admin/presentation/widgets/admin_kpi_card.dart
 import 'package:delwaqty/features/admin/presentation/widgets/admin_page_header.dart';
 import 'package:delwaqty/features/admin/presentation/widgets/admin_states.dart';
 import 'package:delwaqty/core/errors/app_error_text.dart';
+import 'package:delwaqty/l10n/app_localizations.dart';
 
 class AdminOverviewPage extends ConsumerWidget {
   const AdminOverviewPage({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final statsAsync = ref.watch(adminOverviewStatsProvider);
 
     return Padding(
@@ -20,14 +22,14 @@ class AdminOverviewPage extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const AdminPageHeader(
-            title: 'Dashboard Overview',
-            subtitle: 'Live platform counters at a glance',
+          AdminPageHeader(
+            title: l10n.adminDashboardOverview,
+            subtitle: l10n.adminDashboardOverviewSubtitle,
           ),
           const SizedBox(height: 32),
           Expanded(
             child: statsAsync.when(
-              loading: () => const AdminLoadingState(label: 'Loading live stats…'),
+              loading: () => AdminLoadingState(label: l10n.adminLoadingLiveStats),
               error: (error, _) => AdminErrorState(
                 message: appErrorText(context, error),
                 onRetry: () => ref.invalidate(adminOverviewStatsProvider),
@@ -37,7 +39,7 @@ class AdminOverviewPage extends ConsumerWidget {
                   ref.invalidate(adminOverviewStatsProvider);
                   await ref.read(adminOverviewStatsProvider.future);
                 },
-                child: _StatsGrid(stats: stats),
+                child: _StatsGrid(stats: stats, l10n: l10n),
               ),
             ),
           ),
@@ -48,9 +50,10 @@ class AdminOverviewPage extends ConsumerWidget {
 }
 
 class _StatsGrid extends StatelessWidget {
-  const _StatsGrid({required this.stats});
+  const _StatsGrid({required this.stats, required this.l10n});
 
   final AdminOverviewStats stats;
+  final AppLocalizations l10n;
 
   @override
   Widget build(BuildContext context) {
@@ -68,31 +71,31 @@ class _StatsGrid extends StatelessWidget {
           children: [
             AdminKpiCard(
               value: '${stats.users}',
-              label: 'Total Users',
+              label: l10n.adminTotalUsers,
               icon: Icons.people_rounded,
               color: AppColors.brandBlue,
             ),
             AdminKpiCard(
               value: '${stats.merchants}',
-              label: 'Total Merchants',
+              label: l10n.adminTotalMerchants,
               icon: Icons.store_rounded,
               color: AppColors.brandViolet,
             ),
             AdminKpiCard(
               value: '${stats.orders}',
-              label: 'Total Orders',
+              label: l10n.adminTotalOrders,
               icon: Icons.shopping_bag_rounded,
               color: AppColors.successLight,
             ),
             AdminKpiCard(
               value: '${stats.drivers}',
-              label: 'Active Drivers',
+              label: l10n.adminActiveDrivers,
               icon: Icons.delivery_dining_rounded,
               color: AppColors.warningLight,
             ),
             AdminKpiCard(
               value: '${stats.serviceBookings}',
-              label: 'Service Bookings',
+              label: l10n.adminServiceBookings,
               icon: Icons.home_repair_service_rounded,
               color: AppColors.brandCyan,
             ),

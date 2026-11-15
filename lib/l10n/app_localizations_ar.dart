@@ -6783,4 +6783,28 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get errorServerIssue => 'حدث خطأ في الخادم. يرجى المحاولة بعد قليل.';
+
+  @override
+  String get adminDashboardOverview => 'نظرة عامة على لوحة التحكم';
+
+  @override
+  String get adminDashboardOverviewSubtitle => 'مؤشرات حية للمنصة في لمحة';
+
+  @override
+  String get adminLoadingLiveStats => 'جاري تحميل الإحصائيات المباشرة…';
+
+  @override
+  String get adminTotalUsers => 'إجمالي المستخدمين';
+
+  @override
+  String get adminTotalMerchants => 'إجمالي المتاجر';
+
+  @override
+  String get adminTotalOrders => 'إجمالي الطلبات';
+
+  @override
+  String get adminActiveDrivers => 'السائقون النشطون';
+
+  @override
+  String get adminServiceBookings => 'حجوزات الخدمات';
 }

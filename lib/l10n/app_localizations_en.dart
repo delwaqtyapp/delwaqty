@@ -6830,4 +6830,29 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get errorServerIssue =>
       'A server error occurred. Please try again shortly.';
+
+  @override
+  String get adminDashboardOverview => 'Dashboard Overview';
+
+  @override
+  String get adminDashboardOverviewSubtitle =>
+      'Live platform counters at a glance';
+
+  @override
+  String get adminLoadingLiveStats => 'Loading live stats…';
+
+  @override
+  String get adminTotalUsers => 'Total Users';
+
+  @override
+  String get adminTotalMerchants => 'Total Merchants';
+
+  @override
+  String get adminTotalOrders => 'Total Orders';
+
+  @override
+  String get adminActiveDrivers => 'Active Drivers';
+
+  @override
+  String get adminServiceBookings => 'Service Bookings';
 }

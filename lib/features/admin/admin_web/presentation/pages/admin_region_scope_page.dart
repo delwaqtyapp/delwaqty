@@ -156,6 +156,7 @@ class _UsersPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return DecoratedBox(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -169,14 +170,14 @@ class _UsersPanel extends StatelessWidget {
         error: (e, _) => Center(child: Text(appErrorText(context, e))),
         data: (users) {
           if (users.isEmpty) {
-            return const Center(child: Text('No admin-tier users'));
+            return Center(child: Text(l10n.adminMgmtNoAdmins));
           }
           return ListView.builder(
             itemCount: users.length,
             itemBuilder: (context, index) {
               final user = users[index];
               final id = user['id'] as String;
-              final name = user['full_name'] as String? ?? 'Unknown';
+              final name = user['full_name'] as String? ?? l10n.adminMgmtUnknown;
               final email = user['email'] as String? ?? '';
               final selected = id == selectedAdminId;
               return InkWell(

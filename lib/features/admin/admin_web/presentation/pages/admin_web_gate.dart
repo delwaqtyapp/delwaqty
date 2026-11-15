@@ -134,7 +134,7 @@ class _AdminWebLoginPageState extends State<AdminWebLoginPage> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _loading = false;
-  String? _error;
+  bool _hasError = false;
 
   @override
   void dispose() {
@@ -146,7 +146,7 @@ class _AdminWebLoginPageState extends State<AdminWebLoginPage> {
   Future<void> _signIn() async {
     setState(() {
       _loading = true;
-      _error = null;
+      _hasError = false;
     });
     try {
       await Supabase.instance.client.auth.signInWithPassword(
@@ -155,7 +155,7 @@ class _AdminWebLoginPageState extends State<AdminWebLoginPage> {
       );
       widget.onSignedIn?.call();
     } catch (e) {
-      setState(() => _error = 'Invalid email or password');
+      setState(() => _hasError = true);
     } finally {
       if (mounted) setState(() => _loading = false);
     }
@@ -163,6 +163,7 @@ class _AdminWebLoginPageState extends State<AdminWebLoginPage> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Scaffold(
       body: Center(
         child: SingleChildScrollView(
@@ -193,25 +194,25 @@ class _AdminWebLoginPageState extends State<AdminWebLoginPage> {
                   ),
                 ),
                 const SizedBox(height: 16),
-                const Text(
-                  'Delwaqty Admin',
-                  style: TextStyle(
+                Text(
+                  l10n.adminPanel,
+                  style: const TextStyle(
                     color: AppColors.textPrimary,
                     fontSize: 24,
                     fontWeight: FontWeight.w800,
                   ),
                 ),
                 const SizedBox(height: 4),
-                const Text(
-                  'Sign in with an admin account',
-                  style: TextStyle(color: AppColors.textMuted),
+                Text(
+                  l10n.adminManagementMode,
+                  style: const TextStyle(color: AppColors.textMuted),
                 ),
                 const SizedBox(height: 24),
                 TextField(
                   controller: _emailController,
-                  decoration: const InputDecoration(
-                    labelText: 'Email',
-                    border: OutlineInputBorder(),
+                  decoration: InputDecoration(
+                    labelText: l10n.email,
+                    border: const OutlineInputBorder(),
                   ),
                   keyboardType: TextInputType.emailAddress,
                   autocorrect: false,
@@ -220,9 +221,9 @@ class _AdminWebLoginPageState extends State<AdminWebLoginPage> {
                 TextField(
                   controller: _passwordController,
                   decoration: InputDecoration(
-                    labelText: 'Password',
+                    labelText: l10n.password,
                     border: const OutlineInputBorder(),
-                    errorText: _error,
+                    errorText: _hasError ? l10n.errorUnauthenticated : null,
                   ),
                   obscureText: true,
                   onSubmitted: (_) => _signIn(),
@@ -245,9 +246,9 @@ class _AdminWebLoginPageState extends State<AdminWebLoginPage> {
                               strokeWidth: 2,
                             ),
                           )
-                        : const Text(
-                            'Sign In',
-                            style: TextStyle(
+                        : Text(
+                            l10n.signIn,
+                            style: const TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.w700,
                             ),
@@ -284,19 +285,20 @@ class AdminWebDeniedPage extends StatelessWidget {
                   color: AppColors.errorLight,
                 ),
                 const SizedBox(height: 16),
-                const Text(
-                  'Access Denied',
-                  style: TextStyle(
+                Text(
+                  l10n.errorForbidden,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
                     color: AppColors.textPrimary,
-                    fontSize: 24,
+                    fontSize: 22,
                     fontWeight: FontWeight.w800,
                   ),
                 ),
                 const SizedBox(height: 8),
-                const Text(
-                  'Your account does not have admin privileges.',
+                Text(
+                  l10n.accessManagedInAdmin,
                   textAlign: TextAlign.center,
-                  style: TextStyle(color: AppColors.textMuted),
+                  style: const TextStyle(color: AppColors.textMuted),
                 ),
                 const SizedBox(height: 24),
                 OutlinedButton.icon(

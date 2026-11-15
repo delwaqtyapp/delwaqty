@@ -13075,6 +13075,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'A server error occurred. Please try again shortly.'**
   String get errorServerIssue;
+
+  /// No description provided for @adminDashboardOverview.
+  ///
+  /// In en, this message translates to:
+  /// **'Dashboard Overview'**
+  String get adminDashboardOverview;
+
+  /// No description provided for @adminDashboardOverviewSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Live platform counters at a glance'**
+  String get adminDashboardOverviewSubtitle;
+
+  /// No description provided for @adminLoadingLiveStats.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading live stats…'**
+  String get adminLoadingLiveStats;
+
+  /// No description provided for @adminTotalUsers.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Users'**
+  String get adminTotalUsers;
+
+  /// No description provided for @adminTotalMerchants.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Merchants'**
+  String get adminTotalMerchants;
+
+  /// No description provided for @adminTotalOrders.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Orders'**
+  String get adminTotalOrders;
+
+  /// No description provided for @adminActiveDrivers.
+  ///
+  /// In en, this message translates to:
+  /// **'Active Drivers'**
+  String get adminActiveDrivers;
+
+  /// No description provided for @adminServiceBookings.
+  ///
+  /// In en, this message translates to:
+  /// **'Service Bookings'**
+  String get adminServiceBookings;
 }
 
 class _AppLocalizationsDelegate

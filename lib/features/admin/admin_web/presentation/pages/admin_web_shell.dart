@@ -6,6 +6,7 @@ import 'package:delwaqty/features/admin/admin_web/presentation/pages/admin_overv
 import 'package:delwaqty/features/admin/admin_web/presentation/pages/admin_region_scope_page.dart';
 import 'package:delwaqty/features/admin_management/presentation/pages/admin_management_list_page.dart';
 import 'package:delwaqty/features/admin/admin_web/presentation/pages/admin_verifications_page.dart';
+import 'package:delwaqty/l10n/app_localizations.dart';
 
 class AdminWebShell extends StatefulWidget {
   const AdminWebShell({super.key});
@@ -25,16 +26,18 @@ class _AdminWebShellState extends State<AdminWebShell> {
     AdminRegionScopePage(),
   ];
 
-  final _navItems = const [
-    (Icons.dashboard_rounded, 'Dashboard'),
-    (Icons.people_rounded, 'Users'),
-    (Icons.verified_rounded, 'Verifications'),
-    (Icons.category_rounded, 'Categories'),
-    (Icons.location_city_rounded, 'Region Scope'),
-  ];
+  List<(IconData, String)> _getNavItems(AppLocalizations l10n) => [
+        (Icons.dashboard_rounded, l10n.adminCommandCenter),
+        (Icons.people_rounded, l10n.adminUsersPage),
+        (Icons.verified_rounded, l10n.adminVerifications),
+        (Icons.category_rounded, l10n.menuCategories),
+        (Icons.location_city_rounded, l10n.adminMgmtRegion),
+      ];
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final navItems = _getNavItems(l10n);
     return Scaffold(
       body: LayoutBuilder(
         builder: (context, constraints) {
@@ -105,10 +108,10 @@ class _AdminWebShellState extends State<AdminWebShell> {
                     ),
                     const Divider(color: Colors.white12, height: 1),
                     const SizedBox(height: 8),
-                    for (var i = 0; i < _navItems.length; i++)
+                    for (var i = 0; i < navItems.length; i++)
                       _NavItem(
-                        icon: _navItems[i].$1,
-                        label: _navItems[i].$2,
+                        icon: navItems[i].$1,
+                        label: navItems[i].$2,
                         showLabel: !rail,
                         selected: _selectedIndex == i,
                         onTap: () => setState(() => _selectedIndex = i),
@@ -127,7 +130,7 @@ class _AdminWebShellState extends State<AdminWebShell> {
                       ),
                       child: _NavItem(
                         icon: Icons.logout_rounded,
-                        label: 'Sign out',
+                        label: l10n.logout,
                         showLabel: !rail,
                         selected: false,
                         onTap: () => Supabase.instance.client.auth.signOut(),

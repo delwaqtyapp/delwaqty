@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:delwaqty/features/admin/admin_shell.dart';
 import 'package:delwaqty/features/admin/presentation/providers/platform_intelligence_providers.dart';
 import 'package:delwaqty/features/admin/domain/entities/platform_intelligence.dart';
 import 'package:delwaqty/features/admin/financial/presentation/providers/admin_financial_providers.dart';
@@ -25,6 +26,9 @@ class AdminFinancialCenter extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
+        leading: MediaQuery.sizeOf(context).width < 1100
+            ? const AdminMenuButton()
+            : null,
         title: Text(l10n.adminFinancialCenter),
         actions: [
           IconButton(
@@ -76,31 +80,31 @@ class AdminFinancialCenter extends ConsumerWidget {
                     ),
                     _FinanceQuickAction(
                       icon: Icons.swap_horiz_rounded,
-                      label: 'Top-Up Requests',
+                      label: l10n.pendingTopups,
                       color: const Color(0xFF34C759),
                       onTap: () => context.push('/admin/topup-requests'),
                     ),
                     _FinanceQuickAction(
                       icon: Icons.receipt_long_rounded,
-                      label: 'Collections',
+                      label: l10n.regionalCollections,
                       color: const Color(0xFF00C7BE),
                       onTap: () => context.push('/admin/collections'),
                     ),
                     _FinanceQuickAction(
                       icon: Icons.account_balance_rounded,
-                      label: 'Settlements',
+                      label: l10n.settlements,
                       color: const Color(0xFFFF3B30),
                       onTap: () => context.push('/admin/settlements'),
                     ),
                     _FinanceQuickAction(
                       icon: Icons.shield_rounded,
-                      label: 'Grace',
+                      label: l10n.graceManagement,
                       color: const Color(0xFF5B3DF0),
                       onTap: () => context.push('/admin/grace-management'),
                     ),
                     _FinanceQuickAction(
                       icon: Icons.wallet_rounded,
-                      label: 'Receiving',
+                      label: l10n.receivingAccounts,
                       color: const Color(0xFFFF9500),
                       onTap: () => context.push('/admin/receiving-wallets'),
                     ),
@@ -113,7 +117,7 @@ class AdminFinancialCenter extends ConsumerWidget {
                     if (ref.watch(adminIsOwnerProvider).value ?? false)
                       _FinanceQuickAction(
                         icon: Icons.public_rounded,
-                        label: 'Global Audit',
+                        label: l10n.globalFinancialAudit,
                         color: const Color(0xFF5B3DF0),
                         onTap: () => context.push('/admin/owner-dashboard'),
                       ),

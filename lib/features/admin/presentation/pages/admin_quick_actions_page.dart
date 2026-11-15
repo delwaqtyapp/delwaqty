@@ -1,169 +1,243 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:delwaqty/features/admin/admin_shell.dart';
+import 'package:delwaqty/features/admin/financial/presentation/providers/admin_financial_providers.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 import 'package:delwaqty/shared/widgets/design/premium_card.dart';
 
-class AdminQuickActionsPage extends StatelessWidget {
+class AdminQuickActionsPage extends ConsumerStatefulWidget {
   const AdminQuickActionsPage({super.key});
+
+  @override
+  ConsumerState<AdminQuickActionsPage> createState() =>
+      _AdminQuickActionsPageState();
+}
+
+class _AdminQuickActionsPageState extends ConsumerState<AdminQuickActionsPage> {
+  final _searchController = TextEditingController();
+  String _query = '';
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    final isOwner = ref.watch(adminIsOwnerProvider).value ?? false;
 
     final sections = [
       (
         l10n.adminLeadershipSection,
         const Color(0xFF007AFF),
+        Icons.speed_rounded,
         [
+          _ActionData(l10n.adminCommandCenter, Icons.dashboard_rounded, const Color(0xFF007AFF), '/admin'),
           _ActionData(l10n.adminAnalytics, Icons.insights_rounded, const Color(0xFF007AFF), '/admin/analytics'),
           _ActionData(l10n.adminDeliveryIntelligence, Icons.route_rounded, const Color(0xFF00897B), '/admin/delivery-intelligence'),
           _ActionData(l10n.adminMerchantIntelligence, Icons.store_outlined, const Color(0xFF34C759), '/admin/merchant-intelligence'),
           _ActionData(l10n.adminProviderIntelligence, Icons.engineering_outlined, const Color(0xFF0288D1), '/admin/provider-intelligence'),
           _ActionData(l10n.adminWalletIntelligence, Icons.account_balance_wallet_rounded, const Color(0xFFAF52DE), '/admin/wallet-intelligence'),
           _ActionData(l10n.adminServicePerformance, Icons.analytics_rounded, const Color(0xFF5856D6), '/admin/service-performance'),
+          if (isOwner)
+            _ActionData(l10n.adminOwnerGlobalAudit, Icons.public_rounded, const Color(0xFF5B3DF0), '/admin/owner-dashboard'),
         ],
       ),
       (
         l10n.adminMembersSection,
         const Color(0xFF4A90D9),
+        Icons.people_rounded,
         [
+          _ActionData(l10n.adminMembersSection, Icons.people_rounded, const Color(0xFF4A90D9), '/admin/members'),
           _ActionData(l10n.adminVerifications, Icons.verified_user_rounded, const Color(0xFF34C759), '/admin/verifications'),
           _ActionData(l10n.sanctions, Icons.gavel_rounded, const Color(0xFFFF9500), '/admin/sanctions'),
           _ActionData(l10n.complaints, Icons.warning_amber_rounded, const Color(0xFFFF3B30), '/admin/complaints'),
           _ActionData(l10n.liveTracking, Icons.map_rounded, const Color(0xFF00C7BE), '/admin/live-tracking'),
           _ActionData(l10n.adminEscalations, Icons.priority_high_rounded, const Color(0xFFFF6482), '/admin/escalations'),
+          _ActionData(l10n.adminReviewsModeration, Icons.rate_review_rounded, const Color(0xFFAF52DE), '/admin/reviews-moderation'),
         ],
       ),
       (
         l10n.adminOperationsSection,
         const Color(0xFFFF9500),
+        Icons.local_shipping_rounded,
         [
+          _ActionData(l10n.adminOrdersPage, Icons.receipt_long_rounded, const Color(0xFFFF9500), '/admin/orders'),
           _ActionData(l10n.adminDeliveries, Icons.delivery_dining_rounded, const Color(0xFFFF9500), '/admin/deliveries'),
           _ActionData(l10n.adminDrivers, Icons.local_shipping_rounded, const Color(0xFF007AFF), '/admin/drivers'),
           _ActionData(l10n.adminEmergency, Icons.sos_rounded, const Color(0xFFFF3B30), '/admin/emergency'),
           _ActionData(l10n.supportChat, Icons.chat_bubble_rounded, const Color(0xFF34C759), '/admin/support-chat'),
+          _ActionData(l10n.auditLog, Icons.history_rounded, const Color(0xFF5B3DF0), '/admin/audit-log'),
         ],
       ),
       (
         l10n.adminFinancialSection,
         const Color(0xFF5B3DF0),
+        Icons.account_balance_rounded,
         [
-          _ActionData(l10n.adminTransactionLedger, Icons.receipt_long_rounded, const Color(0xFFFF9500), '/admin/transaction-ledger'),
+          _ActionData(l10n.adminFinancialCenter, Icons.account_balance_rounded, const Color(0xFF5B3DF0), '/admin/financial-center'),
+          _ActionData(l10n.adminTransactionLedger, Icons.menu_book_rounded, const Color(0xFFFF9500), '/admin/transaction-ledger'),
           _ActionData(l10n.adminCommissions, Icons.percent_rounded, const Color(0xFF5B3DF0), '/admin/commissions'),
+          _ActionData(l10n.pendingTopups, Icons.swap_horiz_rounded, const Color(0xFF34C759), '/admin/topup-requests'),
+          _ActionData(l10n.regionalCollections, Icons.receipt_long_rounded, const Color(0xFF00C7BE), '/admin/collections'),
+          _ActionData(l10n.settlements, Icons.payments_rounded, const Color(0xFFFF3B30), '/admin/settlements'),
+          _ActionData(l10n.graceManagement, Icons.shield_rounded, const Color(0xFF5B3DF0), '/admin/grace-management'),
+          _ActionData(l10n.receivingAccounts, Icons.wallet_rounded, const Color(0xFFAF52DE), '/admin/receiving-wallets'),
         ],
       ),
       (
         l10n.adminPlatformSection,
         const Color(0xFF34C759),
+        Icons.storefront_rounded,
         [
           _ActionData(l10n.adminMgmtList, Icons.group_rounded, const Color(0xFF4A90D9), '/admin/admins'),
           _ActionData(l10n.adminMerchants, Icons.storefront_rounded, const Color(0xFF34C759), '/admin/merchants'),
           _ActionData(l10n.adminCategories, Icons.category_rounded, const Color(0xFFAF52DE), '/admin/categories'),
-        ],
-      ),
-      (
-        l10n.adminMarketingSection,
-        const Color(0xFF34C759),
-        [
           _ActionData(l10n.adminPushNotifications, Icons.campaign_rounded, const Color(0xFF34C759), '/admin/push-notifications'),
-        ],
-      ),
-      (
-        l10n.adminAdministrationSection,
-        const Color(0xFF8B5CF6),
-        [
           _ActionData(l10n.adminApprovals, Icons.fact_check_rounded, const Color(0xFF8B5CF6), '/admin/approvals'),
+          _ActionData(l10n.pendingDeletions, Icons.person_remove_rounded, const Color(0xFFFF3B30), '/admin/pending-deletions'),
+          _ActionData(l10n.permissionDelegation, Icons.account_tree_rounded, const Color(0xFF007AFF), '/admin/hierarchy'),
+          _ActionData(l10n.chatPermissions, Icons.security_rounded, const Color(0xFF5B3DF0), '/admin/chat-permissions'),
         ],
       ),
       (
         l10n.adminSettingsGroupSection,
         const Color(0xFFAF52DE),
+        Icons.settings_rounded,
         [
-          _ActionData(l10n.adminSettingsPage, Icons.settings_rounded, const Color(0xFFAF52DE), '/admin/settings'),
+          _ActionData(l10n.adminSettingsMenu, Icons.tune_rounded, const Color(0xFFAF52DE), '/admin/settings'),
+          _ActionData(l10n.adminPlatformConfig, Icons.settings_rounded, const Color(0xFF5B3DF0), '/admin/platform-config'),
+          _ActionData(l10n.adminProfile, Icons.person_rounded, const Color(0xFF4A90D9), '/admin/profile'),
         ],
       ),
     ];
 
+    // Filter sections by search query
+    final filtered = _query.isEmpty
+        ? sections
+        : sections
+            .map(
+              (s) => (
+                s.$1,
+                s.$2,
+                s.$3,
+                s.$4.where((a) => a.label.toLowerCase().contains(_query)).toList(),
+              ),
+            )
+            .where((s) => s.$4.isNotEmpty)
+            .toList();
+
     return Scaffold(
       appBar: AppBar(
+        leading: MediaQuery.sizeOf(context).width < 1100
+            ? const AdminMenuButton()
+            : null,
         title: Text(l10n.adminQuickActions),
       ),
-      body: ListView(
-        padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
+      body: Column(
         children: [
-          for (int g = 0; g < sections.length; g++) ...[
-            Padding(
-              padding: const EdgeInsets.only(top: 20),
-              child: Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(5),
-                    decoration: BoxDecoration(
-                      color: sections[g].$2.withValues(alpha: 0.12),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Icon(sections[g].$2 == const Color(0xFF007AFF) ? Icons.speed_rounded : Icons.circle, size: 12, color: sections[g].$2),
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    sections[g].$1,
-                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ],
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
+            child: TextField(
+              controller: _searchController,
+              decoration: InputDecoration(
+                prefixIcon: const Icon(Icons.search_rounded),
+                hintText: l10n.search,
+                isDense: true,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                filled: true,
+                fillColor: Theme.of(context).colorScheme.surfaceContainerHighest,
               ),
+              onChanged: (v) => setState(() => _query = v.trim().toLowerCase()),
             ),
-            const SizedBox(height: 10),
-            LayoutBuilder(
-              builder: (context, constraints) {
-                final crossAxisCount = constraints.maxWidth > 600 ? 4 : 3;
-                return GridView.builder(
-                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: crossAxisCount,
-                    mainAxisSpacing: 8,
-                    crossAxisSpacing: 8,
-                  ),
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  itemCount: sections[g].$3.length,
-                  itemBuilder: (context, index) {
-                    final action = sections[g].$3[index];
-                    return GestureDetector(
-                      onTap: () => context.push(action.route),
-                      child: PremiumCard(
-                        padding: const EdgeInsets.all(8),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.all(10),
-                              decoration: BoxDecoration(
-                                color: action.color.withValues(alpha: 0.15),
-                                borderRadius: BorderRadius.circular(14),
+          ),
+          Expanded(
+            child: filtered.isEmpty
+                ? Center(child: Text(l10n.noResultsFound))
+                : ListView(
+                    padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+                    children: [
+                      for (int g = 0; g < filtered.length; g++) ...[
+                        Padding(
+                          padding: const EdgeInsets.only(top: 20),
+                          child: Row(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(5),
+                                decoration: BoxDecoration(
+                                  color: filtered[g].$2.withValues(alpha: 0.12),
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Icon(filtered[g].$3, size: 14, color: filtered[g].$2),
                               ),
-                              child: Icon(action.icon, color: action.color, size: 22),
-                            ),
-                            const SizedBox(height: 6),
-                            Text(
-                              action.label,
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .labelSmall
-                                  ?.copyWith(fontWeight: FontWeight.w600),
-                              textAlign: TextAlign.center,
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ],
+                              const SizedBox(width: 8),
+                              Text(
+                                filtered[g].$1,
+                                style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
-                    );
-                  },
-                );
-              },
-            ),
-          ],
+                        const SizedBox(height: 10),
+                        LayoutBuilder(
+                          builder: (context, constraints) {
+                            final crossAxisCount = constraints.maxWidth > 600 ? 4 : 3;
+                            return GridView.builder(
+                              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount: crossAxisCount,
+                                mainAxisSpacing: 8,
+                                crossAxisSpacing: 8,
+                              ),
+                              shrinkWrap: true,
+                              physics: const NeverScrollableScrollPhysics(),
+                              itemCount: filtered[g].$4.length,
+                              itemBuilder: (context, index) {
+                                final action = filtered[g].$4[index];
+                                return GestureDetector(
+                                  onTap: () => context.push(action.route),
+                                  child: PremiumCard(
+                                    padding: const EdgeInsets.all(8),
+                                    child: Column(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        Container(
+                                          padding: const EdgeInsets.all(10),
+                                          decoration: BoxDecoration(
+                                            color: action.color.withValues(alpha: 0.15),
+                                            borderRadius: BorderRadius.circular(14),
+                                          ),
+                                          child: Icon(action.icon, color: action.color, size: 22),
+                                        ),
+                                        const SizedBox(height: 6),
+                                        Text(
+                                          action.label,
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .labelSmall
+                                              ?.copyWith(fontWeight: FontWeight.w600),
+                                          textAlign: TextAlign.center,
+                                          maxLines: 2,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                );
+                              },
+                            );
+                          },
+                        ),
+                      ],
+                    ],
+                  ),
+          ),
         ],
       ),
     );

@@ -78,7 +78,7 @@ class _AdminGraceManagementPageState
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Lookup Account',
+                  l10n.lookupAccount,
                   style: Theme.of(context)
                       .textTheme
                       .titleMedium
@@ -90,9 +90,9 @@ class _AdminGraceManagementPageState
                     Expanded(
                       child: TextField(
                         controller: _targetController,
-                        decoration: const InputDecoration(
-                          labelText: 'User ID (UUID)',
-                          hintText: 'Paste the account UUID',
+                        decoration: InputDecoration(
+                          labelText: l10n.accountId,
+                          hintText: l10n.regionIdLabel,
                         ),
                       ),
                     ),
@@ -123,11 +123,10 @@ class _AdminGraceManagementPageState
             ),
             data: (account) {
               if (account == null) {
-                return const PremiumEmptyState(
+                return PremiumEmptyState(
                   icon: Icons.search_rounded,
-                  title: 'No account',
-                  message:
-                      'Enter a valid account UUID to manage its grace limit.',
+                  title: l10n.noGraceAccount,
+                  message: l10n.graceAccountHint,
                 );
               }
               return PremiumCard(
@@ -135,7 +134,7 @@ class _AdminGraceManagementPageState
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Current Grace',
+                      l10n.currentGrace,
                       style: Theme.of(context)
                           .textTheme
                           .titleMedium
@@ -145,15 +144,15 @@ class _AdminGraceManagementPageState
                     Row(
                       children: [
                         _Stat(
-                          label: 'Limit',
+                          label: l10n.graceLabel,
                           value: account.graceLimit.toString(),
                         ),
                         _Stat(
-                          label: 'Used',
+                          label: l10n.graceLabel,
                           value: account.graceUsed.toString(),
                         ),
                         _Stat(
-                          label: 'Remaining',
+                          label: l10n.graceLabel,
                           value: account.remaining.toString(),
                           color: cs.primary,
                         ),
@@ -162,17 +161,17 @@ class _AdminGraceManagementPageState
                     const Divider(),
                     TextField(
                       controller: _limitController,
-                      decoration: const InputDecoration(
-                        labelText: 'New Grace Limit',
-                        hintText: '0, 1, 2, 3, 4, 5, 6, 10 ...',
+                      decoration: InputDecoration(
+                        labelText: l10n.settlementsGraceLimit,
+                        hintText: l10n.settlementsGraceLimitHint,
                       ),
                       keyboardType: TextInputType.number,
                     ),
                     const SizedBox(height: 8),
                     TextField(
                       controller: _reasonController,
-                      decoration: const InputDecoration(
-                        labelText: 'Reason',
+                      decoration: InputDecoration(
+                        labelText: l10n.reason,
                       ),
                     ),
                     const SizedBox(height: 12),

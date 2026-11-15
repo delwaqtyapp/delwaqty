@@ -89,7 +89,7 @@ class _AdminApprovalsCenterPageState
       title: l10n.approvalRequest,
       message: approve
           ? l10n.approvalConfirmApprove
-          : '$l10n.approvalConfirmReject — $reason',
+          : '${l10n.approvalConfirmReject} — $reason',
       confirmLabel: approve ? l10n.approveRequest : l10n.rejectRequest,
       isDestructive: !approve,
     );

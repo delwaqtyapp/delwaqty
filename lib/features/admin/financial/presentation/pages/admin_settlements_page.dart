@@ -173,7 +173,7 @@ class _AdminSettlementsPageState extends ConsumerState<AdminSettlementsPage> {
         ),
       ),
     );
-    if (result != true) return;
+    if (!mounted || result != true) return;
     final amount = double.tryParse(amountController.text) ?? 0;
     if (amount <= 0) return;
     try {

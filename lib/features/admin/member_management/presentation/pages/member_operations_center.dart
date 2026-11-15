@@ -2,6 +2,7 @@ import 'package:delwaqty/core/utils/avatar_initial.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:delwaqty/features/admin/admin_shell.dart';
 import 'package:delwaqty/features/admin/member_management/domain/entities/member.dart';
 import 'package:delwaqty/features/admin/member_management/presentation/member_providers.dart';
 import 'package:delwaqty/features/admin/member_management/presentation/pages/member_drawer.dart';
@@ -39,6 +40,9 @@ class _MemberOperationsCenterState
 
     return Scaffold(
       appBar: AppBar(
+        leading: MediaQuery.sizeOf(context).width < 1100
+            ? const AdminMenuButton()
+            : null,
         title: Text(AppLocalizations.of(context).memberOperationsCenter),
         actions: [
           IconButton(
@@ -224,6 +228,7 @@ class _MemberListPanel extends ConsumerStatefulWidget {
 }
 
 class _MemberListPanelState extends ConsumerState<_MemberListPanel> {
+  final TextEditingController _searchController = TextEditingController();
   String _search = '';
   String? _roleFilter;
   String? _accountStatusFilter;
@@ -235,46 +240,65 @@ class _MemberListPanelState extends ConsumerState<_MemberListPanel> {
   final int _offset = 0;
 
   @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  void _applyFilters() {
+    final filters = {
+      'search': _search,
+      'role': _roleFilter,
+      'userType': null,
+      'accountStatus': _accountStatusFilter,
+      'verificationStatus': _verificationStatusFilter,
+      'serviceCategory': _serviceCategoryFilter,
+      'sanctionStatus': _sanctionStatusFilter,
+      'sort': _sortBy ?? 'newest',
+      'limit': _limit,
+      'offset': _offset,
+    };
+    ref.read(memberOpsProvider.notifier).setFilters(filters);
+  }
+
+  @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final notifier = ref.read(memberOpsProvider.notifier);
-
-    void applyFilters() {
-      final filters = {
-        'search': _search,
-        'role': _roleFilter,
-        'userType': null,
-        'accountStatus': _accountStatusFilter,
-        'verificationStatus': _verificationStatusFilter,
-        'serviceCategory': _serviceCategoryFilter,
-        'sanctionStatus': _sanctionStatusFilter,
-        'sort': _sortBy ?? 'newest',
-        'limit': _limit,
-        'offset': _offset,
-      };
-      notifier.setFilters(filters);
-    }
 
     return Column(
       children: [
         Padding(
           padding: const EdgeInsets.fromLTRB(12, 8, 12, 0),
           child: TextField(
+            controller: _searchController,
             decoration: InputDecoration(
               hintText: l10n.search,
               prefixIcon: const Icon(Icons.search_rounded),
+              suffixIcon: _search.isNotEmpty
+                  ? IconButton(
+                      icon: const Icon(Icons.clear_rounded, size: 18),
+                      onPressed: () {
+                        _searchController.clear();
+                        setState(() => _search = '');
+                        _applyFilters();
+                      },
+                    )
+                  : null,
               border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(14),
               ),
               contentPadding: const EdgeInsets.symmetric(horizontal: 16),
               isDense: true,
             ),
-            onChanged: (v) => setState(() => _search = v),
-            onSubmitted: (_) => applyFilters(),
+            onChanged: (v) {
+              setState(() => _search = v);
+              _applyFilters();
+            },
+            onSubmitted: (_) => _applyFilters(),
           ),
         ),
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
           child: SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: Row(
@@ -282,65 +306,89 @@ class _MemberListPanelState extends ConsumerState<_MemberListPanel> {
                 _FilterChipWidget(
                   label: l10n.allRoles,
                   selected: _roleFilter == null,
-                  onTap: () => setState(() => _roleFilter = null),
+                  onTap: () {
+                    setState(() => _roleFilter = null);
+                    _applyFilters();
+                  },
                 ),
                 _FilterChipWidget(
                   label: l10n.customer,
                   selected: _roleFilter == 'customer',
-                  onTap: () => setState(() => _roleFilter = 'customer'),
+                  onTap: () {
+                    setState(() => _roleFilter = 'customer');
+                    _applyFilters();
+                  },
                 ),
                 _FilterChipWidget(
                   label: l10n.driver,
                   selected: _roleFilter == 'driver',
-                  onTap: () => setState(() => _roleFilter = 'driver'),
+                  onTap: () {
+                    setState(() => _roleFilter = 'driver');
+                    _applyFilters();
+                  },
                 ),
                 _FilterChipWidget(
                   label: l10n.merchant,
                   selected: _roleFilter == 'merchant',
-                  onTap: () => setState(() => _roleFilter = 'merchant'),
+                  onTap: () {
+                    setState(() => _roleFilter = 'merchant');
+                    _applyFilters();
+                  },
                 ),
                 _FilterChipWidget(
                   label: l10n.active,
                   selected: _accountStatusFilter == 'active',
-                  onTap: () => setState(() {
-                    _accountStatusFilter =
-                        _accountStatusFilter == 'active' ? null : 'active';
-                  }),
+                  onTap: () {
+                    setState(() {
+                      _accountStatusFilter =
+                          _accountStatusFilter == 'active' ? null : 'active';
+                    });
+                    _applyFilters();
+                  },
                 ),
                 _FilterChipWidget(
                   label: l10n.suspended,
                   selected: _accountStatusFilter == 'suspended',
-                  onTap: () => setState(() {
-                    _accountStatusFilter =
-                        _accountStatusFilter == 'suspended' ? null : 'suspended';
-                  }),
+                  onTap: () {
+                    setState(() {
+                      _accountStatusFilter =
+                          _accountStatusFilter == 'suspended' ? null : 'suspended';
+                    });
+                    _applyFilters();
+                  },
                 ),
                 _FilterChipWidget(
                   label: l10n.unverified,
                   selected: _verificationStatusFilter == 'unverified',
-                  onTap: () => setState(() {
-                    _verificationStatusFilter =
-                        _verificationStatusFilter == 'unverified'
-                            ? null
-                            : 'unverified';
-                  }),
+                  onTap: () {
+                    setState(() {
+                      _verificationStatusFilter =
+                          _verificationStatusFilter == 'unverified'
+                              ? null
+                              : 'unverified';
+                    });
+                    _applyFilters();
+                  },
                 ),
                 _FilterChipWidget(
                   label: l10n.verified,
                   selected: _verificationStatusFilter == 'verified',
-                  onTap: () => setState(() {
-                    _verificationStatusFilter =
-                        _verificationStatusFilter == 'verified'
-                            ? null
-                            : 'verified';
-                  }),
+                  onTap: () {
+                    setState(() {
+                      _verificationStatusFilter =
+                          _verificationStatusFilter == 'verified'
+                              ? null
+                              : 'verified';
+                    });
+                    _applyFilters();
+                  },
                 ),
               ],
             ),
           ),
         ),
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
           child: DropdownButtonFormField<String>(
             initialValue: _sortBy,
             decoration: InputDecoration(
@@ -349,6 +397,10 @@ class _MemberListPanelState extends ConsumerState<_MemberListPanel> {
                 borderRadius: BorderRadius.circular(12),
               ),
               isDense: true,
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 12,
+                vertical: 8,
+              ),
             ),
             items: [
               DropdownMenuItem(
@@ -372,19 +424,13 @@ class _MemberListPanelState extends ConsumerState<_MemberListPanel> {
                 child: Text(l10n.wallet),
               ),
             ],
-            onChanged: (value) => setState(() => _sortBy = value),
+            onChanged: (value) {
+              setState(() => _sortBy = value);
+              _applyFilters();
+            },
           ),
         ),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-          child: SizedBox(
-            width: double.infinity,
-            child: ElevatedButton(
-              onPressed: applyFilters,
-              child: Text(l10n.applyFilters),
-            ),
-          ),
-        ),
+        const SizedBox(height: 6),
         Expanded(
           child: Builder(
             builder: (context) {
@@ -407,7 +453,7 @@ class _MemberListPanelState extends ConsumerState<_MemberListPanel> {
                 );
               }
               return ListView.builder(
-                padding: const EdgeInsets.symmetric(horizontal: 12),
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                 itemCount: members.length,
                 itemBuilder: (context, index) {
                   final member = members[index];
@@ -440,26 +486,31 @@ class _FilterChipWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = selected
-        ? Theme.of(context).colorScheme.primary
-        : Theme.of(context).colorScheme.surfaceContainerHighest;
+    final cs = Theme.of(context).colorScheme;
     return GestureDetector(
       onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         margin: const EdgeInsets.only(right: 6),
         decoration: BoxDecoration(
-          color: color,
+          color: selected
+              ? cs.primary.withValues(alpha: 0.15)
+              : cs.surfaceContainerHighest,
           borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: selected
+                ? cs.primary
+                : cs.outlineVariant.withValues(alpha: 0.25),
+            width: selected ? 1.5 : 1,
+          ),
         ),
         child: Text(
           label,
           style: TextStyle(
-            fontSize: 11,
-            color: selected
-                ? Theme.of(context).colorScheme.onPrimary
-                : Theme.of(context).colorScheme.onSurface,
-            fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
+            fontSize: 12,
+            color: selected ? cs.primary : cs.onSurface,
+            fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
           ),
         ),
       ),
@@ -482,65 +533,170 @@ class _MemberTileWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final statusColor = switch (member.accountStatus) {
-      'active' => Colors.green,
-      'restricted' => Colors.orange,
-      'suspended' => Colors.red,
-      'banned' => Colors.red.shade900,
+      'active' => const Color(0xFF34C759),
+      'restricted' => const Color(0xFFFF9500),
+      'suspended' => const Color(0xFFFF3B30),
+      'banned' => const Color(0xFF8B0000),
       _ => Colors.grey,
+    };
+    final roleColor = switch (member.role) {
+      'admin' => const Color(0xFF5B3DF0),
+      'driver' => const Color(0xFF007AFF),
+      'merchant' => const Color(0xFFFF9500),
+      'customer' => const Color(0xFF00C7BE),
+      _ => Colors.blueGrey,
     };
     final cs = Theme.of(context).colorScheme;
 
-    return Card(
-      margin: const EdgeInsets.only(bottom: 6),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      color: isSelected
-          ? cs.primaryContainer.withValues(alpha: 0.3)
-          : null,
-      child: ListTile(
-        onTap: onTap,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
-        leading: CircleAvatar(
-          radius: 18,
-          backgroundColor: statusColor.withValues(alpha: 0.15),
-          child: Text(
-            safeInitialFrom([
-              member.fullName,
-              member.email,
-              member.username,
-            ]),
-            style: TextStyle(
-              color: statusColor,
-              fontWeight: FontWeight.w700,
-              fontSize: 14,
-            ),
+    return Container(
+      margin: const EdgeInsets.only(bottom: 8),
+      decoration: BoxDecoration(
+        color: isSelected
+            ? cs.primaryContainer.withValues(alpha: 0.25)
+            : cs.surfaceContainerLowest,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: isSelected
+              ? cs.primary
+              : cs.outlineVariant.withValues(alpha: 0.22),
+          width: isSelected ? 1.6 : 1,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.03),
+            blurRadius: 6,
+            offset: const Offset(0, 2),
           ),
-        ),
-        title: Text(
-          member.fullName ?? l10n.unnamed,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
-        ),
-        subtitle: Text(
-          '${member.email ?? ''}  Â·  ${_roleLabel(l10n, member.role ?? '')}',
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: Theme.of(context).textTheme.bodySmall,
-        ),
-        trailing: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-          decoration: BoxDecoration(
-            color: statusColor.withValues(alpha: 0.12),
-            borderRadius: BorderRadius.circular(6),
-          ),
-          child: Text(
-            _accountStatusLabel(l10n, member.accountStatus ?? 'active'),
-            style: TextStyle(
-              color: statusColor,
-              fontWeight: FontWeight.w600,
-              fontSize: 10,
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(16),
+          onTap: onTap,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+            child: Row(
+              children: [
+                Stack(
+                  children: [
+                    CircleAvatar(
+                      radius: 22,
+                      backgroundColor: roleColor.withValues(alpha: 0.15),
+                      child: Text(
+                        safeInitialFrom([
+                          member.fullName,
+                          member.email,
+                          member.username,
+                        ]),
+                        style: TextStyle(
+                          color: roleColor,
+                          fontWeight: FontWeight.w700,
+                          fontSize: 16,
+                        ),
+                      ),
+                    ),
+                    PositionedDirectional(
+                      bottom: 0,
+                      end: 0,
+                      child: Container(
+                        width: 11,
+                        height: 11,
+                        decoration: BoxDecoration(
+                          color: statusColor,
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: cs.surface,
+                            width: 2,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Flexible(
+                            child: Text(
+                              member.fullName ?? l10n.unnamed,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                            ),
+                          ),
+                          const SizedBox(width: 6),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 6,
+                              vertical: 2,
+                            ),
+                            decoration: BoxDecoration(
+                              color: roleColor.withValues(alpha: 0.12),
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: Text(
+                              _roleLabel(l10n, member.role ?? ''),
+                              style: TextStyle(
+                                color: roleColor,
+                                fontWeight: FontWeight.w700,
+                                fontSize: 10,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 3),
+                      Text(
+                        member.email?.isNotEmpty == true
+                            ? '${member.email!} • ${_roleLabel(l10n, member.role ?? '')}'
+                            : (member.phone ?? ''),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: cs.onSurfaceVariant,
+                            ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 7,
+                        vertical: 3,
+                      ),
+                      decoration: BoxDecoration(
+                        color: statusColor.withValues(alpha: 0.12),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        _accountStatusLabel(l10n, member.accountStatus ?? 'active'),
+                        style: TextStyle(
+                          color: statusColor,
+                          fontWeight: FontWeight.w700,
+                          fontSize: 10,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Icon(
+                      Icons.chevron_right_rounded,
+                      size: 16,
+                      color: cs.onSurfaceVariant.withValues(alpha: 0.5),
+                    ),
+                  ],
+                ),
+              ],
             ),
           ),
         ),

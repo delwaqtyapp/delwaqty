@@ -605,7 +605,10 @@ final response = await _supabase
   @override
   Future<void> deleteUser(String userId) async {
     try {
-      await _supabase.from('admin_users').delete().eq('id', userId);
+      await _supabase.rpc('owner_delete_member', params: {
+        'p_member_id': userId,
+        'p_reason': 'Deleted via Admin Repository',
+      });
     } catch (e) {
       throw AdminException('Failed to delete user: $e');
     }

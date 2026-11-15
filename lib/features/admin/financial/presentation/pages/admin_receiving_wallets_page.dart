@@ -75,7 +75,7 @@ class _AdminReceivingWalletsPageState
         ],
       ),
     );
-    if (ok != true) return;
+    if (!mounted || ok != true) return;
     try {
       await ref.read(adminFinancialRepositoryProvider).ownerCreateReceivingAccount(
             methodType: methodController.text.trim(),
@@ -168,7 +168,7 @@ class _AdminReceivingWalletsPageState
         ],
       ),
     );
-    if (ok != true) return;
+    if (!mounted || ok != true) return;
     try {
       await ref.read(adminFinancialRepositoryProvider).createAdminReceivingWallet(
             regionId: regionController.text.trim(),

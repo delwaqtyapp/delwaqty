@@ -6,6 +6,7 @@ import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
 import 'package:delwaqty/shared/widgets/glass_card.dart';
 import 'package:delwaqty/shared/widgets/premium_empty_state.dart';
 import 'package:delwaqty/shared/widgets/app_loader.dart';
+import 'package:delwaqty/features/admin/admin_shell.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 
 final _adminDriversProvider = FutureProvider<List<Map<String, dynamic>>>((
@@ -71,6 +72,9 @@ class _AdminDriversPageState extends ConsumerState<AdminDriversPage> {
 
     return Scaffold(
       appBar: AppBar(
+        leading: MediaQuery.sizeOf(context).width < 1100
+            ? const AdminMenuButton()
+            : null,
         title: Text(l10n.driverManagement),
         actions: [
           IconButton(

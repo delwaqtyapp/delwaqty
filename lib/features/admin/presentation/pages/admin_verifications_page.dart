@@ -10,6 +10,7 @@ import 'package:delwaqty/shared/widgets/design/premium_card.dart';
 import 'package:delwaqty/shared/widgets/premium_empty_state.dart';
 import 'package:delwaqty/shared/widgets/app_loader.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
+import 'package:delwaqty/features/admin/admin_shell.dart';
 import 'package:delwaqty/core/theme/app_colors.dart';
 
 class AdminVerificationsPage extends ConsumerStatefulWidget {
@@ -170,6 +171,9 @@ class _AdminVerificationsPageState
 
     return Scaffold(
       appBar: AppBar(
+        leading: MediaQuery.sizeOf(context).width < 1100
+            ? const AdminMenuButton()
+            : null,
         title: Text(l10n.verificationRequests),
         actions: [
           IconButton(

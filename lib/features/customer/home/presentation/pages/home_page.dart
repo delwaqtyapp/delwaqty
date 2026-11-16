@@ -113,7 +113,7 @@ const _topBookingTypes = <ServiceCategoryType>[
   ServiceCategoryType.barber,
 ];
 
-const _stripHeight = 120.0;
+const _stripHeight = 132.0;
 const _tileLabelHeight = 22.0;
 
 void _precacheImageUrls(BuildContext context, Iterable<String> urls) {
@@ -758,16 +758,31 @@ class _DirectOrderButtonState extends State<_DirectOrderButton>
     return GestureDetector(
       onTap: widget.onTap,
       child: Container(
-        height: 60,
+        height: 64,
         clipBehavior: Clip.antiAlias,
-        decoration: const BoxDecoration(
-          borderRadius: BorderRadius.all(Radius.circular(30)),
-          gradient: LinearGradient(
+        decoration: BoxDecoration(
+          borderRadius: const BorderRadius.all(Radius.circular(30)),
+          gradient: const LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [AppColors.brandPurple, AppColors.brandBlue],
+            colors: [
+              AppColors.brandPurple,
+              AppColors.brandViolet,
+              AppColors.brandBlue,
+            ],
           ),
-          boxShadow: AppElevation.shadowGlow,
+          border: Border.all(
+            color: Colors.white.withValues(alpha: 0.30),
+            width: 1.2,
+          ),
+          boxShadow: [
+            ...AppElevation.shadowGlow,
+            BoxShadow(
+              color: AppColors.brandPurple.withValues(alpha: 0.25),
+              blurRadius: 18,
+              offset: const Offset(0, 8),
+            ),
+          ],
         ),
         child: AnimatedBuilder(
           animation: _controller,
@@ -874,17 +889,28 @@ class _DirectOrderButtonState extends State<_DirectOrderButton>
                 ),
                 const SizedBox(width: 8),
                 Container(
-                  width: 30,
-                  height: 30,
+                  width: 34,
+                  height: 34,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: Colors.white.withValues(alpha: 0.18),
+                    color: Colors.white.withValues(alpha: 0.22),
+                    border: Border.all(
+                      color: Colors.white.withValues(alpha: 0.35),
+                      width: 1,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.12),
+                        blurRadius: 6,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
                   ),
                   child: Icon(
                     isRtl
                         ? Icons.arrow_back_rounded
                         : Icons.arrow_forward_rounded,
-                    size: 17,
+                    size: 18,
                     color: Colors.white,
                   ),
                 ),
@@ -934,13 +960,35 @@ class _CompactCategories extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Expanded(
-                  child: Text(
-                    l10n.mainCategories,
-                    style: context.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w800,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
+                  child: Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(7),
+                        decoration: BoxDecoration(
+                          color: AppColors.brandPurple.withValues(alpha: 0.12),
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(
+                            color: AppColors.brandPurple.withValues(alpha: 0.2),
+                          ),
+                        ),
+                        child: const Icon(
+                          AppIcons.gridView,
+                          size: 16,
+                          color: AppColors.brandPurple,
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Flexible(
+                        child: Text(
+                          l10n.mainCategories,
+                          style: context.textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.w800,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
                 TextButton(
@@ -956,7 +1004,7 @@ class _CompactCategories extends StatelessWidget {
               ],
             ),
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: 6),
           categoriesAsync.when(
             loading: () => _shimmerStrip(),
             error: (_, _) => _buildStrip(context, _topBookingItems),
@@ -1021,7 +1069,6 @@ class _CompactCategories extends StatelessWidget {
     final typeColor = merchantType != null
         ? merchantTypeColor(merchantType)
         : AppColors.brandPurple;
-    final emoji = merchantType != null ? merchantEmoji(merchantType) : '🏪';
 
     return PressableScale(
       onTap: () {
@@ -1029,35 +1076,19 @@ class _CompactCategories extends StatelessWidget {
         context.push('/market?type=$typeParam');
       },
       child: SizedBox(
-        width: 76,
+        width: 84,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Container(
-              width: 58,
-              height: 58,
-              clipBehavior: Clip.antiAlias,
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [
-                    typeColor.withValues(alpha: 0.38),
-                    typeColor.withValues(alpha: 0.15),
-                  ],
-                ),
-                borderRadius: BorderRadius.circular(18),
-                border: Border.all(color: typeColor.withValues(alpha: 0.25)),
-              ),
-              child: category.imageUrl != null
-                  ? Image.network(
-                      category.imageUrl!,
-                      fit: BoxFit.cover,
-                      errorBuilder: (_, _, _) => _emojiFallback(emoji),
-                    )
-                  : _emojiFallback(emoji),
+            Category3dTileIcon(
+              color: typeColor,
+              icon: merchantCategoryIcon(category.name),
+              networkImageUrl: category.imageUrl,
+              assetImagePath: merchantCategoryAsset(category.name),
+              size: 64,
+              borderRadius: 20,
             ),
-            const SizedBox(height: 6),
+            const SizedBox(height: 8),
             SizedBox(
               height: _tileLabelHeight,
               child: Center(
@@ -1089,28 +1120,17 @@ class _CompactCategories extends StatelessWidget {
     return PressableScale(
       onTap: () => context.push('/home-services/providers/${type.name}'),
       child: SizedBox(
-        width: 76,
+        width: 84,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Container(
-              width: 58,
-              height: 58,
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [
-                    color.withValues(alpha: 0.38),
-                    color.withValues(alpha: 0.15),
-                  ],
-                ),
-                borderRadius: BorderRadius.circular(18),
-                border: Border.all(color: color.withValues(alpha: 0.25)),
-              ),
-              child: Center(child: Icon(icon, color: color, size: 24)),
+            Category3dTileIcon(
+              color: color,
+              icon: icon,
+              size: 64,
+              borderRadius: 20,
             ),
-            const SizedBox(height: 6),
+            const SizedBox(height: 8),
             SizedBox(
               height: _tileLabelHeight,
               child: Center(
@@ -1130,10 +1150,6 @@ class _CompactCategories extends StatelessWidget {
         ),
       ),
     );
-  }
-
-  Widget _emojiFallback(String emoji) {
-    return Center(child: Text(emoji, style: const TextStyle(fontSize: 24)));
   }
 }
 
@@ -1163,59 +1179,82 @@ class _DiscoveryTabsState extends ConsumerState<_DiscoveryTabs> {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: 36,
-      child: ListView.separated(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 20),
-        itemCount: _labels.length,
-        separatorBuilder: (_, _) => const SizedBox(width: 8),
-        itemBuilder: (context, index) {
-          final selected = _selectedIndex == index;
-          return PressableScale(
-            onTap: () {
-              if (_selectedIndex == index) return;
-              setState(() => _selectedIndex = index);
-              ref.read(discoveryModeProvider.notifier).state = _modes[index];
-            },
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 200),
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              decoration: BoxDecoration(
-                gradient: selected
-                    ? const LinearGradient(
-                        colors: [
-                          AppColors.brandPurpleDeep,
-                          AppColors.brandViolet,
-                        ],
-                      )
-                    : null,
-                color: selected
-                    ? null
-                    : Theme.of(context).colorScheme.surfaceContainerHighest
-                          .withValues(alpha: 0.35),
-                borderRadius: BorderRadius.circular(999),
-                border: Border.all(
-                  color: selected
-                      ? Colors.transparent
-                      : Theme.of(
-                          context,
-                        ).colorScheme.outlineVariant.withValues(alpha: 0.15),
-                ),
-              ),
-              child: Text(
-                _labels[index],
-                style: AppTextStyles.labelLarge.copyWith(
-                  color: selected
-                      ? Colors.white
-                      : Theme.of(context).colorScheme.onSurfaceVariant,
-                  fontWeight: selected ? FontWeight.w700 : FontWeight.w600,
-                  fontSize: 13,
-                ),
-              ),
+    final cs = Theme.of(context).colorScheme;
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      child: Container(
+        height: 44,
+        padding: const EdgeInsets.all(4),
+        decoration: BoxDecoration(
+          color: cs.surfaceContainerHighest.withValues(alpha: 0.45),
+          borderRadius: BorderRadius.circular(999),
+          border: Border.all(
+            color: cs.outlineVariant.withValues(alpha: 0.25),
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.04),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
             ),
-          );
-        },
+          ],
+        ),
+        child: ListView.separated(
+          scrollDirection: Axis.horizontal,
+          itemCount: _labels.length,
+          separatorBuilder: (_, _) => const SizedBox(width: 6),
+          itemBuilder: (context, index) {
+            final selected = _selectedIndex == index;
+            return PressableScale(
+              onTap: () {
+                if (_selectedIndex == index) return;
+                setState(() => _selectedIndex = index);
+                ref.read(discoveryModeProvider.notifier).state = _modes[index];
+              },
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 220),
+                curve: Curves.easeOutCubic,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 7,
+                ),
+                decoration: BoxDecoration(
+                  gradient: selected
+                      ? const LinearGradient(
+                          colors: [
+                            AppColors.brandPurpleDeep,
+                            AppColors.brandViolet,
+                          ],
+                        )
+                      : null,
+                  color: selected ? null : Colors.transparent,
+                  borderRadius: BorderRadius.circular(999),
+                  boxShadow: selected
+                      ? [
+                          BoxShadow(
+                            color: AppColors.brandPurple.withValues(
+                              alpha: 0.28,
+                            ),
+                            blurRadius: 8,
+                            offset: const Offset(0, 2),
+                          ),
+                        ]
+                      : null,
+                ),
+                child: Center(
+                  child: Text(
+                    _labels[index],
+                    style: AppTextStyles.labelLarge.copyWith(
+                      color: selected ? Colors.white : cs.onSurfaceVariant,
+                      fontWeight: selected ? FontWeight.w700 : FontWeight.w600,
+                      fontSize: 13,
+                    ),
+                  ),
+                ),
+              ),
+            );
+          },
+        ),
       ),
     );
   }
@@ -1581,11 +1620,20 @@ class _PromoSlide extends ConsumerWidget {
           end: Alignment.bottomRight,
           colors: colors,
         ),
+        border: Border.all(
+          color: Colors.white.withValues(alpha: 0.22),
+          width: 1,
+        ),
         boxShadow: [
           BoxShadow(
-            color: colors.first.withValues(alpha: 0.3),
-            blurRadius: 24,
-            offset: const Offset(0, 10),
+            color: colors.first.withValues(alpha: 0.34),
+            blurRadius: 28,
+            offset: const Offset(0, 12),
+          ),
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.08),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
           ),
         ],
       ),
@@ -1746,14 +1794,21 @@ class _HomeDiscoveryListCard extends StatelessWidget {
       color: context.colorScheme.surfaceContainerLowest,
       borderColor: context.colorScheme.outlineVariant.withValues(alpha: 0.15),
       child: Padding(
-        padding: const EdgeInsets.all(12),
+        padding: const EdgeInsets.all(14),
         child: Row(
           children: [
-            ClipRRect(
-              borderRadius: BorderRadius.circular(18),
-              child: SizedBox(
-                width: 110,
-                height: 110,
+            Container(
+              width: 108,
+              height: 108,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(18),
+                border: Border.all(
+                  color: color.withValues(alpha: 0.18),
+                  width: 1,
+                ),
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(17),
                 child: imageUrl != null
                     ? Image.network(
                         imageUrl!,
@@ -1764,7 +1819,7 @@ class _HomeDiscoveryListCard extends StatelessWidget {
                     : merchantHeaderGradient(context, color, emoji),
               ),
             ),
-            const SizedBox(width: 12),
+            const SizedBox(width: 14),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -1782,16 +1837,17 @@ class _HomeDiscoveryListCard extends StatelessWidget {
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
+                      const SizedBox(width: 8),
                       _StatusBadge(open: open, label: openLabel),
                     ],
                   ),
-                  const SizedBox(height: 6),
+                  const SizedBox(height: 8),
                   Row(
                     children: [
                       Container(
                         padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 2,
+                          horizontal: 9,
+                          vertical: 3,
                         ),
                         decoration: BoxDecoration(
                           color: color.withValues(alpha: 0.14),
@@ -1809,27 +1865,44 @@ class _HomeDiscoveryListCard extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(width: 8),
-                      const Icon(
-                        Icons.star_rounded,
-                        size: 15,
-                        color: AppColors.rating,
-                      ),
-                      const SizedBox(width: 2),
-                      Text(
-                        rating.toStringAsFixed(1),
-                        style: context.textTheme.bodySmall?.copyWith(
-                          fontWeight: FontWeight.w700,
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 3,
+                        ),
+                        decoration: BoxDecoration(
+                          color: AppColors.rating.withValues(alpha: 0.14),
+                          borderRadius: BorderRadius.circular(999),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(
+                              Icons.star_rounded,
+                              size: 14,
+                              color: AppColors.rating,
+                            ),
+                            const SizedBox(width: 3),
+                            Text(
+                              rating.toStringAsFixed(1),
+                              style: context.textTheme.bodySmall?.copyWith(
+                                fontWeight: FontWeight.w700,
+                                fontSize: 11,
+                              ),
+                            ),
+                            if (ratingCount > 0) ...[
+                              const SizedBox(width: 2),
+                              Text(
+                                '($ratingCount)',
+                                style: context.textTheme.bodySmall?.copyWith(
+                                  color: context.colorScheme.onSurfaceVariant,
+                                  fontSize: 10,
+                                ),
+                              ),
+                            ],
+                          ],
                         ),
                       ),
-                      if (ratingCount > 0) ...[
-                        const SizedBox(width: 3),
-                        Text(
-                          '($ratingCount)',
-                          style: context.textTheme.bodySmall?.copyWith(
-                            color: context.colorScheme.onSurfaceVariant,
-                          ),
-                        ),
-                      ],
                       const Spacer(),
                       if (favoriteId != null)
                         FavoriteButton(
@@ -1840,7 +1913,7 @@ class _HomeDiscoveryListCard extends StatelessWidget {
                     ],
                   ),
                   if (subtitle != null) ...[
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 9),
                     Row(
                       children: [
                         const Icon(
@@ -1881,22 +1954,33 @@ class _StatusBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bg = open
-        ? AppColors.successLight
-        : Colors.black.withValues(alpha: 0.45);
+    final dotColor = open ? AppColors.successLight : AppColors.errorLight;
+    final bg = dotColor.withValues(alpha: 0.14);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
       decoration: BoxDecoration(
         color: bg,
         borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: dotColor.withValues(alpha: 0.3)),
       ),
-      child: Text(
-        label,
-        style: AppTextStyles.labelSmall.copyWith(
-          fontSize: 10,
-          color: Colors.white,
-          fontWeight: FontWeight.w700,
-        ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 6,
+            height: 6,
+            decoration: BoxDecoration(color: dotColor, shape: BoxShape.circle),
+          ),
+          const SizedBox(width: 4),
+          Text(
+            label,
+            style: AppTextStyles.labelSmall.copyWith(
+              fontSize: 10,
+              color: dotColor,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ],
       ),
     );
   }

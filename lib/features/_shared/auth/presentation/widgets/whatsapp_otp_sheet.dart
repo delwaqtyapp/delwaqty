@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:delwaqty/core/errors/error_text.dart';
+import 'package:delwaqty/core/errors/app_error_text.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 
 class WhatsAppOtpSheet extends StatefulWidget {

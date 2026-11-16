@@ -58,6 +58,9 @@ abstract class DeliveryOrder with _$DeliveryOrder {
     DateTime? completedAt,
     DateTime? cancelledAt,
     String? cancellationReason,
+    String? recipientName,
+    String? recipientPhone,
+    String? pickupOtp,
   }) = _DeliveryOrder;
 
   factory DeliveryOrder.fromJson(Map<String, dynamic> json) =>

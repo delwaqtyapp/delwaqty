@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:delwaqty/core/theme/app_colors.dart';
 import 'package:delwaqty/features/provider/merchant/presentation/providers/merchant_providers.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
@@ -48,7 +50,6 @@ class StorefrontData {
   final double? deliveryFee;
   final double? minOrder;
   final int? deliveryTimeMin;
-
 }
 
 /// One row of the weekly schedule.
@@ -144,6 +145,8 @@ class StorefrontNotifier {
         'p_cover_url': data.coverUrl,
         'p_phone': data.phone,
         'p_address': data.address,
+        'p_latitude': data.latitude,
+        'p_longitude': data.longitude,
         'p_delivery_fee': data.deliveryFee,
         'p_min_order': data.minOrder,
         'p_delivery_time_min': data.deliveryTimeMin,
@@ -193,10 +196,16 @@ class _MerchantStorefrontPageState
   final _minOrder = TextEditingController();
   final _deliveryTime = TextEditingController();
 
+  String? _coverUrl;
+  double? _latitude;
+  double? _longitude;
+
   List<WorkingHoursDay> _hours = List.generate(7, (i) => WorkingHoursDay(day: i));
   bool _hydrated = false;
+  bool _hoursHydrated = false;
   bool _saving = false;
   bool _hoursDirty = false;
+  bool _gettingGps = false;
 
   @override
   void dispose() {
@@ -219,10 +228,57 @@ class _MerchantStorefrontPageState
     _phone.text = data.phone ?? '';
     _address.text = data.address ?? '';
     _logoUrl.text = data.logoUrl ?? '';
+    _coverUrl = data.coverUrl;
+    _latitude = data.latitude;
+    _longitude = data.longitude;
     _deliveryFee.text = data.deliveryFee == null ? '' : '${data.deliveryFee}';
     _minOrder.text = data.minOrder == null ? '' : '${data.minOrder}';
     _deliveryTime.text =
         data.deliveryTimeMin == null ? '' : '${data.deliveryTimeMin}';
+  }
+
+  Future<void> _useCurrentGps() async {
+    if (_gettingGps) return;
+    final l10n = AppLocalizations.of(context);
+    setState(() => _gettingGps = true);
+    try {
+      var perm = await Geolocator.checkPermission();
+      if (perm == LocationPermission.denied) {
+        perm = await Geolocator.requestPermission();
+      }
+      final pos = await Geolocator.getCurrentPosition();
+      if (!mounted) return;
+      setState(() {
+        _latitude = pos.latitude;
+        _longitude = pos.longitude;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.storeCoordinatesSaved)),
+      );
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.somethingWentWrong)),
+      );
+    } finally {
+      if (mounted) setState(() => _gettingGps = false);
+    }
+  }
+
+  void _copyDayZeroHoursToAll() {
+    if (_hours.isEmpty) return;
+    final first = _hours.first;
+    setState(() {
+      _hours = [
+        for (final d in _hours)
+          d.copyWith(
+            open: first.open,
+            close: first.close,
+            closed: first.closed,
+          ),
+      ];
+      _hoursDirty = true;
+    });
   }
 
   Future<void> _save() async {
@@ -240,10 +296,13 @@ class _MerchantStorefrontPageState
               logoUrl: _logoUrl.text.trim().isEmpty
                   ? null
                   : _logoUrl.text.trim(),
+              coverUrl: _coverUrl,
               phone: _phone.text.trim().isEmpty ? null : _phone.text.trim(),
               address: _address.text.trim().isEmpty
                   ? null
                   : _address.text.trim(),
+              latitude: _latitude,
+              longitude: _longitude,
               deliveryFee: double.tryParse(_deliveryFee.text.trim()),
               minOrder: double.tryParse(_minOrder.text.trim()),
               deliveryTimeMin: int.tryParse(_deliveryTime.text.trim()),
@@ -276,9 +335,14 @@ class _MerchantStorefrontPageState
     final hoursAsync = ref.watch(workingHoursProvider);
 
     storefrontAsync.whenData(_hydrate);
-    if (!_hydrated && hoursAsync.hasValue) {
-      _hours = hoursAsync.requireValue;
-    }
+    hoursAsync.whenData((days) {
+      if (!_hoursHydrated) {
+        _hoursHydrated = true;
+        _hours = List<WorkingHoursDay>.from(days);
+      }
+    });
+
+    final mapTarget = LatLng(_latitude ?? 30.0444, _longitude ?? 31.2357);
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.storefront)),
@@ -295,14 +359,51 @@ class _MerchantStorefrontPageState
               padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
               children: [
                 _SectionTitle(title: l10n.storeIdentity),
-                _field(_name, l10n.storeName,
-                    required: true),
+                _field(_name, l10n.storeName, required: true),
                 _field(_description, l10n.description, maxLines: 3),
                 _field(_logoUrl, l10n.logoUrl, keyboard: TextInputType.url),
                 const SizedBox(height: 16),
                 _SectionTitle(title: l10n.contact),
                 _field(_phone, l10n.phone, keyboard: TextInputType.phone),
                 _field(_address, l10n.address, maxLines: 2),
+                const SizedBox(height: 12),
+                _SectionTitle(title: l10n.pickStoreLocationOnMap),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: SizedBox(
+                    height: 200,
+                    child: GoogleMap(
+                      initialCameraPosition: CameraPosition(
+                        target: mapTarget,
+                        zoom: 14,
+                      ),
+                      markers: {
+                        Marker(
+                          markerId: const MarkerId('store_location'),
+                          position: mapTarget,
+                        ),
+                      },
+                      onTap: (pos) => setState(() {
+                        _latitude = pos.latitude;
+                        _longitude = pos.longitude;
+                      }),
+                      myLocationButtonEnabled: false,
+                      zoomControlsEnabled: false,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                OutlinedButton.icon(
+                  onPressed: _gettingGps ? null : _useCurrentGps,
+                  icon: _gettingGps
+                      ? const SizedBox(
+                          width: 16,
+                          height: 16,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Icon(Icons.my_location_rounded),
+                  label: Text(l10n.useCurrentStoreGps),
+                ),
                 const SizedBox(height: 16),
                 _SectionTitle(title: l10n.deliveryPolicy),
                 Row(
@@ -334,7 +435,16 @@ class _MerchantStorefrontPageState
                   keyboard: TextInputType.number,
                 ),
                 const SizedBox(height: 16),
-                _SectionTitle(title: l10n.workingHours),
+                Row(
+                  children: [
+                    Expanded(child: _SectionTitle(title: l10n.workingHours)),
+                    TextButton.icon(
+                      onPressed: _copyDayZeroHoursToAll,
+                      icon: const Icon(Icons.copy_all_rounded, size: 18),
+                      label: Text(l10n.copyHoursToAllDays),
+                    ),
+                  ],
+                ),
                 if (hoursAsync.isLoading)
                   const Center(
                     child: Padding(
@@ -446,16 +556,39 @@ class _MerchantStorefrontPageState
     );
   }
 
-  Widget _timeField({required String value, required ValueChanged<String> onChanged}) {
+  TimeOfDay _parseTimeOfDay(String hhmm) {
+    final parts = hhmm.split(':');
+    final h = parts.isNotEmpty ? (int.tryParse(parts[0]) ?? 9) : 9;
+    final m = parts.length > 1 ? (int.tryParse(parts[1]) ?? 0) : 0;
+    return TimeOfDay(hour: h.clamp(0, 23), minute: m.clamp(0, 59));
+  }
+
+  Widget _timeField({
+    required String value,
+    required ValueChanged<String> onChanged,
+  }) {
     return TextFormField(
+      key: ValueKey(value),
       initialValue: value,
       keyboardType: TextInputType.datetime,
       decoration: InputDecoration(
         isDense: true,
+        suffixIcon: const Icon(Icons.access_time_rounded, size: 16),
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
         contentPadding:
             const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
       ),
+      onTap: () async {
+        final picked = await showTimePicker(
+          context: context,
+          initialTime: _parseTimeOfDay(value),
+        );
+        if (picked != null) {
+          final formatted =
+              '${picked.hour.toString().padLeft(2, '0')}:${picked.minute.toString().padLeft(2, '0')}';
+          onChanged(formatted);
+        }
+      },
       onChanged: onChanged,
     );
   }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
+import 'package:intl/intl.dart';
 import 'package:delwaqty/features/provider/merchant/presentation/providers/merchant_providers.dart';
 import 'package:delwaqty/features/provider/merchant/merchant_module.dart';
 import 'package:delwaqty/features/provider/merchant/domain/entities/merchant_order.dart';
@@ -13,7 +14,6 @@ import 'package:delwaqty/core/theme/app_colors.dart';
 import 'package:delwaqty/core/theme/app_text_styles.dart';
 import 'package:delwaqty/services/realtime/realtime_channel_constants.dart';
 import 'package:delwaqty/services/realtime/realtime_service.dart';
-import 'package:delwaqty/services/supabase/supabase_service.dart';
 
 final _merchantIdProvider = providerMerchantIdProvider;
 
@@ -41,25 +41,27 @@ class _MerchantOrdersPageState extends ConsumerState<MerchantOrdersPage> {
     _subscribeRealtime();
   }
 
-  void _subscribeRealtime() {
-    final uid = ref.read(supabaseClientProvider).auth.currentUser?.id;
-    if (uid == null) return;
-    ref.read(realtimeServiceProvider).subscribe(
-          channelName: RealtimeChannels.providerOrders,
-          opts: [
-            RealtimeChannelFilter(
-              event: PostgresChangeEvent.all,
-              schema: 'public',
-              table: 'orders',
-              filter: PostgresChangeFilter(
-                type: PostgresChangeFilterType.eq,
-                column: 'merchant_id',
-                value: uid,
+  Future<void> _subscribeRealtime() async {
+    try {
+      final merchantId = await ref.read(providerMerchantIdProvider.future);
+      if (!mounted || merchantId.isEmpty) return;
+      ref.read(realtimeServiceProvider).subscribe(
+            channelName: RealtimeChannels.providerOrders,
+            opts: [
+              RealtimeChannelFilter(
+                event: PostgresChangeEvent.all,
+                schema: 'public',
+                table: 'orders',
+                filter: PostgresChangeFilter(
+                  type: PostgresChangeFilterType.eq,
+                  column: 'merchant_id',
+                  value: merchantId,
+                ),
+                callback: (_) => ref.invalidate(_ordersProvider),
               ),
-              callback: (_) => ref.invalidate(_ordersProvider),
-            ),
-          ],
-        );
+            ],
+          );
+    } catch (_) {}
   }
 
   @override
@@ -216,8 +218,10 @@ class _OrderCard extends StatelessWidget {
 
     final statusColor = switch (order.status) {
       'delivered' => AppColors.successLight,
+      'delivering' => Colors.indigo,
       'ready' => AppColors.orderReady,
       'preparing' => AppColors.infoLight,
+      'confirmed' || 'accepted' => Colors.teal,
       'pending' => AppColors.warningLight,
       'cancelled' => AppColors.errorLight,
       _ => theme.colorScheme.onSurfaceVariant,
@@ -225,17 +229,22 @@ class _OrderCard extends StatelessWidget {
 
     final statusLabel = switch (order.status) {
       'pending' => l10n.pending,
-      'accepted' => l10n.accepted,
+      'confirmed' || 'accepted' => l10n.accepted,
       'preparing' => l10n.preparing,
       'ready' => l10n.ready,
+      'delivering' => l10n.startOrderDelivery,
       'delivered' => l10n.delivered,
       'cancelled' => l10n.cancelled,
-      _ => order.status,
+      _ => l10n.pending,
     };
 
     final itemsSummary = order.items
         .map((item) => '${item.quantity}x ${item.productName}')
         .join(', ');
+    final formattedDate =
+        DateFormat('yyyy-MM-dd HH:mm').format(order.createdAt.toLocal());
+    final deliveryAddress = order.deliveryAddress?.trim() ?? '';
+    final notes = order.notes?.trim() ?? '';
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
@@ -248,11 +257,23 @@ class _OrderCard extends StatelessWidget {
               Row(
                 children: [
                   Expanded(
-                    child: Text(
-                      order.customerName ?? l10n.customer,
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          order.customerName ?? l10n.customer,
+                          style: theme.textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          formattedDate,
+                          style: theme.textTheme.labelSmall?.copyWith(
+                            color: theme.colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                   Container(
@@ -283,6 +304,51 @@ class _OrderCard extends StatelessWidget {
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
               ),
+              if (deliveryAddress.isNotEmpty) ...[
+                const SizedBox(height: 6),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Icon(
+                      Icons.location_on_outlined,
+                      size: 16,
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                    const SizedBox(width: 4),
+                    Expanded(
+                      child: Text(
+                        '${l10n.orderDeliveryAddress}: $deliveryAddress',
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: theme.colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+              if (notes.isNotEmpty) ...[
+                const SizedBox(height: 4),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Icon(
+                      Icons.notes_rounded,
+                      size: 16,
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                    const SizedBox(width: 4),
+                    Expanded(
+                      child: Text(
+                        '${l10n.orderSpecialNotes}: $notes',
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: theme.colorScheme.onSurfaceVariant,
+                          fontStyle: FontStyle.italic,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
               const SizedBox(height: 12),
               Row(
                 children: [
@@ -324,6 +390,18 @@ class _OrderCard extends StatelessWidget {
                       onPressed: () => onStatusChanged('ready'),
                     ),
                   ] else if (order.status == 'ready') ...[
+                    _ActionButton(
+                      label: l10n.startOrderDelivery,
+                      color: Colors.indigo,
+                      onPressed: () => onStatusChanged('delivering'),
+                    ),
+                    const SizedBox(width: 8),
+                    _ActionButton(
+                      label: l10n.markDelivered,
+                      color: AppColors.successLight,
+                      onPressed: () => onStatusChanged('delivered'),
+                    ),
+                  ] else if (order.status == 'delivering') ...[
                     _ActionButton(
                       label: l10n.markDelivered,
                       color: AppColors.successLight,

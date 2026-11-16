@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:delwaqty/features/provider/availability/presentation/providers/provider_availability_providers.dart';
 import 'package:delwaqty/shared/widgets/app_loader.dart';
 import 'package:delwaqty/shared/widgets/design/premium_card.dart';
@@ -34,7 +35,7 @@ class _ProviderAvailabilityPageState
       }
       ref.invalidate(providerAvailabilityProvider);
     } catch (e) {
-      setState(() => appErrorText(context, e));
+      if (mounted) setState(() => _error = appErrorText(context, e));
     } finally {
       if (mounted) setState(() => _saving = false);
     }
@@ -47,7 +48,16 @@ class _ProviderAvailabilityPageState
     final availability = ref.watch(providerAvailabilityProvider);
 
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.availability)),
+      appBar: AppBar(
+        title: Text(l10n.availability),
+        actions: [
+          IconButton(
+            tooltip: l10n.edit,
+            icon: const Icon(Icons.edit_calendar_rounded),
+            onPressed: () => context.push('/merchant-dashboard/storefront'),
+          ),
+        ],
+      ),
       body: RefreshIndicator(
         onRefresh: () async => ref.invalidate(providerAvailabilityProvider),
         child: SingleChildScrollView(
@@ -150,12 +160,24 @@ class _ProviderAvailabilityPageState
                       ),
                     ),
                   const SizedBox(height: 20),
-                  Text(
-                    l10n.weeklySchedule,
-                    style: Theme.of(context)
-                        .textTheme
-                        .titleMedium
-                        ?.copyWith(fontWeight: FontWeight.bold),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          l10n.weeklySchedule,
+                          style: Theme.of(context)
+                              .textTheme
+                              .titleMedium
+                              ?.copyWith(fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                      TextButton.icon(
+                        onPressed: () =>
+                            context.push('/merchant-dashboard/storefront'),
+                        icon: const Icon(Icons.edit_outlined, size: 18),
+                        label: Text(l10n.edit),
+                      ),
+                    ],
                   ),
                   const SizedBox(height: 8),
                   if (schedule.isEmpty)
@@ -164,6 +186,9 @@ class _ProviderAvailabilityPageState
                         icon: Icons.schedule_rounded,
                         title: l10n.noScheduleSet,
                         message: l10n.configureWorkingHours,
+                        actionLabel: l10n.edit,
+                        onAction: () =>
+                            context.push('/merchant-dashboard/storefront'),
                       ),
                     )
                   else

@@ -5482,10 +5482,10 @@ class AppLocalizationsAr extends AppLocalizations {
   String get timeline => 'الخط الزمني';
 
   @override
-  String get memberOperationsCenter => 'مركزOperations الأعضاء';
+  String get memberOperationsCenter => 'مركز عمليات الأعضاء';
 
   @override
-  String get selectMemberHint => 'اختر Member لعرض التفاصيل';
+  String get selectMemberHint => 'اختر عضواً لعرض التفاصيل';
 
   @override
   String get allRoles => 'جميع الأدوار';
@@ -6870,4 +6870,188 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get chatPermissionsShort => 'صلاحيات الدردشة';
+
+  @override
+  String get registerWithPhoneFast => 'تسجيل سريع برقم الهاتف وتفعيل واتساب';
+
+  @override
+  String get verifyViaWhatsApp => 'تفعيل عبر واتساب';
+
+  @override
+  String get whatsappOtpTitle => 'تفعيل الحساب عبر واتساب';
+
+  @override
+  String get whatsappOtpSubtitle =>
+      'فعّل رقم هاتفك فورًا عبر رسالة واتساب لتنشيط حسابك بسهولة.';
+
+  @override
+  String get sendCodeViaWhatsApp => 'إرسال كود التفعيل عبر واتساب';
+
+  @override
+  String get openWhatsAppToVerify => 'فتح واتساب للتفعيل الفوري';
+
+  @override
+  String whatsappCodeSentBanner(String code) {
+    return 'كود تفعيل واتساب الخاص بك هو: $code';
+  }
+
+  @override
+  String get enterOtpCode => 'أدخل كود التفعيل المكون من 6 أرقام';
+
+  @override
+  String get verifyAndActivateAccount => 'تأكيد وتفعيل الحساب';
+
+  @override
+  String get resendWhatsAppCode => 'إعادة إرسال الكود';
+
+  @override
+  String get phoneOrEmailOrUsername =>
+      'رقم الهاتف أو البريد الإلكتروني أو اسم المستخدم';
+
+  @override
+  String get phoneOptionalEmailHint =>
+      'البريد الإلكتروني (اختياري - يتم توليده تلقائيًا من رقم الهاتف)';
+
+  @override
+  String get whatsappVerifiedSuccess =>
+      'تم التحقق من رقم الهاتف عبر واتساب بنجاح!';
+
+  @override
+  String get invalidOtpCode => 'كود التفعيل غير صحيح أو منتهي الصلاحية.';
+
+  @override
+  String get pickLocationOnMap => 'تحديد الموقع الدقيق على الخريطة';
+
+  @override
+  String get smartGpsHighPrecision => 'تحديد ذكي فائق الدقة (GPS)';
+
+  @override
+  String get acquiringHighAccuracyGps =>
+      'جاري قفل إشارة الأقمار الصناعية بأعلى دقة…';
+
+  @override
+  String gpsLockedWithinMeters(String meters) {
+    return 'تم قفل الموقع بدقة فائقة (±$meters متر)';
+  }
+
+  @override
+  String get dragMapToRefineLocation =>
+      'حرّك الخريطة لوضع الدبوس أمام بابك تمامًا';
+
+  @override
+  String get confirmSelectedLocation => 'تأكيد الموقع المحدد';
+
+  @override
+  String get selectedAddressLabel => 'العنوان المحدد';
+
+  @override
+  String get useSmartGpsLocation => 'تحديد موقعي الذكي بدقة عالية';
+
+  @override
+  String get requireProviderDocumentsTitle =>
+      'إلزامية رفع أوراق ومستندات مزودي الخدمة والمتاجر';
+
+  @override
+  String get requireProviderDocumentsSubtitle =>
+      'عند الإيقاف، يمكن للمطاعم ومزودي الخدمة التسجيل والعمل فورًا بدون رفع أوراق المحل تسهيلًا للتشغيل.';
+
+  @override
+  String get ownerExclusiveControlBadge => 'صلاحية حصرية للمالك (Owner)';
+
+  @override
+  String get providerDocumentsDisabledNotice =>
+      'وضع التشغيل السريع مفعّل: تم إعفاء المتاجر ومزودي الخدمة من رفع الأوراق حاليًا بقرار المالك.';
+
+  @override
+  String get providerDocumentsOptionalBadge =>
+      'اختياري في المرحلة الحالية للتسهيل';
+
+  @override
+  String get navigateToPickup => 'التوجه للمتجر (الاستلام)';
+
+  @override
+  String get navigateToCustomer => 'التوجه للعميل (التسليم)';
+
+  @override
+  String get callCustomer => 'اتصال بالعميل';
+
+  @override
+  String get whatsappCustomer => 'واتساب العميل';
+
+  @override
+  String get callMerchant => 'اتصال بالمتجر';
+
+  @override
+  String get whatsappMerchant => 'واتساب المتجر';
+
+  @override
+  String get liveDeliveryMapTitle => 'خريطة المسار وموقع العميل المباشر';
+
+  @override
+  String get pickupPointLabel => 'نقطة الاستلام (المتجر)';
+
+  @override
+  String get dropoffPointLabel => 'نقطة التسليم (العميل)';
+
+  @override
+  String get orderItemsSummary => 'تفاصيل الطلب';
+
+  @override
+  String get deliveryNotesLabel => 'ملاحظات التوصيل';
+
+  @override
+  String estimatedMinutesValue(int minutes) {
+    return '$minutes دقيقة';
+  }
+
+  @override
+  String get confirmCancelDeliveryTitle => 'إلغاء التوصيل النشط؟';
+
+  @override
+  String get confirmCancelDeliveryBody =>
+      'هل أنت متأكد من رغبتك في إلغاء مهمة التوصيل الحالية؟';
+
+  @override
+  String get radarSearchingForOrders =>
+      'جاري مسح المنطقة المحيطة لاستقبال الطلبات…';
+
+  @override
+  String get onlineReadyForOrders => 'أنت متصل الآن وجاهز لاستقبال الطلبات';
+
+  @override
+  String get offlineTapToGoOnline =>
+      'أنت غير متصل — فعّل الاتصال لاستقبال الطلبات';
+
+  @override
+  String get pickStoreLocationOnMap => 'تحديد موقع المتجر على الخريطة';
+
+  @override
+  String get useCurrentStoreGps => 'استخدام موقعي الحالي للمتجر (GPS)';
+
+  @override
+  String get storeCoordinatesSaved => 'تم حفظ إحداثيات موقع المتجر على الخريطة';
+
+  @override
+  String get copyHoursToAllDays => 'تطبيق على جميع الأيام';
+
+  @override
+  String get uploadProductPhoto => 'رفع صورة المنتج';
+
+  @override
+  String get toggleProductAvailability => 'تغيير حالة التوفر';
+
+  @override
+  String get startOrderDelivery => 'بدء التوصيل للعميل';
+
+  @override
+  String get orderCustomerPhone => 'هاتف العميل';
+
+  @override
+  String get orderDeliveryAddress => 'عنوان التوصيل';
+
+  @override
+  String get orderSpecialNotes => 'ملاحظات خاصة';
+
+  @override
+  String get autoProvisionedStoreReady => 'ملف المتجر جاهز ومفعّل للتشغيل';
 }

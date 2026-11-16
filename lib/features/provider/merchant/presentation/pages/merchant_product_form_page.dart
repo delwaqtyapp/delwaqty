@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:delwaqty/features/provider/merchant/presentation/providers/merchant_providers.dart';
 import 'package:go_router/go_router.dart';
 import 'package:delwaqty/core/extensions/context_extensions.dart';
 import 'package:delwaqty/features/provider/merchant/merchant_module.dart';
+import 'package:delwaqty/services/supabase/supabase_service.dart';
 import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
 import 'package:delwaqty/shared/widgets/app_loader.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
@@ -44,6 +46,7 @@ class _MerchantProductFormPageState
   bool _isAvailable = true;
   bool _isFeatured = false;
   bool _isSaving = false;
+  bool _isUploadingPhoto = false;
 
   bool get _isEditing => widget.productId != null && widget.productId != 'new';
 
@@ -68,6 +71,40 @@ class _MerchantProductFormPageState
       _isAvailable = product['is_available'] as bool? ?? true;
       _isFeatured = product['is_featured'] as bool? ?? false;
     });
+  }
+
+  Future<void> _pickAndUploadPhoto() async {
+    if (_isUploadingPhoto) return;
+    final l10n = AppLocalizations.of(context);
+    try {
+      final picker = ImagePicker();
+      final picked = await picker.pickImage(
+        source: ImageSource.gallery,
+        imageQuality: 85,
+      );
+      if (picked == null) return;
+      setState(() => _isUploadingPhoto = true);
+      final bytes = await picked.readAsBytes();
+      final name = picked.name.isEmpty ? 'photo.jpg' : picked.name;
+      final path = 'products/${DateTime.now().millisecondsSinceEpoch}_$name';
+      final client = ref.read(supabaseClientProvider);
+      await client.storage.from('profile-photos').uploadBinary(path, bytes);
+      final publicUrl =
+          client.storage.from('profile-photos').getPublicUrl(path);
+      if (mounted) {
+        setState(() {
+          _imageUrlController.text = publicUrl;
+        });
+      }
+    } catch (_) {
+      if (mounted) {
+        context.showAppSnackBar(l10n.somethingWentWrong, isError: true);
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isUploadingPhoto = false);
+      }
+    }
   }
 
   @override
@@ -102,7 +139,7 @@ class _MerchantProductFormPageState
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     AnimatedFadeIn(
-                      child: _buildImagePreview(),
+                      child: _buildImagePreview(l10n),
                     ),
                     const SizedBox(height: 16),
                     AnimatedFadeIn(
@@ -137,58 +174,75 @@ class _MerchantProductFormPageState
     );
   }
 
-  Widget _buildImagePreview() {
+  Widget _buildImagePreview(AppLocalizations l10n) {
     final url = _imageUrlController.text;
-    return Container(
-      height: 180,
-      width: double.infinity,
-      decoration: BoxDecoration(
-        color: context.colorScheme.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: context.colorScheme.outlineVariant.withValues(alpha: 0.5),
-        ),
-      ),
-      clipBehavior: Clip.antiAlias,
-      child: url.isNotEmpty
-          ? Image.network(
-              url,
-              fit: BoxFit.cover,
-              errorBuilder: (_, _, _) => Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.image_outlined,
-                    size: 48,
-                    color: context.colorScheme.onSurfaceVariant,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Container(
+          height: 180,
+          width: double.infinity,
+          decoration: BoxDecoration(
+            color: context.colorScheme.surfaceContainerHighest,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: context.colorScheme.outlineVariant.withValues(alpha: 0.5),
+            ),
+          ),
+          clipBehavior: Clip.antiAlias,
+          child: url.isNotEmpty
+              ? Image.network(
+                  url,
+                  fit: BoxFit.cover,
+                  errorBuilder: (_, _, _) => Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.image_outlined,
+                        size: 48,
+                        color: context.colorScheme.onSurfaceVariant,
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        l10n.invalidImageUrl,
+                        style: context.textTheme.bodySmall?.copyWith(
+                          color: context.colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 8),
-                  Text(
-                    AppLocalizations.of(context).invalidImageUrl,
-                    style: context.textTheme.bodySmall?.copyWith(
+                )
+              : Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.add_a_photo_outlined,
+                      size: 48,
                       color: context.colorScheme.onSurfaceVariant,
                     ),
-                  ),
-                ],
-              ),
-            )
-          : Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  Icons.add_a_photo_outlined,
-                  size: 48,
-                  color: context.colorScheme.onSurfaceVariant,
+                    const SizedBox(height: 8),
+                    Text(
+                      l10n.addProductImage,
+                      style: context.textTheme.bodySmall?.copyWith(
+                        color: context.colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 8),
-                Text(
-                  AppLocalizations.of(context).addProductImage,
-                  style: context.textTheme.bodySmall?.copyWith(
-                    color: context.colorScheme.onSurfaceVariant,
-                  ),
-                ),
-              ],
-            ),
+        ),
+        const SizedBox(height: 8),
+        OutlinedButton.icon(
+          onPressed: _isUploadingPhoto ? null : _pickAndUploadPhoto,
+          icon: _isUploadingPhoto
+              ? const SizedBox(
+                  width: 16,
+                  height: 16,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                )
+              : const Icon(Icons.upload_rounded),
+          label: Text(l10n.uploadProductPhoto),
+        ),
+      ],
     );
   }
 
@@ -342,7 +396,7 @@ class _MerchantProductFormPageState
       }
 
       if (mounted) {
-        ref.invalidate(_productsProvider);
+        ref.invalidate(merchantProductsProvider);
         context.pop();
         context.showAppSnackBar(
           _isEditing ? l10n.productUpdated : l10n.productCreated,
@@ -357,9 +411,3 @@ class _MerchantProductFormPageState
     }
   }
 }
-
-final _productsProvider = FutureProvider<List<Map<String, dynamic>>>((ref) async {
-  final repo = ref.watch(merchantDashboardRepositoryProvider);
-  final merchantId = await ref.watch(_merchantIdProvider.future);
-  return repo.getMerchantProducts(merchantId);
-});

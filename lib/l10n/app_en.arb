@@ -2232,5 +2232,81 @@
   "settlementsGraceLimit": "New grace limit",
   "settlementsGraceLimitHint": "0, 1, 2, 3, 4, 5, 6, 10 ...",
   "adminOwnerGlobalAudit": "Owner Global Audit",
-  "chatPermissionsShort": "Chat Access"
+  "chatPermissionsShort": "Chat Access",
+  "registerWithPhoneFast": "Quick Registration with Phone & WhatsApp",
+  "verifyViaWhatsApp": "Verify via WhatsApp",
+  "whatsappOtpTitle": "WhatsApp Account Verification",
+  "whatsappOtpSubtitle": "Verify your phone number instantly via WhatsApp to activate your account.",
+  "sendCodeViaWhatsApp": "Send Verification via WhatsApp",
+  "openWhatsAppToVerify": "Open WhatsApp to Activate",
+  "whatsappCodeSentBanner": "Your WhatsApp activation code is: {code}",
+  "@whatsappCodeSentBanner": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "enterOtpCode": "Enter 6-digit verification code",
+  "verifyAndActivateAccount": "Verify & Activate Account",
+  "resendWhatsAppCode": "Resend Code",
+  "phoneOrEmailOrUsername": "Phone Number, Email, or Username",
+  "phoneOptionalEmailHint": "Email (Optional - auto-generated from phone if left blank)",
+  "whatsappVerifiedSuccess": "Phone number verified via WhatsApp successfully!",
+  "invalidOtpCode": "Invalid or expired verification code.",
+  "pickLocationOnMap": "Pick Exact Location on Map",
+  "smartGpsHighPrecision": "Ultra-Precise Smart GPS",
+  "acquiringHighAccuracyGps": "Locking onto high-precision satellite signal…",
+  "gpsLockedWithinMeters": "High-accuracy GPS locked (±{meters}m)",
+  "@gpsLockedWithinMeters": {
+    "placeholders": {
+      "meters": {
+        "type": "String"
+      }
+    }
+  },
+  "dragMapToRefineLocation": "Move the map to place the pin at your exact doorstep",
+  "confirmSelectedLocation": "Confirm Exact Location",
+  "selectedAddressLabel": "Selected Location",
+  "useSmartGpsLocation": "Detect My Location Precisely",
+  "requireProviderDocumentsTitle": "Require Provider & Merchant Store Documents",
+  "requireProviderDocumentsSubtitle": "When disabled, restaurants and service providers can register and operate immediately without uploading store papers.",
+  "ownerExclusiveControlBadge": "Owner Exclusive Authority",
+  "providerDocumentsDisabledNotice": "Fast Launch Mode Active: Document upload is currently waived by the platform owner.",
+  "providerDocumentsOptionalBadge": "Optional during initial launch phase",
+  "navigateToPickup": "Navigate to Pickup",
+  "navigateToCustomer": "Navigate to Customer",
+  "callCustomer": "Call Customer",
+  "whatsappCustomer": "WhatsApp Customer",
+  "callMerchant": "Call Store",
+  "whatsappMerchant": "WhatsApp Store",
+  "liveDeliveryMapTitle": "Live Route & Customer Map",
+  "pickupPointLabel": "Pickup Point (Store)",
+  "dropoffPointLabel": "Dropoff Point (Customer)",
+  "orderItemsSummary": "Order Items",
+  "deliveryNotesLabel": "Delivery Notes",
+  "estimatedMinutesValue": "{minutes} min",
+  "@estimatedMinutesValue": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "confirmCancelDeliveryTitle": "Cancel Active Delivery?",
+  "confirmCancelDeliveryBody": "Are you sure you want to cancel this delivery assignment?",
+  "radarSearchingForOrders": "Scanning nearby zones for incoming orders…",
+  "onlineReadyForOrders": "You are Online & Ready for Orders",
+  "offlineTapToGoOnline": "You are Offline — Toggle to receive orders",
+  "pickStoreLocationOnMap": "Set Store Location on Map",
+  "useCurrentStoreGps": "Use Current GPS for Store",
+  "storeCoordinatesSaved": "Store map coordinates updated",
+  "copyHoursToAllDays": "Apply to All Days",
+  "uploadProductPhoto": "Upload Product Photo",
+  "toggleProductAvailability": "Toggle Availability",
+  "startOrderDelivery": "Out for Delivery",
+  "orderCustomerPhone": "Customer Phone",
+  "orderDeliveryAddress": "Delivery Address",
+  "orderSpecialNotes": "Special Instructions",
+  "autoProvisionedStoreReady": "Your store profile is active and ready"
 }

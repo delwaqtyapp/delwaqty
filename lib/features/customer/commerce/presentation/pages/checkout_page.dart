@@ -6,6 +6,8 @@ import 'package:delwaqty/features/customer/commerce/commerce_module.dart';
 import 'package:delwaqty/features/customer/commerce/domain/entities/cart.dart'
     as commerce;
 import 'package:delwaqty/features/customer/commerce/domain/entities/coupon.dart';
+import 'package:delwaqty/features/customer/location/presentation/providers/location_provider.dart';
+import 'package:delwaqty/features/customer/location/presentation/widgets/smart_map_picker_sheet.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 import 'package:delwaqty/core/extensions/context_extensions.dart';
 import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
@@ -23,12 +25,33 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
   final _addressController = TextEditingController();
   final _couponController = TextEditingController();
   bool _isPlacing = false;
+  bool _addressPrefilled = false;
+
+  @override
+  void initState() {
+    super.initState();
+    final loc = ref.read(userLocationProvider).value;
+    if (loc != null && loc.detailedAddress.isNotEmpty) {
+      _addressController.text = loc.detailedAddress;
+      _addressPrefilled = true;
+    }
+  }
 
   @override
   void dispose() {
     _addressController.dispose();
     _couponController.dispose();
     super.dispose();
+  }
+
+  Future<void> _pickAddressOnMap() async {
+    final picked = await SmartMapPickerSheet.show(context);
+    if (picked != null && mounted) {
+      setState(() {
+        _addressController.text = picked.detailedAddress;
+        _addressPrefilled = true;
+      });
+    }
   }
 
   Future<void> _addNewAddress() async {
@@ -72,6 +95,14 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
     final colorScheme = context.colorScheme;
     final textTheme = context.textTheme;
     final cartAsync = ref.watch(_cartFutureProvider);
+    final userLoc = ref.watch(userLocationProvider).value;
+    if (!_addressPrefilled &&
+        _addressController.text.isEmpty &&
+        userLoc != null &&
+        userLoc.detailedAddress.isNotEmpty) {
+      _addressController.text = userLoc.detailedAddress;
+      _addressPrefilled = true;
+    }
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.checkout)),
@@ -111,16 +142,28 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
                   decoration: InputDecoration(
                     hintText: l10n.selectDeliveryAddress,
                     prefixIcon: const Icon(Icons.location_on_outlined),
+                    suffixIcon: IconButton(
+                      tooltip: l10n.pickLocationOnMap,
+                      icon: const Icon(Icons.map_rounded),
+                      onPressed: _pickAddressOnMap,
+                    ),
                     border: const OutlineInputBorder(),
                   ),
                 ),
               ),
-              Align(
-                alignment: Alignment.centerRight,
-                child: TextButton(
-                  onPressed: _addNewAddress,
-                  child: Text(l10n.addNewAddress),
-                ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  TextButton.icon(
+                    onPressed: _pickAddressOnMap,
+                    icon: const Icon(Icons.edit_location_alt_rounded, size: 18),
+                    label: Text(l10n.pickLocationOnMap),
+                  ),
+                  TextButton(
+                    onPressed: _addNewAddress,
+                    child: Text(l10n.addNewAddress),
+                  ),
+                ],
               ),
               const SizedBox(height: 16),
               AnimatedFadeIn(

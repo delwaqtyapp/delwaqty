@@ -1,6 +1,11 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:delwaqty/features/provider/merchant/data/datasources/remote/supabase_merchant_dashboard_data_source.dart';
+import 'package:delwaqty/features/provider/merchant/merchant_module.dart';
 import 'package:delwaqty/services/supabase/supabase_service.dart';
+
+final merchantDashboardDataSourceProvider =
+    supabaseMerchantDashboardDataSourceProvider;
 
 /// Resolves the Provider app's merchant/provider account id.
 ///
@@ -20,4 +25,13 @@ final providerMerchantIdProvider = FutureProvider<String>((ref) async {
   // The server resolves the real id (109_resolve_my_merchant).
   final id = await client.rpc('resolve_my_merchant');
   return id as String? ?? '';
+});
+
+/// Shared merchant products provider so both the products list page and
+/// the product form page watch/invalidate the exact same provider instance.
+final merchantProductsProvider =
+    FutureProvider.autoDispose<List<Map<String, dynamic>>>((ref) async {
+  final repo = ref.watch(merchantDashboardRepositoryProvider);
+  final merchantId = await ref.watch(providerMerchantIdProvider.future);
+  return repo.getMerchantProducts(merchantId);
 });

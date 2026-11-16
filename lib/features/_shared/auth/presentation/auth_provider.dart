@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:typed_data';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:supabase_flutter/supabase_flutter.dart' show SupabaseClient;
+import 'package:supabase_flutter/supabase_flutter.dart' show Supabase, SupabaseClient;
 import 'package:delwaqty/config/app_config.dart';
 import 'package:delwaqty/data/datasources/local/biometric_auth_store.dart';
 import 'package:delwaqty/domain/enums/user_type.dart';
@@ -15,6 +15,19 @@ import 'package:delwaqty/core/errors/exceptions.dart';
 import 'package:delwaqty/services/logger/app_logger.dart';
 import 'package:delwaqty/services/push_notification/push_notification_service.dart';
 
+final requireProviderDocumentsProvider = FutureProvider<bool>((ref) async {
+  try {
+    final row = await Supabase.instance.client
+        .from('platform_settings')
+        .select('require_provider_documents')
+        .eq('id', 'default')
+        .maybeSingle();
+    return (row?['require_provider_documents'] as bool?) ?? false;
+  } catch (_) {
+    return false;
+  }
+});
+
 final authStateProvider = NotifierProvider<AuthStateNotifier, AuthState>(
   AuthStateNotifier.new,
 );
@@ -23,6 +36,7 @@ class AuthStateNotifier extends Notifier<AuthState> {
   StreamSubscription? _authSubscription;
   bool _isSignUpInProgress = false;
   bool _isSignInInProgress = false;
+  bool _cachedRequireProviderDocuments = false;
 
   @override
   AuthState build() {
@@ -45,6 +59,16 @@ class AuthStateNotifier extends Notifier<AuthState> {
   DeleteAccountUseCase get _deleteAccountUseCase =>
       ref.read(deleteAccountUseCaseProvider);
   AppLogger get _logger => ref.read(loggerProvider);
+
+  Future<void> _refreshRequireProviderDocuments() async {
+    try {
+      _cachedRequireProviderDocuments = await ref
+          .read(requireProviderDocumentsProvider.future)
+          .timeout(const Duration(seconds: 4));
+    } catch (_) {
+      _cachedRequireProviderDocuments = false;
+    }
+  }
 
   void startAuthListener() {
     _authSubscription?.cancel();
@@ -94,6 +118,7 @@ class AuthStateNotifier extends Notifier<AuthState> {
         } catch (_) {}
       }
       if (session != null) {
+        await _refreshRequireProviderDocuments();
         final user = await ref
             .read(getCurrentUserUseCaseProvider)
             .call()
@@ -108,9 +133,9 @@ class AuthStateNotifier extends Notifier<AuthState> {
     }
   }
 
-  /// Signs in with an email OR a username. Usernames (created from inside the
-  /// app / at registration) are resolved to their auth email through the
-  /// public.users table before Supabase auth.
+  /// Signs in with an email, phone number, OR a username. Usernames and phone
+  /// numbers are resolved to their auth email through security-definer RPCs
+  /// before Supabase auth.
   Future<void> signIn({required String email, required String password}) async {
     _isSignInInProgress = true;
     state = const AuthState.loading();
@@ -120,6 +145,7 @@ class AuthStateNotifier extends Notifier<AuthState> {
         identifier = await _resolveUsernameToEmail(identifier);
       }
       await _signInUseCase(email: identifier, password: password);
+      await _refreshRequireProviderDocuments();
       // Bound the profile fetch so a slow/hanging network after sign-in (e.g.
       // right after a logout) can never leave the app stuck on "loading".
       final user = await ref
@@ -136,19 +162,34 @@ class AuthStateNotifier extends Notifier<AuthState> {
     }
   }
 
-  /// Looks up the auth email for a username through the security-definer RPC
-  /// `lookup_email_by_username` (RLS on users only allows reading your own
-  /// row, so a direct query cannot resolve other accounts). Throws the same
-  /// failure shape as a wrong password so the UI shows a single message.
-  Future<String> _resolveUsernameToEmail(String username) async {
+  /// Looks up the auth email for a phone number or username through
+  /// security-definer RPCs (`lookup_email_by_phone` / `lookup_email_by_username`).
+  Future<String> _resolveUsernameToEmail(String identifier) async {
+    final trimmed = identifier.trim();
     final client = SupabaseClient(
       AppConfig.supabaseUrl,
       AppConfig.supabaseAnonKey,
     );
-    final resolved =
-        await client.rpc('lookup_email_by_username', params: {'p_username': username}) as String?;
+    final phonePattern = RegExp(r'^[+0-9][0-9\s\-]{7,}$');
+    if (phonePattern.hasMatch(trimmed)) {
+      try {
+        final resolvedPhone = await client.rpc(
+          'lookup_email_by_phone',
+          params: {'p_phone': trimmed},
+        ) as String?;
+        if (resolvedPhone != null && resolvedPhone.isNotEmpty) {
+          return resolvedPhone;
+        }
+      } catch (_) {}
+      final digits = trimmed.replaceAll(RegExp(r'[^0-9]'), '');
+      return 'phone_$digits@delwaqty.app';
+    }
+    final resolved = await client.rpc(
+      'lookup_email_by_username',
+      params: {'p_username': trimmed},
+    ) as String?;
     if (resolved == null || resolved.isEmpty) {
-      throw const AuthException(message: 'اسم المستخدم أو كلمة المرور غير صحيحة.');
+      throw const AuthException(message: 'Invalid username or password.');
     }
     return resolved;
   }
@@ -157,6 +198,7 @@ class AuthStateNotifier extends Notifier<AuthState> {
     required String email,
     required String password,
     String? fullName,
+    String? phone,
     UserType userType = UserType.customer,
     String language = 'en',
     Uint8List? idCardBytes,
@@ -175,6 +217,7 @@ class AuthStateNotifier extends Notifier<AuthState> {
         email: email,
         password: password,
         fullName: fullName,
+        phone: phone,
         userType: userType,
         language: language,
         idCardBytes: idCardBytes,
@@ -191,6 +234,7 @@ class AuthStateNotifier extends Notifier<AuthState> {
         _isSignUpInProgress = false;
         return;
       }
+      await _refreshRequireProviderDocuments();
       final user = await ref.read(getCurrentUserUseCaseProvider).call();
       state = _resolveAuthenticated(user);
     } catch (e) {
@@ -218,6 +262,7 @@ class AuthStateNotifier extends Notifier<AuthState> {
     state = const AuthState.loading();
     try {
       await _verifyOTPUseCase(phone: phone, otp: otp);
+      await _refreshRequireProviderDocuments();
       final user = await ref.read(getCurrentUserUseCaseProvider).call();
       state = _resolveAuthenticated(user);
     } catch (e) {
@@ -231,6 +276,7 @@ class AuthStateNotifier extends Notifier<AuthState> {
     state = const AuthState.loading();
     try {
       await _signInAnonymouslyUseCase();
+      await _refreshRequireProviderDocuments();
       final user = await ref.read(getCurrentUserUseCaseProvider).call();
       state = _resolveAuthenticated(user);
     } catch (e) {
@@ -330,6 +376,17 @@ class AuthStateNotifier extends Notifier<AuthState> {
   }
 
   AuthState _resolveAuthenticated(User user) {
+    final requireDocs = ref
+            .read(requireProviderDocumentsProvider)
+            .asData
+            ?.value ??
+        _cachedRequireProviderDocuments;
+    final isMerchantOrProvider =
+        user.userType == UserType.merchant ||
+        user.userType == UserType.provider;
+    if (isMerchantOrProvider && !requireDocs) {
+      return AuthState.authenticated(user: user);
+    }
     if (user.userType.requiresVerification &&
         !user.verificationStatus.isApproved) {
       return const AuthState.pendingVerification();

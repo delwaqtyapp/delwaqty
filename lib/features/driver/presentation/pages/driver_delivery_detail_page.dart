@@ -1,11 +1,22 @@
-import 'package:delwaqty/features/driver/driver_module.dart';
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:delwaqty/l10n/app_localizations.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:url_launcher/url_launcher.dart';
 
-import 'package:delwaqty/features/_shared/auth/presentation/auth_provider.dart';
+import 'package:delwaqty/core/errors/app_error_text.dart';
+import 'package:delwaqty/core/theme/app_colors.dart';
 import 'package:delwaqty/features/_shared/auth/domain/auth_state.dart';
+import 'package:delwaqty/features/_shared/auth/presentation/auth_provider.dart';
+import 'package:delwaqty/features/customer/commerce/domain/entities/geo_location.dart';
+import 'package:delwaqty/features/customer/delivery/domain/entities/delivery_order.dart';
 import 'package:delwaqty/features/customer/delivery/presentation/providers/delivery_providers.dart';
+import 'package:delwaqty/features/customer/driver/presentation/providers/dispatch_providers.dart';
+import 'package:delwaqty/features/customer/ride/presentation/widgets/ride_map.dart';
+import 'package:delwaqty/features/driver/driver_module.dart';
+import 'package:delwaqty/l10n/app_localizations.dart';
+import 'package:delwaqty/services/maps/maps_service.dart';
 import 'package:delwaqty/shared/widgets/shimmer_loading.dart';
 
 class DriverDeliveryDetailPage extends ConsumerStatefulWidget {
@@ -30,18 +41,26 @@ class _DriverDeliveryDetailPageState
       if (mounted) ref.invalidate(deliveryOrderByIdProvider(widget.id));
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(
-              SnackBar(content: Text(AppLocalizations.of(context).error)),
-            );
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(appErrorText(context, e))),
+        );
       }
     } finally {
       if (mounted) setState(() => _busy = false);
     }
   }
 
-  Future<void> _startWithOtp(String driverId, String rideId) async {
-    final controller = TextEditingController();
+  Future<void> _startWithOtp(String driverId, DeliveryOrder order) async {
+    if (!order.otpRequired) {
+      await _run(
+        () => ref
+            .read(deliveryRepositoryProvider)
+            .startDelivery(order.id, driverId, order.pickupOtp ?? ''),
+      );
+      return;
+    }
+
+    final controller = TextEditingController(text: order.pickupOtp ?? '');
     final otp = await showDialog<String>(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -53,18 +72,83 @@ class _DriverDeliveryDetailPageState
         ),
         actions: [
           TextButton(
-              onPressed: () => Navigator.of(ctx).pop(),
-              child: Text(AppLocalizations.of(context).cancel)),
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: Text(AppLocalizations.of(context).cancel),
+          ),
           TextButton(
-              onPressed: () => Navigator.of(ctx).pop(controller.text),
-              child: Text(AppLocalizations.of(context).confirm)),
+            onPressed: () => Navigator.of(ctx).pop(controller.text),
+            child: Text(AppLocalizations.of(context).confirm),
+          ),
         ],
       ),
     );
     if (otp == null || otp.isEmpty) return;
-    await _run(() => ref
-        .read(deliveryRepositoryProvider)
-        .startDelivery(rideId, driverId, otp));
+    await _run(
+      () => ref
+          .read(deliveryRepositoryProvider)
+          .startDelivery(order.id, driverId, otp),
+    );
+  }
+
+  Future<void> _confirmAndCancel(String orderId) async {
+    final l10n = AppLocalizations.of(context);
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(l10n.confirmCancelDeliveryTitle),
+        content: Text(l10n.confirmCancelDeliveryBody),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: Text(l10n.cancel),
+          ),
+          FilledButton(
+            style: FilledButton.styleFrom(
+              backgroundColor: Theme.of(context).colorScheme.error,
+            ),
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: Text(l10n.confirm),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+    await _run(
+      () => ref.read(deliveryRepositoryProvider).cancelDelivery(
+            orderId,
+            reason: 'cancelled_by_driver',
+            byDriver: true,
+          ),
+    );
+  }
+
+  String? _resolveCustomerPhone(DeliveryOrder order) {
+    final direct = order.recipientPhone?.trim();
+    if (direct != null && direct.isNotEmpty) return direct;
+    final notes = order.dropoffNotes;
+    if (notes != null && notes.isNotEmpty) {
+      final match = RegExp(r'(\+?\d[\d\s\-]{7,14}\d)').firstMatch(notes);
+      if (match != null) {
+        return match.group(0)?.replaceAll(RegExp(r'[\s\-]'), '');
+      }
+    }
+    return null;
+  }
+
+  Future<void> _callPhone(String phone) async {
+    final uri = Uri.parse('tel:$phone');
+    await launchUrl(uri, mode: LaunchMode.externalApplication);
+  }
+
+  Future<void> _openWhatsApp(String phone) async {
+    var digits = phone.replaceAll(RegExp(r'[^\d]'), '');
+    if (digits.startsWith('00')) {
+      digits = digits.substring(2);
+    } else if (digits.startsWith('01') && digits.length == 11) {
+      digits = '2$digits';
+    }
+    final uri = Uri.parse('https://wa.me/$digits');
+    await launchUrl(uri, mode: LaunchMode.externalApplication);
   }
 
   Widget _row(String label, String value) => Padding(
@@ -73,9 +157,15 @@ class _DriverDeliveryDetailPageState
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             SizedBox(
-                width: 110,
-                child: Text(label,
-                    style: const TextStyle(color: Colors.grey))),
+              width: 120,
+              child: Text(
+                label,
+                style: const TextStyle(
+                  color: Colors.grey,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
             Expanded(child: Text(value)),
           ],
         ),
@@ -84,21 +174,14 @@ class _DriverDeliveryDetailPageState
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
     final orderAsync = ref.watch(deliveryOrderByIdProvider(widget.id));
     final authState = ref.watch(authStateProvider);
-    final userId =
-        authState is AuthAuthenticated ? authState.user.id : null;
+    final userId = authState is AuthAuthenticated ? authState.user.id : null;
 
-    // Every lifecycle RPC (accept_ride_request / driver_arrive /
-    // start_trip / complete_delivery) opens with
-    //   SELECT user_id INTO v_owner FROM drivers WHERE id = p_driver_id
-    // and rejects the call when p_driver_id is not a drivers.id.
-    // Passing the auth uid made Accept / Arrive / Start / Complete all
-    // fail with 'forbidden', so the whole delivery loop was dead from
-    // this page.
-    final profileAsync = userId == null
-        ? null
-        : ref.watch(driverProfileProvider(userId));
+    final profileAsync =
+        userId == null ? null : ref.watch(driverProfileProvider(userId));
     final driverId = profileAsync?.asData?.value?.id ?? '';
 
     if (userId != null && driverId.isEmpty) {
@@ -107,6 +190,9 @@ class _DriverDeliveryDetailPageState
         body: const Center(child: CircularProgressIndicator()),
       );
     }
+
+    final livePosition =
+        driverId.isEmpty ? null : ref.watch(driverLivePositionProvider(driverId));
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.deliveryDetails)),
@@ -119,17 +205,123 @@ class _DriverDeliveryDetailPageState
             ShimmerCard(),
           ],
         ),
-        error: (e, _) => Center(child: Text(l10n.error)),
+        error: (e, _) => Center(child: Text(appErrorText(context, e))),
         data: (order) {
           if (order == null) {
             return Center(child: Text(l10n.orderNotFound));
           }
           final status = order.status;
-          final canCancel =
-              status != 'completed' && status != 'cancelled';
+          final canCancel = status != 'completed' && status != 'cancelled';
+          final customerPhone = _resolveCustomerPhone(order);
+          final pickupLatLng =
+              LatLng(order.pickupLatitude, order.pickupLongitude);
+          final dropoffLatLng =
+              LatLng(order.dropoffLatitude, order.dropoffLongitude);
+          final driverLatLng = livePosition != null
+              ? LatLng(livePosition.latitude, livePosition.longitude)
+              : null;
+
           return ListView(
             padding: const EdgeInsets.all(16),
             children: [
+              // Live Delivery Map Section
+              Text(
+                l10n.liveDeliveryMapTitle,
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Container(
+                height: 240,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(
+                    color: cs.outlineVariant.withValues(alpha: 0.4),
+                  ),
+                ),
+                clipBehavior: Clip.antiAlias,
+                child: RideMap(
+                  pickup: pickupLatLng,
+                  dropoff: dropoffLatLng,
+                  driver: driverLatLng,
+                  height: 240,
+                ),
+              ),
+              const SizedBox(height: 12),
+              // 1-Tap Navigation Buttons
+              Row(
+                children: [
+                  Expanded(
+                    child: FilledButton.tonalIcon(
+                      onPressed: () {
+                        ref.read(mapsServiceProvider).openNavigation(
+                              GeoLocation(
+                                latitude: order.pickupLatitude,
+                                longitude: order.pickupLongitude,
+                              ),
+                            );
+                      },
+                      icon: const Icon(Icons.storefront_rounded, size: 18),
+                      label: Text(
+                        l10n.navigateToPickup,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: FilledButton.icon(
+                      onPressed: () {
+                        ref.read(mapsServiceProvider).openNavigation(
+                              GeoLocation(
+                                latitude: order.dropoffLatitude,
+                                longitude: order.dropoffLongitude,
+                              ),
+                            );
+                      },
+                      icon: const Icon(Icons.navigation_rounded, size: 18),
+                      label: Text(
+                        l10n.navigateToCustomer,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              if (customerPhone != null && customerPhone.isNotEmpty) ...[
+                const SizedBox(height: 10),
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        onPressed: () => _callPhone(customerPhone),
+                        icon: const Icon(Icons.call_rounded, size: 18),
+                        label: Text(
+                          l10n.callCustomer,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: AppColors.successLight,
+                        ),
+                        onPressed: () => _openWhatsApp(customerPhone),
+                        icon: const Icon(Icons.chat_rounded, size: 18),
+                        label: Text(
+                          l10n.whatsappCustomer,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+              const SizedBox(height: 16),
+              // Order Details Card
               Card(
                 child: Padding(
                   padding: const EdgeInsets.all(16),
@@ -138,19 +330,39 @@ class _DriverDeliveryDetailPageState
                     children: [
                       _row(l10n.status, status),
                       _row(l10n.type, order.serviceType),
-                      if (order.merchantName != null)
+                      if (order.merchantName != null &&
+                          order.merchantName!.isNotEmpty)
                         _row(l10n.merchant, order.merchantName!),
-                      _row(l10n.pickup, order.pickupAddress),
-                      _row(l10n.dropoff, order.dropoffAddress),
-                      if (order.itemsSummary != null)
-                        _row(l10n.items, order.itemsSummary!),
+                      if (order.recipientName != null &&
+                          order.recipientName!.isNotEmpty)
+                        _row(l10n.customerName, order.recipientName!),
+                      if (customerPhone != null && customerPhone.isNotEmpty)
+                        _row(l10n.orderCustomerPhone, customerPhone),
+                      _row(l10n.pickupPointLabel, order.pickupAddress),
+                      if (order.pickupNotes != null &&
+                          order.pickupNotes!.isNotEmpty)
+                        _row(l10n.deliveryNotesLabel, order.pickupNotes!),
+                      _row(l10n.dropoffPointLabel, order.dropoffAddress),
+                      if (order.dropoffNotes != null &&
+                          order.dropoffNotes!.isNotEmpty)
+                        _row(l10n.orderSpecialNotes, order.dropoffNotes!),
+                      if (order.itemsSummary != null &&
+                          order.itemsSummary!.isNotEmpty)
+                        _row(l10n.orderItemsSummary, order.itemsSummary!),
                       if (order.fare != null)
                         _row(l10n.fare, '${order.fare} ${order.currency}'),
                       if (order.distance != null)
-                        _row(l10n.distance, l10n.expectedKm(order.distance?.toStringAsFixed(1) ?? '0')),
+                        _row(
+                          l10n.distance,
+                          l10n.expectedKm(
+                            order.distance?.toStringAsFixed(1) ?? '0',
+                          ),
+                        ),
                       if (order.estimatedMinutes != null)
-                        _row(l10n.estimatedTime,
-                            '${order.estimatedMinutes} دقيقة'),
+                        _row(
+                          l10n.estimatedTime,
+                          l10n.estimatedMinutesValue(order.estimatedMinutes!),
+                        ),
                     ],
                   ),
                 ),
@@ -161,47 +373,46 @@ class _DriverDeliveryDetailPageState
                 FilledButton(
                   onPressed: _busy
                       ? null
-                      : () => _run(() => ref
-                          .read(deliveryRepositoryProvider)
-                          .acceptDeliveryRequest(order.id, driverId)),
+                      : () => _run(
+                            () => ref
+                                .read(deliveryRepositoryProvider)
+                                .acceptDeliveryRequest(order.id, driverId),
+                          ),
                   child: Text(l10n.accept),
                 ),
               if (status == 'matched')
                 FilledButton(
                   onPressed: _busy
                       ? null
-                      : () => _run(() => ref
-                          .read(deliveryRepositoryProvider)
-                          .driverArrivedAtPickup(order.id, driverId)),
+                      : () => _run(
+                            () => ref
+                                .read(deliveryRepositoryProvider)
+                                .driverArrivedAtPickup(order.id, driverId),
+                          ),
                   child: Text(l10n.arriveAtPickup),
                 ),
               if (status == 'arrived')
                 FilledButton(
-                  onPressed: _busy
-                      ? null
-                      : () => _startWithOtp(driverId, order.id),
+                  onPressed:
+                      _busy ? null : () => _startWithOtp(driverId, order),
                   child: Text(l10n.startDelivery),
                 ),
               if (status == 'inTrip')
                 FilledButton(
                   onPressed: _busy
                       ? null
-                      : () => _run(() => ref
-                          .read(deliveryRepositoryProvider)
-                          .completeDelivery(order.id, driverId)),
+                      : () => _run(
+                            () => ref
+                                .read(deliveryRepositoryProvider)
+                                .completeDelivery(order.id, driverId),
+                          ),
                   child: Text(l10n.completeDelivery),
                 ),
               if (canCancel) ...[
                 const SizedBox(height: 8),
                 OutlinedButton(
-                  onPressed: _busy
-                      ? null
-                      : () => _run(() => ref
-                          .read(deliveryRepositoryProvider)
-                          .cancelDelivery(order.id,
-                              reason: 'cancelled_by_driver',
-                              byDriver: true)),
-                  child: Text(AppLocalizations.of(context).cancel),
+                  onPressed: _busy ? null : () => _confirmAndCancel(order.id),
+                  child: Text(l10n.cancel),
                 ),
               ],
             ],

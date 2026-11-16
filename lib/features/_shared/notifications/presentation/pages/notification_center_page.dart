@@ -5,13 +5,14 @@ import 'package:delwaqty/domain/entities/app_notification.dart';
 import 'package:delwaqty/core/auth/admin_access.dart';
 import 'package:delwaqty/features/_shared/auth/domain/auth_state.dart';
 import 'package:delwaqty/features/_shared/auth/presentation/auth_provider.dart';
+import 'package:delwaqty/core/errors/app_error_text.dart';
 import 'package:delwaqty/features/_shared/notifications/notifications_module.dart';
+import 'package:delwaqty/shared/notifications/notification_localizer.dart';
 import 'package:delwaqty/shared/notifications/notification_route_resolver.dart';
 import 'package:delwaqty/shared/widgets/app_loader.dart';
 import 'package:delwaqty/shared/widgets/premium_empty_state.dart';
 import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
-import 'package:delwaqty/core/theme/app_colors.dart';
 import 'dart:async';
 
 const _pageSize = 20;
@@ -29,6 +30,7 @@ class _NotificationCenterPageState extends ConsumerState<NotificationCenterPage>
   int _offset = 0;
   bool _loading = false;
   bool _hasMore = true;
+  Object? _error;
 
   @override
   void initState() {
@@ -38,18 +40,26 @@ class _NotificationCenterPageState extends ConsumerState<NotificationCenterPage>
 
   Future<void> _loadMore() async {
     if (_loading || !_hasMore) return;
-    setState(() => _loading = true);
+    setState(() {
+      _loading = true;
+      _error = null;
+    });
     try {
       final repo = ref.read(notificationRepositoryProvider);
       final page = await repo.getNotifications(offset: _offset);
+      if (!mounted) return;
       setState(() {
         _items.addAll(page);
         _offset += page.length;
         _hasMore = page.length == _pageSize;
         _loading = false;
       });
-    } catch (_) {
-      setState(() => _loading = false);
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _loading = false;
+        _error = e;
+      });
     }
   }
 
@@ -58,6 +68,7 @@ class _NotificationCenterPageState extends ConsumerState<NotificationCenterPage>
       _items.clear();
       _offset = 0;
       _hasMore = true;
+      _error = null;
     });
     await _loadMore();
   }
@@ -89,6 +100,7 @@ class _NotificationCenterPageState extends ConsumerState<NotificationCenterPage>
             onPressed: () async {
               final repo = ref.read(notificationRepositoryProvider);
               await repo.markAllAsRead();
+              if (!mounted) return;
               for (var i = 0; i < _items.length; i++) {
                 _items[i] = _items[i].copyWith(isRead: true);
               }
@@ -109,6 +121,27 @@ class _NotificationCenterPageState extends ConsumerState<NotificationCenterPage>
               padding: const EdgeInsets.all(16),
               itemCount: 5,
               itemBuilder: (context, index) => const SkeletonListTile(),
+            )
+          : _items.isEmpty && _error != null
+          ? Center(
+              child: Padding(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      appErrorText(context, _error!),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 12),
+                    FilledButton.icon(
+                      onPressed: _refresh,
+                      icon: const Icon(Icons.refresh_rounded),
+                      label: Text(l10n.retry),
+                    ),
+                  ],
+                ),
+              ),
             )
           : _items.isEmpty
           ? PremiumEmptyState(
@@ -177,6 +210,7 @@ class _NotificationCenterPageState extends ConsumerState<NotificationCenterPage>
                         final repo =
                             ref.read(notificationRepositoryProvider);
                         await repo.markAsRead(notification.id);
+                        if (!mounted) return;
                         final index = _items.indexWhere(
                           (n) => n.id == notification.id,
                         );
@@ -204,6 +238,7 @@ class _NotificationCenterPageState extends ConsumerState<NotificationCenterPage>
                         final repo =
                             ref.read(notificationRepositoryProvider);
                         await repo.deleteNotification(notification.id);
+                        if (!mounted) return;
                         _items.removeWhere((n) => n.id == notification.id);
                         _offset = _items.length;
                         setState(() {});
@@ -288,8 +323,12 @@ class _NotificationCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final colorScheme = Theme.of(context).colorScheme;
-    final typeColor = _getTypeColor(notification.type, colorScheme);
+    final typeColor = NotificationLocalizer.typeColor(
+      notification.type,
+      colorScheme,
+    );
 
     return Material(
       color: notification.isRead
@@ -312,7 +351,7 @@ class _NotificationCard extends StatelessWidget {
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Icon(
-                  _getTypeIcon(notification.type),
+                  NotificationLocalizer.typeIcon(notification.type),
                   size: 20,
                   color: typeColor,
                 ),
@@ -326,7 +365,7 @@ class _NotificationCard extends StatelessWidget {
                       children: [
                         Expanded(
                           child: Text(
-                            notification.title,
+                            NotificationLocalizer.title(context, notification),
                             style: Theme.of(context)
                                 .textTheme
                                 .bodyMedium
@@ -339,22 +378,20 @@ class _NotificationCard extends StatelessWidget {
                         ),
                         if (notification.priority == NotificationPriority.high)
                           Container(
-                            margin: const EdgeInsets.only(right: 6),
+                            margin: const EdgeInsetsDirectional.only(end: 6),
                             padding: const EdgeInsets.symmetric(
                               horizontal: 6,
                               vertical: 2,
                             ),
                             decoration: BoxDecoration(
-                              color: AppColors.errorLight.withValues(alpha: 0.15),
+                              color: colorScheme.error.withValues(alpha: 0.15),
                               borderRadius: BorderRadius.circular(4),
                             ),
                             child: Text(
-                              AppLocalizations.of(
-                                context,
-                              ).notificationPriorityHigh,
+                              l10n.notificationPriorityHigh,
                               style: Theme.of(context).textTheme.labelSmall
                                   ?.copyWith(
-                                    color: AppColors.errorLight,
+                                    color: colorScheme.error,
                                     fontWeight: FontWeight.w700,
                                   ),
                             ),
@@ -372,7 +409,7 @@ class _NotificationCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      notification.body,
+                      NotificationLocalizer.body(context, notification),
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         color: colorScheme.onSurfaceVariant,
                       ),
@@ -381,9 +418,9 @@ class _NotificationCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      _formatTime(
+                      NotificationLocalizer.formatRelativeTime(
                         notification.createdAt,
-                        AppLocalizations.of(context),
+                        l10n,
                       ),
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         color: colorScheme.onSurfaceVariant,
@@ -394,9 +431,7 @@ class _NotificationCard extends StatelessWidget {
               ),
               if (onDelete != null)
                 IconButton(
-                  tooltip: AppLocalizations.of(
-                    context,
-                  ).deleteNotification,
+                  tooltip: l10n.deleteNotification,
                   visualDensity: VisualDensity.compact,
                   icon: const Icon(Icons.delete_outline_rounded, size: 20),
                   color: colorScheme.onSurfaceVariant,
@@ -407,121 +442,5 @@ class _NotificationCard extends StatelessWidget {
         ),
       ),
     );
-  }
-
-  Color _getTypeColor(NotificationType type, ColorScheme colorScheme) {
-    switch (type) {
-      case NotificationType.system:
-        return colorScheme.primary;
-      case NotificationType.order:
-        return AppColors.brandPurple;
-      case NotificationType.payment:
-        return AppColors.successLight;
-      case NotificationType.promotion:
-        return AppColors.warningLight;
-      case NotificationType.service:
-        return AppColors.serviceRestaurant;
-      case NotificationType.account:
-        return colorScheme.tertiary;
-      case NotificationType.security:
-        return AppColors.errorLight;
-      case NotificationType.message:
-        return colorScheme.secondary;
-      case NotificationType.info:
-        return colorScheme.primary;
-      case NotificationType.warning:
-        return AppColors.warningLight;
-      case NotificationType.success:
-        return AppColors.successLight;
-      case NotificationType.reminder:
-        return AppColors.orderPreparing;
-      case NotificationType.reward:
-        return AppColors.brandPurple;
-      case NotificationType.chatReply:
-      case NotificationType.chatAssigned:
-      case NotificationType.chatEscalated:
-      case NotificationType.chatClosed:
-        return colorScheme.secondary;
-      case NotificationType.complaint:
-      case NotificationType.complaintNote:
-      case NotificationType.complaintEscalated:
-      case NotificationType.complaintAssigned:
-        return AppColors.warningLight;
-      case NotificationType.emergency:
-      case NotificationType.emergencyAlert:
-      case NotificationType.emergencyResolved:
-        return AppColors.errorLight;
-      case NotificationType.adminManagement:
-      case NotificationType.moderation:
-      case NotificationType.approval:
-      case NotificationType.providerProfile:
-        return colorScheme.tertiary;
-      case NotificationType.topupApproved:
-      case NotificationType.adminTopup:
-        return AppColors.successLight;
-    }
-  }
-
-  IconData _getTypeIcon(NotificationType type) {
-    switch (type) {
-      case NotificationType.system:
-        return Icons.info_outline_rounded;
-      case NotificationType.order:
-        return Icons.shopping_bag_outlined;
-      case NotificationType.payment:
-      case NotificationType.topupApproved:
-      case NotificationType.adminTopup:
-        return Icons.payment_rounded;
-      case NotificationType.promotion:
-        return Icons.local_offer_outlined;
-      case NotificationType.service:
-        return Icons.home_repair_service_outlined;
-      case NotificationType.account:
-        return Icons.person_outline_rounded;
-      case NotificationType.security:
-        return Icons.shield_outlined;
-      case NotificationType.message:
-        return Icons.chat_bubble_outline_rounded;
-      case NotificationType.info:
-        return Icons.info_outline_rounded;
-      case NotificationType.warning:
-        return Icons.warning_amber_rounded;
-      case NotificationType.success:
-        return Icons.check_circle_outline_rounded;
-      case NotificationType.reminder:
-        return Icons.alarm_rounded;
-      case NotificationType.reward:
-        return Icons.card_giftcard_rounded;
-      case NotificationType.chatReply:
-      case NotificationType.chatAssigned:
-      case NotificationType.chatEscalated:
-      case NotificationType.chatClosed:
-        return Icons.chat_bubble_outline_rounded;
-      case NotificationType.complaint:
-      case NotificationType.complaintNote:
-      case NotificationType.complaintEscalated:
-      case NotificationType.complaintAssigned:
-        return Icons.report_outlined;
-      case NotificationType.emergency:
-      case NotificationType.emergencyAlert:
-      case NotificationType.emergencyResolved:
-        return Icons.emergency_rounded;
-      case NotificationType.adminManagement:
-      case NotificationType.moderation:
-      case NotificationType.approval:
-      case NotificationType.providerProfile:
-        return Icons.admin_panel_settings_outlined;
-    }
-  }
-
-  String _formatTime(DateTime dateTime, AppLocalizations l10n) {
-    final now = DateTime.now();
-    final diff = now.difference(dateTime);
-
-    if (diff.inMinutes < 1) return l10n.justNow;
-    if (diff.inMinutes < 60) return l10n.minutesAgoShort(diff.inMinutes);
-    if (diff.inHours < 24) return l10n.hoursAgoShort(diff.inHours);
-    if (diff.inDays < 7) return l10n.daysAgoShort(diff.inDays);
-    return '${dateTime.day}/${dateTime.month}/${dateTime.year}';
   }
 }

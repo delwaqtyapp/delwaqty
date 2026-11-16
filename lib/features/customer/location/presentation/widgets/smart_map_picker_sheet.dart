@@ -10,7 +10,8 @@ import 'package:http/http.dart' as http;
 import 'package:delwaqty/core/theme/app_colors.dart';
 import 'package:delwaqty/core/theme/app_text_styles.dart';
 import 'package:delwaqty/features/customer/location/presentation/providers/location_provider.dart';
-import 'package:delwaqty/features/customer/search/domain/geocoding_provider.dart';
+import 'package:delwaqty/features/customer/search/domain/entities/geo_point.dart';
+import 'package:delwaqty/features/customer/search/domain/entities/search_session.dart';
 import 'package:delwaqty/features/customer/search/presentation/providers/search_providers.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 
@@ -67,6 +68,7 @@ class _SmartMapPickerSheetState extends ConsumerState<SmartMapPickerSheet> {
 
   final Completer<GoogleMapController> _mapController = Completer();
   final TextEditingController _searchController = TextEditingController();
+  final SearchSession _searchSession = SearchSession.generate();
   Timer? _searchDebounce;
   late LatLng _center;
   bool _isMoving = false;
@@ -125,18 +127,21 @@ class _SmartMapPickerSheetState extends ConsumerState<SmartMapPickerSheet> {
   }
 
   Future<void> _performSearch(String query) async {
+    final lang = Localizations.localeOf(context).languageCode;
     final hits = <_MapSearchHit>[];
     try {
       final places = ref.read(placesRepositoryProvider);
       final suggestions = await places.autocomplete(
         query: query,
-        bias: GeoPoint(latitude: _center.latitude, longitude: _center.longitude),
+        languageCode: lang,
+        origin: GeoPoint(latitude: _center.latitude, longitude: _center.longitude),
+        session: _searchSession,
       );
       for (final s in suggestions.take(5)) {
         hits.add(
           _MapSearchHit(
             title: s.primaryText,
-            subtitle: s.secondaryText ?? '',
+            subtitle: s.secondaryText,
             placeId: s.placeId,
           ),
         );
@@ -145,7 +150,6 @@ class _SmartMapPickerSheetState extends ConsumerState<SmartMapPickerSheet> {
 
     if (hits.isEmpty) {
       try {
-        final lang = Localizations.localeOf(context).languageCode;
         final uri = Uri.https('nominatim.openstreetmap.org', '/search', {
           'q': query,
           'format': 'json',
@@ -191,6 +195,7 @@ class _SmartMapPickerSheetState extends ConsumerState<SmartMapPickerSheet> {
   }
 
   Future<void> _selectSearchHit(_MapSearchHit hit) async {
+    final lang = Localizations.localeOf(context).languageCode;
     FocusScope.of(context).unfocus();
     setState(() {
       _searchHits = const [];
@@ -204,10 +209,13 @@ class _SmartMapPickerSheetState extends ConsumerState<SmartMapPickerSheet> {
 
     if ((lat == null || lng == null) && hit.placeId != null) {
       try {
-        final details =
-            await ref.read(placesRepositoryProvider).details(placeId: hit.placeId!);
-        lat = details.point.latitude;
-        lng = details.point.longitude;
+        final details = await ref.read(placesRepositoryProvider).details(
+              placeId: hit.placeId!,
+              languageCode: lang,
+              session: _searchSession,
+            );
+        lat = details.location.latitude;
+        lng = details.location.longitude;
         if (details.formattedAddress.isNotEmpty) {
           address = details.formattedAddress;
         }

@@ -148,7 +148,7 @@ class _ProviderVerificationPageState
                 subtitle: Text(
                   _idCardFile?.name ??
                       (idCard != null && idCard.isNotEmpty
-                          ? l10n.uploaded
+                          ? l10n.done
                           : l10n.notUploaded),
                 ),
                 trailing: TextButton(
@@ -161,7 +161,7 @@ class _ProviderVerificationPageState
                 subtitle: Text(
                   _photoFile?.name ??
                       (photo != null && photo.isNotEmpty
-                          ? l10n.uploaded
+                          ? l10n.done
                           : l10n.notUploaded),
                 ),
                 trailing: TextButton(

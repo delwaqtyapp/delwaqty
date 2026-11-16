@@ -147,7 +147,7 @@ class _ProviderDocumentsPageState extends ConsumerState<ProviderDocumentsPage> {
                   'verified' || 'approved' => l10n.verified,
                   'rejected' => l10n.rejected,
                   'pending' => l10n.pendingReview,
-                  _ => l10n.uploaded,
+                  _ => l10n.done,
                 };
                 return Card(
                   child: ListTile(

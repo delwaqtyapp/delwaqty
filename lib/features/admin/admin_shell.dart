@@ -4,9 +4,13 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:delwaqty/core/localization/admin_locale_provider.dart';
+import 'package:delwaqty/core/module/feature_module.dart';
 import 'package:delwaqty/core/theme/app_colors.dart';
+import 'package:delwaqty/core/theme/app_icons.dart';
 import 'package:delwaqty/features/admin/floating_sidebar/sidebar_theme.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
+import 'package:delwaqty/shared/widgets/floating_glass_buttons.dart';
+import 'package:delwaqty/shared/widgets/glass_side_menu.dart';
 
 class _AdminNavItem {
   const _AdminNavItem({
@@ -292,20 +296,63 @@ class AdminShellScope extends InheritedWidget {
   bool updateShouldNotify(covariant InheritedWidget oldWidget) => false;
 }
 
-/// Global burger / menu button that opens the admin navigation drawer.
-class AdminMenuButton extends StatelessWidget {
+/// Converts [_adminGroups] into [DrawerEntry] items for [GlassSideMenuController].
+List<DrawerEntry> buildAdminDrawerEntries(BuildContext context) {
+  return [
+    for (final group in _adminGroups)
+      for (final item in group.items)
+        DrawerEntry(
+          id: 'admin-${item.path}',
+          label: (ctx) => item.label(AppLocalizations.of(ctx)),
+          icon: item.icon,
+          position: item.path == '/admin/settings' ||
+                  item.path == '/admin/platform-config' ||
+                  item.path == '/admin/profile'
+              ? DrawerPosition.settings
+              : DrawerPosition.body,
+          onTap: (ctx, _) => ctx.go(item.path),
+        ),
+  ];
+}
+
+/// Global burger / menu button that opens the floating glass admin menu.
+class AdminMenuButton extends ConsumerStatefulWidget {
   const AdminMenuButton({super.key, this.color});
 
   final Color? color;
 
   @override
+  ConsumerState<AdminMenuButton> createState() => _AdminMenuButtonState();
+}
+
+class _AdminMenuButtonState extends ConsumerState<AdminMenuButton> {
+  final GlobalKey _key = GlobalKey();
+
+  void _openMenu() {
+    final box = _key.currentContext?.findRenderObject() as RenderBox?;
+    final anchor = box == null
+        ? null
+        : box.localToGlobal(Offset.zero) & box.size;
+    GlassSideMenuController.open(
+      context,
+      ref,
+      anchor: anchor,
+      drawerEntries: buildAdminDrawerEntries(context),
+    );
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return IconButton(
-      tooltip: MaterialLocalizations.of(context).openAppDrawerTooltip,
-      icon: Icon(Icons.menu_rounded, color: color),
-      onPressed: () {
-        AdminShellScope.of(context)?.openDrawer();
-      },
+    final l10n = AppLocalizations.of(context);
+    return Center(
+      child: FloatingGlassCircleButton(
+        key: _key,
+        size: 40,
+        iconSize: 20,
+        tooltip: l10n.openMenuTooltip,
+        onTap: _openMenu,
+        child: Icon(AppIcons.navDrawer, color: widget.color, size: 20),
+      ),
     );
   }
 }

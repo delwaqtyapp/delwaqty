@@ -70,11 +70,17 @@ const _$NotificationTypeEnumMap = {
   NotificationType.chatClosed: 'chat_closed',
   NotificationType.complaint: 'complaint',
   NotificationType.complaintNote: 'complaint_note',
+  NotificationType.complaintEscalated: 'complaint_escalated',
+  NotificationType.complaintAssigned: 'complaint_assigned',
   NotificationType.emergency: 'emergency',
   NotificationType.emergencyAlert: 'emergency_alert',
   NotificationType.emergencyResolved: 'emergency_resolved',
   NotificationType.adminManagement: 'admin_management',
   NotificationType.moderation: 'moderation',
+  NotificationType.approval: 'approval',
+  NotificationType.topupApproved: 'topup_approved',
+  NotificationType.adminTopup: 'admin_topup',
+  NotificationType.providerProfile: 'provider_profile',
 };
 
 const _$NotificationPriorityEnumMap = {

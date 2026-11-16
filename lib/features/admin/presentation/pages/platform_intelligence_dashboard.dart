@@ -6,6 +6,7 @@ import 'package:delwaqty/features/admin/presentation/providers/platform_intellig
 import 'package:delwaqty/features/admin/domain/entities/platform_intelligence.dart';
 import 'package:delwaqty/features/_shared/regions/presentation/providers/region_providers.dart';
 import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
+import 'package:delwaqty/shared/widgets/floating_glass_buttons.dart';
 import 'package:delwaqty/shared/widgets/premium_empty_state.dart';
 import 'package:delwaqty/shared/widgets/app_loader.dart';
 import 'package:delwaqty/shared/widgets/design/premium_card.dart';
@@ -38,6 +39,12 @@ class _PlatformIntelligenceDashboardState
             : null,
         title: Text(l10n.adminCommandCenter),
         actions: [
+          const Center(
+            child: Padding(
+              padding: EdgeInsetsDirectional.only(end: 6),
+              child: FloatingNotificationCircleButton(size: 40, iconSize: 20),
+            ),
+          ),
           IconButton(
             tooltip: l10n.adminQuickActions,
             icon: const Icon(Icons.grid_view_rounded),

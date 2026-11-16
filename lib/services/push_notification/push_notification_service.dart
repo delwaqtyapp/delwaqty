@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -24,16 +24,11 @@ import 'package:delwaqty/shared/notifications/notification_route_resolver.dart';
 final pushNotificationServiceProvider = Provider<PushNotificationService>((
   ref,
 ) {
-  final service = PushNotificationService(
+  return PushNotificationService(
+    ref,
     ref.watch(loggerProvider),
     ref.watch(realtimeServiceProvider),
   );
-  service.onRealtimeNotification = (_) {
-    ref.invalidate(notificationsProvider);
-    ref.invalidate(unreadCountProvider);
-    ref.invalidate(unreadCountStreamProvider);
-  };
-  return service;
 });
 
 const _notificationChannelId = 'delwaqty_notifications';
@@ -120,13 +115,17 @@ Future<void> showChatCallNotification({
   required String roomId,
   required String callerLabel,
   required String message,
+  String? title,
+  String? body,
 }) async {
   try {
     await _initLocalNotifications();
     await _localNotifications.show(
       id: DateTime.now().millisecondsSinceEpoch.remainder(1 << 31),
-      title: '📞 مكالمة صوتية واردة',
-      body: '$callerLabel — ${message.isEmpty ? 'اضغط للرد' : message}',
+      title: title ?? 'Incoming voice call',
+      body:
+          body ??
+          '$callerLabel — ${message.isEmpty ? 'Tap to answer' : message}',
       notificationDetails: const NotificationDetails(
         android: AndroidNotificationDetails(
           _notificationChannelId,
@@ -183,25 +182,35 @@ void _handleNotificationTap(Map<String, dynamic> data) {
   router.push(deepLink);
 
   if (payload.notificationId != null) {
-    _markNotificationRead(payload.notificationId!);
+    _markNotificationRead(payload.notificationId!, context: context);
   }
 }
 
-Future<void> _markNotificationRead(String notificationId) async {
+Future<void> _markNotificationRead(
+  String notificationId, {
+  BuildContext? context,
+}) async {
   try {
     final client = Supabase.instance.client;
     await client.from('notifications').update({
       'is_read': true,
       'read_at': DateTime.now().toIso8601String(),
     }).eq('id', notificationId);
+    if (context != null && context.mounted) {
+      final container = ProviderScope.containerOf(context);
+      container.invalidate(unreadCountProvider);
+      container.invalidate(unreadCountStreamProvider);
+      container.invalidate(notificationsProvider);
+    }
   } catch (e) {
     debugPrint('Failed to mark notification read: $e');
   }
 }
 
 class PushNotificationService {
-  PushNotificationService(this._logger, this._realtime);
+  PushNotificationService(this._ref, this._logger, this._realtime);
 
+  final Ref _ref;
   final AppLogger _logger;
   final RealtimeService _realtime;
   final FirebaseMessaging _messaging = FirebaseMessaging.instance;
@@ -209,51 +218,55 @@ class PushNotificationService {
   String? _lastToken;
   String? _deviceId;
   Timer? _heartbeat;
-  bool _initialized = false;
+  bool _localAndFcmReady = false;
+  String? _boundUserId;
 
   void Function(Map<String, dynamic> record)? onRealtimeNotification;
 
   Future<void> initialize() async {
-    if (_initialized) return;
-
     try {
-      await _initLocalNotifications();
-      _setupRealtimeNotifications();
+      if (!_localAndFcmReady) {
+        await _initLocalNotifications();
+        _deviceId ??= await DeviceIdentity.getOrCreate();
 
-      _deviceId = await DeviceIdentity.getOrCreate();
+        final settings = await _messaging.requestPermission();
+        if (settings.authorizationStatus == AuthorizationStatus.authorized) {
+          _lastToken = await _messaging.getToken();
 
-      final settings = await _messaging.requestPermission();
+          _messaging.onTokenRefresh.listen((token) {
+            _lastToken = token;
+            _saveToken(token);
+          });
 
-      if (settings.authorizationStatus != AuthorizationStatus.authorized) {
-        _logger.i('Push notification permission denied');
-        return;
+          FirebaseMessaging.onMessage.listen(_handleForegroundMessage);
+          FirebaseMessaging.onMessageOpenedApp.listen(_handleBackgroundMessage);
+
+          final initialMessage = await _messaging.getInitialMessage();
+          if (initialMessage != null) {
+            _handleBackgroundMessage(initialMessage);
+          }
+        } else {
+          _logger.i('Push notification permission denied');
+        }
+
+        _localAndFcmReady = true;
       }
 
-      final token = await _messaging.getToken();
-      if (token != null) {
-        _lastToken = token;
-        await _saveToken(token);
+      final currentUser = Supabase.instance.client.auth.currentUser;
+      if (currentUser != null && _boundUserId != currentUser.id) {
+        _setupRealtimeNotifications();
+
+        final token = _lastToken ?? await _messaging.getToken();
+        if (token != null) {
+          _lastToken = token;
+          await _saveToken(token);
+        }
+
+        _startHeartbeat();
+        _boundUserId = currentUser.id;
+        _logger.i('Push notifications bound to user ${currentUser.id}');
       }
-
-      _messaging.onTokenRefresh.listen((token) {
-        _lastToken = token;
-        _saveToken(token);
-      });
-
-      _startHeartbeat();
-
-      FirebaseMessaging.onMessage.listen(_handleForegroundMessage);
-      FirebaseMessaging.onMessageOpenedApp.listen(_handleBackgroundMessage);
-
-      final initialMessage = await _messaging.getInitialMessage();
-      if (initialMessage != null) {
-        _handleBackgroundMessage(initialMessage);
-      }
-
-      _initialized = true;
-      _logger.i('Push notifications initialized');
     } catch (e) {
-      _initialized = false;
       _logger.e('Failed to initialize push notifications', e);
     }
   }
@@ -283,7 +296,20 @@ class PushNotificationService {
               if (!isOwn) return;
 
               _logger.i('Realtime notification: $title');
-              _showLocalNotification(title: title, body: body);
+              final notificationPayload = jsonEncode({
+                if (record['id'] != null) 'notification_id': record['id'],
+                if (record['type'] != null) 'type': record['type'],
+                if (record['deep_link'] != null)
+                  'deep_link': record['deep_link'],
+              });
+              _showLocalNotification(
+                title: title,
+                body: body,
+                payload: notificationPayload,
+              );
+              _ref.invalidate(unreadCountProvider);
+              _ref.invalidate(unreadCountStreamProvider);
+              _ref.invalidate(notificationsProvider);
               onRealtimeNotification?.call(record);
             },
           ),
@@ -358,35 +384,35 @@ class PushNotificationService {
         adminNavigatorKey.currentContext ??
         driverRootNavigatorKey.currentContext ??
         providerRootNavigatorKey.currentContext;
+    BuildContext? navContext;
     if (anyCtx != null) {
       final flavor = ProviderScope.containerOf(anyCtx).read(appFlavorProvider);
-      final navContext = activeNavigatorContext(flavor);
+      navContext = activeNavigatorContext(flavor);
       if (navContext == null) return;
-      final context = navContext;
-      GoRouter.of(context).push(deepLink);
+      GoRouter.of(navContext).push(deepLink);
     }
 
     if (payload.notificationId != null) {
-      _markNotificationRead(payload.notificationId!);
+      _markNotificationRead(payload.notificationId!, context: navContext);
     }
   }
 
   Future<void> deactivateTokensOnLogout() async {
     try {
       final client = Supabase.instance.client;
-      if (client.auth.currentUser == null) return;
-
-      final deviceId = _deviceId ?? await DeviceIdentity.getOrCreate();
-      _deviceId = deviceId;
-      await client.rpc('deactivate_device_tokens', params: {
-        'p_device_id': deviceId,
-      });
+      if (client.auth.currentUser != null) {
+        final deviceId = _deviceId ?? await DeviceIdentity.getOrCreate();
+        _deviceId = deviceId;
+        await client.rpc('deactivate_device_tokens', params: {
+          'p_device_id': deviceId,
+        });
+      }
 
       _heartbeat?.cancel();
       _heartbeat = null;
       await _realtime.unsubscribeAll();
       _lastToken = null;
-      _initialized = false;
+      _boundUserId = null;
 
       _logger.i('Tokens deactivated on logout');
     } catch (e) {

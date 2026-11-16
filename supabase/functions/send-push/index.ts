@@ -131,7 +131,7 @@ async function handleRequest(req: Request): Promise<Response> {
 
   const { data: notification, error: notifError } = await supabase
     .from("notifications")
-    .select("id, user_id, title, body, data")
+    .select("id, user_id, title, body, type, deep_link, data")
     .eq("id", notificationId)
     .single();
   if (notifError || !notification || !notification.user_id) {
@@ -159,13 +159,18 @@ async function handleRequest(req: Request): Promise<Response> {
     return json({ ok: false, error: message }, 502);
   }
 
-  const deepLink = typeof notification.data?.deep_link === "string"
-    ? notification.data.deep_link as string
-    : null;
-  const payloadData: Record<string, string> = {
-    type: typeof notification.data?.type === "string"
+  const deepLink = typeof notification.deep_link === "string" && notification.deep_link.length > 0
+    ? notification.deep_link as string
+    : typeof notification.data?.deep_link === "string"
+      ? notification.data.deep_link as string
+      : null;
+  const notifType = typeof notification.type === "string" && notification.type.length > 0
+    ? notification.type as string
+    : typeof notification.data?.type === "string"
       ? notification.data.type as string
-      : "info",
+      : "info";
+  const payloadData: Record<string, string> = {
+    type: notifType,
     notification_id: notificationId,
   };
   if (deepLink) payloadData.deep_link = deepLink;

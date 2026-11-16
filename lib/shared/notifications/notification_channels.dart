@@ -44,6 +44,7 @@ class NotificationChannels {
   static const List<NotificationChannel> channels = [
     // ── Cross-app support ────────────────────────────────────────────────
     NotificationChannel('/notifications'),
+    NotificationChannel('/safety'),
     NotificationChannel(
       '/support/room/:roomId',
       contexts: {

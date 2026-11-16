@@ -55,6 +55,7 @@ final adminNotificationTokensProvider =
       final data = await client
           .from('notification_tokens')
           .select('token, platform, updated_at')
+          .eq('is_active', true)
           .order('updated_at', ascending: false);
       return List<Map<String, dynamic>>.from(data as List);
     });
@@ -408,6 +409,8 @@ class _AdminPushNotificationsPageState
         return Icons.chat_bubble_outline_rounded;
       case NotificationType.complaint:
       case NotificationType.complaintNote:
+      case NotificationType.complaintEscalated:
+      case NotificationType.complaintAssigned:
         return Icons.report_outlined;
       case NotificationType.emergency:
       case NotificationType.emergencyAlert:
@@ -415,7 +418,12 @@ class _AdminPushNotificationsPageState
         return Icons.emergency_rounded;
       case NotificationType.adminManagement:
       case NotificationType.moderation:
+      case NotificationType.approval:
+      case NotificationType.providerProfile:
         return Icons.admin_panel_settings_outlined;
+      case NotificationType.topupApproved:
+      case NotificationType.adminTopup:
+        return Icons.payment_rounded;
     }
   }
 }

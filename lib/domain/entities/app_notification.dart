@@ -84,6 +84,10 @@ enum NotificationType {
   complaint,
   @JsonValue('complaint_note')
   complaintNote,
+  @JsonValue('complaint_escalated')
+  complaintEscalated,
+  @JsonValue('complaint_assigned')
+  complaintAssigned,
   @JsonValue('emergency')
   emergency,
   @JsonValue('emergency_alert')
@@ -94,6 +98,14 @@ enum NotificationType {
   adminManagement,
   @JsonValue('moderation')
   moderation,
+  @JsonValue('approval')
+  approval,
+  @JsonValue('topup_approved')
+  topupApproved,
+  @JsonValue('admin_topup')
+  adminTopup,
+  @JsonValue('provider_profile')
+  providerProfile,
 }
 
 class NotificationPayload {

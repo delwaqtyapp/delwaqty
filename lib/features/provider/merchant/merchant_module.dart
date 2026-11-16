@@ -114,6 +114,47 @@ class MerchantModule extends FeatureModule {
   }
 
   @override
+  List<DrawerEntry> get drawerEntries => [
+    DrawerEntry(
+      id: 'merchant-storefront',
+      label: (ctx) => AppLocalizations.of(ctx).storefront,
+      icon: Icons.storefront_outlined,
+      onTap: (ctx, _) => ctx.push('/merchant-dashboard/storefront'),
+    ),
+    DrawerEntry(
+      id: 'merchant-branches',
+      label: (ctx) => AppLocalizations.of(ctx).branches,
+      icon: Icons.location_city_outlined,
+      onTap: (ctx, _) => ctx.push('/merchant-dashboard/branches'),
+    ),
+    DrawerEntry(
+      id: 'provider-availability',
+      label: (ctx) => AppLocalizations.of(ctx).availability,
+      icon: Icons.schedule_outlined,
+      onTap: (ctx, _) => ctx.push('/provider-availability'),
+    ),
+    DrawerEntry(
+      id: 'provider-financial-center',
+      label: (ctx) => AppLocalizations.of(ctx).financialCenter,
+      icon: Icons.account_balance_wallet_outlined,
+      onTap: (ctx, _) => ctx.push('/provider-financial-center'),
+    ),
+    DrawerEntry(
+      id: 'merchant-reviews',
+      label: (ctx) => AppLocalizations.of(ctx).reviews,
+      icon: Icons.rate_review_outlined,
+      onTap: (ctx, _) => ctx.push('/merchant-dashboard/reviews'),
+    ),
+    DrawerEntry(
+      id: 'provider-support',
+      label: (ctx) => AppLocalizations.of(ctx).support,
+      icon: Icons.support_agent_rounded,
+      position: DrawerPosition.footer,
+      onTap: (ctx, _) => ctx.push('/support'),
+    ),
+  ];
+
+  @override
   List<Override> providerOverrides(Ref ref) => [];
 
   @override

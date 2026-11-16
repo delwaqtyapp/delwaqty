@@ -12,6 +12,7 @@ import 'package:delwaqty/core/localization/admin_locale_provider.dart';
 import 'package:delwaqty/features/admin/support_chat/presentation/chat_providers.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 import 'package:delwaqty/services/ota/ota_update_dialog.dart';
+import 'package:delwaqty/services/push_notification/push_notification_service.dart';
 import 'dart:async';
 
 class AppAdmin extends ConsumerStatefulWidget {
@@ -50,6 +51,7 @@ class _AppAdminState extends ConsumerState<AppAdmin> {
         debugPrint('Auth listener start failed: $e');
       }
       unawaited(authNotifier.checkAuthStatus());
+      unawaited(ref.read(pushNotificationServiceProvider).initialize());
       ref.read(chatCallAlertServiceProvider);
 
       unawaited(_checkOtaUpdate());

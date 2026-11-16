@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:delwaqty/core/errors/app_error_text.dart';
+import 'package:delwaqty/features/customer/location/presentation/providers/location_provider.dart';
+import 'package:delwaqty/features/customer/location/presentation/widgets/smart_map_picker_sheet.dart';
 import 'package:delwaqty/features/provider/merchant/presentation/providers/merchant_providers.dart';
 import 'package:delwaqty/core/extensions/context_extensions.dart';
 import 'package:delwaqty/features/customer/restaurant/restaurant_module.dart';
@@ -369,17 +370,24 @@ class _BranchFormSheetState extends ConsumerState<_BranchFormSheet> {
 
   Future<void> _useCurrentGps() async {
     if (_gettingGps) return;
+    final l10n = AppLocalizations.of(context);
     setState(() => _gettingGps = true);
     try {
-      var perm = await Geolocator.checkPermission();
-      if (perm == LocationPermission.denied) {
-        perm = await Geolocator.requestPermission();
-      }
-      final pos = await Geolocator.getCurrentPosition();
+      final loc =
+          await ref.read(userLocationProvider.notifier).refreshDeepLocked();
       if (!mounted) return;
+      if (loc == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n.locationUnavailable)),
+        );
+        return;
+      }
       setState(() {
-        _latitudeController.text = pos.latitude.toString();
-        _longitudeController.text = pos.longitude.toString();
+        _latitudeController.text = loc.latitude.toStringAsFixed(6);
+        _longitudeController.text = loc.longitude.toStringAsFixed(6);
+        if (loc.detailedAddress.isNotEmpty) {
+          _addressController.text = loc.detailedAddress;
+        }
       });
     } catch (e) {
       if (!mounted) return;
@@ -389,6 +397,24 @@ class _BranchFormSheetState extends ConsumerState<_BranchFormSheet> {
     } finally {
       if (mounted) setState(() => _gettingGps = false);
     }
+  }
+
+  Future<void> _openMapSearchPicker() async {
+    final initLat = double.tryParse(_latitudeController.text.trim());
+    final initLng = double.tryParse(_longitudeController.text.trim());
+    final picked = await SmartMapPickerSheet.show(
+      context,
+      initialLat: initLat,
+      initialLng: initLng,
+    );
+    if (picked == null || !mounted) return;
+    setState(() {
+      _latitudeController.text = picked.latitude.toStringAsFixed(6);
+      _longitudeController.text = picked.longitude.toStringAsFixed(6);
+      if (picked.detailedAddress.isNotEmpty) {
+        _addressController.text = picked.detailedAddress;
+      }
+    });
   }
 
   @override
@@ -522,21 +548,32 @@ class _BranchFormSheetState extends ConsumerState<_BranchFormSheet> {
                       ],
                     ),
                     const SizedBox(height: AppSpacing.sm),
-                    SizedBox(
-                      width: double.infinity,
-                      child: OutlinedButton.icon(
-                        onPressed: _gettingGps ? null : _useCurrentGps,
-                        icon: _gettingGps
-                            ? const SizedBox(
-                                width: 16,
-                                height: 16,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                ),
-                              )
-                            : const Icon(Icons.my_location_rounded),
-                        label: Text(l10n.useCurrentStoreGps),
-                      ),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: OutlinedButton.icon(
+                            onPressed: _gettingGps ? null : _useCurrentGps,
+                            icon: _gettingGps
+                                ? const SizedBox(
+                                    width: 16,
+                                    height: 16,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                    ),
+                                  )
+                                : const Icon(Icons.my_location_rounded),
+                            label: Text(l10n.useCurrentStoreGps),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: FilledButton.tonalIcon(
+                            onPressed: _openMapSearchPicker,
+                            icon: const Icon(Icons.search_rounded),
+                            label: Text(l10n.pickLocationOnMap),
+                          ),
+                        ),
+                      ],
                     ),
                     const SizedBox(height: AppSpacing.lg),
                     SwitchListTile(

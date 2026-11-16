@@ -2,11 +2,12 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:delwaqty/core/errors/app_error_text.dart';
 import 'package:delwaqty/core/theme/app_colors.dart';
+import 'package:delwaqty/features/customer/location/presentation/providers/location_provider.dart';
+import 'package:delwaqty/features/customer/location/presentation/widgets/smart_map_picker_sheet.dart';
 import 'package:delwaqty/features/provider/merchant/presentation/providers/merchant_providers.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 import 'package:delwaqty/services/supabase/supabase_service.dart';
@@ -341,20 +342,24 @@ class _MerchantStorefrontPageState
     final l10n = AppLocalizations.of(context);
     setState(() => _gettingGps = true);
     try {
-      var perm = await Geolocator.checkPermission();
-      if (perm == LocationPermission.denied) {
-        perm = await Geolocator.requestPermission();
-      }
-      final pos = await Geolocator.getCurrentPosition();
+      final loc =
+          await ref.read(userLocationProvider.notifier).refreshDeepLocked();
       if (!mounted) return;
-      final lat = pos.latitude;
-      final lng = pos.longitude;
+      if (loc == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n.locationUnavailable)),
+        );
+        return;
+      }
       setState(() {
-        _latitude = lat;
-        _longitude = lng;
+        _latitude = loc.latitude;
+        _longitude = loc.longitude;
+        if (loc.detailedAddress.isNotEmpty) {
+          _address.text = loc.detailedAddress;
+        }
       });
       await _mapController?.animateCamera(
-        CameraUpdate.newLatLng(LatLng(lat, lng)),
+        CameraUpdate.newLatLngZoom(LatLng(loc.latitude, loc.longitude), 17),
       );
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -368,6 +373,33 @@ class _MerchantStorefrontPageState
     } finally {
       if (mounted) setState(() => _gettingGps = false);
     }
+  }
+
+  Future<void> _openMapSearchPicker() async {
+    final l10n = AppLocalizations.of(context);
+    final picked = await SmartMapPickerSheet.show(
+      context,
+      initialLat: _latitude,
+      initialLng: _longitude,
+    );
+    if (picked == null || !mounted) return;
+    setState(() {
+      _latitude = picked.latitude;
+      _longitude = picked.longitude;
+      if (picked.detailedAddress.isNotEmpty) {
+        _address.text = picked.detailedAddress;
+      }
+    });
+    await _mapController?.animateCamera(
+      CameraUpdate.newLatLngZoom(
+        LatLng(picked.latitude, picked.longitude),
+        17,
+      ),
+    );
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(l10n.storeCoordinatesSaved)),
+    );
   }
 
   void _copyDayZeroHoursToAll() {
@@ -604,16 +636,30 @@ class _MerchantStorefrontPageState
                   ),
                 ),
                 const SizedBox(height: 8),
-                OutlinedButton.icon(
-                  onPressed: _gettingGps ? null : _useCurrentGps,
-                  icon: _gettingGps
-                      ? const SizedBox(
-                          width: 16,
-                          height: 16,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : const Icon(Icons.my_location_rounded),
-                  label: Text(l10n.useCurrentStoreGps),
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        onPressed: _gettingGps ? null : _useCurrentGps,
+                        icon: _gettingGps
+                            ? const SizedBox(
+                                width: 16,
+                                height: 16,
+                                child: CircularProgressIndicator(strokeWidth: 2),
+                              )
+                            : const Icon(Icons.my_location_rounded),
+                        label: Text(l10n.useCurrentStoreGps),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: FilledButton.tonalIcon(
+                        onPressed: _openMapSearchPicker,
+                        icon: const Icon(Icons.search_rounded),
+                        label: Text(l10n.pickLocationOnMap),
+                      ),
+                    ),
+                  ],
                 ),
                 const SizedBox(height: 16),
                 _SectionTitle(title: l10n.deliveryPolicy),

@@ -1,14 +1,34 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:http/http.dart' as http;
 import 'package:delwaqty/core/theme/app_colors.dart';
 import 'package:delwaqty/core/theme/app_text_styles.dart';
 import 'package:delwaqty/features/customer/location/presentation/providers/location_provider.dart';
+import 'package:delwaqty/features/customer/search/domain/geocoding_provider.dart';
+import 'package:delwaqty/features/customer/search/presentation/providers/search_providers.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
+
+class _MapSearchHit {
+  const _MapSearchHit({
+    required this.title,
+    this.subtitle = '',
+    this.placeId,
+    this.lat,
+    this.lng,
+  });
+
+  final String title;
+  final String subtitle;
+  final String? placeId;
+  final double? lat;
+  final double? lng;
+}
 
 class SmartMapPickerSheet extends ConsumerStatefulWidget {
   const SmartMapPickerSheet({
@@ -46,11 +66,15 @@ class _SmartMapPickerSheetState extends ConsumerState<SmartMapPickerSheet> {
   static const LatLng _cairoFallback = LatLng(30.0444, 31.2357);
 
   final Completer<GoogleMapController> _mapController = Completer();
+  final TextEditingController _searchController = TextEditingController();
+  Timer? _searchDebounce;
   late LatLng _center;
   bool _isMoving = false;
   bool _isGeocoding = false;
   bool _isLockingGps = false;
   bool _isConfirming = false;
+  bool _isSearching = false;
+  List<_MapSearchHit> _searchHits = const [];
   String _resolvedAddress = '';
   double? _accuracyMeters;
   int _geocodeToken = 0;
@@ -69,10 +93,139 @@ class _SmartMapPickerSheetState extends ConsumerState<SmartMapPickerSheet> {
       _center = _cairoFallback;
     }
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (_resolvedAddress.isEmpty) {
+      if (widget.initialLat == null && currentLoc == null) {
+        _detectPreciseGps();
+      } else if (_resolvedAddress.isEmpty) {
         _reverseGeocodeCenter(_center);
       }
     });
+  }
+
+  @override
+  void dispose() {
+    _searchDebounce?.cancel();
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  void _onSearchChanged(String query) {
+    _searchDebounce?.cancel();
+    final q = query.trim();
+    if (q.length < 2) {
+      setState(() {
+        _searchHits = const [];
+        _isSearching = false;
+      });
+      return;
+    }
+    setState(() => _isSearching = true);
+    _searchDebounce = Timer(const Duration(milliseconds: 350), () {
+      _performSearch(q);
+    });
+  }
+
+  Future<void> _performSearch(String query) async {
+    final hits = <_MapSearchHit>[];
+    try {
+      final places = ref.read(placesRepositoryProvider);
+      final suggestions = await places.autocomplete(
+        query: query,
+        bias: GeoPoint(latitude: _center.latitude, longitude: _center.longitude),
+      );
+      for (final s in suggestions.take(5)) {
+        hits.add(
+          _MapSearchHit(
+            title: s.primaryText,
+            subtitle: s.secondaryText ?? '',
+            placeId: s.placeId,
+          ),
+        );
+      }
+    } catch (_) {}
+
+    if (hits.isEmpty) {
+      try {
+        final lang = Localizations.localeOf(context).languageCode;
+        final uri = Uri.https('nominatim.openstreetmap.org', '/search', {
+          'q': query,
+          'format': 'json',
+          'addressdetails': '1',
+          'limit': '6',
+          'countrycodes': 'eg',
+          'accept-language': lang,
+        });
+        final resp = await http
+            .get(uri, headers: {'User-Agent': 'DelwaqtyApp/1.0'})
+            .timeout(const Duration(seconds: 6));
+        if (resp.statusCode == 200) {
+          final decoded = jsonDecode(resp.body);
+          if (decoded is List) {
+            for (final item in decoded) {
+              if (item is Map) {
+                final lat = double.tryParse('${item['lat']}');
+                final lng = double.tryParse('${item['lon']}');
+                final display = (item['display_name'] ?? '').toString();
+                if (lat != null && lng != null && display.isNotEmpty) {
+                  final parts = display.split(',');
+                  hits.add(
+                    _MapSearchHit(
+                      title: parts.first.trim(),
+                      subtitle: parts.skip(1).take(2).join(', ').trim(),
+                      lat: lat,
+                      lng: lng,
+                    ),
+                  );
+                }
+              }
+            }
+          }
+        }
+      } catch (_) {}
+    }
+
+    if (!mounted) return;
+    setState(() {
+      _searchHits = hits;
+      _isSearching = false;
+    });
+  }
+
+  Future<void> _selectSearchHit(_MapSearchHit hit) async {
+    FocusScope.of(context).unfocus();
+    setState(() {
+      _searchHits = const [];
+      _isSearching = false;
+    });
+    double? lat = hit.lat;
+    double? lng = hit.lng;
+    String? address = hit.subtitle.isNotEmpty
+        ? '${hit.title}, ${hit.subtitle}'
+        : hit.title;
+
+    if ((lat == null || lng == null) && hit.placeId != null) {
+      try {
+        final details =
+            await ref.read(placesRepositoryProvider).details(placeId: hit.placeId!);
+        lat = details.point.latitude;
+        lng = details.point.longitude;
+        if (details.formattedAddress.isNotEmpty) {
+          address = details.formattedAddress;
+        }
+      } catch (_) {}
+    }
+
+    if (lat == null || lng == null || !mounted) return;
+    final target = LatLng(lat, lng);
+    setState(() {
+      _center = target;
+      _resolvedAddress = address ?? '';
+      _searchController.text = hit.title;
+    });
+    if (_mapController.isCompleted) {
+      final ctrl = await _mapController.future;
+      await ctrl.animateCamera(CameraUpdate.newLatLngZoom(target, 17));
+    }
+    unawaited(_reverseGeocodeCenter(target));
   }
 
   Future<void> _reverseGeocodeCenter(LatLng target) async {
@@ -157,7 +310,7 @@ class _SmartMapPickerSheetState extends ConsumerState<SmartMapPickerSheet> {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
-    final height = MediaQuery.sizeOf(context).height * 0.88;
+    final height = MediaQuery.sizeOf(context).height * 0.90;
 
     return Container(
       height: height,
@@ -170,7 +323,7 @@ class _SmartMapPickerSheetState extends ConsumerState<SmartMapPickerSheet> {
         children: [
           // Top bar
           Padding(
-            padding: const EdgeInsets.fromLTRB(20, 12, 12, 8),
+            padding: const EdgeInsets.fromLTRB(20, 12, 12, 6),
             child: Row(
               children: [
                 const Icon(
@@ -208,6 +361,86 @@ class _SmartMapPickerSheetState extends ConsumerState<SmartMapPickerSheet> {
               ],
             ),
           ),
+          // Live Search Bar
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+            child: TextField(
+              controller: _searchController,
+              onChanged: _onSearchChanged,
+              textInputAction: TextInputAction.search,
+              onSubmitted: _performSearch,
+              decoration: InputDecoration(
+                hintText: '${l10n.search}…',
+                prefixIcon: const Icon(Icons.search_rounded),
+                suffixIcon: _isSearching
+                    ? const Padding(
+                        padding: EdgeInsets.all(12),
+                        child: SizedBox(
+                          width: 16,
+                          height: 16,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        ),
+                      )
+                    : _searchController.text.isNotEmpty
+                    ? IconButton(
+                        tooltip: l10n.clear,
+                        icon: const Icon(Icons.clear_rounded, size: 18),
+                        onPressed: () {
+                          _searchController.clear();
+                          setState(() => _searchHits = const []);
+                        },
+                      )
+                    : null,
+                isDense: true,
+                filled: true,
+                fillColor: cs.surfaceContainerHighest.withValues(alpha: 0.45),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(14),
+                  borderSide: BorderSide.none,
+                ),
+              ),
+            ),
+          ),
+          if (_searchHits.isNotEmpty)
+            Container(
+              constraints: const BoxConstraints(maxHeight: 190),
+              margin: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+              decoration: BoxDecoration(
+                color: cs.surfaceContainerLow,
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(color: cs.outlineVariant),
+              ),
+              child: ListView.separated(
+                shrinkWrap: true,
+                itemCount: _searchHits.length,
+                separatorBuilder: (_, _) => const Divider(height: 1),
+                itemBuilder: (_, idx) {
+                  final hit = _searchHits[idx];
+                  return ListTile(
+                    dense: true,
+                    leading: const Icon(
+                      Icons.place_rounded,
+                      color: AppColors.brandPurple,
+                      size: 20,
+                    ),
+                    title: Text(
+                      hit.title,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(fontWeight: FontWeight.w600),
+                    ),
+                    subtitle: hit.subtitle.isNotEmpty
+                        ? Text(
+                            hit.subtitle,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          )
+                        : null,
+                    onTap: () => _selectSearchHit(hit),
+                  );
+                },
+              ),
+            ),
           // Map + Floating center pin + accuracy badge
           Expanded(
             child: Stack(

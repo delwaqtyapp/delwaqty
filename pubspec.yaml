@@ -136,6 +136,7 @@ flutter:
     - assets/lottie/
     - assets/logo app/logo.webp
     - assets/egypt/
+    - assets/categories/
   fonts:
     - family: Cairo
       fonts:

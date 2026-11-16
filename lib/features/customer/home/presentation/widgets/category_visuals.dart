@@ -221,3 +221,229 @@ String serviceTypeLabel(ServiceCategoryType type, AppLocalizations l10n) =>
       ServiceCategoryType.dishRepair => l10n.serviceCategoryDishRepair,
       ServiceCategoryType.other => l10n.serviceOther,
     };
+
+/// Returns the bundled 3D category asset path for core merchant categories,
+/// or `null` when a 3D icon composition should be rendered instead.
+String? merchantCategoryAsset(String type) {
+  final lower = type.toLowerCase();
+  final resolved = categoryNameToMerchantType(type);
+
+  if (resolved == MerchantType.restaurant ||
+      lower.contains('restaurant') ||
+      lower.contains('fast_food') ||
+      lower.contains('food') ||
+      lower.contains('grill') ||
+      lower.contains('pizza') ||
+      lower.contains('burger')) {
+    return 'assets/categories/cat_restaurant.jpg';
+  }
+
+  if (resolved == MerchantType.grocery ||
+      resolved == MerchantType.supermarket ||
+      resolved == MerchantType.fruits ||
+      resolved == MerchantType.vegetables ||
+      resolved == MerchantType.butcher ||
+      resolved == MerchantType.seafood ||
+      resolved == MerchantType.meat ||
+      resolved == MerchantType.dairy ||
+      lower.contains('grocery') ||
+      lower.contains('supermarket') ||
+      lower.contains('hypermarket') ||
+      lower.contains('fruit') ||
+      lower.contains('vegetable') ||
+      lower.contains('butcher') ||
+      lower.contains('fish')) {
+    return 'assets/categories/cat_grocery.jpg';
+  }
+
+  if (resolved == MerchantType.electronics ||
+      resolved == MerchantType.mobile ||
+      resolved == MerchantType.appliances ||
+      lower.contains('electronic') ||
+      lower.contains('mobile') ||
+      lower.contains('computer') ||
+      lower.contains('tech') ||
+      lower.contains('appliance')) {
+    return 'assets/categories/cat_electronics.jpg';
+  }
+
+  return null;
+}
+
+/// Maps any merchant category name or [MerchantType] to a crisp Material icon
+/// so category tiles never fall back to flat text emojis.
+IconData merchantCategoryIcon(String type) {
+  final lower = type.toLowerCase();
+  if (lower.contains('beauty') || lower.contains('cosmetic')) {
+    return Icons.face_retouching_natural_rounded;
+  }
+  if (lower.contains('book')) return Icons.menu_book_rounded;
+  if (lower.contains('sport')) return Icons.sports_soccer_rounded;
+  if (lower.contains('toy')) return Icons.toys_rounded;
+  if (lower.contains('jewel')) return Icons.diamond_rounded;
+  if (lower.contains('coffee') || lower.contains('cafe')) {
+    return Icons.local_cafe_rounded;
+  }
+  if (lower.contains('computer') || lower.contains('tech')) {
+    return Icons.devices_rounded;
+  }
+  if (lower.contains('fast_food') ||
+      lower.contains('food') ||
+      lower.contains('grill') ||
+      lower.contains('pizza') ||
+      lower.contains('burger')) {
+    return Icons.restaurant_rounded;
+  }
+  if (lower.contains('hypermarket')) return Icons.storefront_rounded;
+  if (lower.contains('fish')) return Icons.set_meal_rounded;
+
+  final merchantType = categoryNameToMerchantType(type) ?? MerchantType.other;
+  return switch (merchantType) {
+    MerchantType.restaurant => Icons.restaurant_rounded,
+    MerchantType.grocery => Icons.local_grocery_store_rounded,
+    MerchantType.supermarket => Icons.storefront_rounded,
+    MerchantType.fruits => Icons.eco_rounded,
+    MerchantType.meat => Icons.kebab_dining_rounded,
+    MerchantType.seafood => Icons.set_meal_rounded,
+    MerchantType.pharmacy => Icons.local_pharmacy_rounded,
+    MerchantType.bakery => Icons.bakery_dining_rounded,
+    MerchantType.sweets => Icons.cake_rounded,
+    MerchantType.flowers => Icons.local_florist_rounded,
+    MerchantType.clothing => Icons.checkroom_rounded,
+    MerchantType.shoes => Icons.shopping_bag_rounded,
+    MerchantType.electronics => Icons.devices_rounded,
+    MerchantType.mobile => Icons.smartphone_rounded,
+    MerchantType.furniture => Icons.chair_rounded,
+    MerchantType.fashion => Icons.checkroom_rounded,
+    MerchantType.appliances => Icons.kitchen_rounded,
+    MerchantType.home => Icons.chair_rounded,
+    MerchantType.cafe => Icons.local_cafe_rounded,
+    MerchantType.petShop => Icons.pets_rounded,
+    MerchantType.fitness => Icons.fitness_center_rounded,
+    MerchantType.gas => Icons.local_gas_station_rounded,
+    MerchantType.carwash => Icons.local_car_wash_rounded,
+    MerchantType.perfumes => Icons.spa_rounded,
+    MerchantType.spices => Icons.rice_bowl_rounded,
+    MerchantType.dairy => Icons.local_drink_rounded,
+    MerchantType.accessories => Icons.watch_rounded,
+    MerchantType.butcher => Icons.kebab_dining_rounded,
+    MerchantType.vegetables => Icons.eco_rounded,
+    MerchantType.other => Icons.storefront_rounded,
+  };
+}
+
+/// Sleek 3D-styled rounded tile icon supporting network images, bundled 3D
+/// category artwork, and a glossy layered Material icon fallback.
+class Category3dTileIcon extends StatelessWidget {
+  const Category3dTileIcon({
+    super.key,
+    required this.color,
+    required this.icon,
+    this.networkImageUrl,
+    this.assetImagePath,
+    this.size = 64,
+    this.borderRadius = 20,
+  });
+
+  final Color color;
+  final IconData icon;
+  final String? networkImageUrl;
+  final String? assetImagePath;
+  final double size;
+  final double borderRadius;
+
+  @override
+  Widget build(BuildContext context) {
+    final radius = BorderRadius.circular(borderRadius);
+    final innerRadius = BorderRadius.circular(
+      (borderRadius - 1.2).clamp(0, borderRadius),
+    );
+
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        borderRadius: radius,
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            color.withValues(alpha: 0.92),
+            Color.lerp(color, Colors.black, 0.22)!,
+          ],
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: color.withValues(alpha: 0.28),
+            blurRadius: 14,
+            offset: const Offset(0, 6),
+          ),
+        ],
+        border: Border.all(
+          color: Colors.white.withValues(alpha: 0.35),
+          width: 1.2,
+        ),
+      ),
+      child: ClipRRect(
+        borderRadius: innerRadius,
+        child: (networkImageUrl != null && networkImageUrl!.isNotEmpty)
+            ? Image.network(
+                networkImageUrl!,
+                width: size,
+                height: size,
+                fit: BoxFit.cover,
+                errorBuilder: (_, _, _) => _buildAssetOrIcon(),
+              )
+            : _buildAssetOrIcon(),
+      ),
+    );
+  }
+
+  Widget _buildAssetOrIcon() {
+    if (assetImagePath != null) {
+      return Image.asset(
+        assetImagePath!,
+        width: size,
+        height: size,
+        fit: BoxFit.cover,
+        errorBuilder: (_, _, _) => _build3dIconLayer(),
+      );
+    }
+    return _build3dIconLayer();
+  }
+
+  Widget _build3dIconLayer() {
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        DecoratedBox(
+          decoration: BoxDecoration(
+            gradient: RadialGradient(
+              center: const Alignment(-0.45, -0.45),
+              radius: 0.85,
+              colors: [
+                Colors.white.withValues(alpha: 0.34),
+                Colors.transparent,
+              ],
+            ),
+          ),
+        ),
+        Center(
+          child: Icon(
+            icon,
+            color: Colors.white,
+            size: size * 0.44,
+            shadows: [
+              Shadow(
+                color: Colors.black.withValues(alpha: 0.24),
+                blurRadius: 8,
+                offset: const Offset(0, 3),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+

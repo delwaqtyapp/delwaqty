@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:delwaqty/core/errors/app_error_text.dart';
 import 'package:delwaqty/features/provider/merchant/presentation/providers/merchant_providers.dart';
 import 'package:delwaqty/core/extensions/context_extensions.dart';
 import 'package:delwaqty/features/customer/restaurant/restaurant_module.dart';
@@ -159,18 +160,36 @@ class _MerchantBranchesPageState extends ConsumerState<MerchantBranchesPage> {
 
   Future<void> _deleteBranch(Branch branch) async {
     final repo = ref.read(branchRepositoryProvider);
-    await repo.deleteBranch(branch.id);
-    ref.invalidate(_branchesProvider);
-    if (mounted) {
-      context.showAppSnackBar('Branch deleted');
+    try {
+      await repo.deleteBranch(branch.id);
+      ref.invalidate(_branchesProvider);
+      if (mounted) {
+        context.showAppSnackBar(AppLocalizations.of(context).branchDeleted);
+      }
+    } catch (e) {
+      if (mounted) {
+        context.showAppSnackBar(
+          appErrorText(context, e),
+          isError: true,
+        );
+      }
     }
   }
 
   Future<void> _toggleActive(Branch branch) async {
     final repo = ref.read(branchRepositoryProvider);
     final updated = branch.copyWith(isActive: !branch.isActive);
-    await repo.updateBranch(updated);
-    ref.invalidate(_branchesProvider);
+    try {
+      await repo.updateBranch(updated);
+      ref.invalidate(_branchesProvider);
+    } catch (e) {
+      if (mounted) {
+        context.showAppSnackBar(
+          appErrorText(context, e),
+          isError: true,
+        );
+      }
+    }
   }
 }
 
@@ -189,6 +208,7 @@ class _BranchCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
 
     return Dismissible(
@@ -240,7 +260,7 @@ class _BranchCard extends StatelessWidget {
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Text(
-                        'Primary',
+                        l10n.primaryBranchBadge,
                         style: theme.textTheme.labelSmall?.copyWith(
                           color: AppColors.brandPurple,
                           fontWeight: FontWeight.bold,
@@ -349,7 +369,6 @@ class _BranchFormSheetState extends ConsumerState<_BranchFormSheet> {
 
   Future<void> _useCurrentGps() async {
     if (_gettingGps) return;
-    final l10n = AppLocalizations.of(context);
     setState(() => _gettingGps = true);
     try {
       var perm = await Geolocator.checkPermission();
@@ -362,10 +381,10 @@ class _BranchFormSheetState extends ConsumerState<_BranchFormSheet> {
         _latitudeController.text = pos.latitude.toString();
         _longitudeController.text = pos.longitude.toString();
       });
-    } catch (_) {
+    } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.somethingWentWrong)),
+        SnackBar(content: Text(appErrorText(context, e))),
       );
     } finally {
       if (mounted) setState(() => _gettingGps = false);
@@ -440,7 +459,7 @@ class _BranchFormSheetState extends ConsumerState<_BranchFormSheet> {
                       controller: _nameController,
                       decoration: InputDecoration(
                         labelText: l10n.branchName,
-                        hintText: 'Enter branch name',
+                        hintText: l10n.branchName,
                         border: const OutlineInputBorder(),
                       ),
                       validator: (v) =>
@@ -451,7 +470,7 @@ class _BranchFormSheetState extends ConsumerState<_BranchFormSheet> {
                       controller: _addressController,
                       decoration: InputDecoration(
                         labelText: l10n.address,
-                        hintText: 'Enter branch address',
+                        hintText: l10n.address,
                         border: const OutlineInputBorder(),
                       ),
                       maxLines: 2,
@@ -461,7 +480,7 @@ class _BranchFormSheetState extends ConsumerState<_BranchFormSheet> {
                       controller: _phoneController,
                       decoration: InputDecoration(
                         labelText: l10n.phone,
-                        hintText: 'Enter phone number',
+                        hintText: l10n.phoneNumber,
                         border: const OutlineInputBorder(),
                       ),
                       keyboardType: TextInputType.phone,
@@ -472,10 +491,10 @@ class _BranchFormSheetState extends ConsumerState<_BranchFormSheet> {
                         Expanded(
                           child: TextFormField(
                             controller: _latitudeController,
-                            decoration: const InputDecoration(
-                              labelText: 'Latitude',
+                            decoration: InputDecoration(
+                              labelText: '${l10n.location} (Lat)',
                               hintText: '0.0',
-                              border: OutlineInputBorder(),
+                              border: const OutlineInputBorder(),
                             ),
                             keyboardType:
                                 const TextInputType.numberWithOptions(
@@ -488,10 +507,10 @@ class _BranchFormSheetState extends ConsumerState<_BranchFormSheet> {
                         Expanded(
                           child: TextFormField(
                             controller: _longitudeController,
-                            decoration: const InputDecoration(
-                              labelText: 'Longitude',
+                            decoration: InputDecoration(
+                              labelText: '${l10n.location} (Lng)',
                               hintText: '0.0',
-                              border: OutlineInputBorder(),
+                              border: const OutlineInputBorder(),
                             ),
                             keyboardType:
                                 const TextInputType.numberWithOptions(
@@ -523,7 +542,7 @@ class _BranchFormSheetState extends ConsumerState<_BranchFormSheet> {
                     SwitchListTile(
                       title: Text(l10n.primaryBranch),
                       subtitle: Text(
-                        _isPrimary ? 'Yes' : 'No',
+                        _isPrimary ? l10n.yes : l10n.no,
                       ),
                       value: _isPrimary,
                       onChanged: (v) => setState(() => _isPrimary = v),
@@ -579,18 +598,17 @@ class _BranchFormSheetState extends ConsumerState<_BranchFormSheet> {
     );
 
     try {
-    if (widget.branch != null) {
-      await repo.updateBranch(branch);
-    } else {
-      await repo.createBranch(branch);
-    }
-
-    setState(() => _saving = false);
+      if (widget.branch != null) {
+        await repo.updateBranch(branch);
+      } else {
+        await repo.createBranch(branch);
+      }
+      setState(() => _saving = false);
     } catch (e) {
       if (!mounted) return;
       setState(() => _saving = false);
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(AppLocalizations.of(context).somethingWentWrong)),
+        SnackBar(content: Text(appErrorText(context, e))),
       );
       return;
     }

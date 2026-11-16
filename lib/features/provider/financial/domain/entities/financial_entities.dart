@@ -61,7 +61,7 @@ class TopupRequest {
   factory TopupRequest.fromJson(Map<String, dynamic> json) => TopupRequest(
         id: json['id'] as String,
         amount: (json['amount'] as num?)?.toDouble() ?? 0,
-        currency: json['currency'] as String? ?? 'SAR',
+        currency: json['currency'] as String? ?? 'EGP',
         status: json['status'] as String? ?? 'pending',
         paymentMethod: json['payment_method'] as String? ?? '',
         transferReference: json['transfer_reference'] as String? ?? '',

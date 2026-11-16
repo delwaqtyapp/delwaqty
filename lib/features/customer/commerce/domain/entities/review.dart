@@ -14,6 +14,8 @@ abstract class Review with _$Review {
     String? orderId,
     required double rating,
     String? comment,
+    String? merchantReply,
+    DateTime? merchantRepliedAt,
     @Default([]) List<String> imageUrls,
     DateTime? createdAt,
     DateTime? updatedAt,

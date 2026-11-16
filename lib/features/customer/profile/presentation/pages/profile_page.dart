@@ -313,6 +313,8 @@ class ProfilePage extends ConsumerWidget {
         return l10n.driver;
       case 'merchant':
         return l10n.merchant;
+      case 'provider':
+        return l10n.provider;
       case 'owner':
         return l10n.owner;
       default:

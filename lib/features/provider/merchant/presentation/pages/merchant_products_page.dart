@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:delwaqty/features/provider/merchant/presentation/providers/merchant_providers.dart';
 import 'package:go_router/go_router.dart';
 import 'package:delwaqty/core/extensions/context_extensions.dart';
+import 'package:delwaqty/core/errors/app_error_text.dart';
 import 'package:delwaqty/features/provider/merchant/merchant_module.dart';
 import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
 import 'package:delwaqty/shared/widgets/premium_empty_state.dart';
@@ -133,7 +134,7 @@ class _MerchantProductsPageState extends ConsumerState<MerchantProductsPage> {
                   onRefresh: () async =>
                       ref.invalidate(merchantProductsProvider),
                   child: ListView.builder(
-                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 80),
+                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 120),
                     itemCount: filtered.length,
                     itemBuilder: (context, index) {
                       final product = filtered[index];
@@ -169,30 +170,39 @@ class _MerchantProductsPageState extends ConsumerState<MerchantProductsPage> {
     final l10n = AppLocalizations.of(context);
     showDialog<void>(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (dialogContext) => AlertDialog(
         title: Text(l10n.deleteProduct),
         content: Text(
           '${l10n.areYouSureYouWantToDelete} ${product['name'] as String? ?? ''}?',
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.of(context).pop(),
+            onPressed: () => Navigator.of(dialogContext).pop(),
             child: Text(l10n.cancel),
           ),
           TextButton(
             onPressed: () async {
-              Navigator.of(context).pop();
-              final repo = ref.read(merchantDashboardRepositoryProvider);
-              final id = product['id'] as String;
-              await repo.deleteProduct(id);
-              ref.invalidate(merchantProductsProvider);
-              if (context.mounted) {
-                context.showAppSnackBar(l10n.productDeleted);
+              Navigator.of(dialogContext).pop();
+              try {
+                final repo = ref.read(merchantDashboardRepositoryProvider);
+                final id = product['id'] as String;
+                await repo.deleteProduct(id);
+                ref.invalidate(merchantProductsProvider);
+                if (context.mounted) {
+                  context.showAppSnackBar(l10n.productDeleted);
+                }
+              } catch (e) {
+                if (context.mounted) {
+                  context.showAppSnackBar(
+                    appErrorText(context, e),
+                    isError: true,
+                  );
+                }
               }
             },
             child: Text(
               l10n.delete,
-              style: TextStyle(color: Theme.of(context).colorScheme.error),
+              style: TextStyle(color: Theme.of(dialogContext).colorScheme.error),
             ),
           ),
         ],
@@ -319,10 +329,19 @@ class _ProductCard extends ConsumerWidget {
                     value: isAvailable,
                     materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                     onChanged: (value) async {
-                      await ref
-                          .read(merchantDashboardDataSourceProvider)
-                          .updateProduct(id, {'is_available': value});
-                      ref.invalidate(merchantProductsProvider);
+                      try {
+                        await ref
+                            .read(merchantDashboardDataSourceProvider)
+                            .updateProduct(id, {'is_available': value});
+                        ref.invalidate(merchantProductsProvider);
+                      } catch (e) {
+                        if (context.mounted) {
+                          context.showAppSnackBar(
+                            appErrorText(context, e),
+                            isError: true,
+                          );
+                        }
+                      }
                     },
                   ),
                 ),

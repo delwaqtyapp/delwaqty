@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:delwaqty/core/errors/app_error_text.dart';
 import 'package:delwaqty/features/provider/merchant/presentation/providers/merchant_providers.dart';
 import 'package:delwaqty/core/extensions/context_extensions.dart';
 import 'package:delwaqty/features/customer/restaurant/restaurant_module.dart';
@@ -198,20 +199,38 @@ class _MerchantOffersPageState extends ConsumerState<MerchantOffersPage> {
 
   Future<void> _deleteOffer(Offer offer) async {
     final repo = ref.read(offerRepositoryProvider);
-    await repo.deleteOffer(offer.id);
-    ref.invalidate(_offersProvider);
-    if (mounted) {
-      context.showAppSnackBar(
-        AppLocalizations.of(context).offerDeleted,
-      );
+    try {
+      await repo.deleteOffer(offer.id);
+      ref.invalidate(_offersProvider);
+      if (mounted) {
+        context.showAppSnackBar(
+          AppLocalizations.of(context).offerDeleted,
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        context.showAppSnackBar(
+          appErrorText(context, e),
+          isError: true,
+        );
+      }
     }
   }
 
   Future<void> _toggleActive(Offer offer) async {
     final repo = ref.read(offerRepositoryProvider);
     final updated = offer.copyWith(isActive: !offer.isActive);
-    await repo.updateOffer(updated);
-    ref.invalidate(_offersProvider);
+    try {
+      await repo.updateOffer(updated);
+      ref.invalidate(_offersProvider);
+    } catch (e) {
+      if (mounted) {
+        context.showAppSnackBar(
+          appErrorText(context, e),
+          isError: true,
+        );
+      }
+    }
   }
 }
 
@@ -236,7 +255,7 @@ class _OfferCard extends StatelessWidget {
     final isPercentage = offer.discountType == 'percentage';
     final discountText = isPercentage
         ? '${offer.discountValue.toStringAsFixed(0)}% OFF'
-        : '${offer.discountValue.toStringAsFixed(0)} ${l10n.sar} OFF';
+        : '${offer.discountValue.toStringAsFixed(0)} ${l10n.currencySymbol} OFF';
 
     final isExpired =
         offer.expiresAt != null && offer.expiresAt!.isBefore(DateTime.now());
@@ -338,7 +357,7 @@ class _OfferCard extends StatelessWidget {
                         Text(
                           l10n.minOrderRequired(
                             offer.minimumOrder.toStringAsFixed(0),
-                            l10n.sar,
+                            l10n.currencySymbol,
                           ),
                           style: theme.textTheme.bodySmall?.copyWith(
                             color: theme.colorScheme.onSurfaceVariant,
@@ -582,7 +601,9 @@ class _OfferFormSheetState extends ConsumerState<_OfferFormSheet> {
                         labelText: l10n.discountValue,
                         hintText: l10n.enterDiscountValue,
                         border: const OutlineInputBorder(),
-                        suffixText: _discountType == 'percentage' ? '%' : l10n.sar,
+                        suffixText: _discountType == 'percentage'
+                            ? '%'
+                            : l10n.currencySymbol,
                       ),
                       keyboardType: TextInputType.number,
                       validator: (v) {
@@ -598,7 +619,7 @@ class _OfferFormSheetState extends ConsumerState<_OfferFormSheet> {
                         labelText: l10n.minimumOrder,
                         hintText: l10n.enterMinimumOrder,
                         border: const OutlineInputBorder(),
-                        prefixText: '${l10n.sar} ',
+                        prefixText: '${l10n.currencySymbol} ',
                       ),
                       keyboardType: TextInputType.number,
                     ),
@@ -609,7 +630,7 @@ class _OfferFormSheetState extends ConsumerState<_OfferFormSheet> {
                         labelText: l10n.maximumDiscount,
                         hintText: l10n.enterMaximumDiscount,
                         border: const OutlineInputBorder(),
-                        prefixText: '${l10n.sar} ',
+                        prefixText: '${l10n.currencySymbol} ',
                       ),
                       keyboardType: TextInputType.number,
                     ),
@@ -621,11 +642,16 @@ class _OfferFormSheetState extends ConsumerState<_OfferFormSheet> {
                             label: l10n.startDate,
                             date: _startDate,
                             onTap: () async {
+                              final now = DateTime.now();
+                              final firstDate = _startDate != null &&
+                                      _startDate!.isBefore(now)
+                                  ? _startDate!
+                                  : now;
                               final picked = await showDatePicker(
                                 context: context,
-                                initialDate: _startDate ?? DateTime.now(),
-                                firstDate: DateTime.now(),
-                                lastDate: DateTime.now().add(
+                                initialDate: _startDate ?? now,
+                                firstDate: firstDate,
+                                lastDate: now.add(
                                   const Duration(days: 365),
                                 ),
                               );
@@ -641,12 +667,22 @@ class _OfferFormSheetState extends ConsumerState<_OfferFormSheet> {
                             label: l10n.endDate,
                             date: _endDate,
                             onTap: () async {
+                              final now = DateTime.now();
+                              final firstDate = _startDate != null &&
+                                      _startDate!.isBefore(now)
+                                  ? _startDate!
+                                  : (_startDate ?? now);
+                              final defaultEnd =
+                                  now.add(const Duration(days: 30));
+                              final rawInitial = _endDate ?? defaultEnd;
+                              final initialDate = rawInitial.isBefore(firstDate)
+                                  ? firstDate
+                                  : rawInitial;
                               final picked = await showDatePicker(
                                 context: context,
-                                initialDate:
-                                    _endDate ?? DateTime.now().add(const Duration(days: 30)),
-                                firstDate: _startDate ?? DateTime.now(),
-                                lastDate: DateTime.now().add(
+                                initialDate: initialDate,
+                                firstDate: firstDate,
+                                lastDate: now.add(
                                   const Duration(days: 365),
                                 ),
                               );
@@ -703,6 +739,8 @@ class _OfferFormSheetState extends ConsumerState<_OfferFormSheet> {
     final offer = Offer(
       id: widget.offer?.id ?? '',
       merchantId: widget.merchantId,
+      branchId: widget.offer?.branchId,
+      categoryId: widget.offer?.categoryId,
       title: _titleController.text.trim(),
       description: _descriptionController.text.trim().isEmpty
           ? null
@@ -711,7 +749,9 @@ class _OfferFormSheetState extends ConsumerState<_OfferFormSheet> {
       discountValue: double.parse(_discountValueController.text),
       minimumOrder: double.tryParse(_minimumOrderController.text) ?? 0,
       maximumDiscount: double.tryParse(_maxDiscountController.text),
+      productIds: widget.offer?.productIds ?? const [],
       isActive: _isActive,
+      isAutomatic: widget.offer?.isAutomatic ?? false,
       startsAt: _startDate,
       expiresAt: _endDate,
       createdAt: widget.offer?.createdAt ?? DateTime.now(),
@@ -731,7 +771,7 @@ class _OfferFormSheetState extends ConsumerState<_OfferFormSheet> {
       if (!mounted) return;
       setState(() => _saving = false);
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(AppLocalizations.of(context).somethingWentWrong)),
+        SnackBar(content: Text(appErrorText(context, e))),
       );
       return;
     }

@@ -47,9 +47,13 @@ class SupabaseMerchantDashboardDataSource {
       customerName: (user is Map && user['full_name'] != null)
           ? user['full_name'] as String
           : null,
+      customerPhone: (user is Map && user['phone'] != null)
+          ? user['phone'] as String
+          : (row['customer_phone'] as String?),
       items: items,
       totalAmount: (row['total_amount'] as num).toDouble(),
       status: row['status'] as String,
+      dispatchStatus: row['dispatch_status'] as String?,
       createdAt: DateTime.parse(row['created_at'] as String),
       deliveryAddress: row['delivery_address'] as String?,
       notes: row['notes'] as String?,
@@ -57,6 +61,9 @@ class SupabaseMerchantDashboardDataSource {
   }
 
   Future<MerchantStats> getMerchantStats(String merchantId) async {
+    if (merchantId.isEmpty) {
+      return const MerchantStats();
+    }
     try {
       final now = DateTime.now();
       final todayStart = DateTime(now.year, now.month, now.day);
@@ -81,6 +88,7 @@ class SupabaseMerchantDashboardDataSource {
           .from('orders')
           .select('total_amount')
           .eq('merchant_id', merchantId)
+          .neq('status', 'cancelled')
           .gte('created_at', todayStart.toIso8601String());
       final todayRevenue = (revenueRes as List<dynamic>).fold<double>(
         0,
@@ -130,12 +138,15 @@ class SupabaseMerchantDashboardDataSource {
     int limit = 20,
     int offset = 0,
   }) async {
+    if (merchantId.isEmpty) {
+      return const [];
+    }
     try {
       var query = _client
           .from('orders')
           .select(
-            'id, user_id, status, total_amount, created_at, delivery_address, notes, '
-            'users(full_name), '
+            'id, user_id, status, dispatch_status, total_amount, created_at, delivery_address, notes, '
+            'users(full_name, phone), '
             'order_items(product_id, product_name, quantity, unit_price, modifiers, products(name))',
           )
           .eq('merchant_id', merchantId);
@@ -153,6 +164,7 @@ class SupabaseMerchantDashboardDataSource {
         final usersData = map['users'] as Map<String, dynamic>?;
         final orderMap = Map<String, dynamic>.from(map);
         orderMap['customer_name'] = usersData?['full_name'] as String?;
+        orderMap['customer_phone'] = usersData?['phone'] as String?;
         return _orderFromRow(orderMap);
       }).toList();
     } catch (e) {
@@ -179,6 +191,9 @@ class SupabaseMerchantDashboardDataSource {
   Future<List<Map<String, dynamic>>> getMerchantProducts(
     String merchantId,
   ) async {
+    if (merchantId.isEmpty) {
+      return const [];
+    }
     try {
       final data = await _client
           .from('products')

@@ -15,6 +15,10 @@ _Review _$ReviewFromJson(Map<String, dynamic> json) => _Review(
   orderId: json['orderId'] as String?,
   rating: (json['rating'] as num).toDouble(),
   comment: json['comment'] as String?,
+  merchantReply: json['merchantReply'] as String?,
+  merchantRepliedAt: json['merchantRepliedAt'] == null
+      ? null
+      : DateTime.parse(json['merchantRepliedAt'] as String),
   imageUrls:
       (json['imageUrls'] as List<dynamic>?)?.map((e) => e as String).toList() ??
       const [],
@@ -35,6 +39,8 @@ Map<String, dynamic> _$ReviewToJson(_Review instance) => <String, dynamic>{
   'orderId': instance.orderId,
   'rating': instance.rating,
   'comment': instance.comment,
+  'merchantReply': instance.merchantReply,
+  'merchantRepliedAt': instance.merchantRepliedAt?.toIso8601String(),
   'imageUrls': instance.imageUrls,
   'createdAt': instance.createdAt?.toIso8601String(),
   'updatedAt': instance.updatedAt?.toIso8601String(),

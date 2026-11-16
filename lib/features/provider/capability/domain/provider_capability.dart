@@ -65,12 +65,23 @@ enum ProviderCategory {
       case 'general':
       case 'retail':
         return ProviderCategory.retail;
+      case 'service':
+      case 'home_services':
+      case 'homeservices':
       case 'plumbing':
       case 'electrical':
       case 'cleaning':
       case 'handyman':
-      case 'home_services':
-      case 'homeservices':
+      case 'carpentry':
+      case 'acmaintenance':
+      case 'ac_maintenance':
+      case 'painting':
+      case 'pestcontrol':
+      case 'pest_control':
+      case 'appliancerepair':
+      case 'appliance_repair':
+      case 'doctor':
+      case 'clinic':
         return ProviderCategory.homeServices;
       case 'owner':
         return ProviderCategory.owner;
@@ -143,6 +154,8 @@ Set<ProviderCapability> resolveCapabilities(ProviderCategory category) {
     case ProviderCategory.homeServices:
       return {
         ProviderCapability.dashboard,
+        ProviderCapability.orders,
+        ProviderCapability.catalog,
         ProviderCapability.services,
         ProviderCapability.bookings,
         ProviderCapability.availability,
@@ -159,6 +172,12 @@ Set<ProviderCapability> resolveCapabilities(ProviderCategory category) {
     case ProviderCategory.unknown:
       return {
         ProviderCapability.dashboard,
+        ProviderCapability.orders,
+        ProviderCapability.catalog,
+        ProviderCapability.reviews,
+        ProviderCapability.availability,
+        ProviderCapability.verification,
+        ProviderCapability.documents,
         ProviderCapability.financial,
         ProviderCapability.notifications,
         ProviderCapability.support,
@@ -186,6 +205,10 @@ Set<ProviderCapability> resolveCapabilities(ProviderCategory category) {
       };
   }
 }
+
+/// Alias for [resolveCapabilities].
+Set<ProviderCapability> capabilitiesForCategory(ProviderCategory category) =>
+    resolveCapabilities(category);
 
 /// Convenience helper used by UI guards (does NOT replace server authz).
 bool hasCapability(

@@ -62,11 +62,12 @@ class MerchantStockItem {
 
 final merchantStockProvider =
     FutureProvider.family<List<MerchantStockItem>, String>((ref, merchantId) async {
+  if (merchantId.isEmpty) return const <MerchantStockItem>[];
   final client = ref.watch(supabaseClientProvider);
 
   // One round trip: the inventory row is embedded through the
   // product_inventory -> products foreign key instead of a query per item.
-  final res = await client
+  var res = await client
       .from('product_inventory')
       .select(
         'product_id, stock_quantity, reserved_quantity, low_stock_threshold, '
@@ -74,6 +75,59 @@ final merchantStockProvider =
       )
       .eq('merchant_id', merchantId)
       .order('stock_quantity', ascending: true);
+
+  if ((res as List).isEmpty) {
+    final productsRes = await client
+        .from('products')
+        .select('id, name, price, is_available, image_url, stock_quantity')
+        .eq('merchant_id', merchantId);
+    final productsList = productsRes as List;
+    if (productsList.isNotEmpty) {
+      final initialRows = productsList.map((raw) {
+        final p = raw as Map<String, dynamic>;
+        final stock = (p['stock_quantity'] as num?)?.toInt() ?? 50;
+        final available = (p['is_available'] as bool?) ?? true;
+        return <String, dynamic>{
+          'merchant_id': merchantId,
+          'product_id': p['id'] as String,
+          'stock_quantity': stock,
+          'reserved_quantity': 0,
+          'low_stock_threshold': 5,
+          'is_in_stock': available && stock > 0,
+        };
+      }).toList();
+      try {
+        await client
+            .from('product_inventory')
+            .upsert(initialRows, onConflict: 'product_id');
+        res = await client
+            .from('product_inventory')
+            .select(
+              'product_id, stock_quantity, reserved_quantity, low_stock_threshold, '
+              'is_in_stock, products(name, price, is_available, image_url)',
+            )
+            .eq('merchant_id', merchantId)
+            .order('stock_quantity', ascending: true);
+      } catch (_) {
+        return productsList.map((raw) {
+          final p = raw as Map<String, dynamic>;
+          final stock = (p['stock_quantity'] as num?)?.toInt() ?? 50;
+          final available = (p['is_available'] as bool?) ?? true;
+          return MerchantStockItem(
+            productId: p['id'] as String,
+            productName: (p['name'] as String?) ?? '',
+            price: (p['price'] as num?)?.toDouble() ?? 0,
+            isAvailable: available,
+            imageUrl: p['image_url'] as String?,
+            stockQuantity: stock,
+            reservedQuantity: 0,
+            lowStockThreshold: 5,
+            isInStock: available && stock > 0,
+          );
+        }).toList();
+      }
+    }
+  }
 
   return (res as List).map((row) {
     final map = row as Map<String, dynamic>;
@@ -113,11 +167,23 @@ class StockNotifier {
     final client = _ref.read(supabaseClientProvider);
     final clamped = quantity.clamp(0, 1 << 31);
 
+    final existingItems =
+        _ref.read(merchantStockProvider(merchantId)).asData?.value;
+    int? existingReserved;
+    if (existingItems != null) {
+      for (final item in existingItems) {
+        if (item.productId == productId) {
+          existingReserved = item.reservedQuantity;
+          break;
+        }
+      }
+    }
+
     await client.from('product_inventory').upsert({
       'merchant_id': merchantId,
       'product_id': productId,
       'stock_quantity': clamped,
-      'reserved_quantity': 0,
+      if (existingReserved != null) 'reserved_quantity': existingReserved,
       'low_stock_threshold': lowStockThreshold,
       'is_in_stock': clamped > 0,
     }, onConflict: 'product_id');

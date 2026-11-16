@@ -13579,6 +13579,120 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Your store profile is active and ready'**
   String get autoProvisionedStoreReady;
+
+  /// No description provided for @dispatchDeliveryDriver.
+  ///
+  /// In en, this message translates to:
+  /// **'Dispatch Delivery Driver'**
+  String get dispatchDeliveryDriver;
+
+  /// No description provided for @driverDispatchedSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivery driver dispatch requested!'**
+  String get driverDispatchedSuccess;
+
+  /// No description provided for @storeOpenStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Store is Open & Receiving Orders'**
+  String get storeOpenStatus;
+
+  /// No description provided for @storeClosedStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Store is Currently Closed'**
+  String get storeClosedStatus;
+
+  /// No description provided for @uploadStoreLogo.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload Store Logo'**
+  String get uploadStoreLogo;
+
+  /// No description provided for @uploadStoreCover.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload Cover Photo'**
+  String get uploadStoreCover;
+
+  /// No description provided for @storeCategoryLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Store / Service Category'**
+  String get storeCategoryLabel;
+
+  /// No description provided for @serviceBookingsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Service Bookings'**
+  String get serviceBookingsTitle;
+
+  /// No description provided for @tableReservationsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Table Reservations'**
+  String get tableReservationsTitle;
+
+  /// No description provided for @markSeated.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark Seated'**
+  String get markSeated;
+
+  /// No description provided for @markCompleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark Completed'**
+  String get markCompleted;
+
+  /// No description provided for @guestsCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} guests'**
+  String guestsCount(int count);
+
+  /// No description provided for @primaryBranchBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Primary'**
+  String get primaryBranchBadge;
+
+  /// No description provided for @branchDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Branch deleted'**
+  String get branchDeleted;
+
+  /// No description provided for @merchantReplyLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Store Reply'**
+  String get merchantReplyLabel;
+
+  /// No description provided for @writeReplyHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Write your reply to the customer…'**
+  String get writeReplyHint;
+
+  /// No description provided for @receivingAccountTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Platform Receiving Account (Transfer To)'**
+  String get receivingAccountTitle;
+
+  /// No description provided for @copyAccountNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy Account / Wallet Number'**
+  String get copyAccountNumber;
+
+  /// No description provided for @viewDocumentTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Preview Document'**
+  String get viewDocumentTooltip;
 }
 
 class _AppLocalizationsDelegate

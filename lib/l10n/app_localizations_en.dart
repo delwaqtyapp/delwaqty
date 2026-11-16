@@ -7106,4 +7106,64 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get autoProvisionedStoreReady =>
       'Your store profile is active and ready';
+
+  @override
+  String get dispatchDeliveryDriver => 'Dispatch Delivery Driver';
+
+  @override
+  String get driverDispatchedSuccess => 'Delivery driver dispatch requested!';
+
+  @override
+  String get storeOpenStatus => 'Store is Open & Receiving Orders';
+
+  @override
+  String get storeClosedStatus => 'Store is Currently Closed';
+
+  @override
+  String get uploadStoreLogo => 'Upload Store Logo';
+
+  @override
+  String get uploadStoreCover => 'Upload Cover Photo';
+
+  @override
+  String get storeCategoryLabel => 'Store / Service Category';
+
+  @override
+  String get serviceBookingsTitle => 'Service Bookings';
+
+  @override
+  String get tableReservationsTitle => 'Table Reservations';
+
+  @override
+  String get markSeated => 'Mark Seated';
+
+  @override
+  String get markCompleted => 'Mark Completed';
+
+  @override
+  String guestsCount(int count) {
+    return '$count guests';
+  }
+
+  @override
+  String get primaryBranchBadge => 'Primary';
+
+  @override
+  String get branchDeleted => 'Branch deleted';
+
+  @override
+  String get merchantReplyLabel => 'Store Reply';
+
+  @override
+  String get writeReplyHint => 'Write your reply to the customer…';
+
+  @override
+  String get receivingAccountTitle =>
+      'Platform Receiving Account (Transfer To)';
+
+  @override
+  String get copyAccountNumber => 'Copy Account / Wallet Number';
+
+  @override
+  String get viewDocumentTooltip => 'Preview Document';
 }

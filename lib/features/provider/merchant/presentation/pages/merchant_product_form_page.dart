@@ -47,6 +47,7 @@ class _MerchantProductFormPageState
   bool _isFeatured = false;
   bool _isSaving = false;
   bool _isUploadingPhoto = false;
+  bool _isLoadingInitial = false;
 
   bool get _isEditing => widget.productId != null && widget.productId != 'new';
 
@@ -54,23 +55,30 @@ class _MerchantProductFormPageState
   void initState() {
     super.initState();
     if (_isEditing) {
+      _isLoadingInitial = true;
       WidgetsBinding.instance.addPostFrameCallback((_) => _loadProduct());
     }
   }
 
   Future<void> _loadProduct() async {
-    final product = await ref.read(_productProvider(widget.productId!).future);
-    if (!mounted || product == null) return;
-    _nameController.text = product['name'] as String? ?? '';
-    _descriptionController.text = product['description'] as String? ?? '';
-    _priceController.text =
-        (product['price'] as num?)?.toString() ?? '';
-    _categoryController.text = product['category'] as String? ?? '';
-    _imageUrlController.text = product['image_url'] as String? ?? '';
-    setState(() {
-      _isAvailable = product['is_available'] as bool? ?? true;
-      _isFeatured = product['is_featured'] as bool? ?? false;
-    });
+    try {
+      final product = await ref.read(_productProvider(widget.productId!).future);
+      if (!mounted || product == null) return;
+      _nameController.text = product['name'] as String? ?? '';
+      _descriptionController.text = product['description'] as String? ?? '';
+      _priceController.text =
+          (product['price'] as num?)?.toString() ?? '';
+      _categoryController.text = product['category'] as String? ?? '';
+      _imageUrlController.text = product['image_url'] as String? ?? '';
+      setState(() {
+        _isAvailable = product['is_available'] as bool? ?? true;
+        _isFeatured = product['is_featured'] as bool? ?? false;
+      });
+    } finally {
+      if (mounted) {
+        setState(() => _isLoadingInitial = false);
+      }
+    }
   }
 
   Future<void> _pickAndUploadPhoto() async {
@@ -86,8 +94,10 @@ class _MerchantProductFormPageState
       setState(() => _isUploadingPhoto = true);
       final bytes = await picked.readAsBytes();
       final name = picked.name.isEmpty ? 'photo.jpg' : picked.name;
-      final path = 'products/${DateTime.now().millisecondsSinceEpoch}_$name';
       final client = ref.read(supabaseClientProvider);
+      final uid = client.auth.currentUser?.id ?? 'anon';
+      final path =
+          '$uid/products/${DateTime.now().millisecondsSinceEpoch}_$name';
       await client.storage.from('profile-photos').uploadBinary(path, bytes);
       final publicUrl =
           client.storage.from('profile-photos').getPublicUrl(path);
@@ -129,7 +139,7 @@ class _MerchantProductFormPageState
           if (_isSaving) const AppLoaderCircular(size: 20, strokeWidth: 2),
         ],
       ),
-      body: _isEditing && _nameController.text.isEmpty
+      body: _isLoadingInitial
           ? const Center(child: AppLoaderCircular())
           : SingleChildScrollView(
               padding: const EdgeInsets.all(16),

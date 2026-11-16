@@ -7054,4 +7054,63 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get autoProvisionedStoreReady => 'ملف المتجر جاهز ومفعّل للتشغيل';
+
+  @override
+  String get dispatchDeliveryDriver => 'طلب مندوب توصيل';
+
+  @override
+  String get driverDispatchedSuccess => 'تم إرسال طلب مندوب التوصيل بنجاح!';
+
+  @override
+  String get storeOpenStatus => 'المتجر مفتوح ويستقبل الطلبات';
+
+  @override
+  String get storeClosedStatus => 'المتجر مغلق حالياً';
+
+  @override
+  String get uploadStoreLogo => 'رفع شعار المتجر';
+
+  @override
+  String get uploadStoreCover => 'رفع صورة الغلاف';
+
+  @override
+  String get storeCategoryLabel => 'تصنيف المتجر أو الخدمة';
+
+  @override
+  String get serviceBookingsTitle => 'حجوزات الخدمات';
+
+  @override
+  String get tableReservationsTitle => 'حجوزات الطاولات';
+
+  @override
+  String get markSeated => 'تم الجلوس';
+
+  @override
+  String get markCompleted => 'مكتمل';
+
+  @override
+  String guestsCount(int count) {
+    return '$count ضيوف';
+  }
+
+  @override
+  String get primaryBranchBadge => 'الرئيسي';
+
+  @override
+  String get branchDeleted => 'تم حذف الفرع';
+
+  @override
+  String get merchantReplyLabel => 'رد المتجر';
+
+  @override
+  String get writeReplyHint => 'اكتب ردك على تقييم العميل…';
+
+  @override
+  String get receivingAccountTitle => 'بيانات حساب الاستلام للتحويل';
+
+  @override
+  String get copyAccountNumber => 'نسخ رقم الحساب / المحفظة';
+
+  @override
+  String get viewDocumentTooltip => 'معاينة المستند';
 }

@@ -139,9 +139,16 @@ class _ProviderDocumentsPageState extends ConsumerState<ProviderDocumentsPage> {
               ...providerDocTypes.map((doc) {
                 final existing = byType[doc.key];
                 final status = existing?['status'] as String?;
+                final rejectionReason = existing?['rejection_reason'] as String?;
                 final fileUrl = existing?['file_url'] as String?;
                 final hasDoc = fileUrl != null && fileUrl.isNotEmpty;
                 final label = _docLabel(doc.key);
+                final localizedStatus = switch (status) {
+                  'verified' || 'approved' => l10n.verified,
+                  'rejected' => l10n.rejected,
+                  'pending' => l10n.pendingReview,
+                  _ => l10n.uploaded,
+                };
                 return Card(
                   child: ListTile(
                     leading: hasDoc
@@ -152,8 +159,10 @@ class _ProviderDocumentsPageState extends ConsumerState<ProviderDocumentsPage> {
                     subtitle: !hasDoc
                         ? Text(l10n.notUploaded)
                         : Text(
-                            (status ?? 'uploaded')[0].toUpperCase() +
-                                (status ?? 'uploaded').substring(1),
+                            rejectionReason != null &&
+                                    rejectionReason.isNotEmpty
+                                ? '$localizedStatus — $rejectionReason'
+                                : localizedStatus,
                           ),
                     trailing: _busy && _busyKey == doc.key
                         ? const SizedBox(
@@ -166,7 +175,7 @@ class _ProviderDocumentsPageState extends ConsumerState<ProviderDocumentsPage> {
                             children: [
                               if (hasDoc)
                                 IconButton(
-                                  tooltip: l10n.delete,
+                                  tooltip: l10n.viewDocumentTooltip,
                                   icon: const Icon(Icons.visibility_outlined),
                                   onPressed: _busy ? null : () => _view(fileUrl),
                                 ),

@@ -296,7 +296,17 @@ class _ReviewCardState extends State<_ReviewCard> {
   @override
   void initState() {
     super.initState();
-    _replyController = TextEditingController(text: widget.review.comment);
+    _replyController =
+        TextEditingController(text: widget.review.merchantReply ?? '');
+  }
+
+  @override
+  void didUpdateWidget(covariant _ReviewCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.review.merchantReply != widget.review.merchantReply &&
+        !_showReplyField) {
+      _replyController.text = widget.review.merchantReply ?? '';
+    }
   }
 
   @override
@@ -314,6 +324,9 @@ class _ReviewCardState extends State<_ReviewCard> {
     final dateStr = date != null
         ? '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}'
         : '';
+
+    final savedReply = widget.review.merchantReply;
+    final hasReply = savedReply != null && savedReply.trim().isNotEmpty;
 
     return Padding(
       padding: const EdgeInsets.only(bottom: AppSpacing.md),
@@ -382,6 +395,35 @@ class _ReviewCardState extends State<_ReviewCard> {
                 style: theme.textTheme.bodyMedium,
               ),
             ],
+            if (hasReply) ...[
+              const SizedBox(height: AppSpacing.md),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(AppSpacing.md),
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.surfaceContainerHighest
+                      .withValues(alpha: 0.6),
+                  borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      l10n.merchantReplyLabel,
+                      style: theme.textTheme.labelSmall?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.brandPurple,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      savedReply,
+                      style: theme.textTheme.bodySmall,
+                    ),
+                  ],
+                ),
+              ),
+            ],
             const SizedBox(height: AppSpacing.md),
             if (!_showReplyField)
               Align(
@@ -389,8 +431,8 @@ class _ReviewCardState extends State<_ReviewCard> {
                 child: TextButton.icon(
                   onPressed: () => setState(() => _showReplyField = true),
                   icon: const Icon(Icons.reply, size: 16),
-                  label: const Text(
-                    'Reply',
+                  label: Text(
+                    l10n.merchantReplyLabel,
                     style: AppTextStyles.labelMedium,
                   ),
                 ),
@@ -401,10 +443,10 @@ class _ReviewCardState extends State<_ReviewCard> {
                 children: [
                   TextFormField(
                     controller: _replyController,
-                    decoration: const InputDecoration(
-                      hintText: 'Write a reply...',
-                      border: OutlineInputBorder(),
-                      contentPadding: EdgeInsets.symmetric(
+                    decoration: InputDecoration(
+                      hintText: l10n.writeReplyHint,
+                      border: const OutlineInputBorder(),
+                      contentPadding: const EdgeInsets.symmetric(
                         horizontal: AppSpacing.lg,
                         vertical: AppSpacing.md,
                       ),

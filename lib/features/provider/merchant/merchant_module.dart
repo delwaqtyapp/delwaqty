@@ -19,6 +19,7 @@ import 'package:delwaqty/features/provider/merchant/presentation/pages/merchant_
 import 'package:delwaqty/features/provider/availability/presentation/pages/provider_availability_page.dart';
 import 'package:delwaqty/features/provider/verification/presentation/pages/provider_verification_page.dart';
 import 'package:delwaqty/features/provider/documents/presentation/pages/provider_documents_page.dart';
+import 'package:delwaqty/l10n/app_localizations.dart';
 
 final merchantDashboardRepositoryImplProvider =
     Provider<MerchantDashboardRepositoryImpl>(
@@ -36,7 +37,8 @@ class MerchantModule extends FeatureModule {
   String get id => 'merchant';
 
   @override
-  String name(BuildContext context) => 'Merchant Dashboard';
+  String name(BuildContext context) =>
+      AppLocalizations.of(context).merchantDashboard;
 
   @override
   IconData? get icon => Icons.store_outlined;

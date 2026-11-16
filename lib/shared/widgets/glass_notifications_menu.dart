@@ -235,7 +235,7 @@ class _GlassNotificationsPanel extends ConsumerWidget {
         ref.watch(unreadCountProvider).value ??
         0;
 
-    return Container(
+    return DecoratedBox(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(26),
         boxShadow: [
@@ -250,7 +250,7 @@ class _GlassNotificationsPanel extends ConsumerWidget {
         borderRadius: BorderRadius.circular(26),
         child: BackdropFilter(
           filter: ImageFilter.blur(sigmaX: 40, sigmaY: 40),
-          child: Container(
+          child: DecoratedBox(
             decoration: BoxDecoration(
               color: isDark
                   ? Colors.white.withValues(alpha: 0.34)

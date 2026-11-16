@@ -306,8 +306,8 @@ class _MerchantDashboardPageState
           color: Colors.teal,
           onTap: () => context.push('/merchant-dashboard/branches'),
         ),
-      if (caps.contains(ProviderCapability.reservations) ||
-          caps.contains(ProviderCapability.bookings))
+      if (caps.contains(ProviderCapability.bookings) ||
+          caps.contains(ProviderCapability.orders))
         _QuickActionItem(
           title: l10n.reservations,
           icon: Icons.calendar_month_rounded,
@@ -636,7 +636,7 @@ class _StatCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return PressableScale(
-      onTap: onTap,
+      onTap: onTap ?? () {},
       child: Card(
         margin: EdgeInsets.zero,
         shape: highlight

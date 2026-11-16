@@ -31,7 +31,7 @@ class FinancialCenterPage extends ConsumerWidget {
     switch (status.toLowerCase()) {
       case 'approved':
       case 'completed':
-        return (l10n.approved, AppColors.successLight);
+        return (l10n.verified, AppColors.successLight);
       case 'rejected':
       case 'cancelled':
         return (l10n.rejected, AppColors.errorLight);
@@ -268,7 +268,7 @@ class FinancialCenterPage extends ConsumerWidget {
                           ),
                           title: Text(t.description),
                           subtitle: Text(
-                            isCredit ? l10n.credit : l10n.debit,
+                            isCredit ? l10n.topUp : l10n.commission,
                           ),
                           trailing: Text(
                             '${isCredit ? '+' : '-'}${t.amount.toStringAsFixed(2)} ${l10n.currencySymbol}',

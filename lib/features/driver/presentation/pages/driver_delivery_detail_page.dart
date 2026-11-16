@@ -335,7 +335,7 @@ class _DriverDeliveryDetailPageState
                         _row(l10n.merchant, order.merchantName!),
                       if (order.recipientName != null &&
                           order.recipientName!.isNotEmpty)
-                        _row(l10n.customerName, order.recipientName!),
+                        _row(l10n.fullName, order.recipientName!),
                       if (customerPhone != null && customerPhone.isNotEmpty)
                         _row(l10n.orderCustomerPhone, customerPhone),
                       _row(l10n.pickupPointLabel, order.pickupAddress),

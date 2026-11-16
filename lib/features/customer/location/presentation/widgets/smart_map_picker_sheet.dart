@@ -222,9 +222,8 @@ class _SmartMapPickerSheetState extends ConsumerState<SmartMapPickerSheet> {
                   myLocationButtonEnabled: false,
                   zoomControlsEnabled: false,
                   mapToolbarEnabled: false,
-                  compassEnabled: true,
                   gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
-                    Factory<OneSequenceGestureRecognizer>(
+                    const Factory<OneSequenceGestureRecognizer>(
                       EagerGestureRecognizer.new,
                     ),
                   },

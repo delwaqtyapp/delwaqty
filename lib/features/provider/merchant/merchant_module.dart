@@ -132,3 +132,62 @@ class MerchantModule extends FeatureModule {
         ),
       ];
 }
+
+class ProviderOrdersNavModule extends FeatureModule {
+  @override
+  String get id => 'provider-orders-nav';
+
+  @override
+  String name(BuildContext context) => AppLocalizations.of(context).orders;
+
+  @override
+  IconData? get icon => Icons.receipt_long_rounded;
+
+  @override
+  bool get isNavModule => true;
+
+  @override
+  int get navPriority => 12;
+
+  @override
+  StatefulShellBranch? buildBranch() {
+    return StatefulShellBranch(
+      routes: [
+        GoRoute(
+          path: '/provider-orders',
+          builder: (context, state) => const MerchantOrdersPage(),
+        ),
+      ],
+    );
+  }
+}
+
+class ProviderProductsNavModule extends FeatureModule {
+  @override
+  String get id => 'provider-products-nav';
+
+  @override
+  String name(BuildContext context) => AppLocalizations.of(context).products;
+
+  @override
+  IconData? get icon => Icons.inventory_2_rounded;
+
+  @override
+  bool get isNavModule => true;
+
+  @override
+  int get navPriority => 15;
+
+  @override
+  StatefulShellBranch? buildBranch() {
+    return StatefulShellBranch(
+      routes: [
+        GoRoute(
+          path: '/provider-products',
+          builder: (context, state) => const MerchantProductsPage(),
+        ),
+      ],
+    );
+  }
+}
+

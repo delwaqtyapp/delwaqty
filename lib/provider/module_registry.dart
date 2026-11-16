@@ -36,6 +36,8 @@ void registerProviderModules() {
     CommerceModule(),
     RestaurantModule(),
     MerchantModule(),
+    ProviderOrdersNavModule(),
+    ProviderProductsNavModule(),
     FinancialModule(),
     DirectDeliveryModule(),
     WalletModule(),

@@ -80,7 +80,6 @@ final customerMyRoomsProvider = FutureProvider<List<ChatRoom>>((ref) async {
   final authState = ref.watch(authStateProvider);
   final user = authState is AuthAuthenticated ? authState.user : null;
   if (user == null) return [];
-  await repo.purgeExpiredChats();
   return repo.getRoomsForParticipant(user.id);
 });
 

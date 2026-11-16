@@ -258,6 +258,10 @@ abstract final class AppTheme {
         ),
       ),
       chipTheme: ChipThemeData(
+        backgroundColor:
+            colorScheme.surfaceContainerHighest.withValues(alpha: 0.65),
+        selectedColor: colorScheme.primary,
+        checkmarkColor: colorScheme.onPrimary,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
           side: BorderSide(color: colorScheme.outlineVariant),
@@ -265,6 +269,11 @@ abstract final class AppTheme {
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
         labelStyle: AppTextStyles.labelLarge.copyWith(
           fontWeight: FontWeight.w600,
+          color: colorScheme.onSurface,
+        ),
+        secondaryLabelStyle: AppTextStyles.labelLarge.copyWith(
+          fontWeight: FontWeight.w700,
+          color: colorScheme.onPrimary,
         ),
       ),
       dividerTheme: DividerThemeData(

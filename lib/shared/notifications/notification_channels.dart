@@ -46,7 +46,12 @@ class NotificationChannels {
     NotificationChannel('/notifications'),
     NotificationChannel(
       '/support/room/:roomId',
-      contexts: {AppContext.admin, AppContext.customer},
+      contexts: {
+        AppContext.admin,
+        AppContext.customer,
+        AppContext.driver,
+        AppContext.provider,
+      },
     ),
 
     // ── Customer ─────────────────────────────────────────────────────────

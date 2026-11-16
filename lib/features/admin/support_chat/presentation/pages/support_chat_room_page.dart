@@ -7,6 +7,8 @@ import 'package:image_picker/image_picker.dart';
 import 'package:record/record.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:supabase_flutter/supabase_flutter.dart' hide User;
+import 'package:url_launcher/url_launcher.dart';
 import 'package:delwaqty/features/admin/support_chat/presentation/chat_providers.dart';
 import 'package:delwaqty/features/admin/support_chat/presentation/chat_origin_helpers.dart';
 import 'package:delwaqty/features/admin/support_chat/presentation/widgets/chat_media_bubbles.dart';
@@ -49,7 +51,42 @@ class _SupportChatRoomPageState extends ConsumerState<SupportChatRoomPage> {
       _scrollToBottom();
       _maybeSendWelcome();
       _maybeHandlePendingIncomingCall();
+      final uid = _currentUser()?.id;
+      if (uid != null) {
+        unawaited(ref.read(chatRepositoryProvider).markAsRead(widget.roomId, uid));
+      }
     });
+  }
+
+  Future<void> _launchDirectPhoneCall() async {
+    try {
+      final res = await Supabase.instance.client.rpc(
+        'get_support_room_contact',
+        params: {'p_room_id': widget.roomId},
+      );
+      final map = res is Map ? Map<String, dynamic>.from(res) : null;
+      final phone = (map?['other_phone'] ?? map?['support_phone'] ?? '')
+          .toString()
+          .replaceAll(RegExp(r'[^\d+]'), '');
+      if (phone.isEmpty) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(AppLocalizations.of(context).errorNotFound)),
+          );
+        }
+        return;
+      }
+      await launchUrl(
+        Uri(scheme: 'tel', path: phone),
+        mode: LaunchMode.externalApplication,
+      );
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(appErrorText(context, e))),
+        );
+      }
+    }
   }
 
   @override
@@ -228,6 +265,11 @@ class _SupportChatRoomPageState extends ConsumerState<SupportChatRoomPage> {
           ],
         ),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.phone_forwarded_rounded),
+            tooltip: l10n.phone,
+            onPressed: _launchDirectPhoneCall,
+          ),
           if (isRoomActive && callEnabled)
             IconButton(
               icon: const Icon(Icons.call_rounded),
@@ -655,7 +697,13 @@ class _SupportChatRoomPageState extends ConsumerState<SupportChatRoomPage> {
         responderType: _selfSenderType(),
       );
       _scrollToBottom();
-    } catch (_) {}
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(appErrorText(context, e))),
+        );
+      }
+    }
   }
 
   Future<void> _declineCall(ChatMessage incoming) async {
@@ -670,7 +718,13 @@ class _SupportChatRoomPageState extends ConsumerState<SupportChatRoomPage> {
         responderType: _selfSenderType(),
       );
       _scrollToBottom();
-    } catch (_) {}
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(appErrorText(context, e))),
+        );
+      }
+    }
   }
 
   // Hang up a call in progress — clears status to 'ended' on the same bubble.
@@ -685,7 +739,13 @@ class _SupportChatRoomPageState extends ConsumerState<SupportChatRoomPage> {
         responderId: user.id,
         responderType: _selfSenderType(),
       );
-    } catch (_) {}
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(appErrorText(context, e))),
+        );
+      }
+    }
   }
 
   // Opens a full-screen call sheet when a REAL-TIME ringing call arrives from

@@ -108,6 +108,11 @@ class _MerchantDashboardPageState
         title: Text(l10n.merchantDashboard),
         actions: [
           IconButton(
+            tooltip: l10n.support,
+            icon: const Icon(Icons.support_agent_rounded),
+            onPressed: () => context.push('/support'),
+          ),
+          IconButton(
             tooltip: l10n.notifications,
             icon: const Icon(Icons.notifications_outlined),
             onPressed: () => context.push('/notifications'),

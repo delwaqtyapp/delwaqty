@@ -13693,6 +13693,60 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Preview Document'**
   String get viewDocumentTooltip;
+
+  /// No description provided for @switchWorkspace.
+  ///
+  /// In en, this message translates to:
+  /// **'Switch Service / Workspace'**
+  String get switchWorkspace;
+
+  /// No description provided for @activeWorkspaceLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Active Business Line'**
+  String get activeWorkspaceLabel;
+
+  /// No description provided for @requestAdditionalService.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Another Business / Service'**
+  String get requestAdditionalService;
+
+  /// No description provided for @additionalServiceHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Apply to operate an additional service line under one account (requires Admin approval).'**
+  String get additionalServiceHint;
+
+  /// No description provided for @serviceDisplayName.
+  ///
+  /// In en, this message translates to:
+  /// **'Business / Service Name'**
+  String get serviceDisplayName;
+
+  /// No description provided for @serviceRequestSubmitted.
+  ///
+  /// In en, this message translates to:
+  /// **'Request sent! Awaiting Admin approval.'**
+  String get serviceRequestSubmitted;
+
+  /// No description provided for @ownerAllModesUnlocked.
+  ///
+  /// In en, this message translates to:
+  /// **'Owner Access: All Service Verticals Unlocked'**
+  String get ownerAllModesUnlocked;
+
+  /// No description provided for @multiServiceRequestsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Multi-Service Expansion Requests'**
+  String get multiServiceRequestsTitle;
+
+  /// No description provided for @noMultiServiceRequests.
+  ///
+  /// In en, this message translates to:
+  /// **'No pending multi-service requests'**
+  String get noMultiServiceRequests;
 }
 
 class _AppLocalizationsDelegate

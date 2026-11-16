@@ -3,22 +3,101 @@ import 'package:delwaqty/services/supabase/supabase_service.dart';
 import 'package:delwaqty/core/auth/platform_capabilities.dart';
 import 'package:delwaqty/features/provider/capability/domain/provider_capability.dart';
 
-/// Resolves the Provider app account's raw database classification.
+class ProviderBusinessProfile {
+  const ProviderBusinessProfile({
+    required this.id,
+    required this.categoryType,
+    required this.displayName,
+    required this.status,
+    this.merchantId,
+    this.serviceProviderId,
+    this.rejectionReason,
+  });
+
+  factory ProviderBusinessProfile.fromJson(Map<String, dynamic> json) =>
+      ProviderBusinessProfile(
+        id: json['id']?.toString() ?? '',
+        categoryType: (json['category_type'] as String? ?? 'restaurant').trim(),
+        displayName: (json['display_name'] as String? ?? '').trim(),
+        status: (json['status'] as String? ?? 'pending').trim(),
+        merchantId: json['merchant_id'] as String?,
+        serviceProviderId: json['service_provider_id'] as String?,
+        rejectionReason: json['rejection_reason'] as String?,
+      );
+
+  final String id;
+  final String categoryType;
+  final String displayName;
+  final String status;
+  final String? merchantId;
+  final String? serviceProviderId;
+  final String? rejectionReason;
+
+  bool get isApproved => status == 'approved';
+}
+
+class ProviderProfilesState {
+  const ProviderProfilesState({
+    this.isOwner = false,
+    this.activeCategory = 'restaurant',
+    this.profiles = const [],
+  });
+
+  final bool isOwner;
+  final String activeCategory;
+  final List<ProviderBusinessProfile> profiles;
+}
+
+final providerProfilesProvider =
+    FutureProvider<ProviderProfilesState>((ref) async {
+      final client = ref.watch(supabaseClientProvider);
+      final uid = client.auth.currentUser?.id;
+      if (uid == null || uid.isEmpty) {
+        return const ProviderProfilesState();
+      }
+      try {
+        final raw = await client.rpc('get_my_provider_profiles');
+        if (raw is Map) {
+          final map = Map<String, dynamic>.from(raw);
+          final listRaw = map['profiles'];
+          final profiles = listRaw is List
+              ? listRaw
+                    .whereType<Map>()
+                    .map(
+                      (e) => ProviderBusinessProfile.fromJson(
+                        Map<String, dynamic>.from(e),
+                      ),
+                    )
+                    .toList()
+              : <ProviderBusinessProfile>[];
+          return ProviderProfilesState(
+            isOwner: map['is_owner'] == true,
+            activeCategory:
+                (map['active_category'] as String?)?.trim().isNotEmpty == true
+                ? (map['active_category'] as String).trim()
+                : 'restaurant',
+            profiles: profiles,
+          );
+        }
+      } catch (_) {}
+      return const ProviderProfilesState();
+    });
+
+/// Resolves the Provider app account's active raw database classification.
 ///
-/// Canonical source of truth (backend contract):
-///   - `merchants.id` equals the auth user id (`get_user_merchant_id`).
-///   - `service_providers.user_id` equals the auth user id.
-/// We try `merchants.type` first, then `service_providers.category_type`.
-/// RLS restricts these rows to the caller's own account, so ownership is
-/// enforced server-side and never trusted from a client-supplied value.
-///
-/// The global Owner (users.role='owner') is granted every provider capability
-/// without needing a merchant/service_provider row, so the same Auth identity
-/// works across all four apps. Backend RLS remains authoritative for real ops.
+/// Honors `providerProfilesProvider.activeCategory` so both the global Owner
+/// (for full platform evaluation) and approved multi-service providers can
+/// switch seamlessly between verticals in one app.
 final providerRawCategoryProvider = FutureProvider<String>((ref) async {
   final client = ref.watch(supabaseClientProvider);
   final uid = client.auth.currentUser?.id;
   if (uid == null || uid.isEmpty) return 'unknown';
+
+  final profilesState = await ref.watch(providerProfilesProvider.future);
+  if (profilesState.profiles.isNotEmpty &&
+      profilesState.activeCategory.isNotEmpty) {
+    return profilesState.activeCategory;
+  }
 
   if (await isOwnerByRole(client, uid)) return 'owner';
 
@@ -32,15 +111,15 @@ final providerRawCategoryProvider = FutureProvider<String>((ref) async {
 
   final merchant = merchantId != null
       ? await client
-          .from('merchants')
-          .select('type')
-          .eq('id', merchantId)
-          .maybeSingle()
+            .from('merchants')
+            .select('type')
+            .eq('id', merchantId)
+            .maybeSingle()
       : await client
-          .from('merchants')
-          .select('type')
-          .or('id.eq.$uid,owner_user_id.eq.$uid')
-          .maybeSingle();
+            .from('merchants')
+            .select('type')
+            .or('id.eq.$uid,owner_user_id.eq.$uid')
+            .maybeSingle();
   if (merchant != null && merchant['type'] is String) {
     return merchant['type'] as String;
   }
@@ -76,9 +155,6 @@ final providerCategoryProvider = Provider<ProviderCategory>((ref) {
 });
 
 /// The resolved capability set for the current provider account.
-///
-/// UX composition only — every sensitive action must still be protected by
-/// RLS / RPC authorization / ownership / region scope on the backend.
 final providerCapabilitiesProvider = Provider<Set<ProviderCapability>>((ref) {
   return resolveCapabilities(ref.watch(providerCategoryProvider));
 });

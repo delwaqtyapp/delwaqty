@@ -2306,5 +2306,14 @@
   "writeReplyHint": "اكتب ردك على تقييم العميل…",
   "receivingAccountTitle": "بيانات حساب الاستلام للتحويل",
   "copyAccountNumber": "نسخ رقم الحساب / المحفظة",
-  "viewDocumentTooltip": "معاينة المستند"
+  "viewDocumentTooltip": "معاينة المستند",
+  "switchWorkspace": "تبديل النشاط / الخدمة",
+  "activeWorkspaceLabel": "النشاط النشط حالياً",
+  "requestAdditionalService": "إضافة نشاط أو خدمة جديدة",
+  "additionalServiceHint": "قدّم طلباً لتشغيل نشاط إضافي من نفس الحساب (يُفعّل فور موافقة الإدارة).",
+  "serviceDisplayName": "اسم النشاط أو الخدمة",
+  "serviceRequestSubmitted": "تم إرسال الطلب! بانتظار موافقة الإدارة.",
+  "ownerAllModesUnlocked": "صلاحية المالك: جميع أنشطة المنصة مفتوحة للتقييم والإدارة",
+  "multiServiceRequestsTitle": "طلبات تعدد الأنشطة والخدمات",
+  "noMultiServiceRequests": "لا توجد طلبات تعدد أنشطة معلقة"
 }

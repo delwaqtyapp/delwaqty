@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:delwaqty/core/errors/app_error_text.dart';
 import 'package:delwaqty/core/extensions/context_extensions.dart';
 import 'package:delwaqty/domain/enums/user_type.dart';
 import 'package:delwaqty/services/admin/admin_providers.dart';
@@ -12,6 +14,21 @@ import 'package:delwaqty/shared/widgets/app_loader.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 import 'package:delwaqty/features/admin/admin_shell.dart';
 import 'package:delwaqty/core/theme/app_colors.dart';
+
+final multiServiceRequestsProvider =
+    FutureProvider<List<Map<String, dynamic>>>((ref) async {
+      final res = await Supabase.instance.client.rpc(
+        'list_provider_profile_requests',
+        params: {'p_status': 'pending'},
+      );
+      if (res is List) {
+        return res
+            .whereType<Map>()
+            .map((e) => Map<String, dynamic>.from(e))
+            .toList();
+      }
+      return const [];
+    });
 
 class AdminVerificationsPage extends ConsumerStatefulWidget {
   const AdminVerificationsPage({super.key});
@@ -163,75 +180,239 @@ class _AdminVerificationsPageState
     );
   }
 
+  Future<void> _decideMultiService(
+    Map<String, dynamic> req, {
+    required bool approve,
+  }) async {
+    final l10n = AppLocalizations.of(context);
+    String? reason;
+    if (!approve) {
+      reason = await _askRejectReason(l10n);
+      if (reason == null || !mounted) return;
+    }
+    final id = req['id']?.toString() ?? '';
+    if (id.isEmpty) return;
+    setState(() => _processingUserId = id);
+    try {
+      await Supabase.instance.client.rpc(
+        'decide_provider_profile_request',
+        params: {
+          'p_profile_id': id,
+          'p_decision': approve ? 'approved' : 'rejected',
+          'p_reason': ?reason,
+        },
+      );
+      ref.invalidate(multiServiceRequestsProvider);
+      if (mounted) {
+        context.showAppSnackBar(
+          approve ? l10n.approvalSuccessful : l10n.rejectionSuccessful,
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        context.showAppSnackBar(appErrorText(context, e), isError: true);
+      }
+    } finally {
+      if (mounted) setState(() => _processingUserId = null);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final cs = Theme.of(context).colorScheme;
     final requestsAsync = ref.watch(verificationRequestsProvider);
+    final multiAsync = ref.watch(multiServiceRequestsProvider);
+    final multiCount = multiAsync.value?.length ?? 0;
 
-    return Scaffold(
-      appBar: AppBar(
-        leading: MediaQuery.sizeOf(context).width < 1100
-            ? const AdminMenuButton()
-            : null,
-        title: Text(l10n.verificationRequests),
-        actions: [
-          IconButton(
-            tooltip: l10n.refresh,
-            icon: const Icon(Icons.refresh_rounded),
-            onPressed: () => ref.invalidate(verificationRequestsProvider),
-          ),
-        ],
-      ),
-      body: requestsAsync.when(
-        loading: () => const Center(child: AppLoaderCircular()),
-        error: (e, _) => Center(
-          child: PremiumEmptyState(
-            icon: Icons.error_outline_rounded,
-            title: l10n.error,
-            message: l10n.errorLoading,
-            actionLabel: l10n.retry,
-            onAction: () => ref.invalidate(verificationRequestsProvider),
+    return DefaultTabController(
+      length: 2,
+      child: Scaffold(
+        appBar: AppBar(
+          leading: MediaQuery.sizeOf(context).width < 1100
+              ? const AdminMenuButton()
+              : null,
+          title: Text(l10n.verificationRequests),
+          actions: [
+            IconButton(
+              tooltip: l10n.refresh,
+              icon: const Icon(Icons.refresh_rounded),
+              onPressed: () {
+                ref.invalidate(verificationRequestsProvider);
+                ref.invalidate(multiServiceRequestsProvider);
+              },
+            ),
+          ],
+          bottom: TabBar(
+            tabs: [
+              Tab(text: l10n.verificationRequests),
+              Tab(
+                text: multiCount > 0
+                    ? '${l10n.multiServiceRequestsTitle} ($multiCount)'
+                    : l10n.multiServiceRequestsTitle,
+              ),
+            ],
           ),
         ),
-        data: (requests) {
-          if (requests.isEmpty) {
-            return PremiumEmptyState(
-              icon: Icons.verified_user_outlined,
-              title: l10n.verificationRequests,
-              message: l10n.noVerificationRequests,
-            );
-          }
-          return RefreshIndicator(
-            onRefresh: () async {
-              ref.invalidate(verificationRequestsProvider);
-              await ref.read(verificationRequestsProvider.future);
-            },
-            child: ListView.builder(
-              padding: const EdgeInsets.all(16),
-              itemCount: requests.length,
-              itemBuilder: (context, index) {
-                return AnimatedFadeIn(
-                  delay: Duration(milliseconds: 100 + index * 60),
-                  child: Padding(
-                    padding: EdgeInsets.only(
-                      bottom: index < requests.length - 1 ? 12 : 0,
-                    ),
-                    child: _VerificationCard(
-                      request: requests[index],
-                      cs: cs,
-                      isProcessing: _processingUserId == requests[index].userId,
-                      onApprove: () => _decide(requests[index], approve: true),
-                      onReject: () => _decide(requests[index], approve: false),
-                      onViewDocument: (url, label) =>
-                          _showDocument(url: url, label: label),
-                    ),
+        body: TabBarView(
+          children: [
+            requestsAsync.when(
+              loading: () => const Center(child: AppLoaderCircular()),
+              error: (e, _) => Center(
+                child: PremiumEmptyState(
+                  icon: Icons.error_outline_rounded,
+                  title: l10n.error,
+                  message: l10n.errorLoading,
+                  actionLabel: l10n.retry,
+                  onAction: () => ref.invalidate(verificationRequestsProvider),
+                ),
+              ),
+              data: (requests) {
+                if (requests.isEmpty) {
+                  return PremiumEmptyState(
+                    icon: Icons.verified_user_outlined,
+                    title: l10n.verificationRequests,
+                    message: l10n.noVerificationRequests,
+                  );
+                }
+                return RefreshIndicator(
+                  onRefresh: () async {
+                    ref.invalidate(verificationRequestsProvider);
+                    await ref.read(verificationRequestsProvider.future);
+                  },
+                  child: ListView.builder(
+                    padding: const EdgeInsets.all(16),
+                    itemCount: requests.length,
+                    itemBuilder: (context, index) {
+                      return AnimatedFadeIn(
+                        delay: Duration(milliseconds: 100 + index * 60),
+                        child: Padding(
+                          padding: EdgeInsets.only(
+                            bottom: index < requests.length - 1 ? 12 : 0,
+                          ),
+                          child: _VerificationCard(
+                            request: requests[index],
+                            cs: cs,
+                            isProcessing:
+                                _processingUserId == requests[index].userId,
+                            onApprove: () =>
+                                _decide(requests[index], approve: true),
+                            onReject: () =>
+                                _decide(requests[index], approve: false),
+                            onViewDocument: (url, label) =>
+                                _showDocument(url: url, label: label),
+                          ),
+                        ),
+                      );
+                    },
                   ),
                 );
               },
             ),
-          );
-        },
+            multiAsync.when(
+              loading: () => const Center(child: AppLoaderCircular()),
+              error: (e, _) => Center(
+                child: PremiumEmptyState(
+                  icon: Icons.error_outline_rounded,
+                  title: l10n.error,
+                  message: appErrorText(context, e),
+                  actionLabel: l10n.retry,
+                  onAction: () => ref.invalidate(multiServiceRequestsProvider),
+                ),
+              ),
+              data: (list) {
+                if (list.isEmpty) {
+                  return PremiumEmptyState(
+                    icon: Icons.add_business_rounded,
+                    title: l10n.multiServiceRequestsTitle,
+                    message: l10n.noMultiServiceRequests,
+                  );
+                }
+                return RefreshIndicator(
+                  onRefresh: () async {
+                    ref.invalidate(multiServiceRequestsProvider);
+                    await ref.read(multiServiceRequestsProvider.future);
+                  },
+                  child: ListView.builder(
+                    padding: const EdgeInsets.all(16),
+                    itemCount: list.length,
+                    itemBuilder: (context, index) {
+                      final req = list[index];
+                      final id = req['id']?.toString() ?? '';
+                      final busy = _processingUserId == id;
+                      return Card(
+                        margin: const EdgeInsets.only(bottom: 12),
+                        child: Padding(
+                          padding: const EdgeInsets.all(14),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  const Icon(
+                                    Icons.add_business_rounded,
+                                    color: AppColors.brandPurple,
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Expanded(
+                                    child: Text(
+                                      (req['display_name'] ?? '').toString(),
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .titleMedium
+                                          ?.copyWith(
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                    ),
+                                  ),
+                                  Chip(
+                                    label: Text(
+                                      (req['category_type'] ?? '').toString(),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 6),
+                              Text(
+                                '${req['user_name'] ?? ''} · ${req['user_phone'] ?? req['user_email'] ?? ''}',
+                                style: Theme.of(context).textTheme.bodySmall,
+                              ),
+                              const SizedBox(height: 12),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.end,
+                                children: [
+                                  OutlinedButton(
+                                    onPressed: busy
+                                        ? null
+                                        : () => _decideMultiService(
+                                            req,
+                                            approve: false,
+                                          ),
+                                    child: Text(l10n.reject),
+                                  ),
+                                  const SizedBox(width: 10),
+                                  FilledButton(
+                                    onPressed: busy
+                                        ? null
+                                        : () => _decideMultiService(
+                                            req,
+                                            approve: true,
+                                          ),
+                                    child: Text(l10n.approve),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                );
+              },
+            ),
+          ],
+        ),
       ),
     );
   }

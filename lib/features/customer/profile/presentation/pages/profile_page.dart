@@ -142,7 +142,6 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
         ),
       ],
       flexibleSpace: FlexibleSpaceBar(
-        collapseMode: CollapseMode.parallax,
         background: ClipRRect(
           borderRadius: const BorderRadius.vertical(
             bottom: Radius.circular(28),

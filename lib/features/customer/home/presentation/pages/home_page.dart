@@ -896,7 +896,6 @@ class _DirectOrderButtonState extends State<_DirectOrderButton>
                     color: Colors.white.withValues(alpha: 0.22),
                     border: Border.all(
                       color: Colors.white.withValues(alpha: 0.35),
-                      width: 1,
                     ),
                     boxShadow: [
                       BoxShadow(
@@ -1085,8 +1084,6 @@ class _CompactCategories extends StatelessWidget {
               icon: merchantCategoryIcon(category.name),
               networkImageUrl: category.imageUrl,
               assetImagePath: merchantCategoryAsset(category.name),
-              size: 64,
-              borderRadius: 20,
             ),
             const SizedBox(height: 8),
             SizedBox(
@@ -1127,8 +1124,6 @@ class _CompactCategories extends StatelessWidget {
             Category3dTileIcon(
               color: color,
               icon: icon,
-              size: 64,
-              borderRadius: 20,
             ),
             const SizedBox(height: 8),
             SizedBox(
@@ -1622,7 +1617,6 @@ class _PromoSlide extends ConsumerWidget {
         ),
         border: Border.all(
           color: Colors.white.withValues(alpha: 0.22),
-          width: 1,
         ),
         boxShadow: [
           BoxShadow(
@@ -1804,7 +1798,6 @@ class _HomeDiscoveryListCard extends StatelessWidget {
                 borderRadius: BorderRadius.circular(18),
                 border: Border.all(
                   color: color.withValues(alpha: 0.18),
-                  width: 1,
                 ),
               ),
               child: ClipRRect(

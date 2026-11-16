@@ -19,12 +19,14 @@ final notificationRepositoryProvider = Provider<NotificationRepository>((ref) {
 
 final notificationsProvider = FutureProvider.autoDispose<List<AppNotification>>(
   (ref) async {
+    ref.watch(authStateProvider);
     final repo = ref.watch(notificationRepositoryProvider);
     return repo.getNotifications();
   },
 );
 
 final unreadCountProvider = FutureProvider.autoDispose<int>((ref) async {
+  ref.watch(authStateProvider);
   final repo = ref.watch(notificationRepositoryProvider);
   return repo.getUnreadCount();
 });

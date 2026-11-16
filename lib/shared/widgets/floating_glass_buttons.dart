@@ -12,6 +12,7 @@ import 'package:delwaqty/features/_shared/auth/domain/auth_state.dart';
 import 'package:delwaqty/features/_shared/auth/presentation/auth_provider.dart';
 import 'package:delwaqty/features/_shared/notifications/notifications_module.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
+import 'package:delwaqty/shared/widgets/glass_notifications_menu.dart';
 import 'package:delwaqty/shared/widgets/glass_side_menu.dart';
 import 'package:delwaqty/shared/widgets/pressable_scale.dart';
 
@@ -177,7 +178,10 @@ class _FloatingMenuCircleButtonState
 }
 
 /// Floating glass circle notification button with live unread count badge.
-class FloatingNotificationCircleButton extends ConsumerWidget {
+///
+/// Opens [GlassNotificationsMenuController] as a floating transparent glass
+/// bubble anchored to the bell button (matching [FloatingMenuCircleButton]).
+class FloatingNotificationCircleButton extends ConsumerStatefulWidget {
   const FloatingNotificationCircleButton({
     super.key,
     this.overDarkHero = false,
@@ -192,7 +196,24 @@ class FloatingNotificationCircleButton extends ConsumerWidget {
   final VoidCallback? onTap;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<FloatingNotificationCircleButton> createState() =>
+      _FloatingNotificationCircleButtonState();
+}
+
+class _FloatingNotificationCircleButtonState
+    extends ConsumerState<FloatingNotificationCircleButton> {
+  final GlobalKey _key = GlobalKey();
+
+  void _openNotifications() {
+    final box = _key.currentContext?.findRenderObject() as RenderBox?;
+    final anchor = box == null
+        ? null
+        : box.localToGlobal(Offset.zero) & box.size;
+    GlassNotificationsMenuController.open(context, ref, anchor: anchor);
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final authState = ref.watch(authStateProvider);
     final isGuest = authState is AuthGuest;
@@ -203,22 +224,21 @@ class FloatingNotificationCircleButton extends ConsumerWidget {
             0;
 
     return FloatingGlassCircleButton(
-      overDarkHero: overDarkHero,
-      size: size,
-      iconSize: iconSize,
+      key: _key,
+      overDarkHero: widget.overDarkHero,
+      size: widget.size,
+      iconSize: widget.iconSize,
       tooltip: l10n.notificationsTooltip,
       onTap:
-          onTap ??
-          (isGuest
-              ? () => context.push('/login')
-              : () => context.push('/notifications')),
+          widget.onTap ??
+          (isGuest ? () => context.push('/login') : _openNotifications),
       child: Stack(
         clipBehavior: Clip.none,
         children: [
           Center(
             child: Icon(
               Icons.notifications_outlined,
-              size: iconSize,
+              size: widget.iconSize,
             ),
           ),
           Positioned(

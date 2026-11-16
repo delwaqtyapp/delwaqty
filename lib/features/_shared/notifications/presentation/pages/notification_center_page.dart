@@ -62,9 +62,24 @@ class _NotificationCenterPageState extends ConsumerState<NotificationCenterPage>
     await _loadMore();
   }
 
+  void _invalidateNotificationProviders() {
+    ref.invalidate(unreadCountProvider);
+    ref.invalidate(unreadCountStreamProvider);
+    ref.invalidate(notificationsProvider);
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+
+    ref.listen<AsyncValue<int>>(unreadCountStreamProvider, (prev, next) {
+      if (prev != null &&
+          prev.hasValue &&
+          next.hasValue &&
+          prev.value != next.value) {
+        _refresh();
+      }
+    });
 
     return Scaffold(
       appBar: AppBar(
@@ -78,7 +93,7 @@ class _NotificationCenterPageState extends ConsumerState<NotificationCenterPage>
                 _items[i] = _items[i].copyWith(isRead: true);
               }
               setState(() {});
-              ref.invalidate(unreadCountProvider);
+              _invalidateNotificationProviders();
             },
             child: Text(l10n.markAllRead),
           ),
@@ -169,7 +184,7 @@ class _NotificationCenterPageState extends ConsumerState<NotificationCenterPage>
                           _items[index] = _items[index].copyWith(isRead: true);
                           setState(() {});
                         }
-                        ref.invalidate(unreadCountProvider);
+                        _invalidateNotificationProviders();
                         if (context.mounted) {
                           final authState = ref.read(authStateProvider);
                           final isAdmin = authState is AuthAuthenticated &&
@@ -180,7 +195,9 @@ class _NotificationCenterPageState extends ConsumerState<NotificationCenterPage>
                                 ? AppContext.admin
                                 : NotificationRouteResolver.appContext,
                           );
-                          unawaited(context.push(route));
+                          if (route != '/notifications') {
+                            unawaited(context.push(route));
+                          }
                         }
                       },
                       onDelete: () async {
@@ -190,7 +207,7 @@ class _NotificationCenterPageState extends ConsumerState<NotificationCenterPage>
                         _items.removeWhere((n) => n.id == notification.id);
                         _offset = _items.length;
                         setState(() {});
-                        ref.invalidate(unreadCountProvider);
+                        _invalidateNotificationProviders();
                       },
                     ),
                   ),
@@ -258,7 +275,7 @@ class _NotificationCenterPageState extends ConsumerState<NotificationCenterPage>
       _offset = 0;
       _hasMore = false;
     });
-    ref.invalidate(unreadCountProvider);
+    _invalidateNotificationProviders();
   }
 }
 
@@ -364,7 +381,10 @@ class _NotificationCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      _formatTime(notification.createdAt),
+                      _formatTime(
+                        notification.createdAt,
+                        AppLocalizations.of(context),
+                      ),
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         color: colorScheme.onSurfaceVariant,
                       ),
@@ -424,6 +444,8 @@ class _NotificationCard extends StatelessWidget {
         return colorScheme.secondary;
       case NotificationType.complaint:
       case NotificationType.complaintNote:
+      case NotificationType.complaintEscalated:
+      case NotificationType.complaintAssigned:
         return AppColors.warningLight;
       case NotificationType.emergency:
       case NotificationType.emergencyAlert:
@@ -431,7 +453,12 @@ class _NotificationCard extends StatelessWidget {
         return AppColors.errorLight;
       case NotificationType.adminManagement:
       case NotificationType.moderation:
+      case NotificationType.approval:
+      case NotificationType.providerProfile:
         return colorScheme.tertiary;
+      case NotificationType.topupApproved:
+      case NotificationType.adminTopup:
+        return AppColors.successLight;
     }
   }
 
@@ -442,6 +469,8 @@ class _NotificationCard extends StatelessWidget {
       case NotificationType.order:
         return Icons.shopping_bag_outlined;
       case NotificationType.payment:
+      case NotificationType.topupApproved:
+      case NotificationType.adminTopup:
         return Icons.payment_rounded;
       case NotificationType.promotion:
         return Icons.local_offer_outlined;
@@ -470,6 +499,8 @@ class _NotificationCard extends StatelessWidget {
         return Icons.chat_bubble_outline_rounded;
       case NotificationType.complaint:
       case NotificationType.complaintNote:
+      case NotificationType.complaintEscalated:
+      case NotificationType.complaintAssigned:
         return Icons.report_outlined;
       case NotificationType.emergency:
       case NotificationType.emergencyAlert:
@@ -477,18 +508,20 @@ class _NotificationCard extends StatelessWidget {
         return Icons.emergency_rounded;
       case NotificationType.adminManagement:
       case NotificationType.moderation:
+      case NotificationType.approval:
+      case NotificationType.providerProfile:
         return Icons.admin_panel_settings_outlined;
     }
   }
 
-  String _formatTime(DateTime dateTime) {
+  String _formatTime(DateTime dateTime, AppLocalizations l10n) {
     final now = DateTime.now();
     final diff = now.difference(dateTime);
 
-    if (diff.inMinutes < 1) return 'now';
-    if (diff.inMinutes < 60) return '${diff.inMinutes}m';
-    if (diff.inHours < 24) return '${diff.inHours}h';
-    if (diff.inDays < 7) return '${diff.inDays}d';
+    if (diff.inMinutes < 1) return l10n.justNow;
+    if (diff.inMinutes < 60) return l10n.minutesAgoShort(diff.inMinutes);
+    if (diff.inHours < 24) return l10n.hoursAgoShort(diff.inHours);
+    if (diff.inDays < 7) return l10n.daysAgoShort(diff.inDays);
     return '${dateTime.day}/${dateTime.month}/${dateTime.year}';
   }
 }

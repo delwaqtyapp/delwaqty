@@ -33,7 +33,7 @@ import 'package:delwaqty/core/theme/app_colors.dart';
 import 'package:delwaqty/core/theme/app_text_styles.dart';
 import 'package:delwaqty/core/theme/app_spacing.dart';
 import 'package:delwaqty/core/theme/app_elevation.dart';
-import 'package:delwaqty/shared/widgets/glass_side_menu.dart';
+import 'package:delwaqty/shared/widgets/floating_glass_buttons.dart';
 
 final _homeServiceCategoriesProvider = FutureProvider<List<ServiceCategory>>((
   ref,
@@ -432,13 +432,10 @@ class _EgyptHeroState extends State<_EgyptHero>
                           textDirection: TextDirection.ltr,
                           child: Row(
                             children: [
-                              _NotificationCircle(
-                                unreadCount: widget.unreadCount,
-                                onTap: widget.isGuest
-                                    ? () => context.push('/login')
-                                    : () => context.push('/notifications'),
+                              FloatingNotificationCircleButton(
                                 size: topButtonSize,
                                 iconSize: topIconSize,
+                                overDarkHero: true,
                               ),
                               const Spacer(),
                               _buildMiniLockup(
@@ -446,9 +443,10 @@ class _EgyptHeroState extends State<_EgyptHero>
                                 arabicSize: arabicSize,
                               ),
                               const Spacer(),
-                              _MenuCircleButton(
+                              FloatingMenuCircleButton(
                                 size: topButtonSize,
                                 iconSize: topIconSize,
+                                overDarkHero: true,
                               ),
                             ],
                           ),
@@ -1348,137 +1346,6 @@ class _DiscoveryContent extends ConsumerWidget {
       );
     }
     return const SizedBox.shrink();
-  }
-}
-
-class _MenuCircleButton extends ConsumerStatefulWidget {
-  const _MenuCircleButton({
-    this.size = 54,
-    this.iconSize = 24,
-  });
-
-  final double size;
-  final double iconSize;
-
-  @override
-  ConsumerState<_MenuCircleButton> createState() => _MenuCircleButtonState();
-}
-
-class _MenuCircleButtonState extends ConsumerState<_MenuCircleButton> {
-  final GlobalKey _key = GlobalKey();
-
-  void _openMenu() {
-    final box = _key.currentContext?.findRenderObject() as RenderBox?;
-    final anchor = box == null
-        ? null
-        : box.localToGlobal(Offset.zero) & box.size;
-    GlassSideMenuController.open(context, ref, anchor: anchor);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return PressableScale(
-      key: _key,
-      onTap: _openMenu,
-      child: Container(
-        width: widget.size,
-        height: widget.size,
-        decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: 0.2),
-          shape: BoxShape.circle,
-          border: Border.all(color: Colors.white.withValues(alpha: 0.35)),
-          boxShadow: const [
-            BoxShadow(
-              color: Color(0x22000000),
-              blurRadius: 12,
-              offset: Offset(0, 4),
-            ),
-          ],
-        ),
-        child: Icon(AppIcons.navDrawer, color: Colors.white, size: widget.iconSize),
-      ),
-    );
-  }
-}
-
-class _NotificationCircle extends StatelessWidget {
-  const _NotificationCircle({
-    required this.unreadCount,
-    required this.onTap,
-    this.size = 54,
-    this.iconSize = 24,
-  });
-
-  final int unreadCount;
-  final VoidCallback onTap;
-  final double size;
-  final double iconSize;
-
-  @override
-  Widget build(BuildContext context) {
-    return AnimatedFadeIn(
-      delay: const Duration(milliseconds: 100),
-      child: PressableScale(
-        onTap: onTap,
-        child: Container(
-          width: size,
-          height: size,
-          decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.2),
-            shape: BoxShape.circle,
-            border: Border.all(color: Colors.white.withValues(alpha: 0.35)),
-            boxShadow: const [
-              BoxShadow(
-                color: Color(0x22000000),
-                blurRadius: 12,
-                offset: Offset(0, 4),
-              ),
-            ],
-          ),
-          child: Stack(
-            clipBehavior: Clip.none,
-            children: [
-              Center(
-                child: Icon(
-                  Icons.notifications_outlined,
-                  color: Colors.white,
-                  size: iconSize,
-                ),
-              ),
-              if (unreadCount > 0)
-                Positioned(
-                  top: 7,
-                  right: 8,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 5,
-                      vertical: 1,
-                    ),
-                    decoration: BoxDecoration(
-                      color: context.colorScheme.error,
-                      borderRadius: BorderRadius.circular(
-                        AppSpacing.radiusFull,
-                      ),
-                      border: Border.all(
-                        color: context.colorScheme.surfaceContainerLowest,
-                        width: 1.5,
-                      ),
-                    ),
-                    child: Text(
-                      unreadCount > 99 ? '99+' : '$unreadCount',
-                      style: AppTextStyles.labelSmall.copyWith(
-                        fontSize: 9,
-                        color: Colors.white,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                  ),
-                ),
-            ],
-          ),
-        ),
-      ),
-    );
   }
 }
 

@@ -14,6 +14,7 @@ import 'package:delwaqty/features/provider/availability/presentation/providers/p
 import 'package:delwaqty/services/realtime/realtime_channel_constants.dart';
 import 'package:delwaqty/services/realtime/realtime_service.dart';
 import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
+import 'package:delwaqty/shared/widgets/floating_glass_buttons.dart';
 import 'package:delwaqty/shared/widgets/pressable_scale.dart';
 import 'package:delwaqty/shared/widgets/premium_empty_state.dart';
 import 'package:delwaqty/shared/widgets/shimmer_loading.dart';
@@ -355,6 +356,13 @@ class _MerchantDashboardPageState
 
     return Scaffold(
       appBar: AppBar(
+        leadingWidth: 56,
+        leading: const Padding(
+          padding: EdgeInsetsDirectional.only(start: 12),
+          child: Center(
+            child: FloatingMenuCircleButton(size: 40, iconSize: 20),
+          ),
+        ),
         title: Text(l10n.merchantDashboard),
         actions: [
           IconButton(
@@ -362,10 +370,11 @@ class _MerchantDashboardPageState
             icon: const Icon(Icons.support_agent_rounded),
             onPressed: () => context.push('/support'),
           ),
-          IconButton(
-            tooltip: l10n.notifications,
-            icon: const Icon(Icons.notifications_outlined),
-            onPressed: () => context.push('/notifications'),
+          const Center(
+            child: Padding(
+              padding: EdgeInsetsDirectional.only(end: 6),
+              child: FloatingNotificationCircleButton(size: 40, iconSize: 20),
+            ),
           ),
           IconButton(
             tooltip: l10n.refresh,

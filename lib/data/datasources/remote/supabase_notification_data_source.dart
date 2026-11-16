@@ -12,12 +12,54 @@ class SupabaseNotificationDataSource {
   SupabaseNotificationDataSource(this._client);
   final SupabaseClient _client;
 
+  static const Map<String, NotificationType> _dbTypeMap = {
+    'system': NotificationType.system,
+    'order': NotificationType.order,
+    'order_update': NotificationType.order,
+    'delivery_update': NotificationType.order,
+    'payment': NotificationType.payment,
+    'promotion': NotificationType.promotion,
+    'service': NotificationType.service,
+    'ride_update': NotificationType.service,
+    'account': NotificationType.account,
+    'security': NotificationType.security,
+    'message': NotificationType.message,
+    'info': NotificationType.info,
+    'warning': NotificationType.warning,
+    'success': NotificationType.success,
+    'reminder': NotificationType.reminder,
+    'reward': NotificationType.reward,
+    'chat_reply': NotificationType.chatReply,
+    'chat_assigned': NotificationType.chatAssigned,
+    'chat_escalated': NotificationType.chatEscalated,
+    'chat_closed': NotificationType.chatClosed,
+    'complaint': NotificationType.complaint,
+    'complaint_note': NotificationType.complaintNote,
+    'complaint_escalated': NotificationType.complaintEscalated,
+    'complaint_assigned': NotificationType.complaintAssigned,
+    'emergency': NotificationType.emergency,
+    'emergency_alert': NotificationType.emergencyAlert,
+    'emergency_resolved': NotificationType.emergencyResolved,
+    'admin_management': NotificationType.adminManagement,
+    'moderation': NotificationType.moderation,
+    'approval': NotificationType.approval,
+    'topup_approved': NotificationType.topupApproved,
+    'admin_topup': NotificationType.adminTopup,
+    'provider_profile': NotificationType.providerProfile,
+  };
+
+  NotificationType _parseNotificationType(String raw) {
+    final mapped = _dbTypeMap[raw];
+    if (mapped != null) return mapped;
+    for (final t in NotificationType.values) {
+      if (t.name == raw) return t;
+    }
+    return NotificationType.system;
+  }
+
   AppNotification _fromRow(Map<String, dynamic> row) {
     final dataType = row['type'] as String? ?? 'system';
-    final type = NotificationType.values.firstWhere(
-      (t) => t.name == dataType,
-      orElse: () => NotificationType.system,
-    );
+    final type = _parseNotificationType(dataType);
 
     final data = row['data'] as Map<String, dynamic>?;
     final deepLink = row['deep_link'] as String? ?? data?['deep_link'] as String?;

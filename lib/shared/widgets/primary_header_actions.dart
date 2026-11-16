@@ -5,6 +5,7 @@ import 'package:delwaqty/features/_shared/auth/domain/auth_state.dart';
 import 'package:delwaqty/features/_shared/auth/presentation/auth_provider.dart';
 import 'package:delwaqty/features/customer/commerce/presentation/widgets/cart_badge.dart';
 import 'package:delwaqty/features/_shared/notifications/notifications_module.dart';
+import 'package:delwaqty/l10n/app_localizations.dart';
 import 'package:delwaqty/shared/widgets/glass_side_menu.dart';
 
 class PrimaryHeaderActions extends ConsumerStatefulWidget {
@@ -39,6 +40,7 @@ class _PrimaryHeaderActionsState extends ConsumerState<PrimaryHeaderActions> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final authState = ref.watch(authStateProvider);
     final isGuest = authState is AuthGuest;
     final unreadCount = isGuest
@@ -52,12 +54,12 @@ class _PrimaryHeaderActionsState extends ConsumerState<PrimaryHeaderActions> {
           IconButton(
             key: _menuKey,
             icon: const Icon(Icons.menu_rounded),
-            tooltip: 'Menu',
+            tooltip: l10n.openMenuTooltip,
             onPressed: _openMenu,
           ),
         if (widget.showNotifications)
           IconButton(
-            tooltip: 'Notifications',
+            tooltip: l10n.notificationsTooltip,
             onPressed: isGuest
                 ? () => context.push('/login')
                 : () => context.push('/notifications'),

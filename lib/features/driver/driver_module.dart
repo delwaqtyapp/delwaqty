@@ -18,6 +18,7 @@ import 'package:delwaqty/features/driver/presentation/pages/vehicle_management_p
 import 'package:delwaqty/features/driver/presentation/pages/document_management_page.dart';
 import 'package:delwaqty/features/driver/financial/presentation/pages/driver_financial_center_page.dart';
 import 'package:delwaqty/features/driver/financial/presentation/pages/driver_topup_request_page.dart';
+import 'package:delwaqty/features/driver/presentation/pages/driver_access_page.dart';
 import 'package:delwaqty/features/driver/presentation/pages/driver_delivery_detail_page.dart';
 
 final supabaseDriverRepositoryImplProvider = Provider<DriverRepositoryImpl>((ref) {
@@ -71,6 +72,50 @@ class DriverModule extends FeatureModule {
 
   @override
   Set<ModuleCapability> get capabilities => {ModuleCapability.requiresMap, ModuleCapability.requiresDelivery};
+
+  @override
+  List<DrawerEntry> get drawerEntries => [
+    DrawerEntry(
+      id: 'driver-dashboard',
+      label: (ctx) => AppLocalizations.of(ctx).driverDashboard,
+      icon: Icons.delivery_dining_outlined,
+      onTap: (ctx, _) => ctx.go('/driver'),
+    ),
+    DrawerEntry(
+      id: 'driver-delivery-hub',
+      label: (ctx) => AppLocalizations.of(ctx).deliveryHub,
+      icon: Icons.hub_outlined,
+      onTap: (ctx, _) => ctx.push('/driver/hub'),
+    ),
+    DrawerEntry(
+      id: 'driver-financial-center',
+      label: (ctx) => AppLocalizations.of(ctx).financialCenter,
+      icon: Icons.account_balance_wallet_outlined,
+      onTap: (ctx, _) => ctx.push('/driver/financial-center'),
+    ),
+    DrawerEntry(
+      id: 'driver-access',
+      label: (ctx) => AppLocalizations.of(ctx).deliveryAccess,
+      icon: Icons.shield_outlined,
+      onTap: (ctx, _) => Navigator.of(ctx).push(
+        MaterialPageRoute(builder: (_) => const DriverAccessPage()),
+      ),
+    ),
+    DrawerEntry(
+      id: 'driver-settings',
+      label: (ctx) => AppLocalizations.of(ctx).settings,
+      icon: Icons.settings_outlined,
+      position: DrawerPosition.settings,
+      onTap: (ctx, _) => ctx.push('/settings'),
+    ),
+    DrawerEntry(
+      id: 'driver-support',
+      label: (ctx) => AppLocalizations.of(ctx).support,
+      icon: Icons.support_agent_rounded,
+      position: DrawerPosition.footer,
+      onTap: (ctx, _) => ctx.push('/support'),
+    ),
+  ];
 
   @override
   List<RouteBase> get standaloneRoutes => [

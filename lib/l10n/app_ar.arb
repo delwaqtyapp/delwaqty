@@ -2315,5 +2315,13 @@
   "serviceRequestSubmitted": "تم إرسال الطلب! بانتظار موافقة الإدارة.",
   "ownerAllModesUnlocked": "صلاحية المالك: جميع أنشطة المنصة مفتوحة للتقييم والإدارة",
   "multiServiceRequestsTitle": "طلبات تعدد الأنشطة والخدمات",
-  "noMultiServiceRequests": "لا توجد طلبات تعدد أنشطة معلقة"
+  "noMultiServiceRequests": "لا توجد طلبات تعدد أنشطة معلقة",
+  "minutesAgoShort": "منذ {minutes} د",
+  "hoursAgoShort": "منذ {hours} س",
+  "daysAgoShort": "منذ {days} ي",
+  "openMenuTooltip": "القائمة",
+  "notificationsTooltip": "الإشعارات",
+  "tapToAnswer": "اضغط للرد",
+  "pushChannelName": "إشعارات دلوقتي",
+  "pushChannelDescription": "تحديثات الطلبات والرحلات والرسائل والتنبيهات المهمة"
 }

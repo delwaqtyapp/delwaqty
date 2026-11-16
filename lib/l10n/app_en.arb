@@ -2343,5 +2343,34 @@
   "serviceRequestSubmitted": "Request sent! Awaiting Admin approval.",
   "ownerAllModesUnlocked": "Owner Access: All Service Verticals Unlocked",
   "multiServiceRequestsTitle": "Multi-Service Expansion Requests",
-  "noMultiServiceRequests": "No pending multi-service requests"
+  "noMultiServiceRequests": "No pending multi-service requests",
+  "minutesAgoShort": "{minutes}m",
+  "@minutesAgoShort": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "hoursAgoShort": "{hours}h",
+  "@hoursAgoShort": {
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      }
+    }
+  },
+  "daysAgoShort": "{days}d",
+  "@daysAgoShort": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "openMenuTooltip": "Menu",
+  "notificationsTooltip": "Notifications",
+  "tapToAnswer": "Tap to answer",
+  "pushChannelName": "Delwaqty Notifications",
+  "pushChannelDescription": "Orders, rides, messages, and important updates"
 }

@@ -3,12 +3,15 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:delwaqty/core/module/feature_module.dart';
 import 'package:delwaqty/domain/entities/app_notification.dart';
 import 'package:delwaqty/domain/repositories/notification_repository.dart';
 import 'package:delwaqty/data/repositories/supabase_notification_repository_impl.dart';
+import 'package:delwaqty/features/_shared/auth/presentation/auth_provider.dart';
 import 'package:delwaqty/features/_shared/notifications/presentation/pages/notification_center_page.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
+import 'package:delwaqty/services/supabase/supabase_service.dart';
 
 final notificationRepositoryProvider = Provider<NotificationRepository>((ref) {
   return ref.watch(supabaseNotificationRepositoryImplProvider);
@@ -27,7 +30,15 @@ final unreadCountProvider = FutureProvider.autoDispose<int>((ref) async {
 });
 
 final unreadCountStreamProvider = StreamProvider<int>((ref) {
-  final controller = StreamController<int>();
+  // Re-subscribe whenever auth state changes (login / logout).
+  ref.watch(authStateProvider);
+  final client = ref.watch(supabaseClientProvider);
+  final uid = client.auth.currentUser?.id;
+  if (uid == null) {
+    return Stream.value(0);
+  }
+
+  final controller = StreamController<int>.broadcast();
 
   Future<void> check() async {
     try {
@@ -41,12 +52,23 @@ final unreadCountStreamProvider = StreamProvider<int>((ref) {
 
   check();
 
-  final sub = Stream.periodic(const Duration(minutes: 1), (_) => null).listen(
-    (_) => check(),
-  );
+  final channel = client
+      .channel('unread-notifications-$uid')
+      .onPostgresChanges(
+        event: PostgresChangeEvent.all,
+        schema: 'public',
+        table: 'notifications',
+        filter: PostgresChangeFilter(
+          type: PostgresChangeFilterType.eq,
+          column: 'user_id',
+          value: uid,
+        ),
+        callback: (_) => check(),
+      )
+      .subscribe();
 
   ref.onDispose(() {
-    sub.cancel();
+    channel.unsubscribe();
     controller.close();
   });
 
@@ -95,33 +117,9 @@ class NotificationsModule extends FeatureModule {
       id: 'notifications',
       label: (ctx) => AppLocalizations.of(ctx).notifications,
       icon: Icons.notifications_outlined,
-      badgeStream: (ref) {
-        final controller = StreamController<int>();
-
-        Future<void> check() async {
-          try {
-            final repo = ref.read(notificationRepositoryProvider);
-            final count = await repo.getUnreadCount();
-            if (!controller.isClosed) controller.add(count);
-          } catch (_) {
-            if (!controller.isClosed) controller.add(0);
-          }
-        }
-
-        check();
-
-        final sub =
-            Stream.periodic(const Duration(minutes: 1), (_) => null).listen(
-          (_) => check(),
-        );
-
-        ref.onDispose(() {
-          sub.cancel();
-          controller.close();
-        });
-
-        return controller.stream;
-      },
+      badgeStream: (ref) => ref.watch(unreadCountStreamProvider).whenOrNull(
+            data: (count) => Stream.value(count),
+          ),
       onTap: (ctx, ref) {
         ctx.push('/notifications');
       },

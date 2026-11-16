@@ -7,6 +7,7 @@ import 'package:delwaqty/features/driver/driver_module.dart';
 import 'package:delwaqty/features/driver/domain/entities/driver_profile.dart';
 import 'package:delwaqty/features/driver/domain/entities/driver_performance.dart';
 import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
+import 'package:delwaqty/shared/widgets/floating_glass_buttons.dart';
 import 'package:delwaqty/shared/widgets/shimmer_loading.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 import 'package:delwaqty/features/driver/presentation/pages/driver_access_page.dart';
@@ -43,12 +44,20 @@ class DriverDashboardPage extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
+        leadingWidth: 56,
+        leading: const Padding(
+          padding: EdgeInsetsDirectional.only(start: 12),
+          child: Center(
+            child: FloatingMenuCircleButton(size: 40, iconSize: 20),
+          ),
+        ),
         title: Text(l10n.driverDashboard),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.notifications_outlined),
-            tooltip: l10n.notifications,
-            onPressed: () => context.push('/notifications'),
+          const Center(
+            child: Padding(
+              padding: EdgeInsetsDirectional.only(end: 6),
+              child: FloatingNotificationCircleButton(size: 40, iconSize: 20),
+            ),
           ),
           IconButton(
             icon: const Icon(Icons.settings_outlined),

@@ -348,7 +348,6 @@ class _AdminMenuButtonState extends ConsumerState<AdminMenuButton> {
       child: FloatingGlassCircleButton(
         key: _key,
         size: 40,
-        iconSize: 20,
         tooltip: l10n.openMenuTooltip,
         onTap: _openMenu,
         child: Icon(AppIcons.navDrawer, color: widget.color, size: 20),

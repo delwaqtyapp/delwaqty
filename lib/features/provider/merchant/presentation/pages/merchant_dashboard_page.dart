@@ -360,7 +360,7 @@ class _MerchantDashboardPageState
         leading: const Padding(
           padding: EdgeInsetsDirectional.only(start: 12),
           child: Center(
-            child: FloatingMenuCircleButton(size: 40, iconSize: 20),
+            child: FloatingMenuCircleButton(size: 40),
           ),
         ),
         title: Text(l10n.merchantDashboard),
@@ -373,7 +373,7 @@ class _MerchantDashboardPageState
           const Center(
             child: Padding(
               padding: EdgeInsetsDirectional.only(end: 6),
-              child: FloatingNotificationCircleButton(size: 40, iconSize: 20),
+              child: FloatingNotificationCircleButton(size: 40),
             ),
           ),
           IconButton(

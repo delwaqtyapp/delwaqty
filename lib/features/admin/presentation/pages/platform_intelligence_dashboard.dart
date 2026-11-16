@@ -42,7 +42,7 @@ class _PlatformIntelligenceDashboardState
           const Center(
             child: Padding(
               padding: EdgeInsetsDirectional.only(end: 6),
-              child: FloatingNotificationCircleButton(size: 40, iconSize: 20),
+              child: FloatingNotificationCircleButton(size: 40),
             ),
           ),
           IconButton(

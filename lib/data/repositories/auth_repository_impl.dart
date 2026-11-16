@@ -50,6 +50,7 @@ class AuthRepositoryImpl implements AuthRepository {
     required String email,
     required String password,
     String? fullName,
+    String? phone,
     UserType userType = UserType.customer,
     String language = 'en',
     Uint8List? idCardBytes,
@@ -66,6 +67,7 @@ class AuthRepositoryImpl implements AuthRepository {
         email: email,
         password: password,
         fullName: fullName,
+        phone: phone,
         userType: userType.code,
         language: language,
       );
@@ -74,6 +76,7 @@ class AuthRepositoryImpl implements AuthRepository {
           userId: response.user!.id,
           email: email,
           fullName: fullName,
+          phone: phone,
           userType: userType,
           language: language,
           idCardBytes: idCardBytes,
@@ -100,6 +103,7 @@ class AuthRepositoryImpl implements AuthRepository {
     required String userId,
     required String email,
     String? fullName,
+    String? phone,
     required UserType userType,
     String language = 'en',
     Uint8List? idCardBytes,
@@ -149,16 +153,35 @@ class AuthRepositoryImpl implements AuthRepository {
       );
     }
 
+    var verificationStatus = userType.requiresVerification
+        ? VerificationStatus.pending
+        : VerificationStatus.approved;
+    if (userType == UserType.merchant || userType == UserType.provider) {
+      var requireDocs = false;
+      try {
+        final row = await sb.Supabase.instance.client
+            .from('platform_settings')
+            .select('require_provider_documents')
+            .eq('id', 'default')
+            .maybeSingle();
+        requireDocs = (row?['require_provider_documents'] as bool?) ?? false;
+      } catch (_) {
+        requireDocs = false;
+      }
+      if (!requireDocs) {
+        verificationStatus = VerificationStatus.approved;
+      }
+    }
+
     final model = UserModel(
       id: userId,
       email: email,
       fullName: fullName,
+      phone: phone != null && phone.trim().isNotEmpty ? phone.trim() : null,
       language: language,
       role: userType.code,
       userType: userType,
-      verificationStatus: userType.requiresVerification
-          ? VerificationStatus.pending
-          : VerificationStatus.approved,
+      verificationStatus: verificationStatus,
       idCardUrl: idCardUrl,
       profilePhotoUrl: profilePhotoUrl,
       tradeLicenseUrl: tradeLicenseUrl,

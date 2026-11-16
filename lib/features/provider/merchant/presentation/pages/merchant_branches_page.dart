@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:delwaqty/features/provider/merchant/presentation/providers/merchant_providers.dart';
 import 'package:delwaqty/core/extensions/context_extensions.dart';
 import 'package:delwaqty/features/customer/restaurant/restaurant_module.dart';
@@ -328,6 +329,7 @@ class _BranchFormSheetState extends ConsumerState<_BranchFormSheet> {
   late final TextEditingController _longitudeController;
   bool _isPrimary = false;
   bool _saving = false;
+  bool _gettingGps = false;
 
   @override
   void initState() {
@@ -343,6 +345,31 @@ class _BranchFormSheetState extends ConsumerState<_BranchFormSheet> {
       text: branch?.longitude?.toString() ?? '',
     );
     _isPrimary = branch?.isPrimary ?? false;
+  }
+
+  Future<void> _useCurrentGps() async {
+    if (_gettingGps) return;
+    final l10n = AppLocalizations.of(context);
+    setState(() => _gettingGps = true);
+    try {
+      var perm = await Geolocator.checkPermission();
+      if (perm == LocationPermission.denied) {
+        perm = await Geolocator.requestPermission();
+      }
+      final pos = await Geolocator.getCurrentPosition();
+      if (!mounted) return;
+      setState(() {
+        _latitudeController.text = pos.latitude.toString();
+        _longitudeController.text = pos.longitude.toString();
+      });
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.somethingWentWrong)),
+      );
+    } finally {
+      if (mounted) setState(() => _gettingGps = false);
+    }
   }
 
   @override
@@ -474,6 +501,23 @@ class _BranchFormSheetState extends ConsumerState<_BranchFormSheet> {
                           ),
                         ),
                       ],
+                    ),
+                    const SizedBox(height: AppSpacing.sm),
+                    SizedBox(
+                      width: double.infinity,
+                      child: OutlinedButton.icon(
+                        onPressed: _gettingGps ? null : _useCurrentGps,
+                        icon: _gettingGps
+                            ? const SizedBox(
+                                width: 16,
+                                height: 16,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                ),
+                              )
+                            : const Icon(Icons.my_location_rounded),
+                        label: Text(l10n.useCurrentStoreGps),
+                      ),
                     ),
                     const SizedBox(height: AppSpacing.lg),
                     SwitchListTile(

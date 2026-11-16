@@ -22,11 +22,25 @@ final providerRawCategoryProvider = FutureProvider<String>((ref) async {
 
   if (await isOwnerByRole(client, uid)) return 'owner';
 
-  final merchant = await client
-      .from('merchants')
-      .select('type')
-      .eq('id', uid)
-      .maybeSingle();
+  String? merchantId;
+  try {
+    final resolved = await client.rpc('resolve_my_merchant');
+    if (resolved is String && resolved.isNotEmpty) {
+      merchantId = resolved;
+    }
+  } catch (_) {}
+
+  final merchant = merchantId != null
+      ? await client
+          .from('merchants')
+          .select('type')
+          .eq('id', merchantId)
+          .maybeSingle()
+      : await client
+          .from('merchants')
+          .select('type')
+          .or('id.eq.$uid,owner_user_id.eq.$uid')
+          .maybeSingle();
   if (merchant != null && merchant['type'] is String) {
     return merchant['type'] as String;
   }

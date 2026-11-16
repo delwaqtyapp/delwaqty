@@ -10,6 +10,7 @@ import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
 import 'package:delwaqty/shared/widgets/shimmer_loading.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 import 'package:delwaqty/features/driver/presentation/pages/driver_access_page.dart';
+import 'package:delwaqty/features/customer/driver/presentation/providers/dispatch_providers.dart';
 import 'package:delwaqty/core/auth/platform_capabilities.dart';
 import 'package:delwaqty/core/errors/app_error_text.dart';
 
@@ -264,6 +265,10 @@ class _OnlineHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
+    final onlineState = ref.watch(driverOnlineProvider(profile.id));
+    final isOnline =
+        onlineState.value ?? (profile.status == DriverStatus.online);
+
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -280,25 +285,48 @@ class _OnlineHeader extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                profile.status == DriverStatus.online
-                    ? l10n.online
-                    : l10n.offline,
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  color: theme.colorScheme.onPrimary.withValues(alpha: 0.8),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      isOnline ? l10n.online : l10n.offline,
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        color: theme.colorScheme.onPrimary,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      isOnline
+                          ? l10n.onlineReadyForOrders
+                          : l10n.offlineTapToGoOnline,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color:
+                            theme.colorScheme.onPrimary.withValues(alpha: 0.85),
+                      ),
+                    ),
+                  ],
                 ),
               ),
               Switch(
-                value: profile.status == DriverStatus.online,
+                value: isOnline,
                 activeThumbColor: theme.colorScheme.onPrimary,
-                onChanged: (value) async {
-                  final repo = ref.read(driverRepositoryProvider);
-                  await repo.updateStatus(
-                    profile.id,
-                    value ? DriverStatus.online : DriverStatus.offline,
-                  );
-                  ref.invalidate(driverProfileProvider(profile.userId));
-                },
+                onChanged: onlineState.isLoading
+                    ? null
+                    : (value) async {
+                        final repo = ref.read(driverRepositoryProvider);
+                        await Future.wait([
+                          repo.updateStatus(
+                            profile.id,
+                            value ? DriverStatus.online : DriverStatus.offline,
+                          ),
+                          ref
+                              .read(driverOnlineProvider(profile.id).notifier)
+                              .setOnline(value),
+                        ]);
+                        ref.invalidate(driverProfileProvider(profile.userId));
+                      },
               ),
             ],
           ),

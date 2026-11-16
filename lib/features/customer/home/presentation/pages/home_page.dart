@@ -15,6 +15,7 @@ import 'package:delwaqty/features/_shared/campaigns/presentation/campaign_provid
 import 'package:delwaqty/features/_shared/notifications/notifications_module.dart';
 import 'package:delwaqty/shared/notifications/notification_channels.dart';
 import 'package:delwaqty/features/customer/location/presentation/providers/location_provider.dart';
+import 'package:delwaqty/features/customer/location/presentation/widgets/smart_map_picker_sheet.dart';
 import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
 import 'package:delwaqty/shared/widgets/pressable_scale.dart';
 import 'package:delwaqty/shared/widgets/premium_empty_state.dart';
@@ -384,6 +385,22 @@ class _EgyptHeroState extends State<_EgyptHero>
                 ),
               ),
             ),
+            Positioned.fill(
+              child: IgnorePointer(
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        const Color(0xFF2E146F).withValues(alpha: 0.12),
+                        Colors.transparent,
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
             Align(
               alignment: Alignment.bottomLeft,
               child: Padding(
@@ -393,21 +410,7 @@ class _EgyptHeroState extends State<_EgyptHero>
                   12,
                   (heroH - heroImageH) + 12,
                 ),
-                child: _buildLocationBadge(context, height: 28, maxWidth: 150),
-              ),
-            ),
-            Positioned.fill(
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [
-                      const Color(0xFF2E146F).withValues(alpha: 0.12),
-                      Colors.transparent,
-                    ],
-                  ),
-                ),
+                child: _buildLocationBadge(context, height: 28, maxWidth: 185),
               ),
             ),
             SafeArea(
@@ -500,55 +503,89 @@ class _EgyptHeroState extends State<_EgyptHero>
     );
     return ConstrainedBox(
       constraints: BoxConstraints(maxWidth: maxWidth),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          borderRadius: BorderRadius.circular(14),
-          onTap: () => context.go('/region-selection'),
-          child: Container(
-        height: height,
-        padding: const EdgeInsets.symmetric(horizontal: 12),
-        decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: 0.18),
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: Colors.white.withValues(alpha: 0.3)),
-          boxShadow: const [
-            BoxShadow(
-              color: Color(0x22000000),
-              blurRadius: 10,
-              offset: Offset(0, 4),
-            ),
-          ],
-        ),
-        child: Row(
-          children: [
-            const Icon(
-              Icons.location_on_rounded,
-              size: 15,
-              color: Colors.white,
-            ),
-            const SizedBox(width: 5),
-            Expanded(
-              child: Text(
-                locationText,
-                style: AppTextStyles.bodyMedium.copyWith(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w600,
-                  fontSize: 11,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Flexible(
+            child: Material(
+              color: Colors.transparent,
+              child: InkWell(
+                borderRadius: BorderRadius.circular(14),
+                onTap: () => context.go('/region-selection'),
+                child: Container(
+                  height: height,
+                  padding: const EdgeInsets.symmetric(horizontal: 10),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.18),
+                    borderRadius: BorderRadius.circular(14),
+                    border:
+                        Border.all(color: Colors.white.withValues(alpha: 0.3)),
+                    boxShadow: const [
+                      BoxShadow(
+                        color: Color(0x22000000),
+                        blurRadius: 10,
+                        offset: Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(
+                        Icons.location_on_rounded,
+                        size: 15,
+                        color: Colors.white,
+                      ),
+                      const SizedBox(width: 5),
+                      Expanded(
+                        child: Text(
+                          locationText,
+                          style: AppTextStyles.bodyMedium.copyWith(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w600,
+                            fontSize: 11,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      Icon(
+                        Icons.expand_more_rounded,
+                        size: 14,
+                        color: Colors.white.withValues(alpha: 0.8),
+                      ),
+                    ],
+                  ),
                 ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
               ),
             ),
-            Icon(
-              Icons.expand_more_rounded,
-              size: 14,
-              color: Colors.white.withValues(alpha: 0.8),
-            ),
-          ],
-        ),
           ),
-        ),
+          const SizedBox(width: 6),
+          Container(
+            width: height,
+            height: height,
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.22),
+              shape: BoxShape.circle,
+              border: Border.all(color: Colors.white.withValues(alpha: 0.35)),
+            ),
+            child: IconButton(
+              padding: EdgeInsets.zero,
+              constraints: BoxConstraints.tightFor(
+                width: height,
+                height: height,
+              ),
+              tooltip: widget.l10n.pickLocationOnMap,
+              icon: const Icon(
+                Icons.map_rounded,
+                size: 15,
+                color: Colors.white,
+              ),
+              onPressed: () {
+                unawaited(SmartMapPickerSheet.show(context));
+              },
+            ),
+          ),
+        ],
       ),
     );
   }

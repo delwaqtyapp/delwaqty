@@ -6921,4 +6921,189 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get chatPermissionsShort => 'Chat Access';
+
+  @override
+  String get registerWithPhoneFast =>
+      'Quick Registration with Phone & WhatsApp';
+
+  @override
+  String get verifyViaWhatsApp => 'Verify via WhatsApp';
+
+  @override
+  String get whatsappOtpTitle => 'WhatsApp Account Verification';
+
+  @override
+  String get whatsappOtpSubtitle =>
+      'Verify your phone number instantly via WhatsApp to activate your account.';
+
+  @override
+  String get sendCodeViaWhatsApp => 'Send Verification via WhatsApp';
+
+  @override
+  String get openWhatsAppToVerify => 'Open WhatsApp to Activate';
+
+  @override
+  String whatsappCodeSentBanner(String code) {
+    return 'Your WhatsApp activation code is: $code';
+  }
+
+  @override
+  String get enterOtpCode => 'Enter 6-digit verification code';
+
+  @override
+  String get verifyAndActivateAccount => 'Verify & Activate Account';
+
+  @override
+  String get resendWhatsAppCode => 'Resend Code';
+
+  @override
+  String get phoneOrEmailOrUsername => 'Phone Number, Email, or Username';
+
+  @override
+  String get phoneOptionalEmailHint =>
+      'Email (Optional - auto-generated from phone if left blank)';
+
+  @override
+  String get whatsappVerifiedSuccess =>
+      'Phone number verified via WhatsApp successfully!';
+
+  @override
+  String get invalidOtpCode => 'Invalid or expired verification code.';
+
+  @override
+  String get pickLocationOnMap => 'Pick Exact Location on Map';
+
+  @override
+  String get smartGpsHighPrecision => 'Ultra-Precise Smart GPS';
+
+  @override
+  String get acquiringHighAccuracyGps =>
+      'Locking onto high-precision satellite signal…';
+
+  @override
+  String gpsLockedWithinMeters(String meters) {
+    return 'High-accuracy GPS locked (±${meters}m)';
+  }
+
+  @override
+  String get dragMapToRefineLocation =>
+      'Move the map to place the pin at your exact doorstep';
+
+  @override
+  String get confirmSelectedLocation => 'Confirm Exact Location';
+
+  @override
+  String get selectedAddressLabel => 'Selected Location';
+
+  @override
+  String get useSmartGpsLocation => 'Detect My Location Precisely';
+
+  @override
+  String get requireProviderDocumentsTitle =>
+      'Require Provider & Merchant Store Documents';
+
+  @override
+  String get requireProviderDocumentsSubtitle =>
+      'When disabled, restaurants and service providers can register and operate immediately without uploading store papers.';
+
+  @override
+  String get ownerExclusiveControlBadge => 'Owner Exclusive Authority';
+
+  @override
+  String get providerDocumentsDisabledNotice =>
+      'Fast Launch Mode Active: Document upload is currently waived by the platform owner.';
+
+  @override
+  String get providerDocumentsOptionalBadge =>
+      'Optional during initial launch phase';
+
+  @override
+  String get navigateToPickup => 'Navigate to Pickup';
+
+  @override
+  String get navigateToCustomer => 'Navigate to Customer';
+
+  @override
+  String get callCustomer => 'Call Customer';
+
+  @override
+  String get whatsappCustomer => 'WhatsApp Customer';
+
+  @override
+  String get callMerchant => 'Call Store';
+
+  @override
+  String get whatsappMerchant => 'WhatsApp Store';
+
+  @override
+  String get liveDeliveryMapTitle => 'Live Route & Customer Map';
+
+  @override
+  String get pickupPointLabel => 'Pickup Point (Store)';
+
+  @override
+  String get dropoffPointLabel => 'Dropoff Point (Customer)';
+
+  @override
+  String get orderItemsSummary => 'Order Items';
+
+  @override
+  String get deliveryNotesLabel => 'Delivery Notes';
+
+  @override
+  String estimatedMinutesValue(int minutes) {
+    return '$minutes min';
+  }
+
+  @override
+  String get confirmCancelDeliveryTitle => 'Cancel Active Delivery?';
+
+  @override
+  String get confirmCancelDeliveryBody =>
+      'Are you sure you want to cancel this delivery assignment?';
+
+  @override
+  String get radarSearchingForOrders =>
+      'Scanning nearby zones for incoming orders…';
+
+  @override
+  String get onlineReadyForOrders => 'You are Online & Ready for Orders';
+
+  @override
+  String get offlineTapToGoOnline =>
+      'You are Offline — Toggle to receive orders';
+
+  @override
+  String get pickStoreLocationOnMap => 'Set Store Location on Map';
+
+  @override
+  String get useCurrentStoreGps => 'Use Current GPS for Store';
+
+  @override
+  String get storeCoordinatesSaved => 'Store map coordinates updated';
+
+  @override
+  String get copyHoursToAllDays => 'Apply to All Days';
+
+  @override
+  String get uploadProductPhoto => 'Upload Product Photo';
+
+  @override
+  String get toggleProductAvailability => 'Toggle Availability';
+
+  @override
+  String get startOrderDelivery => 'Out for Delivery';
+
+  @override
+  String get orderCustomerPhone => 'Customer Phone';
+
+  @override
+  String get orderDeliveryAddress => 'Delivery Address';
+
+  @override
+  String get orderSpecialNotes => 'Special Instructions';
+
+  @override
+  String get autoProvisionedStoreReady =>
+      'Your store profile is active and ready';
 }

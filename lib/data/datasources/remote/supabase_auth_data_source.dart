@@ -42,6 +42,7 @@ class SupabaseAuthDataSource {
     required String email,
     required String password,
     String? fullName,
+    String? phone,
     String? userType = 'customer',
     String? language = 'en',
   }) async {
@@ -51,6 +52,7 @@ class SupabaseAuthDataSource {
         password: password,
         data: {
           'full_name': fullName,
+          'phone': phone,
           'user_type': userType,
           'language': language,
           'verification_status':

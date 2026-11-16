@@ -13,6 +13,7 @@ abstract class AuthRepository {
     required String email,
     required String password,
     String? fullName,
+    String? phone,
     UserType userType = UserType.customer,
     String language = 'en',
     Uint8List? idCardBytes,

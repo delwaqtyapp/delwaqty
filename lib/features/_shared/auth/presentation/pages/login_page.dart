@@ -553,7 +553,7 @@ class _LoginPageState extends ConsumerState<LoginPage>
         children: [
           _LightTextField(
             controller: _emailController,
-            hint: l10n.emailOrUsername,
+            hint: l10n.phoneOrEmailOrUsername,
             icon: Icons.alternate_email_rounded,
             keyboardType: TextInputType.emailAddress,
             validator: (v) => AppValidators.loginIdentifier(v),

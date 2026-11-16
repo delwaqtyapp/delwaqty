@@ -46,7 +46,7 @@ class _ProviderDocumentsPageState extends ConsumerState<ProviderDocumentsPage> {
         );
       }
     } catch (e) {
-      if (mounted) setState(() => appErrorText(context, e));
+      if (mounted) setState(() => _error = appErrorText(context, e));
     } finally {
       if (mounted) setState(() => _busy = false);
     }
@@ -71,7 +71,7 @@ class _ProviderDocumentsPageState extends ConsumerState<ProviderDocumentsPage> {
         );
       }
     } catch (e) {
-      if (mounted) setState(() => appErrorText(context, e));
+      if (mounted) setState(() => _error = appErrorText(context, e));
     } finally {
       if (mounted) setState(() => _busy = false);
     }
@@ -84,7 +84,7 @@ class _ProviderDocumentsPageState extends ConsumerState<ProviderDocumentsPage> {
           .getDocumentUrl(path);
       if (mounted) setState(() => _viewUrl = url);
     } catch (e) {
-      if (mounted) setState(() => appErrorText(context, e));
+      if (mounted) setState(() => _error = appErrorText(context, e));
     }
   }
 

@@ -13,6 +13,7 @@ import 'package:delwaqty/core/utils/validators.dart';
 import 'package:delwaqty/domain/enums/user_type.dart';
 import 'package:delwaqty/features/_shared/auth/domain/auth_state.dart';
 import 'package:delwaqty/features/_shared/auth/presentation/auth_provider.dart';
+import 'package:delwaqty/features/_shared/auth/presentation/widgets/whatsapp_otp_sheet.dart';
 import 'package:delwaqty/features/customer/home/presentation/widgets/category_visuals.dart';
 import 'package:delwaqty/features/customer/home_services/domain/entities/service_category.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
@@ -79,6 +80,8 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
   bool _notificationsEnabled = true;
   bool _locationEnabled = true;
   String _selectedLanguage = 'ar';
+  bool _whatsappVerified = false;
+  String _verifiedPhone = '';
 
   UserType? _selectedRole;
   XFile? _idCardFile;
@@ -97,6 +100,25 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
     super.dispose();
   }
 
+  Future<void> _openWhatsAppVerification() async {
+    final l10n = AppLocalizations.of(context);
+    final phone = _phoneController.text.trim();
+    final phoneError = AppValidators.phone(phone);
+    if (phoneError != null) {
+      context.showAppSnackBar(phoneError);
+      return;
+    }
+    final ok = await WhatsAppOtpSheet.show(context, phone: phone);
+    if (!mounted) return;
+    if (ok) {
+      setState(() {
+        _whatsappVerified = true;
+        _verifiedPhone = phone;
+      });
+      context.showAppSnackBar(l10n.whatsappVerifiedSuccess);
+    }
+  }
+
   void _nextStep() {
     if (_currentStep == 0) {
       final role = _selectedRole;
@@ -104,12 +126,21 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
         context.showAppSnackBar(AppLocalizations.of(context).selectAccountType);
         return;
       }
-      if (role.requiresVerification &&
+      final requireProviderDocs =
+          ref.read(requireProviderDocumentsProvider).asData?.value ?? false;
+      final isMerchantOrProvider =
+          role == UserType.merchant || role == UserType.provider;
+      final mustUploadDocs =
+          role.requiresVerification &&
+          !(isMerchantOrProvider && !requireProviderDocs);
+      if (mustUploadDocs &&
           (_idCardFile == null || _profilePhotoFile == null)) {
         context.showAppSnackBar(AppLocalizations.of(context).documentsRequired);
         return;
       }
-      if (role.requiresTradeLicense && _tradeLicenseFile == null) {
+      if (role.requiresTradeLicense &&
+          mustUploadDocs &&
+          _tradeLicenseFile == null) {
         context.showAppSnackBar(AppLocalizations.of(context).documentsRequired);
         return;
       }
@@ -122,6 +153,11 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
     }
     if (_currentStep == 1) {
       if (!_formKey.currentState!.validate()) return;
+      if (_emailController.text.trim().isEmpty &&
+          _phoneController.text.trim().isNotEmpty) {
+        final digits = _phoneController.text.replaceAll(RegExp(r'[^0-9]'), '');
+        _emailController.text = 'phone_$digits@delwaqty.app';
+      }
     }
     setState(() => _currentStep++);
   }
@@ -208,6 +244,24 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
 
   Future<void> _onRegister() async {
     final role = _selectedRole!;
+    final phone = _phoneController.text.trim();
+    if (role == UserType.customer &&
+        phone.isNotEmpty &&
+        (!_whatsappVerified || _verifiedPhone != phone)) {
+      final verified = await WhatsAppOtpSheet.show(context, phone: phone);
+      if (!mounted) return;
+      if (!verified) return;
+      setState(() {
+        _whatsappVerified = true;
+        _verifiedPhone = phone;
+      });
+    }
+    var email = _emailController.text.trim();
+    if (email.isEmpty && phone.isNotEmpty) {
+      final digits = phone.replaceAll(RegExp(r'[^0-9]'), '');
+      email = 'phone_$digits@delwaqty.app';
+      _emailController.text = email;
+    }
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setBool(StorageKeys.deliveryUpdates, _notificationsEnabled);
@@ -249,9 +303,10 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
     await ref
         .read(authStateProvider.notifier)
         .signUp(
-          email: _emailController.text.trim(),
+          email: email,
           password: _passwordController.text,
           fullName: _nameController.text.trim(),
+          phone: phone.isEmpty ? null : phone,
           userType: role,
           language: _selectedLanguage,
           idCardBytes: idCardBytes,
@@ -483,6 +538,11 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
   }
 
   Widget _buildStepRole(AppLocalizations l10n) {
+    final requireProviderDocs =
+        ref.watch(requireProviderDocumentsProvider).asData?.value ?? false;
+    final isMerchantOrProvider =
+        _selectedRole == UserType.merchant ||
+        _selectedRole == UserType.provider;
     final roles = [
       (
         UserType.customer,
@@ -563,12 +623,73 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
           ),
           const SizedBox(height: 14),
         ],
+        if (isMerchantOrProvider && !requireProviderDocs) ...[
+          const SizedBox(height: 4),
+          Container(
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              color: const Color(0xFF34C759).withValues(alpha: 0.14),
+              borderRadius: BorderRadius.circular(18),
+              border: Border.all(
+                color: const Color(0xFF34C759).withValues(alpha: 0.45),
+              ),
+            ),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Icon(
+                  Icons.verified_rounded,
+                  color: Color(0xFF34C759),
+                  size: 22,
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        l10n.providerDocumentsDisabledNotice,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 3,
+                        ),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF34C759).withValues(alpha: 0.2),
+                          borderRadius: BorderRadius.circular(999),
+                        ),
+                        child: Text(
+                          l10n.providerDocumentsOptionalBadge,
+                          style: const TextStyle(
+                            color: Color(0xFF34C759),
+                            fontSize: 11,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 12),
+        ],
         if (_selectedRole != null && _selectedRole!.requiresVerification) ...[
           const SizedBox(height: 6),
           _PremiumUploadTile(
             icon: Icons.badge_outlined,
             title: l10n.uploadIdCard,
-            hint: l10n.uploadIdCardHint,
+            hint: isMerchantOrProvider && !requireProviderDocs
+                ? l10n.providerDocumentsOptionalBadge
+                : l10n.uploadIdCardHint,
             color: const Color(0xFF007AFF),
             hasFile: _idCardFile != null,
             onTap: () => _pickDocument(documentType: 'idCard'),
@@ -577,7 +698,9 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
           _PremiumUploadTile(
             icon: Icons.person_outline_rounded,
             title: l10n.uploadProfilePhoto,
-            hint: l10n.uploadProfilePhotoHint,
+            hint: isMerchantOrProvider && !requireProviderDocs
+                ? l10n.providerDocumentsOptionalBadge
+                : l10n.uploadProfilePhotoHint,
             color: const Color(0xFFAF52DE),
             hasFile: _profilePhotoFile != null,
             onTap: () => _pickDocument(documentType: 'profilePhoto'),
@@ -587,7 +710,9 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
             _PremiumUploadTile(
               icon: Icons.description_outlined,
               title: l10n.uploadTradeLicense,
-              hint: l10n.uploadTradeLicenseHint,
+              hint: isMerchantOrProvider && !requireProviderDocs
+                  ? l10n.providerDocumentsOptionalBadge
+                  : l10n.uploadTradeLicenseHint,
               color: const Color(0xFF34C759),
               hasFile: _tradeLicenseFile != null,
               onTap: () => _pickDocument(documentType: 'tradeLicense'),
@@ -620,6 +745,10 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
   }
 
   Widget _buildStepInfo(AppLocalizations l10n) {
+    final isPhoneVerified =
+        _whatsappVerified &&
+        _verifiedPhone.isNotEmpty &&
+        _verifiedPhone == _phoneController.text.trim();
     return Form(
       key: _formKey,
       child: Column(
@@ -647,6 +776,13 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                 icon: Icons.phone_outlined,
                 keyboardType: TextInputType.phone,
                 textInputAction: TextInputAction.next,
+                validator: (v) {
+                  if ((v == null || v.trim().isEmpty) &&
+                      _emailController.text.trim().isNotEmpty) {
+                    return null;
+                  }
+                  return AppValidators.phone(v);
+                },
               );
               if (constraints.maxWidth >= 340) {
                 return Row(
@@ -668,14 +804,76 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
               );
             },
           ),
+          const SizedBox(height: 10),
+          if (isPhoneVerified)
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+              decoration: BoxDecoration(
+                color: const Color(0xFF25D366).withValues(alpha: 0.14),
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(
+                  color: const Color(0xFF25D366).withValues(alpha: 0.45),
+                ),
+              ),
+              child: Row(
+                children: [
+                  const Icon(
+                    Icons.verified_rounded,
+                    color: Color(0xFF25D366),
+                    size: 18,
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      l10n.whatsappVerifiedSuccess,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 12.5,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            )
+          else
+            Align(
+              alignment: AlignmentDirectional.centerEnd,
+              child: OutlinedButton.icon(
+                onPressed: _openWhatsAppVerification,
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: const Color(0xFF25D366),
+                  side: BorderSide(
+                    color: const Color(0xFF25D366).withValues(alpha: 0.5),
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                icon: const Icon(Icons.chat_rounded, size: 17),
+                label: Text(
+                  l10n.verifyViaWhatsApp,
+                  style: const TextStyle(
+                    fontSize: 12.5,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+            ),
           const SizedBox(height: 14),
           _PremiumField(
             controller: _emailController,
-            hint: l10n.email,
+            hint: l10n.phoneOptionalEmailHint,
             icon: Icons.email_outlined,
             keyboardType: TextInputType.emailAddress,
             textInputAction: TextInputAction.next,
-            validator: (v) => AppValidators.email(v),
+            validator: (v) {
+              if ((v == null || v.trim().isEmpty) &&
+                  _phoneController.text.trim().isNotEmpty) {
+                return null;
+              }
+              return AppValidators.email(v);
+            },
           ),
           const SizedBox(height: 14),
           _PremiumField(
@@ -737,7 +935,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
             children: [
               Expanded(
                 child: _LanguageOption(
-                  label: 'العربية',
+                  label: l10n.arabicLanguageName,
                   isSelected: _selectedLanguage == 'ar',
                   onTap: () => setState(() => _selectedLanguage = 'ar'),
                 ),
@@ -745,7 +943,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
               const SizedBox(width: 6),
               Expanded(
                 child: _LanguageOption(
-                  label: 'English',
+                  label: l10n.englishLanguageName,
                   isSelected: _selectedLanguage == 'en',
                   onTap: () => setState(() => _selectedLanguage = 'en'),
                 ),
@@ -871,13 +1069,13 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
           label: l10n.documentsAttached,
           value: documents.isEmpty
               ? l10n.noDocumentsRequired
-              : documents.join('، '),
+              : documents.join(', '),
         ),
         if (serviceNames.isNotEmpty)
           _ReviewTile(
             icon: Icons.handyman_outlined,
             label: l10n.providerServices,
-            value: serviceNames.join('، '),
+            value: serviceNames.join(', '),
           ),
         const SizedBox(height: 32),
       ],

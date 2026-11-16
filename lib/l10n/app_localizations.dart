@@ -13249,6 +13249,336 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Chat Access'**
   String get chatPermissionsShort;
+
+  /// No description provided for @registerWithPhoneFast.
+  ///
+  /// In en, this message translates to:
+  /// **'Quick Registration with Phone & WhatsApp'**
+  String get registerWithPhoneFast;
+
+  /// No description provided for @verifyViaWhatsApp.
+  ///
+  /// In en, this message translates to:
+  /// **'Verify via WhatsApp'**
+  String get verifyViaWhatsApp;
+
+  /// No description provided for @whatsappOtpTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'WhatsApp Account Verification'**
+  String get whatsappOtpTitle;
+
+  /// No description provided for @whatsappOtpSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Verify your phone number instantly via WhatsApp to activate your account.'**
+  String get whatsappOtpSubtitle;
+
+  /// No description provided for @sendCodeViaWhatsApp.
+  ///
+  /// In en, this message translates to:
+  /// **'Send Verification via WhatsApp'**
+  String get sendCodeViaWhatsApp;
+
+  /// No description provided for @openWhatsAppToVerify.
+  ///
+  /// In en, this message translates to:
+  /// **'Open WhatsApp to Activate'**
+  String get openWhatsAppToVerify;
+
+  /// No description provided for @whatsappCodeSentBanner.
+  ///
+  /// In en, this message translates to:
+  /// **'Your WhatsApp activation code is: {code}'**
+  String whatsappCodeSentBanner(String code);
+
+  /// No description provided for @enterOtpCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter 6-digit verification code'**
+  String get enterOtpCode;
+
+  /// No description provided for @verifyAndActivateAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Verify & Activate Account'**
+  String get verifyAndActivateAccount;
+
+  /// No description provided for @resendWhatsAppCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Resend Code'**
+  String get resendWhatsAppCode;
+
+  /// No description provided for @phoneOrEmailOrUsername.
+  ///
+  /// In en, this message translates to:
+  /// **'Phone Number, Email, or Username'**
+  String get phoneOrEmailOrUsername;
+
+  /// No description provided for @phoneOptionalEmailHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Email (Optional - auto-generated from phone if left blank)'**
+  String get phoneOptionalEmailHint;
+
+  /// No description provided for @whatsappVerifiedSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Phone number verified via WhatsApp successfully!'**
+  String get whatsappVerifiedSuccess;
+
+  /// No description provided for @invalidOtpCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid or expired verification code.'**
+  String get invalidOtpCode;
+
+  /// No description provided for @pickLocationOnMap.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick Exact Location on Map'**
+  String get pickLocationOnMap;
+
+  /// No description provided for @smartGpsHighPrecision.
+  ///
+  /// In en, this message translates to:
+  /// **'Ultra-Precise Smart GPS'**
+  String get smartGpsHighPrecision;
+
+  /// No description provided for @acquiringHighAccuracyGps.
+  ///
+  /// In en, this message translates to:
+  /// **'Locking onto high-precision satellite signal…'**
+  String get acquiringHighAccuracyGps;
+
+  /// No description provided for @gpsLockedWithinMeters.
+  ///
+  /// In en, this message translates to:
+  /// **'High-accuracy GPS locked (±{meters}m)'**
+  String gpsLockedWithinMeters(String meters);
+
+  /// No description provided for @dragMapToRefineLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Move the map to place the pin at your exact doorstep'**
+  String get dragMapToRefineLocation;
+
+  /// No description provided for @confirmSelectedLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm Exact Location'**
+  String get confirmSelectedLocation;
+
+  /// No description provided for @selectedAddressLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Selected Location'**
+  String get selectedAddressLabel;
+
+  /// No description provided for @useSmartGpsLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Detect My Location Precisely'**
+  String get useSmartGpsLocation;
+
+  /// No description provided for @requireProviderDocumentsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Require Provider & Merchant Store Documents'**
+  String get requireProviderDocumentsTitle;
+
+  /// No description provided for @requireProviderDocumentsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'When disabled, restaurants and service providers can register and operate immediately without uploading store papers.'**
+  String get requireProviderDocumentsSubtitle;
+
+  /// No description provided for @ownerExclusiveControlBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Owner Exclusive Authority'**
+  String get ownerExclusiveControlBadge;
+
+  /// No description provided for @providerDocumentsDisabledNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'Fast Launch Mode Active: Document upload is currently waived by the platform owner.'**
+  String get providerDocumentsDisabledNotice;
+
+  /// No description provided for @providerDocumentsOptionalBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Optional during initial launch phase'**
+  String get providerDocumentsOptionalBadge;
+
+  /// No description provided for @navigateToPickup.
+  ///
+  /// In en, this message translates to:
+  /// **'Navigate to Pickup'**
+  String get navigateToPickup;
+
+  /// No description provided for @navigateToCustomer.
+  ///
+  /// In en, this message translates to:
+  /// **'Navigate to Customer'**
+  String get navigateToCustomer;
+
+  /// No description provided for @callCustomer.
+  ///
+  /// In en, this message translates to:
+  /// **'Call Customer'**
+  String get callCustomer;
+
+  /// No description provided for @whatsappCustomer.
+  ///
+  /// In en, this message translates to:
+  /// **'WhatsApp Customer'**
+  String get whatsappCustomer;
+
+  /// No description provided for @callMerchant.
+  ///
+  /// In en, this message translates to:
+  /// **'Call Store'**
+  String get callMerchant;
+
+  /// No description provided for @whatsappMerchant.
+  ///
+  /// In en, this message translates to:
+  /// **'WhatsApp Store'**
+  String get whatsappMerchant;
+
+  /// No description provided for @liveDeliveryMapTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Live Route & Customer Map'**
+  String get liveDeliveryMapTitle;
+
+  /// No description provided for @pickupPointLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Pickup Point (Store)'**
+  String get pickupPointLabel;
+
+  /// No description provided for @dropoffPointLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Dropoff Point (Customer)'**
+  String get dropoffPointLabel;
+
+  /// No description provided for @orderItemsSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Order Items'**
+  String get orderItemsSummary;
+
+  /// No description provided for @deliveryNotesLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivery Notes'**
+  String get deliveryNotesLabel;
+
+  /// No description provided for @estimatedMinutesValue.
+  ///
+  /// In en, this message translates to:
+  /// **'{minutes} min'**
+  String estimatedMinutesValue(int minutes);
+
+  /// No description provided for @confirmCancelDeliveryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel Active Delivery?'**
+  String get confirmCancelDeliveryTitle;
+
+  /// No description provided for @confirmCancelDeliveryBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to cancel this delivery assignment?'**
+  String get confirmCancelDeliveryBody;
+
+  /// No description provided for @radarSearchingForOrders.
+  ///
+  /// In en, this message translates to:
+  /// **'Scanning nearby zones for incoming orders…'**
+  String get radarSearchingForOrders;
+
+  /// No description provided for @onlineReadyForOrders.
+  ///
+  /// In en, this message translates to:
+  /// **'You are Online & Ready for Orders'**
+  String get onlineReadyForOrders;
+
+  /// No description provided for @offlineTapToGoOnline.
+  ///
+  /// In en, this message translates to:
+  /// **'You are Offline — Toggle to receive orders'**
+  String get offlineTapToGoOnline;
+
+  /// No description provided for @pickStoreLocationOnMap.
+  ///
+  /// In en, this message translates to:
+  /// **'Set Store Location on Map'**
+  String get pickStoreLocationOnMap;
+
+  /// No description provided for @useCurrentStoreGps.
+  ///
+  /// In en, this message translates to:
+  /// **'Use Current GPS for Store'**
+  String get useCurrentStoreGps;
+
+  /// No description provided for @storeCoordinatesSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Store map coordinates updated'**
+  String get storeCoordinatesSaved;
+
+  /// No description provided for @copyHoursToAllDays.
+  ///
+  /// In en, this message translates to:
+  /// **'Apply to All Days'**
+  String get copyHoursToAllDays;
+
+  /// No description provided for @uploadProductPhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload Product Photo'**
+  String get uploadProductPhoto;
+
+  /// No description provided for @toggleProductAvailability.
+  ///
+  /// In en, this message translates to:
+  /// **'Toggle Availability'**
+  String get toggleProductAvailability;
+
+  /// No description provided for @startOrderDelivery.
+  ///
+  /// In en, this message translates to:
+  /// **'Out for Delivery'**
+  String get startOrderDelivery;
+
+  /// No description provided for @orderCustomerPhone.
+  ///
+  /// In en, this message translates to:
+  /// **'Customer Phone'**
+  String get orderCustomerPhone;
+
+  /// No description provided for @orderDeliveryAddress.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivery Address'**
+  String get orderDeliveryAddress;
+
+  /// No description provided for @orderSpecialNotes.
+  ///
+  /// In en, this message translates to:
+  /// **'Special Instructions'**
+  String get orderSpecialNotes;
+
+  /// No description provided for @autoProvisionedStoreReady.
+  ///
+  /// In en, this message translates to:
+  /// **'Your store profile is active and ready'**
+  String get autoProvisionedStoreReady;
 }
 
 class _AppLocalizationsDelegate

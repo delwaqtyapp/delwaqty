@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:delwaqty/services/admin/admin_providers.dart';
+import 'package:delwaqty/features/admin/financial/presentation/providers/admin_financial_providers.dart';
+import 'package:delwaqty/features/_shared/auth/presentation/auth_provider.dart';
 import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
 import 'package:delwaqty/shared/widgets/premium_empty_state.dart';
 import 'package:delwaqty/shared/widgets/app_loader.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 import 'package:delwaqty/core/constants/app_constants.dart';
+import 'package:delwaqty/core/errors/error_text.dart';
 import 'package:delwaqty/core/theme/app_colors.dart';
 import 'package:delwaqty/core/localization/admin_locale_provider.dart';
 import 'package:delwaqty/core/theme/theme_mode_provider.dart';
@@ -22,6 +26,8 @@ class _AdminSettingsPageState extends ConsumerState<AdminSettingsPage> {
   late TextEditingController _supportEmailController;
   late TextEditingController _maxDriversPerZoneController;
   bool _maintenanceMode = false;
+  bool _requireProviderDocuments = false;
+  bool _isTogglingProviderDocs = false;
   bool _isLoading = false;
   bool _hydrated = false;
 
@@ -43,11 +49,52 @@ class _AdminSettingsPageState extends ConsumerState<AdminSettingsPage> {
     _maxDriversPerZoneController.text =
         (data['max_drivers_per_zone'] as num?)?.toString() ?? '10';
     _maintenanceMode = data['maintenance_mode'] as bool? ?? false;
+    _requireProviderDocuments =
+        data['require_provider_documents'] as bool? ?? false;
   }
 
   Future<void> _loadSettings() async {
     final settings = await ref.read(platformSettingsProvider.future);
     _hydrate(settings);
+  }
+
+  Future<void> _onToggleRequireProviderDocuments(bool value) async {
+    final l10n = AppLocalizations.of(context);
+    final previous = _requireProviderDocuments;
+    setState(() {
+      _requireProviderDocuments = value;
+      _isTogglingProviderDocs = true;
+    });
+    try {
+      await Supabase.instance.client.rpc(
+        'set_require_provider_documents',
+        params: {'p_required': value},
+      );
+      ref.invalidate(requireProviderDocumentsProvider);
+      ref.invalidate(platformSettingsProvider);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(l10n.settingsSaved),
+            backgroundColor: AppColors.successLight,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _requireProviderDocuments = previous);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(appErrorText(context, e)),
+            backgroundColor: AppColors.errorLight,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isTogglingProviderDocs = false);
+      }
+    }
   }
 
   @override
@@ -62,6 +109,7 @@ class _AdminSettingsPageState extends ConsumerState<AdminSettingsPage> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final settingsAsync = ref.watch(platformSettingsProvider);
+    final isOwner = ref.watch(adminIsOwnerProvider).asData?.value ?? false;
     final adminLocale = ref.watch(adminLocaleProvider);
     final themeMode = ref.watch(themeModeProvider);
     settingsAsync.whenData(_hydrate);
@@ -73,7 +121,11 @@ class _AdminSettingsPageState extends ConsumerState<AdminSettingsPage> {
           IconButton(
             tooltip: l10n.refresh,
             icon: const Icon(Icons.refresh),
-            onPressed: () => ref.invalidate(platformSettingsProvider),
+            onPressed: () {
+              _hydrated = false;
+              ref.invalidate(platformSettingsProvider);
+              ref.invalidate(adminIsOwnerProvider);
+            },
           ),
         ],
       ),
@@ -166,6 +218,77 @@ class _AdminSettingsPageState extends ConsumerState<AdminSettingsPage> {
                   ),
                 ),
               ),
+              if (isOwner) ...[
+                const SizedBox(height: 24),
+                AnimatedFadeIn(
+                  delay: const Duration(milliseconds: 150),
+                  child: Card(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      side: BorderSide(
+                        color: const Color(0xFFD4AF37).withValues(alpha: 0.55),
+                        width: 1.4,
+                      ),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 4,
+                            ),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFD4AF37)
+                                  .withValues(alpha: 0.16),
+                              borderRadius: BorderRadius.circular(999),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Icon(
+                                  Icons.verified_user_rounded,
+                                  size: 15,
+                                  color: Color(0xFFD4AF37),
+                                ),
+                                const SizedBox(width: 6),
+                                Text(
+                                  l10n.ownerExclusiveControlBadge,
+                                  style: const TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w700,
+                                    color: Color(0xFFD4AF37),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          SwitchListTile(
+                            contentPadding: EdgeInsets.zero,
+                            title: Text(
+                              l10n.requireProviderDocumentsTitle,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                            subtitle: Padding(
+                              padding: const EdgeInsets.only(top: 4),
+                              child: Text(l10n.requireProviderDocumentsSubtitle),
+                            ),
+                            value: _requireProviderDocuments,
+                            onChanged: _isTogglingProviderDocs
+                                ? null
+                                : _onToggleRequireProviderDocuments,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ],
               const SizedBox(height: 24),
               AnimatedFadeIn(
                 delay: const Duration(milliseconds: 180),
@@ -268,8 +391,9 @@ class _AdminSettingsPageState extends ConsumerState<AdminSettingsPage> {
     }
     setState(() => _isLoading = true);
 
+    final isOwner = ref.read(adminIsOwnerProvider).asData?.value ?? false;
     final adminService = ref.read(adminServiceProvider);
-    final success = await adminService.updateSettings({
+    final payload = <String, dynamic>{
       'app_name': _appNameController.text.trim().isEmpty
           ? AppConstants.appName
           : _appNameController.text.trim(),
@@ -277,7 +401,9 @@ class _AdminSettingsPageState extends ConsumerState<AdminSettingsPage> {
       'max_drivers_per_zone':
           int.tryParse(_maxDriversPerZoneController.text) ?? 10,
       'maintenance_mode': _maintenanceMode,
-    });
+      if (isOwner) 'require_provider_documents': _requireProviderDocuments,
+    };
+    final success = await adminService.updateSettings(payload);
 
     setState(() => _isLoading = false);
 
@@ -285,11 +411,13 @@ class _AdminSettingsPageState extends ConsumerState<AdminSettingsPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(success ? l10n.settingsSaved : l10n.settingsFailed),
-          backgroundColor: success ? AppColors.successLight : AppColors.errorLight,
+          backgroundColor:
+              success ? AppColors.successLight : AppColors.errorLight,
         ),
       );
     }
 
     ref.invalidate(platformSettingsProvider);
+    ref.invalidate(requireProviderDocumentsProvider);
   }
 }

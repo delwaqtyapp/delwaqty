@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
 import 'package:flutter/foundation.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:delwaqty/config/app_config.dart';
 import 'package:delwaqty/features/customer/commerce/domain/entities/geo_location.dart';
 import 'package:delwaqty/services/maps/maps_service.dart';
@@ -43,7 +44,7 @@ class MapsServiceImpl implements MapsService {
     final route = data['routes'][0];
     final polyline = route['overview_polyline']['points'];
     final totalDuration = Duration(
-      minutes: _parseInt(data['routes'][0]['legs'][0]['duration']['value'] ?? 0),
+      seconds: _parseInt(data['routes'][0]['legs'][0]['duration']['value'] ?? 0),
     );
     final totalDistance = _parseDouble(data['routes'][0]['legs'][0]['distance']['value'] ?? 0);
 
@@ -53,7 +54,7 @@ class MapsServiceImpl implements MapsService {
         instruction: step['html_instructions'].replaceAll('<[^>]+>', ''),
         distanceMetres: _parseDouble(step['distance']['value']),
         duration: Duration(
-          minutes: _parseInt(step['duration']['value']),
+          seconds: _parseInt(step['duration']['value']),
         ),
         startLocation: GeoLocation(
           latitude: _parseDouble(step['start_location']['lat']),
@@ -97,7 +98,7 @@ class MapsServiceImpl implements MapsService {
     }
 
     return Duration(
-      minutes: _parseInt(data['routes'][0]['legs'][0]['duration']['value'] ?? 0),
+      seconds: _parseInt(data['routes'][0]['legs'][0]['duration']['value'] ?? 0),
     );
   }
 
@@ -168,11 +169,17 @@ class MapsServiceImpl implements MapsService {
 
   @override
   void openNavigation(GeoLocation destination) {
-    final url = 'https://www.google.com/maps/dir/?api=1'
-        '&destination=${destination.latitude},${destination.longitude}';
-    // In a real app, use url_launcher to open this URL
-    // For now, we log it
-    debugPrint('Opening navigation: $url');
+    final uri = Uri.parse(
+      'https://www.google.com/maps/dir/?api=1'
+      '&destination=${destination.latitude},${destination.longitude}'
+      '&travelmode=driving',
+    );
+    unawaited(
+      launchUrl(uri, mode: LaunchMode.externalApplication).catchError((Object e) {
+        debugPrint('Opening navigation failed: $e');
+        return false;
+      }),
+    );
   }
 
   @override

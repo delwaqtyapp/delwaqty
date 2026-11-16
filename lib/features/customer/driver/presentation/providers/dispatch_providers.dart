@@ -26,6 +26,10 @@ final driverEarningsProvider =
   return ref.watch(dispatchRepositoryProvider).getEarnings(driverId);
 });
 
+/// Live GPS position for an active driver.
+final driverLivePositionProvider =
+    StateProvider.family<Position?, String>((ref, driverId) => null);
+
 /// Online/offline state and background GPS streaming for a driver.
 final driverOnlineProvider =
     StateNotifierProvider.family<DriverOnlineNotifier, AsyncValue<bool>, String>(
@@ -39,9 +43,18 @@ class DriverOnlineNotifier extends StateNotifier<AsyncValue<bool>> {
   final Ref _ref;
   final String _driverId;
   StreamSubscription<Position>? _positionSub;
+  Position? _lastPosition;
+
+  Position? get lastPosition => _lastPosition;
 
   DispatchRepository get _repo => _ref.read(dispatchRepositoryProvider);
   AppLogger get _log => _ref.read(loggerProvider);
+
+  void _recordPosition(Position? pos) {
+    if (pos == null) return;
+    _lastPosition = pos;
+    _ref.read(driverLivePositionProvider(_driverId).notifier).state = pos;
+  }
 
   Future<Position?> _currentPosition() async {
     try {
@@ -55,15 +68,25 @@ class DriverOnlineNotifier extends StateNotifier<AsyncValue<bool>> {
           permission == LocationPermission.deniedForever) {
         return null;
       }
-      return await Geolocator.getCurrentPosition(
+      final pos = await Geolocator.getCurrentPosition(
         locationSettings: const LocationSettings(
           accuracy: LocationAccuracy.high,
           timeLimit: Duration(seconds: 10),
         ),
       );
+      _recordPosition(pos);
+      return pos;
     } catch (e) {
       _log.e('Driver position error', e);
       return null;
+    }
+  }
+
+  Future<void> setOnline(bool online) async {
+    if (online) {
+      await goOnline();
+    } else {
+      await goOffline();
     }
   }
 
@@ -109,9 +132,10 @@ class DriverOnlineNotifier extends StateNotifier<AsyncValue<bool>> {
     _positionSub = Geolocator.getPositionStream(
       locationSettings: const LocationSettings(
         accuracy: LocationAccuracy.high,
-        distanceFilter: 25,
+        distanceFilter: 15,
       ),
     ).listen((pos) async {
+      _recordPosition(pos);
       try {
         await _repo.updateLocation(
           _driverId,

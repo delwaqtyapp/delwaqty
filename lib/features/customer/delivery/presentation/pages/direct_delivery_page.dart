@@ -9,6 +9,7 @@ import 'package:delwaqty/core/theme/app_text_styles.dart';
 import 'package:delwaqty/features/_shared/auth/domain/auth_state.dart';
 import 'package:delwaqty/features/_shared/auth/presentation/auth_provider.dart';
 import 'package:delwaqty/features/customer/location/presentation/providers/location_provider.dart';
+import 'package:delwaqty/features/customer/location/presentation/widgets/smart_map_picker_sheet.dart';
 import 'package:delwaqty/features/customer/delivery/presentation/providers/delivery_providers.dart';
 import 'package:delwaqty/features/customer/search/domain/entities/geo_point.dart';
 import 'package:delwaqty/features/customer/search/domain/entities/search_session.dart';
@@ -36,6 +37,8 @@ class _DirectDeliveryPageState extends ConsumerState<DirectDeliveryPage> {
   bool _saveNumber = true;
   bool _loadingLocation = false;
   bool _submitting = false;
+  double? _pickedDropoffLat;
+  double? _pickedDropoffLng;
 
   String _selectedUnit = 'none';
   String _selectedWeight = 'none';
@@ -117,7 +120,11 @@ class _DirectDeliveryPageState extends ConsumerState<DirectDeliveryPage> {
         final address = value.detailedAddress.isNotEmpty
             ? value.detailedAddress
             : '${value.latitude}, ${value.longitude}';
-        _dropoffController.text = address;
+        setState(() {
+          _dropoffController.text = address;
+          _pickedDropoffLat = value.latitude;
+          _pickedDropoffLng = value.longitude;
+        });
         final accuracy = value.accuracyMeters;
         if (accuracy != null && accuracy > precisionTargetMeters) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -137,6 +144,21 @@ class _DirectDeliveryPageState extends ConsumerState<DirectDeliveryPage> {
       }
     } finally {
       if (mounted) setState(() => _loadingLocation = false);
+    }
+  }
+
+  Future<void> _pickDropoffOnMap() async {
+    final picked = await SmartMapPickerSheet.show(
+      context,
+      initialLat: _pickedDropoffLat,
+      initialLng: _pickedDropoffLng,
+    );
+    if (picked != null && mounted) {
+      setState(() {
+        _dropoffController.text = picked.detailedAddress;
+        _pickedDropoffLat = picked.latitude;
+        _pickedDropoffLng = picked.longitude;
+      });
     }
   }
 
@@ -164,26 +186,39 @@ class _DirectDeliveryPageState extends ConsumerState<DirectDeliveryPage> {
     }
     setState(() => _submitting = true);
     try {
-      final places = ref.read(placesRepositoryProvider);
-      final languageCode = ref.read(searchLanguageProvider);
-      final session = SearchSession.generate();
-      final suggestions = await places.autocomplete(
-        query: dropoffText,
-        languageCode: languageCode,
-        origin: GeoPoint(location.latitude, location.longitude),
-        session: session,
-      );
-      if (suggestions.isEmpty) {
-        if (mounted) {
-          context.showAppSnackBar(l10n.deliveryAddressNotFound, isError: true);
+      double dropoffLat;
+      double dropoffLng;
+      String dropoffAddress;
+
+      if (_pickedDropoffLat != null && _pickedDropoffLng != null) {
+        dropoffLat = _pickedDropoffLat!;
+        dropoffLng = _pickedDropoffLng!;
+        dropoffAddress = dropoffText;
+      } else {
+        final places = ref.read(placesRepositoryProvider);
+        final languageCode = ref.read(searchLanguageProvider);
+        final session = SearchSession.generate();
+        final suggestions = await places.autocomplete(
+          query: dropoffText,
+          languageCode: languageCode,
+          origin: GeoPoint(location.latitude, location.longitude),
+          session: session,
+        );
+        if (suggestions.isEmpty) {
+          if (mounted) {
+            context.showAppSnackBar(l10n.deliveryAddressNotFound, isError: true);
+          }
+          return;
         }
-        return;
+        final details = await places.details(
+          placeId: suggestions.first.placeId,
+          languageCode: languageCode,
+          session: session,
+        );
+        dropoffLat = details.location.latitude;
+        dropoffLng = details.location.longitude;
+        dropoffAddress = details.formattedAddress;
       }
-      final details = await places.details(
-        placeId: suggestions.first.placeId,
-        languageCode: languageCode,
-        session: session,
-      );
 
       final itemsSummary = _items.isEmpty
           ? null
@@ -203,9 +238,9 @@ class _DirectDeliveryPageState extends ConsumerState<DirectDeliveryPage> {
             pickupLatitude: location.latitude,
             pickupLongitude: location.longitude,
             pickupAddress: location.detailedAddress,
-            dropoffLatitude: details.location.latitude,
-            dropoffLongitude: details.location.longitude,
-            dropoffAddress: details.formattedAddress,
+            dropoffLatitude: dropoffLat,
+            dropoffLongitude: dropoffLng,
+            dropoffAddress: dropoffAddress,
             itemsSummary: itemsSummary,
             notes: notes,
           );
@@ -352,6 +387,10 @@ class _DirectDeliveryPageState extends ConsumerState<DirectDeliveryPage> {
       ),
       child: TextField(
         controller: _dropoffController,
+        onChanged: (_) {
+          _pickedDropoffLat = null;
+          _pickedDropoffLng = null;
+        },
         decoration: InputDecoration(
           prefixIcon: Icon(Icons.location_on_outlined, color: cs.error),
           labelText: l10n.deliverTo,
@@ -370,11 +409,25 @@ class _DirectDeliveryPageState extends ConsumerState<DirectDeliveryPage> {
                     child: CircularProgressIndicator(strokeWidth: 2),
                   ),
                 )
-              : IconButton(
-                  onPressed: _useCurrentLocation,
-                  icon: const Icon(Icons.my_location_rounded, size: 20),
-                  tooltip: l10n.setMyLocation,
-                  color: cs.primary,
+              : Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    IconButton(
+                      onPressed: _pickDropoffOnMap,
+                      icon: const Icon(
+                        Icons.edit_location_alt_rounded,
+                        size: 20,
+                      ),
+                      tooltip: l10n.pickLocationOnMap,
+                      color: cs.primary,
+                    ),
+                    IconButton(
+                      onPressed: _useCurrentLocation,
+                      icon: const Icon(Icons.my_location_rounded, size: 20),
+                      tooltip: l10n.setMyLocation,
+                      color: cs.primary,
+                    ),
+                  ],
                 ),
         ),
       ),
@@ -490,6 +543,7 @@ class _DirectDeliveryPageState extends ConsumerState<DirectDeliveryPage> {
               _buildUnitSelector(l10n, cs),
               const SizedBox(width: 4),
               IconButton.filled(
+                tooltip: l10n.addItem,
                 onPressed: _addItem,
                 icon: const Icon(Icons.add_rounded, size: 20),
                 constraints: const BoxConstraints(minWidth: 40, minHeight: 40),
@@ -687,6 +741,7 @@ class _DirectDeliveryPageState extends ConsumerState<DirectDeliveryPage> {
               ),
               const SizedBox(width: 8),
               IconButton.filled(
+                tooltip: l10n.saveNumber,
                 onPressed: () {
                   if (_saveNumber) {
                     ScaffoldMessenger.of(context).showSnackBar(

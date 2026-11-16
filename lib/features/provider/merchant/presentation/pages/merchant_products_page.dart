@@ -10,13 +10,8 @@ import 'package:delwaqty/shared/widgets/shimmer_loading.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 import 'package:delwaqty/core/theme/app_colors.dart';
 
-final _merchantIdProvider = providerMerchantIdProvider;
-
-final _productsProvider = FutureProvider<List<Map<String, dynamic>>>((ref) async {
-  final repo = ref.watch(merchantDashboardRepositoryProvider);
-  final merchantId = await ref.watch(_merchantIdProvider.future);
-  return repo.getMerchantProducts(merchantId);
-});
+export 'package:delwaqty/features/provider/merchant/presentation/providers/merchant_providers.dart'
+    show merchantProductsProvider;
 
 class MerchantProductsPage extends ConsumerStatefulWidget {
   const MerchantProductsPage({super.key});
@@ -39,7 +34,7 @@ class _MerchantProductsPageState extends ConsumerState<MerchantProductsPage> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final productsAsync = ref.watch(_productsProvider);
+    final productsAsync = ref.watch(merchantProductsProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -53,7 +48,7 @@ class _MerchantProductsPageState extends ConsumerState<MerchantProductsPage> {
           IconButton(
             tooltip: l10n.refresh,
             icon: const Icon(Icons.refresh),
-            onPressed: () => ref.invalidate(_productsProvider),
+            onPressed: () => ref.invalidate(merchantProductsProvider),
           ),
         ],
       ),
@@ -104,7 +99,7 @@ class _MerchantProductsPageState extends ConsumerState<MerchantProductsPage> {
                   title: l10n.error,
                   message: l10n.errorLoading,
                   actionLabel: l10n.retry,
-                  onAction: () => ref.invalidate(_productsProvider),
+                  onAction: () => ref.invalidate(merchantProductsProvider),
                 ),
               ),
               data: (products) {
@@ -135,7 +130,8 @@ class _MerchantProductsPageState extends ConsumerState<MerchantProductsPage> {
                   );
                 }
                 return RefreshIndicator(
-                  onRefresh: () async => ref.invalidate(_productsProvider),
+                  onRefresh: () async =>
+                      ref.invalidate(merchantProductsProvider),
                   child: ListView.builder(
                     padding: const EdgeInsets.fromLTRB(16, 0, 16, 80),
                     itemCount: filtered.length,
@@ -189,7 +185,7 @@ class _MerchantProductsPageState extends ConsumerState<MerchantProductsPage> {
               final repo = ref.read(merchantDashboardRepositoryProvider);
               final id = product['id'] as String;
               await repo.deleteProduct(id);
-              ref.invalidate(_productsProvider);
+              ref.invalidate(merchantProductsProvider);
               if (context.mounted) {
                 context.showAppSnackBar(l10n.productDeleted);
               }
@@ -205,7 +201,7 @@ class _MerchantProductsPageState extends ConsumerState<MerchantProductsPage> {
   }
 }
 
-class _ProductCard extends StatelessWidget {
+class _ProductCard extends ConsumerWidget {
   const _ProductCard({
     required this.product,
     required this.onTap,
@@ -217,8 +213,10 @@ class _ProductCard extends StatelessWidget {
   final VoidCallback onDelete;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context);
+    final id = product['id'] as String? ?? '';
     final name = product['name'] as String? ?? '';
     final price = (product['price'] as num?)?.toDouble() ?? 0;
     final isAvailable = product['is_available'] as bool? ?? true;
@@ -281,7 +279,7 @@ class _ProductCard extends StatelessWidget {
             subtitle: Row(
               children: [
                 Text(
-                  '${AppLocalizations.of(context).currencySymbol} ${price.toStringAsFixed(2)}',
+                  '${l10n.currencySymbol} ${price.toStringAsFixed(2)}',
                   style: theme.textTheme.bodyMedium?.copyWith(
                     color: theme.colorScheme.primary,
                     fontWeight: FontWeight.bold,
@@ -294,23 +292,43 @@ class _ProductCard extends StatelessWidget {
                     vertical: 2,
                   ),
                   decoration: BoxDecoration(
-                    color: (isAvailable ? AppColors.successLight : AppColors.errorLight)
+                    color: (isAvailable
+                            ? AppColors.successLight
+                            : AppColors.errorLight)
                         .withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(4),
                   ),
                   child: Text(
-                    isAvailable
-                        ? AppLocalizations.of(context).available
-                        : AppLocalizations.of(context).unavailable,
+                    isAvailable ? l10n.available : l10n.unavailable,
                     style: theme.textTheme.labelSmall?.copyWith(
-                      color: isAvailable ? AppColors.successLight : AppColors.errorLight,
+                      color: isAvailable
+                          ? AppColors.successLight
+                          : AppColors.errorLight,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
                 ),
               ],
             ),
-            trailing: const Icon(Icons.chevron_right_rounded),
+            trailing: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Tooltip(
+                  message: l10n.toggleProductAvailability,
+                  child: Switch(
+                    value: isAvailable,
+                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    onChanged: (value) async {
+                      await ref
+                          .read(merchantDashboardDataSourceProvider)
+                          .updateProduct(id, {'is_available': value});
+                      ref.invalidate(merchantProductsProvider);
+                    },
+                  ),
+                ),
+                const Icon(Icons.chevron_right_rounded),
+              ],
+            ),
           ),
         ),
       ),

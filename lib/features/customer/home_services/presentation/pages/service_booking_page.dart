@@ -10,6 +10,8 @@ import 'package:delwaqty/features/customer/home/presentation/widgets/category_vi
 import 'package:delwaqty/features/customer/home_services/domain/entities/service_category.dart';
 import 'package:delwaqty/features/customer/home_services/domain/entities/service_provider.dart';
 import 'package:delwaqty/features/customer/home_services/data/repositories/service_booking_repository_impl.dart';
+import 'package:delwaqty/features/customer/location/presentation/providers/location_provider.dart';
+import 'package:delwaqty/features/customer/location/presentation/widgets/smart_map_picker_sheet.dart';
 import 'package:delwaqty/features/_shared/auth/domain/auth_state.dart';
 import 'package:delwaqty/features/_shared/auth/presentation/auth_provider.dart';
 import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
@@ -36,11 +38,13 @@ class ServiceBookingPage extends ConsumerStatefulWidget {
 class _ServiceBookingPageState extends ConsumerState<ServiceBookingPage> {
   DateTime _selectedDate = DateTime.now().add(const Duration(days: 1));
   TimeOfDay _selectedTime = const TimeOfDay(hour: 10, minute: 0);
+  final _addressController = TextEditingController();
   final _descriptionController = TextEditingController();
   final _notesController = TextEditingController();
   String? _selectedProviderId;
   String? _selectedProviderName;
   bool _isSubmitting = false;
+  bool _addressPrefilled = false;
 
   @override
   void initState() {
@@ -50,13 +54,30 @@ class _ServiceBookingPageState extends ConsumerState<ServiceBookingPage> {
       _selectedProviderId = p.id;
       _selectedProviderName = p.name;
     }
+    final locAddress =
+        ref.read(userLocationProvider).value?.detailedAddress ?? '';
+    if (locAddress.isNotEmpty) {
+      _addressController.text = locAddress;
+      _addressPrefilled = true;
+    }
   }
 
   @override
   void dispose() {
+    _addressController.dispose();
     _descriptionController.dispose();
     _notesController.dispose();
     super.dispose();
+  }
+
+  Future<void> _pickAddressOnMap() async {
+    final picked = await SmartMapPickerSheet.show(context);
+    if (picked != null && mounted) {
+      setState(() {
+        _addressController.text = picked.detailedAddress;
+        _addressPrefilled = true;
+      });
+    }
   }
 
   String _categoryName(AppLocalizations l10n) =>
@@ -94,6 +115,9 @@ class _ServiceBookingPageState extends ConsumerState<ServiceBookingPage> {
 
     try {
       final repo = ref.read(serviceBookingRepositoryProvider);
+      final resolvedAddress = _addressController.text.trim().isNotEmpty
+          ? _addressController.text.trim()
+          : (ref.read(userLocationProvider).value?.detailedAddress ?? '');
       await repo.createBooking(
         userId: authState.user.id,
         providerId: _selectedProviderId!,
@@ -105,7 +129,7 @@ class _ServiceBookingPageState extends ConsumerState<ServiceBookingPage> {
         scheduledDate: _selectedDate,
         scheduledTime:
             '${_selectedTime.hour.toString().padLeft(2, '0')}:${_selectedTime.minute.toString().padLeft(2, '0')}',
-        address: '',
+        address: resolvedAddress,
         notes: _notesController.text.isEmpty ? null : _notesController.text,
       );
 
@@ -136,6 +160,14 @@ class _ServiceBookingPageState extends ConsumerState<ServiceBookingPage> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final providersAsync = ref.watch(_providersProvider(widget.categoryType));
+    final userLoc = ref.watch(userLocationProvider).value;
+    if (!_addressPrefilled &&
+        _addressController.text.isEmpty &&
+        userLoc != null &&
+        userLoc.detailedAddress.isNotEmpty) {
+      _addressController.text = userLoc.detailedAddress;
+      _addressPrefilled = true;
+    }
 
     return Scaffold(
       appBar: AppBar(
@@ -294,6 +326,35 @@ class _ServiceBookingPageState extends ConsumerState<ServiceBookingPage> {
                     ),
                   ),
                 ],
+              ),
+            ),
+            const SizedBox(height: 24),
+            AnimatedFadeIn(
+              delay: const Duration(milliseconds: 175),
+              child: Text(
+                l10n.deliveryAddress,
+                style: context.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
+            AnimatedFadeIn(
+              delay: const Duration(milliseconds: 190),
+              child: TextField(
+                controller: _addressController,
+                decoration: InputDecoration(
+                  hintText: l10n.selectDeliveryAddress,
+                  prefixIcon: const Icon(Icons.location_on_outlined),
+                  suffixIcon: IconButton(
+                    tooltip: l10n.pickLocationOnMap,
+                    icon: const Icon(Icons.map_rounded),
+                    onPressed: _pickAddressOnMap,
+                  ),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                ),
               ),
             ),
             const SizedBox(height: 24),

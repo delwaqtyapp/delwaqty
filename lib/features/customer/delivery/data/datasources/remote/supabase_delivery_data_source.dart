@@ -32,6 +32,8 @@ class SupabaseDeliveryDataSource {
       id: row['id'] as String,
       serviceType: row['service_type'] as String? ?? 'ride',
       merchantId: row['merchant_id'] as String?,
+      merchantName: row['merchant_name'] as String?,
+      merchantAddress: row['merchant_address'] as String?,
       riderId: row['rider_id'] as String?,
       driverId: row['driver_id'] as String?,
       driverName: row['driver_name'] as String?,
@@ -78,6 +80,9 @@ class SupabaseDeliveryDataSource {
           ? DateTime.parse(row['cancelled_at'] as String)
           : null,
       cancellationReason: row['cancellation_reason'] as String?,
+      recipientName: row['recipient_name'] as String?,
+      recipientPhone: row['recipient_phone'] as String?,
+      pickupOtp: row['pickup_otp'] as String?,
     );
   }
 

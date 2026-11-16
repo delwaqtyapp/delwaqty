@@ -187,30 +187,9 @@ class _DeliveryHubBodyState extends ConsumerState<_DeliveryHubBody> {
           ),
           const SizedBox(height: 32),
           if (online)
-            AnimatedFadeIn(
-              delay: const Duration(milliseconds: 200),
-              child: Center(
-                child: Column(
-                  children: [
-                    Icon(
-                      Icons.wifi_tethering_rounded,
-                      size: 48,
-                      color: Theme.of(context)
-                          .colorScheme
-                          .onSurfaceVariant
-                          .withValues(alpha: 0.5),
-                    ),
-                    const SizedBox(height: 12),
-                    Text(
-                      l10n.waitingForRides,
-                      textAlign: TextAlign.center,
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: Theme.of(context).colorScheme.onSurfaceVariant,
-                          ),
-                    ),
-                  ],
-                ),
-              ),
+            const AnimatedFadeIn(
+              delay: Duration(milliseconds: 200),
+              child: _RadarPulseWidget(),
             ),
         ],
       ),
@@ -257,6 +236,114 @@ class _DeliveryHubBodyState extends ConsumerState<_DeliveryHubBody> {
       context: context,
       isScrollControlled: true,
       builder: (_) => _CapabilitiesBottomSheet(driverId: _driverId),
+    );
+  }
+}
+
+class _RadarPulseWidget extends StatefulWidget {
+  const _RadarPulseWidget();
+
+  @override
+  State<_RadarPulseWidget> createState() => _RadarPulseWidgetState();
+}
+
+class _RadarPulseWidgetState extends State<_RadarPulseWidget> {
+  bool _expanded = false;
+  Timer? _pulseTimer;
+
+  @override
+  void initState() {
+    super.initState();
+    _pulseTimer = Timer.periodic(const Duration(milliseconds: 1100), (_) {
+      if (mounted) {
+        setState(() => _expanded = !_expanded);
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _pulseTimer?.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+
+    return Center(
+      child: Column(
+        children: [
+          SizedBox(
+            width: 110,
+            height: 110,
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                TweenAnimationBuilder<double>(
+                  tween: Tween<double>(
+                    begin: 56,
+                    end: _expanded ? 104 : 64,
+                  ),
+                  duration: const Duration(milliseconds: 1000),
+                  curve: Curves.easeInOut,
+                  builder: (context, size, _) {
+                    return AnimatedContainer(
+                      duration: const Duration(milliseconds: 1000),
+                      width: size,
+                      height: size,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: AppColors.successLight.withValues(
+                          alpha: _expanded ? 0.10 : 0.24,
+                        ),
+                        border: Border.all(
+                          color: AppColors.successLight.withValues(
+                            alpha: _expanded ? 0.25 : 0.55,
+                          ),
+                          width: 2,
+                        ),
+                      ),
+                    );
+                  },
+                ),
+                Container(
+                  width: 56,
+                  height: 56,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: AppColors.successLight.withValues(alpha: 0.18),
+                  ),
+                  child: const Icon(
+                    Icons.wifi_tethering_rounded,
+                    size: 30,
+                    color: AppColors.successLight,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 12),
+          Text(
+            l10n.radarSearchingForOrders,
+            textAlign: TextAlign.center,
+            style: theme.textTheme.titleSmall?.copyWith(
+              fontWeight: FontWeight.w700,
+              color: cs.onSurface,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            l10n.waitingForRides,
+            textAlign: TextAlign.center,
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: cs.onSurfaceVariant,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

@@ -115,6 +115,41 @@ class UserLocationNotifier extends AsyncNotifier<UserLocation?> {
     }
   }
 
+  Future<String> reverseGeocodePoint(double latitude, double longitude) {
+    return _getAddressFromLatLng(latitude, longitude, _appLanguage());
+  }
+
+  Future<String> _getAddressFromLatLng(
+    double lat,
+    double lng,
+    String language,
+  ) {
+    return _reverseGeocode(lat, lng, language);
+  }
+
+  Future<UserLocation> setCustomCoordinates({
+    required double latitude,
+    required double longitude,
+    String? addressOverride,
+  }) async {
+    final trimmed = addressOverride?.trim();
+    var resolvedAddress = (trimmed != null && trimmed.isNotEmpty)
+        ? trimmed
+        : await _getAddressFromLatLng(latitude, longitude, _appLanguage());
+    if (resolvedAddress.isEmpty) {
+      resolvedAddress =
+          '${latitude.toStringAsFixed(5)}, ${longitude.toStringAsFixed(5)}';
+    }
+    final location = UserLocation(
+      latitude: latitude,
+      longitude: longitude,
+      detailedAddress: resolvedAddress,
+      accuracyMeters: 1.0,
+    );
+    state = AsyncData(location);
+    return location;
+  }
+
   static const _maxFixAge = Duration(minutes: 2);
   static const _maxLastKnownAge = Duration(minutes: 10);
 
@@ -122,8 +157,14 @@ class UserLocationNotifier extends AsyncNotifier<UserLocation?> {
     final lastKnown = await _safeGetLastKnown();
     if (_isFreshAndPrecise(lastKnown)) return lastKnown;
 
-    if (!deepPrecision && _isUsableLastKnown(lastKnown)) {
-      return lastKnown;
+    if (!deepPrecision && lastKnown != null) {
+      final lastKnownAge = DateTime.now().difference(lastKnown.timestamp);
+      if (lastKnownAge >= const Duration(seconds: -30) &&
+          lastKnownAge <= const Duration(minutes: 2) &&
+          lastKnown.accuracy > 0 &&
+          lastKnown.accuracy <= 15.0) {
+        return lastKnown;
+      }
     }
 
     final waitSeconds = deepPrecision && !_isUsableLastKnown(lastKnown)

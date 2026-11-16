@@ -183,7 +183,7 @@ class StockNotifier {
       'merchant_id': merchantId,
       'product_id': productId,
       'stock_quantity': clamped,
-      if (existingReserved != null) 'reserved_quantity': existingReserved,
+      'reserved_quantity': ?existingReserved,
       'low_stock_threshold': lowStockThreshold,
       'is_in_stock': clamped > 0,
     }, onConflict: 'product_id');

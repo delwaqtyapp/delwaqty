@@ -353,9 +353,10 @@ class _MerchantStorefrontPageState
         _latitude = lat;
         _longitude = lng;
       });
-      _mapController?.animateCamera(
+      await _mapController?.animateCamera(
         CameraUpdate.newLatLng(LatLng(lat, lng)),
       );
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(l10n.storeCoordinatesSaved)),
       );

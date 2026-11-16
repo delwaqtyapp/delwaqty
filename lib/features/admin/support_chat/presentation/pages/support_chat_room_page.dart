@@ -53,7 +53,7 @@ class _SupportChatRoomPageState extends ConsumerState<SupportChatRoomPage> {
       _maybeHandlePendingIncomingCall();
       final uid = _currentUser()?.id;
       if (uid != null) {
-        unawaited(ref.read(chatRepositoryProvider).markAsRead(widget.roomId, uid));
+        unawaited(ref.read(chatRepositoryProvider).markAsRead(widget.roomId));
       }
     });
   }

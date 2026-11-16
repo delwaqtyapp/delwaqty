@@ -7166,4 +7166,34 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get viewDocumentTooltip => 'Preview Document';
+
+  @override
+  String get switchWorkspace => 'Switch Service / Workspace';
+
+  @override
+  String get activeWorkspaceLabel => 'Active Business Line';
+
+  @override
+  String get requestAdditionalService => 'Add Another Business / Service';
+
+  @override
+  String get additionalServiceHint =>
+      'Apply to operate an additional service line under one account (requires Admin approval).';
+
+  @override
+  String get serviceDisplayName => 'Business / Service Name';
+
+  @override
+  String get serviceRequestSubmitted =>
+      'Request sent! Awaiting Admin approval.';
+
+  @override
+  String get ownerAllModesUnlocked =>
+      'Owner Access: All Service Verticals Unlocked';
+
+  @override
+  String get multiServiceRequestsTitle => 'Multi-Service Expansion Requests';
+
+  @override
+  String get noMultiServiceRequests => 'No pending multi-service requests';
 }

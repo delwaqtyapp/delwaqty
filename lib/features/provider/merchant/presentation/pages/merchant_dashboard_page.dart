@@ -94,12 +94,262 @@ class _MerchantDashboardPageState
     }
   }
 
+  Future<void> _openWorkspaceSwitcher(
+    BuildContext context,
+    AppLocalizations l10n,
+    ProviderProfilesState profilesState,
+  ) async {
+    await showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (sheetCtx) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(20, 16, 20, 20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                l10n.switchWorkspace,
+                style: Theme.of(sheetCtx).textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              if (profilesState.isOwner) ...[
+                const SizedBox(height: 6),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 6,
+                  ),
+                  decoration: BoxDecoration(
+                    color: AppColors.brandPurple.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(
+                        Icons.verified_rounded,
+                        color: AppColors.brandPurple,
+                        size: 18,
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          l10n.ownerAllModesUnlocked,
+                          style: const TextStyle(
+                            color: AppColors.brandPurple,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+              const SizedBox(height: 12),
+              Flexible(
+                child: ListView.separated(
+                  shrinkWrap: true,
+                  itemCount: profilesState.profiles.length,
+                  separatorBuilder: (_, _) => const SizedBox(height: 6),
+                  itemBuilder: (_, idx) {
+                    final p = profilesState.profiles[idx];
+                    final isActive =
+                        p.categoryType == profilesState.activeCategory;
+                    final canSwitch = p.isApproved || profilesState.isOwner;
+                    return Card(
+                      margin: EdgeInsets.zero,
+                      shape: isActive
+                          ? RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(14),
+                              side: const BorderSide(
+                                color: AppColors.brandPurple,
+                                width: 1.5,
+                              ),
+                            )
+                          : null,
+                      child: ListTile(
+                        leading: CircleAvatar(
+                          backgroundColor:
+                              AppColors.brandPurple.withValues(alpha: 0.12),
+                          child: Icon(
+                            p.categoryType == 'home_services'
+                                ? Icons.handyman_rounded
+                                : Icons.storefront_rounded,
+                            color: AppColors.brandPurple,
+                          ),
+                        ),
+                        title: Text(
+                          p.displayName.isNotEmpty
+                              ? p.displayName
+                              : p.categoryType,
+                          style: const TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        subtitle: Text(
+                          '${p.categoryType} · ${p.isApproved ? l10n.verified : (p.status == 'rejected' ? l10n.rejected : l10n.pendingReview)}',
+                        ),
+                        trailing: isActive
+                            ? const Icon(
+                                Icons.check_circle_rounded,
+                                color: AppColors.successLight,
+                              )
+                            : canSwitch
+                            ? const Icon(Icons.chevron_right_rounded)
+                            : const Icon(Icons.lock_clock_rounded, size: 18),
+                        onTap: !canSwitch
+                            ? null
+                            : () async {
+                                Navigator.of(sheetCtx).pop();
+                                try {
+                                  await Supabase.instance.client.rpc(
+                                    'switch_active_provider_profile',
+                                    params: {'p_category_type': p.categoryType},
+                                  );
+                                  ref.invalidate(providerProfilesProvider);
+                                  ref.invalidate(providerRawCategoryProvider);
+                                  ref.invalidate(providerMerchantIdProvider);
+                                  ref.invalidate(storefrontProvider);
+                                  ref.invalidate(_statsProvider);
+                                  ref.invalidate(providerAvailabilityProvider);
+                                } catch (e) {
+                                  if (context.mounted) {
+                                    context.showAppSnackBar(
+                                      appErrorText(context, e),
+                                      isError: true,
+                                    );
+                                  }
+                                }
+                              },
+                      ),
+                    );
+                  },
+                ),
+              ),
+              const SizedBox(height: 12),
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton.icon(
+                  onPressed: () {
+                    Navigator.of(sheetCtx).pop();
+                    _openRequestServiceDialog(context, l10n);
+                  },
+                  icon: const Icon(Icons.add_business_rounded),
+                  label: Text(l10n.requestAdditionalService),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _openRequestServiceDialog(
+    BuildContext context,
+    AppLocalizations l10n,
+  ) async {
+    const categories = [
+      'restaurant',
+      'grocery',
+      'pharmacy',
+      'bakery',
+      'home_services',
+      'electronics',
+      'fashion',
+    ];
+    String selectedCat = 'grocery';
+    final nameCtrl = TextEditingController();
+
+    final submitted = await showDialog<bool>(
+      context: context,
+      builder: (dlgCtx) => StatefulBuilder(
+        builder: (ctx, setDlgState) => AlertDialog(
+          title: Text(l10n.requestAdditionalService),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                l10n.additionalServiceHint,
+                style: Theme.of(ctx).textTheme.bodySmall,
+              ),
+              const SizedBox(height: 12),
+              DropdownButtonFormField<String>(
+                initialValue: selectedCat,
+                decoration: InputDecoration(
+                  labelText: l10n.storeCategoryLabel,
+                  border: const OutlineInputBorder(),
+                ),
+                items: categories
+                    .map((c) => DropdownMenuItem(value: c, child: Text(c)))
+                    .toList(),
+                onChanged: (v) {
+                  if (v != null) setDlgState(() => selectedCat = v);
+                },
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: nameCtrl,
+                decoration: InputDecoration(
+                  labelText: l10n.serviceDisplayName,
+                  border: const OutlineInputBorder(),
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dlgCtx).pop(false),
+              child: Text(l10n.cancel),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.of(dlgCtx).pop(true),
+              child: Text(l10n.submit),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    if (submitted != true || !mounted) {
+      nameCtrl.dispose();
+      return;
+    }
+    try {
+      await Supabase.instance.client.rpc(
+        'request_additional_provider_profile',
+        params: {
+          'p_category_type': selectedCat,
+          'p_display_name': nameCtrl.text.trim(),
+        },
+      );
+      ref.invalidate(providerProfilesProvider);
+      if (context.mounted) {
+        context.showAppSnackBar(l10n.serviceRequestSubmitted);
+      }
+    } catch (e) {
+      if (context.mounted) {
+        context.showAppSnackBar(appErrorText(context, e), isError: true);
+      }
+    } finally {
+      nameCtrl.dispose();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final statsAsync = ref.watch(_statsProvider);
     final availabilityAsync = ref.watch(providerAvailabilityProvider);
     final storefrontAsync = ref.watch(storefrontProvider);
+    final profilesState =
+        ref.watch(providerProfilesProvider).value ??
+        const ProviderProfilesState();
     final isOpen = availabilityAsync.value?['is_open'] as bool? ?? true;
     final storeData = storefrontAsync.value;
 
@@ -124,6 +374,7 @@ class _MerchantDashboardPageState
               ref.invalidate(_statsProvider);
               ref.invalidate(providerAvailabilityProvider);
               ref.invalidate(storefrontProvider);
+              ref.invalidate(providerProfilesProvider);
             },
           ),
         ],
@@ -133,6 +384,7 @@ class _MerchantDashboardPageState
           ref.invalidate(_statsProvider);
           ref.invalidate(providerAvailabilityProvider);
           ref.invalidate(storefrontProvider);
+          ref.invalidate(providerProfilesProvider);
         },
         child: SingleChildScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
@@ -146,13 +398,17 @@ class _MerchantDashboardPageState
                       ? storeData!.name
                       : l10n.merchantDashboard,
                   logoUrl: storeData?.logoUrl,
-                  category: storeData?.type ?? '',
+                  category: profilesState.activeCategory.isNotEmpty
+                      ? profilesState.activeCategory
+                      : (storeData?.type ?? ''),
                   rating: statsAsync.value?.averageRating ?? 5.0,
                   isOpen: isOpen,
                   toggling: _togglingOpen,
                   onToggle: _toggleStoreOpen,
                   onEditStorefront: () =>
                       context.push('/merchant-dashboard/storefront'),
+                  onSwitchWorkspace: () =>
+                      _openWorkspaceSwitcher(context, l10n, profilesState),
                 ),
               ),
               const SizedBox(height: 20),
@@ -380,6 +636,7 @@ class _StoreHeroCard extends StatelessWidget {
     required this.toggling,
     required this.onToggle,
     required this.onEditStorefront,
+    required this.onSwitchWorkspace,
   });
 
   final String storeName;
@@ -390,6 +647,7 @@ class _StoreHeroCard extends StatelessWidget {
   final bool toggling;
   final ValueChanged<bool> onToggle;
   final VoidCallback onEditStorefront;
+  final VoidCallback onSwitchWorkspace;
 
   @override
   Widget build(BuildContext context) {
@@ -447,21 +705,36 @@ class _StoreHeroCard extends StatelessWidget {
                     Row(
                       children: [
                         if (category.isNotEmpty) ...[
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 8,
-                              vertical: 2,
-                            ),
-                            decoration: BoxDecoration(
-                              color: Colors.white.withValues(alpha: 0.18),
-                              borderRadius: BorderRadius.circular(999),
-                            ),
-                            child: Text(
-                              category,
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 11,
-                                fontWeight: FontWeight.w600,
+                          InkWell(
+                            onTap: onSwitchWorkspace,
+                            borderRadius: BorderRadius.circular(999),
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 10,
+                                vertical: 3,
+                              ),
+                              decoration: BoxDecoration(
+                                color: Colors.white.withValues(alpha: 0.22),
+                                borderRadius: BorderRadius.circular(999),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(
+                                    category,
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 4),
+                                  const Icon(
+                                    Icons.swap_horiz_rounded,
+                                    color: Colors.white,
+                                    size: 14,
+                                  ),
+                                ],
                               ),
                             ),
                           ),
@@ -485,6 +758,11 @@ class _StoreHeroCard extends StatelessWidget {
                     ),
                   ],
                 ),
+              ),
+              IconButton(
+                tooltip: l10n.switchWorkspace,
+                icon: const Icon(Icons.swap_horiz_rounded, color: Colors.white),
+                onPressed: onSwitchWorkspace,
               ),
               IconButton(
                 tooltip: l10n.storefront,

@@ -7113,4 +7113,34 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get viewDocumentTooltip => 'معاينة المستند';
+
+  @override
+  String get switchWorkspace => 'تبديل النشاط / الخدمة';
+
+  @override
+  String get activeWorkspaceLabel => 'النشاط النشط حالياً';
+
+  @override
+  String get requestAdditionalService => 'إضافة نشاط أو خدمة جديدة';
+
+  @override
+  String get additionalServiceHint =>
+      'قدّم طلباً لتشغيل نشاط إضافي من نفس الحساب (يُفعّل فور موافقة الإدارة).';
+
+  @override
+  String get serviceDisplayName => 'اسم النشاط أو الخدمة';
+
+  @override
+  String get serviceRequestSubmitted =>
+      'تم إرسال الطلب! بانتظار موافقة الإدارة.';
+
+  @override
+  String get ownerAllModesUnlocked =>
+      'صلاحية المالك: جميع أنشطة المنصة مفتوحة للتقييم والإدارة';
+
+  @override
+  String get multiServiceRequestsTitle => 'طلبات تعدد الأنشطة والخدمات';
+
+  @override
+  String get noMultiServiceRequests => 'لا توجد طلبات تعدد أنشطة معلقة';
 }

@@ -2334,5 +2334,14 @@
   "writeReplyHint": "Write your reply to the customer…",
   "receivingAccountTitle": "Platform Receiving Account (Transfer To)",
   "copyAccountNumber": "Copy Account / Wallet Number",
-  "viewDocumentTooltip": "Preview Document"
+  "viewDocumentTooltip": "Preview Document",
+  "switchWorkspace": "Switch Service / Workspace",
+  "activeWorkspaceLabel": "Active Business Line",
+  "requestAdditionalService": "Add Another Business / Service",
+  "additionalServiceHint": "Apply to operate an additional service line under one account (requires Admin approval).",
+  "serviceDisplayName": "Business / Service Name",
+  "serviceRequestSubmitted": "Request sent! Awaiting Admin approval.",
+  "ownerAllModesUnlocked": "Owner Access: All Service Verticals Unlocked",
+  "multiServiceRequestsTitle": "Multi-Service Expansion Requests",
+  "noMultiServiceRequests": "No pending multi-service requests"
 }

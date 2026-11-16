@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import 'package:intl/intl.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:delwaqty/core/errors/app_error_text.dart';
 import 'package:delwaqty/features/provider/merchant/presentation/providers/merchant_providers.dart';
 import 'package:delwaqty/features/provider/merchant/merchant_module.dart';
 import 'package:delwaqty/features/provider/merchant/domain/entities/merchant_order.dart';
@@ -123,7 +125,7 @@ class _MerchantOrdersPageState extends ConsumerState<MerchantOrdersPage> {
                 return RefreshIndicator(
                   onRefresh: () async => ref.invalidate(_ordersProvider),
                   child: ListView.builder(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    padding: const EdgeInsets.fromLTRB(16, 8, 16, 110),
                     itemCount: orders.length,
                     itemBuilder: (context, index) {
                       final order = orders[index];
@@ -131,6 +133,30 @@ class _MerchantOrdersPageState extends ConsumerState<MerchantOrdersPage> {
                         delay: Duration(milliseconds: index * 50),
                         child: _OrderCard(
                           order: order,
+                          onDispatchDriver: () async {
+                            final messenger = ScaffoldMessenger.of(context);
+                            messenger.hideCurrentSnackBar();
+                            try {
+                              await Supabase.instance.client.rpc(
+                                'merchant_dispatch_order_driver',
+                                params: {'p_order_id': order.id},
+                              );
+                              ref.invalidate(_ordersProvider);
+                              messenger.showSnackBar(
+                                SnackBar(
+                                  content: Text(l10n.driverDispatchedSuccess),
+                                ),
+                              );
+                            } catch (e) {
+                              if (context.mounted) {
+                                messenger.showSnackBar(
+                                  SnackBar(
+                                    content: Text(appErrorText(context, e)),
+                                  ),
+                                );
+                              }
+                            }
+                          },
                           onStatusChanged: (status) async {
                             final repo = ref.read(
                               merchantDashboardRepositoryProvider,
@@ -141,16 +167,18 @@ class _MerchantOrdersPageState extends ConsumerState<MerchantOrdersPage> {
                               await repo.updateOrderStatus(order.id, status);
                               ref.invalidate(_ordersProvider);
                               messenger.showSnackBar(
-                                SnackBar(content: Text(l10n.updatedSuccessfully)),
-                              );
-                            } catch (e) {
-                              // Without this the failure was invisible and
-                              // the row kept its old state with no feedback.
-                              messenger.showSnackBar(
                                 SnackBar(
-                                  content: Text(l10n.somethingWentWrong),
+                                  content: Text(l10n.updatedSuccessfully),
                                 ),
                               );
+                            } catch (e) {
+                              if (context.mounted) {
+                                messenger.showSnackBar(
+                                  SnackBar(
+                                    content: Text(appErrorText(context, e)),
+                                  ),
+                                );
+                              }
                             }
                           },
                         ),
@@ -206,10 +234,29 @@ class _OrderCard extends StatelessWidget {
   const _OrderCard({
     required this.order,
     required this.onStatusChanged,
+    required this.onDispatchDriver,
   });
 
   final MerchantOrder order;
   final Function(String) onStatusChanged;
+  final VoidCallback onDispatchDriver;
+
+  Future<void> _callCustomer(String phone) async {
+    final cleaned = phone.replaceAll(RegExp(r'[^\d+]'), '');
+    if (cleaned.isEmpty) return;
+    final uri = Uri(scheme: 'tel', path: cleaned);
+    await launchUrl(uri, mode: LaunchMode.externalApplication);
+  }
+
+  Future<void> _whatsappCustomer(String phone) async {
+    var digits = phone.replaceAll(RegExp(r'\D'), '');
+    if (digits.startsWith('01') && digits.length == 11) {
+      digits = '2$digits';
+    }
+    if (digits.isEmpty) return;
+    final uri = Uri.parse('https://wa.me/$digits');
+    await launchUrl(uri, mode: LaunchMode.externalApplication);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -239,12 +286,22 @@ class _OrderCard extends StatelessWidget {
     };
 
     final itemsSummary = order.items
-        .map((item) => '${item.quantity}x ${item.productName}')
+        .map(
+          (item) =>
+              '${item.quantity}x ${item.productName}${item.modifiers.isNotEmpty ? ' (${item.modifiers.join(', ')})' : ''}',
+        )
         .join(', ');
     final formattedDate =
         DateFormat('yyyy-MM-dd HH:mm').format(order.createdAt.toLocal());
     final deliveryAddress = order.deliveryAddress?.trim() ?? '';
     final notes = order.notes?.trim() ?? '';
+    final customerPhone = order.customerPhone?.trim() ?? '';
+    final canDispatchDriver = const {
+      'confirmed',
+      'accepted',
+      'preparing',
+      'ready',
+    }.contains(order.status);
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
@@ -276,6 +333,18 @@ class _OrderCard extends StatelessWidget {
                       ],
                     ),
                   ),
+                  if (customerPhone.isNotEmpty) ...[
+                    IconButton(
+                      tooltip: l10n.callCustomer,
+                      icon: const Icon(Icons.phone_outlined, size: 20),
+                      onPressed: () => _callCustomer(customerPhone),
+                    ),
+                    IconButton(
+                      tooltip: l10n.whatsappCustomer,
+                      icon: const Icon(Icons.chat_bubble_outline, size: 20),
+                      onPressed: () => _whatsappCustomer(customerPhone),
+                    ),
+                  ],
                   Container(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 10,
@@ -301,8 +370,6 @@ class _OrderCard extends StatelessWidget {
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: theme.colorScheme.onSurfaceVariant,
                 ),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
               ),
               if (deliveryAddress.isNotEmpty) ...[
                 const SizedBox(height: 6),
@@ -347,6 +414,20 @@ class _OrderCard extends StatelessWidget {
                       ),
                     ),
                   ],
+                ),
+              ],
+              if (canDispatchDriver) ...[
+                const SizedBox(height: 10),
+                Align(
+                  alignment: AlignmentDirectional.centerStart,
+                  child: OutlinedButton.icon(
+                    onPressed: onDispatchDriver,
+                    icon: const Icon(
+                      Icons.delivery_dining_rounded,
+                      size: 18,
+                    ),
+                    label: Text(l10n.dispatchDeliveryDriver),
+                  ),
                 ),
               ],
               const SizedBox(height: 12),

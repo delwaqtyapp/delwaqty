@@ -2308,5 +2308,31 @@
   "orderCustomerPhone": "Customer Phone",
   "orderDeliveryAddress": "Delivery Address",
   "orderSpecialNotes": "Special Instructions",
-  "autoProvisionedStoreReady": "Your store profile is active and ready"
+  "autoProvisionedStoreReady": "Your store profile is active and ready",
+  "dispatchDeliveryDriver": "Dispatch Delivery Driver",
+  "driverDispatchedSuccess": "Delivery driver dispatch requested!",
+  "storeOpenStatus": "Store is Open & Receiving Orders",
+  "storeClosedStatus": "Store is Currently Closed",
+  "uploadStoreLogo": "Upload Store Logo",
+  "uploadStoreCover": "Upload Cover Photo",
+  "storeCategoryLabel": "Store / Service Category",
+  "serviceBookingsTitle": "Service Bookings",
+  "tableReservationsTitle": "Table Reservations",
+  "markSeated": "Mark Seated",
+  "markCompleted": "Mark Completed",
+  "guestsCount": "{count} guests",
+  "@guestsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "primaryBranchBadge": "Primary",
+  "branchDeleted": "Branch deleted",
+  "merchantReplyLabel": "Store Reply",
+  "writeReplyHint": "Write your reply to the customer…",
+  "receivingAccountTitle": "Platform Receiving Account (Transfer To)",
+  "copyAccountNumber": "Copy Account / Wallet Number",
+  "viewDocumentTooltip": "Preview Document"
 }

@@ -13,6 +13,13 @@ class SupabaseReviewDataSource {
   SupabaseReviewDataSource(this._client);
   final SupabaseClient _client;
 
+  DateTime? _parseDate(Object? value) {
+    if (value is String && value.isNotEmpty) {
+      return DateTime.tryParse(value);
+    }
+    return null;
+  }
+
   Review _fromRow(Map<String, dynamic> row) => Review(
     id: row['id'] as String,
     merchantId: row['merchant_id'] as String? ?? '',
@@ -22,21 +29,54 @@ class SupabaseReviewDataSource {
     orderId: row['order_id'] as String?,
     rating: (row['rating'] as num).toDouble(),
     comment: row['comment'] as String?,
+    merchantReply: row['merchant_reply'] as String?,
+    merchantRepliedAt: _parseDate(row['merchant_replied_at']),
     imageUrls: row['image_urls'] != null
         ? List<String>.from(row['image_urls'] as List)
         : [],
-    createdAt: row['created_at'] != null
-        ? DateTime.parse(row['created_at'] as String)
-        : null,
-    updatedAt: row['updated_at'] != null
-        ? DateTime.parse(row['updated_at'] as String)
-        : null,
+    createdAt: _parseDate(row['created_at']),
+    updatedAt: _parseDate(row['updated_at']),
   );
 
-  ReviewSummary _summaryFromAgg(Map<String, dynamic> row) {
-    final avg = (row['avg_rating'] as num?)?.toDouble() ?? 0.0;
-    final total = (row['total_reviews'] as num?)?.toInt() ?? 0;
-    return ReviewSummary(averageRating: avg, totalReviews: total);
+  ReviewSummary _summaryFromReviews(
+    List<Review> reviews, {
+    double? rpcAvg,
+    int? rpcTotal,
+  }) {
+    var five = 0;
+    var four = 0;
+    var three = 0;
+    var two = 0;
+    var one = 0;
+    for (final r in reviews) {
+      switch (r.rating.round()) {
+        case 5:
+          five++;
+        case 4:
+          four++;
+        case 3:
+          three++;
+        case 2:
+          two++;
+        default:
+          one++;
+      }
+    }
+    final avg = rpcAvg ??
+        (reviews.isEmpty
+            ? 0.0
+            : reviews.map((r) => r.rating).reduce((a, b) => a + b) /
+                reviews.length);
+    final total = rpcTotal ?? reviews.length;
+    return ReviewSummary(
+      averageRating: avg,
+      totalReviews: total,
+      fiveStarCount: five,
+      fourStarCount: four,
+      threeStarCount: three,
+      twoStarCount: two,
+      oneStarCount: one,
+    );
   }
 
   Future<List<Review>> getMerchantReviews(
@@ -163,30 +203,35 @@ class SupabaseReviewDataSource {
   }
 
   Future<ReviewSummary> getMerchantRatingSummary(String merchantId) async {
-    final data = await _client
-        .rpc(
-          'get_merchant_rating_summary',
-          params: {'p_merchant_id': merchantId},
-        )
-        .maybeSingle();
-    if (data != null) return _summaryFromAgg(data);
-    final reviews = await getMerchantReviews(merchantId);
-    if (reviews.isEmpty) {
-      return const ReviewSummary(averageRating: 0, totalReviews: 0);
+    Map<String, dynamic>? data;
+    try {
+      data = await _client
+          .rpc(
+            'get_merchant_rating_summary',
+            params: {'p_merchant_id': merchantId},
+          )
+          .maybeSingle();
+    } catch (_) {
+      data = null;
     }
-    final avg =
-        reviews.map((r) => r.rating).reduce((a, b) => a + b) / reviews.length;
-    return ReviewSummary(averageRating: avg, totalReviews: reviews.length);
+    List<Review> reviews = const [];
+    try {
+      reviews = await getMerchantReviews(merchantId);
+    } catch (_) {
+      reviews = const [];
+    }
+    if (data != null) {
+      final avg = (data['avg_rating'] as num?)?.toDouble() ?? 0.0;
+      final total =
+          (data['total_reviews'] as num?)?.toInt() ?? reviews.length;
+      return _summaryFromReviews(reviews, rpcAvg: avg, rpcTotal: total);
+    }
+    return _summaryFromReviews(reviews);
   }
 
   Future<ReviewSummary> getProductRatingSummary(String productId) async {
     final reviews = await getProductReviews(productId);
-    if (reviews.isEmpty) {
-      return const ReviewSummary(averageRating: 0, totalReviews: 0);
-    }
-    final avg =
-        reviews.map((r) => r.rating).reduce((a, b) => a + b) / reviews.length;
-    return ReviewSummary(averageRating: avg, totalReviews: reviews.length);
+    return _summaryFromReviews(reviews);
   }
 
   /// Emits the most recent review of a merchant, or null when the last

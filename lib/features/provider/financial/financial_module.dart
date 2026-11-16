@@ -5,13 +5,14 @@ import 'package:go_router/go_router.dart';
 import 'package:delwaqty/core/module/feature_module.dart';
 import 'package:delwaqty/features/provider/financial/presentation/pages/financial_center_page.dart';
 import 'package:delwaqty/features/provider/financial/presentation/pages/topup_request_page.dart';
+import 'package:delwaqty/l10n/app_localizations.dart';
 
 class FinancialModule extends FeatureModule {
   @override
   String get id => 'provider-financial';
 
   @override
-  String name(BuildContext context) => 'Financial Center';
+  String name(BuildContext context) => AppLocalizations.of(context).financialCenter;
 
   @override
   IconData? get icon => Icons.account_balance_wallet_outlined;

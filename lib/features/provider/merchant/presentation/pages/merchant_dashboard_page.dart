@@ -1,12 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:delwaqty/features/provider/merchant/presentation/providers/merchant_providers.dart';
 import 'package:go_router/go_router.dart';
 import 'package:delwaqty/core/extensions/context_extensions.dart';
+import 'package:delwaqty/core/errors/app_error_text.dart';
 import 'package:delwaqty/features/provider/merchant/merchant_module.dart';
 import 'package:delwaqty/features/provider/merchant/domain/entities/merchant_stats.dart';
 import 'package:delwaqty/features/provider/capability/presentation/providers/provider_capability_providers.dart';
 import 'package:delwaqty/features/provider/capability/domain/provider_capability.dart';
+import 'package:delwaqty/features/provider/availability/presentation/providers/provider_availability_providers.dart';
+import 'package:delwaqty/services/realtime/realtime_channel_constants.dart';
+import 'package:delwaqty/services/realtime/realtime_service.dart';
 import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
 import 'package:delwaqty/shared/widgets/premium_empty_state.dart';
 import 'package:delwaqty/shared/widgets/shimmer_loading.dart';
@@ -31,10 +36,68 @@ class MerchantDashboardPage extends ConsumerStatefulWidget {
 
 class _MerchantDashboardPageState
     extends ConsumerState<MerchantDashboardPage> {
+  static const _dashboardChannel =
+      '${RealtimeChannels.providerOrders}-dashboard';
+  bool _togglingOpen = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _subscribeRealtime();
+  }
+
+  Future<void> _subscribeRealtime() async {
+    try {
+      final merchantId = await ref.read(_merchantIdProvider.future);
+      if (!mounted || merchantId.isEmpty) return;
+      ref.read(realtimeServiceProvider).subscribe(
+            channelName: _dashboardChannel,
+            opts: [
+              RealtimeChannelFilter(
+                event: PostgresChangeEvent.all,
+                schema: 'public',
+                table: 'orders',
+                filter: PostgresChangeFilter(
+                  type: PostgresChangeFilterType.eq,
+                  column: 'merchant_id',
+                  value: merchantId,
+                ),
+                callback: (_) => ref.invalidate(_statsProvider),
+              ),
+            ],
+          );
+    } catch (_) {}
+  }
+
+  @override
+  void dispose() {
+    ref.read(realtimeServiceProvider).unsubscribe(_dashboardChannel);
+    super.dispose();
+  }
+
+  Future<void> _toggleStoreOpen(bool nextOpen) async {
+    if (_togglingOpen) return;
+    setState(() => _togglingOpen = true);
+    try {
+      await ref
+          .read(providerAvailabilityRepositoryProvider)
+          .setAvailability(nextOpen);
+      ref.invalidate(providerAvailabilityProvider);
+    } catch (e) {
+      if (mounted) {
+        context.showAppSnackBar(appErrorText(context, e), isError: true);
+      }
+    } finally {
+      if (mounted) setState(() => _togglingOpen = false);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final statsAsync = ref.watch(_statsProvider);
+    final availabilityAsync = ref.watch(providerAvailabilityProvider);
+    final isOpen = availabilityAsync.value?['is_open'] as bool? ?? true;
 
     return Scaffold(
       appBar: AppBar(
@@ -43,18 +106,76 @@ class _MerchantDashboardPageState
           IconButton(
             tooltip: l10n.refresh,
             icon: const Icon(Icons.refresh),
-            onPressed: () => ref.invalidate(_statsProvider),
+            onPressed: () {
+              ref.invalidate(_statsProvider);
+              ref.invalidate(providerAvailabilityProvider);
+            },
           ),
         ],
       ),
       body: RefreshIndicator(
-        onRefresh: () async => ref.invalidate(_statsProvider),
+        onRefresh: () async {
+          ref.invalidate(_statsProvider);
+          ref.invalidate(providerAvailabilityProvider);
+        },
         child: SingleChildScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 110),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              AnimatedFadeIn(
+                child: Card(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 12,
+                    ),
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 12,
+                          height: 12,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: isOpen
+                                ? AppColors.successLight
+                                : AppColors.warningLight,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                isOpen
+                                    ? l10n.storeOpenStatus
+                                    : l10n.storeClosedStatus,
+                                style: context.textTheme.titleSmall?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                l10n.autoProvisionedStoreReady,
+                                style: context.textTheme.bodySmall?.copyWith(
+                                  color: context.colorScheme.onSurfaceVariant,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Switch(
+                          value: isOpen,
+                          onChanged: _togglingOpen ? null : _toggleStoreOpen,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
               AnimatedFadeIn(
                 child: Text(
                   l10n.overview,

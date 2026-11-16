@@ -54,6 +54,18 @@ final providerRawCategoryProvider = FutureProvider<String>((ref) async {
     return sp['category_type'] as String;
   }
 
+  try {
+    final userRow = await client
+        .from('users')
+        .select('role')
+        .eq('id', uid)
+        .maybeSingle();
+    final role = (userRow?['role'] as String?)?.trim().toLowerCase();
+    if (role == 'provider') {
+      return 'home_services';
+    }
+  } catch (_) {}
+
   return 'unknown';
 });
 

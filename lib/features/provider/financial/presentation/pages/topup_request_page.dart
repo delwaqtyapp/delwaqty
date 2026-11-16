@@ -1,9 +1,11 @@
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:delwaqty/core/errors/app_error_text.dart';
 import 'package:delwaqty/features/provider/financial/presentation/providers/financial_providers.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 
@@ -107,16 +109,103 @@ class _TopupRequestPageState extends ConsumerState<TopupRequestPage> {
       );
       if (ok) {
         ref.invalidate(topupRequestsProvider);
+        ref.invalidate(financialSummaryProvider);
         if (mounted) context.pop();
       }
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.topUpRequestCreated('ERROR'))),
+        SnackBar(content: Text(appErrorText(context, e))),
       );
     } finally {
       if (mounted) setState(() => _submitting = false);
     }
+  }
+
+  Widget _buildReceivingAccountCard(AppLocalizations l10n) {
+    final receiverAsync = ref.watch(receiverProvider);
+    return receiverAsync.when(
+      loading: () => const SizedBox.shrink(),
+      error: (_, _) => const SizedBox.shrink(),
+      data: (data) {
+        final accountNumber =
+            (data['wallet_number'] ?? data['account_number'] ?? '')
+                .toString()
+                .trim();
+        final accountName =
+            (data['account_name'] ?? data['display_name'] ?? '')
+                .toString()
+                .trim();
+        final providerLabel = (data['provider'] ?? '').toString().trim();
+        final instructions = (data['instructions'] ?? '').toString().trim();
+        if (accountNumber.isEmpty && accountName.isEmpty) {
+          return const SizedBox.shrink();
+        }
+        return Card(
+          margin: const EdgeInsets.only(bottom: 16),
+          child: Padding(
+            padding: const EdgeInsets.all(14),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    const Icon(Icons.account_balance_rounded, size: 20),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        l10n.receivingAccountTitle,
+                        style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                if (accountName.isNotEmpty) Text(accountName),
+                if (providerLabel.isNotEmpty)
+                  Text(
+                    providerLabel,
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                if (accountNumber.isNotEmpty) ...[
+                  const SizedBox(height: 6),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: SelectableText(
+                          accountNumber,
+                          style: Theme.of(context).textTheme.titleMedium
+                              ?.copyWith(fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                      IconButton(
+                        tooltip: l10n.copyAccountNumber,
+                        icon: const Icon(Icons.copy_rounded, size: 20),
+                        onPressed: () {
+                          Clipboard.setData(ClipboardData(text: accountNumber));
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text(l10n.copyAccountNumber)),
+                          );
+                        },
+                      ),
+                    ],
+                  ),
+                ],
+                if (instructions.isNotEmpty) ...[
+                  const SizedBox(height: 4),
+                  Text(
+                    instructions,
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                ],
+              ],
+            ),
+          ),
+        );
+      },
+    );
   }
 
   @override
@@ -127,6 +216,7 @@ class _TopupRequestPageState extends ConsumerState<TopupRequestPage> {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
+          _buildReceivingAccountCard(l10n),
           TextField(
             controller: _amountController,
             keyboardType: TextInputType.number,

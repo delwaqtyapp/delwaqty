@@ -1,7 +1,11 @@
+import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:delwaqty/core/errors/app_error_text.dart';
 import 'package:delwaqty/core/theme/app_colors.dart';
 import 'package:delwaqty/features/provider/merchant/presentation/providers/merchant_providers.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
@@ -11,6 +15,7 @@ class StorefrontData {
   const StorefrontData({
     this.id = '',
     this.name = '',
+    this.type = 'restaurant',
     this.description,
     this.logoUrl,
     this.coverUrl,
@@ -26,6 +31,9 @@ class StorefrontData {
   factory StorefrontData.fromRow(Map<String, dynamic> row) => StorefrontData(
         id: row['id'] as String? ?? '',
         name: row['name'] as String? ?? '',
+        type: (row['type'] as String?)?.isNotEmpty == true
+            ? row['type'] as String
+            : 'restaurant',
         description: row['description'] as String?,
         logoUrl: row['logo_url'] as String?,
         coverUrl: row['cover_url'] as String?,
@@ -40,6 +48,7 @@ class StorefrontData {
 
   final String id;
   final String name;
+  final String type;
   final String? description;
   final String? logoUrl;
   final String? coverUrl;
@@ -89,7 +98,7 @@ final storefrontProvider = FutureProvider<StorefrontData>((ref) async {
   final row = await client
       .from('merchants')
       .select(
-        'id, name, description, logo_url, cover_url, phone, address, '
+        'id, name, type, description, logo_url, cover_url, phone, address, '
         'latitude, longitude, delivery_fee, min_order, delivery_time_min',
       )
       .eq('id', merchantId)
@@ -140,6 +149,7 @@ class StorefrontNotifier {
       'update_my_storefront',
       params: {
         'p_name': data.name,
+        'p_type': data.type,
         'p_description': data.description,
         'p_logo_url': data.logoUrl,
         'p_cover_url': data.coverUrl,
@@ -186,6 +196,18 @@ class MerchantStorefrontPage extends ConsumerStatefulWidget {
 
 class _MerchantStorefrontPageState
     extends ConsumerState<MerchantStorefrontPage> {
+  static const _storeCategories = <String>[
+    'restaurant',
+    'grocery',
+    'pharmacy',
+    'bakery',
+    'cafe',
+    'electronics',
+    'fashion',
+    'home_services',
+    'other',
+  ];
+
   final _formKey = GlobalKey<FormState>();
   final _name = TextEditingController();
   final _description = TextEditingController();
@@ -196,9 +218,11 @@ class _MerchantStorefrontPageState
   final _minOrder = TextEditingController();
   final _deliveryTime = TextEditingController();
 
+  String _storeType = 'restaurant';
   String? _coverUrl;
   double? _latitude;
   double? _longitude;
+  GoogleMapController? _mapController;
 
   List<WorkingHoursDay> _hours = List.generate(7, (i) => WorkingHoursDay(day: i));
   bool _hydrated = false;
@@ -206,6 +230,8 @@ class _MerchantStorefrontPageState
   bool _saving = false;
   bool _hoursDirty = false;
   bool _gettingGps = false;
+  bool _uploadingLogo = false;
+  bool _uploadingCover = false;
 
   @override
   void dispose() {
@@ -224,6 +250,8 @@ class _MerchantStorefrontPageState
     if (_hydrated) return;
     _hydrated = true;
     _name.text = data.name;
+    _storeType =
+        _storeCategories.contains(data.type) ? data.type : 'restaurant';
     _description.text = data.description ?? '';
     _phone.text = data.phone ?? '';
     _address.text = data.address ?? '';
@@ -237,6 +265,77 @@ class _MerchantStorefrontPageState
         data.deliveryTimeMin == null ? '' : '${data.deliveryTimeMin}';
   }
 
+  String _categoryLabel(AppLocalizations l10n, String category) {
+    switch (category) {
+      case 'restaurant':
+        return l10n.restaurant;
+      case 'grocery':
+        return l10n.grocery;
+      case 'pharmacy':
+        return l10n.pharmacy;
+      case 'bakery':
+        return l10n.bakery;
+      case 'cafe':
+        return l10n.cafe;
+      case 'electronics':
+        return l10n.electronics;
+      case 'fashion':
+        return l10n.fashion;
+      case 'home_services':
+        return l10n.homeServices;
+      default:
+        return l10n.other;
+    }
+  }
+
+  Future<void> _pickAndUploadPhoto({required bool isLogo}) async {
+    if (_uploadingLogo || _uploadingCover) return;
+    try {
+      final picker = ImagePicker();
+      final picked = await picker.pickImage(
+        source: ImageSource.gallery,
+        imageQuality: 85,
+      );
+      if (picked == null) return;
+      setState(() {
+        if (isLogo) {
+          _uploadingLogo = true;
+        } else {
+          _uploadingCover = true;
+        }
+      });
+      final bytes = await picked.readAsBytes();
+      final name = picked.name.isEmpty ? 'photo.jpg' : picked.name;
+      final client = ref.read(supabaseClientProvider);
+      final uid = client.auth.currentUser?.id ?? 'anon';
+      final path =
+          '$uid/storefront/${DateTime.now().millisecondsSinceEpoch}_$name';
+      await client.storage.from('profile-photos').uploadBinary(path, bytes);
+      final publicUrl =
+          client.storage.from('profile-photos').getPublicUrl(path);
+      if (!mounted) return;
+      setState(() {
+        if (isLogo) {
+          _logoUrl.text = publicUrl;
+        } else {
+          _coverUrl = publicUrl;
+        }
+      });
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(appErrorText(context, e))),
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _uploadingLogo = false;
+          _uploadingCover = false;
+        });
+      }
+    }
+  }
+
   Future<void> _useCurrentGps() async {
     if (_gettingGps) return;
     final l10n = AppLocalizations.of(context);
@@ -248,17 +347,22 @@ class _MerchantStorefrontPageState
       }
       final pos = await Geolocator.getCurrentPosition();
       if (!mounted) return;
+      final lat = pos.latitude;
+      final lng = pos.longitude;
       setState(() {
-        _latitude = pos.latitude;
-        _longitude = pos.longitude;
+        _latitude = lat;
+        _longitude = lng;
       });
+      _mapController?.animateCamera(
+        CameraUpdate.newLatLng(LatLng(lat, lng)),
+      );
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(l10n.storeCoordinatesSaved)),
       );
-    } catch (_) {
+    } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.somethingWentWrong)),
+        SnackBar(content: Text(appErrorText(context, e))),
       );
     } finally {
       if (mounted) setState(() => _gettingGps = false);
@@ -290,6 +394,7 @@ class _MerchantStorefrontPageState
             StorefrontData(
               id: _hydrated ? '' : '',
               name: _name.text.trim(),
+              type: _storeType,
               description: _description.text.trim().isEmpty
                   ? null
                   : _description.text.trim(),
@@ -321,7 +426,7 @@ class _MerchantStorefrontPageState
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.somethingWentWrong)),
+        SnackBar(content: Text(appErrorText(context, e))),
       );
     } finally {
       if (mounted) setState(() => _saving = false);
@@ -360,8 +465,98 @@ class _MerchantStorefrontPageState
               children: [
                 _SectionTitle(title: l10n.storeIdentity),
                 _field(_name, l10n.storeName, required: true),
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 12),
+                  child: DropdownButtonFormField<String>(
+                    initialValue: _storeType,
+                    decoration: InputDecoration(
+                      labelText: l10n.storeCategoryLabel,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    items: _storeCategories
+                        .map(
+                          (cat) => DropdownMenuItem<String>(
+                            value: cat,
+                            child: Text(_categoryLabel(l10n, cat)),
+                          ),
+                        )
+                        .toList(),
+                    onChanged: (v) {
+                      if (v != null) setState(() => _storeType = v);
+                    },
+                  ),
+                ),
                 _field(_description, l10n.description, maxLines: 3),
                 _field(_logoUrl, l10n.logoUrl, keyboard: TextInputType.url),
+                if (_logoUrl.text.trim().isNotEmpty)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 8),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(12),
+                      child: Image.network(
+                        _logoUrl.text.trim(),
+                        height: 96,
+                        width: 96,
+                        fit: BoxFit.cover,
+                        errorBuilder: (_, _, _) => const SizedBox.shrink(),
+                      ),
+                    ),
+                  ),
+                if (_coverUrl != null && _coverUrl!.isNotEmpty)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 8),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(12),
+                      child: Image.network(
+                        _coverUrl!,
+                        height: 120,
+                        width: double.infinity,
+                        fit: BoxFit.cover,
+                        errorBuilder: (_, _, _) => const SizedBox.shrink(),
+                      ),
+                    ),
+                  ),
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        onPressed: (_uploadingLogo || _uploadingCover)
+                            ? null
+                            : () => _pickAndUploadPhoto(isLogo: true),
+                        icon: _uploadingLogo
+                            ? const SizedBox(
+                                width: 16,
+                                height: 16,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                ),
+                              )
+                            : const Icon(Icons.add_photo_alternate_outlined),
+                        label: Text(l10n.uploadStoreLogo),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        onPressed: (_uploadingLogo || _uploadingCover)
+                            ? null
+                            : () => _pickAndUploadPhoto(isLogo: false),
+                        icon: _uploadingCover
+                            ? const SizedBox(
+                                width: 16,
+                                height: 16,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                ),
+                              )
+                            : const Icon(Icons.wallpaper_outlined),
+                        label: Text(l10n.uploadStoreCover),
+                      ),
+                    ),
+                  ],
+                ),
                 const SizedBox(height: 16),
                 _SectionTitle(title: l10n.contact),
                 _field(_phone, l10n.phone, keyboard: TextInputType.phone),
@@ -377,16 +572,31 @@ class _MerchantStorefrontPageState
                         target: mapTarget,
                         zoom: 14,
                       ),
+                      onMapCreated: (controller) {
+                        _mapController = controller;
+                      },
+                      gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
+                        const Factory<OneSequenceGestureRecognizer>(
+                          EagerGestureRecognizer.new,
+                        ),
+                      },
                       markers: {
                         Marker(
                           markerId: const MarkerId('store_location'),
                           position: mapTarget,
                         ),
                       },
-                      onTap: (pos) => setState(() {
-                        _latitude = pos.latitude;
-                        _longitude = pos.longitude;
-                      }),
+                      onTap: (pos) {
+                        final lat = pos.latitude;
+                        final lng = pos.longitude;
+                        setState(() {
+                          _latitude = lat;
+                          _longitude = lng;
+                        });
+                        _mapController?.animateCamera(
+                          CameraUpdate.newLatLng(LatLng(lat, lng)),
+                        );
+                      },
                       myLocationButtonEnabled: false,
                       zoomControlsEnabled: false,
                     ),
@@ -568,8 +778,8 @@ class _MerchantStorefrontPageState
     required ValueChanged<String> onChanged,
   }) {
     return TextFormField(
-      key: ValueKey(value),
-      initialValue: value,
+      readOnly: true,
+      controller: TextEditingController(text: value),
       keyboardType: TextInputType.datetime,
       decoration: InputDecoration(
         isDense: true,

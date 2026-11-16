@@ -145,7 +145,12 @@ class _ProviderVerificationPageState
               const SizedBox(height: 16),
               ListTile(
                 title: Text(l10n.idCard),
-                subtitle: Text(_idCardFile?.name ?? idCard ?? l10n.notUploaded),
+                subtitle: Text(
+                  _idCardFile?.name ??
+                      (idCard != null && idCard.isNotEmpty
+                          ? l10n.uploaded
+                          : l10n.notUploaded),
+                ),
                 trailing: TextButton(
                   onPressed: _busy ? null : () => _pick(true),
                   child: Text(l10n.choose),
@@ -153,7 +158,12 @@ class _ProviderVerificationPageState
               ),
               ListTile(
                 title: Text(l10n.profilePhoto),
-                subtitle: Text(_photoFile?.name ?? photo ?? l10n.notUploaded),
+                subtitle: Text(
+                  _photoFile?.name ??
+                      (photo != null && photo.isNotEmpty
+                          ? l10n.uploaded
+                          : l10n.notUploaded),
+                ),
                 trailing: TextButton(
                   onPressed: _busy ? null : () => _pick(false),
                   child: Text(l10n.choose),
@@ -169,8 +179,9 @@ class _ProviderVerificationPageState
                   ),
                 ),
               ElevatedButton(
-                onPressed:
-                    _busy || _submitted ? null : () => _submit(rejected),
+                onPressed: _busy || submitted || approved
+                    ? null
+                    : () => _submit(rejected),
                 child: _busy
                     ? const SizedBox(
                         height: 18,

@@ -168,8 +168,8 @@ class UserLocationNotifier extends AsyncNotifier<UserLocation?> {
     }
 
     final waitSeconds = deepPrecision && !_isUsableLastKnown(lastKnown)
-        ? 45
-        : 12;
+        ? 12
+        : 8;
     final precise = await _acquirePreciseFix(
       deepPrecision: deepPrecision,
       waitSeconds: waitSeconds,
@@ -197,7 +197,7 @@ class UserLocationNotifier extends AsyncNotifier<UserLocation?> {
   bool _isFreshAndPrecise(Position? position) {
     if (!_isFreshAndVerified(position)) return false;
     final accuracy = position!.accuracy;
-    return accuracy > 0 && accuracy <= 1;
+    return accuracy > 0 && accuracy <= 8.0;
   }
 
   bool _isUsableLastKnown(Position? position) {
@@ -215,8 +215,8 @@ class UserLocationNotifier extends AsyncNotifier<UserLocation?> {
     final completer = Completer<Position?>();
     Position? best;
     StreamSubscription<Position>? subscription;
-    final timeout = waitSeconds ?? (deepPrecision ? 45 : 12);
-    final targetMeters = deepPrecision ? 1.0 : 10.0;
+    final timeout = waitSeconds ?? (deepPrecision ? 12 : 8);
+    final targetMeters = deepPrecision ? 8.0 : 15.0;
     final timer = Timer(Duration(seconds: timeout), () {
       subscription?.cancel();
       if (!completer.isCompleted) completer.complete(best);

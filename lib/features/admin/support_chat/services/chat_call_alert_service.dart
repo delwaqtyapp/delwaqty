@@ -114,8 +114,7 @@ class ChatCallAlertService {
       // If this room is not already open, jump into it so the in-room
       // incoming-call sheet (accept/decline) is shown immediately.
       if (roomId.isNotEmpty && !_isRoomOpen(roomId)) {
-        _openRoom(roomId);
-        return;
+        if (_openRoom(roomId)) return;
       }
 
       final senderType = record['sender_type'] as String? ?? 'customer';
@@ -162,17 +161,19 @@ class ChatCallAlertService {
     }
   }
 
-  void _openRoom(String roomId) {
+  bool _openRoom(String roomId) {
     final ctx = _activeNavigatorContext();
-    if (ctx == null) return;
+    if (ctx == null) return false;
     final isAdminPanel = _ref.read(isAdminAppProvider);
     final path = isAdminPanel
         ? '/admin/support-chat/room/$roomId'
         : '/support/room/$roomId';
     try {
       GoRouter.of(ctx).push(path);
+      return true;
     } catch (e) {
       _logger.e('ChatCallAlert failed to open room $roomId', e);
+      return false;
     }
   }
 

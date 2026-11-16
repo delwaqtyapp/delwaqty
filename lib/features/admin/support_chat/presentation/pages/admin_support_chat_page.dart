@@ -218,53 +218,54 @@ class _AdminSupportChatPageState extends ConsumerState<AdminSupportChatPage> {
           top: 24,
           bottom: MediaQuery.of(sheetContext).viewInsets.bottom + 24,
         ),
-        child: Consumer(
-          builder: (context, ref, _) {
-            final notifier = ref.read(memberOpsProvider.notifier);
-            final members = ref.watch(memberOpsProvider);
-            // Map the DB role family onto the 4 chat-origin kinds.
-            final filtered = members
-                .where((m) => _roleMatches(r: m.role, f: roleFilter))
-                .toList();
-            return Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  l10n.selectRecipient,
-                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 12),
-                TextField(
-                  controller: controller,
-                  onChanged: (q) {
-                    notifier.setFilters({
-                      'search': q,
-                      'role': null,
-                      'sort': 'newest',
-                      'limit': 100,
-                    });
-                  },
-                  decoration: InputDecoration(
-                    hintText: '${l10n.search}…',
-                    prefixIcon: const Icon(Icons.search_rounded),
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+        child: StatefulBuilder(
+          builder: (modalContext, setModalState) => Consumer(
+            builder: (context, ref, _) {
+              final notifier = ref.read(memberOpsProvider.notifier);
+              final members = ref.watch(memberOpsProvider);
+              // Map the DB role family onto the 4 chat-origin kinds.
+              final filtered = members
+                  .where((m) => _roleMatches(r: m.role, f: roleFilter))
+                  .toList();
+              return Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    l10n.selectRecipient,
+                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
-                ),
-                const SizedBox(height: 8),
-                Wrap(
-                  spacing: 8,
-                  children: ['admin', 'provider', 'driver', 'customer']
-                      .map((role) => ChoiceChip(
-                            label: Text(_roleChipLabel(role, l10n)),
-                            selected: roleFilter == role,
-                            onSelected: (sel) {
-                              setState(() => roleFilter = sel ? role : null);
-                            },
-                          ))
-                      .toList(),
-                ),
+                  const SizedBox(height: 12),
+                  TextField(
+                    controller: controller,
+                    onChanged: (q) {
+                      notifier.setFilters({
+                        'search': q,
+                        'role': null,
+                        'sort': 'newest',
+                        'limit': 100,
+                      });
+                    },
+                    decoration: InputDecoration(
+                      hintText: '${l10n.search}…',
+                      prefixIcon: const Icon(Icons.search_rounded),
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Wrap(
+                    spacing: 8,
+                    children: ['admin', 'provider', 'driver', 'customer']
+                        .map((role) => ChoiceChip(
+                              label: Text(_roleChipLabel(role, l10n)),
+                              selected: roleFilter == role,
+                              onSelected: (sel) {
+                                setModalState(() => roleFilter = sel ? role : null);
+                              },
+                            ))
+                        .toList(),
+                  ),
                 const SizedBox(height: 8),
                 Flexible(
                   child: filtered.isEmpty
@@ -294,7 +295,8 @@ class _AdminSupportChatPageState extends ConsumerState<AdminSupportChatPage> {
                 ),
               ],
             );
-          },
+            },
+          ),
         ),
       ),
     ).then((value) => selected = value);

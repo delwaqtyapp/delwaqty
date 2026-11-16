@@ -314,7 +314,7 @@ class _FloatingSidebarOverlayState extends State<FloatingSidebarOverlay>
                                     isSelected: _selectedIndex == 14,
                                     onTap: () {
                                       setState(() => _selectedIndex = 14);
-                                      _navigate('/support');
+                                      _navigate('/admin/support-chat');
                                     },
                                   ),
                                   SidebarItem(

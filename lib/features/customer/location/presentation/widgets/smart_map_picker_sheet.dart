@@ -134,7 +134,7 @@ class _SmartMapPickerSheetState extends ConsumerState<SmartMapPickerSheet> {
       final suggestions = await places.autocomplete(
         query: query,
         languageCode: lang,
-        origin: GeoPoint(latitude: _center.latitude, longitude: _center.longitude),
+        origin: GeoPoint(_center.latitude, _center.longitude),
         session: _searchSession,
       );
       for (final s in suggestions.take(5)) {

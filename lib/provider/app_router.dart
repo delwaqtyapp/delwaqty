@@ -33,12 +33,11 @@ final providerGoRouterProvider = Provider<GoRouter>((ref) {
     redirect: (context, state) {
       final authState = ref.read(authStateProvider);
       final isAuth = authState is AuthAuthenticated;
-      final isGuest = authState is AuthGuest;
       final isPendingVerification =
           authState is AuthEmailConfirmationRequired ||
           authState is AuthPhoneVerification;
       final isVerificationPending = authState is AuthPendingVerification;
-      final canAccess = isAuth || isGuest || isVerificationPending;
+      final canAccess = isAuth || isVerificationPending;
 
       final isSplash = state.matchedLocation == '/splash';
       final isOnboarding = state.matchedLocation == '/onboarding';

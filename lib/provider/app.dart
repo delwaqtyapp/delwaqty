@@ -109,7 +109,7 @@ class _ProviderAppState extends ConsumerState<ProviderApp> {
     final locale = ref.watch(localeProvider);
 
     return MaterialApp.router(
-      title: 'Delwaqty Provider',
+      onGenerateTitle: (ctx) => AppLocalizations.of(ctx).appTitle,
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme(),
       darkTheme: AppTheme.darkTheme(),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:delwaqty/core/config/app_mode_provider.dart';
 import 'package:delwaqty/core/extensions/context_extensions.dart';
 import 'package:delwaqty/core/localization/locale_provider.dart';
 import 'package:delwaqty/core/theme/app_colors.dart';
@@ -66,7 +67,7 @@ class ProfilePage extends ConsumerWidget {
             const SizedBox(height: 16),
             AnimatedFadeIn(
               delay: const Duration(milliseconds: 160),
-              child: _buildOrdersAndInvoicesSection(context, l10n),
+              child: _buildOrdersAndInvoicesSection(context, ref, l10n),
             ),
             const SizedBox(height: 16),
             AnimatedFadeIn(
@@ -581,6 +582,7 @@ class ProfilePage extends ConsumerWidget {
     WidgetRef ref,
     AppLocalizations l10n,
   ) {
+    final isProvider = ref.watch(appFlavorProvider) == AppFlavor.provider;
     return _SectionCard(
       title: l10n.account,
       children: [
@@ -590,19 +592,34 @@ class ProfilePage extends ConsumerWidget {
           title: l10n.privacySecurity,
           onTap: () => context.push('/settings/privacy-security'),
         ),
-        _SectionTile(
-          icon: Icons.account_balance_wallet_outlined,
-          color: AppColors.orderReady,
-          title: l10n.wallet,
-          onTap: () => context.push('/wallet'),
-        ),
-        _SectionTile(
-          icon: Icons.card_giftcard_rounded,
-          color: AppColors.brandViolet,
-          title: l10n.rewards,
-          subtitle: l10n.rewardsHint,
-          onTap: () => context.push('/rewards'),
-        ),
+        if (isProvider) ...[
+          _SectionTile(
+            icon: Icons.account_balance_wallet_outlined,
+            color: AppColors.orderReady,
+            title: l10n.financialCenter,
+            onTap: () => context.push('/provider-financial-center'),
+          ),
+          _SectionTile(
+            icon: Icons.schedule_rounded,
+            color: AppColors.brandViolet,
+            title: l10n.availability,
+            onTap: () => context.push('/provider-availability'),
+          ),
+        ] else ...[
+          _SectionTile(
+            icon: Icons.account_balance_wallet_outlined,
+            color: AppColors.orderReady,
+            title: l10n.wallet,
+            onTap: () => context.push('/wallet'),
+          ),
+          _SectionTile(
+            icon: Icons.card_giftcard_rounded,
+            color: AppColors.brandViolet,
+            title: l10n.rewards,
+            subtitle: l10n.rewardsHint,
+            onTap: () => context.push('/rewards'),
+          ),
+        ],
         _SectionTile(
           icon: Icons.notifications_outlined,
           color: AppColors.infoLight,
@@ -657,19 +674,36 @@ class ProfilePage extends ConsumerWidget {
 
   Widget _buildOrdersAndInvoicesSection(
     BuildContext context,
+    WidgetRef ref,
     AppLocalizations l10n,
   ) {
+    final isProvider = ref.watch(appFlavorProvider) == AppFlavor.provider;
     return _SectionCard(
-      title: l10n.orders,
-      children: [
-        _SectionTile(
-          icon: Icons.history_rounded,
-          color: AppColors.brandPurple,
-          title: l10n.previousOrders,
-          subtitle: l10n.orderHistory,
-          onTap: () => context.push('/market/orders'),
-        ),
-      ],
+      title: isProvider ? l10n.storefront : l10n.orders,
+      children: isProvider
+          ? [
+              _SectionTile(
+                icon: Icons.receipt_long_rounded,
+                color: AppColors.brandPurple,
+                title: l10n.viewOrders,
+                onTap: () => context.push('/merchant-dashboard/orders'),
+              ),
+              _SectionTile(
+                icon: Icons.storefront_outlined,
+                color: AppColors.successLight,
+                title: l10n.storefront,
+                onTap: () => context.push('/merchant-dashboard/storefront'),
+              ),
+            ]
+          : [
+              _SectionTile(
+                icon: Icons.history_rounded,
+                color: AppColors.brandPurple,
+                title: l10n.previousOrders,
+                subtitle: l10n.orderHistory,
+                onTap: () => context.push('/market/orders'),
+              ),
+            ],
     );
   }
 

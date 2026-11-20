@@ -64,7 +64,7 @@ class SupabaseDriverPlatformDataSource {
     return Vehicle(
       id: row['id'] as String,
       driverId: row['driver_id'] as String,
-      category: row['category'] as String? ?? 'economy',
+      category: row['category'] as String? ?? 'motorcycle',
       make: row['make'] as String?,
       model: row['model'] as String?,
       year: row['year'] as int?,

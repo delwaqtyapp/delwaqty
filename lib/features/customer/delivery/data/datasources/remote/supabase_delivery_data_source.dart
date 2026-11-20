@@ -86,7 +86,7 @@ class SupabaseDeliveryDataSource {
   RideOffer _offerFromRow(Map<String, dynamic> req, Map<String, dynamic> ride) {
     final rideType = RideType.values.firstWhere(
       (t) => t.name == (ride['ride_type'] as String?),
-      orElse: () => RideType.economy,
+      orElse: () => RideType.motorcycle,
     );
     return RideOffer(
       requestId: req['id'] as String,
@@ -128,7 +128,7 @@ class SupabaseDeliveryDataSource {
         .insert({
           'rider_id': riderId,
           'service_type': 'courier',
-          'ride_type': 'economy',
+          'ride_type': 'motorcycle',
           'status': 'searching',
           'pickup_latitude': pickupLatitude,
           'pickup_longitude': pickupLongitude,

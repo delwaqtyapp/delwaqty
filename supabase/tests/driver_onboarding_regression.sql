@@ -7,7 +7,7 @@ BEGIN
  INSERT INTO public.users(id,email,role,role_key) VALUES(u,u::text||'@example.invalid','customer',NULL),(admin_uid,admin_uid::text||'@example.invalid','owner','owner') ON CONFLICT(id) DO UPDATE SET role=excluded.role,role_key=excluded.role_key;
  PERFORM set_config('request.jwt.claim.sub',u::text,true);
  PERFORM set_config('role','authenticated',true);
- a:=public.driver_complete_registration('Synthetic driver',NULL,'motorbike','AUDIT',NULL);
+ a:=public.driver_complete_registration('Synthetic driver',NULL,'motorcycle','AUDIT',NULL);
  PERFORM set_config('role','none',true);
  d:=(a->>'driver_id')::uuid;v:=(a->>'vehicle_id')::uuid;
  IF d IS NULL THEN RAISE EXCEPTION 'registration failed: %',a; END IF;
@@ -23,6 +23,18 @@ BEGIN
   RAISE EXCEPTION 'vehicle self-approval allowed';
  EXCEPTION WHEN raise_exception THEN
   IF SQLERRM='vehicle self-approval allowed' THEN RAISE; END IF;
+ END;
+ PERFORM set_config('role','none',true);
+ PERFORM set_config('role','authenticated',true);
+ FOREACH p IN ARRAY ARRAY['motorcycle','tuk_tuk','tricycle','car'] LOOP
+  a:=public.add_driver_vehicle(d,p,NULL,NULL,NULL,NULL,'AUDIT-'||p,1,NULL);
+  IF a->>'success' <> 'true' THEN RAISE EXCEPTION 'fleet type rejected: % %',p,a; END IF;
+ END LOOP;
+ BEGIN
+  a:=public.add_driver_vehicle(d,'bicycle',NULL,NULL,NULL,NULL,'INVALID',1,NULL);
+  RAISE EXCEPTION 'unsupported fleet type allowed';
+ EXCEPTION WHEN raise_exception THEN
+  IF SQLERRM='unsupported fleet type allowed' THEN RAISE; END IF;
  END;
  PERFORM set_config('role','none',true);
  -- Metadata-only fixtures: no file is uploaded and every row rolls back.
@@ -51,12 +63,12 @@ BEGIN
  IF NOT EXISTS(SELECT 1 FROM public.drivers WHERE id=d AND is_verified) THEN RAISE EXCEPTION 'driver not verified'; END IF;
  PERFORM set_config('request.jwt.claim.sub',u::text,true);
  PERFORM set_config('role','authenticated',true);
- a:=public.driver_complete_registration('Edited driver',NULL,'motorbike','AUDIT',NULL);
+ a:=public.driver_complete_registration('Edited driver',NULL,'motorcycle','AUDIT',NULL);
  PERFORM set_config('role','none',true);
  IF NOT EXISTS(SELECT 1 FROM public.drivers WHERE id=d AND is_verified) THEN RAISE EXCEPTION 'edit removed admin decision'; END IF;
  UPDATE public.drivers SET is_verified=false,verification_status='rejected' WHERE id=d;
  PERFORM set_config('role','authenticated',true);
- a:=public.driver_complete_registration('Edited rejected driver',NULL,'motorbike','AUDIT',NULL);
+ a:=public.driver_complete_registration('Edited rejected driver',NULL,'motorcycle','AUDIT',NULL);
  PERFORM set_config('role','none',true);
  IF EXISTS(SELECT 1 FROM public.drivers WHERE id=d AND is_verified) THEN RAISE EXCEPTION 'edit bypassed rejection'; END IF;
 END $$;

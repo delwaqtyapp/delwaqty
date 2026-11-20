@@ -11,7 +11,7 @@ BEGIN
  INSERT INTO public.users(id,email) VALUES(u,u::text||'@example.invalid'),(m_user,m_user::text||'@example.invalid'),(c,c::text||'@example.invalid') ON CONFLICT(id) DO NOTHING;
  INSERT INTO public.drivers(id,user_id,full_name,status,is_verified,is_active,accepts_deliveries,current_latitude,current_longitude)
  VALUES(d,u,'Synthetic audit driver','online',true,true,true,30,31);
- INSERT INTO public.vehicles(id,driver_id,category,plate_number,is_active) VALUES(v,d,'motorbike','AUDIT-ONLY',true);
+ INSERT INTO public.vehicles(id,driver_id,category,plate_number,is_active) VALUES(v,d,'motorcycle','AUDIT-ONLY',true);
  UPDATE public.drivers SET active_vehicle_id=v WHERE id=d;
  INSERT INTO public.merchants(id,name,owner_user_id,latitude,longitude) VALUES(m,'Synthetic audit merchant',m_user,30,31);
  INSERT INTO public.orders(id,user_id,merchant_id,subtotal,total_amount,delivery_fee,delivery_latitude,delivery_longitude,payment_method)

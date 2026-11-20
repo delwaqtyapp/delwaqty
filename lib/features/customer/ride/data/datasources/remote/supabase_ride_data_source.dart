@@ -27,7 +27,7 @@ class SupabaseRideDataSource {
     final typeStr = row['ride_type'] as String? ?? 'economy';
     final rideType = RideType.values.firstWhere(
       (t) => t.name == typeStr,
-      orElse: () => RideType.economy,
+      orElse: () => RideType.motorcycle,
     );
     return Ride(
       id: row['id'] as String,

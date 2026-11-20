@@ -50,7 +50,7 @@ void main() {
       requestId: 'req',
       rideId: 'ride',
       driverId: 'drv',
-      rideType: RideType.economy,
+      rideType: RideType.motorcycle,
       pickupLatitude: 30.0,
       pickupLongitude: 31.0,
       pickupAddress: 'A',

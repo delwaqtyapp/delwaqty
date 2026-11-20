@@ -20,19 +20,26 @@ class DeepLinkResolver {
   const DeepLinkResolver();
 
   static const String _scheme = 'io.delwaqty';
+
+  /// The admin flavor owns its own scheme (see its AndroidManifest).
+  static const String _adminScheme = 'io.delwaqty.admin';
   static const String _callbackHost = 'login-callback';
 
   /// Classifies [uri] into a [DeepLinkRoute] or `null` when the URI is not a
   /// Delwaqty deep link.
   ///
   /// Allowlist rules:
-  ///   * scheme must be exactly `io.delwaqty`
+  ///   * scheme must be exactly `io.delwaqty` (customer/driver/provider) or
+  ///     `io.delwaqty.admin` (admin flavor)
   ///   * host `login-callback` -> [DeepLinkRoute.loginCallback]
   ///   * unknown hosts are rejected (never trust arbitrary URIs).
   static DeepLinkRoute? resolve(String value) {
     final uri = Uri.tryParse(value);
     if (uri == null) return null;
-    if (!uri.hasScheme || uri.scheme != _scheme) return null;
+    if (!uri.hasScheme ||
+        (uri.scheme != _scheme && uri.scheme != _adminScheme)) {
+      return null;
+    }
     if (!uri.hasAuthority) return null;
     return switch (uri.host) {
       _callbackHost => DeepLinkRoute.loginCallback,

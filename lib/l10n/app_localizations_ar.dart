@@ -7433,4 +7433,17 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get signedAmountHint => 'استخدم قيمة سالبة للخصم (مثال: -750)';
+
+  @override
+  String get reviewDriverDocuments => 'مراجعة مستندات السائق';
+
+  @override
+  String get driverDocumentsReviewed => 'راجعت الرخصة ومستند ترخيص المركبة';
+
+  @override
+  String get driverRequiredDocuments =>
+      'ارفع رخصة القيادة وترخيص المركبة قبل إرسال الطلب. لازم تبدل أي مستند مرفوض أو منتهي.';
+
+  @override
+  String get driverActiveVehicleRequired => 'أضف مركبة نشطة قبل إرسال طلبك.';
 }

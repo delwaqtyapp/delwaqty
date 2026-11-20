@@ -2489,5 +2489,9 @@
   "signedAmountHint": "Use a negative amount to debit (e.g. -750)",
   "@signedAmountHint": {
     "description": "Owner wallet adjustment dialog"
-  }
+  },
+  "reviewDriverDocuments": "Review driver documents",
+  "driverDocumentsReviewed": "I reviewed both required documents",
+  "driverRequiredDocuments": "Upload a driving license and vehicle registration before submitting. Rejected or expired documents must be replaced.",
+  "driverActiveVehicleRequired": "Add an active vehicle before submitting your application."
 }

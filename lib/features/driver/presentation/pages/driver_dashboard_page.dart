@@ -85,8 +85,7 @@ class DriverDashboardPage extends ConsumerWidget {
               return _RegistrationPrompt(userId: userId);
             }
             if (!profile.onboardingCompleted &&
-                profile.verificationStatus == 'pending' &&
-                profile.vehicleType == null) {
+                profile.verificationStatus != 'verified') {
               return _buildOnboardingPrompt(context, profile.id);
             }
             return _buildDashboard(context, ref, profile);

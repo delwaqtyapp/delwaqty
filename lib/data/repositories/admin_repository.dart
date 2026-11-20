@@ -1,3 +1,4 @@
+import 'package:delwaqty/core/utils/rpc_result.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:delwaqty/features/admin/domain/entities/admin_models.dart';
 import 'package:delwaqty/features/admin/domain/repositories/admin_repository.dart'
@@ -242,14 +243,17 @@ class AdminRepository implements admin.AdminRepository {
     required bool isVerified,
   }) async {
     try {
-      await _supabase
-          .from('drivers')
-          .update({
-            'is_verified': isVerified,
-            'verification_status': isVerified ? 'verified' : 'rejected',
-            'updated_at': DateTime.now().toIso8601String(),
-          })
-          .eq('id', driverId);
+      checkedRpcResult(
+        await _supabase.rpc(
+          'review_driver_application',
+          params: {
+            'p_driver_id': driverId,
+            'p_approve': isVerified,
+            'p_reason': isVerified ? null : 'Rejected after document review',
+          },
+        ),
+        onFailure: AdminException.new,
+      );
     } catch (e) {
       throw AdminException('Failed to verify driver: $e');
     }

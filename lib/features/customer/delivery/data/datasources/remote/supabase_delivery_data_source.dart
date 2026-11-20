@@ -1,3 +1,4 @@
+import 'package:delwaqty/core/utils/rpc_result.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:delwaqty/services/supabase/supabase_service.dart';
@@ -20,13 +21,8 @@ class SupabaseDeliveryDataSource {
 
   final SupabaseClient _client;
 
-  Map<String, dynamic> _checkRpc(dynamic data) {
-    final map = Map<String, dynamic>.from(data as Map);
-    if (map['success'] == false) {
-      throw DeliveryException(map['reason'] as String? ?? 'unknown');
-    }
-    return map;
-  }
+  Map<String, dynamic> _checkRpc(dynamic data) =>
+      checkedRpcResult(data, onFailure: DeliveryException.new);
 
   DeliveryOrder _deliveryFromRow(Map<String, dynamic> row) {
     return DeliveryOrder(

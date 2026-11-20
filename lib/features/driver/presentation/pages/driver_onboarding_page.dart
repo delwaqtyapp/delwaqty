@@ -1,3 +1,6 @@
+import 'package:delwaqty/core/utils/rpc_result.dart';
+import 'package:delwaqty/features/driver/data/datasources/remote/supabase_driver_platform_data_source.dart';
+
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -31,7 +34,10 @@ class _DriverOnboardingPageState extends ConsumerState<DriverOnboardingPage> {
   }
 
   Future<void> _pickLicenseImage() async {
-    final pickedFile = await FilePicker.pickFile(type: FileType.image);
+    final pickedFile = await FilePicker.pickFile(
+      type: FileType.custom,
+      allowedExtensions: ['jpg', 'jpeg', 'png', 'webp'],
+    );
 
     if (pickedFile != null && pickedFile.path != null) {
       setState(() => _licenseImage = File(pickedFile.path!));
@@ -40,7 +46,10 @@ class _DriverOnboardingPageState extends ConsumerState<DriverOnboardingPage> {
   }
 
   Future<void> _pickVehicleImage() async {
-    final pickedFile = await FilePicker.pickFile(type: FileType.image);
+    final pickedFile = await FilePicker.pickFile(
+      type: FileType.custom,
+      allowedExtensions: ['jpg', 'jpeg', 'png', 'webp'],
+    );
 
     if (pickedFile != null && pickedFile.path != null) {
       setState(() => _vehicleImage = File(pickedFile.path!));
@@ -69,19 +78,26 @@ class _DriverOnboardingPageState extends ConsumerState<DriverOnboardingPage> {
       }
       // Storage RLS requires the SECOND path segment to be the driver id
       // (064_driver_documents.sql), so the key is <folder>/<drivers.id>/…
+      final extension = _licenseImage!.path.split('.').last.toLowerCase();
       final fileName =
-          'driver_licenses/$driverId/${DateTime.now().millisecondsSinceEpoch}.jpg';
+          'driver_licenses/$driverId/${DateTime.now().millisecondsSinceEpoch}.$extension';
       final fileBytes = await _licenseImage!.readAsBytes();
       await _supabase.storage
           .from('driver-documents')
-          .uploadBinary(fileName, fileBytes);
-      // The bucket is PRIVATE, so a public URL cannot be read by anyone;
-      // store a signed URL that the admin console can open.
-      final fileUrl = await _supabase.storage
-          .from('driver-documents')
-          .createSignedUrl(fileName, 3600);
+          .uploadBinary(
+            fileName,
+            fileBytes,
+            fileOptions: FileOptions(
+              contentType: extension == 'png'
+                  ? 'image/png'
+                  : extension == 'webp'
+                  ? 'image/webp'
+                  : 'image/jpeg',
+            ),
+          );
+      final fileUrl = fileName;
 
-      await _supabase.rpc(
+      final result = await _supabase.rpc(
         'upsert_driver_document',
         params: {
           'p_driver_id': driverId,
@@ -92,6 +108,7 @@ class _DriverOnboardingPageState extends ConsumerState<DriverOnboardingPage> {
           'p_expires_at': null,
         },
       );
+      checkedRpcResult(result, onFailure: DriverPlatformException.new);
 
       if (mounted) {
         setState(() {
@@ -103,8 +120,19 @@ class _DriverOnboardingPageState extends ConsumerState<DriverOnboardingPage> {
     } catch (e) {
       if (mounted) {
         setState(() => _licenseError = appErrorText(context, e));
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text(appErrorText(context, e))));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              e is DriverPlatformException &&
+                      e.reason == 'REQUIRED_DOCUMENTS_MISSING'
+                  ? l10n.driverRequiredDocuments
+                  : e is DriverPlatformException &&
+                        e.reason == 'ACTIVE_VEHICLE_REQUIRED'
+                  ? l10n.driverActiveVehicleRequired
+                  : appErrorText(context, e),
+            ),
+          ),
+        );
       }
     } finally {
       if (mounted) setState(() => _isUploading = false);
@@ -132,19 +160,28 @@ class _DriverOnboardingPageState extends ConsumerState<DriverOnboardingPage> {
       }
       // Storage RLS requires the SECOND path segment to be the driver id
       // (064_driver_documents.sql), so the key is <folder>/<drivers.id>/…
+      final extension = _vehicleImage!.path.split('.').last.toLowerCase();
       final fileName =
-          'driver_vehicles/$driverId/${DateTime.now().millisecondsSinceEpoch}.jpg';
+          'driver_vehicles/$driverId/${DateTime.now().millisecondsSinceEpoch}.$extension';
       final fileBytes = await _vehicleImage!.readAsBytes();
       await _supabase.storage
           .from('driver-documents')
-          .uploadBinary(fileName, fileBytes);
+          .uploadBinary(
+            fileName,
+            fileBytes,
+            fileOptions: FileOptions(
+              contentType: extension == 'png'
+                  ? 'image/png'
+                  : extension == 'webp'
+                  ? 'image/webp'
+                  : 'image/jpeg',
+            ),
+          );
       // The bucket is PRIVATE, so a public URL cannot be read by anyone;
       // store a signed URL that the admin console can open.
-      final fileUrl = await _supabase.storage
-          .from('driver-documents')
-          .createSignedUrl(fileName, 3600);
+      final fileUrl = fileName;
 
-      await _supabase.rpc(
+      final result = await _supabase.rpc(
         'upsert_driver_document',
         params: {
           'p_driver_id': driverId,
@@ -155,6 +192,7 @@ class _DriverOnboardingPageState extends ConsumerState<DriverOnboardingPage> {
           'p_expires_at': null,
         },
       );
+      checkedRpcResult(result, onFailure: DriverPlatformException.new);
 
       if (mounted) {
         setState(() {
@@ -166,8 +204,19 @@ class _DriverOnboardingPageState extends ConsumerState<DriverOnboardingPage> {
     } catch (e) {
       if (mounted) {
         setState(() => _vehicleError = appErrorText(context, e));
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text(appErrorText(context, e))));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              e is DriverPlatformException &&
+                      e.reason == 'REQUIRED_DOCUMENTS_MISSING'
+                  ? l10n.driverRequiredDocuments
+                  : e is DriverPlatformException &&
+                        e.reason == 'ACTIVE_VEHICLE_REQUIRED'
+                  ? l10n.driverActiveVehicleRequired
+                  : appErrorText(context, e),
+            ),
+          ),
+        );
       }
     } finally {
       if (mounted) setState(() => _isUploading = false);
@@ -189,10 +238,9 @@ class _DriverOnboardingPageState extends ConsumerState<DriverOnboardingPage> {
     try {
       final profile = await ref.read(driverProfileProvider(authId).future);
       final driverId = profile?.id;
-      if (driverId != null) {
-        await ref.read(driverRepositoryProvider).completeOnboarding(driverId);
-        ref.invalidate(driverProfileProvider(authId));
-      }
+      if (driverId == null) throw StateError('Driver profile not found');
+      await ref.read(driverRepositoryProvider).completeOnboarding(driverId);
+      ref.invalidate(driverProfileProvider(authId));
       if (!mounted) return;
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text(l10n.onboardingCompleted)));
@@ -204,8 +252,19 @@ class _DriverOnboardingPageState extends ConsumerState<DriverOnboardingPage> {
     } catch (e) {
       if (!mounted) return;
       setState(() => _isUploading = false);
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text(appErrorText(context, e))));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            e is DriverPlatformException &&
+                    e.reason == 'REQUIRED_DOCUMENTS_MISSING'
+                ? l10n.driverRequiredDocuments
+                : e is DriverPlatformException &&
+                      e.reason == 'ACTIVE_VEHICLE_REQUIRED'
+                ? l10n.driverActiveVehicleRequired
+                : appErrorText(context, e),
+          ),
+        ),
+      );
     }
   }
 
@@ -256,6 +315,12 @@ class _DriverOnboardingPageState extends ConsumerState<DriverOnboardingPage> {
               _vehicleError,
               _pickVehicleImage,
               _uploadVehicle,
+            ),
+            const SizedBox(height: 16),
+            OutlinedButton.icon(
+              onPressed: () => context.push('/driver/vehicles'),
+              icon: const Icon(Icons.two_wheeler_rounded),
+              label: Text(l10n.vehicleManagement),
             ),
             const SizedBox(height: 40),
             if (_isUploading)

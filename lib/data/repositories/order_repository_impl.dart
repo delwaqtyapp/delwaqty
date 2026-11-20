@@ -45,6 +45,8 @@ class OrderRepositoryImpl implements OrderRepository {
     required double discount,
     required double total,
     String? deliveryAddress,
+    double? deliveryLatitude,
+    double? deliveryLongitude,
     String? paymentMethod,
     String? specialInstructions,
   }) async {
@@ -58,6 +60,8 @@ class OrderRepositoryImpl implements OrderRepository {
         discount: discount,
         total: total,
         deliveryAddress: deliveryAddress,
+        deliveryLatitude: deliveryLatitude,
+        deliveryLongitude: deliveryLongitude,
         paymentMethod: paymentMethod,
         specialInstructions: specialInstructions,
       );

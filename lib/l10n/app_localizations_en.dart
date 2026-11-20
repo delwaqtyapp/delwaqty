@@ -7490,4 +7490,18 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get signedAmountHint => 'Use a negative amount to debit (e.g. -750)';
+
+  @override
+  String get reviewDriverDocuments => 'Review driver documents';
+
+  @override
+  String get driverDocumentsReviewed => 'I reviewed both required documents';
+
+  @override
+  String get driverRequiredDocuments =>
+      'Upload a driving license and vehicle registration before submitting. Rejected or expired documents must be replaced.';
+
+  @override
+  String get driverActiveVehicleRequired =>
+      'Add an active vehicle before submitting your application.';
 }

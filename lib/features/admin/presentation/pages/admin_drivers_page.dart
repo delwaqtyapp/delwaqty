@@ -1,3 +1,7 @@
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:delwaqty/core/errors/app_error_text.dart';
+import 'package:delwaqty/features/admin/presentation/widgets/driver_document_review_dialog.dart';
 import 'package:delwaqty/core/theme/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -12,22 +16,24 @@ import 'package:delwaqty/l10n/app_localizations.dart';
 final _adminDriversProvider = FutureProvider<List<Map<String, dynamic>>>((
   ref,
 ) async {
-  final adminService = ref.read(adminServiceProvider);
-  final drivers = await adminService.getAllDrivers();
+  final drivers = await Supabase.instance.client
+      .from('drivers')
+      .select()
+      .order('created_at', ascending: false);
   return drivers
       .map(
         (d) => {
-          'id': d.id,
-          'name': d.fullName,
-          'phone': d.phone ?? '',
-          'is_active': d.isActive,
-          'is_online': d.isAvailable,
-          'verification_status': d.isVerified ? 'verified' : 'pending',
-          'rating': d.rating,
-          'trips_count': d.totalTrips,
+          'id': d['id'],
+          'name': d['full_name'] ?? '',
+          'phone': d['phone'] ?? '',
+          'is_active': d['is_active'] ?? false,
+          'is_online': d['is_online'] ?? false,
+          'verification_status': d['verification_status'] ?? 'pending',
+          'rating': d['rating'] ?? 0,
+          'trips_count': d['total_trips'] ?? 0,
           'vehicle': {
-            'model': d.vehicleType ?? '',
-            'plate': d.vehiclePlate ?? '',
+            'model': d['vehicle_type'] ?? '',
+            'plate': d['vehicle_plate'] ?? '',
           },
         },
       )
@@ -44,6 +50,65 @@ class AdminDriversPage extends ConsumerStatefulWidget {
 class _AdminDriversPageState extends ConsumerState<AdminDriversPage> {
   final _searchController = TextEditingController();
   String _searchQuery = '';
+
+  Future<void> _reviewDriver(String driverId) async {
+    final l10n = AppLocalizations.of(context);
+    final messenger = ScaffoldMessenger.of(context);
+    try {
+      final rows = await Supabase.instance.client
+          .from('driver_documents')
+          .select()
+          .eq('driver_id', driverId)
+          .order('created_at', ascending: false);
+      if (!mounted) return;
+      final approved = await showDialog<bool>(
+        context: context,
+        builder: (_) => DriverDocumentReviewDialog(
+          documents: List<Map<String, dynamic>>.from(rows),
+          onOpen: (path) async {
+            try {
+              if (path.contains('://')) {
+                throw StateError('Invalid document path');
+              }
+              final url = await Supabase.instance.client.storage
+                  .from('driver-documents')
+                  .createSignedUrl(path, 300);
+              if (!await launchUrl(
+                Uri.parse(url),
+                mode: LaunchMode.externalApplication,
+              )) {
+                throw StateError('Could not open document');
+              }
+            } catch (error) {
+              if (mounted) {
+                messenger.showSnackBar(
+                  SnackBar(content: Text(appErrorText(context, error))),
+                );
+              }
+            }
+          },
+        ),
+      );
+      if (approved != true || !mounted) return;
+      final ok = await ref
+          .read(adminServiceProvider)
+          .verifyDriver(driverId: driverId, isVerified: true);
+      ref.invalidate(_adminDriversProvider);
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text(
+            ok ? l10n.updatedSuccessfully : l10n.verificationDecisionFailed,
+          ),
+        ),
+      );
+    } catch (error) {
+      if (mounted) {
+        messenger.showSnackBar(
+          SnackBar(content: Text(appErrorText(context, error))),
+        );
+      }
+    }
+  }
 
   @override
   void dispose() {
@@ -194,14 +259,7 @@ class _AdminDriversPageState extends ConsumerState<AdminDriversPage> {
                           driver: driver,
                           cs: cs,
                           l10n: l10n,
-                          onVerify: () async {
-                            final adminService = ref.read(adminServiceProvider);
-                            await adminService.verifyDriver(
-                              driverId: driver['id'] as String,
-                              isVerified: true,
-                            );
-                            ref.invalidate(_adminDriversProvider);
-                          },
+                          onVerify: () => _reviewDriver(driver['id'] as String),
                           onSuspend: () async {
                             final l10n = AppLocalizations.of(context);
                             final messenger = ScaffoldMessenger.of(context);
@@ -331,10 +389,14 @@ class _DriverGlassTile extends StatelessWidget {
 
     Color statusColor;
     String statusLabel;
-    switch (verificationStatus) {
+    switch (isActive ? verificationStatus : 'suspended') {
       case 'verified':
         statusColor = Colors.green;
         statusLabel = l10n.verified;
+        break;
+      case 'rejected':
+        statusColor = Colors.red;
+        statusLabel = l10n.rejected;
         break;
       case 'suspended':
         statusColor = Colors.red;
@@ -470,7 +532,7 @@ class _DriverGlassTile extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(horizontal: 12),
                   ),
                 ),
-              if (verificationStatus != 'suspended')
+              if (isActive)
                 TextButton.icon(
                   onPressed: onSuspend,
                   icon: const Icon(Icons.block_rounded, size: 18),

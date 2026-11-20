@@ -23,6 +23,7 @@ class CheckoutPage extends ConsumerStatefulWidget {
 
 class _CheckoutPageState extends ConsumerState<CheckoutPage> {
   String _paymentMethod = 'cash';
+  UserLocation? _deliveryLocation;
   final _addressController = TextEditingController();
   final _couponController = TextEditingController();
   bool _isPlacing = false;
@@ -34,6 +35,7 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
     final loc = ref.read(userLocationProvider).value;
     if (loc != null && loc.detailedAddress.isNotEmpty) {
       _addressController.text = loc.detailedAddress;
+      _deliveryLocation = loc;
       _addressPrefilled = true;
     }
   }
@@ -50,6 +52,7 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
     if (picked != null && mounted) {
       setState(() {
         _addressController.text = picked.detailedAddress;
+        _deliveryLocation = picked;
         _addressPrefilled = true;
       });
     }
@@ -90,7 +93,10 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
         ),
       );
       if (result == null || result.isEmpty || !mounted) return;
-      setState(() => _addressController.text = result);
+      setState(() {
+        if (result != _addressController.text) _deliveryLocation = null;
+        _addressController.text = result;
+      });
     } finally {
       controller.dispose();
     }
@@ -108,6 +114,7 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
         userLoc != null &&
         userLoc.detailedAddress.isNotEmpty) {
       _addressController.text = userLoc.detailedAddress;
+      _deliveryLocation = userLoc;
       _addressPrefilled = true;
     }
 
@@ -146,6 +153,7 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
                 delay: const Duration(milliseconds: 100),
                 child: TextField(
                   controller: _addressController,
+                  onChanged: (_) => _deliveryLocation = null,
                   decoration: InputDecoration(
                     hintText: l10n.selectDeliveryAddress,
                     prefixIcon: const Icon(Icons.location_on_outlined),
@@ -394,6 +402,11 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
       );
       return;
     }
+    if (_deliveryLocation == null) {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(l10n.pickLocationOnMap)));
+      return;
+    }
     setState(() => _isPlacing = true);
 
     try {
@@ -408,6 +421,8 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
         discount: cart.discount,
         total: cart.total,
         deliveryAddress: address,
+        deliveryLatitude: _deliveryLocation!.latitude,
+        deliveryLongitude: _deliveryLocation!.longitude,
         paymentMethod: _paymentMethod,
       );
 

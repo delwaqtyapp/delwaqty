@@ -17,6 +17,8 @@ abstract interface class OrderRepository {
     required double discount,
     required double total,
     String? deliveryAddress,
+    double? deliveryLatitude,
+    double? deliveryLongitude,
     String? paymentMethod,
     String? specialInstructions,
   });

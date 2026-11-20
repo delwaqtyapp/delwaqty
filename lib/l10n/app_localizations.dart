@@ -14281,6 +14281,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Use a negative amount to debit (e.g. -750)'**
   String get signedAmountHint;
+
+  /// No description provided for @reviewDriverDocuments.
+  ///
+  /// In en, this message translates to:
+  /// **'Review driver documents'**
+  String get reviewDriverDocuments;
+
+  /// No description provided for @driverDocumentsReviewed.
+  ///
+  /// In en, this message translates to:
+  /// **'I reviewed both required documents'**
+  String get driverDocumentsReviewed;
+
+  /// No description provided for @driverRequiredDocuments.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload a driving license and vehicle registration before submitting. Rejected or expired documents must be replaced.'**
+  String get driverRequiredDocuments;
+
+  /// No description provided for @driverActiveVehicleRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Add an active vehicle before submitting your application.'**
+  String get driverActiveVehicleRequired;
 }
 
 class _AppLocalizationsDelegate

@@ -195,6 +195,8 @@ class SupabaseOrderDataSource {
     required double discount,
     required double total,
     String? deliveryAddress,
+    double? deliveryLatitude,
+    double? deliveryLongitude,
     String? paymentMethod,
     String? specialInstructions,
   }) async {
@@ -215,6 +217,8 @@ class SupabaseOrderDataSource {
             'tax': 0,
             'discount': discount,
             'delivery_address': deliveryAddress,
+            'delivery_latitude': deliveryLatitude,
+            'delivery_longitude': deliveryLongitude,
             'payment_method': paymentMethod ?? 'cash',
             'special_instructions': specialInstructions,
           })

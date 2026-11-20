@@ -209,7 +209,7 @@ class _SanctionDetailSheetState extends ConsumerState<_SanctionDetailSheet> {
             style: TextButton.styleFrom(
               foregroundColor: Theme.of(context).colorScheme.error,
             ),
-            child: const Text('Revoke'),
+            child: Text(l10n.revoke),
           ),
         ],
       ),

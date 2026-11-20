@@ -289,6 +289,7 @@ class _MyReviewCard extends ConsumerWidget {
               child: FilledButton.icon(
                 onPressed: () => showModalBottomSheet<void>(
                   context: context,
+                  useRootNavigator: true,
                   isScrollControlled: true,
                   backgroundColor: theme.colorScheme.surface,
                   shape: const RoundedRectangleBorder(

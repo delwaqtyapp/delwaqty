@@ -103,6 +103,7 @@ class _MerchantDashboardPageState extends ConsumerState<MerchantDashboardPage> {
   ) async {
     await showModalBottomSheet<void>(
       context: context,
+      useRootNavigator: true,
       isScrollControlled: true,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),

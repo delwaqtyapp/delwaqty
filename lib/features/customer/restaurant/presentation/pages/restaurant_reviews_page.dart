@@ -221,6 +221,7 @@ class _RestaurantReviewsPageState extends ConsumerState<RestaurantReviewsPage> {
   void _showWriteReviewSheet(BuildContext context) {
     showModalBottomSheet(
       context: context,
+      useRootNavigator: true,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (context) => _WriteReviewSheet(merchantId: widget.merchantId),

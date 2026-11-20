@@ -1228,6 +1228,7 @@ class _MerchantDetailPageState extends ConsumerState<MerchantDetailPage> {
   void _showProductDetail(Product product, Merchant merchant) {
     showModalBottomSheet(
       context: context,
+      useRootNavigator: true,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (context) => ProductDetailBottomSheet(

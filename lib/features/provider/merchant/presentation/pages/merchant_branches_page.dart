@@ -123,6 +123,7 @@ class _MerchantBranchesPageState extends ConsumerState<MerchantBranchesPage> {
     }
     showModalBottomSheet(
       context: context,
+      useRootNavigator: true,
       isScrollControlled: true,
       useSafeArea: true,
       builder: (_) => _BranchFormSheet(

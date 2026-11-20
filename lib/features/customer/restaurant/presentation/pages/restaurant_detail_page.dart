@@ -518,6 +518,7 @@ class _RestaurantDetailPageState extends ConsumerState<RestaurantDetailPage> {
   void _showBranchSelector(BuildContext context, List<Branch> branches) {
     showModalBottomSheet(
       context: context,
+      useRootNavigator: true,
       isScrollControlled: true,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),

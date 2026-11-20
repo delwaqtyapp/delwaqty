@@ -259,6 +259,7 @@ class _DeliveryHubBodyState extends ConsumerState<_DeliveryHubBody> {
   void _showCapabilitiesSheet(BuildContext context, WidgetRef ref) {
     showModalBottomSheet<void>(
       context: context,
+      useRootNavigator: true,
       isScrollControlled: true,
       builder: (_) => _CapabilitiesBottomSheet(driverId: _driverId),
     );

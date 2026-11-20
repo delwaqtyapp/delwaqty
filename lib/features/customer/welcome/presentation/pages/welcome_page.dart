@@ -10,6 +10,7 @@ import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
 import 'package:delwaqty/shared/widgets/animated_slide_in.dart';
 import 'package:delwaqty/shared/widgets/app_button.dart';
 import 'package:delwaqty/shared/widgets/gradient_background.dart';
+import 'package:delwaqty/shared/widgets/social_auth_buttons.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 
 class WelcomePage extends ConsumerWidget {
@@ -113,6 +114,21 @@ class WelcomePage extends ConsumerWidget {
                     isExpanded: true,
                     variant: AppButtonVariant.outlined,
                     child: Text(l10n.welcomeRegisterButton),
+                  ),
+                ),
+                const SizedBox(height: 24),
+                AnimatedSlideIn(
+                  delay: const Duration(milliseconds: 750),
+                  child: SocialAuthButtons(
+                    onGoogle: () => ref
+                        .read(authStateProvider.notifier)
+                        .signInWithGoogle(),
+                    onFacebook: () => ref
+                        .read(authStateProvider.notifier)
+                        .signInWithFacebook(),
+                    dividerColor: context.colorScheme.onPrimary.withValues(
+                      alpha: 0.7,
+                    ),
                   ),
                 ),
                 const SizedBox(height: 24),

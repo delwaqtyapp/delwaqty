@@ -20,6 +20,7 @@ import 'package:delwaqty/features/customer/home/presentation/widgets/category_vi
 import 'package:delwaqty/features/customer/home_services/domain/entities/service_category.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 import 'package:delwaqty/shared/widgets/cinematic_auth_background.dart';
+import 'package:delwaqty/shared/widgets/social_auth_buttons.dart';
 import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
 import 'package:delwaqty/shared/widgets/pressable_scale.dart';
 import 'package:delwaqty/data/repositories/cached_service_booking_repository.dart';
@@ -911,6 +912,16 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
               ),
             ),
           ),
+          if (_selectedRole == UserType.customer) ...[
+            const SizedBox(height: 28),
+            SocialAuthButtons(
+              onGoogle: () =>
+                  ref.read(authStateProvider.notifier).signInWithGoogle(),
+              onFacebook: () =>
+                  ref.read(authStateProvider.notifier).signInWithFacebook(),
+              dividerColor: Colors.white54,
+            ),
+          ],
           const SizedBox(height: 32),
         ],
       ),

@@ -314,8 +314,8 @@ class _MerchantDetailPageState extends ConsumerState<MerchantDetailPage> {
     return DecoratedBox(
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
+          begin: AlignmentDirectional.topStart,
+          end: AlignmentDirectional.bottomEnd,
           colors: [
             _typeColor(merchant.type).withValues(alpha: 0.4),
             context.colorScheme.primaryContainer.withValues(alpha: 0.3),
@@ -1527,8 +1527,8 @@ class _OfferCard extends StatelessWidget {
                   width: double.infinity,
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
+                      begin: AlignmentDirectional.topStart,
+                      end: AlignmentDirectional.bottomEnd,
                       colors: [
                         context.colorScheme.primaryContainer.withValues(
                           alpha: 0.3,
@@ -1725,8 +1725,8 @@ class _SimilarMerchantCard extends StatelessWidget {
               width: double.infinity,
               decoration: BoxDecoration(
                 gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
+                  begin: AlignmentDirectional.topStart,
+                  end: AlignmentDirectional.bottomEnd,
                   colors: [
                     context.colorScheme.primaryContainer.withValues(alpha: 0.3),
                     context.colorScheme.surface,

@@ -58,8 +58,8 @@ class WalletPage extends ConsumerWidget {
                   padding: const EdgeInsets.all(24),
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
+                      begin: AlignmentDirectional.topStart,
+                      end: AlignmentDirectional.bottomEnd,
                       colors: [
                         theme.colorScheme.primary,
                         theme.colorScheme.primary.withValues(alpha: 0.8),

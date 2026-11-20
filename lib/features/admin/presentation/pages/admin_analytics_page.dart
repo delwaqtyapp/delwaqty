@@ -88,8 +88,8 @@ class _RevenueOverviewSection extends StatelessWidget {
                 borderRadius: BorderRadius.circular(20),
                 gradient: const LinearGradient(
                   colors: [Color(0xFF4A90D9), Color(0xFFAF52DE)],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
+                  begin: AlignmentDirectional.topStart,
+                  end: AlignmentDirectional.bottomEnd,
                 ),
               ),
               child: metricsAsync.when(
@@ -166,8 +166,8 @@ class _RevenueChartSection extends StatelessWidget {
                 borderRadius: BorderRadius.circular(20),
                 gradient: const LinearGradient(
                   colors: [Color(0xFFFF9500), Color(0xFFFF3B30)],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
+                  begin: AlignmentDirectional.topStart,
+                  end: AlignmentDirectional.bottomEnd,
                 ),
               ),
               child: revenueAsync.when(

@@ -573,8 +573,8 @@ class GlassMenuPanel extends StatelessWidget {
       decoration: const BoxDecoration(
         shape: BoxShape.circle,
         gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
+          begin: AlignmentDirectional.topStart,
+          end: AlignmentDirectional.bottomEnd,
           colors: [AppColors.brandPurple, AppColors.brandViolet],
         ),
       ),
@@ -946,7 +946,9 @@ class _AnimatedThemeSwitch extends StatelessWidget {
           AnimatedAlign(
             duration: const Duration(milliseconds: 340),
             curve: Curves.easeOutBack,
-            alignment: active ? Alignment.centerRight : Alignment.centerLeft,
+            alignment: active
+                ? AlignmentDirectional.centerEnd
+                : AlignmentDirectional.centerStart,
             child: Container(
               width: 24,
               height: 24,

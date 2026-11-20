@@ -585,13 +585,13 @@ class _DelwaIntroSceneState extends State<DelwaIntroScene>
                   bottom: 0,
                   child: SafeArea(
                     child: Padding(
-                      padding: const EdgeInsets.only(
+                      padding: const EdgeInsetsDirectional.only(
                         top: 10,
-                        right: 14,
-                        left: 44,
+                        end: 14,
+                        start: 44,
                       ),
                       child: Align(
-                        alignment: Alignment.topRight,
+                        alignment: AlignmentDirectional.topEnd,
                         child: Opacity(
                           opacity: egyptStatementFade,
                           child: Transform.translate(

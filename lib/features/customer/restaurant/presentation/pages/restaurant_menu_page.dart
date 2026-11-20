@@ -296,7 +296,7 @@ class _RestaurantMenuPageState extends ConsumerState<RestaurantMenuPage> {
                     const SizedBox(width: 8),
                     ...categories.map(
                       (cat) => Padding(
-                        padding: const EdgeInsets.only(right: 8),
+                        padding: const EdgeInsetsDirectional.only(end: 8),
                         child: _CategoryChip(
                           label: cat.name,
                           isSelected: selectedCategoryId == cat.id,

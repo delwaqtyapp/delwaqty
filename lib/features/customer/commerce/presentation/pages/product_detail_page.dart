@@ -172,8 +172,8 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage> {
                   width: double.infinity,
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
+                      begin: AlignmentDirectional.topStart,
+                      end: AlignmentDirectional.bottomEnd,
                       colors: [
                         context.colorScheme.primaryContainer.withValues(
                           alpha: 0.6,

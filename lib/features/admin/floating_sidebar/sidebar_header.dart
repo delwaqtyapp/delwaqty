@@ -53,8 +53,8 @@ class SidebarHeader extends StatelessWidget {
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
                         colors: [cs.primary, cs.tertiary],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
+                        begin: AlignmentDirectional.topStart,
+                        end: AlignmentDirectional.bottomEnd,
                       ),
                       borderRadius: BorderRadius.circular(14),
                       boxShadow: [

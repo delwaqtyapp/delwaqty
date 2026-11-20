@@ -397,7 +397,7 @@ class _WriteServiceReviewSheetState
                 return GestureDetector(
                   onTap: () => setState(() => _rating = i + 1),
                   child: Padding(
-                    padding: const EdgeInsets.only(right: 4),
+                    padding: const EdgeInsetsDirectional.only(end: 4),
                     child: Icon(
                       i < _rating
                           ? Icons.star_rounded

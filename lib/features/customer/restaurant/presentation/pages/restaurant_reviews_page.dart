@@ -518,7 +518,7 @@ class _WriteReviewSheetState extends ConsumerState<_WriteReviewSheet> {
                 return GestureDetector(
                   onTap: () => setState(() => _rating = (i + 1).toDouble()),
                   child: Padding(
-                    padding: const EdgeInsets.only(right: 4),
+                    padding: const EdgeInsetsDirectional.only(end: 4),
                     child: Icon(
                       i < _rating.round()
                           ? Icons.star_rounded

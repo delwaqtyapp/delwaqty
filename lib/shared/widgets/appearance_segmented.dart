@@ -82,8 +82,8 @@ class _SegmentPill<T> extends StatelessWidget {
         decoration: BoxDecoration(
           gradient: isSelected
               ? LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
+                  begin: AlignmentDirectional.topStart,
+                  end: AlignmentDirectional.bottomEnd,
                   colors: [
                     scheme.primary,
                     Color.lerp(scheme.primary, scheme.primaryContainer, 0.18)!,

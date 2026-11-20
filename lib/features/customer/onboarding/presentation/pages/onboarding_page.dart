@@ -89,8 +89,8 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage>
           return DecoratedBox(
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
+                begin: AlignmentDirectional.topStart,
+                end: AlignmentDirectional.bottomEnd,
                 colors: [
                   fromColor,
                   fromColor.withValues(alpha: 0.7),
@@ -108,7 +108,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage>
               Align(
                 alignment: AlignmentDirectional.topEnd,
                 child: Padding(
-                  padding: const EdgeInsets.only(top: 8, right: 16),
+                  padding: const EdgeInsetsDirectional.only(top: 8, end: 16),
                   child: TextButton(
                     onPressed: _completeOnboarding,
                     child: Text(

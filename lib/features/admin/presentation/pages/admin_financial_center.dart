@@ -489,8 +489,8 @@ class AdminFinancialCenter extends ConsumerWidget {
           borderRadius: BorderRadius.circular(16),
           gradient: const LinearGradient(
             colors: [Color(0xFF5B3DF0), Color(0xFF8B5CF6)],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
+            begin: AlignmentDirectional.topStart,
+            end: AlignmentDirectional.bottomEnd,
           ),
         ),
         padding: const EdgeInsets.all(20),
@@ -773,7 +773,7 @@ class _FinanceQuickAction extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        margin: const EdgeInsets.only(right: 8),
+        margin: const EdgeInsetsDirectional.only(end: 8),
         padding: const EdgeInsets.symmetric(horizontal: 14),
         decoration: BoxDecoration(
           color: color.withValues(alpha: 0.12),

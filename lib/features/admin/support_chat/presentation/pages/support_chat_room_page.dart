@@ -700,7 +700,9 @@ class _SupportChatRoomPageState extends ConsumerState<SupportChatRoomPage> {
     );
 
     return Align(
-      alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
+      alignment: isMe
+          ? AlignmentDirectional.centerEnd
+          : AlignmentDirectional.centerStart,
       child: bubble,
     );
   }

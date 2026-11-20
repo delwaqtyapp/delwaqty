@@ -64,10 +64,10 @@ class _AdminVerificationsWebPageState extends State<AdminVerificationsWebPage> {
     if (!confirmed || !mounted) return;
     setState(() => _processingId = userId);
     try {
-      await _client
-          .from('users')
-          .update({'verification_status': 'approved'})
-          .eq('id', userId);
+      await _client.rpc(
+        'decide_user_verification',
+        params: {'p_user_id': userId, 'p_decision': 'approve'},
+      );
       if (!mounted) return;
       setState(() => _requests.removeWhere((r) => r['id'] == userId));
       ScaffoldMessenger.of(context).showSnackBar(
@@ -90,22 +90,55 @@ class _AdminVerificationsWebPageState extends State<AdminVerificationsWebPage> {
     }
   }
 
+  Future<String?> _promptRejectReason(BuildContext context) async {
+    final l10n = AppLocalizations.of(context);
+    final controller = TextEditingController();
+    final reason = await showDialog<String>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(l10n.adminVerifications),
+        content: TextField(
+          controller: controller,
+          autofocus: true,
+          maxLines: 3,
+          decoration: InputDecoration(
+            labelText: l10n.rejectionReason,
+            hintText: l10n.rejectionReasonHint,
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: Text(l10n.cancel),
+          ),
+          FilledButton(
+            style: FilledButton.styleFrom(
+              backgroundColor: Theme.of(ctx).colorScheme.error,
+            ),
+            onPressed: () => Navigator.of(ctx).pop(controller.text.trim()),
+            child: Text(l10n.reject),
+          ),
+        ],
+      ),
+    );
+    if (reason == null || reason.isEmpty) return null;
+    return reason;
+  }
+
   Future<void> _reject(String userId) async {
     final l10n = AppLocalizations.of(context);
-    final confirmed = await ConfirmDialog.show(
-      context,
-      title: l10n.adminVerifications,
-      message: l10n.confirmRejectVerification,
-      confirmLabel: l10n.reject,
-      isDestructive: true,
-    );
-    if (!confirmed || !mounted) return;
+    final reason = await _promptRejectReason(context);
+    if (reason == null || !mounted) return;
     setState(() => _processingId = userId);
     try {
-      await _client
-          .from('users')
-          .update({'verification_status': 'rejected'})
-          .eq('id', userId);
+      await _client.rpc(
+        'decide_user_verification',
+        params: {
+          'p_user_id': userId,
+          'p_decision': 'reject',
+          'p_reason': reason,
+        },
+      );
       if (!mounted) return;
       setState(() => _requests.removeWhere((r) => r['id'] == userId));
       ScaffoldMessenger.of(context).showSnackBar(

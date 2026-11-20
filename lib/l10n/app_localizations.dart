@@ -14239,6 +14239,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Top-up request submitted. Your wallet will be credited after review.'**
   String get topUpRequestSubmitted;
+
+  /// Owner wallet adjustment dialog
+  ///
+  /// In en, this message translates to:
+  /// **'Adjust wallet'**
+  String get adjustWallet;
+
+  /// Owner wallet adjustment dialog
+  ///
+  /// In en, this message translates to:
+  /// **'Wallet adjusted. New balance: {balance}'**
+  String adjustWalletSuccess(String balance);
+
+  /// Owner wallet adjustment dialog
+  ///
+  /// In en, this message translates to:
+  /// **'Wallet adjustment failed: {code}'**
+  String adjustWalletFailed(String code);
+
+  /// Owner wallet adjustment dialog
+  ///
+  /// In en, this message translates to:
+  /// **'A note is required for adjustments'**
+  String get noteRequired;
+
+  /// Owner wallet adjustment dialog
+  ///
+  /// In en, this message translates to:
+  /// **'Use a negative amount to debit (e.g. -750)'**
+  String get signedAmountHint;
 }
 
 class _AppLocalizationsDelegate

@@ -7408,4 +7408,23 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get topUpRequestSubmitted =>
       'تم إرسال طلب الشحن. سيتم إضافة الرصيد إلى محفظتك بعد المراجعة.';
+
+  @override
+  String get adjustWallet => 'تعديل المحفظة';
+
+  @override
+  String adjustWalletSuccess(String balance) {
+    return 'تم تعديل المحفظة. الرصيد الجديد: $balance';
+  }
+
+  @override
+  String adjustWalletFailed(String code) {
+    return 'فشل تعديل المحفظة: $code';
+  }
+
+  @override
+  String get noteRequired => 'الملاحظة مطلوبة للتعديلات';
+
+  @override
+  String get signedAmountHint => 'استخدم قيمة سالبة للخصم (مثال: -750)';
 }

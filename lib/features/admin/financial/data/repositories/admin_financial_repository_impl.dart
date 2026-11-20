@@ -242,6 +242,24 @@ class AdminFinancialRepositoryImpl implements AdminFinancialRepository {
   }
 
   @override
+  @override
+  Future<Map<String, dynamic>> walletAdjust({
+    required String accountId,
+    required double amount,
+    String? note,
+  }) async {
+    try {
+      return await _source.walletAdjust(
+        accountId: accountId,
+        amount: amount,
+        note: note,
+      );
+    } catch (e) {
+      throw ServerException(message: e.toString());
+    }
+  }
+
+  @override
   Future<Map<String, dynamic>> adminDirectTopup({
     required String accountType,
     required String accountId,

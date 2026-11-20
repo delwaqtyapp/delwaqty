@@ -164,6 +164,7 @@ class VehicleManagementPage extends ConsumerWidget {
   ) {
     showModalBottomSheet(
       context: context,
+      useRootNavigator: true,
       isScrollControlled: true,
       builder: (_) => _VehicleFormSheet(driverId: driverId),
     );
@@ -253,6 +254,7 @@ class _VehicleListBody extends ConsumerWidget {
   ) {
     showModalBottomSheet(
       context: context,
+      useRootNavigator: true,
       isScrollControlled: true,
       builder: (_) =>
           _VehicleFormSheet(driverId: vehicle.driverId, vehicle: vehicle),

@@ -44,6 +44,7 @@ class SmartMapPickerSheet extends ConsumerStatefulWidget {
   }) {
     return showModalBottomSheet<UserLocation>(
       context: context,
+      useRootNavigator: true,
       isScrollControlled: true,
       enableDrag: false,
       backgroundColor: Colors.transparent,

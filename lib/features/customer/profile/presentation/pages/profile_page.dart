@@ -614,6 +614,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
   ) async {
     final source = await showModalBottomSheet<ImageSource>(
       context: context,
+      useRootNavigator: true,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(
           top: Radius.circular(AppSpacing.radiusSheet),
@@ -692,6 +693,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
   ) async {
     final saved = await showModalBottomSheet<bool>(
       context: context,
+      useRootNavigator: true,
       isScrollControlled: true,
       useSafeArea: true,
       backgroundColor: Colors.transparent,

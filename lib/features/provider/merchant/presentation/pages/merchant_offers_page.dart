@@ -164,6 +164,7 @@ class _MerchantOffersPageState extends ConsumerState<MerchantOffersPage> {
     }
     showModalBottomSheet(
       context: context,
+      useRootNavigator: true,
       isScrollControlled: true,
       useSafeArea: true,
       builder: (_) => _OfferFormSheet(

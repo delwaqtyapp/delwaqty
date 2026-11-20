@@ -116,6 +116,7 @@ class _MyComplaintsPageState extends ConsumerState<MyComplaintsPage> {
   ) {
     showModalBottomSheet(
       context: context,
+      useRootNavigator: true,
       isScrollControlled: true,
       useSafeArea: true,
       builder: (ctx) => Padding(

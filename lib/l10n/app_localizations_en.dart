@@ -7465,4 +7465,23 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get topUpRequestSubmitted =>
       'Top-up request submitted. Your wallet will be credited after review.';
+
+  @override
+  String get adjustWallet => 'Adjust wallet';
+
+  @override
+  String adjustWalletSuccess(String balance) {
+    return 'Wallet adjusted. New balance: $balance';
+  }
+
+  @override
+  String adjustWalletFailed(String code) {
+    return 'Wallet adjustment failed: $code';
+  }
+
+  @override
+  String get noteRequired => 'A note is required for adjustments';
+
+  @override
+  String get signedAmountHint => 'Use a negative amount to debit (e.g. -750)';
 }

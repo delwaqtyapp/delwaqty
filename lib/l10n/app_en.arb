@@ -2457,5 +2457,35 @@
   "topUpRequestSubmitted": "Top-up request submitted. Your wallet will be credited after review.",
   "@topUpRequestSubmitted": {
     "description": "Shown after the customer submits a wallet top-up request that awaits approval."
+  },
+  "adjustWallet": "Adjust wallet",
+  "@adjustWallet": {
+    "description": "Owner wallet adjustment dialog"
+  },
+  "adjustWalletSuccess": "Wallet adjusted. New balance: {balance}",
+  "@adjustWalletSuccess": {
+    "description": "Owner wallet adjustment dialog",
+    "placeholders": {
+      "balance": {
+        "type": "String"
+      }
+    }
+  },
+  "adjustWalletFailed": "Wallet adjustment failed: {code}",
+  "@adjustWalletFailed": {
+    "description": "Owner wallet adjustment dialog",
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "noteRequired": "A note is required for adjustments",
+  "@noteRequired": {
+    "description": "Owner wallet adjustment dialog"
+  },
+  "signedAmountHint": "Use a negative amount to debit (e.g. -750)",
+  "@signedAmountHint": {
+    "description": "Owner wallet adjustment dialog"
   }
 }

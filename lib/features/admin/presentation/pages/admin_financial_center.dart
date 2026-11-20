@@ -119,6 +119,13 @@ class AdminFinancialCenter extends ConsumerWidget {
                     ),
                     if (ref.watch(adminIsOwnerProvider).value ?? false)
                       _FinanceQuickAction(
+                        icon: Icons.tune_rounded,
+                        label: l10n.adjustWallet,
+                        color: const Color(0xFFAF52DE),
+                        onTap: () => _showAdjustWalletDialog(context, ref),
+                      ),
+                    if (ref.watch(adminIsOwnerProvider).value ?? false)
+                      _FinanceQuickAction(
                         icon: Icons.public_rounded,
                         label: l10n.globalFinancialAudit,
                         color: const Color(0xFF5B3DF0),
@@ -199,6 +206,135 @@ class AdminFinancialCenter extends ConsumerWidget {
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _showAdjustWalletDialog(
+    BuildContext context,
+    WidgetRef ref,
+  ) async {
+    final l10n = AppLocalizations.of(context);
+    final idController = TextEditingController();
+    final amountController = TextEditingController();
+    final noteController = TextEditingController();
+    final formKey = GlobalKey<FormState>();
+    var submitting = false;
+    var resultMsg = '';
+
+    await showDialog<void>(
+      context: context,
+      builder: (dialogContext) => StatefulBuilder(
+        builder: (ctx, setState) => AlertDialog(
+          title: Text(l10n.adjustWallet),
+          content: Form(
+            key: formKey,
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  TextFormField(
+                    controller: idController,
+                    decoration: InputDecoration(labelText: l10n.accountId),
+                    validator: (v) => (v == null || v.trim().isEmpty)
+                        ? l10n.accountIdRequired
+                        : null,
+                  ),
+                  TextFormField(
+                    controller: amountController,
+                    decoration: InputDecoration(
+                      labelText: l10n.amount,
+                      helperText: l10n.signedAmountHint,
+                    ),
+                    keyboardType: const TextInputType.numberWithOptions(
+                      decimal: true,
+                      signed: true,
+                    ),
+                    validator: (v) {
+                      final n = double.tryParse(v ?? '');
+                      if (n == null || n == 0) return l10n.enterValidAmount;
+                      return null;
+                    },
+                  ),
+                  TextFormField(
+                    controller: noteController,
+                    decoration: InputDecoration(labelText: l10n.note),
+                    validator: (v) => (v == null || v.trim().isEmpty)
+                        ? l10n.noteRequired
+                        : null,
+                  ),
+                  if (resultMsg.isNotEmpty)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 8),
+                      child: Text(
+                        resultMsg,
+                        style: TextStyle(
+                          color: Theme.of(ctx).colorScheme.error,
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: submitting ? null : () => Navigator.of(ctx).pop(),
+              child: Text(l10n.cancel),
+            ),
+            FilledButton(
+              onPressed: submitting
+                  ? null
+                  : () async {
+                      if (!formKey.currentState!.validate()) return;
+                      setState(() => submitting = true);
+                      try {
+                        final res = await ref
+                            .read(adminFinancialRepositoryProvider)
+                            .walletAdjust(
+                              accountId: idController.text.trim(),
+                              amount: double.parse(
+                                amountController.text.trim(),
+                              ),
+                              note: noteController.text.trim(),
+                            );
+                        if ((res['ok'] as bool? ?? false) == true) {
+                          final balance = '${res['balance_after'] ?? ''}';
+                          if (ctx.mounted) Navigator.of(ctx).pop();
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  l10n.adjustWalletSuccess(balance),
+                                ),
+                              ),
+                            );
+                          }
+                        } else {
+                          setState(() {
+                            submitting = false;
+                            resultMsg = l10n.adjustWalletFailed(
+                              (res['code'] as String?) ?? l10n.error,
+                            );
+                          });
+                        }
+                      } catch (e) {
+                        setState(() {
+                          submitting = false;
+                          resultMsg = appErrorText(context, e);
+                        });
+                      }
+                    },
+              child: submitting
+                  ? const SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : Text(l10n.confirm),
+            ),
+          ],
         ),
       ),
     );

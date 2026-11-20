@@ -243,4 +243,18 @@ class AdminFinancialDataSource {
     );
     return Map<String, dynamic>.from(res as Map);
   }
+
+  /// Owner-only signed wallet adjustment (migration 131). Negative amounts
+  /// debit; the server floors at zero and writes a ledger + audit row.
+  Future<Map<String, dynamic>> walletAdjust({
+    required String accountId,
+    required double amount,
+    String? note,
+  }) async {
+    final res = await _client.rpc(
+      'wallet_adjust',
+      params: {'p_account_id': accountId, 'p_amount': amount, 'p_note': note},
+    );
+    return Map<String, dynamic>.from(res as Map);
+  }
 }

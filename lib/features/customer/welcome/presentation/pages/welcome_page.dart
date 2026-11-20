@@ -120,9 +120,8 @@ class WelcomePage extends ConsumerWidget {
                 AnimatedSlideIn(
                   delay: const Duration(milliseconds: 750),
                   child: SocialAuthButtons(
-                    onGoogle: () => ref
-                        .read(authStateProvider.notifier)
-                        .signInWithGoogle(),
+                    onGoogle: () =>
+                        ref.read(authStateProvider.notifier).signInWithGoogle(),
                     onFacebook: () => ref
                         .read(authStateProvider.notifier)
                         .signInWithFacebook(),

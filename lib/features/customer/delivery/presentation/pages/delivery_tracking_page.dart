@@ -452,7 +452,7 @@ class _StatusTimeline extends StatelessWidget {
               ),
               if (i < steps.length - 1)
                 Padding(
-                  padding: const EdgeInsets.only(left: 15),
+                  padding: const EdgeInsetsDirectional.only(start: 15),
                   child: Container(
                     width: 2,
                     height: 20,

@@ -147,8 +147,8 @@ class MerchantCard extends StatelessWidget {
     return DecoratedBox(
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
+          begin: AlignmentDirectional.topStart,
+          end: AlignmentDirectional.bottomEnd,
           colors: [
             colorScheme.primaryContainer.withValues(alpha: 0.55),
             colorScheme.primaryContainer.withValues(alpha: 0.15),

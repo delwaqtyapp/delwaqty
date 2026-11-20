@@ -190,7 +190,7 @@ class _CommerceDiscoveryPageState extends ConsumerState<CommerceDiscoveryPage> {
                   scrollDirection: Axis.horizontal,
                   children: [
                     Padding(
-                      padding: const EdgeInsets.only(right: 8),
+                      padding: const EdgeInsetsDirectional.only(end: 8),
                       child: PressableScale(
                         onTap: () =>
                             ref.read(_selectedTypeProvider.notifier).state =
@@ -240,7 +240,7 @@ class _CommerceDiscoveryPageState extends ConsumerState<CommerceDiscoveryPage> {
                     ),
                     ...MerchantType.values.map(
                       (type) => Padding(
-                        padding: const EdgeInsets.only(right: 8),
+                        padding: const EdgeInsetsDirectional.only(end: 8),
                         child: MerchantTypeChip(
                           type: type,
                           selected: selectedType == type,
@@ -548,11 +548,11 @@ class _AnimatedMerchantCarouselState extends State<_AnimatedMerchantCarousel>
                       }
                       final alignment = isRtl
                           ? (i == _current
-                                ? Alignment.centerRight
-                                : Alignment.centerLeft)
+                                ? AlignmentDirectional.centerEnd
+                                : AlignmentDirectional.centerStart)
                           : (i == _current
-                                ? Alignment.centerLeft
-                                : Alignment.centerRight);
+                                ? AlignmentDirectional.centerStart
+                                : AlignmentDirectional.centerEnd);
                       return Stack(
                         children: [
                           Container(
@@ -868,8 +868,8 @@ class _ImageFallback extends StatelessWidget {
     return DecoratedBox(
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
+          begin: AlignmentDirectional.topStart,
+          end: AlignmentDirectional.bottomEnd,
           colors: [
             typeColor.withValues(alpha: 0.35),
             typeColor.withValues(alpha: 0.12),

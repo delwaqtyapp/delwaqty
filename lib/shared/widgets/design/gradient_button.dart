@@ -44,8 +44,8 @@ class _GradientButtonState extends State<GradientButton>
   bool _pressed = false;
 
   Gradient get _defaultGradient => const LinearGradient(
-    begin: Alignment.topLeft,
-    end: Alignment.bottomRight,
+    begin: AlignmentDirectional.topStart,
+    end: AlignmentDirectional.bottomEnd,
     colors: [AppColors.brandGradientStart, AppColors.brandGradientEnd],
   );
 

@@ -310,8 +310,8 @@ class _StatusTile extends StatelessWidget {
       height: 46,
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
+          begin: AlignmentDirectional.topStart,
+          end: AlignmentDirectional.bottomEnd,
           colors: [
             color.withValues(alpha: 0.25),
             color.withValues(alpha: 0.08),

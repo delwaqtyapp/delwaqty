@@ -563,8 +563,8 @@ class _BottomNavTile extends StatelessWidget {
               borderRadius: BorderRadius.circular(18),
               gradient: isActive
                   ? const LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
+                      begin: AlignmentDirectional.topStart,
+                      end: AlignmentDirectional.bottomEnd,
                       colors: [AppColors.brandPurple, AppColors.brandViolet],
                     )
                   : null,
@@ -708,8 +708,8 @@ class _AdminMasthead extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(14, 16, 14, 14),
       decoration: BoxDecoration(
         gradient: const LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
+          begin: AlignmentDirectional.topStart,
+          end: AlignmentDirectional.bottomEnd,
           colors: [
             AppColors.brandPurple,
             AppColors.brandViolet,
@@ -950,8 +950,8 @@ class _AdminSidebarFooter extends StatelessWidget {
             decoration: BoxDecoration(
               gradient: const LinearGradient(
                 colors: [AppColors.brandPurple, AppColors.brandViolet],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
+                begin: AlignmentDirectional.topStart,
+                end: AlignmentDirectional.bottomEnd,
               ),
               borderRadius: BorderRadius.circular(11),
             ),

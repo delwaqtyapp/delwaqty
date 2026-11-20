@@ -138,7 +138,7 @@ class _AdminVerificationsPageState
           mainAxisSize: MainAxisSize.min,
           children: [
             Align(
-              alignment: Alignment.topRight,
+              alignment: AlignmentDirectional.topEnd,
               child: IconButton(
                 tooltip: l10n.close,
                 icon: const Icon(Icons.close_rounded, color: Colors.white),

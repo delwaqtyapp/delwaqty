@@ -70,8 +70,8 @@ class _PremiumEmptyStateState extends State<PremiumEmptyState>
                 height: 120,
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
+                    begin: AlignmentDirectional.topStart,
+                    end: AlignmentDirectional.bottomEnd,
                     colors: [
                       color.withValues(alpha: 0.15),
                       color.withValues(alpha: 0.05),

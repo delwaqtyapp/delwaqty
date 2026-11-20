@@ -624,7 +624,7 @@ class _CategoryEditDialogState extends State<_CategoryEditDialog> {
                               ],
                             )
                           : Align(
-                              alignment: Alignment.bottomRight,
+                              alignment: AlignmentDirectional.bottomEnd,
                               child: Container(
                                 padding: const EdgeInsets.all(4),
                                 decoration: const BoxDecoration(

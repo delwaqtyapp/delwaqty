@@ -778,7 +778,7 @@ class _CategoryDialogState extends State<_CategoryDialog> {
                             ],
                           )
                         : Align(
-                            alignment: Alignment.bottomRight,
+                            alignment: AlignmentDirectional.bottomEnd,
                             child: Container(
                               padding: const EdgeInsets.all(4),
                               decoration: const BoxDecoration(

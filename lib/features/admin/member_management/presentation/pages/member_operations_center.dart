@@ -557,7 +557,7 @@ class _FilterChipWidget extends StatelessWidget {
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-        margin: const EdgeInsets.only(right: 6),
+        margin: const EdgeInsetsDirectional.only(end: 6),
         decoration: BoxDecoration(
           color: selected
               ? cs.primary.withValues(alpha: 0.15)
@@ -821,7 +821,7 @@ class _MemberQuickAction extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        margin: const EdgeInsets.only(right: 8),
+        margin: const EdgeInsetsDirectional.only(end: 8),
         padding: const EdgeInsets.symmetric(horizontal: 14),
         decoration: BoxDecoration(
           color: color.withValues(alpha: 0.12),

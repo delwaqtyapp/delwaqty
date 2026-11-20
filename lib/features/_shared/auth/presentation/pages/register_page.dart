@@ -420,8 +420,8 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
             height: 34,
             decoration: BoxDecoration(
               gradient: const LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
+                begin: AlignmentDirectional.topStart,
+                end: AlignmentDirectional.bottomEnd,
                 colors: [AppColors.brandPurple, AppColors.brandCyan],
               ),
               borderRadius: BorderRadius.circular(11),
@@ -1257,8 +1257,8 @@ class _StepDot extends StatelessWidget {
         shape: BoxShape.circle,
         gradient: isActive
             ? const LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
+                begin: AlignmentDirectional.topStart,
+                end: AlignmentDirectional.bottomEnd,
                 colors: [AppColors.brandPurple, AppColors.brandCyan],
               )
             : null,
@@ -1308,8 +1308,8 @@ class _GlassCard extends StatelessWidget {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(radius),
         gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
+          begin: AlignmentDirectional.topStart,
+          end: AlignmentDirectional.bottomEnd,
           colors: [
             Colors.white.withValues(alpha: isSelected ? 0.13 : 0.07),
             Colors.white.withValues(alpha: isSelected ? 0.05 : 0.03),
@@ -1403,8 +1403,8 @@ class _RolePremiumCard extends StatelessWidget {
                   height: 44,
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
+                      begin: AlignmentDirectional.topStart,
+                      end: AlignmentDirectional.bottomEnd,
                       colors: [chipStart, chipEnd],
                     ),
                     borderRadius: BorderRadius.circular(13),
@@ -1583,8 +1583,8 @@ class _ServiceChip extends StatelessWidget {
         decoration: BoxDecoration(
           gradient: isSelected
               ? const LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
+                  begin: AlignmentDirectional.topStart,
+                  end: AlignmentDirectional.bottomEnd,
                   colors: [Color(0xFFD4AF37), Color(0xFFE5C25B)],
                 )
               : null,
@@ -1919,7 +1919,7 @@ class _PremiumField extends StatelessWidget {
         ),
         prefixIcon: Container(
           width: 40,
-          margin: const EdgeInsets.only(right: 8),
+          margin: const EdgeInsetsDirectional.only(end: 8),
           decoration: BoxDecoration(
             color: _kGold.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(12),

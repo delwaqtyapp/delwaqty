@@ -1057,8 +1057,8 @@ class _PlatformIntelligenceDashboardState
                       width: 1.2,
                     ),
                     gradient: LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
+                      begin: AlignmentDirectional.topStart,
+                      end: AlignmentDirectional.bottomEnd,
                       colors: [
                         item.color.withValues(alpha: 0.12),
                         cs.surfaceContainerLow.withValues(alpha: 0.9),
@@ -1232,8 +1232,8 @@ class _KpiCard extends StatelessWidget {
               width: 1.2,
             ),
             gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
+              begin: AlignmentDirectional.topStart,
+              end: AlignmentDirectional.bottomEnd,
               colors: [
                 item.color.withValues(alpha: 0.12),
                 cs.surfaceContainerLow.withValues(alpha: 0.9),

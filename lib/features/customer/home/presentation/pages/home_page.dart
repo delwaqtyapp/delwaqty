@@ -301,7 +301,7 @@ class _EgyptHeroState extends State<_EgyptHero>
               ),
             ),
             Align(
-              alignment: Alignment.bottomLeft,
+              alignment: AlignmentDirectional.bottomStart,
               child: Padding(
                 padding: EdgeInsets.fromLTRB(
                   horizontalPadding,
@@ -495,8 +495,8 @@ class _EgyptHeroState extends State<_EgyptHero>
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
+                    begin: AlignmentDirectional.topStart,
+                    end: AlignmentDirectional.bottomEnd,
                     colors: [AppColors.brandPurpleDeep, AppColors.brandViolet],
                   ),
                 ),
@@ -1654,8 +1654,8 @@ class _DirectOrderButtonState extends State<_DirectOrderButton>
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(24),
             gradient: const LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
+              begin: AlignmentDirectional.topStart,
+              end: AlignmentDirectional.bottomEnd,
               colors: [
                 Color(0xFF1E1B4B),
                 AppColors.brandPurple,
@@ -1694,7 +1694,7 @@ class _DirectOrderButtonState extends State<_DirectOrderButton>
                       builder: (context, constraints) {
                         final shiftX = (t * 2.6 - 0.8) * constraints.maxWidth;
                         return Align(
-                          alignment: Alignment.centerLeft,
+                          alignment: AlignmentDirectional.centerStart,
                           child: Transform.translate(
                             offset: Offset(shiftX, 0),
                             child: FractionallySizedBox(
@@ -1752,8 +1752,8 @@ class _DirectOrderButtonState extends State<_DirectOrderButton>
                                 decoration: BoxDecoration(
                                   shape: BoxShape.circle,
                                   gradient: LinearGradient(
-                                    begin: Alignment.topLeft,
-                                    end: Alignment.bottomRight,
+                                    begin: AlignmentDirectional.topStart,
+                                    end: AlignmentDirectional.bottomEnd,
                                     colors: [
                                       Colors.white.withValues(alpha: 0.30),
                                       Colors.white.withValues(alpha: 0.12),
@@ -2616,8 +2616,8 @@ class _PromoSlide extends ConsumerWidget {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(24),
         gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
+          begin: AlignmentDirectional.topStart,
+          end: AlignmentDirectional.bottomEnd,
           colors: colors,
         ),
         border: Border.all(color: Colors.white.withValues(alpha: 0.22)),
@@ -2646,8 +2646,8 @@ class _PromoSlide extends ConsumerWidget {
           DecoratedBox(
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
+                begin: AlignmentDirectional.topStart,
+                end: AlignmentDirectional.bottomEnd,
                 colors: [
                   colors.first.withValues(alpha: 0.72),
                   colors.last.withValues(alpha: 0.86),
@@ -2740,8 +2740,8 @@ Widget merchantHeaderGradient(BuildContext context, Color color, String emoji) {
   return DecoratedBox(
     decoration: BoxDecoration(
       gradient: LinearGradient(
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
+        begin: AlignmentDirectional.topStart,
+        end: AlignmentDirectional.bottomEnd,
         colors: [color.withValues(alpha: 0.55), color.withValues(alpha: 0.15)],
       ),
     ),

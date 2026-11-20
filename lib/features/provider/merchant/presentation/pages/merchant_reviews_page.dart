@@ -449,7 +449,7 @@ class _ReviewCardState extends State<_ReviewCard> {
             const SizedBox(height: AppSpacing.md),
             if (!_showReplyField)
               Align(
-                alignment: Alignment.centerRight,
+                alignment: AlignmentDirectional.centerEnd,
                 child: TextButton.icon(
                   onPressed: () => setState(() => _showReplyField = true),
                   icon: const Icon(Icons.reply, size: 16),

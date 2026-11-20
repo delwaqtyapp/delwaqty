@@ -369,7 +369,7 @@ class _RuleRow extends StatelessWidget {
           Container(
             width: 8,
             height: 8,
-            margin: const EdgeInsets.only(right: 8),
+            margin: const EdgeInsetsDirectional.only(end: 8),
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               color: isActive ? Colors.green : scheme.outlineVariant,

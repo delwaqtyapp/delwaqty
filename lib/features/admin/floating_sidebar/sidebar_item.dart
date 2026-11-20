@@ -85,7 +85,7 @@ class SidebarItem extends StatelessWidget {
                     trailing!
                   else
                     Padding(
-                      padding: const EdgeInsets.only(right: 10),
+                      padding: const EdgeInsetsDirectional.only(end: 10),
                       child: Icon(
                         Icons.chevron_right_rounded,
                         size: 16,
@@ -131,7 +131,7 @@ class SidebarItemWithBadge extends StatelessWidget {
       isSelected: isSelected,
       trailing: badgeCount > 0
           ? Padding(
-              padding: const EdgeInsets.only(right: 12),
+              padding: const EdgeInsetsDirectional.only(end: 12),
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
                 decoration: BoxDecoration(

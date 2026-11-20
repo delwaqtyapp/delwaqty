@@ -189,8 +189,8 @@ class _CategoryCard extends StatelessWidget {
                     height: 56,
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
+                        begin: AlignmentDirectional.topStart,
+                        end: AlignmentDirectional.bottomEnd,
                         colors: [
                           color.withValues(alpha: 0.38),
                           color.withValues(alpha: 0.15),

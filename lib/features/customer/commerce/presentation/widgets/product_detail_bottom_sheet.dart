@@ -136,8 +136,8 @@ class _ProductDetailBottomSheetState
       child: DecoratedBox(
         decoration: BoxDecoration(
           gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
+            begin: AlignmentDirectional.topStart,
+            end: AlignmentDirectional.bottomEnd,
             colors: [
               context.colorScheme.primaryContainer.withValues(alpha: 0.3),
               context.colorScheme.surface,

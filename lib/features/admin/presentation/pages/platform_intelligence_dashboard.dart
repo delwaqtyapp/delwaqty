@@ -921,13 +921,6 @@ class _PlatformIntelligenceDashboardState
         const Color(0xFFFF3B30),
         [
           _KpiItem(
-            l10n.kpiSosActive,
-            kpi.sosActive.toString(),
-            Icons.sos_rounded,
-            const Color(0xFFFF3B30),
-            '/admin/emergency',
-          ),
-          _KpiItem(
             l10n.kpiPendingWithdrawals,
             kpi.pendingWithdrawals.toString(),
             Icons.currency_exchange_rounded,
@@ -1332,7 +1325,7 @@ class _AlertCard extends StatelessWidget {
         cat.contains('emerg') ||
         title.contains('sos') ||
         title.contains('emerg')) {
-      return '/admin/emergency';
+      return '/admin/support-chat';
     }
     if (cat.contains('complaint') ||
         title.contains('complaint') ||

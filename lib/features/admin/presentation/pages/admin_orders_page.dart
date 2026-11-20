@@ -64,12 +64,7 @@ class _AdminOrdersPageState extends ConsumerState<AdminOrdersPage> {
                   color: const Color(0xFF007AFF),
                   onTap: () => context.push('/admin/drivers'),
                 ),
-                _OrderQuickAction(
-                  icon: Icons.sos_rounded,
-                  label: l10n.adminEmergency,
-                  color: const Color(0xFFFF3B30),
-                  onTap: () => context.push('/admin/emergency'),
-                ),
+
                 _OrderQuickAction(
                   icon: Icons.chat_bubble_rounded,
                   label: l10n.supportChat,

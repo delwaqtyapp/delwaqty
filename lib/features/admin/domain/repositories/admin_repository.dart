@@ -62,10 +62,4 @@ abstract class AdminRepository {
   Future<List<VerificationRequest>> getVerificationRequests();
   Future<void> approveVerification(String userId);
   Future<void> rejectVerification(String userId, {required String reason});
-  Future<List<Map<String, dynamic>>> getSosAlerts({String? status});
-  Future<bool> resolveSosAlert(
-    String alertId, {
-    String status = 'resolved',
-    String? note,
-  });
 }

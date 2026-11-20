@@ -121,11 +121,6 @@ final List<_AdminNavGroup> _adminGroups = [
         icon: Icons.chat_bubble_rounded,
         label: (l) => l.supportChat,
       ),
-      _AdminNavItem(
-        path: '/admin/emergency',
-        icon: Icons.sos_rounded,
-        label: (l) => l.adminEmergency,
-      ),
     ],
   ),
   _AdminNavGroup(

@@ -1069,40 +1069,4 @@ class AdminRepository implements admin.AdminRepository {
       createdAt: DateTime.parse(json['created_at'] as String),
     );
   }
-
-  // ─── Emergency / SOS ──────────────────────────────────────
-
-  @override
-  Future<List<Map<String, dynamic>>> getSosAlerts({String? status}) async {
-    try {
-      final response = await _supabase.rpc(
-        'admin_list_sos_alerts',
-        params: {'p_status': status},
-      );
-      return (response as List).cast<Map<String, dynamic>>();
-    } catch (e) {
-      throw AdminException('Failed to load SOS alerts: $e');
-    }
-  }
-
-  @override
-  Future<bool> resolveSosAlert(
-    String alertId, {
-    String status = 'resolved',
-    String? note,
-  }) async {
-    try {
-      final response = await _supabase.rpc(
-        'admin_resolve_sos_alert',
-        params: {
-          'p_alert_id': alertId,
-          'p_status': status,
-          'p_note': note ?? '',
-        },
-      );
-      return (response as Map<String, dynamic>)['success'] == true;
-    } catch (e) {
-      throw AdminException('Failed to resolve SOS alert: $e');
-    }
-  }
 }

@@ -137,12 +137,6 @@ class _AdminQuickActionsPageState extends ConsumerState<AdminQuickActionsPage> {
             const Color(0xFF34C759),
             '/admin/support-chat',
           ),
-          _ActionData(
-            l10n.adminEmergency,
-            Icons.sos_rounded,
-            const Color(0xFFFF3B30),
-            '/admin/emergency',
-          ),
         ],
       ),
       (

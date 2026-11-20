@@ -99,11 +99,8 @@ class DeliveryRepositoryImpl implements DeliveryRepository {
   }) => _dataSource.cancelDelivery(rideId, reason: reason, byDriver: byDriver);
 
   @override
-  Future<void> reportIncident(
-    String rideId,
-    String kind, {
-    String? note,
-  }) => _dataSource.reportIncident(rideId, kind, note: note);
+  Future<void> reportIncident(String rideId, String kind, {String? note}) =>
+      _dataSource.reportIncident(rideId, kind, note: note);
 
   @override
   Future<DeliveryPricingModel> getDeliveryPricing(String serviceType) =>

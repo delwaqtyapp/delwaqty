@@ -19,6 +19,7 @@ import 'package:delwaqty/features/_shared/auth/presentation/auth_provider.dart';
 import 'package:delwaqty/features/_shared/device_lock/device_lock_provider.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 import 'package:delwaqty/shared/widgets/cinematic_auth_background.dart';
+import 'package:delwaqty/shared/widgets/social_auth_buttons.dart';
 
 import 'dart:async';
 
@@ -407,6 +408,19 @@ class _LoginPageState extends ConsumerState<LoginPage>
                         const SizedBox(height: 32),
                         _buildSavedAccountsSection(l10n),
                         _buildForm(l10n, authState),
+                        if (!isAdminApp) ...[
+                          const SizedBox(height: 24),
+                          SocialAuthButtons(
+                            onGoogle: () => ref
+                                .read(authStateProvider.notifier)
+                                .signInWithGoogle(),
+                            onFacebook: () => ref
+                                .read(authStateProvider.notifier)
+                                .signInWithFacebook(),
+                            isLoading: isLoading,
+                            dividerColor: Colors.white54,
+                          ),
+                        ],
                         const SizedBox(height: 24),
                         if (!isAdminApp) ...[
                           _buildRegisterLink(l10n),

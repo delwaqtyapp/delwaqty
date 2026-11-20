@@ -162,6 +162,28 @@ class AuthStateNotifier extends Notifier<AuthState> {
     }
   }
 
+  /// Launches the Google OAuth flow in the system browser. The session
+  /// arrives through the `io.delwaqty://login-callback` deep link; the auth
+  /// listener then moves the state to authenticated.
+  Future<void> signInWithGoogle() async {
+    await _signInWithOAuth(() => ref.read(signInWithGoogleUseCaseProvider)());
+  }
+
+  /// Launches the Facebook OAuth flow; same deep-link return as Google.
+  Future<void> signInWithFacebook() async {
+    await _signInWithOAuth(() => ref.read(signInWithFacebookUseCaseProvider)());
+  }
+
+  Future<void> _signInWithOAuth(Future<void> Function() launch) async {
+    try {
+      await launch();
+    } catch (e) {
+      _logger.e('OAuth sign in failed', e);
+      final failure = handleException(e);
+      state = AuthState.error(message: failure.message);
+    }
+  }
+
   /// Looks up the auth email for a phone number or username through
   /// security-definer RPCs (`lookup_email_by_phone` / `lookup_email_by_username`).
   Future<String> _resolveUsernameToEmail(String identifier) async {

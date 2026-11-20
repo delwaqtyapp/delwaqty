@@ -424,6 +424,8 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
         deliveryLatitude: _deliveryLocation!.latitude,
         deliveryLongitude: _deliveryLocation!.longitude,
         paymentMethod: _paymentMethod,
+        couponCode: cart.couponCode,
+        idempotencyKey: 'checkout-${cart.id}',
       );
 
       await ref.read(cartProvider.notifier).clear();

@@ -132,9 +132,7 @@ class HomePage extends ConsumerWidget {
                         ),
                       ),
                     ),
-                    SliverToBoxAdapter(
-                      child: _CompactCategories(ref: ref, l10n: l10n),
-                    ),
+                    SliverToBoxAdapter(child: _CompactCategories(l10n: l10n)),
                     const SliverToBoxAdapter(child: _PromoCarousel()),
                     SliverToBoxAdapter(
                       child: _buildDiscoverySection(context, ref, l10n),
@@ -1881,14 +1879,13 @@ class _ServiceTile extends _TileItem {
   final String? iconUrl;
 }
 
-class _CompactCategories extends StatelessWidget {
-  const _CompactCategories({required this.ref, required this.l10n});
+class _CompactCategories extends ConsumerWidget {
+  const _CompactCategories({required this.l10n});
 
-  final WidgetRef ref;
   final AppLocalizations l10n;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final categoriesAsync = ref.watch(activeCategoriesProvider);
     final servicesAsync = ref.watch(_homeServiceCategoriesProvider);
     final dbServices = servicesAsync.asData?.value ?? const <ServiceCategory>[];

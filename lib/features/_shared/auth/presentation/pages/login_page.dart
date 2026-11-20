@@ -920,6 +920,8 @@ class _SavedAccountChip extends StatelessWidget {
                   account.email,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
+                  softWrap: false,
+                  textDirection: TextDirection.ltr,
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 11,

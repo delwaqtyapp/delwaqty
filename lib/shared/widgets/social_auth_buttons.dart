@@ -44,8 +44,14 @@ class SocialAuthButtons extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
               child: Text(
                 l10n.orContinueWith,
+                textHeightBehavior: const TextHeightBehavior(
+                  applyHeightToFirstAscent: false,
+                  applyHeightToLastDescent: false,
+                ),
                 style: AppTextStyles.labelMedium.copyWith(
                   color: effectiveDividerColor,
+                  letterSpacing: 0,
+                  height: 1.8,
                 ),
               ),
             ),

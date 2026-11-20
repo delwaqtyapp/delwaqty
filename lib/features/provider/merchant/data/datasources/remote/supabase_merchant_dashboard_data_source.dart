@@ -146,7 +146,6 @@ class SupabaseMerchantDashboardDataSource {
           .from('orders')
           .select(
             'id, user_id, status, dispatch_status, total_amount, created_at, delivery_address, notes, '
-            'users(full_name, phone), '
             'order_items(product_id, product_name, quantity, unit_price, modifiers, products(name))',
           )
           .eq('merchant_id', merchantId);
@@ -159,12 +158,24 @@ class SupabaseMerchantDashboardDataSource {
           .order('created_at', ascending: false)
           .range(offset, offset + limit - 1);
 
+      // Customer PII comes through the scoped RPC (migration 159): the users
+      // table is self+admin only, so an embed always returned null.
+      final contactRows = await _client.rpc(
+        'merchant_order_contacts',
+        params: {'p_merchant_id': merchantId},
+      );
+      final contacts = <String, Map<String, dynamic>>{
+        for (final c in (contactRows as List<dynamic>))
+          (c as Map<String, dynamic>)['order_id'] as String:
+              Map<String, dynamic>.from(c),
+      };
+
       return (data as List<dynamic>).map((row) {
         final map = row as Map<String, dynamic>;
-        final usersData = map['users'] as Map<String, dynamic>?;
+        final contact = contacts[map['id'] as String];
         final orderMap = Map<String, dynamic>.from(map);
-        orderMap['customer_name'] = usersData?['full_name'] as String?;
-        orderMap['customer_phone'] = usersData?['phone'] as String?;
+        orderMap['customer_name'] = contact?['full_name'] as String?;
+        orderMap['customer_phone'] = contact?['phone'] as String?;
         return _orderFromRow(orderMap);
       }).toList();
     } catch (e) {

@@ -235,9 +235,9 @@ class _FloatingNotificationCircleButtonState
           Center(
             child: Icon(Icons.notifications_outlined, size: widget.iconSize),
           ),
-          Positioned(
+          PositionedDirectional(
             top: 4,
-            right: 4,
+            end: 4,
             child: AnimatedSwitcher(
               duration: const Duration(milliseconds: 220),
               transitionBuilder: (child, anim) =>

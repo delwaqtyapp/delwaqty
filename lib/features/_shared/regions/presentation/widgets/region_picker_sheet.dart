@@ -59,7 +59,7 @@ class _RegionPickerSheetState extends ConsumerState<RegionPickerSheet> {
             ),
           ),
           Padding(
-            padding: const EdgeInsets.fromLTRB(16, 12, 8, 8),
+            padding: const EdgeInsetsDirectional.fromSTEB(16, 12, 8, 8),
             child: Row(
               children: [
                 Expanded(

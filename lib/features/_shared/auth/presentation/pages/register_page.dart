@@ -1590,7 +1590,7 @@ class _ServiceChip extends StatelessWidget {
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 220),
         curve: Curves.easeOutCubic,
-        padding: const EdgeInsets.fromLTRB(10, 8, 12, 8),
+        padding: const EdgeInsetsDirectional.fromSTEB(10, 8, 12, 8),
         decoration: BoxDecoration(
           gradient: isSelected
               ? const LinearGradient(

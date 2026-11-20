@@ -328,7 +328,7 @@ class _SmartMapPickerSheetState extends ConsumerState<SmartMapPickerSheet> {
         children: [
           // Top bar
           Padding(
-            padding: const EdgeInsets.fromLTRB(20, 12, 12, 6),
+            padding: const EdgeInsetsDirectional.fromSTEB(20, 12, 12, 6),
             child: Row(
               children: [
                 const Icon(

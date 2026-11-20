@@ -50,8 +50,12 @@ jobs:
           path: coverage/lcov.info
           retention-days: 7
   build:
-    name: Build APK
+    name: Build APK (${{ matrix.flavor }})
     needs: [analyze, test]
+    strategy:
+      fail-fast: false
+      matrix:
+        flavor: [customer, admin, driver, provider]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -68,20 +72,20 @@ jobs:
       - name: Generate code
         run: dart run build_runner build --delete-conflicting-outputs
       - name: Build debug APK
-        run: flutter build apk --debug --flavor customer
+        run: flutter build apk --debug --flavor ${{ matrix.flavor }}
       - name: Build release APK
-        run: flutter build apk --release --flavor customer
+        run: flutter build apk --release --flavor ${{ matrix.flavor }}
       - name: Upload debug APK
         uses: actions/upload-artifact@v4
         with:
-          name: delwaqty-debug-${{ github.run_number }}
-          path: build/app/outputs/flutter-apk/app-debug.apk
+          name: delwaqty-${{ matrix.flavor }}-debug-${{ github.run_number }}
+          path: build/app/outputs/flutter-apk/app-${{ matrix.flavor }}-debug.apk
           retention-days: 14
       - name: Upload release APK
         uses: actions/upload-artifact@v4
         with:
-          name: delwaqty-release-${{ github.run_number }}
-          path: build/app/outputs/flutter-apk/app-release.apk
+          name: delwaqty-${{ matrix.flavor }}-release-${{ github.run_number }}
+          path: build/app/outputs/flutter-apk/app-${{ matrix.flavor }}-release.apk
           retention-days: 90
   release:
     name: Create Release
@@ -92,11 +96,12 @@ jobs:
       contents: write
     steps:
       - uses: actions/checkout@v4
-      - name: Download release APK
+      - name: Download release APKs
         uses: actions/download-artifact@v4
         with:
-          name: delwaqty-release-${{ github.run_number }}
+          pattern: delwaqty-*-release-${{ github.run_number }}
           path: releases/
+          merge-multiple: true
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:

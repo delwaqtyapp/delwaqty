@@ -302,8 +302,7 @@ class _OnlineHeader extends StatelessWidget {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final onlineState = ref.watch(driverOnlineProvider(profile.id));
-    final isOnline =
-        onlineState.value ?? (profile.status == DriverStatus.online);
+    final isOnline = onlineState.value ?? false;
 
     ref.listen<AsyncValue<bool>>(driverOnlineProvider(profile.id), (
       prev,

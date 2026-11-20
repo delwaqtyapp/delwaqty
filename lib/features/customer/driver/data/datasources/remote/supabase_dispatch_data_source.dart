@@ -18,6 +18,13 @@ class SupabaseDispatchDataSource {
   Map<String, dynamic> _checkRpc(dynamic data) =>
       checkedRpcResult(data, onFailure: DispatchException.new);
 
+  Future<bool> getOnline(String driverId) async {
+    final result = _checkRpc(
+      await _client.rpc('driver_presence', params: {'p_driver_id': driverId}),
+    );
+    return result['online'] == true;
+  }
+
   /// Flips the whole dispatch precondition set in one atomic call.
   ///
   /// `driver_set_online` (008) only wrote `is_online` + coordinates, but

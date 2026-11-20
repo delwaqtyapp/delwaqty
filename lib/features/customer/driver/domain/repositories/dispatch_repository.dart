@@ -1,6 +1,8 @@
 import 'package:delwaqty/features/customer/driver/domain/entities/driver_stats.dart';
 
 abstract interface class DispatchRepository {
+  Future<bool> getOnline(String driverId);
+
   Future<void> setOnline(
     String driverId,
     bool online, {

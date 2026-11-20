@@ -45,9 +45,9 @@ class _AdminGraceManagementPageState
         ref.invalidate(graceAccountProvider);
       } else {
         if (mounted) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text(l10n.failedWithError(code ?? 'unknown'))));
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(l10n.failedWithError(code ?? 'unknown'))),
+          );
         }
       }
     } catch (e) {

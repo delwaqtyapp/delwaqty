@@ -224,34 +224,6 @@ class AdminService {
     }
   }
 
-  // ─── Emergency / SOS ──────────────────────────────────────
-
-  Future<List<Map<String, dynamic>>> getSosAlerts({String? status}) async {
-    try {
-      return await _repository.getSosAlerts(status: status);
-    } catch (e) {
-      debugPrint('AdminService.getSosAlerts error: $e');
-      return [];
-    }
-  }
-
-  Future<bool> resolveSosAlert(
-    String alertId, {
-    String status = 'resolved',
-    String? note,
-  }) async {
-    try {
-      return await _repository.resolveSosAlert(
-        alertId,
-        status: status,
-        note: note,
-      );
-    } catch (e) {
-      debugPrint('AdminService.resolveSosAlert error: $e');
-      return false;
-    }
-  }
-
   // ─── Settings ─────────────────────────────────────────────
 
   Future<Map<String, dynamic>> getSettings() async {

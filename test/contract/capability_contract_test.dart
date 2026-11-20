@@ -78,20 +78,19 @@ void main() {
   });
 
   group('admin capability pages', () {
-    test('the SOS console exists and is routed', () {
-      final page = File(
-        'lib/features/admin/presentation/pages/admin_emergency_page.dart',
-      );
-      expect(page.existsSync(), isTrue);
-      final body = page.readAsStringSync();
-      expect(body, contains('adminSosAlertsProvider'));
-      expect(body, contains('resolveSosAlert'));
-
-      final module = read('lib/features/admin/admin_module.dart');
+    test('retired SOS surface is not routed or advertised', () {
       expect(
-        module,
-        contains("path: 'emergency'"),
-        reason: 'four entry points linked to /admin/emergency',
+        File('lib/features/admin/presentation/pages/admin_emergency_page.dart')
+            .existsSync(),
+        isFalse,
+      );
+      expect(
+        File('lib/features/admin/admin_module.dart').readAsStringSync(),
+        isNot(contains("path: 'emergency'")),
+      );
+      expect(
+        File('lib/features/admin/admin_shell.dart').readAsStringSync(),
+        isNot(contains('/admin/emergency')),
       );
     });
 

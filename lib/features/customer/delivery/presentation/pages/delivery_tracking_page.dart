@@ -9,7 +9,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import 'package:delwaqty/core/extensions/context_extensions.dart';
 import 'package:delwaqty/features/customer/delivery/presentation/providers/delivery_providers.dart';
-import 'package:delwaqty/features/customer/ride/presentation/providers/ride_providers.dart';
+import 'package:delwaqty/features/customer/delivery/data/datasources/remote/delivery_trip_tracking_source.dart';
 import 'package:delwaqty/features/customer/ride/presentation/widgets/ride_map.dart';
 import 'package:delwaqty/features/customer/ride/domain/entities/ride.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
@@ -40,7 +40,7 @@ class _DeliveryTrackingPageState extends ConsumerState<DeliveryTrackingPage> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final rideAsync = ref.watch(rideStreamProvider(widget.deliveryId));
+    final rideAsync = ref.watch(deliveryTripStreamProvider(widget.deliveryId));
 
     return Scaffold(
       appBar: AppBar(

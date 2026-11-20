@@ -1,3 +1,6 @@
+import 'dart:typed_data';
+
+import 'package:delwaqty/features/admin/presentation/widgets/private_document_preview.dart';
 import 'package:flutter/material.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 
@@ -6,11 +9,11 @@ class DriverDocumentReviewDialog extends StatefulWidget {
   const DriverDocumentReviewDialog({
     super.key,
     required this.documents,
-    required this.onOpen,
+    required this.loadDocument,
   });
 
   final List<Map<String, dynamic>> documents;
-  final Future<void> Function(String path) onOpen;
+  final Future<Uint8List> Function(String path) loadDocument;
 
   @override
   State<DriverDocumentReviewDialog> createState() =>
@@ -20,6 +23,7 @@ class DriverDocumentReviewDialog extends StatefulWidget {
 class _DriverDocumentReviewDialogState
     extends State<DriverDocumentReviewDialog> {
   bool _reviewed = false;
+  final Set<String> _loaded = {};
 
   @override
   Widget build(BuildContext context) {
@@ -48,7 +52,7 @@ class _DriverDocumentReviewDialogState
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              for (var i = 0; i < requiredTypes.length; i++)
+              for (var i = 0; i < requiredTypes.length; i++) ...[
                 ListTile(
                   contentPadding: EdgeInsets.zero,
                   leading: const Icon(Icons.description_outlined),
@@ -64,17 +68,16 @@ class _DriverDocumentReviewDialogState
                         ? l10n.documentRejected
                         : l10n.documentPending,
                   ),
-                  trailing: IconButton(
-                    tooltip: l10n.viewDocument,
-                    icon: const Icon(Icons.open_in_new_rounded),
-                    onPressed:
-                        (requiredDocs[i]?['file_url'] as String? ?? '').isEmpty
-                        ? null
-                        : () => widget.onOpen(
-                            requiredDocs[i]!['file_url'] as String,
-                          ),
-                  ),
                 ),
+                if ((requiredDocs[i]?['file_url'] as String? ?? '').isNotEmpty)
+                  PrivateDocumentPreview(
+                    key: ValueKey(requiredDocs[i]!['file_url']),
+                    path: requiredDocs[i]!['file_url'] as String,
+                    load: widget.loadDocument,
+                    onReady: () =>
+                        setState(() => _loaded.add(requiredTypes[i])),
+                  ),
+              ],
               if (!complete)
                 Text(
                   l10n.driverRequiredDocuments,
@@ -84,7 +87,7 @@ class _DriverDocumentReviewDialogState
                 contentPadding: EdgeInsets.zero,
                 title: Text(l10n.driverDocumentsReviewed),
                 value: _reviewed,
-                onChanged: complete
+                onChanged: complete && requiredTypes.every(_loaded.contains)
                     ? (value) => setState(() => _reviewed = value ?? false)
                     : null,
                 controlAffinity: ListTileControlAffinity.leading,
@@ -99,7 +102,8 @@ class _DriverDocumentReviewDialogState
           child: Text(l10n.cancel),
         ),
         FilledButton(
-          onPressed: complete && _reviewed
+          onPressed:
+              complete && requiredTypes.every(_loaded.contains) && _reviewed
               ? () => Navigator.pop(context, true)
               : null,
           child: Text(l10n.verify),

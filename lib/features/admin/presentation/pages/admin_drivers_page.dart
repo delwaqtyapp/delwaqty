@@ -1,5 +1,4 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'package:delwaqty/core/errors/app_error_text.dart';
 import 'package:delwaqty/features/admin/presentation/widgets/driver_document_review_dialog.dart';
 import 'package:delwaqty/core/theme/app_colors.dart';
@@ -65,27 +64,12 @@ class _AdminDriversPageState extends ConsumerState<AdminDriversPage> {
         context: context,
         builder: (_) => DriverDocumentReviewDialog(
           documents: List<Map<String, dynamic>>.from(rows),
-          onOpen: (path) async {
-            try {
-              if (path.contains('://')) {
-                throw StateError('Invalid document path');
-              }
-              final url = await Supabase.instance.client.storage
-                  .from('driver-documents')
-                  .createSignedUrl(path, 300);
-              if (!await launchUrl(
-                Uri.parse(url),
-                mode: LaunchMode.externalApplication,
-              )) {
-                throw StateError('Could not open document');
-              }
-            } catch (error) {
-              if (mounted) {
-                messenger.showSnackBar(
-                  SnackBar(content: Text(appErrorText(context, error))),
-                );
-              }
-            }
+          loadDocument: (path) {
+            if (path.contains('://'))
+              throw StateError('Invalid private document path');
+            return Supabase.instance.client.storage
+                .from('driver-documents')
+                .download(path);
           },
         ),
       );

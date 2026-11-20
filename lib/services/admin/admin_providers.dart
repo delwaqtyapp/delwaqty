@@ -25,15 +25,6 @@ final dashboardMetricsProvider = FutureProvider<AdminDashboardMetrics>((
   return adminService.getDashboardMetrics();
 });
 
-// ─── SOS Alerts ─────────────────────────────────────────────
-
-final adminSosAlertsProvider = FutureProvider<List<Map<String, dynamic>>>((
-  ref,
-) async {
-  final adminService = ref.watch(adminServiceProvider);
-  return adminService.getSosAlerts();
-});
-
 // ─── Recent Activity ───────────────────────────────────────
 
 final recentActivityProvider = FutureProvider<List<AdminActivityLog>>((

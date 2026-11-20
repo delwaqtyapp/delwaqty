@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:delwaqty/features/admin/presentation/widgets/driver_document_review_dialog.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
@@ -35,6 +37,8 @@ void main() {
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
+    final imageBytes = File('test/fixtures/private_document.png')
+        .readAsBytesSync();
     await tester.pumpWidget(
       RepaintBoundary(
         key: const ValueKey('capture'),
@@ -52,7 +56,7 @@ void main() {
                     context: context,
                     builder: (_) => DriverDocumentReviewDialog(
                       documents: documents,
-                      onOpen: (_) async {},
+                      loadDocument: (_) async => imageBytes,
                     ),
                   ),
                   child: const Text('Open'),
@@ -63,7 +67,17 @@ void main() {
         ),
       ),
     );
+    await tester.runAsync(
+      () => precacheImage(
+        MemoryImage(imageBytes),
+        tester.element(find.byType(Scaffold).first),
+      ),
+    );
     await tester.tap(find.text('Open'));
+    await tester.pump();
+    await tester.runAsync(() async {
+      await Future<void>.delayed(const Duration(milliseconds: 200));
+    });
     await tester.pumpAndSettle();
   }
 
@@ -75,6 +89,7 @@ void main() {
       tester.widget<FilledButton>(find.byType(FilledButton)).onPressed,
       isNull,
     );
+    await tester.ensureVisible(find.byType(CheckboxListTile));
     await tester.tap(find.byType(CheckboxListTile));
     await tester.pumpAndSettle();
     expect(
@@ -105,5 +120,21 @@ void main() {
       matchesGoldenFile('goldens/driver_document_review_missing_ar.png'),
     );
     expect(tester.takeException(), isNull);
+  });
+  testWidgets('missing private document paths cannot be approved', (
+    tester,
+  ) async {
+    await openReview(
+      tester,
+      docs.map((doc) => {...doc, 'file_url': ''}).toList(),
+    );
+    expect(
+      tester.widget<FilledButton>(find.byType(FilledButton)).onPressed,
+      isNull,
+    );
+    expect(
+      tester.widget<CheckboxListTile>(find.byType(CheckboxListTile)).onChanged,
+      isNull,
+    );
   });
 }

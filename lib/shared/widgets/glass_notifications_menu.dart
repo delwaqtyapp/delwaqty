@@ -261,7 +261,7 @@ class _GlassNotificationsPanel extends ConsumerWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Padding(
-                  padding: const EdgeInsets.fromLTRB(14, 12, 10, 10),
+                  padding: const EdgeInsetsDirectional.fromSTEB(14, 12, 10, 10),
                   child: Row(
                     children: [
                       Container(
@@ -536,7 +536,7 @@ class _GlassNotificationItem extends StatelessWidget {
         onTap: onTap,
         borderRadius: BorderRadius.circular(16),
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(10, 10, 6, 10),
+          padding: const EdgeInsetsDirectional.fromSTEB(10, 10, 6, 10),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [

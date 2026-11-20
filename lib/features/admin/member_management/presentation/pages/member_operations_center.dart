@@ -1160,7 +1160,7 @@ class _AssignAdminFromMembersSheetState
             ),
           ),
           Padding(
-            padding: const EdgeInsets.fromLTRB(16, 12, 8, 8),
+            padding: const EdgeInsetsDirectional.fromSTEB(16, 12, 8, 8),
             child: Row(
               children: [
                 const Icon(

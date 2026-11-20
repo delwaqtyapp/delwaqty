@@ -1213,7 +1213,7 @@ class _GlassSearchPopupPanelState
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Padding(
-                  padding: const EdgeInsets.fromLTRB(14, 6, 8, 6),
+                  padding: const EdgeInsetsDirectional.fromSTEB(14, 6, 8, 6),
                   child: Row(
                     children: [
                       const Icon(

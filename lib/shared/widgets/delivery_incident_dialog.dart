@@ -79,15 +79,14 @@ class _DeliveryIncidentDialogState extends State<_DeliveryIncidentDialog> {
       ),
       actions: [
         TextButton(
-          onPressed: () => Navigator.of(ctx).pop(),
+          onPressed: () => Navigator.of(context).pop(),
           child: Text(l10n.cancel),
         ),
         FilledButton(
           onPressed: () {
             final note = _note.text.trim();
-            Navigator.of(ctx).pop(
-              DeliveryIncidentReport(_kind, note.isEmpty ? null : note),
-            );
+            Navigator.of(context)
+                .pop(DeliveryIncidentReport(_kind, note.isEmpty ? null : note));
           },
           child: Text(l10n.sendReport),
         ),

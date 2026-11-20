@@ -487,9 +487,7 @@ class _DriverDeliveryDetailPageState
                   if (canCancel) ...[
                     const SizedBox(height: 8),
                     OutlinedButton(
-                      onPressed: _busy
-                          ? null
-                          : () => _confirmAndCancel(order),
+                      onPressed: _busy ? null : () => _confirmAndCancel(order),
                       child: Text(l10n.cancel),
                     ),
                   ],

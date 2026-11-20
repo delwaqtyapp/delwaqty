@@ -509,23 +509,6 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                 ),
               ),
           ],
-          const SizedBox(width: 10),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-            decoration: BoxDecoration(
-              color: _kGold.withValues(alpha: 0.14),
-              borderRadius: BorderRadius.circular(999),
-              border: Border.all(color: _kGold.withValues(alpha: 0.35)),
-            ),
-            child: Text(
-              l10n.stepOf(_currentStep + 1, 4),
-              style: const TextStyle(
-                fontSize: 11,
-                fontWeight: FontWeight.w700,
-                color: _kGold,
-              ),
-            ),
-          ),
         ],
       ),
     );

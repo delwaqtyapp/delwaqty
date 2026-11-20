@@ -158,9 +158,7 @@ class DriverDashboardPage extends ConsumerWidget {
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
-        AnimatedFadeIn(
-          child: _OnlineHeader(profile: profile, ref: ref),
-        ),
+        AnimatedFadeIn(child: _OnlineHeader(profile: profile)),
         const SizedBox(height: 16),
         performanceAsync.when(
           loading: () => const SizedBox.shrink(),
@@ -292,13 +290,12 @@ class _RegistrationPromptState extends ConsumerState<_RegistrationPrompt> {
   }
 }
 
-class _OnlineHeader extends StatelessWidget {
-  const _OnlineHeader({required this.profile, required this.ref});
+class _OnlineHeader extends ConsumerWidget {
+  const _OnlineHeader({required this.profile});
   final DriverProfile profile;
-  final WidgetRef ref;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final onlineState = ref.watch(driverOnlineProvider(profile.id));

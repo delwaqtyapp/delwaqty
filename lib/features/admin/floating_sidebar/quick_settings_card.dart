@@ -7,14 +7,13 @@ import 'package:delwaqty/l10n/app_localizations.dart';
 
 import 'sidebar_theme.dart';
 
-class QuickSettingsCard extends StatelessWidget {
-  const QuickSettingsCard({super.key, required this.ref, required this.l10n});
+class QuickSettingsCard extends ConsumerWidget {
+  const QuickSettingsCard({super.key, required this.l10n});
 
-  final WidgetRef ref;
   final AppLocalizations l10n;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final st = Theme.of(context).extension<SidebarTheme>()!;
     final themeMode = ref.watch(themeModeProvider);
     final locale = ref.watch(localeProvider);

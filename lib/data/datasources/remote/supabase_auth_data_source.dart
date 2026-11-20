@@ -195,7 +195,7 @@ class SupabaseAuthDataSource {
       final user = _auth.currentUser;
       if (user == null) throw Exception('No authenticated user');
       await _client.functions.invoke('delete-user');
-      _logger.i('Account deletion requested');
+      _logger.i('Account deletion completed');
     } catch (e, stack) {
       _logger.e('Account deletion failed', e, stack);
       rethrow;

@@ -1,4 +1,5 @@
 import 'package:delwaqty/shared/widgets/delivery_handoff_button.dart';
+import 'package:delwaqty/shared/widgets/delivery_incident_dialog.dart';
 
 import 'dart:async';
 
@@ -64,8 +65,24 @@ class _DriverDeliveryDetailPageState
     );
   }
 
-  Future<void> _confirmAndCancel(String orderId) async {
+  Future<void> _confirmAndCancel(DeliveryOrder order) async {
     final l10n = AppLocalizations.of(context);
+    // Goods already with the driver: the server refuses plain cancellation,
+    // so the driver files an incident for support instead.
+    if (order.status == 'inTrip') {
+      final report = await showDeliveryIncidentDialog(context);
+      if (report == null) return;
+      await _run(() async {
+        await ref
+            .read(deliveryRepositoryProvider)
+            .reportIncident(order.id, report.kind, note: report.note);
+        if (mounted) {
+          ScaffoldMessenger.of(context)
+              .showSnackBar(SnackBar(content: Text(l10n.incidentReported)));
+        }
+      });
+      return;
+    }
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -91,7 +108,7 @@ class _DriverDeliveryDetailPageState
       () => ref
           .read(deliveryRepositoryProvider)
           .cancelDelivery(
-            orderId,
+            order.id,
             reason: 'cancelled_by_driver',
             byDriver: true,
           ),
@@ -472,7 +489,7 @@ class _DriverDeliveryDetailPageState
                     OutlinedButton(
                       onPressed: _busy
                           ? null
-                          : () => _confirmAndCancel(order.id),
+                          : () => _confirmAndCancel(order),
                       child: Text(l10n.cancel),
                     ),
                   ],

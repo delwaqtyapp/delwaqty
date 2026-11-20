@@ -7066,6 +7066,36 @@ class AppLocalizationsEn extends AppLocalizations {
   String get confirmCancelDeliveryTitle => 'Cancel Active Delivery?';
 
   @override
+  String get reportIncidentTitle => 'Report a problem';
+
+  @override
+  String get reportIncidentBody => 'The order is already with the driver, so it can\'t simply be cancelled. Report the problem and support will step in.';
+
+  @override
+  String get incidentKindBreakdown => 'Vehicle breakdown';
+
+  @override
+  String get incidentKindAccident => 'Accident';
+
+  @override
+  String get incidentKindGoodsDamaged => 'Goods damaged';
+
+  @override
+  String get incidentKindCustomerUnreachable => 'Customer unreachable';
+
+  @override
+  String get incidentKindOther => 'Something else';
+
+  @override
+  String get incidentNoteHint => 'What happened? (optional)';
+
+  @override
+  String get incidentReported => 'Report sent. Support will take it from here.';
+
+  @override
+  String get sendReport => 'Send report';
+
+  @override
   String get confirmCancelDeliveryBody =>
       'Are you sure you want to cancel this delivery assignment?';
 

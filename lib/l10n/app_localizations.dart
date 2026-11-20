@@ -13502,6 +13502,76 @@ abstract class AppLocalizations {
   /// **'Cancel Active Delivery?'**
   String get confirmCancelDeliveryTitle;
 
+
+  /// No description provided for @reportIncidentTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Report a problem'**
+  String get reportIncidentTitle;
+  String get confirmCancelDeliveryTitle;
+
+  /// No description provided for @reportIncidentBody.
+  ///
+  /// In en, this message translates to:
+  /// **'The order is already with the driver, so it can't simply be cancelled. Report the problem and support will step in.'**
+  String get reportIncidentBody;
+  String get confirmCancelDeliveryTitle;
+
+  /// No description provided for @incidentKindBreakdown.
+  ///
+  /// In en, this message translates to:
+  /// **'Vehicle breakdown'**
+  String get incidentKindBreakdown;
+  String get confirmCancelDeliveryTitle;
+
+  /// No description provided for @incidentKindAccident.
+  ///
+  /// In en, this message translates to:
+  /// **'Accident'**
+  String get incidentKindAccident;
+  String get confirmCancelDeliveryTitle;
+
+  /// No description provided for @incidentKindGoodsDamaged.
+  ///
+  /// In en, this message translates to:
+  /// **'Goods damaged'**
+  String get incidentKindGoodsDamaged;
+  String get confirmCancelDeliveryTitle;
+
+  /// No description provided for @incidentKindCustomerUnreachable.
+  ///
+  /// In en, this message translates to:
+  /// **'Customer unreachable'**
+  String get incidentKindCustomerUnreachable;
+  String get confirmCancelDeliveryTitle;
+
+  /// No description provided for @incidentKindOther.
+  ///
+  /// In en, this message translates to:
+  /// **'Something else'**
+  String get incidentKindOther;
+  String get confirmCancelDeliveryTitle;
+
+  /// No description provided for @incidentNoteHint.
+  ///
+  /// In en, this message translates to:
+  /// **'What happened? (optional)'**
+  String get incidentNoteHint;
+  String get confirmCancelDeliveryTitle;
+
+  /// No description provided for @incidentReported.
+  ///
+  /// In en, this message translates to:
+  /// **'Report sent. Support will take it from here.'**
+  String get incidentReported;
+  String get confirmCancelDeliveryTitle;
+
+  /// No description provided for @sendReport.
+  ///
+  /// In en, this message translates to:
+  /// **'Send report'**
+  String get sendReport;
+
   /// No description provided for @confirmCancelDeliveryBody.
   ///
   /// In en, this message translates to:

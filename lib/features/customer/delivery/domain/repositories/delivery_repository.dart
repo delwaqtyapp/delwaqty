@@ -42,6 +42,8 @@ abstract interface class DeliveryRepository {
   });
   Future<void> cancelDelivery(String rideId, {String? reason, bool byDriver});
 
+  Future<void> reportIncident(String rideId, String kind, {String? note});
+
   Future<DeliveryPricingModel> getDeliveryPricing(String serviceType);
   Future<Map<String, dynamic>> estimateDeliveryFee(
     String serviceType,

@@ -1,4 +1,5 @@
 import 'package:delwaqty/shared/widgets/delivery_handoff_button.dart';
+import 'package:delwaqty/shared/widgets/delivery_incident_dialog.dart';
 
 import 'dart:async';
 
@@ -95,8 +96,38 @@ class _DeliveryTrackingPageState extends ConsumerState<DeliveryTrackingPage> {
     );
   }
 
+  Future<void> _reportIncident(
+    BuildContext context,
+    WidgetRef ref,
+    Ride ride,
+  ) async {
+    final l10n = AppLocalizations.of(context);
+    final report = await showDeliveryIncidentDialog(context);
+    if (report == null) return;
+    try {
+      await ref
+          .read(deliveryRepositoryProvider)
+          .reportIncident(ride.id, report.kind, note: report.note);
+      if (context.mounted) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(l10n.incidentReported)));
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(appErrorText(context, e))));
+      }
+    }
+  }
+
   void _showCancelDialog(BuildContext context, WidgetRef ref, Ride ride) {
     final l10n = AppLocalizations.of(context);
+    // Goods already with the driver: the server refuses plain cancellation,
+    // so the customer files an incident for support instead.
+    if (ride.status == RideStatus.inTrip) {
+      _reportIncident(context, ref, ride);
+      return;
+    }
     showDialog<void>(
       context: context,
       builder: (ctx) => AlertDialog(

@@ -97,25 +97,3 @@ jobs:
           name: delwaqty-${{ matrix.flavor }}-release-${{ github.run_number }}
           path: build/app/outputs/flutter-apk/app-${{ matrix.flavor }}-release.apk
           retention-days: 90
-  release:
-    name: Create Release
-    if: github.ref == 'refs/heads/master' && github.event_name == 'push'
-    needs: build
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-    steps:
-      - uses: actions/checkout@v4
-      - name: Download release APKs
-        uses: actions/download-artifact@v4
-        with:
-          pattern: delwaqty-*-release-${{ github.run_number }}
-          path: releases/
-          merge-multiple: true
-      - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2
-        with:
-          files: releases/*.apk
-          generate_release_notes: true
-          tag_name: v${{ github.run_number }}
-          name: 'Build ${{ github.run_number }}'

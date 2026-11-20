@@ -474,8 +474,11 @@ class _SmartMapPickerSheetState extends ConsumerState<SmartMapPickerSheet> {
                     }
                   },
                   onCameraMoveStarted: () {
-                    if (!_isMoving) {
-                      setState(() => _isMoving = true);
+                    if (!_isMoving || _accuracyMeters != null) {
+                      setState(() {
+                        _isMoving = true;
+                        _accuracyMeters = null;
+                      });
                     }
                   },
                   onCameraMove: (pos) {
@@ -512,7 +515,7 @@ class _SmartMapPickerSheetState extends ConsumerState<SmartMapPickerSheet> {
                         width: _isMoving ? 14 : 8,
                         height: _isMoving ? 6 : 4,
                         decoration: BoxDecoration(
-                          color: Colors.black.withValues(
+                          color: cs.shadow.withValues(
                             alpha: _isMoving ? 0.25 : 0.45,
                           ),
                           borderRadius: BorderRadius.circular(8),
@@ -580,10 +583,10 @@ class _SmartMapPickerSheetState extends ConsumerState<SmartMapPickerSheet> {
                                 child: Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
-                                    const Icon(
+                                    Icon(
                                       Icons.gps_fixed_rounded,
                                       size: 14,
-                                      color: Colors.white,
+                                      color: cs.onPrimary,
                                     ),
                                     const SizedBox(width: 6),
                                     Text(
@@ -591,7 +594,7 @@ class _SmartMapPickerSheetState extends ConsumerState<SmartMapPickerSheet> {
                                         _accuracyMeters!.toStringAsFixed(1),
                                       ),
                                       style: AppTextStyles.labelSmall.copyWith(
-                                        color: Colors.white,
+                                        color: cs.onPrimary,
                                         fontWeight: FontWeight.w700,
                                       ),
                                     ),
@@ -696,19 +699,19 @@ class _SmartMapPickerSheetState extends ConsumerState<SmartMapPickerSheet> {
                         ),
                       ),
                       icon: _isConfirming
-                          ? const SizedBox(
+                          ? SizedBox(
                               width: 18,
                               height: 18,
                               child: CircularProgressIndicator(
                                 strokeWidth: 2,
-                                color: Colors.white,
+                                color: cs.onPrimary,
                               ),
                             )
                           : const Icon(Icons.check_circle_rounded),
                       label: Text(
                         l10n.confirmSelectedLocation,
                         style: AppTextStyles.titleSmall.copyWith(
-                          color: Colors.white,
+                          color: cs.onPrimary,
                           fontWeight: FontWeight.w700,
                         ),
                       ),

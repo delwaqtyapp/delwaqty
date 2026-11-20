@@ -130,11 +130,10 @@ class _SupportChatRoomPageState extends ConsumerState<SupportChatRoomPage> {
   // Per-bubble role label: prefers the message's own sender_type when present,
   // falling back to the legacy isFromAdmin/admin-vs-customer split.
   String _senderRoleLabel(
-    ChatMessage msg,
-    bool isAdminMsg,
+    String effectiveRole,
     AppLocalizations l10n,
   ) {
-    switch (msg.senderType) {
+    switch (effectiveRole) {
       case 'admin':
         return l10n.adminLabel;
       case 'driver':
@@ -144,8 +143,46 @@ class _SupportChatRoomPageState extends ConsumerState<SupportChatRoomPage> {
       case 'customer':
         return l10n.customerLabel;
       default:
-        return isAdminMsg ? l10n.adminLabel : l10n.customerLabel;
+        return l10n.customerLabel;
     }
+  }
+
+  String _resolveEffectiveRole(
+    ChatMessage msg,
+    Map<String, dynamic> senderProfile,
+  ) {
+    final metaRole = (msg.metaData?['sender_role'] as String?)?.trim() ?? '';
+    final rawType = metaRole.isNotEmpty ? metaRole : msg.senderType.trim();
+    if (rawType == 'admin' || msg.isFromAdmin) return 'admin';
+    if (rawType == 'driver') return 'driver';
+    if (rawType == 'provider' || rawType == 'merchant') return 'provider';
+    if (rawType == 'customer') return 'customer';
+
+    final dbRole = (senderProfile['role'] as String?)?.trim() ?? '';
+    if (const {
+      'admin',
+      'owner',
+      'super_admin',
+      'country_admin',
+      'governorate_admin',
+      'center_admin',
+      'village_admin',
+    }.contains(dbRole)) {
+      return 'admin';
+    }
+    if (dbRole == 'driver') return 'driver';
+    if (dbRole == 'merchant' || dbRole == 'provider') return 'provider';
+    return 'customer';
+  }
+
+  String _resolveCurrentUserName(User? user) {
+    if (user == null) return '';
+    final full = user.fullName?.trim() ?? '';
+    if (full.isNotEmpty) return full;
+    final uname = user.username?.trim() ?? '';
+    if (uname.isNotEmpty) return uname;
+    if (user.email.isNotEmpty) return user.email.split('@').first;
+    return '';
   }
 
   // When the room opens after the call alert routed us here, the ringing call
@@ -239,12 +276,27 @@ class _SupportChatRoomPageState extends ConsumerState<SupportChatRoomPage> {
           if (isNew) {
             _handleIncomingCall(msg, user?.id);
             _closeOutgoingCallOnAnswer(msg, user?.id);
+            if (user != null && msg.senderId != user.id && !msg.isRead) {
+              unawaited(
+                ref.read(chatRepositoryProvider).markAsRead(widget.roomId),
+              );
+            }
           }
         }
       });
     });
 
-    final referenceNumber = roomAsync.asData?.value.referenceNumber;
+    final roomVal = roomLiveAsync.asData?.value ?? roomAsync.asData?.value;
+    final referenceNumber = roomVal?.referenceNumber;
+    final peerIds = roomVal?.participantIds
+            .where((id) => id.isNotEmpty && id != user?.id)
+            .toList() ??
+        const <String>[];
+    final peerProfile = peerIds.isNotEmpty
+        ? (ref.watch(chatRoomUserProvider(peerIds.first)).asData?.value ??
+            const <String, dynamic>{})
+        : const <String, dynamic>{};
+    final peerName = (peerProfile['full_name'] as String?)?.trim() ?? '';
 
     return Scaffold(
       appBar: AppBar(
@@ -252,14 +304,18 @@ class _SupportChatRoomPageState extends ConsumerState<SupportChatRoomPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              referenceNumber?.isEmpty ?? true
-                  ? '${l10n.chatRoom} #${widget.roomId.substring(0, 6)}'
-                  : referenceNumber ?? '',
+              peerName.isNotEmpty
+                  ? peerName
+                  : (referenceNumber?.isEmpty ?? true
+                      ? '${l10n.chatRoom} #${widget.roomId.length >= 6 ? widget.roomId.substring(0, 6) : widget.roomId}'
+                      : referenceNumber ?? ''),
               style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
             ),
-            if (referenceNumber?.isNotEmpty ?? false)
+            if (peerName.isNotEmpty || (referenceNumber?.isNotEmpty ?? false))
               Text(
-                l10n.chatRoom,
+                referenceNumber?.isNotEmpty ?? false
+                    ? '${l10n.chatRoom} • $referenceNumber'
+                    : l10n.chatRoom,
                 style: Theme.of(context).textTheme.bodySmall,
               ),
           ],
@@ -442,71 +498,184 @@ class _SupportChatRoomPageState extends ConsumerState<SupportChatRoomPage> {
     );
   }
 
-  // Bubble positioning rule (mirrored viewer-side):
-  // - From the customer's view: customer's own bubbles on the RIGHT, admin LEFT.
-  // - From the admin's view: the admin's own bubbles on the RIGHT, customer LEFT.
-  // So: isMe -> right; peer -> left. Colors identify the ROLE:
-  // customer bubbles (role) = tertiary container; admin bubbles = primary.
+  // Bubble positioning & color rule:
+  // - Writer / current user (isMe): RIGHT side with distinct Royal Indigo bubble.
+  // - Replier / peer (!isMe): LEFT side with distinct role-tinted bubble & accent border.
+  // - Every bubble displays the sender's Role badge (أدمن / دليفري / مقدم خدمة / عميل)
+  //   AND the sender's Name clearly.
   Widget _buildMessageCard(ChatMessage msg, String currentUserId) {
     final l10n = AppLocalizations.of(context);
-    final cs = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final isMe = msg.senderId == currentUserId;
-    final isAdminMsg = msg.isFromAdmin;
-    final roleLabel = _senderRoleLabel(msg, isAdminMsg, l10n);
+    final senderProfile =
+        ref.watch(chatRoomUserProvider(msg.senderId)).asData?.value ??
+            const <String, dynamic>{};
+
+    final effectiveRole = _resolveEffectiveRole(msg, senderProfile);
+    final roleLabel = _senderRoleLabel(effectiveRole, l10n);
+
+    final metaName = (msg.metaData?['sender_name'] as String?)?.trim() ?? '';
+    final profileName = (senderProfile['full_name'] as String?)?.trim() ?? '';
+    final profilePhone = (senderProfile['phone'] as String?)?.trim() ?? '';
+    final myName = isMe ? _resolveCurrentUserName(_currentUser()) : '';
+    final senderName = metaName.isNotEmpty
+        ? metaName
+        : (profileName.isNotEmpty
+            ? profileName
+            : (myName.isNotEmpty ? myName : profilePhone));
+
+    final (IconData roleIcon, Color peerAccent, Color peerBg, Color peerFg) =
+        switch (effectiveRole) {
+      'admin' => (
+        Icons.support_agent_rounded,
+        const Color(0xFF0D9488),
+        isDark ? const Color(0xFF123532) : const Color(0xFFE6FFFA),
+        isDark ? const Color(0xFFE6FFFA) : const Color(0xFF134E4A),
+      ),
+      'driver' => (
+        Icons.delivery_dining_rounded,
+        const Color(0xFF0284C7),
+        isDark ? const Color(0xFF102A43) : const Color(0xFFE0F2FE),
+        isDark ? const Color(0xFFE0F2FE) : const Color(0xFF0C4A6E),
+      ),
+      'provider' => (
+        Icons.storefront_rounded,
+        const Color(0xFFD97706),
+        isDark ? const Color(0xFF3B240F) : const Color(0xFFFEF3C7),
+        isDark ? const Color(0xFFFEF3C7) : const Color(0xFF78350F),
+      ),
+      _ => (
+        Icons.person_rounded,
+        const Color(0xFF7C3AED),
+        isDark ? const Color(0xFF281948) : const Color(0xFFF3E8FF),
+        isDark ? const Color(0xFFF3E8FF) : const Color(0xFF4C1D95),
+      ),
+    };
+
+    final bubbleBg = isMe ? const Color(0xFF4F46E5) : peerBg;
+    final bubbleFg = isMe ? Colors.white : peerFg;
+    final badgeBg = isMe
+        ? Colors.white.withValues(alpha: 0.2)
+        : peerAccent.withValues(alpha: 0.16);
+    final badgeFg = isMe ? Colors.white : peerAccent;
+    final timeColor = isMe
+        ? Colors.white.withValues(alpha: 0.78)
+        : peerFg.withValues(alpha: 0.65);
+
+    final timeStr =
+        '${msg.createdAt.hour.toString().padLeft(2, '0')}:${msg.createdAt.minute.toString().padLeft(2, '0')}';
 
     final bubble = Container(
-      margin: const EdgeInsets.only(bottom: 8),
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      margin: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 9),
       decoration: BoxDecoration(
-        color: isAdminMsg ? cs.primaryContainer : cs.tertiaryContainer,
+        color: bubbleBg,
         borderRadius: BorderRadius.only(
-          topLeft: const Radius.circular(16),
-          topRight: const Radius.circular(16),
-          bottomLeft: isMe ? const Radius.circular(16) : const Radius.circular(4),
-          bottomRight: isMe ? const Radius.circular(4) : const Radius.circular(16),
+          topLeft: const Radius.circular(18),
+          topRight: const Radius.circular(18),
+          bottomLeft:
+              isMe ? const Radius.circular(18) : const Radius.circular(4),
+          bottomRight:
+              isMe ? const Radius.circular(4) : const Radius.circular(18),
         ),
+        border: Border.all(
+          color: isMe
+              ? const Color(0xFF6366F1).withValues(alpha: 0.45)
+              : peerAccent.withValues(alpha: 0.4),
+          width: 1.1,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: (isMe ? const Color(0xFF4F46E5) : peerAccent)
+                .withValues(alpha: 0.1),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
-      constraints: const BoxConstraints(maxWidth: 400),
+      constraints: const BoxConstraints(minWidth: 130, maxWidth: 340),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
-            padding: const EdgeInsets.only(bottom: 2),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
+            padding: const EdgeInsets.only(bottom: 6),
+            child: Wrap(
+              spacing: 6,
+              runSpacing: 4,
+              crossAxisAlignment: WrapCrossAlignment.center,
               children: [
-                Icon(
-                  isAdminMsg ? Icons.support_agent_rounded : Icons.person_rounded,
-                  size: 12,
-                  color: isAdminMsg
-                      ? (isMe ? cs.onPrimaryContainer : cs.primary)
-                      : (isMe ? cs.onTertiaryContainer : cs.tertiary),
-                ),
-                const SizedBox(width: 4),
-                Text(
-                  roleLabel,
-                  style: TextStyle(
-                    fontSize: 10,
-                    fontWeight: FontWeight.bold,
-                    color: isAdminMsg
-                        ? (isMe ? cs.onPrimaryContainer : cs.primary)
-                        : (isMe ? cs.onTertiaryContainer : cs.tertiary),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 7,
+                    vertical: 2.5,
+                  ),
+                  decoration: BoxDecoration(
+                    color: badgeBg,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(roleIcon, size: 12, color: badgeFg),
+                      const SizedBox(width: 4),
+                      Text(
+                        roleLabel,
+                        style: TextStyle(
+                          fontSize: 10.5,
+                          fontWeight: FontWeight.w800,
+                          color: badgeFg,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-                const Spacer(),
-                Text(
-                  '${msg.createdAt.hour}:${msg.createdAt.minute.toString().padLeft(2, '0')}',
-                  style: TextStyle(
-                    fontSize: 10,
-                    color: isMe
-                        ? (isAdminMsg ? cs.onPrimaryContainer : cs.onTertiaryContainer)
-                        : cs.onSurfaceVariant,
+                if (senderName.isNotEmpty)
+                  Text(
+                    senderName,
+                    style: TextStyle(
+                      fontSize: 11.5,
+                      fontWeight: FontWeight.w700,
+                      color: bubbleFg,
+                    ),
                   ),
-                ),
               ],
             ),
           ),
-          _buildMessageContent(msg, isMe, isAdminMsg, l10n),
+          _buildMessageContent(
+            msg,
+            isMe,
+            effectiveRole == 'admin',
+            l10n,
+            fgColor: bubbleFg,
+            bgColor: bubbleBg,
+          ),
+          const SizedBox(height: 4),
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                timeStr,
+                style: TextStyle(
+                  fontSize: 10,
+                  color: timeColor,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              if (isMe) ...[
+                const SizedBox(width: 4),
+                Icon(
+                  msg.isRead
+                      ? Icons.done_all_rounded
+                      : Icons.done_rounded,
+                  size: 13,
+                  color: msg.isRead
+                      ? const Color(0xFF67E8F9)
+                      : Colors.white.withValues(alpha: 0.78),
+                ),
+              ],
+            ],
+          ),
         ],
       ),
     );
@@ -521,13 +690,17 @@ class _SupportChatRoomPageState extends ConsumerState<SupportChatRoomPage> {
     ChatMessage msg,
     bool isMe,
     bool isAdminMsg,
-    AppLocalizations l10n,
-  ) {
+    AppLocalizations l10n, {
+    Color? fgColor,
+    Color? bgColor,
+  }) {
     final cs = Theme.of(context).colorScheme;
-    final fg = isAdminMsg
-        ? (isMe ? cs.onPrimaryContainer : cs.primary)
-        : (isMe ? cs.onTertiaryContainer : cs.tertiary);
-    final bg = isAdminMsg ? cs.primaryContainer : cs.tertiaryContainer;
+    final fg = fgColor ??
+        (isAdminMsg
+            ? (isMe ? cs.onPrimaryContainer : cs.primary)
+            : (isMe ? cs.onTertiaryContainer : cs.tertiary));
+    final bg =
+        bgColor ?? (isAdminMsg ? cs.primaryContainer : cs.tertiaryContainer);
 
     // Image attachment
     if (msg.messageType == 'image' || (msg.attachmentUrl != null && msg.messageType == 'file' && _looksLikeImage(msg.attachmentUrl!))) {
@@ -566,7 +739,7 @@ class _SupportChatRoomPageState extends ConsumerState<SupportChatRoomPage> {
 
       final Color statusColor = callActive
           ? Colors.green
-          : (callDeclined || callEnded) ? cs.error : cs.primary;
+          : (callDeclined || callEnded) ? cs.error : (isMe ? Colors.white : cs.primary);
       final IconData statusIcon = callActive
           ? Icons.call_rounded
           : (callDeclined || callEnded) ? Icons.call_end_rounded : Icons.call_rounded;
@@ -666,7 +839,11 @@ class _SupportChatRoomPageState extends ConsumerState<SupportChatRoomPage> {
 
     return Text(
       msg.message,
-      style: TextStyle(color: fg),
+      style: TextStyle(
+        color: fg,
+        fontSize: 14,
+        height: 1.38,
+      ),
       softWrap: true,
     );
   }
@@ -1112,11 +1289,12 @@ class _SupportChatRoomPageState extends ConsumerState<SupportChatRoomPage> {
         contentType: contentType,
       );
       final isAdminOrOwner = _sessionIsAdminPanel();
+      final senderType = _selfSenderType();
       final message = ChatMessage(
         id: '',
         roomId: widget.roomId,
         senderId: user.id,
-        senderType: _selfSenderType(),
+        senderType: senderType,
         message: mediaCaption == l10n.voiceMessage ? l10n.voiceMessage : mediaCaption,
         messageType: messageType,
         attachmentUrl: messageType == 'image' ? path : null,
@@ -1124,6 +1302,10 @@ class _SupportChatRoomPageState extends ConsumerState<SupportChatRoomPage> {
         audioUrl: messageType == 'audio' ? path : null,
         isFromAdmin: isAdminOrOwner,
         createdAt: DateTime.now(),
+        metaData: {
+          'sender_name': _resolveCurrentUserName(user),
+          'sender_role': senderType,
+        },
       );
       await repo.sendMessage(message);
       _scrollToBottom();
@@ -1151,11 +1333,12 @@ class _SupportChatRoomPageState extends ConsumerState<SupportChatRoomPage> {
     }
     final l10n = AppLocalizations.of(context);
     final isAdminOrOwner = _sessionIsAdminPanel();
+    final senderType = _selfSenderType();
     final message = ChatMessage(
       id: '',
       roomId: widget.roomId,
       senderId: user.id,
-      senderType: _selfSenderType(),
+      senderType: senderType,
       message: l10n.voiceCallRequest,
       messageType: 'call',
       isFromAdmin: isAdminOrOwner,
@@ -1165,6 +1348,8 @@ class _SupportChatRoomPageState extends ConsumerState<SupportChatRoomPage> {
         'status': 'ringing',
         'requested_by': user.id,
         'requested_at': DateTime.now().toIso8601String(),
+        'sender_name': _resolveCurrentUserName(user),
+        'sender_role': senderType,
       },
     );
     final repo = ref.read(chatRepositoryProvider);
@@ -1288,14 +1473,19 @@ class _SupportChatRoomPageState extends ConsumerState<SupportChatRoomPage> {
     }
 
     final isAdminOrOwner = _sessionIsAdminPanel();
+    final senderType = _selfSenderType();
     final message = ChatMessage(
       id: '',
       roomId: widget.roomId,
       senderId: user.id,
-      senderType: _selfSenderType(),
+      senderType: senderType,
       message: text,
       isFromAdmin: isAdminOrOwner,
       createdAt: DateTime.now(),
+      metaData: {
+        'sender_name': _resolveCurrentUserName(user),
+        'sender_role': senderType,
+      },
     );
 
     final repo = ref.read(chatRepositoryProvider);
@@ -1398,7 +1588,7 @@ class _SupportChatRoomPageState extends ConsumerState<SupportChatRoomPage> {
       if (!mounted) return;
       if (!room.isActive) return;
       if (room.assignedAdminId != null) return;
-      final name = user.fullName ?? user.username ?? user.email.split('@').first;
+      final name = _resolveCurrentUserName(user);
       final welcomeText = room.regionId == null
           ? l10n.welcomeCustomerMessage(name)
           : '📍 ${l10n.welcomeCustomerMessage(name)}';
@@ -1411,6 +1601,10 @@ class _SupportChatRoomPageState extends ConsumerState<SupportChatRoomPage> {
         message: welcomeText,
         isFromAdmin: true,
         createdAt: DateTime.now(),
+        metaData: {
+          'sender_name': name,
+          'sender_role': 'admin',
+        },
       ));
       await repo.setAssignedAdmin(
         roomId: widget.roomId,

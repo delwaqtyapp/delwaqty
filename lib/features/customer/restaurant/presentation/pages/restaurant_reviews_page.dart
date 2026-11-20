@@ -11,6 +11,8 @@ import 'package:delwaqty/shared/widgets/error_state.dart';
 import 'package:delwaqty/shared/widgets/app_snackbar.dart';
 import 'package:delwaqty/shared/widgets/skeleton_loader.dart';
 import 'package:delwaqty/shared/widgets/app_loader.dart';
+import 'package:delwaqty/features/_shared/auth/domain/auth_state.dart';
+import 'package:delwaqty/features/_shared/auth/presentation/auth_provider.dart';
 import 'package:delwaqty/core/theme/app_colors.dart';
 
 class ReviewsState {
@@ -83,8 +85,8 @@ class RestaurantReviewsNotifier extends AsyncNotifier<ReviewsState> {
         isLoadingMore: false,
         offset: currentState.offset + reviews.length,
       ));
-    } catch (e, stack) {
-      state = AsyncValue.error(e, stack);
+    } catch (_) {
+      state = AsyncValue.data(currentState.copyWith(isLoadingMore: false));
     }
   }
 }
@@ -503,14 +505,26 @@ class _WriteReviewSheetState extends ConsumerState<_WriteReviewSheet> {
   }
 
   Future<void> _submitReview() async {
+    final auth = ref.read(authStateProvider);
+    if (auth is! AuthAuthenticated) {
+      if (mounted) {
+        AppSnackbar.error(
+          context,
+          message: AppLocalizations.of(context).login,
+        );
+      }
+      return;
+    }
     setState(() => _isSubmitting = true);
     try {
       final repo = ref.read(reviewRepositoryProvider);
       await repo.submitReview(
         merchantId: widget.merchantId,
-        userId: '',
+        userId: auth.user.id,
         rating: _rating,
-        comment: _commentController.text.isNotEmpty ? _commentController.text : null,
+        comment: _commentController.text.isNotEmpty
+            ? _commentController.text
+            : null,
       );
       if (mounted) {
         ref.invalidate(restaurantReviewsProvider(widget.merchantId));

@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'app_colors.dart';
 import 'app_spacing.dart';
@@ -289,8 +288,11 @@ abstract final class AppTheme {
       ),
       pageTransitionsTheme: const PageTransitionsTheme(
         builders: {
-          TargetPlatform.android: FadeForwardsPageTransitionsBuilder(),
-          TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
+          TargetPlatform.android: _FastModernPageTransitionsBuilder(),
+          TargetPlatform.iOS: _FastModernPageTransitionsBuilder(),
+          TargetPlatform.linux: _FastModernPageTransitionsBuilder(),
+          TargetPlatform.macOS: _FastModernPageTransitionsBuilder(),
+          TargetPlatform.windows: _FastModernPageTransitionsBuilder(),
         },
       ),
       extensions: [
@@ -318,3 +320,54 @@ abstract final class AppFontFamily {
 }
 
 const String _defaultFontFamily = AppFontFamily.cairo;
+
+class _FastModernPageTransitionsBuilder extends PageTransitionsBuilder {
+  const _FastModernPageTransitionsBuilder();
+
+  @override
+  Widget buildTransitions<T>(
+    PageRoute<T> route,
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+    Widget child,
+  ) {
+    final curved = CurvedAnimation(
+      parent: animation,
+      curve: Curves.easeOutCubic,
+      reverseCurve: Curves.easeInCubic,
+    );
+    final secondaryCurved = CurvedAnimation(
+      parent: secondaryAnimation,
+      curve: Curves.easeOutCubic,
+      reverseCurve: Curves.easeInCubic,
+    );
+
+    return SlideTransition(
+      position: Tween<Offset>(
+        begin: const Offset(0.0, 0.035),
+        end: Offset.zero,
+      ).animate(curved),
+      child: ScaleTransition(
+        scale: Tween<double>(
+          begin: 0.965,
+          end: 1.0,
+        ).animate(curved),
+        child: FadeTransition(
+          opacity: Tween<double>(
+            begin: 0.0,
+            end: 1.0,
+          ).animate(curved),
+          child: ScaleTransition(
+            scale: Tween<double>(
+              begin: 1.0,
+              end: 0.985,
+            ).animate(secondaryCurved),
+            child: child,
+          ),
+        ),
+      ),
+    );
+  }
+}
+

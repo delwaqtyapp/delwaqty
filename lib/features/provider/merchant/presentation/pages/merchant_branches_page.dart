@@ -114,9 +114,17 @@ class _MerchantBranchesPageState extends ConsumerState<MerchantBranchesPage> {
 
   void _showBranchForm(
     BuildContext context,
-    WidgetRef ref, {Branch? branch}) {
-    final merchantId =
-        ref.read(providerMerchantIdProvider).value ?? '';
+    WidgetRef ref, {
+    Branch? branch,
+  }) {
+    final merchantId = ref.read(providerMerchantIdProvider).value ?? '';
+    if (merchantId.isEmpty) {
+      context.showAppSnackBar(
+        AppLocalizations.of(context).noMerchantAccount,
+        isError: true,
+      );
+      return;
+    }
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -154,7 +162,7 @@ class _MerchantBranchesPageState extends ConsumerState<MerchantBranchesPage> {
         ],
       ),
     );
-    if (confirmed == true) {
+    if (confirmed == true && mounted) {
       await _deleteBranch(branch);
     }
   }
@@ -518,7 +526,9 @@ class _BranchFormSheetState extends ConsumerState<_BranchFormSheet> {
                           child: TextFormField(
                             controller: _latitudeController,
                             decoration: InputDecoration(
-                              labelText: '${l10n.location} (Lat)',
+                              labelText: l10n.localeName.startsWith('ar')
+                                  ? '${l10n.location} (خط العرض)'
+                                  : '${l10n.location} (Lat)',
                               hintText: '0.0',
                               border: const OutlineInputBorder(),
                             ),
@@ -534,7 +544,9 @@ class _BranchFormSheetState extends ConsumerState<_BranchFormSheet> {
                           child: TextFormField(
                             controller: _longitudeController,
                             decoration: InputDecoration(
-                              labelText: '${l10n.location} (Lng)',
+                              labelText: l10n.localeName.startsWith('ar')
+                                  ? '${l10n.location} (خط الطول)'
+                                  : '${l10n.location} (Lng)',
                               hintText: '0.0',
                               border: const OutlineInputBorder(),
                             ),
@@ -640,6 +652,7 @@ class _BranchFormSheetState extends ConsumerState<_BranchFormSheet> {
       } else {
         await repo.createBranch(branch);
       }
+      if (!mounted) return;
       setState(() => _saving = false);
     } catch (e) {
       if (!mounted) return;
@@ -649,7 +662,6 @@ class _BranchFormSheetState extends ConsumerState<_BranchFormSheet> {
       );
       return;
     }
-    if (mounted) setState(() => _saving = false);
     widget.onSaved();
   }
 }

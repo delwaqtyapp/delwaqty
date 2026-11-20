@@ -1,5 +1,4 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:delwaqty/features/admin/support_chat/domain/entities/chat_room.dart';
 import 'package:delwaqty/features/admin/support_chat/domain/entities/chat_message.dart';
 import 'package:delwaqty/features/admin/support_chat/domain/repositories/chat_repository.dart';
@@ -10,9 +9,10 @@ import 'package:delwaqty/features/_shared/auth/domain/auth_state.dart';
 import 'package:delwaqty/features/admin/support_chat/services/chat_call_alert_service.dart';
 import 'package:delwaqty/services/logger/app_logger.dart';
 import 'package:delwaqty/services/realtime/realtime_service.dart';
+import 'package:delwaqty/services/supabase/supabase_service.dart';
 
 final supabaseChatDataSourceProvider = Provider<SupabaseChatDataSource>((ref) {
-  return SupabaseChatDataSource(Supabase.instance.client);
+  return SupabaseChatDataSource(ref.watch(supabaseClientProvider));
 });
 
 final chatRepositoryProvider = Provider<ChatRepository>((ref) {
@@ -99,7 +99,8 @@ final chatRoomProvider = FutureProvider.family<ChatRoom, String>((ref, roomId) a
 // on BOTH sides (admin closing the chat flips the customer's UI instantly).
 // Requires the chat_rooms REPLICA IDENTITY FULL (migration 098).
 final chatRoomStreamProvider = StreamProvider.family<ChatRoom, String>((ref, roomId) {
-  return Supabase.instance.client
+  return ref
+      .watch(supabaseClientProvider)
       .from('chat_rooms')
       .stream(primaryKey: ['id'])
       .eq('id', roomId)
@@ -118,4 +119,10 @@ final chatPeerTypingProvider = StreamProvider.family<bool, String>((ref, roomId)
   return repo.typingStream(roomId);
 });
 
-// New chat room creation - returns room ID
+// Resolves a user's profile (full_name, phone, avatar_url, role) for chat bubbles & room headers.
+final chatRoomUserProvider =
+    FutureProvider.family<Map<String, dynamic>, String>((ref, userId) async {
+      if (userId.isEmpty) return const <String, dynamic>{};
+      final repo = ref.read(chatRepositoryProvider);
+      return repo.getRoomUser(userId);
+    });

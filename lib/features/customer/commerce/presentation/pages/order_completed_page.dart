@@ -52,6 +52,9 @@ class _OrderCompletedPageState extends State<OrderCompletedPage>
 
     return PopScope(
       canPop: false,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop) context.go('/home');
+      },
       child: Scaffold(
         body: Container(
           width: double.infinity,
@@ -85,9 +88,9 @@ class _OrderCompletedPageState extends State<OrderCompletedPage>
                           color: colorScheme.primary,
                           shape: BoxShape.circle,
                         ),
-                        child: const Icon(
+                        child: Icon(
                           Icons.check,
-                          color: Colors.white,
+                          color: colorScheme.onPrimary,
                           size: 56,
                         ),
                       ),

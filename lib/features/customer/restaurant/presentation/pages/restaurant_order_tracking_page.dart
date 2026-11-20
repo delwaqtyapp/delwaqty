@@ -190,7 +190,7 @@ class _TrackingTile extends StatelessWidget {
                             ),
                             const SizedBox(width: 4),
                             Text(
-                              '~${entry.estimatedMinutes} min',
+                              '~${entry.estimatedMinutes} ${AppLocalizations.of(context).minutesShort}',
                               style: textTheme.bodySmall?.copyWith(
                                 color: colorScheme.onSurfaceVariant,
                               ),

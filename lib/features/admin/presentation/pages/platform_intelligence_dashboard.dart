@@ -4,7 +4,11 @@ import 'package:go_router/go_router.dart';
 import 'package:delwaqty/features/admin/admin_shell.dart';
 import 'package:delwaqty/features/admin/presentation/providers/platform_intelligence_providers.dart';
 import 'package:delwaqty/features/admin/domain/entities/platform_intelligence.dart';
+import 'package:delwaqty/features/_shared/regions/domain/entities/region.dart';
 import 'package:delwaqty/features/_shared/regions/presentation/providers/region_providers.dart';
+import 'package:delwaqty/features/_shared/regions/presentation/widgets/region_picker_sheet.dart';
+import 'package:delwaqty/features/admin_management/domain/entities/admin_account.dart';
+import 'package:delwaqty/features/admin_management/presentation/providers/admin_management_providers.dart';
 import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
 import 'package:delwaqty/shared/widgets/floating_glass_buttons.dart';
 import 'package:delwaqty/shared/widgets/premium_empty_state.dart';
@@ -81,6 +85,8 @@ class _PlatformIntelligenceDashboardState
               AnimatedFadeIn(child: _buildScopeRow(context)),
               const SizedBox(height: 12),
               AnimatedFadeIn(child: _buildTimeFilter(filter, cs)),
+              const SizedBox(height: 12),
+              AnimatedFadeIn(child: _buildExecutiveHubBar(context, cs)),
               const SizedBox(height: 20),
               kpiAsync.when(
                 loading: () => const Center(
@@ -203,61 +209,606 @@ class _PlatformIntelligenceDashboardState
     );
   }
 
+  String _regionTypeLabel(RegionType type, AppLocalizations l10n) {
+    switch (type) {
+      case RegionType.country:
+        return l10n.regionCountry;
+      case RegionType.governorate:
+        return l10n.regionGovernorate;
+      case RegionType.markaz:
+        return l10n.regionCenter;
+      case RegionType.district:
+        return l10n.regionDistrict;
+      case RegionType.city:
+        return l10n.regionCity;
+      case RegionType.newCity:
+        return l10n.regionNewCity;
+      case RegionType.village:
+        return l10n.regionVillage;
+      case RegionType.area:
+        return l10n.regionArea;
+    }
+  }
+
+  IconData _regionTypeIcon(RegionType type) {
+    switch (type) {
+      case RegionType.country:
+        return Icons.public_rounded;
+      case RegionType.governorate:
+        return Icons.location_city_rounded;
+      case RegionType.markaz:
+        return Icons.storefront_rounded;
+      case RegionType.district:
+        return Icons.domain_rounded;
+      case RegionType.city:
+      case RegionType.newCity:
+        return Icons.apartment_rounded;
+      case RegionType.village:
+        return Icons.cottage_outlined;
+      case RegionType.area:
+        return Icons.place_rounded;
+    }
+  }
+
   Widget _buildScopeRow(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final regionAsync = ref.watch(governoratesProvider);
+    final cs = Theme.of(context).colorScheme;
     final scopeRegion = ref.watch(adminScopeRegionProvider);
+    final activeRegionAsync = scopeRegion != null
+        ? ref.watch(regionByIdProvider(scopeRegion))
+        : const AsyncData<Region?>(null);
+    final subRegionsAsync = scopeRegion != null
+        ? ref.watch(regionChildrenProvider(scopeRegion))
+        : ref.watch(governoratesProvider);
+    final adminsAsync = ref.watch(adminsListProvider);
 
-    return Row(
-      children: [
-        const Icon(
-          Icons.tune_rounded,
-          size: 16,
-          color: Color(0xFF5B3DF0),
-        ),
-        const SizedBox(width: 6),
-        Text(
-          l10n.regions,
-          style: Theme.of(context).textTheme.labelMedium?.copyWith(
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        const SizedBox(width: 8),
-        Expanded(
-          child: regionAsync.when(
-            loading: () => const SizedBox.shrink(),
-            error: (_, _) => const SizedBox.shrink(),
-            data: (regions) {
-              return DropdownButtonFormField<String?>(
-                initialValue: scopeRegion,
-                decoration: const InputDecoration(
-                  isDense: true,
-                  contentPadding: EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 8,
-                  ),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(10)),
+    final activeRegion = activeRegionAsync.value;
+    final subRegions = subRegionsAsync.value ?? const <Region>[];
+    final childRegionIds = subRegions.map((r) => r.id).toSet();
+
+    final allRegionalAdmins = (adminsAsync.value ?? const <AdminAccount>[])
+        .where((a) => a.regionId != null && a.regionId!.isNotEmpty)
+        .toList();
+
+    final prioritizedAdmins = scopeRegion == null
+        ? allRegionalAdmins
+        : [
+            ...allRegionalAdmins.where(
+              (a) =>
+                  a.regionId == scopeRegion ||
+                  childRegionIds.contains(a.regionId),
+            ),
+            ...allRegionalAdmins.where(
+              (a) =>
+                  a.regionId != scopeRegion &&
+                  !childRegionIds.contains(a.regionId),
+            ),
+          ];
+
+    final activeRegionAdmin = scopeRegion == null
+        ? null
+        : allRegionalAdmins
+            .where((a) => a.regionId == scopeRegion)
+            .firstOrNull;
+
+    return PremiumCard(
+      padding: const EdgeInsets.all(12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Row 1 — Main Region Picker Button
+          Row(
+            children: [
+              Expanded(
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(12),
+                  onTap: () async {
+                    final picked = await RegionPickerSheet.show(
+                      context,
+                      selectedRegionId: scopeRegion,
+                    );
+                    if (!mounted) return;
+                    if (picked == null) return;
+                    ref.read(adminScopeRegionProvider.notifier).state =
+                        picked.id.isEmpty ? null : picked.id;
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 10,
+                    ),
+                    decoration: BoxDecoration(
+                      color: cs.surfaceContainerHighest.withValues(alpha: 0.65),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: const Color(0xFF5B3DF0).withValues(alpha: 0.3),
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(
+                          activeRegion != null
+                              ? _regionTypeIcon(activeRegion.type)
+                              : Icons.public_rounded,
+                          size: 18,
+                          color: const Color(0xFF5B3DF0),
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            activeRegion?.nameAr ?? l10n.allGovernorates,
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodyMedium
+                                ?.copyWith(fontWeight: FontWeight.w700),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        if (activeRegion != null) ...[
+                          const SizedBox(width: 6),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 2,
+                            ),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF5B3DF0)
+                                  .withValues(alpha: 0.14),
+                              borderRadius: BorderRadius.circular(
+                                AppSpacing.radiusFull,
+                              ),
+                            ),
+                            child: Text(
+                              _regionTypeLabel(activeRegion.type, l10n),
+                              style: const TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w700,
+                                color: Color(0xFF5B3DF0),
+                              ),
+                            ),
+                          ),
+                        ],
+                        const SizedBox(width: 4),
+                        const Icon(
+                          Icons.keyboard_arrow_down_rounded,
+                          size: 18,
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-                items: [
-                  DropdownMenuItem<String?>(
-                    child: Text(l10n.allGovernorates),
-                  ),
-                  for (final r in regions.take(30))
-                    DropdownMenuItem<String?>(
-                      value: r.id,
-                      child: Text(r.nameAr),
+              ),
+              if (scopeRegion != null) ...[
+                if (activeRegion?.parentRegionId != null) ...[
+                  const SizedBox(width: 6),
+                  Tooltip(
+                    message: l10n.regions,
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(10),
+                      onTap: () {
+                        ref.read(adminScopeRegionProvider.notifier).state =
+                            activeRegion!.parentRegionId;
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 10,
+                        ),
+                        decoration: BoxDecoration(
+                          color: cs.secondaryContainer,
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.arrow_upward_rounded,
+                              size: 16,
+                              color: cs.onSecondaryContainer,
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              l10n.regions,
+                              style: TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w700,
+                                color: cs.onSecondaryContainer,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
+                  ),
                 ],
-                onChanged: (v) {
-                  ref.read(adminScopeRegionProvider.notifier).state = v;
-                },
-              );
-            },
+                const SizedBox(width: 6),
+                Tooltip(
+                  message: l10n.allGovernorates,
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(10),
+                    onTap: () {
+                      ref.read(adminScopeRegionProvider.notifier).state = null;
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 10,
+                      ),
+                      decoration: BoxDecoration(
+                        color: cs.errorContainer.withValues(alpha: 0.7),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.public_off_rounded,
+                            size: 15,
+                            color: cs.onErrorContainer,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            l10n.allGovernorates,
+                            style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w700,
+                              color: cs.onErrorContainer,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ],
           ),
+
+          // Row 2 — Sub-Regions Quick Filter Strip
+          if (subRegions.isNotEmpty) ...[
+            const SizedBox(height: 10),
+            Row(
+              children: [
+                const Icon(
+                  Icons.account_tree_rounded,
+                  size: 14,
+                  color: Color(0xFF0D9488),
+                ),
+                const SizedBox(width: 5),
+                Expanded(
+                  child: Text(
+                    '${l10n.regions} (${subRegions.length})',
+                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                      fontWeight: FontWeight.w700,
+                      color: cs.onSurfaceVariant,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 6),
+            SizedBox(
+              height: 38,
+              child: ListView.separated(
+                scrollDirection: Axis.horizontal,
+                itemCount: subRegions.length,
+                separatorBuilder: (_, _) => const SizedBox(width: 6),
+                itemBuilder: (context, index) {
+                  final place = subRegions[index];
+                  return ActionChip(
+                    avatar: Icon(
+                      _regionTypeIcon(place.type),
+                      size: 15,
+                      color: const Color(0xFF0D9488),
+                    ),
+                    label: Text(
+                      '${place.nameAr} (${_regionTypeLabel(place.type, l10n)})',
+                      style: const TextStyle(
+                        fontSize: 11.5,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    backgroundColor:
+                        const Color(0xFF0D9488).withValues(alpha: 0.09),
+                    side: BorderSide(
+                      color: const Color(0xFF0D9488).withValues(alpha: 0.25),
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(
+                        AppSpacing.radiusFull,
+                      ),
+                    ),
+                    onPressed: () {
+                      ref.read(adminScopeRegionProvider.notifier).state =
+                          place.id;
+                    },
+                  );
+                },
+              ),
+            ),
+          ],
+
+          // Row 3 — Subordinate Admins Supervision Strip
+          if (prioritizedAdmins.isNotEmpty) ...[
+            const SizedBox(height: 10),
+            Row(
+              children: [
+                const Icon(
+                  Icons.shield_rounded,
+                  size: 14,
+                  color: Color(0xFF5B3DF0),
+                ),
+                const SizedBox(width: 5),
+                Expanded(
+                  child: Text(
+                    '${l10n.adminMgmtList} (${prioritizedAdmins.length})',
+                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                      fontWeight: FontWeight.w700,
+                      color: cs.onSurfaceVariant,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 6),
+            SizedBox(
+              height: 38,
+              child: ListView.separated(
+                scrollDirection: Axis.horizontal,
+                itemCount: prioritizedAdmins.length,
+                separatorBuilder: (_, _) => const SizedBox(width: 6),
+                itemBuilder: (context, index) {
+                  final admin = prioritizedAdmins[index];
+                  final isCurrentAdminRegion =
+                      scopeRegion != null && admin.regionId == scopeRegion;
+                  final displayName =
+                      (admin.fullName != null && admin.fullName!.trim().isNotEmpty)
+                          ? admin.fullName!.trim()
+                          : admin.email;
+                  final regionLabel =
+                      (admin.regionName != null && admin.regionName!.trim().isNotEmpty)
+                          ? admin.regionName!.trim()
+                          : l10n.regions;
+
+                  return FilterChip(
+                    selected: isCurrentAdminRegion,
+                    showCheckmark: false,
+                    avatar: Icon(
+                      Icons.verified_user_rounded,
+                      size: 15,
+                      color: isCurrentAdminRegion
+                          ? cs.onPrimary
+                          : const Color(0xFF5B3DF0),
+                    ),
+                    label: Text(
+                      '$displayName • $regionLabel',
+                      style: TextStyle(
+                        fontSize: 11.5,
+                        fontWeight: FontWeight.w700,
+                        color: isCurrentAdminRegion
+                            ? cs.onPrimary
+                            : cs.onSurface,
+                      ),
+                    ),
+                    selectedColor: const Color(0xFF5B3DF0),
+                    backgroundColor:
+                        const Color(0xFF5B3DF0).withValues(alpha: 0.08),
+                    side: BorderSide(
+                      color: const Color(0xFF5B3DF0).withValues(alpha: 0.25),
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(
+                        AppSpacing.radiusFull,
+                      ),
+                    ),
+                    onSelected: (_) {
+                      ref.read(adminScopeRegionProvider.notifier).state =
+                          admin.regionId;
+                    },
+                  );
+                },
+              ),
+            ),
+            if (activeRegionAdmin != null) ...[
+              const SizedBox(height: 10),
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF5B3DF0).withValues(alpha: 0.08),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: const Color(0xFF5B3DF0).withValues(alpha: 0.24),
+                  ),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        const Icon(
+                          Icons.admin_panel_settings_rounded,
+                          size: 16,
+                          color: Color(0xFF5B3DF0),
+                        ),
+                        const SizedBox(width: 6),
+                        Expanded(
+                          child: Text(
+                            '${l10n.adminRole}: ${activeRegionAdmin.fullName ?? activeRegionAdmin.email}',
+                            style: Theme.of(context)
+                                .textTheme
+                                .labelMedium
+                                ?.copyWith(fontWeight: FontWeight.w700),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    Wrap(
+                      spacing: 6,
+                      runSpacing: 6,
+                      children: [
+                        _buildSupervisionJumpButton(
+                          context,
+                          label: l10n.adminMembers,
+                          icon: Icons.people_rounded,
+                          color: const Color(0xFF4A90D9),
+                          route: '/admin/members',
+                        ),
+                        _buildSupervisionJumpButton(
+                          context,
+                          label: l10n.adminOrdersPage,
+                          icon: Icons.receipt_long_rounded,
+                          color: const Color(0xFFFF9500),
+                          route: '/admin/orders',
+                        ),
+                        _buildSupervisionJumpButton(
+                          context,
+                          label: l10n.complaints,
+                          icon: Icons.warning_amber_rounded,
+                          color: const Color(0xFFFF3B30),
+                          route: '/admin/complaints',
+                        ),
+                        _buildSupervisionJumpButton(
+                          context,
+                          label: l10n.supportChat,
+                          icon: Icons.chat_bubble_rounded,
+                          color: const Color(0xFF34C759),
+                          route: '/admin/support-chat',
+                        ),
+                        _buildSupervisionJumpButton(
+                          context,
+                          label: l10n.adminProfile,
+                          icon: Icons.badge_rounded,
+                          color: const Color(0xFF5B3DF0),
+                          route: '/admin/admins/${activeRegionAdmin.id}',
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSupervisionJumpButton(
+    BuildContext context, {
+    required String label,
+    required IconData icon,
+    required Color color,
+    required String route,
+  }) {
+    return InkWell(
+      borderRadius: BorderRadius.circular(8),
+      onTap: () => context.push(route),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+        decoration: BoxDecoration(
+          color: color.withValues(alpha: 0.14),
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: color.withValues(alpha: 0.3)),
         ),
-      ],
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, size: 13, color: color),
+            const SizedBox(width: 4),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w700,
+                color: color,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildExecutiveHubBar(BuildContext context, ColorScheme cs) {
+    final l10n = AppLocalizations.of(context);
+    final pills = [
+      (
+        l10n.adminMembers,
+        Icons.people_rounded,
+        const Color(0xFF4A90D9),
+        '/admin/members',
+      ),
+      (
+        l10n.manageRegions,
+        Icons.public_rounded,
+        const Color(0xFF0D9488),
+        '/admin/regions',
+      ),
+      (
+        l10n.adminBannersTitle,
+        Icons.view_carousel_rounded,
+        const Color(0xFFAF52DE),
+        '/admin/campaigns',
+      ),
+      (
+        l10n.adminOrdersPage,
+        Icons.local_shipping_rounded,
+        const Color(0xFFFF9500),
+        '/admin/orders',
+      ),
+      (
+        l10n.supportChat,
+        Icons.chat_bubble_rounded,
+        const Color(0xFF34C759),
+        '/admin/support-chat',
+      ),
+    ];
+
+    return SizedBox(
+      height: 38,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        itemCount: pills.length,
+        separatorBuilder: (_, _) => const SizedBox(width: 8),
+        itemBuilder: (context, index) {
+          final pill = pills[index];
+          return InkWell(
+            borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
+            onTap: () => context.push(pill.$4),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+              decoration: BoxDecoration(
+                color: pill.$3.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
+                border: Border.all(color: pill.$3.withValues(alpha: 0.28)),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(pill.$2, size: 15, color: pill.$3),
+                  const SizedBox(width: 6),
+                  Text(
+                    pill.$1,
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                      color: cs.onSurface,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
     );
   }
 

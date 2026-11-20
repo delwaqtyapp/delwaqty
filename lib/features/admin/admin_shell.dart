@@ -49,6 +49,11 @@ final List<_AdminNavGroup> _adminGroups = [
         label: (l) => l.adminAnalytics,
       ),
       _AdminNavItem(
+        path: '/admin/service-performance',
+        icon: Icons.leaderboard_rounded,
+        label: (l) => l.adminServicePerformance,
+      ),
+      _AdminNavItem(
         path: '/admin/delivery-intelligence',
         icon: Icons.route_rounded,
         label: (l) => l.adminDeliveryIntelligence,
@@ -57,21 +62,6 @@ final List<_AdminNavGroup> _adminGroups = [
         path: '/admin/merchant-intelligence',
         icon: Icons.shopping_bag_rounded,
         label: (l) => l.adminMerchantIntelligence,
-      ),
-      _AdminNavItem(
-        path: '/admin/provider-intelligence',
-        icon: Icons.handyman_rounded,
-        label: (l) => l.adminProviderIntelligence,
-      ),
-      _AdminNavItem(
-        path: '/admin/wallet-intelligence',
-        icon: Icons.account_balance_wallet_rounded,
-        label: (l) => l.adminWalletIntelligence,
-      ),
-      _AdminNavItem(
-        path: '/admin/service-performance',
-        icon: Icons.leaderboard_rounded,
-        label: (l) => l.adminServicePerformance,
       ),
     ],
   ),
@@ -89,6 +79,11 @@ final List<_AdminNavGroup> _adminGroups = [
         label: (l) => l.adminVerifications,
       ),
       _AdminNavItem(
+        path: '/admin/approvals',
+        icon: Icons.fact_check_rounded,
+        label: (l) => l.adminApprovals,
+      ),
+      _AdminNavItem(
         path: '/admin/sanctions',
         icon: Icons.gavel_rounded,
         label: (l) => l.sanctions,
@@ -97,21 +92,6 @@ final List<_AdminNavGroup> _adminGroups = [
         path: '/admin/complaints',
         icon: Icons.warning_amber_rounded,
         label: (l) => l.complaints,
-      ),
-      _AdminNavItem(
-        path: '/admin/live-tracking',
-        icon: Icons.map_rounded,
-        label: (l) => l.liveTracking,
-      ),
-      _AdminNavItem(
-        path: '/admin/escalations',
-        icon: Icons.priority_high_rounded,
-        label: (l) => l.adminEscalations,
-      ),
-      _AdminNavItem(
-        path: '/admin/reviews-moderation',
-        icon: Icons.rate_review_rounded,
-        label: (l) => l.adminReviewsModeration,
       ),
     ],
   ),
@@ -134,19 +114,19 @@ final List<_AdminNavGroup> _adminGroups = [
         label: (l) => l.adminDrivers,
       ),
       _AdminNavItem(
-        path: '/admin/emergency',
-        icon: Icons.sos_rounded,
-        label: (l) => l.adminEmergency,
-      ),
-      _AdminNavItem(
-        path: '/admin/audit-log',
-        icon: Icons.history_rounded,
-        label: (l) => l.auditLog,
+        path: '/admin/live-tracking',
+        icon: Icons.map_rounded,
+        label: (l) => l.liveTracking,
       ),
       _AdminNavItem(
         path: '/admin/support-chat',
         icon: Icons.chat_bubble_rounded,
         label: (l) => l.supportChat,
+      ),
+      _AdminNavItem(
+        path: '/admin/emergency',
+        icon: Icons.sos_rounded,
+        label: (l) => l.adminEmergency,
       ),
     ],
   ),
@@ -174,34 +154,14 @@ final List<_AdminNavGroup> _adminGroups = [
         label: (l) => l.regionalCollections,
       ),
       _AdminNavItem(
-        path: '/admin/grace-management',
-        icon: Icons.shield_rounded,
-        label: (l) => l.graceManagement,
-      ),
-      _AdminNavItem(
-        path: '/admin/receiving-wallets',
-        icon: Icons.wallet_rounded,
-        label: (l) => l.receivingAccounts,
+        path: '/admin/commissions',
+        icon: Icons.percent_rounded,
+        label: (l) => l.adminCommissions,
       ),
       _AdminNavItem(
         path: '/admin/transaction-ledger',
         icon: Icons.menu_book_rounded,
         label: (l) => l.adminTransactionLedger,
-      ),
-      _AdminNavItem(
-        path: '/admin/commissions',
-        icon: Icons.percent_rounded,
-        label: (l) => l.adminCommissions,
-      ),
-    ],
-  ),
-  _AdminNavGroup(
-    label: (l) => l.adminMarketingSection,
-    items: [
-      _AdminNavItem(
-        path: '/admin/push-notifications',
-        icon: Icons.campaign_rounded,
-        label: (l) => l.adminPushNotifications,
       ),
     ],
   ),
@@ -209,9 +169,19 @@ final List<_AdminNavGroup> _adminGroups = [
     label: (l) => l.adminPlatformSection,
     items: [
       _AdminNavItem(
-        path: '/admin/admins',
-        icon: Icons.group_rounded,
-        label: (l) => l.adminMgmtList,
+        path: '/admin/regions',
+        icon: Icons.public_rounded,
+        label: (l) => l.manageRegions,
+      ),
+      _AdminNavItem(
+        path: '/admin/categories',
+        icon: Icons.category_rounded,
+        label: (l) => l.adminCategories,
+      ),
+      _AdminNavItem(
+        path: '/admin/campaigns',
+        icon: Icons.view_carousel_rounded,
+        label: (l) => l.adminBannersTitle,
       ),
       _AdminNavItem(
         path: '/admin/merchants',
@@ -219,54 +189,19 @@ final List<_AdminNavGroup> _adminGroups = [
         label: (l) => l.adminMerchants,
       ),
       _AdminNavItem(
-        path: '/admin/categories',
-        icon: Icons.category_rounded,
-        label: (l) => l.adminCategories,
-      ),
-    ],
-  ),
-  _AdminNavGroup(
-    label: (l) => l.adminAdministrationSection,
-    items: [
-      _AdminNavItem(
-        path: '/admin/approvals',
-        icon: Icons.fact_check_rounded,
-        label: (l) => l.adminApprovals,
+        path: '/admin/push-notifications',
+        icon: Icons.campaign_rounded,
+        label: (l) => l.adminPushNotifications,
       ),
       _AdminNavItem(
-        path: '/admin/pending-deletions',
-        icon: Icons.person_remove_rounded,
-        label: (l) => l.pendingDeletions,
+        path: '/admin/audit-log',
+        icon: Icons.history_rounded,
+        label: (l) => l.auditLog,
       ),
-      _AdminNavItem(
-        path: '/admin/hierarchy',
-        icon: Icons.account_tree_rounded,
-        label: (l) => l.permissionDelegation,
-      ),
-      _AdminNavItem(
-        path: '/admin/chat-permissions',
-        icon: Icons.security_rounded,
-        label: (l) => l.chatPermissions,
-      ),
-    ],
-  ),
-  _AdminNavGroup(
-    label: (l) => l.adminSettingsGroupSection,
-    items: [
       _AdminNavItem(
         path: '/admin/settings',
         icon: Icons.tune_rounded,
         label: (l) => l.adminSettingsMenu,
-      ),
-      _AdminNavItem(
-        path: '/admin/platform-config',
-        icon: Icons.settings_rounded,
-        label: (l) => l.adminPlatformConfig,
-      ),
-      _AdminNavItem(
-        path: '/admin/profile',
-        icon: Icons.person_rounded,
-        label: (l) => l.adminProfile,
       ),
     ],
   ),
@@ -1166,6 +1101,7 @@ class _AdminDrawerState extends ConsumerState<_AdminDrawer> {
                     prefixIcon: Icon(Icons.search_rounded, size: 18, color: sth.iconColor),
                     suffixIcon: _query.isNotEmpty
                         ? IconButton(
+                            tooltip: l10n.clear,
                             icon: const Icon(Icons.clear_rounded, size: 16),
                             onPressed: () {
                               _searchController.clear();

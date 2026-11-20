@@ -8,6 +8,7 @@ import 'package:delwaqty/features/_shared/regions/presentation/providers/region_
 import 'package:delwaqty/features/_shared/regions/presentation/widgets/region_browser.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 import 'package:delwaqty/core/errors/app_error_text.dart';
+import 'package:delwaqty/shared/widgets/confirm_dialog.dart';
 
 class AdminRegionScopePage extends ConsumerStatefulWidget {
   const AdminRegionScopePage({super.key});
@@ -56,6 +57,15 @@ class _AdminRegionScopePageState extends ConsumerState<AdminRegionScopePage> {
   }
 
   Future<void> _removeAssignment(String adminId, String regionId) async {
+    final l10n = AppLocalizations.of(context);
+    final confirmed = await ConfirmDialog.show(
+      context,
+      title: l10n.delete,
+      message: l10n.areYouSure,
+      confirmLabel: l10n.delete,
+      isDestructive: true,
+    );
+    if (!confirmed || !mounted) return;
     setState(() => _saving = true);
     try {
       await ref.read(deleteAdminRegionAssignmentProvider)(

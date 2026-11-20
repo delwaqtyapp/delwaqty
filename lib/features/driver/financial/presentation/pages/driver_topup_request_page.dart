@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:delwaqty/core/errors/app_error_text.dart';
 import 'package:delwaqty/features/provider/financial/presentation/providers/financial_providers.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 
@@ -79,6 +80,27 @@ class _DriverTopupRequestPageState
       );
       return;
     }
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(l10n.confirmTopUp),
+        content: Text(
+          '${amount.toStringAsFixed(2)} ${l10n.currencySymbol} · ${_methodLabel(l10n, _method)}',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: Text(l10n.cancel),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: Text(l10n.confirm),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) return;
+
     setState(() => _submitting = true);
     try {
       final repo = ref.read(providerFinancialRepositoryProvider);
@@ -114,7 +136,7 @@ class _DriverTopupRequestPageState
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.topUpRequestCreated('ERROR'))),
+        SnackBar(content: Text(appErrorText(context, e))),
       );
     } finally {
       if (mounted) setState(() => _submitting = false);

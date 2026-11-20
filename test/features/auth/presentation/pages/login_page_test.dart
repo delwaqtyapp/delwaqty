@@ -97,7 +97,7 @@ void main() {
       await tester.pumpAndSettle();
 
       await tester.enterText(
-        find.widgetWithText(TextFormField, 'Email or username'),
+        find.widgetWithText(TextFormField, 'Phone Number, Email, or Username'),
         'a@b.com',
       );
       await tester.enterText(

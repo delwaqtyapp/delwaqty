@@ -110,7 +110,16 @@ void main() {
         when(() => mockUserRepo.getCurrentUser())
             .thenAnswer((_) async => pendingUser);
 
-        final container = buildTestContainer();
+        final container = ProviderContainer(
+          overrides: [
+            authRepositoryProvider.overrideWithValue(mockAuthRepo),
+            userRepositoryProvider.overrideWithValue(mockUserRepo),
+            loggerProvider.overrideWithValue(mockLogger),
+            sharedPreferencesProvider.overrideWithValue(mockPrefs),
+            biometricAuthStoreProvider.overrideWithValue(biometricStore),
+            requireProviderDocumentsProvider.overrideWith((ref) async => true),
+          ],
+        );
 
         await container.read(authStateProvider.notifier).checkAuthStatus();
 

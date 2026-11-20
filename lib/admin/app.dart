@@ -23,9 +23,12 @@ class AppAdmin extends ConsumerStatefulWidget {
 }
 
 class _AppAdminState extends ConsumerState<AppAdmin> {
+  late final AuthStateNotifier _authNotifier;
+
   @override
   void initState() {
     super.initState();
+    _authNotifier = ref.read(authStateProvider.notifier);
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (!mounted) return;
 
@@ -44,13 +47,12 @@ class _AppAdminState extends ConsumerState<AppAdmin> {
 
       if (!mounted) return;
 
-      final authNotifier = ref.read(authStateProvider.notifier);
       try {
-        authNotifier.startAuthListener();
+        _authNotifier.startAuthListener();
       } catch (e) {
         debugPrint('Auth listener start failed: $e');
       }
-      unawaited(authNotifier.checkAuthStatus());
+      unawaited(_authNotifier.checkAuthStatus());
       unawaited(ref.read(pushNotificationServiceProvider).initialize());
       ref.read(chatCallAlertServiceProvider);
 
@@ -72,7 +74,7 @@ class _AppAdminState extends ConsumerState<AppAdmin> {
 
   @override
   void dispose() {
-    ref.read(authStateProvider.notifier).stopAuthListener();
+    _authNotifier.stopAuthListener();
     super.dispose();
   }
 

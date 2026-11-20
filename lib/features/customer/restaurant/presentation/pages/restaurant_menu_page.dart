@@ -100,7 +100,7 @@ class RestaurantMenuNotifier extends AsyncNotifier<MenuState> {
 
   Future<void> setCategory(String? categoryId) async {
     final currentState = state.value;
-    if (currentState == null) return;
+    if (currentState == null || currentState.categoryId == categoryId) return;
 
     state = const AsyncValue.loading();
 
@@ -219,7 +219,10 @@ class _RestaurantMenuPageState extends ConsumerState<RestaurantMenuPage> {
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
             child: TextField(
               controller: _searchController,
-              onChanged: _debounceSearch,
+              onChanged: (value) {
+                setState(() {});
+                _debounceSearch(value);
+              },
               decoration: InputDecoration(
                 hintText: l10n.searchMenu,
                 prefixIcon: const Icon(Icons.search, size: 20),
@@ -229,7 +232,13 @@ class _RestaurantMenuPageState extends ConsumerState<RestaurantMenuPage> {
                         icon: const Icon(Icons.clear, size: 18),
                         onPressed: () {
                           _searchController.clear();
-                          ref.read(restaurantMenuProvider(widget.merchantId).notifier).setSearchQuery('');
+                          setState(() {});
+                          ref
+                              .read(
+                                restaurantMenuProvider(widget.merchantId)
+                                    .notifier,
+                              )
+                              .setSearchQuery('');
                         },
                       )
                     : null,
@@ -469,12 +478,14 @@ class _ProductListTile extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                     decoration: BoxDecoration(
-                      color: Colors.red.withValues(alpha: 0.1),
+                      color: theme.colorScheme.error.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(4),
                     ),
                     child: Text(
                       l10n.outOfStock,
-                      style: theme.textTheme.labelSmall?.copyWith(color: Colors.red.shade700),
+                      style: theme.textTheme.labelSmall?.copyWith(
+                        color: theme.colorScheme.error,
+                      ),
                     ),
                   )
                 else

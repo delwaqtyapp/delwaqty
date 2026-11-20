@@ -25,9 +25,17 @@ class SupabaseMerchantDataSource {
   Map<String, dynamic> _rowToMap(dynamic row) => row as Map<String, dynamic>;
 
   Merchant _fromRow(Map<String, dynamic> row) {
-    final typeStr = row['type'] as String? ?? 'other';
+    final rawType = (row['type'] as String? ?? 'other').trim().toLowerCase();
+    final normalizedType = switch (rawType) {
+      'food' || 'restaurants' || 'fast_food' => 'restaurant',
+      'super_market' || 'hypermarket' => 'supermarket',
+      'fruit' => 'fruits',
+      'vegetable' => 'vegetables',
+      'clothes' => 'clothing',
+      _ => rawType,
+    };
     final type = MerchantType.values.firstWhere(
-      (t) => t.name == typeStr,
+      (t) => t.name.toLowerCase() == normalizedType,
       orElse: () => MerchantType.other,
     );
     return Merchant(
@@ -61,7 +69,7 @@ class SupabaseMerchantDataSource {
     String? city,
     bool? isOpenNow,
     SearchFilter? filter,
-    int limit = 20,
+    int limit = 100,
     int offset = 0,
   }) async {
     try {

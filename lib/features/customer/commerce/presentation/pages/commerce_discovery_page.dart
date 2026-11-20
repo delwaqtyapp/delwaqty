@@ -25,7 +25,9 @@ final _featuredFutureProvider = FutureProvider<List<Merchant>>((ref) async {
   return repo.getFeaturedMerchants();
 });
 
-final _selectedTypeProvider = StateProvider<MerchantType?>((_) => null);
+final _selectedTypeProvider = StateProvider.autoDispose<MerchantType?>(
+  (_) => null,
+);
 
 class CommerceDiscoveryPage extends ConsumerStatefulWidget {
   const CommerceDiscoveryPage({super.key});
@@ -36,7 +38,88 @@ class CommerceDiscoveryPage extends ConsumerStatefulWidget {
 }
 
 class _CommerceDiscoveryPageState extends ConsumerState<CommerceDiscoveryPage> {
-  bool _initialFilterSet = false;
+  String? _lastQueryType;
+  final _searchController = TextEditingController();
+  String _searchQuery = '';
+
+  static const List<Set<MerchantType>> _typeFamilies = [
+    {
+      MerchantType.grocery,
+      MerchantType.supermarket,
+      MerchantType.vegetables,
+      MerchantType.fruits,
+      MerchantType.dairy,
+      MerchantType.spices,
+      MerchantType.petShop,
+    },
+    {
+      MerchantType.bakery,
+      MerchantType.sweets,
+      MerchantType.cafe,
+      MerchantType.restaurant,
+    },
+    {
+      MerchantType.butcher,
+      MerchantType.meat,
+      MerchantType.seafood,
+    },
+    {
+      MerchantType.fashion,
+      MerchantType.clothing,
+      MerchantType.shoes,
+      MerchantType.accessories,
+      MerchantType.perfumes,
+      MerchantType.flowers,
+    },
+    {
+      MerchantType.electronics,
+      MerchantType.mobile,
+      MerchantType.appliances,
+      MerchantType.furniture,
+      MerchantType.home,
+      MerchantType.carwash,
+      MerchantType.gas,
+    },
+    {
+      MerchantType.pharmacy,
+      MerchantType.fitness,
+    },
+  ];
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  bool _matchesMerchantType(Merchant m, MerchantType selected) {
+    if (m.type == selected) return true;
+    for (final family in _typeFamilies) {
+      if (family.contains(selected) && family.contains(m.type)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  bool _matchesSearch(Merchant m) {
+    if (_searchQuery.isEmpty) return true;
+    final q = _searchQuery.toLowerCase();
+    return m.name.toLowerCase().contains(q) ||
+        (m.description?.toLowerCase().contains(q) ?? false) ||
+        (m.address?.toLowerCase().contains(q) ?? false);
+  }
+
+  List<Merchant> _filterMerchants(
+    List<Merchant> merchants,
+    MerchantType? selectedType,
+  ) {
+    final bySearch = merchants.where(_matchesSearch).toList();
+    if (selectedType == null) return bySearch;
+    final exact = bySearch.where((m) => m.type == selectedType).toList();
+    if (exact.isNotEmpty) return exact;
+    return bySearch.where((m) => _matchesMerchantType(m, selectedType)).toList();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -47,16 +130,16 @@ class _CommerceDiscoveryPageState extends ConsumerState<CommerceDiscoveryPage> {
     final featuredAsync = ref.watch(_featuredFutureProvider);
 
     final extra = GoRouterState.of(context).uri.queryParameters['type'];
-    if (!_initialFilterSet && extra != null) {
-      _initialFilterSet = true;
-      final match = MerchantType.values
-          .where((t) => t.name == extra)
-          .firstOrNull;
-      if (match != null) {
-        WidgetsBinding.instance.addPostFrameCallback((_) {
+    if (extra != _lastQueryType) {
+      _lastQueryType = extra;
+      final match = extra == null
+          ? null
+          : MerchantType.values.where((t) => t.name == extra).firstOrNull;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
           ref.read(_selectedTypeProvider.notifier).state = match;
-        });
-      }
+        }
+      });
     }
 
     return Scaffold(
@@ -78,9 +161,20 @@ class _CommerceDiscoveryPageState extends ConsumerState<CommerceDiscoveryPage> {
           children: [
             AnimatedFadeIn(
               child: TextField(
+                controller: _searchController,
+                onChanged: (value) => setState(() => _searchQuery = value.trim()),
                 decoration: InputDecoration(
                   hintText: l10n.searchMerchantsProducts,
                   prefixIcon: const Icon(Icons.search),
+                  suffixIcon: _searchQuery.isNotEmpty
+                      ? IconButton(
+                          icon: const Icon(Icons.clear_rounded),
+                          onPressed: () {
+                            _searchController.clear();
+                            setState(() => _searchQuery = '');
+                          },
+                        )
+                      : null,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
@@ -88,8 +182,6 @@ class _CommerceDiscoveryPageState extends ConsumerState<CommerceDiscoveryPage> {
                   fillColor: theme.colorScheme.surfaceContainerHighest
                       .withValues(alpha: 0.3),
                 ),
-                onTap: () => context.push('/market/search'),
-                readOnly: true,
               ),
             ),
             const SizedBox(height: 16),
@@ -169,7 +261,11 @@ class _CommerceDiscoveryPageState extends ConsumerState<CommerceDiscoveryPage> {
 
             featuredAsync.when(
               data: (merchants) {
-                if (merchants.isEmpty) return const SizedBox();
+                final filteredFeatured = _filterMerchants(
+                  merchants,
+                  selectedType,
+                );
+                if (filteredFeatured.isEmpty) return const SizedBox();
                 return AnimatedFadeIn(
                   delay: const Duration(milliseconds: 200),
                   child: Column(
@@ -186,10 +282,10 @@ class _CommerceDiscoveryPageState extends ConsumerState<CommerceDiscoveryPage> {
                         height: 250,
                         child: ListView.separated(
                           scrollDirection: Axis.horizontal,
-                          itemCount: merchants.length,
+                          itemCount: filteredFeatured.length,
                           separatorBuilder: (_, _) => const SizedBox(width: 12),
                           itemBuilder: (context, index) {
-                            final merchant = merchants[index];
+                            final merchant = filteredFeatured[index];
                             return SizedBox(
                               width: 260,
                               child: MerchantCard(
@@ -216,8 +312,9 @@ class _CommerceDiscoveryPageState extends ConsumerState<CommerceDiscoveryPage> {
 
             merchantsAsync.when(
               data: (merchants) {
-                if (merchants.isEmpty) return const SizedBox();
-                final mostRequested = List<Merchant>.from(merchants)
+                final filteredMost = _filterMerchants(merchants, selectedType);
+                if (filteredMost.isEmpty) return const SizedBox();
+                final mostRequested = List<Merchant>.from(filteredMost)
                   ..sort((a, b) => b.rating.compareTo(a.rating));
                 final topRequested = mostRequested.take(10).toList();
                 return AnimatedFadeIn(
@@ -284,9 +381,7 @@ class _CommerceDiscoveryPageState extends ConsumerState<CommerceDiscoveryPage> {
 
             merchantsAsync.when(
               data: (merchants) {
-                final filtered = selectedType != null
-                    ? merchants.where((m) => m.type == selectedType).toList()
-                    : merchants;
+                final filtered = _filterMerchants(merchants, selectedType);
 
                 if (filtered.isEmpty) {
                   return Padding(

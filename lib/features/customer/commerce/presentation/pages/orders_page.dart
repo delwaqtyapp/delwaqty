@@ -144,7 +144,7 @@ class _OrderCard extends StatelessWidget {
                   child: Text(
                     order.merchantName.isNotEmpty
                         ? order.merchantName
-                        : 'Order #${_shortOrderId(order.id)}',
+                        : '${l10n.orders} #${_shortOrderId(order.id)}',
                     style: textTheme.titleSmall?.copyWith(
                       fontWeight: FontWeight.w700,
                     ),
@@ -198,8 +198,8 @@ class _OrderCard extends StatelessWidget {
                       ),
                       const SizedBox(width: 2),
                       const Icon(
-                        Icons.chevron_right_rounded,
-                        size: 18,
+                        Icons.arrow_forward_ios_rounded,
+                        size: 14,
                         color: AppColors.brandPurple,
                       ),
                     ],

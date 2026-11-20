@@ -9,6 +9,7 @@ import 'package:delwaqty/features/customer/commerce/domain/entities/coupon.dart'
 import 'package:delwaqty/features/customer/location/presentation/providers/location_provider.dart';
 import 'package:delwaqty/features/customer/location/presentation/widgets/smart_map_picker_sheet.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
+import 'package:delwaqty/core/errors/app_error_text.dart';
 import 'package:delwaqty/core/extensions/context_extensions.dart';
 import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
 import 'package:delwaqty/shared/widgets/app_loader.dart';
@@ -57,36 +58,42 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
   Future<void> _addNewAddress() async {
     final l10n = AppLocalizations.of(context);
     final controller = TextEditingController(text: _addressController.text);
-    final result = await showDialog<String>(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: Text(l10n.addNewAddress),
-        content: TextField(
-          controller: controller,
-          autofocus: true,
-          maxLines: 3,
-          minLines: 1,
-          decoration: InputDecoration(
-            hintText: l10n.selectDeliveryAddress,
-            prefixIcon: const Icon(Icons.location_on_outlined),
+    try {
+      final result = await showDialog<String>(
+        context: context,
+        builder: (dialogContext) => AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
           ),
+          title: Text(l10n.addNewAddress),
+          content: TextField(
+            controller: controller,
+            autofocus: true,
+            maxLines: 3,
+            minLines: 1,
+            decoration: InputDecoration(
+              hintText: l10n.selectDeliveryAddress,
+              prefixIcon: const Icon(Icons.location_on_outlined),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(),
+              child: Text(l10n.cancel),
+            ),
+            FilledButton(
+              onPressed: () =>
+                  Navigator.of(dialogContext).pop(controller.text.trim()),
+              child: Text(l10n.saveChanges),
+            ),
+          ],
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(),
-            child: Text(l10n.cancel),
-          ),
-          FilledButton(
-            onPressed: () =>
-                Navigator.of(dialogContext).pop(controller.text.trim()),
-            child: Text(l10n.saveChanges),
-          ),
-        ],
-      ),
-    );
-    if (result == null || result.isEmpty || !mounted) return;
-    setState(() => _addressController.text = result);
+      );
+      if (result == null || result.isEmpty || !mounted) return;
+      setState(() => _addressController.text = result);
+    } finally {
+      controller.dispose();
+    }
   }
 
   @override
@@ -151,8 +158,8 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
                   ),
                 ),
               ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
+              Wrap(
+                alignment: WrapAlignment.end,
                 children: [
                   TextButton.icon(
                     onPressed: _pickAddressOnMap,
@@ -221,48 +228,61 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
                       onPressed: () async {
                         final code = _couponController.text.trim();
                         if (code.isEmpty) return;
-                        final repo = ref.read(couponRepositoryProvider);
-                        final coupon = await repo.validateCoupon(
-                          code,
-                          cart.total,
-                        );
-                        if (!mounted) return;
-                        if (coupon != null) {
-                          double discount = 0;
-                          switch (coupon.type) {
-                            case CouponType.percentage:
-                              discount = cart.subtotal * (coupon.value / 100);
-                              if (coupon.maximumDiscount != null &&
-                                  discount > coupon.maximumDiscount!) {
-                                discount = coupon.maximumDiscount!;
-                              }
-                              break;
-                            case CouponType.fixed:
-                              discount = coupon.value;
-                              break;
-                            case CouponType.freeDelivery:
-                              discount = cart.deliveryFee;
-                              break;
-                          }
-                          await ref.read(cartProvider.notifier).applyCoupon(
-                                coupon.code,
-                                discount: discount,
-                              );
-                          if (context.mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(
-                                  '${l10n.couponApplied} -${discount.toStringAsFixed(0)} ${l10n.sar}',
+                        try {
+                          final repo = ref.read(couponRepositoryProvider);
+                          final coupon = await repo.validateCoupon(
+                            code,
+                            cart.subtotal,
+                          );
+                          if (!mounted) return;
+                          if (coupon != null) {
+                            double discount = 0;
+                            switch (coupon.type) {
+                              case CouponType.percentage:
+                                discount = cart.subtotal * (coupon.value / 100);
+                                if (coupon.maximumDiscount != null &&
+                                    discount > coupon.maximumDiscount!) {
+                                  discount = coupon.maximumDiscount!;
+                                }
+                                break;
+                              case CouponType.fixed:
+                                discount = coupon.value;
+                                break;
+                              case CouponType.freeDelivery:
+                                discount = cart.deliveryFee;
+                                break;
+                            }
+                            final maxDiscount = cart.subtotal + cart.deliveryFee;
+                            discount = discount.clamp(0.0, maxDiscount);
+                            await ref.read(cartProvider.notifier).applyCoupon(
+                                  coupon.code,
+                                  discount: discount,
+                                );
+                            if (context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    '${l10n.couponApplied} -${discount.toStringAsFixed(0)} ${l10n.sar}',
+                                  ),
+                                  backgroundColor: colorScheme.primary,
                                 ),
-                                backgroundColor: colorScheme.primary,
-                              ),
-                            );
+                              );
+                            }
+                          } else {
+                            if (context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(l10n.couponInvalid),
+                                  backgroundColor: colorScheme.error,
+                                ),
+                              );
+                            }
                           }
-                        } else {
+                        } catch (e) {
                           if (context.mounted) {
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
-                                content: Text(l10n.couponInvalid),
+                                content: Text(appErrorText(context, e)),
                                 backgroundColor: colorScheme.error,
                               ),
                             );
@@ -351,7 +371,7 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
               Text(l10n.error, style: textTheme.titleMedium),
               const SizedBox(height: 8),
               FilledButton.tonal(
-                onPressed: () => ref.invalidate(_cartFutureProvider),
+                onPressed: () => ref.invalidate(cartProvider),
                 child: Text(l10n.retry),
               ),
             ],
@@ -364,6 +384,16 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
   Future<void> _placeOrder(commerce.Cart cart) async {
     final l10n = AppLocalizations.of(context);
     final cs = context.colorScheme;
+    final address = _addressController.text.trim();
+    if (address.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(l10n.addressRequired),
+          backgroundColor: cs.error,
+        ),
+      );
+      return;
+    }
     setState(() => _isPlacing = true);
 
     try {
@@ -377,7 +407,7 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
         deliveryFee: cart.deliveryFee,
         discount: cart.discount,
         total: cart.total,
-        deliveryAddress: _addressController.text,
+        deliveryAddress: address,
         paymentMethod: _paymentMethod,
       );
 

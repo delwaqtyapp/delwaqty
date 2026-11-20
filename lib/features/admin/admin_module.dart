@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 import 'package:delwaqty/core/module/feature_module.dart';
 import 'package:delwaqty/features/admin/presentation/pages/platform_intelligence_dashboard.dart';
+import 'package:delwaqty/features/admin/presentation/pages/admin_regions_management_page.dart';
 import 'package:delwaqty/features/admin_management/presentation/pages/admin_management_list_page.dart';
 import 'package:delwaqty/features/admin_management/presentation/pages/admin_profile_page.dart';
 import 'package:delwaqty/features/admin/presentation/pages/admin_merchants_page.dart';
@@ -46,6 +47,7 @@ import 'package:delwaqty/features/admin/financial/presentation/pages/admin_grace
 import 'package:delwaqty/features/admin/financial/presentation/pages/admin_receiving_wallets_page.dart';
 import 'package:delwaqty/features/admin/financial/presentation/pages/admin_owner_dashboard_page.dart';
 import 'package:delwaqty/features/admin/presentation/pages/admin_categories_management_page.dart';
+import 'package:delwaqty/features/admin/presentation/pages/admin_campaigns_page.dart';
 
 /// Smooth page transition for the admin module: quick fade + subtle rise.
 Page<void> _adminPage(
@@ -146,6 +148,16 @@ class AdminModule extends FeatureModule {
           pageBuilder: (context, state) => _adminPage(
             const AdminCategoriesManagementPage(),
           ),
+        ),
+        GoRoute(
+          path: 'campaigns',
+          pageBuilder: (context, state) =>
+              _adminPage(const AdminCampaignsPage()),
+        ),
+        GoRoute(
+          path: 'regions',
+          pageBuilder: (context, state) =>
+              _adminPage(const AdminRegionsManagementPage()),
         ),
         GoRoute(
           path: 'platform-config',

@@ -9,8 +9,6 @@ import 'package:delwaqty/features/customer/commerce/domain/entities/product.dart
 import 'package:delwaqty/features/customer/commerce/domain/entities/catalog_category.dart';
 import 'package:delwaqty/features/customer/commerce/domain/entities/favorite.dart';
 import 'package:delwaqty/features/customer/commerce/domain/entities/review.dart';
-import 'package:delwaqty/features/customer/commerce/domain/repositories/product_repository.dart';
-import 'package:delwaqty/features/customer/commerce/domain/repositories/catalog_category_repository.dart';
 import 'package:delwaqty/features/customer/commerce/presentation/widgets/product_card.dart';
 import 'package:delwaqty/features/customer/commerce/presentation/widgets/rating_stars.dart';
 import 'package:delwaqty/features/customer/commerce/presentation/widgets/delivery_info.dart';
@@ -43,6 +41,48 @@ class _MerchantDetailPageState extends ConsumerState<MerchantDetailPage> {
   final _searchController = TextEditingController();
   String _searchQuery = '';
 
+  late Future<Merchant?> _merchantFuture;
+  late Future<List<Product>> _allProductsFuture;
+  late Future<List<CatalogCategory>> _categoriesFuture;
+  late Future<List<Product>> _filteredProductsFuture;
+  late Future<List<Review>> _reviewsFuture;
+  Future<List<Merchant>>? _similarMerchantsFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _initFutures();
+  }
+
+  @override
+  void didUpdateWidget(covariant MerchantDetailPage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.merchantId != widget.merchantId) {
+      _selectedCategoryId = null;
+      _similarMerchantsFuture = null;
+      _initFutures();
+    }
+  }
+
+  void _initFutures() {
+    final merchantRepo = ref.read(merchantRepositoryProvider);
+    final productRepo = ref.read(productRepositoryProvider);
+    final categoryRepo = ref.read(catalogCategoryRepositoryProvider);
+    final reviewRepo = ref.read(reviewRepositoryProvider);
+
+    _merchantFuture = merchantRepo.getMerchantById(widget.merchantId);
+    _allProductsFuture = productRepo.getProducts(merchantId: widget.merchantId);
+    _categoriesFuture = categoryRepo.getCategories(widget.merchantId);
+    _filteredProductsFuture = productRepo.getProducts(
+      merchantId: widget.merchantId,
+      categoryId: _selectedCategoryId,
+    );
+    _reviewsFuture = reviewRepo.getMerchantReviews(
+      widget.merchantId,
+      limit: 10,
+    );
+  }
+
   @override
   void dispose() {
     _searchController.dispose();
@@ -50,19 +90,20 @@ class _MerchantDetailPageState extends ConsumerState<MerchantDetailPage> {
   }
 
   Future<void> _onRefresh() async {
-    setState(() => _refreshKey = UniqueKey());
+    setState(() {
+      _refreshKey = UniqueKey();
+      _similarMerchantsFuture = null;
+      _initFutures();
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final merchantRepo = ref.watch(merchantRepositoryProvider);
-    final productRepo = ref.watch(productRepositoryProvider);
-    final categoryRepo = ref.watch(catalogCategoryRepositoryProvider);
 
     return FutureBuilder<Merchant?>(
       key: _refreshKey,
-      future: merchantRepo.getMerchantById(widget.merchantId),
+      future: _merchantFuture,
       builder: (context, merchantSnap) {
         if (merchantSnap.connectionState == ConnectionState.waiting) {
           return Scaffold(
@@ -76,7 +117,7 @@ class _MerchantDetailPageState extends ConsumerState<MerchantDetailPage> {
             appBar: AppBar(title: Text(l10n.error)),
             body: ErrorState(
               message: appErrorMessage(l10n, merchantSnap.error),
-              onRetry: () => setState(() => _refreshKey = UniqueKey()),
+              onRetry: _onRefresh,
             ),
           );
         }
@@ -87,7 +128,7 @@ class _MerchantDetailPageState extends ConsumerState<MerchantDetailPage> {
             appBar: AppBar(title: Text(l10n.error)),
             body: ErrorState(
               message: l10n.noData,
-              onRetry: () => setState(() => _refreshKey = UniqueKey()),
+              onRetry: _onRefresh,
             ),
           );
         }
@@ -109,13 +150,13 @@ class _MerchantDetailPageState extends ConsumerState<MerchantDetailPage> {
                       if (merchant.type == MerchantType.restaurant)
                         _buildFullMenuButton(merchant, l10n),
                       _buildSearchField(merchant, l10n),
-                      _buildOffersAndPopular(productRepo, merchant, l10n),
-                      _buildCategoriesSection(categoryRepo, l10n),
+                      _buildOffersAndPopular(merchant, l10n),
+                      _buildCategoriesSection(l10n),
                       _buildMenuHeader(l10n),
                     ],
                   ),
                 ),
-                _buildProductGrid(productRepo, merchant, l10n),
+                _buildProductGrid(merchant, l10n),
                 SliverToBoxAdapter(
                   child: _buildReviewsSection(merchant, l10n),
                 ),
@@ -144,7 +185,7 @@ class _MerchantDetailPageState extends ConsumerState<MerchantDetailPage> {
             color: Colors.black.withValues(alpha: 0.3),
             shape: BoxShape.circle,
           ),
-          child: const Icon(Icons.arrow_back_ios_new_rounded, size: 18),
+          child: const BackButtonIcon(),
         ),
         onPressed: () => Navigator.of(context).pop(),
       ),
@@ -510,13 +551,25 @@ class _MerchantDetailPageState extends ConsumerState<MerchantDetailPage> {
   }
 
   Widget _buildOffersAndPopular(
-    ProductRepository productRepo,
     Merchant merchant,
     AppLocalizations l10n,
   ) {
     return FutureBuilder<List<Product>>(
-      future: productRepo.getProducts(merchantId: widget.merchantId),
+      future: _allProductsFuture,
       builder: (context, snap) {
+        if (snap.hasError) {
+          return Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            child: ErrorState(
+              message: appErrorMessage(l10n, snap.error),
+              onRetry: () => setState(() {
+                _allProductsFuture = ref
+                    .read(productRepositoryProvider)
+                    .getProducts(merchantId: widget.merchantId);
+              }),
+            ),
+          );
+        }
         final products = snap.data ?? [];
         if (products.isEmpty) return const SizedBox.shrink();
 
@@ -591,17 +644,27 @@ class _MerchantDetailPageState extends ConsumerState<MerchantDetailPage> {
     );
   }
 
-  Widget _buildCategoriesSection(
-    CatalogCategoryRepository categoryRepo,
-    AppLocalizations l10n,
-  ) {
+  Widget _buildCategoriesSection(AppLocalizations l10n) {
     return Padding(
       padding: const EdgeInsets.only(top: 16),
       child: AnimatedFadeIn(
         delay: const Duration(milliseconds: 400),
         child: FutureBuilder<List<CatalogCategory>>(
-          future: categoryRepo.getCategories(widget.merchantId),
+          future: _categoriesFuture,
           builder: (context, catSnap) {
+            if (catSnap.hasError) {
+              return Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: ErrorState(
+                  message: appErrorMessage(l10n, catSnap.error),
+                  onRetry: () => setState(() {
+                    _categoriesFuture = ref
+                        .read(catalogCategoryRepositoryProvider)
+                        .getCategories(widget.merchantId);
+                  }),
+                ),
+              );
+            }
             final categories = catSnap.data ?? [];
             if (categories.isEmpty) return const SizedBox.shrink();
             return SizedBox(
@@ -617,7 +680,14 @@ class _MerchantDetailPageState extends ConsumerState<MerchantDetailPage> {
                     return _CategoryChip(
                       label: l10n.allCategories,
                       isSelected: isSelected,
-                      onTap: () => setState(() => _selectedCategoryId = null),
+                      onTap: () => setState(() {
+                        _selectedCategoryId = null;
+                        _filteredProductsFuture = ref
+                            .read(productRepositoryProvider)
+                            .getProducts(
+                              merchantId: widget.merchantId,
+                            );
+                      }),
                     );
                   }
                   final cat = categories[index - 1];
@@ -626,8 +696,13 @@ class _MerchantDetailPageState extends ConsumerState<MerchantDetailPage> {
                     label: cat.name,
                     isSelected: isSelected,
                     onTap: () => setState(() {
-                      _selectedCategoryId =
-                          isSelected ? null : cat.id;
+                      _selectedCategoryId = isSelected ? null : cat.id;
+                      _filteredProductsFuture = ref
+                          .read(productRepositoryProvider)
+                          .getProducts(
+                            merchantId: widget.merchantId,
+                            categoryId: _selectedCategoryId,
+                          );
                     }),
                   );
                 },
@@ -655,17 +730,12 @@ class _MerchantDetailPageState extends ConsumerState<MerchantDetailPage> {
   }
 
   Widget _buildProductGrid(
-    ProductRepository productRepo,
     Merchant merchant,
     AppLocalizations l10n,
   ) {
     return SliverToBoxAdapter(
       child: FutureBuilder<List<Product>>(
-        key: _refreshKey,
-        future: productRepo.getProducts(
-          merchantId: widget.merchantId,
-          categoryId: _selectedCategoryId,
-        ),
+        future: _filteredProductsFuture,
         builder: (context, prodSnap) {
           if (prodSnap.connectionState == ConnectionState.waiting) {
             return const Center(
@@ -681,7 +751,14 @@ class _MerchantDetailPageState extends ConsumerState<MerchantDetailPage> {
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
               child: ErrorState(
                 message: appErrorMessage(l10n, prodSnap.error),
-                onRetry: () => setState(() => _refreshKey = UniqueKey()),
+                onRetry: () => setState(() {
+                  _filteredProductsFuture = ref
+                      .read(productRepositoryProvider)
+                      .getProducts(
+                        merchantId: widget.merchantId,
+                        categoryId: _selectedCategoryId,
+                      );
+                }),
               ),
             );
           }
@@ -751,8 +828,21 @@ class _MerchantDetailPageState extends ConsumerState<MerchantDetailPage> {
 
   Widget _buildReviewsSection(Merchant merchant, AppLocalizations l10n) {
     return FutureBuilder<List<Review>>(
-      future: ref.read(reviewRepositoryProvider).getMerchantReviews(merchant.id, limit: 10),
+      future: _reviewsFuture,
       builder: (context, snap) {
+        if (snap.hasError) {
+          return Padding(
+            padding: const EdgeInsets.fromLTRB(16, 24, 16, 0),
+            child: ErrorState(
+              message: appErrorMessage(l10n, snap.error),
+              onRetry: () => setState(() {
+                _reviewsFuture = ref
+                    .read(reviewRepositoryProvider)
+                    .getMerchantReviews(widget.merchantId, limit: 10);
+              }),
+            ),
+          );
+        }
         final reviews = snap.data ?? [];
         if (reviews.isEmpty) return const SizedBox.shrink();
 
@@ -1022,9 +1112,25 @@ class _MerchantDetailPageState extends ConsumerState<MerchantDetailPage> {
   }
 
   Widget _buildSimilarMerchants(Merchant merchant, AppLocalizations l10n) {
+    _similarMerchantsFuture ??= ref
+        .read(merchantRepositoryProvider)
+        .getMerchants(type: merchant.type, limit: 10);
     return FutureBuilder<List<Merchant>>(
-      future: ref.read(merchantRepositoryProvider).getMerchants(type: merchant.type, limit: 10),
+      future: _similarMerchantsFuture,
       builder: (context, snap) {
+        if (snap.hasError) {
+          return Padding(
+            padding: const EdgeInsets.fromLTRB(16, 24, 16, 0),
+            child: ErrorState(
+              message: appErrorMessage(l10n, snap.error),
+              onRetry: () => setState(() {
+                _similarMerchantsFuture = ref
+                    .read(merchantRepositoryProvider)
+                    .getMerchants(type: merchant.type, limit: 10);
+              }),
+            ),
+          );
+        }
         final all = snap.data ?? [];
         final similar = all.where((m) => m.id != merchant.id).toList();
         if (similar.length < 2) return const SizedBox.shrink();

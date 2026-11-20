@@ -70,7 +70,13 @@ class _OrderTrackingPageState extends ConsumerState<OrderTrackingPage>
                 _OrderDetailsCard(order: order),
                 const SizedBox(height: 24),
                 _EstimatedArrivalSection(order: order),
-                const _DriverSection(),
+                if (const {
+                  OrderStatus.confirmed,
+                  OrderStatus.preparing,
+                  OrderStatus.ready,
+                  OrderStatus.inTransit,
+                }.contains(order.status))
+                  const _DriverSection(),
               ],
             ),
           );
@@ -147,7 +153,35 @@ class _TimelineSection extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 20),
-              ...List.generate(steps.length, (index) {
+              if (order.status == OrderStatus.cancelled)
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: colorScheme.errorContainer,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.cancel_outlined,
+                        color: colorScheme.onErrorContainer,
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          l10n.orderCancelled,
+                          style: textTheme.titleSmall?.copyWith(
+                            color: colorScheme.onErrorContainer,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                )
+              else
+                ...List.generate(steps.length, (index) {
                 final step = steps[index];
                 final isCompleted = index < currentStatusIndex;
                 final isCurrent = index == currentStatusIndex;
@@ -252,7 +286,8 @@ class _TimelineStep extends StatelessWidget {
         ? activeColor
         : pendingColor;
 
-    final iconColor = isCompleted || isCurrent ? Colors.white : pendingColor;
+    final iconColor =
+        isCompleted || isCurrent ? colorScheme.onPrimary : pendingColor;
 
     final lineColor = isCompleted ? activeColor : pendingColor;
 
@@ -422,6 +457,14 @@ class _OrderDetailsCard extends StatelessWidget {
                 value: '${order.deliveryFee.toStringAsFixed(2)} ${l10n.sar}',
                 textTheme: textTheme,
               ),
+              if (order.discount > 0) ...[
+                const SizedBox(height: 8),
+                _PriceRow(
+                  label: l10n.discount,
+                  value: '-${order.discount.toStringAsFixed(2)} ${l10n.sar}',
+                  textTheme: textTheme,
+                ),
+              ],
               const Divider(height: 24),
               _PriceRow(
                 label: l10n.total,

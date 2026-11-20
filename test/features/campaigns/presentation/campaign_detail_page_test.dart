@@ -37,10 +37,10 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('عرض الصيف'), findsOneWidget);
+    expect(find.text('Summer Offer'), findsOneWidget);
     expect(find.text('1/8/2026 - 31/8/2026'), findsOneWidget);
     expect(find.text('خصم يصل إلى 20% على جميع الطلبات'), findsOneWidget);
-    expect(find.text('Published'), findsOneWidget);
+    expect(find.text('Active'), findsOneWidget);
   });
 
   testWidgets('shows not-found when the campaign is null', (tester) async {

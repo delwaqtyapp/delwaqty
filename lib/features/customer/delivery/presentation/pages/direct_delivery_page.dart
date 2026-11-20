@@ -15,7 +15,9 @@ import 'package:delwaqty/features/customer/search/domain/entities/geo_point.dart
 import 'package:delwaqty/features/customer/search/domain/entities/search_session.dart';
 import 'package:delwaqty/features/customer/search/presentation/providers/search_providers.dart';
 import 'dart:async';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:delwaqty/core/errors/app_error_text.dart';
+import 'package:delwaqty/services/logger/app_logger.dart';
 
 class DirectDeliveryPage extends ConsumerStatefulWidget {
   const DirectDeliveryPage({super.key});
@@ -44,10 +46,12 @@ class _DirectDeliveryPageState extends ConsumerState<DirectDeliveryPage> {
   String _selectedWeight = 'none';
   String _selectedPieceUnit = 'none';
 
+  static const _savedPhoneKey = 'direct_delivery_saved_phone';
+
   @override
   void initState() {
     super.initState();
-    _loadPhoneNumber();
+    unawaited(_loadPhoneNumber());
     _qtyFocusNode.addListener(() {
       if (_qtyFocusNode.hasFocus) {
         _itemQtyController.selection = TextSelection(
@@ -58,10 +62,19 @@ class _DirectDeliveryPageState extends ConsumerState<DirectDeliveryPage> {
     });
   }
 
-  void _loadPhoneNumber() {
+  Future<void> _loadPhoneNumber() async {
     final authState = ref.read(authStateProvider);
     if (authState is AuthAuthenticated && authState.user.phone != null) {
       _phoneController.text = authState.user.phone!;
+      return;
+    }
+    final prefs = await SharedPreferences.getInstance();
+    final saved = prefs.getString(_savedPhoneKey);
+    if (mounted &&
+        _phoneController.text.isEmpty &&
+        saved != null &&
+        saved.isNotEmpty) {
+      _phoneController.text = saved;
     }
   }
 
@@ -248,11 +261,17 @@ class _DirectDeliveryPageState extends ConsumerState<DirectDeliveryPage> {
         await ref
             .read(deliveryRepositoryProvider)
             .dispatchDelivery(deliveryId);
-      } catch (_) {
+      } catch (e, st) {
         // The ride was created; driver matching can be retried from tracking.
+        ref
+            .read(loggerProvider)
+            .e('Failed to dispatch delivery $deliveryId', e, st);
       }
       if (!mounted) return;
       if (_saveNumber) {
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString(_savedPhoneKey, phone);
+        if (!mounted) return;
         context.showAppSnackBar(l10n.numberSaved);
       }
       unawaited(context.push('/delivery-tracking/$deliveryId'));

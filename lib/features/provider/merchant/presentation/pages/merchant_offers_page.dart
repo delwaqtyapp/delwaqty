@@ -154,9 +154,17 @@ class _MerchantOffersPageState extends ConsumerState<MerchantOffersPage> {
 
   void _showOfferForm(
     BuildContext context,
-    WidgetRef ref, {Offer? offer}) {
-    final merchantId =
-        ref.read(providerMerchantIdProvider).value ?? '';
+    WidgetRef ref, {
+    Offer? offer,
+  }) {
+    final merchantId = ref.read(providerMerchantIdProvider).value ?? '';
+    if (merchantId.isEmpty) {
+      context.showAppSnackBar(
+        AppLocalizations.of(context).noMerchantAccount,
+        isError: true,
+      );
+      return;
+    }
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -192,7 +200,7 @@ class _MerchantOffersPageState extends ConsumerState<MerchantOffersPage> {
         ],
       ),
     );
-    if (confirmed == true) {
+    if (confirmed == true && mounted) {
       await _deleteOffer(offer);
     }
   }
@@ -655,6 +663,7 @@ class _OfferFormSheetState extends ConsumerState<_OfferFormSheet> {
                                   const Duration(days: 365),
                                 ),
                               );
+                              if (!mounted) return;
                               if (picked != null) {
                                 setState(() => _startDate = picked);
                               }
@@ -686,6 +695,7 @@ class _OfferFormSheetState extends ConsumerState<_OfferFormSheet> {
                                   const Duration(days: 365),
                                 ),
                               );
+                              if (!mounted) return;
                               if (picked != null) {
                                 setState(() => _endDate = picked);
                               }

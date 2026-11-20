@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:delwaqty/core/module/feature_module.dart';
+import 'package:delwaqty/l10n/app_localizations.dart';
 import 'package:delwaqty/features/customer/commerce/domain/repositories/merchant_repository.dart';
 import 'package:delwaqty/features/customer/commerce/domain/repositories/product_repository.dart';
 import 'package:delwaqty/features/customer/commerce/domain/repositories/catalog_category_repository.dart';
@@ -30,7 +31,6 @@ import 'package:delwaqty/features/customer/commerce/presentation/pages/product_d
 import 'package:delwaqty/features/customer/commerce/presentation/pages/cart_page.dart';
 import 'package:delwaqty/features/customer/commerce/presentation/pages/checkout_page.dart';
 import 'package:delwaqty/features/customer/commerce/presentation/pages/orders_page.dart';
-import 'package:delwaqty/features/customer/commerce/presentation/pages/search_page.dart';
 import 'package:delwaqty/features/customer/commerce/presentation/pages/order_tracking_page.dart';
 import 'package:delwaqty/features/customer/commerce/presentation/pages/order_completed_page.dart';
 import 'package:delwaqty/features/customer/commerce/presentation/pages/favorites_page.dart';
@@ -96,7 +96,7 @@ class CommerceModule extends FeatureModule {
   String get id => 'commerce';
 
   @override
-  String name(BuildContext context) => 'Market';
+  String name(BuildContext context) => AppLocalizations.of(context).market;
 
   @override
   IconData? get icon => Icons.storefront_outlined;
@@ -147,7 +147,7 @@ class CommerceModule extends FeatureModule {
         ),
         GoRoute(
           path: 'search',
-          builder: (context, state) => const SearchPage(),
+          builder: (context, state) => const CartPage(),
         ),
         GoRoute(
           path: 'orders',

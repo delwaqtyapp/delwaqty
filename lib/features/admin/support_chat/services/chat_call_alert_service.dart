@@ -16,6 +16,7 @@ import 'package:delwaqty/features/_shared/auth/domain/auth_state.dart' as auth;
 import 'package:delwaqty/services/logger/app_logger.dart';
 import 'package:delwaqty/services/push_notification/push_notification_service.dart';
 import 'package:delwaqty/services/realtime/realtime_service.dart';
+import 'package:delwaqty/l10n/app_localizations.dart';
 
 /// Listens (app-wide, not just inside the room screen) for NEW incoming
 /// voice-call messages on the user's accessible chat rooms.
@@ -118,11 +119,13 @@ class ChatCallAlertService {
       }
 
       final senderType = record['sender_type'] as String? ?? 'customer';
+      final ctx = _activeNavigatorContext() ?? rootNavigatorKey.currentContext;
+      final l10n = ctx != null && ctx.mounted ? AppLocalizations.of(ctx) : null;
       final callerLabel = switch (senderType) {
-        'driver' => 'مندوب توصيل',
-        'provider' => 'مزود خدمة',
-        'admin' => 'الإدارة',
-        _ => 'عميل',
+        'driver' => l10n?.deliveryDriver ?? senderType,
+        'provider' => l10n?.serviceProvider ?? senderType,
+        'admin' => l10n?.admin ?? senderType,
+        _ => l10n?.customer ?? senderType,
       };
       await showChatCallNotification(
         roomId: roomId,

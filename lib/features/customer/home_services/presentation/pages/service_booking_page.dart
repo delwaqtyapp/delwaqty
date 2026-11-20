@@ -60,6 +60,15 @@ class _ServiceBookingPageState extends ConsumerState<ServiceBookingPage> {
       _addressController.text = locAddress;
       _addressPrefilled = true;
     }
+    ref.listenManual(userLocationProvider, (_, next) {
+      final addr = next.value?.detailedAddress ?? '';
+      if (!_addressPrefilled &&
+          _addressController.text.isEmpty &&
+          addr.isNotEmpty) {
+        _addressController.text = addr;
+        _addressPrefilled = true;
+      }
+    });
   }
 
   @override
@@ -111,13 +120,42 @@ class _ServiceBookingPageState extends ConsumerState<ServiceBookingPage> {
       return;
     }
 
+    final resolvedAddress = _addressController.text.trim().isNotEmpty
+        ? _addressController.text.trim()
+        : (ref.read(userLocationProvider).value?.detailedAddress ?? '').trim();
+    if (resolvedAddress.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(l10n.addressRequired),
+          backgroundColor: Theme.of(context).colorScheme.error,
+        ),
+      );
+      return;
+    }
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(l10n.confirmBooking),
+        content: Text(l10n.confirmBookingMessage),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: Text(l10n.cancel),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: Text(l10n.confirm),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) return;
+
     setState(() => _isSubmitting = true);
 
     try {
       final repo = ref.read(serviceBookingRepositoryProvider);
-      final resolvedAddress = _addressController.text.trim().isNotEmpty
-          ? _addressController.text.trim()
-          : (ref.read(userLocationProvider).value?.detailedAddress ?? '');
       await repo.createBooking(
         userId: authState.user.id,
         providerId: _selectedProviderId!,
@@ -160,14 +198,6 @@ class _ServiceBookingPageState extends ConsumerState<ServiceBookingPage> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final providersAsync = ref.watch(_providersProvider(widget.categoryType));
-    final userLoc = ref.watch(userLocationProvider).value;
-    if (!_addressPrefilled &&
-        _addressController.text.isEmpty &&
-        userLoc != null &&
-        userLoc.detailedAddress.isNotEmpty) {
-      _addressController.text = userLoc.detailedAddress;
-      _addressPrefilled = true;
-    }
 
     return Scaffold(
       appBar: AppBar(
@@ -411,18 +441,18 @@ class _ServiceBookingPageState extends ConsumerState<ServiceBookingPage> {
                     ),
                   ),
                   child: _isSubmitting
-                      ? const SizedBox(
+                      ? SizedBox(
                           width: 22,
                           height: 22,
                           child: CircularProgressIndicator(
                             strokeWidth: 2.5,
-                            color: Colors.white,
+                            color: Theme.of(context).colorScheme.onPrimary,
                           ),
                         )
                       : Text(
                           l10n.confirmBooking,
                           style: AppTextStyles.labelLarge.copyWith(
-                            color: Colors.white,
+                            color: Theme.of(context).colorScheme.onPrimary,
                             fontWeight: FontWeight.w700,
                           ),
                         ),

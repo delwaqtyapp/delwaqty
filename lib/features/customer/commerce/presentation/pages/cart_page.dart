@@ -25,16 +25,38 @@ class CartPage extends ConsumerWidget {
     final textTheme = context.textTheme;
     final cartAsync = ref.watch(_cartFutureProvider);
 
+    final hasItems = cartAsync.value?.items.isNotEmpty ?? false;
+
     return Scaffold(
       appBar: AppBar(
         title: Text(l10n.cart),
         actions: [
-          TextButton(
-            onPressed: () async {
-              await ref.read(cartProvider.notifier).clear();
-            },
-            child: Text(l10n.clearCart),
-          ),
+          if (hasItems)
+            TextButton(
+              onPressed: () async {
+                final confirmed = await showDialog<bool>(
+                  context: context,
+                  builder: (dialogContext) => AlertDialog(
+                    title: Text(l10n.clearCartTitle),
+                    content: Text(l10n.clearCartConfirm),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.of(dialogContext).pop(false),
+                        child: Text(l10n.cancel),
+                      ),
+                      FilledButton(
+                        onPressed: () => Navigator.of(dialogContext).pop(true),
+                        child: Text(l10n.clearCart),
+                      ),
+                    ],
+                  ),
+                );
+                if (confirmed == true) {
+                  await ref.read(cartProvider.notifier).clear();
+                }
+              },
+              child: Text(l10n.clearCart),
+            ),
         ],
       ),
       body: cartAsync.when(
@@ -63,8 +85,8 @@ class CartPage extends ConsumerWidget {
                         key: ValueKey(item.id),
                         direction: DismissDirection.endToStart,
                         background: Container(
-                          alignment: Alignment.centerRight,
-                          padding: const EdgeInsets.only(right: 24),
+                          alignment: AlignmentDirectional.centerEnd,
+                          padding: const EdgeInsetsDirectional.only(end: 24),
                           margin: const EdgeInsets.only(bottom: 8),
                           decoration: BoxDecoration(
                             color: colorScheme.error,
@@ -173,7 +195,7 @@ class CartPage extends ConsumerWidget {
                   color: colorScheme.surface,
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.05),
+                      color: colorScheme.shadow.withValues(alpha: 0.05),
                       blurRadius: 10,
                       offset: const Offset(0, -2),
                     ),
@@ -226,7 +248,7 @@ class CartPage extends ConsumerWidget {
         error: (e, _) => ErrorState(
           title: l10n.error,
           message: appErrorText(context, e),
-          onRetry: () => ref.invalidate(_cartFutureProvider),
+          onRetry: () => ref.invalidate(cartProvider),
           retryLabel: l10n.retry,
         ),
       ),

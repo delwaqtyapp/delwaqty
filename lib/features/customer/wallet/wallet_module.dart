@@ -35,7 +35,7 @@ class WalletModule extends FeatureModule {
   String get id => 'wallet';
 
   @override
-  String name(BuildContext context) => 'Wallet';
+  String name(BuildContext context) => AppLocalizations.of(context).wallet;
 
   @override
   IconData? get icon => Icons.account_balance_wallet_outlined;

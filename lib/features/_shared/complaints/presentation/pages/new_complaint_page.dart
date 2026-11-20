@@ -63,7 +63,12 @@ class _NewComplaintPageState extends ConsumerState<NewComplaintPage> {
                   ),
                 ),
                 items: ['driver', 'merchant', 'customer', 'provider', 'other']
-                    .map((s) => DropdownMenuItem(value: s, child: Text(s)))
+                    .map(
+                      (s) => DropdownMenuItem(
+                        value: s,
+                        child: Text(_typeLabel(AppLocalizations.of(context), s)),
+                      ),
+                    )
                     .toList(),
                 onChanged: (v) => setState(() => _complaintType = v!),
               ),
@@ -77,7 +82,14 @@ class _NewComplaintPageState extends ConsumerState<NewComplaintPage> {
                   ),
                 ),
                 items: ['low', 'medium', 'high', 'urgent']
-                    .map((s) => DropdownMenuItem(value: s, child: Text(s)))
+                    .map(
+                      (s) => DropdownMenuItem(
+                        value: s,
+                        child: Text(
+                          _priorityLabel(AppLocalizations.of(context), s),
+                        ),
+                      ),
+                    )
                     .toList(),
                 onChanged: (v) => setState(() => _priority = v!),
               ),
@@ -155,6 +167,38 @@ class _NewComplaintPageState extends ConsumerState<NewComplaintPage> {
       }
     } finally {
       if (mounted) setState(() => _submitting = false);
+    }
+  }
+
+  String _typeLabel(AppLocalizations l10n, String type) {
+    switch (type) {
+      case 'driver':
+        return l10n.driver;
+      case 'merchant':
+        return l10n.merchant;
+      case 'customer':
+        return l10n.customer;
+      case 'provider':
+        return l10n.provider;
+      case 'other':
+        return l10n.other;
+      default:
+        return type;
+    }
+  }
+
+  String _priorityLabel(AppLocalizations l10n, String priority) {
+    switch (priority) {
+      case 'low':
+        return l10n.lowPriority;
+      case 'medium':
+        return l10n.mediumPriority;
+      case 'high':
+        return l10n.highPriority;
+      case 'urgent':
+        return l10n.urgent;
+      default:
+        return priority;
     }
   }
 }

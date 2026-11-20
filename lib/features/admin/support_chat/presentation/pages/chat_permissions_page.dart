@@ -47,11 +47,13 @@ class _ChatPermissionsPageState extends ConsumerState<ChatPermissionsPage> {
         ? null
         : ref.watch(chatReceiveCallsProvider(myId));
 
-    if (!_loaded) {
+    if (!_loaded &&
+        permissionsAsync.hasValue &&
+        (receiveAsync == null || receiveAsync.hasValue)) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
         final perms = permissionsAsync.asData?.value;
         final receive = receiveAsync?.asData?.value ?? true;
-        if (!mounted) return;
         setState(() {
           _calls = perms?['chat_calls_enabled'] as bool? ?? true;
           _voice = perms?['chat_voice_enabled'] as bool? ?? true;

@@ -62,6 +62,28 @@ class _AdminSupportChatPageState extends ConsumerState<AdminSupportChatPage> {
             itemBuilder: (context, index) {
               final room = rooms[index];
               final refNum = room.referenceNumber;
+              final authState = ref.watch(authStateProvider);
+              final myId =
+                  authState is AuthAuthenticated ? authState.user.id : null;
+              final peerId = room.participantIds.firstWhere(
+                (id) => id.isNotEmpty && id != myId,
+                orElse: () =>
+                    room.participantIds.isNotEmpty ? room.participantIds.first : '',
+              );
+              final peerProfile = peerId.isNotEmpty
+                  ? (ref.watch(chatRoomUserProvider(peerId)).asData?.value ??
+                      const <String, dynamic>{})
+                  : const <String, dynamic>{};
+              final peerName =
+                  (peerProfile['full_name'] as String?)?.trim() ?? '';
+              final shortId =
+                  room.id.length >= 8 ? room.id.substring(0, 8) : room.id;
+              final titleText = peerName.isNotEmpty
+                  ? (refNum == null ? peerName : '$peerName • $refNum')
+                  : (refNum == null
+                      ? '${l10n.chatRoom} $shortId'
+                      : '${l10n.complaintNo}: $refNum');
+
               return Padding(
                 padding: const EdgeInsets.only(bottom: 8),
                 child: AnimatedFadeIn(
@@ -70,7 +92,9 @@ class _AdminSupportChatPageState extends ConsumerState<AdminSupportChatPage> {
                       leading: Container(
                         padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
-                          color: room.isActive ? Colors.green.withValues(alpha: 0.15) : Colors.grey.withValues(alpha: 0.15),
+                          color: room.isActive
+                              ? Colors.green.withValues(alpha: 0.15)
+                              : Colors.grey.withValues(alpha: 0.15),
                           borderRadius: BorderRadius.circular(10),
                         ),
                         child: Icon(
@@ -79,14 +103,17 @@ class _AdminSupportChatPageState extends ConsumerState<AdminSupportChatPage> {
                         ),
                       ),
                       title: Text(
-                        refNum == null ? '${l10n.chatRoom} ${room.id.substring(0, 8)}' : '${l10n.complaintNo}: $refNum',
+                        titleText,
+                        style: const TextStyle(fontWeight: FontWeight.w700),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
                       subtitle: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('${room.roomType} · ${room.participantIds.length} ${l10n.participants}'),
+                          Text(
+                            '${room.roomType} · ${room.participantIds.length} ${l10n.participants}',
+                          ),
                           const SizedBox(height: 4),
                           _originBadge(room, l10n),
                         ],
@@ -96,21 +123,34 @@ class _AdminSupportChatPageState extends ConsumerState<AdminSupportChatPage> {
                         children: [
                           if (room.isActive)
                             Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 4,
+                              ),
                               decoration: BoxDecoration(
                                 color: Colors.green.withValues(alpha: 0.15),
                                 borderRadius: BorderRadius.circular(8),
                               ),
-                              child: Text(l10n.active, style: const TextStyle(fontSize: 11, color: Colors.green)),
+                              child: Text(
+                                l10n.active,
+                                style: const TextStyle(
+                                  fontSize: 11,
+                                  color: Colors.green,
+                                ),
+                              ),
                             ),
                           IconButton(
-                            icon: const Icon(Icons.delete_outline_rounded, size: 20),
+                            icon: const Icon(
+                              Icons.delete_outline_rounded,
+                              size: 20,
+                            ),
                             tooltip: l10n.deleteChat,
                             onPressed: () => _confirmDelete(room.id),
                           ),
                         ],
                       ),
-                      onTap: () => context.push('/admin/support-chat/room/${room.id}'),
+                      onTap: () =>
+                          context.push('/admin/support-chat/room/${room.id}'),
                     ),
                   ),
                 ),

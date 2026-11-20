@@ -15,6 +15,7 @@ import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
 import 'package:delwaqty/shared/widgets/shimmer_loading.dart';
 import 'package:delwaqty/core/theme/app_colors.dart';
 import 'package:delwaqty/features/driver/driver_module.dart';
+import 'package:delwaqty/features/driver/domain/entities/driver_profile.dart';
 import 'package:delwaqty/core/errors/app_error_text.dart';
 
 class DriverDeliveryHubPage extends ConsumerWidget {
@@ -84,6 +85,12 @@ class _RegisterPrompt extends StatelessWidget {
                     ?.copyWith(fontWeight: FontWeight.bold)),
             const SizedBox(height: 8),
             Text(l10n.joinFleetSubtitle, textAlign: TextAlign.center),
+            const SizedBox(height: 24),
+            FilledButton.icon(
+              onPressed: () => context.push('/driver/onboarding/$userId'),
+              icon: const Icon(Icons.app_registration_rounded),
+              label: Text(l10n.registerNow),
+            ),
           ],
         ),
       ),
@@ -93,7 +100,7 @@ class _RegisterPrompt extends StatelessWidget {
 
 class _DeliveryHubBody extends ConsumerStatefulWidget {
   const _DeliveryHubBody({required this.profile});
-  final dynamic profile;
+  final DriverProfile profile;
 
   @override
   ConsumerState<_DeliveryHubBody> createState() => _DeliveryHubBodyState();
@@ -108,7 +115,8 @@ class _DeliveryHubBodyState extends ConsumerState<_DeliveryHubBody> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final onlineState = ref.watch(driverOnlineProvider(_driverId));
-    final online = onlineState.value ?? false;
+    final online = onlineState.value ??
+        (widget.profile.status == DriverStatus.online);
 
     ref.listen<AsyncValue<DeliveryOrder?>>(activeDeliveryProvider(_driverId),
         (prev, next) {
@@ -151,7 +159,10 @@ class _DeliveryHubBodyState extends ConsumerState<_DeliveryHubBody> {
           const SizedBox(height: 16),
           activeDeliveryAsync.when(
             loading: () => const SizedBox.shrink(),
-            error: (e, _) => const SizedBox.shrink(),
+            error: (e, _) => _HubErrorCard(
+              message: appErrorText(context, e),
+              onRetry: () => ref.invalidate(activeDeliveryProvider(_driverId)),
+            ),
             data: (order) {
               if (order == null ||
                   order.status == 'completed' ||
@@ -170,7 +181,10 @@ class _DeliveryHubBodyState extends ConsumerState<_DeliveryHubBody> {
                 child: Padding(
                     padding: EdgeInsets.all(24),
                     child: CircularProgressIndicator())),
-            error: (e, _) => const SizedBox.shrink(),
+            error: (e, _) => _HubErrorCard(
+              message: appErrorText(context, e),
+              onRetry: () => ref.invalidate(driverStatsProvider(_driverId)),
+            ),
             data: (stats) => AnimatedFadeIn(
               delay: const Duration(milliseconds: 100),
               child: _StatsRow(stats: stats),
@@ -534,7 +548,13 @@ class _DeliveryOfferDialogState extends State<_DeliveryOfferDialog>
     _timerController = AnimationController(
       vsync: this,
       duration: remaining,
-    )..forward();
+    )
+      ..addStatusListener((status) {
+        if (status == AnimationStatus.completed && mounted) {
+          Navigator.of(context).pop();
+        }
+      })
+      ..forward();
   }
 
   @override
@@ -632,6 +652,31 @@ class _CapabilitiesBottomSheetState
     ('retail_delivery', Icons.shopping_bag_rounded),
   ];
 
+  String _serviceTypeLabel(AppLocalizations l10n, String type) {
+    switch (type) {
+      case 'food_delivery':
+        return l10n.food;
+      case 'grocery_delivery':
+        return l10n.grocery;
+      case 'pharmacy_delivery':
+        return l10n.pharmacy;
+      case 'marketplace_delivery':
+        return l10n.shopping;
+      case 'courier':
+        return l10n.delivery;
+      case 'package_delivery':
+        return l10n.package;
+      case 'document_delivery':
+        return l10n.documents;
+      case 'flower_delivery':
+        return l10n.flowers;
+      case 'retail_delivery':
+        return l10n.storefront;
+      default:
+        return l10n.delivery;
+    }
+  }
+
   late Set<String> _selectedTypes;
   late bool _acceptsDeliveries;
   late double _maxDistance;
@@ -688,7 +733,7 @@ class _CapabilitiesBottomSheetState
                 return FilterChip(
                   selected: selected,
                   avatar: Icon(icon, size: 18),
-                  label: Text(type.replaceAll('_', ' ')),
+                  label: Text(_serviceTypeLabel(l10n, type)),
                   onSelected: (v) {
                     setState(() {
                       if (v) {
@@ -741,7 +786,6 @@ class _CapabilitiesBottomSheetState
   Future<void> _save() async {
     final navigator = Navigator.of(context);
     final messenger = ScaffoldMessenger.of(context);
-    final l10n = AppLocalizations.of(context);
     try {
       await ref.read(deliveryRepositoryProvider).updateDriverCapabilities(
             widget.driverId,
@@ -753,9 +797,38 @@ class _CapabilitiesBottomSheetState
       ref.invalidate(driverCapabilitiesProvider(widget.driverId));
       navigator.pop();
     } catch (e) {
-      messenger.showSnackBar(
-        SnackBar(content: Text(l10n.somethingWentWrong)),
-      );
+      if (mounted) {
+        messenger.showSnackBar(
+          SnackBar(content: Text(appErrorText(context, e))),
+        );
+      }
     }
+  }
+}
+
+class _HubErrorCard extends StatelessWidget {
+  const _HubErrorCard({required this.message, required this.onRetry});
+
+  final String message;
+  final VoidCallback onRetry;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Row(
+          children: [
+            Expanded(child: Text(message)),
+            const SizedBox(width: 8),
+            TextButton(
+              onPressed: onRetry,
+              child: Text(l10n.retry),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }

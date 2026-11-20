@@ -48,7 +48,9 @@ void main() async {
         child: Padding(
           padding: const EdgeInsets.all(24),
           child: Text(
-            '${details.exception}',
+            kDebugMode
+                ? '${details.exception}'
+                : 'Something went wrong. Please restart the app.',
             style: TextStyle(color: Colors.white.withValues(alpha: 0.9)),
             textAlign: TextAlign.center,
           ),

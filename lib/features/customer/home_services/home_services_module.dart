@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:delwaqty/core/module/feature_module.dart';
+import 'package:delwaqty/l10n/app_localizations.dart';
 import 'package:delwaqty/features/customer/home_services/domain/entities/service_category.dart';
 import 'package:delwaqty/features/customer/home_services/domain/entities/service_provider.dart';
 import 'package:delwaqty/features/customer/home_services/presentation/pages/home_services_page.dart';
@@ -15,7 +16,7 @@ class HomeServicesModule extends FeatureModule {
   String get id => 'home_services';
 
   @override
-  String name(BuildContext context) => 'Home Services';
+  String name(BuildContext context) => AppLocalizations.of(context).homeServices;
 
   @override
   IconData? get icon => Icons.home_repair_service_rounded;

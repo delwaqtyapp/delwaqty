@@ -180,7 +180,7 @@ void main() {
         ),
       ).thenAnswer(
         (_) => Stream.fromIterable([
-          positionWith(29.2, 32.63, 5.0),
+          positionWith(29.2, 32.63, 12.0),
           positionWith(29.2, 32.63, 0.5),
         ]),
       );

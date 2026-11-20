@@ -2020,6 +2020,8 @@
   "paymentBankTransfer": "Bank transfer",
   "paymentInstapay": "InstaPay",
   "paymentVodafoneCash": "Vodafone Cash",
+  "paymentWallet": "Wallet",
+  "walletPaymentFailed": "Insufficient wallet balance",
   "paymentCash": "Cash",
   "proofOfPayment": "Proof of payment",
   "tapToAddProof": "Tap to attach transfer proof",

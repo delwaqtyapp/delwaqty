@@ -1235,7 +1235,7 @@ abstract class AppLocalizations {
   /// No description provided for @accountDeletionInfo.
   ///
   /// In en, this message translates to:
-  /// **'You have been signed out. Account deletion is handled by support — contact support@delwaqty.com'**
+  /// **'You have been signed out. If account deletion fails, contact us at delwaqty.app@gmail.com'**
   String get accountDeletionInfo;
 
   /// No description provided for @emptyCart.
@@ -12049,6 +12049,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Vodafone Cash'**
   String get paymentVodafoneCash;
+
+  /// No description provided for @paymentWallet.
+  ///
+  /// In en, this message translates to:
+  /// **'Wallet'**
+  String get paymentWallet;
+
+  /// No description provided for @walletPaymentFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Insufficient wallet balance'**
+  String get walletPaymentFailed;
 
   /// No description provided for @paymentCash.
   ///

@@ -152,25 +152,35 @@ class ServiceBookingRepositoryImpl implements ServiceBookingRepository {
     String id,
     BookingStatus status,
   ) async {
+    // The booking guard trigger freezes direct client updates; the
+    // role-aware RPC owns every transition.
+    await _client
+        .rpc(
+          'update_service_booking_status',
+          params: {'p_booking_id': id, 'p_status': status.name},
+        )
+        .then((res) {
+          if (res is Map && res['ok'] != true) {
+            throw StateError('update_service_booking_status: ${res['reason']}');
+          }
+        });
     final response = await _client
         .from('service_bookings')
-        .update({
-          'status': status.name,
-          if (status == BookingStatus.completed)
-            'completed_at': DateTime.now().toIso8601String(),
-        })
-        .eq('id', id)
         .select()
+        .eq('id', id)
         .single();
     return ServiceBooking.fromJson(response);
   }
 
   @override
   Future<void> cancelBooking(String id) async {
-    await _client
-        .from('service_bookings')
-        .update({'status': 'cancelled'})
-        .eq('id', id);
+    final res = await _client.rpc(
+      'update_service_booking_status',
+      params: {'p_booking_id': id, 'p_status': 'cancelled'},
+    );
+    if (res is Map && res['ok'] != true) {
+      throw StateError('update_service_booking_status: ${res['reason']}');
+    }
   }
 }
 

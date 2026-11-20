@@ -349,14 +349,16 @@ class _MerchantReservationsPageState
       } catch (_) {
         client = Supabase.instance.client;
       }
-      await client
-          .from('service_bookings')
-          .update({
-            'status': status,
-            if (status == 'completed')
-              'completed_at': DateTime.now().toIso8601String(),
-          })
-          .eq('id', bookingId);
+      // Status transitions go through the role-aware RPC: it records the
+      // provider commission on completion and is the only path the booking
+      // guard trigger accepts.
+      final res = await client.rpc(
+        'update_service_booking_status',
+        params: {'p_booking_id': bookingId, 'p_status': status},
+      );
+      if (res is Map && res['ok'] != true) {
+        throw StateError('update_service_booking_status: ${res['reason']}');
+      }
       ref.invalidate(_serviceBookingsProvider);
       if (mounted) {
         context.showAppSnackBar(

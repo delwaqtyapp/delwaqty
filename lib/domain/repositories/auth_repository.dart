@@ -30,7 +30,6 @@ abstract class AuthRepository {
   Future<AuthResult> signInWithGoogle();
   Future<AuthResult> signInWithApple();
   Future<AuthResult> signInWithFacebook();
-  Future<AuthResult> signInAnonymously();
   Future<void> signOut();
   Future<void> resetPassword({required String email});
   Future<void> resendEmailConfirmation({required String email});

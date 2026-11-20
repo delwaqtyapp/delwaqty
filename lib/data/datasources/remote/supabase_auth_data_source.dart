@@ -150,17 +150,6 @@ class SupabaseAuthDataSource {
     }
   }
 
-  Future<AuthResponse> signInAnonymously() async {
-    try {
-      final response = await _auth.signInAnonymously();
-      _logger.i('Anonymous sign in successful');
-      return response;
-    } catch (e, stack) {
-      _logger.e('Anonymous sign in failed', e, stack);
-      rethrow;
-    }
-  }
-
   Future<void> signOut() async {
     try {
       await _auth.signOut();

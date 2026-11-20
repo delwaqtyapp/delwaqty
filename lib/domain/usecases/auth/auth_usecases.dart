@@ -136,20 +136,6 @@ class SignInWithFacebookUseCase {
   Future<AuthResult> call() => _repository.signInWithFacebook();
 }
 
-final signInAnonymouslyUseCaseProvider = Provider<SignInAnonymouslyUseCase>((
-  ref,
-) {
-  return SignInAnonymouslyUseCase(ref.watch(authRepositoryProvider));
-});
-
-class SignInAnonymouslyUseCase {
-  SignInAnonymouslyUseCase(this._repository);
-
-  final AuthRepository _repository;
-
-  Future<AuthResult> call() => _repository.signInAnonymously();
-}
-
 final signOutUseCaseProvider = Provider<SignOutUseCase>((ref) {
   return SignOutUseCase(ref.watch(authRepositoryProvider));
 });

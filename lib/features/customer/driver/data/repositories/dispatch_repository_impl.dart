@@ -8,6 +8,9 @@ class DispatchRepositoryImpl implements DispatchRepository {
   final SupabaseDispatchDataSource _dataSource;
 
   @override
+  Future<bool> getOnline(String driverId) => _dataSource.getOnline(driverId);
+
+  @override
   Future<void> setOnline(
     String driverId,
     bool online, {

@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import 'package:geolocator/geolocator.dart';
@@ -13,157 +14,195 @@ import 'package:delwaqty/services/logger/app_logger.dart';
 final dispatchRepositoryProvider = Provider<DispatchRepository>((ref) {
   return DispatchRepositoryImpl(ref.watch(supabaseDispatchDataSourceProvider));
 });
-
-/// Aggregated dashboard performance metrics.
 final driverStatsProvider = FutureProvider.family<DriverStats, String>((
   ref,
-  driverId,
+  id,
 ) {
-  return ref.watch(dispatchRepositoryProvider).getDashboardStats(driverId);
+  return ref.watch(dispatchRepositoryProvider).getDashboardStats(id);
 });
-
-/// Driver earnings ledger.
 final driverEarningsProvider =
-    FutureProvider.family<List<DriverEarning>, String>((ref, driverId) {
-      return ref.watch(dispatchRepositoryProvider).getEarnings(driverId);
+    FutureProvider.family<List<DriverEarning>, String>((ref, id) {
+      return ref.watch(dispatchRepositoryProvider).getEarnings(id);
     });
-
-/// Live GPS position for an active driver.
 final driverLivePositionProvider = StateProvider.family<Position?, String>(
-  (ref, driverId) => null,
+  (ref, id) => null,
 );
 
-/// Online/offline state and background GPS streaming for a driver.
+/// Fresh GPS reads, rather than resending cached positions, renew presence.
+class DriverPositionSource {
+  Future<Position> current() async {
+    if (!await Geolocator.isLocationServiceEnabled()) {
+      throw StateError('location_unavailable');
+    }
+    var permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied)
+      permission = await Geolocator.requestPermission();
+    if (permission == LocationPermission.denied ||
+        permission == LocationPermission.deniedForever) {
+      throw StateError('location_permission_required');
+    }
+    final position = await Geolocator.getCurrentPosition(
+      locationSettings: const LocationSettings(
+        accuracy: LocationAccuracy.high,
+        timeLimit: Duration(seconds: 10),
+      ),
+    );
+    if (DateTime.now().difference(position.timestamp).abs() >
+        const Duration(seconds: 30)) {
+      throw StateError('stale_location');
+    }
+    return position;
+  }
+}
+
+final driverPositionSourceProvider = Provider<DriverPositionSource>(
+  (ref) => DriverPositionSource(),
+);
 final driverOnlineProvider =
     StateNotifierProvider.family<
       DriverOnlineNotifier,
       AsyncValue<bool>,
       String
-    >((ref, driverId) => DriverOnlineNotifier(ref, driverId));
+    >((ref, id) => DriverOnlineNotifier(ref, id));
 
-class DriverOnlineNotifier extends StateNotifier<AsyncValue<bool>> {
+/// Foreground lease. Background execution is not assumed: if the OS suspends
+/// this app, dispatch eligibility expires on the server after two minutes.
+class DriverOnlineNotifier extends StateNotifier<AsyncValue<bool>>
+    with WidgetsBindingObserver {
   DriverOnlineNotifier(this._ref, this._driverId)
-    : super(const AsyncValue.data(false));
-
+    : super(const AsyncValue.loading()) {
+    WidgetsBinding.instance.addObserver(this);
+    unawaited(_restore());
+  }
   final Ref _ref;
   final String _driverId;
-  StreamSubscription<Position>? _positionSub;
+  Timer? _heartbeat;
   Position? _lastPosition;
-
+  bool _desiredOnline = false;
+  bool _refreshing = false;
+  bool _disposed = false;
+  int _generation = 0;
   Position? get lastPosition => _lastPosition;
-
   DispatchRepository get _repo => _ref.read(dispatchRepositoryProvider);
-  AppLogger get _log => _ref.read(loggerProvider);
 
-  void _recordPosition(Position? pos) {
-    if (pos == null) return;
-    _lastPosition = pos;
-    _ref.read(driverLivePositionProvider(_driverId).notifier).state = pos;
+  bool _current(int generation) => !_disposed && generation == _generation;
+  void _record(Position position) {
+    _lastPosition = position;
+    _ref.read(driverLivePositionProvider(_driverId).notifier).state = position;
   }
 
-  Future<Position?> _currentPosition() async {
+  Future<void> _restore() async {
+    final generation = _generation;
     try {
-      final enabled = await Geolocator.isLocationServiceEnabled();
-      if (!enabled) return null;
-      var permission = await Geolocator.checkPermission();
-      if (permission == LocationPermission.denied) {
-        permission = await Geolocator.requestPermission();
+      final online = await _repo.getOnline(_driverId);
+      if (!_current(generation)) return;
+      if (online) {
+        await goOnline();
+      } else {
+        state = const AsyncValue.data(false);
       }
-      if (permission == LocationPermission.denied ||
-          permission == LocationPermission.deniedForever) {
-        return null;
-      }
-      final pos = await Geolocator.getCurrentPosition(
-        locationSettings: const LocationSettings(
-          accuracy: LocationAccuracy.high,
-          timeLimit: Duration(seconds: 10),
-        ),
-      );
-      _recordPosition(pos);
-      return pos;
-    } catch (e) {
-      _log.e('Driver position error', e);
-      return null;
+    } catch (error, stack) {
+      if (_current(generation)) state = AsyncValue.error(error, stack);
     }
   }
 
-  Future<void> setOnline(bool online) async {
-    if (online) {
-      await goOnline();
-    } else {
-      await goOffline();
-    }
-  }
+  Future<void> setOnline(bool online) => online ? goOnline() : goOffline();
+  Future<void> toggle() => setOnline(!_desiredOnline);
 
   Future<void> goOnline() async {
+    final generation = ++_generation;
+    _desiredOnline = true;
+    _heartbeat?.cancel();
     state = const AsyncValue.loading();
     try {
-      final pos = await _currentPosition();
+      final position = await _ref.read(driverPositionSourceProvider).current();
+      if (!_current(generation)) return;
       await _repo.setOnline(
         _driverId,
         true,
-        lat: pos?.latitude,
-        lng: pos?.longitude,
+        lat: position.latitude,
+        lng: position.longitude,
       );
-      _startTracking();
+      if (!_current(generation)) {
+        if (!_disposed && !_desiredOnline)
+          await _repo.setOnline(_driverId, false);
+        return;
+      }
+      _record(position);
       state = const AsyncValue.data(true);
-    } catch (e, st) {
-      state = AsyncValue.error(e, st);
+      _heartbeat = Timer.periodic(
+        const Duration(seconds: 45),
+        (_) => unawaited(_renew()),
+      );
+    } catch (error, stack) {
+      if (!_current(generation)) return;
+      _desiredOnline = false;
+      try {
+        await _repo.setOnline(_driverId, false);
+      } catch (_) {
+        /* Server lease still expires. */
+      }
+      if (_current(generation)) state = AsyncValue.error(error, stack);
+    }
+  }
+
+  Future<void> _renew() async {
+    if (_refreshing || !_desiredOnline || _disposed) return;
+    final generation = _generation;
+    _refreshing = true;
+    try {
+      final position = await _ref.read(driverPositionSourceProvider).current();
+      if (!_current(generation) || !_desiredOnline) return;
+      await _repo.updateLocation(
+        _driverId,
+        position.latitude,
+        position.longitude,
+        heading: position.heading,
+        speed: position.speed,
+      );
+      if (_current(generation)) _record(position);
+    } catch (error, stack) {
+      if (!_current(generation)) return;
+      _ref.read(loggerProvider).e('Driver presence renewal failed', error);
+      _heartbeat?.cancel();
+      _desiredOnline = false;
+      try {
+        await _repo.setOnline(_driverId, false);
+      } catch (_) {
+        /* Lease expires. */
+      }
+      if (_current(generation)) state = AsyncValue.error(error, stack);
+    } finally {
+      _refreshing = false;
     }
   }
 
   Future<void> goOffline() async {
+    final generation = ++_generation;
+    _desiredOnline = false;
+    _heartbeat?.cancel();
     state = const AsyncValue.loading();
     try {
-      await _stopTracking();
       await _repo.setOnline(_driverId, false);
-      state = const AsyncValue.data(false);
-    } catch (e, st) {
-      state = AsyncValue.error(e, st);
+      if (_current(generation)) state = const AsyncValue.data(false);
+    } catch (error, stack) {
+      if (_current(generation)) state = AsyncValue.error(error, stack);
     }
   }
 
-  Future<void> toggle() async {
-    final online = state.value ?? false;
-    if (online) {
-      await goOffline();
-    } else {
-      await goOnline();
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState lifecycle) {
+    if (lifecycle == AppLifecycleState.resumed && _desiredOnline) {
+      unawaited(goOnline());
     }
-  }
-
-  void _startTracking() {
-    _positionSub?.cancel();
-    _positionSub =
-        Geolocator.getPositionStream(
-          locationSettings: const LocationSettings(
-            accuracy: LocationAccuracy.high,
-            distanceFilter: 15,
-          ),
-        ).listen((pos) async {
-          _recordPosition(pos);
-          try {
-            await _repo.updateLocation(
-              _driverId,
-              pos.latitude,
-              pos.longitude,
-              heading: pos.heading,
-              speed: pos.speed,
-            );
-          } catch (e) {
-            _log.e('Driver location push failed', e);
-          }
-        });
-  }
-
-  Future<void> _stopTracking() async {
-    await _positionSub?.cancel();
-    _positionSub = null;
   }
 
   @override
   void dispose() {
-    _positionSub?.cancel();
+    _disposed = true;
+    _generation++;
+    _heartbeat?.cancel();
+    WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
 }

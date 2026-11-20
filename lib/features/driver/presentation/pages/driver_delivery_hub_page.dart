@@ -118,8 +118,7 @@ class _DeliveryHubBodyState extends ConsumerState<_DeliveryHubBody> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final onlineState = ref.watch(driverOnlineProvider(_driverId));
-    final online =
-        onlineState.value ?? (widget.profile.status == DriverStatus.online);
+    final online = onlineState.value ?? false;
 
     ref.listen<AsyncValue<DeliveryOrder?>>(activeDeliveryProvider(_driverId), (
       prev,

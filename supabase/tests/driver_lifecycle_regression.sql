@@ -12,11 +12,21 @@ BEGIN
  INSERT INTO public.drivers(id,user_id,full_name,status,is_verified,is_active,accepts_deliveries,current_latitude,current_longitude)
  VALUES(d,u,'Synthetic audit driver','online',true,true,true,30,31);
  INSERT INTO public.vehicles(id,driver_id,category,plate_number,is_active) VALUES(v,d,'motorcycle','AUDIT-ONLY',true);
- UPDATE public.drivers SET active_vehicle_id=v WHERE id=d;
+ UPDATE public.drivers SET active_vehicle_id=v, location_updated_at=now() WHERE id=d;
  INSERT INTO public.merchants(id,name,owner_user_id,latitude,longitude) VALUES(m,'Synthetic audit merchant',m_user,30,31);
  INSERT INTO public.orders(id,user_id,merchant_id,subtotal,total_amount,delivery_fee,delivery_latitude,delivery_longitude,payment_method)
  VALUES(o,c,m,100,120,20,30.001,31.001,'instapay');
  PERFORM set_config('request.jwt.claim.sub',m_user::text,true);
+ PERFORM set_config('role','authenticated',true);
+ PERFORM set_config('role','none',true);
+ UPDATE public.drivers SET location_updated_at=now()-interval '3 minutes' WHERE id=d;
+ PERFORM set_config('role','authenticated',true);
+ a:=public.merchant_dispatch_order_driver(o);
+ PERFORM set_config('role','none',true);
+ IF EXISTS(SELECT 1 FROM ride_requests q JOIN rides t ON t.id=q.ride_id WHERE t.order_id=o) THEN
+   RAISE EXCEPTION 'stale driver received dispatch offer';
+ END IF;
+ UPDATE public.drivers SET location_updated_at=now() WHERE id=d;
  PERFORM set_config('role','authenticated',true);
  a:=public.merchant_dispatch_order_driver(o);
  PERFORM set_config('role','none',true);
@@ -24,6 +34,20 @@ BEGIN
  SELECT id INTO r FROM public.rides WHERE order_id=o;
  IF r IS NULL THEN RAISE EXCEPTION 'no linked ride'; END IF;
  IF NOT EXISTS(SELECT 1 FROM public.ride_requests WHERE ride_id=r AND driver_id=d AND status='offered') THEN RAISE EXCEPTION 'no offer'; END IF;
+ -- Stale GPS cannot accept even a live offer; normal heartbeat restores it.
+ UPDATE public.drivers SET location_updated_at=now()-interval '3 minutes' WHERE id=d;
+ PERFORM set_config('request.jwt.claim.sub',u::text,true);
+ PERFORM set_config('role','authenticated',true);
+ a:=public.accept_ride_request(r,d);
+ IF a->>'reason' IS DISTINCT FROM 'stale_location' THEN RAISE EXCEPTION 'stale acceptance allowed: %',a; END IF;
+ a:=public.driver_set_online_state(true,NULL,NULL,d);
+ IF a->>'ok' IS DISTINCT FROM 'false' THEN RAISE EXCEPTION 'online without fresh location allowed: %',a; END IF;
+ a:=public.driver_set_online_state(true,30,31,d);
+ IF a->>'ok' IS DISTINCT FROM 'true' THEN RAISE EXCEPTION 'fresh online failed: %',a; END IF;
+ a:=public.driver_presence(d);
+ IF a->>'online' IS DISTINCT FROM 'true' OR a->>'fresh' IS DISTINCT FROM 'true' THEN RAISE EXCEPTION 'presence mismatch: %',a; END IF;
+ PERFORM set_config('role','none',true);
+ PERFORM set_config('request.jwt.claim.sub',m_user::text,true);
  -- Repeated dispatch must not create another ride or report no drivers.
  PERFORM set_config('role','authenticated',true);
  a:=public.merchant_dispatch_order_driver(o);

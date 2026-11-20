@@ -20,6 +20,11 @@ void main() {
     });
 
     test('returns null for unknown hosts on the scheme', () {
+      expect(
+        DeepLinkResolver.resolve('io.delwaqty.admin://login-callback'),
+        DeepLinkRoute.loginCallback,
+      );
+      expect(DeepLinkResolver.resolve('io.delwaqty.admin://profile'), isNull);
       expect(DeepLinkResolver.resolve('io.delwaqty://profile'), isNull);
       expect(DeepLinkResolver.resolve('io.delwaqty://'), isNull);
     });

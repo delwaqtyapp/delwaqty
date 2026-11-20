@@ -2,19 +2,31 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:delwaqty/services/supabase/supabase_service.dart';
 import 'package:delwaqty/services/logger/app_logger.dart';
+import 'package:delwaqty/core/config/app_mode_provider.dart';
+
+/// OAuth return URL per flavor. The admin app owns its own scheme
+/// (`io.delwaqty.admin`, see android/app/src/admin/AndroidManifest.xml) so its
+/// OAuth callback can be routed to it when several flavors share a device;
+/// every other flavor uses `io.delwaqty`.
+String oauthRedirectToForFlavor(AppFlavor flavor) => flavor == AppFlavor.admin
+    ? 'io.delwaqty.admin://login-callback'
+    : 'io.delwaqty://login-callback';
 
 final supabaseAuthDataSourceProvider = Provider<SupabaseAuthDataSource>((ref) {
   return SupabaseAuthDataSource(
     ref.watch(supabaseClientProvider),
     ref.watch(loggerProvider),
+    oauthRedirectTo: oauthRedirectToForFlavor(ref.watch(appFlavorProvider)),
   );
 });
 
 class SupabaseAuthDataSource {
-  SupabaseAuthDataSource(this._client, this._logger);
+  SupabaseAuthDataSource(this._client, this._logger, {String? oauthRedirectTo})
+    : _oauthRedirectTo = oauthRedirectTo ?? 'io.delwaqty://login-callback';
 
   final SupabaseClient _client;
   final AppLogger _logger;
+  final String _oauthRedirectTo;
 
   GoTrueClient get _auth => _client.auth;
 
@@ -100,7 +112,7 @@ class SupabaseAuthDataSource {
     try {
       final response = await _auth.signInWithOAuth(
         OAuthProvider.google,
-        redirectTo: 'io.delwaqty://login-callback',
+        redirectTo: _oauthRedirectTo,
       );
       _logger.i('Google sign in initiated');
       return response;
@@ -114,7 +126,7 @@ class SupabaseAuthDataSource {
     try {
       final response = await _auth.signInWithOAuth(
         OAuthProvider.apple,
-        redirectTo: 'io.delwaqty://login-callback',
+        redirectTo: _oauthRedirectTo,
       );
       _logger.i('Apple sign in initiated');
       return response;
@@ -128,7 +140,7 @@ class SupabaseAuthDataSource {
     try {
       final response = await _auth.signInWithOAuth(
         OAuthProvider.facebook,
-        redirectTo: 'io.delwaqty://login-callback',
+        redirectTo: _oauthRedirectTo,
       );
       _logger.i('Facebook sign in initiated');
       return response;

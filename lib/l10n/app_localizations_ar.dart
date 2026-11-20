@@ -7404,4 +7404,8 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get pickFromMap => 'تحديد من الخريطة';
+
+  @override
+  String get topUpRequestSubmitted =>
+      'تم إرسال طلب الشحن. سيتم إضافة الرصيد إلى محفظتك بعد المراجعة.';
 }

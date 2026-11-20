@@ -109,13 +109,15 @@ class SupabaseWalletDataSource {
     }
   }
 
-  /// Credits the wallet through the server-side atomic RPC.
+  /// Submits a top-up REQUEST (create_topup_request); the wallet is credited
+  /// only after the Owner approves it.
   ///
-  /// The previous implementation read the balance, added the amount in
-  /// Dart and wrote it back — so a retry or two concurrent calls could
-  /// credit twice, and there was no audit row if the ledger insert was
-  /// rejected. `wallet_topup` locks the wallet row, is idempotent on
-  /// p_idempotency_key and always writes the ledger entry.
+  /// The previous implementation called `wallet_topup`, which credited any
+  /// authenticated caller's own wallet immediately with an arbitrary amount -
+  /// free money for anyone with a signed-in session. That RPC is now revoked
+  /// from authenticated/anon (migration 130); the request flow is the only
+  /// customer path. The returned WalletTransaction is a local stand-in for the
+  /// pending request (no ledger row exists until approval).
   Future<WalletTransaction> topUp(
     String userId,
     double amount,
@@ -124,11 +126,10 @@ class SupabaseWalletDataSource {
   }) async {
     try {
       final res = await _client.rpc(
-        'wallet_topup',
+        'create_topup_request',
         params: {
           'p_amount': amount,
-          'p_method': method,
-          'p_reference': userId,
+          'p_payment_method': method,
           'p_idempotency_key':
               idempotencyKey ??
               'topup_${DateTime.now().microsecondsSinceEpoch}',
@@ -136,30 +137,17 @@ class SupabaseWalletDataSource {
       );
       final map = Map<String, dynamic>.from(res as Map);
       if (map['ok'] != true) {
-        throw StateError('Wallet top-up failed: ${map['code'] ?? 'unknown'}');
+        throw StateError(
+          'Wallet top-up request failed: ${map['code'] ?? 'unknown'}',
+        );
       }
-      final txId = map['transaction_id'] as String?;
-
-      if (txId != null) {
-        final row = await _client
-            .from(_transactionsTable)
-            .select()
-            .eq('id', txId)
-            .maybeSingle();
-        if (row != null) return _transactionFromRow(row);
-      }
-
-      final walletRow = await _client
-          .from(_walletsTable)
-          .select('id')
-          .eq('user_id', userId)
-          .maybeSingle();
+      final requestId = map['id'] as String?;
       return WalletTransaction(
-        id: txId ?? 'local_${DateTime.now().microsecondsSinceEpoch}',
-        walletId: (walletRow?['id'] as String?) ?? '',
+        id: requestId ?? 'local_${DateTime.now().microsecondsSinceEpoch}',
+        walletId: '',
         type: TransactionType.topup,
         amount: amount,
-        description: 'Top up via $method',
+        description: 'Top-up request via $method (pending approval)',
         createdAt: DateTime.now(),
       );
     } catch (e, stack) {

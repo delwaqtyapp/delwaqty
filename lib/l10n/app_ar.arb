@@ -2394,5 +2394,9 @@
   "addSubRegion": "إضافة مركز / مدينة / قرية / عزبة",
   "regionCoordinates": "إحداثيات الموقع",
   "boundaryRadiusKm": "نطاق الحدود (كم)",
-  "pickFromMap": "تحديد من الخريطة"
+  "pickFromMap": "تحديد من الخريطة",
+  "topUpRequestSubmitted": "تم إرسال طلب الشحن. سيتم إضافة الرصيد إلى محفظتك بعد المراجعة.",
+  "@topUpRequestSubmitted": {
+    "description": "Shown after the customer submits a wallet top-up request that awaits approval."
+  }
 }

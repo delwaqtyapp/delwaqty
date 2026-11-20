@@ -14233,6 +14233,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Pick on Map'**
   String get pickFromMap;
+
+  /// Shown after the customer submits a wallet top-up request that awaits approval.
+  ///
+  /// In en, this message translates to:
+  /// **'Top-up request submitted. Your wallet will be credited after review.'**
+  String get topUpRequestSubmitted;
 }
 
 class _AppLocalizationsDelegate

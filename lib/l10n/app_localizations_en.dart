@@ -7461,4 +7461,8 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get pickFromMap => 'Pick on Map';
+
+  @override
+  String get topUpRequestSubmitted =>
+      'Top-up request submitted. Your wallet will be credited after review.';
 }

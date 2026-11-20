@@ -33,10 +33,14 @@ class SupabaseWalletDataSource {
 
   WalletTransaction _transactionFromRow(Map<String, dynamic> row) {
     final typeStr = row['type'] as String;
-    final type = TransactionType.values.firstWhere(
-      (t) => t.name == typeStr,
-      orElse: () => TransactionType.payment,
-    );
+    final type = switch (typeStr) {
+      'credit' => TransactionType.topup,
+      'debit' => TransactionType.payment,
+      _ => TransactionType.values.firstWhere(
+        (t) => t.name == typeStr,
+        orElse: () => TransactionType.payment,
+      ),
+    };
     return WalletTransaction(
       id: row['id'] as String,
       walletId: row['wallet_id'] as String,
@@ -132,6 +136,9 @@ class SupabaseWalletDataSource {
         },
       );
       final map = Map<String, dynamic>.from(res as Map);
+      if (map['ok'] != true) {
+        throw StateError('Wallet top-up failed: ${map['code'] ?? 'unknown'}');
+      }
       final txId = map['transaction_id'] as String?;
 
       if (txId != null) {

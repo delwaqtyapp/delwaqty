@@ -101,14 +101,28 @@ class _TopupRequestPageState extends ConsumerState<TopupRequestPage> {
       );
       if (!mounted) return;
       final ok = result['ok'] == true;
-      final code = result['code'] ?? (ok ? 'OK' : 'ERROR');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.topUpRequestCreated(code))),
-      );
+      final code = (result['code'] ?? (ok ? 'OK' : 'ERROR')).toString();
       if (ok) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n.topUpRequestCreated(code))),
+        );
         ref.invalidate(topupRequestsProvider);
         ref.invalidate(financialSummaryProvider);
         if (mounted) context.pop();
+      } else {
+        final errorDetail = result['message']?.toString().trim();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              l10n.topUpFailed(
+                errorDetail != null && errorDetail.isNotEmpty
+                    ? errorDetail
+                    : code,
+              ),
+            ),
+            backgroundColor: Theme.of(context).colorScheme.error,
+          ),
+        );
       }
     } catch (e) {
       if (!mounted) return;

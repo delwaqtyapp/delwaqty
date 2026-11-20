@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:delwaqty/features/_shared/auth/presentation/auth_provider.dart';
 import 'package:delwaqty/features/_shared/auth/domain/auth_state.dart';
 import 'package:delwaqty/features/driver/driver_module.dart';
@@ -53,7 +54,9 @@ String _categoryLabel(AppLocalizations l10n, String category) {
     case 'light_transport':
       return l10n.vehicleLightTransport;
     default:
-      return category[0].toUpperCase() + category.substring(1);
+      return category.isNotEmpty
+          ? category[0].toUpperCase() + category.substring(1)
+          : '?';
   }
 }
 
@@ -110,7 +113,43 @@ class VehicleManagementPage extends ConsumerWidget {
         error: (e, _) => Center(child: Text(appErrorText(context, e))),
         data: (profile) {
           if (profile == null) {
-            return Center(child: Text(l10n.noVehicles));
+            return Center(
+              child: Padding(
+                padding: const EdgeInsets.all(32),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.delivery_dining_rounded,
+                      size: 80,
+                      color: Theme.of(context)
+                          .colorScheme
+                          .primary
+                          .withValues(alpha: 0.5),
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      l10n.becomeADriver,
+                      style: Theme.of(context)
+                          .textTheme
+                          .headlineSmall
+                          ?.copyWith(fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      l10n.joinFleetSubtitle,
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 24),
+                    FilledButton.icon(
+                      onPressed: () => context.push('/driver/onboarding/$userId'),
+                      icon: const Icon(Icons.app_registration_rounded),
+                      label: Text(l10n.registerNow),
+                    ),
+                  ],
+                ),
+              ),
+            );
           }
           return _VehicleListBody(driverId: profile.id);
         },
@@ -194,9 +233,17 @@ class _VehicleListBody extends ConsumerWidget {
                 child: _VehicleCard(
                   vehicle: vehicle,
                   onToggleActive: () async {
-                    final repo = ref.read(driverRepositoryProvider);
-                    await repo.toggleVehicleActive(vehicle.id, driverId);
-                    ref.invalidate(_vehiclesProvider(driverId));
+                    try {
+                      final repo = ref.read(driverRepositoryProvider);
+                      await repo.toggleVehicleActive(vehicle.id, driverId);
+                      ref.invalidate(_vehiclesProvider(driverId));
+                    } catch (e) {
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text(appErrorText(context, e))),
+                        );
+                      }
+                    }
                   },
                   onEdit: () => _showEditVehicleSheet(context, ref, vehicle),
                 ),

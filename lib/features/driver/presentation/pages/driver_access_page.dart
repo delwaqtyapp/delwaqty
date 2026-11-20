@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:delwaqty/core/errors/app_error_text.dart';
 import 'package:delwaqty/shared/widgets/premium_empty_state.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -31,21 +32,29 @@ class DriverAccessPage extends ConsumerWidget {
   }
 }
 
-class _AccessBody extends StatelessWidget {
+class _AccessBody extends StatefulWidget {
   const _AccessBody({required this.userId});
   final String userId;
 
-  Future<Map<String, dynamic>?> _load() async {
-    try {
-      final res = await Supabase.instance.client
-          .from('users')
-          .select('role, role_key, status')
-          .eq('id', userId)
-          .maybeSingle();
-      return res;
-    } catch (_) {
-      return null;
-    }
+  @override
+  State<_AccessBody> createState() => _AccessBodyState();
+}
+
+class _AccessBodyState extends State<_AccessBody> {
+  late Future<Map<String, dynamic>?> _future;
+
+  @override
+  void initState() {
+    super.initState();
+    _future = _load();
+  }
+
+  Future<Map<String, dynamic>?> _load() {
+    return Supabase.instance.client
+        .from('users')
+        .select('role, role_key, status')
+        .eq('id', widget.userId)
+        .maybeSingle();
   }
 
   @override
@@ -54,20 +63,19 @@ class _AccessBody extends StatelessWidget {
     final theme = Theme.of(context);
 
     return FutureBuilder<Map<String, dynamic>?>(
-      future: _load(),
+      future: _future,
       builder: (context, snap) {
         if (snap.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
         }
         if (snap.hasError) {
-          // Previously any failure rendered the same fabricated defaults
-          // ('delivery' role, 'active' status) as a successful load, so an
-          // admin with a flaky connection saw a wrong answer confidently.
           return Center(
             child: PremiumEmptyState(
               icon: Icons.error_outline,
-              title: AppLocalizations.of(context).error,
-              message: AppLocalizations.of(context).failedToLoad,
+              title: l10n.error,
+              message: appErrorText(context, snap.error!),
+              actionLabel: l10n.retry,
+              onAction: () => setState(() => _future = _load()),
             ),
           );
         }
@@ -85,7 +93,7 @@ class _AccessBody extends StatelessWidget {
               child: ListTile(
                 leading: const Icon(Icons.delivery_dining_rounded),
                 title: Text(l10n.deliveryAccessSubtitle),
-                subtitle: const Text('DelwaQty Delivery'),
+                subtitle: Text(l10n.delivery),
               ),
             ),
             const SizedBox(height: 12),

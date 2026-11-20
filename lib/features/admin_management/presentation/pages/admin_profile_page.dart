@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:delwaqty/features/_shared/regions/presentation/widgets/region_picker_sheet.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
-import 'package:delwaqty/services/supabase/supabase_service.dart';
 import 'package:delwaqty/features/admin_management/domain/entities/admin_account.dart';
 import 'package:delwaqty/features/admin_management/presentation/providers/admin_management_providers.dart';
 
@@ -84,10 +84,18 @@ class _AdminProfilePageState
         leading: IconButton(
           tooltip: loc.back,
           icon: const Icon(Icons.arrow_back),
-          onPressed: () => context.pop(),
+          onPressed: () {
+            if (context.canPop()) {
+              context.pop();
+            } else {
+              context.go('/admin/admins');
+            }
+          },
         ),
       ),
-      body: detail.when(
+      body: widget.adminId.isEmpty
+          ? Center(child: Text(loc.adminMgmtNotFound))
+          : detail.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => Center(child: Text(loc.adminMgmtFailed)),
         data: (account) {
@@ -183,9 +191,12 @@ class _AdminProfilePageState
                       const LinearProgressIndicator(),
                   error: (e, _) => Text(loc.adminMgmtFailed),
                   data: (p) {
-                    final effective =
-                        List<String>.from(p['effective'] as List? ?? []);
-                    final granted = List<String>.from(p['grants'] as List? ?? []);
+                    final effective = (p['effective'] as List? ?? const [])
+                        .map((e) => e.toString())
+                        .toList();
+                    final granted = (p['grants'] as List? ?? const [])
+                        .map((e) => e.toString())
+                        .toList();
                     return Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -445,12 +456,8 @@ class _AdminProfilePageState
     final reason = await _askReason(context, loc);
     if (reason == null) return;
     String? regionId;
+    String? regionName;
     String scope = 'descendants';
-    final regions = await ref
-        .read(supabaseClientProvider)
-        .from('regions')
-        .select('id,name_en')
-        .order('name_en');
     if (!context.mounted) return;
     final picked = await showDialog<String>(
       context: context,
@@ -459,38 +466,53 @@ class _AdminProfilePageState
           title: Text(loc.adminMgmtSelectRegion),
           content: Column(
             mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              DropdownButtonFormField<String>(
-                items: regions
-                    .map((r) => DropdownMenuItem(
-                        value: r['id'] as String,
-                        child: Text((r['name_en'] as String?) ?? '')))
-                    .toList(),
-                onChanged: (v) => setSt(() => regionId = v),
-                decoration:
-                    InputDecoration(labelText: loc.adminMgmtSelectRegion),
+              RegionSelectorButton(
+                label: loc.adminMgmtSelectRegion,
+                selectedName: regionName,
+                onTap: () async {
+                  final selected = await RegionPickerSheet.show(
+                    c,
+                    selectedRegionId: regionId,
+                  );
+                  if (selected != null && c.mounted) {
+                    final lang = Localizations.localeOf(c).languageCode;
+                    setSt(() {
+                      regionId = selected.id;
+                      regionName = selected.displayName(lang);
+                    });
+                  }
+                },
               ),
-              DropdownButtonFormField<String>(
-                initialValue: scope,
-                items: [
-                  DropdownMenuItem(
-                      value: 'descendants',
-                      child: Text(loc.adminMgmtScopeDescendants)),
-                  DropdownMenuItem(
-                      value: 'self', child: Text(loc.adminMgmtScopeSelf)),
+              const SizedBox(height: 12),
+              SegmentedButton<String>(
+                segments: [
+                  ButtonSegment(
+                    value: 'descendants',
+                    label: Text(loc.adminMgmtScopeDescendants),
+                  ),
+                  ButtonSegment(
+                    value: 'self',
+                    label: Text(loc.adminMgmtScopeSelf),
+                  ),
                 ],
-                onChanged: (v) => setSt(() {}),
-                onSaved: (v) => scope = v ?? 'descendants',
+                selected: {scope},
+                onSelectionChanged: (v) => setSt(() => scope = v.first),
               ),
             ],
           ),
           actions: [
             TextButton(
-                onPressed: () => Navigator.of(ctx).pop(),
-                child: Text(loc.adminMgmtCancel)),
+              onPressed: () => Navigator.of(ctx).pop(),
+              child: Text(loc.adminMgmtCancel),
+            ),
             FilledButton(
-                onPressed: () => Navigator.of(ctx).pop(regionId),
-                child: Text(loc.adminMgmtConfirm)),
+              onPressed: regionId == null
+                  ? null
+                  : () => Navigator.of(ctx).pop(regionId),
+              child: Text(loc.adminMgmtConfirm),
+            ),
           ],
         ),
       ),

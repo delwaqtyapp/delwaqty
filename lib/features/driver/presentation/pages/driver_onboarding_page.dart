@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:delwaqty/features/driver/driver_module.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 import 'package:file_picker/file_picker.dart';
@@ -203,12 +204,16 @@ class _DriverOnboardingPageState extends ConsumerState<DriverOnboardingPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(l10n.onboardingCompleted)),
       );
-      Navigator.of(context).pop();
+      if (context.canPop()) {
+        context.pop();
+      } else {
+        context.go('/driver');
+      }
     } catch (e) {
       if (!mounted) return;
       setState(() => _isUploading = false);
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.somethingWentWrong)),
+        SnackBar(content: Text(appErrorText(context, e))),
       );
     }
   }
@@ -223,7 +228,13 @@ class _DriverOnboardingPageState extends ConsumerState<DriverOnboardingPage> {
         leading: IconButton(
           tooltip: l10n.back,
           icon: const Icon(Icons.arrow_back),
-          onPressed: () => Navigator.of(context).pop(),
+          onPressed: () {
+            if (context.canPop()) {
+              context.pop();
+            } else {
+              context.go('/driver');
+            }
+          },
         ),
       ),
       body: SingleChildScrollView(
@@ -238,7 +249,7 @@ class _DriverOnboardingPageState extends ConsumerState<DriverOnboardingPage> {
             const SizedBox(height: 24),
             // License document section
             _buildDocumentSection(
-              'License',
+              l10n.drivingLicense,
               Icons.description,
               _licenseImage,
               _licenseError,
@@ -248,7 +259,7 @@ class _DriverOnboardingPageState extends ConsumerState<DriverOnboardingPage> {
             const SizedBox(height: 24),
             // Vehicle document section
             _buildDocumentSection(
-              'Vehicle',
+              l10n.vehicleInfo,
               Icons.directions_car,
               _vehicleImage,
               _vehicleError,
@@ -316,10 +327,10 @@ class _DriverOnboardingPageState extends ConsumerState<DriverOnboardingPage> {
                   borderRadius: BorderRadius.circular(8),
                   color: Theme.of(context).colorScheme.surface.withValues(alpha: 0.5),
                 ),
-                child: const Center(
+                child: Center(
                   child: Text(
-                    'Upload Image',
-                    style: TextStyle(
+                    l10n.uploadDocument,
+                    style: const TextStyle(
                       color: Colors.grey,
                     ),
                   ),
@@ -345,14 +356,8 @@ class _DriverOnboardingPageState extends ConsumerState<DriverOnboardingPage> {
                 if (!_isUploading)
                   ElevatedButton.icon(
                     onPressed: onUpload,
-                    icon: _isUploading
-                        ? const SizedBox(
-                            width: 16,
-                            height: 16,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
-                        : const Icon(Icons.arrow_upward),
-                    label: _isUploading ? Text(l10n.uploading) : Text(l10n.upload),
+                    icon: const Icon(Icons.arrow_upward),
+                    label: Text(l10n.upload),
                   ),
               ],
             ),

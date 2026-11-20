@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:delwaqty/features/provider/merchant/presentation/providers/merchant_providers.dart';
 import 'package:go_router/go_router.dart';
+import 'package:delwaqty/core/errors/app_error_text.dart';
 import 'package:delwaqty/core/extensions/context_extensions.dart';
 import 'package:delwaqty/features/provider/merchant/merchant_module.dart';
 import 'package:delwaqty/services/supabase/supabase_service.dart';
@@ -74,6 +75,10 @@ class _MerchantProductFormPageState
         _isAvailable = product['is_available'] as bool? ?? true;
         _isFeatured = product['is_featured'] as bool? ?? false;
       });
+    } catch (e) {
+      if (mounted) {
+        context.showAppSnackBar(appErrorText(context, e), isError: true);
+      }
     } finally {
       if (mounted) {
         setState(() => _isLoadingInitial = false);

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:delwaqty/core/extensions/context_extensions.dart';
 import 'package:delwaqty/core/theme/app_text_styles.dart';
+import 'package:delwaqty/features/customer/commerce/domain/entities/merchant.dart';
 import 'package:delwaqty/features/customer/home/domain/entities/platform_category.dart';
 import 'package:delwaqty/features/customer/home/domain/home_domain.dart';
 import 'package:delwaqty/features/customer/home/presentation/widgets/category_visuals.dart';
@@ -40,56 +41,14 @@ final _allCategoriesProvider = FutureProvider<List<_GridItem>>((ref) async {
 
   final repo = ref.watch(cachedServiceBookingRepositoryProvider);
   final all = await repo.getCategories();
-  const priority = [
-    ServiceCategoryType.doctor,
-    ServiceCategoryType.nurse,
-    ServiceCategoryType.teacher,
-    ServiceCategoryType.barber,
-    ServiceCategoryType.plumbing,
-    ServiceCategoryType.electrical,
-    ServiceCategoryType.carpentry,
-    ServiceCategoryType.painting,
-    ServiceCategoryType.cleaning,
-    ServiceCategoryType.acMaintenance,
-    ServiceCategoryType.pipeChange,
-    ServiceCategoryType.plastering,
-    ServiceCategoryType.carpetCleaning,
-    ServiceCategoryType.dishRepair,
-    ServiceCategoryType.pestControl,
-    ServiceCategoryType.applianceRepair,
-  ];
-  int rank(ServiceCategoryType t) {
-    final i = priority.indexOf(t);
-    return i == -1 ? priority.length : i;
-  }
-
-  final sortedServices = [...all]..sort((a, b) => rank(a.type).compareTo(rank(b.type)));
+  final sortedServices = [...all]
+    ..sort((a, b) => serviceCategoryRank(a.type).compareTo(serviceCategoryRank(b.type)));
 
   return [
     for (final c in sortedPlatform) _PlatformGridItem(c),
     for (final s in sortedServices) _BookingGridItem(s),
   ];
 });
-
-IconData _serviceIcon(ServiceCategoryType t) => switch (t) {
-      ServiceCategoryType.doctor => Icons.medical_services_rounded,
-      ServiceCategoryType.nurse => Icons.health_and_safety_rounded,
-      ServiceCategoryType.teacher => Icons.school_rounded,
-      ServiceCategoryType.barber => Icons.content_cut_rounded,
-      ServiceCategoryType.plumbing => Icons.plumbing_rounded,
-      ServiceCategoryType.electrical => Icons.electrical_services_rounded,
-      ServiceCategoryType.carpentry => Icons.carpenter_rounded,
-      ServiceCategoryType.painting => Icons.format_paint_rounded,
-      ServiceCategoryType.cleaning => Icons.cleaning_services_rounded,
-      ServiceCategoryType.acMaintenance => Icons.ac_unit_rounded,
-      ServiceCategoryType.pipeChange => Icons.settings_input_component_rounded,
-      ServiceCategoryType.plastering => Icons.format_color_fill_rounded,
-      ServiceCategoryType.carpetCleaning => Icons.local_laundry_service_rounded,
-      ServiceCategoryType.dishRepair => Icons.satellite_alt_rounded,
-      ServiceCategoryType.pestControl => Icons.bug_report_rounded,
-      ServiceCategoryType.applianceRepair => Icons.build_rounded,
-      ServiceCategoryType.other => Icons.home_repair_service_rounded,
-    };
 
 class AllServicesPage extends ConsumerWidget {
   const AllServicesPage({super.key});
@@ -148,7 +107,7 @@ class AllServicesPage extends ConsumerWidget {
                   final label = rtl ? item.service.nameAr : item.service.nameEn;
                   return _buildServiceTile(
                     context,
-                    icon: _serviceIcon(item.service.type),
+                    icon: serviceCategoryIcon(item.service.type),
                     label: label,
                     onTap: () => context.push(
                       '/home-services/providers/${item.service.type.name}',
@@ -214,6 +173,11 @@ class AllServicesPage extends ConsumerWidget {
       imageUrl: category.imageUrl,
       emoji: emoji,
       onTap: () {
+        if (merchantType == MerchantType.home ||
+            category.name.trim().toLowerCase() == 'home services') {
+          context.push('/home-services');
+          return;
+        }
         final typeParam = merchantType?.name ?? 'other';
         context.push('/market?type=$typeParam');
       },

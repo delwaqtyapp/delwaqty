@@ -2,9 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:delwaqty/domain/entities/app_notification.dart';
-import 'package:delwaqty/core/auth/admin_access.dart';
-import 'package:delwaqty/features/_shared/auth/domain/auth_state.dart';
-import 'package:delwaqty/features/_shared/auth/presentation/auth_provider.dart';
 import 'package:delwaqty/core/errors/app_error_text.dart';
 import 'package:delwaqty/features/_shared/notifications/notifications_module.dart';
 import 'package:delwaqty/shared/notifications/notification_localizer.dart';
@@ -220,17 +217,20 @@ class _NotificationCenterPageState extends ConsumerState<NotificationCenterPage>
                         }
                         _invalidateNotificationProviders();
                         if (context.mounted) {
-                          final authState = ref.read(authStateProvider);
-                          final isAdmin = authState is AuthAuthenticated &&
-                              authState.user.isAdmin;
-                          final route = NotificationRouteResolver.safe(
-                            deepLink: notification.deepLink,
-                            context: isAdmin
-                                ? AppContext.admin
-                                : NotificationRouteResolver.appContext,
+                          final route =
+                              NotificationRouteResolver.safeNotification(
+                            notification,
+                            context: NotificationRouteResolver.appContext,
                           );
-                          if (route != '/notifications') {
-                            unawaited(context.push(route));
+                          if (route != NotificationRouteResolver.fallbackRoute) {
+                            final matches = GoRouter.of(context)
+                                .routeInformationParser
+                                .configuration
+                                .findMatch(Uri.parse(route))
+                                .matches;
+                            if (matches.isNotEmpty) {
+                              unawaited(context.push(route));
+                            }
                           }
                         }
                       },

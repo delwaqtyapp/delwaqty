@@ -188,11 +188,11 @@ class _MerchantDashboardPageState
                         title: Text(
                           p.displayName.isNotEmpty
                               ? p.displayName
-                              : p.categoryType,
+                              : _categoryLabel(l10n, p.categoryType),
                           style: const TextStyle(fontWeight: FontWeight.bold),
                         ),
                         subtitle: Text(
-                          '${p.categoryType} · ${p.isApproved ? l10n.verified : (p.status == 'rejected' ? l10n.rejected : l10n.pendingReview)}',
+                          '${_categoryLabel(l10n, p.categoryType)} · ${p.isApproved ? l10n.verified : (p.status == 'rejected' ? l10n.rejected : l10n.pendingReview)}',
                         ),
                         trailing: isActive
                             ? const Icon(
@@ -211,6 +211,7 @@ class _MerchantDashboardPageState
                                     'switch_active_provider_profile',
                                     params: {'p_category_type': p.categoryType},
                                   );
+                                  if (!mounted) return;
                                   ref.invalidate(providerProfilesProvider);
                                   ref.invalidate(providerRawCategoryProvider);
                                   ref.invalidate(providerMerchantIdProvider);
@@ -250,6 +251,29 @@ class _MerchantDashboardPageState
     );
   }
 
+  String _categoryLabel(AppLocalizations l10n, String category) {
+    switch (category) {
+      case 'restaurant':
+        return l10n.restaurant;
+      case 'grocery':
+        return l10n.grocery;
+      case 'pharmacy':
+        return l10n.pharmacy;
+      case 'bakery':
+        return l10n.bakery;
+      case 'cafe':
+        return l10n.cafe;
+      case 'electronics':
+        return l10n.electronics;
+      case 'fashion':
+        return l10n.fashion;
+      case 'home_services':
+        return l10n.homeServices;
+      default:
+        return l10n.other;
+    }
+  }
+
   Future<void> _openRequestServiceDialog(
     BuildContext context,
     AppLocalizations l10n,
@@ -287,7 +311,12 @@ class _MerchantDashboardPageState
                   border: const OutlineInputBorder(),
                 ),
                 items: categories
-                    .map((c) => DropdownMenuItem(value: c, child: Text(c)))
+                    .map(
+                      (c) => DropdownMenuItem(
+                        value: c,
+                        child: Text(_categoryLabel(l10n, c)),
+                      ),
+                    )
                     .toList(),
                 onChanged: (v) {
                   if (v != null) setDlgState(() => selectedCat = v);
@@ -329,6 +358,7 @@ class _MerchantDashboardPageState
           'p_display_name': nameCtrl.text.trim(),
         },
       );
+      if (!mounted) return;
       ref.invalidate(providerProfilesProvider);
       if (context.mounted) {
         context.showAppSnackBar(l10n.serviceRequestSubmitted);
@@ -569,6 +599,12 @@ class _MerchantDashboardPageState
           color: AppColors.warningLight,
           onTap: () => context.push('/merchant-dashboard/offers'),
         ),
+      _QuickActionItem(
+        title: l10n.adminBannersTitle,
+        icon: Icons.view_carousel_rounded,
+        color: AppColors.brandViolet,
+        onTap: () => context.push('/merchant-dashboard/banners'),
+      ),
       if (caps.contains(ProviderCapability.branches))
         _QuickActionItem(
           title: l10n.branches,

@@ -1,5 +1,8 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 import 'package:delwaqty/core/theme/app_colors.dart';
 import 'package:delwaqty/features/customer/home/presentation/widgets/category_visuals.dart';
@@ -84,7 +87,10 @@ class ServiceReviewsPage extends ConsumerWidget {
               myReview: myReview,
             ),
             loading: () => const SizedBox.shrink(),
-            error: (e, _) => const SizedBox.shrink(),
+            error: (_, _) => ErrorState(
+              message: l10n.errorLoading,
+              onRetry: () => ref.invalidate(myServiceReviewProvider(scope)),
+            ),
           ),
           const SizedBox(height: 24),
           Text(
@@ -446,13 +452,18 @@ class _WriteServiceReviewSheetState
   }
 
   Future<void> _submitReview() async {
+    final authState = ref.read(authStateProvider);
+    if (authState is! AuthAuthenticated) {
+      final l10n = AppLocalizations.of(context);
+      AppSnackbar.error(context, message: l10n.loginRequired);
+      unawaited(context.push('/login'));
+      return;
+    }
+
     setState(() => _isSubmitting = true);
     try {
-      final authState = ref.read(authStateProvider);
-      final userId = authState is AuthAuthenticated ? authState.user.id : '';
-      final userName = authState is AuthAuthenticated
-          ? (authState.user.fullName ?? '')
-          : '';
+      final userId = authState.user.id;
+      final userName = authState.user.fullName ?? '';
       final repo = ref.read(serviceReviewRepositoryProvider);
       final comment = _commentController.text.isNotEmpty
           ? _commentController.text.trim()
@@ -514,7 +525,9 @@ class _ReviewCard extends StatelessWidget {
             backgroundColor: AppColors.brandViolet.withValues(alpha: 0.15),
             child: Text(
               review.userName.isEmpty
-                  ? '؟'
+                  ? (Localizations.localeOf(context).languageCode == 'ar'
+                      ? '؟'
+                      : '?')
                   : review.userName.characters.first,
               style: const TextStyle(
                 fontWeight: FontWeight.bold,

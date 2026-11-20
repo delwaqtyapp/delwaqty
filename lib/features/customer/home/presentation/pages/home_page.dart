@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:math' as math;
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -28,7 +29,6 @@ import 'package:delwaqty/features/customer/home/domain/entities/platform_categor
 import 'package:delwaqty/shared/widgets/scroll_aware_nav.dart';
 import 'package:delwaqty/data/repositories/cached_service_booking_repository.dart';
 import 'package:delwaqty/features/customer/home_services/domain/entities/service_category.dart';
-import 'package:delwaqty/core/theme/app_icons.dart';
 import 'package:delwaqty/core/theme/app_colors.dart';
 import 'package:delwaqty/core/theme/app_text_styles.dart';
 import 'package:delwaqty/core/theme/app_elevation.dart';
@@ -39,92 +39,29 @@ final _homeServiceCategoriesProvider = FutureProvider<List<ServiceCategory>>((
 ) async {
   final repo = ref.watch(cachedServiceBookingRepositoryProvider);
   final all = await repo.getCategories();
-  const priority = [
-    ServiceCategoryType.doctor,
-    ServiceCategoryType.nurse,
-    ServiceCategoryType.teacher,
-    ServiceCategoryType.barber,
-    ServiceCategoryType.plumbing,
-    ServiceCategoryType.electrical,
-    ServiceCategoryType.carpentry,
-    ServiceCategoryType.painting,
-    ServiceCategoryType.cleaning,
-    ServiceCategoryType.acMaintenance,
-    ServiceCategoryType.pipeChange,
-    ServiceCategoryType.plastering,
-    ServiceCategoryType.carpetCleaning,
-    ServiceCategoryType.dishRepair,
-    ServiceCategoryType.pestControl,
-    ServiceCategoryType.applianceRepair,
-  ];
-  int rank(ServiceCategoryType t) {
-    final i = priority.indexOf(t);
-    return i == -1 ? priority.length : i;
-  }
-
-  final sorted = [...all]..sort((a, b) => rank(a.type).compareTo(rank(b.type)));
+  final sorted = [...all]
+    ..sort((a, b) => serviceCategoryRank(a.type).compareTo(serviceCategoryRank(b.type)));
   return sorted;
 });
 
-IconData _serviceIcon(ServiceCategoryType t) => switch (t) {
-  ServiceCategoryType.doctor => Icons.medical_services_rounded,
-  ServiceCategoryType.nurse => Icons.health_and_safety_rounded,
-  ServiceCategoryType.teacher => Icons.school_rounded,
-  ServiceCategoryType.barber => Icons.content_cut_rounded,
-  ServiceCategoryType.plumbing => Icons.plumbing_rounded,
-  ServiceCategoryType.electrical => Icons.electrical_services_rounded,
-  ServiceCategoryType.carpentry => Icons.carpenter_rounded,
-  ServiceCategoryType.painting => Icons.format_paint_rounded,
-  ServiceCategoryType.cleaning => Icons.cleaning_services_rounded,
-  ServiceCategoryType.acMaintenance => Icons.ac_unit_rounded,
-  ServiceCategoryType.pipeChange => Icons.settings_input_component_rounded,
-  ServiceCategoryType.plastering => Icons.format_color_fill_rounded,
-  ServiceCategoryType.carpetCleaning => Icons.local_laundry_service_rounded,
-  ServiceCategoryType.dishRepair => Icons.satellite_alt_rounded,
-  ServiceCategoryType.pestControl => Icons.bug_report_rounded,
-  ServiceCategoryType.applianceRepair => Icons.build_rounded,
-  ServiceCategoryType.other => Icons.home_repair_service_rounded,
-};
-
-Color _serviceColor(ServiceCategoryType t) => switch (t) {
-  ServiceCategoryType.doctor => AppColors.errorLight,
-  ServiceCategoryType.nurse => AppColors.successLight,
-  ServiceCategoryType.teacher => AppColors.infoLight,
-  ServiceCategoryType.barber => AppColors.brandViolet,
-  ServiceCategoryType.plumbing => AppColors.serviceHome,
-  ServiceCategoryType.electrical => AppColors.serviceElectronics,
-  ServiceCategoryType.carpentry => AppColors.serviceBakery,
-  ServiceCategoryType.painting => AppColors.serviceFashion,
-  ServiceCategoryType.cleaning => AppColors.serviceDelivery,
-  ServiceCategoryType.acMaintenance => AppColors.serviceSeafood,
-  ServiceCategoryType.pipeChange => AppColors.serviceGrocery,
-  ServiceCategoryType.plastering => AppColors.serviceFurniture,
-  ServiceCategoryType.carpetCleaning => AppColors.serviceCafe,
-  ServiceCategoryType.dishRepair => AppColors.serviceElectronics,
-  ServiceCategoryType.pestControl => AppColors.serviceGas,
-  ServiceCategoryType.applianceRepair => AppColors.serviceAppliances,
-  ServiceCategoryType.other => AppColors.serviceMore,
-};
-
-const _topBookingTypes = <ServiceCategoryType>[
-  ServiceCategoryType.doctor,
-  ServiceCategoryType.nurse,
-  ServiceCategoryType.teacher,
-  ServiceCategoryType.barber,
-];
-
-const _stripHeight = 132.0;
-const _tileLabelHeight = 22.0;
+const _stripHeight = 124.0;
+const _tileLabelHeight = 32.0;
 
 void _precacheImageUrls(BuildContext context, Iterable<String> urls) {
   for (final url in urls) {
     if (url.isEmpty) continue;
-    unawaited(precacheImage(NetworkImage(url), context));
+    unawaited(
+      precacheImage(
+        NetworkImage(url),
+        context,
+        onError: (_, _) {},
+      ),
+    );
   }
 }
 
-List<_TileItem> get _topBookingItems =>
-    _topBookingTypes.map((t) => _ServiceTile(t)).toList(growable: false);
+List<_TileItem> get _allDefaultServiceItems =>
+    serviceCategoryPriority.map((t) => _ServiceTile(t)).toList(growable: false);
 
 class HomePage extends ConsumerWidget {
   const HomePage({super.key});
@@ -151,11 +88,17 @@ class HomePage extends ConsumerWidget {
           Scaffold(
             body: RefreshIndicator(
               onRefresh: () async {
-                ref.invalidate(nearbyMerchantsProvider);
-                ref.invalidate(activeCategoriesProvider);
-                ref.invalidate(discoveryEntriesProvider);
-                ref.invalidate(activeCampaignsProvider);
-                unawaited(ref.read(userLocationProvider.notifier).refreshQuick());
+                unawaited(
+                  ref.read(userLocationProvider.notifier).refreshQuick(),
+                );
+                try {
+                  await Future.wait([
+                    ref.refresh(nearbyMerchantsProvider.future),
+                    ref.refresh(activeCategoriesProvider.future),
+                    ref.refresh(discoveryEntriesProvider.future),
+                    ref.refresh(activeCampaignsProvider.future),
+                  ]);
+                } catch (_) {}
               },
               child: NotificationListener<ScrollNotification>(
                 onNotification: (notification) {
@@ -168,9 +111,13 @@ class HomePage extends ConsumerWidget {
                   return false;
                 },
                 child: CustomScrollView(
+                  physics: const ClampingScrollPhysics(
+                    parent: AlwaysScrollableScrollPhysics(),
+                  ),
                   slivers: [
                     SliverToBoxAdapter(
                       child: _EgyptHero(
+                        ref: ref,
                         l10n: l10n,
                         authState: authState,
                         isGuest: isGuest,
@@ -234,57 +181,13 @@ class HomePage extends ConsumerWidget {
     AppLocalizations l10n,
   ) {
     return AnimatedFadeIn(
-      delay: const Duration(milliseconds: 350),
+      delay: const Duration(milliseconds: 300),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        l10n.discoverNearby,
-                        style: AppTextStyles.titleLarge.copyWith(
-                          fontWeight: FontWeight.w800,
-                          fontSize: 20,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        l10n.nearbySubtitle,
-                        style: AppTextStyles.bodySmall.copyWith(
-                          color: context.colorScheme.onSurfaceVariant,
-                          fontSize: 13,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
-                  ),
-                ),
-                TextButton(
-                  onPressed: () => context.push('/market'),
-                  child: Text(
-                    l10n.viewAll,
-                    style: AppTextStyles.labelLarge.copyWith(
-                      color: Theme.of(context).colorScheme.primary,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 14),
           _DiscoveryTabs(l10n: l10n),
-          const SizedBox(height: 4),
+          const SizedBox(height: 6),
           const _DiscoveryContent(),
         ],
       ),
@@ -294,6 +197,7 @@ class HomePage extends ConsumerWidget {
 
 class _EgyptHero extends StatefulWidget {
   const _EgyptHero({
+    required this.ref,
     required this.l10n,
     required this.authState,
     required this.isGuest,
@@ -301,6 +205,7 @@ class _EgyptHero extends StatefulWidget {
     required this.unreadCount,
   });
 
+  final WidgetRef ref;
   final AppLocalizations l10n;
   final AuthState authState;
   final bool isGuest;
@@ -355,16 +260,13 @@ class _EgyptHeroState extends State<_EgyptHero>
     const logoSize = 44.0;
     const arabicSize = 12.0;
     final zoneGap = (screenHeight * 0.008).clamp(4.0, 9.0);
-    final greetingName = widget.authState is AuthAuthenticated
-        ? (widget.authState as AuthAuthenticated).user.fullName
-        : null;
 
     // Hero height must never be smaller than its overlay content, otherwise a
     // tall status bar inset (notch devices) causes a bottom RenderFlex
-    // overflow. The second row holds the search circle + the user greeting
-    // (~60dp worst case); take the max against the image height.
+    // overflow. Row 1 holds the mini lockup (~68dp) and Row 2 holds the
+    // 48dp frosted-glass typewriter search bar.
     final topInset = MediaQuery.paddingOf(context).top;
-    final contentCoreH = topButtonSize + zoneGap + 88.0;
+    final contentCoreH = math.max(topButtonSize, 68.0) + zoneGap + 48.0 + 8.0;
     final contentH = topInset + 2 + contentCoreH;
     final heroH = math.max(heroImageH, contentH);
 
@@ -409,7 +311,11 @@ class _EgyptHeroState extends State<_EgyptHero>
                   12,
                   (heroH - heroImageH) + 12,
                 ),
-                child: _buildLocationBadge(context, height: 28, maxWidth: 185),
+                child: _buildLocationBadge(
+                  context,
+                  height: 28,
+                  maxWidth: screenWidth * 0.72,
+                ),
               ),
             ),
             SafeArea(
@@ -451,27 +357,12 @@ class _EgyptHeroState extends State<_EgyptHero>
                           ),
                         ),
                         SizedBox(height: zoneGap),
-                        Directionality(
-                          textDirection: TextDirection.ltr,
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              _SearchCircleButton(
-                                onTap: () => context.push('/search'),
-                                size: topButtonSize,
-                                iconSize: topIconSize,
-                              ),
-                              Flexible(
-                                child: Align(
-                                  alignment: Alignment.topRight,
-                                  child: _UserGreeting(
-                                    l10n: widget.l10n,
-                                    name: greetingName,
-                                  ),
-                                ),
-                              ),
-                            ],
+                        _PremiumTypewriterSearchBar(
+                          l10n: widget.l10n,
+                          onTap: (anchor) => _GlassSearchPopupController.open(
+                            context,
+                            widget.ref,
+                            anchor: anchor,
                           ),
                         ),
                       ],
@@ -492,6 +383,8 @@ class _EgyptHeroState extends State<_EgyptHero>
     required double maxWidth,
   }) {
     final locationText = widget.locationAsync.when(
+      skipLoadingOnRefresh: true,
+      skipLoadingOnReload: true,
       data: (loc) => loc?.detailedAddress.isNotEmpty == true
           ? loc!.detailedAddress
           : widget.l10n.locationUnavailable,
@@ -534,15 +427,13 @@ class _EgyptHeroState extends State<_EgyptHero>
                       ),
                       const SizedBox(width: 5),
                       Expanded(
-                        child: Text(
-                          locationText,
+                        child: _MarqueeLocationText(
+                          text: locationText,
                           style: AppTextStyles.bodyMedium.copyWith(
                             color: Colors.white,
                             fontWeight: FontWeight.w600,
                             fontSize: 11,
                           ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
                       Icon(
@@ -641,90 +532,1110 @@ class _EgyptHeroState extends State<_EgyptHero>
   }
 }
 
-class _SearchCircleButton extends StatelessWidget {
-  const _SearchCircleButton({
-    required this.onTap,
-    this.size = 54,
-    this.iconSize = 24,
+class _MarqueeLocationText extends StatefulWidget {
+  const _MarqueeLocationText({
+    required this.text,
+    required this.style,
   });
 
-  final VoidCallback onTap;
-  final double size;
-  final double iconSize;
+  final String text;
+  final TextStyle style;
+
+  @override
+  State<_MarqueeLocationText> createState() => _MarqueeLocationTextState();
+}
+
+class _MarqueeLocationTextState extends State<_MarqueeLocationText>
+    with SingleTickerProviderStateMixin {
+  final ScrollController _scrollController = ScrollController();
+  late final AnimationController _controller = AnimationController(
+    vsync: this,
+    duration: const Duration(seconds: 6),
+  );
+  bool _disableAnimations = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller.addListener(_onTick);
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _disableAnimations = MediaQuery.disableAnimationsOf(context);
+    if (_disableAnimations) {
+      _controller.stop();
+      if (_scrollController.hasClients && _scrollController.offset != 0) {
+        _scrollController.jumpTo(0);
+      }
+    } else {
+      _scheduleSync();
+    }
+  }
+
+  @override
+  void didUpdateWidget(covariant _MarqueeLocationText oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.text != widget.text || oldWidget.style != widget.style) {
+      _controller.value = 0;
+      if (_scrollController.hasClients && _scrollController.offset != 0) {
+        _scrollController.jumpTo(0);
+      }
+      _scheduleSync();
+    }
+  }
+
+  void _scheduleSync() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _syncAnimation();
+    });
+  }
+
+  void _syncAnimation() {
+    if (_disableAnimations || !_scrollController.hasClients) {
+      _controller.stop();
+      return;
+    }
+    final maxExtent = _scrollController.position.maxScrollExtent;
+    if (maxExtent <= 0) {
+      _controller.stop();
+      if (_scrollController.offset != 0) {
+        _scrollController.jumpTo(0);
+      }
+      return;
+    }
+    final durationMs = (maxExtent * 35).round().clamp(3500, 14000);
+    final targetDuration = Duration(milliseconds: durationMs);
+    if (_controller.duration != targetDuration) {
+      _controller.duration = targetDuration;
+    }
+    if (!_controller.isAnimating) {
+      _controller.repeat(reverse: true);
+    }
+  }
+
+  void _onTick() {
+    if (!mounted || !_scrollController.hasClients) return;
+    final maxExtent = _scrollController.position.maxScrollExtent;
+    if (maxExtent <= 0) return;
+    final v = _controller.value;
+    final double t;
+    if (v <= 0.12) {
+      t = 0.0;
+    } else if (v >= 0.88) {
+      t = 1.0;
+    } else {
+      t = (v - 0.12) / 0.76;
+    }
+    _scrollController.jumpTo(t * maxExtent);
+  }
+
+  @override
+  void dispose() {
+    _controller.removeListener(_onTick);
+    _controller.dispose();
+    _scrollController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        if (!constraints.hasBoundedWidth || constraints.maxWidth <= 0) {
+          return Text(
+            widget.text,
+            style: widget.style,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          );
+        }
+        final textDirection = Directionality.of(context);
+        final painter = TextPainter(
+          text: TextSpan(text: widget.text, style: widget.style),
+          maxLines: 1,
+          textDirection: textDirection,
+          textScaler: MediaQuery.textScalerOf(context),
+        )..layout();
+        final overflows = painter.width > constraints.maxWidth + 1;
+
+        if (!overflows || _disableAnimations) {
+          return Text(
+            widget.text,
+            style: widget.style,
+            maxLines: 1,
+            softWrap: false,
+            overflow: overflows ? TextOverflow.ellipsis : TextOverflow.clip,
+          );
+        }
+
+        final isRtl = textDirection == TextDirection.rtl;
+        return ShaderMask(
+          blendMode: BlendMode.dstIn,
+          shaderCallback: (bounds) => LinearGradient(
+            colors: isRtl
+                ? const [
+                    Colors.transparent,
+                    Colors.white,
+                    Colors.white,
+                  ]
+                : const [
+                    Colors.white,
+                    Colors.white,
+                    Colors.transparent,
+                  ],
+            stops: isRtl ? const [0.0, 0.10, 1.0] : const [0.0, 0.90, 1.0],
+          ).createShader(bounds),
+          child: SingleChildScrollView(
+            controller: _scrollController,
+            scrollDirection: Axis.horizontal,
+            physics: const NeverScrollableScrollPhysics(),
+            child: Text(
+              widget.text,
+              style: widget.style,
+              maxLines: 1,
+              softWrap: false,
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _PremiumTypewriterSearchBar extends StatefulWidget {
+  const _PremiumTypewriterSearchBar({
+    required this.l10n,
+    required this.onTap,
+  });
+
+  final AppLocalizations l10n;
+  final void Function(Rect? anchor) onTap;
+
+  @override
+  State<_PremiumTypewriterSearchBar> createState() =>
+      _PremiumTypewriterSearchBarState();
+}
+
+class _PremiumTypewriterSearchBarState
+    extends State<_PremiumTypewriterSearchBar>
+    with SingleTickerProviderStateMixin {
+  final GlobalKey _barKey = GlobalKey();
+  Timer? _timer;
+  int _phraseIndex = 0;
+  int _charIndex = 0;
+  bool _isDeleting = false;
+  bool _animationsDisabled = false;
+
+  late final AnimationController _cursorController = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 520),
+  )..repeat(reverse: true);
+
+  List<String> get _hints => [
+    widget.l10n.searchHintRestaurants,
+    widget.l10n.searchHintMarket,
+    widget.l10n.searchHintServices,
+    widget.l10n.searchHintDelivery,
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    _scheduleNext(const Duration(milliseconds: 400));
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final disabled = MediaQuery.disableAnimationsOf(context);
+    if (disabled != _animationsDisabled) {
+      _animationsDisabled = disabled;
+      if (disabled) {
+        _timer?.cancel();
+        _timer = null;
+        _cursorController.stop();
+        _cursorController.value = 1;
+      } else {
+        if (!_cursorController.isAnimating) {
+          _cursorController.repeat(reverse: true);
+        }
+        _scheduleNext(const Duration(milliseconds: 300));
+      }
+    }
+  }
+
+  void _scheduleNext(Duration delay) {
+    _timer?.cancel();
+    if (_animationsDisabled) return;
+    _timer = Timer(delay, _step);
+  }
+
+  void _step() {
+    if (!mounted || _animationsDisabled) return;
+    final hints = _hints;
+    final currentChars = hints[_phraseIndex % hints.length].characters;
+    var nextDelay = const Duration(milliseconds: 55);
+
+    setState(() {
+      if (!_isDeleting) {
+        if (_charIndex < currentChars.length) {
+          _charIndex++;
+          nextDelay = _charIndex == currentChars.length
+              ? const Duration(milliseconds: 1600)
+              : const Duration(milliseconds: 55);
+        } else {
+          _isDeleting = true;
+          nextDelay = const Duration(milliseconds: 30);
+        }
+      } else {
+        if (_charIndex > 0) {
+          _charIndex--;
+          nextDelay = const Duration(milliseconds: 28);
+        } else {
+          _isDeleting = false;
+          _phraseIndex = (_phraseIndex + 1) % hints.length;
+          nextDelay = const Duration(milliseconds: 320);
+        }
+      }
+    });
+
+    _scheduleNext(nextDelay);
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    _timer = null;
+    _cursorController.dispose();
+    super.dispose();
+  }
+
+  void _handleTap() {
+    final box = _barKey.currentContext?.findRenderObject() as RenderBox?;
+    final anchor = box == null
+        ? null
+        : box.localToGlobal(Offset.zero) & box.size;
+    widget.onTap(anchor);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isRtl = Directionality.of(context) == TextDirection.rtl;
+    final hints = _hints;
+    final fullText = hints[_phraseIndex % hints.length];
+    final displayText = _animationsDisabled
+        ? fullText
+        : fullText.characters
+              .take(_charIndex.clamp(0, fullText.characters.length))
+              .toString();
+
     return PressableScale(
-      onTap: onTap,
-      child: Container(
-        width: size,
-        height: size,
+      onTap: _handleTap,
+      child: DecoratedBox(
+        key: _barKey,
         decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: 0.2),
-          shape: BoxShape.circle,
-          border: Border.all(color: Colors.white.withValues(alpha: 0.35)),
-          boxShadow: const [
+          borderRadius: BorderRadius.circular(26),
+          boxShadow: [
             BoxShadow(
-              color: Color(0x22000000),
+              color: Colors.black.withValues(alpha: 0.10),
               blurRadius: 12,
-              offset: Offset(0, 4),
+              offset: const Offset(0, 4),
             ),
           ],
         ),
-        child: Icon(AppIcons.actionSearch, color: Colors.white, size: iconSize),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(26),
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
+            child: Container(
+              height: 48,
+              padding: const EdgeInsets.symmetric(horizontal: 14),
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.08),
+                borderRadius: BorderRadius.circular(26),
+                border: Border.all(
+                  color: Colors.white.withValues(alpha: 0.38),
+                  width: 1.1,
+                ),
+              ),
+              child: Row(
+                children: [
+                  const Icon(
+                    Icons.search_rounded,
+                    color: Colors.white,
+                    size: 21,
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Row(
+                      children: [
+                        Flexible(
+                          child: Text(
+                            displayText,
+                            style: AppTextStyles.bodyMedium.copyWith(
+                              color: Colors.white.withValues(alpha: 0.96),
+                              fontWeight: FontWeight.w500,
+                              fontSize: 13.5,
+                              shadows: const [
+                                Shadow(
+                                  color: Color(0x55000000),
+                                  blurRadius: 4,
+                                ),
+                              ],
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        FadeTransition(
+                          opacity: _cursorController,
+                          child: Text(
+                            '|',
+                            style: AppTextStyles.bodyMedium.copyWith(
+                              color: AppColors.brandGold,
+                              fontWeight: FontWeight.w700,
+                              fontSize: 14,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Container(
+                    height: 28,
+                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(14),
+                      border: Border.all(
+                        color: Colors.white.withValues(alpha: 0.32),
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(
+                          Icons.auto_awesome_rounded,
+                          size: 13,
+                          color: AppColors.brandGold,
+                        ),
+                        const SizedBox(width: 3),
+                        Icon(
+                          isRtl
+                              ? Icons.arrow_back_rounded
+                              : Icons.arrow_forward_rounded,
+                          size: 13,
+                          color: Colors.white,
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }
 }
 
-class _UserGreeting extends StatelessWidget {
-  const _UserGreeting({required this.l10n, this.name});
+/// Floating transparent frosted-glass search menu anchored to the top hero
+/// search bar so tapping the bar immediately pops out a live glass search list.
+class _GlassSearchPopupController {
+  _GlassSearchPopupController._();
 
-  final AppLocalizations l10n;
-  final String? name;
+  static OverlayEntry? _entry;
+
+  static void open(
+    BuildContext context,
+    WidgetRef ref, {
+    Rect? anchor,
+  }) {
+    if (_entry != null) return;
+
+    final router = GoRouter.maybeOf(context);
+    final overlay = Overlay.of(context, rootOverlay: true);
+
+    late final OverlayEntry entry;
+    entry = OverlayEntry(
+      builder: (_) => _GlassSearchPopupOverlay(
+        anchor: anchor,
+        router: router,
+        onDismiss: () {
+          entry.remove();
+          _entry = null;
+        },
+      ),
+    );
+
+    _entry = entry;
+    overlay.insert(entry);
+  }
+}
+
+class _GlassSearchPopupOverlay extends StatefulWidget {
+  const _GlassSearchPopupOverlay({
+    this.anchor,
+    this.router,
+    required this.onDismiss,
+  });
+
+  final Rect? anchor;
+  final GoRouter? router;
+  final VoidCallback onDismiss;
+
+  @override
+  State<_GlassSearchPopupOverlay> createState() =>
+      _GlassSearchPopupOverlayState();
+}
+
+class _GlassSearchPopupOverlayState extends State<_GlassSearchPopupOverlay>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 240),
+    reverseDuration: const Duration(milliseconds: 170),
+  );
+  late final CurvedAnimation _pop = CurvedAnimation(
+    parent: _controller,
+    curve: Curves.easeOutCubic,
+    reverseCurve: Curves.easeInCubic,
+  );
+  bool _closing = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller.forward();
+  }
+
+  @override
+  void dispose() {
+    _pop.dispose();
+    _controller.dispose();
+    super.dispose();
+  }
+
+  Future<void> _close([VoidCallback? afterClose]) async {
+    if (_closing) return;
+    _closing = true;
+    FocusManager.instance.primaryFocus?.unfocus();
+    await _controller.reverse();
+    if (!mounted) return;
+    widget.onDismiss();
+    afterClose?.call();
+  }
 
   @override
   Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.sizeOf(context).width;
-    final titleSize = (screenWidth * 0.05).clamp(18.0, 22.0);
-    final taglineSize = (screenWidth * 0.030).clamp(11.0, 13.0);
-    final hasName = name != null && name!.isNotEmpty;
-    final greeting = hasName ? '${l10n.welcome}، $name' : l10n.welcome;
+    final mq = MediaQuery.of(context);
+    final size = mq.size;
+    final safeTop = mq.padding.top;
+    final safeBottom = mq.padding.bottom;
+    final viewInsetsBottom = mq.viewInsets.bottom;
 
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.end,
-      children: [
-        Directionality(
-          textDirection: TextDirection.rtl,
-          child: Text(
-            greeting,
-            style: AppTextStyles.titleLarge.copyWith(
-              color: AppColors.brandGold,
-              fontWeight: FontWeight.w900,
-              fontSize: titleSize,
+    const margin = 14.0;
+    final anchor = widget.anchor;
+    final panelWidth = anchor != null
+        ? anchor.width.clamp(260.0, size.width - margin * 2)
+        : (size.width - margin * 2).clamp(260.0, 560.0);
+    final left = anchor != null
+        ? anchor.left.clamp(margin, size.width - panelWidth - margin)
+        : (size.width - panelWidth) / 2;
+    final top = anchor != null
+        ? anchor.top.clamp(safeTop + 6, size.height * 0.35)
+        : safeTop + 56;
+
+    final availableBelow =
+        size.height - top - math.max(safeBottom, viewInsetsBottom) - 12;
+    final maxPanelHeight = math.min(440.0, math.max(170.0, availableBelow));
+
+    return Material(
+      color: Colors.transparent,
+      child: Stack(
+        children: [
+          Positioned.fill(
+            child: GestureDetector(
+              onTap: _close,
+              behavior: HitTestBehavior.translucent,
+              child: ColoredBox(
+                color: Colors.black.withValues(alpha: 0.14),
+              ),
             ),
-            textAlign: TextAlign.right,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
+          ),
+          Positioned(
+            top: top,
+            left: left,
+            width: panelWidth,
+            child: ConstrainedBox(
+              constraints: BoxConstraints(maxHeight: maxPanelHeight),
+              child: AnimatedBuilder(
+                animation: _pop,
+                builder: (context, child) {
+                  final t = _pop.value.clamp(0.0, 1.0);
+                  final scale = 0.92 + 0.08 * t;
+                  return Opacity(
+                    opacity: t,
+                    child: Transform.scale(
+                      scale: scale,
+                      alignment: Alignment.topCenter,
+                      child: child,
+                    ),
+                  );
+                },
+                child: _GlassSearchPopupPanel(
+                  onClose: _close,
+                  router: widget.router,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _GlassSearchPopupPanel extends ConsumerStatefulWidget {
+  const _GlassSearchPopupPanel({
+    required this.onClose,
+    required this.router,
+  });
+
+  final Future<void> Function([VoidCallback? afterClose]) onClose;
+  final GoRouter? router;
+
+  @override
+  ConsumerState<_GlassSearchPopupPanel> createState() =>
+      _GlassSearchPopupPanelState();
+}
+
+class _GlassSearchPopupPanelState
+    extends ConsumerState<_GlassSearchPopupPanel> {
+  final TextEditingController _searchController = TextEditingController();
+  String _query = '';
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  void _navigateTo(String route, {Object? extra}) {
+    final router = widget.router;
+    unawaited(
+      widget.onClose(() {
+        if (router != null) {
+          unawaited(router.push(route, extra: extra));
+        }
+      }),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final isRtl = Directionality.of(context) == TextDirection.rtl;
+    final textColor = isDark ? Colors.white : const Color(0xFF1A1033);
+    final subTextColor = isDark
+        ? Colors.white.withValues(alpha: 0.76)
+        : const Color(0xFF3E2E68).withValues(alpha: 0.80);
+
+    final categories =
+        ref.watch(activeCategoriesProvider).asData?.value ??
+        const <PlatformCategory>[];
+    final entries =
+        ref.watch(discoveryEntriesProvider).asData?.value ??
+        const <DiscoveryEntry>[];
+    final nearbyMerchants =
+        ref.watch(nearbyMerchantsProvider).asData?.value ?? const [];
+
+    final q = _query.trim().toLowerCase();
+
+    final matchedServices = <ServiceCategoryType>[];
+    final matchedServiceType = q.isEmpty ? null : categoryNameToServiceType(q);
+    for (final sType in serviceCategoryPriority) {
+      final label = serviceTypeLabel(sType, l10n).toLowerCase();
+      if (q.isEmpty ||
+          label.contains(q) ||
+          sType.name.toLowerCase().contains(q) ||
+          matchedServiceType == sType) {
+        matchedServices.add(sType);
+      }
+    }
+
+    final matchedCategories = categories.where((c) {
+      if (q.isEmpty) return true;
+      final combined =
+          '${c.name} ${c.nameAr ?? ''} ${c.nameEn ?? ''}'.toLowerCase();
+      return combined.contains(q);
+    }).toList();
+
+    final combinedEntries = <DiscoveryEntry>[...entries];
+    final existingMerchantIds = <String>{
+      for (final e in entries)
+        if (e is MerchantDiscoveryEntry) e.merchant.id,
+    };
+    for (final m in nearbyMerchants) {
+      if (!existingMerchantIds.contains(m.id)) {
+        combinedEntries.add(MerchantDiscoveryEntry(m));
+      }
+    }
+
+    final matchedEntries = combinedEntries.where((entry) {
+      if (q.isEmpty) return true;
+      if (entry is MerchantDiscoveryEntry) {
+        final m = entry.merchant;
+        final tLabel = merchantTypeLabel(m.type, l10n).toLowerCase();
+        return m.name.toLowerCase().contains(q) ||
+            tLabel.contains(q) ||
+            (m.description?.toLowerCase().contains(q) ?? false);
+      }
+      if (entry is ProviderDiscoveryEntry) {
+        final p = entry.provider;
+        final tLabel = serviceTypeLabel(p.categoryType, l10n).toLowerCase();
+        return p.name.toLowerCase().contains(q) ||
+            tLabel.contains(q) ||
+            (p.description?.toLowerCase().contains(q) ?? false);
+      }
+      return false;
+    }).take(10).toList();
+
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: isDark ? 0.36 : 0.16),
+            blurRadius: 32,
+            offset: const Offset(0, 12),
+          ),
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(24),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              color: isDark
+                  ? const Color(0xFF17112B).withValues(alpha: 0.68)
+                  : Colors.white.withValues(alpha: 0.74),
+              borderRadius: BorderRadius.circular(24),
+              border: Border.all(
+                color: Colors.white.withValues(alpha: 0.42),
+                width: 1.2,
+              ),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(14, 6, 8, 6),
+                  child: Row(
+                    children: [
+                      const Icon(
+                        Icons.search_rounded,
+                        color: AppColors.brandPurple,
+                        size: 21,
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: TextField(
+                          controller: _searchController,
+                          autofocus: true,
+                          textInputAction: TextInputAction.search,
+                          style: AppTextStyles.bodyMedium.copyWith(
+                            color: textColor,
+                            fontWeight: FontWeight.w600,
+                            fontSize: 14,
+                          ),
+                          decoration: InputDecoration(
+                            hintText: l10n.searchMerchantsProducts,
+                            hintStyle: AppTextStyles.bodyMedium.copyWith(
+                              color: subTextColor,
+                              fontSize: 13.5,
+                            ),
+                            border: InputBorder.none,
+                            enabledBorder: InputBorder.none,
+                            focusedBorder: InputBorder.none,
+                            filled: false,
+                            isDense: true,
+                            contentPadding: const EdgeInsets.symmetric(
+                              vertical: 8,
+                            ),
+                          ),
+                          onChanged: (v) => setState(() => _query = v),
+                          onSubmitted: (_) => _navigateTo('/search'),
+                        ),
+                      ),
+                      if (_query.isNotEmpty)
+                        IconButton(
+                          visualDensity: VisualDensity.compact,
+                          icon: Icon(
+                            Icons.backspace_outlined,
+                            size: 18,
+                            color: subTextColor,
+                          ),
+                          onPressed: () {
+                            _searchController.clear();
+                            setState(() => _query = '');
+                          },
+                        ),
+                      IconButton(
+                        visualDensity: VisualDensity.compact,
+                        icon: Icon(
+                          Icons.close_rounded,
+                          size: 20,
+                          color: textColor,
+                        ),
+                        onPressed: widget.onClose,
+                      ),
+                    ],
+                  ),
+                ),
+                Divider(
+                  height: 1,
+                  color: Colors.white.withValues(alpha: 0.28),
+                ),
+                Flexible(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.fromLTRB(12, 10, 12, 12),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        if (matchedCategories.isNotEmpty ||
+                            matchedServices.isNotEmpty) ...[
+                          Row(
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  l10n.mainCategories,
+                                  style: AppTextStyles.labelMedium.copyWith(
+                                    color: subTextColor,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                              ),
+                              InkWell(
+                                borderRadius: BorderRadius.circular(10),
+                                onTap: () => _navigateTo('/services'),
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 6,
+                                    vertical: 2,
+                                  ),
+                                  child: Text(
+                                    l10n.viewAll,
+                                    style: AppTextStyles.labelSmall.copyWith(
+                                      color: AppColors.brandPurple,
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 8),
+                          SizedBox(
+                            height: 40,
+                            child: ListView(
+                              scrollDirection: Axis.horizontal,
+                              physics: const ClampingScrollPhysics(),
+                              children: [
+                                for (final c in matchedCategories.take(6))
+                                  Padding(
+                                    padding: const EdgeInsetsDirectional.only(
+                                      end: 6,
+                                    ),
+                                    child: _buildPopupChip(
+                                      label: c.displayName(isRtl),
+                                      icon: merchantCategoryIcon(
+                                        '${c.name} ${c.nameAr ?? ''}',
+                                      ),
+                                      textColor: textColor,
+                                      onTap: () {
+                                        final combined =
+                                            '${c.name} ${c.nameAr ?? ''} ${c.nameEn ?? ''}';
+                                        final sType = categoryNameToServiceType(
+                                          combined,
+                                        );
+                                        final mType =
+                                            categoryNameToMerchantType(
+                                              combined,
+                                            );
+                                        if (sType != null) {
+                                          _navigateTo(
+                                            '/home-services/providers/${sType.name}',
+                                          );
+                                        } else if (mType?.name == 'home' ||
+                                            combined
+                                                .toLowerCase()
+                                                .contains('home service')) {
+                                          _navigateTo('/home-services');
+                                        } else {
+                                          _navigateTo(
+                                            '/market?type=${mType?.name ?? 'other'}',
+                                          );
+                                        }
+                                      },
+                                    ),
+                                  ),
+                                for (final sType in matchedServices.take(10))
+                                  Padding(
+                                    padding: const EdgeInsetsDirectional.only(
+                                      end: 6,
+                                    ),
+                                    child: _buildPopupChip(
+                                      label: serviceTypeLabel(sType, l10n),
+                                      icon: serviceCategoryIcon(sType),
+                                      textColor: textColor,
+                                      onTap: () => _navigateTo(
+                                        '/home-services/providers/${sType.name}',
+                                      ),
+                                    ),
+                                  ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                        ],
+                        if (matchedEntries.isNotEmpty) ...[
+                          Text(
+                            l10n.discoverNearby,
+                            style: AppTextStyles.labelMedium.copyWith(
+                              color: subTextColor,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                          const SizedBox(height: 6),
+                          for (final entry in matchedEntries)
+                            _buildPopupEntryRow(
+                              context,
+                              entry: entry,
+                              l10n: l10n,
+                              textColor: textColor,
+                              subTextColor: subTextColor,
+                              isRtl: isRtl,
+                            ),
+                        ] else if (matchedCategories.isEmpty &&
+                            matchedServices.isEmpty) ...[
+                          Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            child: Center(
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    Icons.search_off_rounded,
+                                    size: 28,
+                                    color: subTextColor,
+                                  ),
+                                  const SizedBox(height: 6),
+                                  Text(
+                                    l10n.searchNoResults,
+                                    style: AppTextStyles.bodyMedium.copyWith(
+                                      color: textColor,
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  TextButton.icon(
+                                    onPressed: () => _navigateTo('/search'),
+                                    icon: const Icon(
+                                      Icons.manage_search_rounded,
+                                      size: 18,
+                                    ),
+                                    label: Text(l10n.search),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
-        Directionality(
-          textDirection: TextDirection.rtl,
-          child: Text(
-            l10n.greetingSubtitle,
-            style: AppTextStyles.bodyMedium.copyWith(
-              color: Colors.white,
-              fontWeight: FontWeight.w600,
-              fontSize: taglineSize,
-              shadows: const [Shadow(color: Color(0x55000000), blurRadius: 4)],
+      ),
+    );
+  }
+
+  Widget _buildPopupChip({
+    required String label,
+    required IconData icon,
+    required Color textColor,
+    required VoidCallback onTap,
+  }) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(14),
+        onTap: onTap,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+          decoration: BoxDecoration(
+            color: AppColors.brandPurple.withValues(alpha: 0.16),
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(
+              color: const Color(0xFFE5C158).withValues(alpha: 0.40),
             ),
-            textAlign: TextAlign.right,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(icon, size: 16, color: AppColors.brandPurple),
+              const SizedBox(width: 6),
+              Text(
+                label,
+                style: AppTextStyles.labelSmall.copyWith(
+                  color: textColor,
+                  fontWeight: FontWeight.w700,
+                  fontSize: 12,
+                ),
+              ),
+            ],
           ),
         ),
-      ],
+      ),
+    );
+  }
+
+  Widget _buildPopupEntryRow(
+    BuildContext context, {
+    required DiscoveryEntry entry,
+    required AppLocalizations l10n,
+    required Color textColor,
+    required Color subTextColor,
+    required bool isRtl,
+  }) {
+    final String title;
+    final String subtitle;
+    final double rating;
+    final IconData icon;
+    final String? imageUrl;
+    final VoidCallback onTap;
+
+    if (entry is MerchantDiscoveryEntry) {
+      final m = entry.merchant;
+      title = m.name;
+      subtitle = merchantTypeLabel(m.type, l10n);
+      rating = m.rating;
+      icon = merchantCategoryIcon(m.type.name);
+      imageUrl = m.imageUrl;
+      onTap = () => _navigateTo('/market/merchant/${m.id}');
+    } else if (entry is ProviderDiscoveryEntry) {
+      final p = entry.provider;
+      title = p.name;
+      subtitle = serviceTypeLabel(p.categoryType, l10n);
+      rating = p.rating;
+      icon = serviceCategoryIcon(p.categoryType);
+      imageUrl = p.profileImageUrl;
+      onTap = () => _navigateTo(
+        '/home-services/category/${p.categoryType.name}',
+        extra: p,
+      );
+    } else {
+      return const SizedBox.shrink();
+    }
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 6),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(16),
+          onTap: onTap,
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.14),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: Colors.white.withValues(alpha: 0.24),
+              ),
+            ),
+            child: Row(
+              children: [
+                Category3dTileIcon(
+                  color: AppColors.brandPurple,
+                  icon: icon,
+                  networkImageUrl: imageUrl,
+                  size: 38,
+                  borderRadius: 12,
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        title,
+                        style: AppTextStyles.bodyMedium.copyWith(
+                          color: textColor,
+                          fontWeight: FontWeight.w700,
+                          fontSize: 13,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      Text(
+                        subtitle,
+                        style: AppTextStyles.labelSmall.copyWith(
+                          color: subTextColor,
+                          fontSize: 11,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 6),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(
+                      Icons.star_rounded,
+                      size: 14,
+                      color: AppColors.rating,
+                    ),
+                    const SizedBox(width: 2),
+                    Text(
+                      rating.toStringAsFixed(1),
+                      style: AppTextStyles.labelSmall.copyWith(
+                        color: textColor,
+                        fontWeight: FontWeight.w700,
+                        fontSize: 11.5,
+                      ),
+                    ),
+                    const SizedBox(width: 4),
+                    Icon(
+                      isRtl
+                          ? Icons.chevron_left_rounded
+                          : Icons.chevron_right_rounded,
+                      size: 18,
+                      color: subTextColor,
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
     );
   }
 }
@@ -741,9 +1652,11 @@ class _DirectOrderButton extends StatefulWidget {
 
 class _DirectOrderButtonState extends State<_DirectOrderButton>
     with SingleTickerProviderStateMixin {
+  bool _pressed = false;
+
   late final AnimationController _controller = AnimationController(
     vsync: this,
-    duration: const Duration(milliseconds: 2400),
+    duration: const Duration(milliseconds: 2600),
   )..repeat();
 
   @override
@@ -756,167 +1669,227 @@ class _DirectOrderButtonState extends State<_DirectOrderButton>
   Widget build(BuildContext context) {
     final isRtl = Directionality.of(context) == TextDirection.rtl;
     return GestureDetector(
+      onTapDown: (_) => setState(() => _pressed = true),
+      onTapUp: (_) => setState(() => _pressed = false),
+      onTapCancel: () => setState(() => _pressed = false),
       onTap: widget.onTap,
-      child: Container(
-        height: 64,
-        clipBehavior: Clip.antiAlias,
-        decoration: BoxDecoration(
-          borderRadius: const BorderRadius.all(Radius.circular(30)),
-          gradient: const LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              AppColors.brandPurple,
-              AppColors.brandViolet,
-              AppColors.brandBlue,
+      child: AnimatedScale(
+        scale: _pressed ? 0.97 : 1.0,
+        duration: const Duration(milliseconds: 120),
+        curve: Curves.easeOut,
+        child: Container(
+          height: 76,
+          clipBehavior: Clip.antiAlias,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(24),
+            gradient: const LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                Color(0xFF1E1B4B),
+                AppColors.brandPurple,
+                AppColors.brandViolet,
+                Color(0xFF0EA5E9),
+              ],
+              stops: [0.0, 0.35, 0.72, 1.0],
+            ),
+            border: Border.all(
+              color: Colors.white.withValues(alpha: 0.32),
+              width: 1.2,
+            ),
+            boxShadow: [
+              ...AppElevation.shadowGlow,
+              BoxShadow(
+                color: AppColors.brandPurple.withValues(alpha: 0.30),
+                blurRadius: 20,
+                offset: const Offset(0, 8),
+              ),
             ],
           ),
-          border: Border.all(
-            color: Colors.white.withValues(alpha: 0.30),
-            width: 1.2,
-          ),
-          boxShadow: [
-            ...AppElevation.shadowGlow,
-            BoxShadow(
-              color: AppColors.brandPurple.withValues(alpha: 0.25),
-              blurRadius: 18,
-              offset: const Offset(0, 8),
-            ),
-          ],
-        ),
-        child: AnimatedBuilder(
-          animation: _controller,
-          builder: (context, _) {
-            final t = _controller.value;
-            final ping = math.sin(t * math.pi);
-            final slide = (ping * 2 - 1) * 16;
-            final bob = math.sin(t * math.pi * 2) * 1.5;
-            final wind = math.cos(t * math.pi);
-            return Row(
-              children: [
-                const SizedBox(width: 10),
-                SizedBox(
-                  width: 64,
-                  child: Stack(
-                    alignment: Alignment.center,
-                    clipBehavior: Clip.none,
-                    children: [
-                      // Speed wind trailing behind the motorcycle — it
-                      // stretches opposite the travel direction and fades
-                      // near the turnarounds (where speed drops to zero).
-                      for (var i = 0; i < 4; i++)
-                        Opacity(
-                          opacity: (0.55 - i * 0.14).clamp(0.08, 0.55),
+          child: AnimatedBuilder(
+            animation: _controller,
+            builder: (context, _) {
+              final t = _controller.value;
+              final pulse = (math.sin(t * math.pi * 2) + 1) * 0.5;
+              final floatY = math.sin(t * math.pi * 2) * 2.0;
+              final arrowNudge =
+                  (isRtl ? -1 : 1) * math.sin(t * math.pi * 2) * 2.0;
+
+              return Stack(
+                fit: StackFit.expand,
+                children: [
+                  IgnorePointer(
+                    child: LayoutBuilder(
+                      builder: (context, constraints) {
+                        final shiftX =
+                            (t * 2.6 - 0.8) * constraints.maxWidth;
+                        return Align(
+                          alignment: Alignment.centerLeft,
                           child: Transform.translate(
-                            offset: Offset(slide - wind * (12 + 8 * i), bob),
-                            child: Container(
-                              width: 16 - i * 2.2,
-                              height: i >= 2 ? 2.5 : 3,
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(2),
-                                boxShadow: const [
-                                  BoxShadow(
-                                    color: Color(0x30FFFFFF),
-                                    blurRadius: 6,
+                            offset: Offset(shiftX, 0),
+                            child: FractionallySizedBox(
+                              widthFactor: 0.42,
+                              heightFactor: 1.6,
+                              child: Transform.rotate(
+                                angle: -0.35,
+                                child: DecoratedBox(
+                                  decoration: BoxDecoration(
+                                    gradient: LinearGradient(
+                                      colors: [
+                                        Colors.white.withValues(alpha: 0.0),
+                                        Colors.white.withValues(alpha: 0.16),
+                                        Colors.white.withValues(alpha: 0.0),
+                                      ],
+                                    ),
                                   ),
-                                ],
+                                ),
                               ),
                             ),
                           ),
-                        ),
-                      Opacity(
-                        opacity: 0.12,
-                        child: Transform.translate(
-                          offset: Offset(-slide * 2.4, bob * 2),
-                          child: const Icon(
-                            Icons.two_wheeler_rounded,
-                            size: 26,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ),
-                      Opacity(
-                        opacity: 0.3,
-                        child: Transform.translate(
-                          offset: Offset(-slide * 1.4, bob * 1.4),
-                          child: const Icon(
-                            Icons.two_wheeler_rounded,
-                            size: 30,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ),
-                      Transform.translate(
-                        offset: Offset(slide, bob),
-                        child: const Icon(
-                          Icons.two_wheeler_rounded,
-                          size: 34,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(width: 6),
-                Expanded(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        widget.l10n.orderDirectly,
-                        style: AppTextStyles.bodyLarge.copyWith(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w800,
-                          fontSize: 15,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        widget.l10n.fastestWayToOrder,
-                        style: AppTextStyles.bodySmall.copyWith(
-                          color: Colors.white.withValues(alpha: 0.85),
-                          fontSize: 12,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Container(
-                  width: 34,
-                  height: 34,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: Colors.white.withValues(alpha: 0.22),
-                    border: Border.all(
-                      color: Colors.white.withValues(alpha: 0.35),
+                        );
+                      },
                     ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.12),
-                        blurRadius: 6,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
                   ),
-                  child: Icon(
-                    isRtl
-                        ? Icons.arrow_back_rounded
-                        : Icons.arrow_forward_rounded,
-                    size: 18,
-                    color: Colors.white,
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 14),
+                    child: Row(
+                      children: [
+                        SizedBox(
+                          width: 52,
+                          height: 52,
+                          child: Stack(
+                            alignment: Alignment.center,
+                            children: [
+                              Transform.scale(
+                                scale: 0.90 + 0.16 * pulse,
+                                child: Container(
+                                  width: 48,
+                                  height: 48,
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    border: Border.all(
+                                      color: Colors.white.withValues(
+                                        alpha: 0.42 * (1 - pulse),
+                                      ),
+                                      width: 1.5,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              Container(
+                                width: 46,
+                                height: 46,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  gradient: LinearGradient(
+                                    begin: Alignment.topLeft,
+                                    end: Alignment.bottomRight,
+                                    colors: [
+                                      Colors.white.withValues(alpha: 0.30),
+                                      Colors.white.withValues(alpha: 0.12),
+                                    ],
+                                  ),
+                                  border: Border.all(
+                                    color: Colors.white.withValues(alpha: 0.38),
+                                  ),
+                                ),
+                                child: Transform.translate(
+                                  offset: Offset(0, floatY),
+                                  child: const Icon(
+                                    Icons.two_wheeler_rounded,
+                                    size: 24,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ),
+                              Positioned(
+                                top: 2,
+                                right: 2,
+                                child: Container(
+                                  width: 16,
+                                  height: 16,
+                                  decoration: const BoxDecoration(
+                                    color: Color(0xFF1E1B4B),
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: const Icon(
+                                    Icons.bolt_rounded,
+                                    size: 12,
+                                    color: AppColors.brandGold,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                widget.l10n.orderDirectly,
+                                style: AppTextStyles.bodyLarge.copyWith(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w800,
+                                  fontSize: 15.5,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              const SizedBox(height: 3),
+                              Text(
+                                widget.l10n.orderNowFast,
+                                style: AppTextStyles.bodySmall.copyWith(
+                                  color: Colors.white.withValues(alpha: 0.88),
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 11,
+                            vertical: 8,
+                          ),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(18),
+                            color: Colors.white.withValues(alpha: 0.22),
+                            border: Border.all(
+                              color: Colors.white.withValues(alpha: 0.36),
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withValues(alpha: 0.14),
+                                blurRadius: 8,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
+                          ),
+                          child: Transform.translate(
+                            offset: Offset(arrowNudge, 0),
+                            child: Icon(
+                              isRtl
+                                  ? Icons.arrow_back_rounded
+                                  : Icons.arrow_forward_rounded,
+                              size: 18,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-                const SizedBox(width: 12),
-              ],
-            );
-          },
+                ],
+              );
+            },
+          ),
         ),
       ),
     );
@@ -933,8 +1906,9 @@ class _CategoryTile extends _TileItem {
 }
 
 class _ServiceTile extends _TileItem {
-  const _ServiceTile(this.type);
+  const _ServiceTile(this.type, {this.iconUrl});
   final ServiceCategoryType type;
+  final String? iconUrl;
 }
 
 class _CompactCategories extends StatelessWidget {
@@ -947,84 +1921,26 @@ class _CompactCategories extends StatelessWidget {
   Widget build(BuildContext context) {
     final categoriesAsync = ref.watch(activeCategoriesProvider);
     final servicesAsync = ref.watch(_homeServiceCategoriesProvider);
+    final dbServices =
+        servicesAsync.asData?.value ?? const <ServiceCategory>[];
 
     return AnimatedFadeIn(
       delay: const Duration(milliseconds: 250),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(20, 18, 20, 0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Expanded(
-                  child: Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(7),
-                        decoration: BoxDecoration(
-                          color: AppColors.brandPurple.withValues(alpha: 0.12),
-                          borderRadius: BorderRadius.circular(10),
-                          border: Border.all(
-                            color: AppColors.brandPurple.withValues(alpha: 0.2),
-                          ),
-                        ),
-                        child: const Icon(
-                          AppIcons.gridView,
-                          size: 16,
-                          color: AppColors.brandPurple,
-                        ),
-                      ),
-                      const SizedBox(width: 10),
-                      Flexible(
-                        child: Text(
-                          l10n.mainCategories,
-                          style: context.textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.w800,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                TextButton(
-                  onPressed: () => context.push('/services'),
-                  child: Text(
-                    l10n.viewAll,
-                    style: AppTextStyles.labelLarge.copyWith(
-                      color: Theme.of(context).colorScheme.primary,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 6),
+          const SizedBox(height: 12),
           categoriesAsync.when(
+            skipLoadingOnRefresh: true,
+            skipLoadingOnReload: true,
             loading: () => _shimmerStrip(),
-            error: (_, _) => _buildStrip(context, _topBookingItems),
-            data: (categories) => servicesAsync.when(
-              loading: () => _shimmerStrip(),
-              error: (_, _) => _buildStrip(context, _topBookingItems),
-              data: (services) {
-                if (categories.isEmpty && services.isEmpty) {
-                  return _buildStrip(context, _topBookingItems);
-                }
-                final sorted = [...categories]
-                  ..sort(
-                    (a, b) =>
-                        categoryRank(a.name).compareTo(categoryRank(b.name)),
-                  );
-                final items = <_TileItem>[
-                  for (final c in sorted) _CategoryTile(c),
-                  for (final s in services) _ServiceTile(s.type),
-                ];
-                return _buildStrip(context, items);
-              },
+            error: (_, _) => _buildStrip(
+              context,
+              _mergeItems(const <PlatformCategory>[], dbServices),
+            ),
+            data: (categories) => _buildStrip(
+              context,
+              _mergeItems(categories, dbServices),
             ),
           ),
         ],
@@ -1032,15 +1948,63 @@ class _CompactCategories extends StatelessWidget {
     );
   }
 
+  List<_TileItem> _mergeItems(
+    List<PlatformCategory> categories,
+    List<ServiceCategory> dbServices,
+  ) {
+    final sortedCategories = [...categories]
+      ..sort(
+        (a, b) => categoryRank(
+          '${a.name} ${a.nameAr ?? ''} ${a.nameEn ?? ''}',
+        ).compareTo(
+          categoryRank('${b.name} ${b.nameAr ?? ''} ${b.nameEn ?? ''}'),
+        ),
+      );
+
+    final representedServices = <ServiceCategoryType>{};
+    final items = <_TileItem>[];
+
+    for (final c in sortedCategories) {
+      final combined = '${c.name} ${c.nameAr ?? ''} ${c.nameEn ?? ''}';
+      final sType = categoryNameToServiceType(combined);
+      if (sType != null) {
+        representedServices.add(sType);
+      }
+      items.add(_CategoryTile(c));
+    }
+
+    final serviceIcons = <ServiceCategoryType, String?>{
+      for (final s in dbServices)
+        if (s.iconUrl != null && s.iconUrl!.trim().isNotEmpty)
+          s.type: s.iconUrl,
+    };
+
+    for (final s in dbServices) {
+      if (s.type == ServiceCategoryType.other) continue;
+      if (representedServices.add(s.type)) {
+        items.add(_ServiceTile(s.type, iconUrl: s.iconUrl));
+      }
+    }
+
+    for (final sType in serviceCategoryPriority) {
+      if (representedServices.add(sType)) {
+        items.add(_ServiceTile(sType, iconUrl: serviceIcons[sType]));
+      }
+    }
+
+    return items.isEmpty ? _allDefaultServiceItems : items;
+  }
+
   Widget _shimmerStrip() {
     return SizedBox(
       height: _stripHeight,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
+        physics: const ClampingScrollPhysics(),
+        padding: const EdgeInsets.fromLTRB(14, 6, 14, 0),
         itemCount: 8,
-        separatorBuilder: (_, _) => const SizedBox(width: 12),
-        itemBuilder: (_, _) => const SizedBox(width: 150, child: ShimmerCard()),
+        separatorBuilder: (_, _) => const SizedBox(width: 8),
+        itemBuilder: (_, _) => const SizedBox(width: 74, child: ShimmerCard()),
       ),
     );
   }
@@ -1050,9 +2014,10 @@ class _CompactCategories extends StatelessWidget {
       height: _stripHeight,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
+        physics: const ClampingScrollPhysics(),
+        padding: const EdgeInsets.fromLTRB(14, 6, 14, 0),
         itemCount: items.length,
-        separatorBuilder: (_, _) => const SizedBox(width: 12),
+        separatorBuilder: (_, _) => const SizedBox(width: 8),
         itemBuilder: (context, index) => _buildTile(context, items[index]),
       ),
     );
@@ -1060,32 +2025,51 @@ class _CompactCategories extends StatelessWidget {
 
   Widget _buildTile(BuildContext context, _TileItem item) => switch (item) {
     _CategoryTile(:final category) => _buildCategoryTile(context, category),
-    _ServiceTile(:final type) => _buildServiceTile(context, type),
+    _ServiceTile(:final type, :final iconUrl) => _buildServiceTile(
+      context,
+      type,
+      iconUrl: iconUrl,
+    ),
   };
 
   Widget _buildCategoryTile(BuildContext context, PlatformCategory category) {
-    final merchantType = categoryNameToMerchantType(category.name);
-    final typeColor = merchantType != null
-        ? merchantTypeColor(merchantType)
-        : AppColors.brandPurple;
+    final combinedName =
+        '${category.name} ${category.nameAr ?? ''} ${category.nameEn ?? ''}';
+    final serviceType = categoryNameToServiceType(combinedName);
+    final merchantType = categoryNameToMerchantType(combinedName);
+
+    final icon = serviceType != null
+        ? serviceCategoryIcon(serviceType)
+        : merchantCategoryIcon(combinedName);
+    final fallbackUrl = serviceType != null
+        ? defaultServiceImageUrl(serviceType)
+        : defaultCategoryImageUrl(combinedName);
 
     return PressableScale(
       onTap: () {
-        final typeParam = merchantType?.name ?? 'other';
-        context.push('/market?type=$typeParam');
+        if (serviceType != null) {
+          context.push('/home-services/providers/${serviceType.name}');
+        } else if (merchantType?.name == 'home' ||
+            combinedName.toLowerCase().contains('home service')) {
+          context.push('/home-services');
+        } else {
+          final typeParam = merchantType?.name ?? 'other';
+          context.push('/market?type=$typeParam');
+        }
       },
       child: SizedBox(
-        width: 84,
+        width: 74,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Category3dTileIcon(
-              color: typeColor,
-              icon: merchantCategoryIcon(category.name),
+              color: AppColors.brandPurple,
+              icon: icon,
               networkImageUrl: category.imageUrl,
-              assetImagePath: merchantCategoryAsset(category.name),
+              assetImagePath: merchantCategoryAsset(combinedName),
+              fallbackImageUrl: fallbackUrl,
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 6),
             SizedBox(
               height: _tileLabelHeight,
               child: Center(
@@ -1094,11 +2078,12 @@ class _CompactCategories extends StatelessWidget {
                     Directionality.of(context) == TextDirection.rtl,
                   ),
                   style: AppTextStyles.labelSmall.copyWith(
-                    fontSize: 13,
+                    fontSize: 11.5,
+                    height: 1.2,
                     fontWeight: FontWeight.w600,
                   ),
                   textAlign: TextAlign.center,
-                  maxLines: 1,
+                  maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
@@ -1109,34 +2094,40 @@ class _CompactCategories extends StatelessWidget {
     );
   }
 
-  Widget _buildServiceTile(BuildContext context, ServiceCategoryType type) {
-    final color = _serviceColor(type);
-    final icon = _serviceIcon(type);
+  Widget _buildServiceTile(
+    BuildContext context,
+    ServiceCategoryType type, {
+    String? iconUrl,
+  }) {
+    final icon = serviceCategoryIcon(type);
     final label = serviceTypeLabel(type, AppLocalizations.of(context));
 
     return PressableScale(
       onTap: () => context.push('/home-services/providers/${type.name}'),
       child: SizedBox(
-        width: 84,
+        width: 74,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Category3dTileIcon(
-              color: color,
+              color: AppColors.brandPurple,
               icon: icon,
+              networkImageUrl: iconUrl,
+              fallbackImageUrl: defaultServiceImageUrl(type),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 6),
             SizedBox(
               height: _tileLabelHeight,
               child: Center(
                 child: Text(
                   label,
                   style: AppTextStyles.labelSmall.copyWith(
-                    fontSize: 13,
+                    fontSize: 11.5,
+                    height: 1.2,
                     fontWeight: FontWeight.w600,
                   ),
                   textAlign: TextAlign.center,
-                  maxLines: 1,
+                  maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
@@ -1144,6 +2135,44 @@ class _CompactCategories extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+class _PlayfulServiceCardReveal extends StatelessWidget {
+  const _PlayfulServiceCardReveal({
+    super.key,
+    required this.index,
+    required this.child,
+  });
+
+  final int index;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    if (MediaQuery.disableAnimationsOf(context)) return child;
+    final delayMs = (index * 65).clamp(0, 520);
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: 0.0, end: 1.0),
+      duration: Duration(milliseconds: 460 + delayMs),
+      curve: Curves.easeOutBack,
+      builder: (context, value, animatedChild) {
+        final safeOpacity = value.clamp(0.0, 1.0);
+        final slideY = (1.0 - value) * 26.0;
+        final scale = 0.90 + (0.10 * value);
+        return Opacity(
+          opacity: safeOpacity,
+          child: Transform.translate(
+            offset: Offset(0, slideY),
+            child: Transform.scale(
+              scale: scale,
+              child: animatedChild,
+            ),
+          ),
+        );
+      },
+      child: child,
     );
   }
 }
@@ -1196,6 +2225,7 @@ class _DiscoveryTabsState extends ConsumerState<_DiscoveryTabs> {
         ),
         child: ListView.separated(
           scrollDirection: Axis.horizontal,
+          physics: const BouncingScrollPhysics(),
           itemCount: _labels.length,
           separatorBuilder: (_, _) => const SizedBox(width: 6),
           itemBuilder: (context, index) {
@@ -1261,6 +2291,7 @@ class _DiscoveryContent extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final entriesAsync = ref.watch(discoveryEntriesProvider);
+    final mode = ref.watch(discoveryModeProvider);
 
     return AnimatedSwitcher(
       duration: const Duration(milliseconds: 300),
@@ -1277,6 +2308,8 @@ class _DiscoveryContent extends ConsumerWidget {
         ),
       ),
       child: entriesAsync.when(
+        skipLoadingOnRefresh: true,
+        skipLoadingOnReload: true,
         loading: () => Column(
           key: const ValueKey('shimmer'),
           children: [
@@ -1309,12 +2342,16 @@ class _DiscoveryContent extends ConsumerWidget {
             );
           }
           return Column(
-            key: ValueKey('entries_${entries.length}'),
+            key: ValueKey('entries_${mode.name}_${entries.length}'),
             children: [
               for (var i = 0; i < entries.length; i++)
                 Padding(
                   padding: const EdgeInsets.fromLTRB(20, 10, 20, 0),
-                  child: _buildEntryCard(context, entries[i]),
+                  child: _PlayfulServiceCardReveal(
+                    key: ValueKey('card_${mode.name}_$i'),
+                    index: i,
+                    child: _buildEntryCard(context, entries[i]),
+                  ),
                 ),
             ],
           );
@@ -1481,6 +2518,8 @@ class _PromoCarouselState extends ConsumerState<_PromoCarousel> {
     final campaignsAsync = ref.watch(activeCampaignsProvider);
 
     return campaignsAsync.when(
+      skipLoadingOnRefresh: true,
+      skipLoadingOnReload: true,
       loading: () => const _PromoCarouselLoading(),
       error: (_, _) => const SizedBox.shrink(),
       data: (campaigns) {
@@ -1592,12 +2631,17 @@ class _PromoSlide extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
-    final name = campaign.nameAr.isNotEmpty
-        ? campaign.nameAr
-        : (campaign.nameEn ?? campaign.nameAr);
-    final subtitle = campaign.subtitleAr?.isNotEmpty == true
-        ? campaign.subtitleAr
-        : campaign.subtitleEn;
+    final isRtl = Directionality.of(context) == TextDirection.rtl;
+    final name = (!isRtl && campaign.nameEn?.isNotEmpty == true)
+        ? campaign.nameEn!
+        : (campaign.nameAr.isNotEmpty
+              ? campaign.nameAr
+              : (campaign.nameEn ?? campaign.nameAr));
+    final subtitle = (!isRtl && campaign.subtitleEn?.isNotEmpty == true)
+        ? campaign.subtitleEn
+        : (campaign.subtitleAr?.isNotEmpty == true
+              ? campaign.subtitleAr
+              : campaign.subtitleEn);
     final colors = _campaignColors(campaign);
     final coupon = campaign.cta?.type == CampaignCtaType.copyCode
         ? campaign.cta?.code

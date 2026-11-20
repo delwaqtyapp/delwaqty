@@ -26,6 +26,8 @@ class DriverApp extends ConsumerStatefulWidget {
 }
 
 class _DriverAppState extends ConsumerState<DriverApp> {
+  StreamSubscription<DeepLinkRoute>? _deepLinkSub;
+
   @override
   void initState() {
     super.initState();
@@ -76,7 +78,8 @@ class _DriverAppState extends ConsumerState<DriverApp> {
   void _startDeepLinkListener() {
     final service = ref.read(deepLinkServiceProvider);
     service.start();
-    service.routes.listen((route) {
+    _deepLinkSub?.cancel();
+    _deepLinkSub = service.routes.listen((route) {
       if (route == DeepLinkRoute.loginCallback) {
         _handleLoginCallback();
       }
@@ -98,6 +101,7 @@ class _DriverAppState extends ConsumerState<DriverApp> {
 
   @override
   void dispose() {
+    _deepLinkSub?.cancel();
     ref.read(authStateProvider.notifier).stopAuthListener();
     super.dispose();
   }

@@ -41,6 +41,15 @@ class _ServiceProvidersPageState extends ConsumerState<ServiceProvidersPage> {
 
   static const _radiusOptions = <double>[5, 10, 15, 25];
 
+  @override
+  void didUpdateWidget(covariant ServiceProvidersPage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.initialType != null &&
+        widget.initialType != oldWidget.initialType) {
+      _type = widget.initialType!;
+    }
+  }
+
   double _distanceKm(ServiceProvider p, double? uLat, double? uLng) {
     if (uLat == null || uLng == null) return 0;
     if (p.latitude == null || p.longitude == null) return double.infinity;
@@ -66,7 +75,7 @@ class _ServiceProvidersPageState extends ConsumerState<ServiceProvidersPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(l10n.servicesSection),
+        title: Text(serviceTypeLabel(_type, l10n)),
         actions: [
           ServiceReviewsButton(categoryType: _type),
         ],
@@ -87,14 +96,30 @@ class _ServiceProvidersPageState extends ConsumerState<ServiceProvidersPage> {
                 icon: Icons.error_outline,
                 title: l10n.error,
                 message: l10n.errorLoading,
+                actionLabel: l10n.retry,
+                onAction: () => ref.invalidate(_providersForTypeProvider(_type)),
               ),
               data: (providers) {
-                final visible = providers
+                final withCoords = providers
                     .where((p) =>
+                        p.latitude != null &&
+                        p.longitude != null &&
                         _distanceKm(p, uLat, uLng) <= _radiusKm)
                     .toList()
                   ..sort((a, b) => _distanceKm(a, uLat, uLng)
                       .compareTo(_distanceKm(b, uLat, uLng)));
+                final withoutCoords = providers
+                    .where((p) => p.latitude == null || p.longitude == null)
+                    .toList();
+                final visible = (withCoords.isEmpty &&
+                        withoutCoords.isEmpty &&
+                        providers.isNotEmpty)
+                    ? (List<ServiceProvider>.from(providers)
+                      ..sort(
+                        (a, b) => _distanceKm(a, uLat, uLng)
+                            .compareTo(_distanceKm(b, uLat, uLng)),
+                      ))
+                    : [...withCoords, ...withoutCoords];
                 if (visible.isEmpty) {
                   return PremiumEmptyState(
                     icon: Icons.person_search_rounded,

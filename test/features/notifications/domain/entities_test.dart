@@ -6,7 +6,7 @@ void main() {
 
   group('NotificationType', () {
     test('enum has all values', () {
-      expect(NotificationType.values.length, 24);
+      expect(NotificationType.values.length, 30);
       expect(NotificationType.info.name, 'info');
       expect(NotificationType.warning.name, 'warning');
       expect(NotificationType.success.name, 'success');

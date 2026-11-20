@@ -1,14 +1,33 @@
+import 'dart:async';
 import 'package:delwaqty/core/utils/avatar_initial.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:delwaqty/features/_shared/regions/presentation/widgets/region_picker_sheet.dart';
 import 'package:delwaqty/features/admin/admin_shell.dart';
 import 'package:delwaqty/features/admin/member_management/domain/entities/member.dart';
 import 'package:delwaqty/features/admin/member_management/presentation/member_providers.dart';
 import 'package:delwaqty/features/admin/member_management/presentation/pages/member_drawer.dart';
+import 'package:delwaqty/features/admin_management/presentation/providers/admin_management_providers.dart';
+import 'package:delwaqty/shared/widgets/animated_feedback.dart';
 import 'package:delwaqty/shared/widgets/premium_empty_state.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 import 'package:delwaqty/core/errors/app_error_text.dart';
+
+const Set<String> _kAdminRoles = {
+  'admin',
+  'owner',
+  'super_admin',
+  'country_admin',
+  'governorate_admin',
+  'center_admin',
+  'village_admin',
+};
+
+bool _isAdminRoleOrType(String? role, [String? userType]) {
+  return _kAdminRoles.contains(role) || userType == 'admin';
+}
 
 class MemberOperationsCenter extends ConsumerStatefulWidget {
   const MemberOperationsCenter({super.key});
@@ -32,6 +51,18 @@ class _MemberOperationsCenterState
     _selectedMemberId.value = memberId;
   }
 
+  void _showAssignAdminFromMembersSheet(BuildContext context) {
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      useSafeArea: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (_) => const _AssignAdminFromMembersSheet(),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
@@ -45,6 +76,11 @@ class _MemberOperationsCenterState
             : null,
         title: Text(AppLocalizations.of(context).memberOperationsCenter),
         actions: [
+          IconButton(
+            tooltip: l10n.assignSubAdmin,
+            icon: const Icon(Icons.admin_panel_settings_rounded),
+            onPressed: () => _showAssignAdminFromMembersSheet(context),
+          ),
           IconButton(
             tooltip: l10n.refresh,
             icon: const Icon(Icons.refresh_rounded),
@@ -64,10 +100,28 @@ class _MemberOperationsCenterState
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               children: [
                 _MemberQuickAction(
+                  icon: Icons.admin_panel_settings_rounded,
+                  label: l10n.assignSubAdmin,
+                  color: const Color(0xFF5B3DF0),
+                  onTap: () => _showAssignAdminFromMembersSheet(context),
+                ),
+                _MemberQuickAction(
                   icon: Icons.verified_user_rounded,
                   label: l10n.adminVerifications,
                   color: const Color(0xFF34C759),
                   onTap: () => context.push('/admin/verifications'),
+                ),
+                _MemberQuickAction(
+                  icon: Icons.fact_check_rounded,
+                  label: l10n.adminApprovals,
+                  color: const Color(0xFF007AFF),
+                  onTap: () => context.push('/admin/approvals'),
+                ),
+                _MemberQuickAction(
+                  icon: Icons.person_remove_rounded,
+                  label: l10n.pendingDeletions,
+                  color: const Color(0xFFDC2626),
+                  onTap: () => context.push('/admin/pending-deletions'),
                 ),
                 _MemberQuickAction(
                   icon: Icons.gavel_rounded,
@@ -246,16 +300,17 @@ class _MemberListPanelState extends ConsumerState<_MemberListPanel> {
   }
 
   void _applyFilters() {
+    final isAdminFilter = _roleFilter == 'admin';
     final filters = {
       'search': _search,
-      'role': _roleFilter,
+      'role': isAdminFilter ? null : _roleFilter,
       'userType': null,
       'accountStatus': _accountStatusFilter,
       'verificationStatus': _verificationStatusFilter,
       'serviceCategory': _serviceCategoryFilter,
       'sanctionStatus': _sanctionStatusFilter,
       'sort': _sortBy ?? 'newest',
-      'limit': _limit,
+      'limit': isAdminFilter ? 100 : _limit,
       'offset': _offset,
     };
     ref.read(memberOpsProvider.notifier).setFilters(filters);
@@ -276,6 +331,7 @@ class _MemberListPanelState extends ConsumerState<_MemberListPanel> {
               prefixIcon: const Icon(Icons.search_rounded),
               suffixIcon: _search.isNotEmpty
                   ? IconButton(
+                      tooltip: l10n.clear,
                       icon: const Icon(Icons.clear_rounded, size: 18),
                       onPressed: () {
                         _searchController.clear();
@@ -332,6 +388,16 @@ class _MemberListPanelState extends ConsumerState<_MemberListPanel> {
                   selected: _roleFilter == 'merchant',
                   onTap: () {
                     setState(() => _roleFilter = 'merchant');
+                    _applyFilters();
+                  },
+                ),
+                _FilterChipWidget(
+                  label: l10n.adminRole,
+                  selected: _roleFilter == 'admin',
+                  onTap: () {
+                    setState(
+                      () => _roleFilter = _roleFilter == 'admin' ? null : 'admin',
+                    );
                     _applyFilters();
                   },
                 ),
@@ -434,7 +500,18 @@ class _MemberListPanelState extends ConsumerState<_MemberListPanel> {
         Expanded(
           child: Builder(
             builder: (context) {
-              final members = ref.watch(memberOpsProvider);
+              final members = ref
+                  .watch(memberOpsProvider)
+                  .where(
+                    (m) =>
+                        m.accountStatus != 'deactivated' &&
+                        !(m.fullName == null &&
+                            (m.email?.endsWith('@anonymized.invalid') ??
+                                false)) &&
+                        (_roleFilter != 'admin' ||
+                            _isAdminRoleOrType(m.role, m.userType)),
+                  )
+                  .toList();
               final notifier = ref.read(memberOpsProvider.notifier);
               if (members.isEmpty) {
                 if (notifier.lastError != null) {
@@ -540,11 +617,20 @@ class _MemberTileWidget extends StatelessWidget {
       _ => Colors.grey,
     };
     final roleColor = switch (member.role) {
-      'admin' => const Color(0xFF5B3DF0),
+      'admin' ||
+      'owner' ||
+      'super_admin' ||
+      'country_admin' ||
+      'governorate_admin' ||
+      'center_admin' ||
+      'village_admin' =>
+        const Color(0xFF5B3DF0),
       'driver' => const Color(0xFF007AFF),
       'merchant' => const Color(0xFFFF9500),
       'customer' => const Color(0xFF00C7BE),
-      _ => Colors.blueGrey,
+      _ => _isAdminRoleOrType(member.role, member.userType)
+          ? const Color(0xFF5B3DF0)
+          : Colors.blueGrey,
     };
     final cs = Theme.of(context).colorScheme;
 
@@ -720,6 +806,12 @@ class _MemberTileWidget extends StatelessWidget {
       'driver' => l10n.driver,
       'merchant' => l10n.merchant,
       'admin' => l10n.roleAdmin,
+      'owner' => l10n.ownerFullAccess,
+      'super_admin' => l10n.adminRole,
+      'country_admin' => l10n.countryAdmin,
+      'governorate_admin' => l10n.governorateAdmin,
+      'center_admin' => l10n.centerAdmin,
+      'village_admin' => l10n.villageAdmin,
       _ => role,
     };
   }
@@ -768,3 +860,746 @@ class _MemberQuickAction extends StatelessWidget {
     );
   }
 }
+
+const List<String> _kGranularPlatformPermissionCodes = [
+  'USERS_VIEW',
+  'USERS_MODERATE',
+  'ORDERS_VIEW',
+  'ORDERS_MANAGE',
+  'FINANCE_VIEW',
+  'FINANCE_APPROVE',
+  'PROVIDERS_VERIFY',
+  'DISPUTES_RESOLVE',
+  'CAMPAIGNS_MANAGE',
+  'ANALYTICS_VIEW',
+  'ADMINS_MANAGE',
+];
+
+const List<({String role, IconData icon})> _kSelectableAdminRoles = [
+  (
+    role: 'country_admin',
+    icon: Icons.public_rounded,
+  ),
+  (
+    role: 'governorate_admin',
+    icon: Icons.account_balance_rounded,
+  ),
+  (
+    role: 'center_admin',
+    icon: Icons.location_city_rounded,
+  ),
+  (
+    role: 'village_admin',
+    icon: Icons.holiday_village_rounded,
+  ),
+  (
+    role: 'admin',
+    icon: Icons.admin_panel_settings_rounded,
+  ),
+  (
+    role: 'customer',
+    icon: Icons.person_outline_rounded,
+  ),
+];
+
+class _AssignAdminFromMembersSheet extends ConsumerStatefulWidget {
+  const _AssignAdminFromMembersSheet();
+
+  @override
+  ConsumerState<_AssignAdminFromMembersSheet> createState() =>
+      _AssignAdminFromMembersSheetState();
+}
+
+class _AssignAdminFromMembersSheetState
+    extends ConsumerState<_AssignAdminFromMembersSheet> {
+  final TextEditingController _searchController = TextEditingController();
+  Timer? _debounce;
+  bool _isSearching = false;
+  bool _isLoadingPermissions = false;
+  bool _isSaving = false;
+  List<Map<String, dynamic>> _searchResults = const [];
+  Map<String, dynamic>? _selectedMember;
+  String _selectedRole = 'village_admin';
+  String? _selectedRegionId;
+  String? _selectedRegionName;
+  final Set<String> _selectedPermissions = {};
+  final Set<String> _initialGrantedPermissions = {};
+
+  @override
+  void initState() {
+    super.initState();
+    _searchMembers('');
+  }
+
+  @override
+  void dispose() {
+    _debounce?.cancel();
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  String _permissionLabel(String code, AppLocalizations l10n) {
+    return switch (code) {
+      'USERS_VIEW' => l10n.adminMembers,
+      'USERS_MODERATE' => l10n.sanctions,
+      'ORDERS_VIEW' => l10n.orders,
+      'ORDERS_MANAGE' => l10n.adminOrdersPage,
+      'FINANCE_VIEW' => l10n.adminFinancialCenter,
+      'FINANCE_APPROVE' => l10n.settlements,
+      'PROVIDERS_VERIFY' => l10n.adminVerifications,
+      'DISPUTES_RESOLVE' => l10n.complaints,
+      'CAMPAIGNS_MANAGE' => l10n.adminBannersTitle,
+      'ANALYTICS_VIEW' => l10n.adminAnalytics,
+      'ADMINS_MANAGE' => l10n.adminMgmtList,
+      _ => code,
+    };
+  }
+
+  Future<void> _searchMembers(String query) async {
+    setState(() => _isSearching = true);
+    try {
+      final client = Supabase.instance.client;
+      final q = query.trim();
+      List<dynamic> rows;
+      try {
+        var req = client
+            .from('users')
+            .select('id, full_name, email, phone, role, user_type, region_id');
+        if (q.isNotEmpty) {
+          req = req.or(
+            'full_name.ilike.%$q%,email.ilike.%$q%,phone.ilike.%$q%',
+          );
+        }
+        rows = await req.limit(20);
+      } on PostgrestException {
+        var req = client
+            .from('users')
+            .select('id, full_name, email, phone, role, user_type');
+        if (q.isNotEmpty) {
+          req = req.or(
+            'full_name.ilike.%$q%,email.ilike.%$q%,phone.ilike.%$q%',
+          );
+        }
+        rows = await req.limit(20);
+      }
+      if (!mounted) return;
+      setState(() {
+        _searchResults = rows
+            .map((e) => Map<String, dynamic>.from(e as Map))
+            .toList();
+        _isSearching = false;
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => _isSearching = false);
+    }
+  }
+
+  Future<void> _pickMember(Map<String, dynamic> member) async {
+    final memberId = member['id'] as String? ?? '';
+    final currentRole = member['role'] as String? ?? 'customer';
+    final regionId = member['region_id'] as String?;
+
+    setState(() {
+      _selectedMember = member;
+      _selectedRole = _kSelectableAdminRoles.any((r) => r.role == currentRole)
+          ? currentRole
+          : 'village_admin';
+      _selectedRegionId = regionId;
+      _selectedRegionName = null;
+      _selectedPermissions.clear();
+      _initialGrantedPermissions.clear();
+      _isLoadingPermissions = true;
+    });
+
+    if (memberId.isEmpty) {
+      setState(() => _isLoadingPermissions = false);
+      return;
+    }
+
+    try {
+      final client = Supabase.instance.client;
+      final res = await client.rpc(
+        'get_admin_permissions',
+        params: {'p_admin_id': memberId},
+      );
+      if (res is Map) {
+        final grants = (res['grants'] as List?)
+                ?.map((e) => e.toString())
+                .toSet() ??
+            <String>{};
+        final effective = (res['effective'] as List?)
+                ?.map((e) => e.toString())
+                .toSet() ??
+            <String>{};
+        if (mounted) {
+          setState(() {
+            _initialGrantedPermissions
+              ..clear()
+              ..addAll(grants);
+            _selectedPermissions
+              ..clear()
+              ..addAll(
+                _kGranularPlatformPermissionCodes.where(
+                  (c) => grants.contains(c) || effective.contains(c),
+                ),
+              );
+          });
+        }
+      }
+    } catch (_) {
+      // Member may not be an admin yet; start with empty permissions.
+    } finally {
+      if (mounted) {
+        setState(() => _isLoadingPermissions = false);
+      }
+    }
+  }
+
+  Future<void> _saveConfiguration() async {
+    final l10n = AppLocalizations.of(context);
+    final member = _selectedMember;
+    if (member == null) return;
+    final memberId = member['id'] as String? ?? '';
+    final email = (member['email'] as String?)?.trim() ?? '';
+    final identifier = email.isNotEmpty ? email : memberId;
+    if (memberId.isEmpty) return;
+
+    setState(() => _isSaving = true);
+    final client = Supabase.instance.client;
+
+    try {
+      bool configuredViaUnifiedRpc = false;
+      try {
+        await client.rpc(
+          'admin_promote_and_configure_member',
+          params: {
+            'p_member_id': memberId,
+            'p_role': _selectedRole,
+            'p_region_id': _selectedRegionId,
+            'p_permissions': _selectedPermissions.toList(),
+          },
+        );
+        configuredViaUnifiedRpc = true;
+      } on PostgrestException catch (e) {
+        if (e.code != 'PGRST202') rethrow;
+      }
+
+      if (!configuredViaUnifiedRpc) {
+        await client.rpc(
+          'assign_admin_role',
+          params: {
+            'p_email': identifier,
+            'p_role': _selectedRole,
+          },
+        );
+
+        if (_selectedRole != 'customer' && _selectedRegionId != null) {
+          try {
+            await client.rpc(
+              'admin_assign_region_by_id',
+              params: {
+                'p_email': identifier,
+                'p_region_id': _selectedRegionId,
+                'p_scope': 'descendants',
+              },
+            );
+          } on PostgrestException {
+            await client.rpc(
+              'assign_admin_region',
+              params: {
+                'p_admin_id': memberId,
+                'p_region_id': _selectedRegionId,
+                'p_scope': 'descendants',
+              },
+            );
+          }
+        }
+
+        if (_selectedRole != 'customer') {
+          for (final code in _kGranularPlatformPermissionCodes) {
+            final isSelected = _selectedPermissions.contains(code);
+            final wasGranted = _initialGrantedPermissions.contains(code);
+            if (isSelected && !wasGranted) {
+              try {
+                await client.rpc(
+                  'grant_admin_permission',
+                  params: {
+                    'p_admin_id': memberId,
+                    'p_permission': code,
+                  },
+                );
+              } catch (_) {}
+            } else if (!isSelected && wasGranted) {
+              try {
+                await client.rpc(
+                  'revoke_admin_permission',
+                  params: {
+                    'p_admin_id': memberId,
+                    'p_permission': code,
+                  },
+                );
+              } catch (_) {}
+            }
+          }
+        }
+      }
+
+      if (!mounted) return;
+      ref.invalidate(memberOpsProvider);
+      ref.invalidate(memberOpsCountProvider);
+      ref.invalidate(memberOpsProfileProvider(memberId));
+      ref.invalidate(adminsListProvider);
+      ref.invalidate(adminDetailProvider(memberId));
+      ref.invalidate(adminPermissionsProvider(memberId));
+
+      showAnimatedSuccessToast(
+        context,
+        message: l10n.adminAssigned,
+      );
+      Navigator.of(context).pop();
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(appErrorText(context, e))),
+      );
+    } finally {
+      if (mounted) {
+        setState(() => _isSaving = false);
+      }
+    }
+  }
+
+  String _roleBadgeText(String? role, AppLocalizations l10n) {
+    return switch (role) {
+      'owner' => l10n.ownerFullAccess,
+      'super_admin' => l10n.adminRole,
+      'country_admin' => l10n.countryAdmin,
+      'governorate_admin' => l10n.governorateAdmin,
+      'center_admin' => l10n.centerAdmin,
+      'village_admin' => l10n.villageAdmin,
+      'admin' => l10n.adminRole,
+      'driver' => l10n.driver,
+      'merchant' => l10n.merchant,
+      'provider' => l10n.chatOriginProvider,
+      _ => l10n.customer,
+    };
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final cs = Theme.of(context).colorScheme;
+    final lang = Localizations.localeOf(context).languageCode;
+    final sheetHeight = MediaQuery.sizeOf(context).height * 0.86;
+
+    return SizedBox(
+      height: sheetHeight,
+      child: Column(
+        children: [
+          const SizedBox(height: 10),
+          Container(
+            width: 40,
+            height: 4,
+            decoration: BoxDecoration(
+              color: cs.outlineVariant,
+              borderRadius: BorderRadius.circular(2),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 12, 8, 8),
+            child: Row(
+              children: [
+                const Icon(
+                  Icons.admin_panel_settings_rounded,
+                  color: Color(0xFF5B3DF0),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    l10n.assignSubAdmin,
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                  ),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.close_rounded),
+                  onPressed: () => Navigator.of(context).pop(),
+                ),
+              ],
+            ),
+          ),
+          const Divider(height: 1),
+          Expanded(
+            child: _selectedMember == null
+                ? _buildSearchAndPickStep(cs, l10n)
+                : _buildConfigureMemberStep(cs, lang, l10n),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSearchAndPickStep(ColorScheme cs, AppLocalizations l10n) {
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(16),
+          child: TextField(
+            controller: _searchController,
+            decoration: InputDecoration(
+              hintText: '${l10n.search} (${l10n.nameLabel} / ${l10n.phone})...',
+              prefixIcon: const Icon(Icons.search_rounded),
+              suffixIcon: _searchController.text.isNotEmpty
+                  ? IconButton(
+                      icon: const Icon(Icons.clear_rounded),
+                      onPressed: () {
+                        _searchController.clear();
+                        _searchMembers('');
+                      },
+                    )
+                  : null,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(14),
+              ),
+              isDense: true,
+            ),
+            onChanged: (val) {
+              _debounce?.cancel();
+              _debounce = Timer(
+                const Duration(milliseconds: 280),
+                () => _searchMembers(val),
+              );
+            },
+          ),
+        ),
+        Expanded(
+          child: _isSearching
+              ? const Center(child: CircularProgressIndicator())
+              : _searchResults.isEmpty
+                  ? Center(
+                      child: Text(
+                        l10n.noMembersFound,
+                        style: TextStyle(color: cs.onSurfaceVariant),
+                      ),
+                    )
+                  : ListView.builder(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      itemCount: _searchResults.length,
+                      itemBuilder: (context, index) {
+                        final m = _searchResults[index];
+                        final name =
+                            (m['full_name'] as String?)?.trim().isNotEmpty ==
+                                    true
+                                ? m['full_name'] as String
+                                : l10n.unnamed;
+                        final email = m['email'] as String? ?? '';
+                        final phone = m['phone'] as String? ?? '';
+                        final role = m['role'] as String? ?? 'customer';
+                        final isAdmin = _isAdminRoleOrType(
+                          role,
+                          m['user_type'] as String?,
+                        );
+                        final badgeColor = isAdmin
+                            ? const Color(0xFF5B3DF0)
+                            : cs.primary;
+
+                        return Card(
+                          margin: const EdgeInsets.only(bottom: 8),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                          child: ListTile(
+                            onTap: () => _pickMember(m),
+                            leading: CircleAvatar(
+                              backgroundColor:
+                                  badgeColor.withValues(alpha: 0.14),
+                              child: Text(
+                                safeInitialFrom([name, email, phone]),
+                                style: TextStyle(
+                                  color: badgeColor,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                            title: Text(
+                              name,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                            subtitle: Text(
+                              [
+                                if (email.isNotEmpty) email,
+                                if (phone.isNotEmpty) phone,
+                              ].join(' • '),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            trailing: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 10,
+                                vertical: 4,
+                              ),
+                              decoration: BoxDecoration(
+                                color: badgeColor.withValues(alpha: 0.12),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Text(
+                                _roleBadgeText(role, l10n),
+                                style: TextStyle(
+                                  color: badgeColor,
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: 11,
+                                ),
+                              ),
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildConfigureMemberStep(
+    ColorScheme cs,
+    String lang,
+    AppLocalizations l10n,
+  ) {
+    final member = _selectedMember!;
+    final name = (member['full_name'] as String?)?.trim().isNotEmpty == true
+        ? member['full_name'] as String
+        : l10n.unnamed;
+    final email = member['email'] as String? ?? '';
+    final phone = member['phone'] as String? ?? '';
+    final currentRole = member['role'] as String? ?? 'customer';
+
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: cs.surfaceContainerLow,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: cs.outlineVariant.withValues(alpha: 0.4),
+              ),
+            ),
+            child: Row(
+              children: [
+                CircleAvatar(
+                  radius: 22,
+                  backgroundColor:
+                      const Color(0xFF5B3DF0).withValues(alpha: 0.14),
+                  child: Text(
+                    safeInitialFrom([name, email, phone]),
+                    style: const TextStyle(
+                      color: Color(0xFF5B3DF0),
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        name,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 15,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        [
+                          if (email.isNotEmpty) email,
+                          if (phone.isNotEmpty) phone,
+                          '${l10n.adminRole}: ${_roleBadgeText(currentRole, l10n)}',
+                        ].join(' • '),
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: cs.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                TextButton.icon(
+                  onPressed: () => setState(() => _selectedMember = null),
+                  icon: const Icon(Icons.swap_horiz_rounded, size: 18),
+                  label: Text(l10n.selectRecipient),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 18),
+          Text(
+            l10n.adminRole,
+            style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+          ),
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: _kSelectableAdminRoles.map((item) {
+              final selected = _selectedRole == item.role;
+              return ChoiceChip(
+                avatar: Icon(
+                  item.icon,
+                  size: 16,
+                  color: selected ? cs.onPrimary : const Color(0xFF5B3DF0),
+                ),
+                label: Text(_roleBadgeText(item.role, l10n)),
+                selected: selected,
+                selectedColor: const Color(0xFF5B3DF0),
+                labelStyle: TextStyle(
+                  color: selected ? Colors.white : cs.onSurface,
+                  fontWeight: selected ? FontWeight.bold : FontWeight.w500,
+                ),
+                onSelected: (_) {
+                  setState(() => _selectedRole = item.role);
+                },
+              );
+            }).toList(),
+          ),
+          if (_selectedRole != 'customer') ...[
+            const SizedBox(height: 18),
+            Text(
+              l10n.assignRegion,
+              style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+            ),
+            const SizedBox(height: 8),
+            OutlinedButton.icon(
+              style: OutlinedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 14,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(14),
+                ),
+              ),
+              onPressed: () async {
+                final picked = await RegionPickerSheet.show(
+                  context,
+                  selectedRegionId: _selectedRegionId,
+                );
+                if (picked != null && mounted) {
+                  setState(() {
+                    _selectedRegionId = picked.id;
+                    _selectedRegionName = picked.displayName(lang);
+                  });
+                }
+              },
+              icon: const Icon(Icons.location_on_rounded),
+              label: Text(
+                _selectedRegionName ??
+                    (_selectedRegionId != null
+                        ? '${l10n.regions}: $_selectedRegionId'
+                        : l10n.adminMgmtSelectRegion),
+              ),
+            ),
+            const SizedBox(height: 18),
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    l10n.permissionDelegation,
+                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                  ),
+                ),
+                TextButton(
+                  onPressed: () {
+                    setState(() {
+                      if (_selectedPermissions.length ==
+                          _kGranularPlatformPermissionCodes.length) {
+                        _selectedPermissions.clear();
+                      } else {
+                        _selectedPermissions.addAll(
+                          _kGranularPlatformPermissionCodes,
+                        );
+                      }
+                    });
+                  },
+                  child: Text(
+                    _selectedPermissions.length ==
+                            _kGranularPlatformPermissionCodes.length
+                        ? l10n.clear
+                        : l10n.allRoles,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            if (_isLoadingPermissions)
+              const Padding(
+                padding: EdgeInsets.symmetric(vertical: 16),
+                child: Center(child: CircularProgressIndicator()),
+              )
+            else
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: _kGranularPlatformPermissionCodes.map((code) {
+                  final isSelected = _selectedPermissions.contains(code);
+                  return FilterChip(
+                    label: Text(_permissionLabel(code, l10n)),
+                    selected: isSelected,
+                    onSelected: (val) {
+                      setState(() {
+                        if (val) {
+                          _selectedPermissions.add(code);
+                        } else {
+                          _selectedPermissions.remove(code);
+                        }
+                      });
+                    },
+                  );
+                }).toList(),
+              ),
+          ],
+          const SizedBox(height: 24),
+          FilledButton.icon(
+            style: FilledButton.styleFrom(
+              backgroundColor: const Color(0xFF5B3DF0),
+              padding: const EdgeInsets.symmetric(vertical: 14),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(14),
+              ),
+            ),
+            onPressed: _isSaving ? null : _saveConfiguration,
+            icon: _isSaving
+                ? const SizedBox(
+                    width: 18,
+                    height: 18,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: Colors.white,
+                    ),
+                  )
+                : const Icon(Icons.check_circle_rounded),
+            label: Text(
+              l10n.save,
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:delwaqty/core/config/app_mode_provider.dart';
 import 'package:delwaqty/features/admin/support_chat/presentation/chat_providers.dart';
 import 'package:delwaqty/features/admin/support_chat/domain/entities/chat_room.dart';
 import 'package:delwaqty/features/_shared/auth/presentation/auth_provider.dart';
@@ -88,7 +89,9 @@ class _ClientSupportPageState extends ConsumerState<ClientSupportPage> {
                         child: Icon(Icons.chat_bubble_rounded, color: cs.primary),
                       ),
                       title: Text(
-                        refNum == null ? '${l10n.chatRoom} ${room.id.substring(0, 8)}' : '${l10n.complaintNo}: $refNum',
+                        refNum == null
+                            ? '${l10n.chatRoom} ${room.id.length >= 8 ? room.id.substring(0, 8) : room.id}'
+                            : '${l10n.complaintNo}: $refNum',
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -116,11 +119,24 @@ class _ClientSupportPageState extends ConsumerState<ClientSupportPage> {
   Future<void> _startNewChat() async {
     final authState = ref.read(authStateProvider);
     final user = authState is AuthAuthenticated ? authState.user : null;
-    if (user == null) return;
+    if (user == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(AppLocalizations.of(context).loginRequired)),
+      );
+      return;
+    }
+
+    final originType = switch (ref.read(appFlavorProvider)) {
+      AppFlavor.driver => 'driver',
+      AppFlavor.provider => 'provider',
+      AppFlavor.admin => 'admin',
+      AppFlavor.customer => 'customer',
+    };
 
     final room = ChatRoom(
       id: '',
       roomType: 'support',
+      originType: originType,
       participantIds: [user.id],
       createdAt: DateTime.now(),
     );

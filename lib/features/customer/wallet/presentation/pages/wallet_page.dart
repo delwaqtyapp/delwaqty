@@ -8,6 +8,7 @@ import 'package:delwaqty/features/customer/wallet/domain/entities/wallet_transac
 import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
 import 'package:delwaqty/shared/widgets/premium_empty_state.dart';
 import 'package:delwaqty/shared/widgets/shimmer_loading.dart';
+import 'package:delwaqty/core/errors/app_error_text.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 import 'package:delwaqty/core/theme/app_colors.dart';
 
@@ -29,6 +30,8 @@ class WalletPage extends ConsumerWidget {
             icon: Icons.account_balance_wallet_outlined,
             title: l10n.login,
             message: l10n.loginToViewWallet,
+            actionLabel: l10n.login,
+            onAction: () => context.push('/login'),
           ),
         ),
       );
@@ -80,7 +83,10 @@ class WalletPage extends ConsumerWidget {
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        '${balance.balance.toStringAsFixed(2)} ${balance.currency}',
+                        l10n.amountWithCurrency(
+                          balance.balance.toStringAsFixed(2),
+                          l10n.currencySymbol,
+                        ),
                         style: theme.textTheme.headlineLarge?.copyWith(
                           color: theme.colorScheme.onPrimary,
                           fontWeight: FontWeight.w900,
@@ -93,7 +99,9 @@ class WalletPage extends ConsumerWidget {
                 error: (e, _) => PremiumEmptyState(
                   icon: Icons.error_outline,
                   title: l10n.error,
-                  message: l10n.errorLoading,
+                  message: appErrorText(context, e),
+                  actionLabel: l10n.retry,
+                  onAction: () => ref.invalidate(walletBalanceProvider(userId)),
                 ),
               ),
             ),
@@ -157,7 +165,17 @@ class WalletPage extends ConsumerWidget {
                     child: ShimmerCard(height: 60),
                   )),
                 ),
-                error: (e, _) => const SizedBox.shrink(),
+                error: (e, _) => Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 24),
+                  child: PremiumEmptyState(
+                    icon: Icons.error_outline,
+                    title: l10n.error,
+                    message: appErrorText(context, e),
+                    actionLabel: l10n.retry,
+                    onAction: () =>
+                        ref.invalidate(walletTransactionsProvider(userId)),
+                  ),
+                ),
               ),
             ),
           ],

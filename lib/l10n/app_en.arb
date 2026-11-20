@@ -2493,5 +2493,12 @@
   "reviewDriverDocuments": "Review driver documents",
   "driverDocumentsReviewed": "I reviewed both required documents",
   "driverRequiredDocuments": "Upload a driving license and vehicle registration before submitting. Rejected or expired documents must be replaced.",
-  "driverActiveVehicleRequired": "Add an active vehicle before submitting your application."
+  "driverActiveVehicleRequired": "Add an active vehicle before submitting your application.",
+  "pickupHandoffCode": "Pickup handoff code",
+  "recipientHandoffCode": "Recipient handoff code",
+  "pickupHandoffHint": "Give this code to the driver only when handing over the items.",
+  "recipientHandoffHint": "Give this code to the driver only after receiving the items. For another recipient, share it with them, not the driver.",
+  "showHandoffCode": "Show handoff code",
+  "askRecipientHandoff": "Ask the recipient for their code after handing over the items.",
+  "askPickupHandoff": "Ask the merchant or sender for their code when collecting the items."
 }

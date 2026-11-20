@@ -7504,4 +7504,29 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get driverActiveVehicleRequired =>
       'Add an active vehicle before submitting your application.';
+
+  @override
+  String get pickupHandoffCode => 'Pickup handoff code';
+
+  @override
+  String get recipientHandoffCode => 'Recipient handoff code';
+
+  @override
+  String get pickupHandoffHint =>
+      'Give this code to the driver only when handing over the items.';
+
+  @override
+  String get recipientHandoffHint =>
+      'Give this code to the driver only after receiving the items. For another recipient, share it with them, not the driver.';
+
+  @override
+  String get showHandoffCode => 'Show handoff code';
+
+  @override
+  String get askRecipientHandoff =>
+      'Ask the recipient for their code after handing over the items.';
+
+  @override
+  String get askPickupHandoff =>
+      'Ask the merchant or sender for their code when collecting the items.';
 }

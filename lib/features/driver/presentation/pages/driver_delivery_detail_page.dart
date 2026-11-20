@@ -1,3 +1,5 @@
+import 'package:delwaqty/shared/widgets/delivery_handoff_button.dart';
+
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -50,38 +52,11 @@ class _DriverDeliveryDetailPageState
   }
 
   Future<void> _startWithOtp(String driverId, DeliveryOrder order) async {
-    if (!order.otpRequired) {
-      await _run(
-        () => ref
-            .read(deliveryRepositoryProvider)
-            .startDelivery(order.id, driverId, order.pickupOtp ?? ''),
-      );
-      return;
-    }
-
-    final controller = TextEditingController(text: order.pickupOtp ?? '');
     final otp = await showDialog<String>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(AppLocalizations.of(context).otpPrompt),
-        content: TextField(
-          controller: controller,
-          keyboardType: TextInputType.number,
-          decoration: const InputDecoration(hintText: 'OTP'),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(),
-            child: Text(AppLocalizations.of(context).cancel),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(controller.text),
-            child: Text(AppLocalizations.of(context).confirm),
-          ),
-        ],
-      ),
+      builder: (_) => const DeliveryHandoffInputDialog(pickup: true),
     );
-    if (otp == null || otp.isEmpty) return;
+    if (otp == null || otp.length != 6) return;
     await _run(
       () => ref
           .read(deliveryRepositoryProvider)
@@ -124,30 +99,16 @@ class _DriverDeliveryDetailPageState
   }
 
   Future<void> _confirmAndComplete(String orderId, String driverId) async {
-    final l10n = AppLocalizations.of(context);
-    final confirmed = await showDialog<bool>(
+    final code = await showDialog<String>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(l10n.completeDelivery),
-        content: Text(l10n.areYouSure),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(false),
-            child: Text(l10n.cancel),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.of(ctx).pop(true),
-            child: Text(l10n.confirm),
-          ),
-        ],
-      ),
+      builder: (_) => const DeliveryHandoffInputDialog(pickup: false),
     );
-    if (confirmed != true) return;
-    await _run(
-      () => ref
+    if (code == null || code.length != 6) return;
+    await _run(() async {
+      await ref
           .read(deliveryRepositoryProvider)
-          .completeDelivery(orderId, driverId),
-    );
+          .completeDelivery(orderId, driverId, recipientOtp: code);
+    });
   }
 
   String? _resolveCustomerPhone(DeliveryOrder order) {

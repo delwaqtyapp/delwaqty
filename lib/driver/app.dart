@@ -29,6 +29,8 @@ class DriverApp extends ConsumerStatefulWidget {
 class _DriverAppState extends ConsumerState<DriverApp> {
   StreamSubscription<DeepLinkRoute>? _deepLinkSub;
 
+  AuthStateNotifier? _authListenerOwner;
+
   @override
   void initState() {
     super.initState();
@@ -53,6 +55,7 @@ class _DriverAppState extends ConsumerState<DriverApp> {
       if (!mounted) return;
 
       final authNotifier = ref.read(authStateProvider.notifier);
+      _authListenerOwner = authNotifier;
       try {
         authNotifier.startAuthListener();
       } catch (e) {
@@ -105,7 +108,7 @@ class _DriverAppState extends ConsumerState<DriverApp> {
   @override
   void dispose() {
     _deepLinkSub?.cancel();
-    ref.read(authStateProvider.notifier).stopAuthListener();
+    _authListenerOwner?.stopAuthListener();
     super.dispose();
   }
 

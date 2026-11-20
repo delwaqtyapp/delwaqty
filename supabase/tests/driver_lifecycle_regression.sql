@@ -5,7 +5,7 @@ DO $$
 DECLARE
  u uuid:=gen_random_uuid(); m_user uuid:=gen_random_uuid(); c uuid:=gen_random_uuid();
  d uuid:=gen_random_uuid(); d2 uuid:=gen_random_uuid(); v uuid:=gen_random_uuid();
- m uuid:=gen_random_uuid(); o uuid:=gen_random_uuid(); r uuid; r2 uuid; a jsonb;
+ m uuid:=gen_random_uuid(); o uuid:=gen_random_uuid(); r uuid; r2 uuid; a jsonb; pickup_code text; dropoff_code text;
 BEGIN
  INSERT INTO auth.users(id,email) VALUES(u,u::text||'@example.invalid'),(m_user,m_user::text||'@example.invalid'),(c,c::text||'@example.invalid');
  INSERT INTO public.users(id,email) VALUES(u,u::text||'@example.invalid'),(m_user,m_user::text||'@example.invalid'),(c,c::text||'@example.invalid') ON CONFLICT(id) DO NOTHING;
@@ -74,7 +74,34 @@ BEGIN
  PERFORM set_config('role','none',true);
  IF a->>'success' <> 'true' THEN RAISE EXCEPTION 'arrive failed: %',a; END IF;
  PERFORM set_config('role','authenticated',true);
- a:=public.start_trip(r,d,'');
+ a:=public.delivery_handoff_code('pickup',r,NULL);
+ IF a->>'reason' IS DISTINCT FROM 'FORBIDDEN' THEN RAISE EXCEPTION 'driver could read pickup code: %',a; END IF;
+ BEGIN
+  PERFORM code FROM delivery_handoff_challenges WHERE ride_id=r;
+  RAISE EXCEPTION 'private challenge table readable';
+ EXCEPTION WHEN insufficient_privilege THEN NULL; END;
+ PERFORM set_config('request.jwt.claim.sub',m_user::text,true);
+ a:=public.delivery_handoff_code('pickup',NULL,o);
+ pickup_code:=a->>'code';
+ IF length(pickup_code) IS DISTINCT FROM 6 THEN RAISE EXCEPTION 'merchant pickup code missing: %',a; END IF;
+ a:=public.delivery_handoff_code('dropoff',r,NULL);
+ IF a->>'reason' IS DISTINCT FROM 'FORBIDDEN' THEN RAISE EXCEPTION 'merchant could read dropoff code'; END IF;
+ PERFORM set_config('request.jwt.claim.sub',c::text,true);
+ a:=public.delivery_handoff_code('dropoff',NULL,o);
+ dropoff_code:=a->>'code';
+ IF length(dropoff_code) IS DISTINCT FROM 6 THEN RAISE EXCEPTION 'customer dropoff code missing: %',a; END IF;
+ PERFORM set_config('request.jwt.claim.sub',u::text,true);
+ FOR i IN 1..5 LOOP
+   a:=public.start_trip(r,d,'invalid');
+   IF a->>'success' IS DISTINCT FROM 'false' THEN RAISE EXCEPTION 'bad pickup code accepted'; END IF;
+ END LOOP;
+ a:=public.start_trip(r,d,pickup_code);
+ IF a->>'success' IS DISTINCT FROM 'false' THEN RAISE EXCEPTION 'locked pickup code accepted'; END IF;
+ PERFORM set_config('role','none',true);
+ IF NOT EXISTS(SELECT 1 FROM rides WHERE id=r AND pickup_otp IS NULL) THEN RAISE EXCEPTION 'code leaked to ride row'; END IF;
+ UPDATE delivery_handoff_challenges SET locked_until=now()-interval '1 second' WHERE ride_id=r AND stage='pickup';
+ PERFORM set_config('role','authenticated',true);
+ a:=public.start_trip(r,d,pickup_code);
  PERFORM set_config('role','none',true);
  IF a->>'success' <> 'true' THEN RAISE EXCEPTION 'start failed: %',a; END IF;
  IF NOT EXISTS(SELECT 1 FROM public.orders WHERE id=o AND status='delivering') THEN RAISE EXCEPTION 'pickup sync failed'; END IF;
@@ -86,6 +113,10 @@ BEGIN
  PERFORM set_config('request.jwt.claim.sub',u::text,true);
  PERFORM set_config('role','authenticated',true);
  a:=public.complete_delivery(r,d,NULL::text,NULL::numeric,NULL::text);
+ IF a->>'success' IS DISTINCT FROM 'false' THEN RAISE EXCEPTION 'completion without recipient code allowed'; END IF;
+ a:=public.complete_delivery(o);
+ IF a->>'reason' IS DISTINCT FROM 'USE_ASSIGNED_DELIVERY_FLOW' THEN RAISE EXCEPTION 'legacy order completion bypass allowed: %',a; END IF;
+ a:=public.complete_delivery(r,d,NULL::text,NULL::numeric,dropoff_code);
  PERFORM set_config('role','none',true);
  IF a->>'success' <> 'true' THEN RAISE EXCEPTION 'complete failed: %',a; END IF;
  IF NOT EXISTS(SELECT 1 FROM public.orders WHERE id=o AND status='delivered') THEN RAISE EXCEPTION 'completion sync failed'; END IF;

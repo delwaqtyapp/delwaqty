@@ -1,3 +1,5 @@
+import 'package:delwaqty/shared/widgets/delivery_handoff_button.dart';
+
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -154,17 +156,25 @@ class _DeliveryTrackingPageState extends ConsumerState<DeliveryTrackingPage> {
   }
 }
 
-class _TrackingBody extends StatelessWidget {
+class _TrackingBody extends ConsumerWidget {
   const _TrackingBody({required this.ride, required this.deliveryId});
   final Ride ride;
   final String deliveryId;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final delivery = ref.watch(deliveryOrderByIdProvider(deliveryId)).value;
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
         AnimatedFadeIn(child: _MapSection(ride: ride)),
+        if (ride.driverId != null && !ride.status.isTerminal) ...[
+          if (ride.status != RideStatus.inTrip &&
+              delivery != null &&
+              delivery.merchantId == null)
+            DeliveryHandoffButton(rideId: ride.id, pickup: true),
+          DeliveryHandoffButton(rideId: ride.id, pickup: false),
+        ],
         const SizedBox(height: 16),
         if (ride.driverId != null)
           AnimatedFadeIn(

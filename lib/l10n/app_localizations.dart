@@ -14305,6 +14305,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Add an active vehicle before submitting your application.'**
   String get driverActiveVehicleRequired;
+
+  /// No description provided for @pickupHandoffCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Pickup handoff code'**
+  String get pickupHandoffCode;
+
+  /// No description provided for @recipientHandoffCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Recipient handoff code'**
+  String get recipientHandoffCode;
+
+  /// No description provided for @pickupHandoffHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Give this code to the driver only when handing over the items.'**
+  String get pickupHandoffHint;
+
+  /// No description provided for @recipientHandoffHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Give this code to the driver only after receiving the items. For another recipient, share it with them, not the driver.'**
+  String get recipientHandoffHint;
+
+  /// No description provided for @showHandoffCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Show handoff code'**
+  String get showHandoffCode;
+
+  /// No description provided for @askRecipientHandoff.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask the recipient for their code after handing over the items.'**
+  String get askRecipientHandoff;
+
+  /// No description provided for @askPickupHandoff.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask the merchant or sender for their code when collecting the items.'**
+  String get askPickupHandoff;
 }
 
 class _AppLocalizationsDelegate

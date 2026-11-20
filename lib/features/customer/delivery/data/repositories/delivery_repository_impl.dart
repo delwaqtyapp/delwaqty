@@ -81,11 +81,13 @@ class DeliveryRepositoryImpl implements DeliveryRepository {
     String rideId,
     String driverId, {
     String? proofUrl,
+    String? recipientOtp,
     double? finalDistanceKm,
   }) => _dataSource.completeDelivery(
     rideId,
     driverId,
     proofUrl: proofUrl,
+    recipientOtp: recipientOtp,
     finalDistanceKm: finalDistanceKm,
   );
 

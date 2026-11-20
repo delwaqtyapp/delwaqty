@@ -27,6 +27,8 @@ class ProviderApp extends ConsumerStatefulWidget {
 }
 
 class _ProviderAppState extends ConsumerState<ProviderApp> {
+  AuthStateNotifier? _authListenerOwner;
+
   @override
   void initState() {
     super.initState();
@@ -51,6 +53,7 @@ class _ProviderAppState extends ConsumerState<ProviderApp> {
       if (!mounted) return;
 
       final authNotifier = ref.read(authStateProvider.notifier);
+      _authListenerOwner = authNotifier;
       try {
         authNotifier.startAuthListener();
       } catch (e) {
@@ -101,7 +104,7 @@ class _ProviderAppState extends ConsumerState<ProviderApp> {
 
   @override
   void dispose() {
-    ref.read(authStateProvider.notifier).stopAuthListener();
+    _authListenerOwner?.stopAuthListener();
     super.dispose();
   }
 

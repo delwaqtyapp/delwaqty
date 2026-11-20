@@ -2434,5 +2434,12 @@
   "reviewDriverDocuments": "مراجعة مستندات السائق",
   "driverDocumentsReviewed": "راجعت الرخصة ومستند ترخيص المركبة",
   "driverRequiredDocuments": "ارفع رخصة القيادة وترخيص المركبة قبل إرسال الطلب. لازم تبدل أي مستند مرفوض أو منتهي.",
-  "driverActiveVehicleRequired": "أضف مركبة نشطة قبل إرسال طلبك."
+  "driverActiveVehicleRequired": "أضف مركبة نشطة قبل إرسال طلبك.",
+  "pickupHandoffCode": "كود استلام المندوب",
+  "recipientHandoffCode": "كود تسليم الطلب",
+  "pickupHandoffHint": "قل الكود للمندوب فقط عند تسليمه الطلب فعليًا.",
+  "recipientHandoffHint": "قل الكود للمندوب فقط بعد استلام الطلب. لو المستلم شخص تاني، ابعتله الكود هو مش المندوب.",
+  "showHandoffCode": "عرض كود التسليم",
+  "askRecipientHandoff": "اطلب كود التسليم من المستلم بعد تسليمه الطلب فعليًا.",
+  "askPickupHandoff": "اطلب كود الاستلام من التاجر أو المرسل عند استلام الطلب فعليًا."
 }

@@ -1,3 +1,4 @@
+import 'package:delwaqty/shared/widgets/delivery_handoff_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:delwaqty/features/customer/commerce/commerce_module.dart';
@@ -68,6 +69,8 @@ class _OrderTrackingPageState extends ConsumerState<OrderTrackingPage>
                 _TimelineSection(order: order, pulseAnimation: _pulseAnimation),
                 const SizedBox(height: 24),
                 _OrderDetailsCard(order: order),
+                if (order.status == OrderStatus.inTransit)
+                  DeliveryHandoffButton(orderId: order.id, pickup: false),
                 const SizedBox(height: 24),
                 _EstimatedArrivalSection(order: order),
                 if (const {

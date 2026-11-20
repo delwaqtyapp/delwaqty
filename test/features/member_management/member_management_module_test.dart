@@ -77,7 +77,7 @@ void main() {
   });
 
   test('customer sidebar has no admin entry', () async {
-    final file = File('lib/features/admin/floating_sidebar/floating_sidebar_overlay.dart');
+    final file = File('lib/shared/widgets/glass_side_menu.dart');
     final content = await file.readAsString();
     expect(content, isNot(contains('adminCommandCenter')));
     expect(content, isNot(contains('/admin')));

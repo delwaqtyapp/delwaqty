@@ -246,61 +246,70 @@ class _StockTileState extends ConsumerState<_StockTile> {
     final threshold =
         TextEditingController(text: '${widget.item.lowStockThreshold}');
 
-    final saved = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(widget.item.productName),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: controller,
-              keyboardType: TextInputType.number,
-              decoration: InputDecoration(labelText: l10n.stockQuantity),
+    try {
+      final saved = await showDialog<bool>(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          title: Text(widget.item.productName),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: controller,
+                keyboardType: TextInputType.number,
+                decoration: InputDecoration(labelText: l10n.stockQuantity),
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: threshold,
+                keyboardType: TextInputType.number,
+                decoration: InputDecoration(labelText: l10n.lowStockThreshold),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(false),
+              child: Text(l10n.cancel),
             ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: threshold,
-              keyboardType: TextInputType.number,
-              decoration: InputDecoration(labelText: l10n.lowStockThreshold),
+            FilledButton(
+              onPressed: () => Navigator.of(ctx).pop(true),
+              child: Text(l10n.save),
             ),
           ],
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(false),
-            child: Text(l10n.cancel),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.of(ctx).pop(true),
-            child: Text(l10n.save),
-          ),
-        ],
-      ),
-    );
+      );
 
-    if (saved != true) return;
-    final qty = int.tryParse(controller.text.trim());
-    final low = int.tryParse(threshold.text.trim());
-    if (qty == null) return;
+      if (saved != true || !mounted) return;
+      final qty = int.tryParse(controller.text.trim());
+      final low = int.tryParse(threshold.text.trim());
+      if (qty == null || qty < 0) return;
 
-    setState(() => _busy = true);
-    try {
-      await ref.read(stockNotifierProvider).setStock(
-            merchantId: widget.merchantId,
-            productId: widget.item.productId,
-            quantity: qty,
-            lowStockThreshold: low ?? widget.item.lowStockThreshold,
+      setState(() => _busy = true);
+      try {
+        await ref.read(stockNotifierProvider).setStock(
+              merchantId: widget.merchantId,
+              productId: widget.item.productId,
+              quantity: qty,
+              lowStockThreshold: (low != null && low >= 0)
+                  ? low
+                  : widget.item.lowStockThreshold,
+            );
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(l10n.somethingWentWrong)),
           );
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.somethingWentWrong)),
-        );
+        }
+      } finally {
+        if (mounted) setState(() => _busy = false);
       }
     } finally {
-      if (mounted) setState(() => _busy = false);
+      controller.dispose();
+      threshold.dispose();
     }
   }
 

@@ -29,6 +29,7 @@ class FavoriteButton extends ConsumerStatefulWidget {
 class _FavoriteButtonState extends ConsumerState<FavoriteButton> {
   bool _isFav = false;
   bool _loading = true;
+  bool _toggling = false;
 
   @override
   void initState() {
@@ -64,6 +65,8 @@ class _FavoriteButtonState extends ConsumerState<FavoriteButton> {
   }
 
   Future<void> _toggle() async {
+    if (_toggling) return;
+    _toggling = true;
     try {
       final auth = ref.read(authStateProvider);
       if (auth is! AuthAuthenticated) {
@@ -97,6 +100,8 @@ class _FavoriteButtonState extends ConsumerState<FavoriteButton> {
         context,
         message: AppLocalizations.of(context).failedToLoad,
       );
+    } finally {
+      _toggling = false;
     }
   }
 

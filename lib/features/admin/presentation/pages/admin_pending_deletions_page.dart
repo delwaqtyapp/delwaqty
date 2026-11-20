@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:delwaqty/core/errors/app_error_text.dart';
+import 'package:delwaqty/features/admin/presentation/widgets/admin_states.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
+import 'package:delwaqty/shared/widgets/confirm_dialog.dart';
 import 'package:delwaqty/shared/widgets/premium_empty_state.dart';
 import 'dart:async';
 
@@ -18,6 +21,7 @@ class _AdminPendingDeletionsPageState
     extends ConsumerState<AdminPendingDeletionsPage> {
   List<Map<String, dynamic>> _pendingDeletions = [];
   bool _isLoading = true;
+  Object? _error;
 
   @override
   void initState() {
@@ -26,6 +30,10 @@ class _AdminPendingDeletionsPageState
   }
 
   Future<void> _loadPendingDeletions() async {
+    setState(() {
+      _isLoading = true;
+      _error = null;
+    });
     try {
       final client = Supabase.instance.client;
       final result = await client.rpc('get_pending_deletions');
@@ -43,6 +51,7 @@ class _AdminPendingDeletionsPageState
     } catch (e) {
       if (mounted) {
         setState(() {
+          _error = e;
           _isLoading = false;
         });
       }
@@ -67,12 +76,17 @@ class _AdminPendingDeletionsPageState
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
-          : _pendingDeletions.isEmpty
-              ? PremiumEmptyState(
-                  icon: Icons.check_circle_outline_rounded,
-                  title: l10n.noPendingDeletions,
-                  message: l10n.allCaughtUp,
+          : _error != null
+              ? AdminErrorState(
+                  message: appErrorText(context, _error),
+                  onRetry: _loadPendingDeletions,
                 )
+              : _pendingDeletions.isEmpty
+                  ? PremiumEmptyState(
+                      icon: Icons.check_circle_outline_rounded,
+                      title: l10n.noPendingDeletions,
+                      message: l10n.allCaughtUp,
+                    )
               : ListView.builder(
                   padding: const EdgeInsets.all(16),
                   itemCount: _pendingDeletions.length,
@@ -268,6 +282,15 @@ class _AdminPendingDeletionsPageState
   ) async {
     final deletionId = deletion['id'] as String?;
     if (deletionId == null) return;
+
+    final confirmed = await ConfirmDialog.show(
+      context,
+      title: l10n.rejectDeletion,
+      message: l10n.rejectDeletionTitle,
+      confirmLabel: l10n.reject,
+      isDestructive: true,
+    );
+    if (!confirmed || !mounted) return;
 
     try {
       final client = Supabase.instance.client;

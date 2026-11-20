@@ -222,53 +222,10 @@ String serviceTypeLabel(ServiceCategoryType type, AppLocalizations l10n) =>
       ServiceCategoryType.other => l10n.serviceOther,
     };
 
-/// Returns the bundled 3D category asset path for core merchant categories,
-/// or `null` when a 3D icon composition should be rendered instead.
-String? merchantCategoryAsset(String type) {
-  final lower = type.toLowerCase();
-  final resolved = categoryNameToMerchantType(type);
-
-  if (resolved == MerchantType.restaurant ||
-      lower.contains('restaurant') ||
-      lower.contains('fast_food') ||
-      lower.contains('food') ||
-      lower.contains('grill') ||
-      lower.contains('pizza') ||
-      lower.contains('burger')) {
-    return 'assets/categories/cat_restaurant.jpg';
-  }
-
-  if (resolved == MerchantType.grocery ||
-      resolved == MerchantType.supermarket ||
-      resolved == MerchantType.fruits ||
-      resolved == MerchantType.vegetables ||
-      resolved == MerchantType.butcher ||
-      resolved == MerchantType.seafood ||
-      resolved == MerchantType.meat ||
-      resolved == MerchantType.dairy ||
-      lower.contains('grocery') ||
-      lower.contains('supermarket') ||
-      lower.contains('hypermarket') ||
-      lower.contains('fruit') ||
-      lower.contains('vegetable') ||
-      lower.contains('butcher') ||
-      lower.contains('fish')) {
-    return 'assets/categories/cat_grocery.jpg';
-  }
-
-  if (resolved == MerchantType.electronics ||
-      resolved == MerchantType.mobile ||
-      resolved == MerchantType.appliances ||
-      lower.contains('electronic') ||
-      lower.contains('mobile') ||
-      lower.contains('computer') ||
-      lower.contains('tech') ||
-      lower.contains('appliance')) {
-    return 'assets/categories/cat_electronics.jpg';
-  }
-
-  return null;
-}
+/// Returns `null` so every category tile displays its own dedicated,
+/// category-accurate real photo from [defaultCategoryImageUrl] instead of
+/// sharing a generic local bundle image across unrelated categories.
+String? merchantCategoryAsset(String type) => null;
 
 /// Maps any merchant category name or [MerchantType] to a crisp Material icon
 /// so category tiles never fall back to flat text emojis.
@@ -332,8 +289,247 @@ IconData merchantCategoryIcon(String type) {
   };
 }
 
-/// Sleek 3D-styled rounded tile icon supporting network images, bundled 3D
-/// category artwork, and a glossy layered Material icon fallback.
+/// Maps Arabic or English category/service names to [ServiceCategoryType].
+ServiceCategoryType? categoryNameToServiceType(String name) {
+  final lower = name.toLowerCase().trim();
+  if (lower.isEmpty) return null;
+
+  for (final value in ServiceCategoryType.values) {
+    if (value != ServiceCategoryType.other &&
+        lower == value.name.toLowerCase()) {
+      return value;
+    }
+  }
+
+  if (lower.contains('سجاد') ||
+      lower.contains('موكيت') ||
+      lower.contains('carpet')) {
+    return ServiceCategoryType.carpetCleaning;
+  }
+  if (lower.contains('سباكة') ||
+      lower.contains('سباك') ||
+      lower.contains('plumbing') ||
+      lower.contains('plumber')) {
+    return ServiceCategoryType.plumbing;
+  }
+  if (lower.contains('كهرباء') ||
+      lower.contains('كهربائي') ||
+      lower.contains('electrical') ||
+      lower.contains('electrician')) {
+    return ServiceCategoryType.electrical;
+  }
+  if (lower.contains('نجارة') ||
+      lower.contains('نجار') ||
+      lower.contains('carpentry') ||
+      lower.contains('carpenter')) {
+    return ServiceCategoryType.carpentry;
+  }
+  if (lower.contains('تكييف') ||
+      lower.contains('تبريد') ||
+      lower.contains('ac_maintenance') ||
+      lower.contains('ac maintenance') ||
+      lower.contains('air condition') ||
+      RegExp(r'\bac\b').hasMatch(lower)) {
+    return ServiceCategoryType.acMaintenance;
+  }
+  if (lower.contains('نقاشة') ||
+      lower.contains('محارة') ||
+      lower.contains('جبس') ||
+      lower.contains('plaster')) {
+    return ServiceCategoryType.plastering;
+  }
+  if (lower.contains('دهان') ||
+      lower.contains('painting') ||
+      lower.contains('painter')) {
+    return ServiceCategoryType.painting;
+  }
+  if (lower.contains('تنظيف') ||
+      lower.contains('نظافة') ||
+      lower.contains('cleaning')) {
+    return ServiceCategoryType.cleaning;
+  }
+  if (lower.contains('حشرات') ||
+      lower.contains('مكافحة') ||
+      lower.contains('pest')) {
+    return ServiceCategoryType.pestControl;
+  }
+  if (lower.contains('إصلاح أجهزة') ||
+      lower.contains('اصلاح اجهزة') ||
+      lower.contains('صيانة أجهزة') ||
+      lower.contains('appliance_repair') ||
+      lower.contains('appliance repair') ||
+      (lower.contains('appliance') &&
+          !lower.contains('home appliance') &&
+          !lower.contains('أجهزة منزلية'))) {
+    return ServiceCategoryType.applianceRepair;
+  }
+  if (lower.contains('أنبوبة') ||
+      lower.contains('انبوبه') ||
+      lower.contains('انبوبة') ||
+      lower.contains('أنبوبه') ||
+      lower.contains('أنابيب') ||
+      lower.contains('انابيب') ||
+      lower.contains('pipe')) {
+    return ServiceCategoryType.pipeChange;
+  }
+  if (lower.contains('دش') ||
+      lower.contains('ستلايت') ||
+      lower.contains('dish_repair') ||
+      lower.contains('dish repair') ||
+      lower.contains('satellite') ||
+      RegExp(r'\bdish\b').hasMatch(lower)) {
+    return ServiceCategoryType.dishRepair;
+  }
+  if (lower.contains('مدرس') ||
+      lower.contains('تعليم') ||
+      lower.contains('دروس') ||
+      lower.contains('teacher') ||
+      lower.contains('tutor')) {
+    return ServiceCategoryType.teacher;
+  }
+  if (lower.contains('دكتور') ||
+      lower.contains('طبيب') ||
+      lower.contains('عيادة') ||
+      lower.contains('doctor') ||
+      lower.contains('physician')) {
+    return ServiceCategoryType.doctor;
+  }
+  if (lower.contains('ممرض') ||
+      lower.contains('تمريض') ||
+      lower.contains('nurse') ||
+      lower.contains('nursing')) {
+    return ServiceCategoryType.nurse;
+  }
+  if (lower.contains('حلاق') ||
+      lower.contains('كوافير') ||
+      lower.contains('barber')) {
+    return ServiceCategoryType.barber;
+  }
+  return null;
+}
+
+/// Curated thumbnail image URL for every [ServiceCategoryType] so service
+/// buttons always display a clear, vibrant photo.
+String defaultServiceImageUrl(ServiceCategoryType type) => switch (type) {
+  ServiceCategoryType.doctor =>
+    'https://images.unsplash.com/photo-1622253692010-333f2da6031d?auto=format&fit=crop&w=240&q=80',
+  ServiceCategoryType.nurse =>
+    'https://images.unsplash.com/photo-1584515979956-d9f6e5d09982?auto=format&fit=crop&w=240&q=80',
+  ServiceCategoryType.teacher =>
+    'https://images.unsplash.com/photo-1524178232363-1fb2b075b655?auto=format&fit=crop&w=240&q=80',
+  ServiceCategoryType.barber =>
+    'https://images.unsplash.com/photo-1503951914875-452162b0f3f1?auto=format&fit=crop&w=240&q=80',
+  ServiceCategoryType.plumbing =>
+    'https://images.unsplash.com/photo-1585704032915-c3400ca199e7?auto=format&fit=crop&w=240&q=80',
+  ServiceCategoryType.electrical =>
+    'https://images.unsplash.com/photo-1621905251189-08b45d6a269e?auto=format&fit=crop&w=240&q=80',
+  ServiceCategoryType.carpentry =>
+    'https://images.unsplash.com/photo-1504148455328-c376907d081c?auto=format&fit=crop&w=240&q=80',
+  ServiceCategoryType.painting =>
+    'https://images.unsplash.com/photo-1562259949-e8e7689d7828?auto=format&fit=crop&w=240&q=80',
+  ServiceCategoryType.cleaning =>
+    'https://images.unsplash.com/photo-1581578731548-c64695cc6952?auto=format&fit=crop&w=240&q=80',
+  ServiceCategoryType.acMaintenance =>
+    'https://images.unsplash.com/photo-1621905252507-b35492cc74b4?auto=format&fit=crop&w=240&q=80',
+  ServiceCategoryType.pipeChange =>
+    'https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&w=240&q=80',
+  ServiceCategoryType.plastering =>
+    'https://images.unsplash.com/photo-1504307651254-35680f356dfd?auto=format&fit=crop&w=240&q=80',
+  ServiceCategoryType.carpetCleaning =>
+    'https://images.unsplash.com/photo-1558317374-067fb5f30001?auto=format&fit=crop&w=240&q=80',
+  ServiceCategoryType.dishRepair =>
+    'https://images.unsplash.com/photo-1593784991095-a205069470b6?auto=format&fit=crop&w=240&q=80',
+  ServiceCategoryType.pestControl =>
+    'https://images.unsplash.com/photo-1584820927498-cfe5211fd8bf?auto=format&fit=crop&w=240&q=80',
+  ServiceCategoryType.applianceRepair =>
+    'https://images.unsplash.com/photo-1581092921461-eab62e97a780?auto=format&fit=crop&w=240&q=80',
+  ServiceCategoryType.other =>
+    'https://images.unsplash.com/photo-1581578731548-c64695cc6952?auto=format&fit=crop&w=240&q=80',
+};
+
+/// Curated thumbnail image URL for any merchant category name or [MerchantType].
+String defaultCategoryImageUrl(String typeOrName) {
+  final serviceType = categoryNameToServiceType(typeOrName);
+  if (serviceType != null) {
+    return defaultServiceImageUrl(serviceType);
+  }
+
+  MerchantType? merchantType;
+  final lower = typeOrName.toLowerCase().trim();
+  for (final value in MerchantType.values) {
+    if (value.name.toLowerCase() == lower) {
+      merchantType = value;
+      break;
+    }
+  }
+  merchantType ??= categoryNameToMerchantType(typeOrName) ?? MerchantType.other;
+
+  return switch (merchantType) {
+    MerchantType.restaurant =>
+      'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=240&q=80',
+    MerchantType.grocery =>
+      'https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=240&q=80',
+    MerchantType.supermarket =>
+      'https://images.unsplash.com/photo-1578916171728-46686eac8d58?auto=format&fit=crop&w=240&q=80',
+    MerchantType.fruits =>
+      'https://images.unsplash.com/photo-1610832958506-aa56368176cf?auto=format&fit=crop&w=240&q=80',
+    MerchantType.vegetables =>
+      'https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=240&q=80',
+    MerchantType.meat =>
+      'https://images.unsplash.com/photo-1607623814075-e51df1bdc82f?auto=format&fit=crop&w=240&q=80',
+    MerchantType.butcher =>
+      'https://images.unsplash.com/photo-1551028150-64b9f398f678?auto=format&fit=crop&w=240&q=80',
+    MerchantType.seafood =>
+      'https://images.unsplash.com/photo-1534422298391-e4f8c172dddb?auto=format&fit=crop&w=240&q=80',
+    MerchantType.pharmacy =>
+      'https://images.unsplash.com/photo-1587854692152-cbe660dbde88?auto=format&fit=crop&w=240&q=80',
+    MerchantType.bakery =>
+      'https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=240&q=80',
+    MerchantType.sweets =>
+      'https://images.unsplash.com/photo-1551024601-bec78aea704b?auto=format&fit=crop&w=240&q=80',
+    MerchantType.flowers =>
+      'https://images.unsplash.com/photo-1490750967868-88aa4486c946?auto=format&fit=crop&w=240&q=80',
+    MerchantType.clothing =>
+      'https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&w=240&q=80',
+    MerchantType.shoes =>
+      'https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=240&q=80',
+    MerchantType.electronics =>
+      'https://images.unsplash.com/photo-1498049794561-7780e7231661?auto=format&fit=crop&w=240&q=80',
+    MerchantType.mobile =>
+      'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=240&q=80',
+    MerchantType.furniture =>
+      'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=240&q=80',
+    MerchantType.fashion =>
+      'https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&w=240&q=80',
+    MerchantType.appliances =>
+      'https://images.unsplash.com/photo-1556911220-e15b29be8c8f?auto=format&fit=crop&w=240&q=80',
+    MerchantType.home =>
+      'https://images.unsplash.com/photo-1581578731548-c64695cc6952?auto=format&fit=crop&w=240&q=80',
+    MerchantType.cafe =>
+      'https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?auto=format&fit=crop&w=240&q=80',
+    MerchantType.petShop =>
+      'https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?auto=format&fit=crop&w=240&q=80',
+    MerchantType.fitness =>
+      'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&w=240&q=80',
+    MerchantType.gas =>
+      'https://images.unsplash.com/photo-1545147986-a9d6f2ab03b5?auto=format&fit=crop&w=240&q=80',
+    MerchantType.carwash =>
+      'https://images.unsplash.com/photo-1520340356584-f9917d1eea6f?auto=format&fit=crop&w=240&q=80',
+    MerchantType.perfumes =>
+      'https://images.unsplash.com/photo-1541643600914-78b084683601?auto=format&fit=crop&w=240&q=80',
+    MerchantType.spices =>
+      'https://images.unsplash.com/photo-1596040033229-a9821ebd058d?auto=format&fit=crop&w=240&q=80',
+    MerchantType.dairy =>
+      'https://images.unsplash.com/photo-1550583724-b2692b85b150?auto=format&fit=crop&w=240&q=80',
+    MerchantType.accessories =>
+      'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=240&q=80',
+    MerchantType.other =>
+      'https://images.unsplash.com/photo-1472851294608-062f824d29cc?auto=format&fit=crop&w=240&q=80',
+  };
+}
+
+/// Sleek 3D-styled rounded tile icon with a unified Royal Indigo/Violet/Gold
+/// palette and visible category photography paired with a crisp mini icon badge.
 class Category3dTileIcon extends StatelessWidget {
   const Category3dTileIcon({
     super.key,
@@ -341,88 +537,135 @@ class Category3dTileIcon extends StatelessWidget {
     required this.icon,
     this.networkImageUrl,
     this.assetImagePath,
+    this.fallbackImageUrl,
     this.size = 64,
-    this.borderRadius = 20,
+    this.borderRadius = 18,
   });
 
   final Color color;
   final IconData icon;
   final String? networkImageUrl;
   final String? assetImagePath;
+  final String? fallbackImageUrl;
   final double size;
   final double borderRadius;
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final radius = BorderRadius.circular(borderRadius);
     final innerRadius = BorderRadius.circular(
-      (borderRadius - 1.2).clamp(0, borderRadius),
+      (borderRadius - 1.0).clamp(0, borderRadius),
     );
+    final cardSurface = isDark
+        ? const Color(0xFF261E40)
+        : const Color(0xFFF3EEFF);
+    final borderColor = isDark
+        ? Colors.white.withValues(alpha: 0.14)
+        : AppColors.brandPurple.withValues(alpha: 0.12);
 
     return Container(
       width: size,
       height: size,
       decoration: BoxDecoration(
+        color: cardSurface,
         borderRadius: radius,
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            color.withValues(alpha: 0.92),
-            Color.lerp(color, Colors.black, 0.22)!,
-          ],
-        ),
         boxShadow: [
           BoxShadow(
-            color: color.withValues(alpha: 0.28),
-            blurRadius: 14,
-            offset: const Offset(0, 6),
+            color: (isDark ? Colors.black : AppColors.brandPurple)
+                .withValues(alpha: isDark ? 0.24 : 0.08),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
           ),
         ],
         border: Border.all(
-          color: Colors.white.withValues(alpha: 0.35),
-          width: 1.2,
+          color: borderColor,
         ),
       ),
       child: ClipRRect(
         borderRadius: innerRadius,
-        child: (networkImageUrl != null && networkImageUrl!.isNotEmpty)
-            ? Image.network(
-                networkImageUrl!,
-                width: size,
-                height: size,
-                fit: BoxFit.cover,
-                errorBuilder: (_, _, _) => _buildAssetOrIcon(),
-              )
-            : _buildAssetOrIcon(),
+        child: _buildPrimaryLayer(isDark),
       ),
     );
   }
 
-  Widget _buildAssetOrIcon() {
-    if (assetImagePath != null) {
-      return Image.asset(
-        assetImagePath!,
+  Widget _buildPrimaryLayer(bool isDark) {
+    if (networkImageUrl != null && networkImageUrl!.trim().isNotEmpty) {
+      return Image.network(
+        networkImageUrl!.trim(),
         width: size,
         height: size,
         fit: BoxFit.cover,
-        errorBuilder: (_, _, _) => _build3dIconLayer(),
+        frameBuilder: (ctx, child, frame, sync) =>
+            _photoFrameBuilder(ctx, child, frame, sync, isDark),
+        errorBuilder: (_, _, _) => _buildAssetOrFallbackLayer(isDark),
       );
     }
-    return _build3dIconLayer();
+    return _buildAssetOrFallbackLayer(isDark);
   }
 
-  Widget _build3dIconLayer() {
+  Widget _buildAssetOrFallbackLayer(bool isDark) {
+    if (assetImagePath != null && assetImagePath!.trim().isNotEmpty) {
+      return Image.asset(
+        assetImagePath!.trim(),
+        width: size,
+        height: size,
+        fit: BoxFit.cover,
+        frameBuilder: (ctx, child, frame, sync) =>
+            _photoFrameBuilder(ctx, child, frame, sync, isDark),
+        errorBuilder: (_, _, _) => _buildFallbackNetworkOrIconLayer(isDark),
+      );
+    }
+    return _buildFallbackNetworkOrIconLayer(isDark);
+  }
+
+  Widget _buildFallbackNetworkOrIconLayer(bool isDark) {
+    if (fallbackImageUrl != null && fallbackImageUrl!.trim().isNotEmpty) {
+      return Image.network(
+        fallbackImageUrl!.trim(),
+        width: size,
+        height: size,
+        fit: BoxFit.cover,
+        frameBuilder: (ctx, child, frame, sync) =>
+            _photoFrameBuilder(ctx, child, frame, sync, isDark),
+        errorBuilder: (_, _, _) => _build3dIconLayer(isDark),
+      );
+    }
+    return _build3dIconLayer(isDark);
+  }
+
+  Widget _photoFrameBuilder(
+    BuildContext context,
+    Widget child,
+    int? frame,
+    bool wasSynchronouslyLoaded,
+    bool isDark,
+  ) {
+    final loaded = wasSynchronouslyLoaded || frame != null;
+    if (!loaded) {
+      return Stack(
+        fit: StackFit.expand,
+        children: [
+          _build3dIconLayer(isDark),
+          child,
+        ],
+      );
+    }
+    return child;
+  }
+
+  Widget _build3dIconLayer(bool isDark) {
+    final iconColor = isDark ? Colors.white : AppColors.brandPurple;
     return Stack(
       fit: StackFit.expand,
       children: [
         DecoratedBox(
           decoration: BoxDecoration(
             gradient: RadialGradient(
-              center: const Alignment(-0.45, -0.45),
-              radius: 0.85,
+              center: const Alignment(-0.35, -0.35),
+              radius: 0.9,
               colors: [
-                Colors.white.withValues(alpha: 0.34),
+                Colors.white.withValues(alpha: isDark ? 0.14 : 0.75),
                 Colors.transparent,
               ],
             ),
@@ -431,15 +674,8 @@ class Category3dTileIcon extends StatelessWidget {
         Center(
           child: Icon(
             icon,
-            color: Colors.white,
-            size: size * 0.44,
-            shadows: [
-              Shadow(
-                color: Colors.black.withValues(alpha: 0.24),
-                blurRadius: 8,
-                offset: const Offset(0, 3),
-              ),
-            ],
+            color: iconColor,
+            size: size * 0.46,
           ),
         ),
       ],
@@ -447,3 +683,46 @@ class Category3dTileIcon extends StatelessWidget {
   }
 }
 
+const List<ServiceCategoryType> serviceCategoryPriority = [
+  ServiceCategoryType.doctor,
+  ServiceCategoryType.nurse,
+  ServiceCategoryType.teacher,
+  ServiceCategoryType.barber,
+  ServiceCategoryType.plumbing,
+  ServiceCategoryType.electrical,
+  ServiceCategoryType.carpentry,
+  ServiceCategoryType.painting,
+  ServiceCategoryType.cleaning,
+  ServiceCategoryType.acMaintenance,
+  ServiceCategoryType.pipeChange,
+  ServiceCategoryType.plastering,
+  ServiceCategoryType.carpetCleaning,
+  ServiceCategoryType.dishRepair,
+  ServiceCategoryType.pestControl,
+  ServiceCategoryType.applianceRepair,
+];
+
+int serviceCategoryRank(ServiceCategoryType type) {
+  final index = serviceCategoryPriority.indexOf(type);
+  return index == -1 ? serviceCategoryPriority.length : index;
+}
+
+IconData serviceCategoryIcon(ServiceCategoryType type) => switch (type) {
+  ServiceCategoryType.doctor => Icons.medical_services_rounded,
+  ServiceCategoryType.nurse => Icons.health_and_safety_rounded,
+  ServiceCategoryType.teacher => Icons.school_rounded,
+  ServiceCategoryType.barber => Icons.content_cut_rounded,
+  ServiceCategoryType.plumbing => Icons.plumbing_rounded,
+  ServiceCategoryType.electrical => Icons.electrical_services_rounded,
+  ServiceCategoryType.carpentry => Icons.carpenter_rounded,
+  ServiceCategoryType.painting => Icons.format_paint_rounded,
+  ServiceCategoryType.cleaning => Icons.cleaning_services_rounded,
+  ServiceCategoryType.acMaintenance => Icons.ac_unit_rounded,
+  ServiceCategoryType.pipeChange => Icons.settings_input_component_rounded,
+  ServiceCategoryType.plastering => Icons.format_color_fill_rounded,
+  ServiceCategoryType.carpetCleaning => Icons.local_laundry_service_rounded,
+  ServiceCategoryType.dishRepair => Icons.satellite_alt_rounded,
+  ServiceCategoryType.pestControl => Icons.bug_report_rounded,
+  ServiceCategoryType.applianceRepair => Icons.build_rounded,
+  ServiceCategoryType.other => Icons.home_repair_service_rounded,
+};

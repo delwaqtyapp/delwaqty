@@ -66,7 +66,19 @@ class _RegionSelectionPageState extends ConsumerState<RegionSelectionPage> {
     final current = ref.watch(currentUserRegionProvider);
     return resultsAsync.when(
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (_, _) => Center(child: Text(l10n.noResults)),
+      error: (_, _) => Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(l10n.somethingWentWrong),
+            const SizedBox(height: 12),
+            FilledButton.tonal(
+              onPressed: () => ref.invalidate(regionSearchProvider(_query)),
+              child: Text(l10n.retry),
+            ),
+          ],
+        ),
+      ),
       data: (regions) {
         if (regions.isEmpty) {
           return Center(child: Text(l10n.noResults));

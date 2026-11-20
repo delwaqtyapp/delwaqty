@@ -1,5 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:delwaqty/services/supabase/supabase_service.dart';
 import 'package:delwaqty/features/_shared/regions/domain/entities/region.dart';
 import 'package:delwaqty/features/_shared/regions/domain/entities/geo_entity.dart';
 import 'package:delwaqty/features/_shared/regions/domain/entities/spatial_resolution.dart';
@@ -12,7 +12,7 @@ import 'package:delwaqty/features/_shared/auth/domain/auth_state.dart';
 import 'package:delwaqty/features/customer/location/presentation/providers/location_provider.dart';
 
 final supabaseRegionDataSourceProvider = Provider<RegionDataSource>((ref) {
-  return SupabaseRegionDataSource(Supabase.instance.client);
+  return SupabaseRegionDataSource(ref.watch(supabaseClientProvider));
 });
 
 final regionRepositoryProvider = Provider<RegionRepository>((ref) {

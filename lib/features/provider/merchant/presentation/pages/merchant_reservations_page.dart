@@ -328,6 +328,30 @@ class _MerchantReservationsPageState
 
   Future<void> _updateBookingStatus(String bookingId, String status) async {
     if (bookingId.isEmpty) return;
+    if (status == 'cancelled') {
+      final l10n = AppLocalizations.of(context);
+      final confirmed = await showDialog<bool>(
+        context: context,
+        builder: (dlgCtx) => AlertDialog(
+          title: Text(l10n.cancel),
+          content: Text(l10n.cancelReservationConfirm),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dlgCtx).pop(false),
+              child: Text(l10n.no),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(dlgCtx).pop(true),
+              style: TextButton.styleFrom(
+                foregroundColor: Theme.of(dlgCtx).colorScheme.error,
+              ),
+              child: Text(l10n.yes),
+            ),
+          ],
+        ),
+      );
+      if (confirmed != true || !mounted) return;
+    }
     try {
       SupabaseClient client;
       try {
@@ -413,7 +437,7 @@ class _ReservationCard extends StatelessWidget {
               children: [
                 Expanded(
                   child: Text(
-                    reservation.userId,
+                    l10n.customer,
                     style: theme.textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.w600,
                     ),

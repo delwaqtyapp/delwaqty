@@ -149,7 +149,9 @@ class SupabaseChatDataSource {
         .eq('room_id', roomId)
         .order('created_at')
         .limit(limit);
-    return rows.reversed.map((r) => ChatMessage.fromJson(r)).toList();
+    final list = rows.map((r) => ChatMessage.fromJson(r)).toList()
+      ..sort((a, b) => a.createdAt.compareTo(b.createdAt));
+    return list;
   }
 
   Future<ChatMessage> sendMessage(ChatMessage message) async {
@@ -169,11 +171,32 @@ class SupabaseChatDataSource {
     return ChatMessage.fromJson(row);
   }
 
-  Future<void> markAsRead(String messageId) async {
-    await _client.from('chat_messages').update({
-      'is_read': true,
-      'read_at': DateTime.now().toIso8601String(),
-    }).eq('id', messageId);
+  Future<void> markAsRead(String messageOrRoomId) async {
+    final now = DateTime.now().toIso8601String();
+    final me = _client.auth.currentUser?.id;
+    try {
+      var roomQuery = _client
+          .from('chat_messages')
+          .update({
+            'is_read': true,
+            'read_at': now,
+          })
+          .eq('room_id', messageOrRoomId)
+          .eq('is_read', false);
+      if (me != null && me.isNotEmpty) {
+        roomQuery = roomQuery.neq('sender_id', me);
+      }
+      await roomQuery;
+    } catch (_) {}
+    try {
+      await _client
+          .from('chat_messages')
+          .update({
+            'is_read': true,
+            'read_at': now,
+          })
+          .eq('id', messageOrRoomId);
+    } catch (_) {}
   }
 
   Future<void> setAssignedAdmin({
@@ -196,8 +219,12 @@ class SupabaseChatDataSource {
         .order('created_at')
         .limit(50)
         .map((rows) {
-      final list = (rows as List).cast<Map<String, dynamic>>();
-      return list.reversed.map((r) => ChatMessage.fromJson(r)).toList();
+      final list = (rows as List)
+          .cast<Map<String, dynamic>>()
+          .map((r) => ChatMessage.fromJson(r))
+          .toList()
+        ..sort((a, b) => a.createdAt.compareTo(b.createdAt));
+      return list;
     });
   }
 

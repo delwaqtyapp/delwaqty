@@ -236,6 +236,7 @@ class _MerchantStorefrontPageState
 
   @override
   void dispose() {
+    _mapController?.dispose();
     _name.dispose();
     _description.dispose();
     _phone.dispose();
@@ -486,7 +487,28 @@ class _MerchantStorefrontPageState
       appBar: AppBar(title: Text(l10n.storefront)),
       body: storefrontAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text(l10n.failedToLoad)),
+        error: (e, _) => Center(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  appErrorText(context, e),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 12),
+                FilledButton.tonal(
+                  onPressed: () {
+                    ref.invalidate(storefrontProvider);
+                    ref.invalidate(workingHoursProvider);
+                  },
+                  child: Text(l10n.retry),
+                ),
+              ],
+            ),
+          ),
+        ),
         data: (data) {
           if (data.id.isEmpty) {
             return Center(child: Text(l10n.noMerchantAccount));
@@ -825,8 +847,9 @@ class _MerchantStorefrontPageState
     required ValueChanged<String> onChanged,
   }) {
     return TextFormField(
+      key: ValueKey(value),
       readOnly: true,
-      controller: TextEditingController(text: value),
+      initialValue: value,
       keyboardType: TextInputType.datetime,
       decoration: InputDecoration(
         isDense: true,
@@ -840,7 +863,7 @@ class _MerchantStorefrontPageState
           context: context,
           initialTime: _parseTimeOfDay(value),
         );
-        if (picked != null) {
+        if (picked != null && mounted) {
           final formatted =
               '${picked.hour.toString().padLeft(2, '0')}:${picked.minute.toString().padLeft(2, '0')}';
           onChanged(formatted);

@@ -205,7 +205,25 @@ class _RegionBrowserState extends ConsumerState<RegionBrowser> {
         Expanded(
           child: childrenAsync.when(
             loading: () => const Center(child: CircularProgressIndicator()),
-            error: (_, _) => Center(child: Text(l10n.regionSelectionFailed)),
+            error: (_, _) => Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(l10n.regionSelectionFailed),
+                  const SizedBox(height: 12),
+                  FilledButton.tonal(
+                    onPressed: () {
+                      if (_crumbs.isEmpty) {
+                        ref.invalidate(governoratesProvider);
+                      } else {
+                        ref.invalidate(regionChildrenProvider(_crumbs.last.id));
+                      }
+                    },
+                    child: Text(l10n.retry),
+                  ),
+                ],
+              ),
+            ),
             data: (regions) {
               if (regions.isEmpty) {
                 return Center(child: Text(l10n.subRegionsEmpty));

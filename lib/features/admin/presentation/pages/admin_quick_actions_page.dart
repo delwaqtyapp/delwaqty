@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:delwaqty/features/admin/admin_shell.dart';
-import 'package:delwaqty/features/admin/financial/presentation/providers/admin_financial_providers.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 import 'package:delwaqty/shared/widgets/design/premium_card.dart';
 
@@ -27,7 +26,6 @@ class _AdminQuickActionsPageState extends ConsumerState<AdminQuickActionsPage> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final isOwner = ref.watch(adminIsOwnerProvider).value ?? false;
 
     final sections = [
       (
@@ -35,15 +33,36 @@ class _AdminQuickActionsPageState extends ConsumerState<AdminQuickActionsPage> {
         const Color(0xFF007AFF),
         Icons.speed_rounded,
         [
-          _ActionData(l10n.adminCommandCenter, Icons.dashboard_rounded, const Color(0xFF007AFF), '/admin'),
-          _ActionData(l10n.adminAnalytics, Icons.insights_rounded, const Color(0xFF007AFF), '/admin/analytics'),
-          _ActionData(l10n.adminDeliveryIntelligence, Icons.route_rounded, const Color(0xFF00897B), '/admin/delivery-intelligence'),
-          _ActionData(l10n.adminMerchantIntelligence, Icons.store_outlined, const Color(0xFF34C759), '/admin/merchant-intelligence'),
-          _ActionData(l10n.adminProviderIntelligence, Icons.engineering_outlined, const Color(0xFF0288D1), '/admin/provider-intelligence'),
-          _ActionData(l10n.adminWalletIntelligence, Icons.account_balance_wallet_rounded, const Color(0xFFAF52DE), '/admin/wallet-intelligence'),
-          _ActionData(l10n.adminServicePerformance, Icons.analytics_rounded, const Color(0xFF5856D6), '/admin/service-performance'),
-          if (isOwner)
-            _ActionData(l10n.adminOwnerGlobalAudit, Icons.public_rounded, const Color(0xFF5B3DF0), '/admin/owner-dashboard'),
+          _ActionData(
+            l10n.adminCommandCenter,
+            Icons.dashboard_rounded,
+            const Color(0xFF007AFF),
+            '/admin',
+          ),
+          _ActionData(
+            l10n.adminAnalytics,
+            Icons.insights_rounded,
+            const Color(0xFF007AFF),
+            '/admin/analytics',
+          ),
+          _ActionData(
+            l10n.adminServicePerformance,
+            Icons.analytics_rounded,
+            const Color(0xFF5856D6),
+            '/admin/service-performance',
+          ),
+          _ActionData(
+            l10n.adminDeliveryIntelligence,
+            Icons.route_rounded,
+            const Color(0xFF00897B),
+            '/admin/delivery-intelligence',
+          ),
+          _ActionData(
+            l10n.adminMerchantIntelligence,
+            Icons.store_outlined,
+            const Color(0xFF34C759),
+            '/admin/merchant-intelligence',
+          ),
         ],
       ),
       (
@@ -51,13 +70,36 @@ class _AdminQuickActionsPageState extends ConsumerState<AdminQuickActionsPage> {
         const Color(0xFF4A90D9),
         Icons.people_rounded,
         [
-          _ActionData(l10n.adminMembersSection, Icons.people_rounded, const Color(0xFF4A90D9), '/admin/members'),
-          _ActionData(l10n.adminVerifications, Icons.verified_user_rounded, const Color(0xFF34C759), '/admin/verifications'),
-          _ActionData(l10n.sanctions, Icons.gavel_rounded, const Color(0xFFFF9500), '/admin/sanctions'),
-          _ActionData(l10n.complaints, Icons.warning_amber_rounded, const Color(0xFFFF3B30), '/admin/complaints'),
-          _ActionData(l10n.liveTracking, Icons.map_rounded, const Color(0xFF00C7BE), '/admin/live-tracking'),
-          _ActionData(l10n.adminEscalations, Icons.priority_high_rounded, const Color(0xFFFF6482), '/admin/escalations'),
-          _ActionData(l10n.adminReviewsModeration, Icons.rate_review_rounded, const Color(0xFFAF52DE), '/admin/reviews-moderation'),
+          _ActionData(
+            l10n.adminMembers,
+            Icons.people_rounded,
+            const Color(0xFF4A90D9),
+            '/admin/members',
+          ),
+          _ActionData(
+            l10n.adminVerifications,
+            Icons.verified_user_rounded,
+            const Color(0xFF34C759),
+            '/admin/verifications',
+          ),
+          _ActionData(
+            l10n.adminApprovals,
+            Icons.fact_check_rounded,
+            const Color(0xFF8B5CF6),
+            '/admin/approvals',
+          ),
+          _ActionData(
+            l10n.sanctions,
+            Icons.gavel_rounded,
+            const Color(0xFFFF9500),
+            '/admin/sanctions',
+          ),
+          _ActionData(
+            l10n.complaints,
+            Icons.warning_amber_rounded,
+            const Color(0xFFFF3B30),
+            '/admin/complaints',
+          ),
         ],
       ),
       (
@@ -65,12 +107,42 @@ class _AdminQuickActionsPageState extends ConsumerState<AdminQuickActionsPage> {
         const Color(0xFFFF9500),
         Icons.local_shipping_rounded,
         [
-          _ActionData(l10n.adminOrdersPage, Icons.receipt_long_rounded, const Color(0xFFFF9500), '/admin/orders'),
-          _ActionData(l10n.adminDeliveries, Icons.delivery_dining_rounded, const Color(0xFFFF9500), '/admin/deliveries'),
-          _ActionData(l10n.adminDrivers, Icons.local_shipping_rounded, const Color(0xFF007AFF), '/admin/drivers'),
-          _ActionData(l10n.adminEmergency, Icons.sos_rounded, const Color(0xFFFF3B30), '/admin/emergency'),
-          _ActionData(l10n.supportChat, Icons.chat_bubble_rounded, const Color(0xFF34C759), '/admin/support-chat'),
-          _ActionData(l10n.auditLog, Icons.history_rounded, const Color(0xFF5B3DF0), '/admin/audit-log'),
+          _ActionData(
+            l10n.adminOrdersPage,
+            Icons.receipt_long_rounded,
+            const Color(0xFFFF9500),
+            '/admin/orders',
+          ),
+          _ActionData(
+            l10n.adminDeliveries,
+            Icons.delivery_dining_rounded,
+            const Color(0xFFFF9500),
+            '/admin/deliveries',
+          ),
+          _ActionData(
+            l10n.adminDrivers,
+            Icons.local_shipping_rounded,
+            const Color(0xFF007AFF),
+            '/admin/drivers',
+          ),
+          _ActionData(
+            l10n.liveTracking,
+            Icons.map_rounded,
+            const Color(0xFF00C7BE),
+            '/admin/live-tracking',
+          ),
+          _ActionData(
+            l10n.supportChat,
+            Icons.chat_bubble_rounded,
+            const Color(0xFF34C759),
+            '/admin/support-chat',
+          ),
+          _ActionData(
+            l10n.adminEmergency,
+            Icons.sos_rounded,
+            const Color(0xFFFF3B30),
+            '/admin/emergency',
+          ),
         ],
       ),
       (
@@ -78,14 +150,42 @@ class _AdminQuickActionsPageState extends ConsumerState<AdminQuickActionsPage> {
         const Color(0xFF5B3DF0),
         Icons.account_balance_rounded,
         [
-          _ActionData(l10n.adminFinancialCenter, Icons.account_balance_rounded, const Color(0xFF5B3DF0), '/admin/financial-center'),
-          _ActionData(l10n.adminTransactionLedger, Icons.menu_book_rounded, const Color(0xFFFF9500), '/admin/transaction-ledger'),
-          _ActionData(l10n.adminCommissions, Icons.percent_rounded, const Color(0xFF5B3DF0), '/admin/commissions'),
-          _ActionData(l10n.pendingTopups, Icons.swap_horiz_rounded, const Color(0xFF34C759), '/admin/topup-requests'),
-          _ActionData(l10n.regionalCollections, Icons.receipt_long_rounded, const Color(0xFF00C7BE), '/admin/collections'),
-          _ActionData(l10n.settlements, Icons.payments_rounded, const Color(0xFFFF3B30), '/admin/settlements'),
-          _ActionData(l10n.graceManagement, Icons.shield_rounded, const Color(0xFF5B3DF0), '/admin/grace-management'),
-          _ActionData(l10n.receivingAccounts, Icons.wallet_rounded, const Color(0xFFAF52DE), '/admin/receiving-wallets'),
+          _ActionData(
+            l10n.adminFinancialCenter,
+            Icons.account_balance_rounded,
+            const Color(0xFF5B3DF0),
+            '/admin/financial-center',
+          ),
+          _ActionData(
+            l10n.pendingTopups,
+            Icons.swap_horiz_rounded,
+            const Color(0xFF34C759),
+            '/admin/topup-requests',
+          ),
+          _ActionData(
+            l10n.settlements,
+            Icons.payments_rounded,
+            const Color(0xFFFF3B30),
+            '/admin/settlements',
+          ),
+          _ActionData(
+            l10n.regionalCollections,
+            Icons.receipt_long_rounded,
+            const Color(0xFF00C7BE),
+            '/admin/collections',
+          ),
+          _ActionData(
+            l10n.adminCommissions,
+            Icons.percent_rounded,
+            const Color(0xFF5B3DF0),
+            '/admin/commissions',
+          ),
+          _ActionData(
+            l10n.adminTransactionLedger,
+            Icons.menu_book_rounded,
+            const Color(0xFFFF9500),
+            '/admin/transaction-ledger',
+          ),
         ],
       ),
       (
@@ -93,24 +193,48 @@ class _AdminQuickActionsPageState extends ConsumerState<AdminQuickActionsPage> {
         const Color(0xFF34C759),
         Icons.storefront_rounded,
         [
-          _ActionData(l10n.adminMgmtList, Icons.group_rounded, const Color(0xFF4A90D9), '/admin/admins'),
-          _ActionData(l10n.adminMerchants, Icons.storefront_rounded, const Color(0xFF34C759), '/admin/merchants'),
-          _ActionData(l10n.adminCategories, Icons.category_rounded, const Color(0xFFAF52DE), '/admin/categories'),
-          _ActionData(l10n.adminPushNotifications, Icons.campaign_rounded, const Color(0xFF34C759), '/admin/push-notifications'),
-          _ActionData(l10n.adminApprovals, Icons.fact_check_rounded, const Color(0xFF8B5CF6), '/admin/approvals'),
-          _ActionData(l10n.pendingDeletions, Icons.person_remove_rounded, const Color(0xFFFF3B30), '/admin/pending-deletions'),
-          _ActionData(l10n.permissionDelegation, Icons.account_tree_rounded, const Color(0xFF007AFF), '/admin/hierarchy'),
-          _ActionData(l10n.chatPermissions, Icons.security_rounded, const Color(0xFF5B3DF0), '/admin/chat-permissions'),
-        ],
-      ),
-      (
-        l10n.adminSettingsGroupSection,
-        const Color(0xFFAF52DE),
-        Icons.settings_rounded,
-        [
-          _ActionData(l10n.adminSettingsMenu, Icons.tune_rounded, const Color(0xFFAF52DE), '/admin/settings'),
-          _ActionData(l10n.adminPlatformConfig, Icons.settings_rounded, const Color(0xFF5B3DF0), '/admin/platform-config'),
-          _ActionData(l10n.adminProfile, Icons.person_rounded, const Color(0xFF4A90D9), '/admin/profile'),
+          _ActionData(
+            l10n.manageRegions,
+            Icons.public_rounded,
+            const Color(0xFF0D9488),
+            '/admin/regions',
+          ),
+          _ActionData(
+            l10n.adminCategories,
+            Icons.category_rounded,
+            const Color(0xFFAF52DE),
+            '/admin/categories',
+          ),
+          _ActionData(
+            l10n.adminBannersTitle,
+            Icons.view_carousel_rounded,
+            const Color(0xFFFF9500),
+            '/admin/campaigns',
+          ),
+          _ActionData(
+            l10n.adminMerchants,
+            Icons.storefront_rounded,
+            const Color(0xFF34C759),
+            '/admin/merchants',
+          ),
+          _ActionData(
+            l10n.adminPushNotifications,
+            Icons.campaign_rounded,
+            const Color(0xFF34C759),
+            '/admin/push-notifications',
+          ),
+          _ActionData(
+            l10n.auditLog,
+            Icons.history_rounded,
+            const Color(0xFF5B3DF0),
+            '/admin/audit-log',
+          ),
+          _ActionData(
+            l10n.adminSettingsMenu,
+            Icons.tune_rounded,
+            const Color(0xFFAF52DE),
+            '/admin/settings',
+          ),
         ],
       ),
     ];

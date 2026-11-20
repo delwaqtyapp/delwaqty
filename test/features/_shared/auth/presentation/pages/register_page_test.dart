@@ -138,7 +138,10 @@ void main() {
         'أحمد',
       );
       await tester.enterText(
-        find.widgetWithText(TextFormField, 'البريد الإلكتروني'),
+        find.widgetWithText(
+          TextFormField,
+          'البريد الإلكتروني (اختياري - يتم توليده تلقائيًا من رقم الهاتف)',
+        ),
         'a@b.com',
       );
       await tester.enterText(

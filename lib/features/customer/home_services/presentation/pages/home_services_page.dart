@@ -39,17 +39,31 @@ class HomeServicesPage extends ConsumerWidget {
         onRefresh: () async => ref.invalidate(_categoriesProvider),
         child: categoriesAsync.when(
           loading: () => _buildLoadingSkeleton(context),
-          error: (_, _) => PremiumEmptyState(
-            icon: Icons.error_outline,
-            title: l10n.error,
-            message: l10n.errorLoading,
+          error: (_, _) => ListView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            children: [
+              const SizedBox(height: 80),
+              PremiumEmptyState(
+                icon: Icons.error_outline,
+                title: l10n.error,
+                message: l10n.errorLoading,
+                actionLabel: l10n.retry,
+                onAction: () => ref.invalidate(_categoriesProvider),
+              ),
+            ],
           ),
           data: (categories) {
             if (categories.isEmpty) {
-              return PremiumEmptyState(
-                icon: Icons.home_repair_service_outlined,
-                title: l10n.noResults,
-                message: l10n.nearbyEmptyHint,
+              return ListView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                children: [
+                  const SizedBox(height: 80),
+                  PremiumEmptyState(
+                    icon: Icons.home_repair_service_outlined,
+                    title: l10n.noResults,
+                    message: l10n.nearbyEmptyHint,
+                  ),
+                ],
               );
             }
             return _buildCategoryGrid(context, categories);

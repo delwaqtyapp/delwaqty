@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:delwaqty/features/_shared/regions/presentation/widgets/region_picker_sheet.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
-import 'package:delwaqty/services/supabase/supabase_service.dart';
 import 'package:delwaqty/features/admin_management/domain/entities/admin_account.dart';
 import 'package:delwaqty/features/admin_management/presentation/providers/admin_management_providers.dart';
 
@@ -190,9 +190,14 @@ class _AdminManagementListPageState
                         separatorBuilder: (_, _) => const Divider(height: 1),
                         itemBuilder: (context, i) {
                           final a = pageItems[i];
-                          return _AdminRow(account: a, onTap: () {
-                            context.push('/admin/admins/${a.id}');
-                          });
+                          return _AdminRow(
+                            account: a,
+                            onTap: () {
+                              if (a.id.isNotEmpty) {
+                                context.push('/admin/admins/${a.id}');
+                              }
+                            },
+                          );
                         },
                       ),
                     ),
@@ -317,11 +322,14 @@ Future<void> _openCreateDialog(BuildContext context, WidgetRef ref) async {
   final nameCtrl = TextEditingController();
   String? supervisorId;
   String? regionId;
+  String? selectedRegionName;
   final formKey = GlobalKey<FormState>();
+  final adminsFuture = ref.read(adminsListProvider.future);
 
   await showDialog<void>(
     context: context,
-    builder: (ctx) => AlertDialog(
+    builder: (ctx) => StatefulBuilder(
+      builder: (ctx, setSt) => AlertDialog(
       title: Text(loc.adminMgmtCreateTitle),
       content: Form(
         key: formKey,
@@ -329,6 +337,18 @@ Future<void> _openCreateDialog(BuildContext context, WidgetRef ref) async {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton.icon(
+                  onPressed: () {
+                    Navigator.of(ctx).pop();
+                    context.go('/admin/members');
+                  },
+                  icon: const Icon(Icons.person_search_rounded, size: 18),
+                  label: Text('${loc.search} • ${loc.adminMembers}'),
+                ),
+              ),
+              const SizedBox(height: 8),
               TextFormField(
                 controller: nameCtrl,
                 decoration: InputDecoration(labelText: loc.adminMgmtFullName),
@@ -349,7 +369,7 @@ Future<void> _openCreateDialog(BuildContext context, WidgetRef ref) async {
                     (v == null || v.length < 8) ? loc.adminMgmtPasswordHint : null,
               ),
               FutureBuilder<List<AdminAccount>>(
-                future: ref.read(adminsListProvider.future),
+                future: adminsFuture,
                 builder: (c, snap) {
                   final hasError = snap.hasError;
                   final isLoading =
@@ -387,47 +407,22 @@ Future<void> _openCreateDialog(BuildContext context, WidgetRef ref) async {
                   );
                 },
               ),
-              FutureBuilder<List<Map<String, dynamic>>>(
-                future: ref
-                    .read(supabaseClientProvider)
-                    .from('regions')
-                    .select('id,name_en')
-                    .order('name_en'),
-                builder: (c, snap) {
-                  final hasError = snap.hasError;
-                  final isLoading =
-                      snap.connectionState == ConnectionState.waiting;
-                  final regions = snap.data ?? [];
-                  return DropdownButtonFormField<String?>(
-                    initialValue: regionId,
-                    decoration: InputDecoration(
-                      labelText: loc.adminMgmtSelectRegion,
-                      helperText: hasError ? loc.error : null,
-                      suffixIcon: isLoading
-                          ? const SizedBox(
-                              width: 16,
-                              height: 16,
-                              child: Center(
-                                child: SizedBox(
-                                  width: 14,
-                                  height: 14,
-                                  child:
-                                      CircularProgressIndicator(strokeWidth: 2),
-                                ),
-                              ),
-                            )
-                          : null,
-                    ),
-                    items: [
-                      DropdownMenuItem(child: Text(loc.adminMgmtNone)),
-                      for (final r in regions)
-                        DropdownMenuItem(
-                          value: r['id'] as String,
-                          child: Text((r['name_en'] as String?) ?? ''),
-                        ),
-                    ],
-                    onChanged: (v) => regionId = v,
+              const SizedBox(height: 12),
+              RegionSelectorButton(
+                label: loc.adminMgmtSelectRegion,
+                selectedName: selectedRegionName,
+                onTap: () async {
+                  final picked = await RegionPickerSheet.show(
+                    ctx,
+                    selectedRegionId: regionId,
                   );
+                  if (picked != null && ctx.mounted) {
+                    final lang = Localizations.localeOf(ctx).languageCode;
+                    setSt(() {
+                      regionId = picked.id;
+                      selectedRegionName = picked.displayName(lang);
+                    });
+                  }
                 },
               ),
             ],
@@ -467,6 +462,7 @@ Future<void> _openCreateDialog(BuildContext context, WidgetRef ref) async {
           child: Text(loc.adminMgmtCreate),
         ),
       ],
+    ),
     ),
   );
 }

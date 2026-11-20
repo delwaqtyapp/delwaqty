@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:delwaqty/features/_shared/auth/domain/auth_state.dart';
 import 'package:local_auth/local_auth.dart';
 import 'package:delwaqty/core/extensions/context_extensions.dart';
+import 'package:delwaqty/core/theme/app_colors.dart';
 import 'package:delwaqty/core/utils/validators.dart';
 import 'package:delwaqty/data/datasources/local/biometric_auth_store.dart';
+import 'package:delwaqty/features/_shared/auth/domain/auth_state.dart';
 import 'package:delwaqty/features/_shared/auth/presentation/auth_provider.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
+import 'package:delwaqty/shared/widgets/confirm_dialog.dart';
 
 class FingerprintLoginPage extends ConsumerStatefulWidget {
   const FingerprintLoginPage({super.key});
@@ -176,6 +178,19 @@ class _FingerprintLoginPageState extends ConsumerState<FingerprintLoginPage> {
     return confirmed == true && password.isNotEmpty ? password : null;
   }
 
+  Future<void> _confirmRemoveCredential(BiometricCredentials cred) async {
+    final l10n = AppLocalizations.of(context);
+    final confirmed = await ConfirmDialog.show(
+      context,
+      title: l10n.delete,
+      message: l10n.removeSavedAccountConfirm(cred.email),
+      confirmLabel: l10n.delete,
+      isDestructive: true,
+    );
+    if (!confirmed || !mounted) return;
+    await _removeCredential(cred);
+  }
+
   Future<void> _removeCredential(BiometricCredentials cred) async {
     final l10n = AppLocalizations.of(context);
     final messenger = ScaffoldMessenger.of(context);
@@ -201,54 +216,170 @@ class _FingerprintLoginPageState extends ConsumerState<FingerprintLoginPage> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    final cs = context.colorScheme;
+
     return Scaffold(
       appBar: AppBar(
         title: Text(l10n.fingerprintLogin),
+        leading: IconButton(
+          tooltip: l10n.back,
+          icon: const Icon(Icons.arrow_back_rounded),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
       ),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
+          Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                colors: [
+                  AppColors.brandPurpleDeep,
+                  AppColors.brandPurple,
+                  AppColors.brandViolet,
+                ],
+                begin: AlignmentDirectional.topStart,
+                end: AlignmentDirectional.bottomEnd,
+              ),
+              borderRadius: BorderRadius.circular(20),
+              boxShadow: [
+                BoxShadow(
+                  color: AppColors.brandPurple.withValues(alpha: 0.25),
+                  blurRadius: 16,
+                  offset: const Offset(0, 6),
+                ),
+              ],
+            ),
+            child: Row(
+              children: [
+                Container(
+                  width: 48,
+                  height: 48,
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.16),
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  child: const Icon(
+                    Icons.fingerprint_rounded,
+                    color: Colors.white,
+                    size: 28,
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        l10n.fingerprintLogin,
+                        style: context.textTheme.titleMedium?.copyWith(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      if (_email != null && _email!.isNotEmpty) ...[
+                        const SizedBox(height: 4),
+                        Text(
+                          _email!,
+                          style: context.textTheme.bodySmall?.copyWith(
+                            color: Colors.white.withValues(alpha: 0.85),
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 20),
           _buildSection(context, l10n.security, [
             SwitchListTile(
-              secondary: Icon(
-                Icons.fingerprint_rounded,
-                color: context.colorScheme.primary,
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 14,
+                vertical: 6,
               ),
-              title: Text(l10n.fingerprintLogin),
-              subtitle: Text(l10n.fingerprintLoginDescription),
+              secondary: Container(
+                width: 38,
+                height: 38,
+                decoration: BoxDecoration(
+                  color: cs.primary.withValues(alpha: 0.10),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(
+                  Icons.fingerprint_rounded,
+                  color: cs.primary,
+                  size: 20,
+                ),
+              ),
+              title: Text(
+                l10n.fingerprintLogin,
+                style: context.textTheme.bodyMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              subtitle: Text(
+                l10n.fingerprintLoginDescription,
+                style: context.textTheme.bodySmall?.copyWith(
+                  color: cs.onSurfaceVariant,
+                ),
+              ),
               value: _enabled,
               onChanged: _toggle,
             ),
           ]),
-          if (_email != null) ...[
-            const SizedBox(height: 16),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 4),
-              child: Text(
-                _email!,
-                style: context.textTheme.bodySmall?.copyWith(
-                  color: context.colorScheme.onSurfaceVariant,
-                ),
-              ),
-            ),
-          ],
           if (_allCredentials.length > 1) ...[
-            const SizedBox(height: 24),
+            const SizedBox(height: 20),
             _buildSection(context, l10n.savedAccounts, [
-              for (final cred in _allCredentials)
+              for (var i = 0; i < _allCredentials.length; i++) ...[
+                if (i > 0)
+                  Divider(
+                    height: 1,
+                    indent: 66,
+                    endIndent: 16,
+                    color: cs.outlineVariant.withValues(alpha: 0.35),
+                  ),
                 ListTile(
-                  leading: CircleAvatar(
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 4,
+                  ),
+                  leading: Container(
+                    width: 38,
+                    height: 38,
+                    decoration: BoxDecoration(
+                      color: cs.primary.withValues(alpha: 0.10),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    alignment: Alignment.center,
                     child: Text(
-                      cred.email.substring(0, 1).toUpperCase(),
+                      _allCredentials[i].email.isNotEmpty
+                          ? _allCredentials[i].email[0].toUpperCase()
+                          : '?',
+                      style: context.textTheme.titleSmall?.copyWith(
+                        color: cs.primary,
+                        fontWeight: FontWeight.w700,
+                      ),
                     ),
                   ),
-                  title: Text(cred.email),
+                  title: Text(
+                    _allCredentials[i].email,
+                    style: context.textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
                   trailing: IconButton(
                     tooltip: l10n.delete,
-                    icon: const Icon(Icons.delete_outline),
-                    onPressed: () => _removeCredential(cred),
+                    icon: const Icon(
+                      Icons.delete_outline_rounded,
+                      color: AppColors.errorLight,
+                    ),
+                    onPressed: () =>
+                        _confirmRemoveCredential(_allCredentials[i]),
                   ),
                 ),
+              ],
             ]),
           ],
         ],
@@ -261,26 +392,44 @@ class _FingerprintLoginPageState extends ConsumerState<FingerprintLoginPage> {
     String title,
     List<Widget> children,
   ) {
+    final cs = context.colorScheme;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: const EdgeInsets.only(left: 4, bottom: 8),
-          child: Text(
-            title,
-            style: context.textTheme.titleSmall?.copyWith(
-              color: context.colorScheme.primary,
-              fontWeight: FontWeight.w600,
-            ),
+          padding: const EdgeInsetsDirectional.only(start: 4, bottom: 10),
+          child: Row(
+            children: [
+              Container(
+                width: 4,
+                height: 16,
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    colors: [AppColors.brandPurple, AppColors.brandViolet],
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                  ),
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Text(
+                title,
+                style: context.textTheme.titleSmall?.copyWith(
+                  color: cs.onSurface,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ],
           ),
         ),
         Material(
-          color: context.colorScheme.surfaceContainerLowest,
+          color: cs.surfaceContainerLowest,
           clipBehavior: Clip.antiAlias,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
             side: BorderSide(
-              color: context.colorScheme.outlineVariant.withValues(alpha: 0.5),
+              color: cs.outlineVariant.withValues(alpha: 0.45),
             ),
           ),
           child: Column(children: children),

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:delwaqty/core/module/feature_module.dart';
-import 'package:delwaqty/features/customer/commerce/presentation/pages/search_page.dart';
+import 'package:delwaqty/features/customer/commerce/presentation/pages/cart_page.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 
 class SearchModule extends FeatureModule {
@@ -9,10 +9,10 @@ class SearchModule extends FeatureModule {
   String get id => 'search';
 
   @override
-  String name(BuildContext context) => AppLocalizations.of(context).search;
+  String name(BuildContext context) => AppLocalizations.of(context).cart;
 
   @override
-  IconData? get icon => Icons.search;
+  IconData? get icon => Icons.shopping_cart_outlined;
 
   @override
   bool get isNavModule => true;
@@ -30,9 +30,14 @@ class SearchModule extends FeatureModule {
     return StatefulShellBranch(
       routes: [
         GoRoute(
+          path: '/cart',
+          name: 'cart',
+          builder: (context, state) => const CartPage(),
+        ),
+        GoRoute(
           path: '/search',
           name: 'search',
-          builder: (context, state) => const SearchPage(),
+          builder: (context, state) => const CartPage(),
         ),
       ],
     );

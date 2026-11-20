@@ -1,7 +1,12 @@
 import 'package:delwaqty/core/utils/avatar_initial.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:delwaqty/features/_shared/regions/presentation/widgets/region_picker_sheet.dart';
 import 'package:delwaqty/features/admin/financial/presentation/providers/admin_financial_providers.dart';
+import 'package:delwaqty/features/admin/presentation/providers/platform_intelligence_providers.dart';
+import 'package:delwaqty/features/admin_management/presentation/providers/admin_management_providers.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:delwaqty/features/admin/member_management/presentation/member_providers.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
@@ -103,6 +108,12 @@ class MemberDrawer extends ConsumerWidget {
             ),
             SliverToBoxAdapter(
               child: _DocumentsSection(profile: adapted),
+            ),
+            SliverToBoxAdapter(
+              child: _MemberAdminRoleAndPermissionsSection(
+                memberId: memberId,
+                profile: adapted,
+              ),
             ),
             SliverToBoxAdapter(
               child: _AdminActionsSection(
@@ -2804,6 +2815,9 @@ class _AdminActionsSectionState extends ConsumerState<_AdminActionsSection> {
           'p_reason': 'Deleted by owner from Admin Console',
         });
         if (!mounted) return;
+        ref.invalidate(memberOpsProvider);
+        ref.invalidate(memberOpsCountProvider);
+        ref.invalidate(memberOpsProfileProvider(widget.memberId));
         showAnimatedSuccessToast(
           context,
           title: l10n.accountDeleted,
@@ -2812,8 +2826,6 @@ class _AdminActionsSectionState extends ConsumerState<_AdminActionsSection> {
         await Future<void>.delayed(const Duration(milliseconds: 900));
         if (!mounted) return;
         widget.onDismiss?.call();
-        ref.invalidate(memberOpsProvider);
-        ref.invalidate(memberOpsProfileProvider(widget.memberId));
       } catch (e) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -2960,3 +2972,530 @@ Map<String, dynamic> normalizeMemberOpsProfile(Map<String, dynamic> profile) {
     },
   };
 }
+
+const List<String> _kDrawerGranularPermissionCodes = [
+  'USERS_VIEW',
+  'USERS_MODERATE',
+  'ORDERS_VIEW',
+  'ORDERS_MANAGE',
+  'FINANCE_VIEW',
+  'FINANCE_APPROVE',
+  'PROVIDERS_VERIFY',
+  'DISPUTES_RESOLVE',
+  'CAMPAIGNS_MANAGE',
+  'ANALYTICS_VIEW',
+  'ADMINS_MANAGE',
+];
+
+const List<({String role, IconData icon})> _kDrawerAdminRoles = [
+  (
+    role: 'country_admin',
+    icon: Icons.public_rounded,
+  ),
+  (
+    role: 'governorate_admin',
+    icon: Icons.account_balance_rounded,
+  ),
+  (
+    role: 'center_admin',
+    icon: Icons.location_city_rounded,
+  ),
+  (
+    role: 'village_admin',
+    icon: Icons.holiday_village_rounded,
+  ),
+  (
+    role: 'admin',
+    icon: Icons.admin_panel_settings_rounded,
+  ),
+  (
+    role: 'customer',
+    icon: Icons.person_outline_rounded,
+  ),
+];
+
+class _MemberAdminRoleAndPermissionsSection extends ConsumerStatefulWidget {
+  const _MemberAdminRoleAndPermissionsSection({
+    required this.memberId,
+    required this.profile,
+  });
+
+  final String memberId;
+  final Map<String, dynamic> profile;
+
+  @override
+  ConsumerState<_MemberAdminRoleAndPermissionsSection> createState() =>
+      _MemberAdminRoleAndPermissionsSectionState();
+}
+
+class _MemberAdminRoleAndPermissionsSectionState
+    extends ConsumerState<_MemberAdminRoleAndPermissionsSection> {
+  bool _isUpdatingRole = false;
+  bool _isUpdatingRegion = false;
+  String? _togglingPermission;
+  String? _localRoleOverride;
+  String? _localRegionIdOverride;
+  String? _localRegionLabelOverride;
+
+  @override
+  void didUpdateWidget(
+    covariant _MemberAdminRoleAndPermissionsSection oldWidget,
+  ) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.memberId != widget.memberId) {
+      _localRoleOverride = null;
+      _localRegionIdOverride = null;
+      _localRegionLabelOverride = null;
+    }
+  }
+
+  String _roleLabel(String role, AppLocalizations l10n) {
+    return switch (role) {
+      'owner' => l10n.ownerFullAccess,
+      'super_admin' => l10n.adminRole,
+      'country_admin' => l10n.countryAdmin,
+      'governorate_admin' => l10n.governorateAdmin,
+      'center_admin' => l10n.centerAdmin,
+      'village_admin' => l10n.villageAdmin,
+      'admin' => l10n.adminRole,
+      'driver' => l10n.driver,
+      'merchant' => l10n.merchant,
+      'provider' => l10n.chatOriginProvider,
+      _ => l10n.customer,
+    };
+  }
+
+  String _permissionLabel(String code, AppLocalizations l10n) {
+    return switch (code) {
+      'USERS_VIEW' => l10n.adminMembers,
+      'USERS_MODERATE' => l10n.sanctions,
+      'ORDERS_VIEW' => l10n.orders,
+      'ORDERS_MANAGE' => l10n.adminOrdersPage,
+      'FINANCE_VIEW' => l10n.adminFinancialCenter,
+      'FINANCE_APPROVE' => l10n.settlements,
+      'PROVIDERS_VERIFY' => l10n.adminVerifications,
+      'DISPUTES_RESOLVE' => l10n.complaints,
+      'CAMPAIGNS_MANAGE' => l10n.adminBannersTitle,
+      'ANALYTICS_VIEW' => l10n.adminAnalytics,
+      'ADMINS_MANAGE' => l10n.adminMgmtList,
+      _ => code,
+    };
+  }
+
+  bool _isAdminRole(String role, String? userType) {
+    return const {
+          'admin',
+          'owner',
+          'super_admin',
+          'country_admin',
+          'governorate_admin',
+          'center_admin',
+          'village_admin',
+        }.contains(role) ||
+        userType == 'admin';
+  }
+
+  Future<void> _updateRole(String newRole) async {
+    final l10n = AppLocalizations.of(context);
+    final basic = widget.profile['basic'] as Map<String, dynamic>? ?? {};
+    final email = (basic['email'] as String?)?.trim() ?? '';
+    final identifier = email.isNotEmpty ? email : widget.memberId;
+
+    setState(() => _isUpdatingRole = true);
+    try {
+      final client = ref.read(supabaseClientProvider);
+      await client.rpc(
+        'assign_admin_role',
+        params: {
+          'p_email': identifier,
+          'p_role': newRole,
+        },
+      );
+      if (!mounted) return;
+      setState(() => _localRoleOverride = newRole);
+      ref.invalidate(memberOpsProfileProvider(widget.memberId));
+      ref.invalidate(memberOpsProvider);
+      ref.invalidate(adminsListProvider);
+      ref.invalidate(adminDetailProvider(widget.memberId));
+      ref.invalidate(adminPermissionsProvider(widget.memberId));
+      showAnimatedSuccessToast(
+        context,
+        message: '${l10n.roleUpdated}: ${_roleLabel(newRole, l10n)}',
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(appErrorText(context, e))),
+      );
+    } finally {
+      if (mounted) {
+        setState(() => _isUpdatingRole = false);
+      }
+    }
+  }
+
+  Future<void> _pickAndAssignRegion(String? currentRegionId) async {
+    final l10n = AppLocalizations.of(context);
+    final region = await RegionPickerSheet.show(
+      context,
+      selectedRegionId: currentRegionId,
+    );
+    if (region == null || !mounted) return;
+
+    final basic = widget.profile['basic'] as Map<String, dynamic>? ?? {};
+    final email = (basic['email'] as String?)?.trim() ?? '';
+    final identifier = email.isNotEmpty ? email : widget.memberId;
+    final lang = Localizations.localeOf(context).languageCode;
+
+    setState(() => _isUpdatingRegion = true);
+    try {
+      final client = ref.read(supabaseClientProvider);
+      try {
+        await client.rpc(
+          'assign_admin_region',
+          params: {
+            'p_admin_id': widget.memberId,
+            'p_region_id': region.id,
+            'p_scope': 'descendants',
+          },
+        );
+      } on PostgrestException {
+        await client.rpc(
+          'admin_assign_region_by_id',
+          params: {
+            'p_email': identifier,
+            'p_region_id': region.id,
+            'p_scope': 'descendants',
+          },
+        );
+      }
+      if (!mounted) return;
+      setState(() {
+        _localRegionIdOverride = region.id;
+        _localRegionLabelOverride = region.displayName(lang);
+      });
+      ref.invalidate(memberOpsProfileProvider(widget.memberId));
+      ref.invalidate(adminsListProvider);
+      ref.invalidate(adminDetailProvider(widget.memberId));
+      showAnimatedSuccessToast(
+        context,
+        message: '${l10n.regionSaved}: ${region.displayName(lang)}',
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(appErrorText(context, e))),
+      );
+    } finally {
+      if (mounted) {
+        setState(() => _isUpdatingRegion = false);
+      }
+    }
+  }
+
+  Future<void> _togglePermission(
+    String permissionCode,
+    bool currentlyGranted,
+    String currentRole,
+    String? userType,
+  ) async {
+    final l10n = AppLocalizations.of(context);
+    setState(() => _togglingPermission = permissionCode);
+    try {
+      final client = ref.read(supabaseClientProvider);
+      if (!_isAdminRole(currentRole, userType)) {
+        final basic = widget.profile['basic'] as Map<String, dynamic>? ?? {};
+        final email = (basic['email'] as String?)?.trim() ?? '';
+        final identifier = email.isNotEmpty ? email : widget.memberId;
+        await client.rpc(
+          'assign_admin_role',
+          params: {
+            'p_email': identifier,
+            'p_role': 'admin',
+          },
+        );
+        if (mounted) {
+          setState(() => _localRoleOverride = 'admin');
+        }
+      }
+
+      if (currentlyGranted) {
+        await client.rpc(
+          'revoke_admin_permission',
+          params: {
+            'p_admin_id': widget.memberId,
+            'p_permission': permissionCode,
+          },
+        );
+      } else {
+        await client.rpc(
+          'grant_admin_permission',
+          params: {
+            'p_admin_id': widget.memberId,
+            'p_permission': permissionCode,
+          },
+        );
+      }
+      if (!mounted) return;
+      ref.invalidate(adminPermissionsProvider(widget.memberId));
+      ref.invalidate(memberOpsProfileProvider(widget.memberId));
+      ref.invalidate(memberOpsProvider);
+      ref.invalidate(adminsListProvider);
+      showAnimatedSuccessToast(
+        context,
+        message: '${l10n.roleUpdated} ($permissionCode)',
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(appErrorText(context, e))),
+      );
+    } finally {
+      if (mounted) {
+        setState(() => _togglingPermission = null);
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final isOwner = ref.watch(adminIsOwnerProvider).value ?? false;
+    final permsMap =
+        (widget.profile['permissions'] as Map<String, dynamic>?) ?? {};
+    final canModerate = permsMap['can_moderate'] as bool? ?? false;
+
+    if (!isOwner && !canModerate) {
+      return const SizedBox.shrink();
+    }
+
+    final cs = Theme.of(context).colorScheme;
+    final basic = widget.profile['basic'] as Map<String, dynamic>? ?? {};
+    final regionMap = widget.profile['region'] as Map<String, dynamic>? ?? {};
+    final currentRole =
+        _localRoleOverride ?? (basic['role'] as String? ?? 'customer');
+    final userType = basic['user_type'] as String?;
+    final isTargetOwner = currentRole == 'owner';
+
+    final adminDetailAsync = ref.watch(adminDetailProvider(widget.memberId));
+    final adminAccount = adminDetailAsync.value;
+
+    final regionId = _localRegionIdOverride ??
+        adminAccount?.regionId ??
+        (regionMap['region_id'] as String?) ??
+        (basic['region_id'] as String?);
+    final rawRegionLabel = _localRegionLabelOverride ??
+        adminAccount?.regionName ??
+        (regionMap['hierarchical_label'] as String?);
+    final regionLabel =
+        (rawRegionLabel != null &&
+                rawRegionLabel.isNotEmpty &&
+                rawRegionLabel != '-')
+            ? rawRegionLabel
+            : null;
+
+    final adminPermsAsync =
+        ref.watch(adminPermissionsProvider(widget.memberId));
+
+    return Card(
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: ExpansionTile(
+        initiallyExpanded: _isAdminRole(currentRole, userType),
+        tilePadding: const EdgeInsets.symmetric(horizontal: 16),
+        childrenPadding: const EdgeInsets.fromLTRB(16, 4, 16, 16),
+        leading: const Icon(
+          Icons.admin_panel_settings_rounded,
+          size: 20,
+          color: Color(0xFF5B3DF0),
+        ),
+        title: Text(l10n.permissionDelegation),
+        subtitle: Text(
+          '${l10n.adminRole}: ${_roleLabel(currentRole, l10n)}${regionLabel != null ? ' • $regionLabel' : ''}',
+          style: TextStyle(
+            fontSize: 12,
+            color: cs.onSurfaceVariant,
+          ),
+        ),
+        children: [
+          if (isTargetOwner)
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8),
+              child: Text(
+                l10n.ownerFullAccess,
+                style: const TextStyle(fontWeight: FontWeight.w600),
+              ),
+            )
+          else ...[
+            Align(
+              alignment: AlignmentDirectional.centerStart,
+              child: Text(
+                '1. ${l10n.adminRole}',
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+              ),
+            ),
+            const SizedBox(height: 8),
+            if (_isUpdatingRole)
+              const Padding(
+                padding: EdgeInsets.symmetric(vertical: 8),
+                child: LinearProgressIndicator(),
+              ),
+            Wrap(
+              spacing: 6,
+              runSpacing: 6,
+              children: _kDrawerAdminRoles.map((item) {
+                final selected = currentRole == item.role;
+                return ChoiceChip(
+                  avatar: Icon(
+                    item.icon,
+                    size: 15,
+                    color:
+                        selected ? Colors.white : const Color(0xFF5B3DF0),
+                  ),
+                  label: Text(_roleLabel(item.role, l10n)),
+                  selected: selected,
+                  selectedColor: const Color(0xFF5B3DF0),
+                  labelStyle: TextStyle(
+                    fontSize: 12,
+                    color: selected ? Colors.white : cs.onSurface,
+                    fontWeight: selected ? FontWeight.bold : FontWeight.w500,
+                  ),
+                  onSelected: _isUpdatingRole
+                      ? null
+                      : (_) {
+                          if (!selected) {
+                            _updateRole(item.role);
+                          }
+                        },
+                );
+              }).toList(),
+            ),
+            const SizedBox(height: 16),
+            Align(
+              alignment: AlignmentDirectional.centerStart,
+              child: Text(
+                '2. ${l10n.assignRegion}',
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+              ),
+            ),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: _isUpdatingRegion
+                        ? null
+                        : () => _pickAndAssignRegion(regionId),
+                    icon: _isUpdatingRegion
+                        ? const SizedBox(
+                            width: 16,
+                            height: 16,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : const Icon(Icons.location_on_rounded, size: 18),
+                    label: Text(
+                      regionLabel ?? l10n.adminMgmtSelectRegion,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            if (regionId != null && regionId.isNotEmpty) ...[
+              const SizedBox(height: 10),
+              SizedBox(
+                width: double.infinity,
+                child: FilledButton.tonalIcon(
+                  onPressed: () {
+                    ref.read(adminScopeRegionProvider.notifier).state =
+                        regionId;
+                    context.go('/admin');
+                  },
+                  icon: const Icon(Icons.dashboard_customize_rounded, size: 18),
+                  label: Text(
+                    '${l10n.adminCommandCenter}${regionLabel != null ? ' ($regionLabel)' : ''}',
+                  ),
+                ),
+              ),
+            ],
+            const SizedBox(height: 16),
+            Align(
+              alignment: AlignmentDirectional.centerStart,
+              child: Text(
+                '3. ${l10n.permissionDelegation}',
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+              ),
+            ),
+            const SizedBox(height: 8),
+            adminPermsAsync.when(
+              loading: () => const LinearProgressIndicator(),
+              error: (_, _) => _buildPermissionChips(
+                granted: const {},
+                currentRole: currentRole,
+                userType: userType,
+                l10n: l10n,
+              ),
+              data: (permData) {
+                final grants = (permData['grants'] as List?)
+                        ?.map((e) => e.toString())
+                        .toSet() ??
+                    <String>{};
+                return _buildPermissionChips(
+                  granted: grants,
+                  currentRole: currentRole,
+                  userType: userType,
+                  l10n: l10n,
+                );
+              },
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPermissionChips({
+    required Set<String> granted,
+    required String currentRole,
+    required String? userType,
+    required AppLocalizations l10n,
+  }) {
+    return Wrap(
+      spacing: 6,
+      runSpacing: 6,
+      children: _kDrawerGranularPermissionCodes.map((code) {
+        final isGranted = granted.contains(code);
+        final isBusy = _togglingPermission == code;
+        return FilterChip(
+          label: Text(
+            _permissionLabel(code, l10n),
+            style: const TextStyle(fontSize: 12),
+          ),
+          selected: isGranted,
+          avatar: isBusy
+              ? const SizedBox(
+                  width: 14,
+                  height: 14,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                )
+              : null,
+          onSelected: _togglingPermission != null
+              ? null
+              : (_) => _togglePermission(
+                    code,
+                    isGranted,
+                    currentRole,
+                    userType,
+                  ),
+        );
+      }).toList(),
+    );
+  }
+}
+

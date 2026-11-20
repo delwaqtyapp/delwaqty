@@ -189,6 +189,14 @@ class _AdminVerificationsPageState
     if (!approve) {
       reason = await _askRejectReason(l10n);
       if (reason == null || !mounted) return;
+    } else {
+      final confirmed = await ConfirmDialog.show(
+        context,
+        title: l10n.adminVerifications,
+        message: l10n.confirmApproveVerification,
+        confirmLabel: l10n.approve,
+      );
+      if (!confirmed || !mounted) return;
     }
     final id = req['id']?.toString() ?? '';
     if (id.isEmpty) return;

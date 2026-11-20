@@ -16,6 +16,7 @@ import 'package:delwaqty/features/provider/merchant/presentation/pages/merchant_
 import 'package:delwaqty/features/provider/merchant/presentation/pages/merchant_branches_page.dart';
 import 'package:delwaqty/features/provider/merchant/presentation/pages/merchant_reservations_page.dart';
 import 'package:delwaqty/features/provider/merchant/presentation/pages/merchant_reviews_page.dart';
+import 'package:delwaqty/features/provider/merchant/presentation/pages/provider_banners_page.dart';
 import 'package:delwaqty/features/provider/availability/presentation/pages/provider_availability_page.dart';
 import 'package:delwaqty/features/provider/verification/presentation/pages/provider_verification_page.dart';
 import 'package:delwaqty/features/provider/documents/presentation/pages/provider_documents_page.dart';
@@ -94,6 +95,10 @@ class MerchantModule extends FeatureModule {
             GoRoute(
               path: 'offers',
               builder: (context, state) => const MerchantOffersPage(),
+            ),
+            GoRoute(
+              path: 'banners',
+              builder: (context, state) => const ProviderBannersPage(),
             ),
             GoRoute(
               path: 'branches',

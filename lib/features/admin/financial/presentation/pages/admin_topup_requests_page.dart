@@ -101,7 +101,7 @@ class _AdminTopupRequestsPageState
       } else {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Failed: $code')),
+            SnackBar(content: Text(l10n.operationFailed)),
           );
         }
       }
@@ -145,7 +145,7 @@ class _AdminTopupRequestsPageState
         ],
       ),
     );
-    if (confirmed != true) return;
+    if (confirmed != true || !mounted) return;
     setState(() => _busyId = item.id);
     try {
       final res = await ref
@@ -162,7 +162,7 @@ class _AdminTopupRequestsPageState
       } else {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Failed: $code')),
+            SnackBar(content: Text(l10n.operationFailed)),
           );
         }
       }

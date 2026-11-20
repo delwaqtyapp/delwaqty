@@ -28,7 +28,7 @@ void main() {
       );
     });
 
-    test('support room route allows admin and customer (customer app registers SupportChatModule)', () {
+    test('support room route allows all app contexts', () {
       expect(
         NotificationChannels.isAllowed(
           '/support/room/abc-123',
@@ -48,7 +48,7 @@ void main() {
           '/support/room/abc-123',
           context: AppContext.driver,
         ),
-        isFalse,
+        isTrue,
       );
     });
 

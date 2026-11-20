@@ -1,10 +1,14 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:delwaqty/features/_shared/auth/presentation/auth_provider.dart';
 import 'package:delwaqty/features/_shared/auth/domain/auth_state.dart';
 import 'package:delwaqty/features/customer/wallet/wallet_module.dart';
 import 'package:delwaqty/shared/widgets/app_button.dart';
 import 'package:delwaqty/shared/widgets/app_snackbar.dart';
+import 'package:delwaqty/core/errors/app_error_text.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 
 class WalletTopUpPage extends ConsumerStatefulWidget {
@@ -18,6 +22,7 @@ class _WalletTopUpPageState extends ConsumerState<WalletTopUpPage> {
   final _amountController = TextEditingController();
   String _selectedMethod = 'instapay';
   bool _loading = false;
+  String? _pendingIdempotencyKey;
 
   final _presetAmounts = [50.0, 100.0, 200.0, 500.0];
 
@@ -29,19 +34,52 @@ class _WalletTopUpPageState extends ConsumerState<WalletTopUpPage> {
 
   Future<void> _handleTopUp() async {
     final l10n = AppLocalizations.of(context);
+    final authState = ref.read(authStateProvider);
+    if (authState is! AuthAuthenticated) {
+      AppSnackbar.error(context, message: l10n.loginRequired);
+      unawaited(context.push('/login'));
+      return;
+    }
+
     final amount = double.tryParse(_amountController.text);
     if (amount == null || amount <= 0) {
       AppSnackbar.info(context, message: l10n.enterValidAmount);
       return;
     }
 
+    final amountStr = amount.toStringAsFixed(0);
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(l10n.confirmTopUp),
+        content: Text(l10n.confirmTopUpMessage(amountStr, l10n.currencySymbol)),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: Text(l10n.cancel),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: Text(l10n.confirm),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) return;
+
+    _pendingIdempotencyKey ??=
+        'topup_${authState.user.id}_${DateTime.now().microsecondsSinceEpoch}';
+
     setState(() => _loading = true);
     try {
-      final authState = ref.read(authStateProvider);
-      if (authState is! AuthAuthenticated) return;
-
       final repo = ref.read(walletRepositoryProvider);
-      await repo.topUp(authState.user.id, amount, _selectedMethod);
+      await repo.topUp(
+        authState.user.id,
+        amount,
+        _selectedMethod,
+        idempotencyKey: _pendingIdempotencyKey,
+      );
+      _pendingIdempotencyKey = null;
 
       ref.invalidate(walletBalanceProvider(authState.user.id));
       ref.invalidate(walletTransactionsProvider(authState.user.id));
@@ -52,7 +90,7 @@ class _WalletTopUpPageState extends ConsumerState<WalletTopUpPage> {
       }
     } catch (e) {
       if (mounted) {
-        AppSnackbar.error(context, message: l10n.somethingWentWrong);
+        AppSnackbar.error(context, message: appErrorText(context, e));
       }
     } finally {
       if (mounted) setState(() => _loading = false);
@@ -83,7 +121,10 @@ class _WalletTopUpPageState extends ConsumerState<WalletTopUpPage> {
                 label: Text(l10n.amountWithCurrency(amount.toStringAsFixed(0), l10n.currencySymbol)),
                 selected: isSelected,
                 onSelected: (_) {
-                  setState(() => _amountController.text = amount.toStringAsFixed(0));
+                  setState(() {
+                    _amountController.text = amount.toStringAsFixed(0);
+                    _pendingIdempotencyKey = null;
+                  });
                 },
               );
             }).toList(),
@@ -92,6 +133,7 @@ class _WalletTopUpPageState extends ConsumerState<WalletTopUpPage> {
           TextField(
             controller: _amountController,
             keyboardType: TextInputType.number,
+            onChanged: (_) => setState(() => _pendingIdempotencyKey = null),
             decoration: InputDecoration(
               labelText: l10n.selectAmount,
               prefixText: '${l10n.currencySymbol} ',

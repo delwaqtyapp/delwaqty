@@ -14,6 +14,7 @@ import 'package:delwaqty/l10n/app_localizations.dart';
 import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
 import 'package:delwaqty/shared/widgets/app_loader.dart';
 import 'package:delwaqty/shared/widgets/error_state.dart';
+import 'package:delwaqty/core/errors/app_error_text.dart';
 import 'package:delwaqty/core/extensions/context_extensions.dart';
 
 class ProductDetailPage extends ConsumerStatefulWidget {
@@ -39,6 +40,35 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage> {
   final Set<String> _selectedModifierIds = {};
   List<ProductModifier> _currentModifiers = [];
   bool _modifiersLoaded = false;
+  late Future<Product?> _productFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _productFuture = _fetchProduct();
+  }
+
+  @override
+  void didUpdateWidget(covariant ProductDetailPage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.productId != widget.productId) {
+      _quantity = 1;
+      _selectedVariantId = null;
+      _selectedModifierIds.clear();
+      _currentModifiers = [];
+      _modifiersLoaded = false;
+      _productFuture = _fetchProduct();
+    }
+  }
+
+  Future<Product?> _fetchProduct() =>
+      ref.read(productRepositoryProvider).getProductById(widget.productId);
+
+  void _retryLoadProduct() {
+    setState(() {
+      _productFuture = _fetchProduct();
+    });
+  }
 
   @override
   void dispose() {
@@ -63,13 +93,30 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage> {
     }
   }
 
+  Widget _buildHeroPlaceholder(BuildContext context) {
+    return Center(
+      child: Container(
+        width: 120,
+        height: 120,
+        decoration: BoxDecoration(
+          color: context.colorScheme.primary.withValues(alpha: 0.1),
+          shape: BoxShape.circle,
+        ),
+        child: Icon(
+          Icons.shopping_bag_outlined,
+          size: 64,
+          color: context.colorScheme.primary,
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final productRepo = ref.watch(productRepositoryProvider);
 
     return FutureBuilder<Product?>(
-      future: productRepo.getProductById(widget.productId),
+      future: _productFuture,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return Scaffold(
@@ -82,7 +129,10 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage> {
           // branch, which looks like an empty product rather than an error.
           return Scaffold(
             appBar: AppBar(title: Text(l10n.loading)),
-            body: ErrorState(message: l10n.somethingWentWrong),
+            body: ErrorState(
+              message: l10n.somethingWentWrong,
+              onRetry: _retryLoadProduct,
+            ),
           );
         }
 
@@ -90,7 +140,10 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage> {
         if (product == null) {
           return Scaffold(
             appBar: AppBar(title: Text(l10n.error)),
-            body: ErrorState(message: l10n.noData),
+            body: ErrorState(
+              message: l10n.noData,
+              onRetry: _retryLoadProduct,
+            ),
           );
         }
 
@@ -137,23 +190,17 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage> {
                       ],
                     ),
                   ),
-                  child: Center(
-                    child: Container(
-                      width: 120,
-                      height: 120,
-                      decoration: BoxDecoration(
-                        color: context.colorScheme.primary.withValues(
-                          alpha: 0.1,
-                        ),
-                        shape: BoxShape.circle,
-                      ),
-                      child: Icon(
-                        Icons.shopping_bag_outlined,
-                        size: 64,
-                        color: context.colorScheme.primary,
-                      ),
-                    ),
-                  ),
+                  child: product.imageUrl != null &&
+                          product.imageUrl!.isNotEmpty
+                      ? Image.network(
+                          product.imageUrl!,
+                          fit: BoxFit.cover,
+                          width: double.infinity,
+                          height: 280,
+                          errorBuilder: (_, _, _) =>
+                              _buildHeroPlaceholder(context),
+                        )
+                      : _buildHeroPlaceholder(context),
                 ),
               ),
               Padding(
@@ -388,31 +435,54 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage> {
               child: FilledButton.icon(
                 onPressed: product.isAvailable
                     ? () async {
+                        final selectedModifierNames = _currentModifiers
+                            .where((m) => _selectedModifierIds.contains(m.id))
+                            .map((m) => m.name)
+                            .toList();
+                        final notes = _instructionsController.text.trim();
+                        final instructionsParts = [
+                          if (selectedModifierNames.isNotEmpty)
+                            selectedModifierNames.join(', '),
+                          if (notes.isNotEmpty) notes,
+                        ];
+                        final specialInstructions = instructionsParts.isEmpty
+                            ? null
+                            : instructionsParts.join(' | ');
                         final cartNotifier = ref.read(cartProvider.notifier);
-                        await cartNotifier.addToCart(
-                          merchantId: widget.merchantId,
-                          merchantName: widget.merchantName,
-                          item: commerce.CartItem(
-                            id: 'ci_${DateTime.now().millisecondsSinceEpoch}',
-                            productId: product.id,
-                            productName: product.name,
-                            variantName: selectedVariant?.name,
-                            quantity: _quantity,
-                            unitPrice: unitPrice,
-                          ),
-                        );
-                        if (context.mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(
-                                '${l10n.addToCart} - ${totalPrice.toStringAsFixed(0)} ${l10n.currencySymbol}',
-                              ),
-                              action: SnackBarAction(
-                                label: l10n.cart,
-                                onPressed: () => context.push('/market/cart'),
-                              ),
+                        try {
+                          await cartNotifier.addToCart(
+                            merchantId: widget.merchantId,
+                            merchantName: widget.merchantName,
+                            item: commerce.CartItem(
+                              id: 'ci_${DateTime.now().millisecondsSinceEpoch}',
+                              productId: product.id,
+                              productName: product.name,
+                              variantName: selectedVariant?.name,
+                              quantity: _quantity,
+                              unitPrice: unitPrice + modifierTotal,
+                              totalPrice: totalPrice,
+                              specialInstructions: specialInstructions,
                             ),
                           );
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  '${l10n.addToCart} - ${totalPrice.toStringAsFixed(0)} ${l10n.currencySymbol}',
+                                ),
+                                action: SnackBarAction(
+                                  label: l10n.cart,
+                                  onPressed: () => context.push('/market/cart'),
+                                ),
+                              ),
+                            );
+                          }
+                        } catch (e) {
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text(appErrorText(context, e))),
+                            );
+                          }
                         }
                       }
                     : null,

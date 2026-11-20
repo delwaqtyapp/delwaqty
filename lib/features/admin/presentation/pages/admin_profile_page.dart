@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:delwaqty/core/errors/app_error_text.dart';
 import 'package:delwaqty/features/admin/financial/presentation/providers/admin_financial_providers.dart';
+import 'package:delwaqty/features/admin/presentation/widgets/admin_states.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
 
@@ -15,6 +17,7 @@ class AdminProfilePage extends ConsumerStatefulWidget {
 class _AdminProfilePageState extends ConsumerState<AdminProfilePage> {
   Map<String, dynamic>? _profile;
   bool _isLoading = true;
+  Object? _error;
 
   @override
   void initState() {
@@ -23,10 +26,14 @@ class _AdminProfilePageState extends ConsumerState<AdminProfilePage> {
   }
 
   Future<void> _loadProfile() async {
+    setState(() {
+      _isLoading = true;
+      _error = null;
+    });
     try {
       final client = Supabase.instance.client;
       final email = client.auth.currentUser?.email ?? '';
-      final isOwner = ref.watch(adminIsOwnerProvider).value ?? false;
+      final isOwner = ref.read(adminIsOwnerProvider).value ?? false;
 
       final result = await client.rpc('get_admin_profile', params: {
         'p_email': email,
@@ -45,14 +52,7 @@ class _AdminProfilePageState extends ConsumerState<AdminProfilePage> {
     } catch (e) {
       if (mounted) {
         setState(() {
-          _profile = {
-            'email': Supabase.instance.client.auth.currentUser?.email ?? '',
-            'is_owner': false,
-            'role': 'admin',
-            'assigned_region': null,
-            'total_earnings': 0.0,
-            'region_name': null,
-          };
+          _error = e;
           _isLoading = false;
         });
       }
@@ -70,9 +70,17 @@ class _AdminProfilePageState extends ConsumerState<AdminProfilePage> {
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
-          : _profile == null
-              ? Center(child: Text(l10n.error))
-              : SingleChildScrollView(
+          : _error != null
+              ? AdminErrorState(
+                  message: appErrorText(context, _error),
+                  onRetry: _loadProfile,
+                )
+              : _profile == null
+                  ? AdminErrorState(
+                      message: l10n.error,
+                      onRetry: _loadProfile,
+                    )
+                  : SingleChildScrollView(
                   padding: const EdgeInsets.all(16),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,

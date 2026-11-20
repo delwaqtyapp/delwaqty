@@ -4469,3 +4469,31 @@ The sweep's headline was "29 admin functions executable by `anon`, fix with `REV
 
 ### Consequences
 `flutter analyze` **No issues found**; `flutter test` **1093/1093**. Migrations 113 and 114 are applied live. Post-fix verification: `wallet_topup('<owner>', 999999)` → `FORBIDDEN`, `wallet_pay('<owner>', 999999)` → `FORBIDDEN`, `anon_exec` false and `authenticated_exec` true on both, `view_left = 0`, `unpinned_left = 0`, `complete_delivery` still answering `NOT_ASSIGNED`. All four flavors installed and launched with `FORBIDDEN=0`, confirming the tightened guard rejected no legitimate in-app call. Known limits: leaked-password protection remains off and cannot be turned on without a Pro plan; `spatial_ref_sys` (PostGIS) still has no RLS, which is standard for the extension and carries no platform data; and duplicate migration numbers in `002`/`003`/`032` remain from earlier sprints — renumbering already-applied migrations is deliberately out of scope, and the new suite blocks duplicates for 100+ only.
+
+---
+
+## ADR-137: Full Customer App A-to-Z Audit & Remediation (Round 95 / Sprint 220)
+
+**Date:** 2026-11-17
+**Status:** Accepted
+**Deciders:** Lead Software Architect
+
+### Context
+An end-to-end A-to-Z audit of the Customer App surfaced widespread state-lifecycle, localization, error-handling, and data-integrity defects across commerce, delivery, wallet, services, chat, privacy, and supporting modules: un-cached `FutureBuilder` futures triggering repeated reloads on rebuild; missing error branches in `FutureBuilder`s; missing confirmation dialogs and idempotency/auth guards on destructive or financial actions (`CartPage`, `WalletTopUpPage`, `FingerprintLoginPage`); a `rate_passenger` mismatch in `SupabaseDeliveryDataSource.rateDelivery`; lost product modifiers/instructions in `CartItem`; un-clamped coupons and missing address validation in `CheckoutPage`; a `LateInitializationError` in `LocationSharingPage`; race conditions in `ChatPermissionsPage`; `DropdownButtonFormField` assertion failures in `AdminComplaintsPage`; 36 previously un-generated ARB keys alongside 14 newly required keys; and a duplicate `generate: true` entry in `pubspec.yaml`.
+
+### Decision
+- **Audit and remediate the entire Customer App in one coordinated round (58 files updated, 4 dead files deleted).**
+- **Synchronize L10n deterministically:** Synced all 36 previously un-generated keys plus 14 new keys across `app_en.arb`, `app_ar.arb`, `app_localizations.dart`, `app_localizations_en.dart`, and `app_localizations_ar.dart` (2,325 keys total, 0 duplicates), and removed the duplicate `generate: true` from `pubspec.yaml`.
+- **Cache futures & handle errors explicitly:** Cached futures in `ProductDetailPage` and `MerchantDetailPage` (including 4 `FutureBuilder` error states) so widget rebuilds do not re-fire network requests or mask failures.
+- **Guard financial, destructive, and navigation flows:** Added clear-cart confirmation in `CartPage`; address validation, coupon clamping, and retry provider fix in `CheckoutPage`; `PopScope` in `OrderCompletedPage`; confirmation dialog, idempotency key, and auth guard in `WalletTopUpPage`; confirmation and empty-email guard in `FingerprintLoginPage`; and routed account deletion in `DataPrivacyPage` through `authStateProvider.notifier.deleteAccount()`.
+- **Align data contracts & lifecycle safety:** Updated `SupabaseDeliveryDataSource.rateDelivery` (and `DeliveryTrackingPage`) to target `ride_ratings` instead of `rate_passenger`; preserved modifiers and instructions in `CartItem`; fixed driver/cancelled/discount rendering in `OrderTrackingPage`; persisted phone number in `DirectDeliveryPage`; fixed `ServiceBookingPage`, `ServiceProvidersPage`, and `ServiceReviewsPage`; resolved `LateInitializationError` in `LocationSharingPage`; fixed `DropdownButtonFormField` assertion in `AdminComplaintsPage`; made `CampaignDetailPage` fields locale-aware; and localized roles in `ChatCallAlertService` while fixing the race condition in `ChatPermissionsPage`.
+
+### Rationale
+- Fixing isolated symptoms without caching `FutureBuilder` futures, guarding money/deletion actions, and syncing all L10n keys leaves recurring regressions across rebuilds and locales.
+- Routing `DataPrivacyPage` deletion through `authStateProvider.notifier.deleteAccount()` keeps auth state consistent with backend deletion rather than leaving stale session state.
+- Updating `SupabaseDeliveryDataSource.rateDelivery` to `ride_ratings` aligns the client with the live database schema.
+
+### Consequences
+- 58 files updated and 4 dead files removed across the Customer App and shared L10n/config files; L10n parity stands at 2,325 keys across English and Arabic with 0 duplicates.
+- **Pending Verification (Environment Constraint):** The `flutter` CLI is not installed in this `com.agy` sandbox, so `flutter analyze` and `flutter test` have not yet been executed on these edits and must be run in the Flutter SDK environment (`E:\app\flutter` or Termux).
+

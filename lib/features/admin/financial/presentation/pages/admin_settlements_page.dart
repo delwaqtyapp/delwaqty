@@ -91,7 +91,7 @@ class _AdminSettlementsPageState extends ConsumerState<AdminSettlementsPage> {
       } else {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Failed: $code')),
+            SnackBar(content: Text(l10n.operationFailed)),
           );
         }
       }
@@ -196,7 +196,7 @@ class _AdminSettlementsPageState extends ConsumerState<AdminSettlementsPage> {
       } else {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Failed: $code')),
+            SnackBar(content: Text(l10n.operationFailed)),
           );
         }
       }

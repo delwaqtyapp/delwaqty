@@ -44,12 +44,28 @@ class _CampaignBody extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
-    final name = campaign.nameAr.isNotEmpty
-        ? campaign.nameAr
-        : (campaign.nameEn ?? campaign.nameAr);
-    final description = campaign.descriptionAr?.isNotEmpty == true
-        ? campaign.descriptionAr
-        : campaign.descriptionEn;
+    final isAr = Localizations.localeOf(context).languageCode == 'ar';
+    final name = isAr
+        ? (campaign.nameAr.isNotEmpty
+            ? campaign.nameAr
+            : (campaign.nameEn ?? ''))
+        : (campaign.nameEn?.isNotEmpty == true
+            ? campaign.nameEn!
+            : campaign.nameAr);
+    final subtitle = isAr
+        ? (campaign.subtitleAr?.isNotEmpty == true
+            ? campaign.subtitleAr
+            : campaign.subtitleEn)
+        : (campaign.subtitleEn?.isNotEmpty == true
+            ? campaign.subtitleEn
+            : campaign.subtitleAr);
+    final description = isAr
+        ? (campaign.descriptionAr?.isNotEmpty == true
+            ? campaign.descriptionAr
+            : campaign.descriptionEn)
+        : (campaign.descriptionEn?.isNotEmpty == true
+            ? campaign.descriptionEn
+            : campaign.descriptionAr);
     final imageUrl = ref
         .watch(campaignMediaUrlProvider(campaign.imagePath))
         .value;
@@ -79,7 +95,7 @@ class _CampaignBody extends ConsumerWidget {
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Text(
-                _typeLabel(campaign.campaignType),
+                _typeLabel(l10n, campaign.campaignType),
                 style: Theme.of(context).textTheme.labelMedium?.copyWith(
                   color: Theme.of(context).colorScheme.onPrimaryContainer,
                   fontWeight: FontWeight.w600,
@@ -94,7 +110,7 @@ class _CampaignBody extends ConsumerWidget {
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Text(
-                _statusLabel(campaign.status),
+                _statusLabel(l10n, campaign.status),
                 style: Theme.of(context).textTheme.labelMedium?.copyWith(
                   color: _statusColor(context, campaign.status),
                   fontWeight: FontWeight.w600,
@@ -110,10 +126,10 @@ class _CampaignBody extends ConsumerWidget {
             fontWeight: FontWeight.w700,
           ),
         ),
-        if (campaign.subtitleAr != null || campaign.subtitleEn != null) ...[
+        if (subtitle != null && subtitle.isNotEmpty) ...[
           const SizedBox(height: 8),
           Text(
-            campaign.subtitleAr ?? campaign.subtitleEn ?? '',
+            subtitle,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
               color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
@@ -153,56 +169,53 @@ class _CampaignBody extends ConsumerWidget {
     );
   }
 
-  String _typeLabel(CampaignType type) {
+  String _typeLabel(AppLocalizations l10n, CampaignType type) {
     switch (type) {
       case CampaignType.offer:
+        return l10n.offers;
       case CampaignType.promotion:
-        return 'Promotion';
+        return l10n.promotion;
       case CampaignType.coupon:
-        return 'Coupon';
+        return l10n.benefitCoupon;
       case CampaignType.productPromotion:
-        return 'Product Promotion';
       case CampaignType.servicePromotion:
-        return 'Service Promotion';
+        return l10n.promotions;
       case CampaignType.announcement:
-        return 'Announcement';
-      case CampaignType.informational:
-        return 'Information';
       case CampaignType.serviceAnnouncement:
-        return 'Service Update';
-      case CampaignType.outage:
-        return 'Outage';
       case CampaignType.importantNotice:
-        return 'Important';
+        return l10n.notifications;
+      case CampaignType.informational:
+        return l10n.about;
+      case CampaignType.outage:
       case CampaignType.emergencyNotice:
-        return 'Emergency';
+        return l10n.emergencyStat;
       case CampaignType.safetyNotice:
-        return 'Safety';
+        return l10n.security;
     }
   }
 
-  String _statusLabel(CampaignStatus status) {
+  String _statusLabel(AppLocalizations l10n, CampaignStatus status) {
     switch (status) {
       case CampaignStatus.draft:
-        return 'Draft';
+        return l10n.draft;
       case CampaignStatus.pendingReview:
-        return 'Pending Review';
+        return l10n.pendingReview;
       case CampaignStatus.approved:
-        return 'Approved';
+        return l10n.statusApproved;
       case CampaignStatus.rejected:
-        return 'Rejected';
+        return l10n.rejected;
       case CampaignStatus.scheduled:
-        return 'Scheduled';
+        return l10n.pending;
       case CampaignStatus.published:
-        return 'Published';
+        return l10n.active;
       case CampaignStatus.paused:
-        return 'Paused';
+        return l10n.suspended;
       case CampaignStatus.expired:
-        return 'Expired';
+        return l10n.rewardStatusExpired;
       case CampaignStatus.archived:
-        return 'Archived';
+        return l10n.closed;
       case CampaignStatus.cancelled:
-        return 'Cancelled';
+        return l10n.cancelled;
     }
   }
 

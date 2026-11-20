@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:delwaqty/core/errors/app_error_text.dart';
 import 'package:delwaqty/core/extensions/context_extensions.dart';
 import 'package:delwaqty/domain/entities/app_notification.dart';
 import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
+import 'package:delwaqty/shared/widgets/confirm_dialog.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 
 /// How long a token is considered "online" since its last update.
@@ -94,19 +96,46 @@ class _AdminPushNotificationsPageState
       return;
     }
 
+    final confirmed = await ConfirmDialog.show(
+      context,
+      title: l10n.pushNotificationsTitle,
+      message: l10n.sendNotification,
+      confirmLabel: l10n.sendNotification,
+    );
+    if (!confirmed || !mounted) return;
+
     setState(() => _sending = true);
     try {
       final client = Supabase.instance.client;
-      final result = await client.rpc(
-        'admin_broadcast_notification',
-        params: buildBroadcastParams(
-          title: title,
-          body: body,
-          type: _type,
-          deepLink: _deepLinkController.text,
-          audience: _audience,
-        ),
+      final baseParams = buildBroadcastParams(
+        title: title,
+        body: body,
+        type: _type,
+        deepLink: _deepLinkController.text,
+        audience: _audience,
       );
+      dynamic result;
+      try {
+        result = await client.rpc(
+          'admin_broadcast_notification',
+          params: baseParams,
+        );
+      } catch (_) {
+        result = await client.rpc(
+          'admin_broadcast_notification',
+          params: {
+            'p_title': baseParams['p_title'],
+            'p_body': baseParams['p_body'],
+            'p_target_role': baseParams['p_target_role'],
+            'p_type': baseParams['p_type'],
+            'p_deep_link': baseParams['p_deep_link'],
+            'p_data': {
+              'target_app': _audience,
+              'audience': _audience,
+            },
+          },
+        );
+      }
       final sent = result is num ? result.toInt() : 0;
       setState(() => _lastSentDeviceCount = sent);
       if (mounted) {
@@ -177,7 +206,7 @@ class _AdminPushNotificationsPageState
                             ),
                             const SizedBox(height: 4),
                             Text(
-                              e.toString(),
+                              appErrorText(context, e),
                               style: Theme.of(context).textTheme.bodySmall
                                   ?.copyWith(color: cs.onSurfaceVariant),
                               maxLines: 2,
@@ -316,6 +345,7 @@ class _AdminPushNotificationsPageState
                       decoration: InputDecoration(
                         labelText: l10n.audience,
                         border: const OutlineInputBorder(),
+                        prefixIcon: Icon(_audienceIcon(_audience)),
                       ),
                       items: [
                         DropdownMenuItem(
@@ -424,6 +454,22 @@ class _AdminPushNotificationsPageState
       case NotificationType.topupApproved:
       case NotificationType.adminTopup:
         return Icons.payment_rounded;
+    }
+  }
+
+  IconData _audienceIcon(String audience) {
+    switch (audience) {
+      case 'customer':
+        return Icons.person_outline_rounded;
+      case 'driver':
+        return Icons.delivery_dining_rounded;
+      case 'merchant':
+        return Icons.storefront_outlined;
+      case 'admin':
+        return Icons.admin_panel_settings_outlined;
+      case 'all':
+      default:
+        return Icons.public_rounded;
     }
   }
 }

@@ -2942,9 +2942,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get notificationsDisabled => 'Disabled';
 
   @override
-  String get addLabel => 'Add';
-
-  @override
   String get editLabel => 'Edit';
 
   @override
@@ -3900,9 +3897,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get tapToStop => 'Tap to stop';
-
-  @override
-  String get adminLabel => 'Admin';
 
   @override
   String get customerLabel => 'Customer';
@@ -6901,10 +6895,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get regionIdLabel => 'Region ID (UUID)';
 
   @override
+  String get addLabel => 'Add';
+
+  @override
   String get rejectTopUpTitle => 'Reject Top-Up';
 
   @override
   String get rejectTopUpReasonHint => 'Reason (required)';
+
+  @override
+  String get adminLabel => 'Admin';
 
   @override
   String get noTopUpRequestsScope =>
@@ -7196,4 +7196,268 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get noMultiServiceRequests => 'No pending multi-service requests';
+
+  @override
+  String minutesAgoShort(int minutes) {
+    return '${minutes}m';
+  }
+
+  @override
+  String hoursAgoShort(int hours) {
+    return '${hours}h';
+  }
+
+  @override
+  String daysAgoShort(int days) {
+    return '${days}d';
+  }
+
+  @override
+  String get openMenuTooltip => 'Menu';
+
+  @override
+  String get notificationsTooltip => 'Notifications';
+
+  @override
+  String get tapToAnswer => 'Tap to answer';
+
+  @override
+  String get pushChannelName => 'Delwaqty Notifications';
+
+  @override
+  String get pushChannelDescription =>
+      'Orders, rides, messages, and important updates';
+
+  @override
+  String get notifNewSupportMessageTitle => 'New support message';
+
+  @override
+  String get notifNewSupportMessageBody =>
+      'You have a new reply in support chat';
+
+  @override
+  String get notifNewCustomerMessageTitle => 'New customer message';
+
+  @override
+  String get notifNewCustomerMessageBody =>
+      'A customer replied in support chat';
+
+  @override
+  String get notifSupportEscalatedTitle => 'Support chat escalated';
+
+  @override
+  String get notifSupportEscalatedBody =>
+      'Your chat has been escalated to the next support level.';
+
+  @override
+  String get notifEmergencySupportTitle => 'EMERGENCY support request';
+
+  @override
+  String get notifEmergencySupportBody => 'Immediate assistance required.';
+
+  @override
+  String get notifNewComplaintTitle => 'New complaint';
+
+  @override
+  String get notifNewComplaintBody => 'A new complaint requires review';
+
+  @override
+  String get notifComplaintUpdateTitle => 'Complaint update';
+
+  @override
+  String get notifComplaintUpdateBody =>
+      'Your complaint status has been updated';
+
+  @override
+  String get notifSosAlertTitle => 'SOS Emergency Alert';
+
+  @override
+  String get notifSosAlertBody => 'A user triggered an SOS alert';
+
+  @override
+  String get notifSosResolvedTitle => 'SOS Emergency Resolved';
+
+  @override
+  String get notifSosResolvedBody =>
+      'Your SOS emergency alert has been resolved.';
+
+  @override
+  String get notifVerificationApprovedTitle => 'Account Verified';
+
+  @override
+  String get notifVerificationApprovedBody =>
+      'Your account verification has been approved.';
+
+  @override
+  String get notifVerificationRejectedTitle => 'Verification Update';
+
+  @override
+  String get notifVerificationRejectedBody =>
+      'Your verification needs attention. Please check the details.';
+
+  @override
+  String get notifTopupApprovedTitle => 'Top-up Approved';
+
+  @override
+  String get notifTopupApprovedBody =>
+      'Your wallet top-up request has been approved and credited.';
+
+  @override
+  String get notifWalletCreditedTitle => 'Wallet Credited';
+
+  @override
+  String get notifWalletCreditedBody =>
+      'Your wallet balance has been updated by administration.';
+
+  @override
+  String get notifServiceApprovedTitle => 'Service Line Approved';
+
+  @override
+  String get notifServiceApprovedBody =>
+      'Your additional service line has been approved.';
+
+  @override
+  String get notifServiceRejectedTitle => 'Service Line Update';
+
+  @override
+  String get notifServiceRejectedBody =>
+      'Your additional service line request was reviewed.';
+
+  @override
+  String get clearCartTitle => 'Clear cart?';
+
+  @override
+  String get clearCartConfirm =>
+      'Are you sure you want to remove all items from your cart?';
+
+  @override
+  String confirmTopUpMessage(String amount, String currency) {
+    return 'Top up your wallet with $amount $currency?';
+  }
+
+  @override
+  String get confirmBookingMessage => 'Confirm booking this service?';
+
+  @override
+  String get addressRequired => 'Please enter a delivery address';
+
+  @override
+  String get orderCancelled => 'Order cancelled';
+
+  @override
+  String get rateDriver => 'Rate driver';
+
+  @override
+  String get deliveryDriver => 'Delivery Driver';
+
+  @override
+  String get serviceProvider => 'Service Provider';
+
+  @override
+  String get lowPriority => 'Low';
+
+  @override
+  String get mediumPriority => 'Medium';
+
+  @override
+  String get highPriority => 'High';
+
+  @override
+  String get promotion => 'Promotion';
+
+  @override
+  String get draft => 'Draft';
+
+  @override
+  String get searchHintRestaurants => 'Search restaurants or meals...';
+
+  @override
+  String get searchHintMarket => 'Search groceries or products...';
+
+  @override
+  String get searchHintServices => 'Search plumbing, AC, or services...';
+
+  @override
+  String get searchHintDelivery => 'Search pharmacy or fast delivery...';
+
+  @override
+  String get orderNowFast => 'Instant pickup & delivery anywhere';
+
+  @override
+  String get adminBannersTitle => 'Banners & Ads';
+
+  @override
+  String get createBanner => 'Create Banner Ad';
+
+  @override
+  String get targetScope => 'Target Audience';
+
+  @override
+  String get allEgypt => 'All Egypt';
+
+  @override
+  String get specificGovernorate => 'Specific Governorate';
+
+  @override
+  String get bannerTitleAr => 'Title (Arabic)';
+
+  @override
+  String get bannerTitleEn => 'Title (English)';
+
+  @override
+  String get bannerSubtitleAr => 'Subtitle (Arabic)';
+
+  @override
+  String get bannerSubtitleEn => 'Subtitle (English)';
+
+  @override
+  String get selectBannerImage => 'Select Banner Image';
+
+  @override
+  String get submitForApproval => 'Submit for Approval';
+
+  @override
+  String get publishNow => 'Publish Now';
+
+  @override
+  String get pauseBanner => 'Pause';
+
+  @override
+  String get resumeBanner => 'Resume';
+
+  @override
+  String get bannerSubmitted => 'Banner submitted for admin approval';
+
+  @override
+  String get bannerPublished => 'Banner published successfully';
+
+  @override
+  String get scheduleBanner => 'Schedule (Optional)';
+
+  @override
+  String get editBanner => 'Edit Banner';
+
+  @override
+  String get deleteBanner => 'Delete Banner';
+
+  @override
+  String get bannerUpdated => 'Banner updated successfully';
+
+  @override
+  String get bannerDeleted => 'Banner deleted successfully';
+
+  @override
+  String get manageRegions => 'Regions & Boundaries';
+
+  @override
+  String get addSubRegion => 'Add City / Village / Locality';
+
+  @override
+  String get regionCoordinates => 'Location Coordinates';
+
+  @override
+  String get boundaryRadiusKm => 'Boundary Radius (km)';
+
+  @override
+  String get pickFromMap => 'Pick on Map';
 }

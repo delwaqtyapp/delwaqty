@@ -6,6 +6,7 @@ import 'package:delwaqty/features/customer/commerce/domain/entities/product.dart
 import 'package:delwaqty/features/customer/commerce/domain/entities/cart.dart';
 import 'package:delwaqty/features/customer/commerce/domain/entities/merchant.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
+import 'package:delwaqty/core/errors/app_error_text.dart';
 import 'package:delwaqty/core/extensions/context_extensions.dart';
 import 'package:delwaqty/core/theme/app_colors.dart';
 import 'package:delwaqty/core/theme/app_spacing.dart';
@@ -464,6 +465,8 @@ class _ProductDetailBottomSheetState
       child: FilledButton.icon(
         onPressed: widget.product.isAvailable
             ? () async {
+                final messenger = ScaffoldMessenger.of(context);
+                final router = GoRouter.of(context);
                 final item = CartItem(
                   id: 'ci_${DateTime.now().microsecondsSinceEpoch}',
                   productId: widget.product.id,
@@ -476,24 +479,32 @@ class _ProductDetailBottomSheetState
                       ? null
                       : _instructionsController.text,
                 );
-                await ref.read(cartProvider.notifier).addToCart(
-                  merchantId: widget.merchantId,
-                  merchantName: widget.merchantName,
-                  item: item,
-                );
-                if (mounted) {
-                  Navigator.of(context).pop();
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(l10n.addedToCart),
-                      action: SnackBarAction(
-                        label: l10n.viewCart,
-                        onPressed: () {
-                          context.push('/market/cart');
-                        },
+                try {
+                  await ref.read(cartProvider.notifier).addToCart(
+                        merchantId: widget.merchantId,
+                        merchantName: widget.merchantName,
+                        item: item,
+                      );
+                  if (mounted) {
+                    Navigator.of(context).pop();
+                    messenger.showSnackBar(
+                      SnackBar(
+                        content: Text(l10n.addedToCart),
+                        action: SnackBarAction(
+                          label: l10n.viewCart,
+                          onPressed: () {
+                            router.push('/market/cart');
+                          },
+                        ),
                       ),
-                    ),
-                  );
+                    );
+                  }
+                } catch (e) {
+                  if (mounted) {
+                    messenger.showSnackBar(
+                      SnackBar(content: Text(appErrorText(context, e))),
+                    );
+                  }
                 }
               }
             : null,

@@ -50,7 +50,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     return Scaffold(
       body: GradientBackground(
         child: CustomScrollView(
-          physics: const BouncingScrollPhysics(
+          physics: const ClampingScrollPhysics(
             parent: AlwaysScrollableScrollPhysics(),
           ),
           slivers: [
@@ -87,7 +87,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                     delay: const Duration(milliseconds: 170),
                     child: _buildSupportAndLegalSection(context, l10n),
                   ),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 22),
                   AnimatedFadeIn(
                     delay: const Duration(milliseconds: 220),
                     child: _buildLogoutButton(context, l10n),
@@ -117,11 +117,11 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
 
     return SliverAppBar(
       pinned: true,
-      stretch: true,
-      expandedHeight: 280,
+      expandedHeight: 256,
       elevation: 0,
       scrolledUnderElevation: 0,
-      backgroundColor: context.colorScheme.surface.withValues(alpha: 0.88),
+      backgroundColor: Colors.transparent,
+      surfaceTintColor: Colors.transparent,
       automaticallyImplyLeading: false,
       leadingWidth: 64,
       leading: const Padding(
@@ -142,10 +142,8 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
         ),
       ],
       flexibleSpace: FlexibleSpaceBar(
-        background: ClipRRect(
-          borderRadius: const BorderRadius.vertical(
-            bottom: Radius.circular(28),
-          ),
+        background: ClipPath(
+          clipper: const _ProfileHeroWaveClipper(),
           child: Stack(
             fit: StackFit.expand,
             children: [
@@ -155,42 +153,39 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                     begin: AlignmentDirectional.topStart,
                     end: AlignmentDirectional.bottomEnd,
                     colors: [
+                      Color(0xFF170B3B),
                       AppColors.brandPurpleDeep,
                       AppColors.brandPurple,
-                      AppColors.brandViolet,
+                      Color(0xFF4C1D95),
                     ],
                   ),
                 ),
               ),
-              PositionedDirectional(
-                top: -40,
-                end: -30,
-                child: Container(
-                  width: 170,
-                  height: 170,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: AppColors.brandCyan.withValues(alpha: 0.16),
-                  ),
-                ),
+              Image.asset(
+                'assets/egypt/profile_hero_bg.webp',
+                fit: BoxFit.cover,
+                errorBuilder: (_, _, _) => const SizedBox.shrink(),
               ),
-              PositionedDirectional(
-                bottom: -50,
-                start: -40,
-                child: Container(
-                  width: 190,
-                  height: 190,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: Colors.white.withValues(alpha: 0.08),
+              DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      Colors.black.withValues(alpha: 0.16),
+                      Colors.black.withValues(alpha: 0.36),
+                    ],
                   ),
                 ),
               ),
               Padding(
-                padding: EdgeInsets.fromLTRB(16, topPadding + 52, 16, 16),
+                padding: EdgeInsets.fromLTRB(16, topPadding + 54, 16, 26),
                 child: user == null
                     ? const SizedBox.shrink()
-                    : _buildGlassHeroCard(context, user, l10n),
+                    : Align(
+                        alignment: Alignment.bottomCenter,
+                        child: _buildGlassHeroCard(context, user, l10n),
+                      ),
               ),
             ],
           ),
@@ -210,196 +205,224 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
         ? user.username![0].toUpperCase()
         : 'U';
     final roleLabel = _roleLabel(user.role, l10n);
+    final contactInfo = (user.phone?.isNotEmpty ?? false)
+        ? user.phone!
+        : (user.email.isNotEmpty ? user.email : null);
 
     return ClipRRect(
-      borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
+      borderRadius: BorderRadius.circular(22),
       child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 14, sigmaY: 14),
+        filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
         child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
           decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.14),
-            borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
+            gradient: LinearGradient(
+              begin: AlignmentDirectional.topStart,
+              end: AlignmentDirectional.bottomEnd,
+              colors: [
+                Colors.white.withValues(alpha: 0.16),
+                Colors.white.withValues(alpha: 0.08),
+              ],
+            ),
+            borderRadius: BorderRadius.circular(22),
             border: Border.all(
-              color: Colors.white.withValues(alpha: 0.25),
+              color: Colors.white.withValues(alpha: 0.24),
             ),
           ),
-          child: FittedBox(
-            fit: BoxFit.scaleDown,
-            child: SizedBox(
-              width: MediaQuery.sizeOf(context).width - 68,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
+          child: Row(
+            children: [
+              Stack(
+                clipBehavior: Clip.none,
                 children: [
-                  Stack(
-                    clipBehavior: Clip.none,
-                    children: [
-                      _GradientAvatarRing(
-                        child: ClipOval(
-                          child: SizedBox(
-                            width: 82,
-                            height: 82,
-                            child: user.avatarUrl?.isNotEmpty == true
-                                ? Image.network(
-                                    user.avatarUrl!,
-                                    fit: BoxFit.cover,
-                                    loadingBuilder: (
-                                      context,
-                                      child,
-                                      loadingProgress,
-                                    ) {
-                                      if (loadingProgress == null) {
-                                        return child;
-                                      }
-                                      return Container(
-                                        color: Colors.white.withValues(
-                                          alpha: 0.12,
-                                        ),
-                                        alignment: Alignment.center,
-                                        child: const SizedBox(
-                                          width: 22,
-                                          height: 22,
-                                          child: CircularProgressIndicator(
-                                            strokeWidth: 2,
-                                            color: Colors.white,
-                                          ),
-                                        ),
-                                      );
-                                    },
-                                    errorBuilder: (_, _, _) =>
-                                        _buildAvatarFallback(context, initial),
-                                  )
-                                : _buildAvatarFallback(context, initial),
-                          ),
-                        ),
-                      ),
-                      PositionedDirectional(
-                        bottom: -2,
-                        end: -2,
-                        child: GestureDetector(
-                          onTap: _isUploadingAvatar
-                              ? null
-                              : () => _onChangePhoto(context, user.id, l10n),
-                          child: AnimatedContainer(
-                            duration: const Duration(milliseconds: 200),
-                            padding: const EdgeInsets.all(7),
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              gradient: const LinearGradient(
-                                begin: AlignmentDirectional.topStart,
-                                end: AlignmentDirectional.bottomEnd,
-                                colors: [
-                                  AppColors.brandPurple,
-                                  AppColors.brandViolet,
-                                ],
-                              ),
-                              border: Border.all(
-                                color: Colors.white,
-                                width: 2,
-                              ),
-                              boxShadow: const [
-                                BoxShadow(
-                                  color: Color(0x3D5B3DF0),
-                                  blurRadius: 12,
-                                  offset: Offset(0, 4),
-                                ),
-                              ],
-                            ),
-                            child: _isUploadingAvatar
-                                ? const SizedBox(
-                                    width: 15,
-                                    height: 15,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2,
-                                      color: Colors.white,
+                  _GradientAvatarRing(
+                    child: ClipOval(
+                      child: SizedBox(
+                        width: 74,
+                        height: 74,
+                        child: user.avatarUrl?.isNotEmpty == true
+                            ? Image.network(
+                                user.avatarUrl!,
+                                fit: BoxFit.cover,
+                                loadingBuilder: (
+                                  context,
+                                  child,
+                                  loadingProgress,
+                                ) {
+                                  if (loadingProgress == null) {
+                                    return child;
+                                  }
+                                  return Container(
+                                    color: Colors.white.withValues(
+                                      alpha: 0.12,
                                     ),
-                                  )
-                                : const Icon(
-                                    Icons.camera_alt_rounded,
-                                    size: 15,
-                                    color: Colors.white,
-                                  ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 10),
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Flexible(
-                        child: Text(
-                          user.fullName ?? user.username ?? l10n.user,
-                          style: context.textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.w800,
-                            color: Colors.white,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          textAlign: TextAlign.center,
-                        ),
-                      ),
-                      if (user.verificationStatus.isApproved) ...[
-                        const SizedBox(width: 6),
-                        const Icon(
-                          Icons.verified_rounded,
-                          size: 18,
-                          color: Colors.white,
-                        ),
-                      ],
-                    ],
-                  ),
-                  if (user.username?.isNotEmpty == true) ...[
-                    const SizedBox(height: 2),
-                    Text(
-                      '@${user.username}',
-                      style: context.textTheme.bodySmall?.copyWith(
-                        color: Colors.white.withValues(alpha: 0.88),
-                        fontWeight: FontWeight.w600,
+                                    alignment: Alignment.center,
+                                    child: const SizedBox(
+                                      width: 20,
+                                      height: 20,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                  );
+                                },
+                                errorBuilder: (_, _, _) =>
+                                    _buildAvatarFallback(context, initial),
+                              )
+                            : _buildAvatarFallback(context, initial),
                       ),
                     ),
-                  ],
-                  const SizedBox(height: 10),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 6,
-                    alignment: WrapAlignment.center,
-                    crossAxisAlignment: WrapCrossAlignment.center,
-                    children: [
-                      if (roleLabel != null) _RoleChip(label: roleLabel),
-                      FilledButton.icon(
-                        onPressed: () =>
-                            _showEditProfileSheet(context, user, l10n),
-                        style: FilledButton.styleFrom(
-                          backgroundColor: Colors.white.withValues(alpha: 0.22),
-                          foregroundColor: Colors.white,
-                          elevation: 0,
-                          visualDensity: VisualDensity.compact,
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 14,
-                            vertical: 8,
+                  ),
+                  PositionedDirectional(
+                    bottom: -2,
+                    end: -2,
+                    child: GestureDetector(
+                      onTap: _isUploadingAvatar
+                          ? null
+                          : () => _onChangePhoto(context, user.id, l10n),
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 200),
+                        padding: const EdgeInsets.all(6),
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          gradient: const LinearGradient(
+                            begin: AlignmentDirectional.topStart,
+                            end: AlignmentDirectional.bottomEnd,
+                            colors: [
+                              AppColors.brandPurple,
+                              AppColors.brandViolet,
+                            ],
                           ),
-                          shape: const RoundedRectangleBorder(
-                            borderRadius: AppSpacing.borderRadiusFull,
-                            side: BorderSide(color: Colors.white38),
-                          ),
-                        ),
-                        icon: const Icon(Icons.edit_outlined, size: 15),
-                        label: Text(
-                          l10n.editProfile,
-                          style: context.textTheme.labelMedium?.copyWith(
+                          border: Border.all(
                             color: Colors.white,
-                            fontWeight: FontWeight.w700,
+                            width: 1.8,
                           ),
+                          boxShadow: const [
+                            BoxShadow(
+                              color: Color(0x45170B3B),
+                              blurRadius: 10,
+                              offset: Offset(0, 3),
+                            ),
+                          ],
                         ),
+                        child: _isUploadingAvatar
+                            ? const SizedBox(
+                                width: 14,
+                                height: 14,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: Colors.white,
+                                ),
+                              )
+                            : const Icon(
+                                Icons.camera_alt_rounded,
+                                size: 14,
+                                color: Colors.white,
+                              ),
                       ),
-                    ],
+                    ),
                   ),
                 ],
               ),
-            ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Flexible(
+                          child: Text(
+                            user.fullName ?? user.username ?? l10n.user,
+                            style: context.textTheme.titleMedium?.copyWith(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w800,
+                              color: Colors.white,
+                              letterSpacing: -0.2,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        if (user.verificationStatus.isApproved) ...[
+                          const SizedBox(width: 6),
+                          const Icon(
+                            Icons.verified_rounded,
+                            size: 18,
+                            color: AppColors.brandGold,
+                          ),
+                        ],
+                      ],
+                    ),
+                    if (user.username?.isNotEmpty == true) ...[
+                      const SizedBox(height: 2),
+                      Text(
+                        '@${user.username}',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: context.textTheme.bodySmall?.copyWith(
+                          color: Colors.white.withValues(alpha: 0.84),
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ] else if (contactInfo != null) ...[
+                      const SizedBox(height: 2),
+                      Text(
+                        contactInfo,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: context.textTheme.bodySmall?.copyWith(
+                          color: Colors.white.withValues(alpha: 0.82),
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                    const SizedBox(height: 10),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 6,
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      children: [
+                        if (roleLabel != null) _RoleChip(label: roleLabel),
+                        FilledButton.icon(
+                          onPressed: () =>
+                              _showEditProfileSheet(context, user, l10n),
+                          style: FilledButton.styleFrom(
+                            backgroundColor: Colors.white.withValues(
+                              alpha: 0.18,
+                            ),
+                            foregroundColor: Colors.white,
+                            elevation: 0,
+                            minimumSize: Size.zero,
+                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                            visualDensity: VisualDensity.compact,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 6,
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: AppSpacing.borderRadiusFull,
+                              side: BorderSide(
+                                color: Colors.white.withValues(alpha: 0.32),
+                              ),
+                            ),
+                          ),
+                          icon: const Icon(Icons.edit_outlined, size: 14),
+                          label: Text(
+                            l10n.editProfile,
+                            style: context.textTheme.labelSmall?.copyWith(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
         ),
       ),
@@ -416,19 +439,19 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
             _BentoActionItem(
               icon: Icons.account_balance_wallet_rounded,
               label: l10n.financialCenter,
-              accent: const Color(0xFF10B981),
+              accent: AppColors.brandPurple,
               onTap: () => context.push('/provider-financial-center'),
             ),
             _BentoActionItem(
               icon: Icons.receipt_long_rounded,
               label: l10n.viewOrders,
-              accent: AppColors.brandPurple,
+              accent: AppColors.brandViolet,
               onTap: () => context.push('/merchant-dashboard/orders'),
             ),
             _BentoActionItem(
               icon: Icons.storefront_rounded,
               label: l10n.storefront,
-              accent: AppColors.brandBlue,
+              accent: AppColors.brandGold,
               onTap: () => context.push('/merchant-dashboard/storefront'),
             ),
           ]
@@ -436,7 +459,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
             _BentoActionItem(
               icon: Icons.account_balance_wallet_rounded,
               label: l10n.wallet,
-              accent: const Color(0xFF10B981),
+              accent: AppColors.brandPurple,
               onTap: () => context.push('/wallet'),
             ),
             _BentoActionItem(
@@ -448,7 +471,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
             _BentoActionItem(
               icon: Icons.receipt_long_rounded,
               label: l10n.previousOrders,
-              accent: AppColors.brandPurple,
+              accent: AppColors.brandViolet,
               onTap: () => context.push('/market/orders'),
             ),
           ];
@@ -699,25 +722,26 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     bool isProvider,
     AppLocalizations l10n,
   ) {
+    final primary = context.colorScheme.primary;
     return _SectionCard(
       title: l10n.account,
       children: [
         _SectionTile(
           icon: Icons.lock_outline_rounded,
-          color: AppColors.warningLight,
+          color: primary,
           title: l10n.privacySecurity,
           onTap: () => context.push('/settings/privacy-security'),
         ),
         if (isProvider)
           _SectionTile(
             icon: Icons.schedule_rounded,
-            color: AppColors.brandViolet,
+            color: primary,
             title: l10n.availability,
             onTap: () => context.push('/provider-availability'),
           ),
         _SectionTile(
           icon: Icons.notifications_outlined,
-          color: AppColors.infoLight,
+          color: primary,
           title: l10n.notifications,
           onTap: () => context.push('/notifications'),
         ),
@@ -731,6 +755,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     ThemeMode themeMode,
     Locale locale,
   ) {
+    final cs = context.colorScheme;
     final themeLabel = switch (themeMode) {
       ThemeMode.light => l10n.lightMode,
       ThemeMode.dark => l10n.darkMode,
@@ -745,31 +770,33 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
       title: l10n.appearance,
       children: [
         Padding(
-          padding: const EdgeInsets.fromLTRB(16, 12, 16, 14),
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
                 children: [
-                  _IconTile(icon: themeIcon, color: AppColors.brandViolet),
+                  _IconTile(icon: themeIcon, color: cs.primary),
                   const SizedBox(width: 12),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        l10n.theme,
-                        style: context.textTheme.bodyLarge?.copyWith(
-                          fontWeight: FontWeight.w700,
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          l10n.theme,
+                          style: context.textTheme.bodyMedium?.copyWith(
+                            fontWeight: FontWeight.w700,
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        themeLabel,
-                        style: context.textTheme.bodySmall?.copyWith(
-                          color: context.colorScheme.onSurfaceVariant,
+                        const SizedBox(height: 2),
+                        Text(
+                          themeLabel,
+                          style: context.textTheme.bodySmall?.copyWith(
+                            color: cs.onSurfaceVariant,
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ],
               ),
@@ -799,36 +826,38 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
           ),
         ),
         Padding(
-          padding: const EdgeInsets.fromLTRB(16, 6, 16, 14),
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
                 children: [
-                  const _IconTile(
+                  _IconTile(
                     icon: Icons.language_rounded,
-                    color: AppColors.brandPurple,
+                    color: cs.primary,
                   ),
                   const SizedBox(width: 12),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        l10n.language,
-                        style: context.textTheme.bodyLarge?.copyWith(
-                          fontWeight: FontWeight.w700,
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          l10n.language,
+                          style: context.textTheme.bodyMedium?.copyWith(
+                            fontWeight: FontWeight.w700,
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        locale.languageCode == 'ar'
-                            ? l10n.arabicLanguageName
-                            : l10n.englishLanguageName,
-                        style: context.textTheme.bodySmall?.copyWith(
-                          color: context.colorScheme.onSurfaceVariant,
+                        const SizedBox(height: 2),
+                        Text(
+                          locale.languageCode == 'ar'
+                              ? l10n.arabicLanguageName
+                              : l10n.englishLanguageName,
+                          style: context.textTheme.bodySmall?.copyWith(
+                            color: cs.onSurfaceVariant,
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ],
               ),
@@ -861,37 +890,38 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     BuildContext context,
     AppLocalizations l10n,
   ) {
+    final primary = context.colorScheme.primary;
     return _SectionCard(
       title: l10n.support,
       children: [
         _SectionTile(
           icon: Icons.help_outline_rounded,
-          color: AppColors.infoLight,
+          color: primary,
           title: l10n.helpCenter,
           onTap: () => context.push('/settings/help-center'),
         ),
         _SectionTile(
           icon: Icons.support_agent_rounded,
-          color: AppColors.brandPurple,
+          color: primary,
           title: l10n.support,
           onTap: () => context.push('/support'),
         ),
         _SectionTile(
           icon: Icons.info_outline_rounded,
-          color: AppColors.brandViolet,
+          color: primary,
           title: l10n.about,
           subtitle: l10n.version,
           onTap: () => context.push('/settings/about'),
         ),
         _SectionTile(
           icon: Icons.description_outlined,
-          color: AppColors.successLight,
+          color: primary,
           title: l10n.termsOfService,
           onTap: () => context.push('/settings/terms-of-service'),
         ),
         _SectionTile(
           icon: Icons.privacy_tip_outlined,
-          color: AppColors.warningLight,
+          color: primary,
           title: l10n.privacyPolicy,
           onTap: () => context.push('/settings/privacy-policy'),
         ),
@@ -903,47 +933,56 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     BuildContext context,
     AppLocalizations l10n,
   ) {
-    return OutlinedButton.icon(
-      onPressed: () {
-        showDialog<void>(
-          context: context,
-          builder: (dialogContext) => AlertDialog(
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(AppSpacing.radiusDialog),
-            ),
-            title: Text(l10n.logout),
-            content: Text(l10n.areYouSureYouWantToLogout),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(dialogContext).pop(),
-                child: Text(l10n.cancel),
+    final errorColor = context.colorScheme.error;
+    return SizedBox(
+      width: double.infinity,
+      child: OutlinedButton.icon(
+        onPressed: () {
+          showDialog<void>(
+            context: context,
+            builder: (dialogContext) => AlertDialog(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(AppSpacing.radiusDialog),
               ),
-              TextButton(
-                onPressed: () {
-                  Navigator.of(dialogContext).pop();
-                  ref.read(authStateProvider.notifier).signOut();
-                },
-                child: Text(
-                  l10n.logout,
-                  style: TextStyle(color: context.colorScheme.error),
+              title: Text(l10n.logout),
+              content: Text(l10n.areYouSureYouWantToLogout),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(dialogContext).pop(),
+                  child: Text(l10n.cancel),
                 ),
-              ),
-            ],
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(dialogContext).pop();
+                    ref.read(authStateProvider.notifier).signOut();
+                  },
+                  child: Text(
+                    l10n.logout,
+                    style: TextStyle(color: errorColor),
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
+        icon: Icon(Icons.logout_rounded, size: 20, color: errorColor),
+        label: Text(
+          l10n.logout,
+          style: context.textTheme.labelLarge?.copyWith(
+            color: errorColor,
+            fontWeight: FontWeight.w700,
           ),
-        );
-      },
-      icon: Icon(Icons.logout_rounded, color: context.colorScheme.error),
-      label: Text(
-        l10n.logout,
-        style: TextStyle(color: context.colorScheme.error),
-      ),
-      style: OutlinedButton.styleFrom(
-        side: BorderSide(
-          color: context.colorScheme.error.withValues(alpha: 0.5),
         ),
-        padding: const EdgeInsets.symmetric(vertical: 16),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(AppSpacing.radiusButton),
+        style: OutlinedButton.styleFrom(
+          backgroundColor: errorColor.withValues(alpha: 0.06),
+          side: BorderSide(
+            color: errorColor.withValues(alpha: 0.35),
+            width: 1.2,
+          ),
+          padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 18),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
         ),
       ),
     );
@@ -974,12 +1013,12 @@ class _BentoActionTile extends StatelessWidget {
     return PremiumCard(
       onTap: item.onTap,
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 14),
-      radius: 20,
+      radius: 18,
       gradient: LinearGradient(
         begin: AlignmentDirectional.topStart,
         end: AlignmentDirectional.bottomEnd,
         colors: [
-          item.accent.withValues(alpha: 0.14),
+          item.accent.withValues(alpha: 0.12),
           context.colorScheme.surfaceContainerLowest,
         ],
       ),
@@ -988,20 +1027,23 @@ class _BentoActionTile extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Container(
-            width: 44,
-            height: 44,
+            width: 42,
+            height: 42,
             decoration: BoxDecoration(
-              shape: BoxShape.circle,
+              borderRadius: BorderRadius.circular(13),
               gradient: LinearGradient(
                 begin: AlignmentDirectional.topStart,
                 end: AlignmentDirectional.bottomEnd,
                 colors: [
-                  item.accent.withValues(alpha: 0.25),
-                  item.accent.withValues(alpha: 0.10),
+                  item.accent.withValues(alpha: 0.20),
+                  item.accent.withValues(alpha: 0.08),
                 ],
               ),
+              border: Border.all(
+                color: item.accent.withValues(alpha: 0.22),
+              ),
             ),
-            child: Icon(item.icon, size: 22, color: item.accent),
+            child: Icon(item.icon, size: 21, color: item.accent),
           ),
           const SizedBox(height: 10),
           Text(
@@ -1322,26 +1364,49 @@ class _SectionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = context.colorScheme;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
           padding: const EdgeInsetsDirectional.only(start: 4, bottom: 10),
-          child: Text(
-            title,
-            style: context.textTheme.titleSmall?.copyWith(
-              fontWeight: FontWeight.w700,
-              color: context.colorScheme.onSurfaceVariant,
-            ),
+          child: Row(
+            children: [
+              Container(
+                width: 4,
+                height: 16,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(4),
+                  gradient: const LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      AppColors.brandPurple,
+                      AppColors.brandViolet,
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Text(
+                title,
+                style: context.textTheme.titleSmall?.copyWith(
+                  fontWeight: FontWeight.w800,
+                  color: cs.onSurface,
+                  letterSpacing: 0.15,
+                ),
+              ),
+            ],
           ),
         ),
         PremiumCard(
-          padding: const EdgeInsets.symmetric(vertical: 6),
-          color: context.colorScheme.surfaceContainerLowest.withValues(
-            alpha: 0.92,
+          padding: const EdgeInsets.symmetric(vertical: 4),
+          radius: 20,
+          color: cs.surfaceContainerLowest.withValues(
+            alpha: 0.94,
           ),
-          borderColor: context.colorScheme.outlineVariant.withValues(
-            alpha: 0.18,
+          borderColor: cs.outlineVariant.withValues(
+            alpha: 0.22,
           ),
           child: Material(
             type: MaterialType.transparency,
@@ -1352,10 +1417,10 @@ class _SectionCard extends StatelessWidget {
                   children: [
                     if (index > 0)
                       Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        padding: const EdgeInsets.symmetric(horizontal: 14),
                         child: Divider(
                           height: 1,
-                          color: context.colorScheme.outlineVariant.withValues(
+                          color: cs.outlineVariant.withValues(
                             alpha: 0.25,
                           ),
                         ),
@@ -1389,18 +1454,31 @@ class _SectionTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = context.colorScheme;
     return ListTile(
+      contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 2),
+      minVerticalPadding: 10,
       leading: _IconTile(icon: icon, color: color),
       title: Text(
         title,
-        style: context.textTheme.bodyLarge?.copyWith(
-          fontWeight: FontWeight.w600,
+        style: context.textTheme.bodyMedium?.copyWith(
+          fontWeight: FontWeight.w700,
+          color: cs.onSurface,
         ),
       ),
       subtitle: subtitle == null
           ? null
-          : Text(subtitle!, style: context.textTheme.bodySmall),
-      trailing: const Icon(Icons.chevron_right_rounded),
+          : Text(
+              subtitle!,
+              style: context.textTheme.bodySmall?.copyWith(
+                color: cs.onSurfaceVariant,
+              ),
+            ),
+      trailing: Icon(
+        Icons.chevron_right_rounded,
+        size: 20,
+        color: cs.onSurfaceVariant.withValues(alpha: 0.7),
+      ),
       onTap: onTap,
     );
   }
@@ -1415,17 +1493,16 @@ class _IconTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 44,
-      height: 44,
+      width: 38,
+      height: 38,
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: AlignmentDirectional.topStart,
-          end: AlignmentDirectional.bottomEnd,
-          colors: [color.withValues(alpha: 0.22), color.withValues(alpha: 0.08)],
+        color: color.withValues(alpha: 0.10),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: color.withValues(alpha: 0.16),
         ),
-        borderRadius: BorderRadius.circular(14),
       ),
-      child: Icon(icon, size: 22, color: color),
+      child: Icon(icon, size: 20, color: color),
     );
   }
 }
@@ -1438,21 +1515,31 @@ class _RoleChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          begin: AlignmentDirectional.topStart,
-          end: AlignmentDirectional.bottomEnd,
-          colors: [AppColors.brandPurple, AppColors.brandViolet],
-        ),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      decoration: BoxDecoration(
+        color: AppColors.brandGold.withValues(alpha: 0.20),
         borderRadius: AppSpacing.borderRadiusFull,
-      ),
-      child: Text(
-        label,
-        style: context.textTheme.labelSmall?.copyWith(
-          color: Colors.white,
-          fontWeight: FontWeight.w700,
+        border: Border.all(
+          color: AppColors.brandGold.withValues(alpha: 0.55),
         ),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(
+            Icons.workspace_premium_rounded,
+            size: 13,
+            color: AppColors.brandGold,
+          ),
+          const SizedBox(width: 4),
+          Text(
+            label,
+            style: context.textTheme.labelSmall?.copyWith(
+              color: Colors.white,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -1466,18 +1553,22 @@ class _GradientAvatarRing extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(3),
+      padding: const EdgeInsets.all(2.5),
       decoration: const BoxDecoration(
         shape: BoxShape.circle,
         gradient: LinearGradient(
           begin: AlignmentDirectional.topStart,
           end: AlignmentDirectional.bottomEnd,
-          colors: [AppColors.brandPurple, AppColors.brandViolet],
+          colors: [
+            AppColors.brandGold,
+            AppColors.brandViolet,
+            AppColors.brandPurple,
+          ],
         ),
         boxShadow: [
           BoxShadow(
-            color: Color(0x3D5B3DF0),
-            blurRadius: 18,
+            color: Color(0x42170B3B),
+            blurRadius: 16,
             offset: Offset(0, 6),
           ),
         ],
@@ -1525,3 +1616,48 @@ class _GuestAvatar extends StatelessWidget {
     );
   }
 }
+
+class _ProfileHeroWaveClipper extends CustomClipper<Path> {
+  const _ProfileHeroWaveClipper();
+
+  @override
+  Path getClip(Size size) {
+    final w = size.width;
+    final h = size.height;
+    final path = Path()..lineTo(0, h - 18);
+
+    path.quadraticBezierTo(
+      w * 0.12,
+      h,
+      w * 0.28,
+      h - 10,
+    );
+    path.quadraticBezierTo(
+      w * 0.44,
+      h - 22,
+      w * 0.60,
+      h - 8,
+    );
+    path.quadraticBezierTo(
+      w * 0.76,
+      h + 2,
+      w * 0.90,
+      h - 14,
+    );
+    path.quadraticBezierTo(
+      w * 0.96,
+      h - 21,
+      w,
+      h - 16,
+    );
+
+    path
+      ..lineTo(w, 0)
+      ..close();
+    return path;
+  }
+
+  @override
+  bool shouldReclip(covariant CustomClipper<Path> oldClipper) => false;
+}
+

@@ -53,8 +53,6 @@ class AuthStateNotifier extends Notifier<AuthState> {
   SignInWithPhoneUseCase get _signInWithPhoneUseCase =>
       ref.read(signInWithPhoneUseCaseProvider);
   VerifyOTPUseCase get _verifyOTPUseCase => ref.read(verifyOTPUseCaseProvider);
-  SignInAnonymouslyUseCase get _signInAnonymouslyUseCase =>
-      ref.read(signInAnonymouslyUseCaseProvider);
   SignOutUseCase get _signOutUseCase => ref.read(signOutUseCaseProvider);
   ResetPasswordUseCase get _resetPasswordUseCase =>
       ref.read(resetPasswordUseCaseProvider);
@@ -269,20 +267,6 @@ class AuthStateNotifier extends Notifier<AuthState> {
       state = _resolveAuthenticated(user);
     } catch (e) {
       _logger.e('OTP verification failed', e);
-      final failure = handleException(e);
-      state = AuthState.error(message: failure.message);
-    }
-  }
-
-  Future<void> signInAnonymously() async {
-    state = const AuthState.loading();
-    try {
-      await _signInAnonymouslyUseCase();
-      await _refreshRequireProviderDocuments();
-      final user = await ref.read(getCurrentUserUseCaseProvider).call();
-      state = _resolveAuthenticated(user);
-    } catch (e) {
-      _logger.e('Anonymous sign in failed', e);
       final failure = handleException(e);
       state = AuthState.error(message: failure.message);
     }

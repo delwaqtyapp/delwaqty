@@ -289,20 +289,6 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<AuthResult> signInAnonymously() async {
-    try {
-      final response = await _dataSource.signInAnonymously();
-      return _mapAuthResponse(response);
-    } on sb.AuthException catch (e) {
-      _logger.e('Anonymous sign in error', e);
-      throw AuthException(message: e.message);
-    } catch (e) {
-      _logger.e('Unexpected anonymous sign in error', e);
-      throw ServerException(message: e.toString());
-    }
-  }
-
-  @override
   Future<void> signOut() async {
     try {
       await _dataSource.signOut();

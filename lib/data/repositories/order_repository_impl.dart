@@ -49,6 +49,8 @@ class OrderRepositoryImpl implements OrderRepository {
     double? deliveryLongitude,
     String? paymentMethod,
     String? specialInstructions,
+    String? couponCode,
+    String? idempotencyKey,
   }) async {
     try {
       return await _dataSource.createOrder(
@@ -64,6 +66,8 @@ class OrderRepositoryImpl implements OrderRepository {
         deliveryLongitude: deliveryLongitude,
         paymentMethod: paymentMethod,
         specialInstructions: specialInstructions,
+        couponCode: couponCode,
+        idempotencyKey: idempotencyKey,
       );
     } catch (e) {
       throw ServerException(message: e.toString());

@@ -21,6 +21,8 @@ abstract interface class OrderRepository {
     double? deliveryLongitude,
     String? paymentMethod,
     String? specialInstructions,
+    String? couponCode,
+    String? idempotencyKey,
   });
   Future<Order> cancelOrder({required String orderId, String? reason});
 }

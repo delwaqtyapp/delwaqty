@@ -199,62 +199,41 @@ class SupabaseOrderDataSource {
     double? deliveryLongitude,
     String? paymentMethod,
     String? specialInstructions,
+    String? couponCode,
+    String? idempotencyKey,
   }) async {
     try {
-      final userId = _userId;
-      if (userId == null) throw Exception('User not authenticated');
+      if (_userId == null) throw Exception('User not authenticated');
 
-      final orderData = await _client
-          .from(_ordersTable)
-          .insert({
-            'user_id': userId,
-            'merchant_id': merchantId,
-            'merchant_name': merchantName,
-            'status': OrderStatus.pending.name,
-            'subtotal': subtotal,
-            'total_amount': total,
-            'delivery_fee': deliveryFee,
-            'tax': 0,
-            'discount': discount,
-            'delivery_address': deliveryAddress,
-            'delivery_latitude': deliveryLatitude,
-            'delivery_longitude': deliveryLongitude,
-            'payment_method': paymentMethod ?? 'cash',
-            'special_instructions': specialInstructions,
-          })
-          .select()
-          .single();
-
-      final orderId = orderData['id'] as String;
-
-      for (final item in items) {
-        await _client.from(_itemsTable).insert({
-          'order_id': orderId,
-          'product_id': item.productId,
-          'product_name': item.productName,
-          'variant_name': item.variantName,
-          'quantity': item.quantity,
-          'unit_price': item.unitPrice,
-          'total_price': item.unitPrice * item.quantity,
-        });
-      }
-
-      _logger.i('Created order: $orderId');
-      return _fromRow(
-        orderData,
-        items
-            .map(
-              (ci) => {
-                'product_id': ci.productId,
-                'product_name': ci.productName,
-                'variant_name': ci.variantName,
-                'quantity': ci.quantity,
-                'unit_price': ci.unitPrice,
-                'total_price': ci.unitPrice * ci.quantity,
-              },
-            )
-            .toList(),
+      // Server-side checkout (migration 157): prices, fee and coupon discount
+      // are computed from the database; the client only sends item ids/qtys.
+      final res = await _client.rpc(
+        'create_order',
+        params: {
+          'p_merchant_id': merchantId,
+          'p_items': items
+              .map(
+                (ci) => {'product_id': ci.productId, 'quantity': ci.quantity},
+              )
+              .toList(),
+          'p_delivery_address': deliveryAddress,
+          'p_delivery_latitude': deliveryLatitude,
+          'p_delivery_longitude': deliveryLongitude,
+          'p_payment_method': paymentMethod ?? 'cash',
+          'p_coupon_code': couponCode,
+          'p_special_instructions': specialInstructions,
+          'p_idempotency_key': idempotencyKey,
+        },
       );
+      final map = Map<String, dynamic>.from(res as Map);
+      if (map['ok'] != true) {
+        throw Exception('create_order failed: ${map['code'] ?? map}');
+      }
+      final orderId = map['order_id'] as String;
+      return getOrderById(orderId).then((order) {
+        if (order == null) throw Exception('order $orderId not readable');
+        return order;
+      });
     } catch (e, stack) {
       _logger.e('Failed to create order', e, stack);
       rethrow;
@@ -263,28 +242,18 @@ class SupabaseOrderDataSource {
 
   Future<Order> cancelOrder({required String orderId, String? reason}) async {
     try {
-      final data = await _client
-          .from(_ordersTable)
-          .update({
-            'status': OrderStatus.cancelled.name,
-            'cancelled_reason': reason,
-            'cancelled_at': DateTime.now().toIso8601String(),
-            'updated_at': DateTime.now().toIso8601String(),
-          })
-          .eq('id', orderId)
-          .select()
-          .single();
-
-      final itemsData = await _client
-          .from(_itemsTable)
-          .select()
-          .eq('order_id', orderId);
-      final items = (itemsData as List)
-          .map((i) => i as Map<String, dynamic>)
-          .toList();
-
-      _logger.i('Cancelled order: $orderId');
-      return _fromRow(data, items);
+      // Guarded RPC path (direct updates are frozen by the 151 lockdown).
+      final res = await _client.rpc(
+        'cancel_order',
+        params: {'p_order_id': orderId, 'p_reason': reason},
+      );
+      final map = Map<String, dynamic>.from(res as Map);
+      if (map['ok'] != true) {
+        throw Exception('cancel_order refused: ${map['code'] ?? map}');
+      }
+      final order = await getOrderById(orderId);
+      if (order == null) throw Exception('order $orderId not readable');
+      return order;
     } catch (e, stack) {
       _logger.e('Failed to cancel order: $orderId', e, stack);
       rethrow;

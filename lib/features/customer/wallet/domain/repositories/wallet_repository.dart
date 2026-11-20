@@ -19,6 +19,7 @@ abstract interface class WalletRepository {
     double amount,
     String description, {
     String? referenceId,
+    String? referenceType,
   });
   Future<WalletTransaction?> getTransactionById(String transactionId);
 }

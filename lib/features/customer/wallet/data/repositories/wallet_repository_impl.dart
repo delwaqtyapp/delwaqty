@@ -34,7 +34,14 @@ class WalletRepositoryImpl implements WalletRepository {
     double amount,
     String description, {
     String? referenceId,
-  }) => _dataSource.pay(userId, amount, description, referenceId: referenceId);
+    String? referenceType,
+  }) => _dataSource.pay(
+    userId,
+    amount,
+    description,
+    referenceId: referenceId,
+    referenceType: referenceType,
+  );
 
   @override
   Future<WalletTransaction?> getTransactionById(String transactionId) =>

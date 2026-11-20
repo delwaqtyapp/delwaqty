@@ -42,6 +42,8 @@ class _AdminComplaintsPageState extends ConsumerState<AdminComplaintsPage> {
                 icon: Icons.error_outline,
                 title: l10n.error,
                 message: appErrorText(context, e),
+                actionLabel: l10n.retry,
+                onAction: () => ref.invalidate(complaintsProvider),
               ),
               data: (complaints) {
                 final filtered = _applyFilters(complaints);
@@ -81,7 +83,7 @@ class _AdminComplaintsPageState extends ConsumerState<AdminComplaintsPage> {
             child: DropdownButtonFormField<String>(
               initialValue: _statusFilter,
               decoration: InputDecoration(
-                labelText: 'Status',
+                labelText: l10n.status,
                 isDense: true,
                 contentPadding: const EdgeInsets.symmetric(
                   horizontal: 12,
@@ -98,7 +100,15 @@ class _AdminComplaintsPageState extends ConsumerState<AdminComplaintsPage> {
                 'resolved',
                 'rejected',
                 'escalated',
-              ].map((s) => DropdownMenuItem(value: s, child: Text(s))).toList(),
+                'closed',
+              ]
+                  .map(
+                    (s) => DropdownMenuItem(
+                      value: s,
+                      child: Text(_complaintStatusLabel(l10n, s)),
+                    ),
+                  )
+                  .toList(),
               onChanged: (v) => setState(() => _statusFilter = v!),
             ),
           ),
@@ -124,7 +134,14 @@ class _AdminComplaintsPageState extends ConsumerState<AdminComplaintsPage> {
                 'customer',
                 'provider',
                 'other',
-              ].map((s) => DropdownMenuItem(value: s, child: Text(s))).toList(),
+              ]
+                  .map(
+                    (s) => DropdownMenuItem(
+                      value: s,
+                      child: Text(_complaintTypeLabel(l10n, s)),
+                    ),
+                  )
+                  .toList(),
               onChanged: (v) => setState(() => _typeFilter = v!),
             ),
           ),
@@ -162,6 +179,61 @@ class _AdminComplaintsPageState extends ConsumerState<AdminComplaintsPage> {
         onStatusChanged: () => ref.invalidate(complaintsProvider),
       ),
     );
+  }
+}
+
+String _complaintStatusLabel(AppLocalizations l10n, String status) {
+  switch (status) {
+    case 'all':
+      return l10n.all;
+    case 'pending':
+      return l10n.pending;
+    case 'investigating':
+      return l10n.inProgress;
+    case 'resolved':
+      return l10n.resolved;
+    case 'rejected':
+      return l10n.rejected;
+    case 'escalated':
+      return l10n.escalated;
+    case 'closed':
+      return l10n.closed;
+    default:
+      return status;
+  }
+}
+
+String _complaintTypeLabel(AppLocalizations l10n, String type) {
+  switch (type) {
+    case 'all':
+      return l10n.all;
+    case 'driver':
+      return l10n.driver;
+    case 'merchant':
+      return l10n.merchant;
+    case 'customer':
+      return l10n.customer;
+    case 'provider':
+      return l10n.provider;
+    case 'other':
+      return l10n.other;
+    default:
+      return type;
+  }
+}
+
+String _complaintPriorityLabel(AppLocalizations l10n, String priority) {
+  switch (priority) {
+    case 'low':
+      return l10n.lowPriority;
+    case 'medium':
+      return l10n.mediumPriority;
+    case 'high':
+      return l10n.highPriority;
+    case 'urgent':
+      return l10n.urgent;
+    default:
+      return priority;
   }
 }
 
@@ -219,12 +291,12 @@ class _ComplaintTile extends StatelessWidget {
               overflow: TextOverflow.ellipsis,
             ),
             subtitle: Text(
-              '${complaint.complaintType} Â· ${complaint.status}',
+              '${_complaintTypeLabel(l10n, complaint.complaintType)} · ${_complaintStatusLabel(l10n, complaint.status)}',
               maxLines: 1,
             ),
             trailing: Chip(
               label: Text(
-                complaint.priority,
+                _complaintPriorityLabel(l10n, complaint.priority),
                 style: const TextStyle(fontSize: 10),
               ),
               backgroundColor: complaint.priority == 'urgent'
@@ -397,21 +469,48 @@ class _ComplaintDetailSheetState extends ConsumerState<_ComplaintDetailSheet> {
                 children: [
                   Chip(
                     label: Text(
-                      '${AppLocalizations.of(context).type}: ${c.complaintType}',
+                      '${AppLocalizations.of(context).type}: ${_complaintTypeLabel(AppLocalizations.of(context), c.complaintType)}',
                     ),
                   ),
                   const SizedBox(width: 8),
-                  Chip(label: Text('${AppLocalizations.of(context).statusLabel}: ${c.status}')),
+                  Chip(
+                    label: Text(
+                      '${AppLocalizations.of(context).statusLabel}: ${_complaintStatusLabel(AppLocalizations.of(context), c.status)}',
+                    ),
+                  ),
                 ],
               ),
               const SizedBox(height: 16),
               DropdownButtonFormField<String>(
-                initialValue: _selectedStatus,
+                initialValue: const [
+                  'pending',
+                  'investigating',
+                  'resolved',
+                  'rejected',
+                  'escalated',
+                  'closed',
+                ].contains(_selectedStatus)
+                    ? _selectedStatus
+                    : null,
                 decoration: InputDecoration(
                   labelText: AppLocalizations.of(context).updateStatus,
                 ),
-                items: ['pending', 'investigating', 'resolved', 'rejected']
-                    .map((s) => DropdownMenuItem(value: s, child: Text(s)))
+                items: [
+                  'pending',
+                  'investigating',
+                  'resolved',
+                  'rejected',
+                  'escalated',
+                  'closed',
+                ]
+                    .map(
+                      (s) => DropdownMenuItem(
+                        value: s,
+                        child: Text(
+                          _complaintStatusLabel(AppLocalizations.of(context), s),
+                        ),
+                      ),
+                    )
                     .toList(),
                 onChanged: (v) => setState(() => _selectedStatus = v!),
               ),

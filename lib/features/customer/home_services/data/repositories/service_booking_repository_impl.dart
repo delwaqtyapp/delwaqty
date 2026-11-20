@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:delwaqty/services/supabase/supabase_service.dart';
 import '../../domain/entities/service_category.dart';
 import '../../domain/entities/service_provider.dart';
 import '../../domain/entities/service_booking.dart';
@@ -37,8 +38,41 @@ class ServiceBookingRepositoryImpl implements ServiceBookingRepository {
     final response = await query
         .eq('is_available', true)
         .order('rating', ascending: false);
-    return (response as List)
+    final list = (response as List)
         .map((json) => ServiceProvider.fromJson(json))
+        .toList();
+    if (list.isNotEmpty || categoryType == null) {
+      return list;
+    }
+
+    var fallbackQuery = _client
+        .from('service_providers')
+        .select()
+        .eq('category_type', 'home_services');
+    if (city != null) {
+      fallbackQuery = fallbackQuery.eq('city', city);
+    }
+    var fallbackResponse = await fallbackQuery
+        .eq('is_available', true)
+        .order('rating', ascending: false);
+
+    if ((fallbackResponse as List).isEmpty) {
+      var allQuery = _client.from('service_providers').select();
+      if (city != null) {
+        allQuery = allQuery.eq('city', city);
+      }
+      fallbackResponse = await allQuery
+          .eq('is_available', true)
+          .order('rating', ascending: false);
+    }
+
+    return (fallbackResponse as List)
+        .map(
+          (json) => ServiceProvider.fromJson({
+            ...Map<String, dynamic>.from(json as Map),
+            'category_type': categoryType.name,
+          }),
+        )
         .toList();
   }
 
@@ -138,5 +172,5 @@ class ServiceBookingRepositoryImpl implements ServiceBookingRepository {
 
 final serviceBookingRepositoryProvider =
     Provider<ServiceBookingRepository>((ref) {
-  return ServiceBookingRepositoryImpl(Supabase.instance.client);
+  return ServiceBookingRepositoryImpl(ref.watch(supabaseClientProvider));
 });

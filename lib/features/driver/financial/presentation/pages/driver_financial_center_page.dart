@@ -1,3 +1,4 @@
+import 'package:delwaqty/core/errors/app_error_text.dart';
 import 'package:delwaqty/features/driver/driver_module.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -78,8 +79,10 @@ class DriverFinancialCenterPage extends ConsumerWidget {
                 ],
               ),
               loading: () => const Center(child: CircularProgressIndicator()),
-              error: (_, _) =>
-                  const _StatCard(title: '', value: ''),
+              error: (e, _) => Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                child: Text(appErrorText(context, e)),
+              ),
             ),
             wallet.when(
               data: (w) => Column(
@@ -100,7 +103,10 @@ class DriverFinancialCenterPage extends ConsumerWidget {
                 ],
               ),
               loading: () => const SizedBox.shrink(),
-              error: (_, _) => const SizedBox.shrink(),
+              error: (e, _) => Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                child: Text(appErrorText(context, e)),
+              ),
             ),
             grace.when(
               data: (g) => _StatCard(
@@ -108,7 +114,10 @@ class DriverFinancialCenterPage extends ConsumerWidget {
                 value: l10n.graceUsed(g.limit, g.remaining, g.used),
               ),
               loading: () => const SizedBox.shrink(),
-              error: (_, _) => const SizedBox.shrink(),
+              error: (e, _) => Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                child: Text(appErrorText(context, e)),
+              ),
             ),
             earnings.when(
               data: (list) {
@@ -139,7 +148,10 @@ class DriverFinancialCenterPage extends ConsumerWidget {
                 );
               },
               loading: () => const SizedBox.shrink(),
-              error: (_, _) => const SizedBox.shrink(),
+              error: (e, _) => Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                child: Text(appErrorText(context, e)),
+              ),
             ),
             const SizedBox(height: 12),
             Text(
@@ -162,7 +174,10 @@ class DriverFinancialCenterPage extends ConsumerWidget {
                           .toList(),
                     ),
               loading: () => const SizedBox.shrink(),
-              error: (_, _) => const SizedBox.shrink(),
+              error: (e, _) => Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                child: Text(appErrorText(context, e)),
+              ),
             ),
             const SizedBox(height: 12),
             Text(
@@ -188,7 +203,7 @@ class DriverFinancialCenterPage extends ConsumerWidget {
                           .toList(),
                     ),
               loading: () => const Center(child: CircularProgressIndicator()),
-              error: (e, _) => Text(l10n.error),
+              error: (e, _) => Text(appErrorText(context, e)),
             ),
           ],
         ),

@@ -35,6 +35,8 @@ class _MyComplaintsPageState extends ConsumerState<MyComplaintsPage> {
           icon: Icons.error_outline,
           title: l10n.error,
           message: appErrorText(context, e),
+          actionLabel: l10n.retry,
+          onAction: () => ref.invalidate(myComplaintsProvider),
         ),
         data: (complaints) {
           if (complaints.isEmpty) {

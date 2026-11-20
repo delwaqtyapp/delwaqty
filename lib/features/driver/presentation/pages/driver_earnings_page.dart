@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:delwaqty/core/errors/app_error_text.dart';
 import 'package:delwaqty/core/theme/app_colors.dart';
 import 'package:delwaqty/core/theme/app_text_styles.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -39,12 +40,12 @@ class DriverEarningsPage extends ConsumerWidget {
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => context.push('/driver/financial-center'),
         icon: const Icon(Icons.account_balance_wallet),
-        label: const Text('Financial Center'),
+        label: Text(l10n.financialCenter),
       ),
       body: profileAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) =>
-            Center(child: Text(l10n.somethingWentWrong)),
+            Center(child: Text(appErrorText(context, e))),
         data: (profile) {
           if (profile == null) {
             return Center(child: Text(l10n.noActiveTrip));
@@ -78,13 +79,13 @@ class _EarningsBody extends ConsumerWidget {
         children: [
           statsAsync.when(
             loading: () => const Center(child: CircularProgressIndicator()),
-            error: (e, _) => const SizedBox.shrink(),
+            error: (e, _) => Center(child: Text(appErrorText(context, e))),
             data: (stats) => _BalanceCard(driverId: driverId, stats: stats),
           ),
           const SizedBox(height: 16),
           walletAsync.when(
             loading: () => const SizedBox.shrink(),
-            error: (e, _) => const SizedBox.shrink(),
+            error: (e, _) => Center(child: Text(appErrorText(context, e))),
             data: (wallet) => _WalletBreakdownCard(wallet: wallet),
           ),
           const SizedBox(height: 24),
@@ -96,12 +97,12 @@ class _EarningsBody extends ConsumerWidget {
           const SizedBox(height: 8),
           earningsAsync.when(
             loading: () => const Center(child: CircularProgressIndicator()),
-            error: (e, _) => const SizedBox.shrink(),
+            error: (e, _) => Center(child: Text(appErrorText(context, e))),
             data: (earnings) {
               if (earnings.isEmpty) {
                 return Padding(
                   padding: const EdgeInsets.all(24),
-                  child: Center(child: Text(l10n.noActiveTrip)),
+                  child: Center(child: Text(l10n.noTransactionsYet)),
                 );
               }
               return Column(
@@ -331,33 +332,38 @@ class _BalanceCard extends ConsumerWidget {
     final l10n = AppLocalizations.of(context);
     final controller = TextEditingController(
         text: stats.balance.toStringAsFixed(0));
-    final amount = await showDialog<double>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(l10n.requestWithdrawal),
-        content: TextField(
-          controller: controller,
-          keyboardType: TextInputType.number,
-          decoration: InputDecoration(
-            labelText: l10n.enterAmount,
-            border: const OutlineInputBorder(),
+    final double? amount;
+    try {
+      amount = await showDialog<double>(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          title: Text(l10n.requestWithdrawal),
+          content: TextField(
+            controller: controller,
+            keyboardType: TextInputType.number,
+            decoration: InputDecoration(
+              labelText: l10n.enterAmount,
+              border: const OutlineInputBorder(),
+            ),
           ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(),
+              child: Text(l10n.cancel),
+            ),
+            FilledButton(
+              onPressed: () {
+                final v = double.tryParse(controller.text.trim());
+                Navigator.of(ctx).pop(v);
+              },
+              child: Text(l10n.requestWithdrawal),
+            ),
+          ],
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(),
-            child: Text(l10n.cancel),
-          ),
-          FilledButton(
-            onPressed: () {
-              final v = double.tryParse(controller.text.trim());
-              Navigator.of(ctx).pop(v);
-            },
-            child: Text(l10n.requestWithdrawal),
-          ),
-        ],
-      ),
-    );
+      );
+    } finally {
+      controller.dispose();
+    }
     if (amount == null) return;
     if (!context.mounted) return;
     final messenger = ScaffoldMessenger.of(context);
@@ -378,8 +384,10 @@ class _BalanceCard extends ConsumerWidget {
       ref.invalidate(driverEarningsProvider(driverId));
       messenger.showSnackBar(SnackBar(content: Text(l10n.withdrawalRequested)));
     } catch (e) {
-      messenger
-          .showSnackBar(SnackBar(content: Text(l10n.somethingWentWrong)));
+      if (context.mounted) {
+        messenger
+            .showSnackBar(SnackBar(content: Text(appErrorText(context, e))));
+      }
     }
   }
 }

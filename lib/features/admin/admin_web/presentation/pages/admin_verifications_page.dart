@@ -6,6 +6,7 @@ import 'package:delwaqty/features/admin/presentation/widgets/admin_page_header.d
 import 'package:delwaqty/features/admin/presentation/widgets/admin_states.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 import 'package:delwaqty/core/errors/app_error_text.dart';
+import 'package:delwaqty/shared/widgets/confirm_dialog.dart';
 
 class AdminVerificationsWebPage extends StatefulWidget {
   const AdminVerificationsWebPage({super.key});
@@ -54,20 +55,26 @@ class _AdminVerificationsWebPageState extends State<AdminVerificationsWebPage> {
 
   Future<void> _approve(String userId) async {
     final l10n = AppLocalizations.of(context);
+    final confirmed = await ConfirmDialog.show(
+      context,
+      title: l10n.adminVerifications,
+      message: l10n.confirmApproveVerification,
+      confirmLabel: l10n.approve,
+    );
+    if (!confirmed || !mounted) return;
     setState(() => _processingId = userId);
     try {
       await _client
           .from('users')
           .update({'verification_status': 'approved'}).eq('id', userId);
+      if (!mounted) return;
       setState(() => _requests.removeWhere((r) => r['id'] == userId));
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(l10n.userApproved),
-            backgroundColor: AppColors.successLight,
-          ),
-        );
-      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(l10n.userApproved),
+          backgroundColor: AppColors.successLight,
+        ),
+      );
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -84,20 +91,27 @@ class _AdminVerificationsWebPageState extends State<AdminVerificationsWebPage> {
 
   Future<void> _reject(String userId) async {
     final l10n = AppLocalizations.of(context);
+    final confirmed = await ConfirmDialog.show(
+      context,
+      title: l10n.adminVerifications,
+      message: l10n.confirmRejectVerification,
+      confirmLabel: l10n.reject,
+      isDestructive: true,
+    );
+    if (!confirmed || !mounted) return;
     setState(() => _processingId = userId);
     try {
       await _client
           .from('users')
           .update({'verification_status': 'rejected'}).eq('id', userId);
+      if (!mounted) return;
       setState(() => _requests.removeWhere((r) => r['id'] == userId));
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(l10n.userRejected),
-            backgroundColor: AppColors.warningLight,
-          ),
-        );
-      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(l10n.userRejected),
+          backgroundColor: AppColors.warningLight,
+        ),
+      );
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -151,7 +165,7 @@ class _AdminVerificationsWebPageState extends State<AdminVerificationsWebPage> {
                 ? const AdminLoadingState()
                 : _error != null
                     ? AdminErrorState(
-                        message: appErrorText(context, _error),
+                        message: _error!,
                         onRetry: _loadRequests,
                       )
                     : _requests.isEmpty

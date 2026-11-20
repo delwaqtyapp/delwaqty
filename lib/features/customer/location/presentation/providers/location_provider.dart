@@ -272,7 +272,7 @@ class UserLocationNotifier extends AsyncNotifier<UserLocation?> {
     }
   }
 
-  static const _geocodeCacheKey = 'location_geocode_cache_v2';
+  static const _geocodeCacheKey = 'location_geocode_cache_v3';
   static const _geocodeCacheTtl = Duration(hours: 24);
   static const _geocodeCacheMaxEntries = 200;
 
@@ -349,7 +349,7 @@ class UserLocationNotifier extends AsyncNotifier<UserLocation?> {
       _googleStructuredAddress(lat, lng, language, logger),
       _photonStructuredAddress(lat, lng, language, logger),
       _nominatimStructuredAddress(lat, lng, language, logger),
-      _nearestNamedPlace(lat, lng, logger),
+      _nearestNamedPlace(lat, lng, language, logger),
     ]);
 
     final google = results[0] as ({String address, bool hasNamed})?;
@@ -399,7 +399,12 @@ class UserLocationNotifier extends AsyncNotifier<UserLocation?> {
       );
       final addressLine = result?['addressLine'] as String?;
       if (addressLine == null || addressLine.isEmpty) return null;
-      return _cleanAddress(addressLine, language);
+      final cleaned = _cleanAddress(addressLine, language);
+      if (cleaned.isEmpty) return null;
+      final hasArabic = RegExp(r'[\u0600-\u06FF]').hasMatch(cleaned);
+      if (language == 'ar' && !hasArabic) return null;
+      if (language == 'en' && hasArabic) return null;
+      return cleaned;
     } catch (e) {
       ref.read(loggerProvider).d('Native geocoder failed: $e');
       return null;
@@ -705,6 +710,7 @@ class UserLocationNotifier extends AsyncNotifier<UserLocation?> {
   Future<String?> _nearestNamedPlace(
     double lat,
     double lng,
+    String language,
     dynamic logger,
   ) async {
     final query =
@@ -736,12 +742,20 @@ class UserLocationNotifier extends AsyncNotifier<UserLocation?> {
         if (elements == null || elements.isEmpty) continue;
 
         final candidates =
-            <({double d2, String name, bool arabic, bool poi})>[];
+            <({double d2, String name, bool matchesLanguage, bool poi})>[];
         for (final element in elements) {
           final raw = element as Map<String, dynamic>;
           final tags = raw['tags'] as Map<String, dynamic>?;
-          final name = tags?['name'] as String?;
-          if (name == null || name.trim().isEmpty) continue;
+          final preferredTag = language == 'ar'
+              ? (tags?['name:ar'] as String?)
+              : (tags?['name:en'] as String?);
+          final fallbackTag = tags?['name'] as String?;
+          final rawName =
+              (preferredTag != null && preferredTag.trim().isNotEmpty)
+                  ? preferredTag
+                  : fallbackTag;
+          if (rawName == null || rawName.trim().isEmpty) continue;
+          final name = rawName.trim();
           if (RegExp(r'\d').hasMatch(name)) continue;
           final center = _elementCenter(raw);
           if (center == null) continue;
@@ -764,10 +778,15 @@ class UserLocationNotifier extends AsyncNotifier<UserLocation?> {
                     k == 'camp_site',
               ) ??
               false;
+          final hasArabic = RegExp(r'[\u0600-\u06FF]').hasMatch(name);
+          final hasLatin = RegExp(r'[A-Za-z]').hasMatch(name);
+          final matchesLanguage = language == 'ar'
+              ? hasArabic
+              : (hasLatin && !hasArabic);
           candidates.add((
             d2: d2,
-            name: name.trim(),
-            arabic: RegExp(r'[\u0600-\u06FF]').hasMatch(name),
+            name: name,
+            matchesLanguage: matchesLanguage,
             poi: poi,
           ));
         }
@@ -775,7 +794,9 @@ class UserLocationNotifier extends AsyncNotifier<UserLocation?> {
         if (candidates.isEmpty) continue;
         candidates.sort((a, b) {
           if (a.poi != b.poi) return a.poi ? -1 : 1;
-          if (a.arabic != b.arabic) return a.arabic ? -1 : 1;
+          if (a.matchesLanguage != b.matchesLanguage) {
+            return a.matchesLanguage ? -1 : 1;
+          }
           return a.d2.compareTo(b.d2);
         });
         return candidates.first.name;
@@ -804,13 +825,24 @@ class UserLocationNotifier extends AsyncNotifier<UserLocation?> {
 
   String _cleanAddress(String input, String language) {
     final separator = language == 'ar' ? '،' : ',';
-    var cleaned = input.replaceAll(RegExp(r'\s+'), ' ');
-    cleaned = cleaned.replaceAll(RegExp(r'[()\[\]]'), ' ');
+    var cleaned = input.replaceAll(
+      RegExp(
+        r'\b[23456789CFGHJMPQRVWX]{4,8}\+[23456789CFGHJMPQRVWX]{2,4}\b',
+        caseSensitive: false,
+      ),
+      ' ',
+    );
+    cleaned = cleaned.replaceAll(RegExp(r'[()\[\]•·|+=~_*#@]'), ' ');
+    cleaned = cleaned.replaceAll(RegExp(r'\s+'), ' ');
     cleaned = cleaned.replaceAll(RegExp(r'[،,]'), separator);
     final parts = cleaned
         .split(separator)
         .map((e) => e.trim())
-        .where((e) => e.isNotEmpty)
+        .where(
+          (e) =>
+              e.isNotEmpty &&
+              !RegExp(r'^[\d\s\-+/.,:;]+$').hasMatch(e),
+        )
         .toList();
     return parts.join('$separator ');
   }

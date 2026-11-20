@@ -2925,9 +2925,6 @@ class AppLocalizationsAr extends AppLocalizations {
   String get notificationsDisabled => 'معطل';
 
   @override
-  String get addLabel => 'إضافة';
-
-  @override
   String get editLabel => 'تعديل';
 
   @override
@@ -3870,9 +3867,6 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get tapToStop => 'اضغط للإيقاف';
-
-  @override
-  String get adminLabel => 'المشرف';
 
   @override
   String get customerLabel => 'العميل';
@@ -6851,10 +6845,16 @@ class AppLocalizationsAr extends AppLocalizations {
   String get regionIdLabel => 'معرّف المنطقة (UUID)';
 
   @override
+  String get addLabel => 'إضافة';
+
+  @override
   String get rejectTopUpTitle => 'رفض الشحن';
 
   @override
   String get rejectTopUpReasonHint => 'السبب (مطلوب)';
+
+  @override
+  String get adminLabel => 'المشرف';
 
   @override
   String get noTopUpRequestsScope => 'لا توجد طلبات شحن في هذا النطاق.';
@@ -7143,4 +7143,264 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get noMultiServiceRequests => 'لا توجد طلبات تعدد أنشطة معلقة';
+
+  @override
+  String minutesAgoShort(int minutes) {
+    return 'منذ $minutes د';
+  }
+
+  @override
+  String hoursAgoShort(int hours) {
+    return 'منذ $hours س';
+  }
+
+  @override
+  String daysAgoShort(int days) {
+    return 'منذ $days ي';
+  }
+
+  @override
+  String get openMenuTooltip => 'القائمة';
+
+  @override
+  String get notificationsTooltip => 'الإشعارات';
+
+  @override
+  String get tapToAnswer => 'اضغط للرد';
+
+  @override
+  String get pushChannelName => 'إشعارات دلوقتي';
+
+  @override
+  String get pushChannelDescription =>
+      'تحديثات الطلبات والرحلات والرسائل والتنبيهات المهمة';
+
+  @override
+  String get notifNewSupportMessageTitle => 'رسالة دعم جديدة';
+
+  @override
+  String get notifNewSupportMessageBody => 'لديك رد جديد في محادثة الدعم الفني';
+
+  @override
+  String get notifNewCustomerMessageTitle => 'رسالة جديدة من عميل';
+
+  @override
+  String get notifNewCustomerMessageBody =>
+      'قام أحد العملاء بالرد في محادثة الدعم';
+
+  @override
+  String get notifSupportEscalatedTitle => 'تصعيد محادثة الدعم';
+
+  @override
+  String get notifSupportEscalatedBody =>
+      'تم تصعيد محادثتك إلى مستوى الدعم التالي للمتابعة.';
+
+  @override
+  String get notifEmergencySupportTitle => 'طلب دعم طارئ';
+
+  @override
+  String get notifEmergencySupportBody => 'مطلوب مساعدة فورية.';
+
+  @override
+  String get notifNewComplaintTitle => 'شكوى جديدة';
+
+  @override
+  String get notifNewComplaintBody => 'توجد شكوى جديدة بانتظار المراجعة';
+
+  @override
+  String get notifComplaintUpdateTitle => 'تحديث الشكوى';
+
+  @override
+  String get notifComplaintUpdateBody => 'تم تحديث حالة الشكوى الخاصة بك';
+
+  @override
+  String get notifSosAlertTitle => 'تنبيه طوارئ SOS';
+
+  @override
+  String get notifSosAlertBody => 'أطلق أحد المستخدمين تنبيه طوارئ';
+
+  @override
+  String get notifSosResolvedTitle => 'تم حل بلاغ الطوارئ';
+
+  @override
+  String get notifSosResolvedBody =>
+      'تمت معالجة وإغلاق تنبيه الطوارئ الخاص بك.';
+
+  @override
+  String get notifVerificationApprovedTitle => 'تم توثيق الحساب';
+
+  @override
+  String get notifVerificationApprovedBody =>
+      'تمت الموافقة على توثيق حسابك بنجاح.';
+
+  @override
+  String get notifVerificationRejectedTitle => 'تحديث حالة التوثيق';
+
+  @override
+  String get notifVerificationRejectedBody =>
+      'يرجى مراجعة ملاحظات التوثيق وإعادة المحاولة.';
+
+  @override
+  String get notifTopupApprovedTitle => 'تمت الموافقة على الشحن';
+
+  @override
+  String get notifTopupApprovedBody =>
+      'تمت الموافقة على طلب شحن الرصيد وإضافته لمحفظتك.';
+
+  @override
+  String get notifWalletCreditedTitle => 'إضافة رصيد للمحفظة';
+
+  @override
+  String get notifWalletCreditedBody => 'تم تحديث رصيد محفظتك من قِبل الإدارة.';
+
+  @override
+  String get notifServiceApprovedTitle => 'تم تفعيل النشاط الإضافي';
+
+  @override
+  String get notifServiceApprovedBody =>
+      'تمت الموافقة على تفعيل نشاطك الإضافي بنجاح.';
+
+  @override
+  String get notifServiceRejectedTitle => 'تحديث طلب النشاط الإضافي';
+
+  @override
+  String get notifServiceRejectedBody =>
+      'تمت مراجعة طلب النشاط الإضافي الخاص بك.';
+
+  @override
+  String get clearCartTitle => 'إفراغ السلة؟';
+
+  @override
+  String get clearCartConfirm => 'هل أنت متأكد من إزالة جميع العناصر من السلة؟';
+
+  @override
+  String confirmTopUpMessage(String amount, String currency) {
+    return 'هل تريد شحن محفظتك بمبلغ $amount $currency؟';
+  }
+
+  @override
+  String get confirmBookingMessage => 'هل تريد تأكيد حجز هذه الخدمة؟';
+
+  @override
+  String get addressRequired => 'يرجى إدخال عنوان التوصيل';
+
+  @override
+  String get orderCancelled => 'تم إلغاء الطلب';
+
+  @override
+  String get rateDriver => 'تقييم السائق';
+
+  @override
+  String get deliveryDriver => 'مندوب توصيل';
+
+  @override
+  String get serviceProvider => 'مزود خدمة';
+
+  @override
+  String get lowPriority => 'منخفضة';
+
+  @override
+  String get mediumPriority => 'متوسطة';
+
+  @override
+  String get highPriority => 'عالية';
+
+  @override
+  String get promotion => 'عرض ترويجي';
+
+  @override
+  String get draft => 'مسودة';
+
+  @override
+  String get searchHintRestaurants => 'ابحث عن مطعم أو وجبة...';
+
+  @override
+  String get searchHintMarket => 'ابحث عن سوبر ماركت أو منتج...';
+
+  @override
+  String get searchHintServices => 'ابحث عن سباك أو كهربائي أو صيانة...';
+
+  @override
+  String get searchHintDelivery => 'ابحث عن صيدلية أو توصيل سريع...';
+
+  @override
+  String get orderNowFast => 'اطلب الآن وسيصلك المندوب فوراً';
+
+  @override
+  String get adminBannersTitle => 'البانرات والإعلانات';
+
+  @override
+  String get createBanner => 'إنشاء إعلان جديد';
+
+  @override
+  String get targetScope => 'نطاق النشر';
+
+  @override
+  String get allEgypt => 'كل مصر';
+
+  @override
+  String get specificGovernorate => 'محافظة محددة';
+
+  @override
+  String get bannerTitleAr => 'العنوان (عربي)';
+
+  @override
+  String get bannerTitleEn => 'العنوان (إنجليزي)';
+
+  @override
+  String get bannerSubtitleAr => 'الوصف المختصر (عربي)';
+
+  @override
+  String get bannerSubtitleEn => 'الوصف المختصر (إنجليزي)';
+
+  @override
+  String get selectBannerImage => 'اختيار صورة البانر';
+
+  @override
+  String get submitForApproval => 'إرسال للموافقة';
+
+  @override
+  String get publishNow => 'نشر الآن';
+
+  @override
+  String get pauseBanner => 'إيقاف مؤقت';
+
+  @override
+  String get resumeBanner => 'استئناف';
+
+  @override
+  String get bannerSubmitted => 'تم إرسال الإعلان لمراجعة الإدارة';
+
+  @override
+  String get bannerPublished => 'تم نشر الإعلان بنجاح';
+
+  @override
+  String get scheduleBanner => 'الجدولة (اختياري)';
+
+  @override
+  String get editBanner => 'تعديل الإعلان';
+
+  @override
+  String get deleteBanner => 'حذف الإعلان';
+
+  @override
+  String get bannerUpdated => 'تم تحديث الإعلان بنجاح';
+
+  @override
+  String get bannerDeleted => 'تم حذف الإعلان نهائياً';
+
+  @override
+  String get manageRegions => 'المناطق والحدود الجغرافية';
+
+  @override
+  String get addSubRegion => 'إضافة مركز / مدينة / قرية / عزبة';
+
+  @override
+  String get regionCoordinates => 'إحداثيات الموقع';
+
+  @override
+  String get boundaryRadiusKm => 'نطاق الحدود (كم)';
+
+  @override
+  String get pickFromMap => 'تحديد من الخريطة';
 }

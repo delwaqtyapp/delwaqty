@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:delwaqty/core/errors/app_error_text.dart';
 import 'package:delwaqty/features/admin/financial/presentation/providers/admin_financial_providers.dart';
+import 'package:delwaqty/features/_shared/regions/presentation/widgets/region_picker_sheet.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 import 'package:delwaqty/core/constants/app_constants.dart';
 import 'package:delwaqty/features/admin/domain/entities/admin_models.dart';
@@ -227,46 +229,227 @@ class _AdminHierarchyPageState extends ConsumerState<AdminHierarchyPage> {
   }
 
   void _showAssignDialog(AppLocalizations l10n) {
-    showDialog(
+    final emailController = TextEditingController();
+    final searchController = TextEditingController();
+    AdminRole selectedRole = AdminRole.villageAdmin;
+    String? selectedRegionId;
+    String? selectedRegionName;
+    String? selectedMemberId;
+    String? selectedMemberName;
+    List<Map<String, dynamic>> searchResults = const [];
+    bool isSearching = false;
+    bool initializedSearch = false;
+    Timer? debounce;
+
+    Future<void> runMemberSearch(
+      String query,
+      void Function(void Function()) setDialogState,
+    ) async {
+      setDialogState(() => isSearching = true);
+      try {
+        final client = Supabase.instance.client;
+        final q = query.trim();
+        var req = client
+            .from('users')
+            .select('id, full_name, email, phone, role');
+        if (q.isNotEmpty) {
+          req = req.or(
+            'full_name.ilike.%$q%,email.ilike.%$q%,phone.ilike.%$q%',
+          );
+        }
+        final rows = await req.limit(15);
+        setDialogState(() {
+          searchResults = (rows as List)
+              .map((e) => Map<String, dynamic>.from(e as Map))
+              .toList();
+          isSearching = false;
+        });
+      } catch (_) {
+        setDialogState(() => isSearching = false);
+      }
+    }
+
+    showDialog<Map<String, dynamic>>(
       context: context,
       builder: (ctx) {
-        final emailController = TextEditingController();
-        AdminRole selectedRole = AdminRole.villageAdmin;
-
         return StatefulBuilder(
           builder: (ctx, setDialogState) {
+            if (!initializedSearch) {
+              initializedSearch = true;
+              Future.microtask(() => runMemberSearch('', setDialogState));
+            }
+            final lang = Localizations.localeOf(ctx).languageCode;
+
             return AlertDialog(
               title: Text(l10n.assignSubAdmin),
-              content: SingleChildScrollView(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    TextField(
-                      controller: emailController,
-                      decoration: const InputDecoration(
-                        labelText: 'Email',
-                        border: OutlineInputBorder(),
+              content: SizedBox(
+                width: 420,
+                child: SingleChildScrollView(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      TextField(
+                        controller: searchController,
+                        decoration: InputDecoration(
+                          labelText:
+                              '${l10n.search} (${l10n.nameLabel} / ${l10n.phone})',
+                          prefixIcon: const Icon(Icons.search_rounded),
+                          suffixIcon: searchController.text.isNotEmpty
+                              ? IconButton(
+                                  icon: const Icon(Icons.clear_rounded),
+                                  onPressed: () {
+                                    searchController.clear();
+                                    runMemberSearch('', setDialogState);
+                                  },
+                                )
+                              : null,
+                          border: const OutlineInputBorder(),
+                          isDense: true,
+                        ),
+                        onChanged: (val) {
+                          debounce?.cancel();
+                          debounce = Timer(
+                            const Duration(milliseconds: 280),
+                            () => runMemberSearch(val, setDialogState),
+                          );
+                        },
                       ),
-                    ),
-                    const SizedBox(height: 16),
-                    DropdownButtonFormField<AdminRole>(
-                      initialValue: selectedRole,
-                      decoration: const InputDecoration(
-                        labelText: 'Role',
-                        border: OutlineInputBorder(),
+                      const SizedBox(height: 8),
+                      if (isSearching)
+                        const Padding(
+                          padding: EdgeInsets.symmetric(vertical: 8),
+                          child: LinearProgressIndicator(),
+                        )
+                      else if (searchResults.isNotEmpty)
+                        Container(
+                          constraints: const BoxConstraints(maxHeight: 160),
+                          decoration: BoxDecoration(
+                            border: Border.all(
+                              color: Theme.of(ctx)
+                                  .colorScheme
+                                  .outlineVariant
+                                  .withValues(alpha: 0.5),
+                            ),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: ListView.separated(
+                            shrinkWrap: true,
+                            itemCount: searchResults.length,
+                            separatorBuilder: (_, _) =>
+                                const Divider(height: 1),
+                            itemBuilder: (context, index) {
+                              final m = searchResults[index];
+                              final id = m['id'] as String? ?? '';
+                              final name =
+                                  (m['full_name'] as String?)?.trim() ?? '';
+                              final email =
+                                  (m['email'] as String?)?.trim() ?? '';
+                              final phone =
+                                  (m['phone'] as String?)?.trim() ?? '';
+                              final isSelected = selectedMemberId == id;
+                              return ListTile(
+                                dense: true,
+                                selected: isSelected,
+                                leading: const Icon(
+                                  Icons.person_outline_rounded,
+                                  size: 20,
+                                ),
+                                title: Text(
+                                  name.isNotEmpty ? name : (email.isNotEmpty ? email : phone),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                subtitle: Text(
+                                  [
+                                    if (email.isNotEmpty) email,
+                                    if (phone.isNotEmpty) phone,
+                                  ].join(' • '),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                onTap: () {
+                                  setDialogState(() {
+                                    selectedMemberId = id;
+                                    selectedMemberName = name.isNotEmpty
+                                        ? name
+                                        : (email.isNotEmpty ? email : id);
+                                    emailController.text =
+                                        email.isNotEmpty ? email : id;
+                                  });
+                                },
+                              );
+                            },
+                          ),
+                        ),
+                      if (selectedMemberName != null) ...[
+                        const SizedBox(height: 8),
+                        Text(
+                          '${l10n.adminMembers}: $selectedMemberName',
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                            color: Theme.of(ctx).colorScheme.primary,
+                          ),
+                        ),
+                      ],
+                      const SizedBox(height: 12),
+                      TextField(
+                        controller: emailController,
+                        decoration: InputDecoration(
+                          labelText: l10n.adminMgmtEmail,
+                          border: const OutlineInputBorder(),
+                          isDense: true,
+                        ),
                       ),
-                      items: AdminRole.values
-                          .where((r) => r != AdminRole.owner && r != AdminRole.admin)
-                          .map((r) => DropdownMenuItem(
+                      const SizedBox(height: 12),
+                      DropdownButtonFormField<AdminRole>(
+                        initialValue: selectedRole,
+                        decoration: InputDecoration(
+                          labelText: l10n.adminRole,
+                          border: const OutlineInputBorder(),
+                          isDense: true,
+                        ),
+                        items: AdminRole.values
+                            .where(
+                              (r) =>
+                                  r != AdminRole.owner && r != AdminRole.admin,
+                            )
+                            .map(
+                              (r) => DropdownMenuItem(
                                 value: r,
                                 child: Text(_roleDisplayName(r.toDb(), l10n)),
-                              ))
-                          .toList(),
-                      onChanged: (v) {
-                        if (v != null) setDialogState(() => selectedRole = v);
-                      },
-                    ),
-                  ],
+                              ),
+                            )
+                            .toList(),
+                        onChanged: (v) {
+                          if (v != null) {
+                            setDialogState(() => selectedRole = v);
+                          }
+                        },
+                      ),
+                      const SizedBox(height: 12),
+                      OutlinedButton.icon(
+                        onPressed: () async {
+                          final picked = await RegionPickerSheet.show(
+                            ctx,
+                            selectedRegionId: selectedRegionId,
+                          );
+                          if (picked != null && ctx.mounted) {
+                            setDialogState(() {
+                              selectedRegionId = picked.id;
+                              selectedRegionName = picked.displayName(lang);
+                            });
+                          }
+                        },
+                        icon: const Icon(Icons.location_on_rounded, size: 18),
+                        label: Text(
+                          selectedRegionName ?? l10n.assignRegion,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
               shape: RoundedRectangleBorder(
@@ -281,7 +464,10 @@ class _AdminHierarchyPageState extends ConsumerState<AdminHierarchyPage> {
                   onPressed: () {
                     Navigator.of(ctx).pop({
                       'email': emailController.text.trim(),
+                      'member_id': selectedMemberId,
                       'role': selectedRole.toDb(),
+                      'region_id': selectedRegionId,
+                      'region_name': selectedRegionName,
                     });
                   },
                   child: Text(l10n.assignSubAdmin),
@@ -292,13 +478,42 @@ class _AdminHierarchyPageState extends ConsumerState<AdminHierarchyPage> {
         );
       },
     ).then((result) async {
+      debounce?.cancel();
       if (result == null) return;
+      final identifier = (result['email'] as String?)?.trim() ?? '';
+      if (identifier.isEmpty) return;
+
       try {
         final client = Supabase.instance.client;
         await client.rpc('assign_admin_role', params: {
-          'p_email': result['email'],
+          'p_email': identifier,
           'p_role': result['role'],
         });
+
+        final regionId = result['region_id'] as String?;
+        final regionName = result['region_name'] as String?;
+        if (regionId != null && regionId.isNotEmpty) {
+          try {
+            await client.rpc(
+              'admin_assign_region_by_id',
+              params: {
+                'p_email': identifier,
+                'p_region_id': regionId,
+              },
+            );
+          } on PostgrestException {
+            if (regionName != null && regionName.isNotEmpty) {
+              await client.rpc(
+                'assign_admin_region',
+                params: {
+                  'p_email': identifier,
+                  'p_region': regionName,
+                },
+              );
+            }
+          }
+        }
+
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text(l10n.adminAssigned)),
@@ -308,7 +523,7 @@ class _AdminHierarchyPageState extends ConsumerState<AdminHierarchyPage> {
       } catch (e) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(l10n.errorOccurred(e))),
+            SnackBar(content: Text(appErrorText(context, e))),
           );
         }
       }
@@ -380,71 +595,57 @@ class _AdminHierarchyPageState extends ConsumerState<AdminHierarchyPage> {
       } catch (e) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(l10n.errorOccurred(e))),
+            SnackBar(content: Text(appErrorText(context, e))),
           );
         }
       }
     });
   }
 
-  void _showAssignRegionDialog(Map<String, dynamic> admin, AppLocalizations l10n) {
+  Future<void> _showAssignRegionDialog(
+    Map<String, dynamic> admin,
+    AppLocalizations l10n,
+  ) async {
     final email = admin['email'] as String;
+    final region = await RegionPickerSheet.show(
+      context,
+      selectedRegionId: admin['region_id'] as String?,
+    );
+    if (region == null || !mounted) return;
 
-    showDialog(
-      context: context,
-      builder: (ctx) {
-        final regionController = TextEditingController(
-          text: admin['region_name'] as String? ?? '',
-        );
-
-        return AlertDialog(
-          title: Text('${l10n.assignRegion}: $email'),
-          content: TextField(
-            controller: regionController,
-            decoration: InputDecoration(
-              labelText: l10n.adminAssignedRegion,
-              border: const OutlineInputBorder(),
-            ),
-          ),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(ctx).pop(),
-              child: Text(l10n.cancel),
-            ),
-            FilledButton(
-              onPressed: () {
-                Navigator.of(ctx).pop(regionController.text.trim());
-              },
-              child: Text(l10n.assignRegion),
-            ),
-          ],
-        );
-      },
-    ).then((region) async {
-      if (region == null) return;
+    try {
+      final client = Supabase.instance.client;
       try {
-        final client = Supabase.instance.client;
-        await client.rpc('assign_admin_region', params: {
-          'p_email': email,
-          'p_region': region,
-        });
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Region assigned')),
-          );
-          unawaited(_loadData());
-        }
-      } catch (e) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(l10n.errorOccurred(e))),
-          );
-        }
+        await client.rpc(
+          'admin_assign_region_by_id',
+          params: {
+            'p_email': email,
+            'p_region_id': region.id,
+          },
+        );
+      } on PostgrestException catch (e) {
+        if (e.code != 'PGRST202') rethrow;
+        await client.rpc(
+          'assign_admin_region',
+          params: {
+            'p_email': email,
+            'p_region': region.nameAr,
+          },
+        );
       }
-    });
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n.regionSaved)),
+        );
+        unawaited(_loadData());
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(appErrorText(context, e))),
+        );
+      }
+    }
   }
 
   String _roleDisplayName(String role, AppLocalizations l10n) => switch (role) {

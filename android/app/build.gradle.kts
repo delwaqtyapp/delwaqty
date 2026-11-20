@@ -14,6 +14,12 @@ if (keystorePropertiesFile.exists()) {
     keystoreProperties.load(FileInputStream(keystorePropertiesFile))
 }
 
+val localProperties = Properties()
+val localPropertiesFile = rootProject.file("local.properties")
+if (localPropertiesFile.exists()) {
+    localProperties.load(FileInputStream(localPropertiesFile))
+}
+
 android {
     namespace = "com.delwaqty.app"
     compileSdk = 37
@@ -52,6 +58,7 @@ android {
 
         val mapsApiKey = System.getenv("MAPS_API_KEY")
             ?: project.findProperty("MAPS_API_KEY") as? String
+            ?: localProperties.getProperty("MAPS_API_KEY")
             ?: ""
         manifestPlaceholders["MAPS_API_KEY"] = mapsApiKey
     }

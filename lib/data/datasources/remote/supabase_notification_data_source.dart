@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:delwaqty/services/supabase/supabase_service.dart';
 import 'package:delwaqty/domain/entities/app_notification.dart';
+import 'package:delwaqty/shared/notifications/notification_route_resolver.dart';
 
 final supabaseNotificationDataSourceProvider =
     Provider<SupabaseNotificationDataSource>((ref) {
@@ -95,29 +96,55 @@ class SupabaseNotificationDataSource {
     int limit = 20,
     int offset = 0,
   }) async {
+    if (limit <= 0) return const [];
     var query = _client.from('notifications').select();
 
     if (unreadOnly == true) {
       query = query.eq('is_read', false);
     }
 
+    final fetchCount = ((offset + limit) * 3).clamp(20, 200);
     final data = await query
         .order('created_at', ascending: false)
-        .range(offset, offset + limit - 1);
+        .range(0, fetchCount - 1);
 
-    return (data as List)
-        .map((r) => _fromRow(r as Map<String, dynamic>))
+    final filtered = (data as List)
+        .cast<Map<String, dynamic>>()
+        .where(
+          (r) => NotificationChannels.isRowVisibleInContext(
+            r,
+            context: NotificationRouteResolver.appContext,
+          ),
+        )
         .toList();
+
+    if (offset >= filtered.length) return const [];
+    return filtered.skip(offset).take(limit).map(_fromRow).toList();
   }
 
   Future<int> getUnreadCount() async {
     final userId = _client.auth.currentUser?.id;
     if (userId == null) return 0;
 
-    final data = await _client
-        .rpc('get_unread_notification_count', params: {'p_user_id': userId});
+    try {
+      final rows = await _client
+          .from('notifications')
+          .select('id, type, deep_link, data')
+          .eq('user_id', userId)
+          .eq('is_read', false);
 
-    return (data as int?) ?? 0;
+      return (rows as List)
+          .cast<Map<String, dynamic>>()
+          .where(
+            (r) => NotificationChannels.isRowVisibleInContext(
+              r,
+              context: NotificationRouteResolver.appContext,
+            ),
+          )
+          .length;
+    } catch (_) {
+      return 0;
+    }
   }
 
   Future<void> markAsRead(String id) async {
@@ -131,6 +158,25 @@ class SupabaseNotificationDataSource {
     final userId = _client.auth.currentUser?.id;
     if (userId == null) return;
 
+    final rows = await _client
+        .from('notifications')
+        .select('id, type, deep_link, data')
+        .eq('user_id', userId)
+        .eq('is_read', false);
+
+    final matchingIds = (rows as List)
+        .cast<Map<String, dynamic>>()
+        .where(
+          (r) => NotificationChannels.isRowVisibleInContext(
+            r,
+            context: NotificationRouteResolver.appContext,
+          ),
+        )
+        .map((r) => r['id'] as String)
+        .toList();
+
+    if (matchingIds.isEmpty) return;
+
     await _client
         .from('notifications')
         .update({
@@ -138,7 +184,7 @@ class SupabaseNotificationDataSource {
           'read_at': DateTime.now().toIso8601String(),
         })
         .eq('user_id', userId)
-        .eq('is_read', false);
+        .inFilter('id', matchingIds);
   }
 
   Future<void> deleteNotification(String id) async {
@@ -149,7 +195,29 @@ class SupabaseNotificationDataSource {
     final userId = _client.auth.currentUser?.id;
     if (userId == null) return;
 
-    await _client.from('notifications').delete().eq('user_id', userId);
+    final rows = await _client
+        .from('notifications')
+        .select('id, type, deep_link, data')
+        .eq('user_id', userId);
+
+    final matchingIds = (rows as List)
+        .cast<Map<String, dynamic>>()
+        .where(
+          (r) => NotificationChannels.isRowVisibleInContext(
+            r,
+            context: NotificationRouteResolver.appContext,
+          ),
+        )
+        .map((r) => r['id'] as String)
+        .toList();
+
+    if (matchingIds.isEmpty) return;
+
+    await _client
+        .from('notifications')
+        .delete()
+        .eq('user_id', userId)
+        .inFilter('id', matchingIds);
   }
 
   Future<bool> existsByIdempotencyKey(String key) async {

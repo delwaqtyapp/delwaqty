@@ -122,6 +122,33 @@ class _DriverDeliveryDetailPageState
     );
   }
 
+  Future<void> _confirmAndComplete(String orderId, String driverId) async {
+    final l10n = AppLocalizations.of(context);
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(l10n.completeDelivery),
+        content: Text(l10n.areYouSure),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: Text(l10n.cancel),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: Text(l10n.confirm),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+    await _run(
+      () => ref
+          .read(deliveryRepositoryProvider)
+          .completeDelivery(orderId, driverId),
+    );
+  }
+
   String? _resolveCustomerPhone(DeliveryOrder order) {
     final direct = order.recipientPhone?.trim();
     if (direct != null && direct.isNotEmpty) return direct;
@@ -137,7 +164,25 @@ class _DriverDeliveryDetailPageState
 
   Future<void> _callPhone(String phone) async {
     final uri = Uri.parse('tel:$phone');
-    await launchUrl(uri, mode: LaunchMode.externalApplication);
+    try {
+      if (!await canLaunchUrl(uri)) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(AppLocalizations.of(context).somethingWentWrong),
+            ),
+          );
+        }
+        return;
+      }
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(appErrorText(context, e))),
+        );
+      }
+    }
   }
 
   Future<void> _openWhatsApp(String phone) async {
@@ -148,7 +193,25 @@ class _DriverDeliveryDetailPageState
       digits = '2$digits';
     }
     final uri = Uri.parse('https://wa.me/$digits');
-    await launchUrl(uri, mode: LaunchMode.externalApplication);
+    try {
+      if (!await canLaunchUrl(uri)) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(AppLocalizations.of(context).somethingWentWrong),
+            ),
+          );
+        }
+        return;
+      }
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(appErrorText(context, e))),
+        );
+      }
+    }
   }
 
   Widget _row(String label, String value) => Padding(
@@ -180,19 +243,45 @@ class _DriverDeliveryDetailPageState
     final authState = ref.watch(authStateProvider);
     final userId = authState is AuthAuthenticated ? authState.user.id : null;
 
-    final profileAsync =
-        userId == null ? null : ref.watch(driverProfileProvider(userId));
-    final driverId = profileAsync?.asData?.value?.id ?? '';
-
-    if (userId != null && driverId.isEmpty) {
+    if (userId == null) {
       return Scaffold(
         appBar: AppBar(title: Text(l10n.deliveryDetails)),
-        body: const Center(child: CircularProgressIndicator()),
+        body: Center(child: Text(l10n.pleaseLogIn)),
       );
     }
 
-    final livePosition =
-        driverId.isEmpty ? null : ref.watch(driverLivePositionProvider(driverId));
+    final profileAsync = ref.watch(driverProfileProvider(userId));
+
+    return profileAsync.when(
+      loading: () => Scaffold(
+        appBar: AppBar(title: Text(l10n.deliveryDetails)),
+        body: const Center(child: CircularProgressIndicator()),
+      ),
+      error: (e, _) => Scaffold(
+        appBar: AppBar(title: Text(l10n.deliveryDetails)),
+        body: Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(appErrorText(context, e)),
+              const SizedBox(height: 12),
+              FilledButton(
+                onPressed: () => ref.invalidate(driverProfileProvider(userId)),
+                child: Text(l10n.retry),
+              ),
+            ],
+          ),
+        ),
+      ),
+      data: (profile) {
+        if (profile == null) {
+          return Scaffold(
+            appBar: AppBar(title: Text(l10n.deliveryDetails)),
+            body: Center(child: Text(l10n.becomeADriver)),
+          );
+        }
+        final driverId = profile.id;
+        final livePosition = ref.watch(driverLivePositionProvider(driverId));
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.deliveryDetails)),
@@ -350,7 +439,10 @@ class _DriverDeliveryDetailPageState
                           order.itemsSummary!.isNotEmpty)
                         _row(l10n.orderItemsSummary, order.itemsSummary!),
                       if (order.fare != null)
-                        _row(l10n.fare, '${order.fare} ${order.currency}'),
+                        _row(
+                          l10n.fare,
+                          '${order.fare!.toStringAsFixed(0)} ${order.currency}',
+                        ),
                       if (order.distance != null)
                         _row(
                           l10n.distance,
@@ -401,11 +493,7 @@ class _DriverDeliveryDetailPageState
                 FilledButton(
                   onPressed: _busy
                       ? null
-                      : () => _run(
-                            () => ref
-                                .read(deliveryRepositoryProvider)
-                                .completeDelivery(order.id, driverId),
-                          ),
+                      : () => _confirmAndComplete(order.id, driverId),
                   child: Text(l10n.completeDelivery),
                 ),
               if (canCancel) ...[
@@ -419,6 +507,8 @@ class _DriverDeliveryDetailPageState
           );
         },
       ),
+    );
+      },
     );
   }
 }

@@ -120,14 +120,11 @@ void main() {
     await tester.pump(const Duration(milliseconds: 800));
 
     expect(find.text('Edit Profile'), findsOneWidget);
-    await tester.ensureVisible(find.text('Edit Profile'));
-    await tester.pump(const Duration(milliseconds: 300));
     await tester.tap(
-      find.widgetWithText(OutlinedButton, 'Edit Profile'),
+      find.widgetWithText(FilledButton, 'Edit Profile'),
     );
     await tester.pump(const Duration(milliseconds: 300));
     await tester.pump(const Duration(milliseconds: 400));
-    expect(find.byType(AlertDialog), findsOneWidget);
 
     expect(find.text('Save Changes'), findsOneWidget);
 
@@ -137,6 +134,8 @@ void main() {
     );
     await tester.pump();
 
+    await tester.ensureVisible(find.text('Save Changes'));
+    await tester.pump(const Duration(milliseconds: 300));
     await tester.tap(find.text('Save Changes'));
     await tester.pump(const Duration(milliseconds: 400));
 
@@ -164,7 +163,9 @@ void main() {
     await tester.pumpWidget(_buildTestApp(mockRepo, prefs));
     await tester.pump(const Duration(milliseconds: 800));
 
-    await tester.tap(find.text('Edit Profile'));
+    await tester.tap(
+      find.widgetWithText(FilledButton, 'Edit Profile'),
+    );
     await tester.pump(const Duration(milliseconds: 400));
 
     await tester.enterText(find.byType(TextField).at(0), 'Only Name');
@@ -172,6 +173,8 @@ void main() {
     await tester.enterText(find.byType(TextField).at(2), '');
     await tester.pump();
 
+    await tester.ensureVisible(find.text('Save Changes'));
+    await tester.pump(const Duration(milliseconds: 300));
     await tester.tap(find.text('Save Changes'));
     await tester.pump(const Duration(milliseconds: 400));
 
@@ -208,11 +211,17 @@ void main() {
               tester.view.devicePixelRatio -
           navHeight;
 
-      final listView = tester.widget<ListView>(find.byType(ListView));
-      final bottomPadding = (listView.padding as EdgeInsets).bottom;
+      final sliverPadding = tester.widget<SliverPadding>(
+        find.byType(SliverPadding).first,
+      );
+      final bottomPadding = (sliverPadding.padding as EdgeInsets).bottom;
       expect(bottomPadding, greaterThanOrEqualTo(kFloatingNavClearance));
 
-      await tester.fling(find.byType(ListView), const Offset(0, -3000), 3000);
+      await tester.fling(
+        find.byType(CustomScrollView),
+        const Offset(0, -3000),
+        3000,
+      );
       await tester.pumpAndSettle();
 
       final logoutRect = tester.getBottomRight(find.text('Logout'));

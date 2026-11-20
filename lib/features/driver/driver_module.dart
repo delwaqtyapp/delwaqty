@@ -97,9 +97,7 @@ class DriverModule extends FeatureModule {
       id: 'driver-access',
       label: (ctx) => AppLocalizations.of(ctx).deliveryAccess,
       icon: Icons.shield_outlined,
-      onTap: (ctx, _) => Navigator.of(ctx).push(
-        MaterialPageRoute(builder: (_) => const DriverAccessPage()),
-      ),
+      onTap: (ctx, _) => ctx.push('/driver/access'),
     ),
     DrawerEntry(
       id: 'driver-settings',
@@ -122,6 +120,10 @@ class DriverModule extends FeatureModule {
     GoRoute(
       path: '/driver',
       builder: (context, state) => const DriverDashboardPage(),
+    ),
+    GoRoute(
+      path: '/driver/access',
+      builder: (context, state) => const DriverAccessPage(),
     ),
     GoRoute(
       path: '/driver/onboarding/:userId',

@@ -174,7 +174,27 @@ class AppShell extends ConsumerWidget {
       },
       child: Scaffold(
         extendBody: true,
-        body: navigationShell,
+        body: TweenAnimationBuilder<double>(
+          key: ValueKey<int>(navigationShell.currentIndex),
+          tween: Tween<double>(begin: 0.0, end: 1.0),
+          duration: const Duration(milliseconds: 220),
+          curve: Curves.easeOutCubic,
+          builder: (context, value, child) {
+            final scale = 0.985 + (0.015 * value);
+            final dy = (1.0 - value) * 8.0;
+            return Opacity(
+              opacity: value.clamp(0.0, 1.0),
+              child: Transform.translate(
+                offset: Offset(0, dy),
+                child: Transform.scale(
+                  scale: scale,
+                  child: child,
+                ),
+              ),
+            );
+          },
+          child: navigationShell,
+        ),
         bottomNavigationBar: _TransparentBottomNav(
           selectedIndex: navigationShell.currentIndex,
           onDestinationSelected: _onTap,

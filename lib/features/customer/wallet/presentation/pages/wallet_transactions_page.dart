@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:delwaqty/features/_shared/auth/presentation/auth_provider.dart';
 import 'package:delwaqty/features/_shared/auth/domain/auth_state.dart';
 import 'package:delwaqty/features/customer/wallet/wallet_module.dart';
@@ -7,6 +8,7 @@ import 'package:delwaqty/features/customer/wallet/domain/entities/wallet_transac
 import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
 import 'package:delwaqty/shared/widgets/premium_empty_state.dart';
 import 'package:delwaqty/shared/widgets/shimmer_loading.dart';
+import 'package:delwaqty/core/errors/app_error_text.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 import 'package:delwaqty/core/theme/app_colors.dart';
 
@@ -22,7 +24,15 @@ class WalletTransactionsPage extends ConsumerWidget {
     if (userId == null) {
       return Scaffold(
         appBar: AppBar(title: Text(l10n.transactions)),
-        body: const SizedBox.shrink(),
+        body: Center(
+          child: PremiumEmptyState(
+            icon: Icons.lock_outline_rounded,
+            title: l10n.loginRequired,
+            message: l10n.loginRequired,
+            actionLabel: l10n.login,
+            onAction: () => context.push('/login'),
+          ),
+        ),
       );
     }
 
@@ -35,12 +45,16 @@ class WalletTransactionsPage extends ConsumerWidget {
         child: transactionsAsync.when(skipLoadingOnRefresh: true, 
           data: (transactions) {
             if (transactions.isEmpty) {
-              return Center(
-                child: PremiumEmptyState(
-                  icon: Icons.receipt_long_outlined,
-                  title: l10n.noTransactions,
-                  message: l10n.topUpToGetStarted,
-                ),
+              return ListView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                children: [
+                  const SizedBox(height: 80),
+                  PremiumEmptyState(
+                    icon: Icons.receipt_long_outlined,
+                    title: l10n.noTransactions,
+                    message: l10n.topUpToGetStarted,
+                  ),
+                ],
               );
             }
             return ListView.builder(
@@ -63,10 +77,19 @@ class WalletTransactionsPage extends ConsumerWidget {
               child: ShimmerCard(height: 64),
             ),
           ),
-          error: (e, _) => PremiumEmptyState(
-            icon: Icons.error_outline,
-            title: l10n.error,
-            message: l10n.errorLoading,
+          error: (e, _) => ListView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            children: [
+              const SizedBox(height: 80),
+              PremiumEmptyState(
+                icon: Icons.error_outline,
+                title: l10n.error,
+                message: appErrorText(context, e),
+                actionLabel: l10n.retry,
+                onAction: () =>
+                    ref.invalidate(walletTransactionsProvider(userId)),
+              ),
+            ],
           ),
         ),
       ),

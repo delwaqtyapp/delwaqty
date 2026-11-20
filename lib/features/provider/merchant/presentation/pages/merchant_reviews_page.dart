@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:delwaqty/core/errors/app_error_text.dart';
 import 'package:delwaqty/features/provider/merchant/presentation/providers/merchant_providers.dart';
 import 'package:delwaqty/core/extensions/context_extensions.dart';
 import 'package:delwaqty/features/customer/commerce/commerce_module.dart';
@@ -63,7 +64,28 @@ class _MerchantReviewsPageState extends ConsumerState<MerchantReviewsPage> {
               height: 120,
               child: Center(child: CircularProgressIndicator()),
             ),
-            error: (_, _) => const SizedBox.shrink(),
+            error: (e, _) => Padding(
+              padding: const EdgeInsets.all(AppSpacing.lg),
+              child: PremiumCard(
+                padding: const EdgeInsets.all(AppSpacing.md),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.error_outline_rounded,
+                      color: Theme.of(context).colorScheme.error,
+                    ),
+                    const SizedBox(width: AppSpacing.sm),
+                    Expanded(
+                      child: Text(appErrorText(context, e)),
+                    ),
+                    TextButton(
+                      onPressed: () => ref.invalidate(_reviewSummaryProvider),
+                      child: Text(l10n.retry),
+                    ),
+                  ],
+                ),
+              ),
+            ),
             data: (summary) => _RatingSummaryCard(summary: summary),
           ),
           Expanded(
@@ -327,6 +349,10 @@ class _ReviewCardState extends State<_ReviewCard> {
 
     final savedReply = widget.review.merchantReply;
     final hasReply = savedReply != null && savedReply.trim().isNotEmpty;
+    final trimmedName = widget.review.userName?.trim() ?? '';
+    final displayName = trimmedName.isNotEmpty ? trimmedName : l10n.customer;
+    final avatarInitial =
+        displayName.isNotEmpty ? displayName[0].toUpperCase() : '?';
 
     return Padding(
       padding: const EdgeInsets.only(bottom: AppSpacing.md),
@@ -346,7 +372,7 @@ class _ReviewCardState extends State<_ReviewCard> {
                   ),
                   child: Center(
                     child: Text(
-                      (widget.review.userName ?? 'U')[0].toUpperCase(),
+                      avatarInitial,
                       style: theme.textTheme.titleSmall?.copyWith(
                         color: theme.colorScheme.primary,
                         fontWeight: FontWeight.bold,
@@ -360,7 +386,7 @@ class _ReviewCardState extends State<_ReviewCard> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        widget.review.userName ?? 'User',
+                        displayName,
                         style: theme.textTheme.bodyMedium?.copyWith(
                           fontWeight: FontWeight.w600,
                         ),

@@ -5696,12 +5696,6 @@ abstract class AppLocalizations {
   /// **'Disabled'**
   String get notificationsDisabled;
 
-  /// No description provided for @addLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Add'**
-  String get addLabel;
-
   /// No description provided for @editLabel.
   ///
   /// In en, this message translates to:
@@ -7507,12 +7501,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Tap to stop'**
   String get tapToStop;
-
-  /// No description provided for @adminLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Admin'**
-  String get adminLabel;
 
   /// No description provided for @customerLabel.
   ///
@@ -13208,6 +13196,12 @@ abstract class AppLocalizations {
   /// **'Region ID (UUID)'**
   String get regionIdLabel;
 
+  /// No description provided for @addLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Add'**
+  String get addLabel;
+
   /// No description provided for @rejectTopUpTitle.
   ///
   /// In en, this message translates to:
@@ -13219,6 +13213,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Reason (required)'**
   String get rejectTopUpReasonHint;
+
+  /// No description provided for @adminLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Admin'**
+  String get adminLabel;
 
   /// No description provided for @noTopUpRequestsScope.
   ///
@@ -13747,6 +13747,492 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No pending multi-service requests'**
   String get noMultiServiceRequests;
+
+  /// No description provided for @minutesAgoShort.
+  ///
+  /// In en, this message translates to:
+  /// **'{minutes}m'**
+  String minutesAgoShort(int minutes);
+
+  /// No description provided for @hoursAgoShort.
+  ///
+  /// In en, this message translates to:
+  /// **'{hours}h'**
+  String hoursAgoShort(int hours);
+
+  /// No description provided for @daysAgoShort.
+  ///
+  /// In en, this message translates to:
+  /// **'{days}d'**
+  String daysAgoShort(int days);
+
+  /// No description provided for @openMenuTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Menu'**
+  String get openMenuTooltip;
+
+  /// No description provided for @notificationsTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications'**
+  String get notificationsTooltip;
+
+  /// No description provided for @tapToAnswer.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap to answer'**
+  String get tapToAnswer;
+
+  /// No description provided for @pushChannelName.
+  ///
+  /// In en, this message translates to:
+  /// **'Delwaqty Notifications'**
+  String get pushChannelName;
+
+  /// No description provided for @pushChannelDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Orders, rides, messages, and important updates'**
+  String get pushChannelDescription;
+
+  /// No description provided for @notifNewSupportMessageTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'New support message'**
+  String get notifNewSupportMessageTitle;
+
+  /// No description provided for @notifNewSupportMessageBody.
+  ///
+  /// In en, this message translates to:
+  /// **'You have a new reply in support chat'**
+  String get notifNewSupportMessageBody;
+
+  /// No description provided for @notifNewCustomerMessageTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'New customer message'**
+  String get notifNewCustomerMessageTitle;
+
+  /// No description provided for @notifNewCustomerMessageBody.
+  ///
+  /// In en, this message translates to:
+  /// **'A customer replied in support chat'**
+  String get notifNewCustomerMessageBody;
+
+  /// No description provided for @notifSupportEscalatedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Support chat escalated'**
+  String get notifSupportEscalatedTitle;
+
+  /// No description provided for @notifSupportEscalatedBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Your chat has been escalated to the next support level.'**
+  String get notifSupportEscalatedBody;
+
+  /// No description provided for @notifEmergencySupportTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'EMERGENCY support request'**
+  String get notifEmergencySupportTitle;
+
+  /// No description provided for @notifEmergencySupportBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Immediate assistance required.'**
+  String get notifEmergencySupportBody;
+
+  /// No description provided for @notifNewComplaintTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'New complaint'**
+  String get notifNewComplaintTitle;
+
+  /// No description provided for @notifNewComplaintBody.
+  ///
+  /// In en, this message translates to:
+  /// **'A new complaint requires review'**
+  String get notifNewComplaintBody;
+
+  /// No description provided for @notifComplaintUpdateTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Complaint update'**
+  String get notifComplaintUpdateTitle;
+
+  /// No description provided for @notifComplaintUpdateBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Your complaint status has been updated'**
+  String get notifComplaintUpdateBody;
+
+  /// No description provided for @notifSosAlertTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'SOS Emergency Alert'**
+  String get notifSosAlertTitle;
+
+  /// No description provided for @notifSosAlertBody.
+  ///
+  /// In en, this message translates to:
+  /// **'A user triggered an SOS alert'**
+  String get notifSosAlertBody;
+
+  /// No description provided for @notifSosResolvedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'SOS Emergency Resolved'**
+  String get notifSosResolvedTitle;
+
+  /// No description provided for @notifSosResolvedBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Your SOS emergency alert has been resolved.'**
+  String get notifSosResolvedBody;
+
+  /// No description provided for @notifVerificationApprovedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Account Verified'**
+  String get notifVerificationApprovedTitle;
+
+  /// No description provided for @notifVerificationApprovedBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Your account verification has been approved.'**
+  String get notifVerificationApprovedBody;
+
+  /// No description provided for @notifVerificationRejectedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Verification Update'**
+  String get notifVerificationRejectedTitle;
+
+  /// No description provided for @notifVerificationRejectedBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Your verification needs attention. Please check the details.'**
+  String get notifVerificationRejectedBody;
+
+  /// No description provided for @notifTopupApprovedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Top-up Approved'**
+  String get notifTopupApprovedTitle;
+
+  /// No description provided for @notifTopupApprovedBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Your wallet top-up request has been approved and credited.'**
+  String get notifTopupApprovedBody;
+
+  /// No description provided for @notifWalletCreditedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Wallet Credited'**
+  String get notifWalletCreditedTitle;
+
+  /// No description provided for @notifWalletCreditedBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Your wallet balance has been updated by administration.'**
+  String get notifWalletCreditedBody;
+
+  /// No description provided for @notifServiceApprovedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Service Line Approved'**
+  String get notifServiceApprovedTitle;
+
+  /// No description provided for @notifServiceApprovedBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Your additional service line has been approved.'**
+  String get notifServiceApprovedBody;
+
+  /// No description provided for @notifServiceRejectedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Service Line Update'**
+  String get notifServiceRejectedTitle;
+
+  /// No description provided for @notifServiceRejectedBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Your additional service line request was reviewed.'**
+  String get notifServiceRejectedBody;
+
+  /// No description provided for @clearCartTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear cart?'**
+  String get clearCartTitle;
+
+  /// No description provided for @clearCartConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to remove all items from your cart?'**
+  String get clearCartConfirm;
+
+  /// No description provided for @confirmTopUpMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Top up your wallet with {amount} {currency}?'**
+  String confirmTopUpMessage(String amount, String currency);
+
+  /// No description provided for @confirmBookingMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm booking this service?'**
+  String get confirmBookingMessage;
+
+  /// No description provided for @addressRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a delivery address'**
+  String get addressRequired;
+
+  /// No description provided for @orderCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'Order cancelled'**
+  String get orderCancelled;
+
+  /// No description provided for @rateDriver.
+  ///
+  /// In en, this message translates to:
+  /// **'Rate driver'**
+  String get rateDriver;
+
+  /// No description provided for @deliveryDriver.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivery Driver'**
+  String get deliveryDriver;
+
+  /// No description provided for @serviceProvider.
+  ///
+  /// In en, this message translates to:
+  /// **'Service Provider'**
+  String get serviceProvider;
+
+  /// No description provided for @lowPriority.
+  ///
+  /// In en, this message translates to:
+  /// **'Low'**
+  String get lowPriority;
+
+  /// No description provided for @mediumPriority.
+  ///
+  /// In en, this message translates to:
+  /// **'Medium'**
+  String get mediumPriority;
+
+  /// No description provided for @highPriority.
+  ///
+  /// In en, this message translates to:
+  /// **'High'**
+  String get highPriority;
+
+  /// No description provided for @promotion.
+  ///
+  /// In en, this message translates to:
+  /// **'Promotion'**
+  String get promotion;
+
+  /// No description provided for @draft.
+  ///
+  /// In en, this message translates to:
+  /// **'Draft'**
+  String get draft;
+
+  /// No description provided for @searchHintRestaurants.
+  ///
+  /// In en, this message translates to:
+  /// **'Search restaurants or meals...'**
+  String get searchHintRestaurants;
+
+  /// No description provided for @searchHintMarket.
+  ///
+  /// In en, this message translates to:
+  /// **'Search groceries or products...'**
+  String get searchHintMarket;
+
+  /// No description provided for @searchHintServices.
+  ///
+  /// In en, this message translates to:
+  /// **'Search plumbing, AC, or services...'**
+  String get searchHintServices;
+
+  /// No description provided for @searchHintDelivery.
+  ///
+  /// In en, this message translates to:
+  /// **'Search pharmacy or fast delivery...'**
+  String get searchHintDelivery;
+
+  /// No description provided for @orderNowFast.
+  ///
+  /// In en, this message translates to:
+  /// **'Instant pickup & delivery anywhere'**
+  String get orderNowFast;
+
+  /// No description provided for @adminBannersTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Banners & Ads'**
+  String get adminBannersTitle;
+
+  /// No description provided for @createBanner.
+  ///
+  /// In en, this message translates to:
+  /// **'Create Banner Ad'**
+  String get createBanner;
+
+  /// No description provided for @targetScope.
+  ///
+  /// In en, this message translates to:
+  /// **'Target Audience'**
+  String get targetScope;
+
+  /// No description provided for @allEgypt.
+  ///
+  /// In en, this message translates to:
+  /// **'All Egypt'**
+  String get allEgypt;
+
+  /// No description provided for @specificGovernorate.
+  ///
+  /// In en, this message translates to:
+  /// **'Specific Governorate'**
+  String get specificGovernorate;
+
+  /// No description provided for @bannerTitleAr.
+  ///
+  /// In en, this message translates to:
+  /// **'Title (Arabic)'**
+  String get bannerTitleAr;
+
+  /// No description provided for @bannerTitleEn.
+  ///
+  /// In en, this message translates to:
+  /// **'Title (English)'**
+  String get bannerTitleEn;
+
+  /// No description provided for @bannerSubtitleAr.
+  ///
+  /// In en, this message translates to:
+  /// **'Subtitle (Arabic)'**
+  String get bannerSubtitleAr;
+
+  /// No description provided for @bannerSubtitleEn.
+  ///
+  /// In en, this message translates to:
+  /// **'Subtitle (English)'**
+  String get bannerSubtitleEn;
+
+  /// No description provided for @selectBannerImage.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Banner Image'**
+  String get selectBannerImage;
+
+  /// No description provided for @submitForApproval.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit for Approval'**
+  String get submitForApproval;
+
+  /// No description provided for @publishNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Publish Now'**
+  String get publishNow;
+
+  /// No description provided for @pauseBanner.
+  ///
+  /// In en, this message translates to:
+  /// **'Pause'**
+  String get pauseBanner;
+
+  /// No description provided for @resumeBanner.
+  ///
+  /// In en, this message translates to:
+  /// **'Resume'**
+  String get resumeBanner;
+
+  /// No description provided for @bannerSubmitted.
+  ///
+  /// In en, this message translates to:
+  /// **'Banner submitted for admin approval'**
+  String get bannerSubmitted;
+
+  /// No description provided for @bannerPublished.
+  ///
+  /// In en, this message translates to:
+  /// **'Banner published successfully'**
+  String get bannerPublished;
+
+  /// No description provided for @scheduleBanner.
+  ///
+  /// In en, this message translates to:
+  /// **'Schedule (Optional)'**
+  String get scheduleBanner;
+
+  /// No description provided for @editBanner.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Banner'**
+  String get editBanner;
+
+  /// No description provided for @deleteBanner.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Banner'**
+  String get deleteBanner;
+
+  /// No description provided for @bannerUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Banner updated successfully'**
+  String get bannerUpdated;
+
+  /// No description provided for @bannerDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Banner deleted successfully'**
+  String get bannerDeleted;
+
+  /// No description provided for @manageRegions.
+  ///
+  /// In en, this message translates to:
+  /// **'Regions & Boundaries'**
+  String get manageRegions;
+
+  /// No description provided for @addSubRegion.
+  ///
+  /// In en, this message translates to:
+  /// **'Add City / Village / Locality'**
+  String get addSubRegion;
+
+  /// No description provided for @regionCoordinates.
+  ///
+  /// In en, this message translates to:
+  /// **'Location Coordinates'**
+  String get regionCoordinates;
+
+  /// No description provided for @boundaryRadiusKm.
+  ///
+  /// In en, this message translates to:
+  /// **'Boundary Radius (km)'**
+  String get boundaryRadiusKm;
+
+  /// No description provided for @pickFromMap.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick on Map'**
+  String get pickFromMap;
 }
 
 class _AppLocalizationsDelegate

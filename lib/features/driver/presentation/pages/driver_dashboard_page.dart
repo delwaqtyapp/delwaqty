@@ -10,7 +10,6 @@ import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
 import 'package:delwaqty/shared/widgets/floating_glass_buttons.dart';
 import 'package:delwaqty/shared/widgets/shimmer_loading.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
-import 'package:delwaqty/features/driver/presentation/pages/driver_access_page.dart';
 import 'package:delwaqty/features/customer/driver/presentation/providers/dispatch_providers.dart';
 import 'package:delwaqty/core/auth/platform_capabilities.dart';
 import 'package:delwaqty/core/errors/app_error_text.dart';
@@ -72,9 +71,7 @@ class DriverDashboardPage extends ConsumerWidget {
           IconButton(
             icon: const Icon(Icons.shield_outlined),
             tooltip: l10n.deliveryAccess,
-            onPressed: () => Navigator.of(context).push(
-              MaterialPageRoute(builder: (_) => const DriverAccessPage()),
-            ),
+            onPressed: () => context.push('/driver/access'),
           ),
         ],
       ),
@@ -85,7 +82,7 @@ class DriverDashboardPage extends ConsumerWidget {
         child: profileAsync.when(
           data: (profile) {
             if (profile == null) {
-              return _buildRegistrationPrompt(context, ref, userId);
+              return _RegistrationPrompt(userId: userId);
             }
             if (!profile.onboardingCompleted &&
                 profile.verificationStatus == 'pending' &&
@@ -106,66 +103,6 @@ class DriverDashboardPage extends ConsumerWidget {
           ),
           error: (e, _) => Center(
               child: Text(appErrorText(context, e))),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildRegistrationPrompt(
-      BuildContext context, WidgetRef ref, String userId) {
-    final l10n = AppLocalizations.of(context);
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(32),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.delivery_dining_rounded,
-              size: 80,
-              color: Theme.of(context)
-                  .colorScheme
-                  .primary
-                  .withValues(alpha: 0.5),
-            ),
-            const SizedBox(height: 16),
-            Text(
-              l10n.becomeADriver,
-              style: Theme.of(context)
-                  .textTheme
-                  .headlineSmall
-                  ?.copyWith(fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              l10n.joinFleetSubtitle,
-              textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color:
-                        Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
-            ),
-            const SizedBox(height: 24),
-            FilledButton.icon(
-              onPressed: () async {
-                final repo = ref.read(driverRepositoryProvider);
-                await repo.registerProfile(
-                  userId,
-                  fullName: ref.read(authStateProvider).maybeWhen(
-                        authenticated: (u) =>
-                            u.fullName?.trim().isNotEmpty == true
-                                ? u.fullName!
-                                : 'Driver',
-                        orElse: () => 'Driver',
-                      ),
-                  vehicleType: 'motorcycle',
-                );
-                ref.invalidate(driverProfileProvider(userId));
-              },
-              icon: const Icon(Icons.app_registration_rounded),
-              label: Text(l10n.registerNow),
-            ),
-          ],
         ),
       ),
     );
@@ -270,6 +207,95 @@ class DriverDashboardPage extends ConsumerWidget {
   }
 }
 
+class _RegistrationPrompt extends ConsumerStatefulWidget {
+  const _RegistrationPrompt({required this.userId});
+  final String userId;
+
+  @override
+  ConsumerState<_RegistrationPrompt> createState() => _RegistrationPromptState();
+}
+
+class _RegistrationPromptState extends ConsumerState<_RegistrationPrompt> {
+  bool _registering = false;
+
+  Future<void> _register() async {
+    if (_registering) return;
+    setState(() => _registering = true);
+    try {
+      final repo = ref.read(driverRepositoryProvider);
+      await repo.registerProfile(
+        widget.userId,
+        fullName: ref.read(authStateProvider).maybeWhen(
+              authenticated: (u) =>
+                  u.fullName?.trim().isNotEmpty == true ? u.fullName! : 'Driver',
+              orElse: () => 'Driver',
+            ),
+        vehicleType: 'motorcycle',
+      );
+      ref.invalidate(driverProfileProvider(widget.userId));
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(appErrorText(context, e))),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _registering = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.delivery_dining_rounded,
+              size: 80,
+              color: Theme.of(context)
+                  .colorScheme
+                  .primary
+                  .withValues(alpha: 0.5),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              l10n.becomeADriver,
+              style: Theme.of(context)
+                  .textTheme
+                  .headlineSmall
+                  ?.copyWith(fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              l10n.joinFleetSubtitle,
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+            ),
+            const SizedBox(height: 24),
+            FilledButton.icon(
+              onPressed: _registering ? null : _register,
+              icon: _registering
+                  ? const SizedBox(
+                      width: 18,
+                      height: 18,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Icon(Icons.app_registration_rounded),
+              label: Text(l10n.registerNow),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class _OnlineHeader extends StatelessWidget {
   const _OnlineHeader({required this.profile, required this.ref});
   final DriverProfile profile;
@@ -282,6 +308,14 @@ class _OnlineHeader extends StatelessWidget {
     final onlineState = ref.watch(driverOnlineProvider(profile.id));
     final isOnline =
         onlineState.value ?? (profile.status == DriverStatus.online);
+
+    ref.listen<AsyncValue<bool>>(driverOnlineProvider(profile.id), (prev, next) {
+      if (next.hasError && next.error != null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(appErrorText(context, next.error!))),
+        );
+      }
+    });
 
     return Container(
       padding: const EdgeInsets.all(20),
@@ -329,16 +363,9 @@ class _OnlineHeader extends StatelessWidget {
                 onChanged: onlineState.isLoading
                     ? null
                     : (value) async {
-                        final repo = ref.read(driverRepositoryProvider);
-                        await Future.wait([
-                          repo.updateStatus(
-                            profile.id,
-                            value ? DriverStatus.online : DriverStatus.offline,
-                          ),
-                          ref
-                              .read(driverOnlineProvider(profile.id).notifier)
-                              .setOnline(value),
-                        ]);
+                        await ref
+                            .read(driverOnlineProvider(profile.id).notifier)
+                            .setOnline(value);
                         ref.invalidate(driverProfileProvider(profile.userId));
                       },
               ),

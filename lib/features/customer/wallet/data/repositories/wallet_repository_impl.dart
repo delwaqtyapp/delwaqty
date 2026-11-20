@@ -16,8 +16,18 @@ class WalletRepositoryImpl implements WalletRepository {
       _dataSource.getTransactions(userId, limit: limit, offset: offset);
 
   @override
-  Future<WalletTransaction> topUp(String userId, double amount, String method) =>
-      _dataSource.topUp(userId, amount, method);
+  Future<WalletTransaction> topUp(
+    String userId,
+    double amount,
+    String method, {
+    String? idempotencyKey,
+  }) =>
+      _dataSource.topUp(
+        userId,
+        amount,
+        method,
+        idempotencyKey: idempotencyKey,
+      );
 
   @override
   Future<WalletTransaction> pay(String userId, double amount, String description, {String? referenceId}) =>

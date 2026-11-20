@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:delwaqty/core/module/feature_module.dart';
+import 'package:delwaqty/l10n/app_localizations.dart';
 import 'package:delwaqty/features/customer/restaurant/data/datasources/remote/supabase_branch_data_source.dart';
 import 'package:delwaqty/features/customer/restaurant/data/datasources/remote/supabase_working_hours_data_source.dart';
 import 'package:delwaqty/features/customer/restaurant/data/datasources/remote/supabase_delivery_zone_data_source.dart';
@@ -92,7 +93,8 @@ class RestaurantModule extends FeatureModule {
   String get id => 'restaurant';
 
   @override
-  String name(BuildContext context) => 'Restaurants';
+  String name(BuildContext context) =>
+      AppLocalizations.of(context).restaurants;
 
   @override
   IconData? get icon => Icons.restaurant_outlined;

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -82,7 +84,11 @@ class _DeliveryTrackingPageState extends ConsumerState<DeliveryTrackingPage> {
               rating: _rating,
               onRatingChanged: (r) => setState(() => _rating = r),
               controller: _commentController,
-              onSubmit: () => _submitRating(context, ref),
+              onSubmit: () => _submitRating(
+                context,
+                ref,
+                rideAsync.value!.driverId ?? '',
+              ),
             )
           : null,
     );
@@ -124,14 +130,18 @@ class _DeliveryTrackingPageState extends ConsumerState<DeliveryTrackingPage> {
     );
   }
 
-  Future<void> _submitRating(BuildContext context, WidgetRef ref) async {
+  Future<void> _submitRating(
+    BuildContext context,
+    WidgetRef ref,
+    String driverId,
+  ) async {
     if (_rating == 0) return;
     final messenger = ScaffoldMessenger.of(context);
     final l10n = AppLocalizations.of(context);
     try {
       await ref.read(deliveryRepositoryProvider).rateDelivery(
             widget.deliveryId,
-            '',
+            driverId,
             _rating,
             comment: _commentController.text.isEmpty
                 ? null
@@ -256,7 +266,7 @@ class _DriverInfoCard extends StatelessWidget {
                       ride.vehicleType,
                       ride.vehicleColor,
                       ride.vehiclePlate,
-                    ].where((e) => e != null && e.isNotEmpty).join(' Â· '),
+                    ].where((e) => e != null && e.isNotEmpty).join(' · '),
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: theme.colorScheme.onSurfaceVariant,
                     ),
@@ -268,12 +278,28 @@ class _DriverInfoCard extends StatelessWidget {
               IconButton(
                 tooltip: AppLocalizations.of(context).callDriver,
                 icon: const Icon(Icons.phone_rounded),
-                onPressed: () => launchUrl(Uri.parse('tel:${ride.driverPhone}')),
+                onPressed: () =>
+                    unawaited(_callDriver(context, ride.driverPhone!)),
               ),
           ],
         ),
       ),
     );
+  }
+
+  Future<void> _callDriver(BuildContext context, String phone) async {
+    final uri = Uri.parse('tel:$phone');
+    try {
+      if (await canLaunchUrl(uri)) {
+        await launchUrl(uri);
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(appErrorText(context, e))),
+        );
+      }
+    }
   }
 }
 
@@ -370,11 +396,11 @@ class _StatusTimeline extends StatelessWidget {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final steps = [
-      (RideStatus.searching, l10n.waitingForAcceptance, Icons.search_rounded),
-      (RideStatus.matched, l10n.waitingForPassenger, Icons.person_add_rounded),
-      (RideStatus.arrived, l10n.waitingForPassenger, Icons.location_on_rounded),
-      (RideStatus.inTrip, l10n.deliveryTime, Icons.delivery_dining_rounded),
-      (RideStatus.completed, l10n.orderHistory, Icons.check_circle_rounded),
+      (RideStatus.searching, l10n.searchingForDriver, Icons.search_rounded),
+      (RideStatus.matched, l10n.driverFound, Icons.person_add_rounded),
+      (RideStatus.arrived, l10n.driverArrived, Icons.location_on_rounded),
+      (RideStatus.inTrip, l10n.driverOnTheWay, Icons.delivery_dining_rounded),
+      (RideStatus.completed, l10n.delivered, Icons.check_circle_rounded),
     ];
 
     final currentIndex = steps.indexWhere((s) => s.$1 == status);
@@ -469,7 +495,7 @@ class _EtaCard extends StatelessWidget {
                         color: theme.colorScheme.onSurfaceVariant,
                       )),
                   Text(
-                    '$estimatedMinutes ${l10n.onboardingNext.toLowerCase()}',
+                    '$estimatedMinutes ${l10n.minutesShort}',
                     style: theme.textTheme.titleMedium
                         ?.copyWith(fontWeight: FontWeight.bold),
                     overflow: TextOverflow.ellipsis,
@@ -598,7 +624,7 @@ class _RatingBar extends StatelessWidget {
               children: List.generate(5, (i) {
                 final star = i + 1;
                 return IconButton(
-                  tooltip: AppLocalizations.of(context).call,
+                  tooltip: l10n.rateDriver,
                   icon: Icon(
                     star <= rating
                         ? Icons.star_rounded

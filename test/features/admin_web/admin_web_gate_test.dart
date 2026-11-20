@@ -62,7 +62,7 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(find.text('Delwaqty Admin'), findsOneWidget);
+      expect(find.text('Admin Panel'), findsOneWidget);
       expect(find.text('Sign In'), findsOneWidget);
 
       await stream.close();
@@ -123,7 +123,7 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(find.text('Access Denied'), findsOneWidget);
+      expect(find.text('You do not have permission to do that.'), findsOneWidget);
 
       await stream.close();
     });
@@ -141,7 +141,7 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(find.text('Access Denied'), findsOneWidget);
+      expect(find.text('You do not have permission to do that.'), findsOneWidget);
 
       await stream.close();
     });

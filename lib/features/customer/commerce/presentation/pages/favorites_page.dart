@@ -23,24 +23,20 @@ final _favoriteMerchantsProvider = FutureProvider<List<Merchant>>((ref) async {
   final favs = await ref.watch(_favoritesProvider.future);
   final merchantFavs = favs.where((f) => f.type == FavoriteType.merchant);
   final repo = ref.watch(merchantRepositoryProvider);
-  final merchants = <Merchant>[];
-  for (final fav in merchantFavs) {
-    final m = await repo.getMerchantById(fav.targetId);
-    if (m != null) merchants.add(m);
-  }
-  return merchants;
+  final results = await Future.wait(
+    merchantFavs.map((fav) => repo.getMerchantById(fav.targetId)),
+  );
+  return results.whereType<Merchant>().toList();
 });
 
 final _favoriteProductsProvider = FutureProvider<List<Product>>((ref) async {
   final favs = await ref.watch(_favoritesProvider.future);
   final productFavs = favs.where((f) => f.type == FavoriteType.product);
   final repo = ref.watch(productRepositoryProvider);
-  final products = <Product>[];
-  for (final fav in productFavs) {
-    final p = await repo.getProductById(fav.targetId);
-    if (p != null) products.add(p);
-  }
-  return products;
+  final results = await Future.wait(
+    productFavs.map((fav) => repo.getProductById(fav.targetId)),
+  );
+  return results.whereType<Product>().toList();
 });
 
 class FavoritesPage extends ConsumerStatefulWidget {

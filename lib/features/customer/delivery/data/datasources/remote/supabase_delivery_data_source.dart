@@ -450,12 +450,20 @@ class SupabaseDeliveryDataSource {
   Future<void> rateDelivery(
       String rideId, String driverId, int stars,
       {String? comment}) async {
-    _checkRpc(await _client.rpc('rate_passenger', params: {
-      'p_ride_id': rideId,
-      'p_driver_id': driverId,
-      'p_stars': stars,
-      'p_comment': comment,
-    }));
+    final uid = _client.auth.currentUser?.id;
+    if (uid == null) {
+      throw DeliveryException('unauthenticated');
+    }
+    await _client.from('ride_ratings').upsert(
+      {
+        'ride_id': rideId,
+        'rater_id': uid,
+        'ratee_role': 'driver',
+        'stars': stars,
+        'comment': ?comment,
+      },
+      onConflict: 'ride_id,rater_id',
+    );
   }
 }
 

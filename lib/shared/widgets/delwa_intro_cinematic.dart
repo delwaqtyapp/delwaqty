@@ -132,6 +132,14 @@ class _DelwaIntroSceneState extends State<DelwaIntroScene>
             final bgFade = Curves.easeIn.transform(_clamp(t / 0.045));
             final bgScale = 1.0 + 0.03 * Curves.linear.transform(_clamp(t / 1.0));
 
+            // 1.5) Modern luxury opening light curtain & expanding royal aura rings.
+            final openingCurtain =
+                _clamp(t / 0.08) * (1 - _clamp((t - 0.34) / 0.16));
+            final openingRingProgress =
+                Curves.easeOutCubic.transform(_clamp((t - 0.04) / 0.36));
+            final openingRingOpacity =
+                _clamp((t - 0.03) / 0.08) * (1 - _clamp((t - 0.32) / 0.12));
+
             // 2) Nile light: quiet bottom -> top sweep (about 2.4s).
             const nileStart = 0.055;
             final nileProgress =
@@ -148,41 +156,44 @@ class _DelwaIntroSceneState extends State<DelwaIntroScene>
                 0.16 + 0.08 * (0.5 + 0.5 * math.sin(t * math.pi * 3));
             final haloEffective = haloOpacity * haloPulse;
 
-            // 4) Logo Fade + Scale.
+            // 4) Logo Fade + Scale (UNTOUCHED per user instruction).
             const logoStart = 0.24;
             final logoOpacity =
                 Curves.easeOutCubic.transform(_clamp((t - logoStart) / 0.14));
             final logoScale =
                 0.88 + 0.12 * Curves.easeOutCubic.transform(_clamp((t - logoStart) / 0.15));
 
-            // 5) DelwaQty wordmark (rise from the bottom).
+            // 5) DelwaQty wordmark (rise from the bottom with smooth modern glide).
             final delwaQtyFade =
-                Curves.easeOutCubic.transform(_clamp((t - 0.36) / 0.10));
+                Curves.easeOutCubic.transform(_clamp((t - 0.34) / 0.10));
             final delwaQtySlide =
-                16.0 * (1 - Curves.easeOutCubic.transform(_clamp((t - 0.36) / 0.12)));
+                18.0 * (1 - Curves.easeOutBack.transform(_clamp((t - 0.34) / 0.13)));
 
             // 6) Arabic name + descriptions.
             final dalwaqtyFade =
-                Curves.easeOutCubic.transform(_clamp((t - 0.38) / 0.08));
+                Curves.easeOutCubic.transform(_clamp((t - 0.37) / 0.09));
+            final dalwaqtySlide =
+                10.0 * (1 - Curves.easeOutCubic.transform(_clamp((t - 0.37) / 0.10)));
             final arabicTagFade =
-                Curves.easeOutCubic.transform(_clamp((t - 0.40) / 0.06));
+                Curves.easeOutCubic.transform(_clamp((t - 0.40) / 0.07));
             final englishTagFade =
-                Curves.easeOutCubic.transform(_clamp((t - 0.42) / 0.06));
+                Curves.easeOutCubic.transform(_clamp((t - 0.42) / 0.07));
 
-            // 7) Egypt statement, top-right, appears quietly late.
+            // 7) Egypt statement, top-right, appears with modern slide-in.
             final egyptStatementFade =
-                Curves.easeOutCubic.transform(_clamp((t - 0.42) / 0.08));
+                Curves.easeOutCubic.transform(_clamp((t - 0.40) / 0.09));
             final egyptStatementSlide =
-                8.0 * (1 - Curves.easeOutCubic.transform(_clamp((t - 0.42) / 0.10)));
+                10.0 * (1 - Curves.easeOutCubic.transform(_clamp((t - 0.40) / 0.11)));
 
             // 8) Made in Egypt footer.
             final madeInEgyptFade =
-                Curves.easeOutCubic.transform(_clamp((t - 0.44) / 0.06));
+                Curves.easeOutCubic.transform(_clamp((t - 0.43) / 0.07));
 
             final screenWidth = MediaQuery.of(context).size.width;
             final screenHeight = MediaQuery.of(context).size.height;
+            final isCompactHeight = screenHeight < 560;
             final logoSize = (screenWidth * 0.30).clamp(110.0, 140.0);
-            final logoCenterY = screenHeight * 0.37;
+            final logoCenterY = screenHeight * (isCompactHeight ? 0.34 : 0.36);
 
             return Stack(
               fit: StackFit.expand,
@@ -198,7 +209,7 @@ class _DelwaIntroSceneState extends State<DelwaIntroScene>
                   ),
                 ),
                 // Light dim layer — keeps the pyramids, the Nile and the
-                // Cairo lights clearly visible.
+                // Cairo lights clearly visible while boosting text contrast.
                 IgnorePointer(
                   child: Container(
                     decoration: BoxDecoration(
@@ -206,12 +217,76 @@ class _DelwaIntroSceneState extends State<DelwaIntroScene>
                         begin: Alignment.topCenter,
                         end: Alignment.bottomCenter,
                         colors: [
-                          const Color(0xFF0D0824).withValues(alpha: 0.20),
-                          const Color(0xFF120A30).withValues(alpha: 0.12),
-                          const Color(0xFF0D0824).withValues(alpha: 0.16),
+                          const Color(0xFF0D0824).withValues(alpha: 0.28),
+                          const Color(0xFF120A30).withValues(alpha: 0.14),
+                          const Color(0xFF0B061E).withValues(alpha: 0.34),
                         ],
+                        stops: const [0.0, 0.5, 1.0],
                       ),
                     ),
+                  ),
+                ),
+                // Modern luxury opening light horizon & expanding royal rings.
+                if (openingCurtain > 0.01)
+                  IgnorePointer(
+                    child: Opacity(
+                      opacity: openingCurtain,
+                      child: Container(
+                        decoration: BoxDecoration(
+                          gradient: RadialGradient(
+                            center: const Alignment(0.0, -0.15),
+                            radius: 0.95 + 0.35 * openingRingProgress,
+                            colors: [
+                              _gold.withValues(alpha: 0.18),
+                              _gradientPurple.withValues(alpha: 0.14),
+                              _gradientCyan.withValues(alpha: 0.06),
+                              Colors.transparent,
+                            ],
+                            stops: const [0.0, 0.38, 0.72, 1.0],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                if (openingRingOpacity > 0.01)
+                  Positioned(
+                    left: 0,
+                    right: 0,
+                    top: logoCenterY - logoSize * (0.9 + 0.65 * openingRingProgress),
+                    child: IgnorePointer(
+                      child: Opacity(
+                        opacity: openingRingOpacity,
+                        child: Center(
+                          child: Container(
+                            width: logoSize * (1.8 + 1.3 * openingRingProgress),
+                            height: logoSize * (1.8 + 1.3 * openingRingProgress),
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color: _gold.withValues(alpha: 0.28),
+                                width: 1.2,
+                              ),
+                              gradient: RadialGradient(
+                                colors: [
+                                  Colors.transparent,
+                                  _gold.withValues(alpha: 0.07),
+                                  _gradientCyan.withValues(alpha: 0.08),
+                                  Colors.transparent,
+                                ],
+                                stops: const [0.0, 0.68, 0.9, 1.0],
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                // Subtle floating golden stardust motes around the horizon.
+                IgnorePointer(
+                  child: _buildGoldenStardust(
+                    t: t,
+                    screenWidth: screenWidth,
+                    screenHeight: screenHeight,
                   ),
                 ),
                 // Nile light strip: soft vertical gradient sweeping up.
@@ -298,7 +373,7 @@ class _DelwaIntroSceneState extends State<DelwaIntroScene>
                     ),
                   ),
                 ),
-                // Transparent logo, centered above the wordmark.
+                // Transparent logo, centered above the wordmark (UNTOUCHED).
                 Positioned(
                   left: 0,
                   right: 0,
@@ -348,11 +423,11 @@ class _DelwaIntroSceneState extends State<DelwaIntroScene>
                     ),
                   ),
                 ),
-                // DelwaQty wordmark + Arabic name + descriptions.
+                // DelwaQty wordmark + Arabic name + descriptions (improved position & colors).
                 Positioned(
-                  left: 0,
-                  right: 0,
-                  top: logoCenterY + logoSize / 2 + 16,
+                  left: 16,
+                  right: 16,
+                  top: logoCenterY + logoSize / 2 + (isCompactHeight ? 8 : 14),
                   child: Opacity(
                     opacity: delwaQtyFade,
                     child: Transform.translate(
@@ -367,7 +442,7 @@ class _DelwaIntroSceneState extends State<DelwaIntroScene>
                                 final whiteEnd = _gradWhiteEnd;
                                 return LinearGradient(
                                   colors: const [
-                                    Color(0xFFF7F7FA),
+                                    Color(0xFFFFFFFF),
                                     Color(0xFFF7F7FA),
                                     _gradientPurple,
                                     _gradientBlue,
@@ -388,41 +463,77 @@ class _DelwaIntroSceneState extends State<DelwaIntroScene>
                               ),
                             ),
                           ),
-                          const SizedBox(height: 8),
+                          SizedBox(height: isCompactHeight ? 4 : 6),
                           Opacity(
                             opacity: dalwaqtyFade,
-                            child: const Directionality(
-                              textDirection: TextDirection.rtl,
-                              child: Text(
-                                'دلوقتي',
-                                style: TextStyle(
-                                  fontFamily: 'Cairo',
-                                  fontSize: 26,
-                                  fontWeight: FontWeight.w600,
-                                  color: _textNearWhite,
-                                  letterSpacing: 0.5,
+                            child: Transform.translate(
+                              offset: Offset(0, dalwaqtySlide),
+                              child: Directionality(
+                                textDirection: TextDirection.rtl,
+                                child: ShaderMask(
+                                  shaderCallback: (Rect bounds) {
+                                    return const LinearGradient(
+                                      colors: [
+                                        Color(0xFFFFF3C4),
+                                        Color(0xFFF4C96B),
+                                        Color(0xFFFFF6D6),
+                                      ],
+                                    ).createShader(bounds);
+                                  },
+                                  child: const Text(
+                                    'دلوقتي',
+                                    style: TextStyle(
+                                      fontFamily: 'Cairo',
+                                      fontSize: 27,
+                                      fontWeight: FontWeight.w800,
+                                      color: Colors.white,
+                                      letterSpacing: 0.6,
+                                      shadows: [
+                                        Shadow(
+                                          color: Color(0x66000000),
+                                          blurRadius: 12,
+                                          offset: Offset(0, 3),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
                                 ),
                               ),
                             ),
                           ),
-                          const SizedBox(height: 10),
+                          SizedBox(height: isCompactHeight ? 6 : 10),
                           Opacity(
                             opacity: arabicTagFade,
-                            child: const Directionality(
-                              textDirection: TextDirection.rtl,
-                              child: Text(
-                                'كل احتياجاتك... في تطبيق واحد',
-                                style: TextStyle(
-                                  fontFamily: 'Cairo',
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w500,
-                                  color: Color(0xCCF2EEFF),
-                                  letterSpacing: 0.4,
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 5,
+                              ),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFF140B30)
+                                    .withValues(alpha: 0.44),
+                                borderRadius: BorderRadius.circular(999),
+                                border: Border.all(
+                                  color: _gold.withValues(alpha: 0.34),
+                                ),
+                              ),
+                              child: const Directionality(
+                                textDirection: TextDirection.rtl,
+                                child: Text(
+                                  'كل احتياجاتك... في تطبيق واحد',
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    fontFamily: 'Cairo',
+                                    fontSize: 13.5,
+                                    fontWeight: FontWeight.w700,
+                                    color: Color(0xFFFFFDF7),
+                                    letterSpacing: 0.3,
+                                  ),
                                 ),
                               ),
                             ),
                           ),
-                          const SizedBox(height: 4),
+                          SizedBox(height: isCompactHeight ? 3 : 6),
                           Opacity(
                             opacity: englishTagFade,
                             child: Text(
@@ -430,10 +541,11 @@ class _DelwaIntroSceneState extends State<DelwaIntroScene>
                               textDirection: TextDirection.ltr,
                               style: TextStyle(
                                 fontFamily: 'Cairo',
-                                fontSize: 11,
-                                fontWeight: FontWeight.w400,
-                                color: _textNearWhite.withValues(alpha: 0.6),
-                                letterSpacing: 0.8,
+                                fontSize: 11.5,
+                                fontWeight: FontWeight.w600,
+                                color: const Color(0xFFF6E3B4)
+                                    .withValues(alpha: 0.86),
+                                letterSpacing: 1.1,
                               ),
                             ),
                           ),
@@ -442,7 +554,7 @@ class _DelwaIntroSceneState extends State<DelwaIntroScene>
                     ),
                   ),
                 ),
-                // 7) Egypt statement, top-right inside SafeArea.
+                // 7) Egypt statement, top-right inside SafeArea with royal gold & ivory palette.
                 Positioned(
                   top: 0,
                   left: 0,
@@ -451,9 +563,9 @@ class _DelwaIntroSceneState extends State<DelwaIntroScene>
                   child: SafeArea(
                     child: Padding(
                       padding: const EdgeInsets.only(
-                        top: 14,
-                        right: 16,
-                        left: 60,
+                        top: 10,
+                        right: 14,
+                        left: 44,
                       ),
                       child: Align(
                         alignment: Alignment.topRight,
@@ -461,67 +573,90 @@ class _DelwaIntroSceneState extends State<DelwaIntroScene>
                           opacity: egyptStatementFade,
                           child: Transform.translate(
                             offset: Offset(0, egyptStatementSlide),
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              crossAxisAlignment: CrossAxisAlignment.end,
-                              children: [
-                                const Directionality(
-                                  textDirection: TextDirection.rtl,
-                                  child: Text(
-                                    'مصر',
-                                    style: TextStyle(
-                                      fontFamily: 'Cairo',
-                                      fontSize: 22,
-                                      fontWeight: FontWeight.w700,
-                                      color: _gold,
-                                      letterSpacing: 0.5,
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 7,
+                              ),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFF0E0826)
+                                    .withValues(alpha: 0.38),
+                                borderRadius: BorderRadius.circular(16),
+                                border: Border.all(
+                                  color: _gold.withValues(alpha: 0.34),
+                                ),
+                              ),
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                crossAxisAlignment: CrossAxisAlignment.end,
+                                children: [
+                                  const Directionality(
+                                    textDirection: TextDirection.rtl,
+                                    child: Text(
+                                      'مصر',
+                                      style: TextStyle(
+                                        fontFamily: 'Cairo',
+                                        fontSize: 21,
+                                        fontWeight: FontWeight.w800,
+                                        color: Color(0xFFF7D47B),
+                                        letterSpacing: 0.5,
+                                        shadows: [
+                                          Shadow(
+                                            color: Color(0x66000000),
+                                            blurRadius: 8,
+                                            offset: Offset(0, 2),
+                                          ),
+                                        ],
+                                      ),
                                     ),
                                   ),
-                                ),
-                                const SizedBox(height: 3),
-                                const Directionality(
-                                  textDirection: TextDirection.rtl,
-                                  child: Text(
-                                    'دائمًا بتقدم للعالم',
-                                    style: TextStyle(
-                                      fontFamily: 'Cairo',
-                                      fontSize: 13,
-                                      fontWeight: FontWeight.w500,
-                                      color: _textNearWhite,
-                                      letterSpacing: 0.3,
+                                  const SizedBox(height: 2),
+                                  const Directionality(
+                                    textDirection: TextDirection.rtl,
+                                    child: Text(
+                                      'دائمًا بتقدم للعالم',
+                                      style: TextStyle(
+                                        fontFamily: 'Cairo',
+                                        fontSize: 12.5,
+                                        fontWeight: FontWeight.w600,
+                                        color: Color(0xFFFFF9EC),
+                                        letterSpacing: 0.3,
+                                      ),
                                     ),
                                   ),
-                                ),
-                                const SizedBox(height: 6),
-                                Directionality(
-                                  textDirection: TextDirection.ltr,
-                                  child: Text(
-                                    'Egypt',
-                                    style: TextStyle(
-                                      fontFamily: 'Cairo',
-                                      fontSize: 11,
-                                      fontWeight: FontWeight.w400,
-                                      color: _textNearWhite.withValues(alpha: 0.55),
-                                      letterSpacing: 0.4,
+                                  const SizedBox(height: 4),
+                                  Directionality(
+                                    textDirection: TextDirection.ltr,
+                                    child: Text(
+                                      'Egypt',
+                                      style: TextStyle(
+                                        fontFamily: 'Cairo',
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.w700,
+                                        color: const Color(0xFFF5D076)
+                                            .withValues(alpha: 0.9),
+                                        letterSpacing: 0.5,
+                                      ),
                                     ),
                                   ),
-                                ),
-                                Directionality(
-                                  textDirection: TextDirection.ltr,
-                                  child: Text(
-                                    'Always moving the world forward',
-                                    textAlign: TextAlign.right,
-                                    style: TextStyle(
-                                      fontFamily: 'Cairo',
-                                      fontSize: 10,
-                                      fontWeight: FontWeight.w400,
-                                      color: _textNearWhite.withValues(alpha: 0.55),
-                                      letterSpacing: 0.3,
-                                      height: 1.25,
+                                  Directionality(
+                                    textDirection: TextDirection.ltr,
+                                    child: Text(
+                                      'Always moving the world forward',
+                                      textAlign: TextAlign.right,
+                                      style: TextStyle(
+                                        fontFamily: 'Cairo',
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.w500,
+                                        color: _textNearWhite
+                                            .withValues(alpha: 0.78),
+                                        letterSpacing: 0.3,
+                                        height: 1.2,
+                                      ),
                                     ),
                                   ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
                           ),
                         ),
@@ -539,67 +674,90 @@ class _DelwaIntroSceneState extends State<DelwaIntroScene>
                       padding: const EdgeInsets.only(bottom: 10),
                       child: Opacity(
                         opacity: madeInEgyptFade,
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Directionality(
-                              textDirection: TextDirection.rtl,
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Text(
-                                    'صنع في مصر ',
-                                    style: TextStyle(
-                                      fontFamily: 'Cairo',
-                                      fontSize: 13,
-                                      fontWeight: FontWeight.w500,
-                                      color: _textNearWhite.withValues(alpha: 0.75),
-                                      letterSpacing: 0.3,
-                                    ),
-                                  ),
-                                  Transform.translate(
-                                    offset: Offset(
-                                      2.0 * math.sin(_ctrl.value * math.pi * 4),
-                                      0,
-                                    ),
-                                    child: const Text(
-                                      '🇪🇬',
-                                      style: TextStyle(fontSize: 12),
-                                    ),
-                                  ),
-                                ],
+                        child: Center(
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 14,
+                              vertical: 5,
+                            ),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF0E0826)
+                                  .withValues(alpha: 0.42),
+                              borderRadius: BorderRadius.circular(999),
+                              border: Border.all(
+                                color: _gold.withValues(alpha: 0.28),
                               ),
                             ),
-                            const SizedBox(height: 2),
-                            Directionality(
-                              textDirection: TextDirection.ltr,
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Text(
-                                    'Made in Egypt ',
-                                    style: TextStyle(
-                                      fontFamily: 'Cairo',
-                                      fontSize: 11,
-                                      fontWeight: FontWeight.w400,
-                                      color: _textNearWhite.withValues(alpha: 0.6),
-                                      letterSpacing: 0.3,
-                                    ),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Directionality(
+                                  textDirection: TextDirection.rtl,
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      const Text(
+                                        'صنع في مصر ',
+                                        style: TextStyle(
+                                          fontFamily: 'Cairo',
+                                          fontSize: 12.5,
+                                          fontWeight: FontWeight.w700,
+                                          color: Color(0xFFF6D788),
+                                          letterSpacing: 0.3,
+                                        ),
+                                      ),
+                                      Transform.translate(
+                                        offset: Offset(
+                                          2.0 *
+                                              math.sin(
+                                                _ctrl.value * math.pi * 4,
+                                              ),
+                                          0,
+                                        ),
+                                        child: const Text(
+                                          '🇪🇬',
+                                          style: TextStyle(fontSize: 12),
+                                        ),
+                                      ),
+                                    ],
                                   ),
-                                  Transform.translate(
-                                    offset: Offset(
-                                      2.0 * math.sin(_ctrl.value * math.pi * 4),
-                                      0,
-                                    ),
-                                    child: const Text(
-                                      '🇪🇬',
-                                      style: TextStyle(fontSize: 10),
-                                    ),
+                                ),
+                                const SizedBox(height: 1),
+                                Directionality(
+                                  textDirection: TextDirection.ltr,
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Text(
+                                        'Made in Egypt ',
+                                        style: TextStyle(
+                                          fontFamily: 'Cairo',
+                                          fontSize: 10.5,
+                                          fontWeight: FontWeight.w600,
+                                          color: _textNearWhite
+                                              .withValues(alpha: 0.85),
+                                          letterSpacing: 0.4,
+                                        ),
+                                      ),
+                                      Transform.translate(
+                                        offset: Offset(
+                                          2.0 *
+                                              math.sin(
+                                                _ctrl.value * math.pi * 4,
+                                              ),
+                                          0,
+                                        ),
+                                        child: const Text(
+                                          '🇪🇬',
+                                          style: TextStyle(fontSize: 10),
+                                        ),
+                                      ),
+                                    ],
                                   ),
-                                ],
-                              ),
+                                ),
+                              ],
                             ),
-                          ],
+                          ),
                         ),
                       ),
                     ),
@@ -609,6 +767,49 @@ class _DelwaIntroSceneState extends State<DelwaIntroScene>
             );
           },
         ),
+      ),
+    );
+  }
+
+  Widget _buildGoldenStardust({
+    required double t,
+    required double screenWidth,
+    required double screenHeight,
+  }) {
+    final fade = _clamp((t - 0.06) / 0.14) * (1 - _clamp((t - 0.52) / 0.16));
+    if (fade <= 0.01) return const SizedBox.shrink();
+
+    const seeds = <(double, double, double, bool)>[
+      (0.18, 0.42, 4.0, true),
+      (0.82, 0.38, 3.5, false),
+      (0.26, 0.28, 3.0, false),
+      (0.74, 0.25, 4.5, true),
+      (0.14, 0.56, 3.2, true),
+      (0.86, 0.54, 3.8, false),
+    ];
+
+    return Opacity(
+      opacity: fade,
+      child: Stack(
+        children: [
+          for (var i = 0; i < seeds.length; i++)
+            Positioned(
+              left: screenWidth * seeds[i].$1 +
+                  math.sin((t * 3 + i) * math.pi) * 6,
+              top: screenHeight * seeds[i].$2 - (t * 36),
+              child: Container(
+                width: seeds[i].$3,
+                height: seeds[i].$3,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: (seeds[i].$4 ? _gold : _gradientCyan).withValues(
+                    alpha: (0.45 + 0.35 * math.sin((t * 5 + i) * math.pi))
+                        .clamp(0.1, 0.85),
+                  ),
+                ),
+              ),
+            ),
+        ],
       ),
     );
   }

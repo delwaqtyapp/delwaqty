@@ -29,7 +29,7 @@ void main() {
     });
 
     test('toDb returns DB vocabulary including regional tiers', () {
-      expect(AdminRole.owner.toDb(), 'super_admin');
+      expect(AdminRole.owner.toDb(), 'owner');
       expect(AdminRole.countryAdmin.toDb(), 'country_admin');
       expect(AdminRole.governorateAdmin.toDb(), 'governorate_admin');
       expect(AdminRole.centerAdmin.toDb(), 'center_admin');

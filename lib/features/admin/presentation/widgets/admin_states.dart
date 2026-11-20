@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:delwaqty/core/theme/app_colors.dart';
+import 'package:delwaqty/l10n/app_localizations.dart';
 
 /// Unified loading / error / empty states for admin data surfaces.
 class AdminLoadingState extends StatelessWidget {
@@ -87,7 +88,7 @@ class AdminErrorState extends StatelessWidget {
             OutlinedButton.icon(
               onPressed: onRetry,
               icon: const Icon(Icons.refresh_rounded, size: 18),
-              label: const Text('Retry'),
+              label: Text(AppLocalizations.of(context).retry),
             ),
           ],
         ],

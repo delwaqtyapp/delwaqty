@@ -456,9 +456,37 @@ class _OrderCard extends StatelessWidget {
                     _ActionButton(
                       label: l10n.reject,
                       color: theme.colorScheme.error,
-                      onPressed: () => onStatusChanged('cancelled'),
+                      onPressed: () async {
+                        final confirmed = await showDialog<bool>(
+                          context: context,
+                          builder: (dlgCtx) => AlertDialog(
+                            title: Text(l10n.cancelOrder),
+                            content: Text(l10n.areYouSure),
+                            actions: [
+                              TextButton(
+                                onPressed: () =>
+                                    Navigator.of(dlgCtx).pop(false),
+                                child: Text(l10n.no),
+                              ),
+                              TextButton(
+                                onPressed: () =>
+                                    Navigator.of(dlgCtx).pop(true),
+                                style: TextButton.styleFrom(
+                                  foregroundColor:
+                                      Theme.of(dlgCtx).colorScheme.error,
+                                ),
+                                child: Text(l10n.yes),
+                              ),
+                            ],
+                          ),
+                        );
+                        if (confirmed == true) {
+                          onStatusChanged('cancelled');
+                        }
+                      },
                     ),
-                  ] else if (order.status == 'confirmed') ...[
+                  ] else if (order.status == 'confirmed' ||
+                      order.status == 'accepted') ...[
                     _ActionButton(
                       label: l10n.startPreparing,
                       color: AppColors.orderPreparing,

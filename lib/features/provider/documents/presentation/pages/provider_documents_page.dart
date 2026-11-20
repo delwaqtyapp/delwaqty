@@ -55,6 +55,27 @@ class _ProviderDocumentsPageState extends ConsumerState<ProviderDocumentsPage> {
   Future<void> _delete(String docType, String label) async {
     final l10n = AppLocalizations.of(context);
     if (_busy) return;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dlgCtx) => AlertDialog(
+        title: Text(l10n.delete),
+        content: Text('${l10n.areYouSureYouWantToDelete} $label?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dlgCtx).pop(false),
+            child: Text(l10n.cancel),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(dlgCtx).pop(true),
+            style: TextButton.styleFrom(
+              foregroundColor: Theme.of(dlgCtx).colorScheme.error,
+            ),
+            child: Text(l10n.delete),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) return;
     setState(() {
       _busy = true;
       _busyKey = docType;
@@ -123,7 +144,25 @@ class _ProviderDocumentsPageState extends ConsumerState<ProviderDocumentsPage> {
       appBar: AppBar(title: Text(l10n.documents)),
       body: state.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text(l10n.failedToLoad)),
+        error: (e, _) => Center(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  appErrorText(context, e),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 12),
+                FilledButton.tonal(
+                  onPressed: () => ref.invalidate(providerDocumentsProvider),
+                  child: Text(l10n.retry),
+                ),
+              ],
+            ),
+          ),
+        ),
         data: (docs) {
           final byType = {
             for (final d in docs) d['doc_type'] as String: d,
@@ -221,7 +260,24 @@ class _ProviderDocumentsPageState extends ConsumerState<ProviderDocumentsPage> {
                       child: Text(l10n.docPreview),
                     ),
                     Expanded(
-                      child: Image.network(_viewUrl!, fit: BoxFit.contain),
+                      child: Image.network(
+                        _viewUrl!,
+                        fit: BoxFit.contain,
+                        errorBuilder: (context, error, stackTrace) => Center(
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                Icons.broken_image_outlined,
+                                size: 40,
+                                color: Theme.of(context).colorScheme.error,
+                              ),
+                              const SizedBox(height: 8),
+                              Text(l10n.failedToLoad),
+                            ],
+                          ),
+                        ),
+                      ),
                     ),
                   ],
                 ),

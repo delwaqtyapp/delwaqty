@@ -2453,5 +2453,9 @@
   "addSubRegion": "Add City / Village / Locality",
   "regionCoordinates": "Location Coordinates",
   "boundaryRadiusKm": "Boundary Radius (km)",
-  "pickFromMap": "Pick on Map"
+  "pickFromMap": "Pick on Map",
+  "topUpRequestSubmitted": "Top-up request submitted. Your wallet will be credited after review.",
+  "@topUpRequestSubmitted": {
+    "description": "Shown after the customer submits a wallet top-up request that awaits approval."
+  }
 }

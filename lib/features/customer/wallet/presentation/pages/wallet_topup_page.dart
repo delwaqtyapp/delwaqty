@@ -85,7 +85,7 @@ class _WalletTopUpPageState extends ConsumerState<WalletTopUpPage> {
       ref.invalidate(walletTransactionsProvider(authState.user.id));
 
       if (mounted) {
-        AppSnackbar.success(context, message: l10n.topUpSuccessful);
+        AppSnackbar.success(context, message: l10n.topUpRequestSubmitted);
         Navigator.of(context).pop();
       }
     } catch (e) {

@@ -399,7 +399,7 @@ class _EgyptHeroState extends State<_EgyptHero>
               color: Colors.transparent,
               child: InkWell(
                 borderRadius: BorderRadius.circular(14),
-                onTap: () => context.go('/region-selection'),
+                onTap: () => context.push('/region-selection'),
                 child: Container(
                   height: height,
                   padding: const EdgeInsets.symmetric(horizontal: 10),

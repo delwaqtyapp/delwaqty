@@ -5,6 +5,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:delwaqty/shared/widgets/pressable_scale.dart';
 import 'package:local_auth/local_auth.dart';
 import 'package:delwaqty/core/config/app_mode_provider.dart';
 import 'package:delwaqty/core/extensions/context_extensions.dart';
@@ -399,7 +400,37 @@ class _LoginPageState extends ConsumerState<LoginPage>
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const SizedBox(height: 40),
+                        const SizedBox(height: 14),
+                        Row(
+                          children: [
+                            PressableScale(
+                              scale: 0.92,
+                              onTap: () {
+                                if (context.canPop()) {
+                                  context.pop();
+                                } else {
+                                  context.go('/welcome');
+                                }
+                              },
+                              child: Container(
+                                padding: const EdgeInsets.all(9),
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withValues(alpha: 0.08),
+                                  borderRadius: BorderRadius.circular(13),
+                                  border: Border.all(
+                                    color: Colors.white.withValues(alpha: 0.12),
+                                  ),
+                                ),
+                                child: Icon(
+                                  Icons.close_rounded,
+                                  color: Colors.white.withValues(alpha: 0.75),
+                                  size: 17,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 12),
                         _buildLogoWithWings(),
                         const SizedBox(height: 28),
                         _buildWelcome(l10n),

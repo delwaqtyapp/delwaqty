@@ -276,6 +276,7 @@ class SupabaseDeliveryDataSource {
     String rideId,
     String driverId, {
     String? proofUrl,
+    String? recipientOtp,
     double? finalDistanceKm,
   }) async {
     final map = _checkRpc(
@@ -285,6 +286,7 @@ class SupabaseDeliveryDataSource {
           'p_ride_id': rideId,
           'p_driver_id': driverId,
           'p_proof_url': proofUrl,
+          'p_recipient_otp': recipientOtp,
           'p_final_distance': finalDistanceKm,
         },
       ),

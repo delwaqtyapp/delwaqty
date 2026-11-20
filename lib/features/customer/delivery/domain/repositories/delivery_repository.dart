@@ -37,6 +37,7 @@ abstract interface class DeliveryRepository {
     String rideId,
     String driverId, {
     String? proofUrl,
+    String? recipientOtp,
     double? finalDistanceKm,
   });
   Future<void> cancelDelivery(String rideId, {String? reason, bool byDriver});

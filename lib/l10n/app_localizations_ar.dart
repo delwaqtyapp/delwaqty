@@ -7446,4 +7446,29 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get driverActiveVehicleRequired => 'أضف مركبة نشطة قبل إرسال طلبك.';
+
+  @override
+  String get pickupHandoffCode => 'كود استلام المندوب';
+
+  @override
+  String get recipientHandoffCode => 'كود تسليم الطلب';
+
+  @override
+  String get pickupHandoffHint =>
+      'قل الكود للمندوب فقط عند تسليمه الطلب فعليًا.';
+
+  @override
+  String get recipientHandoffHint =>
+      'قل الكود للمندوب فقط بعد استلام الطلب. لو المستلم شخص تاني، ابعتله الكود هو مش المندوب.';
+
+  @override
+  String get showHandoffCode => 'عرض كود التسليم';
+
+  @override
+  String get askRecipientHandoff =>
+      'اطلب كود التسليم من المستلم بعد تسليمه الطلب فعليًا.';
+
+  @override
+  String get askPickupHandoff =>
+      'اطلب كود الاستلام من التاجر أو المرسل عند استلام الطلب فعليًا.';
 }

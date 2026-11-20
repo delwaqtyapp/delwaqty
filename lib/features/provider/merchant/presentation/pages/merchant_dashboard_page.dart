@@ -38,6 +38,7 @@ class MerchantDashboardPage extends ConsumerStatefulWidget {
 }
 
 class _MerchantDashboardPageState extends ConsumerState<MerchantDashboardPage> {
+  RealtimeService? _realtimeService;
   static const _dashboardChannel =
       '${RealtimeChannels.providerOrders}-dashboard';
   bool _togglingOpen = false;
@@ -52,30 +53,30 @@ class _MerchantDashboardPageState extends ConsumerState<MerchantDashboardPage> {
     try {
       final merchantId = await ref.read(_merchantIdProvider.future);
       if (!mounted || merchantId.isEmpty) return;
-      ref
-          .read(realtimeServiceProvider)
-          .subscribe(
-            channelName: _dashboardChannel,
-            opts: [
-              RealtimeChannelFilter(
-                event: PostgresChangeEvent.all,
-                schema: 'public',
-                table: 'orders',
-                filter: PostgresChangeFilter(
-                  type: PostgresChangeFilterType.eq,
-                  column: 'merchant_id',
-                  value: merchantId,
-                ),
-                callback: (_) => ref.invalidate(_statsProvider),
-              ),
-            ],
-          );
+      final realtime = ref.read(realtimeServiceProvider);
+      _realtimeService = realtime;
+      realtime.subscribe(
+        channelName: _dashboardChannel,
+        opts: [
+          RealtimeChannelFilter(
+            event: PostgresChangeEvent.all,
+            schema: 'public',
+            table: 'orders',
+            filter: PostgresChangeFilter(
+              type: PostgresChangeFilterType.eq,
+              column: 'merchant_id',
+              value: merchantId,
+            ),
+            callback: (_) => ref.invalidate(_statsProvider),
+          ),
+        ],
+      );
     } catch (_) {}
   }
 
   @override
   void dispose() {
-    ref.read(realtimeServiceProvider).unsubscribe(_dashboardChannel);
+    _realtimeService?.unsubscribe(_dashboardChannel);
     super.dispose();
   }
 

@@ -1,3 +1,4 @@
+import 'package:delwaqty/shared/widgets/delivery_handoff_button.dart';
 import 'package:delwaqty/core/utils/rpc_result.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -37,6 +38,7 @@ class MerchantOrdersPage extends ConsumerStatefulWidget {
 }
 
 class _MerchantOrdersPageState extends ConsumerState<MerchantOrdersPage> {
+  RealtimeService? _realtimeService;
   @override
   void initState() {
     super.initState();
@@ -47,32 +49,30 @@ class _MerchantOrdersPageState extends ConsumerState<MerchantOrdersPage> {
     try {
       final merchantId = await ref.read(providerMerchantIdProvider.future);
       if (!mounted || merchantId.isEmpty) return;
-      ref
-          .read(realtimeServiceProvider)
-          .subscribe(
-            channelName: RealtimeChannels.providerOrders,
-            opts: [
-              RealtimeChannelFilter(
-                event: PostgresChangeEvent.all,
-                schema: 'public',
-                table: 'orders',
-                filter: PostgresChangeFilter(
-                  type: PostgresChangeFilterType.eq,
-                  column: 'merchant_id',
-                  value: merchantId,
-                ),
-                callback: (_) => ref.invalidate(_ordersProvider),
-              ),
-            ],
-          );
+      final realtime = ref.read(realtimeServiceProvider);
+      _realtimeService = realtime;
+      realtime.subscribe(
+        channelName: RealtimeChannels.providerOrders,
+        opts: [
+          RealtimeChannelFilter(
+            event: PostgresChangeEvent.all,
+            schema: 'public',
+            table: 'orders',
+            filter: PostgresChangeFilter(
+              type: PostgresChangeFilterType.eq,
+              column: 'merchant_id',
+              value: merchantId,
+            ),
+            callback: (_) => ref.invalidate(_ordersProvider),
+          ),
+        ],
+      );
     } catch (_) {}
   }
 
   @override
   void dispose() {
-    ref
-        .read(realtimeServiceProvider)
-        .unsubscribe(RealtimeChannels.providerOrders);
+    _realtimeService?.unsubscribe(RealtimeChannels.providerOrders);
     super.dispose();
   }
 
@@ -429,6 +429,8 @@ class _OrderCard extends StatelessWidget {
                   ],
                 ),
               ],
+              if (canDispatchDriver)
+                DeliveryHandoffButton(orderId: order.id, pickup: true),
               if (canDispatchDriver) ...[
                 const SizedBox(height: 10),
                 Align(

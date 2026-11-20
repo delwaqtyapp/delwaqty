@@ -90,6 +90,8 @@ class _FakeOrderRepository implements OrderRepository {
     required double discount,
     required double total,
     String? deliveryAddress,
+    String? couponCode,
+    String? idempotencyKey,
     double? deliveryLatitude,
     double? deliveryLongitude,
     String? paymentMethod,

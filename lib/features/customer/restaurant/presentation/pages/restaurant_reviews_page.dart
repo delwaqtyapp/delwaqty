@@ -356,7 +356,7 @@ class _RatingBar extends StatelessWidget {
               style: theme.textTheme.labelSmall?.copyWith(
                 color: theme.colorScheme.onSurfaceVariant,
               ),
-              textAlign: TextAlign.right,
+              textAlign: TextAlign.start,
             ),
           ),
         ],

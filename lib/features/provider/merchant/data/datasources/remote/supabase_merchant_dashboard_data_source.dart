@@ -175,6 +175,21 @@ class SupabaseMerchantDashboardDataSource {
 
   Future<void> updateOrderStatus(String orderId, String status) async {
     try {
+      // Delivery completion must go through the RPC: it records the
+      // merchant commission and is the only path the orders guard
+      // trigger accepts for the 'delivered' transition.
+      if (status == 'delivered') {
+        final res = await _client.rpc(
+          'merchant_complete_order',
+          params: {'p_order_id': orderId},
+        );
+        final ok = res is Map && res['ok'] == true;
+        if (!ok) {
+          final reason = res is Map ? res['reason'] : null;
+          throw StateError('merchant_complete_order failed: $reason');
+        }
+        return;
+      }
       await _client
           .from('orders')
           .update({

@@ -594,7 +594,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get accountDeletionInfo =>
-      'تم تسجيل خروجك. حذف الحساب يتم عبر فريق الدعم — تواصل مع support@delwaqty.com';
+      'تم تسجيل خروجك. لو حذف الحساب مكملش، تواصل معنا على delwaqty.app@gmail.com';
 
   @override
   String get emptyCart => 'سلتك فارغة';

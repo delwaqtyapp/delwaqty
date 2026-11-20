@@ -210,7 +210,7 @@
   "deliveryAddressNotFound": "Could not find this address. Please enter a more specific address.",
   "loginRequired": "Please log in first",
   "thisDevice": "This device",
-  "accountDeletionInfo": "You have been signed out. Account deletion is handled by support — contact support@delwaqty.com",
+  "accountDeletionInfo": "You have been signed out. If account deletion fails, contact us at delwaqty.app@gmail.com",
   "emptyCart": "Your cart is empty",
   "emptyCartMessage": "Add items from restaurants and shops to get started.",
   "clearCart": "Clear Cart",

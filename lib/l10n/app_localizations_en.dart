@@ -597,7 +597,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get accountDeletionInfo =>
-      'You have been signed out. Account deletion is handled by support — contact support@delwaqty.com';
+      'You have been signed out. If account deletion fails, contact us at delwaqty.app@gmail.com';
 
   @override
   String get emptyCart => 'Your cart is empty';

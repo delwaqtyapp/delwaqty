@@ -6,6 +6,7 @@ import 'package:delwaqty/features/customer/commerce/domain/entities/cart.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 import 'package:delwaqty/core/extensions/context_extensions.dart';
 import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
+import 'package:delwaqty/shared/widgets/floating_glass_buttons.dart';
 import 'package:delwaqty/shared/widgets/empty_state.dart';
 import 'package:delwaqty/shared/widgets/app_loader.dart';
 import 'package:delwaqty/shared/widgets/error_state.dart';
@@ -29,6 +30,12 @@ class CartPage extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: false,
+        leadingWidth: 64,
+        leading: const Padding(
+          padding: EdgeInsetsDirectional.only(start: 12),
+          child: Center(child: FloatingMenuCircleButton(size: 40)),
+        ),
         title: Text(l10n.cart),
         actions: [
           if (hasItems)
@@ -57,6 +64,10 @@ class CartPage extends ConsumerWidget {
               },
               child: Text(l10n.clearCart),
             ),
+          const Padding(
+            padding: EdgeInsetsDirectional.only(end: 12),
+            child: Center(child: FloatingNotificationCircleButton(size: 40)),
+          ),
         ],
       ),
       body: cartAsync.when(
@@ -67,7 +78,7 @@ class CartPage extends ConsumerWidget {
               title: l10n.emptyCart,
               message: l10n.emptyCartMessage,
               actionLabel: l10n.browseMerchants,
-              onAction: () => context.go('/market'),
+              onAction: () => context.push('/market'),
             );
           }
 

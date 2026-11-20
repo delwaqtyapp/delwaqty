@@ -9,6 +9,7 @@ import 'package:delwaqty/core/theme/app_colors.dart';
 import 'package:delwaqty/core/theme/app_spacing.dart';
 import 'package:delwaqty/core/theme/app_text_styles.dart';
 import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
+import 'package:delwaqty/shared/widgets/floating_glass_buttons.dart';
 import 'package:delwaqty/shared/widgets/gradient_background.dart';
 import 'package:delwaqty/shared/widgets/premium_empty_state.dart';
 import 'package:delwaqty/shared/widgets/shimmer_loading.dart';
@@ -29,7 +30,21 @@ class OrdersPage extends ConsumerWidget {
     final ordersAsync = ref.watch(_ordersFutureProvider);
 
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.myOrders)),
+      appBar: AppBar(
+        automaticallyImplyLeading: false,
+        leadingWidth: 64,
+        leading: const Padding(
+          padding: EdgeInsetsDirectional.only(start: 12),
+          child: Center(child: FloatingMenuCircleButton(size: 40)),
+        ),
+        title: Text(l10n.myOrders),
+        actions: const [
+          Padding(
+            padding: EdgeInsetsDirectional.only(end: 12),
+            child: Center(child: FloatingNotificationCircleButton(size: 40)),
+          ),
+        ],
+      ),
       body: GradientBackground(
         child: RefreshIndicator(
           onRefresh: () async => ref.invalidate(_ordersFutureProvider),

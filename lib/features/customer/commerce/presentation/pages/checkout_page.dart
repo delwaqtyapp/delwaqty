@@ -129,7 +129,7 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
                   Text(l10n.emptyCart, style: textTheme.titleMedium),
                   const SizedBox(height: 8),
                   FilledButton.tonal(
-                    onPressed: () => context.go('/market'),
+                    onPressed: () => context.push('/market'),
                     child: Text(l10n.browseMerchants),
                   ),
                 ],

@@ -19,7 +19,11 @@ class DeliveryPricingModel {
   final double expressMultiplier;
   final String currency;
 
-  double calculateFee(double distanceKm, {double weightKg = 1.0, String priority = 'standard'}) {
+  double calculateFee(
+    double distanceKm, {
+    double weightKg = 1.0,
+    String priority = 'standard',
+  }) {
     var fee = baseFee + (perKm * distanceKm) + (perKg * weightKg);
     var multiplier = 1.0;
     if (priority == 'priority') {

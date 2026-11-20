@@ -151,10 +151,7 @@ void main() {
         createdAt: now,
       );
 
-      final updated = user.copyWith(
-        name: 'Owner',
-        role: AdminRole.owner,
-      );
+      final updated = user.copyWith(name: 'Owner', role: AdminRole.owner);
       expect(updated.name, 'Owner');
       expect(updated.role, AdminRole.owner);
       expect(updated.id, 'a1');
@@ -396,7 +393,6 @@ void main() {
     });
   });
 
-
   group('DeliveryModel', () {
     test('fromJson creates DeliveryModel from JSON', () {
       final json = {
@@ -621,10 +617,7 @@ void main() {
 
   group('RevenueData', () {
     test('fromJson creates RevenueData from JSON', () {
-      final json = {
-        'date': now.toIso8601String(),
-        'amount': 5000.0,
-      };
+      final json = {'date': now.toIso8601String(), 'amount': 5000.0};
 
       final data = RevenueData.fromJson(json);
       expect(data.date, now);

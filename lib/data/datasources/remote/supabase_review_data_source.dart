@@ -62,11 +62,12 @@ class SupabaseReviewDataSource {
           one++;
       }
     }
-    final avg = rpcAvg ??
+    final avg =
+        rpcAvg ??
         (reviews.isEmpty
             ? 0.0
             : reviews.map((r) => r.rating).reduce((a, b) => a + b) /
-                reviews.length);
+                  reviews.length);
     final total = rpcTotal ?? reviews.length;
     return ReviewSummary(
       averageRating: avg,
@@ -172,10 +173,7 @@ class SupabaseReviewDataSource {
   }) async {
     await _client.rpc(
       'reply_to_merchant_review',
-      params: {
-        'p_review_id': reviewId,
-        'p_reply': reply,
-      },
+      params: {'p_review_id': reviewId, 'p_reply': reply},
     );
   }
 
@@ -222,8 +220,7 @@ class SupabaseReviewDataSource {
     }
     if (data != null) {
       final avg = (data['avg_rating'] as num?)?.toDouble() ?? 0.0;
-      final total =
-          (data['total_reviews'] as num?)?.toInt() ?? reviews.length;
+      final total = (data['total_reviews'] as num?)?.toInt() ?? reviews.length;
       return _summaryFromReviews(reviews, rpcAvg: avg, rpcTotal: total);
     }
     return _summaryFromReviews(reviews);

@@ -32,19 +32,33 @@ void main() {
   group('PlaceSuggestion', () {
     test('fullText joins primary and secondary', () {
       const s = PlaceSuggestion(
-          placeId: 'p', primaryText: 'Cafe', secondaryText: 'Cairo');
+        placeId: 'p',
+        primaryText: 'Cafe',
+        secondaryText: 'Cairo',
+      );
       expect(s.fullText, 'Cafe, Cairo');
     });
 
     test('fullText uses primary when secondary empty', () {
-      const s =
-          PlaceSuggestion(placeId: 'p', primaryText: 'Cafe', secondaryText: '');
+      const s = PlaceSuggestion(
+        placeId: 'p',
+        primaryText: 'Cafe',
+        secondaryText: '',
+      );
       expect(s.fullText, 'Cafe');
     });
 
     test('equality by placeId', () {
-      const a = PlaceSuggestion(placeId: 'x', primaryText: 'A', secondaryText: '');
-      const b = PlaceSuggestion(placeId: 'x', primaryText: 'B', secondaryText: 'C');
+      const a = PlaceSuggestion(
+        placeId: 'x',
+        primaryText: 'A',
+        secondaryText: '',
+      );
+      const b = PlaceSuggestion(
+        placeId: 'x',
+        primaryText: 'B',
+        secondaryText: 'C',
+      );
       expect(a, equals(b));
     });
   });

@@ -43,9 +43,7 @@ class _PrimaryHeaderActionsState extends ConsumerState<PrimaryHeaderActions> {
     final l10n = AppLocalizations.of(context);
     final authState = ref.watch(authStateProvider);
     final isGuest = authState is AuthGuest;
-    final unreadCount = isGuest
-        ? 0
-        : ref.watch(unreadCountProvider).value ?? 0;
+    final unreadCount = isGuest ? 0 : ref.watch(unreadCountProvider).value ?? 0;
 
     return Row(
       mainAxisSize: MainAxisSize.min,
@@ -66,12 +64,16 @@ class _PrimaryHeaderActionsState extends ConsumerState<PrimaryHeaderActions> {
             icon: Badge(
               isLabelVisible: unreadCount > 0,
               backgroundColor: Theme.of(context).colorScheme.error,
-              label: unreadCount > 99 ? const Text('99+') : Text('$unreadCount'),
+              label: unreadCount > 99
+                  ? const Text('99+')
+                  : Text('$unreadCount'),
               child: const Icon(Icons.notifications_outlined),
             ),
           ),
         if (widget.showCart)
-          CartBadge(onTap: widget.onCartTap ?? () => context.push('/market/cart')),
+          CartBadge(
+            onTap: widget.onCartTap ?? () => context.push('/market/cart'),
+          ),
       ],
     );
   }

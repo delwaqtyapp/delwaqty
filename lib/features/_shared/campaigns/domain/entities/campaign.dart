@@ -82,9 +82,8 @@ enum CampaignStatus {
     }
   }
 
-  String get dbName => name == CampaignStatus.pendingReview.name
-      ? 'pending_review'
-      : name;
+  String get dbName =>
+      name == CampaignStatus.pendingReview.name ? 'pending_review' : name;
 }
 
 enum CampaignPriority {
@@ -137,13 +136,13 @@ class CampaignCta {
   });
 
   factory CampaignCta.fromJson(Map<String, dynamic> json) => CampaignCta(
-        type: CampaignCtaType.fromDb(json['type'] as String?),
-        route: json['route'] as String?,
-        url: json['url'] as String?,
-        code: json['code'] as String?,
-        entityType: json['entity_type'] as String?,
-        entityId: json['entity_id'] as String?,
-      );
+    type: CampaignCtaType.fromDb(json['type'] as String?),
+    route: json['route'] as String?,
+    url: json['url'] as String?,
+    code: json['code'] as String?,
+    entityType: json['entity_type'] as String?,
+    entityId: json['entity_id'] as String?,
+  );
 
   final CampaignCtaType type;
   final String? route;
@@ -176,34 +175,32 @@ abstract class Campaign with _$Campaign {
   }) = _Campaign;
 
   static Campaign fromJson(Map<String, dynamic> json) => Campaign(
-        id: json['id'] as String,
-        code: json['code'] as String,
-        campaignType: CampaignType.fromDb(json['campaign_type'] as String),
-        nameAr: json['name_ar'] as String,
-        nameEn: json['name_en'] as String?,
-        subtitleAr: json['subtitle_ar'] as String?,
-        subtitleEn: json['subtitle_en'] as String?,
-        descriptionAr: json['description_ar'] as String?,
-        descriptionEn: json['description_en'] as String?,
-        status: CampaignStatus.fromDb(json['status'] as String),
-        startsAt: json['starts_at'] != null
-            ? DateTime.tryParse(json['starts_at'] as String)
-            : null,
-        endsAt: json['ends_at'] != null
-            ? DateTime.tryParse(json['ends_at'] as String)
-            : null,
-        publishedAt: json['published_at'] != null
-            ? DateTime.tryParse(json['published_at'] as String)
-            : null,
-        createdAt: json['created_at'] != null
-            ? DateTime.tryParse(json['created_at'] as String)
-            : null,
-        priority: CampaignPriority.fromDb(json['priority'] as String?),
-        imagePath: json['image_path'] as String?,
-        cta: json['cta'] != null
-            ? CampaignCta.fromJson(
-                Map<String, dynamic>.from(json['cta'] as Map),
-              )
-            : null,
-      );
+    id: json['id'] as String,
+    code: json['code'] as String,
+    campaignType: CampaignType.fromDb(json['campaign_type'] as String),
+    nameAr: json['name_ar'] as String,
+    nameEn: json['name_en'] as String?,
+    subtitleAr: json['subtitle_ar'] as String?,
+    subtitleEn: json['subtitle_en'] as String?,
+    descriptionAr: json['description_ar'] as String?,
+    descriptionEn: json['description_en'] as String?,
+    status: CampaignStatus.fromDb(json['status'] as String),
+    startsAt: json['starts_at'] != null
+        ? DateTime.tryParse(json['starts_at'] as String)
+        : null,
+    endsAt: json['ends_at'] != null
+        ? DateTime.tryParse(json['ends_at'] as String)
+        : null,
+    publishedAt: json['published_at'] != null
+        ? DateTime.tryParse(json['published_at'] as String)
+        : null,
+    createdAt: json['created_at'] != null
+        ? DateTime.tryParse(json['created_at'] as String)
+        : null,
+    priority: CampaignPriority.fromDb(json['priority'] as String?),
+    imagePath: json['image_path'] as String?,
+    cta: json['cta'] != null
+        ? CampaignCta.fromJson(Map<String, dynamic>.from(json['cta'] as Map))
+        : null,
+  );
 }

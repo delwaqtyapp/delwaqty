@@ -45,27 +45,25 @@ void main() {
   });
 
   group('SupabaseNotificationDataSource RPCs', () {
-    test('registerDeviceToken issues the RPC with device-scoped params',
-        () async {
-      await dataSource.registerDeviceToken(
-        token: 'fcm-token-1',
-        platform: 'android',
-        deviceId: 'dev-1',
-        appVersion: '1.2.0',
-      );
+    test(
+      'registerDeviceToken issues the RPC with device-scoped params',
+      () async {
+        await dataSource.registerDeviceToken(
+          token: 'fcm-token-1',
+          platform: 'android',
+          deviceId: 'dev-1',
+          appVersion: '1.2.0',
+        );
 
-      expect(capturedRequest, isNotNull);
-      expect(
-        capturedRequest!.url.path,
-        '/rest/v1/rpc/register_device_token',
-      );
-      final body =
-          jsonDecode(capturedRequest!.body) as Map<String, dynamic>;
-      expect(body['p_token'], 'fcm-token-1');
-      expect(body['p_platform'], 'android');
-      expect(body['p_device_id'], 'dev-1');
-      expect(body['p_app_version'], '1.2.0');
-    });
+        expect(capturedRequest, isNotNull);
+        expect(capturedRequest!.url.path, '/rest/v1/rpc/register_device_token');
+        final body = jsonDecode(capturedRequest!.body) as Map<String, dynamic>;
+        expect(body['p_token'], 'fcm-token-1');
+        expect(body['p_platform'], 'android');
+        expect(body['p_device_id'], 'dev-1');
+        expect(body['p_app_version'], '1.2.0');
+      },
+    );
 
     test('registerDeviceToken omits app version when null', () async {
       await dataSource.registerDeviceToken(
@@ -74,36 +72,32 @@ void main() {
         deviceId: 'dev-2',
       );
 
-      final body =
-          jsonDecode(capturedRequest!.body) as Map<String, dynamic>;
+      final body = jsonDecode(capturedRequest!.body) as Map<String, dynamic>;
       expect(body.containsKey('p_app_version'), isFalse);
     });
 
     test('refreshTokenHeartbeat issues the RPC', () async {
       await dataSource.refreshTokenHeartbeat(token: 't1', deviceId: 'dev-1');
 
-      expect(
-        capturedRequest!.url.path,
-        '/rest/v1/rpc/refresh_token_heartbeat',
-      );
-      final body =
-          jsonDecode(capturedRequest!.body) as Map<String, dynamic>;
+      expect(capturedRequest!.url.path, '/rest/v1/rpc/refresh_token_heartbeat');
+      final body = jsonDecode(capturedRequest!.body) as Map<String, dynamic>;
       expect(body['p_token'], 't1');
       expect(body['p_device_id'], 'dev-1');
     });
 
-    test('deactivateDeviceTokens issues the RPC for the current device',
-        () async {
-      await dataSource.deactivateDeviceTokens('dev-1');
+    test(
+      'deactivateDeviceTokens issues the RPC for the current device',
+      () async {
+        await dataSource.deactivateDeviceTokens('dev-1');
 
-      expect(
-        capturedRequest!.url.path,
-        '/rest/v1/rpc/deactivate_device_tokens',
-      );
-      final body =
-          jsonDecode(capturedRequest!.body) as Map<String, dynamic>;
-      expect(body['p_device_id'], 'dev-1');
-    });
+        expect(
+          capturedRequest!.url.path,
+          '/rest/v1/rpc/deactivate_device_tokens',
+        );
+        final body = jsonDecode(capturedRequest!.body) as Map<String, dynamic>;
+        expect(body['p_device_id'], 'dev-1');
+      },
+    );
   });
 
   group('SupabaseNotificationDataSource row mapping', () {

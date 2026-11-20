@@ -8,15 +8,14 @@ PlatformCapabilities capsFrom({
   bool merchant = false,
   bool admin = false,
   bool owner = false,
-}) =>
-    PlatformCapabilities(
-      customer: customer,
-      driver: driver,
-      provider: provider,
-      merchant: merchant,
-      admin: admin,
-      owner: owner,
-    );
+}) => PlatformCapabilities(
+  customer: customer,
+  driver: driver,
+  provider: provider,
+  merchant: merchant,
+  admin: admin,
+  owner: owner,
+);
 
 void main() {
   group('PlatformCapabilities.fromJson', () {
@@ -55,12 +54,17 @@ void main() {
 
   group('OwnerContextResolver', () {
     test('Owner is authorized for every context even with no ops rows', () {
-      final r = OwnerContextResolver(capsFrom(owner: true, customer: true, admin: true));
+      final r = OwnerContextResolver(
+        capsFrom(owner: true, customer: true, admin: true),
+      );
       expect(r.authorizedCustomer, isTrue);
       expect(r.authorizedDelivery, isTrue);
       expect(r.authorizedProvider, isTrue);
       expect(r.authorizedAdmin, isTrue);
-      expect(r.availableContexts, containsAll(['customer', 'delivery', 'provider', 'admin']));
+      expect(
+        r.availableContexts,
+        containsAll(['customer', 'delivery', 'provider', 'admin']),
+      );
     });
 
     test('normal Delivery user is NOT admin/provider', () {
@@ -71,7 +75,9 @@ void main() {
     });
 
     test('normal Provider user is NOT delivery/admin', () {
-      final r = OwnerContextResolver(capsFrom(customer: true, provider: true, merchant: true));
+      final r = OwnerContextResolver(
+        capsFrom(customer: true, provider: true, merchant: true),
+      );
       expect(r.authorizedProvider, isTrue);
       expect(r.authorizedDelivery, isFalse);
       expect(r.authorizedAdmin, isFalse);

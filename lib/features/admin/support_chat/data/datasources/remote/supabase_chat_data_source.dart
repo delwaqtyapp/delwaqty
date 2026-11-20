@@ -1,10 +1,10 @@
 import 'dart:typed_data';
+
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:delwaqty/features/admin/support_chat/domain/entities/chat_room.dart';
 import 'package:delwaqty/features/admin/support_chat/domain/entities/chat_message.dart';
 
 class SupabaseChatDataSource {
-
   SupabaseChatDataSource(this._client);
   final SupabaseClient _client;
   static const _bucket = 'chat_attachments';
@@ -30,11 +30,13 @@ class SupabaseChatDataSource {
   }) async {
     final safeName = fileName.replaceAll(RegExp(r'[^a-zA-Z0-9._-]'), '_');
     final path = '$roomId/${DateTime.now().millisecondsSinceEpoch}_$safeName';
-    await _client.storage.from(_bucket).uploadBinary(
-      path,
-      bytes,
-      fileOptions: FileOptions(contentType: contentType, upsert: true),
-    );
+    await _client.storage
+        .from(_bucket)
+        .uploadBinary(
+          path,
+          bytes,
+          fileOptions: FileOptions(contentType: contentType, upsert: true),
+        );
     return path;
   }
 
@@ -69,7 +71,11 @@ class SupabaseChatDataSource {
     if (payload['reference_number'] == null) {
       payload.remove('reference_number');
     }
-    final row = await _client.from('chat_rooms').insert(payload).select().single();
+    final row = await _client
+        .from('chat_rooms')
+        .insert(payload)
+        .select()
+        .single();
     return ChatRoom.fromJson(row);
   }
 
@@ -81,11 +87,14 @@ class SupabaseChatDataSource {
   Future<void> closeRoom(String id) async {
     final now = DateTime.now();
     final oneWeekLater = now.add(const Duration(days: 7));
-    await _client.from('chat_rooms').update({
-      'is_active': false,
-      'auto_delete_at': oneWeekLater.toIso8601String(),
-      'updated_at': now.toIso8601String(),
-    }).eq('id', id);
+    await _client
+        .from('chat_rooms')
+        .update({
+          'is_active': false,
+          'auto_delete_at': oneWeekLater.toIso8601String(),
+          'updated_at': now.toIso8601String(),
+        })
+        .eq('id', id);
   }
 
   // Owner-only hard delete of a chat (room + messages + attachments).
@@ -99,12 +108,15 @@ class SupabaseChatDataSource {
     String? responderId,
     String? responderType,
   }) async {
-    await _client.rpc('chat_set_call_status', params: {
-      'p_message_id': messageId,
-      'p_status': status,
-      'p_responder_id': responderId,
-      'p_responder_type': responderType,
-    });
+    await _client.rpc(
+      'chat_set_call_status',
+      params: {
+        'p_message_id': messageId,
+        'p_status': status,
+        'p_responder_id': responderId,
+        'p_responder_type': responderType,
+      },
+    );
   }
 
   // Auto-purge of chats past auto_delete_at. Returns number removed.
@@ -130,16 +142,17 @@ class SupabaseChatDataSource {
   Stream<bool> typingStream(String roomId) {
     return _client
         .from('chat_typing')
-        .stream(primaryKey: ['room_id', 'user_id']).eq('room_id', roomId)
+        .stream(primaryKey: ['room_id', 'user_id'])
+        .eq('room_id', roomId)
         .map((rows) {
-      final me = _client.auth.currentUser?.id;
-      final rowsList = (rows as List).cast<Map<String, dynamic>>();
-      if (rowsList.isEmpty) return false;
-      final latest = rowsList
-          .where((r) => r['user_id'] != me && r['is_typing'] == true)
-          .isNotEmpty;
-      return latest;
-    });
+          final me = _client.auth.currentUser?.id;
+          final rowsList = (rows as List).cast<Map<String, dynamic>>();
+          if (rowsList.isEmpty) return false;
+          final latest = rowsList
+              .where((r) => r['user_id'] != me && r['is_typing'] == true)
+              .isNotEmpty;
+          return latest;
+        });
   }
 
   Future<List<ChatMessage>> getMessages(String roomId, {int limit = 50}) async {
@@ -164,10 +177,13 @@ class SupabaseChatDataSource {
         .insert(payload)
         .select()
         .single();
-    await _client.from('chat_rooms').update({
-      'last_message_at': message.createdAt.toIso8601String(),
-      'updated_at': message.createdAt.toIso8601String(),
-    }).eq('id', message.roomId);
+    await _client
+        .from('chat_rooms')
+        .update({
+          'last_message_at': message.createdAt.toIso8601String(),
+          'updated_at': message.createdAt.toIso8601String(),
+        })
+        .eq('id', message.roomId);
     return ChatMessage.fromJson(row);
   }
 
@@ -177,10 +193,7 @@ class SupabaseChatDataSource {
     try {
       var roomQuery = _client
           .from('chat_messages')
-          .update({
-            'is_read': true,
-            'read_at': now,
-          })
+          .update({'is_read': true, 'read_at': now})
           .eq('room_id', messageOrRoomId)
           .eq('is_read', false);
       if (me != null && me.isNotEmpty) {
@@ -191,10 +204,7 @@ class SupabaseChatDataSource {
     try {
       await _client
           .from('chat_messages')
-          .update({
-            'is_read': true,
-            'read_at': now,
-          })
+          .update({'is_read': true, 'read_at': now})
           .eq('id', messageOrRoomId);
     } catch (_) {}
   }
@@ -204,11 +214,14 @@ class SupabaseChatDataSource {
     required String adminId,
     required String welcomeMessage,
   }) async {
-    await _client.from('chat_rooms').update({
-      'assigned_admin_id': adminId,
-      'welcome_message': welcomeMessage,
-      'updated_at': DateTime.now().toIso8601String(),
-    }).eq('id', roomId);
+    await _client
+        .from('chat_rooms')
+        .update({
+          'assigned_admin_id': adminId,
+          'welcome_message': welcomeMessage,
+          'updated_at': DateTime.now().toIso8601String(),
+        })
+        .eq('id', roomId);
   }
 
   Stream<List<ChatMessage>> messageStream(String roomId) {
@@ -219,13 +232,14 @@ class SupabaseChatDataSource {
         .order('created_at')
         .limit(50)
         .map((rows) {
-      final list = (rows as List)
-          .cast<Map<String, dynamic>>()
-          .map((r) => ChatMessage.fromJson(r))
-          .toList()
-        ..sort((a, b) => a.createdAt.compareTo(b.createdAt));
-      return list;
-    });
+          final list =
+              (rows as List)
+                  .cast<Map<String, dynamic>>()
+                  .map((r) => ChatMessage.fromJson(r))
+                  .toList()
+                ..sort((a, b) => a.createdAt.compareTo(b.createdAt));
+          return list;
+        });
   }
 
   // Global chat permissions (on the shared platform_settings row).
@@ -236,11 +250,12 @@ class SupabaseChatDataSource {
           .select('chat_calls_enabled,chat_voice_enabled,chat_media_enabled')
           .eq('id', 'default')
           .maybeSingle();
-      return row ?? <String, dynamic>{
-        'chat_calls_enabled': true,
-        'chat_voice_enabled': true,
-        'chat_media_enabled': true,
-      };
+      return row ??
+          <String, dynamic>{
+            'chat_calls_enabled': true,
+            'chat_voice_enabled': true,
+            'chat_media_enabled': true,
+          };
     } catch (_) {
       return <String, dynamic>{
         'chat_calls_enabled': true,
@@ -257,12 +272,15 @@ class SupabaseChatDataSource {
     required bool voice,
     required bool media,
   }) async {
-    await _client.from('platform_settings').update({
-      'chat_calls_enabled': calls,
-      'chat_voice_enabled': voice,
-      'chat_media_enabled': media,
-      'updated_at': DateTime.now().toIso8601String(),
-    }).eq('id', 'default');
+    await _client
+        .from('platform_settings')
+        .update({
+          'chat_calls_enabled': calls,
+          'chat_voice_enabled': voice,
+          'chat_media_enabled': media,
+          'updated_at': DateTime.now().toIso8601String(),
+        })
+        .eq('id', 'default');
   }
 
   // Per-user preference: may this user receive incoming calls?
@@ -280,8 +298,9 @@ class SupabaseChatDataSource {
   }
 
   Future<void> setReceiveCalls(String userId, bool enabled) async {
-    await _client.from('users').update({
-      'chat_calls_enabled': enabled,
-    }).eq('id', userId);
+    await _client
+        .from('users')
+        .update({'chat_calls_enabled': enabled})
+        .eq('id', userId);
   }
 }

@@ -1,4 +1,5 @@
 import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:delwaqty/core/theme/app_elevation.dart';
 import 'package:delwaqty/core/theme/app_spacing.dart';
@@ -56,8 +57,7 @@ class GlassSurface extends StatelessWidget {
             color: effectiveTint,
             borderRadius: BorderRadius.circular(borderRadius),
             border: Border.all(color: effectiveBorder, width: borderWidth),
-            boxShadow:
-                shadow ?? (isDark ? null : AppElevation.shadowCard),
+            boxShadow: shadow ?? (isDark ? null : AppElevation.shadowCard),
           ),
           child: child,
         ),

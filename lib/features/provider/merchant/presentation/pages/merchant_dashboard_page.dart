@@ -37,8 +37,7 @@ class MerchantDashboardPage extends ConsumerStatefulWidget {
       _MerchantDashboardPageState();
 }
 
-class _MerchantDashboardPageState
-    extends ConsumerState<MerchantDashboardPage> {
+class _MerchantDashboardPageState extends ConsumerState<MerchantDashboardPage> {
   static const _dashboardChannel =
       '${RealtimeChannels.providerOrders}-dashboard';
   bool _togglingOpen = false;
@@ -53,7 +52,9 @@ class _MerchantDashboardPageState
     try {
       final merchantId = await ref.read(_merchantIdProvider.future);
       if (!mounted || merchantId.isEmpty) return;
-      ref.read(realtimeServiceProvider).subscribe(
+      ref
+          .read(realtimeServiceProvider)
+          .subscribe(
             channelName: _dashboardChannel,
             opts: [
               RealtimeChannelFilter(
@@ -115,9 +116,8 @@ class _MerchantDashboardPageState
             children: [
               Text(
                 l10n.switchWorkspace,
-                style: Theme.of(sheetCtx).textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+                style: Theme.of(sheetCtx).textTheme.titleLarge
+                    ?.copyWith(fontWeight: FontWeight.bold),
               ),
               if (profilesState.isOwner) ...[
                 const SizedBox(height: 6),
@@ -176,8 +176,9 @@ class _MerchantDashboardPageState
                           : null,
                       child: ListTile(
                         leading: CircleAvatar(
-                          backgroundColor:
-                              AppColors.brandPurple.withValues(alpha: 0.12),
+                          backgroundColor: AppColors.brandPurple.withValues(
+                            alpha: 0.12,
+                          ),
                           child: Icon(
                             p.categoryType == 'home_services'
                                 ? Icons.handyman_rounded
@@ -389,9 +390,7 @@ class _MerchantDashboardPageState
         leadingWidth: 56,
         leading: const Padding(
           padding: EdgeInsetsDirectional.only(start: 12),
-          child: Center(
-            child: FloatingMenuCircleButton(size: 40),
-          ),
+          child: Center(child: FloatingMenuCircleButton(size: 40)),
         ),
         title: Text(l10n.merchantDashboard),
         actions: [
@@ -532,7 +531,8 @@ class _MerchantDashboardPageState
         ),
         _StatCard(
           title: l10n.revenue,
-          value: '${stats.todayRevenue.toStringAsFixed(0)} ${l10n.currencySymbol}',
+          value:
+              '${stats.todayRevenue.toStringAsFixed(0)} ${l10n.currencySymbol}',
           icon: Icons.payments_outlined,
           color: AppColors.successLight,
           onTap: () => context.push('/provider-financial-center'),
@@ -811,8 +811,10 @@ class _StoreHeroCard extends StatelessWidget {
               ),
               IconButton(
                 tooltip: l10n.storefront,
-                icon: const Icon(Icons.edit_location_alt_rounded,
-                    color: Colors.white),
+                icon: const Icon(
+                  Icons.edit_location_alt_rounded,
+                  color: Colors.white,
+                ),
                 onPressed: onEditStorefront,
               ),
             ],
@@ -970,7 +972,10 @@ class _StatCard extends StatelessWidget {
         shape: highlight
             ? RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(16),
-                side: BorderSide(color: color.withValues(alpha: 0.6), width: 1.5),
+                side: BorderSide(
+                  color: color.withValues(alpha: 0.6),
+                  width: 1.5,
+                ),
               )
             : null,
         child: Padding(

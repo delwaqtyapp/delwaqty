@@ -8,6 +8,7 @@ import 'package:delwaqty/shared/widgets/premium_empty_state.dart';
 import 'package:delwaqty/shared/widgets/app_loader.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 import 'package:delwaqty/core/theme/app_colors.dart';
+
 import 'dart:async';
 
 class AdminMerchantsPage extends ConsumerStatefulWidget {
@@ -117,17 +118,13 @@ class _AdminMerchantsPageState extends ConsumerState<AdminMerchantsPage> {
                 ),
               ),
               onChanged: (value) {
-                ref
-                    .read(adminMerchantsSearchProvider.notifier)
-                    .update(value);
+                ref.read(adminMerchantsSearchProvider.notifier).update(value);
               },
             ),
           ),
           Expanded(
             child: merchantsAsync.when(
-              loading: () => const Center(
-                child: AppLoaderCircular(),
-              ),
+              loading: () => const Center(child: AppLoaderCircular()),
               error: (e, _) => Center(
                 child: PremiumEmptyState(
                   icon: Icons.error_outline_rounded,
@@ -156,24 +153,17 @@ class _AdminMerchantsPageState extends ConsumerState<AdminMerchantsPage> {
                         merchant: merchant,
                         l10n: l10n,
                         onStatusChanged: (status) async {
-                          final adminService =
-                              ref.read(adminServiceProvider);
+                          final adminService = ref.read(adminServiceProvider);
                           await adminService.updateMerchantStatus(
                             merchant['id'] as String,
                             status,
                           );
                           ref.invalidate(adminMerchantsProvider(query));
                         },
-                        onManageProducts: () => _showManageProductsSheet(
-                          context,
-                          ref,
-                          merchant,
-                        ),
-                        onDeleteMerchant: () => _confirmDeleteMerchant(
-                          context,
-                          ref,
-                          merchant,
-                        ),
+                        onManageProducts: () =>
+                            _showManageProductsSheet(context, ref, merchant),
+                        onDeleteMerchant: () =>
+                            _confirmDeleteMerchant(context, ref, merchant),
                       ),
                     );
                   },
@@ -213,19 +203,13 @@ class _AdminMerchantsPageState extends ConsumerState<AdminMerchantsPage> {
                   Expanded(
                     child: Text(
                       '${l10n.manageProducts} — $merchantName',
-                      style: Theme.of(ctx)
-                          .textTheme
-                          .titleMedium
+                      style: Theme.of(ctx).textTheme.titleMedium
                           ?.copyWith(fontWeight: FontWeight.bold),
                     ),
                   ),
                   FilledButton.icon(
-                    onPressed: () => _openProductEditor(
-                      pageContext,
-                      ref,
-                      merchant,
-                      null,
-                    ),
+                    onPressed: () =>
+                        _openProductEditor(pageContext, ref, merchant, null),
                     icon: const Icon(Icons.add_rounded, size: 18),
                     label: Text(l10n.addProduct),
                   ),
@@ -240,7 +224,11 @@ class _AdminMerchantsPageState extends ConsumerState<AdminMerchantsPage> {
                     return const Center(child: AppLoaderCircular());
                   }
                   if (snap.hasError) {
-                    return PremiumEmptyState(icon: Icons.error_outline, title: AppLocalizations.of(ctx).error, message: AppLocalizations.of(ctx).failedToLoad);
+                    return PremiumEmptyState(
+                      icon: Icons.error_outline,
+                      title: AppLocalizations.of(ctx).error,
+                      message: AppLocalizations.of(ctx).failedToLoad,
+                    );
                   }
                   final products = snap.data ?? [];
                   if (products.isEmpty) {
@@ -283,8 +271,7 @@ class _AdminMerchantsPageState extends ConsumerState<AdminMerchantsPage> {
                             icon: const Icon(Icons.delete_outline_rounded),
                             color: Theme.of(listCtx).colorScheme.error,
                             onPressed: () async {
-                              final messenger =
-                                  ScaffoldMessenger.of(listCtx);
+                              final messenger = ScaffoldMessenger.of(listCtx);
                               final ok = await showDialog<bool>(
                                 context: listCtx,
                                 builder: (dCtx) => AlertDialog(
@@ -300,8 +287,9 @@ class _AdminMerchantsPageState extends ConsumerState<AdminMerchantsPage> {
                                     ),
                                     FilledButton(
                                       style: FilledButton.styleFrom(
-                                        backgroundColor:
-                                            Theme.of(dCtx).colorScheme.error,
+                                        backgroundColor: Theme.of(dCtx)
+                                            .colorScheme
+                                            .error,
                                       ),
                                       onPressed: () =>
                                           Navigator.pop(dCtx, true),
@@ -311,13 +299,14 @@ class _AdminMerchantsPageState extends ConsumerState<AdminMerchantsPage> {
                                 ),
                               );
                               if (ok != true) return;
-                              final done = await adminService
-                                  .deleteProduct(p['id'] as String);
+                              final done = await adminService.deleteProduct(
+                                p['id'] as String,
+                              );
                               messenger.showSnackBar(
                                 SnackBar(
-                                  content: Text(done
-                                      ? l10n.deleted
-                                      : l10n.deleteSoftFailed),
+                                  content: Text(
+                                    done ? l10n.deleted : l10n.deleteSoftFailed,
+                                  ),
                                   behavior: SnackBarBehavior.floating,
                                 ),
                               );
@@ -333,12 +322,8 @@ class _AdminMerchantsPageState extends ConsumerState<AdminMerchantsPage> {
                               }
                             },
                           ),
-                          onTap: () => _openProductEditor(
-                            pageContext,
-                            ref,
-                            merchant,
-                            p,
-                          ),
+                          onTap: () =>
+                              _openProductEditor(pageContext, ref, merchant, p),
                         ),
                       );
                     },
@@ -385,8 +370,7 @@ class _AdminMerchantsPageState extends ConsumerState<AdminMerchantsPage> {
         SnackBar(
           content: Text(done ? l10n.productSaved : l10n.productSaveFailed),
           behavior: SnackBarBehavior.floating,
-          backgroundColor:
-              done ? AppColors.successLight : AppColors.errorLight,
+          backgroundColor: done ? AppColors.successLight : AppColors.errorLight,
         ),
       );
       if (done) {
@@ -427,8 +411,9 @@ class _AdminMerchantsPageState extends ConsumerState<AdminMerchantsPage> {
     );
     if (ok != true) return;
 
-    final done =
-        await ref.read(adminServiceProvider).deleteMerchant(merchant['id'] as String);
+    final done = await ref
+        .read(adminServiceProvider)
+        .deleteMerchant(merchant['id'] as String);
     ref.invalidate(adminMerchantsProvider);
     messenger.showSnackBar(
       SnackBar(
@@ -497,7 +482,9 @@ class _MerchantTile extends StatelessWidget {
               child: Text(
                 statusLabel,
                 style: theme.textTheme.labelSmall?.copyWith(
-                  color: isVerified ? AppColors.successLight : AppColors.warningLight,
+                  color: isVerified
+                      ? AppColors.successLight
+                      : AppColors.warningLight,
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -514,20 +501,11 @@ class _MerchantTile extends StatelessWidget {
               },
               itemBuilder: (context) => [
                 if (!isVerified)
-                  PopupMenuItem(
-                    value: 'verified',
-                    child: Text(l10n.verify),
-                  ),
+                  PopupMenuItem(value: 'verified', child: Text(l10n.verify)),
                 if (status != 'suspended')
-                  PopupMenuItem(
-                    value: 'suspended',
-                    child: Text(l10n.suspend),
-                  ),
+                  PopupMenuItem(value: 'suspended', child: Text(l10n.suspend)),
                 if (status != 'pending')
-                  PopupMenuItem(
-                    value: 'pending',
-                    child: Text(l10n.setPending),
-                  ),
+                  PopupMenuItem(value: 'pending', child: Text(l10n.setPending)),
                 const PopupMenuDivider(),
                 PopupMenuItem(
                   value: '__products',
@@ -602,7 +580,9 @@ class _MerchantTile extends StatelessWidget {
                         : AppColors.warningLight.withValues(alpha: 0.15),
                     child: Icon(
                       Icons.storefront_rounded,
-                      color: isVerified ? AppColors.successLight : AppColors.warningLight,
+                      color: isVerified
+                          ? AppColors.successLight
+                          : AppColors.warningLight,
                       size: 28,
                     ),
                   ),
@@ -630,7 +610,10 @@ class _MerchantTile extends StatelessWidget {
                     ),
                   ),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 4,
+                    ),
                     decoration: BoxDecoration(
                       color: isVerified
                           ? AppColors.successLight.withValues(alpha: 0.15)
@@ -640,7 +623,9 @@ class _MerchantTile extends StatelessWidget {
                     child: Text(
                       statusLabel,
                       style: theme.textTheme.labelMedium?.copyWith(
-                        color: isVerified ? AppColors.successLight : AppColors.warningLight,
+                        color: isVerified
+                            ? AppColors.successLight
+                            : AppColors.warningLight,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -654,7 +639,9 @@ class _MerchantTile extends StatelessWidget {
                   color: cs.surfaceContainerHighest.withValues(alpha: 0.35),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(16),
-                    side: BorderSide(color: cs.outlineVariant.withValues(alpha: 0.3)),
+                    side: BorderSide(
+                      color: cs.outlineVariant.withValues(alpha: 0.3),
+                    ),
                   ),
                   child: Padding(
                     padding: const EdgeInsets.all(14),
@@ -663,10 +650,17 @@ class _MerchantTile extends StatelessWidget {
                         if (address.isNotEmpty)
                           Row(
                             children: [
-                              Icon(Icons.location_on_outlined, size: 18, color: cs.primary),
+                              Icon(
+                                Icons.location_on_outlined,
+                                size: 18,
+                                color: cs.primary,
+                              ),
                               const SizedBox(width: 8),
                               Expanded(
-                                child: Text(address, style: theme.textTheme.bodySmall),
+                                child: Text(
+                                  address,
+                                  style: theme.textTheme.bodySmall,
+                                ),
                               ),
                             ],
                           ),
@@ -675,10 +669,17 @@ class _MerchantTile extends StatelessWidget {
                         if (phone.isNotEmpty)
                           Row(
                             children: [
-                              Icon(Icons.phone_outlined, size: 18, color: cs.primary),
+                              Icon(
+                                Icons.phone_outlined,
+                                size: 18,
+                                color: cs.primary,
+                              ),
                               const SizedBox(width: 8),
                               Expanded(
-                                child: Text(phone, style: theme.textTheme.bodySmall),
+                                child: Text(
+                                  phone,
+                                  style: theme.textTheme.bodySmall,
+                                ),
                               ),
                             ],
                           ),
@@ -690,7 +691,9 @@ class _MerchantTile extends StatelessWidget {
               const SizedBox(height: 20),
               Text(
                 l10n.adminQuickActions,
-                style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
+                style: theme.textTheme.titleSmall?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               const SizedBox(height: 10),
               FilledButton.icon(
@@ -736,8 +739,15 @@ class _MerchantTile extends StatelessWidget {
                   if (!isVerified)
                     Expanded(
                       child: TextButton.icon(
-                        icon: const Icon(Icons.verified_rounded, size: 18, color: Colors.green),
-                        label: Text(l10n.verify, style: const TextStyle(color: Colors.green)),
+                        icon: const Icon(
+                          Icons.verified_rounded,
+                          size: 18,
+                          color: Colors.green,
+                        ),
+                        label: Text(
+                          l10n.verify,
+                          style: const TextStyle(color: Colors.green),
+                        ),
                         onPressed: () {
                           Navigator.pop(ctx);
                           onStatusChanged('verified');
@@ -747,8 +757,15 @@ class _MerchantTile extends StatelessWidget {
                   if (status != 'suspended')
                     Expanded(
                       child: TextButton.icon(
-                        icon: const Icon(Icons.block_rounded, size: 18, color: Colors.orange),
-                        label: Text(l10n.suspend, style: const TextStyle(color: Colors.orange)),
+                        icon: const Icon(
+                          Icons.block_rounded,
+                          size: 18,
+                          color: Colors.orange,
+                        ),
+                        label: Text(
+                          l10n.suspend,
+                          style: const TextStyle(color: Colors.orange),
+                        ),
                         onPressed: () {
                           Navigator.pop(ctx);
                           onStatusChanged('suspended');
@@ -757,8 +774,15 @@ class _MerchantTile extends StatelessWidget {
                     ),
                   Expanded(
                     child: TextButton.icon(
-                      icon: Icon(Icons.delete_outline_rounded, size: 18, color: cs.error),
-                      label: Text(l10n.delete, style: TextStyle(color: cs.error)),
+                      icon: Icon(
+                        Icons.delete_outline_rounded,
+                        size: 18,
+                        color: cs.error,
+                      ),
+                      label: Text(
+                        l10n.delete,
+                        style: TextStyle(color: cs.error),
+                      ),
                       onPressed: () {
                         Navigator.pop(ctx);
                         onDeleteMerchant();
@@ -963,10 +987,7 @@ class _ProductEditorDialogState extends State<_ProductEditorDialog> {
           onPressed: () => Navigator.pop(context),
           child: Text(l10n.cancel),
         ),
-        FilledButton(
-          onPressed: _save,
-          child: Text(l10n.saveProduct),
-        ),
+        FilledButton(onPressed: _save, child: Text(l10n.saveProduct)),
       ],
     );
   }

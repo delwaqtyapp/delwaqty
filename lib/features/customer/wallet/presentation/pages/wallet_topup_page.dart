@@ -109,16 +109,24 @@ class _WalletTopUpPageState extends ConsumerState<WalletTopUpPage> {
         children: [
           Text(
             l10n.selectAmount,
-            style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+            style: theme.textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.bold,
+            ),
           ),
           const SizedBox(height: 12),
           Wrap(
             spacing: 8,
             runSpacing: 8,
             children: _presetAmounts.map((amount) {
-              final isSelected = _amountController.text == amount.toStringAsFixed(0);
+              final isSelected =
+                  _amountController.text == amount.toStringAsFixed(0);
               return ChoiceChip(
-                label: Text(l10n.amountWithCurrency(amount.toStringAsFixed(0), l10n.currencySymbol)),
+                label: Text(
+                  l10n.amountWithCurrency(
+                    amount.toStringAsFixed(0),
+                    l10n.currencySymbol,
+                  ),
+                ),
                 selected: isSelected,
                 onSelected: (_) {
                   setState(() {
@@ -137,13 +145,17 @@ class _WalletTopUpPageState extends ConsumerState<WalletTopUpPage> {
             decoration: InputDecoration(
               labelText: l10n.selectAmount,
               prefixText: '${l10n.currencySymbol} ',
-              border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
             ),
           ),
           const SizedBox(height: 24),
           Text(
             l10n.paymentMethod,
-            style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+            style: theme.textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.bold,
+            ),
           ),
           const SizedBox(height: 12),
           _PaymentMethodTile(
@@ -202,21 +214,39 @@ class _PaymentMethodTile extends StatelessWidget {
         decoration: BoxDecoration(
           color: isSelected
               ? theme.colorScheme.primaryContainer.withValues(alpha: 0.3)
-              : theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+              : theme.colorScheme.surfaceContainerHighest.withValues(
+                  alpha: 0.3,
+                ),
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: isSelected ? theme.colorScheme.primary : theme.colorScheme.outlineVariant.withValues(alpha: 0.3),
+            color: isSelected
+                ? theme.colorScheme.primary
+                : theme.colorScheme.outlineVariant.withValues(alpha: 0.3),
             width: isSelected ? 2 : 1,
           ),
         ),
         child: Row(
           children: [
-            Icon(icon, color: isSelected ? theme.colorScheme.primary : theme.colorScheme.onSurfaceVariant),
+            Icon(
+              icon,
+              color: isSelected
+                  ? theme.colorScheme.primary
+                  : theme.colorScheme.onSurfaceVariant,
+            ),
             const SizedBox(width: 12),
-            Text(title, style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w500)),
+            Text(
+              title,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                fontWeight: FontWeight.w500,
+              ),
+            ),
             const Spacer(),
             if (isSelected)
-              Icon(Icons.check_circle_rounded, color: theme.colorScheme.primary, size: 20),
+              Icon(
+                Icons.check_circle_rounded,
+                color: theme.colorScheme.primary,
+                size: 20,
+              ),
           ],
         ),
       ),

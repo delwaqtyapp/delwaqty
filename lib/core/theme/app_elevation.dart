@@ -75,11 +75,7 @@ abstract final class AppElevation {
       spreadRadius: -4,
       offset: Offset(0, 10),
     ),
-    BoxShadow(
-      color: Color(0x0D6241C8),
-      blurRadius: 10,
-      offset: Offset(0, 4),
-    ),
+    BoxShadow(color: Color(0x0D6241C8), blurRadius: 10, offset: Offset(0, 4)),
   ];
 
   /// Floating surface shadow (bottom nav, sheets) — soft purple halo.
@@ -90,11 +86,7 @@ abstract final class AppElevation {
       spreadRadius: -6,
       offset: Offset(0, 12),
     ),
-    BoxShadow(
-      color: Color(0x143B1DB0),
-      blurRadius: 12,
-      offset: Offset(0, 6),
-    ),
+    BoxShadow(color: Color(0x143B1DB0), blurRadius: 12, offset: Offset(0, 6)),
   ];
 
   /// Hero / primary-action glow shadow.
@@ -105,11 +97,7 @@ abstract final class AppElevation {
       spreadRadius: -2,
       offset: Offset(0, 12),
     ),
-    BoxShadow(
-      color: Color(0x1A5B3DF0),
-      blurRadius: 12,
-      offset: Offset(0, 4),
-    ),
+    BoxShadow(color: Color(0x1A5B3DF0), blurRadius: 12, offset: Offset(0, 4)),
   ];
 
   // ---------------------------------------------------------------------------

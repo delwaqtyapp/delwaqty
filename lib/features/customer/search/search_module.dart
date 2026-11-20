@@ -21,9 +21,7 @@ class SearchModule extends FeatureModule {
   int get navPriority => 20;
 
   @override
-  Set<ModuleCapability> get capabilities => {
-        ModuleCapability.searchable,
-      };
+  Set<ModuleCapability> get capabilities => {ModuleCapability.searchable};
 
   @override
   StatefulShellBranch? buildBranch() {

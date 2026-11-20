@@ -21,9 +21,8 @@ void main() {
 
   group('getAssignments', () {
     test('delegates without admin filter', () async {
-      when(() => dataSource.getAssignments()).thenAnswer(
-        (_) async => <AdminRegionAssignment>[],
-      );
+      when(() => dataSource.getAssignments())
+          .thenAnswer((_) async => <AdminRegionAssignment>[]);
 
       final result = await repository.getAssignments();
 
@@ -89,9 +88,8 @@ void main() {
 
       await repository.deleteAssignment(adminId: 'a1', regionId: 'r1');
 
-      verify(
-        () => dataSource.deleteAssignment(adminId: 'a1', regionId: 'r1'),
-      ).called(1);
+      verify(() => dataSource.deleteAssignment(adminId: 'a1', regionId: 'r1'))
+          .called(1);
     });
   });
 }

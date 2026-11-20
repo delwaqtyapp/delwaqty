@@ -1,5 +1,4 @@
 class LocationUpdate {
-
   const LocationUpdate({
     required this.id,
     required this.userId,

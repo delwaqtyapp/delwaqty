@@ -9,10 +9,7 @@ void main() {
       const exception = ServerException(message: 'Server error');
       final failure = handleException(exception);
       expect(failure, isA<ServerFailure>());
-      expect(
-        failure.whenOrNull(server: (m) => m),
-        'Server error',
-      );
+      expect(failure.whenOrNull(server: (m) => m), 'Server error');
     });
 
     test('converts CacheException to CacheFailure', () {

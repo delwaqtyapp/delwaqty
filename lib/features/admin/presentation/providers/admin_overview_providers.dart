@@ -4,12 +4,18 @@ import 'package:delwaqty/features/admin/data/repositories/admin_overview_reposit
 import 'package:delwaqty/features/admin/domain/entities/admin_overview.dart';
 import 'package:delwaqty/features/admin/domain/repositories/admin_overview_repository.dart';
 
-final adminOverviewDataSourceProvider = Provider<AdminOverviewDataSource>((ref) {
+final adminOverviewDataSourceProvider = Provider<AdminOverviewDataSource>((
+  ref,
+) {
   return AdminOverviewDataSource();
 });
 
-final adminOverviewRepositoryProvider = Provider<AdminOverviewRepository>((ref) {
-  return AdminOverviewRepositoryImpl(ref.watch(adminOverviewDataSourceProvider));
+final adminOverviewRepositoryProvider = Provider<AdminOverviewRepository>((
+  ref,
+) {
+  return AdminOverviewRepositoryImpl(
+    ref.watch(adminOverviewDataSourceProvider),
+  );
 });
 
 final adminOverviewStatsProvider = FutureProvider<AdminOverviewStats>((ref) {

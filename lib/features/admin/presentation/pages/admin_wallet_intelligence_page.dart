@@ -59,23 +59,25 @@ class AdminWalletIntelligencePage extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          AnimatedFadeIn(
-            child: _buildWalletStats(context, data, l10n, cs),
-          ),
+          AnimatedFadeIn(child: _buildWalletStats(context, data, l10n, cs)),
           const SizedBox(height: 24),
           AnimatedFadeIn(
             delay: const Duration(milliseconds: 100),
             child: Text(
               l10n.transactions,
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+              style: Theme.of(context).textTheme.titleMedium
+                  ?.copyWith(fontWeight: FontWeight.bold),
             ),
           ),
           const SizedBox(height: 12),
           AnimatedFadeIn(
             delay: const Duration(milliseconds: 150),
-            child: _buildTransactionsByType(context, data.transactionsByType, l10n, cs),
+            child: _buildTransactionsByType(
+              context,
+              data.transactionsByType,
+              l10n,
+              cs,
+            ),
           ),
         ],
       ),
@@ -119,14 +121,16 @@ class AdminWalletIntelligencePage extends ConsumerWidget {
             ),
             _SummaryCard(
               title: l10n.totalLiability,
-              value: '${l10n.currencySymbol} ${data.totalLiability.toStringAsFixed(0)}',
+              value:
+                  '${l10n.currencySymbol} ${data.totalLiability.toStringAsFixed(0)}',
               icon: Icons.account_balance_outlined,
               color: const Color(0xFFFF3B30),
               cs: cs,
             ),
             _SummaryCard(
               title: l10n.availableBalance,
-              value: '${l10n.currencySymbol} ${data.avgBalance.toStringAsFixed(0)}',
+              value:
+                  '${l10n.currencySymbol} ${data.avgBalance.toStringAsFixed(0)}',
               icon: Icons.savings_outlined,
               color: const Color(0xFF34C759),
               cs: cs,
@@ -160,9 +164,7 @@ class AdminWalletIntelligencePage extends ConsumerWidget {
         return AnimatedFadeIn(
           delay: Duration(milliseconds: 200 + index * 50),
           child: Padding(
-            padding: EdgeInsets.only(
-              bottom: index < items.length - 1 ? 8 : 0,
-            ),
+            padding: EdgeInsets.only(bottom: index < items.length - 1 ? 8 : 0),
             child: _TransactionTypeTile(
               type: item.type,
               count: item.count,
@@ -214,17 +216,15 @@ class _SummaryCard extends StatelessWidget {
                 fit: BoxFit.scaleDown,
                 child: Text(
                   value,
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: Theme.of(context).textTheme.titleLarge
+                      ?.copyWith(fontWeight: FontWeight.bold),
                 ),
               ),
               const SizedBox(height: 2),
               Text(
                 title,
-                style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                  color: cs.onSurfaceVariant,
-                ),
+                style: Theme.of(context).textTheme.labelSmall
+                    ?.copyWith(color: cs.onSurfaceVariant),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),

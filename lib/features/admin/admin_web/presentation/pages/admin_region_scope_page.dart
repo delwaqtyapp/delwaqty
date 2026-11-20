@@ -134,12 +134,10 @@ class _AdminRegionScopePageState extends ConsumerState<AdminRegionScopePage> {
                     pendingRegionId: _pendingRegionId,
                     pendingScope: _pendingScope,
                     saving: _saving,
-                    onPendingRegionChanged: (value) => setState(
-                      () => _pendingRegionId = value,
-                    ),
-                    onPendingScopeChanged: (value) => setState(
-                      () => _pendingScope = value,
-                    ),
+                    onPendingRegionChanged: (value) =>
+                        setState(() => _pendingRegionId = value),
+                    onPendingScopeChanged: (value) =>
+                        setState(() => _pendingScope = value),
                     onAdd: _addAssignment,
                     onRemove: _removeAssignment,
                   ),
@@ -172,7 +170,10 @@ class _UsersPanel extends StatelessWidget {
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
-          BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 10),
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 10,
+          ),
         ],
       ),
       child: usersAsync.when(
@@ -187,7 +188,8 @@ class _UsersPanel extends StatelessWidget {
             itemBuilder: (context, index) {
               final user = users[index];
               final id = user['id'] as String;
-              final name = user['full_name'] as String? ?? l10n.adminMgmtUnknown;
+              final name =
+                  user['full_name'] as String? ?? l10n.adminMgmtUnknown;
               final email = user['email'] as String? ?? '';
               final selected = id == selectedAdminId;
               return InkWell(
@@ -303,13 +305,11 @@ class _RegionPickerField extends ConsumerWidget {
                     ),
                   );
                 },
-              ).then(
-                (region) {
-                  if (region is Region) {
-                    onPendingRegionChanged(region.id);
-                  }
-                },
-              );
+              ).then((region) {
+                if (region is Region) {
+                  onPendingRegionChanged(region.id);
+                }
+              });
             }
           : null,
       borderRadius: BorderRadius.circular(8),
@@ -321,9 +321,7 @@ class _RegionPickerField extends ConsumerWidget {
         ),
         child: selectedRegion == null
             ? Text(
-                pendingRegionId == null
-                    ? 'Select region (any level)'
-                    : '…',
+                pendingRegionId == null ? 'Select region (any level)' : '…',
                 style: const TextStyle(color: Colors.black54),
               )
             : Row(
@@ -376,7 +374,8 @@ class _AssignmentsPanel extends ConsumerWidget {
     if (selectedAdminId == null) {
       return const _EmptyPanel(message: 'Select an admin user to manage scope');
     }
-    final assignments = assignmentsAsync?.value ?? const <AdminRegionAssignment>[];
+    final assignments =
+        assignmentsAsync?.value ?? const <AdminRegionAssignment>[];
     final assignedIds = assignments.map((a) => a.regionId).toSet();
 
     return Container(
@@ -385,7 +384,10 @@ class _AssignmentsPanel extends ConsumerWidget {
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
-          BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 10),
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 10,
+          ),
         ],
       ),
       child: Column(
@@ -401,49 +403,50 @@ class _AssignmentsPanel extends ConsumerWidget {
           ),
           const SizedBox(height: 16),
           Expanded(
-            child: assignmentsAsync != null &&
+            child:
+                assignmentsAsync != null &&
                     assignmentsAsync!.isLoading &&
                     assignments.isEmpty
                 ? const Center(child: CircularProgressIndicator())
                 : assignments.isEmpty
-                    ? const Center(
-                        child: Text(
-                          'No assignments — admin is global',
-                          style: TextStyle(color: Colors.grey),
+                ? const Center(
+                    child: Text(
+                      'No assignments — admin is global',
+                      style: TextStyle(color: Colors.grey),
+                    ),
+                  )
+                : ListView.separated(
+                    itemCount: assignments.length,
+                    separatorBuilder: (_, _) => const Divider(height: 1),
+                    itemBuilder: (context, index) {
+                      final assignment = assignments[index];
+                      return ListTile(
+                        contentPadding: EdgeInsets.zero,
+                        leading: const Icon(
+                          Icons.location_city_rounded,
+                          color: AppColors.brandPurple,
                         ),
-                      )
-                    : ListView.separated(
-                        itemCount: assignments.length,
-                        separatorBuilder: (_, _) => const Divider(height: 1),
-                        itemBuilder: (context, index) {
-                          final assignment = assignments[index];
-                          return ListTile(
-                            contentPadding: EdgeInsets.zero,
-                            leading: const Icon(
-                              Icons.location_city_rounded,
-                              color: AppColors.brandPurple,
-                            ),
-                            title: _AssignedRegionName(
-                              regionId: assignment.regionId,
-                            ),
-                            subtitle: Text(
-                              assignment.scope == AdminRegionScope.self
-                                  ? 'This region only'
-                                  : 'This region + descendants',
-                            ),
-                            trailing: IconButton(
-                              tooltip: l10n.delete,
-                              icon: const Icon(Icons.delete_outline_rounded),
-                              onPressed: saving
-                                  ? null
-                                  : () => onRemove(
-                                      assignment.adminId,
-                                      assignment.regionId,
-                                    ),
-                            ),
-                          );
-                        },
-                      ),
+                        title: _AssignedRegionName(
+                          regionId: assignment.regionId,
+                        ),
+                        subtitle: Text(
+                          assignment.scope == AdminRegionScope.self
+                              ? 'This region only'
+                              : 'This region + descendants',
+                        ),
+                        trailing: IconButton(
+                          tooltip: l10n.delete,
+                          icon: const Icon(Icons.delete_outline_rounded),
+                          onPressed: saving
+                              ? null
+                              : () => onRemove(
+                                  assignment.adminId,
+                                  assignment.regionId,
+                                ),
+                        ),
+                      );
+                    },
+                  ),
           ),
           const SizedBox(height: 16),
           const Divider(height: 1),
@@ -492,10 +495,10 @@ class _AssignmentsPanel extends ConsumerWidget {
             child: FilledButton.icon(
               onPressed:
                   (saving ||
-                          pendingRegionId == null ||
-                          assignedIds.contains(pendingRegionId))
-                      ? null
-                      : () => onAdd(selectedAdminId!),
+                      pendingRegionId == null ||
+                      assignedIds.contains(pendingRegionId))
+                  ? null
+                  : () => onAdd(selectedAdminId!),
               style: FilledButton.styleFrom(
                 backgroundColor: AppColors.brandPurple,
               ),

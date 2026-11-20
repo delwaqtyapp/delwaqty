@@ -20,9 +20,7 @@ void main() async {
   }
   if (configResult.hasErrors) {
     debugPrint(configResult.toString());
-    runApp(
-      ProviderScope(child: StartupErrorPage(result: configResult)),
-    );
+    runApp(ProviderScope(child: StartupErrorPage(result: configResult)));
     return;
   }
 

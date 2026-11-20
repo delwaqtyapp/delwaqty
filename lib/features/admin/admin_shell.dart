@@ -1,4 +1,5 @@
 import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -25,10 +26,7 @@ class _AdminNavItem {
 }
 
 class _AdminNavGroup {
-  const _AdminNavGroup({
-    required this.label,
-    required this.items,
-  });
+  const _AdminNavGroup({required this.label, required this.items});
 
   final String Function(AppLocalizations) label;
   final List<_AdminNavItem> items;
@@ -240,7 +238,8 @@ List<DrawerEntry> buildAdminDrawerEntries(BuildContext context) {
           id: 'admin-${item.path}',
           label: (ctx) => item.label(AppLocalizations.of(ctx)),
           icon: item.icon,
-          position: item.path == '/admin/settings' ||
+          position:
+              item.path == '/admin/settings' ||
                   item.path == '/admin/platform-config' ||
                   item.path == '/admin/profile'
               ? DrawerPosition.settings
@@ -315,7 +314,8 @@ class _AdminShellState extends ConsumerState<AdminShell> {
     final path = GoRouterState.of(context).matchedLocation;
     for (var i = 0; i < _bottomNavPaths.length; i++) {
       if (path == _bottomNavPaths[i] ||
-          (_bottomNavPaths[i] != '/admin' && path.startsWith(_bottomNavPaths[i]))) {
+          (_bottomNavPaths[i] != '/admin' &&
+              path.startsWith(_bottomNavPaths[i]))) {
         return i;
       }
     }
@@ -348,8 +348,8 @@ class _AdminShellState extends ConsumerState<AdminShell> {
           openDrawer: () => _scaffoldKey.currentState?.openDrawer(),
           child: Builder(
             builder: (context) {
-              final showBottomBar = widget.showFab &&
-                  MediaQuery.sizeOf(context).width < 1100;
+              final showBottomBar =
+                  widget.showFab && MediaQuery.sizeOf(context).width < 1100;
               return Scaffold(
                 key: _scaffoldKey,
                 drawer: _AdminDrawer(
@@ -589,11 +589,9 @@ class _BottomNavTile extends StatelessWidget {
                   color: isActive
                       ? Colors.white
                       : isDark
-                          ? Colors.white.withValues(alpha: 0.55)
-                          : Theme.of(context)
-                              .colorScheme
-                              .onSurface
-                              .withValues(alpha: 0.5),
+                      ? Colors.white.withValues(alpha: 0.55)
+                      : Theme.of(context).colorScheme.onSurface
+                            .withValues(alpha: 0.5),
                 ),
                 AnimatedSize(
                   duration: const Duration(milliseconds: 240),
@@ -642,7 +640,8 @@ class _AdminSidebar extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
-    final sth = Theme.of(context).extension<SidebarTheme>() ?? SidebarTheme.light;
+    final sth =
+        Theme.of(context).extension<SidebarTheme>() ?? SidebarTheme.light;
     final path = GoRouterState.of(context).matchedLocation;
 
     return Container(
@@ -653,9 +652,7 @@ class _AdminSidebar extends ConsumerWidget {
           end: AlignmentDirectional.bottomEnd,
           colors: [sth.cardGradientTop, sth.cardGradientBottom],
         ),
-        border: BorderDirectional(
-          end: BorderSide(color: sth.dividerColor),
-        ),
+        border: BorderDirectional(end: BorderSide(color: sth.dividerColor)),
         boxShadow: [
           BoxShadow(
             color: sth.cardShadowColor,
@@ -713,7 +710,11 @@ class _AdminMasthead extends StatelessWidget {
         gradient: const LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [AppColors.brandPurple, AppColors.brandViolet, Color(0xFF06B6D4)],
+          colors: [
+            AppColors.brandPurple,
+            AppColors.brandViolet,
+            Color(0xFF06B6D4),
+          ],
         ),
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
@@ -855,16 +856,19 @@ class _PremiumNavTileState extends State<_PremiumNavTile> {
             borderRadius: BorderRadius.circular(13),
             gradient: isActive
                 ? LinearGradient(
-                    colors: [sth.selectedGradientStart, sth.selectedGradientEnd],
+                    colors: [
+                      sth.selectedGradientStart,
+                      sth.selectedGradientEnd,
+                    ],
                   )
                 : (_hovered
-                    ? LinearGradient(
-                        colors: [
-                          sth.selectedGradientStart.withValues(alpha: 0.08),
-                          sth.selectedGradientEnd.withValues(alpha: 0.04),
-                        ],
-                      )
-                    : null),
+                      ? LinearGradient(
+                          colors: [
+                            sth.selectedGradientStart.withValues(alpha: 0.08),
+                            sth.selectedGradientEnd.withValues(alpha: 0.04),
+                          ],
+                        )
+                      : null),
             boxShadow: isActive
                 ? [
                     BoxShadow(
@@ -884,8 +888,8 @@ class _PremiumNavTileState extends State<_PremiumNavTile> {
                 color: isActive
                     ? Colors.white
                     : _hovered
-                        ? sth.selectedGradientStart
-                        : sth.iconColor,
+                    ? sth.selectedGradientStart
+                    : sth.iconColor,
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -901,8 +905,8 @@ class _PremiumNavTileState extends State<_PremiumNavTile> {
                     color: isActive
                         ? Colors.white
                         : _hovered
-                            ? sth.textPrimary
-                            : sth.textPrimary.withValues(alpha: 0.92),
+                        ? sth.textPrimary
+                        : sth.textPrimary.withValues(alpha: 0.92),
                   ),
                 ),
               ),
@@ -974,10 +978,7 @@ class _AdminSidebarFooter extends StatelessWidget {
                 ),
                 Text(
                   l10n.adminManagementMode,
-                  style: TextStyle(
-                    color: sth.textSecondary,
-                    fontSize: 11,
-                  ),
+                  style: TextStyle(color: sth.textSecondary, fontSize: 11),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -1013,7 +1014,8 @@ class _AdminDrawerState extends ConsumerState<_AdminDrawer> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final sth = Theme.of(context).extension<SidebarTheme>() ?? SidebarTheme.light;
+    final sth =
+        Theme.of(context).extension<SidebarTheme>() ?? SidebarTheme.light;
     final currentPath = GoRouterState.of(context).matchedLocation;
     final trimmed = _query.trim().toLowerCase();
 
@@ -1087,7 +1089,10 @@ class _AdminDrawerState extends ConsumerState<_AdminDrawer> {
                 child: _AdminMasthead(sth: sth, l10n: l10n),
               ),
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 4,
+                ),
                 child: TextField(
                   controller: _searchController,
                   onChanged: (v) => setState(() => _query = v),
@@ -1098,7 +1103,11 @@ class _AdminDrawerState extends ConsumerState<_AdminDrawer> {
                       fontSize: 12.5,
                       color: sth.textSecondary.withValues(alpha: 0.7),
                     ),
-                    prefixIcon: Icon(Icons.search_rounded, size: 18, color: sth.iconColor),
+                    prefixIcon: Icon(
+                      Icons.search_rounded,
+                      size: 18,
+                      color: sth.iconColor,
+                    ),
                     suffixIcon: _query.isNotEmpty
                         ? IconButton(
                             tooltip: l10n.clear,
@@ -1112,7 +1121,10 @@ class _AdminDrawerState extends ConsumerState<_AdminDrawer> {
                     isDense: true,
                     filled: true,
                     fillColor: sth.quickSettingsBackground,
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 8,
+                    ),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
                       borderSide: BorderSide(color: sth.dividerColor),
@@ -1127,7 +1139,10 @@ class _AdminDrawerState extends ConsumerState<_AdminDrawer> {
               const Divider(height: 1, color: Colors.transparent),
               Expanded(
                 child: ListView(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 4,
+                  ),
                   children: navTiles,
                 ),
               ),

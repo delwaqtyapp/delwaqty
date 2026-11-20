@@ -6,10 +6,10 @@ class GraceInfo {
   });
 
   factory GraceInfo.fromJson(Map<String, dynamic> json) => GraceInfo(
-        limit: (json['grace_limit'] as num?)?.toInt() ?? 0,
-        used: (json['grace_used'] as num?)?.toInt() ?? 0,
-        remaining: (json['grace_remaining'] as num?)?.toInt() ?? 0,
-      );
+    limit: (json['grace_limit'] as num?)?.toInt() ?? 0,
+    used: (json['grace_used'] as num?)?.toInt() ?? 0,
+    remaining: (json['grace_remaining'] as num?)?.toInt() ?? 0,
+  );
 
   final int limit;
   final int used;
@@ -26,7 +26,8 @@ class WalletTransaction {
     required this.createdAt,
   });
 
-  factory WalletTransaction.fromJson(Map<String, dynamic> json) => WalletTransaction(
+  factory WalletTransaction.fromJson(Map<String, dynamic> json) =>
+      WalletTransaction(
         id: json['id'] as String,
         type: json['type'] as String? ?? '',
         amount: (json['amount'] as num?)?.toDouble() ?? 0,
@@ -59,20 +60,20 @@ class TopupRequest {
   });
 
   factory TopupRequest.fromJson(Map<String, dynamic> json) => TopupRequest(
-        id: json['id'] as String,
-        amount: (json['amount'] as num?)?.toDouble() ?? 0,
-        currency: json['currency'] as String? ?? 'EGP',
-        status: json['status'] as String? ?? 'pending',
-        paymentMethod: json['payment_method'] as String? ?? '',
-        transferReference: json['transfer_reference'] as String? ?? '',
-        createdAt: json['created_at'] is String
-            ? DateTime.parse(json['created_at'] as String)
-            : DateTime.now(),
-        reviewedAt: json['reviewed_at'] is String
-            ? DateTime.parse(json['reviewed_at'] as String)
-            : null,
-        rejectionReason: json['rejection_reason'] as String?,
-      );
+    id: json['id'] as String,
+    amount: (json['amount'] as num?)?.toDouble() ?? 0,
+    currency: json['currency'] as String? ?? 'EGP',
+    status: json['status'] as String? ?? 'pending',
+    paymentMethod: json['payment_method'] as String? ?? '',
+    transferReference: json['transfer_reference'] as String? ?? '',
+    createdAt: json['created_at'] is String
+        ? DateTime.parse(json['created_at'] as String)
+        : DateTime.now(),
+    reviewedAt: json['reviewed_at'] is String
+        ? DateTime.parse(json['reviewed_at'] as String)
+        : null,
+    rejectionReason: json['rejection_reason'] as String?,
+  );
 
   final String id;
   final double amount;
@@ -96,7 +97,8 @@ class FinancialSummary {
     required this.recentTransactions,
   });
 
-  factory FinancialSummary.fromJson(Map<String, dynamic> json) => FinancialSummary(
+  factory FinancialSummary.fromJson(Map<String, dynamic> json) =>
+      FinancialSummary(
         balance: (json['balance'] as num?)?.toDouble() ?? 0,
         graceLimit: (json['grace_limit'] as num?)?.toInt() ?? 0,
         graceUsed: (json['grace_used'] as num?)?.toInt() ?? 0,

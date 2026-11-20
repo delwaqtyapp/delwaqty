@@ -73,8 +73,7 @@ class _CountingProvider implements GeocodingProvider {
     required String languageCode,
     String? keyword,
     int radiusMeters = 1500,
-  }) async =>
-      const [];
+  }) async => const [];
 }
 
 void main() {
@@ -92,20 +91,39 @@ void main() {
   });
 
   test('autocomplete caches identical queries', () async {
-    await repo.autocomplete(query: 'cairo', languageCode: 'en', session: session);
-    await repo.autocomplete(query: 'cairo', languageCode: 'en', session: session);
+    await repo.autocomplete(
+      query: 'cairo',
+      languageCode: 'en',
+      session: session,
+    );
+    await repo.autocomplete(
+      query: 'cairo',
+      languageCode: 'en',
+      session: session,
+    );
     expect(provider.autocompleteCalls, 1);
   });
 
   test('autocomplete does not cache across languages', () async {
-    await repo.autocomplete(query: 'cairo', languageCode: 'en', session: session);
-    await repo.autocomplete(query: 'cairo', languageCode: 'ar', session: session);
+    await repo.autocomplete(
+      query: 'cairo',
+      languageCode: 'en',
+      session: session,
+    );
+    await repo.autocomplete(
+      query: 'cairo',
+      languageCode: 'ar',
+      session: session,
+    );
     expect(provider.autocompleteCalls, 2);
   });
 
   test('empty query short-circuits without provider call', () async {
     final r = await repo.autocomplete(
-        query: '  ', languageCode: 'en', session: session);
+      query: '  ',
+      languageCode: 'en',
+      session: session,
+    );
     expect(r, isEmpty);
     expect(provider.autocompleteCalls, 0);
   });
@@ -118,9 +136,13 @@ void main() {
 
   test('reverseGeocode caches rounded coordinates', () async {
     await repo.reverseGeocode(
-        point: const GeoPoint(30.00001, 31.00001), languageCode: 'en');
+      point: const GeoPoint(30.00001, 31.00001),
+      languageCode: 'en',
+    );
     await repo.reverseGeocode(
-        point: const GeoPoint(30.00002, 31.00002), languageCode: 'en');
+      point: const GeoPoint(30.00002, 31.00002),
+      languageCode: 'en',
+    );
     expect(provider.reverseCalls, 1);
   });
 }

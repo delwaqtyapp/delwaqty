@@ -214,9 +214,9 @@ class AdminFinancialRepositoryImpl implements AdminFinancialRepository {
         walletNumber: walletNumber,
         instructions: instructions,
       );
-      } catch (e) {
-        throw ServerException(message: 'Failed to update receiving account: $e');
-      }
+    } catch (e) {
+      throw ServerException(message: 'Failed to update receiving account: $e');
+    }
   }
 
   @override
@@ -224,7 +224,9 @@ class AdminFinancialRepositoryImpl implements AdminFinancialRepository {
     try {
       return await _source.platformCollectionAudit();
     } catch (e) {
-      throw ServerException(message: 'Failed to load platform collection audit: $e');
+      throw ServerException(
+        message: 'Failed to load platform collection audit: $e',
+      );
     }
   }
 
@@ -233,7 +235,9 @@ class AdminFinancialRepositoryImpl implements AdminFinancialRepository {
     try {
       return await _source.platformSettlementAudit();
     } catch (e) {
-      throw ServerException(message: 'Failed to load platform settlement audit: $e');
+      throw ServerException(
+        message: 'Failed to load platform settlement audit: $e',
+      );
     }
   }
 

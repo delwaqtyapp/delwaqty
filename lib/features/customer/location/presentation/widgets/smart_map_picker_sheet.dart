@@ -32,11 +32,7 @@ class _MapSearchHit {
 }
 
 class SmartMapPickerSheet extends ConsumerStatefulWidget {
-  const SmartMapPickerSheet({
-    this.initialLat,
-    this.initialLng,
-    super.key,
-  });
+  const SmartMapPickerSheet({this.initialLat, this.initialLng, super.key});
 
   final double? initialLat;
   final double? initialLng;
@@ -51,10 +47,8 @@ class SmartMapPickerSheet extends ConsumerStatefulWidget {
       isScrollControlled: true,
       enableDrag: false,
       backgroundColor: Colors.transparent,
-      builder: (_) => SmartMapPickerSheet(
-        initialLat: initialLat,
-        initialLng: initialLng,
-      ),
+      builder: (_) =>
+          SmartMapPickerSheet(initialLat: initialLat, initialLng: initialLng),
     );
   }
 
@@ -209,7 +203,9 @@ class _SmartMapPickerSheetState extends ConsumerState<SmartMapPickerSheet> {
 
     if ((lat == null || lng == null) && hit.placeId != null) {
       try {
-        final details = await ref.read(placesRepositoryProvider).details(
+        final details = await ref
+            .read(placesRepositoryProvider)
+            .details(
               placeId: hit.placeId!,
               languageCode: lang,
               session: _searchSession,
@@ -266,8 +262,9 @@ class _SmartMapPickerSheetState extends ConsumerState<SmartMapPickerSheet> {
     if (_isLockingGps) return;
     setState(() => _isLockingGps = true);
     try {
-      final loc =
-          await ref.read(userLocationProvider.notifier).refreshDeepLocked();
+      final loc = await ref
+          .read(userLocationProvider.notifier)
+          .refreshDeepLocked();
       if (!mounted) return;
       if (loc != null) {
         final target = LatLng(loc.latitude, loc.longitude);
@@ -282,9 +279,8 @@ class _SmartMapPickerSheetState extends ConsumerState<SmartMapPickerSheet> {
         }
       } else {
         final l10n = AppLocalizations.of(context);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.locationUnavailable)),
-        );
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(l10n.locationUnavailable)));
       }
     } finally {
       if (mounted) {
@@ -570,38 +566,39 @@ class _SmartMapPickerSheetState extends ConsumerState<SmartMapPickerSheet> {
                             ),
                           )
                         : _accuracyMeters != null
-                            ? Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 12,
-                                  vertical: 6,
+                        ? Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 6,
+                            ),
+                            decoration: BoxDecoration(
+                              color: AppColors.successLight.withValues(
+                                alpha: 0.92,
+                              ),
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  Icons.gps_fixed_rounded,
+                                  size: 14,
+                                  color: cs.onPrimary,
                                 ),
-                                decoration: BoxDecoration(
-                                  color: AppColors.successLight
-                                      .withValues(alpha: 0.92),
-                                  borderRadius: BorderRadius.circular(20),
+                                const SizedBox(width: 6),
+                                Text(
+                                  l10n.gpsLockedWithinMeters(
+                                    _accuracyMeters!.toStringAsFixed(1),
+                                  ),
+                                  style: AppTextStyles.labelSmall.copyWith(
+                                    color: cs.onPrimary,
+                                    fontWeight: FontWeight.w700,
+                                  ),
                                 ),
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Icon(
-                                      Icons.gps_fixed_rounded,
-                                      size: 14,
-                                      color: cs.onPrimary,
-                                    ),
-                                    const SizedBox(width: 6),
-                                    Text(
-                                      l10n.gpsLockedWithinMeters(
-                                        _accuracyMeters!.toStringAsFixed(1),
-                                      ),
-                                      style: AppTextStyles.labelSmall.copyWith(
-                                        color: cs.onPrimary,
-                                        fontWeight: FontWeight.w700,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              )
-                            : const SizedBox.shrink(),
+                              ],
+                            ),
+                          )
+                        : const SizedBox.shrink(),
                   ),
                 ),
                 // Floating Smart GPS button
@@ -647,8 +644,9 @@ class _SmartMapPickerSheetState extends ConsumerState<SmartMapPickerSheet> {
                           width: 40,
                           height: 40,
                           decoration: BoxDecoration(
-                            color:
-                                AppColors.brandPurple.withValues(alpha: 0.12),
+                            color: AppColors.brandPurple.withValues(
+                              alpha: 0.12,
+                            ),
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: const Icon(
@@ -672,8 +670,8 @@ class _SmartMapPickerSheetState extends ConsumerState<SmartMapPickerSheet> {
                                 _isGeocoding
                                     ? l10n.searchingForLocation
                                     : (_resolvedAddress.isNotEmpty
-                                        ? _resolvedAddress
-                                        : l10n.locationUnavailable),
+                                          ? _resolvedAddress
+                                          : l10n.locationUnavailable),
                                 style: AppTextStyles.bodyMedium.copyWith(
                                   fontWeight: FontWeight.w600,
                                 ),
@@ -690,8 +688,9 @@ class _SmartMapPickerSheetState extends ConsumerState<SmartMapPickerSheet> {
                   SizedBox(
                     height: 52,
                     child: FilledButton.icon(
-                      onPressed:
-                          _isConfirming || _isGeocoding ? null : _confirmSelection,
+                      onPressed: _isConfirming || _isGeocoding
+                          ? null
+                          : _confirmSelection,
                       style: FilledButton.styleFrom(
                         backgroundColor: AppColors.brandPurple,
                         shape: RoundedRectangleBorder(

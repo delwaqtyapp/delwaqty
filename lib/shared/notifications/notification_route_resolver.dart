@@ -17,8 +17,7 @@ class NotificationRouteResolver {
       normalized = normalized.substring(0, normalized.length - 1);
     }
 
-    final segments =
-        normalized.split('/').where((e) => e.isNotEmpty).toList();
+    final segments = normalized.split('/').where((e) => e.isNotEmpty).toList();
     if (segments.isEmpty) return normalized;
 
     final first = segments[0];

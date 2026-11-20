@@ -243,16 +243,18 @@ class _AdminQuickActionsPageState extends ConsumerState<AdminQuickActionsPage> {
     final filtered = _query.isEmpty
         ? sections
         : sections
-            .map(
-              (s) => (
-                s.$1,
-                s.$2,
-                s.$3,
-                s.$4.where((a) => a.label.toLowerCase().contains(_query)).toList(),
-              ),
-            )
-            .where((s) => s.$4.isNotEmpty)
-            .toList();
+              .map(
+                (s) => (
+                  s.$1,
+                  s.$2,
+                  s.$3,
+                  s.$4
+                      .where((a) => a.label.toLowerCase().contains(_query))
+                      .toList(),
+                ),
+              )
+              .where((s) => s.$4.isNotEmpty)
+              .toList();
 
     return Scaffold(
       appBar: AppBar(
@@ -275,7 +277,9 @@ class _AdminQuickActionsPageState extends ConsumerState<AdminQuickActionsPage> {
                   borderRadius: BorderRadius.circular(14),
                 ),
                 filled: true,
-                fillColor: Theme.of(context).colorScheme.surfaceContainerHighest,
+                fillColor: Theme.of(context)
+                    .colorScheme
+                    .surfaceContainerHighest,
               ),
               onChanged: (v) => setState(() => _query = v.trim().toLowerCase()),
             ),
@@ -297,14 +301,17 @@ class _AdminQuickActionsPageState extends ConsumerState<AdminQuickActionsPage> {
                                   color: filtered[g].$2.withValues(alpha: 0.12),
                                   borderRadius: BorderRadius.circular(8),
                                 ),
-                                child: Icon(filtered[g].$3, size: 14, color: filtered[g].$2),
+                                child: Icon(
+                                  filtered[g].$3,
+                                  size: 14,
+                                  color: filtered[g].$2,
+                                ),
                               ),
                               const SizedBox(width: 8),
                               Text(
                                 filtered[g].$1,
-                                style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                ),
+                                style: Theme.of(context).textTheme.titleSmall
+                                    ?.copyWith(fontWeight: FontWeight.bold),
                               ),
                             ],
                           ),
@@ -312,13 +319,16 @@ class _AdminQuickActionsPageState extends ConsumerState<AdminQuickActionsPage> {
                         const SizedBox(height: 10),
                         LayoutBuilder(
                           builder: (context, constraints) {
-                            final crossAxisCount = constraints.maxWidth > 600 ? 4 : 3;
+                            final crossAxisCount = constraints.maxWidth > 600
+                                ? 4
+                                : 3;
                             return GridView.builder(
-                              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                                crossAxisCount: crossAxisCount,
-                                mainAxisSpacing: 8,
-                                crossAxisSpacing: 8,
-                              ),
+                              gridDelegate:
+                                  SliverGridDelegateWithFixedCrossAxisCount(
+                                    crossAxisCount: crossAxisCount,
+                                    mainAxisSpacing: 8,
+                                    crossAxisSpacing: 8,
+                                  ),
                               shrinkWrap: true,
                               physics: const NeverScrollableScrollPhysics(),
                               itemCount: filtered[g].$4.length,
@@ -329,15 +339,24 @@ class _AdminQuickActionsPageState extends ConsumerState<AdminQuickActionsPage> {
                                   child: PremiumCard(
                                     padding: const EdgeInsets.all(8),
                                     child: Column(
-                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
                                       children: [
                                         Container(
                                           padding: const EdgeInsets.all(10),
                                           decoration: BoxDecoration(
-                                            color: action.color.withValues(alpha: 0.15),
-                                            borderRadius: BorderRadius.circular(14),
+                                            color: action.color.withValues(
+                                              alpha: 0.15,
+                                            ),
+                                            borderRadius: BorderRadius.circular(
+                                              14,
+                                            ),
                                           ),
-                                          child: Icon(action.icon, color: action.color, size: 22),
+                                          child: Icon(
+                                            action.icon,
+                                            color: action.color,
+                                            size: 22,
+                                          ),
                                         ),
                                         const SizedBox(height: 6),
                                         Text(
@@ -345,7 +364,9 @@ class _AdminQuickActionsPageState extends ConsumerState<AdminQuickActionsPage> {
                                           style: Theme.of(context)
                                               .textTheme
                                               .labelSmall
-                                              ?.copyWith(fontWeight: FontWeight.w600),
+                                              ?.copyWith(
+                                                fontWeight: FontWeight.w600,
+                                              ),
                                           textAlign: TextAlign.center,
                                           maxLines: 2,
                                           overflow: TextOverflow.ellipsis,

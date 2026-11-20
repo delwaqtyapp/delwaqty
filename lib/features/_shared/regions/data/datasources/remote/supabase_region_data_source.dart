@@ -158,10 +158,7 @@ class SupabaseRegionDataSource implements RegionDataSource {
   @override
   Future<List<GeoPlace>> getGeoPlaces({String? type, String? query}) async {
     try {
-      var request = _client
-          .from('geo_places')
-          .select()
-          .eq('is_active', true);
+      var request = _client.from('geo_places').select().eq('is_active', true);
       if (type != null) {
         request = request.eq('type', type);
       }

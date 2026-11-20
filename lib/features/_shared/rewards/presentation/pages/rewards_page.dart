@@ -50,9 +50,8 @@ class RewardsPage extends ConsumerWidget {
                   const SizedBox(height: 16),
                   Text(
                     l10n.noRewards,
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w600,
-                        ),
+                    style: Theme.of(context).textTheme.titleMedium
+                        ?.copyWith(fontWeight: FontWeight.w600),
                   ),
                   const SizedBox(height: 8),
                   Padding(
@@ -61,10 +60,8 @@ class RewardsPage extends ConsumerWidget {
                       l10n.noRewardsMessage,
                       textAlign: TextAlign.center,
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: Theme.of(
-                              context,
-                            ).colorScheme.onSurfaceVariant,
-                          ),
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
                     ),
                   ),
                 ],
@@ -99,9 +96,7 @@ class _RewardCard extends StatelessWidget {
 
     final isBirthday = reward.rewardType == RewardType.birthday;
     final color = isBirthday ? AppColors.brandPurple : AppColors.successLight;
-    final icon = isBirthday
-        ? Icons.cake_outlined
-        : Icons.auto_awesome_outlined;
+    final icon = isBirthday ? Icons.cake_outlined : Icons.auto_awesome_outlined;
 
     return Card(
       child: Padding(
@@ -208,8 +203,11 @@ class _BenefitCode extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Icon(Icons.confirmation_number_outlined,
-              size: 18, color: colorScheme.primary),
+          Icon(
+            Icons.confirmation_number_outlined,
+            size: 18,
+            color: colorScheme.primary,
+          ),
           const SizedBox(width: 8),
           Expanded(
             child: SelectableText(

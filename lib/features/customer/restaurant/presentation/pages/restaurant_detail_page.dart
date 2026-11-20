@@ -27,27 +27,42 @@ import 'package:delwaqty/shared/widgets/skeleton_loader.dart';
 import 'package:delwaqty/core/theme/app_colors.dart';
 import 'package:delwaqty/core/theme/app_text_styles.dart';
 
-final _merchantProvider = FutureProvider.family<Merchant?, String>((ref, id) async {
+final _merchantProvider = FutureProvider.family<Merchant?, String>((
+  ref,
+  id,
+) async {
   final repo = ref.watch(merchantRepositoryProvider);
   return repo.getMerchantById(id);
 });
 
-final _branchesProvider = FutureProvider.family<List<Branch>, String>((ref, merchantId) async {
+final _branchesProvider = FutureProvider.family<List<Branch>, String>((
+  ref,
+  merchantId,
+) async {
   final repo = ref.watch(branchRepositoryProvider);
   return repo.getBranches(merchantId);
 });
 
-final _hoursProvider = FutureProvider.family<List<WorkingHours>, String>((ref, merchantId) async {
+final _hoursProvider = FutureProvider.family<List<WorkingHours>, String>((
+  ref,
+  merchantId,
+) async {
   final repo = ref.watch(workingHoursRepositoryProvider);
   return repo.getHours(merchantId);
 });
 
-final _settingsProvider = FutureProvider.family<RestaurantSettings?, String>((ref, merchantId) async {
+final _settingsProvider = FutureProvider.family<RestaurantSettings?, String>((
+  ref,
+  merchantId,
+) async {
   final repo = ref.watch(restaurantSettingsRepositoryProvider);
   return repo.getSettings(merchantId);
 });
 
-final _offersProvider = FutureProvider.family<List<Offer>, String>((ref, merchantId) async {
+final _offersProvider = FutureProvider.family<List<Offer>, String>((
+  ref,
+  merchantId,
+) async {
   final repo = ref.watch(offerRepositoryProvider);
   return repo.getActiveOffers(merchantId);
 });
@@ -58,7 +73,8 @@ class RestaurantDetailPage extends ConsumerStatefulWidget {
   final String merchantId;
 
   @override
-  ConsumerState<RestaurantDetailPage> createState() => _RestaurantDetailPageState();
+  ConsumerState<RestaurantDetailPage> createState() =>
+      _RestaurantDetailPageState();
 }
 
 class _RestaurantDetailPageState extends ConsumerState<RestaurantDetailPage> {
@@ -96,16 +112,18 @@ class _RestaurantDetailPageState extends ConsumerState<RestaurantDetailPage> {
         },
         loading: () => const RestaurantDetailSkeleton(),
         error: (_, _) => Center(
-          child: ErrorState(
-            message: l10n.errorLoading,
-            onRetry: _onRefresh,
-          ),
+          child: ErrorState(message: l10n.errorLoading, onRetry: _onRefresh),
         ),
       ),
     );
   }
 
-  Widget _buildBody(BuildContext context, AppLocalizations l10n, ThemeData theme, Merchant merchant) {
+  Widget _buildBody(
+    BuildContext context,
+    AppLocalizations l10n,
+    ThemeData theme,
+    Merchant merchant,
+  ) {
     final settingsAsync = ref.watch(_settingsProvider(widget.merchantId));
     final branchesAsync = ref.watch(_branchesProvider(widget.merchantId));
     final hoursAsync = ref.watch(_hoursProvider(widget.merchantId));
@@ -154,12 +172,18 @@ class _RestaurantDetailPageState extends ConsumerState<RestaurantDetailPage> {
                       if (branches.isEmpty) return const SizedBox.shrink();
                       if (_selectedBranch == null && branches.isNotEmpty) {
                         WidgetsBinding.instance.addPostFrameCallback((_) {
-                          if (mounted) setState(() => _selectedBranch = branches.first);
+                          if (mounted)
+                            setState(() => _selectedBranch = branches.first);
                         });
                       }
                       return AnimatedFadeIn(
                         delay: const Duration(milliseconds: 300),
-                        child: _buildBranchSection(context, l10n, theme, branches),
+                        child: _buildBranchSection(
+                          context,
+                          l10n,
+                          theme,
+                          branches,
+                        ),
                       );
                     },
                     loading: () => const SizedBox.shrink(),
@@ -173,7 +197,8 @@ class _RestaurantDetailPageState extends ConsumerState<RestaurantDetailPage> {
                         if (hours.isEmpty) return const SizedBox.shrink();
                         return WorkingHoursCard(hours: hours);
                       },
-                      loading: () => const SizedBox(height: 60, child: ShimmerCard()),
+                      loading: () =>
+                          const SizedBox(height: 60, child: ShimmerCard()),
                       error: (_, _) => const SizedBox.shrink(),
                     ),
                   ),
@@ -188,7 +213,9 @@ class _RestaurantDetailPageState extends ConsumerState<RestaurantDetailPage> {
                             SectionHeader(
                               title: l10n.activeOffers,
                               actionLabel: l10n.viewAll,
-                              onAction: () => context.push('/restaurant/${widget.merchantId}/offers'),
+                              onAction: () => context.push(
+                                '/restaurant/${widget.merchantId}/offers',
+                              ),
                             ),
                             const SizedBox(height: 8),
                             SizedBox(
@@ -196,8 +223,10 @@ class _RestaurantDetailPageState extends ConsumerState<RestaurantDetailPage> {
                               child: ListView.separated(
                                 scrollDirection: Axis.horizontal,
                                 itemCount: offers.length,
-                                separatorBuilder: (_, _) => const SizedBox(width: 12),
-                                itemBuilder: (context, index) => OfferBannerCard(offer: offers[index]),
+                                separatorBuilder: (_, _) =>
+                                    const SizedBox(width: 12),
+                                itemBuilder: (context, index) =>
+                                    OfferBannerCard(offer: offers[index]),
                               ),
                             ),
                           ],
@@ -269,7 +298,11 @@ class _RestaurantDetailPageState extends ConsumerState<RestaurantDetailPage> {
       actions: [
         IconButton(
           tooltip: AppLocalizations.of(context).reviews,
-          icon: const Icon(Icons.star_rounded, color: AppColors.rating, size: 26),
+          icon: const Icon(
+            Icons.star_rounded,
+            color: AppColors.rating,
+            size: 26,
+          ),
           onPressed: () =>
               context.push('/restaurant/${widget.merchantId}/reviews'),
         ),
@@ -279,8 +312,8 @@ class _RestaurantDetailPageState extends ConsumerState<RestaurantDetailPage> {
         background: Hero(
           tag: 'merchant-${merchant.id}',
           child: Stack(
-          fit: StackFit.expand,
-children: [
+            fit: StackFit.expand,
+            children: [
               if (merchant.imageUrl != null)
                 Image.network(
                   merchant.imageUrl!,
@@ -289,57 +322,68 @@ children: [
                 )
               else
                 _headerImagePlaceholder(theme),
-            DecoratedBox(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [Colors.transparent, theme.colorScheme.onSurface.withValues(alpha: 0.54)],
+              DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      Colors.transparent,
+                      theme.colorScheme.onSurface.withValues(alpha: 0.54),
+                    ],
+                  ),
                 ),
               ),
-            ),
-            Positioned(
-              bottom: 16,
-              left: 16,
-              right: 16,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    merchant.name,
-                    style: theme.textTheme.headlineSmall?.copyWith(
-                      color: theme.colorScheme.onPrimary,
-                      fontWeight: FontWeight.bold,
+              Positioned(
+                bottom: 16,
+                left: 16,
+                right: 16,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      merchant.name,
+                      style: theme.textTheme.headlineSmall?.copyWith(
+                        color: theme.colorScheme.onPrimary,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
-                  ),
-                  if (merchant.isVerified) ...[
-                    const SizedBox(height: 4),
-                    Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(Icons.verified, size: 16, color: theme.colorScheme.primary),
-                        const SizedBox(width: 4),
-                        Text(
-                          AppLocalizations.of(context).verified,
-                          style: theme.textTheme.bodySmall?.copyWith(
+                    if (merchant.isVerified) ...[
+                      const SizedBox(height: 4),
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.verified,
+                            size: 16,
                             color: theme.colorScheme.primary,
-                            fontWeight: FontWeight.w600,
                           ),
-                        ),
-                      ],
-                    ),
+                          const SizedBox(width: 4),
+                          Text(
+                            AppLocalizations.of(context).verified,
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: theme.colorScheme.primary,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
                   ],
-                ],
+                ),
               ),
-            ),
-          ],
-        ),
+            ],
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildHeader(ThemeData theme, AppLocalizations l10n, Merchant merchant) {
+  Widget _buildHeader(
+    ThemeData theme,
+    AppLocalizations l10n,
+    Merchant merchant,
+  ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -358,14 +402,17 @@ children: [
               child: Text(
                 merchant.isOpenNow ? l10n.open : l10n.closed,
                 style: theme.textTheme.labelMedium?.copyWith(
-                  color: merchant.isOpenNow ? AppColors.successLight : AppColors.errorLight,
+                  color: merchant.isOpenNow
+                      ? AppColors.successLight
+                      : AppColors.errorLight,
                   fontWeight: FontWeight.w600,
                 ),
               ),
             ),
           ],
         ),
-        if (merchant.description != null && merchant.description!.isNotEmpty) ...[
+        if (merchant.description != null &&
+            merchant.description!.isNotEmpty) ...[
           const SizedBox(height: 8),
           Text(
             merchant.description!,
@@ -378,7 +425,11 @@ children: [
           const SizedBox(height: 8),
           Row(
             children: [
-              Icon(Icons.location_on_outlined, size: 16, color: theme.colorScheme.onSurfaceVariant),
+              Icon(
+                Icons.location_on_outlined,
+                size: 16,
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
               const SizedBox(width: 4),
               Expanded(
                 child: Text(
@@ -397,7 +448,12 @@ children: [
     );
   }
 
-  Widget _buildBranchSection(BuildContext context, AppLocalizations l10n, ThemeData theme, List<Branch> branches) {
+  Widget _buildBranchSection(
+    BuildContext context,
+    AppLocalizations l10n,
+    ThemeData theme,
+    List<Branch> branches,
+  ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -412,12 +468,18 @@ children: [
           child: Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+              color: theme.colorScheme.surfaceContainerHighest.withValues(
+                alpha: 0.5,
+              ),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Row(
               children: [
-                Icon(Icons.store_outlined, size: 20, color: theme.colorScheme.primary),
+                Icon(
+                  Icons.store_outlined,
+                  size: 20,
+                  color: theme.colorScheme.primary,
+                ),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Column(
@@ -425,7 +487,9 @@ children: [
                     children: [
                       Text(
                         _selectedBranch?.name ?? l10n.selectBranch,
-                        style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
                       if (_selectedBranch?.address != null)
                         Text(
@@ -439,7 +503,10 @@ children: [
                     ],
                   ),
                 ),
-                Icon(Icons.chevron_right, color: theme.colorScheme.onSurfaceVariant),
+                Icon(
+                  Icons.chevron_right,
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
               ],
             ),
           ),
@@ -466,13 +533,37 @@ children: [
     );
   }
 
-  Widget _buildQuickActions(BuildContext context, AppLocalizations l10n, ThemeData theme) {
+  Widget _buildQuickActions(
+    BuildContext context,
+    AppLocalizations l10n,
+    ThemeData theme,
+  ) {
     final actions = [
-      (Icons.restaurant_menu_rounded, l10n.fullMenu, '/restaurant/${widget.merchantId}/menu'),
-      (Icons.local_offer_outlined, l10n.offers, '/restaurant/${widget.merchantId}/offers'),
-      (Icons.star_rounded, l10n.rateUs, '/restaurant/${widget.merchantId}/reviews'),
-      (Icons.calendar_today_outlined, l10n.reserveATable, '/restaurant/${widget.merchantId}/reservation'),
-      (Icons.photo_library_outlined, l10n.gallery, '/restaurant/${widget.merchantId}/gallery'),
+      (
+        Icons.restaurant_menu_rounded,
+        l10n.fullMenu,
+        '/restaurant/${widget.merchantId}/menu',
+      ),
+      (
+        Icons.local_offer_outlined,
+        l10n.offers,
+        '/restaurant/${widget.merchantId}/offers',
+      ),
+      (
+        Icons.star_rounded,
+        l10n.rateUs,
+        '/restaurant/${widget.merchantId}/reviews',
+      ),
+      (
+        Icons.calendar_today_outlined,
+        l10n.reserveATable,
+        '/restaurant/${widget.merchantId}/reservation',
+      ),
+      (
+        Icons.photo_library_outlined,
+        l10n.gallery,
+        '/restaurant/${widget.merchantId}/gallery',
+      ),
     ];
 
     return Column(
@@ -480,7 +571,9 @@ children: [
       children: [
         Text(
           l10n.details,
-          style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+          style: theme.textTheme.titleMedium?.copyWith(
+            fontWeight: FontWeight.bold,
+          ),
         ),
         const SizedBox(height: 12),
         Row(
@@ -498,7 +591,11 @@ children: [
                         color: theme.colorScheme.primaryContainer,
                         borderRadius: BorderRadius.circular(14),
                       ),
-                      child: Icon(icon, color: theme.colorScheme.primary, size: 24),
+                      child: Icon(
+                        icon,
+                        color: theme.colorScheme.primary,
+                        size: 24,
+                      ),
                     ),
                     const SizedBox(height: 6),
                     Text(
@@ -518,7 +615,10 @@ children: [
     );
   }
 
-  Widget _buildDeliveryZonesSection(BuildContext context, AppLocalizations l10n) {
+  Widget _buildDeliveryZonesSection(
+    BuildContext context,
+    AppLocalizations l10n,
+  ) {
     return GlassCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -531,13 +631,20 @@ children: [
     );
   }
 
-  Widget _buildContactSection(BuildContext context, AppLocalizations l10n, ThemeData theme, Merchant merchant) {
+  Widget _buildContactSection(
+    BuildContext context,
+    AppLocalizations l10n,
+    ThemeData theme,
+    Merchant merchant,
+  ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           l10n.contactInfo,
-          style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+          style: theme.textTheme.titleMedium?.copyWith(
+            fontWeight: FontWeight.bold,
+          ),
         ),
         const SizedBox(height: 12),
         if (merchant.address != null)
@@ -552,15 +659,24 @@ children: [
         Container(
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+            color: theme.colorScheme.surfaceContainerHighest.withValues(
+              alpha: 0.5,
+            ),
             borderRadius: BorderRadius.circular(12),
           ),
           child: Row(
             children: [
-              Icon(Icons.share_outlined, size: 20, color: theme.colorScheme.primary),
+              Icon(
+                Icons.share_outlined,
+                size: 20,
+                color: theme.colorScheme.primary,
+              ),
               const SizedBox(width: 12),
               Flexible(
-                child: Text(l10n.shareRestaurant, style: theme.textTheme.bodyMedium),
+                child: Text(
+                  l10n.shareRestaurant,
+                  style: theme.textTheme.bodyMedium,
+                ),
               ),
             ],
           ),
@@ -569,7 +685,13 @@ children: [
     );
   }
 
-  Widget _buildContactRow(BuildContext context, ThemeData theme, IconData icon, String label, String value) {
+  Widget _buildContactRow(
+    BuildContext context,
+    ThemeData theme,
+    IconData icon,
+    String label,
+    String value,
+  ) {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
@@ -584,11 +706,18 @@ children: [
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(label, style: theme.textTheme.labelMedium?.copyWith(fontWeight: FontWeight.w600)),
+                Text(
+                  label,
+                  style: theme.textTheme.labelMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
                 const SizedBox(height: 2),
                 Text(
                   value,
-                  style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),

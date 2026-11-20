@@ -42,7 +42,8 @@ class ServicePerformancePage extends ConsumerWidget {
           onAction: () => ref.invalidate(servicePerformanceProvider),
         ),
         data: (data) {
-          final hasAny = data.homeServices.isNotEmpty ||
+          final hasAny =
+              data.homeServices.isNotEmpty ||
               data.rideServices.isNotEmpty ||
               data.deliveryServices.isNotEmpty;
 
@@ -63,9 +64,8 @@ class ServicePerformancePage extends ConsumerWidget {
                 AnimatedFadeIn(
                   child: Text(
                     l10n.adminServicePerformance,
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w700,
-                        ),
+                    style: Theme.of(context).textTheme.titleMedium
+                        ?.copyWith(fontWeight: FontWeight.w700),
                   ),
                 ),
                 const SizedBox(height: 16),
@@ -127,10 +127,8 @@ class _CategoryGroup extends StatelessWidget {
             const SizedBox(width: 8),
             Text(
               title,
-              style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                    fontWeight: FontWeight.w800,
-                    color: color,
-                  ),
+              style: Theme.of(context).textTheme.titleSmall
+                  ?.copyWith(fontWeight: FontWeight.w800, color: color),
             ),
           ],
         ),

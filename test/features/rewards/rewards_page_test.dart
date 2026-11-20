@@ -49,8 +49,9 @@ void main() {
     mockRepo = MockRewardsRepository();
   });
 
-  testWidgets('renders period, status chip and benefit code on a reward',
-      (tester) async {
+  testWidgets('renders period, status chip and benefit code on a reward', (
+    tester,
+  ) async {
     final rewards = [
       MemberReward(
         id: 'r1',
@@ -86,9 +87,8 @@ void main() {
   });
 
   testWidgets('renders empty state and retry on failure', (tester) async {
-    when(() => mockRepo.getMyRewards(any())).thenAnswer(
-      (_) async => <MemberReward>[],
-    );
+    when(() => mockRepo.getMyRewards(any()))
+        .thenAnswer((_) async => <MemberReward>[]);
 
     await tester.pumpWidget(_buildTestApp(mockRepo));
     await tester.pumpAndSettle();

@@ -60,22 +60,23 @@ void main() {
     );
   }
 
-  testWidgets('phone layout renders the floating pill bottom nav with active tab', (
-    tester,
-  ) async {
-    tester.view.physicalSize = const Size(1290, 2823);
-    tester.view.devicePixelRatio = 3;
-    addTearDown(tester.view.reset);
+  testWidgets(
+    'phone layout renders the floating pill bottom nav with active tab',
+    (tester) async {
+      tester.view.physicalSize = const Size(1290, 2823);
+      tester.view.devicePixelRatio = 3;
+      addTearDown(tester.view.reset);
 
-    await tester.pumpWidget(await harness());
-    await tester.pumpAndSettle();
+      await tester.pumpWidget(await harness());
+      await tester.pumpAndSettle();
 
-    expect(find.byType(AdminShell), findsOneWidget);
-    expect(find.text('Command Center'), findsWidgets);
-    expect(find.byIcon(Icons.people_rounded), findsWidgets);
-    expect(find.byIcon(Icons.receipt_long_rounded), findsWidgets);
-    expect(find.byIcon(Icons.bolt_rounded), findsWidgets);
-  });
+      expect(find.byType(AdminShell), findsOneWidget);
+      expect(find.text('Command Center'), findsWidgets);
+      expect(find.byIcon(Icons.people_rounded), findsWidgets);
+      expect(find.byIcon(Icons.receipt_long_rounded), findsWidgets);
+      expect(find.byIcon(Icons.bolt_rounded), findsWidgets);
+    },
+  );
 
   testWidgets('wide layout renders the premium sidebar with groups', (
     tester,

@@ -93,8 +93,10 @@ class _ProviderAvailabilityPageState
                           padding: const EdgeInsets.all(10),
                           decoration: BoxDecoration(
                             color: isOpen
-                                ? const Color(0xFF34C759).withValues(alpha: 0.15)
-                                : const Color(0xFFFF3B30).withValues(alpha: 0.15),
+                                ? const Color(0xFF34C759)
+                                      .withValues(alpha: 0.15)
+                                : const Color(0xFFFF3B30)
+                                      .withValues(alpha: 0.15),
                             shape: BoxShape.circle,
                           ),
                           child: Icon(
@@ -111,18 +113,14 @@ class _ProviderAvailabilityPageState
                             children: [
                               Text(
                                 isOpen ? l10n.open : l10n.closed,
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .titleMedium
+                                style: Theme.of(context).textTheme.titleMedium
                                     ?.copyWith(fontWeight: FontWeight.bold),
                               ),
                               Text(
                                 isOpen
                                     ? l10n.customersCanPlaceOrders
                                     : l10n.temporarilyUnavailable,
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .bodySmall
+                                style: Theme.of(context).textTheme.bodySmall
                                     ?.copyWith(color: cs.onSurfaceVariant),
                               ),
                             ],
@@ -165,9 +163,7 @@ class _ProviderAvailabilityPageState
                       Expanded(
                         child: Text(
                           l10n.weeklySchedule,
-                          style: Theme.of(context)
-                              .textTheme
-                              .titleMedium
+                          style: Theme.of(context).textTheme.titleMedium
                               ?.copyWith(fontWeight: FontWeight.bold),
                         ),
                       ),
@@ -203,19 +199,21 @@ class _ProviderAvailabilityPageState
                                 children: [
                                   Expanded(
                                     child: Text(
-                                      _dayLabel(row['day_of_week'] as int? ?? 0),
-                                      style: Theme.of(context).textTheme.bodySmall,
+                                      _dayLabel(
+                                        row['day_of_week'] as int? ?? 0,
+                                      ),
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodySmall,
                                     ),
                                   ),
-                                   Text(
-                                     (row['is_closed'] as bool? ?? false)
-                                         ? l10n.closed
-                                         : '${row['open_time']} – ${row['close_time']}',
-                                     style: Theme.of(context)
-                                         .textTheme
-                                         .bodySmall
-                                         ?.copyWith(fontWeight: FontWeight.bold),
-                                   ),
+                                  Text(
+                                    (row['is_closed'] as bool? ?? false)
+                                        ? l10n.closed
+                                        : '${row['open_time']} – ${row['close_time']}',
+                                    style: Theme.of(context).textTheme.bodySmall
+                                        ?.copyWith(fontWeight: FontWeight.bold),
+                                  ),
                                 ],
                               ),
                             ),

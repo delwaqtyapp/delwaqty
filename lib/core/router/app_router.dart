@@ -51,17 +51,20 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       final isVerificationPendingRoute =
           state.matchedLocation == '/pending-verification';
 
-      final restrictedRoutes = ['/market/checkout', '/market/orders', '/market/favorites', '/orders'];
+      final restrictedRoutes = [
+        '/market/checkout',
+        '/market/orders',
+        '/market/favorites',
+        '/orders',
+      ];
       final isRestricted = restrictedRoutes.any(
         (r) => state.matchedLocation.startsWith(r),
       );
 
       final isAdminRoute = state.matchedLocation.startsWith('/admin');
-      final isAdmin = isAuth &&
-          authState.whenOrNull(
-                authenticated: (user) => user.isAdmin,
-              ) ==
-              true;
+      final isAdmin =
+          isAuth &&
+          authState.whenOrNull(authenticated: (user) => user.isAdmin) == true;
 
       if (isSplash || isOnboarding) return null;
 
@@ -110,7 +113,9 @@ final goRouterProvider = Provider<GoRouter>((ref) {
     ],
     errorBuilder: (context, state) => Scaffold(
       body: Center(
-        child: Text('${AppLocalizations.of(context).pageNotFound}: ${state.uri}'),
+        child: Text(
+          '${AppLocalizations.of(context).pageNotFound}: ${state.uri}',
+        ),
       ),
     ),
   );

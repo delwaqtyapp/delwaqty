@@ -17,8 +17,7 @@ abstract class AppNotification with _$AppNotification {
     required DateTime createdAt,
     @Default(NotificationPriority.normal) NotificationPriority priority,
     String? senderId,
-    @Default(NotificationPushStatus.pending)
-    NotificationPushStatus pushStatus,
+    @Default(NotificationPushStatus.pending) NotificationPushStatus pushStatus,
   }) = _AppNotification;
 
   factory AppNotification.fromJson(Map<String, dynamic> json) =>
@@ -137,13 +136,13 @@ class NotificationPayload {
   final String? action;
 
   Map<String, dynamic> toMap() => {
-        if (notificationId != null) 'notification_id': notificationId,
-        if (type != null) 'type': type,
-        if (deepLink != null) 'deep_link': deepLink,
-        if (entityId != null) 'entity_id': entityId,
-        if (entityType != null) 'entity_type': entityType,
-        if (action != null) 'action': action,
-      };
+    if (notificationId != null) 'notification_id': notificationId,
+    if (type != null) 'type': type,
+    if (deepLink != null) 'deep_link': deepLink,
+    if (entityId != null) 'entity_id': entityId,
+    if (entityType != null) 'entity_type': entityType,
+    if (action != null) 'action': action,
+  };
 
   String? resolveDeepLink() {
     if (deepLink != null && deepLink!.isNotEmpty) return deepLink;

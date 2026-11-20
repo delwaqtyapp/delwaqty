@@ -88,6 +88,4 @@ class SettingsModule extends FeatureModule {
       builder: (context, state) => const NotificationPreferencesPage(),
     ),
   ];
-
-
 }

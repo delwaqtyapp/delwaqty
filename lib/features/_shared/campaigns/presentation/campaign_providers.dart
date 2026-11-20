@@ -31,7 +31,10 @@ final activeCampaignsProvider = FutureProvider<List<Campaign>>((ref) async {
   );
 });
 
-final campaignMediaUrlProvider = FutureProvider.family<String?, String?>((ref, path) {
+final campaignMediaUrlProvider = FutureProvider.family<String?, String?>((
+  ref,
+  path,
+) {
   final repo = ref.read(campaignRepositoryProvider);
   return repo.getMediaUrl(path);
 });

@@ -61,7 +61,8 @@ class CouponRepositoryImpl implements CouponRepository {
   Future<CouponStatus> getCouponStatus(String code) async {
     try {
       final coupon = await _dataSource.getCouponByCode(code);
-      if (coupon == null) throw const ServerException(message: 'Coupon not found');
+      if (coupon == null)
+        throw const ServerException(message: 'Coupon not found');
       return _dataSource.getCouponStatus(coupon);
     } catch (e) {
       throw ServerException(message: e.toString());

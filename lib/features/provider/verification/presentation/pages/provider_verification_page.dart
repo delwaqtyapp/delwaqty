@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 
 import '../providers/provider_verification_providers.dart';
+
 import 'package:delwaqty/core/errors/app_error_text.dart';
 
 class ProviderVerificationPage extends ConsumerStatefulWidget {
@@ -86,9 +87,7 @@ class _ProviderVerificationPageState
       appBar: AppBar(title: Text(l10n.verification)),
       body: state.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(
-          child: Text(l10n.failedToLoad),
-        ),
+        error: (e, _) => Center(child: Text(l10n.failedToLoad)),
         data: (data) {
           final status = data['verification_status'] as String?;
           final reason = data['rejection_reason'] as String?;
@@ -116,7 +115,10 @@ class _ProviderVerificationPageState
                 Card(
                   color: Colors.orange,
                   child: ListTile(
-                    leading: const Icon(Icons.hourglass_top, color: Colors.white),
+                    leading: const Icon(
+                      Icons.hourglass_top,
+                      color: Colors.white,
+                    ),
                     title: Text(
                       l10n.pendingReview,
                       style: const TextStyle(color: Colors.white),
@@ -126,9 +128,7 @@ class _ProviderVerificationPageState
               else
                 Card(
                   color: Colors.grey,
-                  child: ListTile(
-                    title: Text(l10n.notSubmitted),
-                  ),
+                  child: ListTile(title: Text(l10n.notSubmitted)),
                 ),
               if (rejected && reason != null)
                 Padding(
@@ -136,7 +136,10 @@ class _ProviderVerificationPageState
                   child: Card(
                     color: Colors.red.shade50,
                     child: ListTile(
-                      leading: const Icon(Icons.error_outline, color: Colors.red),
+                      leading: const Icon(
+                        Icons.error_outline,
+                        color: Colors.red,
+                      ),
                       title: Text(l10n.rejected),
                       subtitle: Text(reason),
                     ),

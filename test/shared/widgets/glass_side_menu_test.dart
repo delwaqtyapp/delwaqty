@@ -40,8 +40,11 @@ class _BubbleHarness extends StatelessWidget {
       body: Center(
         child: Consumer(
           builder: (context, ref, child) => FilledButton(
-            onPressed: () =>
-                GlassSideMenuController.open(context, ref, drawerEntries: entries),
+            onPressed: () => GlassSideMenuController.open(
+              context,
+              ref,
+              drawerEntries: entries,
+            ),
             child: const Text('open'),
           ),
         ),
@@ -87,9 +90,7 @@ Widget _wrap(
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
       locale: const Locale('en'),
-      home: Scaffold(
-        body: Consumer(builder: builder),
-      ),
+      home: Scaffold(body: Consumer(builder: builder)),
     ),
   );
 }
@@ -225,8 +226,7 @@ void main() {
         builder: (context, ref, child) {
           return Center(
             child: FilledButton(
-              onPressed: () =>
-                  GlassSideMenuController.open(context, ref),
+              onPressed: () => GlassSideMenuController.open(context, ref),
               child: const Text('open'),
             ),
           );
@@ -264,16 +264,12 @@ void main() {
                   key: key,
                   icon: const Icon(Icons.menu),
                   onPressed: () {
-                    final box = key.currentContext?.findRenderObject()
-                        as RenderBox?;
+                    final box =
+                        key.currentContext?.findRenderObject() as RenderBox?;
                     final anchor = box == null
                         ? null
                         : box.localToGlobal(Offset.zero) & box.size;
-                    GlassSideMenuController.open(
-                      context,
-                      ref,
-                      anchor: anchor,
-                    );
+                    GlassSideMenuController.open(context, ref, anchor: anchor);
                   },
                 );
               },
@@ -290,59 +286,62 @@ void main() {
     expect(find.text('Dark Mode'), findsOneWidget);
   });
 
-  testWidgets('tapping a bubble tile closes the menu and navigates without crashing', (
-    tester,
-  ) async {
-    final router = GoRouter(
-      initialLocation: '/home',
-      routes: [
-        GoRoute(
-          path: '/home',
-          builder: (c, s) => _BubbleHarness(entries: [
-            DrawerEntry(
-              id: 'services',
-              label: (_) => 'Services',
-              icon: Icons.grid_view_rounded,
-              onTap: (ctx, ref) {
-                Navigator.of(ctx).maybePop();
-                ctx.go('/services');
-              },
+  testWidgets(
+    'tapping a bubble tile closes the menu and navigates without crashing',
+    (tester) async {
+      final router = GoRouter(
+        initialLocation: '/home',
+        routes: [
+          GoRoute(
+            path: '/home',
+            builder: (c, s) => _BubbleHarness(
+              entries: [
+                DrawerEntry(
+                  id: 'services',
+                  label: (_) => 'Services',
+                  icon: Icons.grid_view_rounded,
+                  onTap: (ctx, ref) {
+                    Navigator.of(ctx).maybePop();
+                    ctx.go('/services');
+                  },
+                ),
+              ],
             ),
-          ]),
-        ),
-        GoRoute(
-          path: '/services',
-          builder: (c, s) =>
-              const Scaffold(body: Center(child: Text('ServicesPage'))),
-        ),
-      ],
-    );
-
-    await tester.pumpWidget(
-      ProviderScope(
-        overrides: [
-          authStateProvider.overrideWith(() => _FakeAuthNotifier()),
-          sharedPreferencesProvider.overrideWith((ref) => prefsService),
+          ),
+          GoRoute(
+            path: '/services',
+            builder: (c, s) =>
+                const Scaffold(body: Center(child: Text('ServicesPage'))),
+          ),
         ],
-        child: MaterialApp.router(
-          routerConfig: router,
-          localizationsDelegates: AppLocalizations.localizationsDelegates,
-          supportedLocales: AppLocalizations.supportedLocales,
+      );
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            authStateProvider.overrideWith(() => _FakeAuthNotifier()),
+            sharedPreferencesProvider.overrideWith((ref) => prefsService),
+          ],
+          child: MaterialApp.router(
+            routerConfig: router,
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+          ),
         ),
-      ),
-    );
-    await tester.pumpAndSettle();
+      );
+      await tester.pumpAndSettle();
 
-    await tester.tap(find.text('open'));
-    await tester.pumpAndSettle();
-    expect(find.byType(GlassMenuPanel), findsOneWidget);
+      await tester.tap(find.text('open'));
+      await tester.pumpAndSettle();
+      expect(find.byType(GlassMenuPanel), findsOneWidget);
 
-    await tester.tap(find.text('Services'));
-    await tester.pumpAndSettle();
+      await tester.tap(find.text('Services'));
+      await tester.pumpAndSettle();
 
-    expect(find.byType(GlassMenuPanel), findsNothing);
-    expect(find.text('ServicesPage'), findsOneWidget);
-  });
+      expect(find.byType(GlassMenuPanel), findsNothing);
+      expect(find.text('ServicesPage'), findsOneWidget);
+    },
+  );
 
   testWidgets('home module drawer entries no longer include the home tile', (
     tester,

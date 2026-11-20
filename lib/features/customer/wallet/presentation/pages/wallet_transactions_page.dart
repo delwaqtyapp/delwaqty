@@ -41,8 +41,10 @@ class WalletTransactionsPage extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(title: Text(l10n.transactions)),
       body: RefreshIndicator(
-        onRefresh: () async => ref.invalidate(walletTransactionsProvider(userId)),
-        child: transactionsAsync.when(skipLoadingOnRefresh: true, 
+        onRefresh: () async =>
+            ref.invalidate(walletTransactionsProvider(userId)),
+        child: transactionsAsync.when(
+          skipLoadingOnRefresh: true,
           data: (transactions) {
             if (transactions.isEmpty) {
               return ListView(
@@ -106,7 +108,8 @@ class _TransactionTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
-    final isCredit = transaction.type == TransactionType.topup ||
+    final isCredit =
+        transaction.type == TransactionType.topup ||
         transaction.type == TransactionType.refund;
 
     return Padding(
@@ -133,7 +136,9 @@ class _TransactionTile extends StatelessWidget {
               ),
               child: Icon(
                 _getIcon(transaction.type),
-                color: isCredit ? AppColors.successLight : theme.colorScheme.error,
+                color: isCredit
+                    ? AppColors.successLight
+                    : theme.colorScheme.error,
                 size: 20,
               ),
             ),
@@ -165,7 +170,9 @@ class _TransactionTile extends StatelessWidget {
                 '${isCredit ? '+' : '-'}${l10n.amountWithCurrency(transaction.amount.toStringAsFixed(2), l10n.currencySymbol)}',
                 style: theme.textTheme.bodyMedium?.copyWith(
                   fontWeight: FontWeight.w700,
-                  color: isCredit ? AppColors.successLight : theme.colorScheme.error,
+                  color: isCredit
+                      ? AppColors.successLight
+                      : theme.colorScheme.error,
                 ),
                 overflow: TextOverflow.ellipsis,
               ),

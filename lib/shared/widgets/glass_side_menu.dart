@@ -7,6 +7,7 @@ import 'package:delwaqty/core/theme/theme_mode_provider.dart';
 import 'package:delwaqty/features/_shared/auth/domain/auth_state.dart';
 import 'package:delwaqty/features/_shared/auth/presentation/auth_provider.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
+
 import 'app_shell.dart';
 
 /// Opens the customer side menu as a floating, frosted-glass bubble that bursts

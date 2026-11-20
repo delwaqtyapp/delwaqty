@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 
 import '../providers/provider_documents_providers.dart';
+
 import 'package:delwaqty/core/errors/app_error_text.dart';
 
 class ProviderDocumentsPage extends ConsumerStatefulWidget {
@@ -41,9 +42,9 @@ class _ProviderDocumentsPageState extends ConsumerState<ProviderDocumentsPage> {
           .upsertDocument(docType, path);
       if (mounted) {
         ref.invalidate(providerDocumentsProvider);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.uploadedForReview(label))),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(l10n.uploadedForReview(label))));
       }
     } catch (e) {
       if (mounted) setState(() => _error = appErrorText(context, e));
@@ -87,9 +88,8 @@ class _ProviderDocumentsPageState extends ConsumerState<ProviderDocumentsPage> {
           .deleteDocument(docType);
       if (mounted) {
         ref.invalidate(providerDocumentsProvider);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.docRemoved(label))),
-        );
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(l10n.docRemoved(label))));
       }
     } catch (e) {
       if (mounted) setState(() => _error = appErrorText(context, e));
@@ -150,10 +150,7 @@ class _ProviderDocumentsPageState extends ConsumerState<ProviderDocumentsPage> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text(
-                  appErrorText(context, e),
-                  textAlign: TextAlign.center,
-                ),
+                Text(appErrorText(context, e), textAlign: TextAlign.center),
                 const SizedBox(height: 12),
                 FilledButton.tonal(
                   onPressed: () => ref.invalidate(providerDocumentsProvider),
@@ -164,21 +161,23 @@ class _ProviderDocumentsPageState extends ConsumerState<ProviderDocumentsPage> {
           ),
         ),
         data: (docs) {
-          final byType = {
-            for (final d in docs) d['doc_type'] as String: d,
-          };
+          final byType = {for (final d in docs) d['doc_type'] as String: d};
           return ListView(
             padding: const EdgeInsets.all(16),
             children: [
               if (_error != null)
                 Padding(
                   padding: const EdgeInsets.only(bottom: 12),
-                  child: Text(_error!, style: const TextStyle(color: Colors.red)),
+                  child: Text(
+                    _error!,
+                    style: const TextStyle(color: Colors.red),
+                  ),
                 ),
               ...providerDocTypes.map((doc) {
                 final existing = byType[doc.key];
                 final status = existing?['status'] as String?;
-                final rejectionReason = existing?['rejection_reason'] as String?;
+                final rejectionReason =
+                    existing?['rejection_reason'] as String?;
                 final fileUrl = existing?['file_url'] as String?;
                 final hasDoc = fileUrl != null && fileUrl.isNotEmpty;
                 final label = _docLabel(doc.key);
@@ -191,8 +190,10 @@ class _ProviderDocumentsPageState extends ConsumerState<ProviderDocumentsPage> {
                 return Card(
                   child: ListTile(
                     leading: hasDoc
-                        ? Icon(Icons.check_circle_outline,
-                            color: _statusColor(status))
+                        ? Icon(
+                            Icons.check_circle_outline,
+                            color: _statusColor(status),
+                          )
                         : const Icon(Icons.upload_file_outlined),
                     title: Text(label),
                     subtitle: !hasDoc
@@ -216,7 +217,9 @@ class _ProviderDocumentsPageState extends ConsumerState<ProviderDocumentsPage> {
                                 IconButton(
                                   tooltip: l10n.viewDocumentTooltip,
                                   icon: const Icon(Icons.visibility_outlined),
-                                  onPressed: _busy ? null : () => _view(fileUrl),
+                                  onPressed: _busy
+                                      ? null
+                                      : () => _view(fileUrl),
                                 ),
                               if (hasDoc)
                                 IconButton(
@@ -230,7 +233,9 @@ class _ProviderDocumentsPageState extends ConsumerState<ProviderDocumentsPage> {
                                 onPressed: _busy
                                     ? null
                                     : () => _upload(doc.key, label),
-                                child: Text(hasDoc ? l10n.replace : l10n.upload),
+                                child: Text(
+                                  hasDoc ? l10n.replace : l10n.upload,
+                                ),
                               ),
                             ],
                           ),

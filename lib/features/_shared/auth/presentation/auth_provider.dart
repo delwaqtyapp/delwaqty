@@ -1,7 +1,9 @@
 import 'dart:async';
 import 'dart:typed_data';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:supabase_flutter/supabase_flutter.dart' show Supabase, SupabaseClient;
+import 'package:supabase_flutter/supabase_flutter.dart'
+    show Supabase, SupabaseClient;
 import 'package:delwaqty/config/app_config.dart';
 import 'package:delwaqty/data/datasources/local/biometric_auth_store.dart';
 import 'package:delwaqty/domain/enums/user_type.dart';
@@ -291,9 +293,7 @@ class AuthStateNotifier extends Notifier<AuthState> {
   /// link). Re-throws so callers can surface the outcome in the UI.
   Future<void> resendEmailConfirmation({required String email}) async {
     try {
-      await ref
-          .read(resendEmailConfirmationUseCaseProvider)
-          .call(email: email);
+      await ref.read(resendEmailConfirmationUseCaseProvider).call(email: email);
     } catch (e, stack) {
       _logger.e('Resend confirmation failed', e, stack);
       rethrow;
@@ -348,10 +348,9 @@ class AuthStateNotifier extends Notifier<AuthState> {
     final current = state;
     if (current is! AuthAuthenticated) return;
     try {
-      await ref.read(updateBiometricEnabledUseCaseProvider).call(
-        userId: current.user.id,
-        enabled: enabled,
-      );
+      await ref
+          .read(updateBiometricEnabledUseCaseProvider)
+          .call(userId: current.user.id, enabled: enabled);
       final user = await ref.read(getCurrentUserUseCaseProvider).call();
       state = _resolveAuthenticated(user);
     } catch (e) {
@@ -376,10 +375,8 @@ class AuthStateNotifier extends Notifier<AuthState> {
   }
 
   AuthState _resolveAuthenticated(User user) {
-    final requireDocs = ref
-            .read(requireProviderDocumentsProvider)
-            .asData
-            ?.value ??
+    final requireDocs =
+        ref.read(requireProviderDocumentsProvider).asData?.value ??
         _cachedRequireProviderDocuments;
     final isMerchantOrProvider =
         user.userType == UserType.merchant ||

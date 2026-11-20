@@ -28,9 +28,8 @@ void main() {
           createdAt: DateTime(2026, 7, 19),
         ),
       ];
-      when(() => mockDataSource.getMyRewards('user-123')).thenAnswer(
-        (_) async => rewards,
-      );
+      when(() => mockDataSource.getMyRewards('user-123'))
+          .thenAnswer((_) async => rewards);
 
       final result = await repository.getMyRewards('user-123');
 
@@ -39,9 +38,8 @@ void main() {
     });
 
     test('returns an empty list when no rewards exist', () async {
-      when(() => mockDataSource.getMyRewards('user-123')).thenAnswer(
-        (_) async => <MemberReward>[],
-      );
+      when(() => mockDataSource.getMyRewards('user-123'))
+          .thenAnswer((_) async => <MemberReward>[]);
 
       final result = await repository.getMyRewards('user-123');
 
@@ -49,9 +47,8 @@ void main() {
     });
 
     test('wraps data source errors in ServerException', () async {
-      when(() => mockDataSource.getMyRewards(any())).thenThrow(
-        Exception('network error'),
-      );
+      when(() => mockDataSource.getMyRewards(any()))
+          .thenThrow(Exception('network error'));
 
       expect(
         () => repository.getMyRewards('user-123'),

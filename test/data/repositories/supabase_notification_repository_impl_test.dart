@@ -19,9 +19,8 @@ void main() {
 
   group('SupabaseNotificationRepositoryImpl.deactivateDeviceTokens', () {
     test('delegates the device id to the data source', () async {
-      when(() => mockDataSource.deactivateDeviceTokens('dev-1')).thenAnswer(
-        (_) async {},
-      );
+      when(() => mockDataSource.deactivateDeviceTokens('dev-1'))
+          .thenAnswer((_) async {});
 
       await repository.deactivateDeviceTokens('dev-1');
 
@@ -29,9 +28,8 @@ void main() {
     });
 
     test('wraps data source errors in ServerException', () async {
-      when(() => mockDataSource.deactivateDeviceTokens(any())).thenThrow(
-        Exception('network error'),
-      );
+      when(() => mockDataSource.deactivateDeviceTokens(any()))
+          .thenThrow(Exception('network error'));
 
       expect(
         () => repository.deactivateDeviceTokens('dev-1'),

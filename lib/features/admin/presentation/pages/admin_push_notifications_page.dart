@@ -129,10 +129,7 @@ class _AdminPushNotificationsPageState
             'p_target_role': baseParams['p_target_role'],
             'p_type': baseParams['p_type'],
             'p_deep_link': baseParams['p_deep_link'],
-            'p_data': {
-              'target_app': _audience,
-              'audience': _audience,
-            },
+            'p_data': {'target_app': _audience, 'audience': _audience},
           },
         );
       }
@@ -181,9 +178,8 @@ class _AdminPushNotificationsPageState
                         IconButton(
                           tooltip: l10n.retry,
                           icon: const Icon(Icons.refresh_rounded),
-                          onPressed: () => ref.invalidate(
-                            adminNotificationTokensProvider,
-                          ),
+                          onPressed: () =>
+                              ref.invalidate(adminNotificationTokensProvider),
                         ),
                       ],
                     ),
@@ -275,16 +271,14 @@ class _AdminPushNotificationsPageState
                   children: [
                     Text(
                       l10n.pushNotificationsTitle,
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
+                      style: Theme.of(context).textTheme.titleMedium
+                          ?.copyWith(fontWeight: FontWeight.bold),
                     ),
                     const SizedBox(height: 4),
                     Text(
                       l10n.broadcastNote,
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: cs.onSurfaceVariant,
-                      ),
+                      style: Theme.of(context).textTheme.bodySmall
+                          ?.copyWith(color: cs.onSurfaceVariant),
                     ),
                     const SizedBox(height: 16),
                     TextField(
@@ -505,10 +499,8 @@ class _DeviceStatTile extends StatelessWidget {
               children: [
                 Text(
                   '$value',
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    color: color,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: Theme.of(context).textTheme.titleLarge
+                      ?.copyWith(color: color, fontWeight: FontWeight.bold),
                 ),
                 Text(
                   label,

@@ -40,7 +40,9 @@ class UserRepositoryImpl implements UserRepository {
         final model = await _profileDataSource.getProfile(supabaseUser.id);
         return model.toEntity();
       } catch (e) {
-        _logger.w('Profile not found in users table for authenticated user: ${supabaseUser.id}. Creating default profile...');
+        _logger.w(
+          'Profile not found in users table for authenticated user: ${supabaseUser.id}. Creating default profile...',
+        );
         final defaultModel = _buildDefaultModel(supabaseUser);
         final created = await _profileDataSource.createProfile(defaultModel);
         return created.toEntity();
@@ -62,7 +64,9 @@ class UserRepositoryImpl implements UserRepository {
       } catch (e) {
         final supabaseUser = _authDataSource.currentSupabaseUser;
         if (supabaseUser != null && supabaseUser.id == id) {
-          _logger.w('Profile not found in users table for user by ID: $id (matches current user). Creating default profile...');
+          _logger.w(
+            'Profile not found in users table for user by ID: $id (matches current user). Creating default profile...',
+          );
           final defaultModel = _buildDefaultModel(supabaseUser);
           final created = await _profileDataSource.createProfile(defaultModel);
           return created.toEntity();
@@ -124,7 +128,8 @@ class UserRepositoryImpl implements UserRepository {
     final userType = UserType.fromCode(metaType);
     final metaVerification =
         supabaseUser.userMetadata?['verification_status'] as String?;
-    final verificationStatus = metaVerification != null &&
+    final verificationStatus =
+        metaVerification != null &&
             VerificationStatus.fromCode(metaVerification) !=
                 VerificationStatus.pending
         ? VerificationStatus.fromCode(metaVerification)

@@ -160,7 +160,9 @@ class _AdminRegionsManagementPageState
               label: Text(_crumbs[i].displayName(lang)),
               onPressed: i == _crumbs.length - 1
                   ? null
-                  : () => setState(() => _crumbs.removeRange(i + 1, _crumbs.length)),
+                  : () => setState(
+                      () => _crumbs.removeRange(i + 1, _crumbs.length),
+                    ),
             ),
           ],
         ],
@@ -252,10 +254,8 @@ class _AdminRegionsManagementPageState
                     IconButton(
                       tooltip: l10n.edit,
                       icon: const Icon(Icons.edit_outlined, size: 20),
-                      onPressed: () => _openUpsertSheet(
-                        existing: region,
-                        parent: parent,
-                      ),
+                      onPressed: () =>
+                          _openUpsertSheet(existing: region, parent: parent),
                     ),
                     const Icon(Icons.chevron_right_rounded),
                   ],
@@ -420,21 +420,23 @@ class _RegionUpsertSheetState extends ConsumerState<_RegionUpsertSheet> {
     if (!(_formKey.currentState?.validate() ?? false)) return;
     setState(() => _saving = true);
     try {
-      await ref.read(supabaseClientProvider).rpc(
-        'admin_upsert_region',
-        params: {
-          'p_id': widget.existing?.id,
-          'p_parent_region_id': _parentRegionId,
-          'p_type': _type.code,
-          'p_name_ar': _nameArCtrl.text.trim(),
-          'p_name_en': _nameEnCtrl.text.trim().isEmpty
-              ? null
-              : _nameEnCtrl.text.trim(),
-          'p_lat': _lat,
-          'p_lon': _lon,
-          'p_radius_km': _radiusKm,
-        },
-      );
+      await ref
+          .read(supabaseClientProvider)
+          .rpc(
+            'admin_upsert_region',
+            params: {
+              'p_id': widget.existing?.id,
+              'p_parent_region_id': _parentRegionId,
+              'p_type': _type.code,
+              'p_name_ar': _nameArCtrl.text.trim(),
+              'p_name_en': _nameEnCtrl.text.trim().isEmpty
+                  ? null
+                  : _nameEnCtrl.text.trim(),
+              'p_lat': _lat,
+              'p_lon': _lon,
+              'p_radius_km': _radiusKm,
+            },
+          );
       if (mounted) {
         final l10n = AppLocalizations.of(context);
         context.showAppSnackBar(l10n.regionSaved);
@@ -475,9 +477,8 @@ class _RegionUpsertSheetState extends ConsumerState<_RegionUpsertSheet> {
                               Localizations.localeOf(context).languageCode,
                             )
                           : l10n.addSubRegion,
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
+                      style: Theme.of(context).textTheme.titleMedium
+                          ?.copyWith(fontWeight: FontWeight.bold),
                     ),
                   ),
                   IconButton(
@@ -516,9 +517,8 @@ class _RegionUpsertSheetState extends ConsumerState<_RegionUpsertSheet> {
                   labelText: l10n.bannerTitleAr,
                   border: const OutlineInputBorder(),
                 ),
-                validator: (v) => (v == null || v.trim().isEmpty)
-                    ? l10n.requiredField
-                    : null,
+                validator: (v) =>
+                    (v == null || v.trim().isEmpty) ? l10n.requiredField : null,
               ),
               const SizedBox(height: 12),
               TextFormField(

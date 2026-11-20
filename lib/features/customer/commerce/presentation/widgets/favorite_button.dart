@@ -8,6 +8,7 @@ import 'package:delwaqty/features/customer/commerce/domain/entities/favorite.dar
 import 'package:delwaqty/l10n/app_localizations.dart';
 import 'package:delwaqty/core/theme/app_icons.dart';
 import 'package:delwaqty/shared/widgets/app_snackbar.dart';
+
 import 'dart:async';
 
 class FavoriteButton extends ConsumerStatefulWidget {
@@ -58,9 +59,17 @@ class _FavoriteButtonState extends ConsumerState<FavoriteButton> {
       }
       final repo = ref.read(favoriteRepositoryProvider);
       final result = await repo.isFavorite(widget.targetId, widget.type);
-      if (mounted) setState(() { _isFav = result; _loading = false; });
+      if (mounted)
+        setState(() {
+          _isFav = result;
+          _loading = false;
+        });
     } catch (_) {
-      if (mounted) setState(() { _isFav = false; _loading = false; });
+      if (mounted)
+        setState(() {
+          _isFav = false;
+          _loading = false;
+        });
     }
   }
 

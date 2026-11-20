@@ -55,7 +55,11 @@ class _CinematicAuthBackgroundState extends State<CinematicAuthBackground>
                   gradient: LinearGradient(
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
-                    colors: [Color(0xFF160D0D), Color(0xFF3A1E10), Color(0xFF160D0D)],
+                    colors: [
+                      Color(0xFF160D0D),
+                      Color(0xFF3A1E10),
+                      Color(0xFF160D0D),
+                    ],
                   ),
                 ),
               ),

@@ -32,8 +32,7 @@ class MerchantOrdersPage extends ConsumerStatefulWidget {
   const MerchantOrdersPage({super.key});
 
   @override
-  ConsumerState<MerchantOrdersPage> createState() =>
-      _MerchantOrdersPageState();
+  ConsumerState<MerchantOrdersPage> createState() => _MerchantOrdersPageState();
 }
 
 class _MerchantOrdersPageState extends ConsumerState<MerchantOrdersPage> {
@@ -47,7 +46,9 @@ class _MerchantOrdersPageState extends ConsumerState<MerchantOrdersPage> {
     try {
       final merchantId = await ref.read(providerMerchantIdProvider.future);
       if (!mounted || merchantId.isEmpty) return;
-      ref.read(realtimeServiceProvider).subscribe(
+      ref
+          .read(realtimeServiceProvider)
+          .subscribe(
             channelName: RealtimeChannels.providerOrders,
             opts: [
               RealtimeChannelFilter(
@@ -291,8 +292,8 @@ class _OrderCard extends StatelessWidget {
               '${item.quantity}x ${item.productName}${item.modifiers.isNotEmpty ? ' (${item.modifiers.join(', ')})' : ''}',
         )
         .join(', ');
-    final formattedDate =
-        DateFormat('yyyy-MM-dd HH:mm').format(order.createdAt.toLocal());
+    final formattedDate = DateFormat('yyyy-MM-dd HH:mm')
+        .format(order.createdAt.toLocal());
     final deliveryAddress = order.deliveryAddress?.trim() ?? '';
     final notes = order.notes?.trim() ?? '';
     final customerPhone = order.customerPhone?.trim() ?? '';
@@ -422,10 +423,7 @@ class _OrderCard extends StatelessWidget {
                   alignment: AlignmentDirectional.centerStart,
                   child: OutlinedButton.icon(
                     onPressed: onDispatchDriver,
-                    icon: const Icon(
-                      Icons.delivery_dining_rounded,
-                      size: 18,
-                    ),
+                    icon: const Icon(Icons.delivery_dining_rounded, size: 18),
                     label: Text(l10n.dispatchDeliveryDriver),
                   ),
                 ),
@@ -469,11 +467,11 @@ class _OrderCard extends StatelessWidget {
                                 child: Text(l10n.no),
                               ),
                               TextButton(
-                                onPressed: () =>
-                                    Navigator.of(dlgCtx).pop(true),
+                                onPressed: () => Navigator.of(dlgCtx).pop(true),
                                 style: TextButton.styleFrom(
-                                  foregroundColor:
-                                      Theme.of(dlgCtx).colorScheme.error,
+                                  foregroundColor: Theme.of(dlgCtx)
+                                      .colorScheme
+                                      .error,
                                 ),
                                 child: Text(l10n.yes),
                               ),
@@ -548,9 +546,7 @@ class _ActionButton extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         minimumSize: Size.zero,
         tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       ),
       child: Text(
         label,

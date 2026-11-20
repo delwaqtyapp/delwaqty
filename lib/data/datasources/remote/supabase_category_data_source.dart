@@ -1,4 +1,5 @@
 import 'dart:typed_data';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:delwaqty/services/supabase/supabase_service.dart';
@@ -54,10 +55,7 @@ class SupabaseCategoryDataSource {
 
   Future<List<PlatformCategory>> getAllCategories() async {
     try {
-      final data = await _client
-          .from(_tableName)
-          .select()
-          .order('sort_order');
+      final data = await _client.from(_tableName).select().order('sort_order');
       return (data as List)
           .map((row) => _fromRow(row as Map<String, dynamic>))
           .toList();
@@ -165,7 +163,9 @@ class SupabaseCategoryDataSource {
       final stamp = DateTime.now().millisecondsSinceEpoch;
       final uniqueName = '${stamp}_$fileName';
       final path = 'categories/$categoryId/$uniqueName';
-      await _client.storage.from(_bucketName).uploadBinary(
+      await _client.storage
+          .from(_bucketName)
+          .uploadBinary(
             path,
             imageBytes,
             fileOptions: const FileOptions(upsert: true),

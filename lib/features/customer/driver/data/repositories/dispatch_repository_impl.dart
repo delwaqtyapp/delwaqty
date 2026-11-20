@@ -33,7 +33,12 @@ class DispatchRepositoryImpl implements DispatchRepository {
   }
 
   @override
-  Future<void> setOnline(String driverId, bool online, {double? lat, double? lng}) {
+  Future<void> setOnline(
+    String driverId,
+    bool online, {
+    double? lat,
+    double? lng,
+  }) {
     return _dataSource.setOnline(driverId, online, lat: lat, lng: lng);
   }
 
@@ -45,8 +50,13 @@ class DispatchRepositoryImpl implements DispatchRepository {
     double? heading,
     double? speed,
   }) {
-    return _dataSource.updateLocation(driverId, lat, lng,
-        heading: heading, speed: speed);
+    return _dataSource.updateLocation(
+      driverId,
+      lat,
+      lng,
+      heading: heading,
+      speed: speed,
+    );
   }
 
   @override
@@ -78,18 +88,27 @@ class DispatchRepositoryImpl implements DispatchRepository {
       _dataSource.startTrip(rideId, driverId, otp);
 
   @override
-  Future<double> completeTrip(String rideId, String driverId,
-          {double? finalDistanceKm}) =>
-      _dataSource.completeTrip(rideId, driverId, finalDistanceKm: finalDistanceKm);
+  Future<double> completeTrip(
+    String rideId,
+    String driverId, {
+    double? finalDistanceKm,
+  }) => _dataSource.completeTrip(
+    rideId,
+    driverId,
+    finalDistanceKm: finalDistanceKm,
+  );
 
   @override
   Future<void> cancelAsDriver(String rideId, {String? reason}) =>
       _dataSource.cancelAsDriver(rideId, reason: reason);
 
   @override
-  Future<void> ratePassenger(String rideId, String driverId, int stars,
-          {String? comment}) =>
-      _dataSource.ratePassenger(rideId, driverId, stars, comment: comment);
+  Future<void> ratePassenger(
+    String rideId,
+    String driverId,
+    int stars, {
+    String? comment,
+  }) => _dataSource.ratePassenger(rideId, driverId, stars, comment: comment);
 
   @override
   Future<DriverStats> getDashboardStats(String driverId) =>
@@ -100,7 +119,9 @@ class DispatchRepositoryImpl implements DispatchRepository {
       _dataSource.getEarnings(driverId, limit: limit);
 
   @override
-  Future<String> requestWithdrawal(String driverId, double amount,
-          {String method = 'bank'}) =>
-      _dataSource.requestWithdrawal(driverId, amount, method: method);
+  Future<String> requestWithdrawal(
+    String driverId,
+    double amount, {
+    String method = 'bank',
+  }) => _dataSource.requestWithdrawal(driverId, amount, method: method);
 }

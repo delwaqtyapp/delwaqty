@@ -45,7 +45,10 @@ void main() {
     });
 
     test('fromCode maps known codes', () {
-      expect(VerificationStatus.fromCode('pending'), VerificationStatus.pending);
+      expect(
+        VerificationStatus.fromCode('pending'),
+        VerificationStatus.pending,
+      );
       expect(
         VerificationStatus.fromCode('approved'),
         VerificationStatus.approved,

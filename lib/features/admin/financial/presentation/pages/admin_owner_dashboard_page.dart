@@ -19,7 +19,7 @@ class AdminOwnerDashboardPage extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title:  Text(l10n.globalFinancialAudit),
+        title: Text(l10n.globalFinancialAudit),
         actions: [
           IconButton(
             tooltip: l10n.refresh,
@@ -45,8 +45,12 @@ class AdminOwnerDashboardPage extends ConsumerWidget {
               const _SectionTitle('Platform Collections (all regions)'),
               const SizedBox(height: 12),
               collections.when(
-                loading: () =>
-                    const Center(child: Padding(padding: EdgeInsets.all(32), child: AppLoaderCircular())),
+                loading: () => const Center(
+                  child: Padding(
+                    padding: EdgeInsets.all(32),
+                    child: AppLoaderCircular(),
+                  ),
+                ),
                 error: (e, _) => PremiumCard(
                   child: PremiumEmptyState(
                     icon: Icons.error_outline_rounded,
@@ -54,14 +58,19 @@ class AdminOwnerDashboardPage extends ConsumerWidget {
                     message: appErrorText(context, e),
                   ),
                 ),
-                data: (data) => _CollectionsSection(data: data, cs: cs, l10n: l10n),
+                data: (data) =>
+                    _CollectionsSection(data: data, cs: cs, l10n: l10n),
               ),
               const SizedBox(height: 24),
               const _SectionTitle('Platform Settlements (all regions)'),
               const SizedBox(height: 12),
               settlements.when(
-                loading: () =>
-                    const Center(child: Padding(padding: EdgeInsets.all(32), child: AppLoaderCircular())),
+                loading: () => const Center(
+                  child: Padding(
+                    padding: EdgeInsets.all(32),
+                    child: AppLoaderCircular(),
+                  ),
+                ),
                 error: (e, _) => PremiumCard(
                   child: PremiumEmptyState(
                     icon: Icons.error_outline_rounded,
@@ -69,7 +78,8 @@ class AdminOwnerDashboardPage extends ConsumerWidget {
                     message: appErrorText(context, e),
                   ),
                 ),
-                data: (data) => _SettlementsSection(data: data, cs: cs, l10n: l10n),
+                data: (data) =>
+                    _SettlementsSection(data: data, cs: cs, l10n: l10n),
               ),
             ],
           ),
@@ -84,13 +94,18 @@ class _SectionTitle extends StatelessWidget {
   final String text;
   @override
   Widget build(BuildContext context) => Text(
-        text,
-        style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
-      );
+    text,
+    style: Theme.of(context).textTheme.titleMedium
+        ?.copyWith(fontWeight: FontWeight.bold),
+  );
 }
 
 class _CollectionsSection extends StatelessWidget {
-  const _CollectionsSection({required this.data, required this.cs, required this.l10n});
+  const _CollectionsSection({
+    required this.data,
+    required this.cs,
+    required this.l10n,
+  });
   final Map<String, dynamic> data;
   final ColorScheme cs;
   final AppLocalizations l10n;
@@ -107,7 +122,11 @@ class _CollectionsSection extends StatelessWidget {
     final cards = [
       _Stat(l10n.total, fmt(summary['total']), const Color(0xFF5B3DF0)),
       _Stat('Settled', fmt(summary['settled']), const Color(0xFF34C759)),
-      _Stat('Outstanding', fmt(summary['outstanding']), const Color(0xFFFF3B30)),
+      _Stat(
+        'Outstanding',
+        fmt(summary['outstanding']),
+        const Color(0xFFFF3B30),
+      ),
       _Stat('Today', fmt(summary['today']), const Color(0xFF00C7BE)),
       _Stat('Week', fmt(summary['week']), const Color(0xFFFF9500)),
       _Stat('Month', fmt(summary['month']), const Color(0xFFAF52DE)),
@@ -131,13 +150,16 @@ class _CollectionsSection extends StatelessWidget {
                     children: [
                       Expanded(
                         child: Text(
-                          region.length > 8 ? '${region.substring(0, 8)}…' : region,
+                          region.length > 8
+                              ? '${region.substring(0, 8)}…'
+                              : region,
                           style: Theme.of(context).textTheme.bodySmall,
                         ),
                       ),
                       Text(
                         fmt(r['total']),
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(fontWeight: FontWeight.bold),
+                        style: Theme.of(context).textTheme.bodySmall
+                            ?.copyWith(fontWeight: FontWeight.bold),
                       ),
                     ],
                   ),
@@ -148,7 +170,10 @@ class _CollectionsSection extends StatelessWidget {
           const SizedBox(height: 12),
         ],
         if (rows.isNotEmpty) ...[
-          Text(l10n.recentCollections, style: Theme.of(context).textTheme.titleSmall),
+          Text(
+            l10n.recentCollections,
+            style: Theme.of(context).textTheme.titleSmall,
+          ),
           const SizedBox(height: 8),
           PremiumCard(
             padding: const EdgeInsets.all(12),
@@ -168,7 +193,8 @@ class _CollectionsSection extends StatelessWidget {
                       ),
                       Text(
                         fmt(amount),
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(fontWeight: FontWeight.bold),
+                        style: Theme.of(context).textTheme.bodySmall
+                            ?.copyWith(fontWeight: FontWeight.bold),
                       ),
                     ],
                   ),
@@ -183,7 +209,11 @@ class _CollectionsSection extends StatelessWidget {
 }
 
 class _SettlementsSection extends StatelessWidget {
-  const _SettlementsSection({required this.data, required this.cs, required this.l10n});
+  const _SettlementsSection({
+    required this.data,
+    required this.cs,
+    required this.l10n,
+  });
   final Map<String, dynamic> data;
   final ColorScheme cs;
   final AppLocalizations l10n;
@@ -200,10 +230,18 @@ class _SettlementsSection extends StatelessWidget {
     final cards = [
       _Stat(l10n.total, fmt(summary['total']), const Color(0xFF5B3DF0)),
       _Stat('Pending', fmt(summary['pending']), const Color(0xFFFF9500)),
-      _Stat('Under Review', fmt(summary['under_review']), const Color(0xFF00C7BE)),
+      _Stat(
+        'Under Review',
+        fmt(summary['under_review']),
+        const Color(0xFF00C7BE),
+      ),
       _Stat('Approved', fmt(summary['approved']), const Color(0xFF34C759)),
       _Stat('Rejected', fmt(summary['rejected']), const Color(0xFFFF3B30)),
-      _Stat('Outstanding', fmt(summary['outstanding']), const Color(0xFFAF52DE)),
+      _Stat(
+        'Outstanding',
+        fmt(summary['outstanding']),
+        const Color(0xFFAF52DE),
+      ),
     ];
 
     return Column(
@@ -224,13 +262,16 @@ class _SettlementsSection extends StatelessWidget {
                     children: [
                       Expanded(
                         child: Text(
-                          region.length > 8 ? '${region.substring(0, 8)}…' : region,
+                          region.length > 8
+                              ? '${region.substring(0, 8)}…'
+                              : region,
                           style: Theme.of(context).textTheme.bodySmall,
                         ),
                       ),
                       Text(
                         fmt(r['total']),
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(fontWeight: FontWeight.bold),
+                        style: Theme.of(context).textTheme.bodySmall
+                            ?.copyWith(fontWeight: FontWeight.bold),
                       ),
                     ],
                   ),
@@ -241,7 +282,10 @@ class _SettlementsSection extends StatelessWidget {
           const SizedBox(height: 12),
         ],
         if (rows.isNotEmpty) ...[
-          Text(l10n.recentSettlements, style: Theme.of(context).textTheme.titleSmall),
+          Text(
+            l10n.recentSettlements,
+            style: Theme.of(context).textTheme.titleSmall,
+          ),
           const SizedBox(height: 8),
           PremiumCard(
             padding: const EdgeInsets.all(12),
@@ -261,7 +305,8 @@ class _SettlementsSection extends StatelessWidget {
                       ),
                       Text(
                         fmt(amount),
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(fontWeight: FontWeight.bold),
+                        style: Theme.of(context).textTheme.bodySmall
+                            ?.copyWith(fontWeight: FontWeight.bold),
                       ),
                     ],
                   ),
@@ -311,7 +356,11 @@ class _StatGrid extends StatelessWidget {
                           color: item.color.withValues(alpha: 0.15),
                           borderRadius: BorderRadius.circular(10),
                         ),
-                        child: Icon(Icons.account_balance_wallet_rounded, color: item.color, size: 16),
+                        child: Icon(
+                          Icons.account_balance_wallet_rounded,
+                          color: item.color,
+                          size: 16,
+                        ),
                       ),
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -320,14 +369,18 @@ class _StatGrid extends StatelessWidget {
                             fit: BoxFit.scaleDown,
                             child: Text(
                               item.value,
-                              style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                              style: Theme.of(context).textTheme.titleMedium
+                                  ?.copyWith(fontWeight: FontWeight.bold),
                             ),
                           ),
                           const SizedBox(height: 2),
                           Text(
                             item.label,
-                            style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                            style: Theme.of(context).textTheme.labelSmall
+                                ?.copyWith(
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .onSurfaceVariant,
                                 ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,

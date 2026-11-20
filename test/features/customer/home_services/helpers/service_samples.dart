@@ -11,13 +11,28 @@ final List<ServiceCategory> serviceSamples = [
   _cat('c07', ServiceCategoryType.carpentry, 'نجار', 'Carpentry'),
   _cat('c08', ServiceCategoryType.painting, 'نقاش', 'Painting'),
   _cat('c09', ServiceCategoryType.cleaning, 'نظافة منازل', 'Home Cleaning'),
-  _cat('c10', ServiceCategoryType.acMaintenance, 'صيانة تكييف', 'AC Maintenance'),
+  _cat(
+    'c10',
+    ServiceCategoryType.acMaintenance,
+    'صيانة تكييف',
+    'AC Maintenance',
+  ),
   _cat('c11', ServiceCategoryType.pipeChange, 'تغيير مواسير', 'Pipe Change'),
   _cat('c12', ServiceCategoryType.plastering, 'محارة', 'Plastering'),
-  _cat('c13', ServiceCategoryType.carpetCleaning, 'تنجيد سجاد', 'Carpet Cleaning'),
+  _cat(
+    'c13',
+    ServiceCategoryType.carpetCleaning,
+    'تنجيد سجاد',
+    'Carpet Cleaning',
+  ),
   _cat('c14', ServiceCategoryType.dishRepair, 'تظبيط موتور', 'Dish Repair'),
   _cat('c15', ServiceCategoryType.pestControl, 'مكافحة حشرات', 'Pest Control'),
-  _cat('c16', ServiceCategoryType.applianceRepair, 'صيانة أجهزة', 'Appliance Repair'),
+  _cat(
+    'c16',
+    ServiceCategoryType.applianceRepair,
+    'صيانة أجهزة',
+    'Appliance Repair',
+  ),
   _cat('c17', ServiceCategoryType.other, 'خدمات أخرى', 'Other Services'),
 ];
 

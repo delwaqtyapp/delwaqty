@@ -93,22 +93,23 @@ class _AdminComplaintsPageState extends ConsumerState<AdminComplaintsPage> {
                   borderRadius: BorderRadius.circular(12),
                 ),
               ),
-              items: [
-                'all',
-                'pending',
-                'investigating',
-                'resolved',
-                'rejected',
-                'escalated',
-                'closed',
-              ]
-                  .map(
-                    (s) => DropdownMenuItem(
-                      value: s,
-                      child: Text(_complaintStatusLabel(l10n, s)),
-                    ),
-                  )
-                  .toList(),
+              items:
+                  [
+                        'all',
+                        'pending',
+                        'investigating',
+                        'resolved',
+                        'rejected',
+                        'escalated',
+                        'closed',
+                      ]
+                      .map(
+                        (s) => DropdownMenuItem(
+                          value: s,
+                          child: Text(_complaintStatusLabel(l10n, s)),
+                        ),
+                      )
+                      .toList(),
               onChanged: (v) => setState(() => _statusFilter = v!),
             ),
           ),
@@ -127,21 +128,15 @@ class _AdminComplaintsPageState extends ConsumerState<AdminComplaintsPage> {
                   borderRadius: BorderRadius.circular(12),
                 ),
               ),
-              items: [
-                'all',
-                'driver',
-                'merchant',
-                'customer',
-                'provider',
-                'other',
-              ]
-                  .map(
-                    (s) => DropdownMenuItem(
-                      value: s,
-                      child: Text(_complaintTypeLabel(l10n, s)),
-                    ),
-                  )
-                  .toList(),
+              items:
+                  ['all', 'driver', 'merchant', 'customer', 'provider', 'other']
+                      .map(
+                        (s) => DropdownMenuItem(
+                          value: s,
+                          child: Text(_complaintTypeLabel(l10n, s)),
+                        ),
+                      )
+                      .toList(),
               onChanged: (v) => setState(() => _typeFilter = v!),
             ),
           ),
@@ -238,7 +233,6 @@ String _complaintPriorityLabel(AppLocalizations l10n, String priority) {
 }
 
 class _ComplaintTile extends StatelessWidget {
-
   const _ComplaintTile({
     required this.complaint,
     required this.cs,
@@ -312,7 +306,6 @@ class _ComplaintTile extends StatelessWidget {
 }
 
 class _ComplaintDetailSheet extends ConsumerStatefulWidget {
-
   const _ComplaintDetailSheet({
     required this.complaint,
     required this.onStatusChanged,
@@ -346,18 +339,16 @@ class _ComplaintDetailSheetState extends ConsumerState<_ComplaintDetailSheet> {
 
     try {
       await ref.read(assignComplaintProvider)(
-            complaintId: complaint.id,
-            adminId: adminId,
-          );
+        complaintId: complaint.id,
+        adminId: adminId,
+      );
       ref.invalidate(escalationEventsProvider);
       widget.onStatusChanged();
       messenger.showSnackBar(
         SnackBar(content: Text(l10n.complaintAssignedToYou)),
       );
     } catch (e) {
-      messenger.showSnackBar(
-        SnackBar(content: Text(l10n.somethingWentWrong)),
-      );
+      messenger.showSnackBar(SnackBar(content: Text(l10n.somethingWentWrong)));
     }
   }
 
@@ -414,9 +405,8 @@ class _ComplaintDetailSheetState extends ConsumerState<_ComplaintDetailSheet> {
       }
     } catch (_) {
       if (ctx.mounted) {
-        ScaffoldMessenger.of(
-          ctx,
-        ).showSnackBar(SnackBar(content: Text(l10n.escalationFailed)));
+        ScaffoldMessenger.of(ctx)
+            .showSnackBar(SnackBar(content: Text(l10n.escalationFailed)));
       }
     }
   }
@@ -482,36 +472,41 @@ class _ComplaintDetailSheetState extends ConsumerState<_ComplaintDetailSheet> {
               ),
               const SizedBox(height: 16),
               DropdownButtonFormField<String>(
-                initialValue: const [
-                  'pending',
-                  'investigating',
-                  'resolved',
-                  'rejected',
-                  'escalated',
-                  'closed',
-                ].contains(_selectedStatus)
+                initialValue:
+                    const [
+                      'pending',
+                      'investigating',
+                      'resolved',
+                      'rejected',
+                      'escalated',
+                      'closed',
+                    ].contains(_selectedStatus)
                     ? _selectedStatus
                     : null,
                 decoration: InputDecoration(
                   labelText: AppLocalizations.of(context).updateStatus,
                 ),
-                items: [
-                  'pending',
-                  'investigating',
-                  'resolved',
-                  'rejected',
-                  'escalated',
-                  'closed',
-                ]
-                    .map(
-                      (s) => DropdownMenuItem(
-                        value: s,
-                        child: Text(
-                          _complaintStatusLabel(AppLocalizations.of(context), s),
-                        ),
-                      ),
-                    )
-                    .toList(),
+                items:
+                    [
+                          'pending',
+                          'investigating',
+                          'resolved',
+                          'rejected',
+                          'escalated',
+                          'closed',
+                        ]
+                        .map(
+                          (s) => DropdownMenuItem(
+                            value: s,
+                            child: Text(
+                              _complaintStatusLabel(
+                                AppLocalizations.of(context),
+                                s,
+                              ),
+                            ),
+                          ),
+                        )
+                        .toList(),
                 onChanged: (v) => setState(() => _selectedStatus = v!),
               ),
               const SizedBox(height: 12),
@@ -562,19 +557,14 @@ class _ComplaintDetailSheetState extends ConsumerState<_ComplaintDetailSheet> {
                   // await: this is a StatelessWidget sheet, so there is no
                   // State.mounted to check afterwards.
                   final messenger = ScaffoldMessenger.of(context);
-                  final errorText =
-                      AppLocalizations.of(context).somethingWentWrong;
+                  final errorText = AppLocalizations.of(context)
+                      .somethingWentWrong;
                   try {
-                    await repo.addAdminNote(
-                      c.id,
-                      _noteController.text.trim(),
-                    );
+                    await repo.addAdminNote(c.id, _noteController.text.trim());
                     _noteController.clear();
                     widget.onStatusChanged();
                   } catch (e) {
-                    messenger.showSnackBar(
-                      SnackBar(content: Text(errorText)),
-                    );
+                    messenger.showSnackBar(SnackBar(content: Text(errorText)));
                   }
                 },
                 child: Text(AppLocalizations.of(context).addNote),

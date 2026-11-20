@@ -13,14 +13,18 @@ final nearbyMerchantsProvider = FutureProvider<List<Merchant>>((ref) async {
   return repo.getMerchants();
 });
 
-final activeCategoriesProvider = FutureProvider<List<PlatformCategory>>((ref) async {
+final activeCategoriesProvider = FutureProvider<List<PlatformCategory>>((
+  ref,
+) async {
   final repo = ref.watch(platformCategoryRepositoryProvider);
   return repo.getActiveCategories();
 });
 
 enum DiscoveryMode { nearby, recommended, popular }
 
-final discoveryModeProvider = StateProvider<DiscoveryMode>((_) => DiscoveryMode.nearby);
+final discoveryModeProvider = StateProvider<DiscoveryMode>(
+  (_) => DiscoveryMode.nearby,
+);
 
 /// A discovery entry: either a marketplace merchant (restaurant, pharmacy,
 /// grocery...) or a real booking service provider (doctor, barber, nurse,
@@ -64,7 +68,9 @@ int _bookingRank(ServiceCategoryType type) {
   return i == -1 ? _bookingPriority.length : i;
 }
 
-final discoveryEntriesProvider = FutureProvider<List<DiscoveryEntry>>((ref) async {
+final discoveryEntriesProvider = FutureProvider<List<DiscoveryEntry>>((
+  ref,
+) async {
   final mode = ref.watch(discoveryModeProvider);
   final repo = ref.watch(merchantRepositoryProvider);
   final serviceRepo = ref.watch(cachedServiceBookingRepositoryProvider);
@@ -78,10 +84,11 @@ final discoveryEntriesProvider = FutureProvider<List<DiscoveryEntry>>((ref) asyn
     for (final m in merchants) MerchantDiscoveryEntry(m),
   ];
   final sortedProviders = [...providers]
-    ..sort((a, b) => _bookingRank(a.categoryType).compareTo(_bookingRank(b.categoryType)));
-  entries.addAll([
-    for (final p in sortedProviders) ProviderDiscoveryEntry(p),
-  ]);
+    ..sort(
+      (a, b) =>
+          _bookingRank(a.categoryType).compareTo(_bookingRank(b.categoryType)),
+    );
+  entries.addAll([for (final p in sortedProviders) ProviderDiscoveryEntry(p)]);
 
   switch (mode) {
     case DiscoveryMode.nearby:
@@ -93,8 +100,12 @@ final discoveryEntriesProvider = FutureProvider<List<DiscoveryEntry>>((ref) asyn
         return false;
       }).toList();
       rated.sort((a, b) {
-        final ra = a is MerchantDiscoveryEntry ? a.merchant.rating : (a as ProviderDiscoveryEntry).provider.rating;
-        final rb = b is MerchantDiscoveryEntry ? b.merchant.rating : (b as ProviderDiscoveryEntry).provider.rating;
+        final ra = a is MerchantDiscoveryEntry
+            ? a.merchant.rating
+            : (a as ProviderDiscoveryEntry).provider.rating;
+        final rb = b is MerchantDiscoveryEntry
+            ? b.merchant.rating
+            : (b as ProviderDiscoveryEntry).provider.rating;
         return rb.compareTo(ra);
       });
       return rated.take(20).toList();
@@ -106,8 +117,12 @@ final discoveryEntriesProvider = FutureProvider<List<DiscoveryEntry>>((ref) asyn
       }).toList();
       if (featured.length >= 6) return featured.take(20).toList();
       entries.sort((a, b) {
-        final ra = a is MerchantDiscoveryEntry ? a.merchant.ratingCount : (a as ProviderDiscoveryEntry).provider.ratingCount;
-        final rb = b is MerchantDiscoveryEntry ? b.merchant.ratingCount : (b as ProviderDiscoveryEntry).provider.ratingCount;
+        final ra = a is MerchantDiscoveryEntry
+            ? a.merchant.ratingCount
+            : (a as ProviderDiscoveryEntry).provider.ratingCount;
+        final rb = b is MerchantDiscoveryEntry
+            ? b.merchant.ratingCount
+            : (b as ProviderDiscoveryEntry).provider.ratingCount;
         return rb.compareTo(ra);
       });
       return entries.take(20).toList();

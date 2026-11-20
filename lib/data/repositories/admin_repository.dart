@@ -25,16 +25,18 @@ class AdminRepository implements admin.AdminRepository {
 
       final countResults = await Future.wait([
         _supabase.rpc<int>('count_table_rows', params: {'table_name': 'users'}),
-        _supabase.rpc<int>('count_table_rows', params: {'table_name': 'drivers'}),
-        _supabase.rpc<int>('count_table_rows', params: {'table_name': 'merchants'}),
+        _supabase.rpc<int>(
+          'count_table_rows',
+          params: {'table_name': 'drivers'},
+        ),
+        _supabase.rpc<int>(
+          'count_table_rows',
+          params: {'table_name': 'merchants'},
+        ),
       ]);
 
       final metrics = await Future.wait([
-        _supabase
-            .from('drivers')
-            .select('id')
-            .eq('is_online', true)
-            .count(),
+        _supabase.from('drivers').select('id').eq('is_online', true).count(),
         _supabase
             .from('drivers')
             .select('id')
@@ -45,11 +47,7 @@ class AdminRepository implements admin.AdminRepository {
             .select('id')
             .neq('service_type', 'ride')
             .count(),
-        _supabase
-            .from('orders')
-            .select('id')
-            .eq('status', 'pending')
-            .count(),
+        _supabase.from('orders').select('id').eq('status', 'pending').count(),
         _supabase
             .from('rides')
             .select('id')
@@ -69,10 +67,7 @@ class AdminRepository implements admin.AdminRepository {
       ]);
 
       final revenueResults = await Future.wait([
-        _supabase
-            .from('rides')
-            .select('fare')
-            .eq('status', 'completed'),
+        _supabase.from('rides').select('fare').eq('status', 'completed'),
         _supabase
             .from('rides')
             .select('fare')
@@ -514,51 +509,53 @@ class AdminRepository implements admin.AdminRepository {
 
   // ─── Users ────────────────────────────────────────────────
 
-@override
+  @override
   Future<List<AdminUser>> getUsers({String? search}) async {
-     try {
-       var query = _supabase.from('admin_users').select('id, full_name, email, role, status, last_login, created_at');
- 
-       if (search != null && search.isNotEmpty) {
-         query = query.or('full_name.ilike.%$search%,email.ilike.%$search%');
-       }
- 
-       final response = await query.order('created_at', ascending: false);
- 
-       return (response as List).map((json) {
-         return AdminUser(
-           id: json['id'] as String,
-           name: json['full_name'] as String,
-           email: json['email'] as String,
-           role: AdminRole.fromDb(json['role'] as String?),
-           status: AdminUserStatus.values.firstWhere(
-             (s) => s.name == json['status'],
-             orElse: () => AdminUserStatus.pending,
-           ),
-           lastLogin: json['last_login'] != null
-               ? DateTime.parse(json['last_login'] as String)
-               : null,
-           createdAt: DateTime.parse(json['created_at'] as String),
-         );
-       }).toList();
-     } catch (e) {
-       throw AdminException('Failed to fetch users: $e');
-     }
-   }
+    try {
+      var query = _supabase
+          .from('admin_users')
+          .select('id, full_name, email, role, status, last_login, created_at');
+
+      if (search != null && search.isNotEmpty) {
+        query = query.or('full_name.ilike.%$search%,email.ilike.%$search%');
+      }
+
+      final response = await query.order('created_at', ascending: false);
+
+      return (response as List).map((json) {
+        return AdminUser(
+          id: json['id'] as String,
+          name: json['full_name'] as String,
+          email: json['email'] as String,
+          role: AdminRole.fromDb(json['role'] as String?),
+          status: AdminUserStatus.values.firstWhere(
+            (s) => s.name == json['status'],
+            orElse: () => AdminUserStatus.pending,
+          ),
+          lastLogin: json['last_login'] != null
+              ? DateTime.parse(json['last_login'] as String)
+              : null,
+          createdAt: DateTime.parse(json['created_at'] as String),
+        );
+      }).toList();
+    } catch (e) {
+      throw AdminException('Failed to fetch users: $e');
+    }
+  }
 
   @override
   Future<AdminUser> createUser(AdminUser user) async {
     try {
-final response = await _supabase
-           .from('admin_users')
-           .insert({
-             'full_name': user.name,
-             'email': user.email,
-             'role': user.role.toDb(),
-             'status': user.status.name,
-           })
-           .select()
-           .single();
+      final response = await _supabase
+          .from('admin_users')
+          .insert({
+            'full_name': user.name,
+            'email': user.email,
+            'role': user.role.toDb(),
+            'status': user.status.name,
+          })
+          .select()
+          .single();
 
       return AdminUser(
         id: response['id'] as String,
@@ -576,17 +573,17 @@ final response = await _supabase
   @override
   Future<AdminUser> updateUser(AdminUser user) async {
     try {
-final response = await _supabase
-           .from('admin_users')
-           .update({
-             'full_name': user.name,
-             'email': user.email,
-             'role': user.role.toDb(),
-             'status': user.status.name,
-           })
-           .eq('id', user.id)
-           .select()
-           .single();
+      final response = await _supabase
+          .from('admin_users')
+          .update({
+            'full_name': user.name,
+            'email': user.email,
+            'role': user.role.toDb(),
+            'status': user.status.name,
+          })
+          .eq('id', user.id)
+          .select()
+          .single();
 
       return AdminUser(
         id: response['id'] as String,
@@ -605,10 +602,13 @@ final response = await _supabase
   @override
   Future<void> deleteUser(String userId) async {
     try {
-      await _supabase.rpc('owner_delete_member', params: {
-        'p_member_id': userId,
-        'p_reason': 'Deleted via Admin Repository',
-      });
+      await _supabase.rpc(
+        'owner_delete_member',
+        params: {
+          'p_member_id': userId,
+          'p_reason': 'Deleted via Admin Repository',
+        },
+      );
     } catch (e) {
       throw AdminException('Failed to delete user: $e');
     }
@@ -679,7 +679,9 @@ final response = await _supabase
     try {
       final response = await _supabase
           .from('reviews')
-          .select('id, rating, comment, created_at, merchant_id, product_id, user_id')
+          .select(
+            'id, rating, comment, created_at, merchant_id, product_id, user_id',
+          )
           .order('created_at', ascending: false)
           .limit(limit);
       return List<Map<String, dynamic>>.from(response as List);
@@ -695,7 +697,9 @@ final response = await _supabase
     try {
       final response = await _supabase
           .from('service_reviews')
-          .select('id, rating, comment, created_at, category_type, provider_id, user_name')
+          .select(
+            'id, rating, comment, created_at, category_type, provider_id, user_name',
+          )
           .order('created_at', ascending: false)
           .limit(limit);
       return List<Map<String, dynamic>>.from(response as List);
@@ -956,12 +960,7 @@ final response = await _supabase
           .from('users')
           .select()
           .eq('verification_status', 'pending')
-          .inFilter('user_type', [
-            'provider',
-            'delivery',
-            'merchant',
-            'driver',
-          ])
+          .inFilter('user_type', ['provider', 'delivery', 'merchant', 'driver'])
           .order('created_at', ascending: false);
 
       return (response as List).map((json) {
@@ -1002,7 +1001,10 @@ final response = await _supabase
   }
 
   @override
-  Future<void> rejectVerification(String userId, {required String reason}) async {
+  Future<void> rejectVerification(
+    String userId, {
+    required String reason,
+  }) async {
     try {
       await _supabase.rpc(
         'decide_user_verification',

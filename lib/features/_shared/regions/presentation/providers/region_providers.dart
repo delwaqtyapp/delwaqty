@@ -33,10 +33,10 @@ final regionChildrenProvider = FutureProvider.family<List<Region>, String>((
 /// Resolves a single region by id (any depth), swallowing missing-row errors so
 /// stale admin assignments degrade to a placeholder instead of a red screen.
 final regionByIdProvider = FutureProvider.family<Region?, String>((ref, id) {
-  return ref.watch(regionRepositoryProvider).getRegion(id).then<Region?>(
-    (region) => region,
-    onError: (Object _) => null,
-  );
+  return ref
+      .watch(regionRepositoryProvider)
+      .getRegion(id)
+      .then<Region?>((region) => region, onError: (Object _) => null);
 });
 
 final regionSearchProvider = FutureProvider.family<List<Region>, String>((
@@ -56,28 +56,32 @@ final currentUserRegionProvider = FutureProvider<UserRegionPreference?>((ref) {
 });
 
 /// Persists an explicit user selection (manual / verified).
-final selectRegionProvider = Provider<
-  Future<void> Function({
-    required Region region,
-    required RegionPreferenceSource source,
-  })
->((ref) {
-  return ({required Region region, required RegionPreferenceSource source}) async {
-    final authState = ref.read(authStateProvider);
-    final user = authState is AuthAuthenticated ? authState.user : null;
-    if (user == null) {
-      throw const RegionException('Not authenticated');
-    }
-    await ref
-        .read(regionRepositoryProvider)
-        .setUserRegion(
-          userId: user.id,
-          regionId: region.id,
-          source: source,
-        );
-    ref.invalidate(currentUserRegionProvider);
-  };
-});
+final selectRegionProvider =
+    Provider<
+      Future<void> Function({
+        required Region region,
+        required RegionPreferenceSource source,
+      })
+    >((ref) {
+      return ({
+        required Region region,
+        required RegionPreferenceSource source,
+      }) async {
+        final authState = ref.read(authStateProvider);
+        final user = authState is AuthAuthenticated ? authState.user : null;
+        if (user == null) {
+          throw const RegionException('Not authenticated');
+        }
+        await ref
+            .read(regionRepositoryProvider)
+            .setUserRegion(
+              userId: user.id,
+              regionId: region.id,
+              source: source,
+            );
+        ref.invalidate(currentUserRegionProvider);
+      };
+    });
 
 /// Resolves the current GPS location to a canonical governorate (read-only).
 final detectedRegionProvider = FutureProvider<Region?>((ref) async {
@@ -93,7 +97,10 @@ final detectedRegionProvider = FutureProvider<Region?>((ref) async {
 });
 
 /// Geo-places search (tourism / transport / landmarks), optional type filter.
-final geoPlacesProvider = FutureProvider.family<List<GeoPlace>, String?>((ref, type) {
+final geoPlacesProvider = FutureProvider.family<List<GeoPlace>, String?>((
+  ref,
+  type,
+) {
   return ref.watch(regionRepositoryProvider).getGeoPlaces(type: type);
 });
 
@@ -108,13 +115,15 @@ final geoPlaceSearchProvider = FutureProvider.family<List<GeoPlace>, String>((
 
 /// Server-side spatial resolution of a GPS fix via the
 /// `geo_region_for_point` RPC (PostGIS point-in-polygon / snapping).
-final spatialResolutionProvider = FutureProvider.family<SpatialResolution?, ({double lat, double lon})>(
-  (ref, coords) {
-    return ref
-        .watch(regionRepositoryProvider)
-        .resolveRegionForPoint(lat: coords.lat, lon: coords.lon);
-  },
-);
+final spatialResolutionProvider =
+    FutureProvider.family<SpatialResolution?, ({double lat, double lon})>((
+      ref,
+      coords,
+    ) {
+      return ref
+          .watch(regionRepositoryProvider)
+          .resolveRegionForPoint(lat: coords.lat, lon: coords.lon);
+    });
 
 /// Applies GPS detection, honoring the state-preservation + confidence gates.
 final applyDetectedRegionProvider = Provider<Future<Region?> Function()>((ref) {
@@ -148,42 +157,42 @@ final applyDetectedRegionProvider = Provider<Future<Region?> Function()>((ref) {
 /// applying the ADR-057 confidence gates (never auto-persist LOW; MEDIUM only
 /// when no preference exists; HIGH refines detected but never manual/verified).
 /// Returns the resolution when it may be persisted as `detected`, else null.
-final applySpatialDetectionProvider = Provider<Future<SpatialResolution?> Function()>(
-  (ref) {
-    return () async {
-      final authState = ref.read(authStateProvider);
-      final user = authState is AuthAuthenticated ? authState.user : null;
-      if (user == null) return null;
+final applySpatialDetectionProvider =
+    Provider<Future<SpatialResolution?> Function()>((ref) {
+      return () async {
+        final authState = ref.read(authStateProvider);
+        final user = authState is AuthAuthenticated ? authState.user : null;
+        if (user == null) return null;
 
-      final location = await ref.read(userLocationProvider.future);
-      if (location == null) return null;
-      final resolution = await ref.read(
-        spatialResolutionProvider(
-          (lat: location.latitude, lon: location.longitude),
-        ).future,
-      );
-      if (resolution == null ||
-          resolution.confidence == GeoConfidence.invalid) {
-        return null;
-      }
-      final regionId = resolution.regionId;
-      if (regionId == null) return null;
+        final location = await ref.read(userLocationProvider.future);
+        if (location == null) return null;
+        final resolution = await ref.read(
+          spatialResolutionProvider((
+            lat: location.latitude,
+            lon: location.longitude,
+          )).future,
+        );
+        if (resolution == null ||
+            resolution.confidence == GeoConfidence.invalid) {
+          return null;
+        }
+        final regionId = resolution.regionId;
+        if (regionId == null) return null;
 
-      final repository = ref.read(regionRepositoryProvider);
-      final existing = await repository.getUserRegion(user.id);
-      if (!RegionPreferencePolicy.shouldPersistDetected(
-        confidence: resolution.confidence,
-        existing: existing,
-      )) {
-        return null;
-      }
-      await repository.setUserRegion(
-        userId: user.id,
-        regionId: regionId,
-        source: RegionPreferenceSource.detected,
-      );
-      ref.invalidate(currentUserRegionProvider);
-      return resolution;
-    };
-  },
-);
+        final repository = ref.read(regionRepositoryProvider);
+        final existing = await repository.getUserRegion(user.id);
+        if (!RegionPreferencePolicy.shouldPersistDetected(
+          confidence: resolution.confidence,
+          existing: existing,
+        )) {
+          return null;
+        }
+        await repository.setUserRegion(
+          userId: user.id,
+          regionId: regionId,
+          source: RegionPreferenceSource.detected,
+        );
+        ref.invalidate(currentUserRegionProvider);
+        return resolution;
+      };
+    });

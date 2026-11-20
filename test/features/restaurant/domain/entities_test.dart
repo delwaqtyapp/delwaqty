@@ -174,13 +174,25 @@ void main() {
 
     test('equality works correctly', () {
       final a = DeliveryZone(
-        id: 'dz1', merchantId: 'm1', name: 'A', radiusKm: 5.0, createdAt: now,
+        id: 'dz1',
+        merchantId: 'm1',
+        name: 'A',
+        radiusKm: 5.0,
+        createdAt: now,
       );
       final b = DeliveryZone(
-        id: 'dz1', merchantId: 'm1', name: 'A', radiusKm: 5.0, createdAt: now,
+        id: 'dz1',
+        merchantId: 'm1',
+        name: 'A',
+        radiusKm: 5.0,
+        createdAt: now,
       );
       final c = DeliveryZone(
-        id: 'dz2', merchantId: 'm1', name: 'A', radiusKm: 5.0, createdAt: now,
+        id: 'dz2',
+        merchantId: 'm1',
+        name: 'A',
+        radiusKm: 5.0,
+        createdAt: now,
       );
       expect(a, equals(b));
       expect(a, isNot(equals(c)));
@@ -188,7 +200,11 @@ void main() {
 
     test('copyWith creates modified copy', () {
       final zone = DeliveryZone(
-        id: 'dz1', merchantId: 'm1', name: 'Original', radiusKm: 5.0, createdAt: now,
+        id: 'dz1',
+        merchantId: 'm1',
+        name: 'Original',
+        radiusKm: 5.0,
+        createdAt: now,
       );
       final modified = zone.copyWith(name: 'Modified', radiusKm: 10.0);
       expect(modified.name, 'Modified');
@@ -240,7 +256,11 @@ void main() {
 
     test('toJson serializes correctly', () {
       final offer = Offer(
-        id: 'o1', merchantId: 'm1', title: '20% Off', discountValue: 20.0, createdAt: now,
+        id: 'o1',
+        merchantId: 'm1',
+        title: '20% Off',
+        discountValue: 20.0,
+        createdAt: now,
       );
       final json = offer.toJson();
       expect(json['id'], 'o1');
@@ -257,7 +277,11 @@ void main() {
 
     test('defaults are applied correctly', () {
       final offer = Offer(
-        id: 'o1', merchantId: 'm1', title: 'Test', discountValue: 10.0, createdAt: now,
+        id: 'o1',
+        merchantId: 'm1',
+        title: 'Test',
+        discountValue: 10.0,
+        createdAt: now,
       );
       expect(offer.discountType, 'percentage');
       expect(offer.minimumOrder, 0.0);
@@ -272,16 +296,38 @@ void main() {
     });
 
     test('equality works correctly', () {
-      final a = Offer(id: 'o1', merchantId: 'm1', title: 'A', discountValue: 10.0, createdAt: now);
-      final b = Offer(id: 'o1', merchantId: 'm1', title: 'A', discountValue: 10.0, createdAt: now);
-      final c = Offer(id: 'o2', merchantId: 'm1', title: 'A', discountValue: 10.0, createdAt: now);
+      final a = Offer(
+        id: 'o1',
+        merchantId: 'm1',
+        title: 'A',
+        discountValue: 10.0,
+        createdAt: now,
+      );
+      final b = Offer(
+        id: 'o1',
+        merchantId: 'm1',
+        title: 'A',
+        discountValue: 10.0,
+        createdAt: now,
+      );
+      final c = Offer(
+        id: 'o2',
+        merchantId: 'm1',
+        title: 'A',
+        discountValue: 10.0,
+        createdAt: now,
+      );
       expect(a, equals(b));
       expect(a, isNot(equals(c)));
     });
 
     test('copyWith creates modified copy', () {
       final offer = Offer(
-        id: 'o1', merchantId: 'm1', title: 'Original', discountValue: 10.0, createdAt: now,
+        id: 'o1',
+        merchantId: 'm1',
+        title: 'Original',
+        discountValue: 10.0,
+        createdAt: now,
       );
       final modified = offer.copyWith(title: 'Modified', discountValue: 25.0);
       expect(modified.title, 'Modified');
@@ -313,7 +359,10 @@ void main() {
 
     test('toJson serializes correctly', () {
       final tracking = OrderTracking(
-        id: 'ot1', orderId: 'order1', status: 'preparing', createdAt: now,
+        id: 'ot1',
+        orderId: 'order1',
+        status: 'preparing',
+        createdAt: now,
       );
       final json = tracking.toJson();
       expect(json['id'], 'ot1');
@@ -329,23 +378,44 @@ void main() {
 
     test('defaults are applied correctly', () {
       final tracking = OrderTracking(
-        id: 'ot1', orderId: 'order1', status: 'pending', createdAt: now,
+        id: 'ot1',
+        orderId: 'order1',
+        status: 'pending',
+        createdAt: now,
       );
       expect(tracking.estimatedMinutes, isNull);
       expect(tracking.notes, isNull);
     });
 
     test('equality works correctly', () {
-      final a = OrderTracking(id: 'ot1', orderId: 'order1', status: 'preparing', createdAt: now);
-      final b = OrderTracking(id: 'ot1', orderId: 'order1', status: 'preparing', createdAt: now);
-      final c = OrderTracking(id: 'ot2', orderId: 'order1', status: 'preparing', createdAt: now);
+      final a = OrderTracking(
+        id: 'ot1',
+        orderId: 'order1',
+        status: 'preparing',
+        createdAt: now,
+      );
+      final b = OrderTracking(
+        id: 'ot1',
+        orderId: 'order1',
+        status: 'preparing',
+        createdAt: now,
+      );
+      final c = OrderTracking(
+        id: 'ot2',
+        orderId: 'order1',
+        status: 'preparing',
+        createdAt: now,
+      );
       expect(a, equals(b));
       expect(a, isNot(equals(c)));
     });
 
     test('copyWith creates modified copy', () {
       final tracking = OrderTracking(
-        id: 'ot1', orderId: 'order1', status: 'pending', createdAt: now,
+        id: 'ot1',
+        orderId: 'order1',
+        status: 'pending',
+        createdAt: now,
       );
       final modified = tracking.copyWith(status: 'delivered');
       expect(modified.status, 'delivered');
@@ -379,7 +449,11 @@ void main() {
     });
 
     test('toJson serializes correctly', () {
-      const inv = ProductInventory(id: 'pi1', productId: 'p1', merchantId: 'm1');
+      const inv = ProductInventory(
+        id: 'pi1',
+        productId: 'p1',
+        merchantId: 'm1',
+      );
       final json = inv.toJson();
       expect(json['id'], 'pi1');
       expect(json['productId'], 'p1');
@@ -393,7 +467,11 @@ void main() {
     });
 
     test('defaults are applied correctly', () {
-      const inv = ProductInventory(id: 'pi1', productId: 'p1', merchantId: 'm1');
+      const inv = ProductInventory(
+        id: 'pi1',
+        productId: 'p1',
+        merchantId: 'm1',
+      );
       expect(inv.stockQuantity, 0);
       expect(inv.reservedQuantity, 0);
       expect(inv.lowStockThreshold, 10);
@@ -410,7 +488,11 @@ void main() {
     });
 
     test('copyWith creates modified copy', () {
-      const inv = ProductInventory(id: 'pi1', productId: 'p1', merchantId: 'm1');
+      const inv = ProductInventory(
+        id: 'pi1',
+        productId: 'p1',
+        merchantId: 'm1',
+      );
       final modified = inv.copyWith(stockQuantity: 100, isInStock: true);
       expect(modified.stockQuantity, 100);
       expect(modified.isInStock, true);
@@ -444,7 +526,10 @@ void main() {
 
     test('toJson serializes correctly', () {
       final mod = ProductModifier(
-        id: 'pm1', productId: 'p1', name: 'Extra Cheese', createdAt: now,
+        id: 'pm1',
+        productId: 'p1',
+        name: 'Extra Cheese',
+        createdAt: now,
       );
       final json = mod.toJson();
       expect(json['id'], 'pm1');
@@ -460,7 +545,10 @@ void main() {
 
     test('defaults are applied correctly', () {
       final mod = ProductModifier(
-        id: 'pm1', productId: 'p1', name: 'Test', createdAt: now,
+        id: 'pm1',
+        productId: 'p1',
+        name: 'Test',
+        createdAt: now,
       );
       expect(mod.description, isNull);
       expect(mod.priceAdjustment, 0.0);
@@ -469,16 +557,34 @@ void main() {
     });
 
     test('equality works correctly', () {
-      final a = ProductModifier(id: 'pm1', productId: 'p1', name: 'A', createdAt: now);
-      final b = ProductModifier(id: 'pm1', productId: 'p1', name: 'A', createdAt: now);
-      final c = ProductModifier(id: 'pm2', productId: 'p1', name: 'A', createdAt: now);
+      final a = ProductModifier(
+        id: 'pm1',
+        productId: 'p1',
+        name: 'A',
+        createdAt: now,
+      );
+      final b = ProductModifier(
+        id: 'pm1',
+        productId: 'p1',
+        name: 'A',
+        createdAt: now,
+      );
+      final c = ProductModifier(
+        id: 'pm2',
+        productId: 'p1',
+        name: 'A',
+        createdAt: now,
+      );
       expect(a, equals(b));
       expect(a, isNot(equals(c)));
     });
 
     test('copyWith creates modified copy', () {
       final mod = ProductModifier(
-        id: 'pm1', productId: 'p1', name: 'Original', createdAt: now,
+        id: 'pm1',
+        productId: 'p1',
+        name: 'Original',
+        createdAt: now,
       );
       final modified = mod.copyWith(name: 'Modified', priceAdjustment: 3.0);
       expect(modified.name, 'Modified');
@@ -520,8 +626,12 @@ void main() {
 
     test('toJson serializes correctly', () {
       final res = Reservation(
-        id: 'r1', userId: 'u1', merchantId: 'm1',
-        partySize: 2, reservationTime: now, createdAt: now,
+        id: 'r1',
+        userId: 'u1',
+        merchantId: 'm1',
+        partySize: 2,
+        reservationTime: now,
+        createdAt: now,
       );
       final json = res.toJson();
       expect(json['id'], 'r1');
@@ -537,8 +647,12 @@ void main() {
 
     test('defaults are applied correctly', () {
       final res = Reservation(
-        id: 'r1', userId: 'u1', merchantId: 'm1',
-        partySize: 2, reservationTime: now, createdAt: now,
+        id: 'r1',
+        userId: 'u1',
+        merchantId: 'm1',
+        partySize: 2,
+        reservationTime: now,
+        createdAt: now,
       );
       expect(res.branchId, isNull);
       expect(res.specialRequests, isNull);
@@ -549,16 +663,28 @@ void main() {
 
     test('equality works correctly', () {
       final a = Reservation(
-        id: 'r1', userId: 'u1', merchantId: 'm1',
-        partySize: 2, reservationTime: now, createdAt: now,
+        id: 'r1',
+        userId: 'u1',
+        merchantId: 'm1',
+        partySize: 2,
+        reservationTime: now,
+        createdAt: now,
       );
       final b = Reservation(
-        id: 'r1', userId: 'u1', merchantId: 'm1',
-        partySize: 2, reservationTime: now, createdAt: now,
+        id: 'r1',
+        userId: 'u1',
+        merchantId: 'm1',
+        partySize: 2,
+        reservationTime: now,
+        createdAt: now,
       );
       final c = Reservation(
-        id: 'r2', userId: 'u1', merchantId: 'm1',
-        partySize: 2, reservationTime: now, createdAt: now,
+        id: 'r2',
+        userId: 'u1',
+        merchantId: 'm1',
+        partySize: 2,
+        reservationTime: now,
+        createdAt: now,
       );
       expect(a, equals(b));
       expect(a, isNot(equals(c)));
@@ -566,11 +692,16 @@ void main() {
 
     test('copyWith creates modified copy', () {
       final res = Reservation(
-        id: 'r1', userId: 'u1', merchantId: 'm1',
-        partySize: 2, reservationTime: now, createdAt: now,
+        id: 'r1',
+        userId: 'u1',
+        merchantId: 'm1',
+        partySize: 2,
+        reservationTime: now,
+        createdAt: now,
       );
       final modified = res.copyWith(
-        partySize: 6, status: ReservationStatus.seated,
+        partySize: 6,
+        status: ReservationStatus.seated,
       );
       expect(modified.partySize, 6);
       expect(modified.status, ReservationStatus.seated);
@@ -606,7 +737,10 @@ void main() {
 
     test('toJson serializes correctly', () {
       final slot = ReservationSlot(
-        time: now, tableNumber: 'T1', capacity: 4, isAvailable: false,
+        time: now,
+        tableNumber: 'T1',
+        capacity: 4,
+        isAvailable: false,
       );
       final json = slot.toJson();
       expect(json['tableNumber'], 'T1');
@@ -621,9 +755,24 @@ void main() {
     });
 
     test('equality works correctly', () {
-      final a = ReservationSlot(time: now, tableNumber: 'T1', capacity: 4, isAvailable: true);
-      final b = ReservationSlot(time: now, tableNumber: 'T1', capacity: 4, isAvailable: true);
-      final c = ReservationSlot(time: now, tableNumber: 'T2', capacity: 4, isAvailable: true);
+      final a = ReservationSlot(
+        time: now,
+        tableNumber: 'T1',
+        capacity: 4,
+        isAvailable: true,
+      );
+      final b = ReservationSlot(
+        time: now,
+        tableNumber: 'T1',
+        capacity: 4,
+        isAvailable: true,
+      );
+      final c = ReservationSlot(
+        time: now,
+        tableNumber: 'T2',
+        capacity: 4,
+        isAvailable: true,
+      );
       expect(a, equals(b));
       expect(a, isNot(equals(c)));
     });
@@ -662,7 +811,11 @@ void main() {
     });
 
     test('toJson serializes correctly', () {
-      final settings = RestaurantSettings(id: 'rs1', merchantId: 'm1', createdAt: now);
+      final settings = RestaurantSettings(
+        id: 'rs1',
+        merchantId: 'm1',
+        createdAt: now,
+      );
       final json = settings.toJson();
       expect(json['id'], 'rs1');
       expect(json['merchantId'], 'm1');
@@ -675,7 +828,11 @@ void main() {
     });
 
     test('defaults are applied correctly', () {
-      final settings = RestaurantSettings(id: 'rs1', merchantId: 'm1', createdAt: now);
+      final settings = RestaurantSettings(
+        id: 'rs1',
+        merchantId: 'm1',
+        createdAt: now,
+      );
       expect(settings.acceptsReservations, false);
       expect(settings.hasDineIn, true);
       expect(settings.hasTakeaway, true);
@@ -696,8 +853,15 @@ void main() {
     });
 
     test('copyWith creates modified copy', () {
-      final settings = RestaurantSettings(id: 'rs1', merchantId: 'm1', createdAt: now);
-      final modified = settings.copyWith(hasDelivery: false, averagePrepTime: 30);
+      final settings = RestaurantSettings(
+        id: 'rs1',
+        merchantId: 'm1',
+        createdAt: now,
+      );
+      final modified = settings.copyWith(
+        hasDelivery: false,
+        averagePrepTime: 30,
+      );
       expect(modified.hasDelivery, false);
       expect(modified.averagePrepTime, 30);
       expect(modified.id, 'rs1');
@@ -731,8 +895,12 @@ void main() {
 
     test('toJson serializes correctly', () {
       final hours = WorkingHours(
-        id: 'wh1', merchantId: 'm1', dayOfWeek: 1,
-        openTime: '09:00', closeTime: '22:00', createdAt: now,
+        id: 'wh1',
+        merchantId: 'm1',
+        dayOfWeek: 1,
+        openTime: '09:00',
+        closeTime: '22:00',
+        createdAt: now,
       );
       final json = hours.toJson();
       expect(json['id'], 'wh1');
@@ -750,8 +918,12 @@ void main() {
 
     test('defaults are applied correctly', () {
       final hours = WorkingHours(
-        id: 'wh1', merchantId: 'm1', dayOfWeek: 0,
-        openTime: '00:00', closeTime: '00:00', createdAt: now,
+        id: 'wh1',
+        merchantId: 'm1',
+        dayOfWeek: 0,
+        openTime: '00:00',
+        closeTime: '00:00',
+        createdAt: now,
       );
       expect(hours.isClosed, false);
       expect(hours.branchId, isNull);
@@ -759,16 +931,28 @@ void main() {
 
     test('equality works correctly', () {
       final a = WorkingHours(
-        id: 'wh1', merchantId: 'm1', dayOfWeek: 1,
-        openTime: '09:00', closeTime: '22:00', createdAt: now,
+        id: 'wh1',
+        merchantId: 'm1',
+        dayOfWeek: 1,
+        openTime: '09:00',
+        closeTime: '22:00',
+        createdAt: now,
       );
       final b = WorkingHours(
-        id: 'wh1', merchantId: 'm1', dayOfWeek: 1,
-        openTime: '09:00', closeTime: '22:00', createdAt: now,
+        id: 'wh1',
+        merchantId: 'm1',
+        dayOfWeek: 1,
+        openTime: '09:00',
+        closeTime: '22:00',
+        createdAt: now,
       );
       final c = WorkingHours(
-        id: 'wh2', merchantId: 'm1', dayOfWeek: 2,
-        openTime: '09:00', closeTime: '22:00', createdAt: now,
+        id: 'wh2',
+        merchantId: 'm1',
+        dayOfWeek: 2,
+        openTime: '09:00',
+        closeTime: '22:00',
+        createdAt: now,
       );
       expect(a, equals(b));
       expect(a, isNot(equals(c)));
@@ -776,8 +960,12 @@ void main() {
 
     test('copyWith creates modified copy', () {
       final hours = WorkingHours(
-        id: 'wh1', merchantId: 'm1', dayOfWeek: 1,
-        openTime: '09:00', closeTime: '22:00', createdAt: now,
+        id: 'wh1',
+        merchantId: 'm1',
+        dayOfWeek: 1,
+        openTime: '09:00',
+        closeTime: '22:00',
+        createdAt: now,
       );
       final modified = hours.copyWith(isClosed: true, closeTime: '18:00');
       expect(modified.isClosed, true);

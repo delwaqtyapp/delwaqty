@@ -31,7 +31,7 @@ final providerMerchantIdProvider = FutureProvider<String>((ref) async {
 /// the product form page watch/invalidate the exact same provider instance.
 final merchantProductsProvider =
     FutureProvider.autoDispose<List<Map<String, dynamic>>>((ref) async {
-  final repo = ref.watch(merchantDashboardRepositoryProvider);
-  final merchantId = await ref.watch(providerMerchantIdProvider.future);
-  return repo.getMerchantProducts(merchantId);
-});
+      final repo = ref.watch(merchantDashboardRepositoryProvider);
+      final merchantId = await ref.watch(providerMerchantIdProvider.future);
+      return repo.getMerchantProducts(merchantId);
+    });

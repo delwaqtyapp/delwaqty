@@ -50,11 +50,7 @@ import 'package:delwaqty/features/admin/presentation/pages/admin_categories_mana
 import 'package:delwaqty/features/admin/presentation/pages/admin_campaigns_page.dart';
 
 /// Smooth page transition for the admin module: quick fade + subtle rise.
-Page<void> _adminPage(
-  Widget page, {
-  bool showFab = true,
-  String? keySuffix,
-}) {
+Page<void> _adminPage(Widget page, {bool showFab = true, String? keySuffix}) {
   return CustomTransitionPage<void>(
     key: ValueKey('${page.runtimeType}-$keySuffix'),
     transitionDuration: const Duration(milliseconds: 320),
@@ -145,9 +141,8 @@ class AdminModule extends FeatureModule {
         ),
         GoRoute(
           path: 'categories',
-          pageBuilder: (context, state) => _adminPage(
-            const AdminCategoriesManagementPage(),
-          ),
+          pageBuilder: (context, state) =>
+              _adminPage(const AdminCategoriesManagementPage()),
         ),
         GoRoute(
           path: 'campaigns',
@@ -185,7 +180,8 @@ class AdminModule extends FeatureModule {
         ),
         GoRoute(
           path: 'sanctions',
-          pageBuilder: (context, state) => _adminPage(const AdminSanctionsPage()),
+          pageBuilder: (context, state) =>
+              _adminPage(const AdminSanctionsPage()),
         ),
         GoRoute(
           path: 'live-tracking',
@@ -335,8 +331,7 @@ class AdminModule extends FeatureModule {
         ),
         GoRoute(
           path: 'profile',
-          pageBuilder: (context, state) =>
-              _adminPage(const AdminProfilePage()),
+          pageBuilder: (context, state) => _adminPage(const AdminProfilePage()),
         ),
         GoRoute(
           path: 'hierarchy',

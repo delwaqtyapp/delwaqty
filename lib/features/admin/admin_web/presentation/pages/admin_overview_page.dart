@@ -29,7 +29,8 @@ class AdminOverviewPage extends ConsumerWidget {
           const SizedBox(height: 32),
           Expanded(
             child: statsAsync.when(
-              loading: () => AdminLoadingState(label: l10n.adminLoadingLiveStats),
+              loading: () =>
+                  AdminLoadingState(label: l10n.adminLoadingLiveStats),
               error: (error, _) => AdminErrorState(
                 message: appErrorText(context, error),
                 onRetry: () => ref.invalidate(adminOverviewStatsProvider),

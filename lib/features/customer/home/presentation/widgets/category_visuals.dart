@@ -106,35 +106,82 @@ String merchantEmoji(MerchantType type) => switch (type) {
 
 MerchantType? categoryNameToMerchantType(String name) {
   final lower = name.toLowerCase();
-  if (lower.contains('مطعم') || lower.contains('restaurant')) return MerchantType.restaurant;
-  if (lower.contains('بقال') || lower.contains('grocery')) return MerchantType.grocery;
-  if (lower.contains('سوبرماركت') || lower.contains('supermarket')) return MerchantType.supermarket;
-  if (lower.contains('فاكهة') || lower.contains('fruit')) return MerchantType.fruits;
-  if (lower.contains('لحوم') || lower.contains('meat')) return MerchantType.meat;
-  if (lower.contains('سمك') || lower.contains('seafood')) return MerchantType.seafood;
-  if (lower.contains('صيدل') || lower.contains('pharmacy')) return MerchantType.pharmacy;
-  if (lower.contains('مخب') || lower.contains('bakery')) return MerchantType.bakery;
-  if (lower.contains('حلوي') || lower.contains('sweet')) return MerchantType.sweets;
-  if (lower.contains('ورود') || lower.contains('flower')) return MerchantType.flowers;
-  if (lower.contains('ملابس') || lower.contains('clothing')) return MerchantType.clothing;
-  if (lower.contains('احذي') || lower.contains('shoe')) return MerchantType.shoes;
-  if (lower.contains('electronic') || lower.contains('إلكتروني')) return MerchantType.electronics;
-  if (lower.contains('جوال') || lower.contains('mobile') || lower.contains('هاتف')) return MerchantType.mobile;
-  if (lower.contains('اثاث') || lower.contains('furniture')) return MerchantType.furniture;
-  if (lower.contains('أزياء') || lower.contains('fashion') || lower.contains('mode')) return MerchantType.fashion;
-  if (lower.contains('أجهزة') || lower.contains('appliance')) return MerchantType.appliances;
-  if (lower.contains('منزل') || lower.contains('home')) return MerchantType.home;
-  if (lower.contains('كافيه') || lower.contains('قهوة') || lower.contains('cafe')) return MerchantType.cafe;
-  if (lower.contains('حيوان') || lower.contains('pet')) return MerchantType.petShop;
-  if (lower.contains('لياقة') || lower.contains('fitness')) return MerchantType.fitness;
+  if (lower.contains('مطعم') || lower.contains('restaurant'))
+    return MerchantType.restaurant;
+  if (lower.contains('بقال') || lower.contains('grocery'))
+    return MerchantType.grocery;
+  if (lower.contains('سوبرماركت') || lower.contains('supermarket'))
+    return MerchantType.supermarket;
+  if (lower.contains('فاكهة') || lower.contains('fruit'))
+    return MerchantType.fruits;
+  if (lower.contains('لحوم') || lower.contains('meat'))
+    return MerchantType.meat;
+  if (lower.contains('سمك') || lower.contains('seafood'))
+    return MerchantType.seafood;
+  if (lower.contains('صيدل') || lower.contains('pharmacy'))
+    return MerchantType.pharmacy;
+  if (lower.contains('مخب') || lower.contains('bakery'))
+    return MerchantType.bakery;
+  if (lower.contains('حلوي') || lower.contains('sweet'))
+    return MerchantType.sweets;
+  if (lower.contains('ورود') || lower.contains('flower'))
+    return MerchantType.flowers;
+  if (lower.contains('ملابس') || lower.contains('clothing'))
+    return MerchantType.clothing;
+  if (lower.contains('احذي') || lower.contains('shoe'))
+    return MerchantType.shoes;
+  if (lower.contains('electronic') || lower.contains('إلكتروني'))
+    return MerchantType.electronics;
+  if (lower.contains('جوال') ||
+      lower.contains('mobile') ||
+      lower.contains('هاتف'))
+    return MerchantType.mobile;
+  if (lower.contains('اثاث') || lower.contains('furniture'))
+    return MerchantType.furniture;
+  if (lower.contains('أزياء') ||
+      lower.contains('fashion') ||
+      lower.contains('mode'))
+    return MerchantType.fashion;
+  if (lower.contains('أجهزة') || lower.contains('appliance'))
+    return MerchantType.appliances;
+  if (lower.contains('منزل') || lower.contains('home'))
+    return MerchantType.home;
+  if (lower.contains('كافيه') ||
+      lower.contains('قهوة') ||
+      lower.contains('cafe'))
+    return MerchantType.cafe;
+  if (lower.contains('حيوان') || lower.contains('pet'))
+    return MerchantType.petShop;
+  if (lower.contains('لياقة') || lower.contains('fitness'))
+    return MerchantType.fitness;
   if (lower.contains('بنزين') || lower.contains('gas')) return MerchantType.gas;
-  if (lower.contains('غسيل') || lower.contains('carwash')) return MerchantType.carwash;
-  if (lower.contains('عطور') || lower.contains('عطر') || lower.contains('perfume')) return MerchantType.perfumes;
-  if (lower.contains('عطار') || lower.contains('بهار') || lower.contains('spice')) return MerchantType.spices;
-  if (lower.contains('البان') || lower.contains('ألبان') || lower.contains('لبن') || lower.contains('dairy')) return MerchantType.dairy;
-  if (lower.contains('إكسسوار') || lower.contains('اكسسوار') || lower.contains('accessor')) return MerchantType.accessories;
-  if (lower.contains('جزار') || lower.contains('butcher')) return MerchantType.butcher;
-  if (lower.contains('خضراوات') || lower.contains('خضروات') || lower.contains('خضار') || lower.contains('فواك') || lower.contains('vegetable')) return MerchantType.vegetables;
+  if (lower.contains('غسيل') || lower.contains('carwash'))
+    return MerchantType.carwash;
+  if (lower.contains('عطور') ||
+      lower.contains('عطر') ||
+      lower.contains('perfume'))
+    return MerchantType.perfumes;
+  if (lower.contains('عطار') ||
+      lower.contains('بهار') ||
+      lower.contains('spice'))
+    return MerchantType.spices;
+  if (lower.contains('البان') ||
+      lower.contains('ألبان') ||
+      lower.contains('لبن') ||
+      lower.contains('dairy'))
+    return MerchantType.dairy;
+  if (lower.contains('إكسسوار') ||
+      lower.contains('اكسسوار') ||
+      lower.contains('accessor'))
+    return MerchantType.accessories;
+  if (lower.contains('جزار') || lower.contains('butcher'))
+    return MerchantType.butcher;
+  if (lower.contains('خضراوات') ||
+      lower.contains('خضروات') ||
+      lower.contains('خضار') ||
+      lower.contains('فواك') ||
+      lower.contains('vegetable'))
+    return MerchantType.vegetables;
   return null;
 }
 
@@ -162,44 +209,44 @@ int categoryRank(String name) {
 }
 
 String serviceTypeEmoji(ServiceCategoryType type) => switch (type) {
-      ServiceCategoryType.doctor => '🩺',
-      ServiceCategoryType.nurse => '🩹',
-      ServiceCategoryType.teacher => '📚',
-      ServiceCategoryType.barber => '💈',
-      ServiceCategoryType.plumbing => '🔧',
-      ServiceCategoryType.electrical => '⚡',
-      ServiceCategoryType.carpentry => '🪚',
-      ServiceCategoryType.acMaintenance => '❄️',
-      ServiceCategoryType.painting => '🎨',
-      ServiceCategoryType.cleaning => '🧹',
-      ServiceCategoryType.pestControl => '🪳',
-      ServiceCategoryType.applianceRepair => '🔩',
-      ServiceCategoryType.pipeChange => '🔥',
-      ServiceCategoryType.plastering => '🧱',
-      ServiceCategoryType.carpetCleaning => '🧼',
-      ServiceCategoryType.dishRepair => '📡',
-      ServiceCategoryType.other => '🛠️',
-    };
+  ServiceCategoryType.doctor => '🩺',
+  ServiceCategoryType.nurse => '🩹',
+  ServiceCategoryType.teacher => '📚',
+  ServiceCategoryType.barber => '💈',
+  ServiceCategoryType.plumbing => '🔧',
+  ServiceCategoryType.electrical => '⚡',
+  ServiceCategoryType.carpentry => '🪚',
+  ServiceCategoryType.acMaintenance => '❄️',
+  ServiceCategoryType.painting => '🎨',
+  ServiceCategoryType.cleaning => '🧹',
+  ServiceCategoryType.pestControl => '🪳',
+  ServiceCategoryType.applianceRepair => '🔩',
+  ServiceCategoryType.pipeChange => '🔥',
+  ServiceCategoryType.plastering => '🧱',
+  ServiceCategoryType.carpetCleaning => '🧼',
+  ServiceCategoryType.dishRepair => '📡',
+  ServiceCategoryType.other => '🛠️',
+};
 
 Color serviceTypeColor(ServiceCategoryType type) => switch (type) {
-      ServiceCategoryType.doctor => AppColors.brandPurple,
-      ServiceCategoryType.nurse => AppColors.brandCyan,
-      ServiceCategoryType.teacher => AppColors.brandViolet,
-      ServiceCategoryType.barber => AppColors.brandTeal,
-      ServiceCategoryType.plumbing => Colors.blueGrey,
-      ServiceCategoryType.electrical => Colors.amber.shade800,
-      ServiceCategoryType.carpentry => Colors.brown,
-      ServiceCategoryType.acMaintenance => Colors.cyan.shade700,
-      ServiceCategoryType.painting => Colors.deepPurple,
-      ServiceCategoryType.cleaning => Colors.teal,
-      ServiceCategoryType.pestControl => Colors.green.shade800,
-      ServiceCategoryType.applianceRepair => Colors.indigo,
-      ServiceCategoryType.pipeChange => Colors.redAccent,
-      ServiceCategoryType.plastering => Colors.orange.shade900,
-      ServiceCategoryType.carpetCleaning => Colors.lightBlue.shade800,
-      ServiceCategoryType.dishRepair => Colors.blueGrey.shade700,
-      ServiceCategoryType.other => AppColors.brandPurple,
-    };
+  ServiceCategoryType.doctor => AppColors.brandPurple,
+  ServiceCategoryType.nurse => AppColors.brandCyan,
+  ServiceCategoryType.teacher => AppColors.brandViolet,
+  ServiceCategoryType.barber => AppColors.brandTeal,
+  ServiceCategoryType.plumbing => Colors.blueGrey,
+  ServiceCategoryType.electrical => Colors.amber.shade800,
+  ServiceCategoryType.carpentry => Colors.brown,
+  ServiceCategoryType.acMaintenance => Colors.cyan.shade700,
+  ServiceCategoryType.painting => Colors.deepPurple,
+  ServiceCategoryType.cleaning => Colors.teal,
+  ServiceCategoryType.pestControl => Colors.green.shade800,
+  ServiceCategoryType.applianceRepair => Colors.indigo,
+  ServiceCategoryType.pipeChange => Colors.redAccent,
+  ServiceCategoryType.plastering => Colors.orange.shade900,
+  ServiceCategoryType.carpetCleaning => Colors.lightBlue.shade800,
+  ServiceCategoryType.dishRepair => Colors.blueGrey.shade700,
+  ServiceCategoryType.other => AppColors.brandPurple,
+};
 
 String serviceTypeLabel(ServiceCategoryType type, AppLocalizations l10n) =>
     switch (type) {
@@ -214,7 +261,8 @@ String serviceTypeLabel(ServiceCategoryType type, AppLocalizations l10n) =>
       ServiceCategoryType.painting => l10n.serviceCategoryPainting,
       ServiceCategoryType.cleaning => l10n.serviceCategoryCleaning,
       ServiceCategoryType.pestControl => l10n.serviceCategoryPestControl,
-      ServiceCategoryType.applianceRepair => l10n.serviceCategoryApplianceRepair,
+      ServiceCategoryType.applianceRepair =>
+        l10n.serviceCategoryApplianceRepair,
       ServiceCategoryType.pipeChange => l10n.serviceCategoryPipeChange,
       ServiceCategoryType.plastering => l10n.serviceCategoryPlastering,
       ServiceCategoryType.carpetCleaning => l10n.serviceCategoryCarpetCleaning,
@@ -411,40 +459,23 @@ ServiceCategoryType? categoryNameToServiceType(String name) {
 /// Curated thumbnail image URL for every [ServiceCategoryType] so service
 /// buttons always display a clear, vibrant photo.
 String defaultServiceImageUrl(ServiceCategoryType type) => switch (type) {
-  ServiceCategoryType.doctor =>
-    'https://images.unsplash.com/photo-1622253692010-333f2da6031d?auto=format&fit=crop&w=240&q=80',
-  ServiceCategoryType.nurse =>
-    'https://images.unsplash.com/photo-1584515979956-d9f6e5d09982?auto=format&fit=crop&w=240&q=80',
-  ServiceCategoryType.teacher =>
-    'https://images.unsplash.com/photo-1524178232363-1fb2b075b655?auto=format&fit=crop&w=240&q=80',
-  ServiceCategoryType.barber =>
-    'https://images.unsplash.com/photo-1503951914875-452162b0f3f1?auto=format&fit=crop&w=240&q=80',
-  ServiceCategoryType.plumbing =>
-    'https://images.unsplash.com/photo-1585704032915-c3400ca199e7?auto=format&fit=crop&w=240&q=80',
-  ServiceCategoryType.electrical =>
-    'https://images.unsplash.com/photo-1621905251189-08b45d6a269e?auto=format&fit=crop&w=240&q=80',
-  ServiceCategoryType.carpentry =>
-    'https://images.unsplash.com/photo-1504148455328-c376907d081c?auto=format&fit=crop&w=240&q=80',
-  ServiceCategoryType.painting =>
-    'https://images.unsplash.com/photo-1562259949-e8e7689d7828?auto=format&fit=crop&w=240&q=80',
-  ServiceCategoryType.cleaning =>
-    'https://images.unsplash.com/photo-1581578731548-c64695cc6952?auto=format&fit=crop&w=240&q=80',
-  ServiceCategoryType.acMaintenance =>
-    'https://images.unsplash.com/photo-1621905252507-b35492cc74b4?auto=format&fit=crop&w=240&q=80',
-  ServiceCategoryType.pipeChange =>
-    'https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&w=240&q=80',
-  ServiceCategoryType.plastering =>
-    'https://images.unsplash.com/photo-1504307651254-35680f356dfd?auto=format&fit=crop&w=240&q=80',
-  ServiceCategoryType.carpetCleaning =>
-    'https://images.unsplash.com/photo-1558317374-067fb5f30001?auto=format&fit=crop&w=240&q=80',
-  ServiceCategoryType.dishRepair =>
-    'https://images.unsplash.com/photo-1593784991095-a205069470b6?auto=format&fit=crop&w=240&q=80',
-  ServiceCategoryType.pestControl =>
-    'https://images.unsplash.com/photo-1584820927498-cfe5211fd8bf?auto=format&fit=crop&w=240&q=80',
-  ServiceCategoryType.applianceRepair =>
-    'https://images.unsplash.com/photo-1581092921461-eab62e97a780?auto=format&fit=crop&w=240&q=80',
-  ServiceCategoryType.other =>
-    'https://images.unsplash.com/photo-1581578731548-c64695cc6952?auto=format&fit=crop&w=240&q=80',
+  ServiceCategoryType.doctor => 'https://images.unsplash.com/photo-1622253692010-333f2da6031d?auto=format&fit=crop&w=240&q=80',
+  ServiceCategoryType.nurse => 'https://images.unsplash.com/photo-1584515979956-d9f6e5d09982?auto=format&fit=crop&w=240&q=80',
+  ServiceCategoryType.teacher => 'https://images.unsplash.com/photo-1524178232363-1fb2b075b655?auto=format&fit=crop&w=240&q=80',
+  ServiceCategoryType.barber => 'https://images.unsplash.com/photo-1503951914875-452162b0f3f1?auto=format&fit=crop&w=240&q=80',
+  ServiceCategoryType.plumbing => 'https://images.unsplash.com/photo-1585704032915-c3400ca199e7?auto=format&fit=crop&w=240&q=80',
+  ServiceCategoryType.electrical => 'https://images.unsplash.com/photo-1621905251189-08b45d6a269e?auto=format&fit=crop&w=240&q=80',
+  ServiceCategoryType.carpentry => 'https://images.unsplash.com/photo-1504148455328-c376907d081c?auto=format&fit=crop&w=240&q=80',
+  ServiceCategoryType.painting => 'https://images.unsplash.com/photo-1562259949-e8e7689d7828?auto=format&fit=crop&w=240&q=80',
+  ServiceCategoryType.cleaning => 'https://images.unsplash.com/photo-1581578731548-c64695cc6952?auto=format&fit=crop&w=240&q=80',
+  ServiceCategoryType.acMaintenance => 'https://images.unsplash.com/photo-1621905252507-b35492cc74b4?auto=format&fit=crop&w=240&q=80',
+  ServiceCategoryType.pipeChange => 'https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&w=240&q=80',
+  ServiceCategoryType.plastering => 'https://images.unsplash.com/photo-1504307651254-35680f356dfd?auto=format&fit=crop&w=240&q=80',
+  ServiceCategoryType.carpetCleaning => 'https://images.unsplash.com/photo-1558317374-067fb5f30001?auto=format&fit=crop&w=240&q=80',
+  ServiceCategoryType.dishRepair => 'https://images.unsplash.com/photo-1593784991095-a205069470b6?auto=format&fit=crop&w=240&q=80',
+  ServiceCategoryType.pestControl => 'https://images.unsplash.com/photo-1584820927498-cfe5211fd8bf?auto=format&fit=crop&w=240&q=80',
+  ServiceCategoryType.applianceRepair => 'https://images.unsplash.com/photo-1581092921461-eab62e97a780?auto=format&fit=crop&w=240&q=80',
+  ServiceCategoryType.other => 'https://images.unsplash.com/photo-1581578731548-c64695cc6952?auto=format&fit=crop&w=240&q=80',
 };
 
 /// Curated thumbnail image URL for any merchant category name or [MerchantType].
@@ -465,66 +496,36 @@ String defaultCategoryImageUrl(String typeOrName) {
   merchantType ??= categoryNameToMerchantType(typeOrName) ?? MerchantType.other;
 
   return switch (merchantType) {
-    MerchantType.restaurant =>
-      'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=240&q=80',
-    MerchantType.grocery =>
-      'https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=240&q=80',
-    MerchantType.supermarket =>
-      'https://images.unsplash.com/photo-1578916171728-46686eac8d58?auto=format&fit=crop&w=240&q=80',
-    MerchantType.fruits =>
-      'https://images.unsplash.com/photo-1610832958506-aa56368176cf?auto=format&fit=crop&w=240&q=80',
-    MerchantType.vegetables =>
-      'https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=240&q=80',
-    MerchantType.meat =>
-      'https://images.unsplash.com/photo-1607623814075-e51df1bdc82f?auto=format&fit=crop&w=240&q=80',
-    MerchantType.butcher =>
-      'https://images.unsplash.com/photo-1551028150-64b9f398f678?auto=format&fit=crop&w=240&q=80',
-    MerchantType.seafood =>
-      'https://images.unsplash.com/photo-1534422298391-e4f8c172dddb?auto=format&fit=crop&w=240&q=80',
-    MerchantType.pharmacy =>
-      'https://images.unsplash.com/photo-1587854692152-cbe660dbde88?auto=format&fit=crop&w=240&q=80',
-    MerchantType.bakery =>
-      'https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=240&q=80',
-    MerchantType.sweets =>
-      'https://images.unsplash.com/photo-1551024601-bec78aea704b?auto=format&fit=crop&w=240&q=80',
-    MerchantType.flowers =>
-      'https://images.unsplash.com/photo-1490750967868-88aa4486c946?auto=format&fit=crop&w=240&q=80',
-    MerchantType.clothing =>
-      'https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&w=240&q=80',
-    MerchantType.shoes =>
-      'https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=240&q=80',
-    MerchantType.electronics =>
-      'https://images.unsplash.com/photo-1498049794561-7780e7231661?auto=format&fit=crop&w=240&q=80',
-    MerchantType.mobile =>
-      'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=240&q=80',
-    MerchantType.furniture =>
-      'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=240&q=80',
-    MerchantType.fashion =>
-      'https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&w=240&q=80',
-    MerchantType.appliances =>
-      'https://images.unsplash.com/photo-1556911220-e15b29be8c8f?auto=format&fit=crop&w=240&q=80',
-    MerchantType.home =>
-      'https://images.unsplash.com/photo-1581578731548-c64695cc6952?auto=format&fit=crop&w=240&q=80',
-    MerchantType.cafe =>
-      'https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?auto=format&fit=crop&w=240&q=80',
-    MerchantType.petShop =>
-      'https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?auto=format&fit=crop&w=240&q=80',
-    MerchantType.fitness =>
-      'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&w=240&q=80',
-    MerchantType.gas =>
-      'https://images.unsplash.com/photo-1545147986-a9d6f2ab03b5?auto=format&fit=crop&w=240&q=80',
-    MerchantType.carwash =>
-      'https://images.unsplash.com/photo-1520340356584-f9917d1eea6f?auto=format&fit=crop&w=240&q=80',
-    MerchantType.perfumes =>
-      'https://images.unsplash.com/photo-1541643600914-78b084683601?auto=format&fit=crop&w=240&q=80',
-    MerchantType.spices =>
-      'https://images.unsplash.com/photo-1596040033229-a9821ebd058d?auto=format&fit=crop&w=240&q=80',
-    MerchantType.dairy =>
-      'https://images.unsplash.com/photo-1550583724-b2692b85b150?auto=format&fit=crop&w=240&q=80',
-    MerchantType.accessories =>
-      'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=240&q=80',
-    MerchantType.other =>
-      'https://images.unsplash.com/photo-1472851294608-062f824d29cc?auto=format&fit=crop&w=240&q=80',
+    MerchantType.restaurant => 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=240&q=80',
+    MerchantType.grocery => 'https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=240&q=80',
+    MerchantType.supermarket => 'https://images.unsplash.com/photo-1578916171728-46686eac8d58?auto=format&fit=crop&w=240&q=80',
+    MerchantType.fruits => 'https://images.unsplash.com/photo-1610832958506-aa56368176cf?auto=format&fit=crop&w=240&q=80',
+    MerchantType.vegetables => 'https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=240&q=80',
+    MerchantType.meat => 'https://images.unsplash.com/photo-1607623814075-e51df1bdc82f?auto=format&fit=crop&w=240&q=80',
+    MerchantType.butcher => 'https://images.unsplash.com/photo-1551028150-64b9f398f678?auto=format&fit=crop&w=240&q=80',
+    MerchantType.seafood => 'https://images.unsplash.com/photo-1534422298391-e4f8c172dddb?auto=format&fit=crop&w=240&q=80',
+    MerchantType.pharmacy => 'https://images.unsplash.com/photo-1587854692152-cbe660dbde88?auto=format&fit=crop&w=240&q=80',
+    MerchantType.bakery => 'https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=240&q=80',
+    MerchantType.sweets => 'https://images.unsplash.com/photo-1551024601-bec78aea704b?auto=format&fit=crop&w=240&q=80',
+    MerchantType.flowers => 'https://images.unsplash.com/photo-1490750967868-88aa4486c946?auto=format&fit=crop&w=240&q=80',
+    MerchantType.clothing => 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&w=240&q=80',
+    MerchantType.shoes => 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=240&q=80',
+    MerchantType.electronics => 'https://images.unsplash.com/photo-1498049794561-7780e7231661?auto=format&fit=crop&w=240&q=80',
+    MerchantType.mobile => 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=240&q=80',
+    MerchantType.furniture => 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=240&q=80',
+    MerchantType.fashion => 'https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&w=240&q=80',
+    MerchantType.appliances => 'https://images.unsplash.com/photo-1556911220-e15b29be8c8f?auto=format&fit=crop&w=240&q=80',
+    MerchantType.home => 'https://images.unsplash.com/photo-1581578731548-c64695cc6952?auto=format&fit=crop&w=240&q=80',
+    MerchantType.cafe => 'https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?auto=format&fit=crop&w=240&q=80',
+    MerchantType.petShop => 'https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?auto=format&fit=crop&w=240&q=80',
+    MerchantType.fitness => 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&w=240&q=80',
+    MerchantType.gas => 'https://images.unsplash.com/photo-1545147986-a9d6f2ab03b5?auto=format&fit=crop&w=240&q=80',
+    MerchantType.carwash => 'https://images.unsplash.com/photo-1520340356584-f9917d1eea6f?auto=format&fit=crop&w=240&q=80',
+    MerchantType.perfumes => 'https://images.unsplash.com/photo-1541643600914-78b084683601?auto=format&fit=crop&w=240&q=80',
+    MerchantType.spices => 'https://images.unsplash.com/photo-1596040033229-a9821ebd058d?auto=format&fit=crop&w=240&q=80',
+    MerchantType.dairy => 'https://images.unsplash.com/photo-1550583724-b2692b85b150?auto=format&fit=crop&w=240&q=80',
+    MerchantType.accessories => 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=240&q=80',
+    MerchantType.other => 'https://images.unsplash.com/photo-1472851294608-062f824d29cc?auto=format&fit=crop&w=240&q=80',
   };
 }
 
@@ -572,15 +573,14 @@ class Category3dTileIcon extends StatelessWidget {
         borderRadius: radius,
         boxShadow: [
           BoxShadow(
-            color: (isDark ? Colors.black : AppColors.brandPurple)
-                .withValues(alpha: isDark ? 0.24 : 0.08),
+            color: (isDark ? Colors.black : AppColors.brandPurple).withValues(
+              alpha: isDark ? 0.24 : 0.08,
+            ),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
         ],
-        border: Border.all(
-          color: borderColor,
-        ),
+        border: Border.all(color: borderColor),
       ),
       child: ClipRRect(
         borderRadius: innerRadius,
@@ -645,10 +645,7 @@ class Category3dTileIcon extends StatelessWidget {
     if (!loaded) {
       return Stack(
         fit: StackFit.expand,
-        children: [
-          _build3dIconLayer(isDark),
-          child,
-        ],
+        children: [_build3dIconLayer(isDark), child],
       );
     }
     return child;
@@ -672,11 +669,7 @@ class Category3dTileIcon extends StatelessWidget {
           ),
         ),
         Center(
-          child: Icon(
-            icon,
-            color: iconColor,
-            size: size * 0.46,
-          ),
+          child: Icon(icon, color: iconColor, size: size * 0.46),
         ),
       ],
     );

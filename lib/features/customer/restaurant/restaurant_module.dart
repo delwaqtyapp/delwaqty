@@ -93,8 +93,7 @@ class RestaurantModule extends FeatureModule {
   String get id => 'restaurant';
 
   @override
-  String name(BuildContext context) =>
-      AppLocalizations.of(context).restaurants;
+  String name(BuildContext context) => AppLocalizations.of(context).restaurants;
 
   @override
   IconData? get icon => Icons.restaurant_outlined;
@@ -119,56 +118,55 @@ class RestaurantModule extends FeatureModule {
 
   @override
   List<RouteBase> get standaloneRoutes => [
+    GoRoute(
+      path: '/restaurant/:merchantId',
+      builder: (context, state) =>
+          RestaurantDetailPage(merchantId: state.pathParameters['merchantId']!),
+      routes: [
         GoRoute(
-          path: '/restaurant/:merchantId',
-          builder: (context, state) => RestaurantDetailPage(
+          path: 'menu',
+          builder: (context, state) {
+            final merchantId = state.pathParameters['merchantId']!;
+            final merchantName = state.extra as String?;
+            return RestaurantMenuPage(
+              merchantId: merchantId,
+              merchantName: merchantName,
+            );
+          },
+        ),
+        GoRoute(
+          path: 'offers',
+          builder: (context, state) => RestaurantOffersPage(
             merchantId: state.pathParameters['merchantId']!,
           ),
-          routes: [
-            GoRoute(
-              path: 'menu',
-              builder: (context, state) {
-                final merchantId = state.pathParameters['merchantId']!;
-                final merchantName = state.extra as String?;
-                return RestaurantMenuPage(
-                  merchantId: merchantId,
-                  merchantName: merchantName,
-                );
-              },
-            ),
-            GoRoute(
-              path: 'offers',
-              builder: (context, state) => RestaurantOffersPage(
-                merchantId: state.pathParameters['merchantId']!,
-              ),
-            ),
-            GoRoute(
-              path: 'reviews',
-              builder: (context, state) => RestaurantReviewsPage(
-                merchantId: state.pathParameters['merchantId']!,
-              ),
-            ),
-            GoRoute(
-              path: 'reservation',
-              builder: (context, state) => RestaurantReservationPage(
-                merchantId: state.pathParameters['merchantId']!,
-              ),
-            ),
-            GoRoute(
-              path: 'order-tracking/:orderId',
-              builder: (context, state) => RestaurantOrderTrackingPage(
-                orderId: state.pathParameters['orderId']!,
-              ),
-            ),
-            GoRoute(
-              path: 'gallery',
-              builder: (context, state) => RestaurantGalleryPage(
-                merchantId: state.pathParameters['merchantId']!,
-              ),
-            ),
-          ],
         ),
-      ];
+        GoRoute(
+          path: 'reviews',
+          builder: (context, state) => RestaurantReviewsPage(
+            merchantId: state.pathParameters['merchantId']!,
+          ),
+        ),
+        GoRoute(
+          path: 'reservation',
+          builder: (context, state) => RestaurantReservationPage(
+            merchantId: state.pathParameters['merchantId']!,
+          ),
+        ),
+        GoRoute(
+          path: 'order-tracking/:orderId',
+          builder: (context, state) => RestaurantOrderTrackingPage(
+            orderId: state.pathParameters['orderId']!,
+          ),
+        ),
+        GoRoute(
+          path: 'gallery',
+          builder: (context, state) => RestaurantGalleryPage(
+            merchantId: state.pathParameters['merchantId']!,
+          ),
+        ),
+      ],
+    ),
+  ];
 
   @override
   List<Override> providerOverrides(Ref ref) => [];

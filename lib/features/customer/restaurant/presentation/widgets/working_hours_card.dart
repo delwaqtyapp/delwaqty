@@ -13,7 +13,8 @@ class WorkingHoursCard extends StatelessWidget {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final today = DateTime.now().weekday;
-    final sortedHours = List<WorkingHours>.from(hours)..sort((a, b) => a.dayOfWeek.compareTo(b.dayOfWeek));
+    final sortedHours = List<WorkingHours>.from(hours)
+      ..sort((a, b) => a.dayOfWeek.compareTo(b.dayOfWeek));
 
     final dayNames = [
       l10n.monday,
@@ -42,7 +43,9 @@ class WorkingHoursCard extends StatelessWidget {
           ),
           title: Text(
             l10n.workingHours,
-            style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
+            style: theme.textTheme.bodyMedium?.copyWith(
+              fontWeight: FontWeight.w600,
+            ),
           ),
           children: sortedHours.map((hour) {
             final isToday = hour.dayOfWeek == today;
@@ -59,7 +62,9 @@ class WorkingHoursCard extends StatelessWidget {
                     child: Text(
                       dayName,
                       style: theme.textTheme.bodySmall?.copyWith(
-                        fontWeight: isToday ? FontWeight.bold : FontWeight.normal,
+                        fontWeight: isToday
+                            ? FontWeight.bold
+                            : FontWeight.normal,
                         color: isToday ? theme.colorScheme.primary : null,
                       ),
                     ),
@@ -71,20 +76,27 @@ class WorkingHoursCard extends StatelessWidget {
                             l10n.closed,
                             style: theme.textTheme.bodySmall?.copyWith(
                               color: AppColors.errorLight,
-                              fontWeight: isToday ? FontWeight.bold : FontWeight.normal,
+                              fontWeight: isToday
+                                  ? FontWeight.bold
+                                  : FontWeight.normal,
                             ),
                           )
                         : Text(
                             '${hour.openTime} - ${hour.closeTime}',
                             style: theme.textTheme.bodySmall?.copyWith(
-                              fontWeight: isToday ? FontWeight.bold : FontWeight.normal,
+                              fontWeight: isToday
+                                  ? FontWeight.bold
+                                  : FontWeight.normal,
                               color: isToday ? theme.colorScheme.primary : null,
                             ),
                           ),
                   ),
                   if (isToday)
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 6,
+                        vertical: 2,
+                      ),
                       decoration: BoxDecoration(
                         color: theme.colorScheme.primary.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(4),

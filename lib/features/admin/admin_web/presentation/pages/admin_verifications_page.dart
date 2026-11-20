@@ -66,7 +66,8 @@ class _AdminVerificationsWebPageState extends State<AdminVerificationsWebPage> {
     try {
       await _client
           .from('users')
-          .update({'verification_status': 'approved'}).eq('id', userId);
+          .update({'verification_status': 'approved'})
+          .eq('id', userId);
       if (!mounted) return;
       setState(() => _requests.removeWhere((r) => r['id'] == userId));
       ScaffoldMessenger.of(context).showSnackBar(
@@ -103,7 +104,8 @@ class _AdminVerificationsWebPageState extends State<AdminVerificationsWebPage> {
     try {
       await _client
           .from('users')
-          .update({'verification_status': 'rejected'}).eq('id', userId);
+          .update({'verification_status': 'rejected'})
+          .eq('id', userId);
       if (!mounted) return;
       setState(() => _requests.removeWhere((r) => r['id'] == userId));
       ScaffoldMessenger.of(context).showSnackBar(
@@ -148,9 +150,7 @@ class _AdminVerificationsWebPageState extends State<AdminVerificationsWebPage> {
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(
-                  _loading
-                      ? ''
-                      : l10n.adminPendingCount(_requests.length),
+                  _loading ? '' : l10n.adminPendingCount(_requests.length),
                   style: const TextStyle(
                     color: AppColors.warningLight,
                     fontWeight: FontWeight.w700,
@@ -164,16 +164,13 @@ class _AdminVerificationsWebPageState extends State<AdminVerificationsWebPage> {
             child: _loading
                 ? const AdminLoadingState()
                 : _error != null
-                    ? AdminErrorState(
-                        message: _error!,
-                        onRetry: _loadRequests,
-                      )
-                    : _requests.isEmpty
-                        ? AdminEmptyState(
-                            message: l10n.adminVerificationsEmpty,
-                            icon: Icons.verified_rounded,
-                          )
-                        : _buildList(l10n),
+                ? AdminErrorState(message: _error!, onRetry: _loadRequests)
+                : _requests.isEmpty
+                ? AdminEmptyState(
+                    message: l10n.adminVerificationsEmpty,
+                    icon: Icons.verified_rounded,
+                  )
+                : _buildList(l10n),
           ),
         ],
       ),
@@ -239,8 +236,9 @@ class _VerificationCard extends StatelessWidget {
           CircleAvatar(
             radius: 28,
             backgroundColor: AppColors.brandPurple.withValues(alpha: 0.1),
-            backgroundImage:
-                profilePhotoUrl != null ? NetworkImage(profilePhotoUrl) : null,
+            backgroundImage: profilePhotoUrl != null
+                ? NetworkImage(profilePhotoUrl)
+                : null,
             child: profilePhotoUrl == null
                 ? Text(
                     safeInitial(name),
@@ -267,14 +265,19 @@ class _VerificationCard extends StatelessWidget {
                 const SizedBox(height: 4),
                 Text(
                   email,
-                  style: const TextStyle(color: AppColors.textMuted, fontSize: 13),
+                  style: const TextStyle(
+                    color: AppColors.textMuted,
+                    fontSize: 13,
+                  ),
                 ),
                 const SizedBox(height: 8),
                 Row(
                   children: [
                     Container(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 10, vertical: 4),
+                        horizontal: 10,
+                        vertical: 4,
+                      ),
                       decoration: BoxDecoration(
                         color: _roleColor(role).withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(8),
@@ -294,9 +297,12 @@ class _VerificationCard extends StatelessWidget {
                         onTap: () => _showDocument(context, idCardUrl),
                         child: Container(
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 10, vertical: 4),
+                            horizontal: 10,
+                            vertical: 4,
+                          ),
                           decoration: BoxDecoration(
-                            color: const Color(0xFF007AFF).withValues(alpha: 0.1),
+                            color: const Color(0xFF007AFF)
+                                .withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: const Text(

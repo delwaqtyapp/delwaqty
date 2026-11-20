@@ -74,15 +74,18 @@ class _RegisterPrompt extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.delivery_dining_rounded,
-                size: 80,
-                color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.5)),
+            Icon(
+              Icons.delivery_dining_rounded,
+              size: 80,
+              color: Theme.of(context).colorScheme.primary
+                  .withValues(alpha: 0.5),
+            ),
             const SizedBox(height: 16),
-            Text(l10n.becomeADriver,
-                style: Theme.of(context)
-                    .textTheme
-                    .headlineSmall
-                    ?.copyWith(fontWeight: FontWeight.bold)),
+            Text(
+              l10n.becomeADriver,
+              style: Theme.of(context).textTheme.headlineSmall
+                  ?.copyWith(fontWeight: FontWeight.bold),
+            ),
             const SizedBox(height: 8),
             Text(l10n.joinFleetSubtitle, textAlign: TextAlign.center),
             const SizedBox(height: 24),
@@ -115,25 +118,31 @@ class _DeliveryHubBodyState extends ConsumerState<_DeliveryHubBody> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final onlineState = ref.watch(driverOnlineProvider(_driverId));
-    final online = onlineState.value ??
-        (widget.profile.status == DriverStatus.online);
+    final online =
+        onlineState.value ?? (widget.profile.status == DriverStatus.online);
 
-    ref.listen<AsyncValue<DeliveryOrder?>>(activeDeliveryProvider(_driverId),
-        (prev, next) {
+    ref.listen<AsyncValue<DeliveryOrder?>>(activeDeliveryProvider(_driverId), (
+      prev,
+      next,
+    ) {
       final order = next.value;
-      if (order != null && order.status != 'completed' && order.status != 'cancelled') {
+      if (order != null &&
+          order.status != 'completed' &&
+          order.status != 'cancelled') {
         context.push('/driver/delivery/${order.id}');
       }
     });
 
     if (online) {
-      ref.listen<AsyncValue<List<RideOffer>>>(deliveryOffersProvider(_driverId),
-          (prev, next) {
-        final offers = next.value ?? const [];
-        if (offers.isNotEmpty && !_offerShowing) {
-          _presentOffer(offers.first);
-        }
-      });
+      ref.listen<AsyncValue<List<RideOffer>>>(
+        deliveryOffersProvider(_driverId),
+        (prev, next) {
+          final offers = next.value ?? const [];
+          if (offers.isNotEmpty && !_offerShowing) {
+            _presentOffer(offers.first);
+          }
+        },
+      );
     }
 
     final statsAsync = ref.watch(driverStatsProvider(_driverId));
@@ -178,9 +187,11 @@ class _DeliveryHubBodyState extends ConsumerState<_DeliveryHubBody> {
           const SizedBox(height: 16),
           statsAsync.when(
             loading: () => const Center(
-                child: Padding(
-                    padding: EdgeInsets.all(24),
-                    child: CircularProgressIndicator())),
+              child: Padding(
+                padding: EdgeInsets.all(24),
+                child: CircularProgressIndicator(),
+              ),
+            ),
             error: (e, _) => _HubErrorCard(
               message: appErrorText(context, e),
               onRetry: () => ref.invalidate(driverStatsProvider(_driverId)),
@@ -297,10 +308,7 @@ class _RadarPulseWidgetState extends State<_RadarPulseWidget> {
               alignment: Alignment.center,
               children: [
                 TweenAnimationBuilder<double>(
-                  tween: Tween<double>(
-                    begin: 56,
-                    end: _expanded ? 104 : 64,
-                  ),
+                  tween: Tween<double>(begin: 56, end: _expanded ? 104 : 64),
                   duration: const Duration(milliseconds: 1000),
                   curve: Curves.easeInOut,
                   builder: (context, size, _) {
@@ -383,7 +391,10 @@ class _OnlineCard extends StatelessWidget {
         gradient: LinearGradient(
           colors: online
               ? [AppColors.successLight, AppColors.successLight]
-              : [theme.colorScheme.surfaceContainerHighest, theme.colorScheme.surfaceContainerHigh],
+              : [
+                  theme.colorScheme.surfaceContainerHighest,
+                  theme.colorScheme.surfaceContainerHigh,
+                ],
         ),
         borderRadius: BorderRadius.circular(16),
       ),
@@ -394,16 +405,19 @@ class _OnlineCard extends StatelessWidget {
             online ? l10n.online : l10n.offline,
             style: theme.textTheme.titleMedium?.copyWith(
               fontWeight: FontWeight.bold,
-              color: online ? theme.colorScheme.onPrimary : theme.colorScheme.onSurface,
+              color: online
+                  ? theme.colorScheme.onPrimary
+                  : theme.colorScheme.onSurface,
             ),
           ),
-          if (loading) const SizedBox(
-                  width: 24,
-                  height: 24,
-                  child: CircularProgressIndicator(strokeWidth: 2)) else Switch(
-                  value: online,
-                  onChanged: (_) => onToggle(),
-                ),
+          if (loading)
+            const SizedBox(
+              width: 24,
+              height: 24,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            )
+          else
+            Switch(value: online, onChanged: (_) => onToggle()),
         ],
       ),
     );
@@ -434,8 +448,10 @@ class _ActiveDeliveryCard extends StatelessWidget {
                   color: theme.colorScheme.primary.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: Icon(Icons.delivery_dining_rounded,
-                    color: theme.colorScheme.primary),
+                child: Icon(
+                  Icons.delivery_dining_rounded,
+                  color: theme.colorScheme.primary,
+                ),
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -444,8 +460,9 @@ class _ActiveDeliveryCard extends StatelessWidget {
                   children: [
                     Text(
                       order.serviceType,
-                      style: theme.textTheme.titleSmall
-                          ?.copyWith(fontWeight: FontWeight.bold),
+                      style: theme.textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                     const SizedBox(height: 4),
                     Text(
@@ -460,8 +477,10 @@ class _ActiveDeliveryCard extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 8),
-              Icon(Icons.chevron_right_rounded,
-                  color: theme.colorScheme.onSurfaceVariant),
+              Icon(
+                Icons.chevron_right_rounded,
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
             ],
           ),
         ),
@@ -490,8 +509,9 @@ class _StatsRow extends StatelessWidget {
           child: _MiniStat(
             label: l10n.todayEarnings,
             value: l10n.amountWithCurrency(
-                stats.todayEarnings.toStringAsFixed(0),
-                l10n.currencySymbol),
+              stats.todayEarnings.toStringAsFixed(0),
+              l10n.currencySymbol,
+            ),
           ),
         ),
       ],
@@ -516,13 +536,19 @@ class _MiniStat extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(value,
-              style: theme.textTheme.titleLarge
-                  ?.copyWith(fontWeight: FontWeight.bold)),
+          Text(
+            value,
+            style: theme.textTheme.titleLarge?.copyWith(
+              fontWeight: FontWeight.bold,
+            ),
+          ),
           const SizedBox(height: 4),
-          Text(label,
-              style: theme.textTheme.bodySmall?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant)),
+          Text(
+            label,
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
+          ),
         ],
       ),
     );
@@ -545,10 +571,7 @@ class _DeliveryOfferDialogState extends State<_DeliveryOfferDialog>
   void initState() {
     super.initState();
     final remaining = widget.offer.remaining;
-    _timerController = AnimationController(
-      vsync: this,
-      duration: remaining,
-    )
+    _timerController = AnimationController(vsync: this, duration: remaining)
       ..addStatusListener((status) {
         if (status == AnimationStatus.completed && mounted) {
           Navigator.of(context).pop();
@@ -585,28 +608,34 @@ class _DeliveryOfferDialogState extends State<_DeliveryOfferDialog>
               },
             ),
             const SizedBox(height: 16),
-            Text('${offer.pickupAddress}',
-                style: theme.textTheme.bodyMedium),
+            Text('${offer.pickupAddress}', style: theme.textTheme.bodyMedium),
             const SizedBox(height: 4),
-            Icon(Icons.arrow_downward_rounded,
-                size: 20, color: theme.colorScheme.onSurfaceVariant),
+            Icon(
+              Icons.arrow_downward_rounded,
+              size: 20,
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
             const SizedBox(height: 4),
-            Text('${offer.dropoffAddress}',
-                style: theme.textTheme.bodyMedium),
+            Text('${offer.dropoffAddress}', style: theme.textTheme.bodyMedium),
             const SizedBox(height: 12),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Flexible(
-                  child: Text('${offer.distanceKm.toStringAsFixed(1)} ${l10n.kmUnit}'),
+                  child: Text(
+                    '${offer.distanceKm.toStringAsFixed(1)} ${l10n.kmUnit}',
+                  ),
                 ),
                 const SizedBox(width: 8),
                 Flexible(
                   child: Text(
                     l10n.amountWithCurrency(
-                        offer.fare.toStringAsFixed(0), offer.currency),
-                    style: theme.textTheme.titleMedium
-                        ?.copyWith(fontWeight: FontWeight.bold),
+                      offer.fare.toStringAsFixed(0),
+                      offer.currency,
+                    ),
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
@@ -708,21 +737,29 @@ class _CapabilitiesBottomSheetState
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(l10n.settings,
-                style: theme.textTheme.titleLarge
-                    ?.copyWith(fontWeight: FontWeight.bold)),
+            Text(
+              l10n.settings,
+              style: theme.textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
             const SizedBox(height: 20),
             SwitchListTile(
               contentPadding: EdgeInsets.zero,
               title: Text(l10n.online),
-              subtitle: Text(_acceptsDeliveries ? l10n.youAreOnline : l10n.youAreOffline),
+              subtitle: Text(
+                _acceptsDeliveries ? l10n.youAreOnline : l10n.youAreOffline,
+              ),
               value: _acceptsDeliveries,
               onChanged: (v) => setState(() => _acceptsDeliveries = v),
             ),
             const Divider(),
-            Text(l10n.delivery,
-                style: theme.textTheme.titleSmall
-                    ?.copyWith(fontWeight: FontWeight.bold)),
+            Text(
+              l10n.delivery,
+              style: theme.textTheme.titleSmall?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
             const SizedBox(height: 8),
             Wrap(
               spacing: 8,
@@ -747,9 +784,12 @@ class _CapabilitiesBottomSheetState
               }).toList(),
             ),
             const SizedBox(height: 16),
-            Text('${l10n.deliveryAddress} (${_maxDistance.toStringAsFixed(0)} ${l10n.kmUnit})',
-                style: theme.textTheme.titleSmall
-                    ?.copyWith(fontWeight: FontWeight.bold)),
+            Text(
+              '${l10n.deliveryAddress} (${_maxDistance.toStringAsFixed(0)} ${l10n.kmUnit})',
+              style: theme.textTheme.titleSmall?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
             Slider(
               value: _maxDistance,
               min: 1,
@@ -758,9 +798,12 @@ class _CapabilitiesBottomSheetState
               label: '${_maxDistance.toStringAsFixed(0)} ${l10n.kmUnit}',
               onChanged: (v) => setState(() => _maxDistance = v),
             ),
-            Text('${l10n.orderSummary} (${_maxWeight.toStringAsFixed(0)} ${l10n.kgUnit})',
-                style: theme.textTheme.titleSmall
-                    ?.copyWith(fontWeight: FontWeight.bold)),
+            Text(
+              '${l10n.orderSummary} (${_maxWeight.toStringAsFixed(0)} ${l10n.kgUnit})',
+              style: theme.textTheme.titleSmall?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
             Slider(
               value: _maxWeight,
               min: 1,
@@ -772,10 +815,7 @@ class _CapabilitiesBottomSheetState
             const SizedBox(height: 16),
             SizedBox(
               width: double.infinity,
-              child: FilledButton(
-                onPressed: _save,
-                child: Text(l10n.save),
-              ),
+              child: FilledButton(onPressed: _save, child: Text(l10n.save)),
             ),
           ],
         ),
@@ -787,7 +827,9 @@ class _CapabilitiesBottomSheetState
     final navigator = Navigator.of(context);
     final messenger = ScaffoldMessenger.of(context);
     try {
-      await ref.read(deliveryRepositoryProvider).updateDriverCapabilities(
+      await ref
+          .read(deliveryRepositoryProvider)
+          .updateDriverCapabilities(
             widget.driverId,
             serviceTypes: _selectedTypes.toList(),
             acceptsDeliveries: _acceptsDeliveries,
@@ -822,10 +864,7 @@ class _HubErrorCard extends StatelessWidget {
           children: [
             Expanded(child: Text(message)),
             const SizedBox(width: 8),
-            TextButton(
-              onPressed: onRetry,
-              child: Text(l10n.retry),
-            ),
+            TextButton(onPressed: onRetry, child: Text(l10n.retry)),
           ],
         ),
       ),

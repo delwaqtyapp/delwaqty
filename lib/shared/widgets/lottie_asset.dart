@@ -45,7 +45,8 @@ class LottieAsset extends StatelessWidget {
           child: Icon(
             Icons.animation_outlined,
             size: 48,
-            color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.4),
+            color: Theme.of(context).colorScheme.onSurfaceVariant
+                .withValues(alpha: 0.4),
           ),
         );
       },

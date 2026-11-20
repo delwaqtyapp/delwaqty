@@ -9,16 +9,16 @@ import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 import 'package:delwaqty/core/errors/app_error_text.dart';
 
-final _documentsProvider = FutureProvider.family<List<DriverDocument>, String>((ref, driverId) async {
+final _documentsProvider = FutureProvider.family<List<DriverDocument>, String>((
+  ref,
+  driverId,
+) async {
   final repo = ref.watch(driverRepositoryProvider);
   return repo.getDocuments(driverId);
 });
 
 class _DocTypeEntry {
-  const _DocTypeEntry({
-    required this.key,
-    required this.icon,
-  });
+  const _DocTypeEntry({required this.key, required this.icon});
 
   final String key;
   final IconData icon;
@@ -129,9 +129,8 @@ class _DocumentListBody extends ConsumerWidget {
 
   void _showUploadPlaceholder(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(l10n.uploadComingSoon)),
-    );
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text(l10n.uploadComingSoon)));
   }
 }
 

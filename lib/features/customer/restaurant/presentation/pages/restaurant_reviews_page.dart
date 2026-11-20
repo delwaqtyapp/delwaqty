@@ -1,5 +1,7 @@
 import 'package:delwaqty/core/utils/avatar_initial.dart';
+
 import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
@@ -16,7 +18,6 @@ import 'package:delwaqty/features/_shared/auth/presentation/auth_provider.dart';
 import 'package:delwaqty/core/theme/app_colors.dart';
 
 class ReviewsState {
-
   const ReviewsState({
     this.reviews = const [],
     this.hasMore = true,
@@ -66,7 +67,10 @@ class RestaurantReviewsNotifier extends AsyncNotifier<ReviewsState> {
 
   Future<void> loadNextPage() async {
     final currentState = state.value;
-    if (currentState == null || currentState.isLoadingMore || !currentState.hasMore) return;
+    if (currentState == null ||
+        currentState.isLoadingMore ||
+        !currentState.hasMore)
+      return;
 
     state = AsyncValue.data(currentState.copyWith(isLoadingMore: true));
 
@@ -79,23 +83,29 @@ class RestaurantReviewsNotifier extends AsyncNotifier<ReviewsState> {
       );
 
       final newReviews = [...currentState.reviews, ...reviews];
-      state = AsyncValue.data(currentState.copyWith(
-        reviews: newReviews,
-        hasMore: reviews.length >= _limit,
-        isLoadingMore: false,
-        offset: currentState.offset + reviews.length,
-      ));
+      state = AsyncValue.data(
+        currentState.copyWith(
+          reviews: newReviews,
+          hasMore: reviews.length >= _limit,
+          isLoadingMore: false,
+          offset: currentState.offset + reviews.length,
+        ),
+      );
     } catch (_) {
       state = AsyncValue.data(currentState.copyWith(isLoadingMore: false));
     }
   }
 }
 
-final restaurantReviewsProvider = AsyncNotifierProvider.autoDispose.family<RestaurantReviewsNotifier, ReviewsState, String>(
-  (merchantId) => RestaurantReviewsNotifier(merchantId),
-);
+final restaurantReviewsProvider = AsyncNotifierProvider.autoDispose
+    .family<RestaurantReviewsNotifier, ReviewsState, String>(
+      (merchantId) => RestaurantReviewsNotifier(merchantId),
+    );
 
-final _summaryProvider = FutureProvider.family<ReviewSummary, String>((ref, merchantId) async {
+final _summaryProvider = FutureProvider.family<ReviewSummary, String>((
+  ref,
+  merchantId,
+) async {
   final repo = ref.watch(reviewRepositoryProvider);
   return repo.getMerchantRatingSummary(merchantId);
 });
@@ -106,7 +116,8 @@ class RestaurantReviewsPage extends ConsumerStatefulWidget {
   final String merchantId;
 
   @override
-  ConsumerState<RestaurantReviewsPage> createState() => _RestaurantReviewsPageState();
+  ConsumerState<RestaurantReviewsPage> createState() =>
+      _RestaurantReviewsPageState();
 }
 
 class _RestaurantReviewsPageState extends ConsumerState<RestaurantReviewsPage> {
@@ -119,8 +130,11 @@ class _RestaurantReviewsPageState extends ConsumerState<RestaurantReviewsPage> {
   }
 
   void _onScroll() {
-    if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 200) {
-      ref.read(restaurantReviewsProvider(widget.merchantId).notifier).loadNextPage();
+    if (_scrollController.position.pixels >=
+        _scrollController.position.maxScrollExtent - 200) {
+      ref
+          .read(restaurantReviewsProvider(widget.merchantId).notifier)
+          .loadNextPage();
     }
   }
 
@@ -133,7 +147,9 @@ class _RestaurantReviewsPageState extends ConsumerState<RestaurantReviewsPage> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final reviewsAsync = ref.watch(restaurantReviewsProvider(widget.merchantId));
+    final reviewsAsync = ref.watch(
+      restaurantReviewsProvider(widget.merchantId),
+    );
     final summaryAsync = ref.watch(_summaryProvider(widget.merchantId));
 
     return Scaffold(
@@ -161,7 +177,9 @@ class _RestaurantReviewsPageState extends ConsumerState<RestaurantReviewsPage> {
                 }
                 return RefreshIndicator(
                   onRefresh: () async {
-                    ref.invalidate(restaurantReviewsProvider(widget.merchantId));
+                    ref.invalidate(
+                      restaurantReviewsProvider(widget.merchantId),
+                    );
                     ref.invalidate(_summaryProvider(widget.merchantId));
                   },
                   child: ListView.separated(
@@ -173,9 +191,7 @@ class _RestaurantReviewsPageState extends ConsumerState<RestaurantReviewsPage> {
                       if (index == reviews.length) {
                         return const Padding(
                           padding: EdgeInsets.symmetric(vertical: 16),
-                          child: Center(
-                            child: CircularProgressIndicator(),
-                          ),
+                          child: Center(child: CircularProgressIndicator()),
                         );
                       }
                       final review = reviews[index];
@@ -188,9 +204,8 @@ class _RestaurantReviewsPageState extends ConsumerState<RestaurantReviewsPage> {
                 );
               },
               loading: () => const RestaurantReviewsSkeleton(),
-              error: (_, _) => Center(
-                child: ErrorState(message: l10n.errorLoading),
-              ),
+              error: (_, _) =>
+                  Center(child: ErrorState(message: l10n.errorLoading)),
             ),
           ),
         ],
@@ -231,7 +246,9 @@ class _RatingSummary extends StatelessWidget {
             children: [
               Text(
                 summary.averageRating.toStringAsFixed(1),
-                style: theme.textTheme.headlineLarge?.copyWith(fontWeight: FontWeight.bold),
+                style: theme.textTheme.headlineLarge?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               Row(
                 mainAxisSize: MainAxisSize.min,
@@ -257,11 +274,31 @@ class _RatingSummary extends StatelessWidget {
           Expanded(
             child: Column(
               children: [
-                _RatingBar(label: '5', count: summary.fiveStarCount, total: summary.totalReviews),
-                _RatingBar(label: '4', count: summary.fourStarCount, total: summary.totalReviews),
-                _RatingBar(label: '3', count: summary.threeStarCount, total: summary.totalReviews),
-                _RatingBar(label: '2', count: summary.twoStarCount, total: summary.totalReviews),
-                _RatingBar(label: '1', count: summary.oneStarCount, total: summary.totalReviews),
+                _RatingBar(
+                  label: '5',
+                  count: summary.fiveStarCount,
+                  total: summary.totalReviews,
+                ),
+                _RatingBar(
+                  label: '4',
+                  count: summary.fourStarCount,
+                  total: summary.totalReviews,
+                ),
+                _RatingBar(
+                  label: '3',
+                  count: summary.threeStarCount,
+                  total: summary.totalReviews,
+                ),
+                _RatingBar(
+                  label: '2',
+                  count: summary.twoStarCount,
+                  total: summary.totalReviews,
+                ),
+                _RatingBar(
+                  label: '1',
+                  count: summary.oneStarCount,
+                  total: summary.totalReviews,
+                ),
               ],
             ),
           ),
@@ -272,7 +309,11 @@ class _RatingSummary extends StatelessWidget {
 }
 
 class _RatingBar extends StatelessWidget {
-  const _RatingBar({required this.label, required this.count, required this.total});
+  const _RatingBar({
+    required this.label,
+    required this.count,
+    required this.total,
+  });
 
   final String label;
   final int count;
@@ -300,7 +341,9 @@ class _RatingBar extends StatelessWidget {
                 minHeight: 6,
                 backgroundColor: theme.colorScheme.surfaceContainerHighest,
                 valueColor: AlwaysStoppedAnimation<Color>(
-                  count > 0 ? AppColors.rating : theme.colorScheme.surfaceContainerHighest,
+                  count > 0
+                      ? AppColors.rating
+                      : theme.colorScheme.surfaceContainerHighest,
                 ),
               ),
             ),
@@ -344,7 +387,9 @@ class _ReviewTile extends StatelessWidget {
                 backgroundColor: theme.colorScheme.primaryContainer,
                 child: Text(
                   safeInitial(review.userName, fallback: 'U'),
-                  style: theme.textTheme.labelMedium?.copyWith(fontWeight: FontWeight.bold),
+                  style: theme.textTheme.labelMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
               const SizedBox(width: 10),
@@ -354,7 +399,9 @@ class _ReviewTile extends StatelessWidget {
                   children: [
                     Text(
                       review.userName ?? l10n.user,
-                      style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                     Row(
                       children: List.generate(5, (i) {
@@ -384,10 +431,7 @@ class _ReviewTile extends StatelessWidget {
           ),
           if (review.comment != null && review.comment!.isNotEmpty) ...[
             const SizedBox(height: 8),
-            Text(
-              review.comment!,
-              style: theme.textTheme.bodyMedium,
-            ),
+            Text(review.comment!, style: theme.textTheme.bodyMedium),
           ],
         ],
       ),
@@ -431,7 +475,12 @@ class _WriteReviewSheetState extends ConsumerState<_WriteReviewSheet> {
     final theme = Theme.of(context);
 
     return Padding(
-      padding: EdgeInsets.fromLTRB(16, 16, 16, MediaQuery.of(context).viewInsets.bottom + 16),
+      padding: EdgeInsets.fromLTRB(
+        16,
+        16,
+        16,
+        MediaQuery.of(context).viewInsets.bottom + 16,
+      ),
       child: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -442,7 +491,9 @@ class _WriteReviewSheetState extends ConsumerState<_WriteReviewSheet> {
                 width: 40,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.3),
+                  color: theme.colorScheme.onSurfaceVariant.withValues(
+                    alpha: 0.3,
+                  ),
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -450,10 +501,17 @@ class _WriteReviewSheetState extends ConsumerState<_WriteReviewSheet> {
             const SizedBox(height: 16),
             Text(
               l10n.writeReview,
-              style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+              style: theme.textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
             ),
             const SizedBox(height: 16),
-            Text(l10n.yourRating, style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600)),
+            Text(
+              l10n.yourRating,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
+            ),
             const SizedBox(height: 8),
             Row(
               children: List.generate(5, (i) {
@@ -462,7 +520,9 @@ class _WriteReviewSheetState extends ConsumerState<_WriteReviewSheet> {
                   child: Padding(
                     padding: const EdgeInsets.only(right: 4),
                     child: Icon(
-                      i < _rating.round() ? Icons.star_rounded : Icons.star_border_rounded,
+                      i < _rating.round()
+                          ? Icons.star_rounded
+                          : Icons.star_border_rounded,
                       size: 36,
                       color: AppColors.rating,
                     ),
@@ -477,7 +537,9 @@ class _WriteReviewSheetState extends ConsumerState<_WriteReviewSheet> {
               decoration: InputDecoration(
                 hintText: l10n.yourReview,
                 filled: true,
-                fillColor: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+                fillColor: theme.colorScheme.surfaceContainerHighest.withValues(
+                  alpha: 0.5,
+                ),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                   borderSide: BorderSide.none,
@@ -493,7 +555,10 @@ class _WriteReviewSheetState extends ConsumerState<_WriteReviewSheet> {
                     ? SizedBox(
                         width: 18,
                         height: 18,
-                        child: CircularProgressIndicator(strokeWidth: 2, color: theme.colorScheme.onPrimary),
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: theme.colorScheme.onPrimary,
+                        ),
                       )
                     : Text(l10n.submitReview),
               ),
@@ -508,10 +573,7 @@ class _WriteReviewSheetState extends ConsumerState<_WriteReviewSheet> {
     final auth = ref.read(authStateProvider);
     if (auth is! AuthAuthenticated) {
       if (mounted) {
-        AppSnackbar.error(
-          context,
-          message: AppLocalizations.of(context).login,
-        );
+        AppSnackbar.error(context, message: AppLocalizations.of(context).login);
       }
       return;
     }
@@ -529,7 +591,10 @@ class _WriteReviewSheetState extends ConsumerState<_WriteReviewSheet> {
       if (mounted) {
         ref.invalidate(restaurantReviewsProvider(widget.merchantId));
         ref.invalidate(_summaryProvider(widget.merchantId));
-        AppSnackbar.success(context, message: AppLocalizations.of(context).reviewSubmitted);
+        AppSnackbar.success(
+          context,
+          message: AppLocalizations.of(context).reviewSubmitted,
+        );
         Navigator.pop(context);
       }
     } catch (e) {

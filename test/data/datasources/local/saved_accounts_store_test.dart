@@ -22,10 +22,7 @@ void main() {
     });
 
     test('loadAccounts returns stored accounts', () async {
-      await store.saveAccount(
-        email: 'user@example.com',
-        displayName: 'User',
-      );
+      await store.saveAccount(email: 'user@example.com', displayName: 'User');
 
       final accounts = await store.loadAccounts();
 
@@ -34,15 +31,18 @@ void main() {
       expect(accounts.single.displayName, 'User');
     });
 
-    test('saveAccount updates an existing account without duplicating', () async {
-      await store.saveAccount(email: 'a@b.com', displayName: 'A');
-      await store.saveAccount(email: 'a@b.com', displayName: 'A renamed');
+    test(
+      'saveAccount updates an existing account without duplicating',
+      () async {
+        await store.saveAccount(email: 'a@b.com', displayName: 'A');
+        await store.saveAccount(email: 'a@b.com', displayName: 'A renamed');
 
-      final accounts = await store.loadAccounts();
+        final accounts = await store.loadAccounts();
 
-      expect(accounts, hasLength(1));
-      expect(accounts.single.displayName, 'A renamed');
-    });
+        expect(accounts, hasLength(1));
+        expect(accounts.single.displayName, 'A renamed');
+      },
+    );
 
     test('saveAccount normalizes the email key', () async {
       await store.saveAccount(email: 'A@B.com', displayName: 'AB');

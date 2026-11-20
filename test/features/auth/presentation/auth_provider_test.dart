@@ -39,14 +39,14 @@ void main() {
   );
 
   ProviderContainer buildTestContainer() => ProviderContainer(
-        overrides: [
-          authRepositoryProvider.overrideWithValue(mockAuthRepo),
-          userRepositoryProvider.overrideWithValue(mockUserRepo),
-          loggerProvider.overrideWithValue(mockLogger),
-          sharedPreferencesProvider.overrideWithValue(mockPrefs),
-          biometricAuthStoreProvider.overrideWithValue(biometricStore),
-        ],
-      );
+    overrides: [
+      authRepositoryProvider.overrideWithValue(mockAuthRepo),
+      userRepositoryProvider.overrideWithValue(mockUserRepo),
+      loggerProvider.overrideWithValue(mockLogger),
+      sharedPreferencesProvider.overrideWithValue(mockPrefs),
+      biometricAuthStoreProvider.overrideWithValue(biometricStore),
+    ],
+  );
 
   setUp(() {
     mockAuthRepo = MockAuthRepository();
@@ -85,7 +85,10 @@ void main() {
       });
 
       test('sets authenticated when session exists', () async {
-        const session = AuthResult(userId: 'user-123', email: 'test@example.com');
+        const session = AuthResult(
+          userId: 'user-123',
+          email: 'test@example.com',
+        );
         when(() => mockAuthRepo.getCurrentSession())
             .thenAnswer((_) async => session);
         when(() => mockUserRepo.getCurrentUser())
@@ -99,33 +102,41 @@ void main() {
         expect(state, isA<AuthAuthenticated>());
       });
 
-      test('sets pendingVerification when user requires verification', () async {
-        const session = AuthResult(userId: 'user-123', email: 'test@example.com');
-        final pendingUser = testUser.copyWith(
-          userType: UserType.provider,
-          verificationStatus: VerificationStatus.pending,
-        );
-        when(() => mockAuthRepo.getCurrentSession())
-            .thenAnswer((_) async => session);
-        when(() => mockUserRepo.getCurrentUser())
-            .thenAnswer((_) async => pendingUser);
+      test(
+        'sets pendingVerification when user requires verification',
+        () async {
+          const session = AuthResult(
+            userId: 'user-123',
+            email: 'test@example.com',
+          );
+          final pendingUser = testUser.copyWith(
+            userType: UserType.provider,
+            verificationStatus: VerificationStatus.pending,
+          );
+          when(() => mockAuthRepo.getCurrentSession())
+              .thenAnswer((_) async => session);
+          when(() => mockUserRepo.getCurrentUser())
+              .thenAnswer((_) async => pendingUser);
 
-        final container = ProviderContainer(
-          overrides: [
-            authRepositoryProvider.overrideWithValue(mockAuthRepo),
-            userRepositoryProvider.overrideWithValue(mockUserRepo),
-            loggerProvider.overrideWithValue(mockLogger),
-            sharedPreferencesProvider.overrideWithValue(mockPrefs),
-            biometricAuthStoreProvider.overrideWithValue(biometricStore),
-            requireProviderDocumentsProvider.overrideWith((ref) async => true),
-          ],
-        );
+          final container = ProviderContainer(
+            overrides: [
+              authRepositoryProvider.overrideWithValue(mockAuthRepo),
+              userRepositoryProvider.overrideWithValue(mockUserRepo),
+              loggerProvider.overrideWithValue(mockLogger),
+              sharedPreferencesProvider.overrideWithValue(mockPrefs),
+              biometricAuthStoreProvider.overrideWithValue(biometricStore),
+              requireProviderDocumentsProvider.overrideWith(
+                (ref) async => true,
+              ),
+            ],
+          );
 
-        await container.read(authStateProvider.notifier).checkAuthStatus();
+          await container.read(authStateProvider.notifier).checkAuthStatus();
 
-        final state = container.read(authStateProvider);
-        expect(state, isA<AuthPendingVerification>());
-      });
+          final state = container.read(authStateProvider);
+          expect(state, isA<AuthPendingVerification>());
+        },
+      );
 
       test('sets unauthenticated on error', () async {
         when(() => mockAuthRepo.getCurrentSession())
@@ -142,37 +153,42 @@ void main() {
 
     group('signIn', () {
       test('sets authenticated on success', () async {
-        const session = AuthResult(userId: 'user-123', email: 'test@example.com');
-        when(() => mockAuthRepo.signInWithEmail(
-              email: 'test@example.com',
-              password: 'password123',
-            )).thenAnswer((_) async => session);
+        const session = AuthResult(
+          userId: 'user-123',
+          email: 'test@example.com',
+        );
+        when(
+          () => mockAuthRepo.signInWithEmail(
+            email: 'test@example.com',
+            password: 'password123',
+          ),
+        ).thenAnswer((_) async => session);
         when(() => mockUserRepo.getCurrentUser())
             .thenAnswer((_) async => testUser);
 
         final container = buildTestContainer();
 
-        await container.read(authStateProvider.notifier).signIn(
-              email: 'test@example.com',
-              password: 'password123',
-            );
+        await container
+            .read(authStateProvider.notifier)
+            .signIn(email: 'test@example.com', password: 'password123');
 
         final state = container.read(authStateProvider);
         expect(state, isA<AuthAuthenticated>());
       });
 
       test('sets error on failure', () async {
-        when(() => mockAuthRepo.signInWithEmail(
-              email: any(named: 'email'),
-              password: any(named: 'password'),
-            )).thenThrow(Exception('Invalid credentials'));
+        when(
+          () => mockAuthRepo.signInWithEmail(
+            email: any(named: 'email'),
+            password: any(named: 'password'),
+          ),
+        ).thenThrow(Exception('Invalid credentials'));
 
         final container = buildTestContainer();
 
-        await container.read(authStateProvider.notifier).signIn(
-              email: 'test@example.com',
-              password: 'wrong',
-            );
+        await container
+            .read(authStateProvider.notifier)
+            .signIn(email: 'test@example.com', password: 'wrong');
 
         final state = container.read(authStateProvider);
         expect(state, isA<AuthError>());
@@ -181,18 +197,26 @@ void main() {
 
     group('signUp', () {
       test('sets authenticated on success with valid session', () async {
-        const session = AuthResult(userId: 'user-123', email: 'test@example.com', accessToken: 'valid-token');
-        when(() => mockAuthRepo.signUpWithEmail(
-              email: 'test@example.com',
-              password: 'password123',
-              fullName: 'John Doe',
-            )).thenAnswer((_) async => session);
+        const session = AuthResult(
+          userId: 'user-123',
+          email: 'test@example.com',
+          accessToken: 'valid-token',
+        );
+        when(
+          () => mockAuthRepo.signUpWithEmail(
+            email: 'test@example.com',
+            password: 'password123',
+            fullName: 'John Doe',
+          ),
+        ).thenAnswer((_) async => session);
         when(() => mockUserRepo.getCurrentUser())
             .thenAnswer((_) async => testUser);
 
         final container = buildTestContainer();
 
-        await container.read(authStateProvider.notifier).signUp(
+        await container
+            .read(authStateProvider.notifier)
+            .signUp(
               email: 'test@example.com',
               password: 'password123',
               fullName: 'John Doe',
@@ -202,49 +226,57 @@ void main() {
         expect(state, isA<AuthAuthenticated>());
       });
 
-      test('sets pendingVerification when user requires verification', () async {
-        const session = AuthResult(
-          userId: 'user-123',
-          email: 'test@example.com',
-          accessToken: 'valid-token',
-        );
-        final pendingUser = testUser.copyWith(
-          userType: UserType.delivery,
-          verificationStatus: VerificationStatus.pending,
-        );
-        when(() => mockAuthRepo.signUpWithEmail(
+      test(
+        'sets pendingVerification when user requires verification',
+        () async {
+          const session = AuthResult(
+            userId: 'user-123',
+            email: 'test@example.com',
+            accessToken: 'valid-token',
+          );
+          final pendingUser = testUser.copyWith(
+            userType: UserType.delivery,
+            verificationStatus: VerificationStatus.pending,
+          );
+          when(
+            () => mockAuthRepo.signUpWithEmail(
               email: 'test@example.com',
               password: 'password123',
               fullName: 'John Doe',
-            )).thenAnswer((_) async => session);
-        when(() => mockUserRepo.getCurrentUser())
-            .thenAnswer((_) async => pendingUser);
+            ),
+          ).thenAnswer((_) async => session);
+          when(() => mockUserRepo.getCurrentUser())
+              .thenAnswer((_) async => pendingUser);
 
-        final container = buildTestContainer();
+          final container = buildTestContainer();
 
-        await container.read(authStateProvider.notifier).signUp(
-              email: 'test@example.com',
-              password: 'password123',
-              fullName: 'John Doe',
-            );
+          await container
+              .read(authStateProvider.notifier)
+              .signUp(
+                email: 'test@example.com',
+                password: 'password123',
+                fullName: 'John Doe',
+              );
 
-        final state = container.read(authStateProvider);
-        expect(state, isA<AuthPendingVerification>());
-      });
+          final state = container.read(authStateProvider);
+          expect(state, isA<AuthPendingVerification>());
+        },
+      );
 
       test('sets error on failure', () async {
-        when(() => mockAuthRepo.signUpWithEmail(
-              email: any(named: 'email'),
-              password: any(named: 'password'),
-              fullName: any(named: 'fullName'),
-            )).thenThrow(Exception('Sign up failed'));
+        when(
+          () => mockAuthRepo.signUpWithEmail(
+            email: any(named: 'email'),
+            password: any(named: 'password'),
+            fullName: any(named: 'fullName'),
+          ),
+        ).thenThrow(Exception('Sign up failed'));
 
         final container = buildTestContainer();
 
-        await container.read(authStateProvider.notifier).signUp(
-              email: 'test@example.com',
-              password: 'password123',
-            );
+        await container
+            .read(authStateProvider.notifier)
+            .signUp(email: 'test@example.com', password: 'password123');
 
         final state = container.read(authStateProvider);
         expect(state, isA<AuthError>());
@@ -264,16 +296,23 @@ void main() {
       });
 
       test('sets emailConfirmationRequired when no session returned', () async {
-        const session = AuthResult(userId: 'user-123', email: 'test@example.com');
-        when(() => mockAuthRepo.signUpWithEmail(
-              email: 'test@example.com',
-              password: 'password123',
-              fullName: 'John Doe',
-            )).thenAnswer((_) async => session);
+        const session = AuthResult(
+          userId: 'user-123',
+          email: 'test@example.com',
+        );
+        when(
+          () => mockAuthRepo.signUpWithEmail(
+            email: 'test@example.com',
+            password: 'password123',
+            fullName: 'John Doe',
+          ),
+        ).thenAnswer((_) async => session);
 
         final container = buildTestContainer();
 
-        await container.read(authStateProvider.notifier).signUp(
+        await container
+            .read(authStateProvider.notifier)
+            .signUp(
               email: 'test@example.com',
               password: 'password123',
               fullName: 'John Doe',
@@ -303,9 +342,9 @@ void main() {
 
         final container = buildTestContainer();
 
-        await container.read(authStateProvider.notifier).resetPassword(
-              email: 'test@example.com',
-            );
+        await container
+            .read(authStateProvider.notifier)
+            .resetPassword(email: 'test@example.com');
 
         verify(() => mockAuthRepo.resetPassword(email: 'test@example.com'))
             .called(1);
@@ -321,19 +360,23 @@ void main() {
         );
       }
 
-      test(
-          'failed biometric sign-in followed by invalidation clears the '
+      test('failed biometric sign-in followed by invalidation clears the '
           'stale stored credential', () async {
         await seedStoredCredentials();
-        when(() => mockAuthRepo.signInWithEmail(
-              email: 'test@example.com',
-              password: 'stale-secret',
-            )).thenThrow(Exception('Invalid login credentials'));
+        when(
+          () => mockAuthRepo.signInWithEmail(
+            email: 'test@example.com',
+            password: 'stale-secret',
+          ),
+        ).thenThrow(Exception('Invalid login credentials'));
 
         final container = buildTestContainer();
         final notifier = container.read(authStateProvider.notifier);
 
-        await notifier.signIn(email: 'test@example.com', password: 'stale-secret');
+        await notifier.signIn(
+          email: 'test@example.com',
+          password: 'stale-secret',
+        );
         expect(container.read(authStateProvider), isA<AuthError>());
 
         await notifier.invalidateBiometricCredentials(userId: 'user-123');
@@ -342,35 +385,43 @@ void main() {
         expect(await biometricStore.activeCredentials(), isNull);
       });
 
-      test(
-          'invalidateBiometricCredentials while authenticated disables the '
+      test('invalidateBiometricCredentials while authenticated disables the '
           'server biometric flag', () async {
         const session = AuthResult(
           userId: 'user-123',
           email: 'test@example.com',
         );
-        when(() => mockAuthRepo.signInWithEmail(
-              email: 'test@example.com',
-              password: 'password123',
-            )).thenAnswer((_) async => session);
+        when(
+          () => mockAuthRepo.signInWithEmail(
+            email: 'test@example.com',
+            password: 'password123',
+          ),
+        ).thenAnswer((_) async => session);
         when(() => mockUserRepo.getCurrentUser())
             .thenAnswer((_) async => testUser);
-        when(() => mockAuthRepo.updateBiometricEnabled(
-              userId: any(named: 'userId'),
-              enabled: any(named: 'enabled'),
-            )).thenAnswer((_) async {});
+        when(
+          () => mockAuthRepo.updateBiometricEnabled(
+            userId: any(named: 'userId'),
+            enabled: any(named: 'enabled'),
+          ),
+        ).thenAnswer((_) async {});
 
         final container = buildTestContainer();
         final notifier = container.read(authStateProvider.notifier);
 
-        await notifier.signIn(email: 'test@example.com', password: 'password123');
+        await notifier.signIn(
+          email: 'test@example.com',
+          password: 'password123',
+        );
         await seedStoredCredentials();
         await notifier.invalidateBiometricCredentials(userId: 'user-123');
 
-        verify(() => mockAuthRepo.updateBiometricEnabled(
-              userId: 'user-123',
-              enabled: false,
-            )).called(1);
+        verify(
+          () => mockAuthRepo.updateBiometricEnabled(
+            userId: 'user-123',
+            enabled: false,
+          ),
+        ).called(1);
         expect(await biometricStore.hasAnyCredentials(), isFalse);
       });
 
@@ -386,38 +437,44 @@ void main() {
         expect(await biometricStore.hasAnyCredentials(), isTrue);
       });
 
-      test('deleteAccount clears biometric credentials for the deleted user',
-          () async {
-        const session = AuthResult(
-          userId: 'user-123',
-          email: 'test@example.com',
-        );
-        when(() => mockAuthRepo.signInWithEmail(
+      test(
+        'deleteAccount clears biometric credentials for the deleted user',
+        () async {
+          const session = AuthResult(
+            userId: 'user-123',
+            email: 'test@example.com',
+          );
+          when(
+            () => mockAuthRepo.signInWithEmail(
               email: 'test@example.com',
               password: 'password123',
-            )).thenAnswer((_) async => session);
-        when(() => mockUserRepo.getCurrentUser())
-            .thenAnswer((_) async => testUser);
-        when(() => mockAuthRepo.deleteAccount()).thenAnswer((_) async {});
+            ),
+          ).thenAnswer((_) async => session);
+          when(() => mockUserRepo.getCurrentUser())
+              .thenAnswer((_) async => testUser);
+          when(() => mockAuthRepo.deleteAccount()).thenAnswer((_) async {});
 
-        final container = buildTestContainer();
-        final notifier = container.read(authStateProvider.notifier);
+          final container = buildTestContainer();
+          final notifier = container.read(authStateProvider.notifier);
 
-        await notifier.signIn(email: 'test@example.com', password: 'password123');
-        await seedStoredCredentials();
-        await notifier.deleteAccount();
+          await notifier.signIn(
+            email: 'test@example.com',
+            password: 'password123',
+          );
+          await seedStoredCredentials();
+          await notifier.deleteAccount();
 
-        expect(container.read(authStateProvider), isA<AuthUnauthenticated>());
-        expect(await biometricStore.hasAnyCredentials(), isFalse);
-        expect(await biometricStore.activeCredentials(), isNull);
-      });
+          expect(container.read(authStateProvider), isA<AuthUnauthenticated>());
+          expect(await biometricStore.hasAnyCredentials(), isFalse);
+          expect(await biometricStore.activeCredentials(), isNull);
+        },
+      );
     });
 
     group('resendEmailConfirmation', () {
       test('delegates to the repository with the email', () async {
-        when(
-          () => mockAuthRepo.resendEmailConfirmation(email: 'a@b.com'),
-        ).thenAnswer((_) async {});
+        when(() => mockAuthRepo.resendEmailConfirmation(email: 'a@b.com'))
+            .thenAnswer((_) async {});
 
         final container = buildTestContainer();
 
@@ -425,15 +482,13 @@ void main() {
             .read(authStateProvider.notifier)
             .resendEmailConfirmation(email: 'a@b.com');
 
-        verify(
-          () => mockAuthRepo.resendEmailConfirmation(email: 'a@b.com'),
-        ).called(1);
+        verify(() => mockAuthRepo.resendEmailConfirmation(email: 'a@b.com'))
+            .called(1);
       });
 
       test('rethrows repository failures', () async {
-        when(
-          () => mockAuthRepo.resendEmailConfirmation(email: 'a@b.com'),
-        ).thenThrow(Exception('boom'));
+        when(() => mockAuthRepo.resendEmailConfirmation(email: 'a@b.com'))
+            .thenThrow(Exception('boom'));
 
         final container = buildTestContainer();
 

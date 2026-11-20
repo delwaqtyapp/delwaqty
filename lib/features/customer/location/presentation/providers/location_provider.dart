@@ -32,8 +32,7 @@ final userLocationProvider =
 
 const double precisionTargetMeters = 1.0;
 
-const String _androidCertSha1 =
-    '63F883088459AFB138B3105AAE428B0CC65A4F09';
+const String _androidCertSha1 = '63F883088459AFB138B3105AAE428B0CC65A4F09';
 
 class UserLocationNotifier extends AsyncNotifier<UserLocation?> {
   @override
@@ -64,7 +63,9 @@ class UserLocationNotifier extends AsyncNotifier<UserLocation?> {
                   accuracy < best.accuracyMeters!))) {
         best = value;
       }
-      if (accuracy != null && accuracy > 0 && accuracy <= precisionTargetMeters) {
+      if (accuracy != null &&
+          accuracy > 0 &&
+          accuracy <= precisionTargetMeters) {
         return value;
       }
     }
@@ -324,10 +325,15 @@ class UserLocationNotifier extends AsyncNotifier<UserLocation?> {
     } catch (_) {}
   }
 
-  static const MethodChannel _nativeGeocoder =
-      MethodChannel('com.delwaqty.app/geocoder');
+  static const MethodChannel _nativeGeocoder = MethodChannel(
+    'com.delwaqty.app/geocoder',
+  );
 
-  Future<String> _reverseGeocode(double lat, double lng, String language) async {
+  Future<String> _reverseGeocode(
+    double lat,
+    double lng,
+    String language,
+  ) async {
     final logger = ref.read(loggerProvider);
     final separator = language == 'ar' ? '،' : ',';
     final cacheKey =
@@ -498,9 +504,7 @@ class UserLocationNotifier extends AsyncNotifier<UserLocation?> {
         street ??= name;
       } else if (_typesContain(types, const ['locality', 'postal_town'])) {
         city ??= name;
-      } else if (_typesContain(types, const [
-        'administrative_area_level_1',
-      ])) {
+      } else if (_typesContain(types, const ['administrative_area_level_1'])) {
         region ??= name;
       } else if (types.contains('country')) {
         country ??= name;
@@ -526,8 +530,7 @@ class UserLocationNotifier extends AsyncNotifier<UserLocation?> {
         : hierarchyNames.join(' - ');
 
     final streetPart = <String>[
-      if (streetNumber != null && streetNumber.trim().isNotEmpty)
-        streetNumber,
+      if (streetNumber != null && streetNumber.trim().isNotEmpty) streetNumber,
       if (street != null && street.trim().isNotEmpty) street,
     ].join(' ');
 
@@ -546,10 +549,7 @@ class UserLocationNotifier extends AsyncNotifier<UserLocation?> {
     if (unique.isEmpty) return null;
 
     final separator = language == 'ar' ? '،' : ',';
-    return (
-      address: unique.join('$separator '),
-      hasNamed: named != null,
-    );
+    return (address: unique.join('$separator '), hasNamed: named != null);
   }
 
   Future<({String address, bool hasNamed})?> _nominatimStructuredAddress(
@@ -633,13 +633,7 @@ class UserLocationNotifier extends AsyncNotifier<UserLocation?> {
     final region = address['state'] as String? ?? address['region'] as String?;
     final country = address['country'] as String?;
 
-    final parts = <String>[
-      ?named,
-      ?road,
-      ?hierarchyPart,
-      ?region,
-      ?country,
-    ];
+    final parts = <String>[?named, ?road, ?hierarchyPart, ?region, ?country];
     if (parts.isEmpty) return null;
 
     return (
@@ -700,7 +694,10 @@ class UserLocationNotifier extends AsyncNotifier<UserLocation?> {
       }
       if (parts.isEmpty) return null;
 
-      return (address: parts.join(language == 'ar' ? '، ' : ', '), hasNamed: hasNamed);
+      return (
+        address: parts.join(language == 'ar' ? '، ' : ', '),
+        hasNamed: hasNamed,
+      );
     } catch (e) {
       logger.d('Photon reverse geocoding error: $e');
       return null;
@@ -752,8 +749,8 @@ class UserLocationNotifier extends AsyncNotifier<UserLocation?> {
           final fallbackTag = tags?['name'] as String?;
           final rawName =
               (preferredTag != null && preferredTag.trim().isNotEmpty)
-                  ? preferredTag
-                  : fallbackTag;
+              ? preferredTag
+              : fallbackTag;
           if (rawName == null || rawName.trim().isEmpty) continue;
           final name = rawName.trim();
           if (RegExp(r'\d').hasMatch(name)) continue;
@@ -838,11 +835,7 @@ class UserLocationNotifier extends AsyncNotifier<UserLocation?> {
     final parts = cleaned
         .split(separator)
         .map((e) => e.trim())
-        .where(
-          (e) =>
-              e.isNotEmpty &&
-              !RegExp(r'^[\d\s\-+/.,:;]+$').hasMatch(e),
-        )
+        .where((e) => e.isNotEmpty && !RegExp(r'^[\d\s\-+/.,:;]+$').hasMatch(e))
         .toList();
     return parts.join('$separator ');
   }

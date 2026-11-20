@@ -124,10 +124,7 @@ class _MyComplaintsPageState extends ConsumerState<MyComplaintsPage> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              complaint.subject,
-              style: Theme.of(ctx).textTheme.titleLarge,
-            ),
+            Text(complaint.subject, style: Theme.of(ctx).textTheme.titleLarge),
             const SizedBox(height: 8),
             Text(
               complaint.description,

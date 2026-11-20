@@ -3,13 +3,7 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 part 'wallet_transaction.freezed.dart';
 part 'wallet_transaction.g.dart';
 
-enum TransactionType {
-  topup,
-  payment,
-  refund,
-  withdrawal,
-  transfer,
-}
+enum TransactionType { topup, payment, refund, withdrawal, transfer }
 
 @freezed
 abstract class WalletTransaction with _$WalletTransaction {

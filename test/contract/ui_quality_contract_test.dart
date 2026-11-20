@@ -11,14 +11,15 @@ import 'package:flutter_test/flutter_test.dart';
 /// hard-coded in English inside an Arabic app, and money/deletion actions
 /// that executed on a single tap.
 void main() {
-  List<File> dartFiles() => Directory('lib')
-      .listSync(recursive: true)
-      .whereType<File>()
-      .where((f) => f.path.endsWith('.dart'))
-      .where((f) => !f.path.contains('/l10n/'))
-      .where((f) => !f.path.endsWith('.freezed.dart'))
-      .where((f) => !f.path.endsWith('.g.dart'))
-      .toList();
+  List<File> dartFiles() =>
+      Directory('lib')
+          .listSync(recursive: true)
+          .whereType<File>()
+          .where((f) => f.path.endsWith('.dart'))
+          .where((f) => !f.path.contains('/l10n/'))
+          .where((f) => !f.path.endsWith('.freezed.dart'))
+          .where((f) => !f.path.endsWith('.g.dart'))
+          .toList();
 
   String read(String p) => File(p).readAsStringSync();
 
@@ -68,8 +69,7 @@ void main() {
       expect(
         offenders,
         isEmpty,
-        reason:
-            'raw exception text must be mapped through appErrorText()/appErrorMessage()',
+        reason: 'raw exception text must be mapped through appErrorText()/appErrorMessage()',
       );
     });
 
@@ -85,7 +85,9 @@ void main() {
           if (l.startsWith('//')) continue;
           if (l.contains('appErrorDetail(') &&
               !RegExp(r'(\w+\s*=|error\s*:|promoError\s*:)').hasMatch(l)) {
-            offenders.add('${f.path}: appErrorDetail() outside a technical field: $l');
+            offenders.add(
+              '${f.path}: appErrorDetail() outside a technical field: $l',
+            );
           }
         }
       }
@@ -95,10 +97,9 @@ void main() {
     test('the classifier itself never returns the raw error', () {
       final src = read('lib/core/errors/app_error_text.dart');
       // Every branch of the switch must resolve to a localized getter.
-      final branches = RegExp(r'case AppErrorKind\.\w+:\s*\n\s*return l10n\.(\w+);')
-          .allMatches(src)
-          .map((m) => m.group(1)!)
-          .toList();
+      final branches = RegExp(
+        r'case AppErrorKind\.\w+:\s*\n\s*return l10n\.(\w+);',
+      ).allMatches(src).map((m) => m.group(1)!).toList();
       expect(branches.length, AppErrorKind.values.length);
       expect(
         branches.toSet().length,
@@ -147,8 +148,9 @@ void main() {
         for (var i = 0; i < lines.length; i++) {
           final l = lines[i];
           if (RegExp(r'_logger\.|debugPrint\(').hasMatch(l)) continue;
-          for (final m in RegExp(r"'([^'\\\n]*[؀-ۿ][^'\\\n]*)'")
-              .allMatches(l)) {
+          for (final m in RegExp(
+            r"'([^'\\\n]*[؀-ۿ][^'\\\n]*)'",
+          ).allMatches(l)) {
             final lit = m.group(1)!;
             if (lit.trim().length < 2) continue;
             // A composition like '${l10n.welcome}، $name' interpolates
@@ -189,7 +191,7 @@ void main() {
     test('approving a top-up (credits a real wallet) is confirmed', () {
       expectConfirmation(
         'lib/features/admin/financial/presentation/pages/'
-        'admin_topup_requests_page.dart',
+            'admin_topup_requests_page.dart',
         '.approveTopup(item.id)',
       );
     });
@@ -197,7 +199,7 @@ void main() {
     test('approving or rejecting a settlement is confirmed', () {
       expectConfirmation(
         'lib/features/admin/financial/presentation/pages/'
-        'admin_settlements_page.dart',
+            'admin_settlements_page.dart',
         'await repo.approveSettlement(id)',
       );
     });
@@ -205,7 +207,7 @@ void main() {
     test('approving a permanent account deletion is confirmed', () {
       expectConfirmation(
         'lib/features/admin/presentation/pages/'
-        'admin_pending_deletions_page.dart',
+            'admin_pending_deletions_page.dart',
         "'approve_member_deletion'",
       );
     });
@@ -219,17 +221,21 @@ void main() {
   });
 
   group('failure is distinguishable from emptiness', () {
-    test('the driver access page no longer shows a fabricated success state', () {
-      final src = read(
-        'lib/features/driver/presentation/pages/driver_access_page.dart',
-      );
-      expect(
-        src.contains('snap.hasError') || src.contains('snapshot.hasError'),
-        isTrue,
-        reason: 'a failed role lookup used to render the same defaults as a '
-            'successful load',
-      );
-    });
+    test(
+      'the driver access page no longer shows a fabricated success state',
+      () {
+        final src = read(
+          'lib/features/driver/presentation/pages/driver_access_page.dart',
+        );
+        expect(
+          src.contains('snap.hasError') || src.contains('snapshot.hasError'),
+          isTrue,
+          reason:
+              'a failed role lookup used to render the same defaults as a '
+              'successful load',
+        );
+      },
+    );
 
     test('the product detail page handles an error explicitly', () {
       final src = read(
@@ -258,8 +264,7 @@ void main() {
           // Material's IconButton is always the first token of the
           // expression: `IconButton(`. Anything like `_glassIconButton(`
           // or `MyIconButton(` is a user-defined widget.
-          final isNamed =
-              !before.trimRight().endsWith('IconButton');
+          final isNamed = !before.trimRight().endsWith('IconButton');
           final isCtor = before.trimLeft().startsWith('const ') || isNamed;
           // Find the balanced closing paren of this call.
           var depth = 0;
@@ -277,8 +282,7 @@ void main() {
           if (isCtor) continue;
           // A Tooltip(message:) wrapper is already labelled.
           if (body.contains('tooltip:') || body.contains('message:')) continue;
-          final line =
-              src.substring(0, idx).split('\n').length;
+          final line = src.substring(0, idx).split('\n').length;
           offenders.add('${f.path}:$line');
         }
       }
@@ -292,8 +296,10 @@ void main() {
 
   group('locale parity for the new keys', () {
     test('en and ar still have identical key sets', () {
-      final en = jsonDecode(read('lib/l10n/app_en.arb')) as Map<String, dynamic>;
-      final ar = jsonDecode(read('lib/l10n/app_ar.arb')) as Map<String, dynamic>;
+      final en =
+          jsonDecode(read('lib/l10n/app_en.arb')) as Map<String, dynamic>;
+      final ar =
+          jsonDecode(read('lib/l10n/app_ar.arb')) as Map<String, dynamic>;
       final enKeys = en.keys.where((k) => !k.startsWith('@')).toSet();
       final arKeys = ar.keys.where((k) => !k.startsWith('@')).toSet();
       expect(enKeys.difference(arKeys), isEmpty);

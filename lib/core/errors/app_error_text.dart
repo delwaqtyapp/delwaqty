@@ -41,7 +41,9 @@ AppErrorKind classifyAppError(Object? error) {
   if (error is TimeoutException) return AppErrorKind.timeout;
   if (error is RateLimitException) return AppErrorKind.server;
   if (error is AuthException) {
-    return error.statusCode == 403 ? AppErrorKind.forbidden : AppErrorKind.unauthenticated;
+    return error.statusCode == 403
+        ? AppErrorKind.forbidden
+        : AppErrorKind.unauthenticated;
   }
   if (error is ServerException || error is CacheException) {
     return AppErrorKind.server;
@@ -83,7 +85,8 @@ AppErrorKind classifyAppError(Object? error) {
   if (lowered.contains('jwt') || lowered.contains('not authenticated')) {
     return AppErrorKind.unauthenticated;
   }
-  if (lowered.contains('row-level security') || lowered.contains('permission')) {
+  if (lowered.contains('row-level security') ||
+      lowered.contains('permission')) {
     return AppErrorKind.forbidden;
   }
   return AppErrorKind.unknown;

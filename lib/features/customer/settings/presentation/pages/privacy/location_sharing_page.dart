@@ -28,8 +28,7 @@ class _LocationSharingPageState extends State<LocationSharingPage> {
     _prefs = prefs;
     if (mounted) {
       setState(() {
-        _shareWithDrivers =
-            prefs.getBool(StorageKeys.shareWithDrivers) ?? true;
+        _shareWithDrivers = prefs.getBool(StorageKeys.shareWithDrivers) ?? true;
         _shareWithMerchants =
             prefs.getBool(StorageKeys.shareWithMerchants) ?? true;
       });
@@ -159,8 +158,8 @@ class _LocationSharingPageState extends State<LocationSharingPage> {
                   value: _shareWithDrivers,
                   onChanged: (v) async {
                     setState(() => _shareWithDrivers = v);
-                    final prefs =
-                        _prefs ??= await SharedPreferences.getInstance();
+                    final prefs = _prefs ??=
+                        await SharedPreferences.getInstance();
                     await prefs.setBool(StorageKeys.shareWithDrivers, v);
                   },
                 ),
@@ -203,8 +202,8 @@ class _LocationSharingPageState extends State<LocationSharingPage> {
                   value: _shareWithMerchants,
                   onChanged: (v) async {
                     setState(() => _shareWithMerchants = v);
-                    final prefs =
-                        _prefs ??= await SharedPreferences.getInstance();
+                    final prefs = _prefs ??=
+                        await SharedPreferences.getInstance();
                     await prefs.setBool(StorageKeys.shareWithMerchants, v);
                   },
                 ),
@@ -217,18 +216,12 @@ class _LocationSharingPageState extends State<LocationSharingPage> {
             decoration: BoxDecoration(
               color: cs.primary.withValues(alpha: 0.06),
               borderRadius: BorderRadius.circular(14),
-              border: Border.all(
-                color: cs.primary.withValues(alpha: 0.16),
-              ),
+              border: Border.all(color: cs.primary.withValues(alpha: 0.16)),
             ),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Icon(
-                  Icons.info_outline_rounded,
-                  color: cs.primary,
-                  size: 20,
-                ),
+                Icon(Icons.info_outline_rounded, color: cs.primary, size: 20),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(

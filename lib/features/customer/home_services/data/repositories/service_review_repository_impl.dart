@@ -82,32 +82,35 @@ class ServiceReviewRepositoryImpl implements ServiceReviewRepository {
 
 final serviceReviewRepositoryImplProvider =
     Provider<ServiceReviewRepositoryImpl>(
-  (ref) => ServiceReviewRepositoryImpl(
-    ref.watch(supabaseServiceReviewDataSourceProvider),
-  ),
-);
+      (ref) => ServiceReviewRepositoryImpl(
+        ref.watch(supabaseServiceReviewDataSourceProvider),
+      ),
+    );
 
 final serviceReviewRepositoryProvider = Provider<ServiceReviewRepository>(
   (ref) => ref.watch(serviceReviewRepositoryImplProvider),
 );
 
-final serviceReviewsProvider = FutureProvider.family<List<ServiceReview>,
-    ServiceReviewScope>(
-  (ref, scope) => ref
-      .watch(serviceReviewRepositoryProvider)
-      .getServiceReviews(scope.categoryType, providerId: scope.providerId),
-);
+final serviceReviewsProvider =
+    FutureProvider.family<List<ServiceReview>, ServiceReviewScope>(
+      (ref, scope) => ref
+          .watch(serviceReviewRepositoryProvider)
+          .getServiceReviews(scope.categoryType, providerId: scope.providerId),
+    );
 
 final serviceReviewSummaryProvider =
     FutureProvider.family<ServiceReviewSummary, ServiceReviewScope>(
-  (ref, scope) => ref
-      .watch(serviceReviewRepositoryProvider)
-      .getServiceRatingSummary(scope.categoryType, providerId: scope.providerId),
-);
+      (ref, scope) => ref
+          .watch(serviceReviewRepositoryProvider)
+          .getServiceRatingSummary(
+            scope.categoryType,
+            providerId: scope.providerId,
+          ),
+    );
 
 final myServiceReviewProvider =
     FutureProvider.family<ServiceReview?, ServiceReviewScope>(
-  (ref, scope) => ref
-      .watch(serviceReviewRepositoryProvider)
-      .getMyServiceReview(scope.categoryType, providerId: scope.providerId),
-);
+      (ref, scope) => ref
+          .watch(serviceReviewRepositoryProvider)
+          .getMyServiceReview(scope.categoryType, providerId: scope.providerId),
+    );

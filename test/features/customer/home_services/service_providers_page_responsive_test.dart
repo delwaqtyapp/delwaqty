@@ -94,7 +94,9 @@ Future<void> _pumpAndAssert(
   final prevHandler = FlutterError.onError;
   FlutterError.onError = (details) => trapped.add(details);
 
-  await tester.pumpWidget(_buildTestApp(repo, locale: locale, padding: padding));
+  await tester.pumpWidget(
+    _buildTestApp(repo, locale: locale, padding: padding),
+  );
   await tester.pump(const Duration(milliseconds: 500));
 
   FlutterError.onError = prevHandler;
@@ -117,30 +119,28 @@ void main() {
   group('ServiceProvidersPage at real device geometry '
       '(1280x2800 @ dpr $_phoneDpr = 430x941 logical)', () {
     for (final locale in [const Locale('en'), const Locale('ar')]) {
-      testWidgets(
-        'no overflow, textScale 1.0, ${locale.languageCode}',
-        (tester) async {
-          await _pumpAndAssert(
-            tester,
-            repo: _MockRepo(),
-            locale: locale,
-            padding: const EdgeInsets.only(top: _cutoutTop),
-          );
-        },
-      );
+      testWidgets('no overflow, textScale 1.0, ${locale.languageCode}', (
+        tester,
+      ) async {
+        await _pumpAndAssert(
+          tester,
+          repo: _MockRepo(),
+          locale: locale,
+          padding: const EdgeInsets.only(top: _cutoutTop),
+        );
+      });
 
-      testWidgets(
-        'no overflow, textScale 1.3, ${locale.languageCode}',
-        (tester) async {
-          await _pumpAndAssert(
-            tester,
-            repo: _MockRepo(),
-            textScale: 1.3,
-            locale: locale,
-            padding: const EdgeInsets.only(top: _cutoutTop),
-          );
-        },
-      );
+      testWidgets('no overflow, textScale 1.3, ${locale.languageCode}', (
+        tester,
+      ) async {
+        await _pumpAndAssert(
+          tester,
+          repo: _MockRepo(),
+          textScale: 1.3,
+          locale: locale,
+          padding: const EdgeInsets.only(top: _cutoutTop),
+        );
+      });
     }
   });
 
@@ -154,17 +154,16 @@ void main() {
     ];
 
     for (final (width, height) in sizes) {
-      testWidgets(
-        'no overflow at ${width.round()}x${height.round()}',
-        (tester) async {
-          await _pumpAndAssert(
-            tester,
-            repo: _MockRepo(),
-            size: Size(width, height),
-            dpr: 1.0,
-          );
-        },
-      );
+      testWidgets('no overflow at ${width.round()}x${height.round()}', (
+        tester,
+      ) async {
+        await _pumpAndAssert(
+          tester,
+          repo: _MockRepo(),
+          size: Size(width, height),
+          dpr: 1.0,
+        );
+      });
     }
   });
 }

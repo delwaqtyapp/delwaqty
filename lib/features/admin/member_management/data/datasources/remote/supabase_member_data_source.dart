@@ -20,9 +20,7 @@ class SupabaseMemberDataSource {
     String? cursor,
     int limit = 20,
   }) async {
-    final params = <String, dynamic>{
-      'p_limit': limit,
-    };
+    final params = <String, dynamic>{'p_limit': limit};
     if (search != null && search.isNotEmpty) params['p_search'] = search;
     if (role != null) params['p_role'] = role;
     if (accountStatus != null) params['p_account_status'] = accountStatus;
@@ -37,17 +35,19 @@ class SupabaseMemberDataSource {
   }
 
   Future<Map<String, dynamic>?> getMemberProfile(String memberId) async {
-    final data = await _client.rpc('get_member_profile', params: {
-      'p_member_id': memberId,
-    });
+    final data = await _client.rpc(
+      'get_member_profile',
+      params: {'p_member_id': memberId},
+    );
     if (data == null) return null;
     return Map<String, dynamic>.from(data as Map);
   }
 
   Future<Map<String, dynamic>> getMemberStatus(String memberId) async {
-    final data = await _client.rpc('get_member_status', params: {
-      'p_member_id': memberId,
-    });
+    final data = await _client.rpc(
+      'get_member_status',
+      params: {'p_member_id': memberId},
+    );
     return Map<String, dynamic>.from(data as Map);
   }
 
@@ -56,10 +56,7 @@ class SupabaseMemberDataSource {
     String? cursor,
     int limit = 20,
   }) async {
-    final params = <String, dynamic>{
-      'p_member_id': memberId,
-      'p_limit': limit,
-    };
+    final params = <String, dynamic>{'p_member_id': memberId, 'p_limit': limit};
     if (cursor != null) params['p_before'] = cursor;
 
     final data = await _client.rpc('get_member_timeline', params: params);
@@ -83,21 +80,20 @@ class SupabaseMemberDataSource {
     int limit = 25,
     int offset = 0,
   }) async {
-    final params = <String, dynamic>{
-      'p_limit': limit,
-      'p_offset': offset,
-    };
+    final params = <String, dynamic>{'p_limit': limit, 'p_offset': offset};
     if (search != null && search.isNotEmpty) params['p_search'] = search;
     if (role != null) params['p_role'] = role;
     if (userType != null) params['p_user_type'] = userType;
     if (accountStatus != null) params['p_account_status'] = accountStatus;
-    if (verificationStatus != null) params['p_verification_status'] = verificationStatus;
+    if (verificationStatus != null)
+      params['p_verification_status'] = verificationStatus;
     if (serviceType != null) params['p_service_category'] = serviceType;
     if (serviceCategory != null) params['p_service_category'] = serviceCategory;
     if (regionId != null) params['p_region_id'] = regionId;
     if (sanctionStatus != null) params['p_sanction_status'] = sanctionStatus;
     if (sort != null) params['p_sort'] = sort;
-    if (cursorCreatedAt != null) params['p_cursor'] = cursorCreatedAt.toIso8601String();
+    if (cursorCreatedAt != null)
+      params['p_cursor'] = cursorCreatedAt.toIso8601String();
     if (cursorId != null) params['p_cursor_id'] = cursorId.toString();
 
     final data = await _client.rpc('member_ops_list', params: params);
@@ -122,27 +118,33 @@ class SupabaseMemberDataSource {
     if (role != null) params['p_role'] = role;
     if (userType != null) params['p_user_type'] = userType;
     if (accountStatus != null) params['p_account_status'] = accountStatus;
-    if (verificationStatus != null) params['p_verification_status'] = verificationStatus;
+    if (verificationStatus != null)
+      params['p_verification_status'] = verificationStatus;
     if (serviceCategory != null) params['p_service_category'] = serviceCategory;
     if (regionId != null) params['p_region_id'] = regionId;
     if (sanctionStatus != null) params['p_sanction_status'] = sanctionStatus;
 
-    final result = await _client.rpc<dynamic>('member_ops_count', params: params);
+    final result = await _client.rpc<dynamic>(
+      'member_ops_count',
+      params: params,
+    );
     return (result as num?)?.toInt() ?? 0;
   }
 
   Future<Map<String, dynamic>?> getMemberOpsProfile(String memberId) async {
-    final data = await _client.rpc('get_member_ops_profile', params: {
-      'p_member_id': memberId,
-    });
+    final data = await _client.rpc(
+      'get_member_ops_profile',
+      params: {'p_member_id': memberId},
+    );
     if (data == null) return null;
     return Map<String, dynamic>.from(data as Map);
   }
 
   Future<Map<String, dynamic>?> memberFinancialSummary(String memberId) async {
-    final data = await _client.rpc('member_financial_summary', params: {
-      'p_member_id': memberId,
-    });
+    final data = await _client.rpc(
+      'member_financial_summary',
+      params: {'p_member_id': memberId},
+    );
     if (data == null) return null;
     return Map<String, dynamic>.from(data as Map);
   }

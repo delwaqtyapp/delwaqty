@@ -26,27 +26,30 @@ class _ProviderBannersPageState extends ConsumerState<ProviderBannersPage> {
       confirmTitle: l10n.submitForApproval,
       confirmMessage: l10n.createBanner,
       successMessage: l10n.bannerSubmitted,
-      onSubmit: ({
-        required titleAr,
-        titleEn,
-        subtitleAr,
-        subtitleEn,
-        regionId,
-        imageBytes,
-        imageExtension = 'jpg',
-        startsAt,
-        endsAt,
-      }) async {
-        await ref.read(campaignManagementProvider).submitProviderBanner(
-              titleAr: titleAr,
-              titleEn: titleEn,
-              subtitleAr: subtitleAr,
-              subtitleEn: subtitleEn,
-              regionId: regionId,
-              imageBytes: imageBytes,
-              imageExtension: imageExtension,
-            );
-      },
+      onSubmit:
+          ({
+            required titleAr,
+            titleEn,
+            subtitleAr,
+            subtitleEn,
+            regionId,
+            imageBytes,
+            imageExtension = 'jpg',
+            startsAt,
+            endsAt,
+          }) async {
+            await ref
+                .read(campaignManagementProvider)
+                .submitProviderBanner(
+                  titleAr: titleAr,
+                  titleEn: titleEn,
+                  subtitleAr: subtitleAr,
+                  subtitleEn: subtitleEn,
+                  regionId: regionId,
+                  imageBytes: imageBytes,
+                  imageExtension: imageExtension,
+                );
+          },
     );
     if (submitted) {
       ref.invalidate(providerCampaignsProvider);
@@ -140,9 +143,8 @@ class _ProviderBannersPageState extends ConsumerState<ProviderBannersPage> {
               children: [
                 Text(
                   title,
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
+                  style: Theme.of(context).textTheme.titleMedium
+                      ?.copyWith(fontWeight: FontWeight.bold),
                 ),
                 if (subtitle != null && subtitle.trim().isNotEmpty) ...[
                   const SizedBox(height: 4),
@@ -151,10 +153,8 @@ class _ProviderBannersPageState extends ConsumerState<ProviderBannersPage> {
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Theme.of(context)
-                              .colorScheme
-                              .onSurfaceVariant,
-                        ),
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
                   ),
                 ],
                 const SizedBox(height: 8),

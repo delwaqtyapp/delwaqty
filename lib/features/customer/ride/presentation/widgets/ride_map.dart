@@ -81,7 +81,9 @@ class _RideMapState extends State<RideMap> {
         Marker(
           markerId: const MarkerId('driver'),
           position: widget.driver!,
-          icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueAzure),
+          icon: BitmapDescriptor.defaultMarkerWithHue(
+            BitmapDescriptor.hueAzure,
+          ),
         ),
     };
 
@@ -102,7 +104,10 @@ class _RideMapState extends State<RideMap> {
       child: SizedBox(
         height: widget.height,
         child: GoogleMap(
-          initialCameraPosition: CameraPosition(target: widget.pickup, zoom: 14),
+          initialCameraPosition: CameraPosition(
+            target: widget.pickup,
+            zoom: 14,
+          ),
           markers: markers,
           polylines: polylines,
           myLocationButtonEnabled: false,

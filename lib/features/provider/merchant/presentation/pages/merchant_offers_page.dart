@@ -136,7 +136,8 @@ class _MerchantOffersPageState extends ConsumerState<MerchantOffersPage> {
                         delay: Duration(milliseconds: index * 50),
                         child: _OfferCard(
                           offer: offer,
-                          onEdit: () => _showOfferForm(context, ref, offer: offer),
+                          onEdit: () =>
+                              _showOfferForm(context, ref, offer: offer),
                           onDelete: () => _confirmDelete(context, offer),
                           onToggleActive: () => _toggleActive(offer),
                         ),
@@ -152,11 +153,7 @@ class _MerchantOffersPageState extends ConsumerState<MerchantOffersPage> {
     );
   }
 
-  void _showOfferForm(
-    BuildContext context,
-    WidgetRef ref, {
-    Offer? offer,
-  }) {
+  void _showOfferForm(BuildContext context, WidgetRef ref, {Offer? offer}) {
     final merchantId = ref.read(providerMerchantIdProvider).value ?? '';
     if (merchantId.isEmpty) {
       context.showAppSnackBar(
@@ -211,16 +208,11 @@ class _MerchantOffersPageState extends ConsumerState<MerchantOffersPage> {
       await repo.deleteOffer(offer.id);
       ref.invalidate(_offersProvider);
       if (mounted) {
-        context.showAppSnackBar(
-          AppLocalizations.of(context).offerDeleted,
-        );
+        context.showAppSnackBar(AppLocalizations.of(context).offerDeleted);
       }
     } catch (e) {
       if (mounted) {
-        context.showAppSnackBar(
-          appErrorText(context, e),
-          isError: true,
-        );
+        context.showAppSnackBar(appErrorText(context, e), isError: true);
       }
     }
   }
@@ -233,10 +225,7 @@ class _MerchantOffersPageState extends ConsumerState<MerchantOffersPage> {
       ref.invalidate(_offersProvider);
     } catch (e) {
       if (mounted) {
-        context.showAppSnackBar(
-          appErrorText(context, e),
-          isError: true,
-        );
+        context.showAppSnackBar(appErrorText(context, e), isError: true);
       }
     }
   }
@@ -272,7 +261,9 @@ class _OfferCard extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: 12),
       child: DecoratedBox(
         decoration: BoxDecoration(
-          color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+          color: theme.colorScheme.surfaceContainerHighest.withValues(
+            alpha: 0.5,
+          ),
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
             color: offer.isActive
@@ -285,8 +276,7 @@ class _OfferCard extends StatelessWidget {
           children: [
             Container(
               width: double.infinity,
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   colors: isExpired
@@ -319,15 +309,18 @@ class _OfferCard extends StatelessWidget {
                     const Spacer(),
                     Container(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 8, vertical: 2),
+                        horizontal: 8,
+                        vertical: 2,
+                      ),
                       decoration: BoxDecoration(
                         color: Colors.black26,
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Text(
                         l10n.offerExpired,
-                        style: theme.textTheme.labelSmall
-                            ?.copyWith(color: Colors.white),
+                        style: theme.textTheme.labelSmall?.copyWith(
+                          color: Colors.white,
+                        ),
                       ),
                     ),
                   ],
@@ -341,8 +334,9 @@ class _OfferCard extends StatelessWidget {
                 children: [
                   Text(
                     offer.title,
-                    style: theme.textTheme.bodyLarge
-                        ?.copyWith(fontWeight: FontWeight.w600),
+                    style: theme.textTheme.bodyLarge?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                   if (offer.description != null) ...[
                     const SizedBox(height: 4),
@@ -433,19 +427,19 @@ class _StatusChip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
-                  color: isActive
-                      ? AppColors.successLight
-                      : Theme.of(context).colorScheme.surfaceContainerHighest,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Text(
-                  label,
-                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                        color: isActive
-                            ? AppColors.successDark
-                            : Theme.of(context).colorScheme.onSurfaceVariant,
-              fontWeight: FontWeight.w600,
-            ),
+        color: isActive
+            ? AppColors.successLight
+            : Theme.of(context).colorScheme.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Text(
+        label,
+        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+          color: isActive
+              ? AppColors.successDark
+              : Theme.of(context).colorScheme.onSurfaceVariant,
+          fontWeight: FontWeight.w600,
+        ),
       ),
     );
   }
@@ -485,14 +479,18 @@ class _OfferFormSheetState extends ConsumerState<_OfferFormSheet> {
     super.initState();
     final offer = widget.offer;
     _titleController = TextEditingController(text: offer?.title ?? '');
-    _descriptionController =
-        TextEditingController(text: offer?.description ?? '');
-    _discountValueController =
-        TextEditingController(text: offer?.discountValue.toString() ?? '');
-    _minimumOrderController =
-        TextEditingController(text: offer?.minimumOrder.toString() ?? '');
-    _maxDiscountController =
-        TextEditingController(text: offer?.maximumDiscount?.toString() ?? '');
+    _descriptionController = TextEditingController(
+      text: offer?.description ?? '',
+    );
+    _discountValueController = TextEditingController(
+      text: offer?.discountValue.toString() ?? '',
+    );
+    _minimumOrderController = TextEditingController(
+      text: offer?.minimumOrder.toString() ?? '',
+    );
+    _maxDiscountController = TextEditingController(
+      text: offer?.maximumDiscount?.toString() ?? '',
+    );
     _discountType = offer?.discountType ?? 'percentage';
     _isActive = offer?.isActive ?? true;
     _startDate = offer?.startsAt;
@@ -616,7 +614,8 @@ class _OfferFormSheetState extends ConsumerState<_OfferFormSheet> {
                       keyboardType: TextInputType.number,
                       validator: (v) {
                         if (v == null || v.isEmpty) return l10n.fieldRequired;
-                        if (double.tryParse(v) == null) return l10n.fieldRequired;
+                        if (double.tryParse(v) == null)
+                          return l10n.fieldRequired;
                         return null;
                       },
                     ),
@@ -651,7 +650,8 @@ class _OfferFormSheetState extends ConsumerState<_OfferFormSheet> {
                             date: _startDate,
                             onTap: () async {
                               final now = DateTime.now();
-                              final firstDate = _startDate != null &&
+                              final firstDate =
+                                  _startDate != null &&
                                       _startDate!.isBefore(now)
                                   ? _startDate!
                                   : now;
@@ -659,9 +659,7 @@ class _OfferFormSheetState extends ConsumerState<_OfferFormSheet> {
                                 context: context,
                                 initialDate: _startDate ?? now,
                                 firstDate: firstDate,
-                                lastDate: now.add(
-                                  const Duration(days: 365),
-                                ),
+                                lastDate: now.add(const Duration(days: 365)),
                               );
                               if (!mounted) return;
                               if (picked != null) {
@@ -677,12 +675,14 @@ class _OfferFormSheetState extends ConsumerState<_OfferFormSheet> {
                             date: _endDate,
                             onTap: () async {
                               final now = DateTime.now();
-                              final firstDate = _startDate != null &&
+                              final firstDate =
+                                  _startDate != null &&
                                       _startDate!.isBefore(now)
                                   ? _startDate!
                                   : (_startDate ?? now);
-                              final defaultEnd =
-                                  now.add(const Duration(days: 30));
+                              final defaultEnd = now.add(
+                                const Duration(days: 30),
+                              );
                               final rawInitial = _endDate ?? defaultEnd;
                               final initialDate = rawInitial.isBefore(firstDate)
                                   ? firstDate
@@ -691,9 +691,7 @@ class _OfferFormSheetState extends ConsumerState<_OfferFormSheet> {
                                 context: context,
                                 initialDate: initialDate,
                                 firstDate: firstDate,
-                                lastDate: now.add(
-                                  const Duration(days: 365),
-                                ),
+                                lastDate: now.add(const Duration(days: 365)),
                               );
                               if (!mounted) return;
                               if (picked != null) {
@@ -707,9 +705,7 @@ class _OfferFormSheetState extends ConsumerState<_OfferFormSheet> {
                     const SizedBox(height: 16),
                     SwitchListTile(
                       title: Text(l10n.activateOffer),
-                      subtitle: Text(
-                        _isActive ? l10n.active : l10n.inactive,
-                      ),
+                      subtitle: Text(_isActive ? l10n.active : l10n.inactive),
                       value: _isActive,
                       onChanged: (v) => setState(() => _isActive = v),
                       contentPadding: EdgeInsets.zero,
@@ -780,9 +776,8 @@ class _OfferFormSheetState extends ConsumerState<_OfferFormSheet> {
       // so the Save button stayed permanently disabled with no message.
       if (!mounted) return;
       setState(() => _saving = false);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(appErrorText(context, e))),
-      );
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(appErrorText(context, e))));
       return;
     }
     if (mounted) setState(() => _saving = false);

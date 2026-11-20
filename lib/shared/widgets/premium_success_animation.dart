@@ -97,10 +97,7 @@ class _PremiumSuccessAnimationState extends State<PremiumSuccessAnimation>
             ),
             child: Container(
               margin: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: color,
-              ),
+              decoration: BoxDecoration(shape: BoxShape.circle, color: color),
               child: AnimatedBuilder(
                 animation: _checkAnimation,
                 builder: (context, child) {
@@ -143,8 +140,14 @@ class _CheckPainter extends CustomPainter {
     final center = Offset(size.width / 2, size.height / 2);
     final checkPath = Path();
     checkPath.moveTo(center.dx - size.width * 0.2, center.dy);
-    checkPath.lineTo(center.dx - size.width * 0.05, center.dy + size.height * 0.15);
-    checkPath.lineTo(center.dx + size.width * 0.2, center.dy - size.height * 0.15);
+    checkPath.lineTo(
+      center.dx - size.width * 0.05,
+      center.dy + size.height * 0.15,
+    );
+    checkPath.lineTo(
+      center.dx + size.width * 0.2,
+      center.dy - size.height * 0.15,
+    );
 
     final metric = checkPath.computeMetrics().first;
     final extractedPath = metric.extractPath(0, metric.length * progress);

@@ -113,10 +113,10 @@ class SupabaseMerchantDashboardDataSource {
       final averageRating = reviews.isEmpty
           ? 0.0
           : reviews.fold<double>(
-                0,
-                (sum, r) => sum + ((r['rating'] as num?)?.toDouble() ?? 0),
-              ) /
-              reviews.length;
+                  0,
+                  (sum, r) => sum + ((r['rating'] as num?)?.toDouble() ?? 0),
+                ) /
+                reviews.length;
 
       return MerchantStats(
         todayOrders: todayRes,
@@ -232,10 +232,7 @@ class SupabaseMerchantDashboardDataSource {
     try {
       await _client
           .from('products')
-          .update({
-            ...product,
-            'updated_at': DateTime.now().toIso8601String(),
-          })
+          .update({...product, 'updated_at': DateTime.now().toIso8601String()})
           .eq('id', productId);
     } catch (e) {
       _logger.e('Failed to update product', e);

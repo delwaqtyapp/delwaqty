@@ -31,9 +31,7 @@ class _PagedRepository extends MockNotificationRepository {
 
 Widget _buildTestApp(NotificationRepository repo) {
   return ProviderScope(
-    overrides: [
-      notificationRepositoryProvider.overrideWithValue(repo),
-    ],
+    overrides: [notificationRepositoryProvider.overrideWithValue(repo)],
     child: const MaterialApp(
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,

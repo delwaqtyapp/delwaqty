@@ -66,10 +66,12 @@ void main() {
     );
   }
 
-  testWidgets('shows governorates with a loading indicator first', (tester) async {
-    await tester.pumpWidget(buildTestApp(MockRegionRepository(
-      governorates: [cairo, giza],
-    )));
+  testWidgets('shows governorates with a loading indicator first', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      buildTestApp(MockRegionRepository(governorates: [cairo, giza])),
+    );
     expect(find.byType(CircularProgressIndicator), findsOneWidget);
 
     await tester.pumpAndSettle();
@@ -96,13 +98,14 @@ void main() {
       of: find.byIcon(Icons.check_circle_rounded),
       matching: find.byType(ListTile),
     );
-    expect(find.descendant(of: checkTile, matching: find.text('Cairo')), findsOneWidget);
+    expect(
+      find.descendant(of: checkTile, matching: find.text('Cairo')),
+      findsOneWidget,
+    );
   });
 
   testWidgets('search filters the governorate list', (tester) async {
-    final repository = MockRegionRepository(
-      governorates: [cairo, giza],
-    );
+    final repository = MockRegionRepository(governorates: [cairo, giza]);
 
     await tester.pumpWidget(buildTestApp(repository));
     await tester.pumpAndSettle();
@@ -114,10 +117,10 @@ void main() {
     expect(find.text('Cairo'), findsNothing);
   });
 
-  testWidgets('selecting a governorate persists and pops with the region', (tester) async {
-    final repository = MockRegionRepository(
-      governorates: [cairo, giza],
-    );
+  testWidgets('selecting a governorate persists and pops with the region', (
+    tester,
+  ) async {
+    final repository = MockRegionRepository(governorates: [cairo, giza]);
     Region? popped;
 
     await tester.pumpWidget(
@@ -163,9 +166,7 @@ void main() {
   });
 
   testWidgets('shows a failure snack bar when saving fails', (tester) async {
-    final repository = MockRegionRepository(
-      governorates: [cairo],
-    );
+    final repository = MockRegionRepository(governorates: [cairo]);
 
     await tester.pumpWidget(buildTestApp(repository));
     await tester.pumpAndSettle();
@@ -178,9 +179,7 @@ void main() {
   });
 
   testWidgets('shows no-results text when nothing matches', (tester) async {
-    final repository = MockRegionRepository(
-      governorates: [cairo, giza],
-    );
+    final repository = MockRegionRepository(governorates: [cairo, giza]);
 
     await tester.pumpWidget(buildTestApp(repository));
     await tester.pumpAndSettle();

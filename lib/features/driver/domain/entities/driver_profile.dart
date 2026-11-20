@@ -3,11 +3,7 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 part 'driver_profile.freezed.dart';
 part 'driver_profile.g.dart';
 
-enum DriverStatus {
-  offline,
-  online,
-  onDelivery,
-}
+enum DriverStatus { offline, online, onDelivery }
 
 @freezed
 abstract class DriverProfile with _$DriverProfile {

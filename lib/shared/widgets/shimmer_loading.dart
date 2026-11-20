@@ -39,11 +39,13 @@ class _ShimmerLoadingState extends State<ShimmerLoading>
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final base = widget.baseColor ??
+    final base =
+        widget.baseColor ??
         (isDark
             ? Colors.white.withValues(alpha: 0.06)
             : Colors.black.withValues(alpha: 0.06));
-    final highlight = widget.highlightColor ??
+    final highlight =
+        widget.highlightColor ??
         (isDark
             ? Colors.white.withValues(alpha: 0.12)
             : Colors.black.withValues(alpha: 0.12));

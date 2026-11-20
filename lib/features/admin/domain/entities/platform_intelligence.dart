@@ -72,7 +72,8 @@ abstract class PlatformKpiSummary with _$PlatformKpiSummary {
         verifiedDrivers: json['verified_drivers'] as int? ?? 0,
         totalMerchants: json['total_merchants'] as int? ?? 0,
         activeMerchants: json['active_merchants'] as int? ?? 0,
-        merchantsByType: (json['merchants_by_type'] as List<dynamic>?)
+        merchantsByType:
+            (json['merchants_by_type'] as List<dynamic>?)
                 ?.map((e) => TypeCount.fromJson(e as Map<String, dynamic>))
                 .toList() ??
             const [],
@@ -116,15 +117,13 @@ abstract class PlatformKpiSummary with _$PlatformKpiSummary {
 
 @freezed
 abstract class TypeCount with _$TypeCount {
-  const factory TypeCount({
-    @Default('') String type,
-    @Default(0) int count,
-  }) = _TypeCount;
+  const factory TypeCount({@Default('') String type, @Default(0) int count}) =
+      _TypeCount;
 
   factory TypeCount.fromJson(Map<String, dynamic> json) => TypeCount(
-        type: json['type'] as String? ?? '',
-        count: json['count'] as int? ?? 0,
-      );
+    type: json['type'] as String? ?? '',
+    count: json['count'] as int? ?? 0,
+  );
 }
 
 @freezed
@@ -139,19 +138,31 @@ abstract class ServicePerformance with _$ServicePerformance {
 
   factory ServicePerformance.fromJson(Map<String, dynamic> json) =>
       ServicePerformance(
-        homeServices: (json['home_services'] as List<dynamic>?)
-                ?.map((e) =>
-                    ServiceCategoryPerformance.fromJson(e as Map<String, dynamic>))
+        homeServices:
+            (json['home_services'] as List<dynamic>?)
+                ?.map(
+                  (e) => ServiceCategoryPerformance.fromJson(
+                    e as Map<String, dynamic>,
+                  ),
+                )
                 .toList() ??
             const [],
-        rideServices: (json['ride_services'] as List<dynamic>?)
-                ?.map((e) =>
-                    ServiceCategoryPerformance.fromJson(e as Map<String, dynamic>))
+        rideServices:
+            (json['ride_services'] as List<dynamic>?)
+                ?.map(
+                  (e) => ServiceCategoryPerformance.fromJson(
+                    e as Map<String, dynamic>,
+                  ),
+                )
                 .toList() ??
             const [],
-        deliveryServices: (json['delivery_services'] as List<dynamic>?)
-                ?.map((e) =>
-                    ServiceCategoryPerformance.fromJson(e as Map<String, dynamic>))
+        deliveryServices:
+            (json['delivery_services'] as List<dynamic>?)
+                ?.map(
+                  (e) => ServiceCategoryPerformance.fromJson(
+                    e as Map<String, dynamic>,
+                  ),
+                )
                 .toList() ??
             const [],
         dateFrom: json['date_from'] != null
@@ -245,13 +256,14 @@ abstract class MerchantIntelligence with _$MerchantIntelligence {
       MerchantIntelligence(
         totalMerchants: json['total_merchants'] as int? ?? 0,
         activeMerchants: json['active_merchants'] as int? ?? 0,
-        merchantsByType: (json['merchants_by_type'] as List<dynamic>?)
+        merchantsByType:
+            (json['merchants_by_type'] as List<dynamic>?)
                 ?.map((e) => TypeCount.fromJson(e as Map<String, dynamic>))
                 .toList() ??
             const [],
-        merchants: (json['merchants'] as List<dynamic>?)
-                ?.map((e) =>
-                    MerchantInfo.fromJson(e as Map<String, dynamic>))
+        merchants:
+            (json['merchants'] as List<dynamic>?)
+                ?.map((e) => MerchantInfo.fromJson(e as Map<String, dynamic>))
                 .toList() ??
             const [],
         dateFrom: json['date_from'] != null
@@ -275,13 +287,13 @@ abstract class MerchantInfo with _$MerchantInfo {
   }) = _MerchantInfo;
 
   factory MerchantInfo.fromJson(Map<String, dynamic> json) => MerchantInfo(
-        id: json['id'] as String? ?? '',
-        name: json['name'] as String? ?? '',
-        type: json['type'] as String? ?? '',
-        status: json['status'] as String? ?? '',
-        rating: (json['rating'] as num?)?.toDouble() ?? 0.0,
-        totalOrders: json['total_orders'] as int? ?? 0,
-      );
+    id: json['id'] as String? ?? '',
+    name: json['name'] as String? ?? '',
+    type: json['type'] as String? ?? '',
+    status: json['status'] as String? ?? '',
+    rating: (json['rating'] as num?)?.toDouble() ?? 0.0,
+    totalOrders: json['total_orders'] as int? ?? 0,
+  );
 }
 
 @freezed
@@ -302,7 +314,8 @@ abstract class WalletIntelligence with _$WalletIntelligence {
         totalTransactions: json['total_transactions'] as int? ?? 0,
         totalLiability: (json['total_liability'] as num?)?.toDouble() ?? 0.0,
         avgBalance: (json['avg_balance'] as num?)?.toDouble() ?? 0.0,
-        transactionsByType: (json['transactions_by_type'] as List<dynamic>?)
+        transactionsByType:
+            (json['transactions_by_type'] as List<dynamic>?)
                 ?.map((e) => TypeCount.fromJson(e as Map<String, dynamic>))
                 .toList() ??
             const [],
@@ -332,11 +345,13 @@ abstract class ProviderIntelligence with _$ProviderIntelligence {
         totalProviders: json['total_providers'] as int? ?? 0,
         verifiedProviders: json['verified_providers'] as int? ?? 0,
         availableProviders: json['available_providers'] as int? ?? 0,
-        bookingsByCategory: (json['bookings_by_category'] as List<dynamic>?)
+        bookingsByCategory:
+            (json['bookings_by_category'] as List<dynamic>?)
                 ?.map((e) => TypeCount.fromJson(e as Map<String, dynamic>))
                 .toList() ??
             const [],
-        providersByCategory: (json['providers_by_category'] as List<dynamic>?)
+        providersByCategory:
+            (json['providers_by_category'] as List<dynamic>?)
                 ?.map((e) => TypeCount.fromJson(e as Map<String, dynamic>))
                 .toList() ??
             const [],
@@ -361,31 +376,30 @@ abstract class CommissionSummary with _$CommissionSummary {
     DateTime? dateTo,
   }) = _CommissionSummary;
 
-  factory CommissionSummary.fromJson(Map<String, dynamic> json) =>
-      CommissionSummary(
-        totalCommission:
-            (json['total_commission'] as num?)?.toDouble() ?? 0.0,
-        pendingCommission:
-            (json['pending_commission'] as num?)?.toDouble() ?? 0.0,
-        fulfilledCommission:
-            (json['fulfilled_commission'] as num?)?.toDouble() ?? 0.0,
-        activeRules: (json['active_rules'] as List<dynamic>?)
-                ?.map((e) =>
-                    CommissionRule.fromJson(e as Map<String, dynamic>))
-                .toList() ??
-            const [],
-        commissionByRate: (json['commission_by_rate'] as List<dynamic>?)
-                ?.map((e) =>
-                    CommissionByRate.fromJson(e as Map<String, dynamic>))
-                .toList() ??
-            const [],
-        dateFrom: json['date_from'] != null
-            ? DateTime.parse(json['date_from'] as String)
-            : null,
-        dateTo: json['date_to'] != null
-            ? DateTime.parse(json['date_to'] as String)
-            : null,
-      );
+  factory CommissionSummary.fromJson(
+    Map<String, dynamic> json,
+  ) => CommissionSummary(
+    totalCommission: (json['total_commission'] as num?)?.toDouble() ?? 0.0,
+    pendingCommission: (json['pending_commission'] as num?)?.toDouble() ?? 0.0,
+    fulfilledCommission:
+        (json['fulfilled_commission'] as num?)?.toDouble() ?? 0.0,
+    activeRules:
+        (json['active_rules'] as List<dynamic>?)
+            ?.map((e) => CommissionRule.fromJson(e as Map<String, dynamic>))
+            .toList() ??
+        const [],
+    commissionByRate:
+        (json['commission_by_rate'] as List<dynamic>?)
+            ?.map((e) => CommissionByRate.fromJson(e as Map<String, dynamic>))
+            .toList() ??
+        const [],
+    dateFrom: json['date_from'] != null
+        ? DateTime.parse(json['date_from'] as String)
+        : null,
+    dateTo: json['date_to'] != null
+        ? DateTime.parse(json['date_to'] as String)
+        : null,
+  );
 }
 
 @freezed
@@ -397,13 +411,12 @@ abstract class CommissionRule with _$CommissionRule {
     @Default('') String entityType,
   }) = _CommissionRule;
 
-  factory CommissionRule.fromJson(Map<String, dynamic> json) =>
-      CommissionRule(
-        rate: (json['rate'] as num?)?.toDouble() ?? 0.0,
-        currency: json['currency'] as String? ?? '',
-        entityKey: json['entity_key'] as String? ?? '',
-        entityType: json['entity_type'] as String? ?? '',
-      );
+  factory CommissionRule.fromJson(Map<String, dynamic> json) => CommissionRule(
+    rate: (json['rate'] as num?)?.toDouble() ?? 0.0,
+    currency: json['currency'] as String? ?? '',
+    entityKey: json['entity_key'] as String? ?? '',
+    entityType: json['entity_type'] as String? ?? '',
+  );
 }
 
 @freezed
@@ -442,9 +455,9 @@ abstract class ComplaintSummary with _$ComplaintSummary {
         resolvedComplaints: json['resolved_complaints'] as int? ?? 0,
         escalatedComplaints: json['escalated_complaints'] as int? ?? 0,
         escalationEvents: json['escalation_events'] as int? ?? 0,
-        complaintsByStatus: (json['complaints_by_status'] as List<dynamic>?)
-                ?.map((e) =>
-                    StatusCount.fromJson(e as Map<String, dynamic>))
+        complaintsByStatus:
+            (json['complaints_by_status'] as List<dynamic>?)
+                ?.map((e) => StatusCount.fromJson(e as Map<String, dynamic>))
                 .toList() ??
             const [],
         dateFrom: json['date_from'] != null
@@ -464,9 +477,9 @@ abstract class StatusCount with _$StatusCount {
   }) = _StatusCount;
 
   factory StatusCount.fromJson(Map<String, dynamic> json) => StatusCount(
-        status: json['status'] as String? ?? '',
-        count: json['count'] as int? ?? 0,
-      );
+    status: json['status'] as String? ?? '',
+    count: json['count'] as int? ?? 0,
+  );
 }
 
 @freezed
@@ -485,9 +498,12 @@ abstract class TransactionLedger with _$TransactionLedger {
         page: json['page'] as int? ?? 0,
         pageSize: json['page_size'] as int? ?? 0,
         totalPages: json['total_pages'] as int? ?? 0,
-        items: (json['items'] as List<dynamic>?)
-                ?.map((e) =>
-                    TransactionLedgerItem.fromJson(e as Map<String, dynamic>))
+        items:
+            (json['items'] as List<dynamic>?)
+                ?.map(
+                  (e) =>
+                      TransactionLedgerItem.fromJson(e as Map<String, dynamic>),
+                )
                 .toList() ??
             const [],
       );
@@ -546,8 +562,7 @@ abstract class RevenueOverview with _$RevenueOverview {
         totalGmv: (json['total_gmv'] as num?)?.toDouble() ?? 0.0,
         refundCount: json['refund_count'] as int? ?? 0,
         commission3pct: (json['commission_3pct'] as num?)?.toDouble() ?? 0.0,
-        totalCommission:
-            (json['total_commission'] as num?)?.toDouble() ?? 0.0,
+        totalCommission: (json['total_commission'] as num?)?.toDouble() ?? 0.0,
         dateFrom: json['date_from'] != null
             ? DateTime.parse(json['date_from'] as String)
             : null,
@@ -569,41 +584,39 @@ abstract class TimeseriesData with _$TimeseriesData {
     DateTime? dateTo,
   }) = _TimeseriesData;
 
-  factory TimeseriesData.fromJson(Map<String, dynamic> json) =>
-      TimeseriesData(
-        ordersByDay: (json['orders_by_day'] as List<dynamic>?)
-                ?.map((e) =>
-                    DailyMetric.fromJson(e as Map<String, dynamic>))
-                .toList() ??
-            const [],
-        deliveriesByDay: (json['deliveries_by_day'] as List<dynamic>?)
-                ?.map((e) =>
-                    DailyMetric.fromJson(e as Map<String, dynamic>))
-                .toList() ??
-            const [],
-        ordersByStatus: (json['orders_by_status'] as List<dynamic>?)
-                ?.map((e) =>
-                    StatusCount.fromJson(e as Map<String, dynamic>))
-                .toList() ??
-            const [],
-        deliveriesByStatus: (json['deliveries_by_status'] as List<dynamic>?)
-                ?.map((e) =>
-                    StatusCount.fromJson(e as Map<String, dynamic>))
-                .toList() ??
-            const [],
-        serviceBookingsByStatus:
-            (json['service_bookings_by_status'] as List<dynamic>?)
-                    ?.map((e) =>
-                        StatusCount.fromJson(e as Map<String, dynamic>))
-                    .toList() ??
-                const [],
-        dateFrom: json['date_from'] != null
-            ? DateTime.parse(json['date_from'] as String)
-            : null,
-        dateTo: json['date_to'] != null
-            ? DateTime.parse(json['date_to'] as String)
-            : null,
-      );
+  factory TimeseriesData.fromJson(Map<String, dynamic> json) => TimeseriesData(
+    ordersByDay:
+        (json['orders_by_day'] as List<dynamic>?)
+            ?.map((e) => DailyMetric.fromJson(e as Map<String, dynamic>))
+            .toList() ??
+        const [],
+    deliveriesByDay:
+        (json['deliveries_by_day'] as List<dynamic>?)
+            ?.map((e) => DailyMetric.fromJson(e as Map<String, dynamic>))
+            .toList() ??
+        const [],
+    ordersByStatus:
+        (json['orders_by_status'] as List<dynamic>?)
+            ?.map((e) => StatusCount.fromJson(e as Map<String, dynamic>))
+            .toList() ??
+        const [],
+    deliveriesByStatus:
+        (json['deliveries_by_status'] as List<dynamic>?)
+            ?.map((e) => StatusCount.fromJson(e as Map<String, dynamic>))
+            .toList() ??
+        const [],
+    serviceBookingsByStatus:
+        (json['service_bookings_by_status'] as List<dynamic>?)
+            ?.map((e) => StatusCount.fromJson(e as Map<String, dynamic>))
+            .toList() ??
+        const [],
+    dateFrom: json['date_from'] != null
+        ? DateTime.parse(json['date_from'] as String)
+        : null,
+    dateTo: json['date_to'] != null
+        ? DateTime.parse(json['date_to'] as String)
+        : null,
+  );
 }
 
 @freezed
@@ -615,12 +628,10 @@ abstract class DailyMetric with _$DailyMetric {
   }) = _DailyMetric;
 
   factory DailyMetric.fromJson(Map<String, dynamic> json) => DailyMetric(
-        date: json['date'] != null
-            ? DateTime.parse(json['date'] as String)
-            : null,
-        count: json['count'] as int? ?? 0,
-        revenue: (json['revenue'] as num?)?.toDouble() ?? 0.0,
-      );
+    date: json['date'] != null ? DateTime.parse(json['date'] as String) : null,
+    count: json['count'] as int? ?? 0,
+    revenue: (json['revenue'] as num?)?.toDouble() ?? 0.0,
+  );
 }
 
 @freezed

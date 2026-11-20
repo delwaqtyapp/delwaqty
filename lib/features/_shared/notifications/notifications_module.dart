@@ -108,9 +108,9 @@ class NotificationsModule extends FeatureModule {
 
   @override
   Stream<int>? badgeStream(Ref ref) {
-    return ref.watch(unreadCountStreamProvider).whenOrNull(
-          data: (count) => Stream.value(count),
-        );
+    return ref
+        .watch(unreadCountStreamProvider)
+        .whenOrNull(data: (count) => Stream.value(count));
   }
 
   @override
@@ -119,9 +119,9 @@ class NotificationsModule extends FeatureModule {
       id: 'notifications',
       label: (ctx) => AppLocalizations.of(ctx).notifications,
       icon: Icons.notifications_outlined,
-      badgeStream: (ref) => ref.watch(unreadCountStreamProvider).whenOrNull(
-            data: (count) => Stream.value(count),
-          ),
+      badgeStream: (ref) => ref
+          .watch(unreadCountStreamProvider)
+          .whenOrNull(data: (count) => Stream.value(count)),
       onTap: (ctx, ref) {
         ctx.push('/notifications');
       },

@@ -51,10 +51,7 @@ final _catalog = [
   ),
 ];
 
-Widget _buildTestApp({
-  List<ServiceCategory>? catalog,
-  String locale = 'en',
-}) {
+Widget _buildTestApp({List<ServiceCategory>? catalog, String locale = 'en'}) {
   return ProviderScope(
     overrides: [
       authStateProvider.overrideWith(_FakeAuthNotifier.new),
@@ -71,46 +68,45 @@ Widget _buildTestApp({
 }
 
 void main() {
-  testWidgets(
-    'provider role lists every real service from the live catalog',
-    (tester) async {
-      tester.view.physicalSize = const Size(1280, 2800);
-      tester.view.devicePixelRatio = 2.975;
-      addTearDown(tester.view.reset);
+  testWidgets('provider role lists every real service from the live catalog', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(1280, 2800);
+    tester.view.devicePixelRatio = 2.975;
+    addTearDown(tester.view.reset);
 
-      await tester.pumpWidget(_buildTestApp(catalog: _catalog));
-      await tester.pump(const Duration(milliseconds: 400));
+    await tester.pumpWidget(_buildTestApp(catalog: _catalog));
+    await tester.pump(const Duration(milliseconds: 400));
 
-      await tester.tap(find.text('Service Provider'));
-      await tester.pump(const Duration(milliseconds: 200));
-      await tester.pumpAndSettle();
+    await tester.tap(find.text('Service Provider'));
+    await tester.pump(const Duration(milliseconds: 200));
+    await tester.pumpAndSettle();
 
-      expect(find.text('0 selected'), findsOneWidget);
-      expect(find.text('Plumbing'), findsOneWidget);
-      expect(find.text('Electrical'), findsOneWidget);
-      expect(find.text('Doctor Booking'), findsOneWidget);
-      expect(find.text('Barber'), findsOneWidget);
-      expect(find.text('Other Services'), findsOneWidget);
+    expect(find.text('0 selected'), findsOneWidget);
+    expect(find.text('Plumbing'), findsOneWidget);
+    expect(find.text('Electrical'), findsOneWidget);
+    expect(find.text('Doctor Booking'), findsOneWidget);
+    expect(find.text('Barber'), findsOneWidget);
+    expect(find.text('Other Services'), findsOneWidget);
 
-      await tester.ensureVisible(find.text('Plumbing'));
-      await tester.pump(const Duration(milliseconds: 300));
-      await tester.tap(find.text('Plumbing'));
-      await tester.pump(const Duration(milliseconds: 300));
-      expect(find.text('1 selected'), findsOneWidget);
+    await tester.ensureVisible(find.text('Plumbing'));
+    await tester.pump(const Duration(milliseconds: 300));
+    await tester.tap(find.text('Plumbing'));
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(find.text('1 selected'), findsOneWidget);
 
-      await tester.ensureVisible(find.text('Select all'));
-      await tester.pump(const Duration(milliseconds: 300));
-      await tester.tap(find.text('Select all'));
-      await tester.pump(const Duration(milliseconds: 300));
-      expect(find.text('5 selected'), findsOneWidget);
+    await tester.ensureVisible(find.text('Select all'));
+    await tester.pump(const Duration(milliseconds: 300));
+    await tester.tap(find.text('Select all'));
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(find.text('5 selected'), findsOneWidget);
 
-      final container = ProviderScope.containerOf(
-        tester.element(find.byType(RegisterPage)),
-      );
-      expect(container.read(providerServicesCatalogProvider).value, _catalog);
-      await tester.pumpAndSettle();
-    },
-  );
+    final container = ProviderScope.containerOf(
+      tester.element(find.byType(RegisterPage)),
+    );
+    expect(container.read(providerServicesCatalogProvider).value, _catalog);
+    await tester.pumpAndSettle();
+  });
 
   testWidgets(
     'full wizard reaches confirmation without overflow at the real phone geometry',

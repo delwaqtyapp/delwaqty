@@ -19,9 +19,7 @@ class SupabaseServiceReviewDataSource {
     if (providerId != null) {
       query = query.eq('provider_id', providerId);
     }
-    final data = await query
-        .order('created_at', ascending: false)
-        .limit(100);
+    final data = await query.order('created_at', ascending: false).limit(100);
     return (data as List)
         .map((r) => ServiceReview.fromJson(r as Map<String, dynamic>))
         .toList();
@@ -39,7 +37,10 @@ class SupabaseServiceReviewDataSource {
       if (data == null) return const ServiceReviewSummary();
       return ServiceReviewSummary.fromJson(data as Map<String, dynamic>);
     }
-    final reviews = await getServiceReviews(categoryType, providerId: providerId);
+    final reviews = await getServiceReviews(
+      categoryType,
+      providerId: providerId,
+    );
     return _summarize(reviews);
   }
 
@@ -47,7 +48,8 @@ class SupabaseServiceReviewDataSource {
     if (reviews.isEmpty) return const ServiceReviewSummary();
     final total = reviews.length;
     final sum = reviews.fold<double>(0, (acc, r) => acc + r.rating);
-    int countOf(int stars) => reviews.where((r) => r.rating.round() == stars).length;
+    int countOf(int stars) =>
+        reviews.where((r) => r.rating.round() == stars).length;
     return ServiceReviewSummary(
       averageRating: double.parse((sum / total).toStringAsFixed(1)),
       totalReviews: total,
@@ -124,6 +126,6 @@ class SupabaseServiceReviewDataSource {
 
 final supabaseServiceReviewDataSourceProvider =
     Provider<SupabaseServiceReviewDataSource>(
-  (ref) =>
-      SupabaseServiceReviewDataSource(ref.watch(supabaseClientProvider)),
-);
+      (ref) =>
+          SupabaseServiceReviewDataSource(ref.watch(supabaseClientProvider)),
+    );

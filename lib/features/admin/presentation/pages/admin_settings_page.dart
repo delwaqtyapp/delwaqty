@@ -130,9 +130,7 @@ class _AdminSettingsPageState extends ConsumerState<AdminSettingsPage> {
         ],
       ),
       body: settingsAsync.when(
-        loading: () => const Center(
-          child: AppLoaderCircular(),
-        ),
+        loading: () => const Center(child: AppLoaderCircular()),
         error: (e, _) => Center(
           child: PremiumEmptyState(
             icon: Icons.error_outline_rounded,
@@ -150,9 +148,8 @@ class _AdminSettingsPageState extends ConsumerState<AdminSettingsPage> {
               AnimatedFadeIn(
                 child: Text(
                   l10n.adminPersonalSettings,
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: Theme.of(context).textTheme.titleMedium
+                      ?.copyWith(fontWeight: FontWeight.bold),
                 ),
               ),
               const SizedBox(height: 4),
@@ -191,9 +188,7 @@ class _AdminSettingsPageState extends ConsumerState<AdminSettingsPage> {
                             onSelectionChanged: (selected) {
                               ref
                                   .read(adminLocaleProvider.notifier)
-                                  .setAdminLocale(
-                                    Locale(selected.first),
-                                  );
+                                  .setAdminLocale(Locale(selected.first));
                             },
                             style: const ButtonStyle(
                               visualDensity: VisualDensity.compact,
@@ -276,7 +271,9 @@ class _AdminSettingsPageState extends ConsumerState<AdminSettingsPage> {
                             ),
                             subtitle: Padding(
                               padding: const EdgeInsets.only(top: 4),
-                              child: Text(l10n.requireProviderDocumentsSubtitle),
+                              child: Text(
+                                l10n.requireProviderDocumentsSubtitle,
+                              ),
                             ),
                             value: _requireProviderDocuments,
                             onChanged: _isTogglingProviderDocs
@@ -294,9 +291,8 @@ class _AdminSettingsPageState extends ConsumerState<AdminSettingsPage> {
                 delay: const Duration(milliseconds: 180),
                 child: Text(
                   l10n.adminGlobalSettings,
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: Theme.of(context).textTheme.titleMedium
+                      ?.copyWith(fontWeight: FontWeight.bold),
                 ),
               ),
               const SizedBox(height: 4),
@@ -366,9 +362,7 @@ class _AdminSettingsPageState extends ConsumerState<AdminSettingsPage> {
                         ? const SizedBox(
                             height: 20,
                             width: 20,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                            ),
+                            child: CircularProgressIndicator(strokeWidth: 2),
                           )
                         : Text(l10n.saveSettings),
                   ),
@@ -384,9 +378,8 @@ class _AdminSettingsPageState extends ConsumerState<AdminSettingsPage> {
   Future<void> _saveSettings() async {
     final l10n = AppLocalizations.of(context);
     if (!_hydrated) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.failedToLoad)),
-      );
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(l10n.failedToLoad)));
       return;
     }
     setState(() => _isLoading = true);
@@ -411,8 +404,9 @@ class _AdminSettingsPageState extends ConsumerState<AdminSettingsPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(success ? l10n.settingsSaved : l10n.settingsFailed),
-          backgroundColor:
-              success ? AppColors.successLight : AppColors.errorLight,
+          backgroundColor: success
+              ? AppColors.successLight
+              : AppColors.errorLight,
         ),
       );
     }

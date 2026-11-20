@@ -75,8 +75,7 @@ class _FakeOrderRepository implements OrderRepository {
     OrderStatus? status,
     int limit = 20,
     int offset = 0,
-  }) async =>
-      [];
+  }) async => [];
 
   @override
   Future<Order?> getOrderById(String id) async => null;
@@ -93,8 +92,7 @@ class _FakeOrderRepository implements OrderRepository {
     String? deliveryAddress,
     String? paymentMethod,
     String? specialInstructions,
-  }) =>
-      throw UnimplementedError();
+  }) => throw UnimplementedError();
 
   @override
   Future<Order> cancelOrder({required String orderId, String? reason}) =>
@@ -110,7 +108,8 @@ class _FakeComplaintsRepository implements ComplaintsRepository {
   Future<List<Complaint>> getMyComplaints(String userId) async => [];
 
   @override
-  Future<Complaint> getComplaintById(String id) async => throw UnimplementedError();
+  Future<Complaint> getComplaintById(String id) async =>
+      throw UnimplementedError();
 
   @override
   Future<Complaint> createComplaint(Complaint complaint) async =>
@@ -121,11 +120,13 @@ class _FakeComplaintsRepository implements ComplaintsRepository {
     String id,
     String status, {
     String? resolutionNote,
-  }) async =>
-      throw UnimplementedError();
+  }) async => throw UnimplementedError();
 
   @override
-  Future<void> escalateComplaint({required String id, required String reason}) async {}
+  Future<void> escalateComplaint({
+    required String id,
+    required String reason,
+  }) async {}
 
   @override
   Future<void> addAdminNote(String id, String note) async {}
@@ -142,31 +143,27 @@ class _FakeProfileRepository implements ProfileRepository {
   Future<User> updateProfile({
     required String userId,
     required Map<String, dynamic> data,
-  }) async =>
-      _fakeUser;
+  }) async => _fakeUser;
 
   @override
   Future<User> updateDateOfBirth({
     required String userId,
     required DateTime? dateOfBirth,
-  }) async =>
-      _fakeUser;
+  }) async => _fakeUser;
 
   @override
   Future<String> uploadAvatar({
     required String userId,
     required List<int> bytes,
     required String fileName,
-  }) async =>
-      throw UnimplementedError();
+  }) async => throw UnimplementedError();
 
   @override
   Future<String> uploadDocument({
     required String userId,
     required List<int> bytes,
     required String fileName,
-  }) async =>
-      throw UnimplementedError();
+  }) async => throw UnimplementedError();
 
   @override
   Future<void> reapplyVerification({
@@ -199,14 +196,12 @@ GoRouter _buildRouter() {
       for (final entry in _standaloneTargets.entries)
         GoRoute(
           path: entry.value,
-          builder: (context, state) => Scaffold(
-            body: Center(child: Text('STUB:${entry.value}')),
-          ),
+          builder: (context, state) =>
+              Scaffold(body: Center(child: Text('STUB:${entry.value}'))),
         ),
     ],
-    errorBuilder: (context, state) => Scaffold(
-      body: Center(child: Text('ERROR:${state.matchedLocation}')),
-    ),
+    errorBuilder: (context, state) =>
+        Scaffold(body: Center(child: Text('ERROR:${state.matchedLocation}'))),
   );
 }
 
@@ -222,7 +217,9 @@ Widget _buildApp(SharedPreferencesService prefs) {
       activeCampaignsProvider.overrideWith((_) async => <Campaign>[]),
       unreadCountProvider.overrideWith((_) async => 0),
       orderRepositoryProvider.overrideWithValue(_FakeOrderRepository()),
-      complaintsRepositoryProvider.overrideWithValue(_FakeComplaintsRepository()),
+      complaintsRepositoryProvider.overrideWithValue(
+        _FakeComplaintsRepository(),
+      ),
       profileRepositoryProvider.overrideWithValue(_FakeProfileRepository()),
     ],
     child: Consumer(
@@ -233,9 +230,7 @@ Widget _buildApp(SharedPreferencesService prefs) {
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
           locale: const Locale('en'),
-          theme: ThemeData(
-            colorScheme: ColorScheme.fromSeed(seedColor: seed),
-          ),
+          theme: ThemeData(colorScheme: ColorScheme.fromSeed(seedColor: seed)),
           darkTheme: ThemeData(
             colorScheme: ColorScheme.fromSeed(
               seedColor: seed,
@@ -282,22 +277,24 @@ void main() {
     await tester.pumpWidget(_buildApp(prefsService));
     await settle(tester);
     expect(find.byType(AppShell), findsOneWidget);
-    l10n = AppLocalizations.of(
-      tester.element(find.byType(AppShell)),
-    );
+    l10n = AppLocalizations.of(tester.element(find.byType(AppShell)));
   }
 
   Future<void> openMenu(WidgetTester tester) async {
     await tester.tap(find.byIcon(AppIcons.navDrawer));
     await settle(tester);
-    expect(find.byType(GlassMenuPanel), findsOneWidget,
-        reason: 'bubble menu should open from the home menu button');
+    expect(
+      find.byType(GlassMenuPanel),
+      findsOneWidget,
+      reason: 'bubble menu should open from the home menu button',
+    );
   }
 
   String entryLabel(WidgetTester tester, String id) {
     final context = tester.element(find.byType(AppShell));
-    final entry = FeatureRegistry.instance.allDrawerEntries
-        .firstWhere((e) => e.id == id);
+    final entry = FeatureRegistry.instance.allDrawerEntries.firstWhere(
+      (e) => e.id == id,
+    );
     return entry.label(context);
   }
 
@@ -329,18 +326,31 @@ void main() {
       await openMenu(tester);
       await tapTile(tester, entryLabel(tester, entry.key));
 
-      expect(find.byType(GlassMenuPanel), findsNothing,
-          reason: 'bubble must close after tapping "${entry.key}"');
-      expect(find.text('STUB:${entry.value}'), findsOneWidget,
-          reason: 'tapping "${entry.key}" must land on ${entry.value}');
-      expect(find.byType(Dialog), findsNothing,
-          reason: 'tapping "${entry.key}" must never open the exit dialog');
+      expect(
+        find.byType(GlassMenuPanel),
+        findsNothing,
+        reason: 'bubble must close after tapping "${entry.key}"',
+      );
+      expect(
+        find.text('STUB:${entry.value}'),
+        findsOneWidget,
+        reason: 'tapping "${entry.key}" must land on ${entry.value}',
+      );
+      expect(
+        find.byType(Dialog),
+        findsNothing,
+        reason: 'tapping "${entry.key}" must never open the exit dialog',
+      );
 
       await tester.binding.handlePopRoute();
       await settle(tester);
-      expect(find.byType(AppShell), findsOneWidget,
-          reason: 'back from "${entry.key}" must return to the home shell, '
-              'never exit the app');
+      expect(
+        find.byType(AppShell),
+        findsOneWidget,
+        reason:
+            'back from "${entry.key}" must return to the home shell, '
+            'never exit the app',
+      );
       expect(find.text('STUB:${entry.value}'), findsNothing);
       await disposeApp(tester);
     });
@@ -353,14 +363,26 @@ void main() {
       await openMenu(tester);
       await tapTile(tester, entryLabel(tester, entry.key));
 
-      expect(find.byType(GlassMenuPanel), findsNothing,
-          reason: 'bubble must close after tapping "${entry.key}"');
-      expect(find.text('STUB:'), findsNothing,
-          reason: '${entry.key} is a shell route, not a stub');
-      expect(tester.takeException(), isNull,
-          reason: 'the real ${entry.key} page must build cleanly');
-      expect(find.byType(Dialog), findsNothing,
-          reason: 'tapping "${entry.key}" must never open the exit dialog');
+      expect(
+        find.byType(GlassMenuPanel),
+        findsNothing,
+        reason: 'bubble must close after tapping "${entry.key}"',
+      );
+      expect(
+        find.text('STUB:'),
+        findsNothing,
+        reason: '${entry.key} is a shell route, not a stub',
+      );
+      expect(
+        tester.takeException(),
+        isNull,
+        reason: 'the real ${entry.key} page must build cleanly',
+      );
+      expect(
+        find.byType(Dialog),
+        findsNothing,
+        reason: 'tapping "${entry.key}" must never open the exit dialog',
+      );
 
       final title = switch (entry.key) {
         'orders' => l10n.myOrders,
@@ -368,14 +390,21 @@ void main() {
         'rewards' => l10n.rewards,
         _ => l10n.profile,
       };
-      expect(find.text(title), findsWidgets,
-          reason: 'the ${entry.key} page must actually open');
+      expect(
+        find.text(title),
+        findsWidgets,
+        reason: 'the ${entry.key} page must actually open',
+      );
 
       await tester.binding.handlePopRoute();
       await settle(tester);
-      expect(find.byType(AppShell), findsOneWidget,
-          reason: 'back from "${entry.key}" must return to the home shell, '
-              'never exit the app');
+      expect(
+        find.byType(AppShell),
+        findsOneWidget,
+        reason:
+            'back from "${entry.key}" must return to the home shell, '
+            'never exit the app',
+      );
       await disposeApp(tester);
     });
   }
@@ -386,23 +415,33 @@ void main() {
     await openMenu(tester);
     await tapTile(tester, l10n.darkMode);
 
-    expect(tester.takeException(), isNull,
-        reason: 'tapping dark mode must not crash');
+    expect(
+      tester.takeException(),
+      isNull,
+      reason: 'tapping dark mode must not crash',
+    );
     expect(find.byType(Dialog), findsNothing);
     final appContext = tester.element(find.byType(AppShell));
-    expect(Theme.of(appContext).brightness, Brightness.dark,
-        reason: 'dark mode must actually switch on after the tap');
+    expect(
+      Theme.of(appContext).brightness,
+      Brightness.dark,
+      reason: 'dark mode must actually switch on after the tap',
+    );
     await disposeApp(tester);
   });
 
-  testWidgets('menu button "language" toggles the locale without crashing',
-      (tester) async {
+  testWidgets('menu button "language" toggles the locale without crashing', (
+    tester,
+  ) async {
     await pumpApp(tester);
     await openMenu(tester);
     await tapTile(tester, l10n.language);
 
-    expect(tester.takeException(), isNull,
-        reason: 'tapping language must not crash');
+    expect(
+      tester.takeException(),
+      isNull,
+      reason: 'tapping language must not crash',
+    );
     expect(find.byType(Dialog), findsNothing);
     await disposeApp(tester);
   });

@@ -60,7 +60,10 @@ void main() {
       expect(restored.weightKg, 3.5);
       expect(restored.signatureRequired, true);
       expect(restored.otpRequired, false);
-      expect(restored.deliveryProofUrl, 'https://storage.example.com/proof.jpg');
+      expect(
+        restored.deliveryProofUrl,
+        'https://storage.example.com/proof.jpg',
+      );
     });
 
     test('default values', () {
@@ -89,9 +92,16 @@ void main() {
 
     test('all service types', () {
       final types = [
-        'ride', 'food_delivery', 'grocery_delivery', 'pharmacy_delivery',
-        'marketplace_delivery', 'courier', 'package_delivery',
-        'document_delivery', 'flower_delivery', 'retail_delivery',
+        'ride',
+        'food_delivery',
+        'grocery_delivery',
+        'pharmacy_delivery',
+        'marketplace_delivery',
+        'courier',
+        'package_delivery',
+        'document_delivery',
+        'flower_delivery',
+        'retail_delivery',
       ];
       for (final t in types) {
         final o = DeliveryOrder(
@@ -109,8 +119,12 @@ void main() {
 
     test('delivery statuses', () {
       final statuses = [
-        'searching', 'matched', 'arrived', 'inTrip',
-        'completed', 'cancelled',
+        'searching',
+        'matched',
+        'arrived',
+        'inTrip',
+        'completed',
+        'cancelled',
       ];
       for (final s in statuses) {
         final o = DeliveryOrder(

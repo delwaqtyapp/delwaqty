@@ -32,11 +32,21 @@ class AdminAnalyticsPage extends ConsumerWidget {
             const SizedBox(height: 24),
             _RevenueChartSection(l10n: l10n, revenueAsync: revenueAsync),
             const SizedBox(height: 24),
-            _PeakHoursSection(l10n: l10n, peakHoursAsync: peakHoursAsync, cs: cs),
+            _PeakHoursSection(
+              l10n: l10n,
+              peakHoursAsync: peakHoursAsync,
+              cs: cs,
+            ),
             const SizedBox(height: 24),
-            _TopMerchantsSection(l10n: l10n, topMerchantsAsync: topMerchantsAsync),
+            _TopMerchantsSection(
+              l10n: l10n,
+              topMerchantsAsync: topMerchantsAsync,
+            ),
             const SizedBox(height: 24),
-            _DriverPerformanceSection(l10n: l10n, driverPerfAsync: driverPerfAsync),
+            _DriverPerformanceSection(
+              l10n: l10n,
+              driverPerfAsync: driverPerfAsync,
+            ),
           ],
         ),
       ),
@@ -63,9 +73,8 @@ class _RevenueOverviewSection extends StatelessWidget {
         AnimatedFadeIn(
           child: Text(
             l10n.revenueOverview,
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
+            style: Theme.of(context).textTheme.titleMedium
+                ?.copyWith(fontWeight: FontWeight.bold),
           ),
         ),
         const SizedBox(height: 12),
@@ -90,8 +99,11 @@ class _RevenueOverviewSection extends StatelessWidget {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.account_balance_wallet_rounded,
-                          color: Theme.of(context).colorScheme.onPrimary, size: 40),
+                      Icon(
+                        Icons.account_balance_wallet_rounded,
+                        color: Theme.of(context).colorScheme.onPrimary,
+                        size: 40,
+                      ),
                       const SizedBox(height: 8),
                       Text(
                         '${l10n.currencySymbol} ${metrics.totalRevenue.toStringAsFixed(2)}',
@@ -105,7 +117,8 @@ class _RevenueOverviewSection extends StatelessWidget {
                       Text(
                         '${l10n.revenueChart} • ${metrics.totalDeliveries} ${l10n.orders}',
                         style: AppTextStyles.bodySmall.copyWith(
-                          color: Theme.of(context).colorScheme.onPrimary.withValues(alpha: 0.7),
+                          color: Theme.of(context).colorScheme.onPrimary
+                              .withValues(alpha: 0.7),
                         ),
                       ),
                     ],
@@ -123,10 +136,7 @@ class _RevenueOverviewSection extends StatelessWidget {
 // ─── Revenue Chart ───────────────────────────────────────────
 
 class _RevenueChartSection extends StatelessWidget {
-  const _RevenueChartSection({
-    required this.l10n,
-    required this.revenueAsync,
-  });
+  const _RevenueChartSection({required this.l10n, required this.revenueAsync});
 
   final AppLocalizations l10n;
   final AsyncValue<List> revenueAsync;
@@ -140,9 +150,8 @@ class _RevenueChartSection extends StatelessWidget {
           delay: const Duration(milliseconds: 130),
           child: Text(
             l10n.orderTrends,
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
+            style: Theme.of(context).textTheme.titleMedium
+                ?.copyWith(fontWeight: FontWeight.bold),
           ),
         ),
         const SizedBox(height: 12),
@@ -186,36 +195,45 @@ class _RevenueChartSection extends StatelessWidget {
                       Text(
                         '${l10n.days} 30',
                         style: AppTextStyles.bodySmall.copyWith(
-                          color: Theme.of(context).colorScheme.onPrimary.withValues(alpha: 0.7),
+                          color: Theme.of(context).colorScheme.onPrimary
+                              .withValues(alpha: 0.7),
                         ),
                       ),
                       const Spacer(),
                       Expanded(
                         child: Row(
                           crossAxisAlignment: CrossAxisAlignment.end,
-                          children: revenueList.reversed.take(14).toList().reversed.map((r) {
-                            final amount = r.amount as double;
-                            final height = maxAmount > 0
-                                ? ((amount / maxAmount) * 80)
-                                : 0.0;
-                            return Expanded(
-                              child: Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: 1),
-                                child: Container(
-                                  height: height.clamp(2.0, 80.0),
-                                  decoration: BoxDecoration(
-                                    color: Theme.of(context)
-                                        .colorScheme
-                                        .onPrimary
-                                        .withValues(alpha: 0.7),
-                                    borderRadius: const BorderRadius.vertical(
-                                      top: Radius.circular(3),
+                          children: revenueList.reversed
+                              .take(14)
+                              .toList()
+                              .reversed
+                              .map((r) {
+                                final amount = r.amount as double;
+                                final height = maxAmount > 0
+                                    ? ((amount / maxAmount) * 80)
+                                    : 0.0;
+                                return Expanded(
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 1,
+                                    ),
+                                    child: Container(
+                                      height: height.clamp(2.0, 80.0),
+                                      decoration: BoxDecoration(
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .onPrimary
+                                            .withValues(alpha: 0.7),
+                                        borderRadius:
+                                            const BorderRadius.vertical(
+                                              top: Radius.circular(3),
+                                            ),
+                                      ),
                                     ),
                                   ),
-                                ),
-                              ),
-                            );
-                          }).toList(),
+                                );
+                              })
+                              .toList(),
                         ),
                       ),
                     ],
@@ -252,9 +270,8 @@ class _PeakHoursSection extends StatelessWidget {
           delay: const Duration(milliseconds: 190),
           child: Text(
             l10n.peakHours,
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
+            style: Theme.of(context).textTheme.titleMedium
+                ?.copyWith(fontWeight: FontWeight.bold),
           ),
         ),
         const SizedBox(height: 12),
@@ -263,7 +280,10 @@ class _PeakHoursSection extends StatelessWidget {
           child: peakHoursAsync.when(
             loading: () => const GlassCard(
               borderRadius: 20,
-              child: SizedBox(height: 60, child: Center(child: CircularProgressIndicator())),
+              child: SizedBox(
+                height: 60,
+                child: Center(child: CircularProgressIndicator()),
+              ),
             ),
             error: (_, _) => _PeerMetricCard(
               label: l10n.peakHours,
@@ -274,13 +294,16 @@ class _PeakHoursSection extends StatelessWidget {
             ),
             data: (hours) {
               final ml = MaterialLocalizations.of(context);
-              final topHours = hours.take(3).map((h) {
-                final hour = h['hour'] as int;
-                final formatted = ml.formatTimeOfDay(
-                  TimeOfDay(hour: hour, minute: 0),
-                );
-                return formatted;
-              }).join(' • ');
+              final topHours = hours
+                  .take(3)
+                  .map((h) {
+                    final hour = h['hour'] as int;
+                    final formatted = ml.formatTimeOfDay(
+                      TimeOfDay(hour: hour, minute: 0),
+                    );
+                    return formatted;
+                  })
+                  .join(' • ');
               return _PeerMetricCard(
                 label: '${l10n.peakHours} (${hours.length} ${l10n.days})',
                 value: topHours.isNotEmpty ? topHours : '00:00 - 00:00',
@@ -316,9 +339,8 @@ class _TopMerchantsSection extends StatelessWidget {
           delay: const Duration(milliseconds: 250),
           child: Text(
             l10n.topMerchants,
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
+            style: Theme.of(context).textTheme.titleMedium
+                ?.copyWith(fontWeight: FontWeight.bold),
           ),
         ),
         const SizedBox(height: 12),
@@ -349,7 +371,8 @@ class _TopMerchantsSection extends StatelessWidget {
                   child: Column(
                     children: merchants.take(5).map((m) {
                       final name = m['name'] as String? ?? l10n.unknown;
-                      final revenue = (m['total_revenue'] as num?)?.toDouble() ?? 0;
+                      final revenue =
+                          (m['total_revenue'] as num?)?.toDouble() ?? 0;
                       final deliveries = m['total_deliveries'] as int? ?? 0;
                       return ListTile(
                         leading: CircleAvatar(
@@ -359,7 +382,9 @@ class _TopMerchantsSection extends StatelessWidget {
                           child: Text(
                             name.isNotEmpty ? name[0].toUpperCase() : '?',
                             style: TextStyle(
-                              color: Theme.of(context).colorScheme.onPrimaryContainer,
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .onPrimaryContainer,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
@@ -409,9 +434,8 @@ class _DriverPerformanceSection extends StatelessWidget {
           delay: const Duration(milliseconds: 310),
           child: Text(
             l10n.driverPerformance,
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
+            style: Theme.of(context).textTheme.titleMedium
+                ?.copyWith(fontWeight: FontWeight.bold),
           ),
         ),
         const SizedBox(height: 12),
@@ -441,11 +465,13 @@ class _DriverPerformanceSection extends StatelessWidget {
                   padding: const EdgeInsets.all(8),
                   child: Column(
                     children: drivers.take(5).map((d) {
-final name = d['driver_name'] as String? ??
-                        d['full_name'] as String? ??
-                        l10n.unknown;
+                      final name =
+                          d['driver_name'] as String? ??
+                          d['full_name'] as String? ??
+                          l10n.unknown;
                       final completed = d['completed'] as int? ?? 0;
-                      final revenue = (d['total_revenue'] as num?)?.toDouble() ?? 0;
+                      final revenue =
+                          (d['total_revenue'] as num?)?.toDouble() ?? 0;
                       final rating = (d['rating'] as num?)?.toDouble() ?? 0;
                       return ListTile(
                         leading: CircleAvatar(
@@ -454,7 +480,9 @@ final name = d['driver_name'] as String? ??
                               .tertiaryContainer,
                           child: Icon(
                             Icons.person_rounded,
-                            color: Theme.of(context).colorScheme.onTertiaryContainer,
+                            color: Theme.of(context)
+                                .colorScheme
+                                .onTertiaryContainer,
                           ),
                         ),
                         title: Text(name, style: AppTextStyles.bodyLarge),
@@ -520,15 +548,13 @@ class _PeerMetricCard extends StatelessWidget {
               children: [
                 Text(
                   value,
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: Theme.of(context).textTheme.titleMedium
+                      ?.copyWith(fontWeight: FontWeight.bold),
                 ),
                 Text(
                   label,
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: cs.onSurfaceVariant,
-                  ),
+                  style: Theme.of(context).textTheme.bodySmall
+                      ?.copyWith(color: cs.onSurfaceVariant),
                 ),
               ],
             ),

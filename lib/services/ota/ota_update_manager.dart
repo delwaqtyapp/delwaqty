@@ -1,11 +1,14 @@
 import 'package:crypto/crypto.dart';
 import 'package:http/http.dart' as http;
+
 import 'dart:convert';
 import 'dart:io';
+
 import 'package:path_provider/path_provider.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:flutter/services.dart';
 import 'package:delwaqty/core/config/app_mode_provider.dart';
+
 import 'dart:async';
 
 /// OTA update channel backed by GitHub Releases.
@@ -17,7 +20,8 @@ import 'dart:async';
 /// "latest" redirect whose CDN cache could serve a stale file.
 const kOtaRepoOwner = 'delwaqtyapp';
 const kOtaRepoName = 'delwaqty';
-const kOtaApiLatest = 'https://api.github.com/repos/delwaqtyapp/delwaqty/releases/latest';
+const kOtaApiLatest =
+    'https://api.github.com/repos/delwaqtyapp/delwaqty/releases/latest';
 const kOtaDownloadBaseUrl =
     'https://github.com/delwaqtyapp/delwaqty/releases/download/';
 const kOtaFallbackInterval = Duration(hours: 8);
@@ -43,10 +47,7 @@ class OtaChannelConfig {
 }
 
 class OtaManifest {
-  const OtaManifest({
-    required this.channels,
-    required this.checkedAt,
-  });
+  const OtaManifest({required this.channels, required this.checkedAt});
 
   factory OtaManifest.fromJson(Map<String, dynamic> json) {
     final channels = <String, OtaChannelConfig>{};
@@ -63,10 +64,7 @@ class OtaManifest {
         );
       });
     }
-    return OtaManifest(
-      channels: channels,
-      checkedAt: DateTime.now(),
-    );
+    return OtaManifest(channels: channels, checkedAt: DateTime.now());
   }
 
   final Map<String, OtaChannelConfig> channels;
@@ -135,7 +133,11 @@ Future<OtaCheckResult> checkForOtaUpdate(AppFlavor flavor) async {
   final current = int.tryParse(packageInfo.buildNumber) ?? 0;
   final manifest = await fetchOtaManifest();
   if (manifest == null) {
-    return OtaCheckResult(current: current, latest: current, needsUpdate: false);
+    return OtaCheckResult(
+      current: current,
+      latest: current,
+      needsUpdate: false,
+    );
   }
   final channel = manifest.forFlavor(flavor);
   final latest = channel?.version ?? current;
@@ -219,7 +221,8 @@ Future<(int?, String?)> downloadAndInstallLatest(
     return (size, null);
   } catch (_) {
     return (null, null);
-  }}
+  }
+}
 
 /// Streams [file] through SHA-256 and compares it with [expected].
 ///

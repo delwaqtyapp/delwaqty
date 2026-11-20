@@ -61,12 +61,12 @@ class _AdminAuditLogPageState extends ConsumerState<AdminAuditLogPage> {
           final filtered = query.isEmpty
               ? logs
               : logs
-                  .where(
-                    (l) =>
-                        l.action.toLowerCase().contains(query) ||
-                        l.resource.toLowerCase().contains(query),
-                  )
-                  .toList(growable: false);
+                    .where(
+                      (l) =>
+                          l.action.toLowerCase().contains(query) ||
+                          l.resource.toLowerCase().contains(query),
+                    )
+                    .toList(growable: false);
 
           return Column(
             children: [
@@ -122,9 +122,7 @@ class _LogTile extends StatelessWidget {
       elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
-        side: BorderSide(
-          color: color.withValues(alpha: 0.18),
-        ),
+        side: BorderSide(color: color.withValues(alpha: 0.18)),
       ),
       child: ListTile(
         dense: true,

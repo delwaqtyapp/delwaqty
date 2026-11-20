@@ -20,13 +20,18 @@ final chatRepositoryProvider = Provider<ChatRepository>((ref) {
 });
 
 // Global chat feature flags (admin panel): calls / voice / media for ALL users.
-final chatPermissionsProvider = FutureProvider<Map<String, dynamic>>((ref) async {
+final chatPermissionsProvider = FutureProvider<Map<String, dynamic>>((
+  ref,
+) async {
   final repo = ref.read(chatRepositoryProvider);
   return repo.getChatPermissions();
 });
 
 // Per-user "receive incoming calls" switch (customer + admin apps).
-final chatReceiveCallsProvider = FutureProvider.family<bool, String>((ref, userId) async {
+final chatReceiveCallsProvider = FutureProvider.family<bool, String>((
+  ref,
+  userId,
+) async {
   final repo = ref.read(chatRepositoryProvider);
   return repo.canReceiveCalls(userId);
 });
@@ -84,13 +89,19 @@ final customerMyRoomsProvider = FutureProvider<List<ChatRoom>>((ref) async {
 });
 
 // All messages for a room (realtime stream; no loading flicker on send).
-final chatMessagesProvider = StreamProvider.family<List<ChatMessage>, String>((ref, roomId) {
+final chatMessagesProvider = StreamProvider.family<List<ChatMessage>, String>((
+  ref,
+  roomId,
+) {
   final repo = ref.read(chatRepositoryProvider);
   return repo.messageStream(roomId);
 });
 
 // Single room lookup (for closed/active state, assigned admin, etc.)
-final chatRoomProvider = FutureProvider.family<ChatRoom, String>((ref, roomId) async {
+final chatRoomProvider = FutureProvider.family<ChatRoom, String>((
+  ref,
+  roomId,
+) async {
   final repo = ref.read(chatRepositoryProvider);
   return repo.getRoomById(roomId);
 });
@@ -98,23 +109,29 @@ final chatRoomProvider = FutureProvider.family<ChatRoom, String>((ref, roomId) a
 // LIVE room stream: reflects is_active / assigned_admin changes in real time
 // on BOTH sides (admin closing the chat flips the customer's UI instantly).
 // Requires the chat_rooms REPLICA IDENTITY FULL (migration 098).
-final chatRoomStreamProvider = StreamProvider.family<ChatRoom, String>((ref, roomId) {
+final chatRoomStreamProvider = StreamProvider.family<ChatRoom, String>((
+  ref,
+  roomId,
+) {
   return ref
       .watch(supabaseClientProvider)
       .from('chat_rooms')
       .stream(primaryKey: ['id'])
       .eq('id', roomId)
       .map((rows) {
-    final list = (rows as List).cast<Map<String, dynamic>>();
-    if (list.isEmpty) {
-      throw StateError('chat room not found: $roomId');
-    }
-    return ChatRoom.fromJson(list.last);
-  });
+        final list = (rows as List).cast<Map<String, dynamic>>();
+        if (list.isEmpty) {
+          throw StateError('chat room not found: $roomId');
+        }
+        return ChatRoom.fromJson(list.last);
+      });
 });
 
 // Whether the peer (non-self participant) is currently typing.
-final chatPeerTypingProvider = StreamProvider.family<bool, String>((ref, roomId) {
+final chatPeerTypingProvider = StreamProvider.family<bool, String>((
+  ref,
+  roomId,
+) {
   final repo = ref.read(chatRepositoryProvider);
   return repo.typingStream(roomId);
 });

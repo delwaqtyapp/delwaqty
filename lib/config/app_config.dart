@@ -45,9 +45,7 @@ abstract final class AppConfig {
     'FIREBASE_API_KEY',
   );
 
-  static const String firebaseAppId = String.fromEnvironment(
-    'FIREBASE_APP_ID',
-  );
+  static const String firebaseAppId = String.fromEnvironment('FIREBASE_APP_ID');
 
   static const String firebaseMessagingSenderId = String.fromEnvironment(
     'FIREBASE_MESSAGING_SENDER_ID',
@@ -114,10 +112,16 @@ abstract final class AppConfig {
     debugPrint(
       '  Supabase Anon Key: ${supabaseAnonKey.isEmpty ? "(empty)" : "OK"}',
     );
-    debugPrint('  Firebase Project: ${firebaseProjectId.isEmpty ? "(empty)" : firebaseProjectId}');
-    debugPrint('  Firebase API Key: ${firebaseApiKey.isEmpty ? "(empty)" : "OK"}');
+    debugPrint(
+      '  Firebase Project: ${firebaseProjectId.isEmpty ? "(empty)" : firebaseProjectId}',
+    );
+    debugPrint(
+      '  Firebase API Key: ${firebaseApiKey.isEmpty ? "(empty)" : "OK"}',
+    );
     debugPrint('  Maps API Key: ${mapsApiKey.isEmpty ? "(empty)" : "OK"}');
-    debugPrint('  Cloudflare CDN: ${cloudflareCdnDomain.isEmpty ? "(empty)" : cloudflareCdnDomain}');
+    debugPrint(
+      '  Cloudflare CDN: ${cloudflareCdnDomain.isEmpty ? "(empty)" : cloudflareCdnDomain}',
+    );
     final errors = validationErrors;
     if (errors.isNotEmpty) {
       debugPrint('  ⚠ Validation errors: $errors');

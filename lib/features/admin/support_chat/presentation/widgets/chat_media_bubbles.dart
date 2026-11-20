@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:audioplayers/audioplayers.dart';
@@ -22,7 +23,8 @@ class ChatAttachmentImage extends ConsumerStatefulWidget {
   final Color bgColor;
 
   @override
-  ConsumerState<ChatAttachmentImage> createState() => _ChatAttachmentImageState();
+  ConsumerState<ChatAttachmentImage> createState() =>
+      _ChatAttachmentImageState();
 }
 
 class _ChatAttachmentImageState extends ConsumerState<ChatAttachmentImage> {
@@ -83,11 +85,13 @@ class _ChatAttachmentImageState extends ConsumerState<ChatAttachmentImage> {
           borderRadius: border,
           color: cs.surfaceContainerHighest,
         ),
-        child: const Center(child: SizedBox(
-          width: 24,
-          height: 24,
-          child: CircularProgressIndicator(strokeWidth: 2),
-        )),
+        child: const Center(
+          child: SizedBox(
+            width: 24,
+            height: 24,
+            child: CircularProgressIndicator(strokeWidth: 2),
+          ),
+        ),
       );
     }
     return GestureDetector(
@@ -105,7 +109,10 @@ class _ChatAttachmentImageState extends ConsumerState<ChatAttachmentImage> {
                 width: 200,
                 height: 140,
                 color: cs.surfaceContainerHighest,
-                child: Icon(Icons.broken_image_outlined, color: cs.onSurfaceVariant),
+                child: Icon(
+                  Icons.broken_image_outlined,
+                  color: cs.onSurfaceVariant,
+                ),
               ),
             ),
           ),
@@ -227,11 +234,7 @@ class ChatAttachmentVideo extends StatelessWidget {
 
 // Each voice bubble owns its own AudioPlayer so play states never bleed.
 class ChatAudioMessage extends ConsumerStatefulWidget {
-  const ChatAudioMessage({
-    super.key,
-    required this.path,
-    required this.isMe,
-  });
+  const ChatAudioMessage({super.key, required this.path, required this.isMe});
 
   final String path;
   final bool isMe;
@@ -296,14 +299,19 @@ class _ChatAudioMessageState extends ConsumerState<ChatAudioMessage> {
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(
-            _playing ? Icons.stop_circle_outlined : Icons.play_circle_fill_rounded,
+            _playing
+                ? Icons.stop_circle_outlined
+                : Icons.play_circle_fill_rounded,
             color: canPlay ? fg : fg.withValues(alpha: 0.4),
             size: 28,
           ),
           const SizedBox(width: 8),
           Text(
             _playing ? l10n.tapToStop : l10n.tapToPlay,
-            style: TextStyle(color: canPlay ? fg : fg.withValues(alpha: 0.4), fontSize: 12),
+            style: TextStyle(
+              color: canPlay ? fg : fg.withValues(alpha: 0.4),
+              fontSize: 12,
+            ),
           ),
         ],
       ),

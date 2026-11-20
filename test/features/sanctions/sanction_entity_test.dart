@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+
 import 'dart:io';
 
 void main() {
@@ -68,12 +69,12 @@ void main() {
       reason: 'Direct DELETE on sanctions table must not exist',
     );
     expect(
-      content.contains("rpc('issue_sanction'"),
+      RegExp(r"rpc\(\s*'issue_sanction'").hasMatch(content),
       isTrue,
       reason: 'Must use issue_sanction RPC',
     );
     expect(
-      content.contains("rpc('revoke_sanction'"),
+      RegExp(r"rpc\(\s*'revoke_sanction'").hasMatch(content),
       isTrue,
       reason: 'Must use revoke_sanction RPC',
     );
@@ -161,19 +162,21 @@ void main() {
     );
   });
 
-  test('revoke_sanction writes audit via _member_exec_revoke_sanction',
-      () async {
-    final file = File(
-      'supabase/migrations/035_member_management_moderation_deletion.sql',
-    );
-    final content = await file.readAsString();
+  test(
+    'revoke_sanction writes audit via _member_exec_revoke_sanction',
+    () async {
+      final file = File(
+        'supabase/migrations/035_member_management_moderation_deletion.sql',
+      );
+      final content = await file.readAsString();
 
-    expect(
-      content,
-      contains('_member_exec_revoke_sanction'),
-      reason: 'Revoke must use executor for audit/event logging',
-    );
-  });
+      expect(
+        content,
+        contains('_member_exec_revoke_sanction'),
+        reason: 'Revoke must use executor for audit/event logging',
+      );
+    },
+  );
 
   test('RPCs are revoked from anon and PUBLIC', () async {
     final file = File(

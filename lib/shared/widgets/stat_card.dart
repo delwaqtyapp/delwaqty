@@ -54,9 +54,8 @@ class StatCard extends StatelessWidget {
               Expanded(
                 child: Text(
                   title,
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: colorScheme.onSurfaceVariant,
-                  ),
+                  style: Theme.of(context).textTheme.bodySmall
+                      ?.copyWith(color: colorScheme.onSurfaceVariant),
                 ),
               ),
             ],
@@ -64,9 +63,8 @@ class StatCard extends StatelessWidget {
           const SizedBox(height: 12),
           Text(
             value,
-            style: Theme.of(
-              context,
-            ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
+            style: Theme.of(context).textTheme.headlineSmall
+                ?.copyWith(fontWeight: FontWeight.bold),
           ),
           if (subtitle != null || trend != null) ...[
             const SizedBox(height: 4),
@@ -76,9 +74,8 @@ class StatCard extends StatelessWidget {
                   Expanded(
                     child: Text(
                       subtitle!,
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: colorScheme.onSurfaceVariant,
-                      ),
+                      style: Theme.of(context).textTheme.bodySmall
+                          ?.copyWith(color: colorScheme.onSurfaceVariant),
                     ),
                   ),
                 if (trend != null) ...[
@@ -87,7 +84,9 @@ class StatCard extends StatelessWidget {
                         ? Icons.trending_up_rounded
                         : Icons.trending_down_rounded,
                     size: 16,
-                    color: trendIsPositive == true ? AppColors.successLight : AppColors.errorLight,
+                    color: trendIsPositive == true
+                        ? AppColors.successLight
+                        : AppColors.errorLight,
                   ),
                   const SizedBox(width: 4),
                   Text(

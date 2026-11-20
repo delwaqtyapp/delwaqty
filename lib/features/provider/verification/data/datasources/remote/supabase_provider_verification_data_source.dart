@@ -8,7 +8,6 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 /// link expires on its own.
 const int _signedUrlSeconds = 3600;
 
-
 class ProviderVerificationDataSource {
   ProviderVerificationDataSource(this._client);
 
@@ -55,20 +54,22 @@ class ProviderVerificationDataSource {
   }
 
   /// Uploads an identity scan (national ID) for verification.
-///
-/// This used to write into the PUBLIC `profiles` bucket through
-/// `getPublicUrl`, which made every provider's identity document a
-/// world-readable link. Identity documents now live in the private
-/// `identity-documents` bucket (migration 103) under an owner-scoped
-/// path, and are referenced with a short-lived signed URL.
-Future<String> uploadDoc(String name, Uint8List bytes) async {
+  ///
+  /// This used to write into the PUBLIC `profiles` bucket through
+  /// `getPublicUrl`, which made every provider's identity document a
+  /// world-readable link. Identity documents now live in the private
+  /// `identity-documents` bucket (migration 103) under an owner-scoped
+  /// path, and are referenced with a short-lived signed URL.
+  Future<String> uploadDoc(String name, Uint8List bytes) async {
     final uid = _client.auth.currentUser?.id;
     if (uid == null) {
       throw StateError('Must be authenticated to upload verification docs');
     }
     const bucket = 'identity-documents';
     final path = '$uid/verification/$name';
-    await _client.storage.from(bucket).uploadBinary(
+    await _client.storage
+        .from(bucket)
+        .uploadBinary(
           path,
           bytes,
           fileOptions: const FileOptions(
@@ -76,10 +77,9 @@ Future<String> uploadDoc(String name, Uint8List bytes) async {
             contentType: 'image/jpeg',
           ),
         );
-    final signed = await _client.storage.from(bucket).createSignedUrl(
-      path,
-      _signedUrlSeconds,
-    );
+    final signed = await _client.storage
+        .from(bucket)
+        .createSignedUrl(path, _signedUrlSeconds);
     return signed;
   }
 }

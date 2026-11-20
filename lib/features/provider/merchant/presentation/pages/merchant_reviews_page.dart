@@ -75,9 +75,7 @@ class _MerchantReviewsPageState extends ConsumerState<MerchantReviewsPage> {
                       color: Theme.of(context).colorScheme.error,
                     ),
                     const SizedBox(width: AppSpacing.sm),
-                    Expanded(
-                      child: Text(appErrorText(context, e)),
-                    ),
+                    Expanded(child: Text(appErrorText(context, e))),
                     TextButton(
                       onPressed: () => ref.invalidate(_reviewSummaryProvider),
                       child: Text(l10n.retry),
@@ -258,20 +256,24 @@ class _RatingSummaryCard extends StatelessWidget {
                   children: [
                     SizedBox(
                       width: 14,
-                      child: Text(
-                        '$stars',
-                        style: theme.textTheme.labelSmall,
-                      ),
+                      child: Text('$stars', style: theme.textTheme.labelSmall),
                     ),
-                    const Icon(Icons.star_rounded, size: 14, color: AppColors.rating),
+                    const Icon(
+                      Icons.star_rounded,
+                      size: 14,
+                      color: AppColors.rating,
+                    ),
                     const SizedBox(width: AppSpacing.sm),
                     Expanded(
                       child: ClipRRect(
-                        borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
+                        borderRadius: BorderRadius.circular(
+                          AppSpacing.radiusFull,
+                        ),
                         child: LinearProgressIndicator(
                           value: fraction.toDouble(),
                           minHeight: 8,
-                          backgroundColor: theme.colorScheme.surfaceContainerHighest,
+                          backgroundColor:
+                              theme.colorScheme.surfaceContainerHighest,
                           valueColor: const AlwaysStoppedAnimation<Color>(
                             AppColors.rating,
                           ),
@@ -299,10 +301,7 @@ class _RatingSummaryCard extends StatelessWidget {
 }
 
 class _ReviewCard extends StatefulWidget {
-  const _ReviewCard({
-    required this.review,
-    required this.onReply,
-  });
+  const _ReviewCard({required this.review, required this.onReply});
 
   final Review review;
   final Function(String) onReply;
@@ -318,8 +317,9 @@ class _ReviewCardState extends State<_ReviewCard> {
   @override
   void initState() {
     super.initState();
-    _replyController =
-        TextEditingController(text: widget.review.merchantReply ?? '');
+    _replyController = TextEditingController(
+      text: widget.review.merchantReply ?? '',
+    );
   }
 
   @override
@@ -351,8 +351,9 @@ class _ReviewCardState extends State<_ReviewCard> {
     final hasReply = savedReply != null && savedReply.trim().isNotEmpty;
     final trimmedName = widget.review.userName?.trim() ?? '';
     final displayName = trimmedName.isNotEmpty ? trimmedName : l10n.customer;
-    final avatarInitial =
-        displayName.isNotEmpty ? displayName[0].toUpperCase() : '?';
+    final avatarInitial = displayName.isNotEmpty
+        ? displayName[0].toUpperCase()
+        : '?';
 
     return Padding(
       padding: const EdgeInsets.only(bottom: AppSpacing.md),
@@ -416,10 +417,7 @@ class _ReviewCardState extends State<_ReviewCard> {
             if (widget.review.comment != null &&
                 widget.review.comment!.isNotEmpty) ...[
               const SizedBox(height: AppSpacing.md),
-              Text(
-                widget.review.comment!,
-                style: theme.textTheme.bodyMedium,
-              ),
+              Text(widget.review.comment!, style: theme.textTheme.bodyMedium),
             ],
             if (hasReply) ...[
               const SizedBox(height: AppSpacing.md),
@@ -427,8 +425,9 @@ class _ReviewCardState extends State<_ReviewCard> {
                 width: double.infinity,
                 padding: const EdgeInsets.all(AppSpacing.md),
                 decoration: BoxDecoration(
-                  color: theme.colorScheme.surfaceContainerHighest
-                      .withValues(alpha: 0.6),
+                  color: theme.colorScheme.surfaceContainerHighest.withValues(
+                    alpha: 0.6,
+                  ),
                   borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
                 ),
                 child: Column(
@@ -442,10 +441,7 @@ class _ReviewCardState extends State<_ReviewCard> {
                       ),
                     ),
                     const SizedBox(height: 4),
-                    Text(
-                      savedReply,
-                      style: theme.textTheme.bodySmall,
-                    ),
+                    Text(savedReply, style: theme.textTheme.bodySmall),
                   ],
                 ),
               ),

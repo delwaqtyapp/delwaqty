@@ -3,7 +3,6 @@ import 'package:delwaqty/core/errors/exceptions.dart';
 import 'package:delwaqty/features/admin/escalation/domain/entities/escalation_event.dart';
 
 class SupabaseEscalationDataSource {
-
   SupabaseEscalationDataSource(this._client);
   final SupabaseClient _client;
 

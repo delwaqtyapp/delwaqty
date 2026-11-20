@@ -58,11 +58,7 @@ class _CommerceDiscoveryPageState extends ConsumerState<CommerceDiscoveryPage> {
       MerchantType.cafe,
       MerchantType.restaurant,
     },
-    {
-      MerchantType.butcher,
-      MerchantType.meat,
-      MerchantType.seafood,
-    },
+    {MerchantType.butcher, MerchantType.meat, MerchantType.seafood},
     {
       MerchantType.fashion,
       MerchantType.clothing,
@@ -80,10 +76,7 @@ class _CommerceDiscoveryPageState extends ConsumerState<CommerceDiscoveryPage> {
       MerchantType.carwash,
       MerchantType.gas,
     },
-    {
-      MerchantType.pharmacy,
-      MerchantType.fitness,
-    },
+    {MerchantType.pharmacy, MerchantType.fitness},
   ];
 
   @override
@@ -118,7 +111,9 @@ class _CommerceDiscoveryPageState extends ConsumerState<CommerceDiscoveryPage> {
     if (selectedType == null) return bySearch;
     final exact = bySearch.where((m) => m.type == selectedType).toList();
     if (exact.isNotEmpty) return exact;
-    return bySearch.where((m) => _matchesMerchantType(m, selectedType)).toList();
+    return bySearch
+        .where((m) => _matchesMerchantType(m, selectedType))
+        .toList();
   }
 
   @override
@@ -162,7 +157,8 @@ class _CommerceDiscoveryPageState extends ConsumerState<CommerceDiscoveryPage> {
             AnimatedFadeIn(
               child: TextField(
                 controller: _searchController,
-                onChanged: (value) => setState(() => _searchQuery = value.trim()),
+                onChanged: (value) =>
+                    setState(() => _searchQuery = value.trim()),
                 decoration: InputDecoration(
                   hintText: l10n.searchMerchantsProducts,
                   prefixIcon: const Icon(Icons.search),
@@ -217,13 +213,14 @@ class _CommerceDiscoveryPageState extends ConsumerState<CommerceDiscoveryPage> {
                             color: selectedType == null
                                 ? null
                                 : theme.colorScheme.surfaceContainerHighest
-                                    .withValues(alpha: 0.35),
+                                      .withValues(alpha: 0.35),
                             borderRadius: BorderRadius.circular(999),
                             border: Border.all(
                               color: selectedType == null
                                   ? Colors.transparent
-                                  : theme.colorScheme.outlineVariant
-                                      .withValues(alpha: 0.15),
+                                  : theme.colorScheme.outlineVariant.withValues(
+                                      alpha: 0.15,
+                                    ),
                             ),
                           ),
                           child: Text(
@@ -500,10 +497,9 @@ class _AnimatedMerchantCarouselState extends State<_AnimatedMerchantCarousel>
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isRtl = Directionality.of(context) == TextDirection.rtl;
-    final page =
-        (_controller.hasClients && _controller.position.haveDimensions)
-            ? (_controller.page ?? _current.toDouble())
-            : _current.toDouble();
+    final page = (_controller.hasClients && _controller.position.haveDimensions)
+        ? (_controller.page ?? _current.toDouble())
+        : _current.toDouble();
     return Column(
       children: [
         Expanded(
@@ -552,11 +548,11 @@ class _AnimatedMerchantCarouselState extends State<_AnimatedMerchantCarousel>
                       }
                       final alignment = isRtl
                           ? (i == _current
-                              ? Alignment.centerRight
-                              : Alignment.centerLeft)
+                                ? Alignment.centerRight
+                                : Alignment.centerLeft)
                           : (i == _current
-                              ? Alignment.centerLeft
-                              : Alignment.centerRight);
+                                ? Alignment.centerLeft
+                                : Alignment.centerRight);
                       return Stack(
                         children: [
                           Container(
@@ -625,10 +621,7 @@ class _MostRequestedCard extends StatelessWidget {
                       typeEmoji: typeEmoji,
                     ),
                   )
-                : _ImageFallback(
-                    typeColor: typeColor,
-                    typeEmoji: typeEmoji,
-                  ),
+                : _ImageFallback(typeColor: typeColor, typeEmoji: typeEmoji),
           ),
           Positioned.fill(
             child: DecoratedBox(
@@ -653,7 +646,10 @@ class _MostRequestedCard extends StatelessWidget {
             child: Row(
               children: [
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 5,
+                  ),
                   decoration: BoxDecoration(
                     color: Colors.black.withValues(alpha: 0.35),
                     borderRadius: BorderRadius.circular(999),
@@ -664,10 +660,7 @@ class _MostRequestedCard extends StatelessWidget {
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Text(
-                        typeEmoji,
-                        style: const TextStyle(fontSize: 12),
-                      ),
+                      Text(typeEmoji, style: const TextStyle(fontSize: 12)),
                       const SizedBox(width: 4),
                       Text(
                         typeLabel,
@@ -682,7 +675,10 @@ class _MostRequestedCard extends StatelessWidget {
                 const Spacer(),
                 if (merchant.isOpenNow)
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
                     decoration: BoxDecoration(
                       color: AppColors.successLight,
                       borderRadius: BorderRadius.circular(999),
@@ -862,10 +858,7 @@ class _MostRequestedCard extends StatelessWidget {
 }
 
 class _ImageFallback extends StatelessWidget {
-  const _ImageFallback({
-    required this.typeColor,
-    required this.typeEmoji,
-  });
+  const _ImageFallback({required this.typeColor, required this.typeEmoji});
 
   final Color typeColor;
   final String typeEmoji;
@@ -884,10 +877,7 @@ class _ImageFallback extends StatelessWidget {
         ),
       ),
       child: Center(
-        child: Text(
-          typeEmoji,
-          style: const TextStyle(fontSize: 32),
-        ),
+        child: Text(typeEmoji, style: const TextStyle(fontSize: 32)),
       ),
     );
   }

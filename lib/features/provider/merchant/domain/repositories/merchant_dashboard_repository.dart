@@ -11,13 +11,7 @@ abstract interface class MerchantDashboardRepository {
   });
   Future<void> updateOrderStatus(String orderId, String status);
   Future<List<Map<String, dynamic>>> getMerchantProducts(String merchantId);
-  Future<void> createProduct(
-    String merchantId,
-    Map<String, dynamic> product,
-  );
-  Future<void> updateProduct(
-    String productId,
-    Map<String, dynamic> product,
-  );
+  Future<void> createProduct(String merchantId, Map<String, dynamic> product);
+  Future<void> updateProduct(String productId, Map<String, dynamic> product);
   Future<void> deleteProduct(String productId);
 }

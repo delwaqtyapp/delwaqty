@@ -89,18 +89,15 @@ class _PremiumEmptyStateState extends State<PremiumEmptyState>
             const SizedBox(height: AppSpacing.xl),
             Text(
               widget.title,
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.w700,
-              ),
+              style: Theme.of(context).textTheme.titleLarge
+                  ?.copyWith(fontWeight: FontWeight.w700),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: AppSpacing.sm),
             Text(
               widget.message,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: colorScheme.onSurfaceVariant,
-                height: 1.5,
-              ),
+              style: Theme.of(context).textTheme.bodyMedium
+                  ?.copyWith(color: colorScheme.onSurfaceVariant, height: 1.5),
               textAlign: TextAlign.center,
             ),
             if (widget.actionLabel != null && widget.onAction != null) ...[

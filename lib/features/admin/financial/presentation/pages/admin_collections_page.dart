@@ -19,7 +19,7 @@ class AdminCollectionsPage extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title:  Text(l10n.regionalCollections),
+        title: Text(l10n.regionalCollections),
         actions: [
           IconButton(
             tooltip: l10n.refresh,
@@ -51,8 +51,7 @@ class AdminCollectionsPage extends ConsumerWidget {
                 title: l10n.error,
                 message: appErrorText(context, e),
                 actionLabel: l10n.retry,
-                onAction: () =>
-                    ref.invalidate(adminCollectionSummaryProvider),
+                onAction: () => ref.invalidate(adminCollectionSummaryProvider),
               ),
               data: (s) => Column(
                 children: [
@@ -65,9 +64,7 @@ class AdminCollectionsPage extends ConsumerWidget {
                       children: [
                         Text(
                           'Reconciliation',
-                          style: Theme.of(context)
-                              .textTheme
-                              .titleMedium
+                          style: Theme.of(context).textTheme.titleMedium
                               ?.copyWith(fontWeight: FontWeight.bold),
                         ),
                         const SizedBox(height: 8),
@@ -99,9 +96,7 @@ class AdminCollectionsPage extends ConsumerWidget {
             const SizedBox(height: 16),
             Text(
               'Collection Ledger',
-              style: Theme.of(context)
-                  .textTheme
-                  .titleMedium
+              style: Theme.of(context).textTheme.titleMedium
                   ?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 10),
@@ -147,14 +142,16 @@ class AdminCollectionsPage extends ConsumerWidget {
                                     ),
                                     Text(
                                       'Account: ${c.accountId}',
-                                      style:
-                                          Theme.of(context).textTheme.bodySmall,
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodySmall,
                                     ),
                                     if (c.reference != null)
                                       Text(
                                         'Ref: ${c.reference}',
-                                        style:
-                                            Theme.of(context).textTheme.bodySmall,
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodySmall,
                                       ),
                                   ],
                                 ),
@@ -233,14 +230,12 @@ class _MetricGrid extends StatelessWidget {
                   Text(
                     e.$1,
                     style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
-                        ),
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
                   ),
                   Text(
                     '${l10n.currencySymbol} ${e.$2.toStringAsFixed(2)}',
-                    style: Theme.of(context)
-                        .textTheme
-                        .titleMedium
+                    style: Theme.of(context).textTheme.titleMedium
                         ?.copyWith(fontWeight: FontWeight.bold),
                   ),
                 ],
@@ -277,9 +272,7 @@ class _ReconcileRow extends StatelessWidget {
           Expanded(
             child: Text(
               label,
-              style: bold
-                  ? const TextStyle(fontWeight: FontWeight.bold)
-                  : null,
+              style: bold ? const TextStyle(fontWeight: FontWeight.bold) : null,
             ),
           ),
           Text(

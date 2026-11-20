@@ -16,7 +16,8 @@ class HomeServicesModule extends FeatureModule {
   String get id => 'home_services';
 
   @override
-  String name(BuildContext context) => AppLocalizations.of(context).homeServices;
+  String name(BuildContext context) =>
+      AppLocalizations.of(context).homeServices;
 
   @override
   IconData? get icon => Icons.home_repair_service_rounded;

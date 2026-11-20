@@ -8,7 +8,10 @@ import 'package:delwaqty/shared/widgets/premium_empty_state.dart';
 import 'package:delwaqty/shared/widgets/error_state.dart';
 import 'package:delwaqty/shared/widgets/shimmer_loading.dart';
 
-final _offersProvider = FutureProvider.family<List<Offer>, String>((ref, merchantId) async {
+final _offersProvider = FutureProvider.family<List<Offer>, String>((
+  ref,
+  merchantId,
+) async {
   final repo = ref.watch(offerRepositoryProvider);
   return repo.getActiveOffers(merchantId);
 });
@@ -59,9 +62,7 @@ class RestaurantOffersPage extends ConsumerWidget {
             child: ShimmerCard(),
           ),
         ),
-        error: (_, _) => Center(
-          child: ErrorState(message: l10n.errorLoading),
-        ),
+        error: (_, _) => Center(child: ErrorState(message: l10n.errorLoading)),
       ),
     );
   }
@@ -82,13 +83,16 @@ class _OfferCard extends StatelessWidget {
         ? '${offer.discountValue.toStringAsFixed(0)}% OFF'
         : '${offer.discountValue.toStringAsFixed(0)} ${l10n.sar} OFF';
 
-    final isExpired = offer.expiresAt != null && offer.expiresAt!.isBefore(DateTime.now());
+    final isExpired =
+        offer.expiresAt != null && offer.expiresAt!.isBefore(DateTime.now());
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: DecoratedBox(
         decoration: BoxDecoration(
-          color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+          color: theme.colorScheme.surfaceContainerHighest.withValues(
+            alpha: 0.5,
+          ),
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
             color: isExpired
@@ -106,9 +110,14 @@ class _OfferCard extends StatelessWidget {
                 gradient: LinearGradient(
                   colors: isExpired
                       ? [Colors.grey.shade300, Colors.grey.shade200]
-                      : [theme.colorScheme.primary, theme.colorScheme.primary.withValues(alpha: 0.8)],
+                      : [
+                          theme.colorScheme.primary,
+                          theme.colorScheme.primary.withValues(alpha: 0.8),
+                        ],
                 ),
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(16),
+                ),
               ),
               child: Row(
                 children: [
@@ -128,14 +137,19 @@ class _OfferCard extends StatelessWidget {
                   if (isExpired) ...[
                     const Spacer(),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 2,
+                      ),
                       decoration: BoxDecoration(
                         color: Colors.black26,
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Text(
                         l10n.offerExpired,
-                        style: theme.textTheme.labelSmall?.copyWith(color: Colors.white),
+                        style: theme.textTheme.labelSmall?.copyWith(
+                          color: Colors.white,
+                        ),
                       ),
                     ),
                   ],
@@ -149,7 +163,9 @@ class _OfferCard extends StatelessWidget {
                 children: [
                   Text(
                     offer.title,
-                    style: theme.textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w600),
+                    style: theme.textTheme.bodyLarge?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                   if (offer.description != null) ...[
                     const SizedBox(height: 4),
@@ -169,11 +185,18 @@ class _OfferCard extends StatelessWidget {
                         Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Icon(Icons.shopping_cart_outlined, size: 14, color: theme.colorScheme.onSurfaceVariant),
+                            Icon(
+                              Icons.shopping_cart_outlined,
+                              size: 14,
+                              color: theme.colorScheme.onSurfaceVariant,
+                            ),
                             const SizedBox(width: 4),
                             Flexible(
                               child: Text(
-                                l10n.minOrderRequired(offer.minimumOrder.toStringAsFixed(0), l10n.sar),
+                                l10n.minOrderRequired(
+                                  offer.minimumOrder.toStringAsFixed(0),
+                                  l10n.sar,
+                                ),
                                 style: theme.textTheme.bodySmall?.copyWith(
                                   color: theme.colorScheme.onSurfaceVariant,
                                 ),
@@ -186,7 +209,11 @@ class _OfferCard extends StatelessWidget {
                         Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Icon(Icons.schedule_outlined, size: 14, color: theme.colorScheme.onSurfaceVariant),
+                            Icon(
+                              Icons.schedule_outlined,
+                              size: 14,
+                              color: theme.colorScheme.onSurfaceVariant,
+                            ),
                             const SizedBox(width: 4),
                             Flexible(
                               child: Text(

@@ -11,8 +11,8 @@ enum VerificationStatus {
 
   bool get isRejected => this == VerificationStatus.rejected;
 
-  static VerificationStatus fromCode(String? code) => VerificationStatus.values
-      .firstWhere(
+  static VerificationStatus fromCode(String? code) =>
+      VerificationStatus.values.firstWhere(
         (status) => status.code == code,
         orElse: () => VerificationStatus.pending,
       );

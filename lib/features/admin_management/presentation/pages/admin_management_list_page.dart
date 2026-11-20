@@ -118,9 +118,13 @@ class _AdminManagementListPageState
                   items: [
                     DropdownMenuItem(child: Text(loc.adminMgmtAll)),
                     DropdownMenuItem(
-                        value: 'owner', child: Text(loc.adminMgmtRoleOwner)),
+                      value: 'owner',
+                      child: Text(loc.adminMgmtRoleOwner),
+                    ),
                     DropdownMenuItem(
-                        value: 'admin', child: Text(loc.adminMgmtRoleAdmin)),
+                      value: 'admin',
+                      child: Text(loc.adminMgmtRoleAdmin),
+                    ),
                   ],
                   onChanged: (v) => setState(() => _roleFilter = v),
                 ),
@@ -130,11 +134,13 @@ class _AdminManagementListPageState
                   items: [
                     DropdownMenuItem(child: Text(loc.adminMgmtAll)),
                     DropdownMenuItem(
-                        value: 'active',
-                        child: Text(loc.adminMgmtStatusActive)),
+                      value: 'active',
+                      child: Text(loc.adminMgmtStatusActive),
+                    ),
                     DropdownMenuItem(
-                        value: 'inactive',
-                        child: Text(loc.adminMgmtStatusInactive)),
+                      value: 'inactive',
+                      child: Text(loc.adminMgmtStatusInactive),
+                    ),
                   ],
                   onChanged: (v) => setState(() => _statusFilter = v),
                 ),
@@ -152,12 +158,17 @@ class _AdminManagementListPageState
                   value: _sort,
                   items: [
                     DropdownMenuItem(
-                        value: 'createdAt',
-                        child: Text(loc.adminMgmtSortCreated)),
+                      value: 'createdAt',
+                      child: Text(loc.adminMgmtSortCreated),
+                    ),
                     DropdownMenuItem(
-                        value: 'name', child: Text(loc.adminMgmtSortName)),
+                      value: 'name',
+                      child: Text(loc.adminMgmtSortName),
+                    ),
                     DropdownMenuItem(
-                        value: 'role', child: Text(loc.adminMgmtSortRole)),
+                      value: 'role',
+                      child: Text(loc.adminMgmtSortRole),
+                    ),
                   ],
                   onChanged: (v) => setState(() => _sort = v!),
                 ),
@@ -167,16 +178,13 @@ class _AdminManagementListPageState
           Expanded(
             child: asyncAdmins.when(
               loading: () => const Center(child: CircularProgressIndicator()),
-              error: (e, _) => Center(
-                child: Text(loc.adminMgmtFailed),
-              ),
+              error: (e, _) => Center(child: Text(loc.adminMgmtFailed)),
               data: (all) {
                 final filtered = _applyFilters(all);
                 if (filtered.isEmpty) {
                   return Center(child: Text(loc.adminMgmtNoAdmins));
                 }
-                final pageCount =
-                    (filtered.length / _pageSize).ceil();
+                final pageCount = (filtered.length / _pageSize).ceil();
                 if (_page >= pageCount) _page = pageCount - 1;
                 final start = _page * _pageSize;
                 final end = (start + _pageSize).clamp(0, filtered.length);
@@ -205,10 +213,12 @@ class _AdminManagementListPageState
                       page: _page,
                       pageCount: pageCount,
                       total: filtered.length,
-                      onPrev: () =>
-                          setState(() => _page = (_page - 1).clamp(0, pageCount - 1)),
+                      onPrev: () => setState(
+                        () => _page = (_page - 1).clamp(0, pageCount - 1),
+                      ),
                       onNext: () => setState(
-                          () => _page = (_page + 1).clamp(0, pageCount - 1)),
+                        () => _page = (_page + 1).clamp(0, pageCount - 1),
+                      ),
                     ),
                   ],
                 );
@@ -230,19 +240,20 @@ class _AdminRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final loc = AppLocalizations.of(context);
-    final initials = (account.fullName?.isNotEmpty == true
-            ? account.fullName!
-            : account.email)
-        .trim()
-        .characters
-        .take(2)
-        .join()
-        .toUpperCase();
+    final initials =
+        (account.fullName?.isNotEmpty == true
+                ? account.fullName!
+                : account.email)
+            .trim()
+            .characters
+            .take(2)
+            .join()
+            .toUpperCase();
     final roleLabel = account.role == 'owner'
         ? loc.adminMgmtRoleOwner
         : account.role == 'admin'
-            ? loc.adminMgmtRoleAdmin
-            : account.role;
+        ? loc.adminMgmtRoleAdmin
+        : account.role;
     return ListTile(
       leading: CircleAvatar(child: Text(initials)),
       title: Text(account.fullName ?? account.email),
@@ -253,14 +264,13 @@ class _AdminRow extends StatelessWidget {
         spacing: 6,
         crossAxisAlignment: WrapCrossAlignment.center,
         children: [
+          Chip(label: Text(roleLabel), visualDensity: VisualDensity.compact),
           Chip(
-            label: Text(roleLabel),
-            visualDensity: VisualDensity.compact,
-          ),
-          Chip(
-            label: Text(account.isActive
-                ? loc.adminMgmtStatusActive
-                : loc.adminMgmtStatusInactive),
+            label: Text(
+              account.isActive
+                  ? loc.adminMgmtStatusActive
+                  : loc.adminMgmtStatusInactive,
+            ),
             visualDensity: VisualDensity.compact,
             backgroundColor: account.isActive
                 ? Colors.green.shade100
@@ -305,8 +315,9 @@ class _Pager extends StatelessWidget {
           Text('${loc.adminMgmtPage} ${page + 1} / $pageCount  •  $total'),
           IconButton(
             tooltip: loc.next,
-              onPressed: page < pageCount - 1 ? onNext : null,
-              icon: const Icon(Icons.navigate_next)),
+            onPressed: page < pageCount - 1 ? onNext : null,
+            icon: const Icon(Icons.navigate_next),
+          ),
         ],
       ),
     );
@@ -330,139 +341,146 @@ Future<void> _openCreateDialog(BuildContext context, WidgetRef ref) async {
     context: context,
     builder: (ctx) => StatefulBuilder(
       builder: (ctx, setSt) => AlertDialog(
-      title: Text(loc.adminMgmtCreateTitle),
-      content: Form(
-        key: formKey,
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              SizedBox(
-                width: double.infinity,
-                child: OutlinedButton.icon(
-                  onPressed: () {
-                    Navigator.of(ctx).pop();
-                    context.go('/admin/members');
-                  },
-                  icon: const Icon(Icons.person_search_rounded, size: 18),
-                  label: Text('${loc.search} • ${loc.adminMembers}'),
+        title: Text(loc.adminMgmtCreateTitle),
+        content: Form(
+          key: formKey,
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                SizedBox(
+                  width: double.infinity,
+                  child: OutlinedButton.icon(
+                    onPressed: () {
+                      Navigator.of(ctx).pop();
+                      context.go('/admin/members');
+                    },
+                    icon: const Icon(Icons.person_search_rounded, size: 18),
+                    label: Text('${loc.search} • ${loc.adminMembers}'),
+                  ),
                 ),
-              ),
-              const SizedBox(height: 8),
-              TextFormField(
-                controller: nameCtrl,
-                decoration: InputDecoration(labelText: loc.adminMgmtFullName),
-                validator: (v) =>
-                    (v == null || v.trim().isEmpty) ? loc.adminMgmtFullNameRequired : null,
-              ),
-              TextFormField(
-                controller: emailCtrl,
-                decoration: InputDecoration(labelText: loc.adminMgmtEmail),
-                validator: (v) =>
-                    (v == null || !v.contains('@')) ? loc.adminMgmtEmailInvalid : null,
-              ),
-              TextFormField(
-                controller: passCtrl,
-                decoration: InputDecoration(labelText: loc.adminMgmtPassword),
-                obscureText: true,
-                validator: (v) =>
-                    (v == null || v.length < 8) ? loc.adminMgmtPasswordHint : null,
-              ),
-              FutureBuilder<List<AdminAccount>>(
-                future: adminsFuture,
-                builder: (c, snap) {
-                  final hasError = snap.hasError;
-                  final isLoading =
-                      snap.connectionState == ConnectionState.waiting;
-                  final admins = snap.data ?? [];
-                  return DropdownButtonFormField<String?>(
-                    initialValue: supervisorId,
-                    decoration: InputDecoration(
-                      labelText: loc.adminMgmtSelectSupervisor,
-                      helperText: hasError ? loc.error : null,
-                      suffixIcon: isLoading
-                          ? const SizedBox(
-                              width: 16,
-                              height: 16,
-                              child: Center(
-                                child: SizedBox(
-                                  width: 14,
-                                  height: 14,
-                                  child:
-                                      CircularProgressIndicator(strokeWidth: 2),
+                const SizedBox(height: 8),
+                TextFormField(
+                  controller: nameCtrl,
+                  decoration: InputDecoration(labelText: loc.adminMgmtFullName),
+                  validator: (v) => (v == null || v.trim().isEmpty)
+                      ? loc.adminMgmtFullNameRequired
+                      : null,
+                ),
+                TextFormField(
+                  controller: emailCtrl,
+                  decoration: InputDecoration(labelText: loc.adminMgmtEmail),
+                  validator: (v) => (v == null || !v.contains('@'))
+                      ? loc.adminMgmtEmailInvalid
+                      : null,
+                ),
+                TextFormField(
+                  controller: passCtrl,
+                  decoration: InputDecoration(labelText: loc.adminMgmtPassword),
+                  obscureText: true,
+                  validator: (v) => (v == null || v.length < 8)
+                      ? loc.adminMgmtPasswordHint
+                      : null,
+                ),
+                FutureBuilder<List<AdminAccount>>(
+                  future: adminsFuture,
+                  builder: (c, snap) {
+                    final hasError = snap.hasError;
+                    final isLoading =
+                        snap.connectionState == ConnectionState.waiting;
+                    final admins = snap.data ?? [];
+                    return DropdownButtonFormField<String?>(
+                      initialValue: supervisorId,
+                      decoration: InputDecoration(
+                        labelText: loc.adminMgmtSelectSupervisor,
+                        helperText: hasError ? loc.error : null,
+                        suffixIcon: isLoading
+                            ? const SizedBox(
+                                width: 16,
+                                height: 16,
+                                child: Center(
+                                  child: SizedBox(
+                                    width: 14,
+                                    height: 14,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                    ),
+                                  ),
                                 ),
-                              ),
-                            )
-                          : null,
-                    ),
-                    items: [
-                      DropdownMenuItem(child: Text(loc.adminMgmtNone)),
-                      for (final a in admins)
-                        DropdownMenuItem(
-                          value: a.id,
-                          child: Text(a.fullName ?? a.email),
-                        ),
-                    ],
-                    onChanged: (v) => supervisorId = v,
-                  );
-                },
-              ),
-              const SizedBox(height: 12),
-              RegionSelectorButton(
-                label: loc.adminMgmtSelectRegion,
-                selectedName: selectedRegionName,
-                onTap: () async {
-                  final picked = await RegionPickerSheet.show(
-                    ctx,
-                    selectedRegionId: regionId,
-                  );
-                  if (picked != null && ctx.mounted) {
-                    final lang = Localizations.localeOf(ctx).languageCode;
-                    setSt(() {
-                      regionId = picked.id;
-                      selectedRegionName = picked.displayName(lang);
-                    });
-                  }
-                },
-              ),
-            ],
+                              )
+                            : null,
+                      ),
+                      items: [
+                        DropdownMenuItem(child: Text(loc.adminMgmtNone)),
+                        for (final a in admins)
+                          DropdownMenuItem(
+                            value: a.id,
+                            child: Text(a.fullName ?? a.email),
+                          ),
+                      ],
+                      onChanged: (v) => supervisorId = v,
+                    );
+                  },
+                ),
+                const SizedBox(height: 12),
+                RegionSelectorButton(
+                  label: loc.adminMgmtSelectRegion,
+                  selectedName: selectedRegionName,
+                  onTap: () async {
+                    final picked = await RegionPickerSheet.show(
+                      ctx,
+                      selectedRegionId: regionId,
+                    );
+                    if (picked != null && ctx.mounted) {
+                      final lang = Localizations.localeOf(ctx).languageCode;
+                      setSt(() {
+                        regionId = picked.id;
+                        selectedRegionName = picked.displayName(lang);
+                      });
+                    }
+                  },
+                ),
+              ],
+            ),
           ),
         ),
-      ),
-      actions: [
-        TextButton(
+        actions: [
+          TextButton(
             onPressed: () => Navigator.of(ctx).pop(),
-            child: Text(loc.adminMgmtCancel)),
-        FilledButton(
-          onPressed: () async {
-            if (!formKey.currentState!.validate()) return;
-            try {
-              await ref.read(adminManagementRepositoryProvider).createAdmin(
-                    email: emailCtrl.text.trim(),
-                    password: passCtrl.text,
-                    fullName: nameCtrl.text.trim(),
-                    supervisorId: supervisorId,
-                    regionId: regionId,
+            child: Text(loc.adminMgmtCancel),
+          ),
+          FilledButton(
+            onPressed: () async {
+              if (!formKey.currentState!.validate()) return;
+              try {
+                await ref
+                    .read(adminManagementRepositoryProvider)
+                    .createAdmin(
+                      email: emailCtrl.text.trim(),
+                      password: passCtrl.text,
+                      fullName: nameCtrl.text.trim(),
+                      supervisorId: supervisorId,
+                      regionId: regionId,
+                    );
+                if (ctx.mounted) Navigator.of(ctx).pop();
+                ref.invalidate(adminsListProvider);
+                if (ctx.mounted) {
+                  ScaffoldMessenger.of(ctx).showSnackBar(
+                    SnackBar(content: Text(loc.adminMgmtCreateSuccess)),
                   );
-              if (ctx.mounted) Navigator.of(ctx).pop();
-              ref.invalidate(adminsListProvider);
-              if (ctx.mounted) {
-                ScaffoldMessenger.of(ctx).showSnackBar(
-                  SnackBar(content: Text(loc.adminMgmtCreateSuccess)),
-                );
+                }
+              } catch (e) {
+                if (ctx.mounted) {
+                  ScaffoldMessenger.of(
+                    ctx,
+                  ).showSnackBar(SnackBar(content: Text(loc.adminMgmtFailed)));
+                }
               }
-            } catch (e) {
-              if (ctx.mounted) {
-                ScaffoldMessenger.of(ctx).showSnackBar(
-                  SnackBar(content: Text(loc.adminMgmtFailed)),
-                );
-              }
-            }
-          },
-          child: Text(loc.adminMgmtCreate),
-        ),
-      ],
-    ),
+            },
+            child: Text(loc.adminMgmtCreate),
+          ),
+        ],
+      ),
     ),
   );
 }

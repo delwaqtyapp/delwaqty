@@ -23,32 +23,29 @@ class AdminManagementRepositoryImpl implements AdminManagementRepository {
     required String adminId,
     required String role,
     String? reason,
-  }) =>
-      _dataSource.assignRole(adminId: adminId, role: role, reason: reason);
+  }) => _dataSource.assignRole(adminId: adminId, role: role, reason: reason);
 
   @override
   Future<void> assignRegion({
     required String adminId,
     required String regionId,
     String scope = 'descendants',
-  }) =>
-      _dataSource.assignRegion(
-        adminId: adminId,
-        regionId: regionId,
-        scope: scope,
-      );
+  }) => _dataSource.assignRegion(
+    adminId: adminId,
+    regionId: regionId,
+    scope: scope,
+  );
 
   @override
   Future<void> changeSupervisor({
     required String adminId,
     required String newSupervisorId,
     String? reason,
-  }) =>
-      _dataSource.changeSupervisor(
-        adminId: adminId,
-        newSupervisorId: newSupervisorId,
-        reason: reason,
-      );
+  }) => _dataSource.changeSupervisor(
+    adminId: adminId,
+    newSupervisorId: newSupervisorId,
+    reason: reason,
+  );
 
   @override
   Future<void> deactivate({required String adminId, String? reason}) =>
@@ -62,15 +59,13 @@ class AdminManagementRepositoryImpl implements AdminManagementRepository {
   Future<void> grantPermission({
     required String adminId,
     required String permission,
-  }) =>
-      _dataSource.grantPermission(adminId: adminId, permission: permission);
+  }) => _dataSource.grantPermission(adminId: adminId, permission: permission);
 
   @override
   Future<void> revokePermission({
     required String adminId,
     required String permission,
-  }) =>
-      _dataSource.revokePermission(adminId: adminId, permission: permission);
+  }) => _dataSource.revokePermission(adminId: adminId, permission: permission);
 
   @override
   Future<Map<String, dynamic>> createAdmin({
@@ -80,13 +75,12 @@ class AdminManagementRepositoryImpl implements AdminManagementRepository {
     String? supervisorId,
     String? regionId,
     String scope = 'descendants',
-  }) =>
-      _dataSource.createAdmin(
-        email: email,
-        password: password,
-        fullName: fullName,
-        supervisorId: supervisorId,
-        regionId: regionId,
-        scope: scope,
-      );
+  }) => _dataSource.createAdmin(
+    email: email,
+    password: password,
+    fullName: fullName,
+    supervisorId: supervisorId,
+    regionId: regionId,
+    scope: scope,
+  );
 }

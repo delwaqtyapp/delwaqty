@@ -35,7 +35,10 @@ void main() {
 
     test('canTransitionTo returns correct transitions', () {
       expect(RideStatus.searching.canTransitionTo(RideStatus.matched), isTrue);
-      expect(RideStatus.searching.canTransitionTo(RideStatus.cancelled), isTrue);
+      expect(
+        RideStatus.searching.canTransitionTo(RideStatus.cancelled),
+        isTrue,
+      );
       expect(RideStatus.searching.canTransitionTo(RideStatus.inTrip), isFalse);
 
       expect(RideStatus.matched.canTransitionTo(RideStatus.arrived), isTrue);
@@ -50,7 +53,10 @@ void main() {
       expect(RideStatus.inTrip.canTransitionTo(RideStatus.cancelled), isTrue);
       expect(RideStatus.inTrip.canTransitionTo(RideStatus.searching), isFalse);
 
-      expect(RideStatus.completed.canTransitionTo(RideStatus.cancelled), isFalse);
+      expect(
+        RideStatus.completed.canTransitionTo(RideStatus.cancelled),
+        isFalse,
+      );
       expect(RideStatus.cancelled.canTransitionTo(RideStatus.matched), isFalse);
     });
   });

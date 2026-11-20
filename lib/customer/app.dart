@@ -17,6 +17,7 @@ import 'package:delwaqty/l10n/app_localizations.dart';
 import 'package:delwaqty/services/deep_link/deep_link_service.dart';
 import 'package:delwaqty/services/ota/ota_update_dialog.dart';
 import 'package:delwaqty/services/push_notification/push_notification_service.dart';
+
 import 'dart:async';
 
 class App extends ConsumerStatefulWidget {
@@ -46,7 +47,9 @@ class _AppState extends ConsumerState<App> {
       // the backend finished starting. The bootstrap always completes,
       // so this await is always bounded.
       try {
-        await ref.read(backendBootstrapProvider).ready
+        await ref
+            .read(backendBootstrapProvider)
+            .ready
             .timeout(const Duration(seconds: 20));
       } catch (_) {}
 
@@ -115,19 +118,19 @@ class _AppState extends ConsumerState<App> {
     return AppLifecycleCategoryRefresh(
       child: MaterialApp.router(
         title: 'Delwaqty',
-      debugShowCheckedModeBanner: false,
-      theme: AppTheme.lightTheme(),
-      darkTheme: AppTheme.darkTheme(),
-      themeMode: themeMode,
-      routerConfig: goRouter,
-      locale: locale,
-      localizationsDelegates: const [
-        AppLocalizations.delegate,
-        GlobalMaterialLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-        GlobalCupertinoLocalizations.delegate,
-      ],
-      supportedLocales: const [Locale('en'), Locale('ar')],
+        debugShowCheckedModeBanner: false,
+        theme: AppTheme.lightTheme(),
+        darkTheme: AppTheme.darkTheme(),
+        themeMode: themeMode,
+        routerConfig: goRouter,
+        locale: locale,
+        localizationsDelegates: const [
+          AppLocalizations.delegate,
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
+        supportedLocales: const [Locale('en'), Locale('ar')],
       ),
     );
   }

@@ -1,4 +1,5 @@
 import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:delwaqty/features/admin/domain/entities/admin_models.dart';
 import 'package:delwaqty/data/repositories/admin_repository.dart';
@@ -17,14 +18,18 @@ final adminServiceProvider = Provider<AdminService>((ref) {
 
 // ─── Dashboard Metrics ─────────────────────────────────────
 
-final dashboardMetricsProvider = FutureProvider<AdminDashboardMetrics>((ref) async {
+final dashboardMetricsProvider = FutureProvider<AdminDashboardMetrics>((
+  ref,
+) async {
   final adminService = ref.watch(adminServiceProvider);
   return adminService.getDashboardMetrics();
 });
 
 // ─── SOS Alerts ─────────────────────────────────────────────
 
-final adminSosAlertsProvider = FutureProvider<List<Map<String, dynamic>>>((ref) async {
+final adminSosAlertsProvider = FutureProvider<List<Map<String, dynamic>>>((
+  ref,
+) async {
   final adminService = ref.watch(adminServiceProvider);
   return adminService.getSosAlerts();
 });
@@ -97,14 +102,16 @@ class AdminMerchantsSearchNotifier extends Notifier<String> {
 
 // ─── Content Moderation ───────────────────────────────────
 
-final adminMerchantReviewsProvider =
-    FutureProvider<List<Map<String, dynamic>>>((ref) async {
-  final adminService = ref.watch(adminServiceProvider);
-  return adminService.getRecentMerchantReviews();
-});
+final adminMerchantReviewsProvider = FutureProvider<List<Map<String, dynamic>>>(
+  (ref) async {
+    final adminService = ref.watch(adminServiceProvider);
+    return adminService.getRecentMerchantReviews();
+  },
+);
 
-final adminServiceReviewsProvider =
-    FutureProvider<List<Map<String, dynamic>>>((ref) async {
+final adminServiceReviewsProvider = FutureProvider<List<Map<String, dynamic>>>((
+  ref,
+) async {
   final adminService = ref.watch(adminServiceProvider);
   return adminService.getRecentServiceReviews();
 });
@@ -117,10 +124,7 @@ final adminOrdersProvider =
       query,
     ) async {
       final adminService = ref.watch(adminServiceProvider);
-      return adminService.getOrders(
-        search: query.search,
-        status: query.status,
-      );
+      return adminService.getOrders(search: query.search, status: query.status);
     });
 
 /// Query parameters for the admin orders list (search + status filter).
@@ -135,7 +139,9 @@ class AdminOrdersQuery {
 
   @override
   bool operator ==(Object other) =>
-      other is AdminOrdersQuery && other.search == search && other.status == status;
+      other is AdminOrdersQuery &&
+      other.search == search &&
+      other.status == status;
 
   @override
   int get hashCode => Object.hash(search, status);
@@ -143,7 +149,9 @@ class AdminOrdersQuery {
 
 /// Debounces the free-text search so every keystroke does not fire an RPC.
 final adminOrdersSearchProvider =
-    NotifierProvider<AdminOrdersSearchNotifier, String>(AdminOrdersSearchNotifier.new);
+    NotifierProvider<AdminOrdersSearchNotifier, String>(
+      AdminOrdersSearchNotifier.new,
+    );
 
 class AdminOrdersSearchNotifier extends Notifier<String> {
   Timer? _debounce;
@@ -170,8 +178,9 @@ final platformSettingsProvider = FutureProvider<Map<String, dynamic>>((
 
 // ─── Commission Rules (052) ────────────────────────────────
 
-final commissionRulesProvider =
-    FutureProvider<Map<String, dynamic>>((ref) async {
+final commissionRulesProvider = FutureProvider<Map<String, dynamic>>((
+  ref,
+) async {
   final client = ref.watch(supabaseClientProvider);
   final response = await client.rpc('list_commission_rules');
   return Map<String, dynamic>.from(response as Map);
@@ -179,8 +188,9 @@ final commissionRulesProvider =
 
 // ─── Pending Approval Requests (052) ───────────────────────
 
-final pendingApprovalsProvider =
-    FutureProvider<List<Map<String, dynamic>>>((ref) async {
+final pendingApprovalsProvider = FutureProvider<List<Map<String, dynamic>>>((
+  ref,
+) async {
   final client = ref.watch(supabaseClientProvider);
   final response = await client.rpc('list_approval_requests');
   if (response == null) {
@@ -199,8 +209,10 @@ final activeDriversProvider = FutureProvider<List<DriverModel>>((ref) async {
 
 // ─── All Drivers ───────────────────────────────────────────
 
-final allDriversProvider =
-    FutureProvider.family<List<DriverModel>, String?>((ref, search) async {
+final allDriversProvider = FutureProvider.family<List<DriverModel>, String?>((
+  ref,
+  search,
+) async {
   final adminService = ref.watch(adminServiceProvider);
   return adminService.getAllDrivers(search: search);
 });
@@ -208,39 +220,47 @@ final allDriversProvider =
 // ─── Recent Deliveries ─────────────────────────────────────
 
 final recentDeliveriesProvider =
-    FutureProvider.family<List<DeliveryModel>, String?>((ref, serviceType) async {
-  final adminService = ref.watch(adminServiceProvider);
-  return adminService.getRecentDeliveries(serviceType: serviceType);
-});
+    FutureProvider.family<List<DeliveryModel>, String?>((
+      ref,
+      serviceType,
+    ) async {
+      final adminService = ref.watch(adminServiceProvider);
+      return adminService.getRecentDeliveries(serviceType: serviceType);
+    });
 
 // ─── Revenue Chart ─────────────────────────────────────────
 
-final revenueChartProvider =
-    FutureProvider.family<List<RevenueData>, int>((ref, days) async {
+final revenueChartProvider = FutureProvider.family<List<RevenueData>, int>((
+  ref,
+  days,
+) async {
   final adminService = ref.watch(adminServiceProvider);
   return adminService.getRevenueChart(days: days);
 });
 
 // ─── Peak Hours ────────────────────────────────────────────
 
-final peakHoursProvider =
-    FutureProvider<List<Map<String, dynamic>>>((ref) async {
+final peakHoursProvider = FutureProvider<List<Map<String, dynamic>>>((
+  ref,
+) async {
   final adminService = ref.watch(adminServiceProvider);
   return adminService.getPeakHours();
 });
 
 // ─── Top Merchants ─────────────────────────────────────────
 
-final topMerchantsProvider =
-    FutureProvider<List<Map<String, dynamic>>>((ref) async {
+final topMerchantsProvider = FutureProvider<List<Map<String, dynamic>>>((
+  ref,
+) async {
   final adminService = ref.watch(adminServiceProvider);
   return adminService.getTopMerchants();
 });
 
 // ─── Driver Performance ────────────────────────────────────
 
-final driverPerformanceProvider =
-    FutureProvider<List<Map<String, dynamic>>>((ref) async {
+final driverPerformanceProvider = FutureProvider<List<Map<String, dynamic>>>((
+  ref,
+) async {
   final adminService = ref.watch(adminServiceProvider);
   return adminService.getDriverPerformance();
 });

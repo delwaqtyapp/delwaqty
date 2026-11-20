@@ -31,7 +31,9 @@ Failure handleException(Object error) {
     );
   }
   if (message.contains('TimeoutException') || message.contains('Timed out')) {
-    return const Failure.network(message: 'انتهت مهلة الطلب. يرجى المحاولة مرة أخرى.');
+    return const Failure.network(
+      message: 'انتهت مهلة الطلب. يرجى المحاولة مرة أخرى.',
+    );
   }
 
   return const Failure.unexpected(message: 'حدث خطأ غير متوقع.');

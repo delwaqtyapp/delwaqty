@@ -9,10 +9,11 @@ import 'package:delwaqty/features/customer/driver/domain/entities/driver_stats.d
 import 'package:delwaqty/features/customer/driver/domain/entities/ride_offer.dart';
 import 'package:delwaqty/features/customer/ride/domain/entities/ride.dart';
 
-final supabaseDeliveryDataSourceProvider =
-    Provider<SupabaseDeliveryDataSource>((ref) {
-  return SupabaseDeliveryDataSource(ref.watch(supabaseClientProvider));
-});
+final supabaseDeliveryDataSourceProvider = Provider<SupabaseDeliveryDataSource>(
+  (ref) {
+    return SupabaseDeliveryDataSource(ref.watch(supabaseClientProvider));
+  },
+);
 
 class SupabaseDeliveryDataSource {
   SupabaseDeliveryDataSource(this._client);
@@ -126,49 +127,65 @@ class SupabaseDeliveryDataSource {
     String? notes,
     String priority = 'standard',
   }) async {
-    final data = await _client.from('rides').insert({
-      'rider_id': riderId,
-      'service_type': 'courier',
-      'ride_type': 'economy',
-      'status': 'searching',
-      'pickup_latitude': pickupLatitude,
-      'pickup_longitude': pickupLongitude,
-      'pickup_address': pickupAddress,
-      'dropoff_latitude': dropoffLatitude,
-      'dropoff_longitude': dropoffLongitude,
-      'dropoff_address': dropoffAddress,
-      'items_summary': itemsSummary,
-      'dropoff_notes': notes,
-      'priority': priority,
-    }).select().single();
+    final data = await _client
+        .from('rides')
+        .insert({
+          'rider_id': riderId,
+          'service_type': 'courier',
+          'ride_type': 'economy',
+          'status': 'searching',
+          'pickup_latitude': pickupLatitude,
+          'pickup_longitude': pickupLongitude,
+          'pickup_address': pickupAddress,
+          'dropoff_latitude': dropoffLatitude,
+          'dropoff_longitude': dropoffLongitude,
+          'dropoff_address': dropoffAddress,
+          'items_summary': itemsSummary,
+          'dropoff_notes': notes,
+          'priority': priority,
+        })
+        .select()
+        .single();
     return data['id'] as String;
   }
 
   // ── Dispatch ──
 
-  Future<String> dispatchDelivery(String rideId,
-      {double radiusKm = 10, int limit = 5}) async {
-    final map = _checkRpc(await _client.rpc('dispatch_delivery', params: {
-      'p_ride_id': rideId,
-      'p_radius_km': radiusKm,
-      'p_limit': limit,
-    }));
+  Future<String> dispatchDelivery(
+    String rideId, {
+    double radiusKm = 10,
+    int limit = 5,
+  }) async {
+    final map = _checkRpc(
+      await _client.rpc(
+        'dispatch_delivery',
+        params: {
+          'p_ride_id': rideId,
+          'p_radius_km': radiusKm,
+          'p_limit': limit,
+        },
+      ),
+    );
     return map['offered_to']?.toString() ?? '0';
   }
 
   Future<String> acceptDeliveryRequest(String rideId, String driverId) async {
-    final map = _checkRpc(await _client.rpc('accept_ride_request', params: {
-      'p_ride_id': rideId,
-      'p_driver_id': driverId,
-    }));
+    final map = _checkRpc(
+      await _client.rpc(
+        'accept_ride_request',
+        params: {'p_ride_id': rideId, 'p_driver_id': driverId},
+      ),
+    );
     return map['otp'] as String? ?? '';
   }
 
   Future<void> rejectDeliveryRequest(String rideId, String driverId) async {
-    _checkRpc(await _client.rpc('reject_ride_request', params: {
-      'p_ride_id': rideId,
-      'p_driver_id': driverId,
-    }));
+    _checkRpc(
+      await _client.rpc(
+        'reject_ride_request',
+        params: {'p_ride_id': rideId, 'p_driver_id': driverId},
+      ),
+    );
   }
 
   Stream<List<RideOffer>> watchDeliveryOffers(String driverId) {
@@ -177,24 +194,24 @@ class SupabaseDeliveryDataSource {
         .stream(primaryKey: ['id'])
         .eq('driver_id', driverId)
         .asyncMap((rows) async {
-      final offered = rows.where((r) => r['status'] == 'offered').toList();
-      if (offered.isEmpty) return <RideOffer>[];
-      final offers = <RideOffer>[];
-      for (final req in offered) {
-        final expiresAt = DateTime.parse(req['expires_at'] as String);
-        if (expiresAt.isBefore(DateTime.now())) continue;
-        final rideRow = await _client
-            .from('rides')
-            .select()
-            .eq('id', req['ride_id'] as String)
-            .maybeSingle();
-        if (rideRow == null) continue;
-        if (rideRow['status'] != 'searching') continue;
-        if (rideRow['service_type'] == 'ride') continue;
-        offers.add(_offerFromRow(req, rideRow));
-      }
-      return offers;
-    });
+          final offered = rows.where((r) => r['status'] == 'offered').toList();
+          if (offered.isEmpty) return <RideOffer>[];
+          final offers = <RideOffer>[];
+          for (final req in offered) {
+            final expiresAt = DateTime.parse(req['expires_at'] as String);
+            if (expiresAt.isBefore(DateTime.now())) continue;
+            final rideRow = await _client
+                .from('rides')
+                .select()
+                .eq('id', req['ride_id'] as String)
+                .maybeSingle();
+            if (rideRow == null) continue;
+            if (rideRow['status'] != 'searching') continue;
+            if (rideRow['service_type'] == 'ride') continue;
+            offers.add(_offerFromRow(req, rideRow));
+          }
+          return offers;
+        });
   }
 
   // ── Lifecycle ──
@@ -205,17 +222,20 @@ class SupabaseDeliveryDataSource {
         .stream(primaryKey: ['id'])
         .eq('driver_id', driverId)
         .map((rows) {
-      final active = rows.where((r) {
-        final s = r['status'] as String?;
-        final st = r['service_type'] as String?;
-        return (s == 'matched' || s == 'arrived' || s == 'inTrip') &&
-            st != 'ride';
-      }).toList();
-      if (active.isEmpty) return null;
-      active.sort((a, b) =>
-          (b['created_at'] as String).compareTo(a['created_at'] as String));
-      return _deliveryFromRow(active.first);
-    });
+          final active = rows.where((r) {
+            final s = r['status'] as String?;
+            final st = r['service_type'] as String?;
+            return (s == 'matched' || s == 'arrived' || s == 'inTrip') &&
+                st != 'ride';
+          }).toList();
+          if (active.isEmpty) return null;
+          active.sort(
+            (a, b) => (b['created_at'] as String).compareTo(
+              a['created_at'] as String,
+            ),
+          );
+          return _deliveryFromRow(active.first);
+        });
   }
 
   Future<DeliveryOrder?> getActiveDelivery(String driverId) async {
@@ -233,39 +253,46 @@ class SupabaseDeliveryDataSource {
   }
 
   Future<DeliveryOrder?> getDeliveryOrderById(String id) async {
-    final row = await _client
-        .from('rides')
-        .select()
-        .eq('id', id)
-        .maybeSingle();
+    final row = await _client.from('rides').select().eq('id', id).maybeSingle();
     if (row == null) return null;
     return _deliveryFromRow(row);
   }
 
   Future<void> driverArrivedAtPickup(String rideId, String driverId) async {
-    _checkRpc(await _client.rpc('driver_arrive', params: {
-      'p_ride_id': rideId,
-      'p_driver_id': driverId,
-    }));
+    _checkRpc(
+      await _client.rpc(
+        'driver_arrive',
+        params: {'p_ride_id': rideId, 'p_driver_id': driverId},
+      ),
+    );
   }
 
-  Future<void> startDelivery(
-      String rideId, String driverId, String otp) async {
-    _checkRpc(await _client.rpc('start_trip', params: {
-      'p_ride_id': rideId,
-      'p_driver_id': driverId,
-      'p_otp': otp,
-    }));
+  Future<void> startDelivery(String rideId, String driverId, String otp) async {
+    _checkRpc(
+      await _client.rpc(
+        'start_trip',
+        params: {'p_ride_id': rideId, 'p_driver_id': driverId, 'p_otp': otp},
+      ),
+    );
   }
 
-  Future<double> completeDelivery(String rideId, String driverId,
-      {String? proofUrl, double? finalDistanceKm}) async {
-    final map = _checkRpc(await _client.rpc('complete_delivery', params: {
-      'p_ride_id': rideId,
-      'p_driver_id': driverId,
-      'p_proof_url': proofUrl,
-      'p_final_distance': finalDistanceKm,
-    }));
+  Future<double> completeDelivery(
+    String rideId,
+    String driverId, {
+    String? proofUrl,
+    double? finalDistanceKm,
+  }) async {
+    final map = _checkRpc(
+      await _client.rpc(
+        'complete_delivery',
+        params: {
+          'p_ride_id': rideId,
+          'p_driver_id': driverId,
+          'p_proof_url': proofUrl,
+          'p_final_distance': finalDistanceKm,
+        },
+      ),
+    );
     return (map['fare'] as num?)?.toDouble() ?? 0.0;
   }
 
@@ -274,13 +301,18 @@ class SupabaseDeliveryDataSource {
     String? reason,
     bool byDriver = false,
   }) async {
-    _checkRpc(await _client.rpc('cancel_ride_lifecycle', params: {
-      'p_ride_id': rideId,
-      // The actor must be explicit: hard-coding 'driver' mis-attributed
-      // (or outright rejected) the customer's own cancel action.
-      'p_by': byDriver ? 'driver' : 'rider',
-      'p_reason': reason,
-    }));
+    _checkRpc(
+      await _client.rpc(
+        'cancel_ride_lifecycle',
+        params: {
+          'p_ride_id': rideId,
+          // The actor must be explicit: hard-coding 'driver' mis-attributed
+          // (or outright rejected) the customer's own cancel action.
+          'p_by': byDriver ? 'driver' : 'rider',
+          'p_reason': reason,
+        },
+      ),
+    );
   }
 
   // ── Pricing ──
@@ -301,8 +333,7 @@ class SupabaseDeliveryDataSource {
       minimumFee: (row['minimum_fee'] as num).toDouble(),
       priorityMultiplier:
           (row['priority_multiplier'] as num?)?.toDouble() ?? 1.0,
-      expressMultiplier:
-          (row['express_multiplier'] as num?)?.toDouble() ?? 1.5,
+      expressMultiplier: (row['express_multiplier'] as num?)?.toDouble() ?? 1.5,
       currency: row['currency'] as String? ?? 'EGP',
     );
   }
@@ -313,12 +344,17 @@ class SupabaseDeliveryDataSource {
     double weightKg = 1.0,
     String priority = 'standard',
   }) async {
-    final map = _checkRpc(await _client.rpc('estimate_delivery_fee', params: {
-      'p_service_type': serviceType,
-      'p_distance_km': distanceKm,
-      'p_weight_kg': weightKg,
-      'p_priority': priority,
-    }));
+    final map = _checkRpc(
+      await _client.rpc(
+        'estimate_delivery_fee',
+        params: {
+          'p_service_type': serviceType,
+          'p_distance_km': distanceKm,
+          'p_weight_kg': weightKg,
+          'p_priority': priority,
+        },
+      ),
+    );
     return Map<String, dynamic>.from(map);
   }
 
@@ -328,7 +364,8 @@ class SupabaseDeliveryDataSource {
     final row = await _client
         .from('drivers')
         .select(
-            'service_types, accepts_deliveries, max_delivery_distance_km, max_weight_kg')
+          'service_types, accepts_deliveries, max_delivery_distance_km, max_weight_kg',
+        )
         .eq('id', driverId)
         .maybeSingle();
     if (row == null) throw DeliveryException('driver_not_found');
@@ -350,13 +387,17 @@ class SupabaseDeliveryDataSource {
     double maxWeight = 20,
   }) async {
     _checkRpc(
-        await _client.rpc('update_driver_capabilities', params: {
-      'p_driver_id': driverId,
-      'p_service_types': serviceTypes,
-      'p_accepts_deliveries': acceptsDeliveries,
-      'p_max_delivery_distance': maxDistance,
-      'p_max_weight': maxWeight,
-    }));
+      await _client.rpc(
+        'update_driver_capabilities',
+        params: {
+          'p_driver_id': driverId,
+          'p_service_types': serviceTypes,
+          'p_accepts_deliveries': acceptsDeliveries,
+          'p_max_delivery_distance': maxDistance,
+          'p_max_weight': maxWeight,
+        },
+      ),
+    );
   }
 
   // ── Merchant profiles ──
@@ -374,10 +415,8 @@ class SupabaseDeliveryDataSource {
       userId: row['user_id'] as String,
       serviceTypes:
           (row['service_types'] as List?)?.cast<String>() ?? ['food_delivery'],
-      acceptsDirectDispatch:
-          row['accepts_direct_dispatch'] as bool? ?? true,
-      averagePrepTimeMinutes:
-          row['average_prep_time_minutes'] as int? ?? 15,
+      acceptsDirectDispatch: row['accepts_direct_dispatch'] as bool? ?? true,
+      averagePrepTimeMinutes: row['average_prep_time_minutes'] as int? ?? 15,
       maxDeliveryRadiusKm:
           (row['max_delivery_radius_km'] as num?)?.toDouble() ?? 5.0,
       autoAcceptOrders: row['auto_accept_orders'] as bool? ?? false,
@@ -406,16 +445,18 @@ class SupabaseDeliveryDataSource {
   // ── Stats (reuse existing dispatch) ──
 
   Future<DriverStats> getDashboardStats(String driverId) async {
-    final map = _checkRpc(await _client.rpc('driver_dashboard_stats', params: {
-      'p_driver_id': driverId,
-    }));
+    final map = _checkRpc(
+      await _client.rpc(
+        'driver_dashboard_stats',
+        params: {'p_driver_id': driverId},
+      ),
+    );
     return DriverStats(
       todayRides: (map['today_rides'] as num?)?.toInt() ?? 0,
       todayEarnings: (map['today_earnings'] as num?)?.toDouble() ?? 0,
       weekEarnings: (map['week_earnings'] as num?)?.toDouble() ?? 0,
       balance: (map['balance'] as num?)?.toDouble() ?? 0,
-      pendingWithdrawals:
-          (map['pending_withdrawals'] as num?)?.toDouble() ?? 0,
+      pendingWithdrawals: (map['pending_withdrawals'] as num?)?.toDouble() ?? 0,
       totalTrips: (map['total_trips'] as num?)?.toInt() ?? 0,
       rating: (map['rating'] as num?)?.toDouble() ?? 0,
       acceptanceRate: (map['acceptance_rate'] as num?)?.toDouble() ?? 100,
@@ -423,8 +464,10 @@ class SupabaseDeliveryDataSource {
     );
   }
 
-  Future<List<DriverEarning>> getEarnings(String driverId,
-      {int limit = 30}) async {
+  Future<List<DriverEarning>> getEarnings(
+    String driverId, {
+    int limit = 30,
+  }) async {
     final rows = await _client
         .from('driver_earnings')
         .select()
@@ -448,22 +491,22 @@ class SupabaseDeliveryDataSource {
   // ── Rating ──
 
   Future<void> rateDelivery(
-      String rideId, String driverId, int stars,
-      {String? comment}) async {
+    String rideId,
+    String driverId,
+    int stars, {
+    String? comment,
+  }) async {
     final uid = _client.auth.currentUser?.id;
     if (uid == null) {
       throw DeliveryException('unauthenticated');
     }
-    await _client.from('ride_ratings').upsert(
-      {
-        'ride_id': rideId,
-        'rater_id': uid,
-        'ratee_role': 'driver',
-        'stars': stars,
-        'comment': ?comment,
-      },
-      onConflict: 'ride_id,rater_id',
-    );
+    await _client.from('ride_ratings').upsert({
+      'ride_id': rideId,
+      'rater_id': uid,
+      'ratee_role': 'driver',
+      'stars': stars,
+      'comment': ?comment,
+    }, onConflict: 'ride_id,rater_id');
   }
 }
 

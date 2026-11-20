@@ -16,12 +16,13 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   final migrations = Directory('supabase/migrations');
 
-  List<File> sqlFiles() => migrations
-      .listSync()
-      .whereType<File>()
-      .where((f) => f.path.endsWith('.sql'))
-      .toList()
-    ..sort((a, b) => a.path.compareTo(b.path));
+  List<File> sqlFiles() =>
+      migrations
+          .listSync()
+          .whereType<File>()
+          .where((f) => f.path.endsWith('.sql'))
+          .toList()
+        ..sort((a, b) => a.path.compareTo(b.path));
 
   String read(File f) => f.readAsStringSync();
   String all() => sqlFiles().map(read).join('\n');
@@ -42,11 +43,11 @@ void main() {
             continue;
           }
           // A wallet function in scope of this line?
-          final window = lines.sublist(
-            (i - 25).clamp(0, lines.length),
-            i + 1,
-          ).join('\n');
-          if (window.contains('FUNCTION public.wallet_')) offenders.add(l.trim());
+          final window = lines
+              .sublist((i - 25).clamp(0, lines.length), i + 1)
+              .join('\n');
+          if (window.contains('FUNCTION public.wallet_'))
+            offenders.add(l.trim());
         }
       }
       expect(
@@ -63,7 +64,8 @@ void main() {
         expect(
           sql.contains('CREATE OR REPLACE FUNCTION public.$fn('),
           isTrue,
-          reason: '$fn must be redefined in a migration so its guard is reviewable',
+          reason:
+              '$fn must be redefined in a migration so its guard is reviewable',
         );
       }
       expect(
@@ -71,7 +73,8 @@ void main() {
           r'auth\.uid\(\)\s+IS\s+NULL\s+OR\s+p_user_id\s+IS\s+DISTINCT\s+FROM\s+auth\.uid\(\)',
         ).hasMatch(sql),
         isTrue,
-        reason: 'the fail-closed wallet guard must exist in the migration history',
+        reason:
+            'the fail-closed wallet guard must exist in the migration history',
       );
     });
 
@@ -84,7 +87,8 @@ void main() {
         expect(
           sql.contains('REVOKE ALL ON FUNCTION public.$sig FROM anon;'),
           isTrue,
-          reason: 'the $sig overload accepts a caller-supplied user and must be '
+          reason:
+              'the $sig overload accepts a caller-supplied user and must be '
               'closed to anon',
         );
       }
@@ -100,7 +104,8 @@ void main() {
         expect(
           read(f).contains('CREATE VIEW public.legacy_identity_document_paths'),
           isFalse,
-          reason: '${f.path} recreates a view over storage.objects that '
+          reason:
+              '${f.path} recreates a view over storage.objects that '
               'exposes identity document paths to anon',
         );
       }
@@ -108,43 +113,45 @@ void main() {
 
     test('the drop is recorded so a rebuild reproduces the fix', () {
       expect(
-        all().contains('DROP VIEW IF EXISTS public.legacy_identity_document_paths;'),
+        all().contains(
+          'DROP VIEW IF EXISTS public.legacy_identity_document_paths;',
+        ),
         isTrue,
       );
     });
   });
 
   group('client-facing SECURITY DEFINER functions are pinned', () {
-    test('no public SECURITY DEFINER function is created without search_path', () {
-      final offenders = <String>[];
-      // Look at the CREATE itself: `SECURITY DEFINER` in the header with no
-      // `SET search_path` anywhere in the statement.
-      final stmt = RegExp(
-        r'CREATE\s+(OR\s+REPLACE\s+)?FUNCTION\s+public\.([a-z_0-9]+)\s*\(.*?\$\$[\s\S]*?\$\$;\s*',
-        caseSensitive: false,
-      );
-      for (final f in sqlFiles()) {
-        for (final m in stmt.allMatches(read(f))) {
-          final header = m.group(0)!;
-          if (!header.toUpperCase().contains('SECURITY DEFINER')) continue;
-          if (header.toUpperCase().contains('SEARCH_PATH')) continue;
-          offenders.add('${f.path}: ${m.group(2)}');
+    test(
+      'no public SECURITY DEFINER function is created without search_path',
+      () {
+        final offenders = <String>[];
+        // Look at the CREATE itself: `SECURITY DEFINER` in the header with no
+        // `SET search_path` anywhere in the statement.
+        final stmt = RegExp(
+          r'CREATE\s+(OR\s+REPLACE\s+)?FUNCTION\s+public\.([a-z_0-9]+)\s*\(.*?\$\$[\s\S]*?\$\$;\s*',
+          caseSensitive: false,
+        );
+        for (final f in sqlFiles()) {
+          for (final m in stmt.allMatches(read(f))) {
+            final header = m.group(0)!;
+            if (!header.toUpperCase().contains('SECURITY DEFINER')) continue;
+            if (header.toUpperCase().contains('SEARCH_PATH')) continue;
+            offenders.add('${f.path}: ${m.group(2)}');
+          }
         }
-      }
-      expect(
-        offenders,
-        isEmpty,
-        reason:
-            'a SECURITY DEFINER function resolves unqualified names with the '
-            "caller's search_path; pin it to public, pg_temp",
-      );
-    });
+        expect(
+          offenders,
+          isEmpty,
+          reason:
+              'a SECURITY DEFINER function resolves unqualified names with the '
+              "caller's search_path; pin it to public, pg_temp",
+        );
+      },
+    );
 
     test('the pinning sweep exists in the migration history', () {
-      expect(
-        all().contains('SET search_path = public, pg_temp'),
-        isTrue,
-      );
+      expect(all().contains('SET search_path = public, pg_temp'), isTrue);
     });
   });
 
@@ -159,7 +166,8 @@ void main() {
         expect(
           sql.contains('COMMENT ON TABLE public.$t IS'),
           isTrue,
-          reason: '$t has RLS enabled with no policy; the intent must be written '
+          reason:
+              '$t has RLS enabled with no policy; the intent must be written '
               'down so a later migration does not widen it unknowingly',
         );
       }
@@ -168,9 +176,7 @@ void main() {
 
   group('the migration log is honest', () {
     test('every fix from round 92 is present as a reviewable migration', () {
-      final names = sqlFiles()
-          .map((f) => f.path.split('/').last)
-          .toList();
+      final names = sqlFiles().map((f) => f.path.split('/').last).toList();
       expect(names.any((n) => n.startsWith('113_')), isTrue);
       expect(names.any((n) => n.startsWith('114_')), isTrue);
       // The 111/112 pair fixed the commission ambiguity in round 91.
@@ -178,8 +184,7 @@ void main() {
       expect(names.any((n) => n.startsWith('112_')), isTrue);
     });
 
-    test('migration filenames are zero padded so lexical order is real order',
-        () {
+    test('migration filenames are zero padded so lexical order is real order', () {
       // Sorting by name is how the migration history reads, so the number must
       // be fixed width. (Duplicate numbers already exist in 002/003/032 from
       // earlier sprints; renumbering applied migrations is out of scope, but a
@@ -198,8 +203,11 @@ void main() {
           .where((e) => e.value > 1 && int.parse(e.key) >= 100)
           .map((e) => e.key)
           .toList();
-      expect(duplicates, isEmpty,
-          reason: 'migrations 100+ must be uniquely numbered');
+      expect(
+        duplicates,
+        isEmpty,
+        reason: 'migrations 100+ must be uniquely numbered',
+      );
     });
   });
 }

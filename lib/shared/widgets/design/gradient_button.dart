@@ -60,9 +60,7 @@ class _GradientButtonState extends State<GradientButton>
         onTapDown: onTap == null
             ? null
             : (_) => setState(() => _pressed = true),
-        onTapUp: onTap == null
-            ? null
-            : (_) => setState(() => _pressed = false),
+        onTapUp: onTap == null ? null : (_) => setState(() => _pressed = false),
         onTapCancel: () => setState(() => _pressed = false),
         borderRadius: BorderRadius.circular(widget.radius),
         child: Ink(

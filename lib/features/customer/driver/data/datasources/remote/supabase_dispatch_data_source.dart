@@ -5,10 +5,11 @@ import 'package:delwaqty/features/customer/driver/domain/entities/driver_stats.d
 import 'package:delwaqty/features/customer/driver/domain/entities/ride_offer.dart';
 import 'package:delwaqty/features/customer/ride/domain/entities/ride.dart';
 
-final supabaseDispatchDataSourceProvider =
-    Provider<SupabaseDispatchDataSource>((ref) {
-  return SupabaseDispatchDataSource(ref.watch(supabaseClientProvider));
-});
+final supabaseDispatchDataSourceProvider = Provider<SupabaseDispatchDataSource>(
+  (ref) {
+    return SupabaseDispatchDataSource(ref.watch(supabaseClientProvider));
+  },
+);
 
 class SupabaseDispatchDataSource {
   SupabaseDispatchDataSource(this._client);
@@ -97,16 +98,21 @@ class SupabaseDispatchDataSource {
     required String plate,
     int seats = 4,
   }) async {
-    final map = _checkRpc(await _client.rpc('register_ride_driver', params: {
-      'p_full_name': fullName,
-      'p_phone': phone,
-      'p_category': category.name,
-      'p_make': make,
-      'p_model': model,
-      'p_color': color,
-      'p_plate': plate,
-      'p_seats': seats,
-    }));
+    final map = _checkRpc(
+      await _client.rpc(
+        'register_ride_driver',
+        params: {
+          'p_full_name': fullName,
+          'p_phone': phone,
+          'p_category': category.name,
+          'p_make': make,
+          'p_model': model,
+          'p_color': color,
+          'p_plate': plate,
+          'p_seats': seats,
+        },
+      ),
+    );
     return map['driver_id'] as String;
   }
 
@@ -124,12 +130,17 @@ class SupabaseDispatchDataSource {
     double? lat,
     double? lng,
   }) async {
-    _checkRpc(await _client.rpc('driver_set_online_state', params: {
-      'p_online': online,
-      'p_lat': lat,
-      'p_lng': lng,
-      'p_driver_id': driverId,
-    }));
+    _checkRpc(
+      await _client.rpc(
+        'driver_set_online_state',
+        params: {
+          'p_online': online,
+          'p_lat': lat,
+          'p_lng': lng,
+          'p_driver_id': driverId,
+        },
+      ),
+    );
   }
 
   Future<void> updateLocation(
@@ -139,13 +150,18 @@ class SupabaseDispatchDataSource {
     double? heading,
     double? speed,
   }) async {
-    _checkRpc(await _client.rpc('driver_update_location', params: {
-      'p_driver_id': driverId,
-      'p_lat': lat,
-      'p_lon': lng,
-      'p_heading': heading,
-      'p_speed': speed,
-    }));
+    _checkRpc(
+      await _client.rpc(
+        'driver_update_location',
+        params: {
+          'p_driver_id': driverId,
+          'p_lat': lat,
+          'p_lon': lng,
+          'p_heading': heading,
+          'p_speed': speed,
+        },
+      ),
+    );
   }
 
   Stream<List<RideOffer>> watchOffers(String driverId) {
@@ -154,62 +170,70 @@ class SupabaseDispatchDataSource {
         .stream(primaryKey: ['id'])
         .eq('driver_id', driverId)
         .asyncMap((rows) async {
-      final offered = rows
-          .where((r) => r['status'] == 'offered')
-          .toList();
-      if (offered.isEmpty) return <RideOffer>[];
-      final offers = <RideOffer>[];
-      for (final req in offered) {
-        final expiresAt = DateTime.parse(req['expires_at'] as String);
-        if (expiresAt.isBefore(DateTime.now())) continue;
-        final rideRow = await _client
-            .from(_rides)
-            .select()
-            .eq('id', req['ride_id'] as String)
-            .maybeSingle();
-        if (rideRow == null) continue;
-        if (rideRow['status'] != 'searching') continue;
-        final rideType = RideType.values.firstWhere(
-          (t) => t.name == (rideRow['ride_type'] as String?),
-          orElse: () => RideType.economy,
-        );
-        offers.add(RideOffer(
-          requestId: req['id'] as String,
-          rideId: req['ride_id'] as String,
-          driverId: driverId,
-          rideType: rideType,
-          pickupLatitude: (rideRow['pickup_latitude'] as num).toDouble(),
-          pickupLongitude: (rideRow['pickup_longitude'] as num).toDouble(),
-          pickupAddress: rideRow['pickup_address'] as String? ?? '',
-          dropoffLatitude: (rideRow['dropoff_latitude'] as num).toDouble(),
-          dropoffLongitude: (rideRow['dropoff_longitude'] as num).toDouble(),
-          dropoffAddress: rideRow['dropoff_address'] as String? ?? '',
-          fare: (rideRow['fare'] as num?)?.toDouble() ?? 0.0,
-          currency: rideRow['currency'] as String? ?? 'EGP',
-          distanceKm: (rideRow['distance'] as num?)?.toDouble() ?? 0.0,
-          pickupDistanceKm: (req['distance_km'] as num?)?.toDouble() ?? 0.0,
-          etaMinutes: (req['eta_minutes'] as num?)?.toInt() ?? 0,
-          offeredAt: DateTime.parse(req['offered_at'] as String),
-          expiresAt: expiresAt,
-        ));
-      }
-      return offers;
-    });
+          final offered = rows.where((r) => r['status'] == 'offered').toList();
+          if (offered.isEmpty) return <RideOffer>[];
+          final offers = <RideOffer>[];
+          for (final req in offered) {
+            final expiresAt = DateTime.parse(req['expires_at'] as String);
+            if (expiresAt.isBefore(DateTime.now())) continue;
+            final rideRow = await _client
+                .from(_rides)
+                .select()
+                .eq('id', req['ride_id'] as String)
+                .maybeSingle();
+            if (rideRow == null) continue;
+            if (rideRow['status'] != 'searching') continue;
+            final rideType = RideType.values.firstWhere(
+              (t) => t.name == (rideRow['ride_type'] as String?),
+              orElse: () => RideType.economy,
+            );
+            offers.add(
+              RideOffer(
+                requestId: req['id'] as String,
+                rideId: req['ride_id'] as String,
+                driverId: driverId,
+                rideType: rideType,
+                pickupLatitude: (rideRow['pickup_latitude'] as num).toDouble(),
+                pickupLongitude: (rideRow['pickup_longitude'] as num)
+                    .toDouble(),
+                pickupAddress: rideRow['pickup_address'] as String? ?? '',
+                dropoffLatitude: (rideRow['dropoff_latitude'] as num)
+                    .toDouble(),
+                dropoffLongitude: (rideRow['dropoff_longitude'] as num)
+                    .toDouble(),
+                dropoffAddress: rideRow['dropoff_address'] as String? ?? '',
+                fare: (rideRow['fare'] as num?)?.toDouble() ?? 0.0,
+                currency: rideRow['currency'] as String? ?? 'EGP',
+                distanceKm: (rideRow['distance'] as num?)?.toDouble() ?? 0.0,
+                pickupDistanceKm:
+                    (req['distance_km'] as num?)?.toDouble() ?? 0.0,
+                etaMinutes: (req['eta_minutes'] as num?)?.toInt() ?? 0,
+                offeredAt: DateTime.parse(req['offered_at'] as String),
+                expiresAt: expiresAt,
+              ),
+            );
+          }
+          return offers;
+        });
   }
 
   Future<String> acceptOffer(String rideId, String driverId) async {
-    final map = _checkRpc(await _client.rpc('accept_ride_request', params: {
-      'p_ride_id': rideId,
-      'p_driver_id': driverId,
-    }));
+    final map = _checkRpc(
+      await _client.rpc(
+        'accept_ride_request',
+        params: {'p_ride_id': rideId, 'p_driver_id': driverId},
+      ),
+    );
     return map['otp'] as String? ?? '';
   }
 
   Future<void> rejectOffer(String rideId, String driverId) async {
-    _checkRpc(await _client.rpc('reject_ride_request', params: {
-      'p_ride_id': rideId,
-      'p_driver_id': driverId,
-    }));
+    _checkRpc(
+      await _client.rpc(
+        'reject_ride_request',
+        params: {'p_ride_id': rideId, 'p_driver_id': driverId},
+      ),
+    );
   }
 
   Stream<Ride?> watchActiveDriverRide(String driverId) {
@@ -218,15 +242,18 @@ class SupabaseDispatchDataSource {
         .stream(primaryKey: ['id'])
         .eq('driver_id', driverId)
         .map((rows) {
-      final active = rows.where((r) {
-        final s = r['status'] as String?;
-        return s == 'matched' || s == 'arrived' || s == 'inTrip';
-      }).toList();
-      if (active.isEmpty) return null;
-      active.sort((a, b) => (b['created_at'] as String)
-          .compareTo(a['created_at'] as String));
-      return _rideFromRow(active.first);
-    });
+          final active = rows.where((r) {
+            final s = r['status'] as String?;
+            return s == 'matched' || s == 'arrived' || s == 'inTrip';
+          }).toList();
+          if (active.isEmpty) return null;
+          active.sort(
+            (a, b) => (b['created_at'] as String).compareTo(
+              a['created_at'] as String,
+            ),
+          );
+          return _rideFromRow(active.first);
+        });
   }
 
   Future<Ride?> getActiveDriverRide(String driverId) async {
@@ -243,18 +270,21 @@ class SupabaseDispatchDataSource {
   }
 
   Future<void> arriveAtPickup(String rideId, String driverId) async {
-    _checkRpc(await _client.rpc('driver_arrive', params: {
-      'p_ride_id': rideId,
-      'p_driver_id': driverId,
-    }));
+    _checkRpc(
+      await _client.rpc(
+        'driver_arrive',
+        params: {'p_ride_id': rideId, 'p_driver_id': driverId},
+      ),
+    );
   }
 
   Future<void> startTrip(String rideId, String driverId, String otp) async {
-    _checkRpc(await _client.rpc('start_trip', params: {
-      'p_ride_id': rideId,
-      'p_driver_id': driverId,
-      'p_otp': otp,
-    }));
+    _checkRpc(
+      await _client.rpc(
+        'start_trip',
+        params: {'p_ride_id': rideId, 'p_driver_id': driverId, 'p_otp': otp},
+      ),
+    );
   }
 
   Future<double> completeTrip(
@@ -262,20 +292,26 @@ class SupabaseDispatchDataSource {
     String driverId, {
     double? finalDistanceKm,
   }) async {
-    final map = _checkRpc(await _client.rpc('complete_trip', params: {
-      'p_ride_id': rideId,
-      'p_driver_id': driverId,
-      'p_final_distance': finalDistanceKm,
-    }));
+    final map = _checkRpc(
+      await _client.rpc(
+        'complete_trip',
+        params: {
+          'p_ride_id': rideId,
+          'p_driver_id': driverId,
+          'p_final_distance': finalDistanceKm,
+        },
+      ),
+    );
     return (map['fare'] as num?)?.toDouble() ?? 0.0;
   }
 
   Future<void> cancelAsDriver(String rideId, {String? reason}) async {
-    _checkRpc(await _client.rpc('cancel_ride_lifecycle', params: {
-      'p_ride_id': rideId,
-      'p_by': 'driver',
-      'p_reason': reason,
-    }));
+    _checkRpc(
+      await _client.rpc(
+        'cancel_ride_lifecycle',
+        params: {'p_ride_id': rideId, 'p_by': 'driver', 'p_reason': reason},
+      ),
+    );
   }
 
   Future<void> ratePassenger(
@@ -284,25 +320,32 @@ class SupabaseDispatchDataSource {
     int stars, {
     String? comment,
   }) async {
-    _checkRpc(await _client.rpc('rate_passenger', params: {
-      'p_ride_id': rideId,
-      'p_driver_id': driverId,
-      'p_stars': stars,
-      'p_comment': comment,
-    }));
+    _checkRpc(
+      await _client.rpc(
+        'rate_passenger',
+        params: {
+          'p_ride_id': rideId,
+          'p_driver_id': driverId,
+          'p_stars': stars,
+          'p_comment': comment,
+        },
+      ),
+    );
   }
 
   Future<DriverStats> getDashboardStats(String driverId) async {
-    final map = _checkRpc(await _client.rpc('driver_dashboard_stats', params: {
-      'p_driver_id': driverId,
-    }));
+    final map = _checkRpc(
+      await _client.rpc(
+        'driver_dashboard_stats',
+        params: {'p_driver_id': driverId},
+      ),
+    );
     return DriverStats(
       todayRides: (map['today_rides'] as num?)?.toInt() ?? 0,
       todayEarnings: (map['today_earnings'] as num?)?.toDouble() ?? 0,
       weekEarnings: (map['week_earnings'] as num?)?.toDouble() ?? 0,
       balance: (map['balance'] as num?)?.toDouble() ?? 0,
-      pendingWithdrawals:
-          (map['pending_withdrawals'] as num?)?.toDouble() ?? 0,
+      pendingWithdrawals: (map['pending_withdrawals'] as num?)?.toDouble() ?? 0,
       totalTrips: (map['total_trips'] as num?)?.toInt() ?? 0,
       rating: (map['rating'] as num?)?.toDouble() ?? 0,
       acceptanceRate: (map['acceptance_rate'] as num?)?.toDouble() ?? 100,
@@ -339,11 +382,16 @@ class SupabaseDispatchDataSource {
     double amount, {
     String method = 'bank',
   }) async {
-    final map = _checkRpc(await _client.rpc('request_withdrawal', params: {
-      'p_driver_id': driverId,
-      'p_amount': amount,
-      'p_method': method,
-    }));
+    final map = _checkRpc(
+      await _client.rpc(
+        'request_withdrawal',
+        params: {
+          'p_driver_id': driverId,
+          'p_amount': amount,
+          'p_method': method,
+        },
+      ),
+    );
     return map['withdrawal_id'] as String? ?? '';
   }
 }

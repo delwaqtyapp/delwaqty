@@ -31,10 +31,7 @@ class SupabaseAdminRegionAssignmentDataSource
         query = query.eq('admin_id', adminId);
       }
       final rows = await query.order('created_at', ascending: true);
-      return (rows as List)
-          .cast<Map<String, dynamic>>()
-          .map(_fromRow)
-          .toList();
+      return (rows as List).cast<Map<String, dynamic>>().map(_fromRow).toList();
     } catch (e) {
       throw AdminException('Failed to load region assignments: $e');
     }

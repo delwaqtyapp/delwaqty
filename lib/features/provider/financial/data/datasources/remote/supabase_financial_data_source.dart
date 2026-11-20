@@ -12,9 +12,7 @@ const String topupProofsBucket = 'topup-proofs';
 
 final providerFinancialDataSourceProvider =
     Provider<ProviderFinancialDataSource>((ref) {
-      return ProviderFinancialDataSource(
-        ref.watch(supabaseClientProvider),
-      );
+      return ProviderFinancialDataSource(ref.watch(supabaseClientProvider));
     });
 
 class ProviderFinancialDataSource {
@@ -27,9 +25,10 @@ class ProviderFinancialDataSource {
     required String contentType,
   }) async {
     final uid = _client.auth.currentUser?.id ?? 'unknown';
-    final path =
-        '$uid/${DateTime.now().microsecondsSinceEpoch}_$fileName';
-    await _client.storage.from(topupProofsBucket).uploadBinary(
+    final path = '$uid/${DateTime.now().microsecondsSinceEpoch}_$fileName';
+    await _client.storage
+        .from(topupProofsBucket)
+        .uploadBinary(
           path,
           bytes,
           fileOptions: FileOptions(contentType: contentType),

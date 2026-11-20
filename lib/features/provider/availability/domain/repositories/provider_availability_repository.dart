@@ -6,7 +6,8 @@ abstract class ProviderAvailabilityRepository {
   Future<Map<String, dynamic>> setAvailability(bool isOpen);
 }
 
-class ProviderAvailabilityRepositoryImpl implements ProviderAvailabilityRepository {
+class ProviderAvailabilityRepositoryImpl
+    implements ProviderAvailabilityRepository {
   ProviderAvailabilityRepositoryImpl(this._source);
   final ProviderAvailabilityDataSource _source;
 

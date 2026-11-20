@@ -145,9 +145,7 @@ class AdminFinancialDataSource {
         .from('admin_receiving_wallets')
         .select()
         .order('created_at', ascending: false);
-    return [
-      for (final e in res as List) Map<String, dynamic>.from(e as Map),
-    ];
+    return [for (final e in res as List) Map<String, dynamic>.from(e as Map)];
   }
 
   Future<String> createAdminReceivingWallet({

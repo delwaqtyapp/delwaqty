@@ -115,10 +115,7 @@ class FloatingGlassCircleButton extends StatelessWidget {
       label: tooltip,
       child: Tooltip(
         message: tooltip ?? '',
-        child: PressableScale(
-          onTap: onTap ?? () {},
-          child: circle,
-        ),
+        child: PressableScale(onTap: onTap ?? () {}, child: circle),
       ),
     );
   }
@@ -220,8 +217,8 @@ class _FloatingNotificationCircleButtonState
     final unreadCount = isGuest
         ? 0
         : ref.watch(unreadCountStreamProvider).value ??
-            ref.watch(unreadCountProvider).value ??
-            0;
+              ref.watch(unreadCountProvider).value ??
+              0;
 
     return FloatingGlassCircleButton(
       key: _key,
@@ -236,10 +233,7 @@ class _FloatingNotificationCircleButtonState
         clipBehavior: Clip.none,
         children: [
           Center(
-            child: Icon(
-              Icons.notifications_outlined,
-              size: widget.iconSize,
-            ),
+            child: Icon(Icons.notifications_outlined, size: widget.iconSize),
           ),
           Positioned(
             top: 4,

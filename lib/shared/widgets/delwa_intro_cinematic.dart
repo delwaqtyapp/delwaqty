@@ -95,7 +95,10 @@ class _DelwaIntroSceneState extends State<DelwaIntroScene>
     super.initState();
     _ctrl = AnimationController(vsync: this, duration: _totalDuration);
     final reduced = WidgetsBinding
-        .instance.platformDispatcher.accessibilityFeatures.disableAnimations;
+        .instance
+        .platformDispatcher
+        .accessibilityFeatures
+        .disableAnimations;
     if (reduced) {
       _ctrl.value = 1.0;
     } else {
@@ -130,22 +133,26 @@ class _DelwaIntroSceneState extends State<DelwaIntroScene>
             final t = _ctrl.value;
 
             final bgFade = Curves.easeIn.transform(_clamp(t / 0.045));
-            final bgScale = 1.0 + 0.03 * Curves.linear.transform(_clamp(t / 1.0));
+            final bgScale =
+                1.0 + 0.03 * Curves.linear.transform(_clamp(t / 1.0));
 
             // 1.5) Modern luxury opening light curtain & expanding royal aura rings.
             final openingCurtain =
                 _clamp(t / 0.08) * (1 - _clamp((t - 0.34) / 0.16));
-            final openingRingProgress =
-                Curves.easeOutCubic.transform(_clamp((t - 0.04) / 0.36));
+            final openingRingProgress = Curves.easeOutCubic.transform(
+              _clamp((t - 0.04) / 0.36),
+            );
             final openingRingOpacity =
                 _clamp((t - 0.03) / 0.08) * (1 - _clamp((t - 0.32) / 0.12));
 
             // 2) Nile light: quiet bottom -> top sweep (about 2.4s).
             const nileStart = 0.055;
-            final nileProgress =
-                Curves.easeInOutCubic.transform(_clamp((t - nileStart) / 0.275));
+            final nileProgress = Curves.easeInOutCubic.transform(
+              _clamp((t - nileStart) / 0.275),
+            );
             final nileStripOpacity =
-                _clamp((t - nileStart) / 0.10) * (1 - _clamp((t - 0.40) / 0.08));
+                _clamp((t - nileStart) / 0.10) *
+                (1 - _clamp((t - 0.40) / 0.08));
             final nileReflectionOpacity =
                 _clamp((t - 0.08) / 0.12) * (1 - _clamp((t - 0.36) / 0.10));
 
@@ -158,36 +165,50 @@ class _DelwaIntroSceneState extends State<DelwaIntroScene>
 
             // 4) Logo Fade + Scale (UNTOUCHED per user instruction).
             const logoStart = 0.24;
-            final logoOpacity =
-                Curves.easeOutCubic.transform(_clamp((t - logoStart) / 0.14));
+            final logoOpacity = Curves.easeOutCubic.transform(
+              _clamp((t - logoStart) / 0.14),
+            );
             final logoScale =
-                0.88 + 0.12 * Curves.easeOutCubic.transform(_clamp((t - logoStart) / 0.15));
+                0.88 +
+                0.12 *
+                    Curves.easeOutCubic.transform(
+                      _clamp((t - logoStart) / 0.15),
+                    );
 
             // 5) DelwaQty wordmark (rise from the bottom with smooth modern glide).
-            final delwaQtyFade =
-                Curves.easeOutCubic.transform(_clamp((t - 0.34) / 0.10));
+            final delwaQtyFade = Curves.easeOutCubic.transform(
+              _clamp((t - 0.34) / 0.10),
+            );
             final delwaQtySlide =
-                18.0 * (1 - Curves.easeOutBack.transform(_clamp((t - 0.34) / 0.13)));
+                18.0 *
+                (1 - Curves.easeOutBack.transform(_clamp((t - 0.34) / 0.13)));
 
             // 6) Arabic name + descriptions.
-            final dalwaqtyFade =
-                Curves.easeOutCubic.transform(_clamp((t - 0.37) / 0.09));
+            final dalwaqtyFade = Curves.easeOutCubic.transform(
+              _clamp((t - 0.37) / 0.09),
+            );
             final dalwaqtySlide =
-                10.0 * (1 - Curves.easeOutCubic.transform(_clamp((t - 0.37) / 0.10)));
-            final arabicTagFade =
-                Curves.easeOutCubic.transform(_clamp((t - 0.40) / 0.07));
-            final englishTagFade =
-                Curves.easeOutCubic.transform(_clamp((t - 0.42) / 0.07));
+                10.0 *
+                (1 - Curves.easeOutCubic.transform(_clamp((t - 0.37) / 0.10)));
+            final arabicTagFade = Curves.easeOutCubic.transform(
+              _clamp((t - 0.40) / 0.07),
+            );
+            final englishTagFade = Curves.easeOutCubic.transform(
+              _clamp((t - 0.42) / 0.07),
+            );
 
             // 7) Egypt statement, top-right, appears with modern slide-in.
-            final egyptStatementFade =
-                Curves.easeOutCubic.transform(_clamp((t - 0.40) / 0.09));
+            final egyptStatementFade = Curves.easeOutCubic.transform(
+              _clamp((t - 0.40) / 0.09),
+            );
             final egyptStatementSlide =
-                10.0 * (1 - Curves.easeOutCubic.transform(_clamp((t - 0.40) / 0.11)));
+                10.0 *
+                (1 - Curves.easeOutCubic.transform(_clamp((t - 0.40) / 0.11)));
 
             // 8) Made in Egypt footer.
-            final madeInEgyptFade =
-                Curves.easeOutCubic.transform(_clamp((t - 0.43) / 0.07));
+            final madeInEgyptFade = Curves.easeOutCubic.transform(
+              _clamp((t - 0.43) / 0.07),
+            );
 
             final screenWidth = MediaQuery.of(context).size.width;
             final screenHeight = MediaQuery.of(context).size.height;
@@ -252,14 +273,17 @@ class _DelwaIntroSceneState extends State<DelwaIntroScene>
                   Positioned(
                     left: 0,
                     right: 0,
-                    top: logoCenterY - logoSize * (0.9 + 0.65 * openingRingProgress),
+                    top:
+                        logoCenterY -
+                        logoSize * (0.9 + 0.65 * openingRingProgress),
                     child: IgnorePointer(
                       child: Opacity(
                         opacity: openingRingOpacity,
                         child: Center(
                           child: Container(
                             width: logoSize * (1.8 + 1.3 * openingRingProgress),
-                            height: logoSize * (1.8 + 1.3 * openingRingProgress),
+                            height:
+                                logoSize * (1.8 + 1.3 * openingRingProgress),
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
                               border: Border.all(
@@ -388,10 +412,12 @@ class _DelwaIntroSceneState extends State<DelwaIntroScene>
                           width: logoSize,
                           height: logoSize,
                           cacheWidth:
-                              (logoSize * MediaQuery.of(context).devicePixelRatio)
+                              (logoSize *
+                                      MediaQuery.of(context).devicePixelRatio)
                                   .round(),
                           cacheHeight:
-                              (logoSize * MediaQuery.of(context).devicePixelRatio)
+                              (logoSize *
+                                      MediaQuery.of(context).devicePixelRatio)
                                   .round(),
                           fit: BoxFit.contain,
                           fallbackBuilder: (context) => Container(
@@ -400,10 +426,7 @@ class _DelwaIntroSceneState extends State<DelwaIntroScene>
                             decoration: const BoxDecoration(
                               shape: BoxShape.circle,
                               gradient: LinearGradient(
-                                colors: [
-                                  _gradientPurple,
-                                  _gradientCyan,
-                                ],
+                                colors: [_gradientPurple, _gradientCyan],
                               ),
                             ),
                             child: const Center(
@@ -648,8 +671,9 @@ class _DelwaIntroSceneState extends State<DelwaIntroScene>
                                         fontFamily: 'Cairo',
                                         fontSize: 10,
                                         fontWeight: FontWeight.w500,
-                                        color: _textNearWhite
-                                            .withValues(alpha: 0.78),
+                                        color: _textNearWhite.withValues(
+                                          alpha: 0.78,
+                                        ),
                                         letterSpacing: 0.3,
                                         height: 1.2,
                                       ),
@@ -734,8 +758,9 @@ class _DelwaIntroSceneState extends State<DelwaIntroScene>
                                           fontFamily: 'Cairo',
                                           fontSize: 10.5,
                                           fontWeight: FontWeight.w600,
-                                          color: _textNearWhite
-                                              .withValues(alpha: 0.85),
+                                          color: _textNearWhite.withValues(
+                                            alpha: 0.85,
+                                          ),
                                           letterSpacing: 0.4,
                                         ),
                                       ),
@@ -794,7 +819,8 @@ class _DelwaIntroSceneState extends State<DelwaIntroScene>
         children: [
           for (var i = 0; i < seeds.length; i++)
             Positioned(
-              left: screenWidth * seeds[i].$1 +
+              left:
+                  screenWidth * seeds[i].$1 +
                   math.sin((t * 3 + i) * math.pi) * 6,
               top: screenHeight * seeds[i].$2 - (t * 36),
               child: Container(

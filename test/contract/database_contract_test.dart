@@ -68,7 +68,8 @@ void main() {
         expect(
           sql.contains(column),
           isTrue,
-          reason: 'orders.$column is written by the app but no migration '
+          reason:
+              'orders.$column is written by the app but no migration '
               'declares it',
         );
       }
@@ -160,7 +161,8 @@ void main() {
       expect(
         m,
         isNotNull,
-        reason: 'the identity-documents bucket must be created with '
+        reason:
+            'the identity-documents bucket must be created with '
             'public = false',
       );
     });
@@ -200,9 +202,7 @@ void main() {
     });
 
     test('a merchant reply cannot overwrite the customer review text', () {
-      final file = File(
-        'supabase/migrations/108_merchant_review_reply.sql',
-      );
+      final file = File('supabase/migrations/108_merchant_review_reply.sql');
       expect(file.existsSync(), isTrue);
       final body = file.readAsStringSync();
       final update = RegExp(
@@ -220,13 +220,12 @@ void main() {
 
     test('admin policies exist for the operational tables', () {
       for (final table in ['orders', 'drivers', 'rides']) {
+        expect(sql.contains(table), isTrue);
         expect(
-          sql.contains(table),
-          isTrue,
-        );
-        expect(
-          RegExp('Admins can (view all|update any) $table',
-              caseSensitive: false).hasMatch(sql),
+          RegExp(
+            'Admins can (view all|update any) $table',
+            caseSensitive: false,
+          ).hasMatch(sql),
           isTrue,
           reason: 'missing an admin policy on $table',
         );
@@ -262,13 +261,13 @@ void main() {
 
   group('manifest contract', () {
     test('release builds declare network + background location', () {
-      final main = File(
-        'android/app/src/main/AndroidManifest.xml',
-      ).readAsStringSync();
+      final main = File('android/app/src/main/AndroidManifest.xml')
+          .readAsStringSync();
       expect(
         main,
         contains('android.permission.INTERNET'),
-        reason: 'INTERNET was only in the debug manifest, so a release APK '
+        reason:
+            'INTERNET was only in the debug manifest, so a release APK '
             'would have no network at all',
       );
       expect(
@@ -280,12 +279,10 @@ void main() {
     });
 
     test('the admin notification channel id exists in Dart', () {
-      final manifest = File(
-        'android/app/src/admin/AndroidManifest.xml',
-      ).readAsStringSync();
-      final m = RegExp(
-        r'default_notification_channel_id"\s+value="([^"]+)"',
-      ).firstMatch(manifest);
+      final manifest = File('android/app/src/admin/AndroidManifest.xml')
+          .readAsStringSync();
+      final m = RegExp(r'default_notification_channel_id"\s+value="([^"]+)"')
+          .firstMatch(manifest);
       if (m == null) return;
       final service = File(
         'lib/services/push_notification/push_notification_service.dart',
@@ -293,7 +290,8 @@ void main() {
       expect(
         service,
         contains(m.group(1)!),
-        reason: 'SDK-delivered notifications go to a channel the Dart code '
+        reason:
+            'SDK-delivered notifications go to a channel the Dart code '
             'never creates, so they are dropped',
       );
     });
@@ -301,9 +299,8 @@ void main() {
 
   group('ota contract', () {
     test('a downloaded APK must match a published checksum', () {
-      final ota = File(
-        'lib/services/ota/ota_update_manager.dart',
-      ).readAsStringSync();
+      final ota = File('lib/services/ota/ota_update_manager.dart')
+          .readAsStringSync();
       expect(
         ota,
         contains('verifyArtifactChecksum'),

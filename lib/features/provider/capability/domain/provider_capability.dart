@@ -214,5 +214,4 @@ Set<ProviderCapability> capabilitiesForCategory(ProviderCategory category) =>
 bool hasCapability(
   Set<ProviderCapability> capabilities,
   ProviderCapability capability,
-) =>
-    capabilities.contains(capability);
+) => capabilities.contains(capability);

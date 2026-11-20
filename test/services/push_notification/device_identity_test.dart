@@ -5,8 +5,9 @@ import 'package:delwaqty/services/push_notification/device_identity.dart';
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  final uuidPattern =
-      RegExp(r'^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$');
+  final uuidPattern = RegExp(
+    r'^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$',
+  );
 
   setUp(() {
     DeviceIdentity.debugResetForTest();

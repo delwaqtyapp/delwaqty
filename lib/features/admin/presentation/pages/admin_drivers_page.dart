@@ -14,20 +14,24 @@ final _adminDriversProvider = FutureProvider<List<Map<String, dynamic>>>((
 ) async {
   final adminService = ref.read(adminServiceProvider);
   final drivers = await adminService.getAllDrivers();
-  return drivers.map((d) => {
-    'id': d.id,
-    'name': d.fullName,
-    'phone': d.phone ?? '',
-    'is_active': d.isActive,
-    'is_online': d.isAvailable,
-    'verification_status': d.isVerified ? 'verified' : 'pending',
-    'rating': d.rating,
-    'trips_count': d.totalTrips,
-    'vehicle': {
-      'model': d.vehicleType ?? '',
-      'plate': d.vehiclePlate ?? '',
-    },
-  }).toList();
+  return drivers
+      .map(
+        (d) => {
+          'id': d.id,
+          'name': d.fullName,
+          'phone': d.phone ?? '',
+          'is_active': d.isActive,
+          'is_online': d.isAvailable,
+          'verification_status': d.isVerified ? 'verified' : 'pending',
+          'rating': d.rating,
+          'trips_count': d.totalTrips,
+          'vehicle': {
+            'model': d.vehicleType ?? '',
+            'plate': d.vehiclePlate ?? '',
+          },
+        },
+      )
+      .toList();
 });
 
 class AdminDriversPage extends ConsumerStatefulWidget {
@@ -52,10 +56,12 @@ class _AdminDriversPageState extends ConsumerState<AdminDriversPage> {
     final l10n = AppLocalizations.of(context);
     final cs = Theme.of(context).colorScheme;
     final driversAsync = ref.watch(_adminDriversProvider);
-    final drivers = driversAsync.asData?.value ?? const <Map<String, dynamic>>[];
+    final drivers =
+        driversAsync.asData?.value ?? const <Map<String, dynamic>>[];
     final totalDrivers = drivers.length;
-    final activeDrivers =
-        drivers.where((d) => (d['is_active'] as bool?) ?? false).length;
+    final activeDrivers = drivers
+        .where((d) => (d['is_active'] as bool?) ?? false)
+        .length;
     final pendingDrivers = drivers
         .where((d) => (d['verification_status'] as String?) == 'pending')
         .length;
@@ -65,9 +71,9 @@ class _AdminDriversPageState extends ConsumerState<AdminDriversPage> {
     final avgRating = ratedDrivers.isEmpty
         ? '--'
         : (ratedDrivers
-                    .map((d) => (d['rating'] as num).toDouble())
-                    .reduce((a, b) => a + b) /
-                ratedDrivers.length)
+                      .map((d) => (d['rating'] as num).toDouble())
+                      .reduce((a, b) => a + b) /
+                  ratedDrivers.length)
               .toStringAsFixed(1);
 
     return Scaffold(
@@ -93,10 +99,34 @@ class _AdminDriversPageState extends ConsumerState<AdminDriversPage> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
-                  _StatItem(label: l10n.total, value: '$totalDrivers', icon: Icons.people_outline_rounded, color: cs.primary, cs: cs),
-                  _StatItem(label: l10n.active, value: '$activeDrivers', icon: Icons.check_circle_outline_rounded, color: AppColors.successLight, cs: cs),
-                  _StatItem(label: l10n.pending, value: '$pendingDrivers', icon: Icons.pending_outlined, color: AppColors.warningLight, cs: cs),
-                  _StatItem(label: l10n.rating, value: avgRating, icon: Icons.star_outline_rounded, color: AppColors.brandGold, cs: cs),
+                  _StatItem(
+                    label: l10n.total,
+                    value: '$totalDrivers',
+                    icon: Icons.people_outline_rounded,
+                    color: cs.primary,
+                    cs: cs,
+                  ),
+                  _StatItem(
+                    label: l10n.active,
+                    value: '$activeDrivers',
+                    icon: Icons.check_circle_outline_rounded,
+                    color: AppColors.successLight,
+                    cs: cs,
+                  ),
+                  _StatItem(
+                    label: l10n.pending,
+                    value: '$pendingDrivers',
+                    icon: Icons.pending_outlined,
+                    color: AppColors.warningLight,
+                    cs: cs,
+                  ),
+                  _StatItem(
+                    label: l10n.rating,
+                    value: avgRating,
+                    icon: Icons.star_outline_rounded,
+                    color: AppColors.brandGold,
+                    cs: cs,
+                  ),
                 ],
               ),
             ),
@@ -139,7 +169,8 @@ class _AdminDriversPageState extends ConsumerState<AdminDriversPage> {
                   if (_searchQuery.isEmpty) return true;
                   final name = (d['name'] as String? ?? '').toLowerCase();
                   final phone = (d['phone'] as String? ?? '').toLowerCase();
-                  return name.contains(_searchQuery) || phone.contains(_searchQuery);
+                  return name.contains(_searchQuery) ||
+                      phone.contains(_searchQuery);
                 }).toList();
 
                 if (filtered.isEmpty) {
@@ -181,16 +212,20 @@ class _AdminDriversPageState extends ConsumerState<AdminDriversPage> {
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(20),
                                 ),
-                                content: Text(l10n.suspendDriverBody(
-                                  driver['name'] as String? ?? '',
-                                )),
+                                content: Text(
+                                  l10n.suspendDriverBody(
+                                    driver['name'] as String? ?? '',
+                                  ),
+                                ),
                                 actions: [
                                   TextButton(
-                                    onPressed: () => Navigator.of(ctx).pop(false),
+                                    onPressed: () =>
+                                        Navigator.of(ctx).pop(false),
                                     child: Text(l10n.cancel),
                                   ),
                                   FilledButton(
-                                    onPressed: () => Navigator.of(ctx).pop(true),
+                                    onPressed: () =>
+                                        Navigator.of(ctx).pop(true),
                                     child: Text(l10n.suspend),
                                   ),
                                 ],
@@ -199,11 +234,11 @@ class _AdminDriversPageState extends ConsumerState<AdminDriversPage> {
                             if (confirmed != true || !context.mounted) return;
 
                             final adminService = ref.read(adminServiceProvider);
-                            final ok =
-                                await adminService.updateDriverOnlineStatus(
-                              driverId: driver['id'] as String,
-                              isActive: false,
-                            );
+                            final ok = await adminService
+                                .updateDriverOnlineStatus(
+                                  driverId: driver['id'] as String,
+                                  isActive: false,
+                                );
                             ref.invalidate(_adminDriversProvider);
                             messenger.showSnackBar(
                               SnackBar(
@@ -253,15 +288,13 @@ class _StatItem extends StatelessWidget {
         const SizedBox(height: 4),
         Text(
           value,
-          style: Theme.of(context).textTheme.titleSmall?.copyWith(
-            fontWeight: FontWeight.bold,
-          ),
+          style: Theme.of(context).textTheme.titleSmall
+              ?.copyWith(fontWeight: FontWeight.bold),
         ),
         Text(
           label,
-          style: Theme.of(context).textTheme.labelSmall?.copyWith(
-            color: cs.onSurfaceVariant,
-          ),
+          style: Theme.of(context).textTheme.labelSmall
+              ?.copyWith(color: cs.onSurfaceVariant),
         ),
       ],
     );
@@ -288,7 +321,8 @@ class _DriverGlassTile extends StatelessWidget {
     final name = driver['name'] as String? ?? '';
     final phone = driver['phone'] as String? ?? '';
     final isActive = driver['is_active'] as bool? ?? false;
-    final verificationStatus = driver['verification_status'] as String? ?? 'pending';
+    final verificationStatus =
+        driver['verification_status'] as String? ?? 'pending';
     final rating = (driver['rating'] as num?)?.toDouble() ?? 0.0;
     final tripsCount = (driver['trips_count'] as int?) ?? 0;
     final vehicle = driver['vehicle'] as Map<String, dynamic>?;
@@ -343,16 +377,14 @@ class _DriverGlassTile extends StatelessWidget {
                   children: [
                     Text(
                       name,
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
+                      style: Theme.of(context).textTheme.bodyMedium
+                          ?.copyWith(fontWeight: FontWeight.w600),
                     ),
                     if (phone.isNotEmpty)
                       Text(
                         phone,
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: cs.onSurfaceVariant,
-                        ),
+                        style: Theme.of(context).textTheme.bodySmall
+                            ?.copyWith(color: cs.onSurfaceVariant),
                       ),
                   ],
                 ),
@@ -393,12 +425,24 @@ class _DriverGlassTile extends StatelessWidget {
           const SizedBox(height: 12),
           Row(
             children: [
-              _DriverInfoChip(icon: Icons.star_rounded, label: rating.toStringAsFixed(1), color: Colors.amber),
+              _DriverInfoChip(
+                icon: Icons.star_rounded,
+                label: rating.toStringAsFixed(1),
+                color: Colors.amber,
+              ),
               const SizedBox(width: 8),
-              _DriverInfoChip(icon: Icons.route_rounded, label: '$tripsCount ${l10n.tripsLabel}', color: cs.primary),
+              _DriverInfoChip(
+                icon: Icons.route_rounded,
+                label: '$tripsCount ${l10n.tripsLabel}',
+                color: cs.primary,
+              ),
               if (vehicleModel.isNotEmpty) ...[
                 const SizedBox(width: 8),
-                _DriverInfoChip(icon: Icons.directions_car_rounded, label: vehicleModel, color: cs.secondary),
+                _DriverInfoChip(
+                  icon: Icons.directions_car_rounded,
+                  label: vehicleModel,
+                  color: cs.secondary,
+                ),
               ],
             ],
           ),
@@ -470,10 +514,8 @@ class _DriverInfoChip extends StatelessWidget {
           const SizedBox(width: 4),
           Text(
             label,
-            style: Theme.of(context).textTheme.labelSmall?.copyWith(
-              fontWeight: FontWeight.w600,
-              color: color,
-            ),
+            style: Theme.of(context).textTheme.labelSmall
+                ?.copyWith(fontWeight: FontWeight.w600, color: color),
           ),
         ],
       ),

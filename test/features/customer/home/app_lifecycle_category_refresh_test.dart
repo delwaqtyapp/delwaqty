@@ -72,9 +72,7 @@ void main() {
 
     await tester.pumpWidget(
       ProviderScope(
-        overrides: [
-          platformCategoryRepositoryProvider.overrideWithValue(repo),
-        ],
+        overrides: [platformCategoryRepositoryProvider.overrideWithValue(repo)],
         child: AppLifecycleCategoryRefresh(
           child: MaterialApp(
             home: Consumer(

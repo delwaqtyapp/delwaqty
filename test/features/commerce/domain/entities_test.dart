@@ -947,10 +947,7 @@ void main() {
     });
 
     test('toJson serializes correctly', () {
-      const filter = SearchFilter(
-        minPrice: 10.0,
-        sortBy: SortBy.priceLow,
-      );
+      const filter = SearchFilter(minPrice: 10.0, sortBy: SortBy.priceLow);
 
       final json = filter.toJson();
       expect(json['minPrice'], 10.0);
@@ -1009,10 +1006,7 @@ void main() {
     });
 
     test('toJson serializes correctly', () {
-      const location = GeoLocation(
-        latitude: 24.7136,
-        longitude: 46.6753,
-      );
+      const location = GeoLocation(latitude: 24.7136, longitude: 46.6753);
 
       final json = location.toJson();
       expect(json['latitude'], 24.7136);

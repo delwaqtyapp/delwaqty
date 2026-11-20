@@ -40,11 +40,26 @@ void main() {
     });
 
     test('fromCode maps known codes and falls back to detected', () {
-      expect(RegionPreferenceSource.fromCode('manual'), RegionPreferenceSource.manual);
-      expect(RegionPreferenceSource.fromCode('verified'), RegionPreferenceSource.verified);
-      expect(RegionPreferenceSource.fromCode('detected'), RegionPreferenceSource.detected);
-      expect(RegionPreferenceSource.fromCode('unknown'), RegionPreferenceSource.detected);
-      expect(RegionPreferenceSource.fromCode(null), RegionPreferenceSource.detected);
+      expect(
+        RegionPreferenceSource.fromCode('manual'),
+        RegionPreferenceSource.manual,
+      );
+      expect(
+        RegionPreferenceSource.fromCode('verified'),
+        RegionPreferenceSource.verified,
+      );
+      expect(
+        RegionPreferenceSource.fromCode('detected'),
+        RegionPreferenceSource.detected,
+      );
+      expect(
+        RegionPreferenceSource.fromCode('unknown'),
+        RegionPreferenceSource.detected,
+      );
+      expect(
+        RegionPreferenceSource.fromCode(null),
+        RegionPreferenceSource.detected,
+      );
     });
   });
 
@@ -59,7 +74,10 @@ void main() {
         'nameAr': 'القاهرة',
         'nameEn': 'Cairo',
         'isActive': true,
-        'metadata': {'iso3166_2': 'EG-C', 'aliases': ['Al Qahirah']},
+        'metadata': {
+          'iso3166_2': 'EG-C',
+          'aliases': ['Al Qahirah'],
+        },
         'createdAt': now.toIso8601String(),
         'updatedAt': now.toIso8601String(),
       });

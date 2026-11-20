@@ -14,9 +14,9 @@ import 'package:delwaqty/shared/widgets/design/premium_card.dart';
 
 final _adminCategoriesProvider =
     FutureProvider.autoDispose<List<PlatformCategory>>((ref) async {
-  final repo = ref.watch(platformCategoryRepositoryProvider);
-  return repo.getAllCategories();
-});
+      final repo = ref.watch(platformCategoryRepositoryProvider);
+      return repo.getAllCategories();
+    });
 
 class AdminCategoriesManagementPage extends ConsumerStatefulWidget {
   const AdminCategoriesManagementPage({super.key});
@@ -255,10 +255,7 @@ class _AdminCategoriesManagementPageState
               const SizedBox(height: 12),
               Text(l10n.operationFailed),
               const SizedBox(height: 12),
-              OutlinedButton(
-                onPressed: _refresh,
-                child: Text(l10n.retry),
-              ),
+              OutlinedButton(onPressed: _refresh, child: Text(l10n.retry)),
             ],
           ),
         ),
@@ -537,10 +534,12 @@ class _CategoryEditDialogState extends State<_CategoryEditDialog> {
   @override
   void initState() {
     super.initState();
-    _nameArController =
-        TextEditingController(text: widget.category?.nameAr ?? '');
-    _nameEnController =
-        TextEditingController(text: widget.category?.nameEn ?? '');
+    _nameArController = TextEditingController(
+      text: widget.category?.nameAr ?? '',
+    );
+    _nameEnController = TextEditingController(
+      text: widget.category?.nameEn ?? '',
+    );
     _sortOrder = widget.category?.sortOrder ?? 0;
     _imageUrl = widget.category?.imageUrl;
   }
@@ -597,22 +596,23 @@ class _CategoryEditDialogState extends State<_CategoryEditDialog> {
                                 fit: BoxFit.cover,
                               )
                             : _imageUrl != null && _imageUrl!.isNotEmpty
-                                ? DecorationImage(
-                                    image: NetworkImage(_imageUrl!),
-                                    fit: BoxFit.cover,
-                                  )
-                                : null,
+                            ? DecorationImage(
+                                image: NetworkImage(_imageUrl!),
+                                fit: BoxFit.cover,
+                              )
+                            : null,
                       ),
-                      child: _imageBytes == null &&
+                      child:
+                          _imageBytes == null &&
                               (_imageUrl == null || _imageUrl!.isEmpty)
                           ? Column(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
                                 const Icon(
-                                        Icons.cloud_upload_rounded,
-                                        color: AppColors.textMuted,
-                                        size: 32,
-                                      ),
+                                  Icons.cloud_upload_rounded,
+                                  color: AppColors.textMuted,
+                                  size: 32,
+                                ),
                                 const SizedBox(height: 4),
                                 Text(
                                   l10n.uploadImage,
@@ -631,9 +631,11 @@ class _CategoryEditDialogState extends State<_CategoryEditDialog> {
                                   color: Colors.white,
                                   shape: BoxShape.circle,
                                 ),
-                                child: const Icon(Icons.camera_alt_rounded,
-                                        size: 16,
-                                        color: AppColors.textMuted),
+                                child: const Icon(
+                                  Icons.camera_alt_rounded,
+                                  size: 16,
+                                  color: AppColors.textMuted,
+                                ),
                               ),
                             ),
                     ),
@@ -674,8 +676,10 @@ class _CategoryEditDialogState extends State<_CategoryEditDialog> {
                     icon: const Icon(Icons.remove_rounded),
                     visualDensity: VisualDensity.compact,
                   ),
-                  Text('$_sortOrder',
-                      style: const TextStyle(fontWeight: FontWeight.w600)),
+                  Text(
+                    '$_sortOrder',
+                    style: const TextStyle(fontWeight: FontWeight.w600),
+                  ),
                   IconButton(
                     tooltip: l10n.add,
                     onPressed: () => setState(() => _sortOrder += 1),
@@ -709,9 +713,7 @@ class _CategoryEditDialogState extends State<_CategoryEditDialog> {
               ),
             );
           },
-          style: FilledButton.styleFrom(
-            backgroundColor: AppColors.brandPurple,
-          ),
+          style: FilledButton.styleFrom(backgroundColor: AppColors.brandPurple),
           child: Text(_isEditing ? l10n.save : l10n.create),
         ),
       ],

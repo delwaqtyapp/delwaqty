@@ -5,10 +5,7 @@ import 'package:delwaqty/shared/notifications/notification_route_resolver.dart';
 void main() {
   group('NotificationRouteResolver', () {
     test('resolve returns the deep link when allowed', () {
-      expect(
-        NotificationRouteResolver.resolve(deepLink: '/orders'),
-        '/orders',
-      );
+      expect(NotificationRouteResolver.resolve(deepLink: '/orders'), '/orders');
       expect(
         NotificationRouteResolver.resolve(
           deepLink: '/admin/complaints',

@@ -82,13 +82,10 @@ void main() {
 
   setUp(() async {
     SharedPreferences.setMockInitialValues(<String, Object>{});
-    prefs = SharedPreferencesService(
-      await SharedPreferences.getInstance(),
-    );
+    prefs = SharedPreferencesService(await SharedPreferences.getInstance());
     mockRepo = _MockProfileRepository();
-    when(
-      () => mockRepo.watchProfile(any()),
-    ).thenAnswer((_) => Stream.value(_user));
+    when(() => mockRepo.watchProfile(any()))
+        .thenAnswer((_) => Stream.value(_user));
   });
 
   void Function(FlutterErrorDetails)? ignoreVisualAssertions(
@@ -120,18 +117,13 @@ void main() {
     await tester.pump(const Duration(milliseconds: 800));
 
     expect(find.text('Edit Profile'), findsOneWidget);
-    await tester.tap(
-      find.widgetWithText(FilledButton, 'Edit Profile'),
-    );
+    await tester.tap(find.widgetWithText(FilledButton, 'Edit Profile'));
     await tester.pump(const Duration(milliseconds: 300));
     await tester.pump(const Duration(milliseconds: 400));
 
     expect(find.text('Save Changes'), findsOneWidget);
 
-    await tester.enterText(
-      find.byType(TextField).at(0),
-      'Updated Name',
-    );
+    await tester.enterText(find.byType(TextField).at(0), 'Updated Name');
     await tester.pump();
 
     await tester.ensureVisible(find.text('Save Changes'));
@@ -163,9 +155,7 @@ void main() {
     await tester.pumpWidget(_buildTestApp(mockRepo, prefs));
     await tester.pump(const Duration(milliseconds: 800));
 
-    await tester.tap(
-      find.widgetWithText(FilledButton, 'Edit Profile'),
-    );
+    await tester.tap(find.widgetWithText(FilledButton, 'Edit Profile'));
     await tester.pump(const Duration(milliseconds: 400));
 
     await tester.enterText(find.byType(TextField).at(0), 'Only Name');
@@ -181,11 +171,7 @@ void main() {
     verify(
       () => mockRepo.updateProfile(
         userId: 'u1',
-        data: {
-          'full_name': 'Only Name',
-          'username': null,
-          'phone': null,
-        },
+        data: {'full_name': 'Only Name', 'username': null, 'phone': null},
       ),
     ).called(1);
     expect(tester.takeException(), isNull);
@@ -207,8 +193,7 @@ void main() {
 
       const navHeight = 72.0;
       final navTop =
-          tester.view.physicalSize.height /
-              tester.view.devicePixelRatio -
+          tester.view.physicalSize.height / tester.view.devicePixelRatio -
           navHeight;
 
       final sliverPadding = tester.widget<SliverPadding>(

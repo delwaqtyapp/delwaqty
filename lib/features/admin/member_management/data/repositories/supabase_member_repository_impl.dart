@@ -7,11 +7,13 @@ final memberRepositoryProvider = Provider<MemberRepository>((ref) {
   return ref.watch(supabaseMemberRepositoryProvider);
 });
 
-final supabaseMemberRepositoryProvider = Provider<SupabaseMemberRepositoryImpl>((ref) {
-  return SupabaseMemberRepositoryImpl(
-    ref.watch(supabaseMemberDataSourceProvider),
-  );
-});
+final supabaseMemberRepositoryProvider = Provider<SupabaseMemberRepositoryImpl>(
+  (ref) {
+    return SupabaseMemberRepositoryImpl(
+      ref.watch(supabaseMemberDataSourceProvider),
+    );
+  },
+);
 
 class SupabaseMemberRepositoryImpl implements MemberRepository {
   SupabaseMemberRepositoryImpl(this._dataSource);
@@ -49,9 +51,16 @@ class SupabaseMemberRepositoryImpl implements MemberRepository {
   }
 
   @override
-  Future<List<Map<String, dynamic>>> getMemberTimeline(String memberId,
-      {String? cursor, int limit = 20}) async {
-    return await _dataSource.getMemberTimeline(memberId, cursor: cursor, limit: limit);
+  Future<List<Map<String, dynamic>>> getMemberTimeline(
+    String memberId, {
+    String? cursor,
+    int limit = 20,
+  }) async {
+    return await _dataSource.getMemberTimeline(
+      memberId,
+      cursor: cursor,
+      limit: limit,
+    );
   }
 
   @override

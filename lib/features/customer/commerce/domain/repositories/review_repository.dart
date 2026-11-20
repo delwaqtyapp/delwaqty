@@ -21,6 +21,7 @@ abstract interface class ReviewRepository {
     String? comment,
     List<String>? imageUrls,
   });
+
   /// Merchant reply. Writes only `merchant_reply`, never the customer's
   /// `comment`.
   Future<void> replyToReview({required String reviewId, required String reply});

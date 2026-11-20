@@ -15,6 +15,8 @@ final providerAvailabilityRepositoryProvider =
       );
     });
 
-final providerAvailabilityProvider = FutureProvider<Map<String, dynamic>>((ref) {
+final providerAvailabilityProvider = FutureProvider<Map<String, dynamic>>((
+  ref,
+) {
   return ref.watch(providerAvailabilityRepositoryProvider).getAvailability();
 });

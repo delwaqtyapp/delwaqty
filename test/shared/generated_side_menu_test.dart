@@ -8,8 +8,9 @@ void main() {
   });
 
   test('glass side menu registers all customer feature entries', () {
-    final ids =
-        FeatureRegistry.instance.allDrawerEntries.map((e) => e.id).toList();
+    final ids = FeatureRegistry.instance.allDrawerEntries
+        .map((e) => e.id)
+        .toList();
 
     expect(
       ids,

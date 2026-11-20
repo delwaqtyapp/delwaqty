@@ -75,9 +75,8 @@ void main() {
 
   group('UserLocationNotifier', () {
     test('returns null when location service is disabled', () async {
-      when(
-        () => mockPlatform.isLocationServiceEnabled(),
-      ).thenAnswer((_) async => false);
+      when(() => mockPlatform.isLocationServiceEnabled())
+          .thenAnswer((_) async => false);
 
       final container = ProviderContainer(
         overrides: [loggerProvider.overrideWithValue(mockLogger)],
@@ -93,15 +92,12 @@ void main() {
     });
 
     test('returns null when permission is denied', () async {
-      when(
-        () => mockPlatform.isLocationServiceEnabled(),
-      ).thenAnswer((_) async => true);
-      when(
-        () => mockPlatform.checkPermission(),
-      ).thenAnswer((_) async => LocationPermission.denied);
-      when(
-        () => mockPlatform.requestPermission(),
-      ).thenAnswer((_) async => LocationPermission.denied);
+      when(() => mockPlatform.isLocationServiceEnabled())
+          .thenAnswer((_) async => true);
+      when(() => mockPlatform.checkPermission())
+          .thenAnswer((_) async => LocationPermission.denied);
+      when(() => mockPlatform.requestPermission())
+          .thenAnswer((_) async => LocationPermission.denied);
 
       final container = ProviderContainer(
         overrides: [loggerProvider.overrideWithValue(mockLogger)],
@@ -116,12 +112,10 @@ void main() {
     });
 
     test('returns null when permission is denied forever', () async {
-      when(
-        () => mockPlatform.isLocationServiceEnabled(),
-      ).thenAnswer((_) async => true);
-      when(
-        () => mockPlatform.checkPermission(),
-      ).thenAnswer((_) async => LocationPermission.deniedForever);
+      when(() => mockPlatform.isLocationServiceEnabled())
+          .thenAnswer((_) async => true);
+      when(() => mockPlatform.checkPermission())
+          .thenAnswer((_) async => LocationPermission.deniedForever);
 
       final container = ProviderContainer(
         overrides: [loggerProvider.overrideWithValue(mockLogger)],
@@ -136,12 +130,10 @@ void main() {
     });
 
     test('locks a fresh sub-metre last-known position', () async {
-      when(
-        () => mockPlatform.isLocationServiceEnabled(),
-      ).thenAnswer((_) async => true);
-      when(
-        () => mockPlatform.checkPermission(),
-      ).thenAnswer((_) async => LocationPermission.whileInUse);
+      when(() => mockPlatform.isLocationServiceEnabled())
+          .thenAnswer((_) async => true);
+      when(() => mockPlatform.checkPermission())
+          .thenAnswer((_) async => LocationPermission.whileInUse);
       when(
         () => mockPlatform.getLastKnownPosition(
           forceLocationManager: any(named: 'forceLocationManager'),
@@ -163,12 +155,10 @@ void main() {
     });
 
     test('locks on the first sub-metre stream sample', () async {
-      when(
-        () => mockPlatform.isLocationServiceEnabled(),
-      ).thenAnswer((_) async => true);
-      when(
-        () => mockPlatform.checkPermission(),
-      ).thenAnswer((_) async => LocationPermission.whileInUse);
+      when(() => mockPlatform.isLocationServiceEnabled())
+          .thenAnswer((_) async => true);
+      when(() => mockPlatform.checkPermission())
+          .thenAnswer((_) async => LocationPermission.whileInUse);
       when(
         () => mockPlatform.getLastKnownPosition(
           forceLocationManager: any(named: 'forceLocationManager'),
@@ -198,50 +188,49 @@ void main() {
       expect(result!.accuracyMeters, 0.5);
     });
 
-    test('rejects a stale last-known position when no fresh fix arrives', () async {
-      when(
-        () => mockPlatform.isLocationServiceEnabled(),
-      ).thenAnswer((_) async => true);
-      when(
-        () => mockPlatform.checkPermission(),
-      ).thenAnswer((_) async => LocationPermission.whileInUse);
-      when(
-        () => mockPlatform.getLastKnownPosition(
-          forceLocationManager: any(named: 'forceLocationManager'),
-        ),
-      ).thenAnswer(
-        (_) async => positionWith(
-          29.2,
-          32.63,
-          30.0,
-          DateTime.now().subtract(const Duration(days: 9)),
-        ),
-      );
-      when(
-        () => mockPlatform.getPositionStream(
-          locationSettings: any(named: 'locationSettings'),
-        ),
-      ).thenAnswer((_) => const Stream<Position>.empty());
+    test(
+      'rejects a stale last-known position when no fresh fix arrives',
+      () async {
+        when(() => mockPlatform.isLocationServiceEnabled())
+            .thenAnswer((_) async => true);
+        when(() => mockPlatform.checkPermission())
+            .thenAnswer((_) async => LocationPermission.whileInUse);
+        when(
+          () => mockPlatform.getLastKnownPosition(
+            forceLocationManager: any(named: 'forceLocationManager'),
+          ),
+        ).thenAnswer(
+          (_) async => positionWith(
+            29.2,
+            32.63,
+            30.0,
+            DateTime.now().subtract(const Duration(days: 9)),
+          ),
+        );
+        when(
+          () => mockPlatform.getPositionStream(
+            locationSettings: any(named: 'locationSettings'),
+          ),
+        ).thenAnswer((_) => const Stream<Position>.empty());
 
-      final container = ProviderContainer(
-        overrides: [loggerProvider.overrideWithValue(mockLogger)],
-      );
-      addTearDown(container.dispose);
+        final container = ProviderContainer(
+          overrides: [loggerProvider.overrideWithValue(mockLogger)],
+        );
+        addTearDown(container.dispose);
 
-      final result = await container
-          .read(userLocationProvider.notifier)
-          .refreshDeepLocked();
+        final result = await container
+            .read(userLocationProvider.notifier)
+            .refreshDeepLocked();
 
-      expect(result, isNull);
-    });
+        expect(result, isNull);
+      },
+    );
 
     test('ignores stale stream samples and locks a fresh one', () async {
-      when(
-        () => mockPlatform.isLocationServiceEnabled(),
-      ).thenAnswer((_) async => true);
-      when(
-        () => mockPlatform.checkPermission(),
-      ).thenAnswer((_) async => LocationPermission.whileInUse);
+      when(() => mockPlatform.isLocationServiceEnabled())
+          .thenAnswer((_) async => true);
+      when(() => mockPlatform.checkPermission())
+          .thenAnswer((_) async => LocationPermission.whileInUse);
       when(
         () => mockPlatform.getLastKnownPosition(
           forceLocationManager: any(named: 'forceLocationManager'),
@@ -276,89 +265,86 @@ void main() {
       expect(result!.accuracyMeters, 0.5);
     });
 
-    test('prefers a fresh stream fix over a stale last-known position', () async {
-      when(
-        () => mockPlatform.isLocationServiceEnabled(),
-      ).thenAnswer((_) async => true);
-      when(
-        () => mockPlatform.checkPermission(),
-      ).thenAnswer((_) async => LocationPermission.whileInUse);
-      when(
-        () => mockPlatform.getLastKnownPosition(
-          forceLocationManager: any(named: 'forceLocationManager'),
-        ),
-      ).thenAnswer(
-        (_) async => positionWith(
-          29.2,
-          32.63,
-          30.0,
-          DateTime.now().subtract(const Duration(days: 9)),
-        ),
-      );
-      when(
-        () => mockPlatform.getPositionStream(
-          locationSettings: any(named: 'locationSettings'),
-        ),
-      ).thenAnswer(
-        (_) => Stream.fromIterable([positionWith(29.2, 32.63, 5.0)]),
-      );
+    test(
+      'prefers a fresh stream fix over a stale last-known position',
+      () async {
+        when(() => mockPlatform.isLocationServiceEnabled())
+            .thenAnswer((_) async => true);
+        when(() => mockPlatform.checkPermission())
+            .thenAnswer((_) async => LocationPermission.whileInUse);
+        when(
+          () => mockPlatform.getLastKnownPosition(
+            forceLocationManager: any(named: 'forceLocationManager'),
+          ),
+        ).thenAnswer(
+          (_) async => positionWith(
+            29.2,
+            32.63,
+            30.0,
+            DateTime.now().subtract(const Duration(days: 9)),
+          ),
+        );
+        when(
+          () => mockPlatform.getPositionStream(
+            locationSettings: any(named: 'locationSettings'),
+          ),
+        ).thenAnswer(
+          (_) => Stream.fromIterable([positionWith(29.2, 32.63, 5.0)]),
+        );
 
-      final container = ProviderContainer(
-        overrides: [loggerProvider.overrideWithValue(mockLogger)],
-      );
-      addTearDown(container.dispose);
+        final container = ProviderContainer(
+          overrides: [loggerProvider.overrideWithValue(mockLogger)],
+        );
+        addTearDown(container.dispose);
 
-      final result = await container
-          .read(userLocationProvider.notifier)
-          .refreshDeepLocked();
+        final result = await container
+            .read(userLocationProvider.notifier)
+            .refreshDeepLocked();
 
-      expect(result, isNotNull);
-      expect(result!.accuracyMeters, 5.0);
-    });
+        expect(result, isNotNull);
+        expect(result!.accuracyMeters, 5.0);
+      },
+    );
 
-    test('accepts a satellite-less network/fused stream sample as fallback',
-        () async {
-      when(
-        () => mockPlatform.isLocationServiceEnabled(),
-      ).thenAnswer((_) async => true);
-      when(
-        () => mockPlatform.checkPermission(),
-      ).thenAnswer((_) async => LocationPermission.whileInUse);
-      when(
-        () => mockPlatform.getLastKnownPosition(
-          forceLocationManager: any(named: 'forceLocationManager'),
-        ),
-      ).thenAnswer((_) async => null);
-      when(
-        () => mockPlatform.getPositionStream(
-          locationSettings: any(named: 'locationSettings'),
-        ),
-      ).thenAnswer(
-        (_) => Stream.fromIterable([
-          androidPositionWith(29.2, 32.63, 5.0),
-        ]),
-      );
+    test(
+      'accepts a satellite-less network/fused stream sample as fallback',
+      () async {
+        when(() => mockPlatform.isLocationServiceEnabled())
+            .thenAnswer((_) async => true);
+        when(() => mockPlatform.checkPermission())
+            .thenAnswer((_) async => LocationPermission.whileInUse);
+        when(
+          () => mockPlatform.getLastKnownPosition(
+            forceLocationManager: any(named: 'forceLocationManager'),
+          ),
+        ).thenAnswer((_) async => null);
+        when(
+          () => mockPlatform.getPositionStream(
+            locationSettings: any(named: 'locationSettings'),
+          ),
+        ).thenAnswer(
+          (_) => Stream.fromIterable([androidPositionWith(29.2, 32.63, 5.0)]),
+        );
 
-      final container = ProviderContainer(
-        overrides: [loggerProvider.overrideWithValue(mockLogger)],
-      );
-      addTearDown(container.dispose);
+        final container = ProviderContainer(
+          overrides: [loggerProvider.overrideWithValue(mockLogger)],
+        );
+        addTearDown(container.dispose);
 
-      final result = await container
-          .read(userLocationProvider.notifier)
-          .refreshDeepLocked();
+        final result = await container
+            .read(userLocationProvider.notifier)
+            .refreshDeepLocked();
 
-      expect(result, isNotNull);
-      expect(result!.accuracyMeters, 5.0);
-    });
+        expect(result, isNotNull);
+        expect(result!.accuracyMeters, 5.0);
+      },
+    );
 
     test('accepts a GNSS-verified stream sample', () async {
-      when(
-        () => mockPlatform.isLocationServiceEnabled(),
-      ).thenAnswer((_) async => true);
-      when(
-        () => mockPlatform.checkPermission(),
-      ).thenAnswer((_) async => LocationPermission.whileInUse);
+      when(() => mockPlatform.isLocationServiceEnabled())
+          .thenAnswer((_) async => true);
+      when(() => mockPlatform.checkPermission())
+          .thenAnswer((_) async => LocationPermission.whileInUse);
       when(
         () => mockPlatform.getLastKnownPosition(
           forceLocationManager: any(named: 'forceLocationManager'),
@@ -388,23 +374,15 @@ void main() {
     });
 
     test('accepts a fresh network/fused last-known in quick mode', () async {
-      when(
-        () => mockPlatform.isLocationServiceEnabled(),
-      ).thenAnswer((_) async => true);
-      when(
-        () => mockPlatform.checkPermission(),
-      ).thenAnswer((_) async => LocationPermission.whileInUse);
+      when(() => mockPlatform.isLocationServiceEnabled())
+          .thenAnswer((_) async => true);
+      when(() => mockPlatform.checkPermission())
+          .thenAnswer((_) async => LocationPermission.whileInUse);
       when(
         () => mockPlatform.getLastKnownPosition(
           forceLocationManager: any(named: 'forceLocationManager'),
         ),
-      ).thenAnswer(
-        (_) async => androidPositionWith(
-          29.2,
-          32.63,
-          100.0,
-        ),
-      );
+      ).thenAnswer((_) async => androidPositionWith(29.2, 32.63, 100.0));
 
       final container = ProviderContainer(
         overrides: [loggerProvider.overrideWithValue(mockLogger)],
@@ -421,23 +399,15 @@ void main() {
     });
 
     test('rejects a fresh non-GNSS last-known with poor accuracy', () async {
-      when(
-        () => mockPlatform.isLocationServiceEnabled(),
-      ).thenAnswer((_) async => true);
-      when(
-        () => mockPlatform.checkPermission(),
-      ).thenAnswer((_) async => LocationPermission.whileInUse);
+      when(() => mockPlatform.isLocationServiceEnabled())
+          .thenAnswer((_) async => true);
+      when(() => mockPlatform.checkPermission())
+          .thenAnswer((_) async => LocationPermission.whileInUse);
       when(
         () => mockPlatform.getLastKnownPosition(
           forceLocationManager: any(named: 'forceLocationManager'),
         ),
-      ).thenAnswer(
-        (_) async => androidPositionWith(
-          29.2,
-          32.63,
-          900.0,
-        ),
-      );
+      ).thenAnswer((_) async => androidPositionWith(29.2, 32.63, 900.0));
       when(
         () => mockPlatform.getPositionStream(
           locationSettings: any(named: 'locationSettings'),
@@ -456,53 +426,51 @@ void main() {
       expect(result, isNull);
     });
 
-    test('accepts a GNSS last-known up to 10 minutes old in deep mode',
-        () async {
-      when(
-        () => mockPlatform.isLocationServiceEnabled(),
-      ).thenAnswer((_) async => true);
-      when(
-        () => mockPlatform.checkPermission(),
-      ).thenAnswer((_) async => LocationPermission.whileInUse);
-      when(
-        () => mockPlatform.getLastKnownPosition(
-          forceLocationManager: any(named: 'forceLocationManager'),
-        ),
-      ).thenAnswer(
-        (_) async => androidPositionWith(
-          29.2,
-          32.63,
-          5.0,
-          satellitesUsedInFix: 4,
-          timestamp: DateTime.now().subtract(const Duration(minutes: 5)),
-        ),
-      );
-      when(
-        () => mockPlatform.getPositionStream(
-          locationSettings: any(named: 'locationSettings'),
-        ),
-      ).thenAnswer((_) => const Stream<Position>.empty());
+    test(
+      'accepts a GNSS last-known up to 10 minutes old in deep mode',
+      () async {
+        when(() => mockPlatform.isLocationServiceEnabled())
+            .thenAnswer((_) async => true);
+        when(() => mockPlatform.checkPermission())
+            .thenAnswer((_) async => LocationPermission.whileInUse);
+        when(
+          () => mockPlatform.getLastKnownPosition(
+            forceLocationManager: any(named: 'forceLocationManager'),
+          ),
+        ).thenAnswer(
+          (_) async => androidPositionWith(
+            29.2,
+            32.63,
+            5.0,
+            satellitesUsedInFix: 4,
+            timestamp: DateTime.now().subtract(const Duration(minutes: 5)),
+          ),
+        );
+        when(
+          () => mockPlatform.getPositionStream(
+            locationSettings: any(named: 'locationSettings'),
+          ),
+        ).thenAnswer((_) => const Stream<Position>.empty());
 
-      final container = ProviderContainer(
-        overrides: [loggerProvider.overrideWithValue(mockLogger)],
-      );
-      addTearDown(container.dispose);
+        final container = ProviderContainer(
+          overrides: [loggerProvider.overrideWithValue(mockLogger)],
+        );
+        addTearDown(container.dispose);
 
-      final result = await container
-          .read(userLocationProvider.notifier)
-          .refreshDeepLocked();
+        final result = await container
+            .read(userLocationProvider.notifier)
+            .refreshDeepLocked();
 
-      expect(result, isNotNull);
-      expect(result!.accuracyMeters, 5.0);
-    });
+        expect(result, isNotNull);
+        expect(result!.accuracyMeters, 5.0);
+      },
+    );
 
     test('rejects a non-GNSS last-known older than 10 minutes', () async {
-      when(
-        () => mockPlatform.isLocationServiceEnabled(),
-      ).thenAnswer((_) async => true);
-      when(
-        () => mockPlatform.checkPermission(),
-      ).thenAnswer((_) async => LocationPermission.whileInUse);
+      when(() => mockPlatform.isLocationServiceEnabled())
+          .thenAnswer((_) async => true);
+      when(() => mockPlatform.checkPermission())
+          .thenAnswer((_) async => LocationPermission.whileInUse);
       when(
         () => mockPlatform.getLastKnownPosition(
           forceLocationManager: any(named: 'forceLocationManager'),
@@ -533,23 +501,15 @@ void main() {
       expect(result, isNull);
     });
     test('rejects a non-GNSS last-known with unknown (0.0) accuracy', () async {
-      when(
-        () => mockPlatform.isLocationServiceEnabled(),
-      ).thenAnswer((_) async => true);
-      when(
-        () => mockPlatform.checkPermission(),
-      ).thenAnswer((_) async => LocationPermission.whileInUse);
+      when(() => mockPlatform.isLocationServiceEnabled())
+          .thenAnswer((_) async => true);
+      when(() => mockPlatform.checkPermission())
+          .thenAnswer((_) async => LocationPermission.whileInUse);
       when(
         () => mockPlatform.getLastKnownPosition(
           forceLocationManager: any(named: 'forceLocationManager'),
         ),
-      ).thenAnswer(
-        (_) async => androidPositionWith(
-          29.2,
-          32.63,
-          0.0,
-        ),
-      );
+      ).thenAnswer((_) async => androidPositionWith(29.2, 32.63, 0.0));
       when(
         () => mockPlatform.getPositionStream(
           locationSettings: any(named: 'locationSettings'),
@@ -568,109 +528,101 @@ void main() {
       expect(result, isNull);
     });
 
-    test('does not report 0 m for a GNSS last-known with unknown (0.0) accuracy',
-        () async {
-      when(
-        () => mockPlatform.isLocationServiceEnabled(),
-      ).thenAnswer((_) async => true);
-      when(
-        () => mockPlatform.checkPermission(),
-      ).thenAnswer((_) async => LocationPermission.whileInUse);
-      when(
-        () => mockPlatform.getLastKnownPosition(
-          forceLocationManager: any(named: 'forceLocationManager'),
-        ),
-      ).thenAnswer(
-        (_) async => androidPositionWith(
-          29.2,
-          32.63,
-          0.0,
-          satellitesUsedInFix: 4,
-        ),
-      );
+    test(
+      'does not report 0 m for a GNSS last-known with unknown (0.0) accuracy',
+      () async {
+        when(() => mockPlatform.isLocationServiceEnabled())
+            .thenAnswer((_) async => true);
+        when(() => mockPlatform.checkPermission())
+            .thenAnswer((_) async => LocationPermission.whileInUse);
+        when(
+          () => mockPlatform.getLastKnownPosition(
+            forceLocationManager: any(named: 'forceLocationManager'),
+          ),
+        ).thenAnswer(
+          (_) async =>
+              androidPositionWith(29.2, 32.63, 0.0, satellitesUsedInFix: 4),
+        );
 
-      final container = ProviderContainer(
-        overrides: [loggerProvider.overrideWithValue(mockLogger)],
-      );
-      addTearDown(container.dispose);
+        final container = ProviderContainer(
+          overrides: [loggerProvider.overrideWithValue(mockLogger)],
+        );
+        addTearDown(container.dispose);
 
-      final result = await container
-          .read(userLocationProvider.notifier)
-          .refreshDeepLocked();
+        final result = await container
+            .read(userLocationProvider.notifier)
+            .refreshDeepLocked();
 
-      expect(result, isNotNull);
-      expect(result!.accuracyMeters, isNull);
-      verifyNever(() => mockPlatform.getPositionStream());
-    });
+        expect(result, isNotNull);
+        expect(result!.accuracyMeters, isNull);
+        verifyNever(() => mockPlatform.getPositionStream());
+      },
+    );
 
-    test('does not report 0 m for a stream sample with unknown (0.0) accuracy',
-        () async {
-      when(
-        () => mockPlatform.isLocationServiceEnabled(),
-      ).thenAnswer((_) async => true);
-      when(
-        () => mockPlatform.checkPermission(),
-      ).thenAnswer((_) async => LocationPermission.whileInUse);
-      when(
-        () => mockPlatform.getLastKnownPosition(
-          forceLocationManager: any(named: 'forceLocationManager'),
-        ),
-      ).thenAnswer((_) async => null);
-      when(
-        () => mockPlatform.getPositionStream(
-          locationSettings: any(named: 'locationSettings'),
-        ),
-      ).thenAnswer(
-        (_) => Stream.fromIterable([
-          androidPositionWith(29.2, 32.63, 0.0),
-        ]),
-      );
+    test(
+      'does not report 0 m for a stream sample with unknown (0.0) accuracy',
+      () async {
+        when(() => mockPlatform.isLocationServiceEnabled())
+            .thenAnswer((_) async => true);
+        when(() => mockPlatform.checkPermission())
+            .thenAnswer((_) async => LocationPermission.whileInUse);
+        when(
+          () => mockPlatform.getLastKnownPosition(
+            forceLocationManager: any(named: 'forceLocationManager'),
+          ),
+        ).thenAnswer((_) async => null);
+        when(
+          () => mockPlatform.getPositionStream(
+            locationSettings: any(named: 'locationSettings'),
+          ),
+        ).thenAnswer(
+          (_) => Stream.fromIterable([androidPositionWith(29.2, 32.63, 0.0)]),
+        );
 
-      final container = ProviderContainer(
-        overrides: [loggerProvider.overrideWithValue(mockLogger)],
-      );
-      addTearDown(container.dispose);
+        final container = ProviderContainer(
+          overrides: [loggerProvider.overrideWithValue(mockLogger)],
+        );
+        addTearDown(container.dispose);
 
-      final result = await container
-          .read(userLocationProvider.notifier)
-          .refreshDeepLocked();
+        final result = await container
+            .read(userLocationProvider.notifier)
+            .refreshDeepLocked();
 
-      expect(result, isNotNull);
-      expect(result!.accuracyMeters, isNull);
-    });
+        expect(result, isNotNull);
+        expect(result!.accuracyMeters, isNull);
+      },
+    );
   });
 
   group('composeGoogleAddress', () {
     List<dynamic> component(String name, List<String> types) => [
-      {
-        'long_name': name,
-        'short_name': name,
-        'types': types,
-      },
+      {'long_name': name, 'short_name': name, 'types': types},
     ];
 
-    test('joins markaz and village hierarchy largest first in Arabic',
-        () async {
-      final components = <dynamic>[
-        ...component('Zafarana offices', ['premise']),
-        ...component('قرية الزعفرانة', ['sublocality_level_1']),
-        ...component('مركز السويس', ['administrative_area_level_2']),
-        ...component('محافظة السويس', ['administrative_area_level_1']),
-        ...component('مصر', ['country']),
-      ];
+    test(
+      'joins markaz and village hierarchy largest first in Arabic',
+      () async {
+        final components = <dynamic>[
+          ...component('Zafarana offices', ['premise']),
+          ...component('قرية الزعفرانة', ['sublocality_level_1']),
+          ...component('مركز السويس', ['administrative_area_level_2']),
+          ...component('محافظة السويس', ['administrative_area_level_1']),
+          ...component('مصر', ['country']),
+        ];
 
-      final result = UserLocationNotifier.composeGoogleAddress(
-        components,
-        'ar',
-      );
+        final result = UserLocationNotifier.composeGoogleAddress(
+          components,
+          'ar',
+        );
 
-      expect(result, isNotNull);
-      expect(
-        result!.address,
-        'Zafarana offices، مركز السويس - قرية الزعفرانة، محافظة السويس، مصر',
-      );
-      expect(result.hasNamed, isTrue);
-    });
+        expect(result, isNotNull);
+        expect(
+          result!.address,
+          'Zafarana offices، مركز السويس - قرية الزعفرانة، محافظة السويس، مصر',
+        );
+        expect(result.hasNamed, isTrue);
+      },
+    );
 
     test('keeps hierarchy chain and comma separators in English', () async {
       final components = <dynamic>[
@@ -709,22 +661,24 @@ void main() {
       expect(result!.address, 'السويس - قرية الزعفرانة، السويس، مصر');
     });
 
-    test('collapses identical names repeated within the hierarchy chain',
-        () async {
-      final components = <dynamic>[
-        ...component('السويس', ['sublocality_level_1']),
-        ...component('السويس', ['administrative_area_level_2']),
-        ...component('مصر', ['country']),
-      ];
+    test(
+      'collapses identical names repeated within the hierarchy chain',
+      () async {
+        final components = <dynamic>[
+          ...component('السويس', ['sublocality_level_1']),
+          ...component('السويس', ['administrative_area_level_2']),
+          ...component('مصر', ['country']),
+        ];
 
-      final result = UserLocationNotifier.composeGoogleAddress(
-        components,
-        'ar',
-      );
+        final result = UserLocationNotifier.composeGoogleAddress(
+          components,
+          'ar',
+        );
 
-      expect(result, isNotNull);
-      expect(result!.address, 'السويس، مصر');
-    });
+        expect(result, isNotNull);
+        expect(result!.address, 'السويس، مصر');
+      },
+    );
 
     test('includes street number and route', () async {
       final components = <dynamic>[
@@ -774,7 +728,10 @@ void main() {
         'country': 'مصر',
       };
 
-      final result = UserLocationNotifier.composeNominatimAddress(address, 'ar');
+      final result = UserLocationNotifier.composeNominatimAddress(
+        address,
+        'ar',
+      );
 
       expect(result, isNotNull);
       expect(
@@ -790,7 +747,10 @@ void main() {
         'country': 'مصر',
       };
 
-      final result = UserLocationNotifier.composeNominatimAddress(address, 'ar');
+      final result = UserLocationNotifier.composeNominatimAddress(
+        address,
+        'ar',
+      );
 
       expect(result, isNotNull);
       expect(result!.address, 'القاهرة - مدينة نصر، مصر');
@@ -804,7 +764,10 @@ void main() {
         'country': 'مصر',
       };
 
-      final result = UserLocationNotifier.composeNominatimAddress(address, 'ar');
+      final result = UserLocationNotifier.composeNominatimAddress(
+        address,
+        'ar',
+      );
 
       expect(result, isNotNull);
       expect(result!.address, 'مستشفى السلام، شارع الجيش، القاهرة، مصر');
@@ -818,7 +781,10 @@ void main() {
         'country': 'مصر',
       };
 
-      final result = UserLocationNotifier.composeNominatimAddress(address, 'ar');
+      final result = UserLocationNotifier.composeNominatimAddress(
+        address,
+        'ar',
+      );
 
       expect(result, isNotNull);
       expect(result!.address, 'السويس، مصر');

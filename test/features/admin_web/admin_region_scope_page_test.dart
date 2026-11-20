@@ -61,8 +61,7 @@ void main() {
             (ref) => Future.value([cairo, alex]),
           ),
           regionChildrenProvider.overrideWith(
-            childOverride ??
-                (ref, parentId) => Future.value(<Region>[]),
+            childOverride ?? (ref, parentId) => Future.value(<Region>[]),
           ),
           regionByIdProvider.overrideWith((ref, id) async {
             if (id == cairo.id) return cairo;
@@ -148,15 +147,16 @@ void main() {
     await pumpPage(
       tester,
       upsertOverride: upsertAdminRegionAssignmentProvider.overrideWith(
-        (ref) => ({
-          required String adminId,
-          required String regionId,
-          required AdminRegionScope scope,
-        }) async {
-          capturedAdminId = adminId;
-          capturedRegionId = regionId;
-          capturedScope = scope;
-        },
+        (ref) =>
+            ({
+              required String adminId,
+              required String regionId,
+              required AdminRegionScope scope,
+            }) async {
+              capturedAdminId = adminId;
+              capturedRegionId = regionId;
+              capturedScope = scope;
+            },
       ),
     );
 
@@ -193,13 +193,14 @@ void main() {
     await pumpPage(
       tester,
       upsertOverride: upsertAdminRegionAssignmentProvider.overrideWith(
-        (ref) => ({
-          required String adminId,
-          required String regionId,
-          required AdminRegionScope scope,
-        }) async {
-          capturedRegionId = regionId;
-        },
+        (ref) =>
+            ({
+              required String adminId,
+              required String regionId,
+              required AdminRegionScope scope,
+            }) async {
+              capturedRegionId = regionId;
+            },
       ),
       childOverride: (ref, parentId) async {
         if (parentId == cairo.id) return [dokki];

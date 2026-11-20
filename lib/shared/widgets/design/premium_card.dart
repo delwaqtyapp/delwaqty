@@ -45,9 +45,7 @@ class PremiumCard extends StatelessWidget {
         color: effectiveColor,
         gradient: gradient,
         borderRadius: borderRadius,
-        border: borderColor != null
-            ? Border.all(color: borderColor!)
-            : null,
+        border: borderColor != null ? Border.all(color: borderColor!) : null,
         boxShadow: elevated ? shadow : null,
       ),
       child: padding != null ? Padding(padding: padding!, child: child) : child,
@@ -55,7 +53,11 @@ class PremiumCard extends StatelessWidget {
 
     if (onTap != null) {
       if (pressAnimation) {
-        return _PressableCard(onTap: onTap!, radius: borderRadius, child: surface);
+        return _PressableCard(
+          onTap: onTap!,
+          radius: borderRadius,
+          child: surface,
+        );
       }
       return Material(
         color: Colors.transparent,

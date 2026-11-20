@@ -8,8 +8,16 @@ void main() {
 
     test('counts recently seen tokens as online', () {
       final tokens = [
-        {'updated_at': now.subtract(const Duration(minutes: 2)).toIso8601String()},
-        {'updated_at': now.subtract(const Duration(hours: 1)).toIso8601String()},
+        {
+          'updated_at': now
+              .subtract(const Duration(minutes: 2))
+              .toIso8601String(),
+        },
+        {
+          'updated_at': now
+              .subtract(const Duration(hours: 1))
+              .toIso8601String(),
+        },
       ];
 
       final stats = computeDeviceStats(tokens, now);

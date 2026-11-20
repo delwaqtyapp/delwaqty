@@ -205,7 +205,10 @@ class RideBookingNotifier extends StateNotifier<RideBookingState> {
     state = state.copyWith(clearPromoError: true);
     try {
       final repo = _ref.read(rideRepositoryProvider);
-      final result = await repo.validatePromo(code: code.trim(), fare: quote.total);
+      final result = await repo.validatePromo(
+        code: code.trim(),
+        fare: quote.total,
+      );
       if (result.valid) {
         state = state.copyWith(
           promoCode: code.trim().toUpperCase(),
@@ -225,7 +228,11 @@ class RideBookingNotifier extends StateNotifier<RideBookingState> {
   }
 
   void clearPromo() {
-    state = state.copyWith(clearPromoCode: true, promoDiscount: 0, clearPromoError: true);
+    state = state.copyWith(
+      clearPromoCode: true,
+      promoDiscount: 0,
+      clearPromoError: true,
+    );
   }
 
   Future<void> _revalidatePromo() async {
@@ -271,5 +278,5 @@ class RideBookingNotifier extends StateNotifier<RideBookingState> {
 
 final rideBookingProvider =
     StateNotifierProvider<RideBookingNotifier, RideBookingState>((ref) {
-  return RideBookingNotifier(ref);
-});
+      return RideBookingNotifier(ref);
+    });

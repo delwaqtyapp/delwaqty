@@ -53,11 +53,12 @@ class _PremiumSearchFieldState extends State<PremiumSearchField> {
   @override
   void initState() {
     super.initState();
-    _focusNode = FocusNode()..addListener(() {
-      if (_focusNode.hasFocus != _focused) {
-        setState(() => _focused = _focusNode.hasFocus);
-      }
-    });
+    _focusNode = FocusNode()
+      ..addListener(() {
+        if (_focusNode.hasFocus != _focused) {
+          setState(() => _focused = _focusNode.hasFocus);
+        }
+      });
   }
 
   @override
@@ -82,9 +83,8 @@ class _PremiumSearchFieldState extends State<PremiumSearchField> {
       onSubmitted: widget.onSubmitted,
       readOnly: widget.readOnly,
       onTap: widget.onTap,
-      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-        fontWeight: FontWeight.w600,
-      ),
+      style: Theme.of(context).textTheme.bodyLarge
+          ?.copyWith(fontWeight: FontWeight.w600),
       decoration: InputDecoration(
         hintText: widget.hint ?? AppLocalizations.of(context).searchHint,
         hintStyle: TextStyle(
@@ -111,13 +111,13 @@ class _PremiumSearchFieldState extends State<PremiumSearchField> {
                 ),
               )
             : widget.leading ??
-                Padding(
-                  padding: const EdgeInsets.only(left: 14, right: 10),
-                  child: Icon(
-                    Icons.search_rounded,
-                    color: colorScheme.primary,
+                  Padding(
+                    padding: const EdgeInsets.only(left: 14, right: 10),
+                    child: Icon(
+                      Icons.search_rounded,
+                      color: colorScheme.primary,
+                    ),
                   ),
-                ),
         border: InputBorder.none,
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 16,
@@ -132,7 +132,9 @@ class _PremiumSearchFieldState extends State<PremiumSearchField> {
       height: widget.height ?? 52,
       decoration: BoxDecoration(
         color: base,
-        borderRadius: BorderRadius.circular(widget.borderRadius ?? AppSpacing.radiusSearch),
+        borderRadius: BorderRadius.circular(
+          widget.borderRadius ?? AppSpacing.radiusSearch,
+        ),
         border: Border.all(
           color: _focused
               ? colorScheme.primary.withValues(alpha: 0.7)
@@ -181,11 +183,7 @@ class _CircularFilterButton extends StatelessWidget {
           child: const SizedBox(
             width: 32,
             height: 32,
-            child: Icon(
-              Icons.tune_rounded,
-              size: 17,
-              color: Colors.white,
-            ),
+            child: Icon(Icons.tune_rounded, size: 17, color: Colors.white),
           ),
         ),
       ),

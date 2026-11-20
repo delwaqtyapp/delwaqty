@@ -12,8 +12,9 @@ void main() {
     });
 
     test('expires entries after ttl', () async {
-      final cache =
-          TtlCache<String, int>(ttl: const Duration(milliseconds: 20));
+      final cache = TtlCache<String, int>(
+        ttl: const Duration(milliseconds: 20),
+      );
       cache.put('a', 1);
       await Future<void>.delayed(const Duration(milliseconds: 40));
       expect(cache.get('a'), isNull);

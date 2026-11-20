@@ -59,38 +59,42 @@ class AdminProviderIntelligencePage extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          AnimatedFadeIn(
-            child: _buildSummaryCards(context, data, l10n, cs),
-          ),
+          AnimatedFadeIn(child: _buildSummaryCards(context, data, l10n, cs)),
           const SizedBox(height: 24),
           AnimatedFadeIn(
             delay: const Duration(milliseconds: 100),
             child: Text(
               l10n.providersByCategory,
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+              style: Theme.of(context).textTheme.titleMedium
+                  ?.copyWith(fontWeight: FontWeight.bold),
             ),
           ),
           const SizedBox(height: 12),
           AnimatedFadeIn(
             delay: const Duration(milliseconds: 150),
-            child: _buildProvidersByCategory(context, data.providersByCategory, cs),
+            child: _buildProvidersByCategory(
+              context,
+              data.providersByCategory,
+              cs,
+            ),
           ),
           const SizedBox(height: 24),
           AnimatedFadeIn(
             delay: const Duration(milliseconds: 200),
             child: Text(
               l10n.bookingsByCategory,
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+              style: Theme.of(context).textTheme.titleMedium
+                  ?.copyWith(fontWeight: FontWeight.bold),
             ),
           ),
           const SizedBox(height: 12),
           AnimatedFadeIn(
             delay: const Duration(milliseconds: 250),
-            child: _buildBookingsByCategory(context, data.bookingsByCategory, cs),
+            child: _buildBookingsByCategory(
+              context,
+              data.bookingsByCategory,
+              cs,
+            ),
           ),
         ],
       ),
@@ -165,11 +169,7 @@ class AdminProviderIntelligencePage extends ConsumerWidget {
       spacing: 8,
       runSpacing: 8,
       children: items.map((item) {
-        return _CategoryChip(
-          label: item.type,
-          count: item.count,
-          cs: cs,
-        );
+        return _CategoryChip(label: item.type, count: item.count, cs: cs);
       }).toList(),
     );
   }
@@ -198,11 +198,7 @@ class AdminProviderIntelligencePage extends ConsumerWidget {
       spacing: 8,
       runSpacing: 8,
       children: items.map((item) {
-        return _CategoryChip(
-          label: item.type,
-          count: item.count,
-          cs: cs,
-        );
+        return _CategoryChip(label: item.type, count: item.count, cs: cs);
       }).toList(),
     );
   }
@@ -246,17 +242,15 @@ class _SummaryCard extends StatelessWidget {
                 fit: BoxFit.scaleDown,
                 child: Text(
                   value,
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: Theme.of(context).textTheme.titleLarge
+                      ?.copyWith(fontWeight: FontWeight.bold),
                 ),
               ),
               const SizedBox(height: 2),
               Text(
                 title,
-                style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                  color: cs.onSurfaceVariant,
-                ),
+                style: Theme.of(context).textTheme.labelSmall
+                    ?.copyWith(color: cs.onSurfaceVariant),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
@@ -297,9 +291,7 @@ class _CategoryChip extends StatelessWidget {
           const SizedBox(width: 8),
           Text(
             label,
-            style: AppTextStyles.labelLarge.copyWith(
-              color: cs.onSurface,
-            ),
+            style: AppTextStyles.labelLarge.copyWith(color: cs.onSurface),
           ),
           const SizedBox(width: 6),
           Container(

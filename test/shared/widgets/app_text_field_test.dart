@@ -42,17 +42,13 @@ void main() {
 
     testWidgets('obscures text when obscureText is true', (tester) async {
       await tester.pumpWidget(buildTestWidget(obscureText: true));
-      final textField = tester.widget<AppTextField>(
-        find.byType(AppTextField),
-      );
+      final textField = tester.widget<AppTextField>(find.byType(AppTextField));
       expect(textField.obscureText, isTrue);
     });
 
     testWidgets('does not obscure text by default', (tester) async {
       await tester.pumpWidget(buildTestWidget());
-      final textField = tester.widget<AppTextField>(
-        find.byType(AppTextField),
-      );
+      final textField = tester.widget<AppTextField>(find.byType(AppTextField));
       expect(textField.obscureText, isFalse);
     });
 
@@ -112,12 +108,7 @@ void main() {
       await tester.pumpWidget(
         const MaterialApp(
           home: Scaffold(
-            body: Form(
-              child: AppTextField(
-                enabled: false,
-                label: 'Disabled',
-              ),
-            ),
+            body: Form(child: AppTextField(enabled: false, label: 'Disabled')),
           ),
         ),
       );

@@ -112,11 +112,7 @@ class _MerchantBranchesPageState extends ConsumerState<MerchantBranchesPage> {
     );
   }
 
-  void _showBranchForm(
-    BuildContext context,
-    WidgetRef ref, {
-    Branch? branch,
-  }) {
+  void _showBranchForm(BuildContext context, WidgetRef ref, {Branch? branch}) {
     final merchantId = ref.read(providerMerchantIdProvider).value ?? '';
     if (merchantId.isEmpty) {
       context.showAppSnackBar(
@@ -177,10 +173,7 @@ class _MerchantBranchesPageState extends ConsumerState<MerchantBranchesPage> {
       }
     } catch (e) {
       if (mounted) {
-        context.showAppSnackBar(
-          appErrorText(context, e),
-          isError: true,
-        );
+        context.showAppSnackBar(appErrorText(context, e), isError: true);
       }
     }
   }
@@ -193,10 +186,7 @@ class _MerchantBranchesPageState extends ConsumerState<MerchantBranchesPage> {
       ref.invalidate(_branchesProvider);
     } catch (e) {
       if (mounted) {
-        context.showAppSnackBar(
-          appErrorText(context, e),
-          isError: true,
-        );
+        context.showAppSnackBar(appErrorText(context, e), isError: true);
       }
     }
   }
@@ -381,13 +371,13 @@ class _BranchFormSheetState extends ConsumerState<_BranchFormSheet> {
     final l10n = AppLocalizations.of(context);
     setState(() => _gettingGps = true);
     try {
-      final loc =
-          await ref.read(userLocationProvider.notifier).refreshDeepLocked();
+      final loc = await ref
+          .read(userLocationProvider.notifier)
+          .refreshDeepLocked();
       if (!mounted) return;
       if (loc == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.locationUnavailable)),
-        );
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(l10n.locationUnavailable)));
         return;
       }
       setState(() {
@@ -399,9 +389,8 @@ class _BranchFormSheetState extends ConsumerState<_BranchFormSheet> {
       });
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(appErrorText(context, e))),
-      );
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(appErrorText(context, e))));
     } finally {
       if (mounted) setState(() => _gettingGps = false);
     }
@@ -532,11 +521,10 @@ class _BranchFormSheetState extends ConsumerState<_BranchFormSheet> {
                               hintText: '0.0',
                               border: const OutlineInputBorder(),
                             ),
-                            keyboardType:
-                                const TextInputType.numberWithOptions(
-                                  decimal: true,
-                                  signed: true,
-                                ),
+                            keyboardType: const TextInputType.numberWithOptions(
+                              decimal: true,
+                              signed: true,
+                            ),
                           ),
                         ),
                         const SizedBox(width: AppSpacing.md),
@@ -550,11 +538,10 @@ class _BranchFormSheetState extends ConsumerState<_BranchFormSheet> {
                               hintText: '0.0',
                               border: const OutlineInputBorder(),
                             ),
-                            keyboardType:
-                                const TextInputType.numberWithOptions(
-                                  decimal: true,
-                                  signed: true,
-                                ),
+                            keyboardType: const TextInputType.numberWithOptions(
+                              decimal: true,
+                              signed: true,
+                            ),
                           ),
                         ),
                       ],
@@ -590,9 +577,7 @@ class _BranchFormSheetState extends ConsumerState<_BranchFormSheet> {
                     const SizedBox(height: AppSpacing.lg),
                     SwitchListTile(
                       title: Text(l10n.primaryBranch),
-                      subtitle: Text(
-                        _isPrimary ? l10n.yes : l10n.no,
-                      ),
+                      subtitle: Text(_isPrimary ? l10n.yes : l10n.no),
                       value: _isPrimary,
                       onChanged: (v) => setState(() => _isPrimary = v),
                       contentPadding: EdgeInsets.zero,
@@ -657,9 +642,8 @@ class _BranchFormSheetState extends ConsumerState<_BranchFormSheet> {
     } catch (e) {
       if (!mounted) return;
       setState(() => _saving = false);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(appErrorText(context, e))),
-      );
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(appErrorText(context, e))));
       return;
     }
     widget.onSaved();

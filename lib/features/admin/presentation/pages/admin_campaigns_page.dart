@@ -32,29 +32,32 @@ class _AdminCampaignsPageState extends ConsumerState<AdminCampaignsPage> {
       confirmTitle: l10n.publishNow,
       confirmMessage: l10n.createBanner,
       successMessage: l10n.bannerPublished,
-      onSubmit: ({
-        required titleAr,
-        titleEn,
-        subtitleAr,
-        subtitleEn,
-        regionId,
-        imageBytes,
-        imageExtension = 'jpg',
-        startsAt,
-        endsAt,
-      }) async {
-        await ref.read(campaignManagementProvider).createAndPublishBanner(
-              titleAr: titleAr,
-              titleEn: titleEn,
-              subtitleAr: subtitleAr,
-              subtitleEn: subtitleEn,
-              regionId: regionId,
-              imageBytes: imageBytes,
-              imageExtension: imageExtension,
-              startsAt: startsAt,
-              endsAt: endsAt,
-            );
-      },
+      onSubmit:
+          ({
+            required titleAr,
+            titleEn,
+            subtitleAr,
+            subtitleEn,
+            regionId,
+            imageBytes,
+            imageExtension = 'jpg',
+            startsAt,
+            endsAt,
+          }) async {
+            await ref
+                .read(campaignManagementProvider)
+                .createAndPublishBanner(
+                  titleAr: titleAr,
+                  titleEn: titleEn,
+                  subtitleAr: subtitleAr,
+                  subtitleEn: subtitleEn,
+                  regionId: regionId,
+                  imageBytes: imageBytes,
+                  imageExtension: imageExtension,
+                  startsAt: startsAt,
+                  endsAt: endsAt,
+                );
+          },
     );
     if (created) {
       ref.invalidate(adminCampaignsProvider);
@@ -79,30 +82,33 @@ class _AdminCampaignsPageState extends ConsumerState<AdminCampaignsPage> {
       initialRegionId: campaign.regionId,
       initialStartsAt: campaign.startsAt,
       initialEndsAt: campaign.endsAt,
-      onSubmit: ({
-        required titleAr,
-        titleEn,
-        subtitleAr,
-        subtitleEn,
-        regionId,
-        imageBytes,
-        imageExtension = 'jpg',
-        startsAt,
-        endsAt,
-      }) async {
-        await ref.read(campaignManagementProvider).updateBanner(
-              campaignId: campaign.id,
-              titleAr: titleAr,
-              titleEn: titleEn,
-              subtitleAr: subtitleAr,
-              subtitleEn: subtitleEn,
-              regionId: regionId,
-              imageBytes: imageBytes,
-              imageExtension: imageExtension,
-              startsAt: startsAt,
-              endsAt: endsAt,
-            );
-      },
+      onSubmit:
+          ({
+            required titleAr,
+            titleEn,
+            subtitleAr,
+            subtitleEn,
+            regionId,
+            imageBytes,
+            imageExtension = 'jpg',
+            startsAt,
+            endsAt,
+          }) async {
+            await ref
+                .read(campaignManagementProvider)
+                .updateBanner(
+                  campaignId: campaign.id,
+                  titleAr: titleAr,
+                  titleEn: titleEn,
+                  subtitleAr: subtitleAr,
+                  subtitleEn: subtitleEn,
+                  regionId: regionId,
+                  imageBytes: imageBytes,
+                  imageExtension: imageExtension,
+                  startsAt: startsAt,
+                  endsAt: endsAt,
+                );
+          },
     );
     if (updated) {
       ref.invalidate(adminCampaignsProvider);
@@ -232,11 +238,13 @@ class _AdminCampaignsPageState extends ConsumerState<AdminCampaignsPage> {
     final isBusy = _busyCampaignId == campaign.id;
     final service = ref.read(campaignManagementProvider);
 
-    final canPublish = campaign.status == CampaignStatus.approved ||
+    final canPublish =
+        campaign.status == CampaignStatus.approved ||
         campaign.status == CampaignStatus.scheduled;
     final canPause = campaign.status == CampaignStatus.published;
     final canResume = campaign.status == CampaignStatus.paused;
-    final canCancel = campaign.status == CampaignStatus.draft ||
+    final canCancel =
+        campaign.status == CampaignStatus.draft ||
         campaign.status == CampaignStatus.pendingReview ||
         campaign.status == CampaignStatus.approved ||
         campaign.status == CampaignStatus.scheduled;
@@ -257,9 +265,8 @@ class _AdminCampaignsPageState extends ConsumerState<AdminCampaignsPage> {
                   children: [
                     Text(
                       title,
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
+                      style: Theme.of(context).textTheme.titleMedium
+                          ?.copyWith(fontWeight: FontWeight.bold),
                     ),
                     if (subtitle != null && subtitle.trim().isNotEmpty) ...[
                       const SizedBox(height: 4),
@@ -268,10 +275,8 @@ class _AdminCampaignsPageState extends ConsumerState<AdminCampaignsPage> {
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .onSurfaceVariant,
-                            ),
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
                       ),
                     ],
                     const SizedBox(height: 8),
@@ -304,9 +309,7 @@ class _AdminCampaignsPageState extends ConsumerState<AdminCampaignsPage> {
                                 if (campaign.endsAt != null)
                                   '${l10n.endDate}: ${_formatScheduleDate(campaign.endsAt!)}',
                               ].join('  •  '),
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .bodySmall
+                              style: Theme.of(context).textTheme.bodySmall
                                   ?.copyWith(
                                     color: Theme.of(context)
                                         .colorScheme
@@ -334,13 +337,12 @@ class _AdminCampaignsPageState extends ConsumerState<AdminCampaignsPage> {
                   onPressed: isBusy
                       ? null
                       : () => _runCampaignAction(
-                            campaign: campaign,
-                            confirmTitle: l10n.publishNow,
-                            confirmMessage: title,
-                            confirmLabel: l10n.publishNow,
-                            action: () =>
-                                service.publishCampaign(campaign.id),
-                          ),
+                          campaign: campaign,
+                          confirmTitle: l10n.publishNow,
+                          confirmMessage: title,
+                          confirmLabel: l10n.publishNow,
+                          action: () => service.publishCampaign(campaign.id),
+                        ),
                   icon: const Icon(Icons.publish_rounded, size: 18),
                   label: Text(l10n.publishNow),
                 ),
@@ -349,12 +351,12 @@ class _AdminCampaignsPageState extends ConsumerState<AdminCampaignsPage> {
                   onPressed: isBusy
                       ? null
                       : () => _runCampaignAction(
-                            campaign: campaign,
-                            confirmTitle: l10n.pauseBanner,
-                            confirmMessage: title,
-                            confirmLabel: l10n.pauseBanner,
-                            action: () => service.pauseCampaign(campaign.id),
-                          ),
+                          campaign: campaign,
+                          confirmTitle: l10n.pauseBanner,
+                          confirmMessage: title,
+                          confirmLabel: l10n.pauseBanner,
+                          action: () => service.pauseCampaign(campaign.id),
+                        ),
                   icon: const Icon(Icons.pause_rounded, size: 18),
                   label: Text(l10n.pauseBanner),
                 ),
@@ -363,12 +365,12 @@ class _AdminCampaignsPageState extends ConsumerState<AdminCampaignsPage> {
                   onPressed: isBusy
                       ? null
                       : () => _runCampaignAction(
-                            campaign: campaign,
-                            confirmTitle: l10n.resumeBanner,
-                            confirmMessage: title,
-                            confirmLabel: l10n.resumeBanner,
-                            action: () => service.resumeCampaign(campaign.id),
-                          ),
+                          campaign: campaign,
+                          confirmTitle: l10n.resumeBanner,
+                          confirmMessage: title,
+                          confirmLabel: l10n.resumeBanner,
+                          action: () => service.resumeCampaign(campaign.id),
+                        ),
                   icon: const Icon(Icons.play_arrow_rounded, size: 18),
                   label: Text(l10n.resumeBanner),
                 ),
@@ -385,13 +387,13 @@ class _AdminCampaignsPageState extends ConsumerState<AdminCampaignsPage> {
                   onPressed: isBusy
                       ? null
                       : () => _runCampaignAction(
-                            campaign: campaign,
-                            confirmTitle: l10n.cancel,
-                            confirmMessage: title,
-                            confirmLabel: l10n.cancel,
-                            isDestructive: true,
-                            action: () => service.cancelCampaign(campaign.id),
-                          ),
+                          campaign: campaign,
+                          confirmTitle: l10n.cancel,
+                          confirmMessage: title,
+                          confirmLabel: l10n.cancel,
+                          isDestructive: true,
+                          action: () => service.cancelCampaign(campaign.id),
+                        ),
                   icon: const Icon(Icons.cancel_outlined, size: 18),
                   label: Text(l10n.cancel),
                 ),
@@ -402,21 +404,21 @@ class _AdminCampaignsPageState extends ConsumerState<AdminCampaignsPage> {
                 onPressed: isBusy
                     ? null
                     : () => _runCampaignAction(
-                          campaign: campaign,
-                          confirmTitle: l10n.deleteBanner,
-                          confirmMessage: title,
-                          confirmLabel: l10n.delete,
-                          isDestructive: true,
-                          action: () async {
-                            await service.deleteBanner(
-                              campaign.id,
-                              imagePath: campaign.imagePath,
-                            );
-                            if (context.mounted) {
-                              context.showAppSnackBar(l10n.bannerDeleted);
-                            }
-                          },
-                        ),
+                        campaign: campaign,
+                        confirmTitle: l10n.deleteBanner,
+                        confirmMessage: title,
+                        confirmLabel: l10n.delete,
+                        isDestructive: true,
+                        action: () async {
+                          await service.deleteBanner(
+                            campaign.id,
+                            imagePath: campaign.imagePath,
+                          );
+                          if (context.mounted) {
+                            context.showAppSnackBar(l10n.bannerDeleted);
+                          }
+                        },
+                      ),
                 icon: const Icon(Icons.delete_outline_rounded, size: 18),
                 label: Text(l10n.delete),
               ),

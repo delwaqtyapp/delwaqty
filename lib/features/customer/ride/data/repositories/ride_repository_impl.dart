@@ -38,11 +38,7 @@ class RideRepositoryImpl implements RideRepository {
     required String code,
     required double fare,
   }) {
-    return _dataSource.validatePromo(
-      code: code,
-      fare: fare,
-      userId: _riderId,
-    );
+    return _dataSource.validatePromo(code: code, fare: fare, userId: _riderId);
   }
 
   @override
@@ -115,7 +111,12 @@ class RideRepositoryImpl implements RideRepository {
   }
 
   @override
-  Future<void> rateRide(String rideId, int rating, {String? feedback, double? tip}) {
+  Future<void> rateRide(
+    String rideId,
+    int rating, {
+    String? feedback,
+    double? tip,
+  }) {
     return _dataSource.rateRide(rideId, rating, feedback: feedback, tip: tip);
   }
 

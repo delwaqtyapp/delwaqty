@@ -12,35 +12,34 @@ DriverCandidate driver({
   bool deliveryZoneMatch = true,
   double routeCompatibility = 1,
   double batchingCompatibility = 1,
-}) =>
-    DriverCandidate(
-      id: id,
-      currentLatitude: 0,
-      currentLongitude: 0,
-      distanceKm: distanceKm,
-      etaToPickupMinutes: etaToPickupMinutes,
-      etaToDestinationMinutes: etaToPickupMinutes + 5,
-      activeOrders: activeOrders,
-      isAvailable: isAvailable,
-      status: 'online',
-      vehicleSuitable: vehicleSuitable,
-      serviceCategoryMatch: serviceCategoryMatch,
-      deliveryZoneMatch: deliveryZoneMatch,
-      routeCompatibility: routeCompatibility,
-      batchingCompatibility: batchingCompatibility,
-    );
+}) => DriverCandidate(
+  id: id,
+  currentLatitude: 0,
+  currentLongitude: 0,
+  distanceKm: distanceKm,
+  etaToPickupMinutes: etaToPickupMinutes,
+  etaToDestinationMinutes: etaToPickupMinutes + 5,
+  activeOrders: activeOrders,
+  isAvailable: isAvailable,
+  status: 'online',
+  vehicleSuitable: vehicleSuitable,
+  serviceCategoryMatch: serviceCategoryMatch,
+  deliveryZoneMatch: deliveryZoneMatch,
+  routeCompatibility: routeCompatibility,
+  batchingCompatibility: batchingCompatibility,
+);
 
 OrderDispatchContext order() => const OrderDispatchContext(
-      pickupLatitude: 0,
-      pickupLongitude: 0,
-      destinationLatitude: 1,
-      destinationLongitude: 1,
-      priority: 1,
-      ageMinutes: 0,
-      slaDeadlineMinutes: 30,
-      serviceCategory: 'food',
-      deliveryZone: 'cairo',
-    );
+  pickupLatitude: 0,
+  pickupLongitude: 0,
+  destinationLatitude: 1,
+  destinationLongitude: 1,
+  priority: 1,
+  ageMinutes: 0,
+  slaDeadlineMinutes: 30,
+  serviceCategory: 'food',
+  deliveryZone: 'cairo',
+);
 
 void main() {
   group('NearestDriverStrategy', () {
@@ -54,8 +53,11 @@ void main() {
         order: order(),
         candidates: candidates,
       );
-      expect(ranked.map((e) => e.candidate.id).toList(),
-          ['near', 'mid', 'far']);
+      expect(ranked.map((e) => e.candidate.id).toList(), [
+        'near',
+        'mid',
+        'far',
+      ]);
     });
 
     test('excludes offline drivers', () {
@@ -74,15 +76,8 @@ void main() {
   group('SmartScoreStrategy', () {
     test('ranks by combined score, not just distance', () {
       // A is closer but overloaded + wrong zone; B is farther but free + matched.
-      final a = driver(
-        id: 'A',
-        activeOrders: 5,
-        deliveryZoneMatch: false,
-      );
-      final b = driver(
-        id: 'B',
-        distanceKm: 4,
-      );
+      final a = driver(id: 'A', activeOrders: 5, deliveryZoneMatch: false);
+      final b = driver(id: 'B', distanceKm: 4);
       final ranked = SmartScoreStrategy().rank(
         order: order(),
         candidates: [a, b],
@@ -115,10 +110,7 @@ void main() {
 
   group('ManualStrategy', () {
     test('returns available drivers unsorted, not automatic', () {
-      final candidates = [
-        driver(id: 'z'),
-        driver(id: 'a', distanceKm: 50),
-      ];
+      final candidates = [driver(id: 'z'), driver(id: 'a', distanceKm: 50)];
       final strategy = ManualStrategy();
       final ranked = strategy.rank(order: order(), candidates: candidates);
       expect(strategy.automatic, isFalse);
@@ -134,16 +126,20 @@ void main() {
         candidates: const [],
       );
       expect(ranked, isEmpty);
-      expect(classifyDispatchFailure(const []),
-          DispatchFailureReason.noAvailableDriver);
+      expect(
+        classifyDispatchFailure(const []),
+        DispatchFailureReason.noAvailableDriver,
+      );
     });
 
     test('available but unsuitable -> noSuitableDriver', () {
       final candidates = [
         driver(id: 'x', vehicleSuitable: false, serviceCategoryMatch: false),
       ];
-      expect(classifyDispatchFailure(candidates),
-          DispatchFailureReason.noSuitableDriver);
+      expect(
+        classifyDispatchFailure(candidates),
+        DispatchFailureReason.noSuitableDriver,
+      );
     });
   });
 

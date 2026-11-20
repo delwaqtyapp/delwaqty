@@ -113,9 +113,8 @@ class _PlatformIntelligenceDashboardState
                 delay: const Duration(milliseconds: 150),
                 child: Text(
                   l10n.revenueOverview,
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: Theme.of(context).textTheme.titleMedium
+                      ?.copyWith(fontWeight: FontWeight.bold),
                 ),
               ),
               const SizedBox(height: 12),
@@ -148,9 +147,8 @@ class _PlatformIntelligenceDashboardState
                 delay: const Duration(milliseconds: 250),
                 child: Text(
                   l10n.operationalAlertsTitle,
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: Theme.of(context).textTheme.titleMedium
+                      ?.copyWith(fontWeight: FontWeight.bold),
                 ),
               ),
               const SizedBox(height: 12),
@@ -287,9 +285,7 @@ class _PlatformIntelligenceDashboardState
 
     final activeRegionAdmin = scopeRegion == null
         ? null
-        : allRegionalAdmins
-            .where((a) => a.regionId == scopeRegion)
-            .firstOrNull;
+        : allRegionalAdmins.where((a) => a.regionId == scopeRegion).firstOrNull;
 
     return PremiumCard(
       padding: const EdgeInsets.all(12),
@@ -337,9 +333,7 @@ class _PlatformIntelligenceDashboardState
                         Expanded(
                           child: Text(
                             activeRegion?.nameAr ?? l10n.allGovernorates,
-                            style: Theme.of(context)
-                                .textTheme
-                                .bodyMedium
+                            style: Theme.of(context).textTheme.bodyMedium
                                 ?.copyWith(fontWeight: FontWeight.w700),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
@@ -370,10 +364,7 @@ class _PlatformIntelligenceDashboardState
                           ),
                         ],
                         const SizedBox(width: 4),
-                        const Icon(
-                          Icons.keyboard_arrow_down_rounded,
-                          size: 18,
-                        ),
+                        const Icon(Icons.keyboard_arrow_down_rounded, size: 18),
                       ],
                     ),
                   ),
@@ -511,8 +502,8 @@ class _PlatformIntelligenceDashboardState
                         fontWeight: FontWeight.w600,
                       ),
                     ),
-                    backgroundColor:
-                        const Color(0xFF0D9488).withValues(alpha: 0.09),
+                    backgroundColor: const Color(0xFF0D9488)
+                        .withValues(alpha: 0.09),
                     side: BorderSide(
                       color: const Color(0xFF0D9488).withValues(alpha: 0.25),
                     ),
@@ -567,13 +558,15 @@ class _PlatformIntelligenceDashboardState
                   final isCurrentAdminRegion =
                       scopeRegion != null && admin.regionId == scopeRegion;
                   final displayName =
-                      (admin.fullName != null && admin.fullName!.trim().isNotEmpty)
-                          ? admin.fullName!.trim()
-                          : admin.email;
+                      (admin.fullName != null &&
+                          admin.fullName!.trim().isNotEmpty)
+                      ? admin.fullName!.trim()
+                      : admin.email;
                   final regionLabel =
-                      (admin.regionName != null && admin.regionName!.trim().isNotEmpty)
-                          ? admin.regionName!.trim()
-                          : l10n.regions;
+                      (admin.regionName != null &&
+                          admin.regionName!.trim().isNotEmpty)
+                      ? admin.regionName!.trim()
+                      : l10n.regions;
 
                   return FilterChip(
                     selected: isCurrentAdminRegion,
@@ -596,8 +589,8 @@ class _PlatformIntelligenceDashboardState
                       ),
                     ),
                     selectedColor: const Color(0xFF5B3DF0),
-                    backgroundColor:
-                        const Color(0xFF5B3DF0).withValues(alpha: 0.08),
+                    backgroundColor: const Color(0xFF5B3DF0)
+                        .withValues(alpha: 0.08),
                     side: BorderSide(
                       color: const Color(0xFF5B3DF0).withValues(alpha: 0.25),
                     ),
@@ -639,9 +632,7 @@ class _PlatformIntelligenceDashboardState
                         Expanded(
                           child: Text(
                             '${l10n.adminRole}: ${activeRegionAdmin.fullName ?? activeRegionAdmin.email}',
-                            style: Theme.of(context)
-                                .textTheme
-                                .labelMedium
+                            style: Theme.of(context).textTheme.labelMedium
                                 ?.copyWith(fontWeight: FontWeight.w700),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
@@ -1009,8 +1000,8 @@ class _PlatformIntelligenceDashboardState
             ),
             selected: isSelected,
             onSelected: (_) {
-              ref.read(adminTimeFilterProvider.notifier).state =
-                  filter.copyWith(period: period);
+              ref.read(adminTimeFilterProvider.notifier).state = filter
+                  .copyWith(period: period);
             },
             selectedColor: cs.primary,
             backgroundColor: cs.surfaceContainerHighest,
@@ -1107,9 +1098,7 @@ class _PlatformIntelligenceDashboardState
                             fit: BoxFit.scaleDown,
                             child: Text(
                               '$currency ${item.amount.toStringAsFixed(0)}',
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .titleMedium
+                              style: Theme.of(context).textTheme.titleMedium
                                   ?.copyWith(
                                     fontWeight: FontWeight.w800,
                                     letterSpacing: -0.3,
@@ -1119,9 +1108,7 @@ class _PlatformIntelligenceDashboardState
                           const SizedBox(height: 2),
                           Text(
                             item.label,
-                            style: Theme.of(context)
-                                .textTheme
-                                .labelSmall
+                            style: Theme.of(context).textTheme.labelSmall
                                 ?.copyWith(
                                   color: cs.onSurfaceVariant,
                                   fontWeight: FontWeight.w500,
@@ -1188,9 +1175,8 @@ class _KpiGroup extends StatelessWidget {
               const SizedBox(width: 8),
               Text(
                 title,
-                style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+                style: Theme.of(context).textTheme.titleSmall
+                    ?.copyWith(fontWeight: FontWeight.bold),
               ),
             ],
           ),
@@ -1201,8 +1187,8 @@ class _KpiGroup extends StatelessWidget {
             final crossAxisCount = constraints.maxWidth > 900
                 ? 4
                 : constraints.maxWidth > 600
-                    ? 3
-                    : 2;
+                ? 3
+                : 2;
             return GridView.count(
               crossAxisCount: crossAxisCount,
               shrinkWrap: true,
@@ -1301,19 +1287,19 @@ class _KpiCard extends StatelessWidget {
                     child: Text(
                       item.value,
                       style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                            fontWeight: FontWeight.w800,
-                            letterSpacing: -0.5,
-                            color: cs.onSurface,
-                          ),
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: -0.5,
+                        color: cs.onSurface,
+                      ),
                     ),
                   ),
                   const SizedBox(height: 2),
                   Text(
                     item.label,
                     style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                          color: cs.onSurfaceVariant,
-                          fontWeight: FontWeight.w500,
-                        ),
+                      color: cs.onSurfaceVariant,
+                      fontWeight: FontWeight.w500,
+                    ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -1342,16 +1328,28 @@ class _AlertCard extends StatelessWidget {
   String _targetRoute() {
     final cat = alert.category.toLowerCase();
     final title = alert.title.toLowerCase();
-    if (cat.contains('sos') || cat.contains('emerg') || title.contains('sos') || title.contains('emerg')) {
+    if (cat.contains('sos') ||
+        cat.contains('emerg') ||
+        title.contains('sos') ||
+        title.contains('emerg')) {
       return '/admin/emergency';
     }
-    if (cat.contains('complaint') || title.contains('complaint') || cat.contains('dispute') || title.contains('dispute')) {
+    if (cat.contains('complaint') ||
+        title.contains('complaint') ||
+        cat.contains('dispute') ||
+        title.contains('dispute')) {
       return '/admin/complaints';
     }
-    if (cat.contains('verif') || title.contains('verif') || cat.contains('kyc') || title.contains('kyc')) {
+    if (cat.contains('verif') ||
+        title.contains('verif') ||
+        cat.contains('kyc') ||
+        title.contains('kyc')) {
       return '/admin/verifications';
     }
-    if (cat.contains('sanction') || title.contains('sanction') || cat.contains('penalty') || title.contains('penalty')) {
+    if (cat.contains('sanction') ||
+        title.contains('sanction') ||
+        cat.contains('penalty') ||
+        title.contains('penalty')) {
       return '/admin/sanctions';
     }
     if (cat.contains('order') || title.contains('order')) {
@@ -1360,10 +1358,18 @@ class _AlertCard extends StatelessWidget {
     if (cat.contains('deliver') || title.contains('deliver')) {
       return '/admin/deliveries';
     }
-    if (cat.contains('driver') || title.contains('driver') || cat.contains('courier') || title.contains('courier')) {
+    if (cat.contains('driver') ||
+        title.contains('driver') ||
+        cat.contains('courier') ||
+        title.contains('courier')) {
       return '/admin/drivers';
     }
-    if (cat.contains('wallet') || cat.contains('financ') || cat.contains('payment') || title.contains('wallet') || title.contains('financ') || title.contains('pay')) {
+    if (cat.contains('wallet') ||
+        cat.contains('financ') ||
+        cat.contains('payment') ||
+        title.contains('wallet') ||
+        title.contains('financ') ||
+        title.contains('pay')) {
       return '/admin/financial-center';
     }
     return '/admin/actions';
@@ -1397,9 +1403,7 @@ class _AlertCard extends StatelessWidget {
                 children: [
                   Text(
                     alert.title,
-                    style: Theme.of(context)
-                        .textTheme
-                        .bodyMedium
+                    style: Theme.of(context).textTheme.bodyMedium
                         ?.copyWith(fontWeight: FontWeight.w600),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -1407,9 +1411,7 @@ class _AlertCard extends StatelessWidget {
                   const SizedBox(height: 2),
                   Text(
                     alert.description,
-                    style: Theme.of(context)
-                        .textTheme
-                        .bodySmall
+                    style: Theme.of(context).textTheme.bodySmall
                         ?.copyWith(color: cs.onSurfaceVariant),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,

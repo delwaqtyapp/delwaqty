@@ -27,7 +27,9 @@ class ProviderDocumentsDataSource {
   Future<String> uploadDoc(String name, Uint8List bytes) async {
     final uid = _client.auth.currentUser?.id ?? 'anon';
     final path = 'provider_documents/$uid/$name';
-    await _client.storage.from('provider-documents').uploadBinary(
+    await _client.storage
+        .from('provider-documents')
+        .uploadBinary(
           path,
           bytes,
           fileOptions: const FileOptions(

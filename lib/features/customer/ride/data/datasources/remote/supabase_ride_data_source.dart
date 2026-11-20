@@ -63,11 +63,21 @@ class SupabaseRideDataSource {
       driverLatitude: (row['driver_latitude'] as num?)?.toDouble(),
       driverLongitude: (row['driver_longitude'] as num?)?.toDouble(),
       createdAt: DateTime.parse(row['created_at'] as String),
-      matchedAt: row['matched_at'] != null ? DateTime.parse(row['matched_at'] as String) : null,
-      arrivedAt: row['arrived_at'] != null ? DateTime.parse(row['arrived_at'] as String) : null,
-      startedAt: row['started_at'] != null ? DateTime.parse(row['started_at'] as String) : null,
-      completedAt: row['completed_at'] != null ? DateTime.parse(row['completed_at'] as String) : null,
-      cancelledAt: row['cancelled_at'] != null ? DateTime.parse(row['cancelled_at'] as String) : null,
+      matchedAt: row['matched_at'] != null
+          ? DateTime.parse(row['matched_at'] as String)
+          : null,
+      arrivedAt: row['arrived_at'] != null
+          ? DateTime.parse(row['arrived_at'] as String)
+          : null,
+      startedAt: row['started_at'] != null
+          ? DateTime.parse(row['started_at'] as String)
+          : null,
+      completedAt: row['completed_at'] != null
+          ? DateTime.parse(row['completed_at'] as String)
+          : null,
+      cancelledAt: row['cancelled_at'] != null
+          ? DateTime.parse(row['cancelled_at'] as String)
+          : null,
       cancellationReason: row['cancellation_reason'] as String?,
       isSharedTrip: row['is_shared_trip'] as bool? ?? false,
       emergencyContactId: row['emergency_contact_id'] as String?,
@@ -78,7 +88,8 @@ class SupabaseRideDataSource {
     const r = 6371.0;
     final dLat = _deg2rad(lat2 - lat1);
     final dLon = _deg2rad(lon2 - lon1);
-    final a = math.sin(dLat / 2) * math.sin(dLat / 2) +
+    final a =
+        math.sin(dLat / 2) * math.sin(dLat / 2) +
         math.cos(_deg2rad(lat1)) *
             math.cos(_deg2rad(lat2)) *
             math.sin(dLon / 2) *
@@ -103,27 +114,32 @@ class SupabaseRideDataSource {
     final durationMin = (distanceKm / _avgSpeedKmh) * 60.0;
     final quotes = <FareQuote>[];
     for (final type in RideType.values) {
-      final data = await _client.rpc('estimate_fare', params: {
-        'p_category': type.name,
-        'p_distance_km': distanceKm,
-        'p_duration_min': durationMin,
-        'p_surge': 1.0,
-      });
+      final data = await _client.rpc(
+        'estimate_fare',
+        params: {
+          'p_category': type.name,
+          'p_distance_km': distanceKm,
+          'p_duration_min': durationMin,
+          'p_surge': 1.0,
+        },
+      );
       final map = Map<String, dynamic>.from(data as Map);
       final eta = 2 + (type.index % 3) * 2;
-      quotes.add(FareQuote(
-        rideType: type,
-        baseFare: (map['base_fare'] as num).toDouble(),
-        distanceFare: (map['distance_fare'] as num).toDouble(),
-        timeFare: (map['time_fare'] as num).toDouble(),
-        surgeMultiplier: (map['surge_multiplier'] as num).toDouble(),
-        total: (map['total'] as num).toDouble(),
-        minimumFare: (map['minimum_fare'] as num).toDouble(),
-        currency: map['currency'] as String? ?? 'EGP',
-        distanceKm: distanceKm,
-        durationMinutes: durationMin,
-        etaMinutes: eta,
-      ));
+      quotes.add(
+        FareQuote(
+          rideType: type,
+          baseFare: (map['base_fare'] as num).toDouble(),
+          distanceFare: (map['distance_fare'] as num).toDouble(),
+          timeFare: (map['time_fare'] as num).toDouble(),
+          surgeMultiplier: (map['surge_multiplier'] as num).toDouble(),
+          total: (map['total'] as num).toDouble(),
+          minimumFare: (map['minimum_fare'] as num).toDouble(),
+          currency: map['currency'] as String? ?? 'EGP',
+          distanceKm: distanceKm,
+          durationMinutes: durationMin,
+          etaMinutes: eta,
+        ),
+      );
     }
     return quotes;
   }
@@ -133,11 +149,14 @@ class SupabaseRideDataSource {
     required double fare,
     required String userId,
   }) async {
-    final data = await _client.rpc('validate_promo', params: {
-      'p_code': code.toUpperCase(),
-      'p_user_id': userId,
-      'p_fare': fare,
-    });
+    final data = await _client.rpc(
+      'validate_promo',
+      params: {
+        'p_code': code.toUpperCase(),
+        'p_user_id': userId,
+        'p_fare': fare,
+      },
+    );
     final map = Map<String, dynamic>.from(data as Map);
     final valid = map['valid'] as bool? ?? false;
     if (!valid) {
@@ -165,28 +184,32 @@ class SupabaseRideDataSource {
     double discountAmount = 0,
     String paymentMethod = 'cash',
   }) async {
-    final data = await _client.from(_ridesTable).insert({
-      'rider_id': riderId,
-      'pickup_latitude': pickupLatitude,
-      'pickup_longitude': pickupLongitude,
-      'pickup_address': pickupAddress,
-      'dropoff_latitude': dropoffLatitude,
-      'dropoff_longitude': dropoffLongitude,
-      'dropoff_address': dropoffAddress,
-      'ride_type': rideType.name,
-      'status': RideStatus.searching.name,
-      'fare': fare,
-      'base_fare': quote.baseFare,
-      'distance_fare': quote.distanceFare,
-      'time_fare': quote.timeFare,
-      'surge_multiplier': quote.surgeMultiplier,
-      'discount_amount': discountAmount,
-      'promo_code': promoCode,
-      'payment_method': paymentMethod,
-      'distance': quote.distanceKm,
-      'estimated_minutes': quote.durationMinutes.ceil(),
-      'currency': quote.currency,
-    }).select().single();
+    final data = await _client
+        .from(_ridesTable)
+        .insert({
+          'rider_id': riderId,
+          'pickup_latitude': pickupLatitude,
+          'pickup_longitude': pickupLongitude,
+          'pickup_address': pickupAddress,
+          'dropoff_latitude': dropoffLatitude,
+          'dropoff_longitude': dropoffLongitude,
+          'dropoff_address': dropoffAddress,
+          'ride_type': rideType.name,
+          'status': RideStatus.searching.name,
+          'fare': fare,
+          'base_fare': quote.baseFare,
+          'distance_fare': quote.distanceFare,
+          'time_fare': quote.timeFare,
+          'surge_multiplier': quote.surgeMultiplier,
+          'discount_amount': discountAmount,
+          'promo_code': promoCode,
+          'payment_method': paymentMethod,
+          'distance': quote.distanceKm,
+          'estimated_minutes': quote.durationMinutes.ceil(),
+          'currency': quote.currency,
+        })
+        .select()
+        .single();
     return _rideFromRow(data);
   }
 
@@ -197,13 +220,16 @@ class SupabaseRideDataSource {
     double radiusKm = 8,
     int limit = 10,
   }) async {
-    final data = await _client.rpc('find_nearest_drivers', params: {
-      'p_lat': latitude,
-      'p_lon': longitude,
-      'p_category': rideType.name,
-      'p_radius_km': radiusKm,
-      'p_limit': limit,
-    });
+    final data = await _client.rpc(
+      'find_nearest_drivers',
+      params: {
+        'p_lat': latitude,
+        'p_lon': longitude,
+        'p_category': rideType.name,
+        'p_radius_km': radiusKm,
+        'p_limit': limit,
+      },
+    );
     return (data as List).map((row) {
       final map = Map<String, dynamic>.from(row as Map);
       return NearbyDriver(
@@ -218,9 +244,10 @@ class SupabaseRideDataSource {
   }
 
   Future<int> dispatchRide(String rideId) async {
-    final data = await _client.rpc('dispatch_ride', params: {
-      'p_ride_id': rideId,
-    });
+    final data = await _client.rpc(
+      'dispatch_ride',
+      params: {'p_ride_id': rideId},
+    );
     final map = Map<String, dynamic>.from(data as Map);
     return (map['offered'] as num?)?.toInt() ?? 0;
   }
@@ -236,18 +263,20 @@ class SupabaseRideDataSource {
   }
 
   Future<Ride?> getRide(String rideId) async {
-    final data =
-        await _client.from(_ridesTable).select().eq('id', rideId).maybeSingle();
+    final data = await _client
+        .from(_ridesTable)
+        .select()
+        .eq('id', rideId)
+        .maybeSingle();
     if (data == null) return null;
     return _rideFromRow(data);
   }
 
   Future<void> cancelRide(String rideId, {String? reason}) async {
-    await _client.rpc('cancel_ride_lifecycle', params: {
-      'p_ride_id': rideId,
-      'p_by': 'rider',
-      'p_reason': reason,
-    });
+    await _client.rpc(
+      'cancel_ride_lifecycle',
+      params: {'p_ride_id': rideId, 'p_by': 'rider', 'p_reason': reason},
+    );
   }
 
   Future<Ride?> getActiveRide(String riderId) async {
@@ -268,13 +297,19 @@ class SupabaseRideDataSource {
     return _rideFromRow(data);
   }
 
-  Future<List<Ride>> getRideHistory(String riderId,
-      {int limit = 20, int offset = 0}) async {
+  Future<List<Ride>> getRideHistory(
+    String riderId, {
+    int limit = 20,
+    int offset = 0,
+  }) async {
     final data = await _client
         .from(_ridesTable)
         .select()
         .eq('rider_id', riderId)
-        .inFilter('status', [RideStatus.completed.name, RideStatus.cancelled.name])
+        .inFilter('status', [
+          RideStatus.completed.name,
+          RideStatus.cancelled.name,
+        ])
         .order('created_at', ascending: false)
         .range(offset, offset + limit - 1);
     return (data as List)
@@ -282,19 +317,23 @@ class SupabaseRideDataSource {
         .toList();
   }
 
-  Future<void> rateRide(String rideId, int rating,
-      {String? feedback, double? tip}) async {
-    await _client.from(_ridesTable).update({
-      'rating': rating,
-      'feedback': feedback,
-      'tip': tip,
-    }).eq('id', rideId);
+  Future<void> rateRide(
+    String rideId,
+    int rating, {
+    String? feedback,
+    double? tip,
+  }) async {
+    await _client
+        .from(_ridesTable)
+        .update({'rating': rating, 'feedback': feedback, 'tip': tip})
+        .eq('id', rideId);
   }
 
   Future<void> shareTrip(String rideId) async {
-    await _client.from(_ridesTable).update({
-      'is_shared_trip': true,
-    }).eq('id', rideId);
+    await _client
+        .from(_ridesTable)
+        .update({'is_shared_trip': true})
+        .eq('id', rideId);
   }
 
   Future<void> reportIssue(String rideId, String issue) async {

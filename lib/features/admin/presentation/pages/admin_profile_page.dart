@@ -35,9 +35,10 @@ class _AdminProfilePageState extends ConsumerState<AdminProfilePage> {
       final email = client.auth.currentUser?.email ?? '';
       final isOwner = ref.read(adminIsOwnerProvider).value ?? false;
 
-      final result = await client.rpc('get_admin_profile', params: {
-        'p_email': email,
-      });
+      final result = await client.rpc(
+        'get_admin_profile',
+        params: {'p_email': email},
+      );
 
       if (mounted) {
         setState(() {
@@ -65,47 +66,40 @@ class _AdminProfilePageState extends ConsumerState<AdminProfilePage> {
     final cs = Theme.of(context).colorScheme;
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(l10n.adminProfile),
-      ),
+      appBar: AppBar(title: Text(l10n.adminProfile)),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : _error != null
-              ? AdminErrorState(
-                  message: appErrorText(context, _error),
-                  onRetry: _loadProfile,
-                )
-              : _profile == null
-                  ? AdminErrorState(
-                      message: l10n.error,
-                      onRetry: _loadProfile,
-                    )
-                  : SingleChildScrollView(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      AnimatedFadeIn(
-                        child: _buildProfileHeader(l10n, cs),
-                      ),
-                      const SizedBox(height: 24),
-                      AnimatedFadeIn(
-                        delay: const Duration(milliseconds: 100),
-                        child: _buildRoleInfo(l10n, cs),
-                      ),
-                      const SizedBox(height: 24),
-                      AnimatedFadeIn(
-                        delay: const Duration(milliseconds: 200),
-                        child: _buildEarningsSection(l10n, cs),
-                      ),
-                      const SizedBox(height: 24),
-                      AnimatedFadeIn(
-                        delay: const Duration(milliseconds: 300),
-                        child: _buildRegionInfo(l10n, cs),
-                      ),
-                    ],
+          ? AdminErrorState(
+              message: appErrorText(context, _error),
+              onRetry: _loadProfile,
+            )
+          : _profile == null
+          ? AdminErrorState(message: l10n.error, onRetry: _loadProfile)
+          : SingleChildScrollView(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  AnimatedFadeIn(child: _buildProfileHeader(l10n, cs)),
+                  const SizedBox(height: 24),
+                  AnimatedFadeIn(
+                    delay: const Duration(milliseconds: 100),
+                    child: _buildRoleInfo(l10n, cs),
                   ),
-                ),
+                  const SizedBox(height: 24),
+                  AnimatedFadeIn(
+                    delay: const Duration(milliseconds: 200),
+                    child: _buildEarningsSection(l10n, cs),
+                  ),
+                  const SizedBox(height: 24),
+                  AnimatedFadeIn(
+                    delay: const Duration(milliseconds: 300),
+                    child: _buildRegionInfo(l10n, cs),
+                  ),
+                ],
+              ),
+            ),
     );
   }
 
@@ -120,11 +114,11 @@ class _AdminProfilePageState extends ConsumerState<AdminProfilePage> {
           children: [
             CircleAvatar(
               radius: 40,
-              backgroundColor: isOwner
-                  ? Colors.amber
-                  : cs.primaryContainer,
+              backgroundColor: isOwner ? Colors.amber : cs.primaryContainer,
               child: Icon(
-                isOwner ? Icons.star_rounded : Icons.admin_panel_settings_rounded,
+                isOwner
+                    ? Icons.star_rounded
+                    : Icons.admin_panel_settings_rounded,
                 size: 40,
                 color: isOwner ? Colors.amber.shade800 : cs.primary,
               ),
@@ -132,16 +126,14 @@ class _AdminProfilePageState extends ConsumerState<AdminProfilePage> {
             const SizedBox(height: 16),
             Text(
               isOwner ? l10n.ownerFullAccess : l10n.adminProfile,
-              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+              style: Theme.of(context).textTheme.headlineSmall
+                  ?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 4),
             Text(
               email,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: cs.onSurfaceVariant,
-              ),
+              style: Theme.of(context).textTheme.bodyMedium
+                  ?.copyWith(color: cs.onSurfaceVariant),
             ),
           ],
         ),
@@ -161,9 +153,8 @@ class _AdminProfilePageState extends ConsumerState<AdminProfilePage> {
           children: [
             Text(
               l10n.adminRole,
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+              style: Theme.of(context).textTheme.titleMedium
+                  ?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 12),
             _infoRow(
@@ -191,16 +182,14 @@ class _AdminProfilePageState extends ConsumerState<AdminProfilePage> {
           children: [
             Text(
               l10n.adminEarnings,
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+              style: Theme.of(context).textTheme.titleMedium
+                  ?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 4),
             Text(
               l10n.adminEarningsDesc,
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: cs.onSurfaceVariant,
-              ),
+              style: Theme.of(context).textTheme.bodySmall
+                  ?.copyWith(color: cs.onSurfaceVariant),
             ),
             const SizedBox(height: 16),
             Center(
@@ -216,9 +205,8 @@ class _AdminProfilePageState extends ConsumerState<AdminProfilePage> {
                   const SizedBox(height: 4),
                   Text(
                     l10n.totalEarnings,
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: cs.onSurfaceVariant,
-                    ),
+                    style: Theme.of(context).textTheme.bodySmall
+                        ?.copyWith(color: cs.onSurfaceVariant),
                   ),
                 ],
               ),
@@ -240,9 +228,8 @@ class _AdminProfilePageState extends ConsumerState<AdminProfilePage> {
           children: [
             Text(
               l10n.adminAssignedRegion,
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+              style: Theme.of(context).textTheme.titleMedium
+                  ?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 12),
             _infoRow(
@@ -279,9 +266,8 @@ class _AdminProfilePageState extends ConsumerState<AdminProfilePage> {
               ),
               Text(
                 value,
-                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                  fontWeight: FontWeight.w600,
-                ),
+                style: Theme.of(context).textTheme.bodyLarge
+                    ?.copyWith(fontWeight: FontWeight.w600),
               ),
             ],
           ),

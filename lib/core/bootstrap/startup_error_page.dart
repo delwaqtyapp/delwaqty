@@ -44,10 +44,7 @@ class StartupErrorPage extends StatelessWidget {
                   const Text(
                     'Configuration Error',
                     textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: Color(0x99FFFFFF),
-                      fontSize: 14,
-                    ),
+                    style: TextStyle(color: Color(0x99FFFFFF), fontSize: 14),
                   ),
                   const SizedBox(height: 24),
                   for (final error in result.errors) ...[

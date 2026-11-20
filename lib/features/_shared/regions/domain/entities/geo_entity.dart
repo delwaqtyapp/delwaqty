@@ -27,11 +27,10 @@ enum GeoPlaceType {
 
   final String code;
 
-  static GeoPlaceType fromCode(String? code) =>
-      GeoPlaceType.values.firstWhere(
-        (t) => t.code == code,
-        orElse: () => GeoPlaceType.poi,
-      );
+  static GeoPlaceType fromCode(String? code) => GeoPlaceType.values.firstWhere(
+    (t) => t.code == code,
+    orElse: () => GeoPlaceType.poi,
+  );
 }
 
 /// Source-type classification (mandatory provenance, ADR-057).

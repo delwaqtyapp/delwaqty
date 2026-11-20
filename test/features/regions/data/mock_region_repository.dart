@@ -28,7 +28,8 @@ class MockRegionRepository implements RegionRepository {
 
   void throwOnNextCall(Object error) => _error = error;
 
-  void setPreference(UserRegionPreference? preference) => _preference = preference;
+  void setPreference(UserRegionPreference? preference) =>
+      _preference = preference;
 
   UserRegionPreference? get preference => _preference;
 

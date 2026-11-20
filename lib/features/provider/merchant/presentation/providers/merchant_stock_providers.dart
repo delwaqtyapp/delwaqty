@@ -32,7 +32,8 @@ class MerchantStockItem {
   final String? imageUrl;
 
   /// Available to sell right now.
-  int get availableQuantity => (stockQuantity - reservedQuantity).clamp(0, 1 << 31);
+  int get availableQuantity =>
+      (stockQuantity - reservedQuantity).clamp(0, 1 << 31);
 
   /// True when the merchant should be warned: at or below the threshold.
   bool get isLowStock => isInStock && stockQuantity <= lowStockThreshold;
@@ -61,92 +62,96 @@ class MerchantStockItem {
 }
 
 final merchantStockProvider =
-    FutureProvider.family<List<MerchantStockItem>, String>((ref, merchantId) async {
-  if (merchantId.isEmpty) return const <MerchantStockItem>[];
-  final client = ref.watch(supabaseClientProvider);
+    FutureProvider.family<List<MerchantStockItem>, String>((
+      ref,
+      merchantId,
+    ) async {
+      if (merchantId.isEmpty) return const <MerchantStockItem>[];
+      final client = ref.watch(supabaseClientProvider);
 
-  // One round trip: the inventory row is embedded through the
-  // product_inventory -> products foreign key instead of a query per item.
-  var res = await client
-      .from('product_inventory')
-      .select(
-        'product_id, stock_quantity, reserved_quantity, low_stock_threshold, '
-        'is_in_stock, products(name, price, is_available, image_url)',
-      )
-      .eq('merchant_id', merchantId)
-      .order('stock_quantity', ascending: true);
+      // One round trip: the inventory row is embedded through the
+      // product_inventory -> products foreign key instead of a query per item.
+      var res = await client
+          .from('product_inventory')
+          .select(
+            'product_id, stock_quantity, reserved_quantity, low_stock_threshold, '
+            'is_in_stock, products(name, price, is_available, image_url)',
+          )
+          .eq('merchant_id', merchantId)
+          .order('stock_quantity', ascending: true);
 
-  if ((res as List).isEmpty) {
-    final productsRes = await client
-        .from('products')
-        .select('id, name, price, is_available, image_url, stock_quantity')
-        .eq('merchant_id', merchantId);
-    final productsList = productsRes as List;
-    if (productsList.isNotEmpty) {
-      final initialRows = productsList.map((raw) {
-        final p = raw as Map<String, dynamic>;
-        final stock = (p['stock_quantity'] as num?)?.toInt() ?? 50;
-        final available = (p['is_available'] as bool?) ?? true;
-        return <String, dynamic>{
-          'merchant_id': merchantId,
-          'product_id': p['id'] as String,
-          'stock_quantity': stock,
-          'reserved_quantity': 0,
-          'low_stock_threshold': 5,
-          'is_in_stock': available && stock > 0,
-        };
-      }).toList();
-      try {
-        await client
-            .from('product_inventory')
-            .upsert(initialRows, onConflict: 'product_id');
-        res = await client
-            .from('product_inventory')
-            .select(
-              'product_id, stock_quantity, reserved_quantity, low_stock_threshold, '
-              'is_in_stock, products(name, price, is_available, image_url)',
-            )
-            .eq('merchant_id', merchantId)
-            .order('stock_quantity', ascending: true);
-      } catch (_) {
-        return productsList.map((raw) {
-          final p = raw as Map<String, dynamic>;
-          final stock = (p['stock_quantity'] as num?)?.toInt() ?? 50;
-          final available = (p['is_available'] as bool?) ?? true;
-          return MerchantStockItem(
-            productId: p['id'] as String,
-            productName: (p['name'] as String?) ?? '',
-            price: (p['price'] as num?)?.toDouble() ?? 0,
-            isAvailable: available,
-            imageUrl: p['image_url'] as String?,
-            stockQuantity: stock,
-            reservedQuantity: 0,
-            lowStockThreshold: 5,
-            isInStock: available && stock > 0,
-          );
-        }).toList();
+      if ((res as List).isEmpty) {
+        final productsRes = await client
+            .from('products')
+            .select('id, name, price, is_available, image_url, stock_quantity')
+            .eq('merchant_id', merchantId);
+        final productsList = productsRes as List;
+        if (productsList.isNotEmpty) {
+          final initialRows = productsList.map((raw) {
+            final p = raw as Map<String, dynamic>;
+            final stock = (p['stock_quantity'] as num?)?.toInt() ?? 50;
+            final available = (p['is_available'] as bool?) ?? true;
+            return <String, dynamic>{
+              'merchant_id': merchantId,
+              'product_id': p['id'] as String,
+              'stock_quantity': stock,
+              'reserved_quantity': 0,
+              'low_stock_threshold': 5,
+              'is_in_stock': available && stock > 0,
+            };
+          }).toList();
+          try {
+            await client
+                .from('product_inventory')
+                .upsert(initialRows, onConflict: 'product_id');
+            res = await client
+                .from('product_inventory')
+                .select(
+                  'product_id, stock_quantity, reserved_quantity, low_stock_threshold, '
+                  'is_in_stock, products(name, price, is_available, image_url)',
+                )
+                .eq('merchant_id', merchantId)
+                .order('stock_quantity', ascending: true);
+          } catch (_) {
+            return productsList.map((raw) {
+              final p = raw as Map<String, dynamic>;
+              final stock = (p['stock_quantity'] as num?)?.toInt() ?? 50;
+              final available = (p['is_available'] as bool?) ?? true;
+              return MerchantStockItem(
+                productId: p['id'] as String,
+                productName: (p['name'] as String?) ?? '',
+                price: (p['price'] as num?)?.toDouble() ?? 0,
+                isAvailable: available,
+                imageUrl: p['image_url'] as String?,
+                stockQuantity: stock,
+                reservedQuantity: 0,
+                lowStockThreshold: 5,
+                isInStock: available && stock > 0,
+              );
+            }).toList();
+          }
+        }
       }
-    }
-  }
 
-  return (res as List).map((row) {
-    final map = row as Map<String, dynamic>;
-    final product = map['products'];
-    final p = product is Map ? product : const <String, dynamic>{};
-    final stock = (map['stock_quantity'] as num?)?.toInt() ?? 0;
-    return MerchantStockItem(
-      productId: map['product_id'] as String,
-      productName: (p['name'] as String?) ?? '',
-      price: (p['price'] as num?)?.toDouble() ?? 0,
-      isAvailable: (p['is_available'] as bool?) ?? true,
-      imageUrl: p['image_url'] as String?,
-      stockQuantity: stock,
-      reservedQuantity: (map['reserved_quantity'] as num?)?.toInt() ?? 0,
-      lowStockThreshold: (map['low_stock_threshold'] as num?)?.toInt() ?? 10,
-      isInStock: (map['is_in_stock'] as bool?) ?? (stock > 0),
-    );
-  }).toList();
-});
+      return (res as List).map((row) {
+        final map = row as Map<String, dynamic>;
+        final product = map['products'];
+        final p = product is Map ? product : const <String, dynamic>{};
+        final stock = (map['stock_quantity'] as num?)?.toInt() ?? 0;
+        return MerchantStockItem(
+          productId: map['product_id'] as String,
+          productName: (p['name'] as String?) ?? '',
+          price: (p['price'] as num?)?.toDouble() ?? 0,
+          isAvailable: (p['is_available'] as bool?) ?? true,
+          imageUrl: p['image_url'] as String?,
+          stockQuantity: stock,
+          reservedQuantity: (map['reserved_quantity'] as num?)?.toInt() ?? 0,
+          lowStockThreshold:
+              (map['low_stock_threshold'] as num?)?.toInt() ?? 10,
+          isInStock: (map['is_in_stock'] as bool?) ?? (stock > 0),
+        );
+      }).toList();
+    });
 
 /// Writes the stock level for one product.
 ///
@@ -167,8 +172,10 @@ class StockNotifier {
     final client = _ref.read(supabaseClientProvider);
     final clamped = quantity.clamp(0, 1 << 31);
 
-    final existingItems =
-        _ref.read(merchantStockProvider(merchantId)).asData?.value;
+    final existingItems = _ref
+        .read(merchantStockProvider(merchantId))
+        .asData
+        ?.value;
     int? existingReserved;
     if (existingItems != null) {
       for (final item in existingItems) {
@@ -192,10 +199,7 @@ class StockNotifier {
     // hides out-of-stock items immediately.
     await client
         .from('products')
-        .update({
-          'stock_quantity': clamped,
-          'is_available': clamped > 0,
-        })
+        .update({'stock_quantity': clamped, 'is_available': clamped > 0})
         .eq('id', productId);
 
     _ref.invalidate(merchantStockProvider(merchantId));
@@ -207,13 +211,12 @@ class StockNotifier {
     required int delta,
     required int currentQuantity,
     required int lowStockThreshold,
-  }) =>
-      setStock(
-        merchantId: merchantId,
-        productId: productId,
-        quantity: currentQuantity + delta,
-        lowStockThreshold: lowStockThreshold,
-      );
+  }) => setStock(
+    merchantId: merchantId,
+    productId: productId,
+    quantity: currentQuantity + delta,
+    lowStockThreshold: lowStockThreshold,
+  );
 }
 
 final stockNotifierProvider = Provider<StockNotifier>(StockNotifier.new);

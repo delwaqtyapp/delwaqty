@@ -15,7 +15,8 @@ class DriverRepositoryImpl implements DriverRepository {
   final SupabaseDriverPlatformDataSource _platformDataSource;
 
   @override
-  Future<DriverProfile?> getProfile(String userId) => _dataSource.getProfile(userId);
+  Future<DriverProfile?> getProfile(String userId) =>
+      _dataSource.getProfile(userId);
 
   @override
   Future<DriverProfile> registerProfile(
@@ -25,37 +26,44 @@ class DriverRepositoryImpl implements DriverRepository {
     String? vehicleType,
     String? vehiclePlate,
     String? vehicleColor,
-  }) =>
-      _dataSource.registerProfile(
-        userId,
-        fullName: fullName,
-        phone: phone,
-        vehicleType: vehicleType,
-        vehiclePlate: vehiclePlate,
-        vehicleColor: vehicleColor,
-      );
+  }) => _dataSource.registerProfile(
+    userId,
+    fullName: fullName,
+    phone: phone,
+    vehicleType: vehicleType,
+    vehiclePlate: vehiclePlate,
+    vehicleColor: vehicleColor,
+  );
 
   @override
-  Future<void> updateStatus(String profileId, DriverStatus status) => _dataSource.updateStatus(profileId, status);
+  Future<void> updateStatus(String profileId, DriverStatus status) =>
+      _dataSource.updateStatus(profileId, status);
 
   @override
-  Future<void> updateLocation(String profileId, double lat, double lng) => _dataSource.updateLocation(profileId, lat, lng);
+  Future<void> updateLocation(String profileId, double lat, double lng) =>
+      _dataSource.updateLocation(profileId, lat, lng);
 
   @override
-  Future<List<DriverDelivery>> getAvailableDeliveries() => _dataSource.getAvailableDeliveries();
+  Future<List<DriverDelivery>> getAvailableDeliveries() =>
+      _dataSource.getAvailableDeliveries();
 
   @override
-  Future<List<DriverDelivery>> getMyDeliveries(String profileId, {String? status}) =>
-      _dataSource.getMyDeliveries(profileId, status: status);
+  Future<List<DriverDelivery>> getMyDeliveries(
+    String profileId, {
+    String? status,
+  }) => _dataSource.getMyDeliveries(profileId, status: status);
 
   @override
-  Future<void> acceptDelivery(String deliveryId, String profileId) => _dataSource.acceptDelivery(deliveryId, profileId);
+  Future<void> acceptDelivery(String deliveryId, String profileId) =>
+      _dataSource.acceptDelivery(deliveryId, profileId);
 
   @override
-  Future<void> rejectDelivery(String deliveryId) => _dataSource.rejectDelivery(deliveryId);
+  Future<void> rejectDelivery(String deliveryId) =>
+      _dataSource.rejectDelivery(deliveryId);
 
   @override
-  Future<void> updateDeliveryStatus(String deliveryId, String status) => _dataSource.updateDeliveryStatus(deliveryId, status);
+  Future<void> updateDeliveryStatus(String deliveryId, String status) =>
+      _dataSource.updateDeliveryStatus(deliveryId, status);
 
   @override
   Future<DriverProfile> getStats(String profileId) async {
@@ -66,8 +74,23 @@ class DriverRepositoryImpl implements DriverRepository {
 
   // M6: Onboarding
   @override
-  Future<void> submitOnboardingStep(String driverId, {String? fullName, String? phone, String? nationalId, String? address, String? profilePhotoUrl, required int step}) =>
-      _platformDataSource.submitOnboardingStep(driverId, fullName: fullName, phone: phone, nationalId: nationalId, address: address, profilePhotoUrl: profilePhotoUrl, step: step);
+  Future<void> submitOnboardingStep(
+    String driverId, {
+    String? fullName,
+    String? phone,
+    String? nationalId,
+    String? address,
+    String? profilePhotoUrl,
+    required int step,
+  }) => _platformDataSource.submitOnboardingStep(
+    driverId,
+    fullName: fullName,
+    phone: phone,
+    nationalId: nationalId,
+    address: address,
+    profilePhotoUrl: profilePhotoUrl,
+    step: step,
+  );
 
   @override
   Future<void> completeOnboarding(String driverId) =>
@@ -79,12 +102,54 @@ class DriverRepositoryImpl implements DriverRepository {
       _platformDataSource.getVehicles(driverId);
 
   @override
-  Future<String> addVehicle(String driverId, {required String category, String? make, String? model, int? year, String? color, required String plateNumber, int seats = 4, String? photoUrl}) =>
-      _platformDataSource.addVehicle(driverId, category: category, make: make, model: model, year: year, color: color, plateNumber: plateNumber, seats: seats, photoUrl: photoUrl);
+  Future<String> addVehicle(
+    String driverId, {
+    required String category,
+    String? make,
+    String? model,
+    int? year,
+    String? color,
+    required String plateNumber,
+    int seats = 4,
+    String? photoUrl,
+  }) => _platformDataSource.addVehicle(
+    driverId,
+    category: category,
+    make: make,
+    model: model,
+    year: year,
+    color: color,
+    plateNumber: plateNumber,
+    seats: seats,
+    photoUrl: photoUrl,
+  );
 
   @override
-  Future<void> updateVehicle(String vehicleId, String driverId, {String? category, String? make, String? model, int? year, String? color, String? plateNumber, int? seats, String? photoUrl, bool? isActive}) =>
-      _platformDataSource.updateVehicle(vehicleId, driverId, category: category, make: make, model: model, year: year, color: color, plateNumber: plateNumber, seats: seats, photoUrl: photoUrl, isActive: isActive);
+  Future<void> updateVehicle(
+    String vehicleId,
+    String driverId, {
+    String? category,
+    String? make,
+    String? model,
+    int? year,
+    String? color,
+    String? plateNumber,
+    int? seats,
+    String? photoUrl,
+    bool? isActive,
+  }) => _platformDataSource.updateVehicle(
+    vehicleId,
+    driverId,
+    category: category,
+    make: make,
+    model: model,
+    year: year,
+    color: color,
+    plateNumber: plateNumber,
+    seats: seats,
+    photoUrl: photoUrl,
+    isActive: isActive,
+  );
 
   @override
   Future<void> toggleVehicleActive(String vehicleId, String driverId) =>
@@ -96,8 +161,21 @@ class DriverRepositoryImpl implements DriverRepository {
       _platformDataSource.getDocuments(driverId);
 
   @override
-  Future<String> upsertDocument(String driverId, String docType, String fileUrl, {String? fileName, int? fileSize, DateTime? expiresAt}) =>
-      _platformDataSource.upsertDocument(driverId, docType, fileUrl, fileName: fileName, fileSize: fileSize, expiresAt: expiresAt);
+  Future<String> upsertDocument(
+    String driverId,
+    String docType,
+    String fileUrl, {
+    String? fileName,
+    int? fileSize,
+    DateTime? expiresAt,
+  }) => _platformDataSource.upsertDocument(
+    driverId,
+    docType,
+    fileUrl,
+    fileName: fileName,
+    fileSize: fileSize,
+    expiresAt: expiresAt,
+  );
 
   // M6: Wallet
   @override

@@ -97,8 +97,10 @@ void main() {
     // - SQLSTATE, function name and all - never reaches the screen. 42725 is a
     // server-side fault, so the classifier picks the server sentence rather than
     // the catch-all.
-    expect(find.text('A server error occurred. Please try again shortly.'),
-        findsOneWidget);
+    expect(
+      find.text('A server error occurred. Please try again shortly.'),
+      findsOneWidget,
+    );
     expect(find.text('Retry'), findsOneWidget);
     expect(find.textContaining('get_commission_rate'), findsNothing);
     expect(find.textContaining('42725'), findsNothing);

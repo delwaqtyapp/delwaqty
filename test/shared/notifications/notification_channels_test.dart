@@ -182,7 +182,10 @@ void main() {
 
     test('rejects unknown, empty and relative routes', () {
       expect(
-        NotificationChannels.isAllowed('/admin/hacked', context: AppContext.admin),
+        NotificationChannels.isAllowed(
+          '/admin/hacked',
+          context: AppContext.admin,
+        ),
         isFalse,
       );
       expect(
@@ -194,7 +197,10 @@ void main() {
         isFalse,
       );
       expect(
-        NotificationChannels.isAllowed('/orders/x/y', context: AppContext.admin),
+        NotificationChannels.isAllowed(
+          '/orders/x/y',
+          context: AppContext.admin,
+        ),
         isFalse,
       );
     });

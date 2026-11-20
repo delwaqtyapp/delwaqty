@@ -1,5 +1,4 @@
 class ChatRoom {
-
   const ChatRoom({
     required this.id,
     required this.roomType,

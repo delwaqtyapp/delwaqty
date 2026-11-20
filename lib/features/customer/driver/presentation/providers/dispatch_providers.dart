@@ -15,30 +15,35 @@ final dispatchRepositoryProvider = Provider<DispatchRepository>((ref) {
 });
 
 /// Aggregated dashboard performance metrics.
-final driverStatsProvider =
-    FutureProvider.family<DriverStats, String>((ref, driverId) {
+final driverStatsProvider = FutureProvider.family<DriverStats, String>((
+  ref,
+  driverId,
+) {
   return ref.watch(dispatchRepositoryProvider).getDashboardStats(driverId);
 });
 
 /// Driver earnings ledger.
 final driverEarningsProvider =
     FutureProvider.family<List<DriverEarning>, String>((ref, driverId) {
-  return ref.watch(dispatchRepositoryProvider).getEarnings(driverId);
-});
+      return ref.watch(dispatchRepositoryProvider).getEarnings(driverId);
+    });
 
 /// Live GPS position for an active driver.
-final driverLivePositionProvider =
-    StateProvider.family<Position?, String>((ref, driverId) => null);
+final driverLivePositionProvider = StateProvider.family<Position?, String>(
+  (ref, driverId) => null,
+);
 
 /// Online/offline state and background GPS streaming for a driver.
 final driverOnlineProvider =
-    StateNotifierProvider.family<DriverOnlineNotifier, AsyncValue<bool>, String>(
-  (ref, driverId) => DriverOnlineNotifier(ref, driverId),
-);
+    StateNotifierProvider.family<
+      DriverOnlineNotifier,
+      AsyncValue<bool>,
+      String
+    >((ref, driverId) => DriverOnlineNotifier(ref, driverId));
 
 class DriverOnlineNotifier extends StateNotifier<AsyncValue<bool>> {
   DriverOnlineNotifier(this._ref, this._driverId)
-      : super(const AsyncValue.data(false));
+    : super(const AsyncValue.data(false));
 
   final Ref _ref;
   final String _driverId;
@@ -129,25 +134,26 @@ class DriverOnlineNotifier extends StateNotifier<AsyncValue<bool>> {
 
   void _startTracking() {
     _positionSub?.cancel();
-    _positionSub = Geolocator.getPositionStream(
-      locationSettings: const LocationSettings(
-        accuracy: LocationAccuracy.high,
-        distanceFilter: 15,
-      ),
-    ).listen((pos) async {
-      _recordPosition(pos);
-      try {
-        await _repo.updateLocation(
-          _driverId,
-          pos.latitude,
-          pos.longitude,
-          heading: pos.heading,
-          speed: pos.speed,
-        );
-      } catch (e) {
-        _log.e('Driver location push failed', e);
-      }
-    });
+    _positionSub =
+        Geolocator.getPositionStream(
+          locationSettings: const LocationSettings(
+            accuracy: LocationAccuracy.high,
+            distanceFilter: 15,
+          ),
+        ).listen((pos) async {
+          _recordPosition(pos);
+          try {
+            await _repo.updateLocation(
+              _driverId,
+              pos.latitude,
+              pos.longitude,
+              heading: pos.heading,
+              speed: pos.speed,
+            );
+          } catch (e) {
+            _log.e('Driver location push failed', e);
+          }
+        });
   }
 
   Future<void> _stopTracking() async {

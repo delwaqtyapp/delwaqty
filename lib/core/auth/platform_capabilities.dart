@@ -30,10 +30,13 @@ class PlatformCapabilities {
       admin: json['admin'] as bool? ?? false,
       owner: json['owner'] as bool? ?? false,
       canUseCustomer:
-          json['can_use_customer'] as bool? ?? (json['customer'] as bool? ?? false),
+          json['can_use_customer'] as bool? ??
+          (json['customer'] as bool? ?? false),
       canUseDelivery:
-          json['can_use_delivery'] as bool? ?? (json['driver'] as bool? ?? false),
-      canUseProvider: json['can_use_provider'] as bool? ??
+          json['can_use_delivery'] as bool? ??
+          (json['driver'] as bool? ?? false),
+      canUseProvider:
+          json['can_use_provider'] as bool? ??
           (json['provider'] as bool? ?? false),
       canUseAdmin:
           json['can_use_admin'] as bool? ?? (json['admin'] as bool? ?? false),
@@ -59,8 +62,7 @@ class OwnerContextResolver {
   const OwnerContextResolver(this.caps);
   final PlatformCapabilities caps;
 
-  bool get authorizedCustomer =>
-      caps.canUseCustomer || caps.customer;
+  bool get authorizedCustomer => caps.canUseCustomer || caps.customer;
   bool get authorizedDelivery =>
       caps.canUseDelivery || caps.driver || caps.owner;
   bool get authorizedProvider =>
@@ -99,7 +101,8 @@ Future<bool> isOwnerByRole(SupabaseClient client, String userId) async {
 /// is eligible for every operational context; provisioning rows are attempted
 /// best-effort so a later migration materializes them transparently.
 Future<PlatformCapabilities> resolveOwnerCapabilities(
-    SupabaseClient client) async {
+  SupabaseClient client,
+) async {
   final userId = client.auth.currentUser?.id;
   if (userId == null) return const PlatformCapabilities();
   final isOwner = await isOwnerByRole(client, userId);
@@ -127,8 +130,9 @@ Future<PlatformCapabilities> resolveOwnerCapabilities(
 /// When the identity is the Owner, it also triggers idempotent provisioning of
 /// the required Delivery/Provider operational rows so the same Auth identity
 /// works across all four apps. Failures degrade gracefully (no capability).
-final platformCapabilitiesProvider =
-    FutureProvider<PlatformCapabilities>((ref) async {
+final platformCapabilitiesProvider = FutureProvider<PlatformCapabilities>((
+  ref,
+) async {
   final client = Supabase.instance.client;
   try {
     final res = await client.rpc('get_my_capabilities');

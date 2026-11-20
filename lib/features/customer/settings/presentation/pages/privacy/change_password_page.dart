@@ -34,9 +34,10 @@ class _ChangePasswordPageState extends ConsumerState<ChangePasswordPage> {
     if (!_formKey.currentState!.validate()) return;
     setState(() => _loading = true);
     try {
-      await ref.read(supabaseClientProvider).auth.updateUser(
-            UserAttributes(password: _newPasswordController.text),
-          );
+      await ref
+          .read(supabaseClientProvider)
+          .auth
+          .updateUser(UserAttributes(password: _newPasswordController.text));
       await _invalidateBiometricLogin();
       if (!mounted) return;
       final l10n = AppLocalizations.of(context);

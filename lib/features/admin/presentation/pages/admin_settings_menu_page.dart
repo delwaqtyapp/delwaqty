@@ -18,6 +18,7 @@ import 'package:delwaqty/shared/widgets/appearance_segmented.dart';
 import 'package:delwaqty/shared/widgets/gradient_background.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+
 import 'dart:async';
 
 class AdminSettingsMenuPage extends ConsumerStatefulWidget {
@@ -44,9 +45,10 @@ class _AdminSettingsMenuPageState extends ConsumerState<AdminSettingsMenuPage> {
       final email = client.auth.currentUser?.email ?? '';
       final isOwner = ref.read(adminIsOwnerProvider).value ?? false;
 
-      final result = await client.rpc('get_admin_profile', params: {
-        'p_email': email,
-      });
+      final result = await client.rpc(
+        'get_admin_profile',
+        params: {'p_email': email},
+      );
 
       if (mounted) {
         setState(() {
@@ -87,9 +89,7 @@ class _AdminSettingsMenuPageState extends ConsumerState<AdminSettingsMenuPage> {
               child: ListView(
                 padding: const EdgeInsets.all(16),
                 children: [
-                  AnimatedFadeIn(
-                    child: _buildProfileHeader(context, l10n),
-                  ),
+                  AnimatedFadeIn(child: _buildProfileHeader(context, l10n)),
                   const SizedBox(height: 16),
                   AnimatedFadeIn(
                     delay: const Duration(milliseconds: 80),
@@ -142,7 +142,9 @@ class _AdminSettingsMenuPageState extends ConsumerState<AdminSettingsMenuPage> {
               padding: const EdgeInsets.all(6),
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: isOwner ? Colors.amber : Theme.of(context).colorScheme.primaryContainer,
+                color: isOwner
+                    ? Colors.amber
+                    : Theme.of(context).colorScheme.primaryContainer,
                 border: Border.all(
                   color: isOwner
                       ? Colors.amber.shade600
@@ -151,8 +153,11 @@ class _AdminSettingsMenuPageState extends ConsumerState<AdminSettingsMenuPage> {
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: (isOwner ? Colors.amber : Theme.of(context).colorScheme.primary)
-                        .withValues(alpha: 0.35),
+                    color:
+                        (isOwner
+                                ? Colors.amber
+                                : Theme.of(context).colorScheme.primary)
+                            .withValues(alpha: 0.35),
                     blurRadius: 18,
                     spreadRadius: 2,
                   ),
@@ -162,18 +167,21 @@ class _AdminSettingsMenuPageState extends ConsumerState<AdminSettingsMenuPage> {
                 radius: 40,
                 backgroundColor: Colors.transparent,
                 child: Icon(
-                  isOwner ? Icons.star_rounded : Icons.admin_panel_settings_rounded,
+                  isOwner
+                      ? Icons.star_rounded
+                      : Icons.admin_panel_settings_rounded,
                   size: 40,
-                  color: isOwner ? Colors.amber.shade700 : Theme.of(context).colorScheme.primary,
+                  color: isOwner
+                      ? Colors.amber.shade700
+                      : Theme.of(context).colorScheme.primary,
                 ),
               ),
             ),
             const SizedBox(height: 16),
             Text(
               isOwner ? l10n.ownerFullAccess : _roleDisplayName(role, l10n),
-              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+              style: Theme.of(context).textTheme.headlineSmall
+                  ?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 4),
             Text(
@@ -189,7 +197,8 @@ class _AdminSettingsMenuPageState extends ConsumerState<AdminSettingsMenuPage> {
                 label: Text(regionName),
                 visualDensity: VisualDensity.compact,
                 side: BorderSide(
-                  color: Theme.of(context).colorScheme.outlineVariant.withValues(alpha: 0.4),
+                  color: Theme.of(context).colorScheme.outlineVariant
+                      .withValues(alpha: 0.4),
                 ),
               ),
             ],
@@ -392,10 +401,7 @@ class _AdminSettingsMenuPageState extends ConsumerState<AdminSettingsMenuPage> {
     );
   }
 
-  Widget _buildPlatformSection(
-    BuildContext context,
-    AppLocalizations l10n,
-  ) {
+  Widget _buildPlatformSection(BuildContext context, AppLocalizations l10n) {
     return _SectionCard(
       title: l10n.adminPlatformSection,
       children: [
@@ -507,7 +513,10 @@ class _AdminSettingsMenuPageState extends ConsumerState<AdminSettingsMenuPage> {
     }
   }
 
-  Future<void> _showAboutDialog(BuildContext context, AppLocalizations l10n) async {
+  Future<void> _showAboutDialog(
+    BuildContext context,
+    AppLocalizations l10n,
+  ) async {
     final isOwner = _profile!['is_owner'] as bool? ?? false;
     const flavor = AppFlavor.admin;
     var needsUpdate = false;
@@ -539,18 +548,21 @@ class _AdminSettingsMenuPageState extends ConsumerState<AdminSettingsMenuPage> {
       applicationName: AppConstants.appName,
       applicationVersion: l10n.version,
       applicationIcon: CircleAvatar(
-        backgroundColor: isOwner ? Colors.amber : Theme.of(context).colorScheme.primaryContainer,
+        backgroundColor: isOwner
+            ? Colors.amber
+            : Theme.of(context).colorScheme.primaryContainer,
         child: Icon(
           isOwner ? Icons.star_rounded : Icons.admin_panel_settings_rounded,
-          color: isOwner ? Colors.amber.shade800 : Theme.of(context).colorScheme.primary,
+          color: isOwner
+              ? Colors.amber.shade800
+              : Theme.of(context).colorScheme.primary,
         ),
       ),
       children: [
         Text(
           l10n.adminSettingsMenu,
-          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-            color: Theme.of(context).colorScheme.onSurfaceVariant,
-          ),
+          style: Theme.of(context).textTheme.bodySmall
+              ?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant),
         ),
         const SizedBox(height: 12),
         FilledButton.icon(

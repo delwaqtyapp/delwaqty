@@ -29,9 +29,10 @@ final merchantDashboardRepositoryImplProvider =
       ),
     );
 
-final merchantDashboardRepositoryProvider = Provider<MerchantDashboardRepository>(
-  (ref) => ref.watch(merchantDashboardRepositoryImplProvider),
-);
+final merchantDashboardRepositoryProvider =
+    Provider<MerchantDashboardRepository>(
+      (ref) => ref.watch(merchantDashboardRepositoryImplProvider),
+    );
 
 class MerchantModule extends FeatureModule {
   @override
@@ -51,9 +52,7 @@ class MerchantModule extends FeatureModule {
   int get navPriority => 10;
 
   @override
-  Set<ModuleCapability> get capabilities => {
-    ModuleCapability.hasNotifications,
-  };
+  Set<ModuleCapability> get capabilities => {ModuleCapability.hasNotifications};
 
   @override
   StatefulShellBranch? buildBranch() {
@@ -81,8 +80,7 @@ class MerchantModule extends FeatureModule {
               routes: [
                 GoRoute(
                   path: 'new',
-                  builder: (context, state) =>
-                      const MerchantProductFormPage(),
+                  builder: (context, state) => const MerchantProductFormPage(),
                 ),
                 GoRoute(
                   path: ':id/edit',
@@ -164,19 +162,19 @@ class MerchantModule extends FeatureModule {
 
   @override
   List<RouteBase> get standaloneRoutes => [
-        GoRoute(
-          path: '/provider-availability',
-          builder: (context, state) => const ProviderAvailabilityPage(),
-        ),
-        GoRoute(
-          path: '/provider-verification',
-          builder: (context, state) => const ProviderVerificationPage(),
-        ),
-        GoRoute(
-          path: '/provider-documents',
-          builder: (context, state) => const ProviderDocumentsPage(),
-        ),
-      ];
+    GoRoute(
+      path: '/provider-availability',
+      builder: (context, state) => const ProviderAvailabilityPage(),
+    ),
+    GoRoute(
+      path: '/provider-verification',
+      builder: (context, state) => const ProviderVerificationPage(),
+    ),
+    GoRoute(
+      path: '/provider-documents',
+      builder: (context, state) => const ProviderDocumentsPage(),
+    ),
+  ];
 }
 
 class ProviderOrdersNavModule extends FeatureModule {
@@ -236,4 +234,3 @@ class ProviderProductsNavModule extends FeatureModule {
     );
   }
 }
-

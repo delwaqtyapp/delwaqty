@@ -12,7 +12,9 @@ import 'package:delwaqty/features/customer/wallet/presentation/pages/wallet_topu
 import 'package:delwaqty/features/customer/wallet/presentation/pages/wallet_transactions_page.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 
-final supabaseWalletRepositoryImplProvider = Provider<WalletRepositoryImpl>((ref) {
+final supabaseWalletRepositoryImplProvider = Provider<WalletRepositoryImpl>((
+  ref,
+) {
   return WalletRepositoryImpl(ref.watch(supabaseWalletDataSourceProvider));
 });
 
@@ -20,15 +22,19 @@ final walletRepositoryProvider = Provider<WalletRepository>(
   (ref) => ref.watch(supabaseWalletRepositoryImplProvider),
 );
 
-final walletBalanceProvider = FutureProvider.family<WalletBalance, String>((ref, userId) async {
+final walletBalanceProvider = FutureProvider.family<WalletBalance, String>((
+  ref,
+  userId,
+) async {
   final repo = ref.watch(walletRepositoryProvider);
   return repo.getBalance(userId);
 });
 
-final walletTransactionsProvider = FutureProvider.family<List<WalletTransaction>, String>((ref, userId) async {
-  final repo = ref.watch(walletRepositoryProvider);
-  return repo.getTransactions(userId);
-});
+final walletTransactionsProvider =
+    FutureProvider.family<List<WalletTransaction>, String>((ref, userId) async {
+      final repo = ref.watch(walletRepositoryProvider);
+      return repo.getTransactions(userId);
+    });
 
 class WalletModule extends FeatureModule {
   @override
@@ -47,7 +53,10 @@ class WalletModule extends FeatureModule {
   int get navPriority => 0;
 
   @override
-  Set<ModuleCapability> get capabilities => {ModuleCapability.hasPayments, ModuleCapability.requiresWallet};
+  Set<ModuleCapability> get capabilities => {
+    ModuleCapability.hasPayments,
+    ModuleCapability.requiresWallet,
+  };
 
   @override
   List<DrawerEntry> get drawerEntries => [

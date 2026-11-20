@@ -5,7 +5,9 @@ import 'package:delwaqty/services/logger/app_logger.dart';
 import 'package:delwaqty/features/customer/wallet/domain/entities/wallet_balance.dart';
 import 'package:delwaqty/features/customer/wallet/domain/entities/wallet_transaction.dart';
 
-final supabaseWalletDataSourceProvider = Provider<SupabaseWalletDataSource>((ref) {
+final supabaseWalletDataSourceProvider = Provider<SupabaseWalletDataSource>((
+  ref,
+) {
   return SupabaseWalletDataSource(
     ref.watch(supabaseClientProvider),
     ref.watch(loggerProvider),
@@ -66,11 +68,7 @@ class SupabaseWalletDataSource {
 
       final created = await _client
           .from(_walletsTable)
-          .insert({
-            'user_id': userId,
-            'balance': 0.0,
-            'currency': 'EGP',
-          })
+          .insert({'user_id': userId, 'balance': 0.0, 'currency': 'EGP'})
           .select()
           .single();
 
@@ -132,7 +130,8 @@ class SupabaseWalletDataSource {
           'p_method': method,
           'p_reference': userId,
           'p_idempotency_key':
-              idempotencyKey ?? 'topup_${DateTime.now().microsecondsSinceEpoch}',
+              idempotencyKey ??
+              'topup_${DateTime.now().microsecondsSinceEpoch}',
         },
       );
       final map = Map<String, dynamic>.from(res as Map);
@@ -225,7 +224,6 @@ class SupabaseWalletDataSource {
       rethrow;
     }
   }
-
 
   Future<WalletTransaction?> getTransactionById(String transactionId) async {
     try {

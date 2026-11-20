@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:delwaqty/core/errors/exceptions.dart';
+
 import '../../data/datasources/remote/supabase_provider_verification_data_source.dart';
 
 abstract class ProviderVerificationRepository {
@@ -9,10 +10,7 @@ abstract class ProviderVerificationRepository {
     String idCardUrl,
     String profilePhotoUrl,
   );
-  Future<void> reapplyVerification(
-    String idCardUrl,
-    String profilePhotoUrl,
-  );
+  Future<void> reapplyVerification(String idCardUrl, String profilePhotoUrl);
   Future<String> uploadDoc(String name, Uint8List bytes);
 }
 

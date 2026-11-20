@@ -39,23 +39,20 @@ class _AdminGraceManagementPageState
       final code = res['code'] as String?;
       if (code == 'OK') {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(l10n.graceLimitUpdated)),
-          );
+          ScaffoldMessenger.of(context)
+              .showSnackBar(SnackBar(content: Text(l10n.graceLimitUpdated)));
         }
         ref.invalidate(graceAccountProvider);
       } else {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Failed: $code')),
-          );
+          ScaffoldMessenger.of(context)
+              .showSnackBar(SnackBar(content: Text('Failed: $code')));
         }
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(appErrorText(context, e))),
-        );
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(appErrorText(context, e))));
       }
     } finally {
       if (mounted) setState(() => _busy = false);
@@ -69,7 +66,7 @@ class _AdminGraceManagementPageState
     final accountAsync = ref.watch(graceAccountProvider);
 
     return Scaffold(
-      appBar: AppBar(title:  Text(l10n.graceManagement)),
+      appBar: AppBar(title: Text(l10n.graceManagement)),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
@@ -79,9 +76,7 @@ class _AdminGraceManagementPageState
               children: [
                 Text(
                   l10n.lookupAccount,
-                  style: Theme.of(context)
-                      .textTheme
-                      .titleMedium
+                  style: Theme.of(context).textTheme.titleMedium
                       ?.copyWith(fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 10),
@@ -101,7 +96,7 @@ class _AdminGraceManagementPageState
                       onPressed: () =>
                           ref.read(graceTargetProvider.notifier).state =
                               _targetController.text.trim(),
-                      child:  Text(l10n.fetch),
+                      child: Text(l10n.fetch),
                     ),
                   ],
                 ),
@@ -135,9 +130,7 @@ class _AdminGraceManagementPageState
                   children: [
                     Text(
                       l10n.currentGrace,
-                      style: Theme.of(context)
-                          .textTheme
-                          .titleMedium
+                      style: Theme.of(context).textTheme.titleMedium
                           ?.copyWith(fontWeight: FontWeight.bold),
                     ),
                     const SizedBox(height: 8),
@@ -170,9 +163,7 @@ class _AdminGraceManagementPageState
                     const SizedBox(height: 8),
                     TextField(
                       controller: _reasonController,
-                      decoration: InputDecoration(
-                        labelText: l10n.reason,
-                      ),
+                      decoration: InputDecoration(labelText: l10n.reason),
                     ),
                     const SizedBox(height: 12),
                     SizedBox(
@@ -183,9 +174,11 @@ class _AdminGraceManagementPageState
                             ? const SizedBox(
                                 width: 16,
                                 height: 16,
-                                child: CircularProgressIndicator(strokeWidth: 2),
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                ),
                               )
-                            :  Text(l10n.updateGraceLimit),
+                            : Text(l10n.updateGraceLimit),
                       ),
                     ),
                   ],
@@ -200,11 +193,7 @@ class _AdminGraceManagementPageState
 }
 
 class _Stat extends StatelessWidget {
-  const _Stat({
-    required this.label,
-    required this.value,
-    this.color,
-  });
+  const _Stat({required this.label, required this.value, this.color});
   final String label;
   final String value;
   final Color? color;
@@ -218,8 +207,8 @@ class _Stat extends StatelessWidget {
           Text(
             label,
             style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                ),
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
           ),
           Text(
             value,

@@ -7,6 +7,7 @@ import 'package:delwaqty/l10n/app_localizations.dart';
 import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
 import 'package:delwaqty/shared/widgets/confirm_dialog.dart';
 import 'package:delwaqty/shared/widgets/premium_empty_state.dart';
+
 import 'dart:async';
 
 class AdminPendingDeletionsPage extends ConsumerStatefulWidget {
@@ -37,7 +38,8 @@ class _AdminPendingDeletionsPageState
     try {
       final client = Supabase.instance.client;
       final result = await client.rpc('get_pending_deletions');
-      final deletions = (result as List<dynamic>?)
+      final deletions =
+          (result as List<dynamic>?)
               ?.map((e) => Map<String, dynamic>.from(e as Map))
               .toList() ??
           [];
@@ -77,27 +79,27 @@ class _AdminPendingDeletionsPageState
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : _error != null
-              ? AdminErrorState(
-                  message: appErrorText(context, _error),
-                  onRetry: _loadPendingDeletions,
-                )
-              : _pendingDeletions.isEmpty
-                  ? PremiumEmptyState(
-                      icon: Icons.check_circle_outline_rounded,
-                      title: l10n.noPendingDeletions,
-                      message: l10n.allCaughtUp,
-                    )
-              : ListView.builder(
-                  padding: const EdgeInsets.all(16),
-                  itemCount: _pendingDeletions.length,
-                  itemBuilder: (context, index) {
-                    final deletion = _pendingDeletions[index];
-                    return AnimatedFadeIn(
-                      delay: Duration(milliseconds: index * 80),
-                      child: _buildDeletionCard(deletion, l10n, cs),
-                    );
-                  },
-                ),
+          ? AdminErrorState(
+              message: appErrorText(context, _error),
+              onRetry: _loadPendingDeletions,
+            )
+          : _pendingDeletions.isEmpty
+          ? PremiumEmptyState(
+              icon: Icons.check_circle_outline_rounded,
+              title: l10n.noPendingDeletions,
+              message: l10n.allCaughtUp,
+            )
+          : ListView.builder(
+              padding: const EdgeInsets.all(16),
+              itemCount: _pendingDeletions.length,
+              itemBuilder: (context, index) {
+                final deletion = _pendingDeletions[index];
+                return AnimatedFadeIn(
+                  delay: Duration(milliseconds: index * 80),
+                  child: _buildDeletionCard(deletion, l10n, cs),
+                );
+              },
+            ),
     );
   }
 
@@ -128,15 +130,13 @@ class _AdminPendingDeletionsPageState
                     children: [
                       Text(
                         memberEmail,
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          fontWeight: FontWeight.w600,
-                        ),
+                        style: Theme.of(context).textTheme.bodyMedium
+                            ?.copyWith(fontWeight: FontWeight.w600),
                       ),
                       Text(
                         '${l10n.requestedBy}: $requestedBy',
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: cs.onSurfaceVariant,
-                        ),
+                        style: Theme.of(context).textTheme.bodySmall
+                            ?.copyWith(color: cs.onSurfaceVariant),
                       ),
                     ],
                   ),
@@ -162,10 +162,8 @@ class _AdminPendingDeletionsPageState
               const SizedBox(height: 8),
               Text(
                 createdAt,
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: cs.onSurfaceVariant,
-                  fontSize: 11,
-                ),
+                style: Theme.of(context).textTheme.bodySmall
+                    ?.copyWith(color: cs.onSurfaceVariant, fontSize: 11),
               ),
             ],
             const SizedBox(height: 12),
@@ -224,7 +222,11 @@ class _AdminPendingDeletionsPageState
             const SizedBox(height: 10),
             Row(
               children: [
-                Icon(Icons.warning_amber_rounded, size: 18, color: Theme.of(ctx).colorScheme.error),
+                Icon(
+                  Icons.warning_amber_rounded,
+                  size: 18,
+                  color: Theme.of(ctx).colorScheme.error,
+                ),
                 const SizedBox(width: 6),
                 Flexible(
                   child: Text(
@@ -258,20 +260,19 @@ class _AdminPendingDeletionsPageState
 
     try {
       final client = Supabase.instance.client;
-      await client.rpc('approve_member_deletion', params: {
-        'p_deletion_id': deletionId,
-      });
+      await client.rpc(
+        'approve_member_deletion',
+        params: {'p_deletion_id': deletionId},
+      );
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.deletionApproved)),
-        );
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(l10n.deletionApproved)));
         unawaited(_loadPendingDeletions());
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.operationFailed)),
-        );
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(l10n.operationFailed)));
       }
     }
   }
@@ -294,20 +295,19 @@ class _AdminPendingDeletionsPageState
 
     try {
       final client = Supabase.instance.client;
-      await client.rpc('reject_member_deletion', params: {
-        'p_deletion_id': deletionId,
-      });
+      await client.rpc(
+        'reject_member_deletion',
+        params: {'p_deletion_id': deletionId},
+      );
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.deletionRejected)),
-        );
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(l10n.deletionRejected)));
         unawaited(_loadPendingDeletions());
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.operationFailed)),
-        );
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(l10n.operationFailed)));
       }
     }
   }

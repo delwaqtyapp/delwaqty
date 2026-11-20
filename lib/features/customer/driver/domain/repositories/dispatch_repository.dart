@@ -14,7 +14,12 @@ abstract interface class DispatchRepository {
     int seats,
   });
 
-  Future<void> setOnline(String driverId, bool online, {double? lat, double? lng});
+  Future<void> setOnline(
+    String driverId,
+    bool online, {
+    double? lat,
+    double? lng,
+  });
 
   Future<void> updateLocation(
     String driverId,
@@ -38,15 +43,28 @@ abstract interface class DispatchRepository {
 
   Future<void> startTrip(String rideId, String driverId, String otp);
 
-  Future<double> completeTrip(String rideId, String driverId, {double? finalDistanceKm});
+  Future<double> completeTrip(
+    String rideId,
+    String driverId, {
+    double? finalDistanceKm,
+  });
 
   Future<void> cancelAsDriver(String rideId, {String? reason});
 
-  Future<void> ratePassenger(String rideId, String driverId, int stars, {String? comment});
+  Future<void> ratePassenger(
+    String rideId,
+    String driverId,
+    int stars, {
+    String? comment,
+  });
 
   Future<DriverStats> getDashboardStats(String driverId);
 
   Future<List<DriverEarning>> getEarnings(String driverId, {int limit = 30});
 
-  Future<String> requestWithdrawal(String driverId, double amount, {String method});
+  Future<String> requestWithdrawal(
+    String driverId,
+    double amount, {
+    String method,
+  });
 }

@@ -48,40 +48,41 @@ class ProviderProfilesState {
   final List<ProviderBusinessProfile> profiles;
 }
 
-final providerProfilesProvider =
-    FutureProvider<ProviderProfilesState>((ref) async {
-      final client = ref.watch(supabaseClientProvider);
-      final uid = client.auth.currentUser?.id;
-      if (uid == null || uid.isEmpty) {
-        return const ProviderProfilesState();
-      }
-      try {
-        final raw = await client.rpc('get_my_provider_profiles');
-        if (raw is Map) {
-          final map = Map<String, dynamic>.from(raw);
-          final listRaw = map['profiles'];
-          final profiles = listRaw is List
-              ? listRaw
-                    .whereType<Map>()
-                    .map(
-                      (e) => ProviderBusinessProfile.fromJson(
-                        Map<String, dynamic>.from(e),
-                      ),
-                    )
-                    .toList()
-              : <ProviderBusinessProfile>[];
-          return ProviderProfilesState(
-            isOwner: map['is_owner'] == true,
-            activeCategory:
-                (map['active_category'] as String?)?.trim().isNotEmpty == true
-                ? (map['active_category'] as String).trim()
-                : 'restaurant',
-            profiles: profiles,
-          );
-        }
-      } catch (_) {}
-      return const ProviderProfilesState();
-    });
+final providerProfilesProvider = FutureProvider<ProviderProfilesState>((
+  ref,
+) async {
+  final client = ref.watch(supabaseClientProvider);
+  final uid = client.auth.currentUser?.id;
+  if (uid == null || uid.isEmpty) {
+    return const ProviderProfilesState();
+  }
+  try {
+    final raw = await client.rpc('get_my_provider_profiles');
+    if (raw is Map) {
+      final map = Map<String, dynamic>.from(raw);
+      final listRaw = map['profiles'];
+      final profiles = listRaw is List
+          ? listRaw
+                .whereType<Map>()
+                .map(
+                  (e) => ProviderBusinessProfile.fromJson(
+                    Map<String, dynamic>.from(e),
+                  ),
+                )
+                .toList()
+          : <ProviderBusinessProfile>[];
+      return ProviderProfilesState(
+        isOwner: map['is_owner'] == true,
+        activeCategory:
+            (map['active_category'] as String?)?.trim().isNotEmpty == true
+            ? (map['active_category'] as String).trim()
+            : 'restaurant',
+        profiles: profiles,
+      );
+    }
+  } catch (_) {}
+  return const ProviderProfilesState();
+});
 
 /// Resolves the Provider app account's active raw database classification.
 ///

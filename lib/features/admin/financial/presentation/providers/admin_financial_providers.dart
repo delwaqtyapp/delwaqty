@@ -7,47 +7,48 @@ import 'package:delwaqty/features/admin/financial/data/repositories/admin_financ
 import 'package:delwaqty/features/admin/financial/domain/entities/admin_financial_entities.dart';
 import 'package:delwaqty/features/admin/financial/domain/repositories/admin_financial_repository.dart';
 
-final adminFinancialDataSourceProvider =
-    Provider<AdminFinancialDataSource>((ref) {
-      return AdminFinancialDataSource(ref.watch(supabaseClientProvider));
-    });
+final adminFinancialDataSourceProvider = Provider<AdminFinancialDataSource>((
+  ref,
+) {
+  return AdminFinancialDataSource(ref.watch(supabaseClientProvider));
+});
 
-final adminFinancialRepositoryProvider =
-    Provider<AdminFinancialRepository>((ref) {
-      return AdminFinancialRepositoryImpl(
-        ref.watch(adminFinancialDataSourceProvider),
-      );
-    });
+final adminFinancialRepositoryProvider = Provider<AdminFinancialRepository>((
+  ref,
+) {
+  return AdminFinancialRepositoryImpl(
+    ref.watch(adminFinancialDataSourceProvider),
+  );
+});
 
 final adminTopupStatusFilterProvider = StateProvider<String?>((ref) => null);
 
-final adminTopupRequestsProvider =
-    FutureProvider<List<AdminTopupRequest>>((ref) {
-      final repo = ref.watch(adminFinancialRepositoryProvider);
-      return repo.listTopupRequests(ref.watch(adminTopupStatusFilterProvider));
-    });
+final adminTopupRequestsProvider = FutureProvider<List<AdminTopupRequest>>((
+  ref,
+) {
+  final repo = ref.watch(adminFinancialRepositoryProvider);
+  return repo.listTopupRequests(ref.watch(adminTopupStatusFilterProvider));
+});
 
-final adminCollectionSummaryProvider =
-    FutureProvider<CollectionSummary>((ref) {
-      return ref.watch(adminFinancialRepositoryProvider).collectionSummary();
-    });
+final adminCollectionSummaryProvider = FutureProvider<CollectionSummary>((ref) {
+  return ref.watch(adminFinancialRepositoryProvider).collectionSummary();
+});
 
-final adminCollectionsProvider =
-    FutureProvider<List<CollectionRecord>>((ref) {
-      return ref.watch(adminFinancialRepositoryProvider).listCollections();
-    });
+final adminCollectionsProvider = FutureProvider<List<CollectionRecord>>((ref) {
+  return ref.watch(adminFinancialRepositoryProvider).listCollections();
+});
 
-final adminSettlementsProvider =
-    FutureProvider<List<SettlementRecord>>((ref) {
-      return ref.watch(adminFinancialRepositoryProvider).listSettlements();
-    });
+final adminSettlementsProvider = FutureProvider<List<SettlementRecord>>((ref) {
+  return ref.watch(adminFinancialRepositoryProvider).listSettlements();
+});
 
-final adminReceivingAccountsProvider =
-    FutureProvider<List<ReceivingAccount>>((ref) {
-      return ref
-          .watch(adminFinancialRepositoryProvider)
-          .listPlatformReceivingAccounts();
-    });
+final adminReceivingAccountsProvider = FutureProvider<List<ReceivingAccount>>((
+  ref,
+) {
+  return ref
+      .watch(adminFinancialRepositoryProvider)
+      .listPlatformReceivingAccounts();
+});
 
 final adminReceivingWalletsProvider =
     FutureProvider<List<Map<String, dynamic>>>((ref) {
@@ -79,10 +80,14 @@ final graceAccountProvider = FutureProvider<GraceAccount?>((ref) {
   return ref.watch(adminFinancialRepositoryProvider).getGrace(target);
 });
 
-final platformCollectionAuditProvider = FutureProvider<Map<String, dynamic>>((ref) {
+final platformCollectionAuditProvider = FutureProvider<Map<String, dynamic>>((
+  ref,
+) {
   return ref.watch(adminFinancialRepositoryProvider).platformCollectionAudit();
 });
 
-final platformSettlementAuditProvider = FutureProvider<Map<String, dynamic>>((ref) {
+final platformSettlementAuditProvider = FutureProvider<Map<String, dynamic>>((
+  ref,
+) {
   return ref.watch(adminFinancialRepositoryProvider).platformSettlementAudit();
 });

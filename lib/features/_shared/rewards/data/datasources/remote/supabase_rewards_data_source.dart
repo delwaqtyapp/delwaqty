@@ -38,9 +38,7 @@ class SupabaseRewardsDataSource {
       periodKey: row['period_key'] as String,
       benefit: row['benefit'] as Map<String, dynamic>?,
       campaignId: row['campaign_id'] as String?,
-      status: RewardStatus.values.firstWhere(
-        (s) => s.name == row['status'],
-      ),
+      status: RewardStatus.values.firstWhere((s) => s.name == row['status']),
       notifiedAt: row['notified_at'] != null
           ? DateTime.tryParse(row['notified_at'] as String)
           : null,

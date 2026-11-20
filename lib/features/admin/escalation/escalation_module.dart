@@ -30,19 +30,18 @@ class EscalationModule extends FeatureModule {
         key: const ValueKey('AdminEscalationsPage-null'),
         transitionDuration: const Duration(milliseconds: 320),
         reverseTransitionDuration: const Duration(milliseconds: 220),
-        transitionsBuilder: (
-          context,
-          animation,
-          secondaryAnimation,
-          child,
-        ) {
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
           return SlideTransition(
-            position: Tween<Offset>(
-              begin: const Offset(0.04, 0),
-              end: Offset.zero,
-            ).animate(
-              CurvedAnimation(parent: animation, curve: Curves.easeOutCubic),
-            ),
+            position:
+                Tween<Offset>(
+                  begin: const Offset(0.04, 0),
+                  end: Offset.zero,
+                ).animate(
+                  CurvedAnimation(
+                    parent: animation,
+                    curve: Curves.easeOutCubic,
+                  ),
+                ),
             child: child,
           );
         },

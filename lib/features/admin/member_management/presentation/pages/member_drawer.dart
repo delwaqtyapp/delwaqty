@@ -18,11 +18,7 @@ import 'package:delwaqty/shared/widgets/animated_feedback.dart';
 import 'package:delwaqty/core/errors/app_error_text.dart';
 
 class MemberDrawer extends ConsumerWidget {
-  const MemberDrawer({
-    super.key,
-    required this.memberId,
-    this.onDismiss,
-  });
+  const MemberDrawer({super.key, required this.memberId, this.onDismiss});
 
   final String memberId;
   final VoidCallback? onDismiss;
@@ -53,38 +49,24 @@ class MemberDrawer extends ConsumerWidget {
         return CustomScrollView(
           slivers: [
             SliverToBoxAdapter(
-              child: _DrawerHeader(
-                profile: adapted,
-                onDismiss: onDismiss,
-              ),
+              child: _DrawerHeader(profile: adapted, onDismiss: onDismiss),
             ),
-            const SliverToBoxAdapter(
-              child: _OverviewSection(),
-            ),
-            SliverToBoxAdapter(
-              child: _IdentitySection(profile: adapted),
-            ),
+            const SliverToBoxAdapter(child: _OverviewSection()),
+            SliverToBoxAdapter(child: _IdentitySection(profile: adapted)),
             SliverToBoxAdapter(
               child: _VerificationSection(
                 memberId: memberId,
                 permissions: permissions,
               ),
             ),
-            SliverToBoxAdapter(
-              child: _LocationSection(profile: adapted),
-            ),
+            SliverToBoxAdapter(child: _LocationSection(profile: adapted)),
             SliverToBoxAdapter(
               child: _ActivityTimelineSection(memberId: memberId),
             ),
             SliverToBoxAdapter(
-              child: _OrdersSection(
-                profile: adapted,
-                memberId: memberId,
-              ),
+              child: _OrdersSection(profile: adapted, memberId: memberId),
             ),
-            SliverToBoxAdapter(
-              child: _ServicesSection(profile: adapted),
-            ),
+            SliverToBoxAdapter(child: _ServicesSection(profile: adapted)),
             SliverToBoxAdapter(
               child: _WalletFinancialsSection(memberId: memberId),
             ),
@@ -97,18 +79,14 @@ class MemberDrawer extends ConsumerWidget {
                 permissions: permissions,
               ),
             ),
-            SliverToBoxAdapter(
-              child: _SupportSection(memberId: memberId),
-            ),
+            SliverToBoxAdapter(child: _SupportSection(memberId: memberId)),
             SliverToBoxAdapter(
               child: _SanctionsSection(
                 memberId: memberId,
                 permissions: permissions,
               ),
             ),
-            SliverToBoxAdapter(
-              child: _DocumentsSection(profile: adapted),
-            ),
+            SliverToBoxAdapter(child: _DocumentsSection(profile: adapted)),
             SliverToBoxAdapter(
               child: _MemberAdminRoleAndPermissionsSection(
                 memberId: memberId,
@@ -123,9 +101,7 @@ class MemberDrawer extends ConsumerWidget {
                 onDismiss: onDismiss,
               ),
             ),
-            const SliverToBoxAdapter(
-              child: SizedBox(height: 32),
-            ),
+            const SliverToBoxAdapter(child: SizedBox(height: 32)),
           ],
         );
       },
@@ -134,10 +110,7 @@ class MemberDrawer extends ConsumerWidget {
 }
 
 class _DrawerHeader extends StatelessWidget {
-  const _DrawerHeader({
-    required this.profile,
-    this.onDismiss,
-  });
+  const _DrawerHeader({required this.profile, this.onDismiss});
 
   final Map<String, dynamic> profile;
   final VoidCallback? onDismiss;
@@ -179,9 +152,7 @@ class _DrawerHeader extends StatelessWidget {
       decoration: BoxDecoration(
         color: cs.surfaceContainerLow,
         border: Border(
-          bottom: BorderSide(
-            color: cs.outlineVariant.withValues(alpha: 0.3),
-          ),
+          bottom: BorderSide(color: cs.outlineVariant.withValues(alpha: 0.3)),
         ),
       ),
       child: Column(
@@ -192,8 +163,9 @@ class _DrawerHeader extends StatelessWidget {
               CircleAvatar(
                 radius: 28,
                 backgroundColor: statusColor.withValues(alpha: 0.15),
-                backgroundImage:
-                    avatarUrl != null ? NetworkImage(avatarUrl) : null,
+                backgroundImage: avatarUrl != null
+                    ? NetworkImage(avatarUrl)
+                    : null,
                 child: avatarUrl == null
                     ? Text(
                         safeInitial(name),
@@ -212,18 +184,16 @@ class _DrawerHeader extends StatelessWidget {
                   children: [
                     Text(
                       name,
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.w700,
-                          ),
+                      style: Theme.of(context).textTheme.titleMedium
+                          ?.copyWith(fontWeight: FontWeight.w700),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
                     const SizedBox(height: 2),
                     Text(
                       email,
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: cs.onSurfaceVariant,
-                          ),
+                      style: Theme.of(context).textTheme.bodySmall
+                          ?.copyWith(color: cs.onSurfaceVariant),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -243,23 +213,11 @@ class _DrawerHeader extends StatelessWidget {
             spacing: 6,
             runSpacing: 6,
             children: [
-              _Badge(
-                label: role,
-                color: cs.primary,
-              ),
-              _Badge(
-                label: accountStatus,
-                color: statusColor,
-              ),
-              _Badge(
-                label: verificationStatus,
-                color: verificationColor,
-              ),
+              _Badge(label: role, color: cs.primary),
+              _Badge(label: accountStatus, color: statusColor),
+              _Badge(label: verificationStatus, color: verificationColor),
               if (isOnline)
-                _Badge(
-                  label: l10n.onlineBadge,
-                  color: Colors.green,
-                ),
+                _Badge(label: l10n.onlineBadge, color: Colors.green),
             ],
           ),
           if (regionLabel != null && regionLabel.isNotEmpty) ...[
@@ -275,9 +233,8 @@ class _DrawerHeader extends StatelessWidget {
                 Expanded(
                   child: Text(
                     regionLabel,
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: cs.onSurfaceVariant,
-                        ),
+                    style: Theme.of(context).textTheme.bodySmall
+                        ?.copyWith(color: cs.onSurfaceVariant),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -297,9 +254,8 @@ class _DrawerHeader extends StatelessWidget {
                 const SizedBox(width: 4),
                 Text(
                   l10n.lastSeenLabel(lastSeenAt),
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: cs.onSurfaceVariant,
-                      ),
+                  style: Theme.of(context).textTheme.bodySmall
+                      ?.copyWith(color: cs.onSurfaceVariant),
                 ),
               ],
             ),
@@ -311,10 +267,7 @@ class _DrawerHeader extends StatelessWidget {
 }
 
 class _Badge extends StatelessWidget {
-  const _Badge({
-    required this.label,
-    required this.color,
-  });
+  const _Badge({required this.label, required this.color});
 
   final String label;
   final Color color;
@@ -340,11 +293,7 @@ class _Badge extends StatelessWidget {
 }
 
 class _InfoTile extends StatelessWidget {
-  const _InfoTile({
-    required this.label,
-    required this.value,
-    this.icon,
-  });
+  const _InfoTile({required this.label, required this.value, this.icon});
 
   final String label;
   final String value;
@@ -363,16 +312,14 @@ class _InfoTile extends StatelessWidget {
           ],
           Text(
             '$label: ',
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: cs.onSurfaceVariant,
-                ),
+            style: Theme.of(context).textTheme.bodySmall
+                ?.copyWith(color: cs.onSurfaceVariant),
           ),
           Expanded(
             child: Text(
               value,
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
+              style: Theme.of(context).textTheme.bodySmall
+                  ?.copyWith(fontWeight: FontWeight.w600),
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
             ),
@@ -422,16 +369,40 @@ class _IdentitySection extends StatelessWidget {
         leading: const Icon(Icons.badge_outlined, size: 20),
         title: Text(l10n.identitySection),
         children: [
-          _InfoTile(label: l10n.fullName, value: fullName, icon: Icons.person_outline),
-          _InfoTile(label: l10n.username, value: username, icon: Icons.alternate_email),
-          _InfoTile(label: l10n.email, value: email, icon: Icons.email_outlined),
-          _InfoTile(label: l10n.phone, value: phone, icon: Icons.phone_outlined),
-          _InfoTile(label: l10n.dateOfBirth, value: dob, icon: Icons.cake_outlined),
+          _InfoTile(
+            label: l10n.fullName,
+            value: fullName,
+            icon: Icons.person_outline,
+          ),
+          _InfoTile(
+            label: l10n.username,
+            value: username,
+            icon: Icons.alternate_email,
+          ),
+          _InfoTile(
+            label: l10n.email,
+            value: email,
+            icon: Icons.email_outlined,
+          ),
+          _InfoTile(
+            label: l10n.phone,
+            value: phone,
+            icon: Icons.phone_outlined,
+          ),
+          _InfoTile(
+            label: l10n.dateOfBirth,
+            value: dob,
+            icon: Icons.cake_outlined,
+          ),
           _InfoTile(label: l10n.role, value: role),
           _InfoTile(label: l10n.userTypeLabel, value: userType),
           _InfoTile(label: l10n.avatarUrl, value: avatarUrl),
           if (idCardUrl != null)
-            _InfoTile(label: l10n.idCard, value: idCardUrl, icon: Icons.credit_card),
+            _InfoTile(
+              label: l10n.idCard,
+              value: idCardUrl,
+              icon: Icons.credit_card,
+            ),
           if (tradeLicenseUrl != null)
             _InfoTile(
               label: l10n.tradeLicense,
@@ -476,9 +447,7 @@ class _VerificationSection extends ConsumerWidget {
         title: Text(l10n.verificationSection),
         children: [
           verificationAsync.when(
-            loading: () => const ShimmerLoading(
-              child: SizedBox(height: 60),
-            ),
+            loading: () => const ShimmerLoading(child: SizedBox(height: 60)),
             error: (e, _) => Text(
               l10n.failedToLoad,
               style: Theme.of(context).textTheme.bodySmall,
@@ -493,8 +462,7 @@ class _VerificationSection extends ConsumerWidget {
               final status = attempt['status'] as String? ?? 'pending';
               final attemptsCount =
                   (attempt['attempts_count'] as num?)?.toInt() ?? 0;
-              final rejectionReason =
-                  attempt['rejection_reason'] as String?;
+              final rejectionReason = attempt['rejection_reason'] as String?;
               final reviewedBy = attempt['reviewed_by'] as String?;
               final createdAt = attempt['created_at'] as String? ?? '-';
               return Column(
@@ -573,15 +541,11 @@ class _VerificationSection extends ConsumerWidget {
             hintText: approve
                 ? l10n.approvalNote
                 : l10n.rejectionReasonRequired,
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
           ),
           maxLines: 3,
         ),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(),
@@ -599,19 +563,21 @@ class _VerificationSection extends ConsumerWidget {
 
     final reason = reasonController.text.trim();
     if (!approve && reason.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.rejectionReasonRequired)),
-      );
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(l10n.rejectionReasonRequired)));
       return;
     }
 
     try {
       final client = ref.read(supabaseClientProvider);
-      await client.rpc('decide_user_verification', params: {
-        'p_user_id': memberId,
-        'p_decision': approve ? 'approve' : 'reject',
-        'p_reason': reason.isEmpty ? null : reason,
-      });
+      await client.rpc(
+        'decide_user_verification',
+        params: {
+          'p_user_id': memberId,
+          'p_decision': approve ? 'approve' : 'reject',
+          'p_reason': reason.isEmpty ? null : reason,
+        },
+      );
       if (!context.mounted) return;
       ref.invalidate(memberVerificationProvider(memberId));
       ref.invalidate(memberOpsProfileProvider(memberId));
@@ -623,9 +589,9 @@ class _VerificationSection extends ConsumerWidget {
       );
     } catch (e) {
       if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.verificationDecisionFailed)),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(l10n.verificationDecisionFailed)));
     }
   }
 }
@@ -658,18 +624,30 @@ class _LocationSection extends StatelessWidget {
         leading: const Icon(Icons.location_on_outlined, size: 20),
         title: Text(l10n.locationSection),
         children: [
-          _InfoTile(label: l10n.region, value: hierarchicalLabel, icon: Icons.map_outlined),
+          _InfoTile(
+            label: l10n.region,
+            value: hierarchicalLabel,
+            icon: Icons.map_outlined,
+          ),
           _InfoTile(label: l10n.governorate, value: governorate),
           _InfoTile(label: l10n.city, value: city),
           if (latitude != null && longitude != null)
             _InfoTile(
               label: l10n.coordinates,
-              value: '${latitude.toStringAsFixed(6)}, ${longitude.toStringAsFixed(6)}',
+              value:
+                  '${latitude.toStringAsFixed(6)}, ${longitude.toStringAsFixed(6)}',
               icon: Icons.my_location,
             ),
           if (lastLocationUpdate != null)
-            _InfoTile(label: l10n.lastLocationUpdate, value: lastLocationUpdate),
-          _InfoTile(label: l10n.lastSeen, value: lastSeenAt, icon: Icons.access_time),
+            _InfoTile(
+              label: l10n.lastLocationUpdate,
+              value: lastLocationUpdate,
+            ),
+          _InfoTile(
+            label: l10n.lastSeen,
+            value: lastSeenAt,
+            icon: Icons.access_time,
+          ),
         ],
       ),
     );
@@ -697,9 +675,7 @@ class _ActivityTimelineSection extends ConsumerWidget {
         title: Text(l10n.activityTimelineSection),
         children: [
           timelineAsync.when(
-            loading: () => const ShimmerLoading(
-              child: SizedBox(height: 120),
-            ),
+            loading: () => const ShimmerLoading(child: SizedBox(height: 120)),
             error: (e, _) => Text(
               l10n.failedToLoadTimeline,
               style: Theme.of(context).textTheme.bodySmall,
@@ -708,17 +684,15 @@ class _ActivityTimelineSection extends ConsumerWidget {
               if (events.isEmpty) {
                 return Text(
                   l10n.noEventsYet,
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: cs.onSurfaceVariant,
-                      ),
+                  style: Theme.of(context).textTheme.bodySmall
+                      ?.copyWith(color: cs.onSurfaceVariant),
                 );
               }
               return Column(
                 children: events.take(20).map((e) {
                   final type = e['event_type'] as String? ?? '?';
                   final createdAt = e['created_at'] as String? ?? '';
-                  final detail =
-                      e['detail'] as Map<String, dynamic>? ?? {};
+                  final detail = e['detail'] as Map<String, dynamic>? ?? {};
                   final description =
                       detail['description'] as String? ??
                       detail['reason'] as String? ??
@@ -775,27 +749,23 @@ class _TimelineEventTile extends StatelessWidget {
               children: [
                 Text(
                   type,
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
+                  style: Theme.of(context).textTheme.bodySmall
+                      ?.copyWith(fontWeight: FontWeight.w600),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
                 if (description.isNotEmpty)
                   Text(
                     description,
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: cs.onSurfaceVariant,
-                        ),
+                    style: Theme.of(context).textTheme.bodySmall
+                        ?.copyWith(color: cs.onSurfaceVariant),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
                 Text(
                   timestamp,
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: cs.onSurfaceVariant,
-                        fontSize: 10,
-                      ),
+                  style: Theme.of(context).textTheme.bodySmall
+                      ?.copyWith(color: cs.onSurfaceVariant, fontSize: 10),
                 ),
               ],
             ),
@@ -840,10 +810,7 @@ class _TimelineEventTile extends StatelessWidget {
 }
 
 class _OrdersSection extends ConsumerWidget {
-  const _OrdersSection({
-    required this.profile,
-    required this.memberId,
-  });
+  const _OrdersSection({required this.profile, required this.memberId});
 
   final Map<String, dynamic> profile;
   final String memberId;
@@ -865,76 +832,78 @@ class _OrdersSection extends ConsumerWidget {
         leading: const Icon(Icons.receipt_long_rounded, size: 20),
         title: Text(_sectionTitle(l10n, role)),
         children: [
-          ref.watch(memberOrdersProvider(memberId)).when(
-            loading: () => const ShimmerLoading(
-              child: SizedBox(height: 100),
-            ),
-            error: (e, _) => Text(
-              l10n.failedToLoad,
-              style: Theme.of(context).textTheme.bodySmall,
-            ),
-            data: (orders) {
-              if (orders.isEmpty) {
-                return Text(
-                  l10n.noOrdersFound,
+          ref
+              .watch(memberOrdersProvider(memberId))
+              .when(
+                loading: () =>
+                    const ShimmerLoading(child: SizedBox(height: 100)),
+                error: (e, _) => Text(
+                  l10n.failedToLoad,
                   style: Theme.of(context).textTheme.bodySmall,
-                );
-              }
-              final completed = orders
-                  .where((o) => o['status'] == 'completed')
-                  .length;
-              final cancelled = orders
-                  .where((o) => o['status'] == 'cancelled')
-                  .length;
-              final pending = orders
-                  .where((o) => o['status'] == 'pending')
-                  .length;
-              final totalSpending = orders.fold<double>(
-                0,
-                (sum, o) => sum + ((o['total_amount'] as num?)?.toDouble() ?? 0),
-              );
-              return Column(
-                children: [
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
+                ),
+                data: (orders) {
+                  if (orders.isEmpty) {
+                    return Text(
+                      l10n.noOrdersFound,
+                      style: Theme.of(context).textTheme.bodySmall,
+                    );
+                  }
+                  final completed = orders
+                      .where((o) => o['status'] == 'completed')
+                      .length;
+                  final cancelled = orders
+                      .where((o) => o['status'] == 'cancelled')
+                      .length;
+                  final pending = orders
+                      .where((o) => o['status'] == 'pending')
+                      .length;
+                  final totalSpending = orders.fold<double>(
+                    0,
+                    (sum, o) =>
+                        sum + ((o['total_amount'] as num?)?.toDouble() ?? 0),
+                  );
+                  return Column(
                     children: [
-                      StatCard(
-                        title: l10n.total,
-                        value: ordersCount.toString(),
-                        icon: Icons.receipt_long_rounded,
-                        color: Theme.of(context).colorScheme.primary,
-                      ),
-                      StatCard(
-                        title: l10n.completed,
-                        value: completed.toString(),
-                        icon: Icons.check_circle_outline,
-                        color: Colors.green,
-                      ),
-                      StatCard(
-                        title: l10n.cancelled,
-                        value: cancelled.toString(),
-                        icon: Icons.cancel_outlined,
-                        color: Colors.red,
-                      ),
-                      StatCard(
-                        title: l10n.pending,
-                        value: pending.toString(),
-                        icon: Icons.pending_outlined,
-                        color: Colors.orange,
-                      ),
-                      StatCard(
-                        title: l10n.totalSpending,
-                        value: totalSpending.toStringAsFixed(2),
-                        icon: Icons.payments_outlined,
-                        color: Colors.teal,
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
+                        children: [
+                          StatCard(
+                            title: l10n.total,
+                            value: ordersCount.toString(),
+                            icon: Icons.receipt_long_rounded,
+                            color: Theme.of(context).colorScheme.primary,
+                          ),
+                          StatCard(
+                            title: l10n.completed,
+                            value: completed.toString(),
+                            icon: Icons.check_circle_outline,
+                            color: Colors.green,
+                          ),
+                          StatCard(
+                            title: l10n.cancelled,
+                            value: cancelled.toString(),
+                            icon: Icons.cancel_outlined,
+                            color: Colors.red,
+                          ),
+                          StatCard(
+                            title: l10n.pending,
+                            value: pending.toString(),
+                            icon: Icons.pending_outlined,
+                            color: Colors.orange,
+                          ),
+                          StatCard(
+                            title: l10n.totalSpending,
+                            value: totalSpending.toStringAsFixed(2),
+                            icon: Icons.payments_outlined,
+                            color: Colors.teal,
+                          ),
+                        ],
                       ),
                     ],
-                  ),
-                ],
-              );
-            },
-          ),
+                  );
+                },
+              ),
         ],
       ),
     );
@@ -1073,9 +1042,7 @@ class _WalletFinancialsSection extends ConsumerWidget {
         title: Text(l10n.walletFinancialsSection),
         children: [
           financialAsync.when(
-            loading: () => const ShimmerLoading(
-              child: SizedBox(height: 120),
-            ),
+            loading: () => const ShimmerLoading(child: SizedBox(height: 120)),
             error: (e, _) => Text(
               l10n.failedToLoadFinancials,
               style: Theme.of(context).textTheme.bodySmall,
@@ -1122,8 +1089,7 @@ class _WalletFinancialsSection extends ConsumerWidget {
               final totalWithdrawn = debited;
               final totalRefunds = ledger
                   .where(
-                    (e) =>
-                        (e['reference_type'] as String? ?? '') == 'refund',
+                    (e) => (e['reference_type'] as String? ?? '') == 'refund',
                   )
                   .fold<double>(
                     0,
@@ -1190,9 +1156,8 @@ class _WalletFinancialsSection extends ConsumerWidget {
                     const SizedBox(height: 12),
                     Text(
                       l10n.recentTransactions,
-                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                            fontWeight: FontWeight.w700,
-                          ),
+                      style: Theme.of(context).textTheme.titleSmall
+                          ?.copyWith(fontWeight: FontWeight.w700),
                     ),
                     const SizedBox(height: 8),
                     ...transactions.take(10).map((t) {
@@ -1271,9 +1236,7 @@ class _EarningsCommissionsSection extends ConsumerWidget {
         title: Text(l10n.earningsCommissionsSection),
         children: [
           financialAsync.when(
-            loading: () => const ShimmerLoading(
-              child: SizedBox(height: 80),
-            ),
+            loading: () => const ShimmerLoading(child: SizedBox(height: 80)),
             error: (e, _) => Text(
               l10n.failedToLoad,
               style: Theme.of(context).textTheme.bodySmall,
@@ -1292,9 +1255,9 @@ class _EarningsCommissionsSection extends ConsumerWidget {
               final commissions =
                   (data['commissions'] as List<dynamic>?) ?? const [];
               double sumOf(String field) => commissions.fold<double>(
-                    0,
-                    (sum, e) => sum + ((e[field] as num?)?.toDouble() ?? 0),
-                  );
+                0,
+                (sum, e) => sum + ((e[field] as num?)?.toDouble() ?? 0),
+              );
 
               final grossEarnings = sumOf('gross_amount');
               final commissionAmount = sumOf('commission_amount');
@@ -1303,22 +1266,25 @@ class _EarningsCommissionsSection extends ConsumerWidget {
                   .where((e) => (e['status'] as String?) == 'paid')
                   .fold<double>(
                     0,
-                    (sum, e) => sum + ((e['net_amount'] as num?)?.toDouble() ?? 0),
+                    (sum, e) =>
+                        sum + ((e['net_amount'] as num?)?.toDouble() ?? 0),
                   );
               final pendingEarnings = commissions
                   .where((e) => (e['status'] as String?) == 'pending')
                   .fold<double>(
                     0,
-                    (sum, e) => sum + ((e['net_amount'] as num?)?.toDouble() ?? 0),
+                    (sum, e) =>
+                        sum + ((e['net_amount'] as num?)?.toDouble() ?? 0),
                   );
               final avgRate = commissions.isEmpty
                   ? 0.0
                   : commissions.fold<double>(
-                        0,
-                        (sum, e) =>
-                            sum + ((e['commission_rate'] as num?)?.toDouble() ?? 0),
-                      ) /
-                      commissions.length;
+                          0,
+                          (sum, e) =>
+                              sum +
+                              ((e['commission_rate'] as num?)?.toDouble() ?? 0),
+                        ) /
+                        commissions.length;
               final commissionRate = avgRate;
               return Wrap(
                 spacing: 8,
@@ -1371,10 +1337,7 @@ class _EarningsCommissionsSection extends ConsumerWidget {
 }
 
 class _ComplaintsSection extends ConsumerWidget {
-  const _ComplaintsSection({
-    required this.memberId,
-    required this.permissions,
-  });
+  const _ComplaintsSection({required this.memberId, required this.permissions});
 
   final String memberId;
   final Map<String, dynamic> permissions;
@@ -1394,9 +1357,7 @@ class _ComplaintsSection extends ConsumerWidget {
         title: Text(l10n.complaintsSection),
         children: [
           complaintsAsync.when(
-            loading: () => const ShimmerLoading(
-              child: SizedBox(height: 100),
-            ),
+            loading: () => const ShimmerLoading(child: SizedBox(height: 100)),
             error: (e, _) => Text(
               l10n.failedToLoad,
               style: Theme.of(context).textTheme.bodySmall,
@@ -1462,9 +1423,8 @@ class _ComplaintsSection extends ConsumerWidget {
                   const SizedBox(height: 12),
                   Text(
                     l10n.latestComplaints,
-                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                          fontWeight: FontWeight.w700,
-                        ),
+                    style: Theme.of(context).textTheme.titleSmall
+                        ?.copyWith(fontWeight: FontWeight.w700),
                   ),
                   const SizedBox(height: 8),
                   ...complaints.take(5).map((c) {
@@ -1472,8 +1432,7 @@ class _ComplaintsSection extends ConsumerWidget {
                     final priority = c['priority'] as String? ?? '-';
                     final status = c['status'] as String? ?? '-';
                     final createdAt = c['created_at'] as String? ?? '';
-                    final assignedAdmin =
-                        c['assigned_admin_name'] as String?;
+                    final assignedAdmin = c['assigned_admin_name'] as String?;
                     return ListTile(
                       dense: true,
                       contentPadding: EdgeInsets.zero,
@@ -1542,9 +1501,7 @@ class _SupportSection extends ConsumerWidget {
         title: Text(l10n.supportSection),
         children: [
           roomsAsync.when(
-            loading: () => const ShimmerLoading(
-              child: SizedBox(height: 80),
-            ),
+            loading: () => const ShimmerLoading(child: SizedBox(height: 80)),
             error: (e, _) => Text(
               l10n.failedToLoad,
               style: Theme.of(context).textTheme.bodySmall,
@@ -1600,11 +1557,11 @@ class _SupportSection extends ConsumerWidget {
                   ),
                   const SizedBox(height: 8),
                   ...rooms.take(5).map((r) {
-                    final roomTitle = r['title'] as String? ?? l10n.supportSection;
+                    final roomTitle =
+                        r['title'] as String? ?? l10n.supportSection;
                     final priority = r['priority'] as String? ?? 'normal';
                     final isEmergency = r['is_emergency'] as bool? ?? false;
-                    final assignedAdmin =
-                        r['assigned_admin_name'] as String?;
+                    final assignedAdmin = r['assigned_admin_name'] as String?;
                     final createdAt = r['created_at'] as String? ?? '';
                     return ListTile(
                       dense: true,
@@ -1639,10 +1596,7 @@ class _SupportSection extends ConsumerWidget {
 }
 
 class _SanctionsSection extends ConsumerStatefulWidget {
-  const _SanctionsSection({
-    required this.memberId,
-    required this.permissions,
-  });
+  const _SanctionsSection({required this.memberId, required this.permissions});
 
   final String memberId;
   final Map<String, dynamic> permissions;
@@ -1673,9 +1627,7 @@ class _SanctionsSectionState extends ConsumerState<_SanctionsSection> {
         title: Text(l10n.sanctionsSection),
         children: [
           sanctionsAsync.when(
-            loading: () => const ShimmerLoading(
-              child: SizedBox(height: 100),
-            ),
+            loading: () => const ShimmerLoading(child: SizedBox(height: 100)),
             error: (e, _) => Text(
               l10n.failedToLoad,
               style: Theme.of(context).textTheme.bodySmall,
@@ -1696,37 +1648,39 @@ class _SanctionsSectionState extends ConsumerState<_SanctionsSection> {
                   if (active.isNotEmpty) ...[
                     Text(
                       l10n.activeSanctions,
-                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                            fontWeight: FontWeight.w700,
-                          ),
+                      style: Theme.of(context).textTheme.titleSmall
+                          ?.copyWith(fontWeight: FontWeight.w700),
                     ),
                     const SizedBox(height: 8),
-                    ...active.map((s) => _SanctionTile(
-                          sanction: s,
-                          canRevoke: canRevokeSanction,
-                          onRevoked: () {
-                            ref.invalidate(
-                              memberSanctionsProvider(widget.memberId),
-                            );
-                          },
-                        )),
+                    ...active.map(
+                      (s) => _SanctionTile(
+                        sanction: s,
+                        canRevoke: canRevokeSanction,
+                        onRevoked: () {
+                          ref.invalidate(
+                            memberSanctionsProvider(widget.memberId),
+                          );
+                        },
+                      ),
+                    ),
                   ],
                   if (sanctions.length > active.length) ...[
                     const SizedBox(height: 12),
                     Text(
                       l10n.history,
-                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                            fontWeight: FontWeight.w700,
-                          ),
+                      style: Theme.of(context).textTheme.titleSmall
+                          ?.copyWith(fontWeight: FontWeight.w700),
                     ),
                     const SizedBox(height: 8),
                     ...sanctions
                         .where((s) => s['status'] != 'active')
-                        .map((s) => _SanctionTile(
-                              sanction: s,
-                              canRevoke: false,
-                              onRevoked: () {},
-                            )),
+                        .map(
+                          (s) => _SanctionTile(
+                            sanction: s,
+                            canRevoke: false,
+                            onRevoked: () {},
+                          ),
+                        ),
                   ],
                   if (canIssueSanction) ...[
                     const SizedBox(height: 12),
@@ -1772,14 +1726,8 @@ class _SanctionsSectionState extends ConsumerState<_SanctionsSection> {
                   ),
                 ),
                 items: [
-                  DropdownMenuItem(
-                    value: 'warning',
-                    child: Text(l10n.warning),
-                  ),
-                  DropdownMenuItem(
-                    value: 'fine',
-                    child: Text(l10n.fine),
-                  ),
+                  DropdownMenuItem(value: 'warning', child: Text(l10n.warning)),
+                  DropdownMenuItem(value: 'fine', child: Text(l10n.fine)),
                   DropdownMenuItem(
                     value: 'suspension',
                     child: Text(l10n.suspension),
@@ -1836,24 +1784,23 @@ class _SanctionsSectionState extends ConsumerState<_SanctionsSection> {
     setState(() => _isProcessing = true);
     try {
       final client = ref.read(supabaseClientProvider);
-      await client.rpc('issue_sanction', params: {
-        'p_member_id': widget.memberId,
-        'p_sanction_type': type,
-        'p_reason': reason,
-      });
+      await client.rpc(
+        'issue_sanction',
+        params: {
+          'p_member_id': widget.memberId,
+          'p_sanction_type': type,
+          'p_reason': reason,
+        },
+      );
       if (mounted) {
         ref.invalidate(memberSanctionsProvider(widget.memberId));
         ref.invalidate(memberOpsProfileProvider(widget.memberId));
-        showAnimatedSuccessToast(
-          context,
-          message: l10n.sanctionIssued,
-        );
+        showAnimatedSuccessToast(context, message: l10n.sanctionIssued);
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(appErrorText(context, e))),
-        );
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(appErrorText(context, e))));
       }
     } finally {
       if (mounted) setState(() => _isProcessing = false);
@@ -1907,9 +1854,8 @@ class _SanctionTileState extends ConsumerState<_SanctionTile> {
               children: [
                 Text(
                   '$type — $status',
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
+                  style: Theme.of(context).textTheme.bodySmall
+                      ?.copyWith(fontWeight: FontWeight.w600),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -1917,17 +1863,17 @@ class _SanctionTileState extends ConsumerState<_SanctionTile> {
                   Text(
                     reason,
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
-                        ),
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
                 Text(
                   '$issuedAt${issuedBy != null ? ' Â· ${l10n.issuedBy(issuedBy)}' : ''}${expiry != null ? ' Â· ${l10n.expiresIn(expiry)}' : ''}',
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        fontSize: 10,
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      ),
+                    fontSize: 10,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
                 ),
               ],
             ),
@@ -1960,9 +1906,7 @@ class _SanctionTileState extends ConsumerState<_SanctionTile> {
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(
-              l10n.revokeQuestion('${widget.sanction['sanction_type']}'),
-            ),
+            Text(l10n.revokeQuestion('${widget.sanction['sanction_type']}')),
             const SizedBox(height: 12),
             TextField(
               controller: reasonController,
@@ -1977,9 +1921,7 @@ class _SanctionTileState extends ConsumerState<_SanctionTile> {
             ),
           ],
         ),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(false),
@@ -2000,26 +1942,23 @@ class _SanctionTileState extends ConsumerState<_SanctionTile> {
       setState(() => _isRevoking = true);
       try {
         final client = ref.read(supabaseClientProvider);
-        await client.rpc('revoke_sanction', params: {
-          'p_sanction_id': widget.sanction['id'],
-          'p_reason': reasonController.text.isEmpty
-              ? 'Revoked by admin'
-              : reasonController.text,
-        });
+        await client.rpc(
+          'revoke_sanction',
+          params: {
+            'p_sanction_id': widget.sanction['id'],
+            'p_reason': reasonController.text.isEmpty
+                ? 'Revoked by admin'
+                : reasonController.text,
+          },
+        );
         if (mounted) {
           widget.onRevoked();
-          showAnimatedSuccessToast(
-            context,
-            message: l10n.sanctionRevoked,
-          );
+          showAnimatedSuccessToast(context, message: l10n.sanctionRevoked);
         }
       } catch (e) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(appErrorText(context, e)),
-            ),
-          );
+          ScaffoldMessenger.of(context)
+              .showSnackBar(SnackBar(content: Text(appErrorText(context, e))));
         }
       } finally {
         if (mounted) setState(() => _isRevoking = false);
@@ -2094,14 +2033,8 @@ class _DocumentsSection extends StatelessWidget {
             dense: true,
             contentPadding: EdgeInsets.zero,
             leading: const Icon(Icons.description_outlined, size: 16),
-            title: Text(
-              type,
-              style: const TextStyle(fontSize: 13),
-            ),
-            subtitle: Text(
-              status,
-              style: const TextStyle(fontSize: 11),
-            ),
+            title: Text(type, style: const TextStyle(fontSize: 13)),
+            subtitle: Text(status, style: const TextStyle(fontSize: 11)),
             trailing: IconButton(
               tooltip: l10n.openDetails,
               icon: const Icon(Icons.open_in_new_rounded, size: 16),
@@ -2141,31 +2074,35 @@ class _AdminActionsSection extends ConsumerStatefulWidget {
 }
 
 class _AdminActionsSectionState extends ConsumerState<_AdminActionsSection> {
-
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final isOwner = ref.watch(adminIsOwnerProvider).value ?? false;
-    final canEditProfile = isOwner ||
-        (widget.permissions['can_edit_profile'] as bool? ?? false);
-    final canDecideVerification = isOwner ||
+    final canEditProfile =
+        isOwner || (widget.permissions['can_edit_profile'] as bool? ?? false);
+    final canDecideVerification =
+        isOwner ||
         (widget.permissions['can_decide_verification'] as bool? ?? false);
-    final canIssueSanction = isOwner ||
-        (widget.permissions['can_issue_sanction'] as bool? ?? false);
-    final canRevokeSanction = isOwner ||
+    final canIssueSanction =
+        isOwner || (widget.permissions['can_issue_sanction'] as bool? ?? false);
+    final canRevokeSanction =
+        isOwner ||
         (widget.permissions['can_revoke_sanction'] as bool? ?? false);
-    final canRestrictAccount = isOwner ||
+    final canRestrictAccount =
+        isOwner ||
         (widget.permissions['can_restrict_account'] as bool? ?? false);
-    final canSuspendAccount = isOwner ||
+    final canSuspendAccount =
+        isOwner ||
         (widget.permissions['can_suspend_account'] as bool? ?? false);
-    final canDeleteAccount = isOwner ||
-        (widget.permissions['can_delete_account'] as bool? ?? false);
+    final canDeleteAccount =
+        isOwner || (widget.permissions['can_delete_account'] as bool? ?? false);
     final cs = Theme.of(context).colorScheme;
 
     final basic = widget.profile['basic'] as Map<String, dynamic>? ?? {};
     final accountStatus = basic['account_status'] as String? ?? 'active';
 
-    final hasAnyAction = canEditProfile ||
+    final hasAnyAction =
+        canEditProfile ||
         canDecideVerification ||
         canIssueSanction ||
         canRevokeSanction ||
@@ -2191,7 +2128,10 @@ class _AdminActionsSectionState extends ConsumerState<_AdminActionsSection> {
               dense: true,
               contentPadding: EdgeInsets.zero,
               leading: const Icon(Icons.edit_outlined, size: 18),
-              title: Text(l10n.editProfile, style: const TextStyle(fontSize: 13)),
+              title: Text(
+                l10n.editProfile,
+                style: const TextStyle(fontSize: 13),
+              ),
               onTap: () => _editProfile(),
             ),
           if (canDecideVerification)
@@ -2231,7 +2171,11 @@ class _AdminActionsSectionState extends ConsumerState<_AdminActionsSection> {
             ListTile(
               dense: true,
               contentPadding: EdgeInsets.zero,
-              leading: const Icon(Icons.block_outlined, size: 18, color: Colors.orange),
+              leading: const Icon(
+                Icons.block_outlined,
+                size: 18,
+                color: Colors.orange,
+              ),
               title: Text(
                 l10n.restrictAccount,
                 style: const TextStyle(fontSize: 13, color: Colors.orange),
@@ -2247,7 +2191,11 @@ class _AdminActionsSectionState extends ConsumerState<_AdminActionsSection> {
             ListTile(
               dense: true,
               contentPadding: EdgeInsets.zero,
-              leading: const Icon(Icons.pause_circle_outline, size: 18, color: Colors.red),
+              leading: const Icon(
+                Icons.pause_circle_outline,
+                size: 18,
+                color: Colors.red,
+              ),
               title: Text(
                 l10n.suspendAccount,
                 style: const TextStyle(fontSize: 13, color: Colors.red),
@@ -2262,7 +2210,11 @@ class _AdminActionsSectionState extends ConsumerState<_AdminActionsSection> {
             ListTile(
               dense: true,
               contentPadding: EdgeInsets.zero,
-              leading: const Icon(Icons.restore_rounded, size: 18, color: Colors.green),
+              leading: const Icon(
+                Icons.restore_rounded,
+                size: 18,
+                color: Colors.green,
+              ),
               title: Text(
                 l10n.restoreAccount,
                 style: const TextStyle(fontSize: 13, color: Colors.green),
@@ -2277,7 +2229,11 @@ class _AdminActionsSectionState extends ConsumerState<_AdminActionsSection> {
             ListTile(
               dense: true,
               contentPadding: EdgeInsets.zero,
-              leading: const Icon(Icons.restore_rounded, size: 18, color: Colors.green),
+              leading: const Icon(
+                Icons.restore_rounded,
+                size: 18,
+                color: Colors.green,
+              ),
               title: Text(
                 l10n.restoreAccount,
                 style: const TextStyle(fontSize: 13, color: Colors.green),
@@ -2292,7 +2248,11 @@ class _AdminActionsSectionState extends ConsumerState<_AdminActionsSection> {
             ListTile(
               dense: true,
               contentPadding: EdgeInsets.zero,
-              leading: Icon(Icons.delete_forever_outlined, size: 18, color: cs.error),
+              leading: Icon(
+                Icons.delete_forever_outlined,
+                size: 18,
+                color: cs.error,
+              ),
               title: Text(
                 l10n.deleteAccount,
                 style: TextStyle(fontSize: 13, color: cs.error),
@@ -2366,23 +2326,21 @@ class _AdminActionsSectionState extends ConsumerState<_AdminActionsSection> {
     try {
       final client = ref.read(supabaseClientProvider);
       if (actionKey == 'restore_account') {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              l10n.restorationUnsupported,
-            ),
-          ),
-        );
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(l10n.restorationUnsupported)));
         return;
       }
       final sanctionType = actionKey == 'suspend_account'
           ? 'suspension'
           : 'warning';
-      await client.rpc('issue_sanction', params: {
-        'p_member_id': widget.memberId,
-        'p_sanction_type': sanctionType,
-        'p_reason': reason.trim(),
-      });
+      await client.rpc(
+        'issue_sanction',
+        params: {
+          'p_member_id': widget.memberId,
+          'p_sanction_type': sanctionType,
+          'p_reason': reason.trim(),
+        },
+      );
       if (mounted) {
         ref.invalidate(memberOpsProfileProvider(widget.memberId));
         showAnimatedSuccessToast(
@@ -2392,9 +2350,8 @@ class _AdminActionsSectionState extends ConsumerState<_AdminActionsSection> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(appErrorText(context, e))),
-        );
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(appErrorText(context, e))));
       }
     }
   }
@@ -2461,23 +2418,22 @@ class _AdminActionsSectionState extends ConsumerState<_AdminActionsSection> {
 
     try {
       final client = ref.read(supabaseClientProvider);
-      await client.rpc('admin_update_member_profile', params: {
-        'p_member_id': widget.memberId,
-        'p_full_name': nameController.text.trim(),
-        'p_phone': phoneController.text.trim(),
-      });
+      await client.rpc(
+        'admin_update_member_profile',
+        params: {
+          'p_member_id': widget.memberId,
+          'p_full_name': nameController.text.trim(),
+          'p_phone': phoneController.text.trim(),
+        },
+      );
       if (mounted) {
         ref.invalidate(memberOpsProfileProvider(widget.memberId));
-        showAnimatedSuccessToast(
-          context,
-          message: l10n.profileUpdated,
-        );
+        showAnimatedSuccessToast(context, message: l10n.profileUpdated);
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(appErrorText(context, e))),
-        );
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(appErrorText(context, e))));
       }
     }
   }
@@ -2555,19 +2511,21 @@ class _AdminActionsSectionState extends ConsumerState<_AdminActionsSection> {
 
     if (result == null || !mounted) return;
     if (result.decision == 'reject' && result.reason.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.rejectionReasonRequired)),
-      );
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(l10n.rejectionReasonRequired)));
       return;
     }
 
     try {
       final client = ref.read(supabaseClientProvider);
-      await client.rpc('decide_user_verification', params: {
-        'p_user_id': widget.memberId,
-        'p_decision': result.decision,
-        'p_reason': result.reason.isEmpty ? null : result.reason,
-      });
+      await client.rpc(
+        'decide_user_verification',
+        params: {
+          'p_user_id': widget.memberId,
+          'p_decision': result.decision,
+          'p_reason': result.reason.isEmpty ? null : result.reason,
+        },
+      );
       if (mounted) {
         ref.invalidate(memberOpsProfileProvider(widget.memberId));
         showAnimatedSuccessToast(
@@ -2673,32 +2631,30 @@ class _AdminActionsSectionState extends ConsumerState<_AdminActionsSection> {
 
     final reason = reasonController.text.trim();
     if (reason.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.reasonRequired)),
-      );
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(l10n.reasonRequired)));
       return;
     }
 
     try {
       final client = ref.read(supabaseClientProvider);
-      await client.rpc('issue_sanction', params: {
-        'p_member_id': widget.memberId,
-        'p_sanction_type': typeController.value,
-        'p_reason': reason,
-        'p_amount': double.tryParse(amountController.text.trim()) ?? 0,
-      });
+      await client.rpc(
+        'issue_sanction',
+        params: {
+          'p_member_id': widget.memberId,
+          'p_sanction_type': typeController.value,
+          'p_reason': reason,
+          'p_amount': double.tryParse(amountController.text.trim()) ?? 0,
+        },
+      );
       if (mounted) {
         ref.invalidate(memberOpsProfileProvider(widget.memberId));
-        showAnimatedSuccessToast(
-          context,
-          message: l10n.sanctionIssued,
-        );
+        showAnimatedSuccessToast(context, message: l10n.sanctionIssued);
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(appErrorText(context, e))),
-        );
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(appErrorText(context, e))));
       }
     }
   }
@@ -2706,16 +2662,16 @@ class _AdminActionsSectionState extends ConsumerState<_AdminActionsSection> {
   /// Revoke Sanction: pick the first active sanction via revoke_sanction (035).
   Future<void> _revokeSanction() async {
     final l10n = AppLocalizations.of(context);
-    final activeSanctions = (widget.profile['active_sanctions'] as List?)
+    final activeSanctions =
+        (widget.profile['active_sanctions'] as List?)
             ?.whereType<Map>()
             .map((e) => Map<String, dynamic>.from(e))
             .toList() ??
         const [];
 
     if (activeSanctions.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.noActiveSanctions)),
-      );
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(l10n.noActiveSanctions)));
       return;
     }
 
@@ -2767,22 +2723,18 @@ class _AdminActionsSectionState extends ConsumerState<_AdminActionsSection> {
 
     try {
       final client = ref.read(supabaseClientProvider);
-      await client.rpc('revoke_sanction', params: {
-        'p_sanction_id': sanction['id'],
-        'p_reason': reason,
-      });
+      await client.rpc(
+        'revoke_sanction',
+        params: {'p_sanction_id': sanction['id'], 'p_reason': reason},
+      );
       if (mounted) {
         ref.invalidate(memberOpsProfileProvider(widget.memberId));
-        showAnimatedSuccessToast(
-          context,
-          message: l10n.sanctionRevoked,
-        );
+        showAnimatedSuccessToast(context, message: l10n.sanctionRevoked);
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(appErrorText(context, e))),
-        );
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(appErrorText(context, e))));
       }
     }
   }
@@ -2810,10 +2762,13 @@ class _AdminActionsSectionState extends ConsumerState<_AdminActionsSection> {
 
       try {
         final client = ref.read(supabaseClientProvider);
-        await client.rpc('owner_delete_member', params: {
-          'p_member_id': widget.memberId,
-          'p_reason': 'Deleted by owner from Admin Console',
-        });
+        await client.rpc(
+          'owner_delete_member',
+          params: {
+            'p_member_id': widget.memberId,
+            'p_reason': 'Deleted by owner from Admin Console',
+          },
+        );
         if (!mounted) return;
         ref.invalidate(memberOpsProvider);
         ref.invalidate(memberOpsCountProvider);
@@ -2896,11 +2851,14 @@ class _AdminActionsSectionState extends ConsumerState<_AdminActionsSection> {
 
     try {
       final client = ref.read(supabaseClientProvider);
-      await client.rpc('request_member_deletion', params: {
-        'p_member_id': widget.memberId,
-        'p_confirmation_email': memberEmail.isNotEmpty ? memberEmail : '',
-        'p_reason': reason,
-      });
+      await client.rpc(
+        'request_member_deletion',
+        params: {
+          'p_member_id': widget.memberId,
+          'p_confirmation_email': memberEmail.isNotEmpty ? memberEmail : '',
+          'p_reason': reason,
+        },
+      );
       if (mounted) {
         ref.invalidate(memberOpsProfileProvider(widget.memberId));
         showAnimatedSuccessToast(
@@ -2944,7 +2902,8 @@ Map<String, dynamic> normalizeMemberOpsProfile(Map<String, dynamic> profile) {
   final basic = {
     ...member,
     'last_seen_at': lastSeen,
-    'is_online': lastSeen != null &&
+    'is_online':
+        lastSeen != null &&
         DateTime.now().difference(DateTime.parse(lastSeen)).inMinutes < 5,
   };
 
@@ -2988,30 +2947,12 @@ const List<String> _kDrawerGranularPermissionCodes = [
 ];
 
 const List<({String role, IconData icon})> _kDrawerAdminRoles = [
-  (
-    role: 'country_admin',
-    icon: Icons.public_rounded,
-  ),
-  (
-    role: 'governorate_admin',
-    icon: Icons.account_balance_rounded,
-  ),
-  (
-    role: 'center_admin',
-    icon: Icons.location_city_rounded,
-  ),
-  (
-    role: 'village_admin',
-    icon: Icons.holiday_village_rounded,
-  ),
-  (
-    role: 'admin',
-    icon: Icons.admin_panel_settings_rounded,
-  ),
-  (
-    role: 'customer',
-    icon: Icons.person_outline_rounded,
-  ),
+  (role: 'country_admin', icon: Icons.public_rounded),
+  (role: 'governorate_admin', icon: Icons.account_balance_rounded),
+  (role: 'center_admin', icon: Icons.location_city_rounded),
+  (role: 'village_admin', icon: Icons.holiday_village_rounded),
+  (role: 'admin', icon: Icons.admin_panel_settings_rounded),
+  (role: 'customer', icon: Icons.person_outline_rounded),
 ];
 
 class _MemberAdminRoleAndPermissionsSection extends ConsumerStatefulWidget {
@@ -3106,10 +3047,7 @@ class _MemberAdminRoleAndPermissionsSectionState
       final client = ref.read(supabaseClientProvider);
       await client.rpc(
         'assign_admin_role',
-        params: {
-          'p_email': identifier,
-          'p_role': newRole,
-        },
+        params: {'p_email': identifier, 'p_role': newRole},
       );
       if (!mounted) return;
       setState(() => _localRoleOverride = newRole);
@@ -3124,9 +3062,8 @@ class _MemberAdminRoleAndPermissionsSectionState
       );
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(appErrorText(context, e))),
-      );
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(appErrorText(context, e))));
     } finally {
       if (mounted) {
         setState(() => _isUpdatingRole = false);
@@ -3183,9 +3120,8 @@ class _MemberAdminRoleAndPermissionsSectionState
       );
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(appErrorText(context, e))),
-      );
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(appErrorText(context, e))));
     } finally {
       if (mounted) {
         setState(() => _isUpdatingRegion = false);
@@ -3209,10 +3145,7 @@ class _MemberAdminRoleAndPermissionsSectionState
         final identifier = email.isNotEmpty ? email : widget.memberId;
         await client.rpc(
           'assign_admin_role',
-          params: {
-            'p_email': identifier,
-            'p_role': 'admin',
-          },
+          params: {'p_email': identifier, 'p_role': 'admin'},
         );
         if (mounted) {
           setState(() => _localRoleOverride = 'admin');
@@ -3247,9 +3180,8 @@ class _MemberAdminRoleAndPermissionsSectionState
       );
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(appErrorText(context, e))),
-      );
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(appErrorText(context, e))));
     } finally {
       if (mounted) {
         setState(() => _togglingPermission = null);
@@ -3280,22 +3212,25 @@ class _MemberAdminRoleAndPermissionsSectionState
     final adminDetailAsync = ref.watch(adminDetailProvider(widget.memberId));
     final adminAccount = adminDetailAsync.value;
 
-    final regionId = _localRegionIdOverride ??
+    final regionId =
+        _localRegionIdOverride ??
         adminAccount?.regionId ??
         (regionMap['region_id'] as String?) ??
         (basic['region_id'] as String?);
-    final rawRegionLabel = _localRegionLabelOverride ??
+    final rawRegionLabel =
+        _localRegionLabelOverride ??
         adminAccount?.regionName ??
         (regionMap['hierarchical_label'] as String?);
     final regionLabel =
         (rawRegionLabel != null &&
-                rawRegionLabel.isNotEmpty &&
-                rawRegionLabel != '-')
-            ? rawRegionLabel
-            : null;
+            rawRegionLabel.isNotEmpty &&
+            rawRegionLabel != '-')
+        ? rawRegionLabel
+        : null;
 
-    final adminPermsAsync =
-        ref.watch(adminPermissionsProvider(widget.memberId));
+    final adminPermsAsync = ref.watch(
+      adminPermissionsProvider(widget.memberId),
+    );
 
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
@@ -3312,10 +3247,7 @@ class _MemberAdminRoleAndPermissionsSectionState
         title: Text(l10n.permissionDelegation),
         subtitle: Text(
           '${l10n.adminRole}: ${_roleLabel(currentRole, l10n)}${regionLabel != null ? ' • $regionLabel' : ''}',
-          style: TextStyle(
-            fontSize: 12,
-            color: cs.onSurfaceVariant,
-          ),
+          style: TextStyle(fontSize: 12, color: cs.onSurfaceVariant),
         ),
         children: [
           if (isTargetOwner)
@@ -3331,9 +3263,8 @@ class _MemberAdminRoleAndPermissionsSectionState
               alignment: AlignmentDirectional.centerStart,
               child: Text(
                 '1. ${l10n.adminRole}',
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
+                style: Theme.of(context).textTheme.bodyMedium
+                    ?.copyWith(fontWeight: FontWeight.bold),
               ),
             ),
             const SizedBox(height: 8),
@@ -3351,8 +3282,7 @@ class _MemberAdminRoleAndPermissionsSectionState
                   avatar: Icon(
                     item.icon,
                     size: 15,
-                    color:
-                        selected ? Colors.white : const Color(0xFF5B3DF0),
+                    color: selected ? Colors.white : const Color(0xFF5B3DF0),
                   ),
                   label: Text(_roleLabel(item.role, l10n)),
                   selected: selected,
@@ -3377,9 +3307,8 @@ class _MemberAdminRoleAndPermissionsSectionState
               alignment: AlignmentDirectional.centerStart,
               child: Text(
                 '2. ${l10n.assignRegion}',
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
+                style: Theme.of(context).textTheme.bodyMedium
+                    ?.copyWith(fontWeight: FontWeight.bold),
               ),
             ),
             const SizedBox(height: 8),
@@ -3427,9 +3356,8 @@ class _MemberAdminRoleAndPermissionsSectionState
               alignment: AlignmentDirectional.centerStart,
               child: Text(
                 '3. ${l10n.permissionDelegation}',
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
+                style: Theme.of(context).textTheme.bodyMedium
+                    ?.copyWith(fontWeight: FontWeight.bold),
               ),
             ),
             const SizedBox(height: 8),
@@ -3442,7 +3370,8 @@ class _MemberAdminRoleAndPermissionsSectionState
                 l10n: l10n,
               ),
               data: (permData) {
-                final grants = (permData['grants'] as List?)
+                final grants =
+                    (permData['grants'] as List?)
                         ?.map((e) => e.toString())
                         .toSet() ??
                     <String>{};
@@ -3487,15 +3416,10 @@ class _MemberAdminRoleAndPermissionsSectionState
               : null,
           onSelected: _togglingPermission != null
               ? null
-              : (_) => _togglePermission(
-                    code,
-                    isGranted,
-                    currentRole,
-                    userType,
-                  ),
+              : (_) =>
+                    _togglePermission(code, isGranted, currentRole, userType),
         );
       }).toList(),
     );
   }
 }
-

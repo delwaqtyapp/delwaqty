@@ -86,10 +86,7 @@ class ChatCallAlertService {
     );
   }
 
-  Future<void> _onCallInserted(
-    Map<String, dynamic> record,
-    String meId,
-  ) async {
+  Future<void> _onCallInserted(Map<String, dynamic> record, String meId) async {
     try {
       final id = record['id'] as String?;
       if (id == null) return;

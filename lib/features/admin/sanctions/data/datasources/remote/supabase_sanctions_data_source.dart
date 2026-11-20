@@ -52,9 +52,9 @@ class SupabaseSanctionsDataSource {
     required String sanctionId,
     required String reason,
   }) async {
-    await _client.rpc('revoke_sanction', params: {
-      'p_sanction_id': sanctionId,
-      'p_reason': reason,
-    });
+    await _client.rpc(
+      'revoke_sanction',
+      params: {'p_sanction_id': sanctionId, 'p_reason': reason},
+    );
   }
 }

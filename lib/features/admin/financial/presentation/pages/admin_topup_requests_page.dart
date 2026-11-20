@@ -93,23 +93,20 @@ class _AdminTopupRequestsPageState
       final code = res['code'] as String?;
       if (code == 'OK') {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(l10n.topupApproved)),
-          );
+          ScaffoldMessenger.of(context)
+              .showSnackBar(SnackBar(content: Text(l10n.topupApproved)));
         }
         ref.invalidate(adminTopupRequestsProvider);
       } else {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(l10n.operationFailed)),
-          );
+          ScaffoldMessenger.of(context)
+              .showSnackBar(SnackBar(content: Text(l10n.operationFailed)));
         }
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(appErrorText(context, e))),
-        );
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(appErrorText(context, e))));
       }
     } finally {
       if (mounted) setState(() => _busyId = null);
@@ -125,22 +122,20 @@ class _AdminTopupRequestsPageState
         title: Text(l10n.rejectTopUpTitle),
         content: TextField(
           controller: reasonController,
-          decoration: InputDecoration(
-            labelText: l10n.rejectTopUpReasonHint,
-          ),
+          decoration: InputDecoration(labelText: l10n.rejectTopUpReasonHint),
           maxLines: 3,
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(false),
-            child:  Text(l10n.cancel),
+            child: Text(l10n.cancel),
           ),
           ElevatedButton(
             onPressed: () {
               if (reasonController.text.trim().isEmpty) return;
               Navigator.of(ctx).pop(true);
             },
-            child:  Text(l10n.reject),
+            child: Text(l10n.reject),
           ),
         ],
       ),
@@ -154,23 +149,20 @@ class _AdminTopupRequestsPageState
       final code = res['code'] as String?;
       if (code == 'OK') {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(l10n.topupRejected)),
-          );
+          ScaffoldMessenger.of(context)
+              .showSnackBar(SnackBar(content: Text(l10n.topupRejected)));
         }
         ref.invalidate(adminTopupRequestsProvider);
       } else {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(l10n.operationFailed)),
-          );
+          ScaffoldMessenger.of(context)
+              .showSnackBar(SnackBar(content: Text(l10n.operationFailed)));
         }
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(appErrorText(context, e))),
-        );
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(appErrorText(context, e))));
       }
     } finally {
       if (mounted) setState(() => _busyId = null);
@@ -191,8 +183,7 @@ class _AdminTopupRequestsPageState
           IconButton(
             tooltip: l10n.refresh,
             icon: const Icon(Icons.refresh_rounded),
-            onPressed: () =>
-                ref.invalidate(adminTopupRequestsProvider),
+            onPressed: () => ref.invalidate(adminTopupRequestsProvider),
           ),
         ],
       ),
@@ -212,17 +203,16 @@ class _AdminTopupRequestsPageState
                 return ChoiceChip(
                   label: Text(label),
                   selected: selected,
-                  onSelected: (_) => ref
-                      .read(adminTopupStatusFilterProvider.notifier)
-                      .state = value,
+                  onSelected: (_) =>
+                      ref.read(adminTopupStatusFilterProvider.notifier).state =
+                          value,
                 );
               },
             ),
           ),
           Expanded(
             child: RefreshIndicator(
-              onRefresh: () async =>
-                  ref.invalidate(adminTopupRequestsProvider),
+              onRefresh: () async => ref.invalidate(adminTopupRequestsProvider),
               child: listAsync.when(
                 loading: () => const Center(child: AppLoaderCircular()),
                 error: (e, _) => PremiumEmptyState(
@@ -230,8 +220,7 @@ class _AdminTopupRequestsPageState
                   title: l10n.error,
                   message: appErrorText(context, e),
                   actionLabel: l10n.retry,
-                  onAction: () =>
-                      ref.invalidate(adminTopupRequestsProvider),
+                  onAction: () => ref.invalidate(adminTopupRequestsProvider),
                 ),
                 data: (items) {
                   if (items.isEmpty) {
@@ -305,28 +294,29 @@ class _AdminTopupRequestsPageState
                                 children: [
                                   Expanded(
                                     child: ElevatedButton.icon(
-                                      onPressed:
-                                          busy ? null : () => _approve(item),
+                                      onPressed: busy
+                                          ? null
+                                          : () => _approve(item),
                                       icon: busy
                                           ? const SizedBox(
                                               width: 16,
                                               height: 16,
-                                              child:
-                                                  CircularProgressIndicator(
+                                              child: CircularProgressIndicator(
                                                 strokeWidth: 2,
                                               ),
                                             )
                                           : const Icon(Icons.check),
-                                      label:  Text(l10n.approve),
+                                      label: Text(l10n.approve),
                                     ),
                                   ),
                                   const SizedBox(width: 10),
                                   Expanded(
                                     child: OutlinedButton.icon(
-                                      onPressed:
-                                          busy ? null : () => _reject(item),
+                                      onPressed: busy
+                                          ? null
+                                          : () => _reject(item),
                                       icon: const Icon(Icons.close),
-                                      label:  Text(l10n.reject),
+                                      label: Text(l10n.reject),
                                     ),
                                   ),
                                 ],
@@ -335,9 +325,7 @@ class _AdminTopupRequestsPageState
                               const SizedBox(height: 6),
                               Text(
                                 '${l10n.rejectReason}: ${item.rejectionReason}',
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .bodySmall
+                                style: Theme.of(context).textTheme.bodySmall
                                     ?.copyWith(color: cs.error),
                               ),
                             ],

@@ -133,7 +133,9 @@ class _AdminOrdersPageState extends ConsumerState<AdminOrdersPage> {
                               },
                             ),
                             ListTile(
-                              leading: const Icon(Icons.local_shipping_outlined),
+                              leading: const Icon(
+                                Icons.local_shipping_outlined,
+                              ),
                               title: Text(l10n.inTransit),
                               trailing: _status == 'delivering'
                                   ? const Icon(Icons.check_rounded)
@@ -176,9 +178,7 @@ class _AdminOrdersPageState extends ConsumerState<AdminOrdersPage> {
           ),
           Expanded(
             child: ordersAsync.when(
-              loading: () => const Center(
-                child: AppLoaderCircular(),
-              ),
+              loading: () => const Center(child: AppLoaderCircular()),
               error: (e, _) => Center(
                 child: PremiumEmptyState(
                   icon: Icons.error_outline_rounded,
@@ -207,8 +207,7 @@ class _AdminOrdersPageState extends ConsumerState<AdminOrdersPage> {
                         order: order,
                         l10n: l10n,
                         onStatusChanged: (status) async {
-                          final adminService =
-                              ref.read(adminServiceProvider);
+                          final adminService = ref.read(adminServiceProvider);
                           await adminService.updateOrderStatus(
                             order['id'] as String,
                             status,
@@ -328,13 +327,13 @@ class _OrderTile extends StatelessWidget {
                 value: 'cancelled',
                 child: Text(
                   l10n.cancelOrder,
-                  style:
-                      TextStyle(color: Theme.of(context).colorScheme.error),
+                  style: TextStyle(color: Theme.of(context).colorScheme.error),
                 ),
               ),
           ],
         ),
-        onTap: () => _showOrderDetailsSheet(context, order, l10n, onStatusChanged),
+        onTap: () =>
+            _showOrderDetailsSheet(context, order, l10n, onStatusChanged),
       ),
     );
   }
@@ -395,7 +394,11 @@ class _OrderTile extends StatelessWidget {
                       color: statusColor.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(14),
                     ),
-                    child: Icon(Icons.receipt_long_rounded, color: statusColor, size: 24),
+                    child: Icon(
+                      Icons.receipt_long_rounded,
+                      color: statusColor,
+                      size: 24,
+                    ),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
@@ -420,7 +423,9 @@ class _OrderTile extends StatelessWidget {
                               onPressed: () {
                                 Clipboard.setData(ClipboardData(text: orderId));
                                 ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(content: Text(l10n.copiedToClipboard)),
+                                  SnackBar(
+                                    content: Text(l10n.copiedToClipboard),
+                                  ),
                                 );
                               },
                             ),
@@ -437,7 +442,10 @@ class _OrderTile extends StatelessWidget {
                     ),
                   ),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 4,
+                    ),
                     decoration: BoxDecoration(
                       color: statusColor.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(10),
@@ -458,7 +466,9 @@ class _OrderTile extends StatelessWidget {
                 color: cs.surfaceContainerHighest.withValues(alpha: 0.35),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(16),
-                  side: BorderSide(color: cs.outlineVariant.withValues(alpha: 0.3)),
+                  side: BorderSide(
+                    color: cs.outlineVariant.withValues(alpha: 0.3),
+                  ),
                 ),
                 child: Padding(
                   padding: const EdgeInsets.all(16),
@@ -466,20 +476,31 @@ class _OrderTile extends StatelessWidget {
                     children: [
                       Row(
                         children: [
-                          Icon(Icons.person_rounded, size: 20, color: cs.primary),
+                          Icon(
+                            Icons.person_rounded,
+                            size: 20,
+                            color: cs.primary,
+                          ),
                           const SizedBox(width: 10),
                           Expanded(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  customerName.isNotEmpty ? customerName : l10n.customer,
-                                  style: const TextStyle(fontWeight: FontWeight.w600),
+                                  customerName.isNotEmpty
+                                      ? customerName
+                                      : l10n.customer,
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.w600,
+                                  ),
                                 ),
                                 if (customerEmail.isNotEmpty)
                                   Text(
                                     customerEmail,
-                                    style: TextStyle(fontSize: 12, color: cs.onSurfaceVariant),
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      color: cs.onSurfaceVariant,
+                                    ),
                                   ),
                               ],
                             ),
@@ -489,12 +510,20 @@ class _OrderTile extends StatelessWidget {
                       const Divider(height: 20),
                       Row(
                         children: [
-                          const Icon(Icons.storefront_rounded, size: 20, color: AppColors.brandPurple),
+                          const Icon(
+                            Icons.storefront_rounded,
+                            size: 20,
+                            color: AppColors.brandPurple,
+                          ),
                           const SizedBox(width: 10),
                           Expanded(
                             child: Text(
-                              merchantName.isNotEmpty ? merchantName : l10n.merchant,
-                              style: const TextStyle(fontWeight: FontWeight.w600),
+                              merchantName.isNotEmpty
+                                  ? merchantName
+                                  : l10n.merchant,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w600,
+                              ),
                             ),
                           ),
                         ],
@@ -524,7 +553,9 @@ class _OrderTile extends StatelessWidget {
               const SizedBox(height: 20),
               Text(
                 l10n.status,
-                style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
+                style: theme.textTheme.titleSmall?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               const SizedBox(height: 10),
               Row(
@@ -532,7 +563,10 @@ class _OrderTile extends StatelessWidget {
                   if (status != 'in_transit')
                     Expanded(
                       child: OutlinedButton.icon(
-                        icon: const Icon(Icons.local_shipping_outlined, size: 18),
+                        icon: const Icon(
+                          Icons.local_shipping_outlined,
+                          size: 18,
+                        ),
                         label: Text(l10n.markInTransit),
                         onPressed: () {
                           Navigator.pop(ctx);
@@ -560,7 +594,11 @@ class _OrderTile extends StatelessWidget {
                 SizedBox(
                   width: double.infinity,
                   child: TextButton.icon(
-                    icon: Icon(Icons.cancel_outlined, size: 18, color: cs.error),
+                    icon: Icon(
+                      Icons.cancel_outlined,
+                      size: 18,
+                      color: cs.error,
+                    ),
                     label: Text(
                       l10n.cancelOrder,
                       style: TextStyle(color: cs.error),

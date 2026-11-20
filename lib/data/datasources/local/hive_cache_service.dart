@@ -1,4 +1,5 @@
 import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:delwaqty/features/customer/commerce/domain/entities/merchant.dart';
@@ -59,10 +60,14 @@ class HiveCacheService {
     return DateTime.now().difference(lastUpdated) > ttl;
   }
 
-  Future<void> cacheMerchants(List<Merchant> merchants, {String key = 'all'}) async {
+  Future<void> cacheMerchants(
+    List<Merchant> merchants, {
+    String key = 'all',
+  }) async {
     try {
       final data = <String, Map>{
-        for (final m in merchants) m.id: m.toJson()..['cached_at'] = DateTime.now().toIso8601String(),
+        for (final m in merchants)
+          m.id: m.toJson()..['cached_at'] = DateTime.now().toIso8601String(),
       };
       await _merchants.putAll(data);
       _setLastUpdated('merchants_$key');
@@ -71,12 +76,15 @@ class HiveCacheService {
     }
   }
 
-  List<Merchant> getCachedMerchants({String key = 'all', Duration ttl = _defaultTtl}) {
+  List<Merchant> getCachedMerchants({
+    String key = 'all',
+    Duration ttl = _defaultTtl,
+  }) {
     try {
       if (_isStale('merchants_$key', ttl: ttl)) return [];
-      return _merchants.values
-          .where((m) => m.containsKey('cached_at'))
-          .map((m) {
+      return _merchants.values.where((m) => m.containsKey('cached_at')).map((
+        m,
+      ) {
         final json = Map<String, dynamic>.from(m)..remove('cached_at');
         return Merchant.fromJson(json);
       }).toList();
@@ -86,10 +94,14 @@ class HiveCacheService {
     }
   }
 
-  Future<void> cacheProducts(List<Product> products, {String key = 'all'}) async {
+  Future<void> cacheProducts(
+    List<Product> products, {
+    String key = 'all',
+  }) async {
     try {
       final data = <String, Map>{
-        for (final p in products) p.id: p.toJson()..['cached_at'] = DateTime.now().toIso8601String(),
+        for (final p in products)
+          p.id: p.toJson()..['cached_at'] = DateTime.now().toIso8601String(),
       };
       await _products.putAll(data);
       _setLastUpdated('products_$key');
@@ -98,12 +110,13 @@ class HiveCacheService {
     }
   }
 
-  List<Product> getCachedProducts({String key = 'all', Duration ttl = _defaultTtl}) {
+  List<Product> getCachedProducts({
+    String key = 'all',
+    Duration ttl = _defaultTtl,
+  }) {
     try {
       if (_isStale('products_$key', ttl: ttl)) return [];
-      return _products.values
-          .where((p) => p.containsKey('cached_at'))
-          .map((p) {
+      return _products.values.where((p) => p.containsKey('cached_at')).map((p) {
         final json = Map<String, dynamic>.from(p)..remove('cached_at');
         return Product.fromJson(json);
       }).toList();
@@ -116,7 +129,8 @@ class HiveCacheService {
   Future<void> cacheServiceCategories(List<ServiceCategory> categories) async {
     try {
       final data = <String, Map>{
-        for (final c in categories) c.id: c.toJson()..['cached_at'] = DateTime.now().toIso8601String(),
+        for (final c in categories)
+          c.id: c.toJson()..['cached_at'] = DateTime.now().toIso8601String(),
       };
       await _categories.putAll(data);
       _setLastUpdated('categories');
@@ -125,12 +139,14 @@ class HiveCacheService {
     }
   }
 
-  List<ServiceCategory> getCachedServiceCategories({Duration ttl = _defaultTtl}) {
+  List<ServiceCategory> getCachedServiceCategories({
+    Duration ttl = _defaultTtl,
+  }) {
     try {
       if (_isStale('categories', ttl: ttl)) return [];
-      return _categories.values
-          .where((c) => c.containsKey('cached_at'))
-          .map((c) {
+      return _categories.values.where((c) => c.containsKey('cached_at')).map((
+        c,
+      ) {
         final json = Map<String, dynamic>.from(c)..remove('cached_at');
         return ServiceCategory.fromJson(json);
       }).toList();

@@ -37,8 +37,9 @@ class UpdateProfileUseCase {
   }
 }
 
-final updateDateOfBirthUseCaseProvider =
-    Provider<UpdateDateOfBirthUseCase>((ref) {
+final updateDateOfBirthUseCaseProvider = Provider<UpdateDateOfBirthUseCase>((
+  ref,
+) {
   return UpdateDateOfBirthUseCase(ref.watch(profileRepositoryProvider));
 });
 
@@ -47,10 +48,7 @@ class UpdateDateOfBirthUseCase {
 
   final ProfileRepository _repository;
 
-  Future<User> call({
-    required String userId,
-    required DateTime? dateOfBirth,
-  }) {
+  Future<User> call({required String userId, required DateTime? dateOfBirth}) {
     return _repository.updateDateOfBirth(
       userId: userId,
       dateOfBirth: dateOfBirth,
@@ -108,10 +106,11 @@ final watchProfileUseCaseProvider = StreamProvider.autoDispose
       return repository.watchProfile(userId);
     });
 
-final reapplyVerificationUseCaseProvider =
-    Provider<ReapplyVerificationUseCase>((ref) {
-  return ReapplyVerificationUseCase(ref.watch(profileRepositoryProvider));
-});
+final reapplyVerificationUseCaseProvider = Provider<ReapplyVerificationUseCase>(
+  (ref) {
+    return ReapplyVerificationUseCase(ref.watch(profileRepositoryProvider));
+  },
+);
 
 class ReapplyVerificationUseCase {
   ReapplyVerificationUseCase(this._repository);

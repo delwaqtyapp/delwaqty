@@ -55,8 +55,9 @@ class SupabaseAuthDataSource {
           'phone': phone,
           'user_type': userType,
           'language': language,
-          'verification_status':
-              userType == 'customer' ? 'approved' : 'pending',
+          'verification_status': userType == 'customer'
+              ? 'approved'
+              : 'pending',
         },
       );
       _logger.i('Email sign up successful for ${response.user?.email}');

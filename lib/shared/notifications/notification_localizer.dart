@@ -14,9 +14,12 @@ class NotificationLocalizer {
     final lower = raw.toLowerCase();
 
     if (lower == 'new support message') return l10n.notifNewSupportMessageTitle;
-    if (lower == 'new customer message') return l10n.notifNewCustomerMessageTitle;
-    if (lower == 'support chat escalated') return l10n.notifSupportEscalatedTitle;
-    if (lower == 'emergency support request') return l10n.notifEmergencySupportTitle;
+    if (lower == 'new customer message')
+      return l10n.notifNewCustomerMessageTitle;
+    if (lower == 'support chat escalated')
+      return l10n.notifSupportEscalatedTitle;
+    if (lower == 'emergency support request')
+      return l10n.notifEmergencySupportTitle;
     if (lower == 'new complaint') return l10n.notifNewComplaintTitle;
     if (lower == 'complaint update') return l10n.notifComplaintUpdateTitle;
     if (lower == 'sos emergency alert') return l10n.notifSosAlertTitle;

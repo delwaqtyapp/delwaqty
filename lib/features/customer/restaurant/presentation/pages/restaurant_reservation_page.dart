@@ -9,20 +9,27 @@ import 'package:delwaqty/shared/widgets/premium_empty_state.dart';
 import 'package:delwaqty/shared/widgets/app_loader.dart';
 import 'package:delwaqty/shared/widgets/app_snackbar.dart';
 
-final _branchesProvider = FutureProvider.family<List<Branch>, String>((ref, merchantId) async {
+final _branchesProvider = FutureProvider.family<List<Branch>, String>((
+  ref,
+  merchantId,
+) async {
   final repo = ref.watch(branchRepositoryProvider);
   return repo.getBranches(merchantId);
 });
 
-final _slotsProvider = FutureProvider.family<List<ReservationSlot>, ({String merchantId, DateTime date, int partySize, String? branchId})>((ref, params) async {
-  final repo = ref.watch(reservationRepositoryProvider);
-  return repo.getAvailableSlots(
-    merchantId: params.merchantId,
-    date: params.date,
-    partySize: params.partySize,
-    branchId: params.branchId,
-  );
-});
+final _slotsProvider =
+    FutureProvider.family<
+      List<ReservationSlot>,
+      ({String merchantId, DateTime date, int partySize, String? branchId})
+    >((ref, params) async {
+      final repo = ref.watch(reservationRepositoryProvider);
+      return repo.getAvailableSlots(
+        merchantId: params.merchantId,
+        date: params.date,
+        partySize: params.partySize,
+        branchId: params.branchId,
+      );
+    });
 
 class RestaurantReservationPage extends ConsumerStatefulWidget {
   const RestaurantReservationPage({super.key, required this.merchantId});
@@ -30,10 +37,12 @@ class RestaurantReservationPage extends ConsumerStatefulWidget {
   final String merchantId;
 
   @override
-  ConsumerState<RestaurantReservationPage> createState() => _RestaurantReservationPageState();
+  ConsumerState<RestaurantReservationPage> createState() =>
+      _RestaurantReservationPageState();
 }
 
-class _RestaurantReservationPageState extends ConsumerState<RestaurantReservationPage> {
+class _RestaurantReservationPageState
+    extends ConsumerState<RestaurantReservationPage> {
   DateTime _selectedDate = DateTime.now();
   int _partySize = 2;
   Branch? _selectedBranch;
@@ -52,12 +61,14 @@ class _RestaurantReservationPageState extends ConsumerState<RestaurantReservatio
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final branchesAsync = ref.watch(_branchesProvider(widget.merchantId));
-    final slotsAsync = ref.watch(_slotsProvider((
-      merchantId: widget.merchantId,
-      date: _selectedDate,
-      partySize: _partySize,
-      branchId: _selectedBranch?.id,
-    )));
+    final slotsAsync = ref.watch(
+      _slotsProvider((
+        merchantId: widget.merchantId,
+        date: _selectedDate,
+        partySize: _partySize,
+        branchId: _selectedBranch?.id,
+      )),
+    );
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.reserveATable)),
@@ -97,7 +108,9 @@ class _RestaurantReservationPageState extends ConsumerState<RestaurantReservatio
               delay: const Duration(milliseconds: 400),
               child: Text(
                 l10n.availableSlots,
-                style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
             const SizedBox(height: 8),
@@ -121,16 +134,22 @@ class _RestaurantReservationPageState extends ConsumerState<RestaurantReservatio
                         onTap: () => setState(() => _selectedSlot = slot),
                         child: AnimatedContainer(
                           duration: const Duration(milliseconds: 200),
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 10,
+                          ),
                           decoration: BoxDecoration(
                             color: isSelected
                                 ? theme.colorScheme.primary
-                                : theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+                                : theme.colorScheme.surfaceContainerHighest
+                                      .withValues(alpha: 0.5),
                             borderRadius: BorderRadius.circular(10),
                             border: Border.all(
                               color: isSelected
                                   ? theme.colorScheme.primary
-                                  : theme.colorScheme.outline.withValues(alpha: 0.2),
+                                  : theme.colorScheme.outline.withValues(
+                                      alpha: 0.2,
+                                    ),
                             ),
                           ),
                           child: Column(
@@ -138,7 +157,9 @@ class _RestaurantReservationPageState extends ConsumerState<RestaurantReservatio
                               Text(
                                 '${slot.time.hour.toString().padLeft(2, '0')}:${slot.time.minute.toString().padLeft(2, '0')}',
                                 style: theme.textTheme.bodyMedium?.copyWith(
-                                  color: isSelected ? theme.colorScheme.onPrimary : null,
+                                  color: isSelected
+                                      ? theme.colorScheme.onPrimary
+                                      : null,
                                   fontWeight: FontWeight.w600,
                                 ),
                               ),
@@ -146,7 +167,9 @@ class _RestaurantReservationPageState extends ConsumerState<RestaurantReservatio
                                 '${slot.capacity} ${l10n.guests}',
                                 style: theme.textTheme.labelSmall?.copyWith(
                                   color: isSelected
-                                      ? theme.colorScheme.onPrimary.withValues(alpha: 0.8)
+                                      ? theme.colorScheme.onPrimary.withValues(
+                                          alpha: 0.8,
+                                        )
                                       : theme.colorScheme.onSurfaceVariant,
                                 ),
                               ),
@@ -167,18 +190,25 @@ class _RestaurantReservationPageState extends ConsumerState<RestaurantReservatio
               child: SizedBox(
                 width: double.infinity,
                 child: FilledButton.icon(
-                  onPressed: _selectedSlot == null || _isSubmitting ? null : _submitReservation,
+                  onPressed: _selectedSlot == null || _isSubmitting
+                      ? null
+                      : _submitReservation,
                   icon: _isSubmitting
                       ? SizedBox(
                           width: 18,
                           height: 18,
-                          child: CircularProgressIndicator(strokeWidth: 2, color: theme.colorScheme.onPrimary),
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: theme.colorScheme.onPrimary,
+                          ),
                         )
                       : const Icon(Icons.check_circle_outline),
                   label: Text(l10n.confirmReservation),
                   style: FilledButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 14),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                   ),
                 ),
               ),
@@ -189,15 +219,24 @@ class _RestaurantReservationPageState extends ConsumerState<RestaurantReservatio
     );
   }
 
-  Widget _buildDateSelector(BuildContext context, AppLocalizations l10n, ThemeData theme) {
-    final dates = List.generate(7, (i) => DateTime.now().add(Duration(days: i)));
+  Widget _buildDateSelector(
+    BuildContext context,
+    AppLocalizations l10n,
+    ThemeData theme,
+  ) {
+    final dates = List.generate(
+      7,
+      (i) => DateTime.now().add(Duration(days: i)),
+    );
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           l10n.selectDate,
-          style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+          style: theme.textTheme.titleMedium?.copyWith(
+            fontWeight: FontWeight.bold,
+          ),
         ),
         const SizedBox(height: 8),
         SizedBox(
@@ -209,7 +248,11 @@ class _RestaurantReservationPageState extends ConsumerState<RestaurantReservatio
             itemBuilder: (context, index) {
               final date = dates[index];
               final isSelected = _isSameDay(date, _selectedDate);
-              final dayName = index == 0 ? l10n.today : index == 1 ? l10n.tomorrow : _getDayName(date.weekday, l10n);
+              final dayName = index == 0
+                  ? l10n.today
+                  : index == 1
+                  ? l10n.tomorrow
+                  : _getDayName(date.weekday, l10n);
 
               return GestureDetector(
                 onTap: () => setState(() {
@@ -223,7 +266,9 @@ class _RestaurantReservationPageState extends ConsumerState<RestaurantReservatio
                   decoration: BoxDecoration(
                     color: isSelected
                         ? theme.colorScheme.primary
-                        : theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+                        : theme.colorScheme.surfaceContainerHighest.withValues(
+                            alpha: 0.5,
+                          ),
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
                       color: isSelected
@@ -237,14 +282,18 @@ class _RestaurantReservationPageState extends ConsumerState<RestaurantReservatio
                       Text(
                         dayName,
                         style: theme.textTheme.labelSmall?.copyWith(
-                          color: isSelected ? theme.colorScheme.onPrimary : theme.colorScheme.onSurfaceVariant,
+                          color: isSelected
+                              ? theme.colorScheme.onPrimary
+                              : theme.colorScheme.onSurfaceVariant,
                         ),
                       ),
                       const SizedBox(height: 4),
                       Text(
                         '${date.day}',
                         style: theme.textTheme.titleMedium?.copyWith(
-                          color: isSelected ? theme.colorScheme.onPrimary : null,
+                          color: isSelected
+                              ? theme.colorScheme.onPrimary
+                              : null,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -259,20 +308,31 @@ class _RestaurantReservationPageState extends ConsumerState<RestaurantReservatio
     );
   }
 
-  Widget _buildPartySizeSelector(BuildContext context, AppLocalizations l10n, ThemeData theme) {
+  Widget _buildPartySizeSelector(
+    BuildContext context,
+    AppLocalizations l10n,
+    ThemeData theme,
+  ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           l10n.partySize,
-          style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+          style: theme.textTheme.titleMedium?.copyWith(
+            fontWeight: FontWeight.bold,
+          ),
         ),
         const SizedBox(height: 8),
         Row(
           children: [
             _CircleButton(
               icon: Icons.remove,
-              onTap: _partySize > 1 ? () => setState(() { _partySize--; _selectedSlot = null; }) : null,
+              onTap: _partySize > 1
+                  ? () => setState(() {
+                      _partySize--;
+                      _selectedSlot = null;
+                    })
+                  : null,
             ),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -280,18 +340,27 @@ class _RestaurantReservationPageState extends ConsumerState<RestaurantReservatio
                 children: [
                   Text(
                     '$_partySize',
-                    style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
+                    style: theme.textTheme.headlineSmall?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   Text(
                     l10n.guests,
-                    style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
                   ),
                 ],
               ),
             ),
             _CircleButton(
               icon: Icons.add,
-              onTap: _partySize < 20 ? () => setState(() { _partySize++; _selectedSlot = null; }) : null,
+              onTap: _partySize < 20
+                  ? () => setState(() {
+                      _partySize++;
+                      _selectedSlot = null;
+                    })
+                  : null,
             ),
           ],
         ),
@@ -299,13 +368,20 @@ class _RestaurantReservationPageState extends ConsumerState<RestaurantReservatio
     );
   }
 
-  Widget _buildBranchSelector(BuildContext context, AppLocalizations l10n, ThemeData theme, List<Branch> branches) {
+  Widget _buildBranchSelector(
+    BuildContext context,
+    AppLocalizations l10n,
+    ThemeData theme,
+    List<Branch> branches,
+  ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           l10n.branches,
-          style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+          style: theme.textTheme.titleMedium?.copyWith(
+            fontWeight: FontWeight.bold,
+          ),
         ),
         const SizedBox(height: 8),
         Wrap(
@@ -328,13 +404,19 @@ class _RestaurantReservationPageState extends ConsumerState<RestaurantReservatio
     );
   }
 
-  Widget _buildSpecialRequests(BuildContext context, AppLocalizations l10n, ThemeData theme) {
+  Widget _buildSpecialRequests(
+    BuildContext context,
+    AppLocalizations l10n,
+    ThemeData theme,
+  ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           l10n.specialRequests,
-          style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+          style: theme.textTheme.titleMedium?.copyWith(
+            fontWeight: FontWeight.bold,
+          ),
         ),
         const SizedBox(height: 8),
         TextField(
@@ -343,7 +425,9 @@ class _RestaurantReservationPageState extends ConsumerState<RestaurantReservatio
           decoration: InputDecoration(
             hintText: l10n.specialRequestsHint,
             filled: true,
-            fillColor: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+            fillColor: theme.colorScheme.surfaceContainerHighest.withValues(
+              alpha: 0.5,
+            ),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
               borderSide: BorderSide.none,
@@ -376,22 +460,27 @@ class _RestaurantReservationPageState extends ConsumerState<RestaurantReservatio
 
     try {
       final repo = ref.read(reservationRepositoryProvider);
-      await repo.createReservation(Reservation(
-        id: '',
-        userId: '',
-        merchantId: widget.merchantId,
-        branchId: _selectedBranch?.id,
-        partySize: _partySize,
-        reservationTime: _selectedSlot!.time,
-        specialRequests: _specialRequestsController.text.isNotEmpty
-            ? _specialRequestsController.text
-            : null,
-        tableNumber: _selectedSlot!.tableNumber,
-        createdAt: DateTime.now(),
-      ));
+      await repo.createReservation(
+        Reservation(
+          id: '',
+          userId: '',
+          merchantId: widget.merchantId,
+          branchId: _selectedBranch?.id,
+          partySize: _partySize,
+          reservationTime: _selectedSlot!.time,
+          specialRequests: _specialRequestsController.text.isNotEmpty
+              ? _specialRequestsController.text
+              : null,
+          tableNumber: _selectedSlot!.tableNumber,
+          createdAt: DateTime.now(),
+        ),
+      );
 
       if (mounted) {
-        AppSnackbar.success(context, message: AppLocalizations.of(context).reservationConfirmed);
+        AppSnackbar.success(
+          context,
+          message: AppLocalizations.of(context).reservationConfirmed,
+        );
         Navigator.pop(context);
       }
     } catch (e) {
@@ -421,7 +510,9 @@ class _CircleButton extends StatelessWidget {
         decoration: BoxDecoration(
           color: onTap != null
               ? theme.colorScheme.primaryContainer
-              : theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+              : theme.colorScheme.surfaceContainerHighest.withValues(
+                  alpha: 0.3,
+                ),
           shape: BoxShape.circle,
         ),
         child: Icon(

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import 'app_colors.dart';
 import 'app_spacing.dart';
 import 'app_text_styles.dart';
@@ -126,9 +127,7 @@ abstract final class AppTheme {
         ),
       ),
       listTileTheme: ListTileThemeData(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(14),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
         selectedTileColor: colorScheme.primaryContainer.withValues(alpha: 0.55),
       ),
       switchTheme: SwitchThemeData(
@@ -145,9 +144,7 @@ abstract final class AppTheme {
         trackOutlineColor: const WidgetStatePropertyAll(null),
       ),
       checkboxTheme: CheckboxThemeData(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(4),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
         fillColor: WidgetStateProperty.resolveWith(
           (states) => states.contains(WidgetState.selected)
               ? colorScheme.primary
@@ -179,19 +176,14 @@ abstract final class AppTheme {
       popupMenuTheme: PopupMenuThemeData(
         color: colorScheme.surface,
         elevation: 8,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(14),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
       ),
       tooltipTheme: TooltipThemeData(
         decoration: BoxDecoration(
           color: colorScheme.inverseSurface,
           borderRadius: BorderRadius.circular(8),
         ),
-        textStyle: TextStyle(
-          color: colorScheme.onInverseSurface,
-          fontSize: 12,
-        ),
+        textStyle: TextStyle(color: colorScheme.onInverseSurface, fontSize: 12),
         waitDuration: const Duration(milliseconds: 400),
       ),
       progressIndicatorTheme: ProgressIndicatorThemeData(
@@ -257,8 +249,9 @@ abstract final class AppTheme {
         ),
       ),
       chipTheme: ChipThemeData(
-        backgroundColor:
-            colorScheme.surfaceContainerHighest.withValues(alpha: 0.65),
+        backgroundColor: colorScheme.surfaceContainerHighest.withValues(
+          alpha: 0.65,
+        ),
         selectedColor: colorScheme.primary,
         checkmarkColor: colorScheme.onPrimary,
         shape: RoundedRectangleBorder(
@@ -296,7 +289,10 @@ abstract final class AppTheme {
         },
       ),
       extensions: [
-        if (colorScheme.brightness == Brightness.dark) SidebarTheme.dark else SidebarTheme.light,
+        if (colorScheme.brightness == Brightness.dark)
+          SidebarTheme.dark
+        else
+          SidebarTheme.light,
       ],
     );
   }
@@ -349,15 +345,9 @@ class _FastModernPageTransitionsBuilder extends PageTransitionsBuilder {
         end: Offset.zero,
       ).animate(curved),
       child: ScaleTransition(
-        scale: Tween<double>(
-          begin: 0.965,
-          end: 1.0,
-        ).animate(curved),
+        scale: Tween<double>(begin: 0.965, end: 1.0).animate(curved),
         child: FadeTransition(
-          opacity: Tween<double>(
-            begin: 0.0,
-            end: 1.0,
-          ).animate(curved),
+          opacity: Tween<double>(begin: 0.0, end: 1.0).animate(curved),
           child: ScaleTransition(
             scale: Tween<double>(
               begin: 1.0,
@@ -370,4 +360,3 @@ class _FastModernPageTransitionsBuilder extends PageTransitionsBuilder {
     );
   }
 }
-

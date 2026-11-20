@@ -6,9 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 /// The migration is the source of truth, so the test parses the SQL seed
 /// rather than duplicating the data in Dart.
 void main() {
-  final seedFile = File(
-    'supabase/migrations/030_regional_system.sql',
-  );
+  final seedFile = File('supabase/migrations/030_regional_system.sql');
   final seedRows = _parseSeedRows(seedFile);
 
   const countryId = '00000000-0000-0000-0000-000000000001';
@@ -41,15 +39,35 @@ void main() {
           .where((r) => r['type'] == 'governorate')
           .map((r) => r['code']!)
           .toSet();
-      expect(
-        codes,
-        {
-          'EG-ALX', 'EG-ASN', 'EG-AST', 'EG-BA', 'EG-BH', 'EG-BNS', 'EG-C',
-          'EG-DK', 'EG-DT', 'EG-FYM', 'EG-GH', 'EG-GZ', 'EG-IS', 'EG-JS',
-          'EG-KB', 'EG-KFS', 'EG-KN', 'EG-LX', 'EG-MN', 'EG-MNF', 'EG-MT',
-          'EG-PTS', 'EG-SHG', 'EG-SHR', 'EG-SIN', 'EG-SUZ', 'EG-WAD',
-        },
-      );
+      expect(codes, {
+        'EG-ALX',
+        'EG-ASN',
+        'EG-AST',
+        'EG-BA',
+        'EG-BH',
+        'EG-BNS',
+        'EG-C',
+        'EG-DK',
+        'EG-DT',
+        'EG-FYM',
+        'EG-GH',
+        'EG-GZ',
+        'EG-IS',
+        'EG-JS',
+        'EG-KB',
+        'EG-KFS',
+        'EG-KN',
+        'EG-LX',
+        'EG-MN',
+        'EG-MNF',
+        'EG-MT',
+        'EG-PTS',
+        'EG-SHG',
+        'EG-SHR',
+        'EG-SIN',
+        'EG-SUZ',
+        'EG-WAD',
+      });
     });
 
     test('all governorates have the official English names', () {
@@ -57,16 +75,35 @@ void main() {
           .where((r) => r['type'] == 'governorate')
           .map((r) => r['name_en']!)
           .toSet();
-      expect(
-        names,
-        {
-          'Alexandria', 'Aswan', 'Asyut', 'Red Sea', 'Beheira', 'Beni Suef',
-          'Cairo', 'Dakahlia', 'Damietta', 'Faiyum', 'Gharbia', 'Giza',
-          'Ismailia', 'South Sinai', 'Qalyubia', 'Kafr el Sheikh', 'Qena',
-          'Luxor', 'Minya', 'Monufia', 'Matrouh', 'Port Said', 'Sohag',
-          'Sharqia', 'North Sinai', 'Suez', 'New Valley',
-        },
-      );
+      expect(names, {
+        'Alexandria',
+        'Aswan',
+        'Asyut',
+        'Red Sea',
+        'Beheira',
+        'Beni Suef',
+        'Cairo',
+        'Dakahlia',
+        'Damietta',
+        'Faiyum',
+        'Gharbia',
+        'Giza',
+        'Ismailia',
+        'South Sinai',
+        'Qalyubia',
+        'Kafr el Sheikh',
+        'Qena',
+        'Luxor',
+        'Minya',
+        'Monufia',
+        'Matrouh',
+        'Port Said',
+        'Sohag',
+        'Sharqia',
+        'North Sinai',
+        'Suez',
+        'New Valley',
+      });
     });
 
     test('every governorate has a non-empty Arabic name', () {

@@ -104,11 +104,7 @@ class OrdersPage extends ConsumerWidget {
 }
 
 class _OrderCard extends StatelessWidget {
-  const _OrderCard({
-    required this.order,
-    required this.canTrack,
-    this.onTap,
-  });
+  const _OrderCard({required this.order, required this.canTrack, this.onTap});
 
   final Order order;
   final bool canTrack;
@@ -316,7 +312,10 @@ class _StatusTile extends StatelessWidget {
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [color.withValues(alpha: 0.25), color.withValues(alpha: 0.08)],
+          colors: [
+            color.withValues(alpha: 0.25),
+            color.withValues(alpha: 0.08),
+          ],
         ),
         borderRadius: AppSpacing.borderRadiusLg,
         border: Border.all(color: color.withValues(alpha: 0.3)),

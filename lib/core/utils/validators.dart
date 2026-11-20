@@ -1,7 +1,9 @@
 abstract final class AppValidators {
   static String? required(String? value, [String? fieldName]) {
     if (value == null || value.trim().isEmpty) {
-      return fieldName != null ? '$fieldName is required' : 'This field is required';
+      return fieldName != null
+          ? '$fieldName is required'
+          : 'This field is required';
     }
     return null;
   }
@@ -50,7 +52,9 @@ abstract final class AppValidators {
 
   static String? minLength(String? value, int min, [String? fieldName]) {
     if (value == null || value.trim().isEmpty) {
-      return fieldName != null ? '$fieldName is required' : 'This field is required';
+      return fieldName != null
+          ? '$fieldName is required'
+          : 'This field is required';
     }
     if (value.trim().length < min) {
       return fieldName != null

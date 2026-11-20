@@ -1,5 +1,7 @@
 import 'package:delwaqty/core/router/post_auth_route.dart';
+
 import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -17,6 +19,7 @@ import 'package:delwaqty/features/_shared/auth/presentation/auth_provider.dart';
 import 'package:delwaqty/features/_shared/device_lock/device_lock_provider.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 import 'package:delwaqty/shared/widgets/cinematic_auth_background.dart';
+
 import 'dart:async';
 
 class LoginPage extends ConsumerStatefulWidget {
@@ -74,8 +77,9 @@ class _LoginPageState extends ConsumerState<LoginPage>
 
   Future<void> _loadSavedAccounts() async {
     try {
-      final accounts =
-          await ref.read(savedAccountsStoreProvider).loadAccounts();
+      final accounts = await ref
+          .read(savedAccountsStoreProvider)
+          .loadAccounts();
       if (mounted) setState(() => _savedAccounts = accounts);
     } catch (_) {}
   }
@@ -83,8 +87,9 @@ class _LoginPageState extends ConsumerState<LoginPage>
   Future<void> _checkBiometric() async {
     try {
       final canCheck = await _localAuth.canCheckBiometrics;
-      final hasCreds =
-          await ref.read(biometricAuthStoreProvider).hasAnyCredentials();
+      final hasCreds = await ref
+          .read(biometricAuthStoreProvider)
+          .hasAnyCredentials();
       if (mounted) setState(() => _biometricAvailable = canCheck && hasCreds);
     } catch (_) {}
   }
@@ -97,7 +102,9 @@ class _LoginPageState extends ConsumerState<LoginPage>
     _postLoginHandled = false;
     _pendingSaveAccount = _rememberMe;
     unawaited(
-      ref.read(authStateProvider.notifier).signIn(
+      ref
+          .read(authStateProvider.notifier)
+          .signIn(
             email: _emailController.text.trim(),
             password: _passwordController.text,
           ),
@@ -135,9 +142,9 @@ class _LoginPageState extends ConsumerState<LoginPage>
     );
     if (resend != true || !mounted) return;
     try {
-      await ref.read(authStateProvider.notifier).resendEmailConfirmation(
-            email: email,
-          );
+      await ref
+          .read(authStateProvider.notifier)
+          .resendEmailConfirmation(email: email);
       if (mounted) context.showAppSnackBar(l10n.emailConfirmationSent(email));
     } catch (_) {
       if (mounted) context.showAppSnackBar(l10n.tryAgain);
@@ -261,14 +268,14 @@ class _LoginPageState extends ConsumerState<LoginPage>
       _postLoginHandled = false;
       _pendingBiometricUserId = credentials.userId;
       unawaited(
-        ref.read(authStateProvider.notifier).signIn(
-              email: credentials.email,
-              password: credentials.password,
-            ),
+        ref
+            .read(authStateProvider.notifier)
+            .signIn(email: credentials.email, password: credentials.password),
       );
     } on Exception catch (e) {
       if (!mounted) return;
-      final isNotEnrolled = e.toString().contains('noAvailableEnrollment') ||
+      final isNotEnrolled =
+          e.toString().contains('noAvailableEnrollment') ||
           e.toString().contains('NotEnrolled');
       final message = isNotEnrolled
           ? l10n.biometricNotEnrolled
@@ -308,8 +315,9 @@ class _LoginPageState extends ConsumerState<LoginPage>
       ),
     );
     if (confirmed != true || !mounted) return;
-    final accounts =
-        await ref.read(savedAccountsStoreProvider).removeAccount(account.email);
+    final accounts = await ref
+        .read(savedAccountsStoreProvider)
+        .removeAccount(account.email);
     if (mounted) {
       setState(() => _savedAccounts = accounts);
       context.showAppSnackBar(l10n.accountRemoved);
@@ -335,8 +343,7 @@ class _LoginPageState extends ConsumerState<LoginPage>
           deviceLockNotifier.markUnlocked();
           await _handlePostLoginNavigation(user);
         },
-        guest: () =>
-            context.go(postAuthRoute(ref.read(appFlavorProvider))),
+        guest: () => context.go(postAuthRoute(ref.read(appFlavorProvider))),
         error: (msg) {
           _postLoginHandled = false;
           _pendingSaveAccount = false;
@@ -366,7 +373,8 @@ class _LoginPageState extends ConsumerState<LoginPage>
             child: AnimatedBuilder(
               animation: _shakeAnimation,
               builder: (context, child) {
-                final shake = sin(_shakeAnimation.value * 3 * 3.14159) *
+                final shake =
+                    sin(_shakeAnimation.value * 3 * 3.14159) *
                     8 *
                     (1 - _shakeAnimation.value);
                 return Transform.translate(
@@ -383,7 +391,8 @@ class _LoginPageState extends ConsumerState<LoginPage>
                   padding: const EdgeInsets.symmetric(horizontal: 24),
                   child: ConstrainedBox(
                     constraints: BoxConstraints(
-                      minHeight: MediaQuery.of(context).size.height -
+                      minHeight:
+                          MediaQuery.of(context).size.height -
                           MediaQuery.of(context).padding.vertical,
                     ),
                     child: Column(
@@ -405,7 +414,9 @@ class _LoginPageState extends ConsumerState<LoginPage>
                         ],
                         if (_biometricAvailable) ...[
                           _BiometricButton(
-                            onPressed: isLoading ? null : _authenticateWithBiometric,
+                            onPressed: isLoading
+                                ? null
+                                : _authenticateWithBiometric,
                           ),
                           const SizedBox(height: 32),
                         ],
@@ -525,8 +536,8 @@ class _LoginPageState extends ConsumerState<LoginPage>
                 final account = _savedAccounts[index];
                 return _SavedAccountChip(
                   account: account,
-                  selected: account.key ==
-                      _emailController.text.trim().toLowerCase(),
+                  selected:
+                      account.key == _emailController.text.trim().toLowerCase(),
                   onTap: () {
                     setState(() => _emailController.text = account.email);
                     _emailController.selection = TextSelection(
@@ -567,8 +578,7 @@ class _LoginPageState extends ConsumerState<LoginPage>
             focusNode: _passwordFocusNode,
             validator: (v) => AppValidators.password(v),
             suffix: GestureDetector(
-              onTap: () =>
-                  setState(() => _obscurePassword = !_obscurePassword),
+              onTap: () => setState(() => _obscurePassword = !_obscurePassword),
               child: Icon(
                 _obscurePassword
                     ? Icons.visibility_off_rounded
@@ -708,28 +718,19 @@ class _LightTextField extends StatelessWidget {
         fillColor: Colors.white.withValues(alpha: 0.14),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(18),
-          borderSide: BorderSide(
-            color: Colors.white.withValues(alpha: 0.2),
-          ),
+          borderSide: BorderSide(color: Colors.white.withValues(alpha: 0.2)),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(18),
-          borderSide: BorderSide(
-            color: Colors.white.withValues(alpha: 0.2),
-          ),
+          borderSide: BorderSide(color: Colors.white.withValues(alpha: 0.2)),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(18),
-          borderSide: const BorderSide(
-            color: Color(0xFFD8A84E),
-            width: 1.6,
-          ),
+          borderSide: const BorderSide(color: Color(0xFFD8A84E), width: 1.6),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(18),
-          borderSide: BorderSide(
-            color: Theme.of(context).colorScheme.error,
-          ),
+          borderSide: BorderSide(color: Theme.of(context).colorScheme.error),
         ),
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 18,
@@ -761,10 +762,7 @@ class _LoginButton extends StatelessWidget {
         decoration: BoxDecoration(
           gradient: onPressed != null
               ? const LinearGradient(
-                  colors: [
-                    AppColors.brandPurple,
-                    Color(0xFF6B5CE7),
-                  ],
+                  colors: [AppColors.brandPurple, Color(0xFF6B5CE7)],
                 )
               : null,
           color: onPressed == null
@@ -830,8 +828,7 @@ class _SavedAccountChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final email = account.email.trim();
-    final initial =
-        email.isEmpty ? '?' : email.substring(0, 1).toUpperCase();
+    final initial = email.isEmpty ? '?' : email.substring(0, 1).toUpperCase();
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -859,8 +856,9 @@ class _SavedAccountChip extends StatelessWidget {
                   children: [
                     CircleAvatar(
                       radius: 18,
-                      backgroundColor:
-                          AppColors.brandPurple.withValues(alpha: 0.2),
+                      backgroundColor: AppColors.brandPurple.withValues(
+                        alpha: 0.2,
+                      ),
                       child: Text(
                         initial,
                         style: const TextStyle(

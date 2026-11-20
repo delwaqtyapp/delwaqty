@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:math' as math;
 import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -40,7 +41,10 @@ final _homeServiceCategoriesProvider = FutureProvider<List<ServiceCategory>>((
   final repo = ref.watch(cachedServiceBookingRepositoryProvider);
   final all = await repo.getCategories();
   final sorted = [...all]
-    ..sort((a, b) => serviceCategoryRank(a.type).compareTo(serviceCategoryRank(b.type)));
+    ..sort(
+      (a, b) =>
+          serviceCategoryRank(a.type).compareTo(serviceCategoryRank(b.type)),
+    );
   return sorted;
 });
 
@@ -50,13 +54,7 @@ const _tileLabelHeight = 32.0;
 void _precacheImageUrls(BuildContext context, Iterable<String> urls) {
   for (final url in urls) {
     if (url.isEmpty) continue;
-    unawaited(
-      precacheImage(
-        NetworkImage(url),
-        context,
-        onError: (_, _) {},
-      ),
-    );
+    unawaited(precacheImage(NetworkImage(url), context, onError: (_, _) {}));
   }
 }
 
@@ -408,8 +406,9 @@ class _EgyptHeroState extends State<_EgyptHero>
                   decoration: BoxDecoration(
                     color: Colors.white.withValues(alpha: 0.18),
                     borderRadius: BorderRadius.circular(14),
-                    border:
-                        Border.all(color: Colors.white.withValues(alpha: 0.3)),
+                    border: Border.all(
+                      color: Colors.white.withValues(alpha: 0.3),
+                    ),
                     boxShadow: const [
                       BoxShadow(
                         color: Color(0x22000000),
@@ -533,10 +532,7 @@ class _EgyptHeroState extends State<_EgyptHero>
 }
 
 class _MarqueeLocationText extends StatefulWidget {
-  const _MarqueeLocationText({
-    required this.text,
-    required this.style,
-  });
+  const _MarqueeLocationText({required this.text, required this.style});
 
   final String text;
   final TextStyle style;
@@ -675,16 +671,8 @@ class _MarqueeLocationTextState extends State<_MarqueeLocationText>
           blendMode: BlendMode.dstIn,
           shaderCallback: (bounds) => LinearGradient(
             colors: isRtl
-                ? const [
-                    Colors.transparent,
-                    Colors.white,
-                    Colors.white,
-                  ]
-                : const [
-                    Colors.white,
-                    Colors.white,
-                    Colors.transparent,
-                  ],
+                ? const [Colors.transparent, Colors.white, Colors.white]
+                : const [Colors.white, Colors.white, Colors.transparent],
             stops: isRtl ? const [0.0, 0.10, 1.0] : const [0.0, 0.90, 1.0],
           ).createShader(bounds),
           child: SingleChildScrollView(
@@ -705,10 +693,7 @@ class _MarqueeLocationTextState extends State<_MarqueeLocationText>
 }
 
 class _PremiumTypewriterSearchBar extends StatefulWidget {
-  const _PremiumTypewriterSearchBar({
-    required this.l10n,
-    required this.onTap,
-  });
+  const _PremiumTypewriterSearchBar({required this.l10n, required this.onTap});
 
   final AppLocalizations l10n;
   final void Function(Rect? anchor) onTap;
@@ -879,10 +864,7 @@ class _PremiumTypewriterSearchBarState
                               fontWeight: FontWeight.w500,
                               fontSize: 13.5,
                               shadows: const [
-                                Shadow(
-                                  color: Color(0x55000000),
-                                  blurRadius: 4,
-                                ),
+                                Shadow(color: Color(0x55000000), blurRadius: 4),
                               ],
                             ),
                             maxLines: 1,
@@ -950,11 +932,7 @@ class _GlassSearchPopupController {
 
   static OverlayEntry? _entry;
 
-  static void open(
-    BuildContext context,
-    WidgetRef ref, {
-    Rect? anchor,
-  }) {
+  static void open(BuildContext context, WidgetRef ref, {Rect? anchor}) {
     if (_entry != null) return;
 
     final router = GoRouter.maybeOf(context);
@@ -1062,9 +1040,7 @@ class _GlassSearchPopupOverlayState extends State<_GlassSearchPopupOverlay>
             child: GestureDetector(
               onTap: _close,
               behavior: HitTestBehavior.translucent,
-              child: ColoredBox(
-                color: Colors.black.withValues(alpha: 0.14),
-              ),
+              child: ColoredBox(color: Colors.black.withValues(alpha: 0.14)),
             ),
           ),
           Positioned(
@@ -1101,10 +1077,7 @@ class _GlassSearchPopupOverlayState extends State<_GlassSearchPopupOverlay>
 }
 
 class _GlassSearchPopupPanel extends ConsumerStatefulWidget {
-  const _GlassSearchPopupPanel({
-    required this.onClose,
-    required this.router,
-  });
+  const _GlassSearchPopupPanel({required this.onClose, required this.router});
 
   final Future<void> Function([VoidCallback? afterClose]) onClose;
   final GoRouter? router;
@@ -1171,8 +1144,8 @@ class _GlassSearchPopupPanelState
 
     final matchedCategories = categories.where((c) {
       if (q.isEmpty) return true;
-      final combined =
-          '${c.name} ${c.nameAr ?? ''} ${c.nameEn ?? ''}'.toLowerCase();
+      final combined = '${c.name} ${c.nameAr ?? ''} ${c.nameEn ?? ''}'
+          .toLowerCase();
       return combined.contains(q);
     }).toList();
 
@@ -1187,24 +1160,27 @@ class _GlassSearchPopupPanelState
       }
     }
 
-    final matchedEntries = combinedEntries.where((entry) {
-      if (q.isEmpty) return true;
-      if (entry is MerchantDiscoveryEntry) {
-        final m = entry.merchant;
-        final tLabel = merchantTypeLabel(m.type, l10n).toLowerCase();
-        return m.name.toLowerCase().contains(q) ||
-            tLabel.contains(q) ||
-            (m.description?.toLowerCase().contains(q) ?? false);
-      }
-      if (entry is ProviderDiscoveryEntry) {
-        final p = entry.provider;
-        final tLabel = serviceTypeLabel(p.categoryType, l10n).toLowerCase();
-        return p.name.toLowerCase().contains(q) ||
-            tLabel.contains(q) ||
-            (p.description?.toLowerCase().contains(q) ?? false);
-      }
-      return false;
-    }).take(10).toList();
+    final matchedEntries = combinedEntries
+        .where((entry) {
+          if (q.isEmpty) return true;
+          if (entry is MerchantDiscoveryEntry) {
+            final m = entry.merchant;
+            final tLabel = merchantTypeLabel(m.type, l10n).toLowerCase();
+            return m.name.toLowerCase().contains(q) ||
+                tLabel.contains(q) ||
+                (m.description?.toLowerCase().contains(q) ?? false);
+          }
+          if (entry is ProviderDiscoveryEntry) {
+            final p = entry.provider;
+            final tLabel = serviceTypeLabel(p.categoryType, l10n).toLowerCase();
+            return p.name.toLowerCase().contains(q) ||
+                tLabel.contains(q) ||
+                (p.description?.toLowerCase().contains(q) ?? false);
+          }
+          return false;
+        })
+        .take(10)
+        .toList();
 
     return DecoratedBox(
       decoration: BoxDecoration(
@@ -1300,10 +1276,7 @@ class _GlassSearchPopupPanelState
                     ],
                   ),
                 ),
-                Divider(
-                  height: 1,
-                  color: Colors.white.withValues(alpha: 0.28),
-                ),
+                Divider(height: 1, color: Colors.white.withValues(alpha: 0.28)),
                 Flexible(
                   child: SingleChildScrollView(
                     padding: const EdgeInsets.fromLTRB(12, 10, 12, 12),
@@ -1376,9 +1349,9 @@ class _GlassSearchPopupPanelState
                                             '/home-services/providers/${sType.name}',
                                           );
                                         } else if (mType?.name == 'home' ||
-                                            combined
-                                                .toLowerCase()
-                                                .contains('home service')) {
+                                            combined.toLowerCase().contains(
+                                              'home service',
+                                            )) {
                                           _navigateTo('/home-services');
                                         } else {
                                           _navigateTo(
@@ -1562,9 +1535,7 @@ class _GlassSearchPopupPanelState
             decoration: BoxDecoration(
               color: Colors.white.withValues(alpha: 0.14),
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(
-                color: Colors.white.withValues(alpha: 0.24),
-              ),
+              border: Border.all(color: Colors.white.withValues(alpha: 0.24)),
             ),
             child: Row(
               children: [
@@ -1721,8 +1692,7 @@ class _DirectOrderButtonState extends State<_DirectOrderButton>
                   IgnorePointer(
                     child: LayoutBuilder(
                       builder: (context, constraints) {
-                        final shiftX =
-                            (t * 2.6 - 0.8) * constraints.maxWidth;
+                        final shiftX = (t * 2.6 - 0.8) * constraints.maxWidth;
                         return Align(
                           alignment: Alignment.centerLeft,
                           child: Transform.translate(
@@ -1921,8 +1891,7 @@ class _CompactCategories extends StatelessWidget {
   Widget build(BuildContext context) {
     final categoriesAsync = ref.watch(activeCategoriesProvider);
     final servicesAsync = ref.watch(_homeServiceCategoriesProvider);
-    final dbServices =
-        servicesAsync.asData?.value ?? const <ServiceCategory>[];
+    final dbServices = servicesAsync.asData?.value ?? const <ServiceCategory>[];
 
     return AnimatedFadeIn(
       delay: const Duration(milliseconds: 250),
@@ -1938,10 +1907,8 @@ class _CompactCategories extends StatelessWidget {
               context,
               _mergeItems(const <PlatformCategory>[], dbServices),
             ),
-            data: (categories) => _buildStrip(
-              context,
-              _mergeItems(categories, dbServices),
-            ),
+            data: (categories) =>
+                _buildStrip(context, _mergeItems(categories, dbServices)),
           ),
         ],
       ),
@@ -1954,11 +1921,10 @@ class _CompactCategories extends StatelessWidget {
   ) {
     final sortedCategories = [...categories]
       ..sort(
-        (a, b) => categoryRank(
-          '${a.name} ${a.nameAr ?? ''} ${a.nameEn ?? ''}',
-        ).compareTo(
-          categoryRank('${b.name} ${b.nameAr ?? ''} ${b.nameEn ?? ''}'),
-        ),
+        (a, b) => categoryRank('${a.name} ${a.nameAr ?? ''} ${a.nameEn ?? ''}')
+            .compareTo(
+              categoryRank('${b.name} ${b.nameAr ?? ''} ${b.nameEn ?? ''}'),
+            ),
       );
 
     final representedServices = <ServiceCategoryType>{};
@@ -2165,10 +2131,7 @@ class _PlayfulServiceCardReveal extends StatelessWidget {
           opacity: safeOpacity,
           child: Transform.translate(
             offset: Offset(0, slideY),
-            child: Transform.scale(
-              scale: scale,
-              child: animatedChild,
-            ),
+            child: Transform.scale(scale: scale, child: animatedChild),
           ),
         );
       },
@@ -2212,9 +2175,7 @@ class _DiscoveryTabsState extends ConsumerState<_DiscoveryTabs> {
         decoration: BoxDecoration(
           color: cs.surfaceContainerHighest.withValues(alpha: 0.45),
           borderRadius: BorderRadius.circular(999),
-          border: Border.all(
-            color: cs.outlineVariant.withValues(alpha: 0.25),
-          ),
+          border: Border.all(color: cs.outlineVariant.withValues(alpha: 0.25)),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withValues(alpha: 0.04),
@@ -2659,9 +2620,7 @@ class _PromoSlide extends ConsumerWidget {
           end: Alignment.bottomRight,
           colors: colors,
         ),
-        border: Border.all(
-          color: Colors.white.withValues(alpha: 0.22),
-        ),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.22)),
         boxShadow: [
           BoxShadow(
             color: colors.first.withValues(alpha: 0.34),
@@ -2840,9 +2799,7 @@ class _HomeDiscoveryListCard extends StatelessWidget {
               height: 108,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(18),
-                border: Border.all(
-                  color: color.withValues(alpha: 0.18),
-                ),
+                border: Border.all(color: color.withValues(alpha: 0.18)),
               ),
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(17),

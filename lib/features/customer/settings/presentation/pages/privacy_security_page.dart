@@ -15,7 +15,8 @@ class PrivacySecurityPage extends ConsumerWidget {
     final l10n = AppLocalizations.of(context);
     final cs = context.colorScheme;
     final authState = ref.watch(authStateProvider);
-    final isBiometricEnabled = authState.whenOrNull(
+    final isBiometricEnabled =
+        authState.whenOrNull(
           authenticated: (user) => user.isBiometricEnabled,
         ) ??
         false;
@@ -226,9 +227,7 @@ class PrivacySecurityPage extends ConsumerWidget {
           clipBehavior: Clip.antiAlias,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
-            side: BorderSide(
-              color: cs.outlineVariant.withValues(alpha: 0.45),
-            ),
+            side: BorderSide(color: cs.outlineVariant.withValues(alpha: 0.45)),
           ),
           child: Column(children: children),
         ),
@@ -277,10 +276,7 @@ class PrivacySecurityPage extends ConsumerWidget {
             trailingWidget,
             const SizedBox(width: 6),
           ],
-          Icon(
-            Icons.chevron_right_rounded,
-            color: cs.onSurfaceVariant,
-          ),
+          Icon(Icons.chevron_right_rounded, color: cs.onSurfaceVariant),
         ],
       ),
       onTap: onTap,
@@ -298,10 +294,7 @@ class PrivacySecurityPage extends ConsumerWidget {
 }
 
 class _StatusPill extends StatelessWidget {
-  const _StatusPill({
-    required this.label,
-    required this.isActive,
-  });
+  const _StatusPill({required this.label, required this.isActive});
 
   final String label;
   final bool isActive;

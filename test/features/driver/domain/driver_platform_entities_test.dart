@@ -50,8 +50,16 @@ void main() {
 
     test('vehicle category types for future-proofing', () {
       final categories = [
-        'economy', 'comfort', 'premium', 'xl',
-        'motorbike', 'taxi', 'motorcycle', 'scooter', 'van', 'pickup',
+        'economy',
+        'comfort',
+        'premium',
+        'xl',
+        'motorbike',
+        'taxi',
+        'motorcycle',
+        'scooter',
+        'van',
+        'pickup',
       ];
       for (final cat in categories) {
         final v = Vehicle(
@@ -89,8 +97,12 @@ void main() {
 
     test('all doc types', () {
       final types = [
-        'identity', 'driving_license', 'vehicle_registration',
-        'insurance', 'vehicle_photo', 'profile_photo',
+        'identity',
+        'driving_license',
+        'vehicle_registration',
+        'insurance',
+        'vehicle_photo',
+        'profile_photo',
       ];
       for (final t in types) {
         final d = DriverDocument(
@@ -105,15 +117,24 @@ void main() {
 
     test('document status states', () {
       final pending = DriverDocument(
-        id: 'd1', driverId: 'd1', docType: 'identity', createdAt: DateTime(2026),
+        id: 'd1',
+        driverId: 'd1',
+        docType: 'identity',
+        createdAt: DateTime(2026),
       );
       final verified = DriverDocument(
-        id: 'd2', driverId: 'd1', docType: 'identity',
-        status: 'verified', createdAt: DateTime(2026),
+        id: 'd2',
+        driverId: 'd1',
+        docType: 'identity',
+        status: 'verified',
+        createdAt: DateTime(2026),
       );
       final rejected = DriverDocument(
-        id: 'd3', driverId: 'd1', docType: 'identity',
-        status: 'rejected', rejectionReason: 'Blurry image',
+        id: 'd3',
+        driverId: 'd1',
+        docType: 'identity',
+        status: 'rejected',
+        rejectionReason: 'Blurry image',
         createdAt: DateTime(2026),
       );
       expect(pending.status, 'pending');

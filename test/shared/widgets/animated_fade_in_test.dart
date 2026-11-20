@@ -9,11 +9,7 @@ void main() {
     testWidgets('renders child widget', (tester) async {
       await tester.pumpWidget(
         const MaterialApp(
-          home: Scaffold(
-            body: AnimatedFadeIn(
-              child: Text('Hello'),
-            ),
-          ),
+          home: Scaffold(body: AnimatedFadeIn(child: Text('Hello'))),
         ),
       );
       expect(find.text('Hello'), findsOneWidget);
@@ -24,10 +20,7 @@ void main() {
       await tester.pumpWidget(
         const MaterialApp(
           home: Scaffold(
-            body: AnimatedFadeIn(
-              key: fadeKey,
-              child: Text('Animated'),
-            ),
+            body: AnimatedFadeIn(key: fadeKey, child: Text('Animated')),
           ),
         ),
       );
@@ -59,11 +52,7 @@ void main() {
     testWidgets('renders child widget', (tester) async {
       await tester.pumpWidget(
         const MaterialApp(
-          home: Scaffold(
-            body: AnimatedSlideIn(
-              child: Text('Slide In'),
-            ),
-          ),
+          home: Scaffold(body: AnimatedSlideIn(child: Text('Slide In'))),
         ),
       );
       expect(find.text('Slide In'), findsOneWidget);
@@ -109,11 +98,7 @@ void main() {
     testWidgets('renders child widget', (tester) async {
       await tester.pumpWidget(
         const MaterialApp(
-          home: Scaffold(
-            body: GradientBackground(
-              child: Text('Content'),
-            ),
-          ),
+          home: Scaffold(body: GradientBackground(child: Text('Content'))),
         ),
       );
       expect(find.text('Content'), findsOneWidget);
@@ -122,11 +107,7 @@ void main() {
     testWidgets('applies gradient decoration', (tester) async {
       await tester.pumpWidget(
         const MaterialApp(
-          home: Scaffold(
-            body: GradientBackground(
-              child: SizedBox(),
-            ),
-          ),
+          home: Scaffold(body: GradientBackground(child: SizedBox())),
         ),
       );
       expect(find.byType(DecoratedBox), findsWidgets);

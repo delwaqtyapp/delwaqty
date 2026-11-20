@@ -123,9 +123,7 @@ class _AdminTransactionLedgerPageState
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12),
               decoration: BoxDecoration(
-                border: Border.all(
-                  color: cs.outlineVariant,
-                ),
+                border: Border.all(color: cs.outlineVariant),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: DropdownButtonHideUnderline(
@@ -194,14 +192,8 @@ class _AdminTransactionLedgerPageState
         return AnimatedFadeIn(
           delay: Duration(milliseconds: index * 30),
           child: Padding(
-            padding: EdgeInsets.only(
-              bottom: index < items.length - 1 ? 8 : 0,
-            ),
-            child: _LedgerItemTile(
-              item: item,
-              l10n: l10n,
-              cs: cs,
-            ),
+            padding: EdgeInsets.only(bottom: index < items.length - 1 ? 8 : 0),
+            child: _LedgerItemTile(item: item, l10n: l10n, cs: cs),
           ),
         );
       },
@@ -329,7 +321,8 @@ class _LedgerItemTile extends StatelessWidget {
             children: [
               _AmountColumn(
                 label: l10n.amount,
-                value: '${item.grossAmount.toStringAsFixed(2)} ${item.currency}',
+                value:
+                    '${item.grossAmount.toStringAsFixed(2)} ${item.currency}',
                 cs: cs,
               ),
               const SizedBox(width: 12),
@@ -342,7 +335,8 @@ class _LedgerItemTile extends StatelessWidget {
               const SizedBox(width: 12),
               _AmountColumn(
                 label: l10n.netLabel,
-                value: '${item.commissionAmount.toStringAsFixed(2)} ${item.currency}',
+                value:
+                    '${item.commissionAmount.toStringAsFixed(2)} ${item.currency}',
                 cs: cs,
               ),
               const Spacer(),
@@ -406,16 +400,12 @@ class _AmountColumn extends StatelessWidget {
       children: [
         Text(
           label,
-          style: AppTextStyles.labelSmall.copyWith(
-            color: cs.onSurfaceVariant,
-          ),
+          style: AppTextStyles.labelSmall.copyWith(color: cs.onSurfaceVariant),
         ),
         Text(
           value,
           style: (isSmall ? AppTextStyles.labelMedium : AppTextStyles.bodySmall)
-              .copyWith(
-            fontWeight: FontWeight.w600,
-          ),
+              .copyWith(fontWeight: FontWeight.w600),
         ),
       ],
     );

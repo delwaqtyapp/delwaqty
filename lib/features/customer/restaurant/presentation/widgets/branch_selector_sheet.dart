@@ -36,7 +36,9 @@ class BranchSelectorSheet extends StatelessWidget {
                 height: 4,
                 margin: const EdgeInsets.only(top: 12),
                 decoration: BoxDecoration(
-                  color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.3),
+                  color: theme.colorScheme.onSurfaceVariant.withValues(
+                    alpha: 0.3,
+                  ),
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -44,7 +46,9 @@ class BranchSelectorSheet extends StatelessWidget {
                 padding: const EdgeInsets.all(16),
                 child: Text(
                   l10n.selectBranch,
-                  style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
               Expanded(
@@ -110,7 +114,9 @@ class _BranchTile extends StatelessWidget {
                   decoration: BoxDecoration(
                     color: isSelected
                         ? theme.colorScheme.primary
-                        : theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.1),
+                        : theme.colorScheme.onSurfaceVariant.withValues(
+                            alpha: 0.1,
+                          ),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Icon(
@@ -138,9 +144,14 @@ class _BranchTile extends StatelessWidget {
                           ),
                           if (isPrimary)
                             Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 6,
+                                vertical: 2,
+                              ),
                               decoration: BoxDecoration(
-                                color: theme.colorScheme.primary.withValues(alpha: 0.1),
+                                color: theme.colorScheme.primary.withValues(
+                                  alpha: 0.1,
+                                ),
                                 borderRadius: BorderRadius.circular(4),
                               ),
                               child: Text(
@@ -169,9 +180,17 @@ class _BranchTile extends StatelessWidget {
                 ),
                 const SizedBox(width: 8),
                 if (isSelected)
-                  Icon(Icons.check_circle, color: theme.colorScheme.primary, size: 20)
+                  Icon(
+                    Icons.check_circle,
+                    color: theme.colorScheme.primary,
+                    size: 20,
+                  )
                 else
-                  Icon(Icons.chevron_right, color: theme.colorScheme.onSurfaceVariant, size: 20),
+                  Icon(
+                    Icons.chevron_right,
+                    color: theme.colorScheme.onSurfaceVariant,
+                    size: 20,
+                  ),
               ],
             ),
           ),

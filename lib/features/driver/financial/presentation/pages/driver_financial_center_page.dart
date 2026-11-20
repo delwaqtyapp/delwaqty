@@ -17,8 +17,7 @@ class DriverFinancialCenterPage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final authState = ref.watch(authStateProvider);
-    final userId =
-        authState is AuthAuthenticated ? authState.user.id : null;
+    final userId = authState is AuthAuthenticated ? authState.user.id : null;
     if (userId == null) {
       return Scaffold(
         appBar: AppBar(title: Text(l10n.financialCenter)),
@@ -121,8 +120,7 @@ class DriverFinancialCenterPage extends ConsumerWidget {
             ),
             earnings.when(
               data: (list) {
-                final gross =
-                    list.fold<double>(0, (sum, e) => sum + e.amount);
+                final gross = list.fold<double>(0, (sum, e) => sum + e.amount);
                 final rate = summary.maybeWhen(
                   data: (s) => s.commissionRate,
                   orElse: () => 0.0,
@@ -167,8 +165,7 @@ class DriverFinancialCenterPage extends ConsumerWidget {
                             (t) => ListTile(
                               title: Text(t.description),
                               subtitle: Text(t.type),
-                              trailing:
-                                  Text(t.amount.toStringAsFixed(2)),
+                              trailing: Text(t.amount.toStringAsFixed(2)),
                             ),
                           )
                           .toList(),
@@ -194,7 +191,9 @@ class DriverFinancialCenterPage extends ConsumerWidget {
                               title: Text(
                                 '${t.amount.toStringAsFixed(2)} ${t.currency}',
                               ),
-                              subtitle: Text('${t.status} · ${t.paymentMethod}'),
+                              subtitle: Text(
+                                '${t.status} · ${t.paymentMethod}',
+                              ),
                               trailing: t.rejectionReason != null
                                   ? Text(t.rejectionReason!)
                                   : null,
@@ -219,6 +218,6 @@ class _StatCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Card(
-        child: ListTile(title: Text(title), subtitle: Text(value)),
-      );
+    child: ListTile(title: Text(title), subtitle: Text(value)),
+  );
 }

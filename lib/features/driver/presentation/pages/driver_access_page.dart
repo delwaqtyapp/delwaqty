@@ -20,8 +20,7 @@ class DriverAccessPage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final authState = ref.watch(authStateProvider);
-    final userId =
-        authState is AuthAuthenticated ? authState.user.id : null;
+    final userId = authState is AuthAuthenticated ? authState.user.id : null;
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.deliveryAccess)),
@@ -80,7 +79,8 @@ class _AccessBodyState extends State<_AccessBody> {
           );
         }
         final data = snap.data;
-        final role = (data?['role_key'] as String?) ??
+        final role =
+            (data?['role_key'] as String?) ??
             (data?['role'] as String?) ??
             'delivery';
         final status = (data?['status'] as String?) ?? 'active';

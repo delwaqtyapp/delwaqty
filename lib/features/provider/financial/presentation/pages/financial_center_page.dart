@@ -111,7 +111,9 @@ class FinancialCenterPage extends ConsumerWidget {
                         borderRadius: BorderRadius.circular(20),
                         boxShadow: [
                           BoxShadow(
-                            color: AppColors.brandPurple.withValues(alpha: 0.28),
+                            color: AppColors.brandPurple.withValues(
+                              alpha: 0.28,
+                            ),
                             blurRadius: 16,
                             offset: const Offset(0, 6),
                           ),
@@ -131,9 +133,7 @@ class FinancialCenterPage extends ConsumerWidget {
                           const SizedBox(height: 6),
                           Text(
                             '${s.balance.toStringAsFixed(2)} ${l10n.currencySymbol}',
-                            style: Theme.of(context)
-                                .textTheme
-                                .headlineMedium
+                            style: Theme.of(context).textTheme.headlineMedium
                                 ?.copyWith(
                                   color: Colors.white,
                                   fontWeight: FontWeight.bold,
@@ -145,7 +145,8 @@ class FinancialCenterPage extends ConsumerWidget {
                               Expanded(
                                 child: _HeroPill(
                                   label: l10n.commissionRate,
-                                  value: '${s.commissionRate.toStringAsFixed(1)}%',
+                                  value:
+                                      '${s.commissionRate.toStringAsFixed(1)}%',
                                 ),
                               ),
                               const SizedBox(width: 10),
@@ -164,10 +165,13 @@ class FinancialCenterPage extends ConsumerWidget {
                               style: FilledButton.styleFrom(
                                 backgroundColor: Colors.white,
                                 foregroundColor: AppColors.brandPurple,
-                                padding: const EdgeInsets.symmetric(vertical: 12),
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 12,
+                                ),
                               ),
-                              onPressed: () => context
-                                  .push('/provider-financial-center/topup'),
+                              onPressed: () => context.push(
+                                '/provider-financial-center/topup',
+                              ),
                               icon: const Icon(Icons.add_card_rounded),
                               label: Text(
                                 l10n.requestTopUp,
@@ -236,9 +240,8 @@ class FinancialCenterPage extends ConsumerWidget {
                   const SizedBox(height: 18),
                   Text(
                     l10n.recentTransactions,
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
+                    style: Theme.of(context).textTheme.titleMedium
+                        ?.copyWith(fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 8),
                   if (s.recentTransactions.isEmpty)
@@ -286,9 +289,8 @@ class FinancialCenterPage extends ConsumerWidget {
             const SizedBox(height: 18),
             Text(
               l10n.topUpHistory,
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+              style: Theme.of(context).textTheme.titleMedium
+                  ?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
             topups.when(
@@ -308,14 +310,17 @@ class FinancialCenterPage extends ConsumerWidget {
                     )
                   : Column(
                       children: list.map((t) {
-                        final (statusText, statusColor) =
-                            _localizedStatus(l10n, t.status);
+                        final (statusText, statusColor) = _localizedStatus(
+                          l10n,
+                          t.status,
+                        );
                         return Card(
                           margin: const EdgeInsets.only(bottom: 8),
                           child: ListTile(
                             leading: CircleAvatar(
-                              backgroundColor:
-                                  statusColor.withValues(alpha: 0.12),
+                              backgroundColor: statusColor.withValues(
+                                alpha: 0.12,
+                              ),
                               child: Icon(
                                 Icons.receipt_rounded,
                                 color: statusColor,
@@ -323,8 +328,9 @@ class FinancialCenterPage extends ConsumerWidget {
                             ),
                             title: Text(
                               '${t.amount.toStringAsFixed(2)} ${l10n.currencySymbol}',
-                              style:
-                                  const TextStyle(fontWeight: FontWeight.bold),
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                             subtitle: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,

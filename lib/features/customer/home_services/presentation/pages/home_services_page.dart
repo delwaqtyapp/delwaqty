@@ -107,9 +107,8 @@ class HomeServicesPage extends ConsumerWidget {
           final category = categories[index];
           return _CategoryCard(
             category: category,
-            onTap: () => context.push(
-              '/home-services/providers/${category.type.name}',
-            ),
+            onTap: () =>
+                context.push('/home-services/providers/${category.type.name}'),
           );
         },
       ),
@@ -169,16 +168,15 @@ class _CategoryCard extends StatelessWidget {
     final isRtl = Directionality.of(context) == TextDirection.rtl;
     final name = isRtl ? category.nameAr : category.nameEn;
 
-return AnimatedFadeIn(
+    return AnimatedFadeIn(
       child: GestureDetector(
         onTap: onTap,
         child: Stack(
           children: [
             Container(
               decoration: BoxDecoration(
-                color: Theme.of(
-                  context,
-                ).colorScheme.surfaceContainerHighest.withValues(alpha: 0.35),
+                color: Theme.of(context).colorScheme.surfaceContainerHighest
+                    .withValues(alpha: 0.35),
                 borderRadius: BorderRadius.circular(20),
                 border: Border.all(color: color.withValues(alpha: 0.2)),
               ),
@@ -227,9 +225,7 @@ return AnimatedFadeIn(
               child: ServiceReviewsButton(
                 categoryType: category.type,
                 iconSize: 20,
-                tooltipLabel: AppLocalizations.of(
-                  context,
-                ).rateService,
+                tooltipLabel: AppLocalizations.of(context).rateService,
               ),
             ),
           ],

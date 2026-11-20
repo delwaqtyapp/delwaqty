@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:delwaqty/core/theme/app_text_styles.dart';
+
 import 'sidebar_theme.dart';
 
 class FooterCard extends StatelessWidget {
-  const FooterCard({
-    super.key,
-    required this.children,
-  });
+  const FooterCard({super.key, required this.children});
 
   final List<Widget> children;
 
@@ -21,15 +19,9 @@ class FooterCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: st.quickSettingsBackground,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: st.dividerColor,
-          width: 0.5,
-        ),
+        border: Border.all(color: st.dividerColor, width: 0.5),
       ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: children,
-      ),
+      child: Column(mainAxisSize: MainAxisSize.min, children: children),
     );
   }
 }
@@ -76,7 +68,9 @@ class FooterTile extends StatelessWidget {
                   child: Icon(
                     icon,
                     size: 18,
-                    color: isDestructive ? st.selectedGradientStart : st.iconColor,
+                    color: isDestructive
+                        ? st.selectedGradientStart
+                        : st.iconColor,
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -84,9 +78,13 @@ class FooterTile extends StatelessWidget {
                   child: Text(
                     label,
                     style: AppTextStyles.labelMedium.copyWith(
-                      color: isDestructive ? st.selectedGradientStart : st.textPrimary,
+                      color: isDestructive
+                          ? st.selectedGradientStart
+                          : st.textPrimary,
                       fontSize: 13,
-                      fontWeight: isDestructive ? FontWeight.w600 : FontWeight.w500,
+                      fontWeight: isDestructive
+                          ? FontWeight.w600
+                          : FontWeight.w500,
                     ),
                   ),
                 ),
@@ -122,7 +120,11 @@ class AppVersionTile extends StatelessWidget {
         children: [
           SizedBox(
             width: 20,
-            child: Icon(Icons.info_outline_rounded, size: 16, color: st.iconColor),
+            child: Icon(
+              Icons.info_outline_rounded,
+              size: 16,
+              color: st.iconColor,
+            ),
           ),
           const SizedBox(width: 12),
           Text(

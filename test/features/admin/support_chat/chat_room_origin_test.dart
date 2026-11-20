@@ -5,10 +5,7 @@ import 'package:delwaqty/features/admin/support_chat/presentation/chat_origin_he
 import 'package:delwaqty/l10n/app_localizations.dart';
 
 void main() {
-  ChatRoom roomWith({
-    String? originType,
-    String? originLabel,
-  }) {
+  ChatRoom roomWith({String? originType, String? originLabel}) {
     return ChatRoom(
       id: 'r1',
       roomType: 'support',
@@ -61,21 +58,36 @@ void main() {
 
     test('maps customer / driver / admin origins', () {
       final l = l10n();
-      expect(chatOriginLabel(l, roomWith(originType: 'customer')), l.chatOriginCustomer);
-      expect(chatOriginLabel(l, roomWith(originType: 'driver')), l.chatOriginDriver);
-      expect(chatOriginLabel(l, roomWith(originType: 'admin')), l.chatOriginAdmin);
+      expect(
+        chatOriginLabel(l, roomWith(originType: 'customer')),
+        l.chatOriginCustomer,
+      );
+      expect(
+        chatOriginLabel(l, roomWith(originType: 'driver')),
+        l.chatOriginDriver,
+      );
+      expect(
+        chatOriginLabel(l, roomWith(originType: 'admin')),
+        l.chatOriginAdmin,
+      );
     });
 
     test('provider origin shows service type when label maps', () {
       final l = l10n();
-      final label = chatOriginLabel(l, roomWith(originType: 'provider', originLabel: 'doctor'));
+      final label = chatOriginLabel(
+        l,
+        roomWith(originType: 'provider', originLabel: 'doctor'),
+      );
       expect(label, contains(l.chatOriginProvider));
       expect(label, contains(l.serviceCategoryDoctor));
     });
 
     test('provider origin falls back to raw label for unknown types', () {
       final l = l10n();
-      final label = chatOriginLabel(l, roomWith(originType: 'provider', originLabel: 'home_services'));
+      final label = chatOriginLabel(
+        l,
+        roomWith(originType: 'provider', originLabel: 'home_services'),
+      );
       expect(label, contains('home_services'));
     });
   });

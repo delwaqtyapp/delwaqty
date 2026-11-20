@@ -60,7 +60,9 @@ class CartNotifier extends AsyncNotifier<Cart?> {
   }
 }
 
-final cartProvider = AsyncNotifierProvider<CartNotifier, Cart?>(CartNotifier.new);
+final cartProvider = AsyncNotifierProvider<CartNotifier, Cart?>(
+  CartNotifier.new,
+);
 
 /// Convenience view: just the cart, ignoring loading/error states.
 final currentCartProvider = Provider<Cart?>(

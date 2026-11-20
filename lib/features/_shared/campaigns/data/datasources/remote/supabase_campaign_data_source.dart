@@ -71,9 +71,7 @@ class SupabaseCampaignDataSource {
       priority: CampaignPriority.fromDb(row['priority'] as String?),
       imagePath: row['image_path'] as String?,
       cta: row['cta'] != null
-          ? CampaignCta.fromJson(
-              Map<String, dynamic>.from(row['cta'] as Map),
-            )
+          ? CampaignCta.fromJson(Map<String, dynamic>.from(row['cta'] as Map))
           : null,
     );
   }

@@ -140,10 +140,7 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage> {
         if (product == null) {
           return Scaffold(
             appBar: AppBar(title: Text(l10n.error)),
-            body: ErrorState(
-              message: l10n.noData,
-              onRetry: _retryLoadProduct,
-            ),
+            body: ErrorState(message: l10n.noData, onRetry: _retryLoadProduct),
           );
         }
 
@@ -155,15 +152,10 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage> {
                   .firstOrNull
             : null;
         final unitPrice = selectedVariant?.price ?? product.price;
-        final modifierTotal = _selectedModifierIds.fold<double>(
-          0,
-          (sum, id) {
-            final mod = _currentModifiers
-                .where((m) => m.id == id)
-                .firstOrNull;
-            return sum + (mod?.priceAdjustment ?? 0);
-          },
-        );
+        final modifierTotal = _selectedModifierIds.fold<double>(0, (sum, id) {
+          final mod = _currentModifiers.where((m) => m.id == id).firstOrNull;
+          return sum + (mod?.priceAdjustment ?? 0);
+        });
         final totalPrice = (unitPrice + modifierTotal) * _quantity;
 
         return Scaffold(
@@ -190,8 +182,8 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage> {
                       ],
                     ),
                   ),
-                  child: product.imageUrl != null &&
-                          product.imageUrl!.isNotEmpty
+                  child:
+                      product.imageUrl != null && product.imageUrl!.isNotEmpty
                       ? Image.network(
                           product.imageUrl!,
                           fit: BoxFit.cover,
@@ -289,7 +281,9 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage> {
                       const SizedBox(height: 10),
                       ...List.generate(_currentModifiers.length, (i) {
                         final mod = _currentModifiers[i];
-                        final isSelected = _selectedModifierIds.contains(mod.id);
+                        final isSelected = _selectedModifierIds.contains(
+                          mod.id,
+                        );
                         return AnimatedFadeIn(
                           delay: Duration(milliseconds: 500 + i * 40),
                           child: CheckboxListTile(

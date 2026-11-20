@@ -40,7 +40,8 @@ class AdminReviewsModerationPage extends ConsumerWidget {
           children: [
             _ReviewsList(
               provider: adminMerchantReviewsProvider,
-              onDelete: (id) => ref.read(adminServiceProvider).deleteMerchantReview(id),
+              onDelete: (id) =>
+                  ref.read(adminServiceProvider).deleteMerchantReview(id),
               emptyIcon: Icons.storefront_outlined,
               titleOf: (r) => [
                 '${(r['rating'] as num?)?.toInt() ?? 0} ★',
@@ -53,7 +54,8 @@ class AdminReviewsModerationPage extends ConsumerWidget {
             ),
             _ReviewsList(
               provider: adminServiceReviewsProvider,
-              onDelete: (id) => ref.read(adminServiceProvider).deleteServiceReview(id),
+              onDelete: (id) =>
+                  ref.read(adminServiceProvider).deleteServiceReview(id),
               emptyIcon: Icons.rate_review_outlined,
               titleOf: (r) => [
                 '${(r['rating'] as num?)?.toInt() ?? 0} ★ — ${r['category_type']}',
@@ -135,8 +137,11 @@ class _ReviewsList extends ConsumerWidget {
                     leading: const CircleAvatar(
                       radius: 18,
                       backgroundColor: AppColors.rating,
-                      child: Icon(Icons.star_rounded,
-                          color: Colors.white, size: 20),
+                      child: Icon(
+                        Icons.star_rounded,
+                        color: Colors.white,
+                        size: 20,
+                      ),
                     ),
                     title: Text(
                       lines.first,
@@ -161,7 +166,8 @@ class _ReviewsList extends ConsumerWidget {
                       tooltip: l10n.deleteReviewAction,
                       icon: const Icon(Icons.delete_outline_rounded),
                       color: Theme.of(context).colorScheme.error,
-                      onPressed: () => _confirmDelete(context, ref, review['id'] as String),
+                      onPressed: () =>
+                          _confirmDelete(context, ref, review['id'] as String),
                     ),
                   ),
                 ),

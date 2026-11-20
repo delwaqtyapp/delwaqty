@@ -51,8 +51,8 @@ class _DeviceUnlockPageState extends ConsumerState<DeviceUnlockPage> {
         _activeUserId = active != null && entries.any((e) => e.userId == active)
             ? active
             : entries.isNotEmpty
-                ? entries.first.userId
-                : null;
+            ? entries.first.userId
+            : null;
       });
     } catch (_) {}
   }
@@ -86,16 +86,15 @@ class _DeviceUnlockPageState extends ConsumerState<DeviceUnlockPage> {
         if (mounted) setState(() => _isAuthenticating = false);
         return;
       }
-      await ref.read(authStateProvider.notifier).signIn(
-            email: creds.email,
-            password: creds.password,
-          );
+      await ref
+          .read(authStateProvider.notifier)
+          .signIn(email: creds.email, password: creds.password);
       final next = ref.read(authStateProvider);
       if (!mounted) return;
       if (next is AuthError) {
-        final isBadCredentials = next.message
-            .toLowerCase()
-            .contains('invalid login credentials');
+        final isBadCredentials = next.message.toLowerCase().contains(
+          'invalid login credentials',
+        );
         if (isBadCredentials) {
           await store.clearForUser(userId);
         }
@@ -112,7 +111,9 @@ class _DeviceUnlockPageState extends ConsumerState<DeviceUnlockPage> {
       }
       ref.read(deviceLockProvider.notifier).markUnlocked();
       final isAdminApp = ref.read(isAdminAppProvider);
-      final userIsAdmin = ref.read(authStateProvider).maybeWhen(
+      final userIsAdmin = ref
+          .read(authStateProvider)
+          .maybeWhen(
             authenticated: (user) => user.isAdmin,
             orElse: () => false,
           );
@@ -132,8 +133,8 @@ class _DeviceUnlockPageState extends ConsumerState<DeviceUnlockPage> {
         _error = detail.contains('LockedOut') || detail.contains('Too many')
             ? l10n.deviceUnlockLockedOut
             : detail.contains('NotEnrolled')
-                ? l10n.deviceUnlockNotEnrolled
-                : message;
+            ? l10n.deviceUnlockNotEnrolled
+            : message;
       });
     }
   }
@@ -198,8 +199,7 @@ class _DeviceUnlockPageState extends ConsumerState<DeviceUnlockPage> {
                     expanded: _showAccounts,
                     onToggle: () =>
                         setState(() => _showAccounts = !_showAccounts),
-                    onSelect: (uid) =>
-                        setState(() => _activeUserId = uid),
+                    onSelect: (uid) => setState(() => _activeUserId = uid),
                   ),
                 if (_accounts.length == 1)
                   Container(
@@ -213,10 +213,7 @@ class _DeviceUnlockPageState extends ConsumerState<DeviceUnlockPage> {
                     ),
                     child: Text(
                       _accounts.first.email,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 14,
-                      ),
+                      style: const TextStyle(color: Colors.white, fontSize: 14),
                     ),
                   ),
                 const SizedBox(height: 24),
@@ -242,7 +239,8 @@ class _DeviceUnlockPageState extends ConsumerState<DeviceUnlockPage> {
                       shape: BoxShape.circle,
                       boxShadow: [
                         BoxShadow(
-                          color: const Color(0xFF7A5CFF).withValues(alpha: 0.25),
+                          color: const Color(0xFF7A5CFF)
+                              .withValues(alpha: 0.25),
                           blurRadius: 18,
                           offset: const Offset(0, 6),
                         ),
@@ -255,7 +253,8 @@ class _DeviceUnlockPageState extends ConsumerState<DeviceUnlockPage> {
                           )
                         : Icon(
                             Icons.fingerprint_rounded,
-                            color: const Color(0xFF7A5CFF).withValues(alpha: 0.8),
+                            color: const Color(0xFF7A5CFF)
+                                .withValues(alpha: 0.8),
                             size: 38,
                           ),
                   ),
@@ -314,8 +313,7 @@ class _AccountSelector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final matching =
-        accounts.where((e) => e.userId == activeUserId).toList();
+    final matching = accounts.where((e) => e.userId == activeUserId).toList();
     final active = matching.isEmpty ? null : matching.first;
     return Column(
       children: [

@@ -52,8 +52,10 @@ class _FingerprintLoginPageState extends ConsumerState<FingerprintLoginPage> {
   Future<void> _loadStatus() async {
     final authState = ref.read(authStateProvider);
     final enabled =
-        authState.whenOrNull(authenticated: (user) => user.isBiometricEnabled) ??
-            false;
+        authState.whenOrNull(
+          authenticated: (user) => user.isBiometricEnabled,
+        ) ??
+        false;
     if (mounted) setState(() => _enabled = enabled);
   }
 
@@ -428,9 +430,7 @@ class _FingerprintLoginPageState extends ConsumerState<FingerprintLoginPage> {
           clipBehavior: Clip.antiAlias,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
-            side: BorderSide(
-              color: cs.outlineVariant.withValues(alpha: 0.45),
-            ),
+            side: BorderSide(color: cs.outlineVariant.withValues(alpha: 0.45)),
           ),
           child: Column(children: children),
         ),

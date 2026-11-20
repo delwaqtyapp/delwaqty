@@ -284,7 +284,10 @@ class AdminService {
     }
   }
 
-  Future<List<DriverModel>> getAllDrivers({String? search, String? status}) async {
+  Future<List<DriverModel>> getAllDrivers({
+    String? search,
+    String? status,
+  }) async {
     try {
       return await _repository.getAllDrivers(search: search, status: status);
     } catch (e) {
@@ -375,7 +378,9 @@ class AdminService {
     }
   }
 
-  Future<List<Map<String, dynamic>>> getDriverPerformance({int limit = 10}) async {
+  Future<List<Map<String, dynamic>>> getDriverPerformance({
+    int limit = 10,
+  }) async {
     try {
       return await _repository.getDriverPerformance(limit: limit);
     } catch (e) {

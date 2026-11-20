@@ -118,8 +118,10 @@ void main() {
         tester.element(find.byType(LoginPage)),
       ).read(authStateProvider.notifier) as _ConfirmResendAuthNotifier;
       expect(notifier.lastResendEmail, 'a@b.com');
-      expect(find.textContaining('We sent a confirmation link to a@b.com'),
-          findsOneWidget);
+      expect(
+        find.textContaining('We sent a confirmation link to a@b.com'),
+        findsOneWidget,
+      );
     },
   );
 }

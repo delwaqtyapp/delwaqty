@@ -15,20 +15,22 @@ void main() {
       expect(await store.activeCredentials(), isNull);
     });
 
-    test('saveCredentials stores credentials and marks the user as active',
-        () async {
-      await store.saveCredentials(
-        userId: 'user-1',
-        email: 'a@b.com',
-        password: 'secret',
-      );
+    test(
+      'saveCredentials stores credentials and marks the user as active',
+      () async {
+        await store.saveCredentials(
+          userId: 'user-1',
+          email: 'a@b.com',
+          password: 'secret',
+        );
 
-      final credentials = await store.activeCredentials();
+        final credentials = await store.activeCredentials();
 
-      expect(credentials, isNotNull);
-      expect(credentials!.email, 'a@b.com');
-      expect(credentials.password, 'secret');
-    });
+        expect(credentials, isNotNull);
+        expect(credentials!.email, 'a@b.com');
+        expect(credentials.password, 'secret');
+      },
+    );
 
     test('credentialsFor reads a specific user', () async {
       await store.saveCredentials(
@@ -97,20 +99,22 @@ void main() {
       expect(await store.credentialsFor('user-1'), isNull);
     });
 
-    test('clearForUser removes the user credentials and clears the active key',
-        () async {
-      await store.saveCredentials(
-        userId: 'user-1',
-        email: 'a@b.com',
-        password: 'secret',
-      );
+    test(
+      'clearForUser removes the user credentials and clears the active key',
+      () async {
+        await store.saveCredentials(
+          userId: 'user-1',
+          email: 'a@b.com',
+          password: 'secret',
+        );
 
-      await store.clearForUser('user-1');
+        await store.clearForUser('user-1');
 
-      expect(await store.activeCredentials(), isNull);
-      expect(await store.credentialsFor('user-1'), isNull);
-      expect(await store.hasAnyCredentials(), isFalse);
-    });
+        expect(await store.activeCredentials(), isNull);
+        expect(await store.credentialsFor('user-1'), isNull);
+        expect(await store.hasAnyCredentials(), isFalse);
+      },
+    );
 
     test('clearForUser only removes the targeted user', () async {
       await store.saveCredentials(
@@ -130,19 +134,21 @@ void main() {
       expect(await store.credentialsFor('user-2'), isNotNull);
     });
 
-    test('invalidation prevents further biometric auto-login attempts',
-        () async {
-      await store.saveCredentials(
-        userId: 'user-1',
-        email: 'a@b.com',
-        password: 'secret',
-      );
+    test(
+      'invalidation prevents further biometric auto-login attempts',
+      () async {
+        await store.saveCredentials(
+          userId: 'user-1',
+          email: 'a@b.com',
+          password: 'secret',
+        );
 
-      await store.clearForUser('user-1');
+        await store.clearForUser('user-1');
 
-      expect(await store.hasAnyCredentials(), isFalse);
-      expect(await store.activeCredentials(), isNull);
-    });
+        expect(await store.hasAnyCredentials(), isFalse);
+        expect(await store.activeCredentials(), isNull);
+      },
+    );
 
     test('credentials can be re-enrolled after invalidation', () async {
       await store.saveCredentials(

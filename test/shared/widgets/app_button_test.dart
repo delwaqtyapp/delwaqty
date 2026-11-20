@@ -31,9 +31,7 @@ void main() {
 
     testWidgets('calls onPressed when tapped', (tester) async {
       var tapped = false;
-      await tester.pumpWidget(
-        buildTestWidget(onPressed: () => tapped = true),
-      );
+      await tester.pumpWidget(buildTestWidget(onPressed: () => tapped = true));
       await tester.tap(find.byType(AppButton));
       expect(tapped, isTrue);
     });
@@ -41,10 +39,7 @@ void main() {
     testWidgets('does not call onPressed when isLoading', (tester) async {
       var tapped = false;
       await tester.pumpWidget(
-        buildTestWidget(
-          onPressed: () => tapped = true,
-          isLoading: true,
-        ),
+        buildTestWidget(onPressed: () => tapped = true, isLoading: true),
       );
       await tester.tap(find.byType(AppButton));
       expect(tapped, isFalse);
@@ -69,9 +64,7 @@ void main() {
     });
 
     testWidgets('renders text variant', (tester) async {
-      await tester.pumpWidget(
-        buildTestWidget(variant: AppButtonVariant.text),
-      );
+      await tester.pumpWidget(buildTestWidget(variant: AppButtonVariant.text));
       expect(find.byType(TextButton), findsOneWidget);
     });
 
@@ -89,10 +82,12 @@ void main() {
       );
       // The button should be wrapped in a SizedBox with width: double.infinity
       final sizedBox = tester.widget<SizedBox>(
-        find.ancestor(
-          of: find.byType(FilledButton),
-          matching: find.byType(SizedBox),
-        ).first,
+        find
+            .ancestor(
+              of: find.byType(FilledButton),
+              matching: find.byType(SizedBox),
+            )
+            .first,
       );
       expect(sizedBox.width, double.infinity);
     });

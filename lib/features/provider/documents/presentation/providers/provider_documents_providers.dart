@@ -6,15 +6,15 @@ import '../../domain/repositories/provider_documents_repository.dart';
 
 final providerDocumentsDataSourceProvider =
     Provider<ProviderDocumentsDataSource>(
-  (ref) => ProviderDocumentsDataSource(ref.watch(supabaseClientProvider)),
-);
+      (ref) => ProviderDocumentsDataSource(ref.watch(supabaseClientProvider)),
+    );
 
 final providerDocumentsRepositoryProvider =
     Provider<ProviderDocumentsRepository>(
-  (ref) => ProviderDocumentsRepositoryImpl(
-    ref.watch(providerDocumentsDataSourceProvider),
-  ),
-);
+      (ref) => ProviderDocumentsRepositoryImpl(
+        ref.watch(providerDocumentsDataSourceProvider),
+      ),
+    );
 
 final providerDocumentsProvider = FutureProvider<List<Map<String, dynamic>>>(
   (ref) => ref.watch(providerDocumentsRepositoryProvider).getDocuments(),

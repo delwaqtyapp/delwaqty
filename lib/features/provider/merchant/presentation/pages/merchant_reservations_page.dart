@@ -23,16 +23,16 @@ final _reservationsFilterProvider = StateProvider<ReservationStatus?>(
   (ref) => null,
 );
 
-final _reservationsProvider =
-    FutureProvider<List<Reservation>>((ref) async {
+final _reservationsProvider = FutureProvider<List<Reservation>>((ref) async {
   final repo = ref.watch(reservationRepositoryProvider);
   final merchantId = await ref.watch(_merchantIdProvider.future);
   final status = ref.watch(_reservationsFilterProvider);
   return repo.getReservations(merchantId, status: status);
 });
 
-final _serviceBookingsProvider =
-    FutureProvider<List<Map<String, dynamic>>>((ref) async {
+final _serviceBookingsProvider = FutureProvider<List<Map<String, dynamic>>>((
+  ref,
+) async {
   SupabaseClient client;
   try {
     client = ref.watch(supabaseClientProvider);
@@ -47,9 +47,7 @@ final _serviceBookingsProvider =
       .select()
       .eq('provider_id', spId)
       .order('created_at', ascending: false);
-  return (res as List)
-      .map((e) => Map<String, dynamic>.from(e as Map))
-      .toList();
+  return (res as List).map((e) => Map<String, dynamic>.from(e as Map)).toList();
 });
 
 class MerchantReservationsPage extends ConsumerStatefulWidget {
@@ -153,8 +151,7 @@ class _MerchantReservationsPageState
                                   reservation,
                                   ReservationStatus.completed,
                                 ),
-                                onCancel: () =>
-                                    _cancelReservation(reservation),
+                                onCancel: () => _cancelReservation(reservation),
                               ),
                             );
                           },
@@ -250,8 +247,7 @@ class _MerchantReservationsPageState
             label: Text(filter.value ?? ''),
             selected: isSelected,
             onSelected: (_) {
-              ref.read(_reservationsFilterProvider.notifier).state =
-                  filter.key;
+              ref.read(_reservationsFilterProvider.notifier).state = filter.key;
             },
           );
         },
@@ -277,10 +273,7 @@ class _MerchantReservationsPageState
       }
     } catch (e) {
       if (mounted) {
-        context.showAppSnackBar(
-          appErrorText(context, e),
-          isError: true,
-        );
+        context.showAppSnackBar(appErrorText(context, e), isError: true);
       }
     }
   }
@@ -317,10 +310,7 @@ class _MerchantReservationsPageState
         }
       } catch (e) {
         if (mounted) {
-          context.showAppSnackBar(
-            appErrorText(context, e),
-            isError: true,
-          );
+          context.showAppSnackBar(appErrorText(context, e), isError: true);
         }
       }
     }
@@ -375,10 +365,7 @@ class _MerchantReservationsPageState
       }
     } catch (e) {
       if (mounted) {
-        context.showAppSnackBar(
-          appErrorText(context, e),
-          isError: true,
-        );
+        context.showAppSnackBar(appErrorText(context, e), isError: true);
       }
     }
   }
@@ -517,8 +504,9 @@ class _ReservationCard extends StatelessWidget {
                     FilledButton.tonal(
                       onPressed: onConfirm,
                       style: FilledButton.styleFrom(
-                        backgroundColor:
-                            AppColors.successLight.withValues(alpha: 0.1),
+                        backgroundColor: AppColors.successLight.withValues(
+                          alpha: 0.1,
+                        ),
                         foregroundColor: AppColors.successLight,
                         padding: const EdgeInsets.symmetric(
                           horizontal: AppSpacing.lg,
@@ -541,8 +529,9 @@ class _ReservationCard extends StatelessWidget {
                     FilledButton.tonal(
                       onPressed: onMarkSeated,
                       style: FilledButton.styleFrom(
-                        backgroundColor:
-                            AppColors.brandPurple.withValues(alpha: 0.1),
+                        backgroundColor: AppColors.brandPurple.withValues(
+                          alpha: 0.1,
+                        ),
                         foregroundColor: AppColors.brandPurple,
                         padding: const EdgeInsets.symmetric(
                           horizontal: AppSpacing.lg,
@@ -565,8 +554,9 @@ class _ReservationCard extends StatelessWidget {
                     FilledButton.tonal(
                       onPressed: onMarkCompleted,
                       style: FilledButton.styleFrom(
-                        backgroundColor:
-                            AppColors.successLight.withValues(alpha: 0.1),
+                        backgroundColor: AppColors.successLight.withValues(
+                          alpha: 0.1,
+                        ),
                         foregroundColor: AppColors.successLight,
                         padding: const EdgeInsets.symmetric(
                           horizontal: AppSpacing.lg,
@@ -590,8 +580,9 @@ class _ReservationCard extends StatelessWidget {
                     FilledButton.tonal(
                       onPressed: onCancel,
                       style: FilledButton.styleFrom(
-                        backgroundColor:
-                            theme.colorScheme.error.withValues(alpha: 0.1),
+                        backgroundColor: theme.colorScheme.error.withValues(
+                          alpha: 0.1,
+                        ),
                         foregroundColor: theme.colorScheme.error,
                         padding: const EdgeInsets.symmetric(
                           horizontal: AppSpacing.lg,
@@ -783,8 +774,9 @@ class _ServiceBookingCard extends StatelessWidget {
                   FilledButton.tonal(
                     onPressed: () => onUpdateStatus('cancelled'),
                     style: FilledButton.styleFrom(
-                      backgroundColor:
-                          theme.colorScheme.error.withValues(alpha: 0.1),
+                      backgroundColor: theme.colorScheme.error.withValues(
+                        alpha: 0.1,
+                      ),
                       foregroundColor: theme.colorScheme.error,
                     ),
                     child: Text(l10n.cancel),

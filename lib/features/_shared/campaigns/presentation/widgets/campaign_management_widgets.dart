@@ -130,8 +130,9 @@ class CampaignScopeBadge extends StatelessWidget {
     final label = campaign.isNational
         ? l10n.allEgypt
         : (campaign.localizedRegionName(lang) ?? l10n.specificGovernorate);
-    final color =
-        campaign.isNational ? AppColors.brandPurple : AppColors.infoLight;
+    final color = campaign.isNational
+        ? AppColors.brandPurple
+        : AppColors.infoLight;
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),

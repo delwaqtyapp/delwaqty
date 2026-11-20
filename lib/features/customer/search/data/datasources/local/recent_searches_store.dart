@@ -31,9 +31,7 @@ class RecentSearchesStore {
   }
 
   Future<void> add(RecentSearch search) async {
-    final current = getAll()
-        .where((e) => e.placeId != search.placeId)
-        .toList()
+    final current = getAll().where((e) => e.placeId != search.placeId).toList()
       ..insert(0, search);
     final trimmed = current.take(maxEntries).toList();
     await _prefs.saveString(

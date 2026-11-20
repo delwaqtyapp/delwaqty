@@ -19,14 +19,16 @@ void main() {
 
   group('SanctionsRepositoryImpl.issueSanction', () {
     test('delegates to data source with correct params', () async {
-      when(() => mockDataSource.issueSanction(
-            memberId: any(named: 'memberId'),
-            sanctionType: any(named: 'sanctionType'),
-            reason: any(named: 'reason'),
-            durationDays: any(named: 'durationDays'),
-            amount: any(named: 'amount'),
-            evidenceUrl: any(named: 'evidenceUrl'),
-          )).thenAnswer((_) async => 'sanction-id-123');
+      when(
+        () => mockDataSource.issueSanction(
+          memberId: any(named: 'memberId'),
+          sanctionType: any(named: 'sanctionType'),
+          reason: any(named: 'reason'),
+          durationDays: any(named: 'durationDays'),
+          amount: any(named: 'amount'),
+          evidenceUrl: any(named: 'evidenceUrl'),
+        ),
+      ).thenAnswer((_) async => 'sanction-id-123');
 
       final result = await repository.issueSanction(
         memberId: 'member-1',
@@ -35,22 +37,26 @@ void main() {
       );
 
       expect(result, 'sanction-id-123');
-      verify(() => mockDataSource.issueSanction(
-            memberId: 'member-1',
-            sanctionType: 'warning',
-            reason: 'Test warning',
-          )).called(1);
+      verify(
+        () => mockDataSource.issueSanction(
+          memberId: 'member-1',
+          sanctionType: 'warning',
+          reason: 'Test warning',
+        ),
+      ).called(1);
     });
 
     test('passes optional params correctly', () async {
-      when(() => mockDataSource.issueSanction(
-            memberId: any(named: 'memberId'),
-            sanctionType: any(named: 'sanctionType'),
-            reason: any(named: 'reason'),
-            durationDays: any(named: 'durationDays'),
-            amount: any(named: 'amount'),
-            evidenceUrl: any(named: 'evidenceUrl'),
-          )).thenAnswer((_) async => 'sanction-id-456');
+      when(
+        () => mockDataSource.issueSanction(
+          memberId: any(named: 'memberId'),
+          sanctionType: any(named: 'sanctionType'),
+          reason: any(named: 'reason'),
+          durationDays: any(named: 'durationDays'),
+          amount: any(named: 'amount'),
+          evidenceUrl: any(named: 'evidenceUrl'),
+        ),
+      ).thenAnswer((_) async => 'sanction-id-456');
 
       await repository.issueSanction(
         memberId: 'member-2',
@@ -61,25 +67,29 @@ void main() {
         evidenceUrl: 'https://example.com/evidence.png',
       );
 
-      verify(() => mockDataSource.issueSanction(
-            memberId: 'member-2',
-            sanctionType: 'suspension',
-            reason: 'Rule violation',
-            durationDays: 7,
-            amount: 50,
-            evidenceUrl: 'https://example.com/evidence.png',
-          )).called(1);
+      verify(
+        () => mockDataSource.issueSanction(
+          memberId: 'member-2',
+          sanctionType: 'suspension',
+          reason: 'Rule violation',
+          durationDays: 7,
+          amount: 50,
+          evidenceUrl: 'https://example.com/evidence.png',
+        ),
+      ).called(1);
     });
 
     test('wraps errors in ServerException', () async {
-      when(() => mockDataSource.issueSanction(
-            memberId: any(named: 'memberId'),
-            sanctionType: any(named: 'sanctionType'),
-            reason: any(named: 'reason'),
-            durationDays: any(named: 'durationDays'),
-            amount: any(named: 'amount'),
-            evidenceUrl: any(named: 'evidenceUrl'),
-          )).thenThrow(Exception('Not authorized'));
+      when(
+        () => mockDataSource.issueSanction(
+          memberId: any(named: 'memberId'),
+          sanctionType: any(named: 'sanctionType'),
+          reason: any(named: 'reason'),
+          durationDays: any(named: 'durationDays'),
+          amount: any(named: 'amount'),
+          evidenceUrl: any(named: 'evidenceUrl'),
+        ),
+      ).thenThrow(Exception('Not authorized'));
 
       expect(
         () => repository.issueSanction(
@@ -94,27 +104,33 @@ void main() {
 
   group('SanctionsRepositoryImpl.revokeSanction', () {
     test('delegates to data source with correct params', () async {
-      when(() => mockDataSource.revokeSanction(
-            sanctionId: any(named: 'sanctionId'),
-            reason: any(named: 'reason'),
-          )).thenAnswer((_) async {});
+      when(
+        () => mockDataSource.revokeSanction(
+          sanctionId: any(named: 'sanctionId'),
+          reason: any(named: 'reason'),
+        ),
+      ).thenAnswer((_) async {});
 
       await repository.revokeSanction(
         sanctionId: 'sanction-1',
         reason: 'Resolved',
       );
 
-      verify(() => mockDataSource.revokeSanction(
-            sanctionId: 'sanction-1',
-            reason: 'Resolved',
-          )).called(1);
+      verify(
+        () => mockDataSource.revokeSanction(
+          sanctionId: 'sanction-1',
+          reason: 'Resolved',
+        ),
+      ).called(1);
     });
 
     test('wraps errors in ServerException', () async {
-      when(() => mockDataSource.revokeSanction(
-            sanctionId: any(named: 'sanctionId'),
-            reason: any(named: 'reason'),
-          )).thenThrow(Exception('Sanction not found'));
+      when(
+        () => mockDataSource.revokeSanction(
+          sanctionId: any(named: 'sanctionId'),
+          reason: any(named: 'reason'),
+        ),
+      ).thenThrow(Exception('Sanction not found'));
 
       expect(
         () => repository.revokeSanction(

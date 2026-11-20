@@ -14,8 +14,10 @@ import 'package:delwaqty/features/customer/driver/presentation/providers/dispatc
 import 'package:delwaqty/core/auth/platform_capabilities.dart';
 import 'package:delwaqty/core/errors/app_error_text.dart';
 
-final _performanceProvider =
-    FutureProvider.family<DriverPerformance, String>((ref, driverId) async {
+final _performanceProvider = FutureProvider.family<DriverPerformance, String>((
+  ref,
+  driverId,
+) async {
   final repo = ref.watch(driverRepositoryProvider);
   return repo.getPerformance(driverId);
 });
@@ -46,9 +48,7 @@ class DriverDashboardPage extends ConsumerWidget {
         leadingWidth: 56,
         leading: const Padding(
           padding: EdgeInsetsDirectional.only(start: 12),
-          child: Center(
-            child: FloatingMenuCircleButton(size: 40),
-          ),
+          child: Center(child: FloatingMenuCircleButton(size: 40)),
         ),
         title: Text(l10n.driverDashboard),
         actions: [
@@ -101,8 +101,7 @@ class DriverDashboardPage extends ConsumerWidget {
               ShimmerCard(height: 100),
             ],
           ),
-          error: (e, _) => Center(
-              child: Text(appErrorText(context, e))),
+          error: (e, _) => Center(child: Text(appErrorText(context, e))),
         ),
       ),
     );
@@ -119,17 +118,13 @@ class DriverDashboardPage extends ConsumerWidget {
             Icon(
               Icons.app_registration_rounded,
               size: 80,
-              color: Theme.of(context)
-                  .colorScheme
-                  .primary
+              color: Theme.of(context).colorScheme.primary
                   .withValues(alpha: 0.5),
             ),
             const SizedBox(height: 16),
             Text(
               l10n.onboardingTitle,
-              style: Theme.of(context)
-                  .textTheme
-                  .headlineSmall
+              style: Theme.of(context).textTheme.headlineSmall
                   ?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
@@ -137,9 +132,8 @@ class DriverDashboardPage extends ConsumerWidget {
               l10n.registrationPendingApproval,
               textAlign: TextAlign.center,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color:
-                        Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
             ),
             const SizedBox(height: 24),
             FilledButton.icon(
@@ -154,7 +148,10 @@ class DriverDashboardPage extends ConsumerWidget {
   }
 
   Widget _buildDashboard(
-      BuildContext context, WidgetRef ref, DriverProfile profile) {
+    BuildContext context,
+    WidgetRef ref,
+    DriverProfile profile,
+  ) {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final performanceAsync = ref.watch(_performanceProvider(profile.id));
@@ -193,8 +190,9 @@ class DriverDashboardPage extends ConsumerWidget {
           delay: const Duration(milliseconds: 200),
           child: Text(
             l10n.vehicleInfo,
-            style: theme.textTheme.titleMedium
-                ?.copyWith(fontWeight: FontWeight.bold),
+            style: theme.textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.bold,
+            ),
           ),
         ),
         const SizedBox(height: 8),
@@ -212,7 +210,8 @@ class _RegistrationPrompt extends ConsumerStatefulWidget {
   final String userId;
 
   @override
-  ConsumerState<_RegistrationPrompt> createState() => _RegistrationPromptState();
+  ConsumerState<_RegistrationPrompt> createState() =>
+      _RegistrationPromptState();
 }
 
 class _RegistrationPromptState extends ConsumerState<_RegistrationPrompt> {
@@ -225,9 +224,12 @@ class _RegistrationPromptState extends ConsumerState<_RegistrationPrompt> {
       final repo = ref.read(driverRepositoryProvider);
       await repo.registerProfile(
         widget.userId,
-        fullName: ref.read(authStateProvider).maybeWhen(
-              authenticated: (u) =>
-                  u.fullName?.trim().isNotEmpty == true ? u.fullName! : 'Driver',
+        fullName: ref
+            .read(authStateProvider)
+            .maybeWhen(
+              authenticated: (u) => u.fullName?.trim().isNotEmpty == true
+                  ? u.fullName!
+                  : 'Driver',
               orElse: () => 'Driver',
             ),
         vehicleType: 'motorcycle',
@@ -235,9 +237,8 @@ class _RegistrationPromptState extends ConsumerState<_RegistrationPrompt> {
       ref.invalidate(driverProfileProvider(widget.userId));
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(appErrorText(context, e))),
-        );
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(appErrorText(context, e))));
       }
     } finally {
       if (mounted) setState(() => _registering = false);
@@ -256,17 +257,13 @@ class _RegistrationPromptState extends ConsumerState<_RegistrationPrompt> {
             Icon(
               Icons.delivery_dining_rounded,
               size: 80,
-              color: Theme.of(context)
-                  .colorScheme
-                  .primary
+              color: Theme.of(context).colorScheme.primary
                   .withValues(alpha: 0.5),
             ),
             const SizedBox(height: 16),
             Text(
               l10n.becomeADriver,
-              style: Theme.of(context)
-                  .textTheme
-                  .headlineSmall
+              style: Theme.of(context).textTheme.headlineSmall
                   ?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
@@ -274,8 +271,8 @@ class _RegistrationPromptState extends ConsumerState<_RegistrationPrompt> {
               l10n.joinFleetSubtitle,
               textAlign: TextAlign.center,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
             ),
             const SizedBox(height: 24),
             FilledButton.icon(
@@ -309,7 +306,10 @@ class _OnlineHeader extends StatelessWidget {
     final isOnline =
         onlineState.value ?? (profile.status == DriverStatus.online);
 
-    ref.listen<AsyncValue<bool>>(driverOnlineProvider(profile.id), (prev, next) {
+    ref.listen<AsyncValue<bool>>(driverOnlineProvider(profile.id), (
+      prev,
+      next,
+    ) {
       if (next.hasError && next.error != null) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(appErrorText(context, next.error!))),
@@ -350,8 +350,9 @@ class _OnlineHeader extends StatelessWidget {
                           ? l10n.onlineReadyForOrders
                           : l10n.offlineTapToGoOnline,
                       style: theme.textTheme.bodySmall?.copyWith(
-                        color:
-                            theme.colorScheme.onPrimary.withValues(alpha: 0.85),
+                        color: theme.colorScheme.onPrimary.withValues(
+                          alpha: 0.85,
+                        ),
                       ),
                     ),
                   ],
@@ -376,16 +377,20 @@ class _OnlineHeader extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
               _StatItem(
-                  label: l10n.totalDeliveries,
-                  value: '${profile.totalDeliveries}'),
+                label: l10n.totalDeliveries,
+                value: '${profile.totalDeliveries}',
+              ),
               _StatItem(
-                  label: l10n.earnings,
-                  value: l10n.amountWithCurrency(
-                      profile.totalEarnings.toStringAsFixed(0),
-                      l10n.currencySymbol)),
+                label: l10n.earnings,
+                value: l10n.amountWithCurrency(
+                  profile.totalEarnings.toStringAsFixed(0),
+                  l10n.currencySymbol,
+                ),
+              ),
               _StatItem(
-                  label: l10n.rating,
-                  value: profile.rating.toStringAsFixed(1)),
+                label: l10n.rating,
+                value: profile.rating.toStringAsFixed(1),
+              ),
             ],
           ),
         ],
@@ -405,23 +410,27 @@ class _EarningsOverviewCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerHighest
-            .withValues(alpha: 0.3),
+        color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
         borderRadius: BorderRadius.circular(16),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(l10n.wallet,
-              style: theme.textTheme.titleMedium
-                  ?.copyWith(fontWeight: FontWeight.bold)),
+          Text(
+            l10n.wallet,
+            style: theme.textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.bold,
+            ),
+          ),
           const SizedBox(height: 12),
           Text(
             l10n.amountWithCurrency(
-                performance.balance.toStringAsFixed(2),
-                l10n.currencySymbol),
-            style: theme.textTheme.headlineMedium
-                ?.copyWith(fontWeight: FontWeight.bold),
+              performance.balance.toStringAsFixed(2),
+              l10n.currencySymbol,
+            ),
+            style: theme.textTheme.headlineMedium?.copyWith(
+              fontWeight: FontWeight.bold,
+            ),
           ),
           const SizedBox(height: 12),
           Row(
@@ -430,8 +439,9 @@ class _EarningsOverviewCard extends StatelessWidget {
                 child: _MiniStat(
                   label: l10n.todayEarnings,
                   value: l10n.amountWithCurrency(
-                      performance.todayEarnings.toStringAsFixed(0),
-                      l10n.currencySymbol),
+                    performance.todayEarnings.toStringAsFixed(0),
+                    l10n.currencySymbol,
+                  ),
                 ),
               ),
               const SizedBox(width: 8),
@@ -439,8 +449,9 @@ class _EarningsOverviewCard extends StatelessWidget {
                 child: _MiniStat(
                   label: l10n.weeklyEarnings,
                   value: l10n.amountWithCurrency(
-                      performance.weekEarnings.toStringAsFixed(0),
-                      l10n.currencySymbol),
+                    performance.weekEarnings.toStringAsFixed(0),
+                    l10n.currencySymbol,
+                  ),
                 ),
               ),
               const SizedBox(width: 8),
@@ -448,8 +459,9 @@ class _EarningsOverviewCard extends StatelessWidget {
                 child: _MiniStat(
                   label: l10n.monthlyEarnings,
                   value: l10n.amountWithCurrency(
-                      performance.monthEarnings.toStringAsFixed(0),
-                      l10n.currencySymbol),
+                    performance.monthEarnings.toStringAsFixed(0),
+                    l10n.currencySymbol,
+                  ),
                 ),
               ),
             ],
@@ -464,8 +476,9 @@ class _EarningsOverviewCard extends StatelessWidget {
                     child: _MiniStat(
                       label: l10n.bonusBalance,
                       value: l10n.amountWithCurrency(
-                          performance.bonusBalance.toStringAsFixed(0),
-                          l10n.currencySymbol),
+                        performance.bonusBalance.toStringAsFixed(0),
+                        l10n.currencySymbol,
+                      ),
                     ),
                   ),
                 if (performance.bonusBalance > 0 &&
@@ -476,9 +489,9 @@ class _EarningsOverviewCard extends StatelessWidget {
                     child: _MiniStat(
                       label: l10n.incentiveBalance,
                       value: l10n.amountWithCurrency(
-                          performance.incentiveBalance
-                              .toStringAsFixed(0),
-                          l10n.currencySymbol),
+                        performance.incentiveBalance.toStringAsFixed(0),
+                        l10n.currencySymbol,
+                      ),
                     ),
                   ),
               ],
@@ -501,16 +514,18 @@ class _PerformanceGrid extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerHighest
-            .withValues(alpha: 0.3),
+        color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
         borderRadius: BorderRadius.circular(16),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(l10n.performance,
-              style: theme.textTheme.titleMedium
-                  ?.copyWith(fontWeight: FontWeight.bold)),
+          Text(
+            l10n.performance,
+            style: theme.textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.bold,
+            ),
+          ),
           const SizedBox(height: 12),
           Row(
             children: [
@@ -524,16 +539,14 @@ class _PerformanceGrid extends StatelessWidget {
               Expanded(
                 child: _MiniStat(
                   label: l10n.acceptanceRate,
-                  value:
-                      '${performance.acceptanceRate.toStringAsFixed(0)}%',
+                  value: '${performance.acceptanceRate.toStringAsFixed(0)}%',
                 ),
               ),
               const SizedBox(width: 8),
               Expanded(
                 child: _MiniStat(
                   label: l10n.cancellationRate,
-                  value:
-                      '${performance.cancellationRate.toStringAsFixed(0)}%',
+                  value: '${performance.cancellationRate.toStringAsFixed(0)}%',
                 ),
               ),
             ],
@@ -608,14 +621,12 @@ class _VehicleInfoCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerHighest
-            .withValues(alpha: 0.3),
+        color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
         children: [
-          Icon(Icons.two_wheeler_rounded,
-              color: theme.colorScheme.primary),
+          Icon(Icons.two_wheeler_rounded, color: theme.colorScheme.primary),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
@@ -623,8 +634,9 @@ class _VehicleInfoCard extends StatelessWidget {
               children: [
                 Text(
                   profile.vehicleType ?? l10n.notSet,
-                  style: theme.textTheme.bodyMedium
-                      ?.copyWith(fontWeight: FontWeight.w600),
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
                   overflow: TextOverflow.ellipsis,
                 ),
                 if (profile.vehiclePlate != null)
@@ -659,8 +671,7 @@ class _ActionCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Material(
-      color: theme.colorScheme.surfaceContainerHighest
-          .withValues(alpha: 0.3),
+      color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
       borderRadius: BorderRadius.circular(12),
       child: InkWell(
         onTap: onTap,
@@ -673,8 +684,9 @@ class _ActionCard extends StatelessWidget {
               const SizedBox(height: 8),
               Text(
                 label,
-                style: theme.textTheme.bodyMedium
-                    ?.copyWith(fontWeight: FontWeight.w600),
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
               ),
             ],
           ),
@@ -697,16 +709,17 @@ class _StatItem extends StatelessWidget {
         Text(
           value,
           style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                color: Theme.of(context).colorScheme.onPrimary,
-                fontWeight: FontWeight.bold,
-              ),
+            color: Theme.of(context).colorScheme.onPrimary,
+            fontWeight: FontWeight.bold,
+          ),
         ),
         const SizedBox(height: 4),
         Text(
           label,
           style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: Theme.of(context).colorScheme.onPrimary.withValues(alpha: 0.8),
-              ),
+            color: Theme.of(context).colorScheme.onPrimary
+                .withValues(alpha: 0.8),
+          ),
         ),
       ],
     );
@@ -723,17 +736,17 @@ class _MiniStat extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(value,
-            style: Theme.of(context)
-                .textTheme
-                .titleSmall
-                ?.copyWith(fontWeight: FontWeight.bold)),
+        Text(
+          value,
+          style: Theme.of(context).textTheme.titleSmall
+              ?.copyWith(fontWeight: FontWeight.bold),
+        ),
         const SizedBox(height: 2),
-        Text(label,
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color:
-                      Theme.of(context).colorScheme.onSurfaceVariant,
-                )),
+        Text(
+          label,
+          style: Theme.of(context).textTheme.bodySmall
+              ?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant),
+        ),
       ],
     );
   }

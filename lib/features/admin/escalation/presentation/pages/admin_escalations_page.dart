@@ -56,7 +56,6 @@ class _AdminEscalationsPageState extends ConsumerState<AdminEscalationsPage> {
 }
 
 class _EscalationTile extends StatelessWidget {
-
   const _EscalationTile({
     required this.event,
     required this.cs,

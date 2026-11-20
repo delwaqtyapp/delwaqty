@@ -178,8 +178,8 @@ class ResetPasswordUseCase {
 
 final resendEmailConfirmationUseCaseProvider =
     Provider<ResendEmailConfirmationUseCase>((ref) {
-  return ResendEmailConfirmationUseCase(ref.watch(authRepositoryProvider));
-});
+      return ResendEmailConfirmationUseCase(ref.watch(authRepositoryProvider));
+    });
 
 class ResendEmailConfirmationUseCase {
   ResendEmailConfirmationUseCase(this._repository);
@@ -205,8 +205,8 @@ class DeleteAccountUseCase {
 
 final updateBiometricEnabledUseCaseProvider =
     Provider<UpdateBiometricEnabledUseCase>((ref) {
-  return UpdateBiometricEnabledUseCase(ref.watch(authRepositoryProvider));
-});
+      return UpdateBiometricEnabledUseCase(ref.watch(authRepositoryProvider));
+    });
 
 class UpdateBiometricEnabledUseCase {
   UpdateBiometricEnabledUseCase(this._repository);

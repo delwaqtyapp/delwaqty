@@ -63,7 +63,8 @@ class SupabaseNotificationDataSource {
     final type = _parseNotificationType(dataType);
 
     final data = row['data'] as Map<String, dynamic>?;
-    final deepLink = row['deep_link'] as String? ?? data?['deep_link'] as String?;
+    final deepLink =
+        row['deep_link'] as String? ?? data?['deep_link'] as String?;
     final priority = NotificationPriority.values.firstWhere(
       (p) => p.name == (row['priority'] as String? ?? 'normal'),
       orElse: () => NotificationPriority.normal,
@@ -148,10 +149,10 @@ class SupabaseNotificationDataSource {
   }
 
   Future<void> markAsRead(String id) async {
-    await _client.from('notifications').update({
-      'is_read': true,
-      'read_at': DateTime.now().toIso8601String(),
-    }).eq('id', id);
+    await _client
+        .from('notifications')
+        .update({'is_read': true, 'read_at': DateTime.now().toIso8601String()})
+        .eq('id', id);
   }
 
   Future<void> markAllAsRead() async {
@@ -179,10 +180,7 @@ class SupabaseNotificationDataSource {
 
     await _client
         .from('notifications')
-        .update({
-          'is_read': true,
-          'read_at': DateTime.now().toIso8601String(),
-        })
+        .update({'is_read': true, 'read_at': DateTime.now().toIso8601String()})
         .eq('user_id', userId)
         .inFilter('id', matchingIds);
   }
@@ -235,27 +233,31 @@ class SupabaseNotificationDataSource {
     required String deviceId,
     String? appVersion,
   }) async {
-    await _client.rpc('register_device_token', params: {
-      'p_token': token,
-      'p_platform': platform,
-      'p_device_id': deviceId,
-      'p_app_version': ?appVersion,
-    });
+    await _client.rpc(
+      'register_device_token',
+      params: {
+        'p_token': token,
+        'p_platform': platform,
+        'p_device_id': deviceId,
+        'p_app_version': ?appVersion,
+      },
+    );
   }
 
   Future<void> refreshTokenHeartbeat({
     required String token,
     required String deviceId,
   }) async {
-    await _client.rpc('refresh_token_heartbeat', params: {
-      'p_token': token,
-      'p_device_id': deviceId,
-    });
+    await _client.rpc(
+      'refresh_token_heartbeat',
+      params: {'p_token': token, 'p_device_id': deviceId},
+    );
   }
 
   Future<void> deactivateDeviceTokens(String deviceId) async {
-    await _client.rpc('deactivate_device_tokens', params: {
-      'p_device_id': deviceId,
-    });
+    await _client.rpc(
+      'deactivate_device_tokens',
+      params: {'p_device_id': deviceId},
+    );
   }
 }

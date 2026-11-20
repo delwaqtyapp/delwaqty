@@ -1,5 +1,4 @@
 class ChatMessage {
-
   const ChatMessage({
     required this.id,
     required this.roomId,
@@ -30,7 +29,9 @@ class ChatMessage {
       audioUrl: json['audio_url'] as String?,
       isFromAdmin: json['is_from_admin'] as bool? ?? false,
       isRead: json['is_read'] as bool? ?? false,
-      readAt: json['read_at'] != null ? DateTime.parse(json['read_at'] as String) : null,
+      readAt: json['read_at'] != null
+          ? DateTime.parse(json['read_at'] as String)
+          : null,
       createdAt: DateTime.parse(json['created_at'] as String),
       metaData: json['meta_data'] as Map<String, dynamic>?,
     );

@@ -1,4 +1,5 @@
 import 'dart:io' show Platform;
+
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -55,8 +56,8 @@ class LoginActivityPage extends ConsumerWidget {
     final contact = (user?.email?.isNotEmpty ?? false)
         ? user!.email!
         : (user?.phone?.isNotEmpty ?? false)
-            ? user!.phone!
-            : l10n.thisDevice;
+        ? user!.phone!
+        : l10n.thisDevice;
     final lastSignIn = _formatLastSignIn(user?.lastSignInAt);
 
     return Scaffold(

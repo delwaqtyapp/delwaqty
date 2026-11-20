@@ -54,8 +54,7 @@ void main() {
     });
 
     test('rethrows data source errors', () {
-      when(() => dataSource.getGovernorates())
-          .thenThrow(Exception('db down'));
+      when(() => dataSource.getGovernorates()).thenThrow(Exception('db down'));
 
       expect(() => repository.getGovernorates(), throwsException);
     });
@@ -153,8 +152,7 @@ void main() {
     });
 
     test('returns null when no preference exists', () async {
-      when(() => dataSource.getUserRegion('u1'))
-          .thenAnswer((_) async => null);
+      when(() => dataSource.getUserRegion('u1')).thenAnswer((_) async => null);
 
       final result = await repository.getUserRegion('u1');
 
@@ -175,9 +173,8 @@ void main() {
           createdAt: now,
         ),
       ];
-      when(
-        () => dataSource.getGeoPlaces(type: 'airport'),
-      ).thenAnswer((_) async => places);
+      when(() => dataSource.getGeoPlaces(type: 'airport'))
+          .thenAnswer((_) async => places);
 
       final result = await repository.getGeoPlaces(type: 'airport');
 
@@ -186,9 +183,8 @@ void main() {
     });
 
     test('forwards query filter to the data source', () async {
-      when(
-        () => dataSource.getGeoPlaces(query: 'pyram'),
-      ).thenAnswer((_) async => const <GeoPlace>[]);
+      when(() => dataSource.getGeoPlaces(query: 'pyram'))
+          .thenAnswer((_) async => const <GeoPlace>[]);
 
       final result = await repository.getGeoPlaces(query: 'pyram');
 

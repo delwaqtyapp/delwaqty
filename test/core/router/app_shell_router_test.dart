@@ -4,11 +4,11 @@ import 'package:delwaqty/features/_shared/auth/domain/auth_state.dart';
 
 void main() {
   User mockUser() => User(
-        id: 'user-123',
-        email: 'test@example.com',
-        fullName: 'Test User',
-        createdAt: DateTime(2024),
-      );
+    id: 'user-123',
+    email: 'test@example.com',
+    fullName: 'Test User',
+    createdAt: DateTime(2024),
+  );
 
   group('AuthState pattern matching', () {
     test('AuthInitial is created correctly', () {
@@ -52,22 +52,23 @@ void main() {
       final user = mockUser();
       final state = AuthState.authenticated(user: user);
       expect(state, isA<AuthAuthenticated>());
-      state.whenOrNull(
-        authenticated: (u) => expect(u.id, 'user-123'),
-      );
+      state.whenOrNull(authenticated: (u) => expect(u.id, 'user-123'));
     });
   });
 
   group('GoRouter redirect logic (conceptual)', () {
-    test('unauthenticated user on protected route should redirect to welcome', () {
-      const authState = AuthState.unauthenticated();
-      const isAuth = authState is AuthAuthenticated;
-      const isAuthRoute = false;
-      const isWelcome = false;
+    test(
+      'unauthenticated user on protected route should redirect to welcome',
+      () {
+        const authState = AuthState.unauthenticated();
+        const isAuth = authState is AuthAuthenticated;
+        const isAuthRoute = false;
+        const isWelcome = false;
 
-      const shouldRedirect = !isAuth && !isAuthRoute && !isWelcome;
-      expect(shouldRedirect, isTrue);
-    });
+        const shouldRedirect = !isAuth && !isAuthRoute && !isWelcome;
+        expect(shouldRedirect, isTrue);
+      },
+    );
 
     test('authenticated user on auth route should redirect to home', () {
       final authState = AuthState.authenticated(user: mockUser());

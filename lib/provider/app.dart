@@ -16,6 +16,7 @@ import 'package:delwaqty/l10n/app_localizations.dart';
 import 'package:delwaqty/services/deep_link/deep_link_service.dart';
 import 'package:delwaqty/services/ota/ota_update_dialog.dart';
 import 'package:delwaqty/services/push_notification/push_notification_service.dart';
+
 import 'dart:async';
 
 class ProviderApp extends ConsumerStatefulWidget {
@@ -41,7 +42,9 @@ class _ProviderAppState extends ConsumerState<ProviderApp> {
       if (!mounted) return;
 
       try {
-        await ref.read(backendBootstrapProvider).ready
+        await ref
+            .read(backendBootstrapProvider)
+            .ready
             .timeout(const Duration(seconds: 20));
       } catch (_) {}
 

@@ -9,7 +9,10 @@ import 'package:delwaqty/shared/widgets/error_state.dart';
 import 'package:delwaqty/shared/widgets/app_loader.dart';
 import 'package:delwaqty/core/theme/app_text_styles.dart';
 
-final _merchantProvider = FutureProvider.family<Merchant?, String>((ref, id) async {
+final _merchantProvider = FutureProvider.family<Merchant?, String>((
+  ref,
+  id,
+) async {
   final repo = ref.watch(merchantRepositoryProvider);
   return repo.getMerchantById(id);
 });
@@ -53,7 +56,8 @@ class RestaurantGalleryPage extends ConsumerWidget {
           }
 
           return RefreshIndicator(
-            onRefresh: () async => ref.invalidate(_merchantProvider(merchantId)),
+            onRefresh: () async =>
+                ref.invalidate(_merchantProvider(merchantId)),
             child: GridView.builder(
               padding: const EdgeInsets.all(12),
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
@@ -102,10 +106,15 @@ class RestaurantGalleryPage extends ConsumerWidget {
     );
   }
 
-  void _openFullScreen(BuildContext context, List<String> images, int initialIndex) {
+  void _openFullScreen(
+    BuildContext context,
+    List<String> images,
+    int initialIndex,
+  ) {
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (_) => _FullScreenGallery(images: images, initialIndex: initialIndex),
+        builder: (_) =>
+            _FullScreenGallery(images: images, initialIndex: initialIndex),
       ),
     );
   }
@@ -147,7 +156,9 @@ class _FullScreenGalleryState extends State<_FullScreenGallery> {
         foregroundColor: Theme.of(context).colorScheme.surface,
         title: Text(
           '${_currentIndex + 1} / ${widget.images.length}',
-          style: AppTextStyles.titleMedium.copyWith(color: Theme.of(context).colorScheme.surface),
+          style: AppTextStyles.titleMedium.copyWith(
+            color: Theme.of(context).colorScheme.surface,
+          ),
         ),
       ),
       body: PageView.builder(
@@ -166,7 +177,8 @@ class _FullScreenGalleryState extends State<_FullScreenGallery> {
                   fit: BoxFit.contain,
                   errorBuilder: (_, _, _) => Icon(
                     Icons.broken_image,
-                    color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.54),
+                    color: Theme.of(context).colorScheme.onSurface
+                        .withValues(alpha: 0.54),
                     size: 64,
                   ),
                 ),

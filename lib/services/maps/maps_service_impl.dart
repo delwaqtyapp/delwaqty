@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
+
 import 'package:flutter/foundation.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:delwaqty/config/app_config.dart';
@@ -9,12 +10,13 @@ import 'package:delwaqty/services/maps/maps_service.dart';
 import 'package:http/http.dart' as http;
 
 String get _googleMapsApiKey => AppConfig.mapsApiKey;
-const _directionsApiUrl = 'https://maps.googleapis.com/maps/api/directions/json';
-const _placesApiUrl = 'https://maps.googleapis.com/maps/api/place/nearbysearch/json';
+const _directionsApiUrl =
+    'https://maps.googleapis.com/maps/api/directions/json';
+const _placesApiUrl =
+    'https://maps.googleapis.com/maps/api/place/nearbysearch/json';
 const _staticMapBaseUrl = 'https://maps.googleapis.com/maps/api/staticmap';
 
 class MapsServiceImpl implements MapsService {
-
   MapsServiceImpl() {
     _client = http.Client();
   }
@@ -23,13 +25,14 @@ class MapsServiceImpl implements MapsService {
   @override
   Future<Route> getRoute(GeoLocation origin, GeoLocation destination) async {
     final response = await _client.get(
-      Uri.parse(_directionsApiUrl)
-          .replace(queryParameters: {
-        'origin': '${origin.latitude},${origin.longitude}',
-        'destination': '${destination.latitude},${destination.longitude}',
-        'key': _googleMapsApiKey,
-        'mode': 'driving',
-      }),
+      Uri.parse(_directionsApiUrl).replace(
+        queryParameters: {
+          'origin': '${origin.latitude},${origin.longitude}',
+          'destination': '${destination.latitude},${destination.longitude}',
+          'key': _googleMapsApiKey,
+          'mode': 'driving',
+        },
+      ),
     );
 
     if (response.statusCode != 200) {
@@ -44,27 +47,31 @@ class MapsServiceImpl implements MapsService {
     final route = data['routes'][0];
     final polyline = route['overview_polyline']['points'];
     final totalDuration = Duration(
-      seconds: _parseInt(data['routes'][0]['legs'][0]['duration']['value'] ?? 0),
+      seconds: _parseInt(
+        data['routes'][0]['legs'][0]['duration']['value'] ?? 0,
+      ),
     );
-    final totalDistance = _parseDouble(data['routes'][0]['legs'][0]['distance']['value'] ?? 0);
+    final totalDistance = _parseDouble(
+      data['routes'][0]['legs'][0]['distance']['value'] ?? 0,
+    );
 
     final steps = <RouteStep>[];
     for (final step in route['legs'][0]['steps']) {
-      steps.add(RouteStep(
-        instruction: step['html_instructions'].replaceAll('<[^>]+>', ''),
-        distanceMetres: _parseDouble(step['distance']['value']),
-        duration: Duration(
-          seconds: _parseInt(step['duration']['value']),
+      steps.add(
+        RouteStep(
+          instruction: step['html_instructions'].replaceAll('<[^>]+>', ''),
+          distanceMetres: _parseDouble(step['distance']['value']),
+          duration: Duration(seconds: _parseInt(step['duration']['value'])),
+          startLocation: GeoLocation(
+            latitude: _parseDouble(step['start_location']['lat']),
+            longitude: _parseDouble(step['start_location']['lng']),
+          ),
+          endLocation: GeoLocation(
+            latitude: _parseDouble(step['end_location']['lat']),
+            longitude: _parseDouble(step['end_location']['lng']),
+          ),
         ),
-        startLocation: GeoLocation(
-          latitude: _parseDouble(step['start_location']['lat']),
-          longitude: _parseDouble(step['start_location']['lng']),
-        ),
-        endLocation: GeoLocation(
-          latitude: _parseDouble(step['end_location']['lat']),
-          longitude: _parseDouble(step['end_location']['lng']),
-        ),
-      ));
+      );
     }
 
     return Route(
@@ -78,14 +85,15 @@ class MapsServiceImpl implements MapsService {
   @override
   Future<Duration> getETA(GeoLocation origin, GeoLocation destination) async {
     final response = await _client.get(
-      Uri.parse(_directionsApiUrl)
-          .replace(queryParameters: {
-        'origin': '${origin.latitude},${origin.longitude}',
-        'destination': '${destination.latitude},${destination.longitude}',
-        'key': _googleMapsApiKey,
-        'mode': 'driving',
-        'alternatives': 'false',
-      }),
+      Uri.parse(_directionsApiUrl).replace(
+        queryParameters: {
+          'origin': '${origin.latitude},${origin.longitude}',
+          'destination': '${destination.latitude},${destination.longitude}',
+          'key': _googleMapsApiKey,
+          'mode': 'driving',
+          'alternatives': 'false',
+        },
+      ),
     );
 
     if (response.statusCode != 200) {
@@ -98,7 +106,9 @@ class MapsServiceImpl implements MapsService {
     }
 
     return Duration(
-      seconds: _parseInt(data['routes'][0]['legs'][0]['duration']['value'] ?? 0),
+      seconds: _parseInt(
+        data['routes'][0]['legs'][0]['duration']['value'] ?? 0,
+      ),
     );
   }
 
@@ -109,13 +119,14 @@ class MapsServiceImpl implements MapsService {
     double radius,
   ) async {
     final response = await _client.get(
-      Uri.parse(_placesApiUrl)
-          .replace(queryParameters: {
-        'location': '${location.latitude},${location.longitude}',
-        'radius': radius.toString(),
-        'type': type,
-        'key': _googleMapsApiKey,
-      }),
+      Uri.parse(_placesApiUrl).replace(
+        queryParameters: {
+          'location': '${location.latitude},${location.longitude}',
+          'radius': radius.toString(),
+          'type': type,
+          'key': _googleMapsApiKey,
+        },
+      ),
     );
 
     if (response.statusCode != 200) {
@@ -130,28 +141,30 @@ class MapsServiceImpl implements MapsService {
     final places = <NearbyPlace>[];
     for (final result in data['results']) {
       final geometry = result['geometry']['location'];
-      places.add(NearbyPlace(
-        id: result['place_id'],
-        name: result['name'],
-        location: GeoLocation(
-          latitude: geometry['lat'],
-          longitude: geometry['lng'],
+      places.add(
+        NearbyPlace(
+          id: result['place_id'],
+          name: result['name'],
+          location: GeoLocation(
+            latitude: geometry['lat'],
+            longitude: geometry['lng'],
+          ),
+          type: result['types'].isNotEmpty
+              ? result['types'].firstWhere(
+                  (t) => t != 'establishment',
+                  orElse: () => result['types'][0] ?? '',
+                )
+              : '',
+          rating: _parseDouble(result['rating']),
+          distanceMetres: _calculateDistance(
+            location.latitude,
+            location.longitude,
+            (geometry['lat'] as num).toDouble(),
+            (geometry['lng'] as num).toDouble(),
+          ),
+          isOpenNow: result['opening_hours']?['open_now'] ?? false,
         ),
-        type: result['types'].isNotEmpty
-            ? result['types'].firstWhere(
-                (t) => t != 'establishment',
-                orElse: () => result['types'][0] ?? '',
-              )
-            : '',
-        rating: _parseDouble(result['rating']),
-        distanceMetres: _calculateDistance(
-          location.latitude,
-          location.longitude,
-          (geometry['lat'] as num).toDouble(),
-          (geometry['lng'] as num).toDouble(),
-        ),
-        isOpenNow: result['opening_hours']?['open_now'] ?? false,
-      ));
+      );
     }
 
     return places;
@@ -175,7 +188,9 @@ class MapsServiceImpl implements MapsService {
       '&travelmode=driving',
     );
     unawaited(
-      launchUrl(uri, mode: LaunchMode.externalApplication).catchError((Object e) {
+      launchUrl(uri, mode: LaunchMode.externalApplication).catchError((
+        Object e,
+      ) {
         debugPrint('Opening navigation failed: $e');
         return false;
       }),
@@ -204,13 +219,21 @@ class MapsServiceImpl implements MapsService {
   }
 
   double _calculateDistance(
-      double lat1, double lon1, double lat2, double lon2) {
+    double lat1,
+    double lon1,
+    double lat2,
+    double lon2,
+  ) {
     // Haversine formula
     const r = 6371e3; // Earth radius in metres
     final dLat = (lat2 - lat1) * 3.14159 / 180;
     final dLon = (lon2 - lon1) * 3.14159 / 180;
-    final a = sin(dLat / 2) * sin(dLat / 2) +
-        cos(lat1 * 3.14159 / 180) * cos(lat2 * 3.14159 / 180) * sin(dLon / 2) * sin(dLon / 2);
+    final a =
+        sin(dLat / 2) * sin(dLat / 2) +
+        cos(lat1 * 3.14159 / 180) *
+            cos(lat2 * 3.14159 / 180) *
+            sin(dLon / 2) *
+            sin(dLon / 2);
     final c = 2 * asin(sqrt(a));
     return r * c;
   }

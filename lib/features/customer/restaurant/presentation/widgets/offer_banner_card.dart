@@ -52,14 +52,19 @@ class OfferBannerCard extends StatelessWidget {
           const SizedBox(height: 8),
           Text(
             offer.title,
-            style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
+            style: theme.textTheme.bodyMedium?.copyWith(
+              fontWeight: FontWeight.w600,
+            ),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
           if (offer.minimumOrder > 0) ...[
             const SizedBox(height: 4),
             Text(
-              l10n.minOrderRequired(offer.minimumOrder.toStringAsFixed(0), l10n.sar),
+              l10n.minOrderRequired(
+                offer.minimumOrder.toStringAsFixed(0),
+                l10n.sar,
+              ),
               style: theme.textTheme.bodySmall?.copyWith(
                 color: theme.colorScheme.onSurfaceVariant,
                 fontSize: 10,

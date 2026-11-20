@@ -13,7 +13,7 @@ class GooglePlacesProvider implements GeocodingProvider {
     required this._apiKey,
     http.Client? client,
     this.regionCode = 'eg',
-  })  : _client = client ?? http.Client();
+  }) : _client = client ?? http.Client();
 
   final String _apiKey;
   final http.Client _client;
@@ -49,22 +49,26 @@ class GooglePlacesProvider implements GeocodingProvider {
     }
     final data = await _get('/maps/api/place/autocomplete/json', params);
     final predictions = (data['predictions'] as List?) ?? const [];
-    return predictions.map((p) {
-      final m = p as Map<String, dynamic>;
-      final structured =
-          m['structured_formatting'] as Map<String, dynamic>? ?? const {};
-      return PlaceSuggestion(
-        placeId: m['place_id'] as String? ?? '',
-        primaryText: structured['main_text'] as String? ??
-            m['description'] as String? ??
-            '',
-        secondaryText: structured['secondary_text'] as String? ?? '',
-        distanceMeters: (m['distance_meters'] as num?)?.toInt(),
-        types: ((m['types'] as List?) ?? const [])
-            .map((e) => e.toString())
-            .toList(),
-      );
-    }).where((s) => s.placeId.isNotEmpty).toList();
+    return predictions
+        .map((p) {
+          final m = p as Map<String, dynamic>;
+          final structured =
+              m['structured_formatting'] as Map<String, dynamic>? ?? const {};
+          return PlaceSuggestion(
+            placeId: m['place_id'] as String? ?? '',
+            primaryText:
+                structured['main_text'] as String? ??
+                m['description'] as String? ??
+                '',
+            secondaryText: structured['secondary_text'] as String? ?? '',
+            distanceMeters: (m['distance_meters'] as num?)?.toInt(),
+            types: ((m['types'] as List?) ?? const [])
+                .map((e) => e.toString())
+                .toList(),
+          );
+        })
+        .where((s) => s.placeId.isNotEmpty)
+        .toList();
   }
 
   @override
@@ -109,8 +113,10 @@ class GooglePlacesProvider implements GeocodingProvider {
       name: first['formatted_address'] as String? ?? '',
       formattedAddress: first['formatted_address'] as String? ?? '',
       location: loc != null
-          ? GeoPoint((loc['lat'] as num).toDouble(),
-              (loc['lng'] as num).toDouble())
+          ? GeoPoint(
+              (loc['lat'] as num).toDouble(),
+              (loc['lng'] as num).toDouble(),
+            )
           : point,
       types: ((first['types'] as List?) ?? const [])
           .map((e) => e.toString())
@@ -136,7 +142,9 @@ class GooglePlacesProvider implements GeocodingProvider {
     }
     final data = await _get('/maps/api/place/nearbysearch/json', params);
     final results = (data['results'] as List?) ?? const [];
-    return results.map((r) => _detailsFromResult(r as Map<String, dynamic>)).toList();
+    return results
+        .map((r) => _detailsFromResult(r as Map<String, dynamic>))
+        .toList();
   }
 
   PlaceDetails _detailsFromResult(Map<String, dynamic> result) {
@@ -144,15 +152,19 @@ class GooglePlacesProvider implements GeocodingProvider {
     final loc = geometry?['location'] as Map<String, dynamic>?;
     return PlaceDetails(
       placeId: result['place_id'] as String? ?? '',
-      name: result['name'] as String? ??
+      name:
+          result['name'] as String? ??
           result['formatted_address'] as String? ??
           '',
-      formattedAddress: result['formatted_address'] as String? ??
+      formattedAddress:
+          result['formatted_address'] as String? ??
           result['vicinity'] as String? ??
           '',
       location: loc != null
-          ? GeoPoint((loc['lat'] as num).toDouble(),
-              (loc['lng'] as num).toDouble())
+          ? GeoPoint(
+              (loc['lat'] as num).toDouble(),
+              (loc['lng'] as num).toDouble(),
+            )
           : const GeoPoint(0, 0),
       types: ((result['types'] as List?) ?? const [])
           .map((e) => e.toString())
@@ -166,14 +178,14 @@ class GooglePlacesProvider implements GeocodingProvider {
   ) async {
     if (_apiKey.isEmpty) {
       throw const GeocodingException(
-          GeocodingErrorKind.denied, 'Missing Maps API key');
+        GeocodingErrorKind.denied,
+        'Missing Maps API key',
+      );
     }
     final uri = Uri.https(_base, path, params);
     http.Response response;
     try {
-      response = await _client
-          .get(uri)
-          .timeout(const Duration(seconds: 10));
+      response = await _client.get(uri).timeout(const Duration(seconds: 10));
     } on Exception catch (e) {
       throw GeocodingException(GeocodingErrorKind.network, e.toString());
     }
@@ -182,7 +194,9 @@ class GooglePlacesProvider implements GeocodingProvider {
     }
     if (response.statusCode != 200) {
       throw GeocodingException(
-          GeocodingErrorKind.network, 'HTTP ${response.statusCode}');
+        GeocodingErrorKind.network,
+        'HTTP ${response.statusCode}',
+      );
     }
     final body = json.decode(response.body) as Map<String, dynamic>;
     final status = body['status'] as String? ?? 'UNKNOWN_ERROR';
@@ -194,12 +208,16 @@ class GooglePlacesProvider implements GeocodingProvider {
         throw const GeocodingException(GeocodingErrorKind.rateLimited);
       case 'REQUEST_DENIED':
         throw GeocodingException(
-            GeocodingErrorKind.denied, body['error_message'] as String?);
+          GeocodingErrorKind.denied,
+          body['error_message'] as String?,
+        );
       case 'NOT_FOUND':
         throw const GeocodingException(GeocodingErrorKind.notFound);
       default:
         throw GeocodingException(
-            GeocodingErrorKind.unknown, body['error_message'] as String?);
+          GeocodingErrorKind.unknown,
+          body['error_message'] as String?,
+        );
     }
   }
 }

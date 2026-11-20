@@ -7,9 +7,7 @@ void main() {
     testWidgets('displays title', (tester) async {
       await tester.pumpWidget(
         const MaterialApp(
-          home: Scaffold(
-            body: SectionHeader(title: 'Recent'),
-          ),
+          home: Scaffold(body: SectionHeader(title: 'Recent')),
         ),
       );
 

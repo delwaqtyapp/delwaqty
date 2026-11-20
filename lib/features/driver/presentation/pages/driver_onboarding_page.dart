@@ -1,4 +1,5 @@
 import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -12,7 +13,8 @@ class DriverOnboardingPage extends ConsumerStatefulWidget {
   const DriverOnboardingPage({super.key});
 
   @override
-  ConsumerState<DriverOnboardingPage> createState() => _DriverOnboardingPageState();
+  ConsumerState<DriverOnboardingPage> createState() =>
+      _DriverOnboardingPageState();
 }
 
 class _DriverOnboardingPageState extends ConsumerState<DriverOnboardingPage> {
@@ -29,9 +31,7 @@ class _DriverOnboardingPageState extends ConsumerState<DriverOnboardingPage> {
   }
 
   Future<void> _pickLicenseImage() async {
-    final pickedFile = await FilePicker.pickFile(
-      type: FileType.image,
-    );
+    final pickedFile = await FilePicker.pickFile(type: FileType.image);
 
     if (pickedFile != null && pickedFile.path != null) {
       setState(() => _licenseImage = File(pickedFile.path!));
@@ -40,9 +40,7 @@ class _DriverOnboardingPageState extends ConsumerState<DriverOnboardingPage> {
   }
 
   Future<void> _pickVehicleImage() async {
-    final pickedFile = await FilePicker.pickFile(
-      type: FileType.image,
-    );
+    final pickedFile = await FilePicker.pickFile(type: FileType.image);
 
     if (pickedFile != null && pickedFile.path != null) {
       setState(() => _vehicleImage = File(pickedFile.path!));
@@ -64,9 +62,8 @@ class _DriverOnboardingPageState extends ConsumerState<DriverOnboardingPage> {
       final driverId = profileAsync?.id;
       if (driverId == null) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(l10n.failedToLoad)),
-          );
+          ScaffoldMessenger.of(context)
+              .showSnackBar(SnackBar(content: Text(l10n.failedToLoad)));
         }
         return;
       }
@@ -84,30 +81,30 @@ class _DriverOnboardingPageState extends ConsumerState<DriverOnboardingPage> {
           .from('driver-documents')
           .createSignedUrl(fileName, 3600);
 
-      await _supabase
-          .rpc('upsert_driver_document', params: {
-        'p_driver_id': driverId,
-        'p_doc_type': 'driving_license',
-        'p_file_url': fileUrl,
-        'p_file_name': 'license.jpg',
-        'p_file_size': _licenseImage!.lengthSync(),
-        'p_expires_at': null,
-      });
+      await _supabase.rpc(
+        'upsert_driver_document',
+        params: {
+          'p_driver_id': driverId,
+          'p_doc_type': 'driving_license',
+          'p_file_url': fileUrl,
+          'p_file_name': 'license.jpg',
+          'p_file_size': _licenseImage!.lengthSync(),
+          'p_expires_at': null,
+        },
+      );
 
       if (mounted) {
         setState(() {
           _licenseError = null;
         });
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.documentUploaded)),
-        );
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(l10n.documentUploaded)));
       }
     } catch (e) {
       if (mounted) {
         setState(() => _licenseError = appErrorText(context, e));
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(appErrorText(context, e))),
-        );
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(appErrorText(context, e))));
       }
     } finally {
       if (mounted) setState(() => _isUploading = false);
@@ -128,9 +125,8 @@ class _DriverOnboardingPageState extends ConsumerState<DriverOnboardingPage> {
       final driverId = profileAsync?.id;
       if (driverId == null) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(l10n.failedToLoad)),
-          );
+          ScaffoldMessenger.of(context)
+              .showSnackBar(SnackBar(content: Text(l10n.failedToLoad)));
         }
         return;
       }
@@ -148,30 +144,30 @@ class _DriverOnboardingPageState extends ConsumerState<DriverOnboardingPage> {
           .from('driver-documents')
           .createSignedUrl(fileName, 3600);
 
-      await _supabase
-          .rpc('upsert_driver_document', params: {
-        'p_driver_id': driverId,
-        'p_doc_type': 'vehicle_registration',
-        'p_file_url': fileUrl,
-        'p_file_name': 'vehicle.jpg',
-        'p_file_size': _vehicleImage!.lengthSync(),
-        'p_expires_at': null,
-      });
+      await _supabase.rpc(
+        'upsert_driver_document',
+        params: {
+          'p_driver_id': driverId,
+          'p_doc_type': 'vehicle_registration',
+          'p_file_url': fileUrl,
+          'p_file_name': 'vehicle.jpg',
+          'p_file_size': _vehicleImage!.lengthSync(),
+          'p_expires_at': null,
+        },
+      );
 
       if (mounted) {
         setState(() {
           _vehicleError = null;
         });
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.documentUploaded)),
-        );
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(l10n.documentUploaded)));
       }
     } catch (e) {
       if (mounted) {
         setState(() => _vehicleError = appErrorText(context, e));
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(appErrorText(context, e))),
-        );
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(appErrorText(context, e))));
       }
     } finally {
       if (mounted) setState(() => _isUploading = false);
@@ -191,19 +187,15 @@ class _DriverOnboardingPageState extends ConsumerState<DriverOnboardingPage> {
 
     setState(() => _isUploading = true);
     try {
-      final profile =
-          await ref.read(driverProfileProvider(authId).future);
+      final profile = await ref.read(driverProfileProvider(authId).future);
       final driverId = profile?.id;
       if (driverId != null) {
-        await ref
-            .read(driverRepositoryProvider)
-            .completeOnboarding(driverId);
+        await ref.read(driverRepositoryProvider).completeOnboarding(driverId);
         ref.invalidate(driverProfileProvider(authId));
       }
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.onboardingCompleted)),
-      );
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(l10n.onboardingCompleted)));
       if (context.canPop()) {
         context.pop();
       } else {
@@ -212,9 +204,8 @@ class _DriverOnboardingPageState extends ConsumerState<DriverOnboardingPage> {
     } catch (e) {
       if (!mounted) return;
       setState(() => _isUploading = false);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(appErrorText(context, e))),
-      );
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(appErrorText(context, e))));
     }
   }
 
@@ -297,7 +288,11 @@ class _DriverOnboardingPageState extends ConsumerState<DriverOnboardingPage> {
           children: [
             Row(
               children: [
-                Icon(icon, size: 28, color: Theme.of(context).colorScheme.primary),
+                Icon(
+                  icon,
+                  size: 28,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(
@@ -313,7 +308,9 @@ class _DriverOnboardingPageState extends ConsumerState<DriverOnboardingPage> {
                 height: 120,
                 width: double.infinity,
                 decoration: BoxDecoration(
-                  border: Border.all(color: Theme.of(context).colorScheme.outline),
+                  border: Border.all(
+                    color: Theme.of(context).colorScheme.outline,
+                  ),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Image.file(image),
@@ -323,16 +320,18 @@ class _DriverOnboardingPageState extends ConsumerState<DriverOnboardingPage> {
                 height: 120,
                 width: double.infinity,
                 decoration: BoxDecoration(
-                  border: Border.all(color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.5)),
+                  border: Border.all(
+                    color: Theme.of(context).colorScheme.outline
+                        .withValues(alpha: 0.5),
+                  ),
                   borderRadius: BorderRadius.circular(8),
-                  color: Theme.of(context).colorScheme.surface.withValues(alpha: 0.5),
+                  color: Theme.of(context).colorScheme.surface
+                      .withValues(alpha: 0.5),
                 ),
                 child: Center(
                   child: Text(
                     l10n.uploadDocument,
-                    style: const TextStyle(
-                      color: Colors.grey,
-                    ),
+                    style: const TextStyle(color: Colors.grey),
                   ),
                 ),
               ),

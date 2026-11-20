@@ -1,4 +1,5 @@
 import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -76,9 +77,7 @@ void main() {
             authStream: stream.stream,
             userIdLoader: () async => 'u1',
             roleLoader: (_) async => 'admin',
-            authorizedBuilder: () => const Scaffold(
-              body: Text('shell'),
-            ),
+            authorizedBuilder: () => const Scaffold(body: Text('shell')),
           ),
         ),
       );
@@ -97,9 +96,7 @@ void main() {
             authStream: stream.stream,
             userIdLoader: () async => 'u1',
             roleLoader: (_) async => 'owner',
-            authorizedBuilder: () => const Scaffold(
-              body: Text('shell'),
-            ),
+            authorizedBuilder: () => const Scaffold(body: Text('shell')),
           ),
         ),
       );
@@ -123,7 +120,10 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(find.text('You do not have permission to do that.'), findsOneWidget);
+      expect(
+        find.text('You do not have permission to do that.'),
+        findsOneWidget,
+      );
 
       await stream.close();
     });
@@ -141,7 +141,10 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(find.text('You do not have permission to do that.'), findsOneWidget);
+      expect(
+        find.text('You do not have permission to do that.'),
+        findsOneWidget,
+      );
 
       await stream.close();
     });

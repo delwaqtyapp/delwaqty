@@ -51,7 +51,8 @@ class WalletPage extends ConsumerWidget {
           padding: const EdgeInsets.all(16),
           children: [
             AnimatedFadeIn(
-              child: balanceAsync.when(skipLoadingOnRefresh: true, 
+              child: balanceAsync.when(
+                skipLoadingOnRefresh: true,
                 data: (balance) => Container(
                   width: double.infinity,
                   padding: const EdgeInsets.all(24),
@@ -78,7 +79,9 @@ class WalletPage extends ConsumerWidget {
                       Text(
                         l10n.availableBalance,
                         style: theme.textTheme.bodyMedium?.copyWith(
-                          color: theme.colorScheme.onPrimary.withValues(alpha: 0.8),
+                          color: theme.colorScheme.onPrimary.withValues(
+                            alpha: 0.8,
+                          ),
                         ),
                       ),
                       const SizedBox(height: 8),
@@ -141,7 +144,8 @@ class WalletPage extends ConsumerWidget {
             const SizedBox(height: 8),
             AnimatedFadeIn(
               delay: const Duration(milliseconds: 300),
-              child: transactionsAsync.when(skipLoadingOnRefresh: true, 
+              child: transactionsAsync.when(
+                skipLoadingOnRefresh: true,
                 data: (transactions) {
                   if (transactions.isEmpty) {
                     return Padding(
@@ -160,10 +164,13 @@ class WalletPage extends ConsumerWidget {
                   );
                 },
                 loading: () => Column(
-                  children: List.filled(3, const Padding(
-                    padding: EdgeInsets.only(bottom: 8),
-                    child: ShimmerCard(height: 60),
-                  )),
+                  children: List.filled(
+                    3,
+                    const Padding(
+                      padding: EdgeInsets.only(bottom: 8),
+                      child: ShimmerCard(height: 60),
+                    ),
+                  ),
                 ),
                 error: (e, _) => Padding(
                   padding: const EdgeInsets.symmetric(vertical: 24),
@@ -204,7 +211,9 @@ class _QuickAction extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 16),
         decoration: BoxDecoration(
-          color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+          color: theme.colorScheme.surfaceContainerHighest.withValues(
+            alpha: 0.5,
+          ),
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
             color: theme.colorScheme.outlineVariant.withValues(alpha: 0.3),
@@ -216,7 +225,9 @@ class _QuickAction extends StatelessWidget {
             const SizedBox(height: 4),
             Text(
               label,
-              style: theme.textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w600),
+              style: theme.textTheme.bodySmall?.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ],
         ),
@@ -234,7 +245,8 @@ class _TransactionTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
-    final isCredit = transaction.type == TransactionType.topup ||
+    final isCredit =
+        transaction.type == TransactionType.topup ||
         transaction.type == TransactionType.refund;
 
     return Padding(
@@ -261,7 +273,9 @@ class _TransactionTile extends StatelessWidget {
               ),
               child: Icon(
                 _getIcon(transaction.type),
-                color: isCredit ? AppColors.successLight : theme.colorScheme.error,
+                color: isCredit
+                    ? AppColors.successLight
+                    : theme.colorScheme.error,
                 size: 20,
               ),
             ),
@@ -293,7 +307,9 @@ class _TransactionTile extends StatelessWidget {
                 '${isCredit ? '+' : '-'}${l10n.amountWithCurrency(transaction.amount.toStringAsFixed(2), l10n.currencySymbol)}',
                 style: theme.textTheme.bodyMedium?.copyWith(
                   fontWeight: FontWeight.w700,
-                  color: isCredit ? AppColors.successLight : theme.colorScheme.error,
+                  color: isCredit
+                      ? AppColors.successLight
+                      : theme.colorScheme.error,
                 ),
                 overflow: TextOverflow.ellipsis,
               ),

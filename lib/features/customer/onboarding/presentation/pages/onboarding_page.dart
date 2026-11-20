@@ -114,7 +114,8 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage>
                     child: Text(
                       l10n.onboardingSkip,
                       style: AppTextStyles.labelLarge.copyWith(
-                        color: Theme.of(context).colorScheme.onPrimary.withValues(alpha: 0.8),
+                        color: Theme.of(context).colorScheme.onPrimary
+                            .withValues(alpha: 0.8),
                       ),
                     ),
                   ),
@@ -236,43 +237,43 @@ class _OnboardingSlideData {
 
 class _OnboardingSlides {
   static List<_OnboardingSlideData> get(AppLocalizations l10n) => [
-        _OnboardingSlideData(
-          title: l10n.onboardingTitle1,
-          description: l10n.onboardingDesc1,
-          icon: Icons.auto_awesome_rounded,
-          illustration: '✨',
-        ),
-        _OnboardingSlideData(
-          title: l10n.onboardingTitle2,
-          description: l10n.onboardingDesc2,
-          icon: Icons.restaurant_rounded,
-          illustration: '🍕',
-        ),
-        _OnboardingSlideData(
-          title: l10n.onboardingTitle6,
-          description: l10n.onboardingDesc6,
-          icon: Icons.shopping_bag_rounded,
-          illustration: '🛍️',
-        ),
-        _OnboardingSlideData(
-          title: l10n.onboardingTitle3,
-          description: l10n.onboardingDesc3,
-          icon: Icons.home_repair_service_rounded,
-          illustration: '🔧',
-        ),
-        _OnboardingSlideData(
-          title: l10n.onboardingTitle4,
-          description: l10n.onboardingDesc4,
-          icon: Icons.delivery_dining_rounded,
-          illustration: '📍',
-        ),
-        _OnboardingSlideData(
-          title: l10n.onboardingTitle5,
-          description: l10n.onboardingDesc5,
-          icon: Icons.rocket_launch_rounded,
-          illustration: '🚀',
-        ),
-      ];
+    _OnboardingSlideData(
+      title: l10n.onboardingTitle1,
+      description: l10n.onboardingDesc1,
+      icon: Icons.auto_awesome_rounded,
+      illustration: '✨',
+    ),
+    _OnboardingSlideData(
+      title: l10n.onboardingTitle2,
+      description: l10n.onboardingDesc2,
+      icon: Icons.restaurant_rounded,
+      illustration: '🍕',
+    ),
+    _OnboardingSlideData(
+      title: l10n.onboardingTitle6,
+      description: l10n.onboardingDesc6,
+      icon: Icons.shopping_bag_rounded,
+      illustration: '🛍️',
+    ),
+    _OnboardingSlideData(
+      title: l10n.onboardingTitle3,
+      description: l10n.onboardingDesc3,
+      icon: Icons.home_repair_service_rounded,
+      illustration: '🔧',
+    ),
+    _OnboardingSlideData(
+      title: l10n.onboardingTitle4,
+      description: l10n.onboardingDesc4,
+      icon: Icons.delivery_dining_rounded,
+      illustration: '📍',
+    ),
+    _OnboardingSlideData(
+      title: l10n.onboardingTitle5,
+      description: l10n.onboardingDesc5,
+      icon: Icons.rocket_launch_rounded,
+      illustration: '🚀',
+    ),
+  ];
 }
 
 class _OnboardingSlideWidget extends StatelessWidget {
@@ -298,10 +299,7 @@ class _OnboardingSlideWidget extends StatelessWidget {
           AnimatedBuilder(
             animation: enterScale,
             builder: (context, child) {
-              return Transform.scale(
-                scale: enterScale.value,
-                child: child,
-              );
+              return Transform.scale(scale: enterScale.value, child: child);
             },
             child: Text(
               slide.illustration,
@@ -324,14 +322,20 @@ class _OnboardingSlideWidget extends StatelessWidget {
               width: 80,
               height: 80,
               decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.onPrimary.withValues(alpha: 0.15),
+                color: Theme.of(context).colorScheme.onPrimary
+                    .withValues(alpha: 0.15),
                 shape: BoxShape.circle,
                 border: Border.all(
-                  color: Theme.of(context).colorScheme.onPrimary.withValues(alpha: 0.25),
+                  color: Theme.of(context).colorScheme.onPrimary
+                      .withValues(alpha: 0.25),
                   width: 2,
                 ),
               ),
-              child: Icon(slide.icon, size: 40, color: Theme.of(context).colorScheme.onPrimary),
+              child: Icon(
+                slide.icon,
+                size: 40,
+                color: Theme.of(context).colorScheme.onPrimary,
+              ),
             ),
           ),
           const SizedBox(height: 40),
@@ -371,7 +375,8 @@ class _OnboardingSlideWidget extends StatelessWidget {
             child: Text(
               slide.description,
               style: AppTextStyles.bodyLarge.copyWith(
-                color: Theme.of(context).colorScheme.onPrimary.withValues(alpha: 0.85),
+                color: Theme.of(context).colorScheme.onPrimary
+                    .withValues(alpha: 0.85),
                 height: 1.6,
               ),
               textAlign: TextAlign.center,

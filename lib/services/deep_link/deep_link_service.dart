@@ -13,7 +13,7 @@ import 'package:delwaqty/services/logger/app_logger.dart';
 /// the last received route so the router can consult it after the session
 /// resolves (cold start / app already running).
 class DeepLinkService {
-DeepLinkService({
+  DeepLinkService({
     required this._appLinks,
     required this._logger,
     this._overrideStream,

@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:delwaqty/services/admin/admin_providers.dart';
@@ -15,22 +14,27 @@ final _adminDeliveriesProvider = FutureProvider<List<Map<String, dynamic>>>((
 ) async {
   final adminService = ref.read(adminServiceProvider);
   final deliveries = await adminService.getRecentDeliveries();
-  return deliveries.map((d) => {
-    'id': d.id,
-    'service_type': d.serviceType,
-    'status': d.status,
-    'sender_name': d.senderName ?? '',
-    'receiver_name': d.receiverName ?? '',
-    'items_description': d.itemDescription ?? '',
-    'created_at': d.createdAt.toIso8601String(),
-  }).toList();
+  return deliveries
+      .map(
+        (d) => {
+          'id': d.id,
+          'service_type': d.serviceType,
+          'status': d.status,
+          'sender_name': d.senderName ?? '',
+          'receiver_name': d.receiverName ?? '',
+          'items_description': d.itemDescription ?? '',
+          'created_at': d.createdAt.toIso8601String(),
+        },
+      )
+      .toList();
 });
 
 class AdminDeliveriesPage extends ConsumerStatefulWidget {
   const AdminDeliveriesPage({super.key});
 
   @override
-  ConsumerState<AdminDeliveriesPage> createState() => _AdminDeliveriesPageState();
+  ConsumerState<AdminDeliveriesPage> createState() =>
+      _AdminDeliveriesPageState();
 }
 
 class _AdminDeliveriesPageState extends ConsumerState<AdminDeliveriesPage> {
@@ -100,7 +104,8 @@ class _AdminDeliveriesPageState extends ConsumerState<AdminDeliveriesPage> {
                     _ServiceChip(
                       label: l10n.package,
                       selected: _serviceFilter == 'direct_delivery',
-                      onTap: () => setState(() => _serviceFilter = 'direct_delivery'),
+                      onTap: () =>
+                          setState(() => _serviceFilter = 'direct_delivery'),
                       cs: cs,
                     ),
                   ],
@@ -123,7 +128,9 @@ class _AdminDeliveriesPageState extends ConsumerState<AdminDeliveriesPage> {
               data: (deliveries) {
                 final filtered = _serviceFilter.isEmpty
                     ? deliveries
-                    : deliveries.where((d) => d['service_type'] == _serviceFilter).toList();
+                    : deliveries
+                          .where((d) => d['service_type'] == _serviceFilter)
+                          .toList();
 
                 if (filtered.isEmpty) {
                   return PremiumEmptyState(
@@ -186,38 +193,40 @@ class _ServiceChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 4),
-          child: GestureDetector(
-            onTap: onTap,
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 200),
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-              decoration: BoxDecoration(
-                gradient: selected
-                    ? LinearGradient(
-                        colors: [
-                          AppColors.brandPurple,
-                          AppColors.brandPurple.withValues(alpha: 0.8),
-                        ],
-                      )
-                    : null,
-                color: selected ? null : cs.surfaceContainerHighest.withValues(alpha: 0.3),
-                borderRadius: BorderRadius.circular(14),
-                border: Border.all(
-                  color: selected
-                      ? AppColors.brandPurple.withValues(alpha: 0.5)
-                      : cs.outline.withValues(alpha: 0.1),
-                ),
-              ),
-              child: Text(
-                label,
-                style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                  fontWeight: selected ? FontWeight.bold : FontWeight.normal,
-                  color: selected ? Colors.white : cs.onSurfaceVariant,
-                ),
-              ),
+      padding: const EdgeInsets.symmetric(horizontal: 4),
+      child: GestureDetector(
+        onTap: onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+          decoration: BoxDecoration(
+            gradient: selected
+                ? LinearGradient(
+                    colors: [
+                      AppColors.brandPurple,
+                      AppColors.brandPurple.withValues(alpha: 0.8),
+                    ],
+                  )
+                : null,
+            color: selected
+                ? null
+                : cs.surfaceContainerHighest.withValues(alpha: 0.3),
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(
+              color: selected
+                  ? AppColors.brandPurple.withValues(alpha: 0.5)
+                  : cs.outline.withValues(alpha: 0.1),
             ),
           ),
+          child: Text(
+            label,
+            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+              fontWeight: selected ? FontWeight.bold : FontWeight.normal,
+              color: selected ? Colors.white : cs.onSurfaceVariant,
+            ),
+          ),
+        ),
+      ),
     );
   }
 }
@@ -239,9 +248,18 @@ class _DeliveryGlassTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final serviceType = delivery['service_type'] as String? ?? 'delivery';
     final status = delivery['status'] as String? ?? 'pending';
-    final senderName = delivery['sender_name'] as String? ?? delivery['sender']?['name'] as String? ?? '';
-    final receiverName = delivery['receiver_name'] as String? ?? delivery['receiver']?['name'] as String? ?? '';
-    final items = delivery['items_description'] as String? ?? delivery['description'] as String? ?? '';
+    final senderName =
+        delivery['sender_name'] as String? ??
+        delivery['sender']?['name'] as String? ??
+        '';
+    final receiverName =
+        delivery['receiver_name'] as String? ??
+        delivery['receiver']?['name'] as String? ??
+        '';
+    final items =
+        delivery['items_description'] as String? ??
+        delivery['description'] as String? ??
+        '';
     final idShort = (delivery['id'] as String? ?? '').length > 8
         ? (delivery['id'] as String).substring(0, 8)
         : (delivery['id'] as String? ?? '');
@@ -296,9 +314,8 @@ class _DeliveryGlassTile extends StatelessWidget {
                   children: [
                     Text(
                       '${l10n.deliveryNumber}$idShort',
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
+                      style: Theme.of(context).textTheme.bodyMedium
+                          ?.copyWith(fontWeight: FontWeight.w600),
                     ),
                     Text(
                       serviceType.replaceAll('_', ' ').toUpperCase(),
@@ -330,13 +347,16 @@ class _DeliveryGlassTile extends StatelessWidget {
           const SizedBox(height: 12),
           Row(
             children: [
-              Icon(Icons.person_outline_rounded, size: 16, color: cs.onSurfaceVariant),
+              Icon(
+                Icons.person_outline_rounded,
+                size: 16,
+                color: cs.onSurfaceVariant,
+              ),
               const SizedBox(width: 6),
               Text(
                 '${l10n.from}: $senderName',
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: cs.onSurfaceVariant,
-                ),
+                style: Theme.of(context).textTheme.bodySmall
+                    ?.copyWith(color: cs.onSurfaceVariant),
               ),
             ],
           ),
@@ -347,9 +367,8 @@ class _DeliveryGlassTile extends StatelessWidget {
               const SizedBox(width: 6),
               Text(
                 '${l10n.to}: $receiverName',
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: cs.onSurfaceVariant,
-                ),
+                style: Theme.of(context).textTheme.bodySmall
+                    ?.copyWith(color: cs.onSurfaceVariant),
               ),
             ],
           ),
@@ -357,14 +376,17 @@ class _DeliveryGlassTile extends StatelessWidget {
             const SizedBox(height: 4),
             Row(
               children: [
-                Icon(Icons.inventory_rounded, size: 16, color: cs.onSurfaceVariant),
+                Icon(
+                  Icons.inventory_rounded,
+                  size: 16,
+                  color: cs.onSurfaceVariant,
+                ),
                 const SizedBox(width: 6),
                 Expanded(
                   child: Text(
                     items,
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: cs.onSurfaceVariant,
-                    ),
+                    style: Theme.of(context).textTheme.bodySmall
+                        ?.copyWith(color: cs.onSurfaceVariant),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -379,18 +401,29 @@ class _DeliveryGlassTile extends StatelessWidget {
               PopupMenuButton<String>(
                 onSelected: onStatusChanged,
                 padding: EdgeInsets.zero,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(14),
+                ),
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 6,
+                  ),
                   decoration: BoxDecoration(
                     color: cs.primary.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: cs.primary.withValues(alpha: 0.2)),
+                    border: Border.all(
+                      color: cs.primary.withValues(alpha: 0.2),
+                    ),
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(Icons.swap_horiz_rounded, size: 16, color: cs.primary),
+                      Icon(
+                        Icons.swap_horiz_rounded,
+                        size: 16,
+                        color: cs.primary,
+                      ),
                       const SizedBox(width: 4),
                       Text(
                         l10n.updateStatus,
@@ -403,14 +436,35 @@ class _DeliveryGlassTile extends StatelessWidget {
                   ),
                 ),
                 itemBuilder: (context) => [
-                  if (status != 'confirmed') PopupMenuItem(value: 'confirmed', child: Text(l10n.confirm)),
-                  if (status != 'picked_up') PopupMenuItem(value: 'picked_up', child: Text(l10n.markPickedUp)),
-                  if (status != 'in_transit') PopupMenuItem(value: 'in_transit', child: Text(l10n.markInTransit)),
-                  if (status != 'delivered') PopupMenuItem(value: 'delivered', child: Text(l10n.markDelivered)),
+                  if (status != 'confirmed')
+                    PopupMenuItem(
+                      value: 'confirmed',
+                      child: Text(l10n.confirm),
+                    ),
+                  if (status != 'picked_up')
+                    PopupMenuItem(
+                      value: 'picked_up',
+                      child: Text(l10n.markPickedUp),
+                    ),
+                  if (status != 'in_transit')
+                    PopupMenuItem(
+                      value: 'in_transit',
+                      child: Text(l10n.markInTransit),
+                    ),
+                  if (status != 'delivered')
+                    PopupMenuItem(
+                      value: 'delivered',
+                      child: Text(l10n.markDelivered),
+                    ),
                   if (status != 'cancelled')
                     PopupMenuItem(
                       value: 'cancelled',
-                      child: Text(l10n.cancel, style: TextStyle(color: Theme.of(context).colorScheme.error)),
+                      child: Text(
+                        l10n.cancel,
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.error,
+                        ),
+                      ),
                     ),
                 ],
               ),

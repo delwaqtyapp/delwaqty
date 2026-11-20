@@ -18,10 +18,7 @@ void main() {
           ],
           supportedLocales: const [Locale('en')],
           home: Scaffold(
-            body: AppSearchBar(
-              hint: 'Search expenses',
-              onChanged: (_) {},
-            ),
+            body: AppSearchBar(hint: 'Search expenses', onChanged: (_) {}),
           ),
         ),
       );
@@ -34,10 +31,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
-            body: AppSearchBar(
-              hint: 'Search',
-              onChanged: (v) => value = v,
-            ),
+            body: AppSearchBar(hint: 'Search', onChanged: (v) => value = v),
           ),
         ),
       );

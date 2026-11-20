@@ -1,5 +1,4 @@
 class AdminTopupRequest {
-
   const AdminTopupRequest({
     required this.id,
     required this.accountId,
@@ -16,7 +15,8 @@ class AdminTopupRequest {
     this.rejectionReason,
   });
 
-  factory AdminTopupRequest.fromJson(Map<String, dynamic> json) => AdminTopupRequest(
+  factory AdminTopupRequest.fromJson(Map<String, dynamic> json) =>
+      AdminTopupRequest(
         id: json['id'].toString(),
         accountId: json['account_id'].toString(),
         regionId: json['region_id']?.toString(),
@@ -47,7 +47,6 @@ class AdminTopupRequest {
 }
 
 class CollectionSummary {
-
   const CollectionSummary({
     this.regionId,
     required this.today,
@@ -61,7 +60,8 @@ class CollectionSummary {
     required this.outstanding,
   });
 
-  factory CollectionSummary.fromJson(Map<String, dynamic> json) => CollectionSummary(
+  factory CollectionSummary.fromJson(Map<String, dynamic> json) =>
+      CollectionSummary(
         regionId: json['region_id']?.toString(),
         today: _toDouble(json['today']),
         week: _toDouble(json['week']),
@@ -88,7 +88,6 @@ class CollectionSummary {
 }
 
 class CollectionRecord {
-
   const CollectionRecord({
     required this.id,
     required this.adminId,
@@ -103,7 +102,8 @@ class CollectionRecord {
     this.settlementId,
   });
 
-  factory CollectionRecord.fromJson(Map<String, dynamic> json) => CollectionRecord(
+  factory CollectionRecord.fromJson(Map<String, dynamic> json) =>
+      CollectionRecord(
         id: json['id'].toString(),
         adminId: json['admin_id'].toString(),
         regionId: json['region_id']?.toString(),
@@ -130,7 +130,6 @@ class CollectionRecord {
 }
 
 class SettlementRecord {
-
   const SettlementRecord({
     required this.id,
     required this.adminId,
@@ -145,7 +144,8 @@ class SettlementRecord {
     this.rejectionReason,
   });
 
-  factory SettlementRecord.fromJson(Map<String, dynamic> json) => SettlementRecord(
+  factory SettlementRecord.fromJson(Map<String, dynamic> json) =>
+      SettlementRecord(
         id: json['id'].toString(),
         adminId: json['admin_id'].toString(),
         regionId: json['region_id']?.toString(),
@@ -172,7 +172,6 @@ class SettlementRecord {
 }
 
 class ReceivingAccount {
-
   const ReceivingAccount({
     required this.id,
     required this.methodType,
@@ -184,7 +183,8 @@ class ReceivingAccount {
     required this.isActive,
   });
 
-  factory ReceivingAccount.fromJson(Map<String, dynamic> json) => ReceivingAccount(
+  factory ReceivingAccount.fromJson(Map<String, dynamic> json) =>
+      ReceivingAccount(
         id: json['id'].toString(),
         methodType: json['method_type'] as String? ?? 'bank_transfer',
         displayName: json['display_name'] as String? ?? '',
@@ -205,7 +205,6 @@ class ReceivingAccount {
 }
 
 class GraceAccount {
-
   const GraceAccount({
     required this.userId,
     required this.graceLimit,
@@ -213,10 +212,10 @@ class GraceAccount {
   });
 
   factory GraceAccount.fromJson(Map<String, dynamic> json) => GraceAccount(
-        userId: json['user_id'].toString(),
-        graceLimit: (json['grace_limit'] as num?)?.toInt() ?? 0,
-        graceUsed: (json['grace_used'] as num?)?.toInt() ?? 0,
-      );
+    userId: json['user_id'].toString(),
+    graceLimit: (json['grace_limit'] as num?)?.toInt() ?? 0,
+    graceUsed: (json['grace_used'] as num?)?.toInt() ?? 0,
+  );
   final String userId;
   final int graceLimit;
   final int graceUsed;

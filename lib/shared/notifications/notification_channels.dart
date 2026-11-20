@@ -25,7 +25,10 @@ class NotificationChannel {
   /// '/region-selection' never matched any channel and every such
   /// notification silently fell back to '/notifications'.
   bool matches(String route) {
-    final patternSegments = pattern.split('/').where((e) => e.isNotEmpty).toList();
+    final patternSegments = pattern
+        .split('/')
+        .where((e) => e.isNotEmpty)
+        .toList();
     final routeSegments = route.split('/').where((e) => e.isNotEmpty).toList();
     if (routeSegments.length < patternSegments.length) return false;
     for (var i = 0; i < patternSegments.length; i++) {
@@ -56,44 +59,35 @@ class NotificationChannels {
     ),
     NotificationChannel(
       '/region-selection',
-      contexts: {
-        AppContext.customer,
-        AppContext.driver,
-        AppContext.provider,
-      },
+      contexts: {AppContext.customer, AppContext.driver, AppContext.provider},
     ),
 
     // ── Customer ─────────────────────────────────────────────────────────
-    NotificationChannel('/campaign/:id',
-        contexts: {
-          AppContext.customer,
-          AppContext.admin,
-          AppContext.provider,
-        }),
-    NotificationChannel('/my-complaints',
-        contexts: {
-          AppContext.customer,
-          AppContext.provider,
-          AppContext.driver,
-        }),
+    NotificationChannel(
+      '/campaign/:id',
+      contexts: {AppContext.customer, AppContext.admin, AppContext.provider},
+    ),
+    NotificationChannel(
+      '/my-complaints',
+      contexts: {AppContext.customer, AppContext.provider, AppContext.driver},
+    ),
     NotificationChannel(
       '/orders',
       contexts: {AppContext.customer, AppContext.provider},
     ),
-    NotificationChannel('/profile',
-        contexts: {
-          AppContext.customer,
-          AppContext.driver,
-          AppContext.provider,
-        }),
-    NotificationChannel('/rewards',
-        contexts: {AppContext.customer, AppContext.provider}),
+    NotificationChannel(
+      '/profile',
+      contexts: {AppContext.customer, AppContext.driver, AppContext.provider},
+    ),
+    NotificationChannel(
+      '/rewards',
+      contexts: {AppContext.customer, AppContext.provider},
+    ),
     NotificationChannel(
       '/wallet',
       contexts: {AppContext.customer, AppContext.provider},
     ),
-    NotificationChannel('/home-services',
-        contexts: {AppContext.customer}),
+    NotificationChannel('/home-services', contexts: {AppContext.customer}),
     NotificationChannel(
       '/market/orders/:orderId',
       contexts: {AppContext.customer, AppContext.provider},
@@ -108,12 +102,15 @@ class NotificationChannels {
     ),
 
     // ── Provider ─────────────────────────────────────────────────────────
-    NotificationChannel('/provider-availability',
-        contexts: {AppContext.provider}),
-    NotificationChannel('/provider-verification',
-        contexts: {AppContext.provider}),
-    NotificationChannel('/provider-documents',
-        contexts: {AppContext.provider}),
+    NotificationChannel(
+      '/provider-availability',
+      contexts: {AppContext.provider},
+    ),
+    NotificationChannel(
+      '/provider-verification',
+      contexts: {AppContext.provider},
+    ),
+    NotificationChannel('/provider-documents', contexts: {AppContext.provider}),
     NotificationChannel(
       '/pending-verification',
       contexts: {AppContext.provider, AppContext.driver},
@@ -125,10 +122,7 @@ class NotificationChannels {
     // to land in the router's unrecoverable error page.
     NotificationChannel('/driver/earnings', contexts: {AppContext.driver}),
     NotificationChannel('/driver/hub', contexts: {AppContext.driver}),
-    NotificationChannel(
-      '/driver/delivery/:id',
-      contexts: {AppContext.driver},
-    ),
+    NotificationChannel('/driver/delivery/:id', contexts: {AppContext.driver}),
 
     // ── Admin / Owner ────────────────────────────────────────────────────
     NotificationChannel('/admin/complaints', adminOnly: true),
@@ -181,10 +175,7 @@ class NotificationChannels {
     'providerProfile',
   };
 
-  static const Set<String> _customerOnlyTypes = {
-    'promotion',
-    'reward',
-  };
+  static const Set<String> _customerOnlyTypes = {'promotion', 'reward'};
 
   static const Set<String> _userTransactionalTypes = {
     'order',
@@ -294,8 +285,8 @@ class NotificationChannels {
       }
     }
 
-    final resolvedLink =
-        (deepLink ?? data?['deep_link']?.toString() ?? '').trim();
+    final resolvedLink = (deepLink ?? data?['deep_link']?.toString() ?? '')
+        .trim();
     if (resolvedLink.isNotEmpty) {
       if (resolvedLink.startsWith('/admin')) {
         return context == AppContext.admin;
@@ -316,8 +307,7 @@ class NotificationChannels {
       }
     }
 
-    final resolvedType =
-        (type ?? data?['type']?.toString() ?? 'system').trim();
+    final resolvedType = (type ?? data?['type']?.toString() ?? 'system').trim();
 
     if (_adminOperationalTypes.contains(resolvedType)) {
       return context == AppContext.admin;

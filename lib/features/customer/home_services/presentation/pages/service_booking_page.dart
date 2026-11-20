@@ -17,16 +17,24 @@ import 'package:delwaqty/features/_shared/auth/presentation/auth_provider.dart';
 import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
 import 'package:delwaqty/shared/widgets/premium_empty_state.dart';
 import 'package:delwaqty/shared/widgets/shimmer_loading.dart';
+
 import 'dart:async';
 
 final _providersProvider =
-    FutureProvider.family<List<dynamic>, ServiceCategoryType>((ref, type) async {
-  final repo = ref.watch(serviceBookingRepositoryProvider);
-  return repo.getProviders(categoryType: type);
-});
+    FutureProvider.family<List<dynamic>, ServiceCategoryType>((
+      ref,
+      type,
+    ) async {
+      final repo = ref.watch(serviceBookingRepositoryProvider);
+      return repo.getProviders(categoryType: type);
+    });
 
 class ServiceBookingPage extends ConsumerStatefulWidget {
-  const ServiceBookingPage({super.key, required this.categoryType, this.preselectedProvider});
+  const ServiceBookingPage({
+    super.key,
+    required this.categoryType,
+    this.preselectedProvider,
+  });
 
   final ServiceCategoryType categoryType;
   final ServiceProvider? preselectedProvider;
@@ -230,7 +238,8 @@ class _ServiceBookingPageState extends ConsumerState<ServiceBookingPage> {
                 title: l10n.error,
                 message: l10n.failedToLoadProviders,
                 actionLabel: l10n.retry,
-                onAction: () => ref.invalidate(_providersProvider(widget.categoryType)),
+                onAction: () =>
+                    ref.invalidate(_providersProvider(widget.categoryType)),
               ),
               data: (providers) {
                 if (providers.isEmpty) {
@@ -261,17 +270,15 @@ class _ServiceBookingPageState extends ConsumerState<ServiceBookingPage> {
                             color: isSelected
                                 ? AppColors.brandPurple.withValues(alpha: 0.12)
                                 : Theme.of(context)
-                                    .colorScheme
-                                    .surfaceContainerHighest
-                                    .withValues(alpha: 0.35),
+                                      .colorScheme
+                                      .surfaceContainerHighest
+                                      .withValues(alpha: 0.35),
                             borderRadius: BorderRadius.circular(16),
                             border: Border.all(
                               color: isSelected
                                   ? AppColors.brandPurple
-                                  : Theme.of(context)
-                                      .colorScheme
-                                      .outlineVariant
-                                      .withValues(alpha: 0.2),
+                                  : Theme.of(context).colorScheme.outlineVariant
+                                        .withValues(alpha: 0.2),
                               width: isSelected ? 2 : 1,
                             ),
                           ),
@@ -280,8 +287,8 @@ class _ServiceBookingPageState extends ConsumerState<ServiceBookingPage> {
                             children: [
                               CircleAvatar(
                                 radius: 20,
-                                backgroundColor:
-                                    AppColors.brandPurple.withValues(alpha: 0.12),
+                                backgroundColor: AppColors.brandPurple
+                                    .withValues(alpha: 0.12),
                                 child: Text(
                                   safeInitial(provider.name),
                                   style: AppTextStyles.titleMedium.copyWith(
@@ -304,8 +311,11 @@ class _ServiceBookingPageState extends ConsumerState<ServiceBookingPage> {
                                 Row(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
-                                    const Icon(Icons.star_rounded,
-                                        size: 12, color: AppColors.rating),
+                                    const Icon(
+                                      Icons.star_rounded,
+                                      size: 12,
+                                      color: AppColors.rating,
+                                    ),
                                     const SizedBox(width: 2),
                                     Text(
                                       provider.rating.toStringAsFixed(1),
@@ -343,7 +353,8 @@ class _ServiceBookingPageState extends ConsumerState<ServiceBookingPage> {
                   Expanded(
                     child: _DateTimeButton(
                       icon: Icons.calendar_today_rounded,
-                      label: '${_selectedDate.day}/${_selectedDate.month}/${_selectedDate.year}',
+                      label:
+                          '${_selectedDate.day}/${_selectedDate.month}/${_selectedDate.year}',
                       onTap: _pickDate,
                     ),
                   ),
@@ -485,15 +496,11 @@ class _DateTimeButton extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         decoration: BoxDecoration(
-          color: Theme.of(context)
-              .colorScheme
-              .surfaceContainerHighest
+          color: Theme.of(context).colorScheme.surfaceContainerHighest
               .withValues(alpha: 0.35),
           borderRadius: BorderRadius.circular(14),
           border: Border.all(
-            color: Theme.of(context)
-                .colorScheme
-                .outlineVariant
+            color: Theme.of(context).colorScheme.outlineVariant
                 .withValues(alpha: 0.2),
           ),
         ),

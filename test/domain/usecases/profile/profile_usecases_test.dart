@@ -28,9 +28,8 @@ void main() {
     });
 
     test('calls getProfile on repository with correct userId', () async {
-      when(
-        () => mockRepository.getProfile('user-123'),
-      ).thenAnswer((_) async => testUser);
+      when(() => mockRepository.getProfile('user-123'))
+          .thenAnswer((_) async => testUser);
 
       final result = await useCase('user-123');
 
@@ -39,9 +38,8 @@ void main() {
     });
 
     test('propagates exceptions from repository', () async {
-      when(
-        () => mockRepository.getProfile(any()),
-      ).thenThrow(Exception('Profile not found'));
+      when(() => mockRepository.getProfile(any()))
+          .thenThrow(Exception('Profile not found'));
 
       expect(() => useCase('user-123'), throwsA(isA<Exception>()));
     });
@@ -58,16 +56,14 @@ void main() {
       final data = {'full_name': 'Jane Doe'};
       final updatedUser = testUser.copyWith(fullName: 'Jane Doe');
 
-      when(
-        () => mockRepository.updateProfile(userId: 'user-123', data: data),
-      ).thenAnswer((_) async => updatedUser);
+      when(() => mockRepository.updateProfile(userId: 'user-123', data: data))
+          .thenAnswer((_) async => updatedUser);
 
       final result = await useCase(userId: 'user-123', data: data);
 
       expect(result.fullName, 'Jane Doe');
-      verify(
-        () => mockRepository.updateProfile(userId: 'user-123', data: data),
-      ).called(1);
+      verify(() => mockRepository.updateProfile(userId: 'user-123', data: data))
+          .called(1);
     });
   });
 
@@ -89,10 +85,7 @@ void main() {
         ),
       ).thenAnswer((_) async => updatedUser);
 
-      final result = await useCase(
-        userId: 'user-123',
-        dateOfBirth: dob,
-      );
+      final result = await useCase(userId: 'user-123', dateOfBirth: dob);
 
       expect(result.dateOfBirth, dob);
       verify(

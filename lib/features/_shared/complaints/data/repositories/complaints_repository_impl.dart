@@ -3,7 +3,6 @@ import 'package:delwaqty/features/_shared/complaints/domain/repositories/complai
 import 'package:delwaqty/features/_shared/complaints/data/datasources/remote/supabase_complaints_data_source.dart';
 
 class ComplaintsRepositoryImpl implements ComplaintsRepository {
-
   ComplaintsRepositoryImpl(this._dataSource);
   final SupabaseComplaintsDataSource _dataSource;
 

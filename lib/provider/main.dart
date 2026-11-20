@@ -1,4 +1,5 @@
 import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -75,9 +76,7 @@ void main() async {
 
   if (configResult.hasErrors) {
     debugPrint(configResult.toString());
-    runApp(
-      ProviderScope(child: StartupErrorPage(result: configResult)),
-    );
+    runApp(ProviderScope(child: StartupErrorPage(result: configResult)));
     return;
   }
 
@@ -176,8 +175,7 @@ Future<void> _initFirebase() async {
 
 Future<void> _initSupabase() async {
   try {
-    await SupabaseInitializer.initialize()
-        .timeout(const Duration(seconds: 10));
+    await SupabaseInitializer.initialize().timeout(const Duration(seconds: 10));
   } catch (e) {
     debugPrint('Supabase initialization failed: $e');
     debugPrint('App running without backend connectivity.');

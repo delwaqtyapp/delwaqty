@@ -5,7 +5,9 @@ import 'package:delwaqty/services/logger/app_logger.dart';
 import 'package:delwaqty/features/driver/domain/entities/driver_profile.dart';
 import 'package:delwaqty/features/driver/domain/entities/driver_delivery.dart';
 
-final supabaseDriverDataSourceProvider = Provider<SupabaseDriverDataSource>((ref) {
+final supabaseDriverDataSourceProvider = Provider<SupabaseDriverDataSource>((
+  ref,
+) {
   return SupabaseDriverDataSource(
     ref.watch(supabaseClientProvider),
     ref.watch(loggerProvider),
@@ -63,9 +65,15 @@ class SupabaseDriverDataSource {
       deliveryFee: (row['delivery_fee'] as num?)?.toDouble(),
       notes: row['notes'] as String?,
       createdAt: DateTime.parse(row['created_at'] as String),
-      acceptedAt: row['accepted_at'] != null ? DateTime.parse(row['accepted_at'] as String) : null,
-      pickedUpAt: row['picked_up_at'] != null ? DateTime.parse(row['picked_up_at'] as String) : null,
-      deliveredAt: row['delivered_at'] != null ? DateTime.parse(row['delivered_at'] as String) : null,
+      acceptedAt: row['accepted_at'] != null
+          ? DateTime.parse(row['accepted_at'] as String)
+          : null,
+      pickedUpAt: row['picked_up_at'] != null
+          ? DateTime.parse(row['picked_up_at'] as String)
+          : null,
+      deliveredAt: row['delivered_at'] != null
+          ? DateTime.parse(row['delivered_at'] as String)
+          : null,
     );
   }
 
@@ -126,9 +134,10 @@ class SupabaseDriverDataSource {
 
   Future<void> updateStatus(String profileId, DriverStatus status) async {
     try {
-      await _client.from(_driversTable).update({
-        'status': status.name,
-      }).eq('id', profileId);
+      await _client
+          .from(_driversTable)
+          .update({'status': status.name})
+          .eq('id', profileId);
     } catch (e, stack) {
       _logger.e('Failed to update driver status', e, stack);
       rethrow;
@@ -137,10 +146,10 @@ class SupabaseDriverDataSource {
 
   Future<void> updateLocation(String profileId, double lat, double lng) async {
     try {
-      await _client.from(_driversTable).update({
-        'current_latitude': lat,
-        'current_longitude': lng,
-      }).eq('id', profileId);
+      await _client
+          .from(_driversTable)
+          .update({'current_latitude': lat, 'current_longitude': lng})
+          .eq('id', profileId);
     } catch (e, stack) {
       _logger.e('Failed to update location', e, stack);
       rethrow;
@@ -164,7 +173,10 @@ class SupabaseDriverDataSource {
     }
   }
 
-  Future<List<DriverDelivery>> getMyDeliveries(String profileId, {String? status}) async {
+  Future<List<DriverDelivery>> getMyDeliveries(
+    String profileId, {
+    String? status,
+  }) async {
     try {
       var query = _client
           .from(_deliveriesTable)
@@ -185,11 +197,14 @@ class SupabaseDriverDataSource {
 
   Future<void> acceptDelivery(String deliveryId, String profileId) async {
     try {
-      await _client.from(_deliveriesTable).update({
-        'driver_id': profileId,
-        'status': 'accepted',
-        'accepted_at': DateTime.now().toIso8601String(),
-      }).eq('id', deliveryId);
+      await _client
+          .from(_deliveriesTable)
+          .update({
+            'driver_id': profileId,
+            'status': 'accepted',
+            'accepted_at': DateTime.now().toIso8601String(),
+          })
+          .eq('id', deliveryId);
     } catch (e, stack) {
       _logger.e('Failed to accept delivery', e, stack);
       rethrow;
@@ -198,9 +213,10 @@ class SupabaseDriverDataSource {
 
   Future<void> rejectDelivery(String deliveryId) async {
     try {
-      await _client.from(_deliveriesTable).update({
-        'status': 'rejected',
-      }).eq('id', deliveryId);
+      await _client
+          .from(_deliveriesTable)
+          .update({'status': 'rejected'})
+          .eq('id', deliveryId);
     } catch (e, stack) {
       _logger.e('Failed to reject delivery', e, stack);
       rethrow;

@@ -58,7 +58,10 @@ class AdminFinancialCenter extends ConsumerWidget {
                 height: 68,
                 child: ListView(
                   scrollDirection: Axis.horizontal,
-                  padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 4,
+                    vertical: 8,
+                  ),
                   children: [
                     _FinanceQuickAction(
                       icon: Icons.menu_book_rounded,
@@ -149,9 +152,8 @@ class AdminFinancialCenter extends ConsumerWidget {
                 delay: const Duration(milliseconds: 100),
                 child: Text(
                   l10n.revenueSummary,
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: Theme.of(context).textTheme.titleMedium
+                      ?.copyWith(fontWeight: FontWeight.bold),
                 ),
               ),
               const SizedBox(height: 12),
@@ -163,16 +165,16 @@ class AdminFinancialCenter extends ConsumerWidget {
                   ),
                 ),
                 error: (_, _) => const SizedBox.shrink(),
-                data: (overview) => _buildRevenueOverviewCards(overview, cs, context),
+                data: (overview) =>
+                    _buildRevenueOverviewCards(overview, cs, context),
               ),
               const SizedBox(height: 24),
               AnimatedFadeIn(
                 delay: const Duration(milliseconds: 200),
                 child: Text(
                   l10n.commissionRules,
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: Theme.of(context).textTheme.titleMedium
+                      ?.copyWith(fontWeight: FontWeight.bold),
                 ),
               ),
               const SizedBox(height: 12),
@@ -192,7 +194,8 @@ class AdminFinancialCenter extends ConsumerWidget {
                     onAction: () => ref.invalidate(commissionSummaryProvider),
                   ),
                 ),
-                data: (summary) => _buildCommissionSection(summary, cs, context),
+                data: (summary) =>
+                    _buildCommissionSection(summary, cs, context),
               ),
             ],
           ),
@@ -243,13 +246,16 @@ class AdminFinancialCenter extends ConsumerWidget {
                   TextFormField(
                     controller: idController,
                     decoration: InputDecoration(labelText: l10n.accountId),
-                    validator: (v) =>
-                        (v == null || v.trim().isEmpty) ? l10n.accountIdRequired : null,
+                    validator: (v) => (v == null || v.trim().isEmpty)
+                        ? l10n.accountIdRequired
+                        : null,
                   ),
                   TextFormField(
                     controller: amountController,
                     decoration: InputDecoration(labelText: l10n.amount),
-                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                    keyboardType: const TextInputType.numberWithOptions(
+                      decimal: true,
+                    ),
                     validator: (v) {
                       final n = double.tryParse(v ?? '');
                       if (n == null || n <= 0) return l10n.enterValidAmount;
@@ -291,7 +297,9 @@ class AdminFinancialCenter extends ConsumerWidget {
                             .adminDirectTopup(
                               accountType: accountType,
                               accountId: idController.text.trim(),
-                              amount: double.parse(amountController.text.trim()),
+                              amount: double.parse(
+                                amountController.text.trim(),
+                              ),
                               note: noteController.text.trim().isEmpty
                                   ? null
                                   : noteController.text.trim(),
@@ -332,7 +340,11 @@ class AdminFinancialCenter extends ConsumerWidget {
     );
   }
 
-  Widget _buildRevenueHero(RevenueOverview revenue, ColorScheme cs, BuildContext context) {
+  Widget _buildRevenueHero(
+    RevenueOverview revenue,
+    ColorScheme cs,
+    BuildContext context,
+  ) {
     final l10n = AppLocalizations.of(context);
     return PremiumCard(
       padding: const EdgeInsets.all(16),
@@ -356,17 +368,14 @@ class AdminFinancialCenter extends ConsumerWidget {
             const SizedBox(height: 12),
             Text(
               '${l10n.currencySymbol} ${revenue.totalGmv.toStringAsFixed(2)}',
-              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                color: cs.onPrimary,
-                fontWeight: FontWeight.bold,
-              ),
+              style: Theme.of(context).textTheme.headlineSmall
+                  ?.copyWith(color: cs.onPrimary, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 4),
             Text(
               l10n.kpiTotalGmv,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: cs.onPrimary.withValues(alpha: 0.7),
-              ),
+              style: Theme.of(context).textTheme.bodyMedium
+                  ?.copyWith(color: cs.onPrimary.withValues(alpha: 0.7)),
             ),
           ],
         ),
@@ -374,13 +383,29 @@ class AdminFinancialCenter extends ConsumerWidget {
     );
   }
 
-  Widget _buildRevenueOverviewCards(RevenueOverview overview, ColorScheme cs, BuildContext context) {
+  Widget _buildRevenueOverviewCards(
+    RevenueOverview overview,
+    ColorScheme cs,
+    BuildContext context,
+  ) {
     final l10n = AppLocalizations.of(context);
     final items = [
       _MetricData(l10n.kpiTotalGmv, overview.totalGmv, const Color(0xFF5B3DF0)),
-      _MetricData(l10n.kpiPlatformCommission, overview.totalCommission, const Color(0xFF34C759)),
-      _MetricData(l10n.returnsLabel, overview.refundCount.toDouble(), const Color(0xFFFF3B30)),
-      _MetricData(l10n.commissionRate3, overview.commission3pct, const Color(0xFFFF9500)),
+      _MetricData(
+        l10n.kpiPlatformCommission,
+        overview.totalCommission,
+        const Color(0xFF34C759),
+      ),
+      _MetricData(
+        l10n.returnsLabel,
+        overview.refundCount.toDouble(),
+        const Color(0xFFFF3B30),
+      ),
+      _MetricData(
+        l10n.commissionRate3,
+        overview.commission3pct,
+        const Color(0xFFFF9500),
+      ),
     ];
 
     return LayoutBuilder(
@@ -407,7 +432,11 @@ class AdminFinancialCenter extends ConsumerWidget {
                           color: item.color.withValues(alpha: 0.15),
                           borderRadius: BorderRadius.circular(10),
                         ),
-                        child: Icon(Icons.account_balance_wallet_rounded, color: item.color, size: 16),
+                        child: Icon(
+                          Icons.account_balance_wallet_rounded,
+                          color: item.color,
+                          size: 16,
+                        ),
                       ),
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -416,17 +445,15 @@ class AdminFinancialCenter extends ConsumerWidget {
                             fit: BoxFit.scaleDown,
                             child: Text(
                               '${l10n.currencySymbol} ${item.value.toStringAsFixed(0)}',
-                              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                fontWeight: FontWeight.bold,
-                              ),
+                              style: Theme.of(context).textTheme.titleMedium
+                                  ?.copyWith(fontWeight: FontWeight.bold),
                             ),
                           ),
                           const SizedBox(height: 2),
                           Text(
                             item.label,
-                            style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                              color: cs.onSurfaceVariant,
-                            ),
+                            style: Theme.of(context).textTheme.labelSmall
+                                ?.copyWith(color: cs.onSurfaceVariant),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                           ),
@@ -442,7 +469,11 @@ class AdminFinancialCenter extends ConsumerWidget {
     );
   }
 
-  Widget _buildCommissionSection(CommissionSummary summary, ColorScheme cs, BuildContext context) {
+  Widget _buildCommissionSection(
+    CommissionSummary summary,
+    ColorScheme cs,
+    BuildContext context,
+  ) {
     final l10n = AppLocalizations.of(context);
     return Column(
       children: [
@@ -484,46 +515,55 @@ class AdminFinancialCenter extends ConsumerWidget {
                 children: [
                   Text(
                     l10n.activeRulesCount(summary.activeRules.length),
-                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
+                    style: Theme.of(context).textTheme.titleSmall
+                        ?.copyWith(fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 8),
-                  ...summary.activeRules.take(10).map(
-                    (rule) => Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 4),
-                      child: Row(
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                            decoration: BoxDecoration(
-                              color: rule.rate > 0
-                                  ? const Color(0xFF5B3DF0).withValues(alpha: 0.1)
-                                  : cs.surfaceContainerHighest,
-                              borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
-                            ),
-                            child: Text(
-                              '${rule.rate.toStringAsFixed(0)}%',
-                              style: TextStyle(
-                                color: rule.rate > 0 ? const Color(0xFF5B3DF0) : cs.onSurfaceVariant,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 12,
+                  ...summary.activeRules
+                      .take(10)
+                      .map(
+                        (rule) => Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 4),
+                          child: Row(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 2,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: rule.rate > 0
+                                      ? const Color(0xFF5B3DF0)
+                                            .withValues(alpha: 0.1)
+                                      : cs.surfaceContainerHighest,
+                                  borderRadius: BorderRadius.circular(
+                                    AppSpacing.radiusFull,
+                                  ),
+                                ),
+                                child: Text(
+                                  '${rule.rate.toStringAsFixed(0)}%',
+                                  style: TextStyle(
+                                    color: rule.rate > 0
+                                        ? const Color(0xFF5B3DF0)
+                                        : cs.onSurfaceVariant,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 12,
+                                  ),
+                                ),
                               ),
-                            ),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Text(
+                                  '${rule.entityKey} (${rule.entityType})',
+                                  style: Theme.of(context).textTheme.bodySmall,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            ],
                           ),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: Text(
-                              '${rule.entityKey} (${rule.entityType})',
-                              style: Theme.of(context).textTheme.bodySmall,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                        ],
+                        ),
                       ),
-                    ),
-                  ),
                 ],
               ),
             ),
@@ -563,10 +603,8 @@ class _CommissionStatCard extends StatelessWidget {
         children: [
           Text(
             '${l10n.currencySymbol} ${value.toStringAsFixed(0)}',
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.bold,
-              color: color,
-            ),
+            style: Theme.of(context).textTheme.titleMedium
+                ?.copyWith(fontWeight: FontWeight.bold, color: color),
           ),
           const SizedBox(height: 2),
           Text(

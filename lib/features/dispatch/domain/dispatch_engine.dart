@@ -12,7 +12,6 @@ library;
 // ---------------------------------------------------------------------------
 
 class OrderDispatchContext {
-
   const OrderDispatchContext({
     required this.pickupLatitude,
     required this.pickupLongitude,
@@ -43,7 +42,6 @@ class OrderDispatchContext {
 }
 
 class DriverCandidate {
-
   const DriverCandidate({
     required this.id,
     required this.currentLatitude,
@@ -94,7 +92,6 @@ class DriverCandidate {
 /// proximity/ETA dominate, workload and SLA matter, zone and compatibility
 /// are tie-breakers. Change centrally — never hardcode ad-hoc weights in UI.
 class DispatchWeights {
-
   const DispatchWeights({
     this.distance = 0.30,
     this.eta = 0.25,
@@ -114,7 +111,6 @@ class DispatchWeights {
 }
 
 class ScoredCandidate {
-
   const ScoredCandidate(this.candidate, this.score);
   final DriverCandidate candidate;
   final double score;
@@ -195,11 +191,12 @@ class SmartScoreStrategy extends DispatchStrategy {
         ? 1.0
         : (o.ageMinutes / o.slaDeadlineMinutes).clamp(0.0, 1.0);
     final zoneScore = c.deliveryZoneMatch ? 1.0 : 0.0;
-    final compatScore = ((c.vehicleSuitable ? 1.0 : 0.0) * 0.4 +
-            (c.serviceCategoryMatch ? 1.0 : 0.0) * 0.4 +
-            c.routeCompatibility * 0.1 +
-            c.batchingCompatibility * 0.1)
-        .clamp(0.0, 1.0);
+    final compatScore =
+        ((c.vehicleSuitable ? 1.0 : 0.0) * 0.4 +
+                (c.serviceCategoryMatch ? 1.0 : 0.0) * 0.4 +
+                c.routeCompatibility * 0.1 +
+                c.batchingCompatibility * 0.1)
+            .clamp(0.0, 1.0);
     return w.distance * distanceScore +
         w.eta * etaScore +
         w.workload * workloadScore +
@@ -226,12 +223,11 @@ class HybridStrategy extends DispatchStrategy {
     required OrderDispatchContext order,
     required List<DriverCandidate> candidates,
     DispatchWeights weights = const DispatchWeights(),
-  }) =>
-      SmartScoreStrategy().rank(
-        order: order,
-        candidates: candidates,
-        weights: weights,
-      );
+  }) => SmartScoreStrategy().rank(
+    order: order,
+    candidates: candidates,
+    weights: weights,
+  );
 }
 
 /// No automatic ranking; authorized admins pick freely from available
@@ -303,7 +299,6 @@ enum DispatchAssignmentResult { assigned, rejectedStale, noCandidate }
 /// against a non-PENDING order is rejected as stale, guaranteeing exactly
 /// one successful assignment even under concurrent callers.
 class DispatchAssignment {
-
   DispatchAssignment(this.orderId, this.status);
   final String orderId;
   String? assignedDriverId;

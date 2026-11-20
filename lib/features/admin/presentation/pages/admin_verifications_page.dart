@@ -15,20 +15,21 @@ import 'package:delwaqty/l10n/app_localizations.dart';
 import 'package:delwaqty/features/admin/admin_shell.dart';
 import 'package:delwaqty/core/theme/app_colors.dart';
 
-final multiServiceRequestsProvider =
-    FutureProvider<List<Map<String, dynamic>>>((ref) async {
-      final res = await Supabase.instance.client.rpc(
-        'list_provider_profile_requests',
-        params: {'p_status': 'pending'},
-      );
-      if (res is List) {
-        return res
-            .whereType<Map>()
-            .map((e) => Map<String, dynamic>.from(e))
-            .toList();
-      }
-      return const [];
-    });
+final multiServiceRequestsProvider = FutureProvider<List<Map<String, dynamic>>>(
+  (ref) async {
+    final res = await Supabase.instance.client.rpc(
+      'list_provider_profile_requests',
+      params: {'p_status': 'pending'},
+    );
+    if (res is List) {
+      return res
+          .whereType<Map>()
+          .map((e) => Map<String, dynamic>.from(e))
+          .toList();
+    }
+    return const [];
+  },
+);
 
 class AdminVerificationsPage extends ConsumerStatefulWidget {
   const AdminVerificationsPage({super.key});
@@ -108,9 +109,7 @@ class _AdminVerificationsPageState
           maxLines: 3,
           decoration: InputDecoration(
             hintText: l10n.verificationRejectReasonHint,
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
           ),
         ),
         actions: [
@@ -476,18 +475,16 @@ class _VerificationCard extends StatelessWidget {
                   children: [
                     Text(
                       request.fullName ?? request.email,
-                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
+                      style: Theme.of(context).textTheme.titleSmall
+                          ?.copyWith(fontWeight: FontWeight.bold),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
                     const SizedBox(height: 2),
                     Text(
                       request.email,
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: cs.onSurfaceVariant,
-                      ),
+                      style: Theme.of(context).textTheme.bodySmall
+                          ?.copyWith(color: cs.onSurfaceVariant),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -526,9 +523,8 @@ class _VerificationCard extends StatelessWidget {
                 const SizedBox(width: 6),
                 Text(
                   request.phone!,
-                  style: Theme.of(
-                    context,
-                  ).textTheme.bodySmall?.copyWith(color: cs.onSurfaceVariant),
+                  style: Theme.of(context).textTheme.bodySmall
+                      ?.copyWith(color: cs.onSurfaceVariant),
                 ),
               ],
             ),

@@ -14,7 +14,10 @@ void main() {
     });
 
     test('allows cancellation from every active state', () {
-      expect(RideStatus.searching.canTransitionTo(RideStatus.cancelled), isTrue);
+      expect(
+        RideStatus.searching.canTransitionTo(RideStatus.cancelled),
+        isTrue,
+      );
       expect(RideStatus.matched.canTransitionTo(RideStatus.cancelled), isTrue);
       expect(RideStatus.arrived.canTransitionTo(RideStatus.cancelled), isTrue);
       expect(RideStatus.inTrip.canTransitionTo(RideStatus.cancelled), isTrue);
@@ -44,38 +47,44 @@ void main() {
 
   group('RideOffer', () {
     RideOffer build({required DateTime expiresAt}) => RideOffer(
-          requestId: 'req',
-          rideId: 'ride',
-          driverId: 'drv',
-          rideType: RideType.economy,
-          pickupLatitude: 30.0,
-          pickupLongitude: 31.0,
-          pickupAddress: 'A',
-          dropoffLatitude: 30.1,
-          dropoffLongitude: 31.1,
-          dropoffAddress: 'B',
-          fare: 85.5,
-          currency: 'EGP',
-          distanceKm: 5.0,
-          pickupDistanceKm: 1.2,
-          etaMinutes: 4,
-          offeredAt: DateTime.now(),
-          expiresAt: expiresAt,
-        );
+      requestId: 'req',
+      rideId: 'ride',
+      driverId: 'drv',
+      rideType: RideType.economy,
+      pickupLatitude: 30.0,
+      pickupLongitude: 31.0,
+      pickupAddress: 'A',
+      dropoffLatitude: 30.1,
+      dropoffLongitude: 31.1,
+      dropoffAddress: 'B',
+      fare: 85.5,
+      currency: 'EGP',
+      distanceKm: 5.0,
+      pickupDistanceKm: 1.2,
+      etaMinutes: 4,
+      offeredAt: DateTime.now(),
+      expiresAt: expiresAt,
+    );
 
     test('estimatedEarnings equals fare', () {
-      final offer = build(expiresAt: DateTime.now().add(const Duration(seconds: 20)));
+      final offer = build(
+        expiresAt: DateTime.now().add(const Duration(seconds: 20)),
+      );
       expect(offer.estimatedEarnings, 85.5);
     });
 
     test('remaining is positive before expiry', () {
-      final offer = build(expiresAt: DateTime.now().add(const Duration(seconds: 15)));
+      final offer = build(
+        expiresAt: DateTime.now().add(const Duration(seconds: 15)),
+      );
       expect(offer.remaining.inSeconds, greaterThan(0));
       expect(offer.isExpired, isFalse);
     });
 
     test('expired offer clamps remaining to zero', () {
-      final offer = build(expiresAt: DateTime.now().subtract(const Duration(seconds: 5)));
+      final offer = build(
+        expiresAt: DateTime.now().subtract(const Duration(seconds: 5)),
+      );
       expect(offer.remaining, Duration.zero);
       expect(offer.isExpired, isTrue);
     });

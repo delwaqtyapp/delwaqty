@@ -21,12 +21,18 @@ class PlacesRepositoryImpl implements PlacesRepository {
   final SupabaseSavedPlacesDataSource _savedPlaces;
   final RecentSearchesStore _recentSearches;
 
-  final TtlCache<String, List<PlaceSuggestion>> _autocompleteCache =
-      TtlCache(maxEntries: 60, ttl: const Duration(minutes: 3));
-  final TtlCache<String, PlaceDetails> _detailsCache =
-      TtlCache(maxEntries: 60, ttl: const Duration(hours: 12));
-  final TtlCache<String, PlaceDetails?> _reverseCache =
-      TtlCache(maxEntries: 40, ttl: const Duration(minutes: 30));
+  final TtlCache<String, List<PlaceSuggestion>> _autocompleteCache = TtlCache(
+    maxEntries: 60,
+    ttl: const Duration(minutes: 3),
+  );
+  final TtlCache<String, PlaceDetails> _detailsCache = TtlCache(
+    maxEntries: 60,
+    ttl: const Duration(hours: 12),
+  );
+  final TtlCache<String, PlaceDetails?> _reverseCache = TtlCache(
+    maxEntries: 40,
+    ttl: const Duration(minutes: 30),
+  );
 
   @override
   Future<List<PlaceSuggestion>> autocomplete({
@@ -78,8 +84,10 @@ class PlacesRepositoryImpl implements PlacesRepository {
     final cacheKey = '$languageCode|$rl,$rn';
     final cached = _reverseCache.get(cacheKey);
     if (cached != null) return cached;
-    final result =
-        await _provider.reverseGeocode(point: point, languageCode: languageCode);
+    final result = await _provider.reverseGeocode(
+      point: point,
+      languageCode: languageCode,
+    );
     _reverseCache.put(cacheKey, result);
     return result;
   }
@@ -105,8 +113,7 @@ class PlacesRepositoryImpl implements PlacesRepository {
       _savedPlaces.upsertSavedPlace(place);
 
   @override
-  Future<void> deleteSavedPlace(String id) =>
-      _savedPlaces.deleteSavedPlace(id);
+  Future<void> deleteSavedPlace(String id) => _savedPlaces.deleteSavedPlace(id);
 
   @override
   Future<List<RecentSearch>> getRecentSearches() async =>

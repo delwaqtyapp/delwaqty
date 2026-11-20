@@ -293,9 +293,8 @@ class SkeletonCard extends StatelessWidget {
         vertical: AppSpacing.cardMarginVertical,
       ),
       decoration: BoxDecoration(
-        color: Theme.of(
-          context,
-        ).colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+        color: Theme.of(context).colorScheme.surfaceContainerHighest
+            .withValues(alpha: 0.3),
         borderRadius: AppSpacing.borderRadiusXl,
       ),
       child: const Padding(

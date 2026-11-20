@@ -26,19 +26,14 @@ class AdminEmergencyPage extends ConsumerStatefulWidget {
 class _AdminEmergencyPageState extends ConsumerState<AdminEmergencyPage> {
   String _filter = 'open';
 
-  Future<void> _resolve(
-    Map<String, dynamic> alert,
-    String status,
-  ) async {
+  Future<void> _resolve(Map<String, dynamic> alert, String status) async {
     final l10n = AppLocalizations.of(context);
     final noteController = TextEditingController();
 
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text(
-          status == 'resolved' ? l10n.markResolved : l10n.dismiss,
-        ),
+        title: Text(status == 'resolved' ? l10n.markResolved : l10n.dismiss),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         content: TextField(
           controller: noteController,
@@ -60,7 +55,9 @@ class _AdminEmergencyPageState extends ConsumerState<AdminEmergencyPage> {
 
     if (confirmed != true) return;
 
-    final ok = await ref.read(adminServiceProvider).resolveSosAlert(
+    final ok = await ref
+        .read(adminServiceProvider)
+        .resolveSosAlert(
           alert['id'] as String,
           status: status,
           note: noteController.text.trim().isEmpty
@@ -134,12 +131,14 @@ class _AdminEmergencyPageState extends ConsumerState<AdminEmergencyPage> {
               ),
               data: (alerts) {
                 final filtered = switch (_filter) {
-                  'open' => alerts
-                      .where((a) => a['status'] != 'resolved')
-                      .toList(growable: false),
-                  'resolved' => alerts
-                      .where((a) => a['status'] == 'resolved')
-                      .toList(growable: false),
+                  'open' =>
+                    alerts
+                        .where((a) => a['status'] != 'resolved')
+                        .toList(growable: false),
+                  'resolved' =>
+                    alerts
+                        .where((a) => a['status'] == 'resolved')
+                        .toList(growable: false),
                   _ => alerts,
                 };
 
@@ -152,8 +151,7 @@ class _AdminEmergencyPageState extends ConsumerState<AdminEmergencyPage> {
                 }
 
                 return RefreshIndicator(
-                  onRefresh: () async =>
-                      ref.invalidate(adminSosAlertsProvider),
+                  onRefresh: () async => ref.invalidate(adminSosAlertsProvider),
                   child: ListView.separated(
                     physics: const AlwaysScrollableScrollPhysics(),
                     padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
@@ -232,17 +230,19 @@ class _AlertTile extends StatelessWidget {
               children: [
                 CircleAvatar(
                   radius: 18,
-                  backgroundColor: (isResolved
-                          ? AppColors.successLight
-                          : AppColors.errorLight)
-                      .withValues(alpha: 0.15),
+                  backgroundColor:
+                      (isResolved
+                              ? AppColors.successLight
+                              : AppColors.errorLight)
+                          .withValues(alpha: 0.15),
                   child: Icon(
                     isResolved
                         ? Icons.check_circle_outline
                         : Icons.emergency_share_outlined,
                     size: 20,
-                    color:
-                        isResolved ? AppColors.successLight : AppColors.errorLight,
+                    color: isResolved
+                        ? AppColors.successLight
+                        : AppColors.errorLight,
                   ),
                 ),
                 const SizedBox(width: 10),
@@ -252,9 +252,8 @@ class _AlertTile extends StatelessWidget {
                     children: [
                       Text(
                         type.replaceAll('_', ' '),
-                        style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                              fontWeight: FontWeight.w700,
-                            ),
+                        style: Theme.of(context).textTheme.titleSmall
+                            ?.copyWith(fontWeight: FontWeight.w700),
                       ),
                       if (createdAt != null)
                         Text(
@@ -265,13 +264,16 @@ class _AlertTile extends StatelessWidget {
                   ),
                 ),
                 Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
-                    color: (isResolved
-                            ? AppColors.successLight
-                            : AppColors.errorLight)
-                        .withValues(alpha: 0.12),
+                    color:
+                        (isResolved
+                                ? AppColors.successLight
+                                : AppColors.errorLight)
+                            .withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text(
@@ -279,8 +281,9 @@ class _AlertTile extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 11,
                       fontWeight: FontWeight.w700,
-                      color:
-                          isResolved ? AppColors.successLight : AppColors.errorLight,
+                      color: isResolved
+                          ? AppColors.successLight
+                          : AppColors.errorLight,
                     ),
                   ),
                 ),

@@ -14,7 +14,9 @@ import 'package:delwaqty/features/customer/delivery/presentation/providers/deliv
 import 'package:delwaqty/features/customer/search/domain/entities/geo_point.dart';
 import 'package:delwaqty/features/customer/search/domain/entities/search_session.dart';
 import 'package:delwaqty/features/customer/search/presentation/providers/search_providers.dart';
+
 import 'dart:async';
+
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:delwaqty/core/errors/app_error_text.dart';
 import 'package:delwaqty/services/logger/app_logger.dart';
@@ -219,7 +221,10 @@ class _DirectDeliveryPageState extends ConsumerState<DirectDeliveryPage> {
         );
         if (suggestions.isEmpty) {
           if (mounted) {
-            context.showAppSnackBar(l10n.deliveryAddressNotFound, isError: true);
+            context.showAppSnackBar(
+              l10n.deliveryAddressNotFound,
+              isError: true,
+            );
           }
           return;
         }
@@ -258,9 +263,7 @@ class _DirectDeliveryPageState extends ConsumerState<DirectDeliveryPage> {
             notes: notes,
           );
       try {
-        await ref
-            .read(deliveryRepositoryProvider)
-            .dispatchDelivery(deliveryId);
+        await ref.read(deliveryRepositoryProvider).dispatchDelivery(deliveryId);
       } catch (e, st) {
         // The ride was created; driver matching can be retried from tracking.
         ref
@@ -277,10 +280,7 @@ class _DirectDeliveryPageState extends ConsumerState<DirectDeliveryPage> {
       unawaited(context.push('/delivery-tracking/$deliveryId'));
     } catch (e) {
       if (mounted) {
-        context.showAppSnackBar(
-          appErrorText(context, e),
-          isError: true,
-        );
+        context.showAppSnackBar(appErrorText(context, e), isError: true);
       }
     } finally {
       if (mounted) setState(() => _submitting = false);
@@ -543,9 +543,7 @@ class _DirectDeliveryPageState extends ConsumerState<DirectDeliveryPage> {
                 child: TextField(
                   controller: _itemQtyController,
                   focusNode: _qtyFocusNode,
-                  keyboardType: const TextInputType.numberWithOptions(
-                    
-                  ),
+                  keyboardType: const TextInputType.numberWithOptions(),
                   inputFormatters: [
                     FilteringTextInputFormatter.digitsOnly,
                     LengthLimitingTextInputFormatter(4),
@@ -831,7 +829,6 @@ class _DirectDeliveryPageState extends ConsumerState<DirectDeliveryPage> {
 }
 
 class _ShoppingItem {
-
   const _ShoppingItem({
     required this.name,
     required this.quantity,

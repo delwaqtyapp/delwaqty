@@ -8,6 +8,7 @@ import 'package:delwaqty/l10n/app_localizations.dart';
 import 'package:delwaqty/core/constants/app_constants.dart';
 import 'package:delwaqty/features/admin/domain/entities/admin_models.dart';
 import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
+
 import 'dart:async';
 
 class AdminHierarchyPage extends ConsumerStatefulWidget {
@@ -34,9 +35,10 @@ class _AdminHierarchyPageState extends ConsumerState<AdminHierarchyPage> {
       final email = client.auth.currentUser?.email ?? '';
       final isOwner = ref.watch(adminIsOwnerProvider).value ?? false;
 
-      final profileResult = await client.rpc('get_admin_profile', params: {
-        'p_email': email,
-      });
+      final profileResult = await client.rpc(
+        'get_admin_profile',
+        params: {'p_email': email},
+      );
 
       final profile = (profileResult as Map<String, dynamic>?) ?? {};
       _currentRole = isOwner
@@ -44,7 +46,8 @@ class _AdminHierarchyPageState extends ConsumerState<AdminHierarchyPage> {
           : AdminRole.fromDb(profile['role'] as String?);
 
       final adminsResult = await client.rpc('get_all_admins');
-      final admins = (adminsResult as List<dynamic>?)
+      final admins =
+          (adminsResult as List<dynamic>?)
               ?.map((e) => Map<String, dynamic>.from(e as Map))
               .toList() ??
           [];
@@ -84,27 +87,31 @@ class _AdminHierarchyPageState extends ConsumerState<AdminHierarchyPage> {
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : _admins.isEmpty
-              ? Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.group_outlined, size: 64, color: cs.onSurfaceVariant),
-                      const SizedBox(height: 16),
-                      Text(l10n.noAdmins),
-                    ],
+          ? Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.group_outlined,
+                    size: 64,
+                    color: cs.onSurfaceVariant,
                   ),
-                )
-              : ListView.builder(
-                  padding: const EdgeInsets.all(16),
-                  itemCount: _admins.length,
-                  itemBuilder: (context, index) {
-                    final admin = _admins[index];
-                    return AnimatedFadeIn(
-                      delay: Duration(milliseconds: index * 50),
-                      child: _buildAdminCard(admin, l10n, cs),
-                    );
-                  },
-                ),
+                  const SizedBox(height: 16),
+                  Text(l10n.noAdmins),
+                ],
+              ),
+            )
+          : ListView.builder(
+              padding: const EdgeInsets.all(16),
+              itemCount: _admins.length,
+              itemBuilder: (context, index) {
+                final admin = _admins[index];
+                return AnimatedFadeIn(
+                  delay: Duration(milliseconds: index * 50),
+                  child: _buildAdminCard(admin, l10n, cs),
+                );
+              },
+            ),
     );
   }
 
@@ -133,10 +140,12 @@ class _AdminHierarchyPageState extends ConsumerState<AdminHierarchyPage> {
                   backgroundColor: isOwner
                       ? Colors.amber
                       : isActive
-                          ? cs.primaryContainer
-                          : cs.surfaceContainerHighest,
+                      ? cs.primaryContainer
+                      : cs.surfaceContainerHighest,
                   child: Icon(
-                    isOwner ? Icons.star_rounded : Icons.admin_panel_settings_rounded,
+                    isOwner
+                        ? Icons.star_rounded
+                        : Icons.admin_panel_settings_rounded,
                     color: isOwner ? Colors.amber.shade800 : cs.primary,
                     size: 20,
                   ),
@@ -148,24 +157,25 @@ class _AdminHierarchyPageState extends ConsumerState<AdminHierarchyPage> {
                     children: [
                       Text(
                         email,
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          fontWeight: FontWeight.w600,
-                        ),
+                        style: Theme.of(context).textTheme.bodyMedium
+                            ?.copyWith(fontWeight: FontWeight.w600),
                       ),
                       Text(
                         isOwner
                             ? l10n.ownerFullAccess
                             : _roleDisplayName(role, l10n),
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: cs.onSurfaceVariant,
-                        ),
+                        style: Theme.of(context).textTheme.bodySmall
+                            ?.copyWith(color: cs.onSurfaceVariant),
                       ),
                     ],
                   ),
                 ),
                 if (!isActive)
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
                     decoration: BoxDecoration(
                       color: cs.errorContainer,
                       borderRadius: BorderRadius.circular(8),
@@ -188,14 +198,15 @@ class _AdminHierarchyPageState extends ConsumerState<AdminHierarchyPage> {
                   const SizedBox(width: 8),
                   Text(
                     regionName,
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: cs.onSurfaceVariant,
-                    ),
+                    style: Theme.of(context).textTheme.bodySmall
+                        ?.copyWith(color: cs.onSurfaceVariant),
                   ),
                 ],
               ),
             ],
-            if (!isOwner && _currentRole != null && _canManageAdmin(adminRole)) ...[
+            if (!isOwner &&
+                _currentRole != null &&
+                _canManageAdmin(adminRole)) ...[
               const SizedBox(height: 12),
               Row(
                 children: [
@@ -326,9 +337,7 @@ class _AdminHierarchyPageState extends ConsumerState<AdminHierarchyPage> {
                           constraints: const BoxConstraints(maxHeight: 160),
                           decoration: BoxDecoration(
                             border: Border.all(
-                              color: Theme.of(ctx)
-                                  .colorScheme
-                                  .outlineVariant
+                              color: Theme.of(ctx).colorScheme.outlineVariant
                                   .withValues(alpha: 0.5),
                             ),
                             borderRadius: BorderRadius.circular(12),
@@ -356,7 +365,9 @@ class _AdminHierarchyPageState extends ConsumerState<AdminHierarchyPage> {
                                   size: 20,
                                 ),
                                 title: Text(
-                                  name.isNotEmpty ? name : (email.isNotEmpty ? email : phone),
+                                  name.isNotEmpty
+                                      ? name
+                                      : (email.isNotEmpty ? email : phone),
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                 ),
@@ -374,8 +385,9 @@ class _AdminHierarchyPageState extends ConsumerState<AdminHierarchyPage> {
                                     selectedMemberName = name.isNotEmpty
                                         ? name
                                         : (email.isNotEmpty ? email : id);
-                                    emailController.text =
-                                        email.isNotEmpty ? email : id;
+                                    emailController.text = email.isNotEmpty
+                                        ? email
+                                        : id;
                                   });
                                 },
                               );
@@ -485,10 +497,10 @@ class _AdminHierarchyPageState extends ConsumerState<AdminHierarchyPage> {
 
       try {
         final client = Supabase.instance.client;
-        await client.rpc('assign_admin_role', params: {
-          'p_email': identifier,
-          'p_role': result['role'],
-        });
+        await client.rpc(
+          'assign_admin_role',
+          params: {'p_email': identifier, 'p_role': result['role']},
+        );
 
         final regionId = result['region_id'] as String?;
         final regionName = result['region_name'] as String?;
@@ -496,35 +508,27 @@ class _AdminHierarchyPageState extends ConsumerState<AdminHierarchyPage> {
           try {
             await client.rpc(
               'admin_assign_region_by_id',
-              params: {
-                'p_email': identifier,
-                'p_region_id': regionId,
-              },
+              params: {'p_email': identifier, 'p_region_id': regionId},
             );
           } on PostgrestException {
             if (regionName != null && regionName.isNotEmpty) {
               await client.rpc(
                 'assign_admin_region',
-                params: {
-                  'p_email': identifier,
-                  'p_region': regionName,
-                },
+                params: {'p_email': identifier, 'p_region': regionName},
               );
             }
           }
         }
 
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(l10n.adminAssigned)),
-          );
+          ScaffoldMessenger.of(context)
+              .showSnackBar(SnackBar(content: Text(l10n.adminAssigned)));
           unawaited(_loadData());
         }
       } catch (e) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(appErrorText(context, e))),
-          );
+          ScaffoldMessenger.of(context)
+              .showSnackBar(SnackBar(content: Text(appErrorText(context, e))));
         }
       }
     });
@@ -545,15 +549,15 @@ class _AdminHierarchyPageState extends ConsumerState<AdminHierarchyPage> {
               title: Text('${l10n.adminRole}: $email'),
               content: DropdownButtonFormField<AdminRole>(
                 initialValue: selectedRole,
-                decoration: const InputDecoration(
-                  border: OutlineInputBorder(),
-                ),
+                decoration: const InputDecoration(border: OutlineInputBorder()),
                 items: AdminRole.values
                     .where((r) => r != AdminRole.owner)
-                    .map((r) => DropdownMenuItem(
-                          value: r,
-                          child: Text(_roleDisplayName(r.toDb(), l10n)),
-                        ))
+                    .map(
+                      (r) => DropdownMenuItem(
+                        value: r,
+                        child: Text(_roleDisplayName(r.toDb(), l10n)),
+                      ),
+                    )
                     .toList(),
                 onChanged: (v) {
                   if (v != null) setDialogState(() => selectedRole = v);
@@ -582,21 +586,19 @@ class _AdminHierarchyPageState extends ConsumerState<AdminHierarchyPage> {
       if (newRole == null) return;
       try {
         final client = Supabase.instance.client;
-        await client.rpc('assign_admin_role', params: {
-          'p_email': email,
-          'p_role': newRole,
-        });
+        await client.rpc(
+          'assign_admin_role',
+          params: {'p_email': email, 'p_role': newRole},
+        );
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(l10n.roleUpdated)),
-          );
+          ScaffoldMessenger.of(context)
+              .showSnackBar(SnackBar(content: Text(l10n.roleUpdated)));
           unawaited(_loadData());
         }
       } catch (e) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(appErrorText(context, e))),
-          );
+          ScaffoldMessenger.of(context)
+              .showSnackBar(SnackBar(content: Text(appErrorText(context, e))));
         }
       }
     });
@@ -618,32 +620,24 @@ class _AdminHierarchyPageState extends ConsumerState<AdminHierarchyPage> {
       try {
         await client.rpc(
           'admin_assign_region_by_id',
-          params: {
-            'p_email': email,
-            'p_region_id': region.id,
-          },
+          params: {'p_email': email, 'p_region_id': region.id},
         );
       } on PostgrestException catch (e) {
         if (e.code != 'PGRST202') rethrow;
         await client.rpc(
           'assign_admin_region',
-          params: {
-            'p_email': email,
-            'p_region': region.nameAr,
-          },
+          params: {'p_email': email, 'p_region': region.nameAr},
         );
       }
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.regionSaved)),
-        );
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(l10n.regionSaved)));
         unawaited(_loadData());
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(appErrorText(context, e))),
-        );
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(appErrorText(context, e))));
       }
     }
   }

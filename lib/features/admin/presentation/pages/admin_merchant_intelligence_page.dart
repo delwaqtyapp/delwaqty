@@ -31,7 +31,7 @@ class AdminMerchantIntelligencePage extends ConsumerWidget {
         ],
       ),
       body: intelligenceAsync.when(
-        loading: () => const Center(child: AppLoaderCircular(),),
+        loading: () => const Center(child: AppLoaderCircular()),
         error: (e, _) => Center(
           child: PremiumCard(
             child: PremiumEmptyState(
@@ -59,17 +59,14 @@ class AdminMerchantIntelligencePage extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          AnimatedFadeIn(
-            child: _buildSummaryCards(context, data, l10n, cs),
-          ),
+          AnimatedFadeIn(child: _buildSummaryCards(context, data, l10n, cs)),
           const SizedBox(height: 24),
           AnimatedFadeIn(
             delay: const Duration(milliseconds: 100),
             child: Text(
               l10n.merchantsByType,
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+              style: Theme.of(context).textTheme.titleMedium
+                  ?.copyWith(fontWeight: FontWeight.bold),
             ),
           ),
           const SizedBox(height: 12),
@@ -82,9 +79,8 @@ class AdminMerchantIntelligencePage extends ConsumerWidget {
             delay: const Duration(milliseconds: 200),
             child: Text(
               l10n.totalMerchants,
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+              style: Theme.of(context).textTheme.titleMedium
+                  ?.copyWith(fontWeight: FontWeight.bold),
             ),
           ),
           const SizedBox(height: 12),
@@ -155,11 +151,7 @@ class AdminMerchantIntelligencePage extends ConsumerWidget {
       spacing: 8,
       runSpacing: 8,
       children: items.map((item) {
-        return _TypeChip(
-          label: item.type,
-          count: item.count,
-          cs: cs,
-        );
+        return _TypeChip(label: item.type, count: item.count, cs: cs);
       }).toList(),
     );
   }
@@ -187,12 +179,10 @@ class AdminMerchantIntelligencePage extends ConsumerWidget {
         return AnimatedFadeIn(
           delay: Duration(milliseconds: 250 + index * 50),
           child: Padding(
-            padding: EdgeInsets.only(bottom: index < merchants.length - 1 ? 8 : 0),
-            child: _MerchantInfoTile(
-              merchant: merchant,
-              l10n: l10n,
-              cs: cs,
+            padding: EdgeInsets.only(
+              bottom: index < merchants.length - 1 ? 8 : 0,
             ),
+            child: _MerchantInfoTile(merchant: merchant, l10n: l10n, cs: cs),
           ),
         );
       }),
@@ -238,17 +228,15 @@ class _SummaryCard extends StatelessWidget {
                 fit: BoxFit.scaleDown,
                 child: Text(
                   value,
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: Theme.of(context).textTheme.titleLarge
+                      ?.copyWith(fontWeight: FontWeight.bold),
                 ),
               ),
               const SizedBox(height: 2),
               Text(
                 title,
-                style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                  color: cs.onSurfaceVariant,
-                ),
+                style: Theme.of(context).textTheme.labelSmall
+                    ?.copyWith(color: cs.onSurfaceVariant),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
@@ -261,11 +249,7 @@ class _SummaryCard extends StatelessWidget {
 }
 
 class _TypeChip extends StatelessWidget {
-  const _TypeChip({
-    required this.label,
-    required this.count,
-    required this.cs,
-  });
+  const _TypeChip({required this.label, required this.count, required this.cs});
 
   final String label;
   final int count;
@@ -289,9 +273,7 @@ class _TypeChip extends StatelessWidget {
           const SizedBox(width: 8),
           Text(
             label,
-            style: AppTextStyles.labelLarge.copyWith(
-              color: cs.onSurface,
-            ),
+            style: AppTextStyles.labelLarge.copyWith(color: cs.onSurface),
           ),
           const SizedBox(width: 6),
           Container(
@@ -327,8 +309,11 @@ class _MerchantInfoTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isActive = merchant.status == 'active' || merchant.status == 'verified';
-    final statusColor = isActive ? AppColors.successLight : AppColors.warningLight;
+    final isActive =
+        merchant.status == 'active' || merchant.status == 'verified';
+    final statusColor = isActive
+        ? AppColors.successLight
+        : AppColors.warningLight;
     final stars = merchant.rating.round().clamp(0, 5);
 
     return PremiumCard(
@@ -341,11 +326,7 @@ class _MerchantInfoTile extends StatelessWidget {
               color: statusColor.withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(12),
             ),
-            child: Icon(
-              Icons.store_outlined,
-              color: statusColor,
-              size: 20,
-            ),
+            child: Icon(Icons.store_outlined, color: statusColor, size: 20),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -364,7 +345,10 @@ class _MerchantInfoTile extends StatelessWidget {
                 Row(
                   children: [
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 6,
+                        vertical: 1,
+                      ),
                       decoration: BoxDecoration(
                         color: AppColors.brandLavender,
                         borderRadius: BorderRadius.circular(6),
@@ -378,7 +362,10 @@ class _MerchantInfoTile extends StatelessWidget {
                     ),
                     const SizedBox(width: 8),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 6,
+                        vertical: 1,
+                      ),
                       decoration: BoxDecoration(
                         color: statusColor.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(6),

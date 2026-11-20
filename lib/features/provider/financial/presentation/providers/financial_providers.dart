@@ -11,14 +11,19 @@ final providerFinancialRepositoryProvider =
       );
     });
 
-final financialSummaryProvider = FutureProvider<FinancialSummary>((ref) =>
-    ref.watch(providerFinancialRepositoryProvider).getMyFinancialSummary());
+final financialSummaryProvider = FutureProvider<FinancialSummary>(
+  (ref) =>
+      ref.watch(providerFinancialRepositoryProvider).getMyFinancialSummary(),
+);
 
-final graceProvider = FutureProvider<GraceInfo>((ref) =>
-    ref.watch(providerFinancialRepositoryProvider).getMyGrace());
+final graceProvider = FutureProvider<GraceInfo>(
+  (ref) => ref.watch(providerFinancialRepositoryProvider).getMyGrace(),
+);
 
-final topupRequestsProvider = FutureProvider<List<TopupRequest>>((ref) =>
-    ref.watch(providerFinancialRepositoryProvider).getMyTopupRequests());
+final topupRequestsProvider = FutureProvider<List<TopupRequest>>(
+  (ref) => ref.watch(providerFinancialRepositoryProvider).getMyTopupRequests(),
+);
 
-final receiverProvider = FutureProvider<Map<String, dynamic>>((ref) =>
-    ref.watch(providerFinancialRepositoryProvider).resolveReceiver());
+final receiverProvider = FutureProvider<Map<String, dynamic>>(
+  (ref) => ref.watch(providerFinancialRepositoryProvider).resolveReceiver(),
+);

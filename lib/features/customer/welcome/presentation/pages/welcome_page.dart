@@ -89,7 +89,9 @@ class WelcomePage extends ConsumerWidget {
                   child: Text(
                     l10n.welcomeSubtitle,
                     style: context.textTheme.bodyLarge?.copyWith(
-                      color: context.colorScheme.onPrimary.withValues(alpha: 0.85),
+                      color: context.colorScheme.onPrimary.withValues(
+                        alpha: 0.85,
+                      ),
                     ),
                     textAlign: TextAlign.center,
                   ),
@@ -119,14 +121,14 @@ class WelcomePage extends ConsumerWidget {
                   child: TextButton(
                     onPressed: () {
                       ref.read(authStateProvider.notifier).enterGuestMode();
-                      context.go(
-                        postAuthRoute(ref.read(appFlavorProvider)),
-                      );
+                      context.go(postAuthRoute(ref.read(appFlavorProvider)));
                     },
                     child: Text(
                       l10n.welcomeGuestButton,
                       style: AppTextStyles.labelLarge.copyWith(
-                        color: context.colorScheme.onPrimary.withValues(alpha: 0.7),
+                        color: context.colorScheme.onPrimary.withValues(
+                          alpha: 0.7,
+                        ),
                       ),
                     ),
                   ),

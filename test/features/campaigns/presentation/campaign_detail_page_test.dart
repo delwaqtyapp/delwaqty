@@ -46,9 +46,7 @@ void main() {
   testWidgets('shows not-found when the campaign is null', (tester) async {
     await tester.pumpWidget(
       ProviderScope(
-        overrides: [
-          campaignByIdProvider.overrideWith((ref, id) async => null),
-        ],
+        overrides: [campaignByIdProvider.overrideWith((ref, id) async => null)],
         child: const MaterialApp(
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,

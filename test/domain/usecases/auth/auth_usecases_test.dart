@@ -1,4 +1,5 @@
 import 'dart:typed_data';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:delwaqty/domain/enums/user_type.dart';
@@ -15,10 +16,7 @@ void main() {
   });
 
   setUpAll(() {
-    registerFallbackValue(const AuthResult(
-      userId: '',
-      email: '',
-    ));
+    registerFallbackValue(const AuthResult(userId: '', email: ''));
     registerFallbackValue(UserType.customer);
     registerFallbackValue(Uint8List(0));
   });
@@ -35,25 +33,25 @@ void main() {
       const password = 'password123';
       const expectedResult = AuthResult(userId: '1', email: email);
 
-      when(() => mockRepository.signInWithEmail(
-            email: email,
-            password: password,
-          )).thenAnswer((_) async => expectedResult);
+      when(
+        () => mockRepository.signInWithEmail(email: email, password: password),
+      ).thenAnswer((_) async => expectedResult);
 
       final result = await useCase(email: email, password: password);
 
       expect(result, expectedResult);
-      verify(() => mockRepository.signInWithEmail(
-            email: email,
-            password: password,
-          )).called(1);
+      verify(
+        () => mockRepository.signInWithEmail(email: email, password: password),
+      ).called(1);
     });
 
     test('propagates exceptions from repository', () async {
-      when(() => mockRepository.signInWithEmail(
-            email: any(named: 'email'),
-            password: any(named: 'password'),
-          )).thenThrow(Exception('Auth failed'));
+      when(
+        () => mockRepository.signInWithEmail(
+          email: any(named: 'email'),
+          password: any(named: 'password'),
+        ),
+      ).thenThrow(Exception('Auth failed'));
 
       expect(
         () => useCase(email: 'test@example.com', password: 'wrong'),
@@ -75,17 +73,19 @@ void main() {
       const fullName = 'John Doe';
       const expectedResult = AuthResult(userId: '1', email: email);
 
-      when(() => mockRepository.signUpWithEmail(
-            email: email,
-            password: password,
-            fullName: fullName,
-            userType: any(named: 'userType'),
-            language: any(named: 'language'),
-            idCardBytes: any(named: 'idCardBytes'),
-            idCardFileName: any(named: 'idCardFileName'),
-            profilePhotoBytes: any(named: 'profilePhotoBytes'),
-            profilePhotoFileName: any(named: 'profilePhotoFileName'),
-          )).thenAnswer((_) async => expectedResult);
+      when(
+        () => mockRepository.signUpWithEmail(
+          email: email,
+          password: password,
+          fullName: fullName,
+          userType: any(named: 'userType'),
+          language: any(named: 'language'),
+          idCardBytes: any(named: 'idCardBytes'),
+          idCardFileName: any(named: 'idCardFileName'),
+          profilePhotoBytes: any(named: 'profilePhotoBytes'),
+          profilePhotoFileName: any(named: 'profilePhotoFileName'),
+        ),
+      ).thenAnswer((_) async => expectedResult);
 
       final result = await useCase(
         email: email,
@@ -100,17 +100,19 @@ void main() {
       );
 
       expect(result, expectedResult);
-      verify(() => mockRepository.signUpWithEmail(
-            email: email,
-            password: password,
-            fullName: fullName,
-            userType: UserType.delivery,
-            language: 'ar',
-            idCardBytes: any(named: 'idCardBytes'),
-            idCardFileName: 'id.jpg',
-            profilePhotoBytes: any(named: 'profilePhotoBytes'),
-            profilePhotoFileName: 'photo.jpg',
-          )).called(1);
+      verify(
+        () => mockRepository.signUpWithEmail(
+          email: email,
+          password: password,
+          fullName: fullName,
+          userType: UserType.delivery,
+          language: 'ar',
+          idCardBytes: any(named: 'idCardBytes'),
+          idCardFileName: 'id.jpg',
+          profilePhotoBytes: any(named: 'profilePhotoBytes'),
+          profilePhotoFileName: 'photo.jpg',
+        ),
+      ).called(1);
     });
   });
 
@@ -130,7 +132,8 @@ void main() {
     });
 
     test('propagates exceptions from repository', () async {
-      when(() => mockRepository.signOut()).thenThrow(Exception('Sign out failed'));
+      when(() => mockRepository.signOut())
+          .thenThrow(Exception('Sign out failed'));
 
       expect(() => useCase(), throwsA(isA<Exception>()));
     });

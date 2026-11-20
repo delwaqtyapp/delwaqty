@@ -7,7 +7,6 @@ import 'package:delwaqty/features/_shared/auth/domain/auth_state.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 
 class NewComplaintPage extends ConsumerStatefulWidget {
-
   const NewComplaintPage({super.key, this.orderId});
   final String? orderId;
 
@@ -66,7 +65,9 @@ class _NewComplaintPageState extends ConsumerState<NewComplaintPage> {
                     .map(
                       (s) => DropdownMenuItem(
                         value: s,
-                        child: Text(_typeLabel(AppLocalizations.of(context), s)),
+                        child: Text(
+                          _typeLabel(AppLocalizations.of(context), s),
+                        ),
                       ),
                     )
                     .toList(),

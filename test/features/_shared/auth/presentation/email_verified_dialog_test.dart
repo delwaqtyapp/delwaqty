@@ -25,8 +25,9 @@ Widget _buildHost({Locale locale = const Locale('ar')}) {
 }
 
 void main() {
-  testWidgets('shows email-verified confirmation in Arabic and dismisses',
-      (tester) async {
+  testWidgets('shows email-verified confirmation in Arabic and dismisses', (
+    tester,
+  ) async {
     await tester.pumpWidget(_buildHost());
     await tester.tap(find.text('open'));
     await tester.pumpAndSettle();

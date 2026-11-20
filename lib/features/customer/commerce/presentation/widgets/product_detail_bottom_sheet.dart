@@ -93,7 +93,9 @@ class _ProductDetailBottomSheetState
                   width: 40,
                   height: 4,
                   decoration: BoxDecoration(
-                    color: context.colorScheme.onSurfaceVariant.withValues(alpha: 0.3),
+                    color: context.colorScheme.onSurfaceVariant.withValues(
+                      alpha: 0.3,
+                    ),
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
@@ -271,7 +273,8 @@ class _ProductDetailBottomSheetState
           spacing: 8,
           runSpacing: 8,
           children: widget.product.variants.map((variant) {
-            final isSelected = _selectedVariantId == variant.id ||
+            final isSelected =
+                _selectedVariantId == variant.id ||
                 (variant.id == widget.product.variants.first.id &&
                     _selectedVariantId == null);
             return GestureDetector(
@@ -280,19 +283,31 @@ class _ProductDetailBottomSheetState
                   : null,
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 200),
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 10,
+                ),
                 decoration: BoxDecoration(
                   gradient: isSelected
                       ? const LinearGradient(
-                          colors: [AppColors.brandGradientStart, AppColors.brandGradientEnd],
+                          colors: [
+                            AppColors.brandGradientStart,
+                            AppColors.brandGradientEnd,
+                          ],
                         )
                       : null,
-                  color: isSelected ? null : context.colorScheme.surfaceContainerHighest.withValues(alpha: 0.4),
+                  color: isSelected
+                      ? null
+                      : context.colorScheme.surfaceContainerHighest.withValues(
+                          alpha: 0.4,
+                        ),
                   borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
                   border: Border.all(
                     color: isSelected
                         ? Colors.transparent
-                        : context.colorScheme.outlineVariant.withValues(alpha: 0.3),
+                        : context.colorScheme.outlineVariant.withValues(
+                            alpha: 0.3,
+                          ),
                   ),
                 ),
                 child: Column(
@@ -300,8 +315,12 @@ class _ProductDetailBottomSheetState
                     Text(
                       variant.name,
                       style: context.textTheme.bodyMedium?.copyWith(
-                        color: isSelected ? Colors.white : context.colorScheme.onSurface,
-                        fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                        color: isSelected
+                            ? Colors.white
+                            : context.colorScheme.onSurface,
+                        fontWeight: isSelected
+                            ? FontWeight.w700
+                            : FontWeight.w500,
                       ),
                     ),
                     Text(
@@ -346,7 +365,9 @@ class _ProductDetailBottomSheetState
           decoration: InputDecoration(
             hintText: l10n.specialInstructionsHint,
             filled: true,
-            fillColor: context.colorScheme.surfaceContainerHighest.withValues(alpha: 0.4),
+            fillColor: context.colorScheme.surfaceContainerHighest.withValues(
+              alpha: 0.4,
+            ),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
               borderSide: BorderSide.none,
@@ -364,50 +385,126 @@ class _ProductDetailBottomSheetState
     switch (widget.merchantType) {
       case MerchantType.restaurant:
         if (tags.containsKey('calories')) {
-          infoItems.add(_InfoItem(Icons.local_fire_department_outlined, l10n.calories, tags['calories']!));
+          infoItems.add(
+            _InfoItem(
+              Icons.local_fire_department_outlined,
+              l10n.calories,
+              tags['calories']!,
+            ),
+          );
         }
         if (tags.containsKey('ingredients')) {
-          infoItems.add(_InfoItem(Icons.eco_outlined, l10n.ingredients, tags['ingredients']!));
+          infoItems.add(
+            _InfoItem(
+              Icons.eco_outlined,
+              l10n.ingredients,
+              tags['ingredients']!,
+            ),
+          );
         }
         if (tags.containsKey('prep_time')) {
-          infoItems.add(_InfoItem(Icons.timer_outlined, l10n.preparationTime, tags['prep_time']!));
+          infoItems.add(
+            _InfoItem(
+              Icons.timer_outlined,
+              l10n.preparationTime,
+              tags['prep_time']!,
+            ),
+          );
         }
       case MerchantType.pharmacy:
         if (tags.containsKey('dosage')) {
-          infoItems.add(_InfoItem(Icons.medication_outlined, l10n.dosageForm, tags['dosage']!));
+          infoItems.add(
+            _InfoItem(
+              Icons.medication_outlined,
+              l10n.dosageForm,
+              tags['dosage']!,
+            ),
+          );
         }
         if (tags.containsKey('active_ingredient')) {
-          infoItems.add(_InfoItem(Icons.science_outlined, l10n.activeIngredient, tags['active_ingredient']!));
+          infoItems.add(
+            _InfoItem(
+              Icons.science_outlined,
+              l10n.activeIngredient,
+              tags['active_ingredient']!,
+            ),
+          );
         }
         if (tags['prescription'] == 'true') {
-          infoItems.add(_InfoItem(Icons.receipt_outlined, l10n.prescriptionRequired, ''));
+          infoItems.add(
+            _InfoItem(Icons.receipt_outlined, l10n.prescriptionRequired, ''),
+          );
         }
         if (tags.containsKey('warnings')) {
-          infoItems.add(_InfoItem(Icons.warning_amber_outlined, l10n.warnings, tags['warnings']!));
+          infoItems.add(
+            _InfoItem(
+              Icons.warning_amber_outlined,
+              l10n.warnings,
+              tags['warnings']!,
+            ),
+          );
         }
       case MerchantType.grocery:
         if (tags.containsKey('weight')) {
-          infoItems.add(_InfoItem(Icons.scale_outlined, l10n.weight, tags['weight']!));
+          infoItems.add(
+            _InfoItem(Icons.scale_outlined, l10n.weight, tags['weight']!),
+          );
         }
         if (tags.containsKey('expiry')) {
-          infoItems.add(_InfoItem(Icons.calendar_today_outlined, l10n.expiryDate, tags['expiry']!));
+          infoItems.add(
+            _InfoItem(
+              Icons.calendar_today_outlined,
+              l10n.expiryDate,
+              tags['expiry']!,
+            ),
+          );
         }
         if (tags.containsKey('storage')) {
-          infoItems.add(_InfoItem(Icons.kitchen_outlined, l10n.storageInstructions, tags['storage']!));
+          infoItems.add(
+            _InfoItem(
+              Icons.kitchen_outlined,
+              l10n.storageInstructions,
+              tags['storage']!,
+            ),
+          );
         }
       case MerchantType.bakery:
         if (tags.containsKey('ingredients')) {
-          infoItems.add(_InfoItem(Icons.eco_outlined, l10n.ingredients, tags['ingredients']!));
+          infoItems.add(
+            _InfoItem(
+              Icons.eco_outlined,
+              l10n.ingredients,
+              tags['ingredients']!,
+            ),
+          );
         }
         if (tags.containsKey('allergens')) {
-          infoItems.add(_InfoItem(Icons.warning_amber_outlined, l10n.allergens, tags['allergens']!));
+          infoItems.add(
+            _InfoItem(
+              Icons.warning_amber_outlined,
+              l10n.allergens,
+              tags['allergens']!,
+            ),
+          );
         }
       case MerchantType.home:
         if (tags.containsKey('duration')) {
-          infoItems.add(_InfoItem(Icons.schedule_outlined, l10n.serviceDuration, tags['duration']!));
+          infoItems.add(
+            _InfoItem(
+              Icons.schedule_outlined,
+              l10n.serviceDuration,
+              tags['duration']!,
+            ),
+          );
         }
         if (tags.containsKey('included')) {
-          infoItems.add(_InfoItem(Icons.check_circle_outline, l10n.whatsIncluded, tags['included']!));
+          infoItems.add(
+            _InfoItem(
+              Icons.check_circle_outline,
+              l10n.whatsIncluded,
+              tags['included']!,
+            ),
+          );
         }
       default:
         break;
@@ -425,36 +522,38 @@ class _ProductDetailBottomSheetState
           ),
         ),
         const SizedBox(height: 8),
-        ...infoItems.map((item) => Padding(
-          padding: const EdgeInsets.only(bottom: 8),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Icon(item.icon, size: 18, color: context.colorScheme.primary),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      item.label,
-                      style: context.textTheme.labelMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    if (item.value.isNotEmpty)
+        ...infoItems.map(
+          (item) => Padding(
+            padding: const EdgeInsets.only(bottom: 8),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Icon(item.icon, size: 18, color: context.colorScheme.primary),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
                       Text(
-                        item.value,
-                        style: context.textTheme.bodySmall?.copyWith(
-                          color: context.colorScheme.onSurfaceVariant,
+                        item.label,
+                        style: context.textTheme.labelMedium?.copyWith(
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
-                  ],
+                      if (item.value.isNotEmpty)
+                        Text(
+                          item.value,
+                          style: context.textTheme.bodySmall?.copyWith(
+                            color: context.colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                    ],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-        )),
+        ),
       ],
     );
   }
@@ -480,7 +579,9 @@ class _ProductDetailBottomSheetState
                       : _instructionsController.text,
                 );
                 try {
-                  await ref.read(cartProvider.notifier).addToCart(
+                  await ref
+                      .read(cartProvider.notifier)
+                      .addToCart(
                         merchantId: widget.merchantId,
                         merchantName: widget.merchantName,
                         item: item,
@@ -562,9 +663,8 @@ class _QuantitySelectorState extends State<_QuantitySelector> {
       children: [
         Text(
           l10n.quantity,
-          style: Theme.of(context).textTheme.titleSmall?.copyWith(
-            fontWeight: FontWeight.w700,
-          ),
+          style: Theme.of(context).textTheme.titleSmall
+              ?.copyWith(fontWeight: FontWeight.w700),
         ),
         const Spacer(),
         DecoratedBox(
@@ -585,9 +685,8 @@ class _QuantitySelectorState extends State<_QuantitySelector> {
                 child: Text(
                   '$_qty',
                   key: ValueKey(_qty),
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w700,
-                  ),
+                  style: Theme.of(context).textTheme.titleMedium
+                      ?.copyWith(fontWeight: FontWeight.w700),
                 ),
               ),
               IconButton(

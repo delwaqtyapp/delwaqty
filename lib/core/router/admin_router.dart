@@ -34,11 +34,9 @@ final adminGoRouterProvider = Provider<GoRouter>((ref) {
     redirect: (context, state) {
       final authState = ref.read(authStateProvider);
       final isAuth = authState is AuthAuthenticated;
-      final isAdmin = isAuth &&
-          authState.whenOrNull(
-                authenticated: (user) => user.isAdmin,
-              ) ==
-              true;
+      final isAdmin =
+          isAuth &&
+          authState.whenOrNull(authenticated: (user) => user.isAdmin) == true;
 
       final isAuthRoute =
           state.matchedLocation == '/login' ||

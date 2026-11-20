@@ -75,9 +75,8 @@ class _DriverTopupRequestPageState
     final l10n = AppLocalizations.of(context);
     final amount = double.tryParse(_amountController.text);
     if (amount == null || amount <= 0) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.enterValidAmount)),
-      );
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(l10n.enterValidAmount)));
       return;
     }
     final confirmed = await showDialog<bool>(
@@ -126,18 +125,17 @@ class _DriverTopupRequestPageState
       if (!mounted) return;
       final ok = result['ok'] == true;
       final code = result['code'] ?? (ok ? 'OK' : 'ERROR');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.topUpRequestCreated(code))),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(l10n.topUpRequestCreated(code))));
       if (ok) {
         ref.invalidate(topupRequestsProvider);
         if (mounted) context.pop();
       }
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(appErrorText(context, e))),
-      );
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(appErrorText(context, e))));
     } finally {
       if (mounted) setState(() => _submitting = false);
     }
@@ -215,7 +213,11 @@ class _DriverTopupRequestPageState
               padding: const EdgeInsets.only(top: 12),
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(12),
-                child: Image.memory(_proofBytes!, height: 180, fit: BoxFit.cover),
+                child: Image.memory(
+                  _proofBytes!,
+                  height: 180,
+                  fit: BoxFit.cover,
+                ),
               ),
             ),
           const SizedBox(height: 20),

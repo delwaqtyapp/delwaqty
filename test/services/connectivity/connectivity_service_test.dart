@@ -16,13 +16,10 @@ void main() {
 
     test('stream is broadcast and can have multiple listeners', () {
       final service = ConnectivityService();
-      expect(
-        () {
-          service.statusStream.listen((_) {});
-          service.statusStream.listen((_) {});
-        },
-        returnsNormally,
-      );
+      expect(() {
+        service.statusStream.listen((_) {});
+        service.statusStream.listen((_) {});
+      }, returnsNormally);
       service.dispose();
     });
   });

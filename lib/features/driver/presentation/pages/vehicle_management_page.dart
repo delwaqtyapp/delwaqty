@@ -10,7 +10,10 @@ import 'package:delwaqty/shared/widgets/shimmer_loading.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 import 'package:delwaqty/core/errors/app_error_text.dart';
 
-final _vehiclesProvider = FutureProvider.family<List<Vehicle>, String>((ref, driverId) async {
+final _vehiclesProvider = FutureProvider.family<List<Vehicle>, String>((
+  ref,
+  driverId,
+) async {
   final repo = ref.watch(driverRepositoryProvider);
   return repo.getVehicles(driverId);
 });
@@ -104,11 +107,7 @@ class VehicleManagementPage extends ConsumerWidget {
       body: profileAsync.when(
         loading: () => ListView(
           padding: const EdgeInsets.all(16),
-          children: const [
-            ShimmerCard(),
-            SizedBox(height: 12),
-            ShimmerCard(),
-          ],
+          children: const [ShimmerCard(), SizedBox(height: 12), ShimmerCard()],
         ),
         error: (e, _) => Center(child: Text(appErrorText(context, e))),
         data: (profile) {
@@ -122,27 +121,21 @@ class VehicleManagementPage extends ConsumerWidget {
                     Icon(
                       Icons.delivery_dining_rounded,
                       size: 80,
-                      color: Theme.of(context)
-                          .colorScheme
-                          .primary
+                      color: Theme.of(context).colorScheme.primary
                           .withValues(alpha: 0.5),
                     ),
                     const SizedBox(height: 16),
                     Text(
                       l10n.becomeADriver,
-                      style: Theme.of(context)
-                          .textTheme
-                          .headlineSmall
+                      style: Theme.of(context).textTheme.headlineSmall
                           ?.copyWith(fontWeight: FontWeight.bold),
                     ),
                     const SizedBox(height: 8),
-                    Text(
-                      l10n.joinFleetSubtitle,
-                      textAlign: TextAlign.center,
-                    ),
+                    Text(l10n.joinFleetSubtitle, textAlign: TextAlign.center),
                     const SizedBox(height: 24),
                     FilledButton.icon(
-                      onPressed: () => context.push('/driver/onboarding/$userId'),
+                      onPressed: () =>
+                          context.push('/driver/onboarding/$userId'),
                       icon: const Icon(Icons.app_registration_rounded),
                       label: Text(l10n.registerNow),
                     ),
@@ -156,18 +149,19 @@ class VehicleManagementPage extends ConsumerWidget {
       ),
       floatingActionButton: profileAsync.hasValue && profileAsync.value != null
           ? FloatingActionButton(
-              onPressed: () => _showAddVehicleSheet(
-                context,
-                ref,
-                profileAsync.value!.id,
-              ),
+              onPressed: () =>
+                  _showAddVehicleSheet(context, ref, profileAsync.value!.id),
               child: const Icon(Icons.add_rounded),
             )
           : null,
     );
   }
 
-  void _showAddVehicleSheet(BuildContext context, WidgetRef ref, String driverId) {
+  void _showAddVehicleSheet(
+    BuildContext context,
+    WidgetRef ref,
+    String driverId,
+  ) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -191,11 +185,7 @@ class _VehicleListBody extends ConsumerWidget {
       child: vehiclesAsync.when(
         loading: () => ListView(
           padding: const EdgeInsets.all(16),
-          children: const [
-            ShimmerCard(),
-            SizedBox(height: 12),
-            ShimmerCard(),
-          ],
+          children: const [ShimmerCard(), SizedBox(height: 12), ShimmerCard()],
         ),
         error: (e, _) => Center(child: Text(appErrorText(context, e))),
         data: (vehicles) {
@@ -209,7 +199,8 @@ class _VehicleListBody extends ConsumerWidget {
                     Icon(
                       Icons.directions_car_rounded,
                       size: 64,
-                      color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.4),
+                      color: Theme.of(context).colorScheme.primary
+                          .withValues(alpha: 0.4),
                     ),
                     const SizedBox(height: 16),
                     Text(
@@ -255,14 +246,16 @@ class _VehicleListBody extends ConsumerWidget {
     );
   }
 
-  void _showEditVehicleSheet(BuildContext context, WidgetRef ref, Vehicle vehicle) {
+  void _showEditVehicleSheet(
+    BuildContext context,
+    WidgetRef ref,
+    Vehicle vehicle,
+  ) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      builder: (_) => _VehicleFormSheet(
-        driverId: vehicle.driverId,
-        vehicle: vehicle,
-      ),
+      builder: (_) =>
+          _VehicleFormSheet(driverId: vehicle.driverId, vehicle: vehicle),
     );
   }
 }
@@ -332,7 +325,8 @@ class _VehicleCard extends StatelessWidget {
                   Text(
                     [
                       if (vehicle.year != null) '${vehicle.year}',
-                      if (vehicle.color != null && vehicle.color!.isNotEmpty) vehicle.color!,
+                      if (vehicle.color != null && vehicle.color!.isNotEmpty)
+                        vehicle.color!,
                       vehicle.plateNumber,
                       if (vehicle.seats > 0) '${vehicle.seats} ${l10n.seats}',
                     ].join(' \u2022 '),
@@ -349,7 +343,9 @@ class _VehicleCard extends StatelessWidget {
                       ),
                       const SizedBox(width: 4),
                       Text(
-                        vehicle.isActive ? l10n.vehicleActive : l10n.vehicleInactive,
+                        vehicle.isActive
+                            ? l10n.vehicleActive
+                            : l10n.vehicleInactive,
                         style: theme.textTheme.bodySmall?.copyWith(
                           color: vehicle.isActive
                               ? theme.colorScheme.primary
@@ -375,10 +371,7 @@ class _VehicleCard extends StatelessWidget {
 }
 
 class _VehicleFormSheet extends ConsumerStatefulWidget {
-  const _VehicleFormSheet({
-    required this.driverId,
-    this.vehicle,
-  });
+  const _VehicleFormSheet({required this.driverId, this.vehicle});
 
   final String driverId;
   final Vehicle? vehicle;
@@ -453,9 +446,8 @@ class _VehicleFormSheetState extends ConsumerState<_VehicleFormSheet> {
               ),
               Text(
                 _isEditing ? l10n.editVehicle : l10n.addVehicle,
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+                style: Theme.of(context).textTheme.titleLarge
+                    ?.copyWith(fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 20),
               DropdownButtonFormField<String>(
@@ -586,10 +578,16 @@ class _VehicleFormSheetState extends ConsumerState<_VehicleFormSheet> {
           widget.vehicle!.id,
           widget.driverId,
           category: _category,
-          make: _makeController.text.trim().isNotEmpty ? _makeController.text.trim() : null,
-          model: _modelController.text.trim().isNotEmpty ? _modelController.text.trim() : null,
+          make: _makeController.text.trim().isNotEmpty
+              ? _makeController.text.trim()
+              : null,
+          model: _modelController.text.trim().isNotEmpty
+              ? _modelController.text.trim()
+              : null,
           year: int.tryParse(_yearController.text.trim()),
-          color: _colorController.text.trim().isNotEmpty ? _colorController.text.trim() : null,
+          color: _colorController.text.trim().isNotEmpty
+              ? _colorController.text.trim()
+              : null,
           plateNumber: _plateController.text.trim(),
           seats: int.tryParse(_seatsController.text.trim()) ?? 4,
         );
@@ -597,10 +595,16 @@ class _VehicleFormSheetState extends ConsumerState<_VehicleFormSheet> {
         await repo.addVehicle(
           widget.driverId,
           category: _category,
-          make: _makeController.text.trim().isNotEmpty ? _makeController.text.trim() : null,
-          model: _modelController.text.trim().isNotEmpty ? _modelController.text.trim() : null,
+          make: _makeController.text.trim().isNotEmpty
+              ? _makeController.text.trim()
+              : null,
+          model: _modelController.text.trim().isNotEmpty
+              ? _modelController.text.trim()
+              : null,
           year: int.tryParse(_yearController.text.trim()),
-          color: _colorController.text.trim().isNotEmpty ? _colorController.text.trim() : null,
+          color: _colorController.text.trim().isNotEmpty
+              ? _colorController.text.trim()
+              : null,
           plateNumber: _plateController.text.trim(),
           seats: int.tryParse(_seatsController.text.trim()) ?? 4,
         );

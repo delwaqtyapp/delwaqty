@@ -67,10 +67,10 @@ class ServiceReviewSummary {
   final int oneStar;
 
   int countFor(int stars) => switch (stars) {
-        5 => fiveStar,
-        4 => fourStar,
-        3 => threeStar,
-        2 => twoStar,
-        _ => oneStar,
-      };
+    5 => fiveStar,
+    4 => fourStar,
+    3 => threeStar,
+    2 => twoStar,
+    _ => oneStar,
+  };
 }

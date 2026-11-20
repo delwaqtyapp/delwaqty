@@ -18,10 +18,7 @@ void showEmailVerifiedDialog(BuildContext context) {
         size: 56,
       ),
       title: Center(child: Text(l10n.emailVerifiedTitle)),
-      content: Text(
-        l10n.emailVerifiedBody,
-        textAlign: TextAlign.center,
-      ),
+      content: Text(l10n.emailVerifiedBody, textAlign: TextAlign.center),
       actionsAlignment: MainAxisAlignment.center,
       actions: [
         FilledButton(

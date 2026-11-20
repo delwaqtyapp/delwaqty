@@ -72,9 +72,8 @@ class _TopupRequestPageState extends ConsumerState<TopupRequestPage> {
     final l10n = AppLocalizations.of(context);
     final amount = double.tryParse(_amountController.text);
     if (amount == null || amount <= 0) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.enterValidAmount)),
-      );
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(l10n.enterValidAmount)));
       return;
     }
     setState(() => _submitting = true);
@@ -103,9 +102,9 @@ class _TopupRequestPageState extends ConsumerState<TopupRequestPage> {
       final ok = result['ok'] == true;
       final code = (result['code'] ?? (ok ? 'OK' : 'ERROR')).toString();
       if (ok) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.topUpRequestCreated(code))),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(l10n.topUpRequestCreated(code))));
         ref.invalidate(topupRequestsProvider);
         ref.invalidate(financialSummaryProvider);
         if (mounted) context.pop();
@@ -126,9 +125,8 @@ class _TopupRequestPageState extends ConsumerState<TopupRequestPage> {
       }
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(appErrorText(context, e))),
-      );
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(appErrorText(context, e))));
     } finally {
       if (mounted) setState(() => _submitting = false);
     }
@@ -144,10 +142,9 @@ class _TopupRequestPageState extends ConsumerState<TopupRequestPage> {
             (data['wallet_number'] ?? data['account_number'] ?? '')
                 .toString()
                 .trim();
-        final accountName =
-            (data['account_name'] ?? data['display_name'] ?? '')
-                .toString()
-                .trim();
+        final accountName = (data['account_name'] ?? data['display_name'] ?? '')
+            .toString()
+            .trim();
         final providerLabel = (data['provider'] ?? '').toString().trim();
         final instructions = (data['instructions'] ?? '').toString().trim();
         if (accountNumber.isEmpty && accountName.isEmpty) {
@@ -167,9 +164,8 @@ class _TopupRequestPageState extends ConsumerState<TopupRequestPage> {
                     Expanded(
                       child: Text(
                         l10n.receivingAccountTitle,
-                        style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
+                        style: Theme.of(context).textTheme.titleSmall
+                            ?.copyWith(fontWeight: FontWeight.bold),
                       ),
                     ),
                   ],
@@ -293,7 +289,11 @@ class _TopupRequestPageState extends ConsumerState<TopupRequestPage> {
               padding: const EdgeInsets.only(top: 12),
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(12),
-                child: Image.memory(_proofBytes!, height: 180, fit: BoxFit.cover),
+                child: Image.memory(
+                  _proofBytes!,
+                  height: 180,
+                  fit: BoxFit.cover,
+                ),
               ),
             ),
           const SizedBox(height: 20),

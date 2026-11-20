@@ -7,7 +7,9 @@ import 'package:flutter_test/flutter_test.dart';
 /// (and the canonical 030 seed) rather than duplicating the data in Dart.
 void main() {
   final seedFile = File('supabase/migrations/032_egypt_geographic_seed.sql');
-  final schemaFile = File('supabase/migrations/032_egypt_geographic_schema.sql');
+  final schemaFile = File(
+    'supabase/migrations/032_egypt_geographic_schema.sql',
+  );
   final canonicalFile = File('supabase/migrations/030_regional_system.sql');
 
   final lines = seedFile.readAsLinesSync();
@@ -31,8 +33,7 @@ void main() {
     });
 
     test('counts by type match the approved taxonomy', () {
-      int count(String type) =>
-          regionRows.where((r) => r[4] == type).length;
+      int count(String type) => regionRows.where((r) => r[4] == type).length;
       expect(count('markaz'), 165);
       expect(count('district'), 173);
       expect(count('city'), 27);
@@ -102,7 +103,12 @@ void main() {
     test('every region carries provenance metadata', () {
       for (final r in regionRows) {
         final metadata = r[8];
-        for (final key in ['source', 'source_date', 'source_type', 'confidence']) {
+        for (final key in [
+          'source',
+          'source_date',
+          'source_type',
+          'confidence',
+        ]) {
           expect(metadata, contains('"$key"'), reason: '${r[1]} missing $key');
         }
       }
@@ -113,9 +119,20 @@ void main() {
     test('64 places with approved types only', () {
       expect(placeRows.length, 64);
       const allowed = {
-        'hotel', 'resort', 'tourist_village', 'tourist_city', 'compound',
-        'development', 'airport', 'port', 'university', 'hospital', 'station',
-        'landmark', 'settlement', 'poi',
+        'hotel',
+        'resort',
+        'tourist_village',
+        'tourist_city',
+        'compound',
+        'development',
+        'airport',
+        'port',
+        'university',
+        'hospital',
+        'station',
+        'landmark',
+        'settlement',
+        'poi',
       };
       for (final p in placeRows) {
         expect(allowed, contains(p[1]), reason: 'type ${p[1]}');
@@ -223,7 +240,11 @@ void main() {
     });
 
     test('geo tables + spatial RPC declared', () {
-      for (final table in ['geo_places', 'geo_aliases', 'geo_admin_boundaries']) {
+      for (final table in [
+        'geo_places',
+        'geo_aliases',
+        'geo_admin_boundaries',
+      ]) {
         expect(schema, contains('CREATE TABLE IF NOT EXISTS public.$table'));
         expect(schema, contains('ENABLE ROW LEVEL SECURITY'));
       }
@@ -251,21 +272,28 @@ void main() {
         contains('REVOKE ALL ON public.geo_places FROM anon, authenticated'),
       );
       expect(
-        schema.contains('GRANT SELECT ON public.geo_places, public.geo_aliases,') &&
+        schema.contains(
+              'GRANT SELECT ON public.geo_places, public.geo_aliases,',
+            ) &&
             schema.contains('TO anon, authenticated'),
         isTrue,
       );
     });
 
-    test('RPC is SECURITY DEFINER with search_path + authenticated EXECUTE', () {
-      expect(schema, contains('SECURITY DEFINER'));
-      expect(schema, contains('SET search_path = public, pg_temp'));
-      expect(
-        schema.contains('GRANT EXECUTE ON FUNCTION public.geo_region_for_point(') &&
-            schema.contains('TO authenticated'),
-        isTrue,
-      );
-    });
+    test(
+      'RPC is SECURITY DEFINER with search_path + authenticated EXECUTE',
+      () {
+        expect(schema, contains('SECURITY DEFINER'));
+        expect(schema, contains('SET search_path = public, pg_temp'));
+        expect(
+          schema.contains(
+                'GRANT EXECUTE ON FUNCTION public.geo_region_for_point(',
+              ) &&
+              schema.contains('TO authenticated'),
+          isTrue,
+        );
+      },
+    );
   });
 }
 

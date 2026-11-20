@@ -12,7 +12,9 @@ enum UserType {
   final String code;
 
   bool get requiresVerification =>
-      this != UserType.customer && this != UserType.admin && this != UserType.owner;
+      this != UserType.customer &&
+      this != UserType.admin &&
+      this != UserType.owner;
 
   bool get requiresTradeLicense =>
       this == UserType.merchant || this == UserType.admin;
@@ -20,7 +22,8 @@ enum UserType {
   bool get requiresDrivingLicense =>
       this == UserType.driver || this == UserType.delivery;
 
-  bool get requiresIdCard => this != UserType.customer && this != UserType.admin;
+  bool get requiresIdCard =>
+      this != UserType.customer && this != UserType.admin;
 
   bool get requiresProfilePhoto =>
       this != UserType.customer && this != UserType.admin;

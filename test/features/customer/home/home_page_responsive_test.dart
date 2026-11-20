@@ -63,41 +63,40 @@ void main() {
   ];
 
   for (final (width, height) in sizes) {
-    testWidgets(
-      'HomePage hero renders without overflow or exceptions at '
-      '${width.round()}x${height.round()}',
-      (tester) async {
-        tester.view.physicalSize = Size(width, height);
-        tester.view.devicePixelRatio = 1.0;
-        addTearDown(tester.view.resetPhysicalSize);
-        addTearDown(tester.view.resetDevicePixelRatio);
+    testWidgets('HomePage hero renders without overflow or exceptions at '
+        '${width.round()}x${height.round()}', (tester) async {
+      tester.view.physicalSize = Size(width, height);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
 
-        final trapped = <FlutterErrorDetails>[];
-        final prevHandler = FlutterError.onError;
-        FlutterError.onError = (details) => trapped.add(details);
+      final trapped = <FlutterErrorDetails>[];
+      final prevHandler = FlutterError.onError;
+      FlutterError.onError = (details) => trapped.add(details);
 
-        await tester.pumpWidget(_buildTestApp());
-        await tester.pump(const Duration(milliseconds: 500));
+      await tester.pumpWidget(_buildTestApp());
+      await tester.pump(const Duration(milliseconds: 500));
 
-        FlutterError.onError = prevHandler;
+      FlutterError.onError = prevHandler;
 
-        for (final details in trapped) {
-          debugPrint('=====DETAILS-START=====\n${details.toString()}\n=====DETAILS-END=====');
-        }
+      for (final details in trapped) {
+        debugPrint(
+          '=====DETAILS-START=====\n${details.toString()}\n=====DETAILS-END=====',
+        );
+      }
 
-        // Flush all AnimatedFadeIn stagger timers (delay 280ms + index*40ms,
-        // up to 560ms across the compact strip) so none are pending at teardown.
-        await tester.pump(const Duration(seconds: 1));
-        await tester.pump(const Duration(seconds: 1));
-        await tester.pumpWidget(const SizedBox.shrink());
-        await tester.pump(const Duration(milliseconds: 500));
-        await tester.pump(const Duration(milliseconds: 500));
-        expect(trapped, isEmpty);
+      // Flush all AnimatedFadeIn stagger timers (delay 280ms + index*40ms,
+      // up to 560ms across the compact strip) so none are pending at teardown.
+      await tester.pump(const Duration(seconds: 1));
+      await tester.pump(const Duration(seconds: 1));
+      await tester.pumpWidget(const SizedBox.shrink());
+      await tester.pump(const Duration(milliseconds: 500));
+      await tester.pump(const Duration(milliseconds: 500));
+      expect(trapped, isEmpty);
 
-        await tester.pumpWidget(const SizedBox.shrink());
-        await tester.pump(const Duration(milliseconds: 300));
-      },
-    );
+      await tester.pumpWidget(const SizedBox.shrink());
+      await tester.pump(const Duration(milliseconds: 300));
+    });
   }
 
   testWidgets(
@@ -266,8 +265,9 @@ void main() {
             discoveryEntriesProvider.overrideWith((_) async => discovery),
             activeCampaignsProvider.overrideWith((_) async => <Campaign>[]),
             unreadCountProvider.overrideWith((_) async => 0),
-            cachedServiceBookingRepositoryProvider
-                .overrideWithValue(serviceRepo),
+            cachedServiceBookingRepositoryProvider.overrideWithValue(
+              serviceRepo,
+            ),
           ],
           child: const MaterialApp(
             localizationsDelegates: AppLocalizations.localizationsDelegates,

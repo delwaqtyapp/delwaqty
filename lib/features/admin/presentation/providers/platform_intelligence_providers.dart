@@ -7,8 +7,8 @@ import 'package:delwaqty/features/admin/domain/entities/platform_intelligence.da
 
 final platformIntelligenceDataSourceProvider =
     Provider<PlatformIntelligenceDataSource>((ref) {
-  return PlatformIntelligenceDataSource();
-});
+      return PlatformIntelligenceDataSource();
+    });
 
 // ─── Admin Scope State ────────────────────────────────────
 
@@ -44,21 +44,14 @@ class AdminTimeFilter {
   (DateTime?, DateTime?) get dateRange {
     final now = DateTime.now();
     return switch (period) {
-      AdminTimePeriod.today => (
-        DateTime(now.year, now.month, now.day),
-        now,
-      ),
-      AdminTimePeriod.week => (
-        now.subtract(const Duration(days: 7)),
-        now,
-      ),
-      AdminTimePeriod.month => (
-        DateTime(now.year, now.month),
-        now,
-      ),
+      AdminTimePeriod.today => (DateTime(now.year, now.month, now.day), now),
+      AdminTimePeriod.week => (now.subtract(const Duration(days: 7)), now),
+      AdminTimePeriod.month => (DateTime(now.year, now.month), now),
       AdminTimePeriod.quarter => (
-        DateTime(now.month <= 3 ? now.year - 1 : now.year,
-            now.month <= 3 ? 10 + now.month : now.month - 2),
+        DateTime(
+          now.month <= 3 ? now.year - 1 : now.year,
+          now.month <= 3 ? 10 + now.month : now.month - 2,
+        ),
         now,
       ),
       AdminTimePeriod.all => (null, null),
@@ -66,8 +59,9 @@ class AdminTimeFilter {
   }
 }
 
-final adminTimeFilterProvider =
-    StateProvider<AdminTimeFilter>((ref) => const AdminTimeFilter());
+final adminTimeFilterProvider = StateProvider<AdminTimeFilter>(
+  (ref) => const AdminTimeFilter(),
+);
 
 // ─── KPI Summary ──────────────────────────────────────────
 
@@ -81,7 +75,9 @@ final platformKpiProvider = FutureProvider<PlatformKpiSummary>((ref) async {
 
 // ─── Service Performance ──────────────────────────────────
 
-final servicePerformanceProvider = FutureProvider<ServicePerformance>((ref) async {
+final servicePerformanceProvider = FutureProvider<ServicePerformance>((
+  ref,
+) async {
   final ds = ref.watch(platformIntelligenceDataSourceProvider);
   final filter = ref.watch(adminTimeFilterProvider);
   final (from, to) = filter.dateRange;
@@ -90,7 +86,9 @@ final servicePerformanceProvider = FutureProvider<ServicePerformance>((ref) asyn
 
 // ─── Delivery Intelligence ────────────────────────────────
 
-final deliveryIntelligenceProvider = FutureProvider<DeliveryIntelligence>((ref) async {
+final deliveryIntelligenceProvider = FutureProvider<DeliveryIntelligence>((
+  ref,
+) async {
   final ds = ref.watch(platformIntelligenceDataSourceProvider);
   final filter = ref.watch(adminTimeFilterProvider);
   final (from, to) = filter.dateRange;
@@ -99,7 +97,9 @@ final deliveryIntelligenceProvider = FutureProvider<DeliveryIntelligence>((ref) 
 
 // ─── Merchant Intelligence ────────────────────────────────
 
-final merchantIntelligenceProvider = FutureProvider<MerchantIntelligence>((ref) async {
+final merchantIntelligenceProvider = FutureProvider<MerchantIntelligence>((
+  ref,
+) async {
   final ds = ref.watch(platformIntelligenceDataSourceProvider);
   final filter = ref.watch(adminTimeFilterProvider);
   final (from, to) = filter.dateRange;
@@ -108,7 +108,9 @@ final merchantIntelligenceProvider = FutureProvider<MerchantIntelligence>((ref) 
 
 // ─── Wallet Intelligence ──────────────────────────────────
 
-final walletIntelligenceProvider = FutureProvider<WalletIntelligence>((ref) async {
+final walletIntelligenceProvider = FutureProvider<WalletIntelligence>((
+  ref,
+) async {
   final ds = ref.watch(platformIntelligenceDataSourceProvider);
   final filter = ref.watch(adminTimeFilterProvider);
   final (from, to) = filter.dateRange;
@@ -117,7 +119,9 @@ final walletIntelligenceProvider = FutureProvider<WalletIntelligence>((ref) asyn
 
 // ─── Provider Intelligence ────────────────────────────────
 
-final providerIntelligenceProvider = FutureProvider<ProviderIntelligence>((ref) async {
+final providerIntelligenceProvider = FutureProvider<ProviderIntelligence>((
+  ref,
+) async {
   final ds = ref.watch(platformIntelligenceDataSourceProvider);
   final filter = ref.watch(adminTimeFilterProvider);
   final (from, to) = filter.dateRange;
@@ -126,7 +130,9 @@ final providerIntelligenceProvider = FutureProvider<ProviderIntelligence>((ref) 
 
 // ─── Commission Summary ───────────────────────────────────
 
-final commissionSummaryProvider = FutureProvider<CommissionSummary>((ref) async {
+final commissionSummaryProvider = FutureProvider<CommissionSummary>((
+  ref,
+) async {
   final ds = ref.watch(platformIntelligenceDataSourceProvider);
   final filter = ref.watch(adminTimeFilterProvider);
   final (from, to) = filter.dateRange;
@@ -145,30 +151,32 @@ final complaintSummaryProvider = FutureProvider<ComplaintSummary>((ref) async {
 // ─── Transaction Ledger ───────────────────────────────────
 
 final transactionLedgerProvider =
-    FutureProvider.family<TransactionLedger, ({String? type, String? search, int page})>(
-  (ref, params) async {
-    final ds = ref.watch(platformIntelligenceDataSourceProvider);
-    final filter = ref.watch(adminTimeFilterProvider);
-    final (from, to) = filter.dateRange;
-    return ds.getTransactionLedger(
-      from: from,
-      to: to,
-      type: params.type,
-      search: params.search,
-      offset: params.page * 50,
-    );
-  },
-);
+    FutureProvider.family<
+      TransactionLedger,
+      ({String? type, String? search, int page})
+    >((ref, params) async {
+      final ds = ref.watch(platformIntelligenceDataSourceProvider);
+      final filter = ref.watch(adminTimeFilterProvider);
+      final (from, to) = filter.dateRange;
+      return ds.getTransactionLedger(
+        from: from,
+        to: to,
+        type: params.type,
+        search: params.search,
+        offset: params.page * 50,
+      );
+    });
 
 // ─── Revenue Overview ─────────────────────────────────────
 
-final revenueOverviewProvider =
-    FutureProvider.family<RevenueOverview, String?>((ref, period) async {
-  final ds = ref.watch(platformIntelligenceDataSourceProvider);
-  final filter = ref.watch(adminTimeFilterProvider);
-  final (from, to) = filter.dateRange;
-  return ds.getRevenueOverview(period: period, from: from, to: to);
-});
+final revenueOverviewProvider = FutureProvider.family<RevenueOverview, String?>(
+  (ref, period) async {
+    final ds = ref.watch(platformIntelligenceDataSourceProvider);
+    final filter = ref.watch(adminTimeFilterProvider);
+    final (from, to) = filter.dateRange;
+    return ds.getRevenueOverview(period: period, from: from, to: to);
+  },
+);
 
 // ─── Orders Timeseries ────────────────────────────────────
 
@@ -181,7 +189,9 @@ final ordersTimeseriesProvider = FutureProvider<TimeseriesData>((ref) async {
 
 // ─── Operational Alerts ───────────────────────────────────
 
-final operationalAlertsProvider = FutureProvider<List<OperationalAlert>>((ref) async {
+final operationalAlertsProvider = FutureProvider<List<OperationalAlert>>((
+  ref,
+) async {
   final ds = ref.watch(platformIntelligenceDataSourceProvider);
   return ds.getOperationalAlerts();
 });

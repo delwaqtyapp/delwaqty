@@ -5,7 +5,8 @@ import 'package:delwaqty/features/_shared/campaigns/data/datasources/remote/supa
 import 'package:delwaqty/features/_shared/campaigns/data/repositories/supabase_campaign_repository_impl.dart';
 import 'package:delwaqty/features/_shared/campaigns/domain/entities/campaign.dart';
 
-class MockCampaignDataSource extends Mock implements SupabaseCampaignDataSource {}
+class MockCampaignDataSource extends Mock
+    implements SupabaseCampaignDataSource {}
 
 void main() {
   late MockCampaignDataSource mockDataSource;
@@ -25,7 +26,8 @@ void main() {
         nameAr: 'عرض',
         status: CampaignStatus.published,
       );
-      when(() => mockDataSource.getById('c1')).thenAnswer((_) async => campaign);
+      when(() => mockDataSource.getById('c1'))
+          .thenAnswer((_) async => campaign);
 
       final result = await repository.getById('c1');
 
@@ -34,7 +36,8 @@ void main() {
     });
 
     test('returns null when no campaign exists', () async {
-      when(() => mockDataSource.getById('missing')).thenAnswer((_) async => null);
+      when(() => mockDataSource.getById('missing'))
+          .thenAnswer((_) async => null);
 
       final result = await repository.getById('missing');
 
@@ -42,14 +45,10 @@ void main() {
     });
 
     test('wraps data source errors in ServerException', () async {
-      when(() => mockDataSource.getById(any())).thenThrow(
-        Exception('network error'),
-      );
+      when(() => mockDataSource.getById(any()))
+          .thenThrow(Exception('network error'));
 
-      expect(
-        () => repository.getById('c1'),
-        throwsA(isA<ServerException>()),
-      );
+      expect(() => repository.getById('c1'), throwsA(isA<ServerException>()));
     });
   });
 
@@ -63,9 +62,8 @@ void main() {
         status: CampaignStatus.published,
         priority: CampaignPriority.critical,
       );
-      when(
-        () => mockDataSource.getActiveCampaigns(),
-      ).thenAnswer((_) async => [campaign]);
+      when(() => mockDataSource.getActiveCampaigns())
+          .thenAnswer((_) async => [campaign]);
 
       final result = await repository.getActiveCampaigns();
 
@@ -74,9 +72,8 @@ void main() {
     });
 
     test('returns an empty list when nothing is active', () async {
-      when(
-        () => mockDataSource.getActiveCampaigns(locale: 'en'),
-      ).thenAnswer((_) async => const <Campaign>[]);
+      when(() => mockDataSource.getActiveCampaigns(locale: 'en'))
+          .thenAnswer((_) async => const <Campaign>[]);
 
       final result = await repository.getActiveCampaigns(locale: 'en');
 
@@ -84,8 +81,9 @@ void main() {
     });
 
     test('wraps data source errors in ServerException', () async {
-      when(() => mockDataSource.getActiveCampaigns(locale: any(named: 'locale')))
-          .thenThrow(Exception('network error'));
+      when(
+        () => mockDataSource.getActiveCampaigns(locale: any(named: 'locale')),
+      ).thenThrow(Exception('network error'));
 
       expect(
         () => repository.getActiveCampaigns(),
@@ -96,7 +94,8 @@ void main() {
 
   group('SupabaseCampaignRepositoryImpl.getMediaUrl', () {
     test('returns null when the path is null', () async {
-      when(() => mockDataSource.getMediaUrl(null)).thenAnswer((_) async => null);
+      when(() => mockDataSource.getMediaUrl(null))
+          .thenAnswer((_) async => null);
 
       final result = await repository.getMediaUrl(null);
 
@@ -104,9 +103,8 @@ void main() {
     });
 
     test('returns the resolved url for a path', () async {
-      when(
-        () => mockDataSource.getMediaUrl('campaigns/x/b.png'),
-      ).thenAnswer((_) async => 'https://cdn.example/b.png');
+      when(() => mockDataSource.getMediaUrl('campaigns/x/b.png'))
+          .thenAnswer((_) async => 'https://cdn.example/b.png');
 
       final result = await repository.getMediaUrl('campaigns/x/b.png');
 
@@ -114,9 +112,8 @@ void main() {
     });
 
     test('wraps data source errors in ServerException', () async {
-      when(() => mockDataSource.getMediaUrl(any())).thenThrow(
-        Exception('network error'),
-      );
+      when(() => mockDataSource.getMediaUrl(any()))
+          .thenThrow(Exception('network error'));
 
       expect(
         () => repository.getMediaUrl('campaigns/x/b.png'),

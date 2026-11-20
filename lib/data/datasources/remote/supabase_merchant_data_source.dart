@@ -46,7 +46,8 @@ class SupabaseMerchantDataSource {
       longitude: (row['longitude'] as num?)?.toDouble() ?? 0.0,
       address: row['address'] as String?,
       rating: (row['rating'] as num?)?.toDouble() ?? 0.0,
-      ratingCount: (row['total_reviews'] as int?) ?? (row['total_orders'] as int?) ?? 0,
+      ratingCount:
+          (row['total_reviews'] as int?) ?? (row['total_orders'] as int?) ?? 0,
       imageUrl: row['logo_url'] as String?,
       description: row['description'] as String?,
       isVerified: (row['status'] as String?) == 'active',

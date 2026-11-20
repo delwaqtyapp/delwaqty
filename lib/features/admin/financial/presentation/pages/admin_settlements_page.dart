@@ -90,16 +90,14 @@ class _AdminSettlementsPageState extends ConsumerState<AdminSettlementsPage> {
         ref.invalidate(adminSettlementsProvider);
       } else {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(l10n.operationFailed)),
-          );
+          ScaffoldMessenger.of(context)
+              .showSnackBar(SnackBar(content: Text(l10n.operationFailed)));
         }
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(appErrorText(context, e))),
-        );
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(appErrorText(context, e))));
       }
     } finally {
       if (mounted) setState(() => _busyId = null);
@@ -116,7 +114,7 @@ class _AdminSettlementsPageState extends ConsumerState<AdminSettlementsPage> {
       context: context,
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setStateDialog) => AlertDialog(
-          title:  Text(l10n.submitSettlement),
+          title: Text(l10n.submitSettlement),
           content: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -146,7 +144,9 @@ class _AdminSettlementsPageState extends ConsumerState<AdminSettlementsPage> {
                 const SizedBox(height: 8),
                 TextField(
                   controller: referenceController,
-                  decoration: InputDecoration(labelText: l10n.transferReference),
+                  decoration: InputDecoration(
+                    labelText: l10n.transferReference,
+                  ),
                 ),
                 const SizedBox(height: 8),
                 TextField(
@@ -159,7 +159,7 @@ class _AdminSettlementsPageState extends ConsumerState<AdminSettlementsPage> {
           actions: [
             TextButton(
               onPressed: () => Navigator.of(ctx).pop(false),
-              child:  Text(l10n.cancel),
+              child: Text(l10n.cancel),
             ),
             ElevatedButton(
               onPressed: () {
@@ -167,7 +167,7 @@ class _AdminSettlementsPageState extends ConsumerState<AdminSettlementsPage> {
                 if (amt == null || amt <= 0) return;
                 Navigator.of(ctx).pop(true);
               },
-              child:  Text(l10n.submit),
+              child: Text(l10n.submit),
             ),
           ],
         ),
@@ -188,23 +188,20 @@ class _AdminSettlementsPageState extends ConsumerState<AdminSettlementsPage> {
       final code = res['code'] as String?;
       if (code == 'OK') {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(l10n.settlementSubmitted)),
-          );
+          ScaffoldMessenger.of(context)
+              .showSnackBar(SnackBar(content: Text(l10n.settlementSubmitted)));
         }
         ref.invalidate(adminSettlementsProvider);
       } else {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(l10n.operationFailed)),
-          );
+          ScaffoldMessenger.of(context)
+              .showSnackBar(SnackBar(content: Text(l10n.operationFailed)));
         }
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(appErrorText(context, e))),
-        );
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(appErrorText(context, e))));
       }
     }
   }
@@ -217,7 +214,7 @@ class _AdminSettlementsPageState extends ConsumerState<AdminSettlementsPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title:  Text(l10n.settlements),
+        title: Text(l10n.settlements),
         actions: [
           IconButton(
             tooltip: l10n.refresh,
@@ -229,7 +226,7 @@ class _AdminSettlementsPageState extends ConsumerState<AdminSettlementsPage> {
       floatingActionButton: FloatingActionButton.extended(
         onPressed: _submit,
         icon: const Icon(Icons.add),
-        label:  Text(l10n.submit),
+        label: Text(l10n.submit),
       ),
       body: RefreshIndicator(
         onRefresh: () async => ref.invalidate(adminSettlementsProvider),
@@ -266,9 +263,7 @@ class _AdminSettlementsPageState extends ConsumerState<AdminSettlementsPage> {
                           Expanded(
                             child: Text(
                               '${l10n.currencySymbol} ${s.amount.toStringAsFixed(2)}',
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .titleMedium
+                              style: Theme.of(context).textTheme.titleMedium
                                   ?.copyWith(fontWeight: FontWeight.bold),
                             ),
                           ),
@@ -318,15 +313,17 @@ class _AdminSettlementsPageState extends ConsumerState<AdminSettlementsPage> {
                                         ),
                                       )
                                     : const Icon(Icons.check),
-                                label:  Text(l10n.approve),
+                                label: Text(l10n.approve),
                               ),
                             ),
                             const SizedBox(width: 10),
                             Expanded(
                               child: OutlinedButton.icon(
-                                onPressed: busy ? null : () => _act(s.id, false),
+                                onPressed: busy
+                                    ? null
+                                    : () => _act(s.id, false),
                                 icon: const Icon(Icons.close),
-                                label:  Text(l10n.reject),
+                                label: Text(l10n.reject),
                               ),
                             ),
                           ],
@@ -335,9 +332,7 @@ class _AdminSettlementsPageState extends ConsumerState<AdminSettlementsPage> {
                         const SizedBox(height: 6),
                         Text(
                           '${l10n.rejectReason}: ${s.rejectionReason}',
-                          style: Theme.of(context)
-                              .textTheme
-                              .bodySmall
+                          style: Theme.of(context).textTheme.bodySmall
                               ?.copyWith(
                                 color: Theme.of(context).colorScheme.error,
                               ),

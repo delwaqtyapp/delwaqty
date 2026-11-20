@@ -6,7 +6,7 @@ import '../../../domain/entities/admin_account.dart';
 /// Talks only to the modern, authorized RPCs. Never touches admin_users.
 class AdminManagementDataSource {
   AdminManagementDataSource({SupabaseClient? client})
-      : _client = client ?? Supabase.instance.client;
+    : _client = client ?? Supabase.instance.client;
 
   final SupabaseClient _client;
 
@@ -22,7 +22,8 @@ class AdminManagementDataSource {
       'get_admin_permissions',
       params: {'p_admin_id': adminId},
     );
-    if (res == null) return {'authorized': false, 'grants': [], 'effective': []};
+    if (res == null)
+      return {'authorized': false, 'grants': [], 'effective': []};
     return Map<String, dynamic>.from(res as Map);
   }
 
@@ -57,11 +58,7 @@ class AdminManagementDataSource {
   }) async {
     await _client.rpc(
       'assign_admin_role',
-      params: {
-        'p_admin_id': adminId,
-        'p_new_role': role,
-        'p_reason': ?reason,
-      },
+      params: {'p_admin_id': adminId, 'p_new_role': role, 'p_reason': ?reason},
     );
   }
 
@@ -98,20 +95,14 @@ class AdminManagementDataSource {
   Future<void> deactivate({required String adminId, String? reason}) async {
     await _client.rpc(
       'deactivate_admin',
-      params: {
-        'p_admin_id': adminId,
-        'p_reason': ?reason,
-      },
+      params: {'p_admin_id': adminId, 'p_reason': ?reason},
     );
   }
 
   Future<void> reactivate({required String adminId, String? reason}) async {
     await _client.rpc(
       'reactivate_admin',
-      params: {
-        'p_admin_id': adminId,
-        'p_reason': ?reason,
-      },
+      params: {'p_admin_id': adminId, 'p_reason': ?reason},
     );
   }
 

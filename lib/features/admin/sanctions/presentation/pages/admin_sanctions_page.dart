@@ -14,8 +14,7 @@ class AdminSanctionsPage extends ConsumerStatefulWidget {
   const AdminSanctionsPage({super.key});
 
   @override
-  ConsumerState<AdminSanctionsPage> createState() =>
-      _AdminSanctionsPageState();
+  ConsumerState<AdminSanctionsPage> createState() => _AdminSanctionsPageState();
 }
 
 class _AdminSanctionsPageState extends ConsumerState<AdminSanctionsPage> {
@@ -24,8 +23,9 @@ class _AdminSanctionsPageState extends ConsumerState<AdminSanctionsPage> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final sanctionsAsync =
-        ref.watch(_showActiveOnly ? activeSanctionsProvider : sanctionsProvider);
+    final sanctionsAsync = ref.watch(
+      _showActiveOnly ? activeSanctionsProvider : sanctionsProvider,
+    );
 
     return Scaffold(
       appBar: AppBar(
@@ -33,8 +33,10 @@ class _AdminSanctionsPageState extends ConsumerState<AdminSanctionsPage> {
         actions: [
           Row(
             children: [
-              Text(l10n.activeOnly,
-                  style: Theme.of(context).textTheme.bodySmall),
+              Text(
+                l10n.activeOnly,
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
               Switch(
                 value: _showActiveOnly,
                 onChanged: (v) => setState(() => _showActiveOnly = v),
@@ -94,21 +96,34 @@ class _AdminSanctionsPageState extends ConsumerState<AdminSanctionsPage> {
                               : AppColors.warningLight,
                         ),
                       ),
-                      title: Text('${s.sanctionType} — ${s.targetRole}',
-                          maxLines: 1),
-                      subtitle: Text(s.reason,
-                          maxLines: 2, overflow: TextOverflow.ellipsis),
+                      title: Text(
+                        '${s.sanctionType} — ${s.targetRole}',
+                        maxLines: 1,
+                      ),
+                      subtitle: Text(
+                        s.reason,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
                       trailing: s.isActive
                           ? Container(
                               padding: const EdgeInsets.symmetric(
-                                  horizontal: 8, vertical: 4),
+                                horizontal: 8,
+                                vertical: 4,
+                              ),
                               decoration: BoxDecoration(
-                                color: AppColors.successLight.withValues(alpha: 0.15),
+                                color: AppColors.successLight.withValues(
+                                  alpha: 0.15,
+                                ),
                                 borderRadius: BorderRadius.circular(8),
                               ),
-                              child: Text(l10n.active,
-                                  style: const TextStyle(
-                                      fontSize: 11, color: AppColors.successLight)),
+                              child: Text(
+                                l10n.active,
+                                style: const TextStyle(
+                                  fontSize: 11,
+                                  color: AppColors.successLight,
+                                ),
+                              ),
                             )
                           : null,
                       onTap: () => _showSanctionDetail(s),
@@ -142,10 +157,7 @@ class _AdminSanctionsPageState extends ConsumerState<AdminSanctionsPage> {
 }
 
 class _SanctionDetailSheet extends ConsumerStatefulWidget {
-  const _SanctionDetailSheet({
-    required this.sanction,
-    required this.onRevoked,
-  });
+  const _SanctionDetailSheet({required this.sanction, required this.onRevoked});
 
   final Sanction sanction;
   final VoidCallback onRevoked;
@@ -186,9 +198,7 @@ class _SanctionDetailSheetState extends ConsumerState<_SanctionDetailSheet> {
             ),
           ],
         ),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(false),
@@ -218,15 +228,13 @@ class _SanctionDetailSheetState extends ConsumerState<_SanctionDetailSheet> {
         if (mounted) {
           widget.onRevoked();
           Navigator.of(context).pop();
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(l10n.sanctionRevoked)),
-          );
+          ScaffoldMessenger.of(context)
+              .showSnackBar(SnackBar(content: Text(l10n.sanctionRevoked)));
         }
       } catch (e) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(l10n.failedToRevoke(e))),
-          );
+          ScaffoldMessenger.of(context)
+              .showSnackBar(SnackBar(content: Text(l10n.failedToRevoke(e))));
         }
       } finally {
         if (mounted) setState(() => _isRevoking = false);
@@ -260,28 +268,38 @@ class _SanctionDetailSheetState extends ConsumerState<_SanctionDetailSheet> {
                 ),
               ),
               const SizedBox(height: 16),
-              Text('${sanction.sanctionType} — ${sanction.targetRole}',
-                  style: Theme.of(context).textTheme.titleLarge),
+              Text(
+                '${sanction.sanctionType} — ${sanction.targetRole}',
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
               const SizedBox(height: 8),
-              Text(sanction.reason,
-                  style: Theme.of(context).textTheme.bodyMedium),
+              Text(
+                sanction.reason,
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
               const SizedBox(height: 16),
               if (sanction.amount > 0)
-                Text('${l10n.fineAmount}: \$${sanction.amount.toStringAsFixed(2)}'),
-              if (sanction.durationDays > 0)
                 Text(
-                    '${l10n.duration}: ${sanction.durationDays} ${l10n.days}'),
+                  '${l10n.fineAmount}: \$${sanction.amount.toStringAsFixed(2)}',
+                ),
+              if (sanction.durationDays > 0)
+                Text('${l10n.duration}: ${sanction.durationDays} ${l10n.days}'),
               Text(
-                  'Status: ${sanction.isActive ? l10n.active : l10n.inactive}'),
+                'Status: ${sanction.isActive ? l10n.active : l10n.inactive}',
+              ),
               Text(
-                  '${l10n.startDate}: ${sanction.startDate.toLocal().toString().split('.')[0]}'),
+                '${l10n.startDate}: ${sanction.startDate.toLocal().toString().split('.')[0]}',
+              ),
               if (sanction.endDate != null)
                 Text(
-                    '${l10n.endDate}: ${sanction.endDate!.toLocal().toString().split('.')[0]}'),
+                  '${l10n.endDate}: ${sanction.endDate!.toLocal().toString().split('.')[0]}',
+                ),
               if (sanction.notes != null && sanction.notes!.isNotEmpty) ...[
                 const SizedBox(height: 12),
-                Text(l10n.notes,
-                    style: Theme.of(context).textTheme.titleMedium),
+                Text(
+                  l10n.notes,
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
                 Text(sanction.notes!),
               ],
               if (sanction.isActive) ...[
@@ -297,12 +315,16 @@ class _SanctionDetailSheetState extends ConsumerState<_SanctionDetailSheet> {
                             child: CircularProgressIndicator(strokeWidth: 2),
                           )
                         : const Icon(Icons.undo_rounded),
-                    label: Text(_isRevoking ? 'Revoking...' : l10n.revokeSanction),
+                    label: Text(
+                      _isRevoking ? 'Revoking...' : l10n.revokeSanction,
+                    ),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor:
-                          Theme.of(context).colorScheme.errorContainer,
-                      foregroundColor:
-                          Theme.of(context).colorScheme.onErrorContainer,
+                      backgroundColor: Theme.of(context)
+                          .colorScheme
+                          .errorContainer,
+                      foregroundColor: Theme.of(context)
+                          .colorScheme
+                          .onErrorContainer,
                     ),
                   ),
                 ),

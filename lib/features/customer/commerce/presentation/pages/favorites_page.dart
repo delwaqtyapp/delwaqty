@@ -128,8 +128,7 @@ class _MerchantFavoritesTab extends ConsumerWidget {
               delay: Duration(milliseconds: 80 * index),
               child: MerchantCard(
                 merchant: merchant,
-                onTap: () =>
-                    context.push('/market/merchant/${merchant.id}'),
+                onTap: () => context.push('/market/merchant/${merchant.id}'),
               ),
             );
           },

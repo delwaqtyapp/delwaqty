@@ -141,7 +141,8 @@ class CartPage extends ConsumerWidget {
                                   children: [
                                     _QuantityButton(
                                       icon: Icons.remove_circle_outline,
-                                      tooltip: AppLocalizations.of(context).decrease,
+                                      tooltip: AppLocalizations.of(context)
+                                          .decrease,
                                       onPressed: () async {
                                         if (item.quantity <= 1) {
                                           await ref
@@ -167,8 +168,8 @@ class CartPage extends ConsumerWidget {
                                     const SizedBox(width: 16),
                                     _QuantityButton(
                                       icon: Icons.add_circle_outline,
-                                      tooltip:
-                                          AppLocalizations.of(context).increase,
+                                      tooltip: AppLocalizations.of(context)
+                                          .increase,
                                       onPressed: () async {
                                         await ref
                                             .read(cartProvider.notifier)

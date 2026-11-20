@@ -13,9 +13,7 @@ class ConfigValidationException implements Exception {
       buffer.writeln('  ${i + 1}. ${errors[i]}');
     }
     buffer.writeln('\nSet these values in your .env file and rebuild.');
-    buffer.writeln(
-      'Usage: flutter run --dart-define-from-file=.env.dev',
-    );
+    buffer.writeln('Usage: flutter run --dart-define-from-file=.env.dev');
     return buffer.toString();
   }
 }
@@ -27,7 +25,9 @@ class ConfigValidationException implements Exception {
 /// and prevents the app from starting.
 abstract final class ConfigValidator {
   static final _urlPattern = RegExp(r'^https://[a-zA-Z0-9.-]+\.supabase\.co$');
-  static final _jwtPattern = RegExp(r'^eyJ[A-Za-z0-9_-]+\.eyJ[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+$');
+  static final _jwtPattern = RegExp(
+    r'^eyJ[A-Za-z0-9_-]+\.eyJ[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+$',
+  );
 
   /// Validates all configuration and returns a [ValidationResult].
   static ValidationResult validate() {

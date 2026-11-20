@@ -13,11 +13,14 @@ class PlatformIntelligenceDataSource {
     String? regionId,
   }) async {
     try {
-      final response = await _supabase.rpc('platform_kpi_summary', params: {
-        'p_from': from?.toIso8601String(),
-        'p_to': to?.toIso8601String(),
-        'p_region_id': regionId,
-      });
+      final response = await _supabase.rpc(
+        'platform_kpi_summary',
+        params: {
+          'p_from': from?.toIso8601String(),
+          'p_to': to?.toIso8601String(),
+          'p_region_id': regionId,
+        },
+      );
       final data = _unwrapResponse(response, 'platform_kpi_summary');
       return PlatformKpiSummary.fromJson(data);
     } catch (e) {
@@ -29,10 +32,13 @@ class PlatformIntelligenceDataSource {
     DateTime? from,
     DateTime? to,
   }) async {
-    final response = await _supabase.rpc('platform_service_performance', params: {
-      'p_from': from?.toIso8601String(),
-      'p_to': to?.toIso8601String(),
-    });
+    final response = await _supabase.rpc(
+      'platform_service_performance',
+      params: {
+        'p_from': from?.toIso8601String(),
+        'p_to': to?.toIso8601String(),
+      },
+    );
     final data = _unwrapResponse(response, 'platform_service_performance');
     return ServicePerformance.fromJson(data);
   }
@@ -41,10 +47,13 @@ class PlatformIntelligenceDataSource {
     DateTime? from,
     DateTime? to,
   }) async {
-    final response = await _supabase.rpc('platform_delivery_intelligence', params: {
-      'p_from': from?.toIso8601String(),
-      'p_to': to?.toIso8601String(),
-    });
+    final response = await _supabase.rpc(
+      'platform_delivery_intelligence',
+      params: {
+        'p_from': from?.toIso8601String(),
+        'p_to': to?.toIso8601String(),
+      },
+    );
     final data = _unwrapResponse(response, 'platform_delivery_intelligence');
     return DeliveryIntelligence.fromJson(data);
   }
@@ -53,10 +62,13 @@ class PlatformIntelligenceDataSource {
     DateTime? from,
     DateTime? to,
   }) async {
-    final response = await _supabase.rpc('platform_merchant_intelligence', params: {
-      'p_from': from?.toIso8601String(),
-      'p_to': to?.toIso8601String(),
-    });
+    final response = await _supabase.rpc(
+      'platform_merchant_intelligence',
+      params: {
+        'p_from': from?.toIso8601String(),
+        'p_to': to?.toIso8601String(),
+      },
+    );
     final data = _unwrapResponse(response, 'platform_merchant_intelligence');
     return MerchantIntelligence.fromJson(data);
   }
@@ -65,10 +77,13 @@ class PlatformIntelligenceDataSource {
     DateTime? from,
     DateTime? to,
   }) async {
-    final response = await _supabase.rpc('platform_wallet_intelligence', params: {
-      'p_from': from?.toIso8601String(),
-      'p_to': to?.toIso8601String(),
-    });
+    final response = await _supabase.rpc(
+      'platform_wallet_intelligence',
+      params: {
+        'p_from': from?.toIso8601String(),
+        'p_to': to?.toIso8601String(),
+      },
+    );
     final data = _unwrapResponse(response, 'platform_wallet_intelligence');
     return WalletIntelligence.fromJson(data);
   }
@@ -77,10 +92,13 @@ class PlatformIntelligenceDataSource {
     DateTime? from,
     DateTime? to,
   }) async {
-    final response = await _supabase.rpc('platform_provider_intelligence', params: {
-      'p_from': from?.toIso8601String(),
-      'p_to': to?.toIso8601String(),
-    });
+    final response = await _supabase.rpc(
+      'platform_provider_intelligence',
+      params: {
+        'p_from': from?.toIso8601String(),
+        'p_to': to?.toIso8601String(),
+      },
+    );
     final data = _unwrapResponse(response, 'platform_provider_intelligence');
     return ProviderIntelligence.fromJson(data);
   }
@@ -89,10 +107,13 @@ class PlatformIntelligenceDataSource {
     DateTime? from,
     DateTime? to,
   }) async {
-    final response = await _supabase.rpc('platform_commission_summary', params: {
-      'p_from': from?.toIso8601String(),
-      'p_to': to?.toIso8601String(),
-    });
+    final response = await _supabase.rpc(
+      'platform_commission_summary',
+      params: {
+        'p_from': from?.toIso8601String(),
+        'p_to': to?.toIso8601String(),
+      },
+    );
     final data = _unwrapResponse(response, 'platform_commission_summary');
     return CommissionSummary.fromJson(data);
   }
@@ -101,10 +122,13 @@ class PlatformIntelligenceDataSource {
     DateTime? from,
     DateTime? to,
   }) async {
-    final response = await _supabase.rpc('platform_complaint_summary', params: {
-      'p_from': from?.toIso8601String(),
-      'p_to': to?.toIso8601String(),
-    });
+    final response = await _supabase.rpc(
+      'platform_complaint_summary',
+      params: {
+        'p_from': from?.toIso8601String(),
+        'p_to': to?.toIso8601String(),
+      },
+    );
     final data = _unwrapResponse(response, 'platform_complaint_summary');
     return ComplaintSummary.fromJson(data);
   }
@@ -118,15 +142,18 @@ class PlatformIntelligenceDataSource {
     int limit = 50,
     int offset = 0,
   }) async {
-    final response = await _supabase.rpc('platform_transaction_ledger', params: {
-      'p_from': from?.toIso8601String(),
-      'p_to': to?.toIso8601String(),
-      'p_type': type,
-      'p_member_id': memberId,
-      'p_search': search,
-      'p_limit': limit,
-      'p_offset': offset,
-    });
+    final response = await _supabase.rpc(
+      'platform_transaction_ledger',
+      params: {
+        'p_from': from?.toIso8601String(),
+        'p_to': to?.toIso8601String(),
+        'p_type': type,
+        'p_member_id': memberId,
+        'p_search': search,
+        'p_limit': limit,
+        'p_offset': offset,
+      },
+    );
     final data = _unwrapResponse(response, 'platform_transaction_ledger');
     return TransactionLedger.fromJson(data);
   }
@@ -137,12 +164,15 @@ class PlatformIntelligenceDataSource {
     DateTime? from,
     DateTime? to,
   }) async {
-    final response = await _supabase.rpc('platform_revenue_overview', params: {
-      'p_period': period,
-      'p_service_category': serviceCategory,
-      'p_from': from?.toIso8601String(),
-      'p_to': to?.toIso8601String(),
-    });
+    final response = await _supabase.rpc(
+      'platform_revenue_overview',
+      params: {
+        'p_period': period,
+        'p_service_category': serviceCategory,
+        'p_from': from?.toIso8601String(),
+        'p_to': to?.toIso8601String(),
+      },
+    );
     final data = _unwrapResponse(response, 'platform_revenue_overview');
     return RevenueOverview.fromJson(data);
   }
@@ -151,10 +181,13 @@ class PlatformIntelligenceDataSource {
     DateTime? from,
     DateTime? to,
   }) async {
-    final response = await _supabase.rpc('platform_orders_timeseries', params: {
-      'p_from': from?.toIso8601String(),
-      'p_to': to?.toIso8601String(),
-    });
+    final response = await _supabase.rpc(
+      'platform_orders_timeseries',
+      params: {
+        'p_from': from?.toIso8601String(),
+        'p_to': to?.toIso8601String(),
+      },
+    );
     final data = _unwrapResponse(response, 'platform_orders_timeseries');
     return TimeseriesData.fromJson(data);
   }
@@ -164,9 +197,11 @@ class PlatformIntelligenceDataSource {
       final response = await _supabase.rpc('platform_operational_alerts');
       if (response is List) {
         return response
-            .map((e) => OperationalAlert.fromJson(
-                  Map<String, dynamic>.from(e as Map),
-                ))
+            .map(
+              (e) => OperationalAlert.fromJson(
+                Map<String, dynamic>.from(e as Map),
+              ),
+            )
             .toList();
       }
       return [];
@@ -181,11 +216,14 @@ class PlatformIntelligenceDataSource {
     String? regionId,
   }) async {
     try {
-      final response = await _supabase.rpc('platform_revenue_breakdown', params: {
-        'p_from': from?.toIso8601String(),
-        'p_to': to?.toIso8601String(),
-        'p_region_id': regionId,
-      });
+      final response = await _supabase.rpc(
+        'platform_revenue_breakdown',
+        params: {
+          'p_from': from?.toIso8601String(),
+          'p_to': to?.toIso8601String(),
+          'p_region_id': regionId,
+        },
+      );
       final data = _unwrapResponse(response, 'platform_revenue_breakdown');
       return RevenueOverview.fromJson(data);
     } catch (e) {

@@ -98,8 +98,7 @@ class _ChatPermissionsPageState extends ConsumerState<ChatPermissionsPage> {
               child: Column(
                 children: [
                   SwitchListTile(
-                    secondary:
-                        Icon(Icons.call_rounded, color: cs.primary),
+                    secondary: Icon(Icons.call_rounded, color: cs.primary),
                     title: Text(l10n.chatCallsEnabled),
                     subtitle: Text(l10n.chatCallsEnabledHint),
                     value: _calls,
@@ -107,8 +106,7 @@ class _ChatPermissionsPageState extends ConsumerState<ChatPermissionsPage> {
                   ),
                   const Divider(height: 1),
                   SwitchListTile(
-                    secondary:
-                        Icon(Icons.mic_rounded, color: cs.primary),
+                    secondary: Icon(Icons.mic_rounded, color: cs.primary),
                     title: Text(l10n.chatVoiceEnabled),
                     subtitle: Text(l10n.chatVoiceEnabledHint),
                     value: _voice,
@@ -116,8 +114,10 @@ class _ChatPermissionsPageState extends ConsumerState<ChatPermissionsPage> {
                   ),
                   const Divider(height: 1),
                   SwitchListTile(
-                    secondary: Icon(Icons.attach_file_rounded,
-                        color: cs.primary),
+                    secondary: Icon(
+                      Icons.attach_file_rounded,
+                      color: cs.primary,
+                    ),
                     title: Text(l10n.chatMediaEnabled),
                     subtitle: Text(l10n.chatMediaEnabledHint),
                     value: _media,
@@ -154,9 +154,8 @@ class _ChatPermissionsPageState extends ConsumerState<ChatPermissionsPage> {
         ref.invalidate(chatReceiveCallsProvider(myId));
         setState(() => _receiveCalls = toggleReceiveCalls);
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(l10n.chatSaved)),
-          );
+          ScaffoldMessenger.of(context)
+              .showSnackBar(SnackBar(content: Text(l10n.chatSaved)));
         }
       }
       if (calls != null || voice != null || media != null) {
@@ -172,16 +171,14 @@ class _ChatPermissionsPageState extends ConsumerState<ChatPermissionsPage> {
         });
         ref.invalidate(chatPermissionsProvider);
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(l10n.chatSaved)),
-          );
+          ScaffoldMessenger.of(context)
+              .showSnackBar(SnackBar(content: Text(l10n.chatSaved)));
         }
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(appErrorText(context, e))),
-        );
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(appErrorText(context, e))));
       }
     } finally {
       _saving = false;

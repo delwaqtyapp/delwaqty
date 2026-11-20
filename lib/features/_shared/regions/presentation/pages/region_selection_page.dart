@@ -19,7 +19,8 @@ class RegionSelectionPage extends ConsumerStatefulWidget {
   final RegionPreferenceSource source;
 
   @override
-  ConsumerState<RegionSelectionPage> createState() => _RegionSelectionPageState();
+  ConsumerState<RegionSelectionPage> createState() =>
+      _RegionSelectionPageState();
 }
 
 class _RegionSelectionPageState extends ConsumerState<RegionSelectionPage> {
@@ -124,7 +125,7 @@ class _RegionSelectionPageState extends ConsumerState<RegionSelectionPage> {
                 suffixIcon: _query.isEmpty
                     ? null
                     : IconButton(
-                      tooltip: l10n.close,
+                        tooltip: l10n.close,
                         icon: const Icon(Icons.close_rounded),
                         onPressed: () {
                           _searchController.clear();

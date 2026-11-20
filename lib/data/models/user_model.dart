@@ -71,9 +71,7 @@ abstract class UserModel with _$UserModel {
   static String _verificationCode(Map<String, dynamic> json, String role) {
     final value = json['verification_status'] as String?;
     if (value != null && value.isNotEmpty) return value;
-    final userType = UserType.fromCode(
-      (json['user_type'] ?? role) as String?,
-    );
+    final userType = UserType.fromCode((json['user_type'] ?? role) as String?);
     return userType == UserType.customer ? 'approved' : 'pending';
   }
 
@@ -125,7 +123,8 @@ abstract class UserModel with _$UserModel {
     if (idCardUrl != null) json['id_card_url'] = idCardUrl;
     if (profilePhotoUrl != null) json['profile_photo_url'] = profilePhotoUrl;
     if (tradeLicenseUrl != null) json['trade_license_url'] = tradeLicenseUrl;
-    if (drivingLicenseUrl != null) json['driving_license_url'] = drivingLicenseUrl;
+    if (drivingLicenseUrl != null)
+      json['driving_license_url'] = drivingLicenseUrl;
     return json;
   }
 
@@ -145,7 +144,8 @@ abstract class UserModel with _$UserModel {
     if (idCardUrl != null) json['id_card_url'] = idCardUrl;
     if (profilePhotoUrl != null) json['profile_photo_url'] = profilePhotoUrl;
     if (tradeLicenseUrl != null) json['trade_license_url'] = tradeLicenseUrl;
-    if (drivingLicenseUrl != null) json['driving_license_url'] = drivingLicenseUrl;
+    if (drivingLicenseUrl != null)
+      json['driving_license_url'] = drivingLicenseUrl;
     return json;
   }
 

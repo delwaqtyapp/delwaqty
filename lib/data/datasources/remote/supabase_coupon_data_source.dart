@@ -45,7 +45,8 @@ class SupabaseCouponDataSource {
 
   CouponStatus _deriveStatus(Coupon coupon) {
     if (!coupon.isActive) return CouponStatus.inactive;
-    if (coupon.expiresAt != null && coupon.expiresAt!.isBefore(DateTime.now())) {
+    if (coupon.expiresAt != null &&
+        coupon.expiresAt!.isBefore(DateTime.now())) {
       return CouponStatus.expired;
     }
     if (coupon.usageLimit != null &&

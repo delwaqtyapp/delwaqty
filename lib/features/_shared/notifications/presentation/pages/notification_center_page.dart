@@ -10,6 +10,7 @@ import 'package:delwaqty/shared/widgets/app_loader.dart';
 import 'package:delwaqty/shared/widgets/premium_empty_state.dart';
 import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
+
 import 'dart:async';
 
 const _pageSize = 20;
@@ -22,7 +23,8 @@ class NotificationCenterPage extends ConsumerStatefulWidget {
       _NotificationCenterPageState();
 }
 
-class _NotificationCenterPageState extends ConsumerState<NotificationCenterPage> {
+class _NotificationCenterPageState
+    extends ConsumerState<NotificationCenterPage> {
   final List<AppNotification> _items = [];
   int _offset = 0;
   bool _loading = false;
@@ -190,9 +192,9 @@ class _NotificationCenterPageState extends ConsumerState<NotificationCenterPage>
                 child: Text(
                   section.key,
                   style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                        fontWeight: FontWeight.w700,
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      ),
+                    fontWeight: FontWeight.w700,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
                 ),
               ),
               ...List.generate(section.value.length, (index) {
@@ -204,8 +206,7 @@ class _NotificationCenterPageState extends ConsumerState<NotificationCenterPage>
                     child: _NotificationCard(
                       notification: notification,
                       onTap: () async {
-                        final repo =
-                            ref.read(notificationRepositoryProvider);
+                        final repo = ref.read(notificationRepositoryProvider);
                         await repo.markAsRead(notification.id);
                         if (!mounted) return;
                         final index = _items.indexWhere(
@@ -219,10 +220,11 @@ class _NotificationCenterPageState extends ConsumerState<NotificationCenterPage>
                         if (context.mounted) {
                           final route =
                               NotificationRouteResolver.safeNotification(
-                            notification,
-                            context: NotificationRouteResolver.appContext,
-                          );
-                          if (route != NotificationRouteResolver.fallbackRoute) {
+                                notification,
+                                context: NotificationRouteResolver.appContext,
+                              );
+                          if (route !=
+                              NotificationRouteResolver.fallbackRoute) {
                             final matches = GoRouter.of(context)
                                 .routeInformationParser
                                 .configuration
@@ -235,8 +237,7 @@ class _NotificationCenterPageState extends ConsumerState<NotificationCenterPage>
                         }
                       },
                       onDelete: () async {
-                        final repo =
-                            ref.read(notificationRepositoryProvider);
+                        final repo = ref.read(notificationRepositoryProvider);
                         await repo.deleteNotification(notification.id);
                         if (!mounted) return;
                         _items.removeWhere((n) => n.id == notification.id);
@@ -267,7 +268,11 @@ class _NotificationCenterPageState extends ConsumerState<NotificationCenterPage>
     final Map<String, List<AppNotification>> grouped = {};
 
     for (final n in notifications) {
-      final date = DateTime(n.createdAt.year, n.createdAt.month, n.createdAt.day);
+      final date = DateTime(
+        n.createdAt.year,
+        n.createdAt.month,
+        n.createdAt.day,
+      );
       String label;
       if (!date.isBefore(today)) {
         label = l10n.notificationToday;
@@ -315,7 +320,11 @@ class _NotificationCenterPageState extends ConsumerState<NotificationCenterPage>
 }
 
 class _NotificationCard extends StatelessWidget {
-  const _NotificationCard({required this.notification, this.onTap, this.onDelete});
+  const _NotificationCard({
+    required this.notification,
+    this.onTap,
+    this.onDelete,
+  });
 
   final AppNotification notification;
   final VoidCallback? onTap;
@@ -366,9 +375,7 @@ class _NotificationCard extends StatelessWidget {
                         Expanded(
                           child: Text(
                             NotificationLocalizer.title(context, notification),
-                            style: Theme.of(context)
-                                .textTheme
-                                .bodyMedium
+                            style: Theme.of(context).textTheme.bodyMedium
                                 ?.copyWith(
                                   fontWeight: notification.isRead
                                       ? FontWeight.normal
@@ -410,9 +417,8 @@ class _NotificationCard extends StatelessWidget {
                     const SizedBox(height: 4),
                     Text(
                       NotificationLocalizer.body(context, notification),
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: colorScheme.onSurfaceVariant,
-                      ),
+                      style: Theme.of(context).textTheme.bodySmall
+                          ?.copyWith(color: colorScheme.onSurfaceVariant),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -422,9 +428,8 @@ class _NotificationCard extends StatelessWidget {
                         notification.createdAt,
                         l10n,
                       ),
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: colorScheme.onSurfaceVariant,
-                      ),
+                      style: Theme.of(context).textTheme.bodySmall
+                          ?.copyWith(color: colorScheme.onSurfaceVariant),
                     ),
                   ],
                 ),

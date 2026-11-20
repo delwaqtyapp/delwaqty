@@ -65,9 +65,8 @@ class _RegionPickerSheetState extends ConsumerState<RegionPickerSheet> {
                 Expanded(
                   child: Text(
                     l10n.adminMgmtSelectRegion,
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
+                    style: Theme.of(context).textTheme.titleMedium
+                        ?.copyWith(fontWeight: FontWeight.bold),
                   ),
                 ),
                 IconButton(
@@ -165,7 +164,8 @@ class RegionSelectorButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    final hasSelection = selectedName != null && selectedName!.trim().isNotEmpty;
+    final hasSelection =
+        selectedName != null && selectedName!.trim().isNotEmpty;
     return InkWell(
       borderRadius: BorderRadius.circular(12),
       onTap: onTap,

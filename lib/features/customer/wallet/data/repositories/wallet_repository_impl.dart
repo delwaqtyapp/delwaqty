@@ -9,11 +9,15 @@ class WalletRepositoryImpl implements WalletRepository {
   final SupabaseWalletDataSource _dataSource;
 
   @override
-  Future<WalletBalance> getBalance(String userId) => _dataSource.getBalance(userId);
+  Future<WalletBalance> getBalance(String userId) =>
+      _dataSource.getBalance(userId);
 
   @override
-  Future<List<WalletTransaction>> getTransactions(String userId, {int limit = 20, int offset = 0}) =>
-      _dataSource.getTransactions(userId, limit: limit, offset: offset);
+  Future<List<WalletTransaction>> getTransactions(
+    String userId, {
+    int limit = 20,
+    int offset = 0,
+  }) => _dataSource.getTransactions(userId, limit: limit, offset: offset);
 
   @override
   Future<WalletTransaction> topUp(
@@ -22,16 +26,15 @@ class WalletRepositoryImpl implements WalletRepository {
     String method, {
     String? idempotencyKey,
   }) =>
-      _dataSource.topUp(
-        userId,
-        amount,
-        method,
-        idempotencyKey: idempotencyKey,
-      );
+      _dataSource.topUp(userId, amount, method, idempotencyKey: idempotencyKey);
 
   @override
-  Future<WalletTransaction> pay(String userId, double amount, String description, {String? referenceId}) =>
-      _dataSource.pay(userId, amount, description, referenceId: referenceId);
+  Future<WalletTransaction> pay(
+    String userId,
+    double amount,
+    String description, {
+    String? referenceId,
+  }) => _dataSource.pay(userId, amount, description, referenceId: referenceId);
 
   @override
   Future<WalletTransaction?> getTransactionById(String transactionId) =>

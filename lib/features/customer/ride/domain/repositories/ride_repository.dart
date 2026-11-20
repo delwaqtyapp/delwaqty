@@ -47,7 +47,12 @@ abstract interface class RideRepository {
 
   Future<List<Ride>> getRideHistory({int limit = 20, int offset = 0});
 
-  Future<void> rateRide(String rideId, int rating, {String? feedback, double? tip});
+  Future<void> rateRide(
+    String rideId,
+    int rating, {
+    String? feedback,
+    double? tip,
+  });
 
   Future<void> shareTrip(String rideId);
 

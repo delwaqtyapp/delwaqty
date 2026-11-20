@@ -81,11 +81,7 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
         gradient: LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
-          colors: [
-            Color(0xFFF8F6FF),
-            Color(0xFFEFEBFF),
-            Color(0xFFF5F3FF),
-          ],
+          colors: [Color(0xFFF8F6FF), Color(0xFFEFEBFF), Color(0xFFF5F3FF)],
         ),
       ),
       child: Stack(
@@ -314,13 +310,12 @@ class _PurpleButton extends StatelessWidget {
         decoration: BoxDecoration(
           gradient: onPressed != null
               ? const LinearGradient(
-                  colors: [
-                    AppColors.brandPurple,
-                    Color(0xFF6B5CE7),
-                  ],
+                  colors: [AppColors.brandPurple, Color(0xFF6B5CE7)],
                 )
               : null,
-          color: onPressed == null ? const Color(0xFF1A1035).withValues(alpha: 0.08) : null,
+          color: onPressed == null
+              ? const Color(0xFF1A1035).withValues(alpha: 0.08)
+              : null,
           borderRadius: BorderRadius.circular(22),
           boxShadow: onPressed != null
               ? [

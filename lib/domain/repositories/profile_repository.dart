@@ -1,4 +1,5 @@
 import 'dart:async';
+
 import 'package:delwaqty/domain/entities/user.dart';
 
 abstract class ProfileRepository {

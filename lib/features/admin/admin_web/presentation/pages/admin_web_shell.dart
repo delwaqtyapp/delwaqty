@@ -27,12 +27,12 @@ class _AdminWebShellState extends State<AdminWebShell> {
   ];
 
   List<(IconData, String)> _getNavItems(AppLocalizations l10n) => [
-        (Icons.dashboard_rounded, l10n.adminCommandCenter),
-        (Icons.people_rounded, l10n.adminUsersPage),
-        (Icons.verified_rounded, l10n.adminVerifications),
-        (Icons.category_rounded, l10n.menuCategories),
-        (Icons.location_city_rounded, l10n.adminMgmtRegion),
-      ];
+    (Icons.dashboard_rounded, l10n.adminCommandCenter),
+    (Icons.people_rounded, l10n.adminUsersPage),
+    (Icons.verified_rounded, l10n.adminVerifications),
+    (Icons.category_rounded, l10n.menuCategories),
+    (Icons.location_city_rounded, l10n.adminMgmtRegion),
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -60,9 +60,7 @@ class _AdminWebShellState extends State<AdminWebShell> {
                   children: [
                     Container(
                       height: 72,
-                      padding: EdgeInsets.symmetric(
-                        horizontal: rail ? 0 : 20,
-                      ),
+                      padding: EdgeInsets.symmetric(horizontal: rail ? 0 : 20),
                       alignment: Alignment.center,
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
@@ -120,14 +118,14 @@ class _AdminWebShellState extends State<AdminWebShell> {
                     if (rail) const SizedBox(height: 16),
                     if (!rail)
                       const Padding(
-                        padding:
-                            EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 8,
+                        ),
                         child: Divider(color: Colors.white12, height: 1),
                       ),
                     Padding(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: rail ? 0 : 16,
-                      ),
+                      padding: EdgeInsets.symmetric(horizontal: rail ? 0 : 16),
                       child: _NavItem(
                         icon: Icons.logout_rounded,
                         label: l10n.logout,
@@ -141,18 +139,14 @@ class _AdminWebShellState extends State<AdminWebShell> {
                         padding: EdgeInsets.all(16),
                         child: Text(
                           'Delwaqty v1.0',
-                          style:
-                              TextStyle(color: Colors.white38, fontSize: 12),
+                          style: TextStyle(color: Colors.white38, fontSize: 12),
                         ),
                       ),
                   ],
                 ),
               ),
               Expanded(
-                child: IndexedStack(
-                  index: _selectedIndex,
-                  children: _pages,
-                ),
+                child: IndexedStack(index: _selectedIndex, children: _pages),
               ),
             ],
           );
@@ -217,8 +211,9 @@ class _NavItem extends StatelessWidget {
                       label,
                       style: TextStyle(
                         color: selected ? Colors.white : Colors.white54,
-                        fontWeight:
-                            selected ? FontWeight.w600 : FontWeight.w400,
+                        fontWeight: selected
+                            ? FontWeight.w600
+                            : FontWeight.w400,
                         fontSize: 14,
                       ),
                     ),

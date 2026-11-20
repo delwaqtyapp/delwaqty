@@ -145,10 +145,7 @@ class CommerceModule extends FeatureModule {
           path: 'checkout',
           builder: (context, state) => const CheckoutPage(),
         ),
-        GoRoute(
-          path: 'search',
-          builder: (context, state) => const CartPage(),
-        ),
+        GoRoute(path: 'search', builder: (context, state) => const CartPage()),
         GoRoute(
           path: 'orders',
           builder: (context, state) => const OrdersPage(),

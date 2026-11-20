@@ -80,10 +80,10 @@ void main() {
 
     test('tokenize strips governorate stop words', () {
       expect(RegionResolver.tokenize('محافظة القاهرة'), ['القاهره']);
-      expect(
-        RegionResolver.tokenize('Cairo Governorate, Egypt'),
-        ['cairo', 'egypt'],
-      );
+      expect(RegionResolver.tokenize('Cairo Governorate, Egypt'), [
+        'cairo',
+        'egypt',
+      ]);
     });
   });
 
@@ -288,15 +288,18 @@ void main() {
       );
     });
 
-    test('resolves within scope even when the name is also a parent-level name', () {
-      expect(
-        RegionResolver.resolveRegionId(
-          candidates: markazes,
-          candidateStrings: const ['Giza'],
-        ),
-        'r-giza-markaz',
-      );
-    });
+    test(
+      'resolves within scope even when the name is also a parent-level name',
+      () {
+        expect(
+          RegionResolver.resolveRegionId(
+            candidates: markazes,
+            candidateStrings: const ['Giza'],
+          ),
+          'r-giza-markaz',
+        );
+      },
+    );
 
     test('does not resolve a name absent from the scoped candidates', () {
       expect(

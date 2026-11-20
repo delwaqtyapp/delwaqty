@@ -98,17 +98,18 @@ class _AdminApprovalsCenterPageState
     setState(() => _processingId = requestId);
     try {
       final client = ref.read(supabaseClientProvider);
-      await client.rpc('decide_approval_request', params: {
-        'p_request_id': requestId,
-        'p_decision': approve ? 'approve' : 'reject',
-        'p_reason': approve ? null : reason,
-      });
+      await client.rpc(
+        'decide_approval_request',
+        params: {
+          'p_request_id': requestId,
+          'p_decision': approve ? 'approve' : 'reject',
+          'p_reason': approve ? null : reason,
+        },
+      );
       if (mounted) {
         ref.invalidate(pendingApprovalsProvider);
         context.showAppSnackBar(
-          approve
-              ? l10n.approvalRequestApproved
-              : l10n.approvalRequestRejected,
+          approve ? l10n.approvalRequestApproved : l10n.approvalRequestRejected,
         );
       }
     } catch (e) {
@@ -187,7 +188,10 @@ class _AdminApprovalsCenterPageState
                                 borderRadius: BorderRadius.circular(20),
                               ),
                               child: Text(
-                                _typeLabel(l10n, request['request_type'] as String),
+                                _typeLabel(
+                                  l10n,
+                                  request['request_type'] as String,
+                                ),
                                 style: TextStyle(
                                   fontSize: 12,
                                   color: scheme.primary,
@@ -205,9 +209,8 @@ class _AdminApprovalsCenterPageState
                         const SizedBox(height: 10),
                         Text(
                           '${l10n.requester}: ${request['requested_by']}',
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: scheme.onSurfaceVariant,
-                          ),
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(color: scheme.onSurfaceVariant),
                         ),
                         if (request['reason'] != null &&
                             (request['reason'] as String).isNotEmpty) ...[
@@ -223,9 +226,10 @@ class _AdminApprovalsCenterPageState
                             Expanded(
                               child: OutlinedButton.icon(
                                 onPressed:
-                                    isProcessing || request['state'] != 'pending'
-                                        ? null
-                                        : () => _decide(request, approve: false),
+                                    isProcessing ||
+                                        request['state'] != 'pending'
+                                    ? null
+                                    : () => _decide(request, approve: false),
                                 icon: const Icon(Icons.close_rounded, size: 18),
                                 label: Text(l10n.rejectRequest),
                               ),
@@ -234,9 +238,10 @@ class _AdminApprovalsCenterPageState
                             Expanded(
                               child: FilledButton.icon(
                                 onPressed:
-                                    isProcessing || request['state'] != 'pending'
-                                        ? null
-                                        : () => _decide(request, approve: true),
+                                    isProcessing ||
+                                        request['state'] != 'pending'
+                                    ? null
+                                    : () => _decide(request, approve: true),
                                 icon: const Icon(Icons.check_rounded, size: 18),
                                 label: isProcessing
                                     ? const SizedBox(

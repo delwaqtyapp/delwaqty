@@ -19,27 +19,33 @@ void main() {
 
   group('EscalationRepositoryImpl.escalateComplaint', () {
     test('delegates to data source with correct params', () async {
-      when(() => mockDataSource.escalateComplaint(
-            complaintId: any(named: 'complaintId'),
-            reason: any(named: 'reason'),
-          )).thenAnswer((_) async {});
+      when(
+        () => mockDataSource.escalateComplaint(
+          complaintId: any(named: 'complaintId'),
+          reason: any(named: 'reason'),
+        ),
+      ).thenAnswer((_) async {});
 
       await repository.escalateComplaint(
         complaintId: 'complaint-1',
         reason: 'Understaffed',
       );
 
-      verify(() => mockDataSource.escalateComplaint(
-            complaintId: 'complaint-1',
-            reason: 'Understaffed',
-          )).called(1);
+      verify(
+        () => mockDataSource.escalateComplaint(
+          complaintId: 'complaint-1',
+          reason: 'Understaffed',
+        ),
+      ).called(1);
     });
 
     test('propagates ServerException from data source', () async {
-      when(() => mockDataSource.escalateComplaint(
-            complaintId: any(named: 'complaintId'),
-            reason: any(named: 'reason'),
-          )).thenThrow(const ServerException(message: 'Complaint not found'));
+      when(
+        () => mockDataSource.escalateComplaint(
+          complaintId: any(named: 'complaintId'),
+          reason: any(named: 'reason'),
+        ),
+      ).thenThrow(const ServerException(message: 'Complaint not found'));
 
       expect(
         () => repository.escalateComplaint(
@@ -53,20 +59,24 @@ void main() {
 
   group('EscalationRepositoryImpl.assignComplaint', () {
     test('delegates to data source with correct params', () async {
-      when(() => mockDataSource.assignComplaint(
-            complaintId: any(named: 'complaintId'),
-            adminId: any(named: 'adminId'),
-          )).thenAnswer((_) async {});
+      when(
+        () => mockDataSource.assignComplaint(
+          complaintId: any(named: 'complaintId'),
+          adminId: any(named: 'adminId'),
+        ),
+      ).thenAnswer((_) async {});
 
       await repository.assignComplaint(
         complaintId: 'complaint-1',
         adminId: 'admin-1',
       );
 
-      verify(() => mockDataSource.assignComplaint(
-            complaintId: 'complaint-1',
-            adminId: 'admin-1',
-          )).called(1);
+      verify(
+        () => mockDataSource.assignComplaint(
+          complaintId: 'complaint-1',
+          adminId: 'admin-1',
+        ),
+      ).called(1);
     });
   });
 
@@ -83,24 +93,28 @@ void main() {
           createdAt: DateTime(2026, 8, 18),
         ),
       ];
-      when(() => mockDataSource.getEscalationEvents(
-            complaintId: any(named: 'complaintId'),
-          )).thenAnswer((_) async => events);
+      when(
+        () => mockDataSource.getEscalationEvents(
+          complaintId: any(named: 'complaintId'),
+        ),
+      ).thenAnswer((_) async => events);
 
       final result = await repository.getEscalationEvents(
         complaintId: 'complaint-1',
       );
 
       expect(result, events);
-      verify(() => mockDataSource.getEscalationEvents(
-            complaintId: 'complaint-1',
-          )).called(1);
+      verify(
+        () => mockDataSource.getEscalationEvents(complaintId: 'complaint-1'),
+      ).called(1);
     });
 
     test('passes null complaintId when omitted', () async {
-      when(() => mockDataSource.getEscalationEvents(
-            complaintId: any(named: 'complaintId'),
-          )).thenAnswer((_) async => []);
+      when(
+        () => mockDataSource.getEscalationEvents(
+          complaintId: any(named: 'complaintId'),
+        ),
+      ).thenAnswer((_) async => []);
 
       await repository.getEscalationEvents();
 

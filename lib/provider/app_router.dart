@@ -8,9 +8,8 @@ import 'package:delwaqty/features/_shared/device_lock/device_lock_provider.dart'
 import 'package:delwaqty/features/_shared/device_lock/presentation/device_unlock_page.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 
-final GlobalKey<NavigatorState> providerRootNavigatorKey = GlobalKey<NavigatorState>(
-  debugLabel: 'provider-root',
-);
+final GlobalKey<NavigatorState> providerRootNavigatorKey =
+    GlobalKey<NavigatorState>(debugLabel: 'provider-root');
 
 final providerGoRouterProvider = Provider<GoRouter>((ref) {
   final registry = FeatureRegistry.instance;

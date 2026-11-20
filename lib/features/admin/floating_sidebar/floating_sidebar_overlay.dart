@@ -1,4 +1,5 @@
 import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -7,6 +8,7 @@ import 'package:delwaqty/features/_shared/auth/presentation/auth_provider.dart';
 import 'package:delwaqty/domain/entities/user.dart';
 import 'package:delwaqty/core/theme/app_text_styles.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
+
 import 'sidebar_theme.dart';
 import 'animations.dart';
 import 'sidebar_header.dart';
@@ -99,9 +101,7 @@ class _FloatingSidebarOverlayState extends State<FloatingSidebarOverlay>
       builder: (ctx) => AlertDialog(
         title: Text(widget.l10n.logout),
         content: Text(widget.l10n.areYouSureYouWantToLogout),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(),
@@ -155,9 +155,7 @@ class _FloatingSidebarOverlayState extends State<FloatingSidebarOverlay>
             child: IgnorePointer(
               child: BackdropFilter(
                 filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
-                child: Container(
-                  color: Colors.black.withValues(alpha: 0.35),
-                ),
+                child: Container(color: Colors.black.withValues(alpha: 0.35)),
               ),
             ),
           ),
@@ -185,9 +183,7 @@ class _FloatingSidebarOverlayState extends State<FloatingSidebarOverlay>
                             end: Alignment.bottomCenter,
                           ),
                           borderRadius: BorderRadius.circular(30),
-                          border: Border.all(
-                            color: st.cardBorderColor,
-                          ),
+                          border: Border.all(color: st.cardBorderColor),
                           boxShadow: [
                             BoxShadow(
                               color: st.cardShadowColor,
@@ -212,8 +208,10 @@ class _FloatingSidebarOverlayState extends State<FloatingSidebarOverlay>
                                 avatarUrl: user?.avatarUrl,
                                 roleBadge: _roleBadge(user),
                                 isVerified:
-                                    user?.verificationStatus.isApproved ?? false,
-                                onEditProfile: () => _navigateReplace('/profile'),
+                                    user?.verificationStatus.isApproved ??
+                                    false,
+                                onEditProfile: () =>
+                                    _navigateReplace('/profile'),
                               ),
                               const SidebarDivider(),
                               SidebarSection(

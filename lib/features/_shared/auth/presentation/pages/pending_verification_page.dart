@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -141,7 +142,10 @@ class _PendingVerificationPageState
       } else {
         await ref.read(updateProfileUseCaseProvider)(
           userId: user.id,
-          data: {'id_card_url': idCardUrl, 'profile_photo_url': profilePhotoUrl},
+          data: {
+            'id_card_url': idCardUrl,
+            'profile_photo_url': profilePhotoUrl,
+          },
         );
       }
       if (!mounted) return;
@@ -159,7 +163,9 @@ class _PendingVerificationPageState
     } catch (_) {
       if (mounted) {
         context.showAppSnackBar(
-          _isReapply ? l10n.verificationReapplyFailed : l10n.documentsUploadFailed,
+          _isReapply
+              ? l10n.verificationReapplyFailed
+              : l10n.documentsUploadFailed,
         );
       }
     } finally {
@@ -194,10 +200,10 @@ class _PendingVerificationPageState
             ? _buildLoadError(l10n, authState)
             : _user!.verificationStatus.isRejected
             ? _isReapply
-                ? _needsDocuments(_user!)
-                    ? _buildDocumentsFlow(l10n, authState, _user!)
-                    : _buildReviewOnly(l10n, authState)
-                : _buildRejected(l10n, authState, _user!)
+                  ? _needsDocuments(_user!)
+                        ? _buildDocumentsFlow(l10n, authState, _user!)
+                        : _buildReviewOnly(l10n, authState)
+                  : _buildRejected(l10n, authState, _user!)
             : _needsDocuments(_user!)
             ? _buildDocumentsFlow(l10n, authState, _user!)
             : _buildReviewOnly(l10n, authState),
@@ -205,11 +211,7 @@ class _PendingVerificationPageState
     );
   }
 
-  Widget _buildRejected(
-    AppLocalizations l10n,
-    AuthState authState,
-    User user,
-  ) {
+  Widget _buildRejected(AppLocalizations l10n, AuthState authState, User user) {
     return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 32),
       child: Column(
@@ -329,10 +331,7 @@ class _PendingVerificationPageState
           SizedBox(
             width: double.infinity,
             height: 52,
-            child: FilledButton(
-              onPressed: _loadUser,
-              child: Text(l10n.retry),
-            ),
+            child: FilledButton(onPressed: _loadUser, child: Text(l10n.retry)),
           ),
           const Spacer(),
           _buildLogoutButton(l10n, authState),

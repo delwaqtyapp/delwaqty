@@ -1,4 +1,5 @@
 import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -72,7 +73,9 @@ class AppShell extends ConsumerWidget {
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withValues(alpha: isDark ? 0.5 : 0.14),
+                      color: Colors.black.withValues(
+                        alpha: isDark ? 0.5 : 0.14,
+                      ),
                       blurRadius: 32,
                       offset: const Offset(0, 12),
                     ),
@@ -84,7 +87,9 @@ class AppShell extends ConsumerWidget {
                     Container(
                       padding: const EdgeInsets.all(10),
                       decoration: BoxDecoration(
-                        color: cs.surfaceContainerHighest.withValues(alpha: 0.55),
+                        color: cs.surfaceContainerHighest.withValues(
+                          alpha: 0.55,
+                        ),
                         shape: BoxShape.circle,
                       ),
                       child: ClipRRect(
@@ -186,10 +191,7 @@ class AppShell extends ConsumerWidget {
               opacity: value.clamp(0.0, 1.0),
               child: Transform.translate(
                 offset: Offset(0, dy),
-                child: Transform.scale(
-                  scale: scale,
-                  child: child,
-                ),
+                child: Transform.scale(scale: scale, child: child),
               ),
             );
           },
@@ -365,71 +367,74 @@ class GlassMenuPanel extends StatelessWidget {
                             colorScheme: cs,
                           ),
                         ),
-                const SizedBox(height: 8),
-                _AnimatedDarkModeTile(
-                  active: themeMode == ThemeMode.dark,
-                  label: l10n.darkMode,
-                  onTap: () =>
-                      ref.read(themeModeProvider.notifier).toggleTheme(),
-                  colorScheme: cs,
-                ),
-                GlassMenuItemTile(
-                  icon: Icons.language_rounded,
-                  label: l10n.language,
-                  subtitle: locale.languageCode == 'ar' ? 'العربية' : 'English',
-                  onTap: () =>
-                      ref.read(localeProvider.notifier).toggleLocale(),
-                  colorScheme: cs,
-                ),
-                if (footerEntries.isNotEmpty) ...[
-                  const SizedBox(height: 8),
-                  ...footerEntries.map(
-                    (entry) => GlassMenuItemTile(
-                      icon: entry.icon,
-                      label: entry.label(context),
-                      onTap: () => _onEntryTap(context, ref, entry),
-                      colorScheme: cs,
-                    ),
-                  ),
-                ],
-                const SizedBox(height: 8),
-                GlassMenuItemTile(
-                  icon: Icons.logout_rounded,
-                  label: l10n.logout,
-                  colorScheme: cs,
-                  isDestructive: true,
-                  onTap: () {
-                    onRequestClose?.call();
-                    showDialog<void>(
-                      context: context,
-                      builder: (ctx) => AlertDialog(
-                        title: Text(l10n.logout),
-                        content: Text(l10n.areYouSureYouWantToLogout),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(20),
+                        const SizedBox(height: 8),
+                        _AnimatedDarkModeTile(
+                          active: themeMode == ThemeMode.dark,
+                          label: l10n.darkMode,
+                          onTap: () => ref
+                              .read(themeModeProvider.notifier)
+                              .toggleTheme(),
+                          colorScheme: cs,
                         ),
-                        actions: [
-                          TextButton(
-                            onPressed: () => Navigator.of(ctx).pop(),
-                            child: Text(l10n.cancel),
-                          ),
-                          TextButton(
-                            onPressed: () {
-                              Navigator.of(ctx).pop();
-                              ref
-                                  .read(authStateProvider.notifier)
-                                  .signOut();
-                            },
-                            child: Text(
-                              l10n.logout,
-                              style: TextStyle(color: cs.error),
+                        GlassMenuItemTile(
+                          icon: Icons.language_rounded,
+                          label: l10n.language,
+                          subtitle: locale.languageCode == 'ar'
+                              ? 'العربية'
+                              : 'English',
+                          onTap: () =>
+                              ref.read(localeProvider.notifier).toggleLocale(),
+                          colorScheme: cs,
+                        ),
+                        if (footerEntries.isNotEmpty) ...[
+                          const SizedBox(height: 8),
+                          ...footerEntries.map(
+                            (entry) => GlassMenuItemTile(
+                              icon: entry.icon,
+                              label: entry.label(context),
+                              onTap: () => _onEntryTap(context, ref, entry),
+                              colorScheme: cs,
                             ),
                           ),
                         ],
-                      ),
-                    );
-                  },
-                ),
+                        const SizedBox(height: 8),
+                        GlassMenuItemTile(
+                          icon: Icons.logout_rounded,
+                          label: l10n.logout,
+                          colorScheme: cs,
+                          isDestructive: true,
+                          onTap: () {
+                            onRequestClose?.call();
+                            showDialog<void>(
+                              context: context,
+                              builder: (ctx) => AlertDialog(
+                                title: Text(l10n.logout),
+                                content: Text(l10n.areYouSureYouWantToLogout),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () => Navigator.of(ctx).pop(),
+                                    child: Text(l10n.cancel),
+                                  ),
+                                  TextButton(
+                                    onPressed: () {
+                                      Navigator.of(ctx).pop();
+                                      ref
+                                          .read(authStateProvider.notifier)
+                                          .signOut();
+                                    },
+                                    child: Text(
+                                      l10n.logout,
+                                      style: TextStyle(color: cs.error),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            );
+                          },
+                        ),
                       ],
                     ),
                   ),
@@ -590,7 +595,11 @@ class GlassMenuPanel extends StatelessWidget {
     );
   }
 
-  Widget _buildAvatarFallback(BuildContext context, ColorScheme cs, String initial) {
+  Widget _buildAvatarFallback(
+    BuildContext context,
+    ColorScheme cs,
+    String initial,
+  ) {
     return Container(
       color: cs.primary,
       alignment: Alignment.center,
@@ -843,16 +852,16 @@ class _AnimatedDarkModeTile extends StatelessWidget {
                     turns: anim,
                     child: ScaleTransition(
                       scale: anim.drive(
-                        Tween(begin: 0.2, end: 1.0)
-                            .chain(CurveTween(curve: Curves.easeOutBack)),
+                        Tween(
+                          begin: 0.2,
+                          end: 1.0,
+                        ).chain(CurveTween(curve: Curves.easeOutBack)),
                       ),
                       child: child,
                     ),
                   ),
                   child: Icon(
-                    active
-                        ? Icons.light_mode_rounded
-                        : Icons.dark_mode_rounded,
+                    active ? Icons.light_mode_rounded : Icons.dark_mode_rounded,
                     key: ValueKey(active),
                     size: 22,
                     color: colorScheme.onSurface,
@@ -918,8 +927,9 @@ class _AnimatedThemeSwitch extends StatelessWidget {
                     ? const [Color(0xFF3A2E6E), Color(0xFF6D5AE0)]
                     : [
                         colorScheme.surfaceContainerHighest,
-                        colorScheme.surfaceContainerHighest
-                            .withValues(alpha: 0.7),
+                        colorScheme.surfaceContainerHighest.withValues(
+                          alpha: 0.7,
+                        ),
                       ],
               ),
               boxShadow: [
@@ -936,8 +946,7 @@ class _AnimatedThemeSwitch extends StatelessWidget {
           AnimatedAlign(
             duration: const Duration(milliseconds: 340),
             curve: Curves.easeOutBack,
-            alignment:
-                active ? Alignment.centerRight : Alignment.centerLeft,
+            alignment: active ? Alignment.centerRight : Alignment.centerLeft,
             child: Container(
               width: 24,
               height: 24,
@@ -954,12 +963,11 @@ class _AnimatedThemeSwitch extends StatelessWidget {
                 ],
               ),
               child: Icon(
-                active
-                    ? Icons.dark_mode_rounded
-                    : Icons.wb_sunny_rounded,
+                active ? Icons.dark_mode_rounded : Icons.wb_sunny_rounded,
                 size: 14,
-                color:
-                    active ? const Color(0xFFFFD54F) : const Color(0xFFF6A107),
+                color: active
+                    ? const Color(0xFFFFD54F)
+                    : const Color(0xFFF6A107),
               ),
             ),
           ),

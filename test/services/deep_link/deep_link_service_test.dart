@@ -88,9 +88,8 @@ void main() {
   });
 
   test('initialRoute returns the classified launching URI', () async {
-    when(
-      () => mockAppLinks.getInitialLink(),
-    ).thenAnswer((_) async => Uri.parse('io.delwaqty://login-callback'));
+    when(() => mockAppLinks.getInitialLink())
+        .thenAnswer((_) async => Uri.parse('io.delwaqty://login-callback'));
 
     final service = buildService(null);
     expect(await service.initialRoute, DeepLinkRoute.loginCallback);

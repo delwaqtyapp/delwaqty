@@ -76,19 +76,18 @@ class _DeliveryTrackingPageState extends ConsumerState<DeliveryTrackingPage> {
           ],
         ),
         error: (e, _) => Center(child: Text(appErrorText(context, e))),
-        data: (ride) => _TrackingBody(ride: ride, deliveryId: widget.deliveryId),
+        data: (ride) =>
+            _TrackingBody(ride: ride, deliveryId: widget.deliveryId),
       ),
-      bottomNavigationBar: rideAsync.value != null &&
+      bottomNavigationBar:
+          rideAsync.value != null &&
               rideAsync.value!.status == RideStatus.completed
           ? _RatingBar(
               rating: _rating,
               onRatingChanged: (r) => setState(() => _rating = r),
               controller: _commentController,
-              onSubmit: () => _submitRating(
-                context,
-                ref,
-                rideAsync.value!.driverId ?? '',
-              ),
+              onSubmit: () =>
+                  _submitRating(context, ref, rideAsync.value!.driverId ?? ''),
             )
           : null,
     );
@@ -117,8 +116,7 @@ class _DeliveryTrackingPageState extends ConsumerState<DeliveryTrackingPage> {
               } catch (e) {
                 if (context.mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                        content: Text(appErrorText(context, e))),
+                    SnackBar(content: Text(appErrorText(context, e))),
                   );
                 }
               }
@@ -139,7 +137,9 @@ class _DeliveryTrackingPageState extends ConsumerState<DeliveryTrackingPage> {
     final messenger = ScaffoldMessenger.of(context);
     final l10n = AppLocalizations.of(context);
     try {
-      await ref.read(deliveryRepositoryProvider).rateDelivery(
+      await ref
+          .read(deliveryRepositoryProvider)
+          .rateDelivery(
             widget.deliveryId,
             driverId,
             _rating,
@@ -147,13 +147,9 @@ class _DeliveryTrackingPageState extends ConsumerState<DeliveryTrackingPage> {
                 ? null
                 : _commentController.text,
           );
-      messenger.showSnackBar(
-        SnackBar(content: Text(l10n.success)),
-      );
+      messenger.showSnackBar(SnackBar(content: Text(l10n.success)));
     } catch (e) {
-      messenger.showSnackBar(
-        SnackBar(content: Text(appErrorMessage(l10n, e))),
-      );
+      messenger.showSnackBar(SnackBar(content: Text(appErrorMessage(l10n, e))));
     }
   }
 }
@@ -168,9 +164,7 @@ class _TrackingBody extends StatelessWidget {
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
-        AnimatedFadeIn(
-          child: _MapSection(ride: ride),
-        ),
+        AnimatedFadeIn(child: _MapSection(ride: ride)),
         const SizedBox(height: 16),
         if (ride.driverId != null)
           AnimatedFadeIn(
@@ -257,8 +251,9 @@ class _DriverInfoCard extends StatelessWidget {
                 children: [
                   Text(
                     ride.driverName ?? l10n.notSet,
-                    style: theme.textTheme.titleSmall
-                        ?.copyWith(fontWeight: FontWeight.bold),
+                    style: theme.textTheme.titleSmall?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   const SizedBox(height: 4),
                   Text(
@@ -295,9 +290,8 @@ class _DriverInfoCard extends StatelessWidget {
       }
     } catch (e) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(appErrorText(context, e))),
-        );
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(appErrorText(context, e))));
       }
     }
   }
@@ -308,7 +302,8 @@ class _RescueDispatchCard extends ConsumerStatefulWidget {
   final String rideId;
 
   @override
-  ConsumerState<_RescueDispatchCard> createState() => _RescueDispatchCardState();
+  ConsumerState<_RescueDispatchCard> createState() =>
+      _RescueDispatchCardState();
 }
 
 class _RescueDispatchCardState extends ConsumerState<_RescueDispatchCard> {
@@ -317,11 +312,11 @@ class _RescueDispatchCardState extends ConsumerState<_RescueDispatchCard> {
   Future<void> _retryDispatch() async {
     setState(() => _busy = true);
     try {
-      await ref.read(deliveryRepositoryProvider).dispatchDelivery(widget.rideId);
+      await ref
+          .read(deliveryRepositoryProvider)
+          .dispatchDelivery(widget.rideId);
       if (!mounted) return;
-      context.showAppSnackBar(
-        AppLocalizations.of(context).driverSearchRetried,
-      );
+      context.showAppSnackBar(AppLocalizations.of(context).driverSearchRetried);
     } catch (e) {
       if (!mounted) return;
       context.showAppSnackBar(
@@ -412,9 +407,12 @@ class _StatusTimeline extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(l10n.orderTracking,
-                style: theme.textTheme.titleSmall
-                    ?.copyWith(fontWeight: FontWeight.bold)),
+            Text(
+              l10n.orderTracking,
+              style: theme.textTheme.titleSmall?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
             const SizedBox(height: 16),
             for (int i = 0; i < steps.length; i++) ...[
               Row(
@@ -444,8 +442,9 @@ class _StatusTimeline extends StatelessWidget {
                         color: i <= activeIndex
                             ? theme.colorScheme.onSurface
                             : theme.colorScheme.onSurfaceVariant,
-                        fontWeight:
-                            i == activeIndex ? FontWeight.bold : FontWeight.normal,
+                        fontWeight: i == activeIndex
+                            ? FontWeight.bold
+                            : FontWeight.normal,
                       ),
                     ),
                   ),
@@ -483,21 +482,27 @@ class _EtaCard extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         child: Row(
           children: [
-            Icon(Icons.timer_outlined,
-                color: theme.colorScheme.primary, size: 32),
+            Icon(
+              Icons.timer_outlined,
+              color: theme.colorScheme.primary,
+              size: 32,
+            ),
             const SizedBox(width: 12),
             Flexible(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(l10n.deliveryTime,
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: theme.colorScheme.onSurfaceVariant,
-                      )),
+                  Text(
+                    l10n.deliveryTime,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                  ),
                   Text(
                     '$estimatedMinutes ${l10n.minutesShort}',
-                    style: theme.textTheme.titleMedium
-                        ?.copyWith(fontWeight: FontWeight.bold),
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
                     overflow: TextOverflow.ellipsis,
                   ),
                 ],
@@ -524,25 +529,33 @@ class _ReceiptCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(l10n.orderSummary,
-                style: theme.textTheme.titleSmall
-                    ?.copyWith(fontWeight: FontWeight.bold)),
+            Text(
+              l10n.orderSummary,
+              style: theme.textTheme.titleSmall?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
             const SizedBox(height: 12),
             _ReceiptRow(
-                label: l10n.deliveryFee,
-                value: l10n.amountWithCurrency(
-                    (ride.baseFare ?? 0).toStringAsFixed(2),
-                    ride.currency)),
+              label: l10n.deliveryFee,
+              value: l10n.amountWithCurrency(
+                (ride.baseFare ?? 0).toStringAsFixed(2),
+                ride.currency,
+              ),
+            ),
             if (ride.discountAmount > 0)
               _ReceiptRow(
                 label: l10n.offers,
-                value: '-${l10n.amountWithCurrency(ride.discountAmount.toStringAsFixed(2), ride.currency)}',
+                value:
+                    '-${l10n.amountWithCurrency(ride.discountAmount.toStringAsFixed(2), ride.currency)}',
               ),
             const Divider(),
             _ReceiptRow(
               label: l10n.subtotal,
               value: l10n.amountWithCurrency(
-                  (ride.fare ?? 0).toStringAsFixed(2), ride.currency),
+                (ride.fare ?? 0).toStringAsFixed(2),
+                ride.currency,
+              ),
               bold: true,
             ),
           ],
@@ -553,7 +566,11 @@ class _ReceiptCard extends StatelessWidget {
 }
 
 class _ReceiptRow extends StatelessWidget {
-  const _ReceiptRow({required this.label, required this.value, this.bold = false});
+  const _ReceiptRow({
+    required this.label,
+    required this.value,
+    this.bold = false,
+  });
   final String label;
   final String value;
   final bool bold;
@@ -567,19 +584,23 @@ class _ReceiptRow extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Flexible(
-            child: Text(label,
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  fontWeight: bold ? FontWeight.bold : FontWeight.normal,
-                ),
-                overflow: TextOverflow.ellipsis),
+            child: Text(
+              label,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                fontWeight: bold ? FontWeight.bold : FontWeight.normal,
+              ),
+              overflow: TextOverflow.ellipsis,
+            ),
           ),
           const SizedBox(width: 8),
           Flexible(
-            child: Text(value,
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  fontWeight: bold ? FontWeight.bold : FontWeight.normal,
-                ),
-                overflow: TextOverflow.ellipsis),
+            child: Text(
+              value,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                fontWeight: bold ? FontWeight.bold : FontWeight.normal,
+              ),
+              overflow: TextOverflow.ellipsis,
+            ),
           ),
         ],
       ),
@@ -609,7 +630,8 @@ class _RatingBar extends StatelessWidget {
         color: Theme.of(context).colorScheme.surface,
         boxShadow: [
           BoxShadow(
-            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.05),
+            color: Theme.of(context).colorScheme.onSurface
+                .withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, -2),
           ),

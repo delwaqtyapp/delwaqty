@@ -17,9 +17,9 @@ import 'package:delwaqty/core/errors/app_error_text.dart';
 
 final _allCategoriesProvider =
     FutureProvider.autoDispose<List<PlatformCategory>>((ref) async {
-  final repo = ref.watch(platformCategoryRepositoryProvider);
-  return repo.getAllCategories();
-});
+      final repo = ref.watch(platformCategoryRepositoryProvider);
+      return repo.getAllCategories();
+    });
 
 class AdminCategoriesPage extends ConsumerStatefulWidget {
   const AdminCategoriesPage({super.key});
@@ -333,92 +333,98 @@ class _AdminCategoriesPageState extends ConsumerState<AdminCategoriesPage> {
                         DataColumn(label: Text(l10n.actions)),
                       ],
                       rows: sorted.map((cat) {
-                        return DataRow(cells: [
-                          DataCell(_buildThumbnail(cat)),
-                          DataCell(
-                            _EditableTextField(
-                              value: cat.nameAr ?? '',
-                              onSubmitted: (v) async {
-                                setState(() => _saving = true);
-                                try {
-                                  await _repo.updateCategory(
-                                      id: cat.id, nameAr: v);
-                                  await _refresh();
-                                } catch (_) {}
-                                if (mounted) {
-                                  setState(() => _saving = false);
-                                }
-                              },
+                        return DataRow(
+                          cells: [
+                            DataCell(_buildThumbnail(cat)),
+                            DataCell(
+                              _EditableTextField(
+                                value: cat.nameAr ?? '',
+                                onSubmitted: (v) async {
+                                  setState(() => _saving = true);
+                                  try {
+                                    await _repo.updateCategory(
+                                      id: cat.id,
+                                      nameAr: v,
+                                    );
+                                    await _refresh();
+                                  } catch (_) {}
+                                  if (mounted) {
+                                    setState(() => _saving = false);
+                                  }
+                                },
+                              ),
                             ),
-                          ),
-                          DataCell(
-                            _EditableTextField(
-                              value: cat.nameEn ?? '',
-                              onSubmitted: (v) async {
-                                setState(() => _saving = true);
-                                try {
-                                  await _repo.updateCategory(
-                                      id: cat.id, nameEn: v);
-                                  await _refresh();
-                                } catch (_) {}
-                                if (mounted) {
-                                  setState(() => _saving = false);
-                                }
-                              },
+                            DataCell(
+                              _EditableTextField(
+                                value: cat.nameEn ?? '',
+                                onSubmitted: (v) async {
+                                  setState(() => _saving = true);
+                                  try {
+                                    await _repo.updateCategory(
+                                      id: cat.id,
+                                      nameEn: v,
+                                    );
+                                    await _refresh();
+                                  } catch (_) {}
+                                  if (mounted) {
+                                    setState(() => _saving = false);
+                                  }
+                                },
+                              ),
                             ),
-                          ),
-                          DataCell(
-                            _SortOrderSpinner(
-                              value: cat.sortOrder,
-                              onChanged: (v) => _updateSortOrder(cat, v),
+                            DataCell(
+                              _SortOrderSpinner(
+                                value: cat.sortOrder,
+                                onChanged: (v) => _updateSortOrder(cat, v),
+                              ),
                             ),
-                          ),
-                          DataCell(
-                            Switch(
-                              value: cat.isActive,
-                              onChanged: (_) => _toggleActive(cat),
-                              activeThumbColor: AppColors.brandPurple,
+                            DataCell(
+                              Switch(
+                                value: cat.isActive,
+                                onChanged: (_) => _toggleActive(cat),
+                                activeThumbColor: AppColors.brandPurple,
+                              ),
                             ),
-                          ),
-                          DataCell(
-                            Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                _ActionIconButton(
-                                  icon: Icons.edit_rounded,
-                                  tooltip: l10n.editCategory,
-                                  color: AppColors.brandViolet,
-                                  onTap: () => _editCategory(cat),
-                                ),
-                                const SizedBox(width: 4),
-                                if (isOwner) ...[
+                            DataCell(
+                              Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
                                   _ActionIconButton(
-                                    icon: Icons.cloud_upload_rounded,
-                                    tooltip: l10n.uploadImage,
-                                    color: AppColors.brandCyan,
-                                    onTap: () => _uploadImage(cat),
+                                    icon: Icons.edit_rounded,
+                                    tooltip: l10n.editCategory,
+                                    color: AppColors.brandViolet,
+                                    onTap: () => _editCategory(cat),
                                   ),
-                                  if (cat.imageUrl != null) ...[
-                                    const SizedBox(width: 4),
+                                  const SizedBox(width: 4),
+                                  if (isOwner) ...[
                                     _ActionIconButton(
-                                      icon: Icons.image_not_supported_rounded,
-                                      tooltip: l10n.removeImage,
-                                      color: AppColors.warningLight,
-                                      onTap: () => _deleteImage(cat),
+                                      icon: Icons.cloud_upload_rounded,
+                                      tooltip: l10n.uploadImage,
+                                      color: AppColors.brandCyan,
+                                      onTap: () => _uploadImage(cat),
                                     ),
+                                    if (cat.imageUrl != null) ...[
+                                      const SizedBox(width: 4),
+                                      _ActionIconButton(
+                                        icon: Icons.image_not_supported_rounded,
+                                        tooltip: l10n.removeImage,
+                                        color: AppColors.warningLight,
+                                        onTap: () => _deleteImage(cat),
+                                      ),
+                                    ],
                                   ],
+                                  const SizedBox(width: 4),
+                                  _ActionIconButton(
+                                    icon: Icons.delete_rounded,
+                                    tooltip: l10n.deleteCategory,
+                                    color: AppColors.errorLight,
+                                    onTap: () => _deleteCategory(cat),
+                                  ),
                                 ],
-                                const SizedBox(width: 4),
-                                _ActionIconButton(
-                                  icon: Icons.delete_rounded,
-                                  tooltip: l10n.deleteCategory,
-                                  color: AppColors.errorLight,
-                                  onTap: () => _deleteCategory(cat),
-                                ),
-                              ],
+                              ),
                             ),
-                          ),
-                        ]);
+                          ],
+                        );
                       }).toList(),
                     ),
                   ),
@@ -499,10 +505,7 @@ class _ActionIconButton extends StatelessWidget {
 }
 
 class _EditableTextField extends StatefulWidget {
-  const _EditableTextField({
-    required this.value,
-    required this.onSubmitted,
-  });
+  const _EditableTextField({required this.value, required this.onSubmitted});
 
   final String value;
   final ValueChanged<String> onSubmitted;
@@ -546,11 +549,11 @@ class _EditableTextFieldState extends State<_EditableTextField> {
           style: const TextStyle(fontSize: 13),
           decoration: InputDecoration(
             isDense: true,
-            contentPadding:
-                const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 8,
+              vertical: 6,
             ),
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
           ),
           onSubmitted: (v) {
             setState(() => _editing = false);
@@ -588,10 +591,7 @@ class _EditableTextFieldState extends State<_EditableTextField> {
 }
 
 class _SortOrderSpinner extends StatelessWidget {
-  const _SortOrderSpinner({
-    required this.value,
-    required this.onChanged,
-  });
+  const _SortOrderSpinner({required this.value, required this.onChanged});
 
   final int value;
   final ValueChanged<int> onChanged;
@@ -608,8 +608,9 @@ class _SortOrderSpinner extends StatelessWidget {
         children: [
           InkWell(
             onTap: value > 0 ? () => onChanged(value - 1) : null,
-            borderRadius:
-                const BorderRadius.horizontal(left: Radius.circular(7)),
+            borderRadius: const BorderRadius.horizontal(
+              left: Radius.circular(7),
+            ),
             child: Container(
               width: 28,
               height: 32,
@@ -627,14 +628,14 @@ class _SortOrderSpinner extends StatelessWidget {
             child: Text(
               '$value',
               textAlign: TextAlign.center,
-              style: const TextStyle(
-                  fontSize: 13, fontWeight: FontWeight.w600),
+              style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
             ),
           ),
           InkWell(
             onTap: () => onChanged(value + 1),
-            borderRadius:
-                const BorderRadius.horizontal(right: Radius.circular(7)),
+            borderRadius: const BorderRadius.horizontal(
+              right: Radius.circular(7),
+            ),
             child: Container(
               width: 28,
               height: 32,
@@ -690,10 +691,12 @@ class _CategoryDialogState extends State<_CategoryDialog> {
   @override
   void initState() {
     super.initState();
-    _nameArController =
-        TextEditingController(text: widget.category?.nameAr ?? '');
-    _nameEnController =
-        TextEditingController(text: widget.category?.nameEn ?? '');
+    _nameArController = TextEditingController(
+      text: widget.category?.nameAr ?? '',
+    );
+    _nameEnController = TextEditingController(
+      text: widget.category?.nameEn ?? '',
+    );
     _sortOrder = widget.category?.sortOrder ?? 0;
     _imageUrl = widget.category?.imageUrl;
   }
@@ -742,29 +745,28 @@ class _CategoryDialogState extends State<_CategoryDialog> {
                     decoration: BoxDecoration(
                       color: AppColors.brandSoftGray,
                       borderRadius: BorderRadius.circular(16),
-                      border: Border.all(
-                        color: AppColors.borderSubtle,
-                      ),
+                      border: Border.all(color: AppColors.borderSubtle),
                       image: _imageBytes != null
                           ? DecorationImage(
                               image: MemoryImage(_imageBytes!),
                               fit: BoxFit.cover,
                             )
                           : _imageUrl != null
-                              ? DecorationImage(
-                                  image: NetworkImage(_imageUrl!),
-                                  fit: BoxFit.cover,
-                                )
-                              : null,
+                          ? DecorationImage(
+                              image: NetworkImage(_imageUrl!),
+                              fit: BoxFit.cover,
+                            )
+                          : null,
                     ),
                     child: _imageBytes == null && _imageUrl == null
                         ? Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               const Icon(
-                                  Icons.cloud_upload_rounded,
-                                  color: AppColors.textMuted,
-                                  size: 32),
+                                Icons.cloud_upload_rounded,
+                                color: AppColors.textMuted,
+                                size: 32,
+                              ),
                               const SizedBox(height: 4),
                               Text(
                                 l10n.upload,
@@ -783,8 +785,11 @@ class _CategoryDialogState extends State<_CategoryDialog> {
                                 color: Colors.white,
                                 shape: BoxShape.circle,
                               ),
-                              child: const Icon(Icons.camera_alt_rounded,
-                                  size: 16, color: AppColors.textMuted),
+                              child: const Icon(
+                                Icons.camera_alt_rounded,
+                                size: 16,
+                                color: AppColors.textMuted,
+                              ),
                             ),
                           ),
                   ),
@@ -849,9 +854,7 @@ class _CategoryDialogState extends State<_CategoryDialog> {
               ),
             );
           },
-          style: FilledButton.styleFrom(
-            backgroundColor: AppColors.brandPurple,
-          ),
+          style: FilledButton.styleFrom(backgroundColor: AppColors.brandPurple),
           child: Text(_isEditing ? l10n.save : l10n.create),
         ),
       ],

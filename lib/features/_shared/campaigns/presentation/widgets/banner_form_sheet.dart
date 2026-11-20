@@ -262,9 +262,8 @@ class _BannerFormSheetState extends ConsumerState<BannerFormSheet> {
                   Expanded(
                     child: Text(
                       widget.sheetTitle ?? l10n.createBanner,
-                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
+                      style: Theme.of(context).textTheme.titleLarge
+                          ?.copyWith(fontWeight: FontWeight.bold),
                     ),
                   ),
                   IconButton(
@@ -319,9 +318,8 @@ class _BannerFormSheetState extends ConsumerState<BannerFormSheet> {
               const SizedBox(height: 16),
               Text(
                 l10n.targetScope,
-                style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
+                style: Theme.of(context).textTheme.titleSmall
+                    ?.copyWith(fontWeight: FontWeight.w600),
               ),
               const SizedBox(height: 8),
               SegmentedButton<bool>(
@@ -380,7 +378,8 @@ class _BannerFormSheetState extends ConsumerState<BannerFormSheet> {
                     onChanged: _submitting
                         ? null
                         : (val) => setState(() => _selectedGovernorateId = val),
-                    validator: (val) => !_isNational && (val == null || val.isEmpty)
+                    validator: (val) =>
+                        !_isNational && (val == null || val.isEmpty)
                         ? l10n.selectGovernorate
                         : null,
                   ),
@@ -389,17 +388,17 @@ class _BannerFormSheetState extends ConsumerState<BannerFormSheet> {
               const SizedBox(height: 16),
               Text(
                 l10n.scheduleBanner,
-                style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
+                style: Theme.of(context).textTheme.titleSmall
+                    ?.copyWith(fontWeight: FontWeight.w600),
               ),
               const SizedBox(height: 8),
               Row(
                 children: [
                   Expanded(
                     child: OutlinedButton.icon(
-                      onPressed:
-                          _submitting ? null : () => _pickDateTime(isStart: true),
+                      onPressed: _submitting
+                          ? null
+                          : () => _pickDateTime(isStart: true),
                       icon: const Icon(Icons.event_available_outlined),
                       label: Text(
                         _startsAt != null

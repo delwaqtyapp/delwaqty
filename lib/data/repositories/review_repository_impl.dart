@@ -79,8 +79,7 @@ class ReviewRepositoryImpl implements ReviewRepository {
   Future<void> replyToReview({
     required String reviewId,
     required String reply,
-  }) =>
-      _dataSource.replyToReview(reviewId: reviewId, reply: reply);
+  }) => _dataSource.replyToReview(reviewId: reviewId, reply: reply);
 
   @override
   Future<Review> updateReview({

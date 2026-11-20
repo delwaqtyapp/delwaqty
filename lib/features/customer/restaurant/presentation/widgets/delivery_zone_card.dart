@@ -5,8 +5,10 @@ import 'package:delwaqty/features/customer/restaurant/restaurant_module.dart';
 import 'package:delwaqty/features/customer/restaurant/domain/entities/delivery_zone.dart';
 import 'package:delwaqty/core/theme/app_colors.dart';
 
-
-final _zonesProvider = FutureProvider.family<List<DeliveryZone>, String>((ref, merchantId) async {
+final _zonesProvider = FutureProvider.family<List<DeliveryZone>, String>((
+  ref,
+  merchantId,
+) async {
   final repo = ref.watch(deliveryZoneRepositoryProvider);
   return repo.getZones(merchantId);
 });
@@ -29,7 +31,9 @@ class DeliveryZoneCard extends ConsumerWidget {
             width: double.infinity,
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+              color: theme.colorScheme.surfaceContainerHighest.withValues(
+                alpha: 0.5,
+              ),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Column(
@@ -37,7 +41,9 @@ class DeliveryZoneCard extends ConsumerWidget {
                 Icon(
                   Icons.local_shipping_outlined,
                   size: 32,
-                  color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
+                  color: theme.colorScheme.onSurfaceVariant.withValues(
+                    alpha: 0.5,
+                  ),
                 ),
                 const SizedBox(height: 8),
                 Text(
@@ -53,13 +59,18 @@ class DeliveryZoneCard extends ConsumerWidget {
 
         return DecoratedBox(
           decoration: BoxDecoration(
-            color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+            color: theme.colorScheme.surfaceContainerHighest.withValues(
+              alpha: 0.5,
+            ),
             borderRadius: BorderRadius.circular(12),
           ),
           child: Column(
             children: zones.map((zone) {
               return Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
+                ),
                 child: Row(
                   children: [
                     Icon(
@@ -74,7 +85,9 @@ class DeliveryZoneCard extends ConsumerWidget {
                         children: [
                           Text(
                             zone.name,
-                            style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              fontWeight: FontWeight.w600,
+                            ),
                           ),
                           Text(
                             '${zone.radiusKm.toStringAsFixed(1)} ${l10n.km}',
@@ -93,7 +106,9 @@ class DeliveryZoneCard extends ConsumerWidget {
                               ? l10n.freeDelivery
                               : '${zone.deliveryFee.toStringAsFixed(0)} ${l10n.sar}',
                           style: theme.textTheme.labelMedium?.copyWith(
-                            color: zone.deliveryFee == 0 ? AppColors.successLight : null,
+                            color: zone.deliveryFee == 0
+                                ? AppColors.successLight
+                                : null,
                             fontWeight: FontWeight.w600,
                           ),
                           overflow: TextOverflow.ellipsis,

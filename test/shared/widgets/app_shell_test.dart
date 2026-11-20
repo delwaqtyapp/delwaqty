@@ -22,9 +22,7 @@ const _searchLabel = 'SEARCH_STUB';
 
 Widget _stub(String label) {
   return Scaffold(
-    body: Center(
-      child: Text(label, style: const TextStyle(fontSize: 24)),
-    ),
+    body: Center(child: Text(label, style: const TextStyle(fontSize: 24))),
   );
 }
 
@@ -52,7 +50,10 @@ void main() {
             ),
             StatefulShellBranch(
               routes: [
-                GoRoute(path: '/search', builder: (c, s) => _stub(_searchLabel)),
+                GoRoute(
+                  path: '/search',
+                  builder: (c, s) => _stub(_searchLabel),
+                ),
               ],
             ),
           ],
@@ -76,9 +77,7 @@ void main() {
     );
   }
 
-  testWidgets('back on a non-home tab returns to the home tab', (
-    tester,
-  ) async {
+  testWidgets('back on a non-home tab returns to the home tab', (tester) async {
     await tester.pumpWidget(buildTestApp());
     router.go('/search');
     await tester.pumpAndSettle();
@@ -101,10 +100,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Exit app'), findsNWidgets(2));
-    expect(
-      find.text('Are you sure you want to exit the app?'),
-      findsOneWidget,
-    );
+    expect(find.text('Are you sure you want to exit the app?'), findsOneWidget);
     expect(find.text('Cancel'), findsOneWidget);
     final logoFinder = find.descendant(
       of: find.byType(Dialog),

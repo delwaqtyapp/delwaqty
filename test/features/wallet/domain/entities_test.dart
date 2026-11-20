@@ -34,11 +34,7 @@ void main() {
     });
 
     test('toJson serializes correctly', () {
-      final wallet = WalletBalance(
-        id: 'wb1',
-        userId: 'u1',
-        updatedAt: now,
-      );
+      final wallet = WalletBalance(id: 'wb1', userId: 'u1', updatedAt: now);
 
       final json = wallet.toJson();
       expect(json['id'], 'wb1');
@@ -99,11 +95,7 @@ void main() {
     });
 
     test('defaults are applied correctly', () {
-      final wallet = WalletBalance(
-        id: 'wb1',
-        userId: 'u1',
-        updatedAt: now,
-      );
+      final wallet = WalletBalance(id: 'wb1', userId: 'u1', updatedAt: now);
 
       expect(wallet.balance, 0.0);
       expect(wallet.currency, 'ج.م');

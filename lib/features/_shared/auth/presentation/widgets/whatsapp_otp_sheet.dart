@@ -57,10 +57,7 @@ class _WhatsAppOtpSheetState extends State<WhatsAppOtpSheet> {
     try {
       final raw = await Supabase.instance.client.rpc(
         'request_whatsapp_otp',
-        params: {
-          'p_phone': widget.phone.trim(),
-          'p_purpose': 'register',
-        },
+        params: {'p_phone': widget.phone.trim(), 'p_purpose': 'register'},
       );
       if (!mounted) return;
       final map = raw is Map
@@ -117,10 +114,7 @@ class _WhatsAppOtpSheetState extends State<WhatsAppOtpSheet> {
     try {
       final raw = await Supabase.instance.client.rpc(
         'verify_whatsapp_otp',
-        params: {
-          'p_phone': widget.phone.trim(),
-          'p_otp_code': code,
-        },
+        params: {'p_phone': widget.phone.trim(), 'p_otp_code': code},
       );
       if (!mounted) return;
       final map = raw is Map

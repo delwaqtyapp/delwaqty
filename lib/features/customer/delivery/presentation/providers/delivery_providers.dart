@@ -11,29 +11,35 @@ final deliveryRepositoryProvider = Provider<DeliveryRepository>((ref) {
   return DeliveryRepositoryImpl(ref.watch(supabaseDeliveryDataSourceProvider));
 });
 
-final deliveryOffersProvider =
-    StreamProvider.family<List<RideOffer>, String>((ref, driverId) {
+final deliveryOffersProvider = StreamProvider.family<List<RideOffer>, String>((
+  ref,
+  driverId,
+) {
   return ref.watch(deliveryRepositoryProvider).watchDeliveryOffers(driverId);
 });
 
-final activeDeliveryProvider =
-    StreamProvider.family<DeliveryOrder?, String>((ref, driverId) {
+final activeDeliveryProvider = StreamProvider.family<DeliveryOrder?, String>((
+  ref,
+  driverId,
+) {
   return ref.watch(deliveryRepositoryProvider).watchActiveDelivery(driverId);
 });
 
-final deliveryOrderByIdProvider =
-    FutureProvider.family<DeliveryOrder?, String>((ref, id) {
-  return ref.watch(deliveryRepositoryProvider).getDeliveryOrderById(id);
-});
+final deliveryOrderByIdProvider = FutureProvider.family<DeliveryOrder?, String>(
+  (ref, id) {
+    return ref.watch(deliveryRepositoryProvider).getDeliveryOrderById(id);
+  },
+);
 
 final driverCapabilitiesProvider =
     FutureProvider.family<DriverCapability, String>((ref, driverId) {
-  return ref.watch(deliveryRepositoryProvider).getDriverCapabilities(driverId);
-});
+      return ref
+          .watch(deliveryRepositoryProvider)
+          .getDriverCapabilities(driverId);
+    });
 
-final merchantProfileProvider =
-    FutureProvider.family<MerchantProfile?, String>((ref, merchantId) {
-  return ref.watch(deliveryRepositoryProvider).getMerchantProfile(merchantId);
-});
-
-
+final merchantProfileProvider = FutureProvider.family<MerchantProfile?, String>(
+  (ref, merchantId) {
+    return ref.watch(deliveryRepositoryProvider).getMerchantProfile(merchantId);
+  },
+);

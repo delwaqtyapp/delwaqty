@@ -43,7 +43,7 @@ class HomeModule extends FeatureModule {
     ),
   ];
 
-@override
+  @override
   List<DrawerEntry> get drawerEntries => [
     DrawerEntry(
       id: 'services',

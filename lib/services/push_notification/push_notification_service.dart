@@ -149,17 +149,18 @@ void _handleNotificationTap(Map<String, dynamic> data) {
     // Resolve the ACTIVE flavor navigator: rootNavigatorKey only exists
     // in the customer app, so notification taps were dead in admin,
     // driver and provider.
-    final anyContext = rootNavigatorKey.currentContext ??
+    final anyContext =
+        rootNavigatorKey.currentContext ??
         adminNavigatorKey.currentContext ??
         driverRootNavigatorKey.currentContext ??
         providerRootNavigatorKey.currentContext;
     if (anyContext == null) return;
-    final flavor =
-        ProviderScope.containerOf(anyContext).read(appFlavorProvider);
+    final flavor = ProviderScope.containerOf(anyContext)
+        .read(appFlavorProvider);
     final context = activeNavigatorContext(flavor);
     if (context == null) return;
-    final isAdminPanel =
-        ProviderScope.containerOf(context).read(isAdminAppProvider);
+    final isAdminPanel = ProviderScope.containerOf(context)
+        .read(isAdminAppProvider);
     final path = isAdminPanel
         ? '/admin/support-chat/room/$chatRoomId'
         : '/support/room/$chatRoomId';
@@ -169,7 +170,8 @@ void _handleNotificationTap(Map<String, dynamic> data) {
 
   final payload = NotificationPayload.fromMap(data);
   final deepLink = NotificationRouteResolver.safePayload(payload);
-  final anyContext = rootNavigatorKey.currentContext ??
+  final anyContext =
+      rootNavigatorKey.currentContext ??
       adminNavigatorKey.currentContext ??
       driverRootNavigatorKey.currentContext ??
       providerRootNavigatorKey.currentContext;
@@ -193,10 +195,10 @@ Future<void> _markNotificationRead(
 }) async {
   try {
     final client = Supabase.instance.client;
-    await client.from('notifications').update({
-      'is_read': true,
-      'read_at': DateTime.now().toIso8601String(),
-    }).eq('id', notificationId);
+    await client
+        .from('notifications')
+        .update({'is_read': true, 'read_at': DateTime.now().toIso8601String()})
+        .eq('id', notificationId);
     if (context != null && context.mounted) {
       final container = ProviderScope.containerOf(context);
       container.invalidate(unreadCountProvider);
@@ -329,11 +331,14 @@ class PushNotificationService {
       final deviceId = _deviceId ?? await DeviceIdentity.getOrCreate();
       _deviceId = deviceId;
 
-      await client.rpc('register_device_token', params: {
-        'p_token': token,
-        'p_platform': _platformName(),
-        'p_device_id': deviceId,
-      });
+      await client.rpc(
+        'register_device_token',
+        params: {
+          'p_token': token,
+          'p_platform': _platformName(),
+          'p_device_id': deviceId,
+        },
+      );
 
       _logger.i('Push notification token saved');
     } catch (e) {
@@ -350,10 +355,10 @@ class PushNotificationService {
         final client = Supabase.instance.client;
         final deviceId = _deviceId ?? await DeviceIdentity.getOrCreate();
         _deviceId = deviceId;
-        await client.rpc('refresh_token_heartbeat', params: {
-          'p_token': token,
-          'p_device_id': deviceId,
-        });
+        await client.rpc(
+          'refresh_token_heartbeat',
+          params: {'p_token': token, 'p_device_id': deviceId},
+        );
       } catch (e) {
         _logger.e('Failed to refresh push heartbeat', e);
       }
@@ -381,7 +386,8 @@ class PushNotificationService {
     final payload = NotificationPayload.fromMap(message.data);
     final deepLink = NotificationRouteResolver.safePayload(payload);
 
-    final anyCtx = rootNavigatorKey.currentContext ??
+    final anyCtx =
+        rootNavigatorKey.currentContext ??
         adminNavigatorKey.currentContext ??
         driverRootNavigatorKey.currentContext ??
         providerRootNavigatorKey.currentContext;
@@ -404,9 +410,10 @@ class PushNotificationService {
       if (client.auth.currentUser != null) {
         final deviceId = _deviceId ?? await DeviceIdentity.getOrCreate();
         _deviceId = deviceId;
-        await client.rpc('deactivate_device_tokens', params: {
-          'p_device_id': deviceId,
-        });
+        await client.rpc(
+          'deactivate_device_tokens',
+          params: {'p_device_id': deviceId},
+        );
       }
 
       _heartbeat?.cancel();

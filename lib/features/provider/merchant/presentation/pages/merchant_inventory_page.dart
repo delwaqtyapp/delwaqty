@@ -141,10 +141,7 @@ class _InventoryBody extends ConsumerWidget {
                 separatorBuilder: (_, _) => const SizedBox(height: 8),
                 itemBuilder: (context, index) => Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: _StockTile(
-                    item: items[index],
-                    merchantId: merchantId,
-                  ),
+                  child: _StockTile(item: items[index], merchantId: merchantId),
                 ),
               ),
               const SliverToBoxAdapter(child: SizedBox(height: 24)),
@@ -221,7 +218,9 @@ class _StockTileState extends ConsumerState<_StockTile> {
     if (_busy) return;
     setState(() => _busy = true);
     try {
-      await ref.read(stockNotifierProvider).adjustBy(
+      await ref
+          .read(stockNotifierProvider)
+          .adjustBy(
             merchantId: widget.merchantId,
             productId: widget.item.productId,
             delta: delta,
@@ -231,7 +230,9 @@ class _StockTileState extends ConsumerState<_StockTile> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(AppLocalizations.of(context).somethingWentWrong)),
+          SnackBar(
+            content: Text(AppLocalizations.of(context).somethingWentWrong),
+          ),
         );
       }
     } finally {
@@ -241,10 +242,12 @@ class _StockTileState extends ConsumerState<_StockTile> {
 
   Future<void> _editExact() async {
     final l10n = AppLocalizations.of(context);
-    final controller =
-        TextEditingController(text: '${widget.item.stockQuantity}');
-    final threshold =
-        TextEditingController(text: '${widget.item.lowStockThreshold}');
+    final controller = TextEditingController(
+      text: '${widget.item.stockQuantity}',
+    );
+    final threshold = TextEditingController(
+      text: '${widget.item.lowStockThreshold}',
+    );
 
     try {
       final saved = await showDialog<bool>(
@@ -290,7 +293,9 @@ class _StockTileState extends ConsumerState<_StockTile> {
 
       setState(() => _busy = true);
       try {
-        await ref.read(stockNotifierProvider).setStock(
+        await ref
+            .read(stockNotifierProvider)
+            .setStock(
               merchantId: widget.merchantId,
               productId: widget.item.productId,
               quantity: qty,
@@ -300,9 +305,8 @@ class _StockTileState extends ConsumerState<_StockTile> {
             );
       } catch (e) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(l10n.somethingWentWrong)),
-          );
+          ScaffoldMessenger.of(context)
+              .showSnackBar(SnackBar(content: Text(l10n.somethingWentWrong)));
         }
       } finally {
         if (mounted) setState(() => _busy = false);
@@ -320,13 +324,13 @@ class _StockTileState extends ConsumerState<_StockTile> {
     final statusColor = item.isOutOfStock
         ? AppColors.errorLight
         : item.isLowStock
-            ? AppColors.warningLight
-            : AppColors.successLight;
+        ? AppColors.warningLight
+        : AppColors.successLight;
     final statusLabel = item.isOutOfStock
         ? l10n.outOfStock
         : item.isLowStock
-            ? l10n.lowStock
-            : l10n.inStock;
+        ? l10n.lowStock
+        : l10n.inStock;
 
     return Container(
       padding: const EdgeInsets.all(12),
@@ -336,7 +340,8 @@ class _StockTileState extends ConsumerState<_StockTile> {
         border: Border.all(
           color: item.isLowStock || item.isOutOfStock
               ? statusColor.withValues(alpha: 0.35)
-              : Theme.of(context).colorScheme.outlineVariant.withValues(alpha: 0.4),
+              : Theme.of(context).colorScheme.outlineVariant
+                    .withValues(alpha: 0.4),
         ),
       ),
       child: Row(
@@ -374,9 +379,7 @@ class _StockTileState extends ConsumerState<_StockTile> {
                 const SizedBox(height: 3),
                 Text(
                   '$statusLabel · ${l10n.availableLabel} ${item.availableQuantity}',
-                  style: AppTextStyles.labelSmall.copyWith(
-                    color: statusColor,
-                  ),
+                  style: AppTextStyles.labelSmall.copyWith(color: statusColor),
                 ),
               ],
             ),
@@ -395,11 +398,7 @@ class _StockTileState extends ConsumerState<_StockTile> {
               ),
             ),
           ),
-          _StepButton(
-            icon: Icons.add,
-            enabled: !_busy,
-            onTap: () => _apply(1),
-          ),
+          _StepButton(icon: Icons.add, enabled: !_busy, onTap: () => _apply(1)),
           IconButton(
             tooltip: l10n.edit,
             onPressed: _busy ? null : _editExact,

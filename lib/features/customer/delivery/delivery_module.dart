@@ -10,7 +10,8 @@ class DirectDeliveryModule extends FeatureModule {
   String get id => 'direct_delivery';
 
   @override
-  String name(BuildContext context) => AppLocalizations.of(context).directDelivery;
+  String name(BuildContext context) =>
+      AppLocalizations.of(context).directDelivery;
 
   @override
   IconData? get icon => Icons.delivery_dining_rounded;
@@ -23,9 +24,9 @@ class DirectDeliveryModule extends FeatureModule {
 
   @override
   Set<ModuleCapability> get capabilities => {
-        ModuleCapability.hasLocation,
-        ModuleCapability.requiresDelivery,
-      };
+    ModuleCapability.hasLocation,
+    ModuleCapability.requiresDelivery,
+  };
 
   @override
   List<String> get dependsOn => [];
@@ -52,9 +53,8 @@ class DirectDeliveryModule extends FeatureModule {
     GoRoute(
       path: '/delivery-tracking/:deliveryId',
       name: 'delivery_tracking',
-      builder: (context, state) => DeliveryTrackingPage(
-        deliveryId: state.pathParameters['deliveryId']!,
-      ),
+      builder: (context, state) =>
+          DeliveryTrackingPage(deliveryId: state.pathParameters['deliveryId']!),
     ),
   ];
 }

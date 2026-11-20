@@ -1,13 +1,13 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:delwaqty/services/supabase/supabase_service.dart';
+
 import '../../domain/entities/service_category.dart';
 import '../../domain/entities/service_provider.dart';
 import '../../domain/entities/service_booking.dart';
 import '../../domain/repositories/service_booking_repository.dart';
 
 class ServiceBookingRepositoryImpl implements ServiceBookingRepository {
-
   ServiceBookingRepositoryImpl(this._client);
   final SupabaseClient _client;
 
@@ -149,12 +149,15 @@ class ServiceBookingRepositoryImpl implements ServiceBookingRepository {
 
   @override
   Future<ServiceBooking> updateBookingStatus(
-      String id, BookingStatus status) async {
+    String id,
+    BookingStatus status,
+  ) async {
     final response = await _client
         .from('service_bookings')
         .update({
           'status': status.name,
-          if (status == BookingStatus.completed) 'completed_at': DateTime.now().toIso8601String(),
+          if (status == BookingStatus.completed)
+            'completed_at': DateTime.now().toIso8601String(),
         })
         .eq('id', id)
         .select()
@@ -166,11 +169,13 @@ class ServiceBookingRepositoryImpl implements ServiceBookingRepository {
   Future<void> cancelBooking(String id) async {
     await _client
         .from('service_bookings')
-        .update({'status': 'cancelled'}).eq('id', id);
+        .update({'status': 'cancelled'})
+        .eq('id', id);
   }
 }
 
-final serviceBookingRepositoryProvider =
-    Provider<ServiceBookingRepository>((ref) {
+final serviceBookingRepositoryProvider = Provider<ServiceBookingRepository>((
+  ref,
+) {
   return ServiceBookingRepositoryImpl(ref.watch(supabaseClientProvider));
 });

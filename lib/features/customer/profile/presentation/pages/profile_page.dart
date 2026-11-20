@@ -225,9 +225,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
               ],
             ),
             borderRadius: BorderRadius.circular(22),
-            border: Border.all(
-              color: Colors.white.withValues(alpha: 0.24),
-            ),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.24)),
           ),
           child: Row(
             children: [
@@ -243,29 +241,26 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                             ? Image.network(
                                 user.avatarUrl!,
                                 fit: BoxFit.cover,
-                                loadingBuilder: (
-                                  context,
-                                  child,
-                                  loadingProgress,
-                                ) {
-                                  if (loadingProgress == null) {
-                                    return child;
-                                  }
-                                  return Container(
-                                    color: Colors.white.withValues(
-                                      alpha: 0.12,
-                                    ),
-                                    alignment: Alignment.center,
-                                    child: const SizedBox(
-                                      width: 20,
-                                      height: 20,
-                                      child: CircularProgressIndicator(
-                                        strokeWidth: 2,
-                                        color: Colors.white,
-                                      ),
-                                    ),
-                                  );
-                                },
+                                loadingBuilder:
+                                    (context, child, loadingProgress) {
+                                      if (loadingProgress == null) {
+                                        return child;
+                                      }
+                                      return Container(
+                                        color: Colors.white.withValues(
+                                          alpha: 0.12,
+                                        ),
+                                        alignment: Alignment.center,
+                                        child: const SizedBox(
+                                          width: 20,
+                                          height: 20,
+                                          child: CircularProgressIndicator(
+                                            strokeWidth: 2,
+                                            color: Colors.white,
+                                          ),
+                                        ),
+                                      );
+                                    },
                                 errorBuilder: (_, _, _) =>
                                     _buildAvatarFallback(context, initial),
                               )
@@ -293,10 +288,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                               AppColors.brandViolet,
                             ],
                           ),
-                          border: Border.all(
-                            color: Colors.white,
-                            width: 1.8,
-                          ),
+                          border: Border.all(color: Colors.white, width: 1.8),
                           boxShadow: const [
                             BoxShadow(
                               color: Color(0x45170B3B),
@@ -486,10 +478,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     );
   }
 
-  Widget _buildGuestProfile(
-    BuildContext context,
-    AppLocalizations l10n,
-  ) {
+  Widget _buildGuestProfile(BuildContext context, AppLocalizations l10n) {
     return Scaffold(
       appBar: AppBar(
         title: Text(l10n.profile),
@@ -706,10 +695,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
       isScrollControlled: true,
       useSafeArea: true,
       backgroundColor: Colors.transparent,
-      builder: (sheetContext) => _EditProfileSheet(
-        user: user,
-        l10n: l10n,
-      ),
+      builder: (sheetContext) => _EditProfileSheet(user: user, l10n: l10n),
     );
 
     if (saved == true && context.mounted) {
@@ -832,10 +818,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
             children: [
               Row(
                 children: [
-                  _IconTile(
-                    icon: Icons.language_rounded,
-                    color: cs.primary,
-                  ),
+                  _IconTile(icon: Icons.language_rounded, color: cs.primary),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Column(
@@ -929,10 +912,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     );
   }
 
-  Widget _buildLogoutButton(
-    BuildContext context,
-    AppLocalizations l10n,
-  ) {
+  Widget _buildLogoutButton(BuildContext context, AppLocalizations l10n) {
     final errorColor = context.colorScheme.error;
     return SizedBox(
       width: double.infinity,
@@ -956,10 +936,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                     Navigator.of(dialogContext).pop();
                     ref.read(authStateProvider.notifier).signOut();
                   },
-                  child: Text(
-                    l10n.logout,
-                    style: TextStyle(color: errorColor),
-                  ),
+                  child: Text(l10n.logout, style: TextStyle(color: errorColor)),
                 ),
               ],
             ),
@@ -1039,9 +1016,7 @@ class _BentoActionTile extends StatelessWidget {
                   item.accent.withValues(alpha: 0.08),
                 ],
               ),
-              border: Border.all(
-                color: item.accent.withValues(alpha: 0.22),
-              ),
+              border: Border.all(color: item.accent.withValues(alpha: 0.22)),
             ),
             child: Icon(item.icon, size: 21, color: item.accent),
           ),
@@ -1083,9 +1058,7 @@ class _EditProfileSheetState extends ConsumerState<_EditProfileSheet> {
   @override
   void initState() {
     super.initState();
-    _nameController = TextEditingController(
-      text: widget.user.fullName ?? '',
-    );
+    _nameController = TextEditingController(text: widget.user.fullName ?? '');
     _usernameController = TextEditingController(
       text: widget.user.username ?? '',
     );
@@ -1134,10 +1107,9 @@ class _EditProfileSheetState extends ConsumerState<_EditProfileSheet> {
       }
       final dobChanged = _selectedDate != widget.user.dateOfBirth;
       if (dobChanged) {
-        await ref.read(updateDateOfBirthUseCaseProvider).call(
-              userId: widget.user.id,
-              dateOfBirth: _selectedDate,
-            );
+        await ref
+            .read(updateDateOfBirthUseCaseProvider)
+            .call(userId: widget.user.id, dateOfBirth: _selectedDate);
       }
       if (mounted) {
         Navigator.of(context).pop(true);
@@ -1380,10 +1352,7 @@ class _SectionCard extends StatelessWidget {
                   gradient: const LinearGradient(
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
-                    colors: [
-                      AppColors.brandPurple,
-                      AppColors.brandViolet,
-                    ],
+                    colors: [AppColors.brandPurple, AppColors.brandViolet],
                   ),
                 ),
               ),
@@ -1402,12 +1371,8 @@ class _SectionCard extends StatelessWidget {
         PremiumCard(
           padding: const EdgeInsets.symmetric(vertical: 4),
           radius: 20,
-          color: cs.surfaceContainerLowest.withValues(
-            alpha: 0.94,
-          ),
-          borderColor: cs.outlineVariant.withValues(
-            alpha: 0.22,
-          ),
+          color: cs.surfaceContainerLowest.withValues(alpha: 0.94),
+          borderColor: cs.outlineVariant.withValues(alpha: 0.22),
           child: Material(
             type: MaterialType.transparency,
             child: Column(
@@ -1420,9 +1385,7 @@ class _SectionCard extends StatelessWidget {
                         padding: const EdgeInsets.symmetric(horizontal: 14),
                         child: Divider(
                           height: 1,
-                          color: cs.outlineVariant.withValues(
-                            alpha: 0.25,
-                          ),
+                          color: cs.outlineVariant.withValues(alpha: 0.25),
                         ),
                       ),
                     tile,
@@ -1498,9 +1461,7 @@ class _IconTile extends StatelessWidget {
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.10),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: color.withValues(alpha: 0.16),
-        ),
+        border: Border.all(color: color.withValues(alpha: 0.16)),
       ),
       child: Icon(icon, size: 20, color: color),
     );
@@ -1519,9 +1480,7 @@ class _RoleChip extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.brandGold.withValues(alpha: 0.20),
         borderRadius: AppSpacing.borderRadiusFull,
-        border: Border.all(
-          color: AppColors.brandGold.withValues(alpha: 0.55),
-        ),
+        border: Border.all(color: AppColors.brandGold.withValues(alpha: 0.55)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -1626,30 +1585,10 @@ class _ProfileHeroWaveClipper extends CustomClipper<Path> {
     final h = size.height;
     final path = Path()..lineTo(0, h - 18);
 
-    path.quadraticBezierTo(
-      w * 0.12,
-      h,
-      w * 0.28,
-      h - 10,
-    );
-    path.quadraticBezierTo(
-      w * 0.44,
-      h - 22,
-      w * 0.60,
-      h - 8,
-    );
-    path.quadraticBezierTo(
-      w * 0.76,
-      h + 2,
-      w * 0.90,
-      h - 14,
-    );
-    path.quadraticBezierTo(
-      w * 0.96,
-      h - 21,
-      w,
-      h - 16,
-    );
+    path.quadraticBezierTo(w * 0.12, h, w * 0.28, h - 10);
+    path.quadraticBezierTo(w * 0.44, h - 22, w * 0.60, h - 8);
+    path.quadraticBezierTo(w * 0.76, h + 2, w * 0.90, h - 14);
+    path.quadraticBezierTo(w * 0.96, h - 21, w, h - 16);
 
     path
       ..lineTo(w, 0)
@@ -1660,4 +1599,3 @@ class _ProfileHeroWaveClipper extends CustomClipper<Path> {
   @override
   bool shouldReclip(covariant CustomClipper<Path> oldClipper) => false;
 }
-

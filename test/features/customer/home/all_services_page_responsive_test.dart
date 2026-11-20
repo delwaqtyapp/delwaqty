@@ -22,12 +22,42 @@ const _phoneDpr = 2.975;
 const _cutoutTop = 47.4;
 
 final _platformSamples = <PlatformCategory>[
-  const PlatformCategory(id: '1', name: 'restaurants', nameAr: 'مطاعم', nameEn: 'Restaurants'),
-  const PlatformCategory(id: '2', name: 'grocery', nameAr: 'بقالة', nameEn: 'Groceries'),
-  const PlatformCategory(id: '3', name: 'bakery', nameAr: 'مخبز', nameEn: 'Bakeries'),
-  const PlatformCategory(id: '4', name: 'pharmacy', nameAr: 'صيدلية', nameEn: 'Pharmacies'),
-  const PlatformCategory(id: '5', name: 'vegetables', nameAr: 'خضروات وفواكه', nameEn: 'Produce'),
-  const PlatformCategory(id: '6', name: 'cafe', nameAr: 'كافيه', nameEn: 'Cafes'),
+  const PlatformCategory(
+    id: '1',
+    name: 'restaurants',
+    nameAr: 'مطاعم',
+    nameEn: 'Restaurants',
+  ),
+  const PlatformCategory(
+    id: '2',
+    name: 'grocery',
+    nameAr: 'بقالة',
+    nameEn: 'Groceries',
+  ),
+  const PlatformCategory(
+    id: '3',
+    name: 'bakery',
+    nameAr: 'مخبز',
+    nameEn: 'Bakeries',
+  ),
+  const PlatformCategory(
+    id: '4',
+    name: 'pharmacy',
+    nameAr: 'صيدلية',
+    nameEn: 'Pharmacies',
+  ),
+  const PlatformCategory(
+    id: '5',
+    name: 'vegetables',
+    nameAr: 'خضروات وفواكه',
+    nameEn: 'Produce',
+  ),
+  const PlatformCategory(
+    id: '6',
+    name: 'cafe',
+    nameAr: 'كافيه',
+    nameEn: 'Cafes',
+  ),
 ];
 
 Widget _buildTestApp(
@@ -78,12 +108,9 @@ Future<void> _pumpAndAssert(
   final prevHandler = FlutterError.onError;
   FlutterError.onError = (details) => trapped.add(details);
 
-  await tester.pumpWidget(_buildTestApp(
-    repo,
-    platformRepo,
-    locale: locale,
-    padding: padding,
-  ));
+  await tester.pumpWidget(
+    _buildTestApp(repo, platformRepo, locale: locale, padding: padding),
+  );
   await tester.pump(const Duration(milliseconds: 500));
 
   FlutterError.onError = prevHandler;
@@ -106,32 +133,30 @@ void main() {
   group('AllServicesPage at real device geometry '
       '(1280x2800 @ dpr $_phoneDpr = 430x941 logical)', () {
     for (final locale in [const Locale('en'), const Locale('ar')]) {
-      testWidgets(
-        'no overflow, textScale 1.0, ${locale.languageCode}',
-        (tester) async {
-          await _pumpAndAssert(
-            tester,
-            repo: _MockCachedRepo(),
-            platformRepo: _MockPlatformRepo(),
-            locale: locale,
-            padding: const EdgeInsets.only(top: _cutoutTop),
-          );
-        },
-      );
+      testWidgets('no overflow, textScale 1.0, ${locale.languageCode}', (
+        tester,
+      ) async {
+        await _pumpAndAssert(
+          tester,
+          repo: _MockCachedRepo(),
+          platformRepo: _MockPlatformRepo(),
+          locale: locale,
+          padding: const EdgeInsets.only(top: _cutoutTop),
+        );
+      });
 
-      testWidgets(
-        'no overflow, textScale 1.3, ${locale.languageCode}',
-        (tester) async {
-          await _pumpAndAssert(
-            tester,
-            repo: _MockCachedRepo(),
-            platformRepo: _MockPlatformRepo(),
-            textScale: 1.3,
-            locale: locale,
-            padding: const EdgeInsets.only(top: _cutoutTop),
-          );
-        },
-      );
+      testWidgets('no overflow, textScale 1.3, ${locale.languageCode}', (
+        tester,
+      ) async {
+        await _pumpAndAssert(
+          tester,
+          repo: _MockCachedRepo(),
+          platformRepo: _MockPlatformRepo(),
+          textScale: 1.3,
+          locale: locale,
+          padding: const EdgeInsets.only(top: _cutoutTop),
+        );
+      });
     }
   });
 
@@ -145,25 +170,28 @@ void main() {
     ];
 
     for (final (width, height) in sizes) {
-      testWidgets(
-        'no overflow at ${width.round()}x${height.round()}',
-        (tester) async {
-          await _pumpAndAssert(
-            tester,
-            repo: _MockCachedRepo(),
-            platformRepo: _MockPlatformRepo(),
-            size: Size(width, height),
-            dpr: 1.0,
-          );
-        },
-      );
+      testWidgets('no overflow at ${width.round()}x${height.round()}', (
+        tester,
+      ) async {
+        await _pumpAndAssert(
+          tester,
+          repo: _MockCachedRepo(),
+          platformRepo: _MockPlatformRepo(),
+          size: Size(width, height),
+          dpr: 1.0,
+        );
+      });
     }
   });
 
   group('AllServicesPage shows every Main Category plus booking services', () {
-    testWidgets('both sections render all samples, Arabic locale',
-        (tester) async {
-      tester.view.physicalSize = const Size(_phonePhysicalWidth, _phonePhysicalHeight);
+    testWidgets('both sections render all samples, Arabic locale', (
+      tester,
+    ) async {
+      tester.view.physicalSize = const Size(
+        _phonePhysicalWidth,
+        _phonePhysicalHeight,
+      );
       tester.view.devicePixelRatio = _phoneDpr;
       addTearDown(tester.view.resetPhysicalSize);
       addTearDown(tester.view.resetDevicePixelRatio);
@@ -174,12 +202,14 @@ void main() {
       when(() => platformRepo.getActiveCategories())
           .thenAnswer((_) async => _platformSamples);
 
-      await tester.pumpWidget(_buildTestApp(
-        repo,
-        platformRepo,
-        locale: const Locale('ar'),
-        padding: const EdgeInsets.only(top: _cutoutTop),
-      ));
+      await tester.pumpWidget(
+        _buildTestApp(
+          repo,
+          platformRepo,
+          locale: const Locale('ar'),
+          padding: const EdgeInsets.only(top: _cutoutTop),
+        ),
+      );
       await tester.pump(const Duration(seconds: 1));
       await tester.pump(const Duration(seconds: 1));
 

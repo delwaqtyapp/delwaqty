@@ -5,15 +5,19 @@ import 'package:delwaqty/features/admin/location_tracking/domain/repositories/lo
 import 'package:delwaqty/features/admin/location_tracking/data/datasources/remote/supabase_location_data_source.dart';
 import 'package:delwaqty/features/admin/location_tracking/data/repositories/location_repository_impl.dart';
 
-final supabaseLocationDataSourceProvider = Provider<SupabaseLocationDataSource>((ref) {
-  return SupabaseLocationDataSource(Supabase.instance.client);
-});
+final supabaseLocationDataSourceProvider = Provider<SupabaseLocationDataSource>(
+  (ref) {
+    return SupabaseLocationDataSource(Supabase.instance.client);
+  },
+);
 
 final locationRepositoryProvider = Provider<LocationRepository>((ref) {
   return LocationRepositoryImpl(ref.read(supabaseLocationDataSourceProvider));
 });
 
-final activeDriversLocationProvider = FutureProvider<List<LocationUpdate>>((ref) async {
+final activeDriversLocationProvider = FutureProvider<List<LocationUpdate>>((
+  ref,
+) async {
   final repo = ref.read(locationRepositoryProvider);
   return repo.getActiveDrivers();
 });

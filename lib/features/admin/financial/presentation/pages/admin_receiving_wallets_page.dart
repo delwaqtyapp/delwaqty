@@ -28,7 +28,7 @@ class _AdminReceivingWalletsPageState
     final ok = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title:  Text(l10n.addPlatformReceivingAccount),
+        title: Text(l10n.addPlatformReceivingAccount),
         content: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -63,7 +63,7 @@ class _AdminReceivingWalletsPageState
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(false),
-            child:  Text(l10n.cancel),
+            child: Text(l10n.cancel),
           ),
           ElevatedButton(
             onPressed: () {
@@ -77,7 +77,9 @@ class _AdminReceivingWalletsPageState
     );
     if (!mounted || ok != true) return;
     try {
-      await ref.read(adminFinancialRepositoryProvider).ownerCreateReceivingAccount(
+      await ref
+          .read(adminFinancialRepositoryProvider)
+          .ownerCreateReceivingAccount(
             methodType: methodController.text.trim(),
             displayName: nameController.text.trim(),
             accountName: accountController.text.trim(),
@@ -86,16 +88,14 @@ class _AdminReceivingWalletsPageState
             instructions: instrController.text.trim(),
           );
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.receivingAccountAdded)),
-        );
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(l10n.receivingAccountAdded)));
       }
       ref.invalidate(adminReceivingAccountsProvider);
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(appErrorText(context, e))),
-        );
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(appErrorText(context, e))));
       }
     }
   }
@@ -108,9 +108,8 @@ class _AdminReceivingWalletsPageState
       ref.invalidate(adminReceivingAccountsProvider);
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(appErrorText(context, e))),
-        );
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(appErrorText(context, e))));
       }
     }
   }
@@ -125,7 +124,7 @@ class _AdminReceivingWalletsPageState
     final ok = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title:  Text(l10n.addReceivingWallet),
+        title: Text(l10n.addReceivingWallet),
         content: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -156,7 +155,7 @@ class _AdminReceivingWalletsPageState
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(false),
-            child:  Text(l10n.cancel),
+            child: Text(l10n.cancel),
           ),
           ElevatedButton(
             onPressed: () {
@@ -170,7 +169,9 @@ class _AdminReceivingWalletsPageState
     );
     if (!mounted || ok != true) return;
     try {
-      await ref.read(adminFinancialRepositoryProvider).createAdminReceivingWallet(
+      await ref
+          .read(adminFinancialRepositoryProvider)
+          .createAdminReceivingWallet(
             regionId: regionController.text.trim(),
             methodType: methodController.text.trim(),
             walletNumber: walletController.text.trim(),
@@ -178,16 +179,14 @@ class _AdminReceivingWalletsPageState
             provider: providerController.text.trim(),
           );
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.receivingWalletAdded)),
-        );
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(l10n.receivingWalletAdded)));
       }
       ref.invalidate(adminReceivingWalletsProvider);
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(appErrorText(context, e))),
-        );
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(appErrorText(context, e))));
       }
     }
   }
@@ -201,7 +200,7 @@ class _AdminReceivingWalletsPageState
 
     return Scaffold(
       appBar: AppBar(
-        title:  Text(l10n.receivingAccounts),
+        title: Text(l10n.receivingAccounts),
         actions: [
           IconButton(
             tooltip: l10n.refresh,
@@ -227,7 +226,7 @@ class _AdminReceivingWalletsPageState
             heroTag: 'wallet',
             onPressed: _addWallet,
             icon: const Icon(Icons.add),
-            label:  Text(l10n.wallet),
+            label: Text(l10n.wallet),
           ),
         ],
       ),
@@ -236,9 +235,7 @@ class _AdminReceivingWalletsPageState
         children: [
           Text(
             l10n.platformReceivingAccounts,
-            style: Theme.of(context)
-                .textTheme
-                .titleMedium
+            style: Theme.of(context).textTheme.titleMedium
                 ?.copyWith(fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 8),
@@ -296,9 +293,7 @@ class _AdminReceivingWalletsPageState
           const SizedBox(height: 16),
           Text(
             l10n.receivingAccounts,
-            style: Theme.of(context)
-                .textTheme
-                .titleMedium
+            style: Theme.of(context).textTheme.titleMedium
                 ?.copyWith(fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 8),

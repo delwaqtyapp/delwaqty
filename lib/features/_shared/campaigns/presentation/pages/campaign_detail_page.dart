@@ -47,25 +47,25 @@ class _CampaignBody extends ConsumerWidget {
     final isAr = Localizations.localeOf(context).languageCode == 'ar';
     final name = isAr
         ? (campaign.nameAr.isNotEmpty
-            ? campaign.nameAr
-            : (campaign.nameEn ?? ''))
+              ? campaign.nameAr
+              : (campaign.nameEn ?? ''))
         : (campaign.nameEn?.isNotEmpty == true
-            ? campaign.nameEn!
-            : campaign.nameAr);
+              ? campaign.nameEn!
+              : campaign.nameAr);
     final subtitle = isAr
         ? (campaign.subtitleAr?.isNotEmpty == true
-            ? campaign.subtitleAr
-            : campaign.subtitleEn)
+              ? campaign.subtitleAr
+              : campaign.subtitleEn)
         : (campaign.subtitleEn?.isNotEmpty == true
-            ? campaign.subtitleEn
-            : campaign.subtitleAr);
+              ? campaign.subtitleEn
+              : campaign.subtitleAr);
     final description = isAr
         ? (campaign.descriptionAr?.isNotEmpty == true
-            ? campaign.descriptionAr
-            : campaign.descriptionEn)
+              ? campaign.descriptionAr
+              : campaign.descriptionEn)
         : (campaign.descriptionEn?.isNotEmpty == true
-            ? campaign.descriptionEn
-            : campaign.descriptionAr);
+              ? campaign.descriptionEn
+              : campaign.descriptionAr);
     final imageUrl = ref
         .watch(campaignMediaUrlProvider(campaign.imagePath))
         .value;
@@ -106,7 +106,10 @@ class _CampaignBody extends ConsumerWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               decoration: BoxDecoration(
-                color: _statusColor(context, campaign.status).withValues(alpha: 0.15),
+                color: _statusColor(
+                  context,
+                  campaign.status,
+                ).withValues(alpha: 0.15),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Text(
@@ -122,9 +125,8 @@ class _CampaignBody extends ConsumerWidget {
         const SizedBox(height: 16),
         Text(
           name,
-          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-            fontWeight: FontWeight.w700,
-          ),
+          style: Theme.of(context).textTheme.headlineSmall
+              ?.copyWith(fontWeight: FontWeight.w700),
         ),
         if (subtitle != null && subtitle.isNotEmpty) ...[
           const SizedBox(height: 8),
@@ -139,9 +141,8 @@ class _CampaignBody extends ConsumerWidget {
           const SizedBox(height: 16),
           Text(
             l10n.campaignDates,
-            style: Theme.of(context).textTheme.titleSmall?.copyWith(
-              fontWeight: FontWeight.w700,
-            ),
+            style: Theme.of(context).textTheme.titleSmall
+                ?.copyWith(fontWeight: FontWeight.w700),
           ),
           const SizedBox(height: 4),
           Text(
@@ -153,16 +154,14 @@ class _CampaignBody extends ConsumerWidget {
           const SizedBox(height: 16),
           Text(
             l10n.campaignDescription,
-            style: Theme.of(context).textTheme.titleSmall?.copyWith(
-              fontWeight: FontWeight.w700,
-            ),
+            style: Theme.of(context).textTheme.titleSmall
+                ?.copyWith(fontWeight: FontWeight.w700),
           ),
           const SizedBox(height: 4),
           Text(
             description,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              height: 1.6,
-            ),
+            style: Theme.of(context).textTheme.bodyMedium
+                ?.copyWith(height: 1.6),
           ),
         ],
       ],
@@ -260,7 +259,11 @@ class _MessageView extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 48, color: Theme.of(context).colorScheme.onSurfaceVariant),
+          Icon(
+            icon,
+            size: 48,
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
+          ),
           const SizedBox(height: 12),
           Text(text, style: Theme.of(context).textTheme.bodyLarge),
         ],

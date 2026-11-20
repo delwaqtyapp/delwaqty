@@ -58,7 +58,9 @@ class _AdminCommissionManagementPageState
     final rateController = TextEditingController(
       text: currentRate.toStringAsFixed(2).replaceFirst(RegExp(r'\.?0+$'), ''),
     );
-    final descController = TextEditingController(text: currentDescription ?? '');
+    final descController = TextEditingController(
+      text: currentDescription ?? '',
+    );
 
     final result = await showDialog<Map<String, dynamic>>(
       context: context,
@@ -130,23 +132,24 @@ class _AdminCommissionManagementPageState
     setState(() => _savingKey = key);
     try {
       final client = ref.read(supabaseClientProvider);
-      await client.rpc('set_commission_rate', params: {
-        'p_entity_type': entityType,
-        'p_entity_key': entityKey,
-        'p_rate': newRate,
-        'p_description': description?.isEmpty ?? true ? null : description,
-      });
+      await client.rpc(
+        'set_commission_rate',
+        params: {
+          'p_entity_type': entityType,
+          'p_entity_key': entityKey,
+          'p_rate': newRate,
+          'p_description': description?.isEmpty ?? true ? null : description,
+        },
+      );
       if (mounted) {
         ref.invalidate(commissionRulesProvider);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.commissionRateUpdated)),
-        );
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(l10n.commissionRateUpdated)));
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.commissionRateFailed)),
-        );
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(l10n.commissionRateFailed)));
       }
     } finally {
       if (mounted) {
@@ -247,9 +250,8 @@ class _AdminCommissionManagementPageState
           padding: const EdgeInsets.only(top: 8, bottom: 12),
           child: Text(
             groupLabel,
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
+            style: Theme.of(context).textTheme.titleMedium
+                ?.copyWith(fontWeight: FontWeight.bold),
           ),
         ),
       ),
@@ -268,9 +270,7 @@ class _AdminCommissionManagementPageState
                       Expanded(
                         child: Text(
                           _entityLabel(l10n, entityType, entry.key),
-                          style: Theme.of(context)
-                              .textTheme
-                              .titleSmall
+                          style: Theme.of(context).textTheme.titleSmall
                               ?.copyWith(fontWeight: FontWeight.w600),
                         ),
                       ),
@@ -325,9 +325,10 @@ class _AdminCommissionManagementPageState
                                   entityType,
                                   entry.key,
                                 ),
-                                currentRate: (active?['rate'] ??
-                                        entry.value.first['rate'])
-                                    as num,
+                                currentRate:
+                                    (active?['rate'] ??
+                                            entry.value.first['rate'])
+                                        as num,
                                 currentDescription:
                                     active?['description'] as String?,
                               );
@@ -391,9 +392,8 @@ class _RuleRow extends StatelessWidget {
               else
                 l10n.commissionNoExpiry,
             ].join(' '),
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: scheme.onSurfaceVariant,
-            ),
+            style: Theme.of(context).textTheme.bodySmall
+                ?.copyWith(color: scheme.onSurfaceVariant),
           ),
         ],
       ),

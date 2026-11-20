@@ -10,21 +10,24 @@ import 'package:delwaqty/shared/widgets/app_loader.dart';
 import 'package:delwaqty/core/extensions/context_extensions.dart';
 import 'package:delwaqty/core/errors/app_error_text.dart';
 
-String _orderStatusLabel(String status, AppLocalizations l10n) => switch (status) {
-  'pending' => l10n.pending,
-  'confirmed' => l10n.confirmed,
-  'preparing' => l10n.preparing,
-  'ready' => l10n.ready,
-  'picked_up' => l10n.pickedUp,
-  'in_transit' => l10n.inTransit,
-  'delivering' => l10n.delivering,
-  'delivered' => l10n.delivered,
-  'cancelled' => l10n.cancelled,
-  _ => status,
-};
+String _orderStatusLabel(String status, AppLocalizations l10n) =>
+    switch (status) {
+      'pending' => l10n.pending,
+      'confirmed' => l10n.confirmed,
+      'preparing' => l10n.preparing,
+      'ready' => l10n.ready,
+      'picked_up' => l10n.pickedUp,
+      'in_transit' => l10n.inTransit,
+      'delivering' => l10n.delivering,
+      'delivered' => l10n.delivered,
+      'cancelled' => l10n.cancelled,
+      _ => status,
+    };
 
-final _trackingProvider =
-    FutureProvider.family<List<OrderTracking>, String>((ref, orderId) async {
+final _trackingProvider = FutureProvider.family<List<OrderTracking>, String>((
+  ref,
+  orderId,
+) async {
   final repo = ref.watch(orderTrackingRepositoryProvider);
   return repo.getTracking(orderId);
 });
@@ -131,10 +134,7 @@ class _TrackingTile extends StatelessWidget {
               ),
               if (!isLast)
                 Expanded(
-                  child: Container(
-                    width: 2,
-                    color: colorScheme.outlineVariant,
-                  ),
+                  child: Container(width: 2, color: colorScheme.outlineVariant),
                 ),
             ],
           ),

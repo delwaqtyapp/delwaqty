@@ -1,4 +1,5 @@
 import 'dart:ui';
+
 import 'package:flutter/material.dart';
 
 class SidebarTheme extends ThemeExtension<SidebarTheme> {
@@ -109,9 +110,11 @@ class SidebarTheme extends ThemeExtension<SidebarTheme> {
       cardOpacity: cardOpacity ?? this.cardOpacity,
       cardBorderColor: cardBorderColor ?? this.cardBorderColor,
       cardShadowColor: cardShadowColor ?? this.cardShadowColor,
-      selectedGradientStart: selectedGradientStart ?? this.selectedGradientStart,
+      selectedGradientStart:
+          selectedGradientStart ?? this.selectedGradientStart,
       selectedGradientEnd: selectedGradientEnd ?? this.selectedGradientEnd,
-      selectedIndicatorColor: selectedIndicatorColor ?? this.selectedIndicatorColor,
+      selectedIndicatorColor:
+          selectedIndicatorColor ?? this.selectedIndicatorColor,
       iconColor: iconColor ?? this.iconColor,
       textPrimary: textPrimary ?? this.textPrimary,
       textSecondary: textSecondary ?? this.textSecondary,
@@ -119,30 +122,58 @@ class SidebarTheme extends ThemeExtension<SidebarTheme> {
       sectionTitleColor: sectionTitleColor ?? this.sectionTitleColor,
       badgeBackground: badgeBackground ?? this.badgeBackground,
       badgeTextColor: badgeTextColor ?? this.badgeTextColor,
-      quickSettingsBackground: quickSettingsBackground ?? this.quickSettingsBackground,
+      quickSettingsBackground:
+          quickSettingsBackground ?? this.quickSettingsBackground,
     );
   }
 
   @override
-  ThemeExtension<SidebarTheme> lerp(covariant ThemeExtension<SidebarTheme>? other, double t) {
+  ThemeExtension<SidebarTheme> lerp(
+    covariant ThemeExtension<SidebarTheme>? other,
+    double t,
+  ) {
     if (other is! SidebarTheme) return this;
     return SidebarTheme(
       cardGradientTop: Color.lerp(cardGradientTop, other.cardGradientTop, t)!,
-      cardGradientBottom: Color.lerp(cardGradientBottom, other.cardGradientBottom, t)!,
+      cardGradientBottom: Color.lerp(
+        cardGradientBottom,
+        other.cardGradientBottom,
+        t,
+      )!,
       cardOpacity: lerpDouble(cardOpacity, other.cardOpacity, t)!,
       cardBorderColor: Color.lerp(cardBorderColor, other.cardBorderColor, t)!,
       cardShadowColor: Color.lerp(cardShadowColor, other.cardShadowColor, t)!,
-      selectedGradientStart: Color.lerp(selectedGradientStart, other.selectedGradientStart, t)!,
-      selectedGradientEnd: Color.lerp(selectedGradientEnd, other.selectedGradientEnd, t)!,
-      selectedIndicatorColor: Color.lerp(selectedIndicatorColor, other.selectedIndicatorColor, t)!,
+      selectedGradientStart: Color.lerp(
+        selectedGradientStart,
+        other.selectedGradientStart,
+        t,
+      )!,
+      selectedGradientEnd: Color.lerp(
+        selectedGradientEnd,
+        other.selectedGradientEnd,
+        t,
+      )!,
+      selectedIndicatorColor: Color.lerp(
+        selectedIndicatorColor,
+        other.selectedIndicatorColor,
+        t,
+      )!,
       iconColor: Color.lerp(iconColor, other.iconColor, t)!,
       textPrimary: Color.lerp(textPrimary, other.textPrimary, t)!,
       textSecondary: Color.lerp(textSecondary, other.textSecondary, t)!,
       dividerColor: Color.lerp(dividerColor, other.dividerColor, t)!,
-      sectionTitleColor: Color.lerp(sectionTitleColor, other.sectionTitleColor, t)!,
+      sectionTitleColor: Color.lerp(
+        sectionTitleColor,
+        other.sectionTitleColor,
+        t,
+      )!,
       badgeBackground: Color.lerp(badgeBackground, other.badgeBackground, t)!,
       badgeTextColor: Color.lerp(badgeTextColor, other.badgeTextColor, t)!,
-      quickSettingsBackground: Color.lerp(quickSettingsBackground, other.quickSettingsBackground, t)!,
+      quickSettingsBackground: Color.lerp(
+        quickSettingsBackground,
+        other.quickSettingsBackground,
+        t,
+      )!,
     );
   }
 }

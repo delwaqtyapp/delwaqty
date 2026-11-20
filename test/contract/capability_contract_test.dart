@@ -9,11 +9,9 @@ import 'package:flutter_test/flutter_test.dart';
 /// not restock, could not edit their storefront or hours, and the admin had
 /// no emergency console, no audit view and could not claim a complaint.
 void main() {
-  final migrations = Directory('supabase/migrations')
-      .listSync()
-      .whereType<File>()
-      .toList()
-    ..sort((a, b) => a.path.compareTo(b.path));
+  final migrations =
+      Directory('supabase/migrations').listSync().whereType<File>().toList()
+        ..sort((a, b) => a.path.compareTo(b.path));
   final sql = migrations.map((f) => f.readAsStringSync()).join('\n---\n');
 
   String read(String path) => File(path).readAsStringSync();
@@ -28,7 +26,8 @@ void main() {
       expect(
         module,
         contains('resolve_my_merchant'),
-        reason: 'passing auth.uid() as merchant_id filters on a value that '
+        reason:
+            'passing auth.uid() as merchant_id filters on a value that '
             'can never match a merchants.id',
       );
       expect(
@@ -67,9 +66,11 @@ void main() {
       );
       expect(page, contains('provider_set_working_hours'));
       // Invalid input must be rejected server-side.
-      final rpc = RegExp(
-        r'CREATE OR REPLACE FUNCTION public\.provider_set_working_hours[\s\S]*?\$\$;',
-      ).firstMatch(sql)?.group(0) ?? '';
+      final rpc =
+          RegExp(
+            r'CREATE OR REPLACE FUNCTION public\.provider_set_working_hours[\s\S]*?\$\$;',
+          ).firstMatch(sql)?.group(0) ??
+          '';
       expect(rpc, contains('Invalid day of week'));
       expect(rpc, contains('Invalid time format'));
       expect(rpc, contains('must be after opening time'));
@@ -117,10 +118,7 @@ void main() {
         'admin_complaints_page.dart',
       );
       expect(page, contains('assignComplaintProvider'));
-      expect(
-        page,
-        contains('addAdminNote'),
-      );
+      expect(page, contains('addAdminNote'));
     });
 
     test('service performance renders real data, not placeholders', () {
@@ -130,7 +128,8 @@ void main() {
       expect(
         page,
         contains('servicePerformanceProvider'),
-        reason: 'the RPC and the provider existed but the page showed '
+        reason:
+            'the RPC and the provider existed but the page showed '
             '"no data yet" placeholders',
       );
       expect(page, isNot(contains('adminServicePerformancePending\n')));
@@ -139,7 +138,9 @@ void main() {
 
   group('module registration', () {
     test('the new merchant routes are registered', () {
-      final module = read('lib/features/provider/merchant/merchant_module.dart');
+      final module = read(
+        'lib/features/provider/merchant/merchant_module.dart',
+      );
       expect(module, contains("path: 'inventory'"));
       expect(module, contains("path: 'storefront'"));
     });
@@ -160,7 +161,8 @@ void main() {
       expect(
         raw,
         isNot(contains('admin_placeholder')),
-        reason: 'a placeholder mobilesdk_app_id makes every Firebase call '
+        reason:
+            'a placeholder mobilesdk_app_id makes every Firebase call '
             'return 404 (Crashlytics, Messaging, Installations)',
       );
     });

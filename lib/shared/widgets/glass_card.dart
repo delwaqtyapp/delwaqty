@@ -1,4 +1,5 @@
 import 'dart:ui';
+
 import 'package:flutter/material.dart';
 
 class GlassCard extends StatelessWidget {
@@ -22,10 +23,11 @@ class GlassCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    final effectiveBg = backgroundColor ??
+    final effectiveBg =
+        backgroundColor ??
         colorScheme.surfaceContainerHighest.withValues(alpha: 0.4);
-    final effectiveBorder = borderColor ??
-        colorScheme.outline.withValues(alpha: 0.15);
+    final effectiveBorder =
+        borderColor ?? colorScheme.outline.withValues(alpha: 0.15);
 
     return ClipRRect(
       borderRadius: BorderRadius.circular(borderRadius),

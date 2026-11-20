@@ -7,13 +7,11 @@ import 'package:delwaqty/features/admin/sanctions/data/repositories/sanctions_re
 
 final supabaseSanctionsDataSourceProvider =
     Provider<SupabaseSanctionsDataSource>((ref) {
-  return SupabaseSanctionsDataSource(Supabase.instance.client);
-});
+      return SupabaseSanctionsDataSource(Supabase.instance.client);
+    });
 
 final sanctionsRepositoryProvider = Provider<SanctionsRepository>((ref) {
-  return SanctionsRepositoryImpl(
-    ref.read(supabaseSanctionsDataSourceProvider),
-  );
+  return SanctionsRepositoryImpl(ref.read(supabaseSanctionsDataSourceProvider));
 });
 
 final sanctionsProvider = FutureProvider<List<Sanction>>((ref) async {

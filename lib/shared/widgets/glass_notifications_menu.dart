@@ -29,11 +29,7 @@ class GlassNotificationsMenuController {
     _entry = null;
   }
 
-  static void open(
-    BuildContext context,
-    WidgetRef ref, {
-    Rect? anchor,
-  }) {
+  static void open(BuildContext context, WidgetRef ref, {Rect? anchor}) {
     if (_entry != null) return;
 
     final router = GoRouter.maybeOf(context);
@@ -201,10 +197,7 @@ class _GlassNotificationsMenuOverlayState
 }
 
 class _GlassNotificationsPanel extends ConsumerWidget {
-  const _GlassNotificationsPanel({
-    required this.onClose,
-    required this.router,
-  });
+  const _GlassNotificationsPanel({required this.onClose, required this.router});
 
   final Future<void> Function([VoidCallback? afterClose]) onClose;
   final GoRouter? router;
@@ -231,7 +224,8 @@ class _GlassNotificationsPanel extends ConsumerWidget {
     });
 
     final notificationsAsync = ref.watch(notificationsProvider);
-    final unreadCount = ref.watch(unreadCountStreamProvider).value ??
+    final unreadCount =
+        ref.watch(unreadCountStreamProvider).value ??
         ref.watch(unreadCountProvider).value ??
         0;
 
@@ -290,9 +284,7 @@ class _GlassNotificationsPanel extends ConsumerWidget {
                             Flexible(
                               child: Text(
                                 l10n.notifications,
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .titleMedium
+                                style: Theme.of(context).textTheme.titleMedium
                                     ?.copyWith(fontWeight: FontWeight.w800),
                                 overflow: TextOverflow.ellipsis,
                               ),
@@ -310,9 +302,7 @@ class _GlassNotificationsPanel extends ConsumerWidget {
                                 ),
                                 child: Text(
                                   unreadCount > 99 ? '99+' : '$unreadCount',
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .labelSmall
+                                  style: Theme.of(context).textTheme.labelSmall
                                       ?.copyWith(
                                         color: Colors.white,
                                         fontWeight: FontWeight.w700,
@@ -381,7 +371,8 @@ class _GlassNotificationsPanel extends ConsumerWidget {
                           ),
                           const SizedBox(height: 8),
                           TextButton.icon(
-                            onPressed: () => ref.invalidate(notificationsProvider),
+                            onPressed: () =>
+                                ref.invalidate(notificationsProvider),
                             icon: const Icon(Icons.refresh_rounded, size: 16),
                             label: Text(l10n.retry),
                           ),
@@ -401,23 +392,21 @@ class _GlassNotificationsPanel extends ConsumerWidget {
                               Icon(
                                 Icons.notifications_none_rounded,
                                 size: 36,
-                                color: cs.onSurfaceVariant.withValues(alpha: 0.7),
+                                color: cs.onSurfaceVariant.withValues(
+                                  alpha: 0.7,
+                                ),
                               ),
                               const SizedBox(height: 8),
                               Text(
                                 l10n.noNotifications,
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .titleSmall
+                                style: Theme.of(context).textTheme.titleSmall
                                     ?.copyWith(fontWeight: FontWeight.w700),
                               ),
                               const SizedBox(height: 4),
                               Text(
                                 l10n.noNotificationsMessage,
                                 textAlign: TextAlign.center,
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .bodySmall
+                                style: Theme.of(context).textTheme.bodySmall
                                     ?.copyWith(color: cs.onSurfaceVariant),
                               ),
                             ],
@@ -446,7 +435,8 @@ class _GlassNotificationsPanel extends ConsumerWidget {
                               } catch (_) {}
 
                               final authState = ref.read(authStateProvider);
-                              final isAdmin = authState is AuthAuthenticated &&
+                              final isAdmin =
+                                  authState is AuthAuthenticated &&
                                   authState.user.isAdmin;
                               final route = NotificationRouteResolver.safe(
                                 deepLink: n.deepLink,
@@ -499,11 +489,11 @@ class _GlassNotificationsPanel extends ConsumerWidget {
                         const SizedBox(width: 6),
                         Text(
                           l10n.viewAll,
-                          style:
-                              Theme.of(context).textTheme.labelLarge?.copyWith(
-                                    color: cs.primary,
-                                    fontWeight: FontWeight.w700,
-                                  ),
+                          style: Theme.of(context).textTheme.labelLarge
+                              ?.copyWith(
+                                color: cs.primary,
+                                fontWeight: FontWeight.w700,
+                              ),
                         ),
                       ],
                     ),
@@ -573,9 +563,7 @@ class _GlassNotificationItem extends StatelessWidget {
                         Expanded(
                           child: Text(
                             title,
-                            style: Theme.of(context)
-                                .textTheme
-                                .bodySmall
+                            style: Theme.of(context).textTheme.bodySmall
                                 ?.copyWith(
                                   fontWeight: notification.isRead
                                       ? FontWeight.w600
@@ -602,9 +590,9 @@ class _GlassNotificationItem extends StatelessWidget {
                     Text(
                       body,
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            fontSize: 11.5,
-                            color: cs.onSurfaceVariant,
-                          ),
+                        fontSize: 11.5,
+                        color: cs.onSurfaceVariant,
+                      ),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -615,9 +603,9 @@ class _GlassNotificationItem extends StatelessWidget {
                         l10n,
                       ),
                       style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                            fontSize: 10,
-                            color: cs.onSurfaceVariant.withValues(alpha: 0.8),
-                          ),
+                        fontSize: 10,
+                        color: cs.onSurfaceVariant.withValues(alpha: 0.8),
+                      ),
                     ),
                   ],
                 ),

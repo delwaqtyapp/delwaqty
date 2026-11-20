@@ -4,14 +4,11 @@ import 'package:delwaqty/core/theme/app_text_styles.dart';
 import 'package:delwaqty/core/theme/theme_mode_provider.dart';
 import 'package:delwaqty/core/localization/locale_provider.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
+
 import 'sidebar_theme.dart';
 
 class QuickSettingsCard extends StatelessWidget {
-  const QuickSettingsCard({
-    super.key,
-    required this.ref,
-    required this.l10n,
-  });
+  const QuickSettingsCard({super.key, required this.ref, required this.l10n});
 
   final WidgetRef ref;
   final AppLocalizations l10n;
@@ -27,10 +24,7 @@ class QuickSettingsCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: st.quickSettingsBackground,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: st.dividerColor,
-          width: 0.5,
-        ),
+        border: Border.all(color: st.dividerColor, width: 0.5),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -46,7 +40,8 @@ class QuickSettingsCard extends StatelessWidget {
               child: Switch(
                 value: themeMode == ThemeMode.dark,
                 activeThumbColor: st.selectedGradientStart,
-                onChanged: (_) => ref.read(themeModeProvider.notifier).toggleTheme(),
+                onChanged: (_) =>
+                    ref.read(themeModeProvider.notifier).toggleTheme(),
               ),
             ),
           ),
@@ -113,10 +108,7 @@ class _QuickSettingTile extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       child: Row(
         children: [
-          SizedBox(
-            width: 20,
-            child: Icon(icon, size: 18, color: st.iconColor),
-          ),
+          SizedBox(width: 20, child: Icon(icon, size: 18, color: st.iconColor)),
           const SizedBox(width: 12),
           Expanded(
             child: Column(

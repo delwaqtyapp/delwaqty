@@ -11,10 +11,7 @@ class DeviceLockState {
   final bool unlocked;
   final bool hasDeviceAccount;
 
-  DeviceLockState copyWith({
-    bool? unlocked,
-    bool? hasDeviceAccount,
-  }) {
+  DeviceLockState copyWith({bool? unlocked, bool? hasDeviceAccount}) {
     return DeviceLockState(
       unlocked: unlocked ?? this.unlocked,
       hasDeviceAccount: hasDeviceAccount ?? this.hasDeviceAccount,
@@ -24,8 +21,8 @@ class DeviceLockState {
 
 final deviceLockProvider =
     NotifierProvider<DeviceLockNotifier, DeviceLockState>(
-  DeviceLockNotifier.new,
-);
+      DeviceLockNotifier.new,
+    );
 
 class DeviceLockNotifier extends Notifier<DeviceLockState> {
   @override
@@ -44,16 +41,10 @@ class DeviceLockNotifier extends Notifier<DeviceLockState> {
           .read(biometricAuthStoreProvider)
           .hasAnyCredentials()
           .timeout(const Duration(seconds: 5));
-      state = DeviceLockState(
-        unlocked: false,
-        hasDeviceAccount: hasCreds,
-      );
+      state = DeviceLockState(unlocked: false, hasDeviceAccount: hasCreds);
     } catch (e) {
       debugPrint('Device lock init failed, assuming no device account: $e');
-      state = const DeviceLockState(
-        unlocked: false,
-        hasDeviceAccount: false,
-      );
+      state = const DeviceLockState(unlocked: false, hasDeviceAccount: false);
     }
   }
 

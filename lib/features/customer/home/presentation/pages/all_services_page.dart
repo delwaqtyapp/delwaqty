@@ -42,7 +42,10 @@ final _allCategoriesProvider = FutureProvider<List<_GridItem>>((ref) async {
   final repo = ref.watch(cachedServiceBookingRepositoryProvider);
   final all = await repo.getCategories();
   final sortedServices = [...all]
-    ..sort((a, b) => serviceCategoryRank(a.type).compareTo(serviceCategoryRank(b.type)));
+    ..sort(
+      (a, b) =>
+          serviceCategoryRank(a.type).compareTo(serviceCategoryRank(b.type)),
+    );
 
   return [
     for (final c in sortedPlatform) _PlatformGridItem(c),
@@ -272,6 +275,8 @@ class _SimpleGridTile extends StatelessWidget {
   }
 
   Widget _emojiWidget() {
-    return Center(child: Text(emoji ?? '🏪', style: const TextStyle(fontSize: 22)));
+    return Center(
+      child: Text(emoji ?? '🏪', style: const TextStyle(fontSize: 22)),
+    );
   }
 }

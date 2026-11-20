@@ -107,8 +107,7 @@ class _MerchantProductsPageState extends ConsumerState<MerchantProductsPage> {
                 final filtered = _searchQuery.isEmpty
                     ? products
                     : products.where((p) {
-                        final name =
-                            (p['name'] as String? ?? '').toLowerCase();
+                        final name = (p['name'] as String? ?? '').toLowerCase();
                         return name.contains(_searchQuery.toLowerCase());
                       }).toList();
 
@@ -125,7 +124,7 @@ class _MerchantProductsPageState extends ConsumerState<MerchantProductsPage> {
                           : null,
                       onAction: _searchQuery.isEmpty
                           ? () =>
-                              context.push('/merchant-dashboard/products/new')
+                                context.push('/merchant-dashboard/products/new')
                           : null,
                     ),
                   );
@@ -202,7 +201,9 @@ class _MerchantProductsPageState extends ConsumerState<MerchantProductsPage> {
             },
             child: Text(
               l10n.delete,
-              style: TextStyle(color: Theme.of(dialogContext).colorScheme.error),
+              style: TextStyle(
+                color: Theme.of(dialogContext).colorScheme.error,
+              ),
             ),
           ),
         ],
@@ -302,10 +303,11 @@ class _ProductCard extends ConsumerWidget {
                     vertical: 2,
                   ),
                   decoration: BoxDecoration(
-                    color: (isAvailable
-                            ? AppColors.successLight
-                            : AppColors.errorLight)
-                        .withValues(alpha: 0.1),
+                    color:
+                        (isAvailable
+                                ? AppColors.successLight
+                                : AppColors.errorLight)
+                            .withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(4),
                   ),
                   child: Text(

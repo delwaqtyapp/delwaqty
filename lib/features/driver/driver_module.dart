@@ -21,7 +21,9 @@ import 'package:delwaqty/features/driver/financial/presentation/pages/driver_top
 import 'package:delwaqty/features/driver/presentation/pages/driver_access_page.dart';
 import 'package:delwaqty/features/driver/presentation/pages/driver_delivery_detail_page.dart';
 
-final supabaseDriverRepositoryImplProvider = Provider<DriverRepositoryImpl>((ref) {
+final supabaseDriverRepositoryImplProvider = Provider<DriverRepositoryImpl>((
+  ref,
+) {
   return DriverRepositoryImpl(
     ref.watch(supabaseDriverDataSourceProvider),
     ref.watch(supabaseDriverPlatformDataSourceProvider),
@@ -32,7 +34,10 @@ final driverRepositoryProvider = Provider<DriverRepository>(
   (ref) => ref.watch(supabaseDriverRepositoryImplProvider),
 );
 
-final driverProfileProvider = FutureProvider.family<DriverProfile?, String>((ref, userId) async {
+final driverProfileProvider = FutureProvider.family<DriverProfile?, String>((
+  ref,
+  userId,
+) async {
   final repo = ref.watch(driverRepositoryProvider);
   final profile = await repo.getProfile(userId);
   if (profile != null) return profile;
@@ -71,7 +76,10 @@ class DriverModule extends FeatureModule {
   int get navPriority => 0;
 
   @override
-  Set<ModuleCapability> get capabilities => {ModuleCapability.requiresMap, ModuleCapability.requiresDelivery};
+  Set<ModuleCapability> get capabilities => {
+    ModuleCapability.requiresMap,
+    ModuleCapability.requiresDelivery,
+  };
 
   @override
   List<DrawerEntry> get drawerEntries => [

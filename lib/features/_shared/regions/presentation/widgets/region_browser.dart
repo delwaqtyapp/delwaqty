@@ -82,8 +82,7 @@ class _RegionBrowserState extends ConsumerState<RegionBrowser> {
     if (_openingId != null) return;
     setState(() => _openingId = region.id);
     try {
-      final children =
-          await ref.read(regionChildrenProvider(region.id).future);
+      final children = await ref.read(regionChildrenProvider(region.id).future);
       if (!mounted) return;
       if (children.isNotEmpty) {
         setState(() => _crumbs.add(region));
@@ -168,9 +167,7 @@ class _RegionBrowserState extends ConsumerState<RegionBrowser> {
             ActionChip(
               avatar: const Icon(Icons.public_rounded, size: 16),
               label: Text(l10n.allOfEgypt),
-              onPressed: _crumbs.isEmpty
-                  ? null
-                  : () => setState(_crumbs.clear),
+              onPressed: _crumbs.isEmpty ? null : () => setState(_crumbs.clear),
             ),
             for (var i = 0; i < _crumbs.length; i++) ...[
               const Padding(
@@ -182,7 +179,9 @@ class _RegionBrowserState extends ConsumerState<RegionBrowser> {
                 label: Text(_displayName(_crumbs[i])),
                 onPressed: i == _crumbs.length - 1
                     ? null
-                    : () => setState(() => _crumbs.removeRange(i + 1, _crumbs.length)),
+                    : () => setState(
+                        () => _crumbs.removeRange(i + 1, _crumbs.length),
+                      ),
               ),
             ],
           ],
@@ -230,8 +229,7 @@ class _RegionBrowserState extends ConsumerState<RegionBrowser> {
               }
               return ListView.separated(
                 itemCount: regions.length,
-                separatorBuilder: (context, index) =>
-                    const Divider(height: 1),
+                separatorBuilder: (context, index) => const Divider(height: 1),
                 itemBuilder: (context, index) =>
                     _buildRow(context, ref, regions[index]),
               );

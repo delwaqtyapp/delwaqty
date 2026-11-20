@@ -8,8 +8,10 @@ import 'package:delwaqty/features/driver/domain/entities/driver_performance.dart
 
 final supabaseDriverPlatformDataSourceProvider =
     Provider<SupabaseDriverPlatformDataSource>((ref) {
-  return SupabaseDriverPlatformDataSource(ref.watch(supabaseClientProvider));
-});
+      return SupabaseDriverPlatformDataSource(
+        ref.watch(supabaseClientProvider),
+      );
+    });
 
 class SupabaseDriverPlatformDataSource {
   SupabaseDriverPlatformDataSource(this._client);
@@ -35,21 +37,29 @@ class SupabaseDriverPlatformDataSource {
     String? profilePhotoUrl,
     required int step,
   }) async {
-    _checkRpc(await _client.rpc('submit_driver_onboarding', params: {
-      'p_driver_id': driverId,
-      'p_full_name': ?fullName,
-      'p_phone': ?phone,
-      'p_national_id': ?nationalId,
-      'p_address': ?address,
-      'p_profile_photo_url': ?profilePhotoUrl,
-      'p_onboarding_step': step,
-    }));
+    _checkRpc(
+      await _client.rpc(
+        'submit_driver_onboarding',
+        params: {
+          'p_driver_id': driverId,
+          'p_full_name': ?fullName,
+          'p_phone': ?phone,
+          'p_national_id': ?nationalId,
+          'p_address': ?address,
+          'p_profile_photo_url': ?profilePhotoUrl,
+          'p_onboarding_step': step,
+        },
+      ),
+    );
   }
 
   Future<void> completeOnboarding(String driverId) async {
-    _checkRpc(await _client.rpc('complete_driver_onboarding', params: {
-      'p_driver_id': driverId,
-    }));
+    _checkRpc(
+      await _client.rpc(
+        'complete_driver_onboarding',
+        params: {'p_driver_id': driverId},
+      ),
+    );
   }
 
   // ── Vehicles ──
@@ -100,17 +110,22 @@ class SupabaseDriverPlatformDataSource {
     int seats = 4,
     String? photoUrl,
   }) async {
-    final map = _checkRpc(await _client.rpc('add_driver_vehicle', params: {
-      'p_driver_id': driverId,
-      'p_category': category,
-      'p_make': make,
-      'p_model': model,
-      'p_year': year,
-      'p_color': color,
-      'p_plate_number': plateNumber,
-      'p_seats': seats,
-      'p_photo_url': photoUrl,
-    }));
+    final map = _checkRpc(
+      await _client.rpc(
+        'add_driver_vehicle',
+        params: {
+          'p_driver_id': driverId,
+          'p_category': category,
+          'p_make': make,
+          'p_model': model,
+          'p_year': year,
+          'p_color': color,
+          'p_plate_number': plateNumber,
+          'p_seats': seats,
+          'p_photo_url': photoUrl,
+        },
+      ),
+    );
     return map['vehicle_id'] as String? ?? '';
   }
 
@@ -127,26 +142,33 @@ class SupabaseDriverPlatformDataSource {
     String? photoUrl,
     bool? isActive,
   }) async {
-    _checkRpc(await _client.rpc('update_driver_vehicle', params: {
-      'p_vehicle_id': vehicleId,
-      'p_driver_id': driverId,
-      'p_category': ?category,
-      'p_make': ?make,
-      'p_model': ?model,
-      'p_year': ?year,
-      'p_color': ?color,
-      'p_plate_number': ?plateNumber,
-      'p_seats': ?seats,
-      'p_photo_url': ?photoUrl,
-      'p_is_active': ?isActive,
-    }));
+    _checkRpc(
+      await _client.rpc(
+        'update_driver_vehicle',
+        params: {
+          'p_vehicle_id': vehicleId,
+          'p_driver_id': driverId,
+          'p_category': ?category,
+          'p_make': ?make,
+          'p_model': ?model,
+          'p_year': ?year,
+          'p_color': ?color,
+          'p_plate_number': ?plateNumber,
+          'p_seats': ?seats,
+          'p_photo_url': ?photoUrl,
+          'p_is_active': ?isActive,
+        },
+      ),
+    );
   }
 
   Future<void> toggleVehicleActive(String vehicleId, String driverId) async {
-    _checkRpc(await _client.rpc('toggle_vehicle_active', params: {
-      'p_vehicle_id': vehicleId,
-      'p_driver_id': driverId,
-    }));
+    _checkRpc(
+      await _client.rpc(
+        'toggle_vehicle_active',
+        params: {'p_vehicle_id': vehicleId, 'p_driver_id': driverId},
+      ),
+    );
   }
 
   // ── Documents ──
@@ -190,23 +212,31 @@ class SupabaseDriverPlatformDataSource {
     int? fileSize,
     DateTime? expiresAt,
   }) async {
-    final map = _checkRpc(await _client.rpc('upsert_driver_document', params: {
-      'p_driver_id': driverId,
-      'p_doc_type': docType,
-      'p_file_url': fileUrl,
-      'p_file_name': fileName,
-      'p_file_size': fileSize,
-      'p_expires_at': expiresAt?.toIso8601String().split('T').first,
-    }));
+    final map = _checkRpc(
+      await _client.rpc(
+        'upsert_driver_document',
+        params: {
+          'p_driver_id': driverId,
+          'p_doc_type': docType,
+          'p_file_url': fileUrl,
+          'p_file_name': fileName,
+          'p_file_size': fileSize,
+          'p_expires_at': expiresAt?.toIso8601String().split('T').first,
+        },
+      ),
+    );
     return map['document_id'] as String? ?? '';
   }
 
   // ── Wallet ──
 
   Future<WalletDetail> getWalletDetail(String driverId) async {
-    final map = _checkRpc(await _client.rpc('get_driver_wallet_detail', params: {
-      'p_driver_id': driverId,
-    }));
+    final map = _checkRpc(
+      await _client.rpc(
+        'get_driver_wallet_detail',
+        params: {'p_driver_id': driverId},
+      ),
+    );
     return WalletDetail(
       balance: (map['balance'] as num?)?.toDouble() ?? 0,
       bonusBalance: (map['bonus_balance'] as num?)?.toDouble() ?? 0,
@@ -220,9 +250,12 @@ class SupabaseDriverPlatformDataSource {
   // ── Performance ──
 
   Future<DriverPerformance> getPerformance(String driverId) async {
-    final map = _checkRpc(await _client.rpc('get_driver_performance', params: {
-      'p_driver_id': driverId,
-    }));
+    final map = _checkRpc(
+      await _client.rpc(
+        'get_driver_performance',
+        params: {'p_driver_id': driverId},
+      ),
+    );
     return DriverPerformance(
       totalTrips: (map['total_trips'] as num?)?.toInt() ?? 0,
       completedTrips: (map['completed_trips'] as num?)?.toInt() ?? 0,

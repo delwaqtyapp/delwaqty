@@ -3,7 +3,6 @@ import 'package:delwaqty/features/admin/escalation/domain/repositories/escalatio
 import 'package:delwaqty/features/admin/escalation/data/datasources/remote/supabase_escalation_data_source.dart';
 
 class EscalationRepositoryImpl implements EscalationRepository {
-
   EscalationRepositoryImpl(this._dataSource);
   final SupabaseEscalationDataSource _dataSource;
 

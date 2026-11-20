@@ -1,4 +1,5 @@
 import 'dart:ui';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:delwaqty/core/constants/storage_keys.dart';
 import 'package:delwaqty/data/datasources/local/shared_preferences_service.dart';
@@ -24,10 +25,7 @@ class LocaleNotifier extends Notifier<Locale> {
 
   Future<void> setLocale(Locale locale) async {
     final sharedPrefs = ref.read(sharedPreferencesProvider);
-    await sharedPrefs.saveString(
-      key: storageKey,
-      value: locale.languageCode,
-    );
+    await sharedPrefs.saveString(key: storageKey, value: locale.languageCode);
     state = locale;
   }
 

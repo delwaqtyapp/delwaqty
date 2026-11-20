@@ -3,10 +3,9 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('App smoke test', (WidgetTester tester) async {
-    await tester.pumpWidget(const Directionality(
-      textDirection: TextDirection.ltr,
-      child: SizedBox(),
-    ));
+    await tester.pumpWidget(
+      const Directionality(textDirection: TextDirection.ltr, child: SizedBox()),
+    );
     expect(find.byType(SizedBox), findsOneWidget);
   });
 }

@@ -60,7 +60,9 @@ class SupabaseOrderDataSource {
       status: _parseStatus(row['status'] as String),
       deliveryAddress: row['delivery_address'] as String?,
       paymentMethod: row['payment_method'] as String?,
-      paymentStatus: _parsePaymentStatus(row['payment_status'] as String? ?? 'unpaid'),
+      paymentStatus: _parsePaymentStatus(
+        row['payment_status'] as String? ?? 'unpaid',
+      ),
       paymentId: row['payment_id'] as String?,
       transactionId: row['transaction_id'] as String?,
       specialInstructions:

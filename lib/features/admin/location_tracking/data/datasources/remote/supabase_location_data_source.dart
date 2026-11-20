@@ -2,11 +2,13 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:delwaqty/features/admin/location_tracking/domain/entities/location_update.dart';
 
 class SupabaseLocationDataSource {
-
   SupabaseLocationDataSource(this._client);
   final SupabaseClient _client;
 
-  Future<List<LocationUpdate>> getUserLocations(String userId, {int limit = 50}) async {
+  Future<List<LocationUpdate>> getUserLocations(
+    String userId, {
+    int limit = 50,
+  }) async {
     final rows = await _client
         .from('location_updates')
         .select()
@@ -17,7 +19,9 @@ class SupabaseLocationDataSource {
   }
 
   Future<List<LocationUpdate>> getActiveDrivers() async {
-    final sixHoursAgo = DateTime.now().subtract(const Duration(hours: 6)).toIso8601String();
+    final sixHoursAgo = DateTime.now()
+        .subtract(const Duration(hours: 6))
+        .toIso8601String();
     final rows = await _client
         .from('location_updates')
         .select()

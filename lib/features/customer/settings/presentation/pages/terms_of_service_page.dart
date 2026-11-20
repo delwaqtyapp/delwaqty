@@ -96,11 +96,7 @@ class TermsOfServicePage extends StatelessWidget {
           ),
           const SizedBox(height: 20),
           for (final section in sections)
-            _buildSection(
-              context,
-              title: section.title,
-              body: section.body,
-            ),
+            _buildSection(context, title: section.title, body: section.body),
           const SizedBox(height: 16),
         ],
       ),
@@ -120,9 +116,7 @@ class TermsOfServicePage extends StatelessWidget {
         clipBehavior: Clip.antiAlias,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
-          side: BorderSide(
-            color: cs.outlineVariant.withValues(alpha: 0.45),
-          ),
+          side: BorderSide(color: cs.outlineVariant.withValues(alpha: 0.45)),
         ),
         child: Padding(
           padding: const EdgeInsets.all(16),

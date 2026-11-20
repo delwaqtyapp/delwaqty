@@ -41,7 +41,8 @@ enum AdminRole {
     AdminRole.admin => 5,
   };
 
-  bool canAssignRole(AdminRole target) => hierarchyLevel < target.hierarchyLevel;
+  bool canAssignRole(AdminRole target) =>
+      hierarchyLevel < target.hierarchyLevel;
 }
 
 enum AdminUserStatus { active, suspended, pending, deactivated }
@@ -197,10 +198,8 @@ abstract class AdminQuickAction with _$AdminQuickAction {
 
 @freezed
 abstract class RevenueData with _$RevenueData {
-  const factory RevenueData({
-    required DateTime date,
-    required double amount,
-  }) = _RevenueData;
+  const factory RevenueData({required DateTime date, required double amount}) =
+      _RevenueData;
 
   factory RevenueData.fromJson(Map<String, dynamic> json) =>
       _$RevenueDataFromJson(json);

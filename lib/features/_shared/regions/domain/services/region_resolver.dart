@@ -26,7 +26,10 @@ class RegionResolver {
     v = v.replaceAll('ة', 'ه');
     v = v.replaceAll('ـ', '');
     v = v.replaceAll('’', "'");
-    v = v.replaceAll(RegExp(r'[^a-z0-9\u0621-\u064A\u0660-\u0669\u06F0-\u06F9]+'), ' ');
+    v = v.replaceAll(
+      RegExp(r'[^a-z0-9\u0621-\u064A\u0660-\u0669\u06F0-\u06F9]+'),
+      ' ',
+    );
     v = v.trim().replaceAll(RegExp(r'\s+'), ' ');
     return v;
   }
@@ -68,7 +71,9 @@ class RegionResolver {
     }
     if (candidateWords.isEmpty) return null;
 
-    final matches = candidates.where((c) => _matches(candidateWords, c)).toList();
+    final matches = candidates
+        .where((c) => _matches(candidateWords, c))
+        .toList();
     if (matches.length != 1) return null;
     return matches.single.id;
   }

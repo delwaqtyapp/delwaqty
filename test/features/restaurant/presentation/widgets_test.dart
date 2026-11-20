@@ -71,7 +71,9 @@ void main() {
       expect(find.byIcon(Icons.delivery_dining_rounded), findsNothing);
     });
 
-    testWidgets('shows only delivery when only hasDelivery is true', (tester) async {
+    testWidgets('shows only delivery when only hasDelivery is true', (
+      tester,
+    ) async {
       final settings = RestaurantSettings(
         id: 'rs1',
         merchantId: 'm1',
@@ -100,9 +102,9 @@ void main() {
         createdAt: DateTime(2025, 6, 15),
       );
 
-      await tester.pumpWidget(wrapInApp(
-        SizedBox(width: 300, child: OfferBannerCard(offer: offer)),
-      ));
+      await tester.pumpWidget(
+        wrapInApp(SizedBox(width: 300, child: OfferBannerCard(offer: offer))),
+      );
       await tester.pumpAndSettle();
 
       expect(find.text('20% Off Everything'), findsOneWidget);
@@ -119,9 +121,9 @@ void main() {
         createdAt: DateTime(2025, 6, 15),
       );
 
-      await tester.pumpWidget(wrapInApp(
-        SizedBox(width: 300, child: OfferBannerCard(offer: offer)),
-      ));
+      await tester.pumpWidget(
+        wrapInApp(SizedBox(width: 300, child: OfferBannerCard(offer: offer))),
+      );
       await tester.pumpAndSettle();
 
       expect(find.text('5 EGP Off'), findsOneWidget);
@@ -137,9 +139,9 @@ void main() {
         createdAt: DateTime(2025, 6, 15),
       );
 
-      await tester.pumpWidget(wrapInApp(
-        SizedBox(width: 300, child: OfferBannerCard(offer: offer)),
-      ));
+      await tester.pumpWidget(
+        wrapInApp(SizedBox(width: 300, child: OfferBannerCard(offer: offer))),
+      );
       await tester.pumpAndSettle();
 
       expect(find.byType(OfferBannerCard), findsOneWidget);
@@ -154,9 +156,9 @@ void main() {
         createdAt: DateTime(2025, 6, 15),
       );
 
-      await tester.pumpWidget(wrapInApp(
-        SizedBox(width: 300, child: OfferBannerCard(offer: offer)),
-      ));
+      await tester.pumpWidget(
+        wrapInApp(SizedBox(width: 300, child: OfferBannerCard(offer: offer))),
+      );
       await tester.pumpAndSettle();
 
       expect(find.byType(OfferBannerCard), findsOneWidget);

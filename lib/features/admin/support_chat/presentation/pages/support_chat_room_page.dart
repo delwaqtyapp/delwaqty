@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
@@ -27,7 +28,8 @@ class SupportChatRoomPage extends ConsumerStatefulWidget {
   final String roomId;
 
   @override
-  ConsumerState<SupportChatRoomPage> createState() => _SupportChatRoomPageState();
+  ConsumerState<SupportChatRoomPage> createState() =>
+      _SupportChatRoomPageState();
 }
 
 class _SupportChatRoomPageState extends ConsumerState<SupportChatRoomPage> {
@@ -82,9 +84,8 @@ class _SupportChatRoomPageState extends ConsumerState<SupportChatRoomPage> {
       );
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(appErrorText(context, e))),
-        );
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(appErrorText(context, e))));
       }
     }
   }
@@ -129,10 +130,7 @@ class _SupportChatRoomPageState extends ConsumerState<SupportChatRoomPage> {
 
   // Per-bubble role label: prefers the message's own sender_type when present,
   // falling back to the legacy isFromAdmin/admin-vs-customer split.
-  String _senderRoleLabel(
-    String effectiveRole,
-    AppLocalizations l10n,
-  ) {
+  String _senderRoleLabel(String effectiveRole, AppLocalizations l10n) {
     switch (effectiveRole) {
       case 'admin':
         return l10n.adminLabel;
@@ -198,8 +196,8 @@ class _SupportChatRoomPageState extends ConsumerState<SupportChatRoomPage> {
     final messages = messagesAsync.asData?.value;
     if (messages == null || messages.isEmpty) return;
     final candidate = messages.where((m) {
-      final isCall = m.messageType == 'call' ||
-          (m.metaData?['call_type'] != null);
+      final isCall =
+          m.messageType == 'call' || (m.metaData?['call_type'] != null);
       if (!isCall) return false;
       final status = (m.metaData?['status'] as String?) ?? 'ringing';
       if (status != 'ringing') return false;
@@ -236,11 +234,9 @@ class _SupportChatRoomPageState extends ConsumerState<SupportChatRoomPage> {
     _typingDebounce = Timer(const Duration(milliseconds: 1200), () {
       final users2 = _currentUser();
       if (users2 == null) return;
-      ref.read(chatRepositoryProvider).setTyping(
-            roomId: widget.roomId,
-            userId: users2.id,
-            isTyping: false,
-          );
+      ref
+          .read(chatRepositoryProvider)
+          .setTyping(roomId: widget.roomId, userId: users2.id, isTyping: false);
     });
     return t;
   }
@@ -256,7 +252,9 @@ class _SupportChatRoomPageState extends ConsumerState<SupportChatRoomPage> {
     final roomAsync = ref.watch(chatRoomProvider(widget.roomId));
     final roomLiveAsync = ref.watch(chatRoomStreamProvider(widget.roomId));
     final isRoomActive =
-        roomLiveAsync.asData?.value.isActive ?? roomAsync.asData?.value.isActive ?? true;
+        roomLiveAsync.asData?.value.isActive ??
+        roomAsync.asData?.value.isActive ??
+        true;
     final peerTyping = ref.watch(chatPeerTypingProvider(widget.roomId));
     final permissionsAsync = ref.watch(chatPermissionsProvider);
     final permissions = permissionsAsync.asData?.value ?? <String, dynamic>{};
@@ -270,7 +268,8 @@ class _SupportChatRoomPageState extends ConsumerState<SupportChatRoomPage> {
         if (msgs.isNotEmpty) {
           final msg = msgs.last;
           final prevMsgs = prev?.asData?.value;
-          final isNew = prevMsgs == null ||
+          final isNew =
+              prevMsgs == null ||
               prevMsgs.length != msgs.length ||
               (prevMsgs.isNotEmpty && prevMsgs.last.id != msg.id);
           if (isNew) {
@@ -288,13 +287,14 @@ class _SupportChatRoomPageState extends ConsumerState<SupportChatRoomPage> {
 
     final roomVal = roomLiveAsync.asData?.value ?? roomAsync.asData?.value;
     final referenceNumber = roomVal?.referenceNumber;
-    final peerIds = roomVal?.participantIds
+    final peerIds =
+        roomVal?.participantIds
             .where((id) => id.isNotEmpty && id != user?.id)
             .toList() ??
         const <String>[];
     final peerProfile = peerIds.isNotEmpty
         ? (ref.watch(chatRoomUserProvider(peerIds.first)).asData?.value ??
-            const <String, dynamic>{})
+              const <String, dynamic>{})
         : const <String, dynamic>{};
     final peerName = (peerProfile['full_name'] as String?)?.trim() ?? '';
 
@@ -307,8 +307,8 @@ class _SupportChatRoomPageState extends ConsumerState<SupportChatRoomPage> {
               peerName.isNotEmpty
                   ? peerName
                   : (referenceNumber?.isEmpty ?? true
-                      ? '${l10n.chatRoom} #${widget.roomId.length >= 6 ? widget.roomId.substring(0, 6) : widget.roomId}'
-                      : referenceNumber ?? ''),
+                        ? '${l10n.chatRoom} #${widget.roomId.length >= 6 ? widget.roomId.substring(0, 6) : widget.roomId}'
+                        : referenceNumber ?? ''),
               style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
             ),
             if (peerName.isNotEmpty || (referenceNumber?.isNotEmpty ?? false))
@@ -348,7 +348,8 @@ class _SupportChatRoomPageState extends ConsumerState<SupportChatRoomPage> {
       ),
       body: Column(
         children: [
-          if (roomAsync.asData?.value != null) _originBanner(roomAsync.asData!.value, l10n, cs),
+          if (roomAsync.asData?.value != null)
+            _originBanner(roomAsync.asData!.value, l10n, cs),
           Expanded(
             child: roomAsync.when(
               data: (room) {
@@ -365,14 +366,15 @@ class _SupportChatRoomPageState extends ConsumerState<SupportChatRoomPage> {
                           ),
                           child: Row(
                             children: [
-                              Icon(Icons.lock_outline_rounded,
-                                  color: cs.onErrorContainer),
+                              Icon(
+                                Icons.lock_outline_rounded,
+                                color: cs.onErrorContainer,
+                              ),
                               const SizedBox(width: 8),
                               Expanded(
                                 child: Text(
                                   l10n.chatClosed,
-                                  style: TextStyle(
-                                      color: cs.onErrorContainer),
+                                  style: TextStyle(color: cs.onErrorContainer),
                                 ),
                               ),
                             ],
@@ -381,13 +383,21 @@ class _SupportChatRoomPageState extends ConsumerState<SupportChatRoomPage> {
                       ),
                       Expanded(
                         child: _messagesSection(
-                          messagesAsync, cs, l10n, user?.id ?? ''),
+                          messagesAsync,
+                          cs,
+                          l10n,
+                          user?.id ?? '',
+                        ),
                       ),
                     ],
                   );
                 }
                 return _messagesSection(
-                  messagesAsync, cs, l10n, user?.id ?? '');
+                  messagesAsync,
+                  cs,
+                  l10n,
+                  user?.id ?? '',
+                );
               },
               loading: () => const Center(child: AppLoaderCircular()),
               error: (e, _) => Center(child: Text(appErrorText(context, e))),
@@ -472,17 +482,21 @@ class _SupportChatRoomPageState extends ConsumerState<SupportChatRoomPage> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.chat_outlined,
-                    size: 48, color: cs.onSurfaceVariant.withValues(alpha: 0.4)),
+                Icon(
+                  Icons.chat_outlined,
+                  size: 48,
+                  color: cs.onSurfaceVariant.withValues(alpha: 0.4),
+                ),
                 const SizedBox(height: 12),
-                Text(l10n.noMessages,
-                    style: Theme.of(context).textTheme.bodyMedium),
+                Text(
+                  l10n.noMessages,
+                  style: Theme.of(context).textTheme.bodyMedium,
+                ),
               ],
             ),
           );
         }
-        WidgetsBinding.instance
-            .addPostFrameCallback((_) => _scrollToBottom());
+        WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToBottom());
         return ListView.builder(
           controller: _scrollController,
           padding: const EdgeInsets.all(12),
@@ -509,7 +523,7 @@ class _SupportChatRoomPageState extends ConsumerState<SupportChatRoomPage> {
     final isMe = msg.senderId == currentUserId;
     final senderProfile =
         ref.watch(chatRoomUserProvider(msg.senderId)).asData?.value ??
-            const <String, dynamic>{};
+        const <String, dynamic>{};
 
     final effectiveRole = _resolveEffectiveRole(msg, senderProfile);
     final roleLabel = _senderRoleLabel(effectiveRole, l10n);
@@ -521,11 +535,15 @@ class _SupportChatRoomPageState extends ConsumerState<SupportChatRoomPage> {
     final senderName = metaName.isNotEmpty
         ? metaName
         : (profileName.isNotEmpty
-            ? profileName
-            : (myName.isNotEmpty ? myName : profilePhone));
+              ? profileName
+              : (myName.isNotEmpty ? myName : profilePhone));
 
-    final (IconData roleIcon, Color peerAccent, Color peerBg, Color peerFg) =
-        switch (effectiveRole) {
+    final (
+      IconData roleIcon,
+      Color peerAccent,
+      Color peerBg,
+      Color peerFg,
+    ) = switch (effectiveRole) {
       'admin' => (
         Icons.support_agent_rounded,
         const Color(0xFF0D9488),
@@ -573,10 +591,12 @@ class _SupportChatRoomPageState extends ConsumerState<SupportChatRoomPage> {
         borderRadius: BorderRadius.only(
           topLeft: const Radius.circular(18),
           topRight: const Radius.circular(18),
-          bottomLeft:
-              isMe ? const Radius.circular(18) : const Radius.circular(4),
-          bottomRight:
-              isMe ? const Radius.circular(4) : const Radius.circular(18),
+          bottomLeft: isMe
+              ? const Radius.circular(18)
+              : const Radius.circular(4),
+          bottomRight: isMe
+              ? const Radius.circular(4)
+              : const Radius.circular(18),
         ),
         border: Border.all(
           color: isMe
@@ -586,8 +606,9 @@ class _SupportChatRoomPageState extends ConsumerState<SupportChatRoomPage> {
         ),
         boxShadow: [
           BoxShadow(
-            color: (isMe ? const Color(0xFF4F46E5) : peerAccent)
-                .withValues(alpha: 0.1),
+            color: (isMe ? const Color(0xFF4F46E5) : peerAccent).withValues(
+              alpha: 0.1,
+            ),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -665,9 +686,7 @@ class _SupportChatRoomPageState extends ConsumerState<SupportChatRoomPage> {
               if (isMe) ...[
                 const SizedBox(width: 4),
                 Icon(
-                  msg.isRead
-                      ? Icons.done_all_rounded
-                      : Icons.done_rounded,
+                  msg.isRead ? Icons.done_all_rounded : Icons.done_rounded,
                   size: 13,
                   color: msg.isRead
                       ? const Color(0xFF67E8F9)
@@ -695,7 +714,8 @@ class _SupportChatRoomPageState extends ConsumerState<SupportChatRoomPage> {
     Color? bgColor,
   }) {
     final cs = Theme.of(context).colorScheme;
-    final fg = fgColor ??
+    final fg =
+        fgColor ??
         (isAdminMsg
             ? (isMe ? cs.onPrimaryContainer : cs.primary)
             : (isMe ? cs.onTertiaryContainer : cs.tertiary));
@@ -703,7 +723,10 @@ class _SupportChatRoomPageState extends ConsumerState<SupportChatRoomPage> {
         bgColor ?? (isAdminMsg ? cs.primaryContainer : cs.tertiaryContainer);
 
     // Image attachment
-    if (msg.messageType == 'image' || (msg.attachmentUrl != null && msg.messageType == 'file' && _looksLikeImage(msg.attachmentUrl!))) {
+    if (msg.messageType == 'image' ||
+        (msg.attachmentUrl != null &&
+            msg.messageType == 'file' &&
+            _looksLikeImage(msg.attachmentUrl!))) {
       return ChatAttachmentImage(
         path: msg.attachmentUrl ?? msg.fileUrl ?? '',
         fgColor: fg,
@@ -712,7 +735,8 @@ class _SupportChatRoomPageState extends ConsumerState<SupportChatRoomPage> {
     }
 
     // Video attachment
-    if (msg.messageType == 'video' || (msg.fileUrl != null && _looksLikeVideo(msg.fileUrl!))) {
+    if (msg.messageType == 'video' ||
+        (msg.fileUrl != null && _looksLikeVideo(msg.fileUrl!))) {
       return ChatAttachmentVideo(
         path: msg.fileUrl ?? msg.attachmentUrl ?? '',
         isMe: isMe,
@@ -739,10 +763,14 @@ class _SupportChatRoomPageState extends ConsumerState<SupportChatRoomPage> {
 
       final Color statusColor = callActive
           ? Colors.green
-          : (callDeclined || callEnded) ? cs.error : (isMe ? Colors.white : cs.primary);
+          : (callDeclined || callEnded)
+          ? cs.error
+          : (isMe ? Colors.white : cs.primary);
       final IconData statusIcon = callActive
           ? Icons.call_rounded
-          : (callDeclined || callEnded) ? Icons.call_end_rounded : Icons.call_rounded;
+          : (callDeclined || callEnded)
+          ? Icons.call_end_rounded
+          : Icons.call_rounded;
 
       final String statusLabel;
       if (callActive) {
@@ -839,11 +867,7 @@ class _SupportChatRoomPageState extends ConsumerState<SupportChatRoomPage> {
 
     return Text(
       msg.message,
-      style: TextStyle(
-        color: fg,
-        fontSize: 14,
-        height: 1.38,
-      ),
+      style: TextStyle(color: fg, fontSize: 14, height: 1.38),
       softWrap: true,
     );
   }
@@ -876,9 +900,8 @@ class _SupportChatRoomPageState extends ConsumerState<SupportChatRoomPage> {
       _scrollToBottom();
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(appErrorText(context, e))),
-        );
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(appErrorText(context, e))));
       }
     }
   }
@@ -897,9 +920,8 @@ class _SupportChatRoomPageState extends ConsumerState<SupportChatRoomPage> {
       _scrollToBottom();
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(appErrorText(context, e))),
-        );
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(appErrorText(context, e))));
       }
     }
   }
@@ -918,9 +940,8 @@ class _SupportChatRoomPageState extends ConsumerState<SupportChatRoomPage> {
       );
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(appErrorText(context, e))),
-        );
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(appErrorText(context, e))));
       }
     }
   }
@@ -929,8 +950,8 @@ class _SupportChatRoomPageState extends ConsumerState<SupportChatRoomPage> {
   // the peer (fresh message, not my own, not already handled). Shows the same
   // accept/decline actions; once answered the bubble itself flips to live state.
   void _handleIncomingCall(ChatMessage msg, String? meId) {
-    final isCall = msg.messageType == 'call' ||
-        (msg.metaData?['call_type'] != null);
+    final isCall =
+        msg.messageType == 'call' || (msg.metaData?['call_type'] != null);
     if (!isCall) return;
     final status = (msg.metaData?['status'] as String?) ?? 'ringing';
     if (status != 'ringing') return;
@@ -965,7 +986,10 @@ class _SupportChatRoomPageState extends ConsumerState<SupportChatRoomPage> {
               const SizedBox(height: 12),
               Text(
                 l10n.incomingVoiceCall,
-                style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                style: const TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               const SizedBox(height: 4),
               Text(msg.message, style: TextStyle(color: cs.onSurfaceVariant)),
@@ -978,7 +1002,9 @@ class _SupportChatRoomPageState extends ConsumerState<SupportChatRoomPage> {
                       backgroundColor: Colors.green,
                       foregroundColor: Colors.white,
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 20, vertical: 12),
+                        horizontal: 20,
+                        vertical: 12,
+                      ),
                     ),
                     icon: const Icon(Icons.call_rounded),
                     label: Text(l10n.acceptCall),
@@ -993,7 +1019,9 @@ class _SupportChatRoomPageState extends ConsumerState<SupportChatRoomPage> {
                       backgroundColor: cs.error,
                       foregroundColor: cs.onError,
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 20, vertical: 12),
+                        horizontal: 20,
+                        vertical: 12,
+                      ),
                     ),
                     icon: const Icon(Icons.call_end_rounded),
                     label: Text(l10n.declineCall),
@@ -1061,9 +1089,12 @@ class _SupportChatRoomPageState extends ConsumerState<SupportChatRoomPage> {
                   decoration: InputDecoration(
                     hintText: l10n.typeMessage,
                     border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(24)),
+                      borderRadius: BorderRadius.circular(24),
+                    ),
                     contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 16, vertical: 8),
+                      horizontal: 16,
+                      vertical: 8,
+                    ),
                   ),
                   textInputAction: TextInputAction.send,
                   onChanged: (_) => _notifyTyping(l10n),
@@ -1110,29 +1141,35 @@ class _SupportChatRoomPageState extends ConsumerState<SupportChatRoomPage> {
         if (mediaEnabled) ...[
           PopupMenuItem(
             value: 'image',
-            child: Row(children: [
-              Icon(Icons.image_outlined, color: cs.primary),
-              const SizedBox(width: 8),
-              Text(l10n.sendImage),
-            ]),
+            child: Row(
+              children: [
+                Icon(Icons.image_outlined, color: cs.primary),
+                const SizedBox(width: 8),
+                Text(l10n.sendImage),
+              ],
+            ),
           ),
           PopupMenuItem(
             value: 'video',
-            child: Row(children: [
-              Icon(Icons.videocam_outlined, color: cs.primary),
-              const SizedBox(width: 8),
-              Text(l10n.sendVideo),
-            ]),
+            child: Row(
+              children: [
+                Icon(Icons.videocam_outlined, color: cs.primary),
+                const SizedBox(width: 8),
+                Text(l10n.sendVideo),
+              ],
+            ),
           ),
         ],
         if (callEnabled)
           PopupMenuItem(
             value: 'call',
-            child: Row(children: [
-              Icon(Icons.call_outlined, color: cs.primary),
-              const SizedBox(width: 8),
-              Text(l10n.voiceCall),
-            ]),
+            child: Row(
+              children: [
+                Icon(Icons.call_outlined, color: cs.primary),
+                const SizedBox(width: 8),
+                Text(l10n.voiceCall),
+              ],
+            ),
           ),
       ],
     );
@@ -1150,7 +1187,9 @@ class _SupportChatRoomPageState extends ConsumerState<SupportChatRoomPage> {
         padding: const EdgeInsets.all(6),
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          color: _isRecording ? cs.tertiaryContainer : cs.surfaceContainerHighest,
+          color: _isRecording
+              ? cs.tertiaryContainer
+              : cs.surfaceContainerHighest,
         ),
         child: Icon(
           _isRecording ? Icons.mic_rounded : Icons.mic_none_rounded,
@@ -1168,17 +1207,15 @@ class _SupportChatRoomPageState extends ConsumerState<SupportChatRoomPage> {
     if (!ok) return;
 
     final dir = await getTemporaryDirectory();
-    final path = '${dir.path}/voice_${DateTime.now().millisecondsSinceEpoch}.m4a';
+    final path =
+        '${dir.path}/voice_${DateTime.now().millisecondsSinceEpoch}.m4a';
 
     setState(() {
       _isRecording = true;
     });
 
     try {
-      await _recorder.start(
-        const RecordConfig(),
-        path: path,
-      );
+      await _recorder.start(const RecordConfig(), path: path);
     } catch (_) {
       setState(() => _isRecording = false);
     }
@@ -1274,9 +1311,8 @@ class _SupportChatRoomPageState extends ConsumerState<SupportChatRoomPage> {
     if (user == null) return;
     if (!_isRoomActive() && mounted) {
       final l10n = AppLocalizations.of(context);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.chatClosed)),
-      );
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(l10n.chatClosed)));
       return;
     }
     setState(() => _isSendingMedia = true);
@@ -1295,7 +1331,9 @@ class _SupportChatRoomPageState extends ConsumerState<SupportChatRoomPage> {
         roomId: widget.roomId,
         senderId: user.id,
         senderType: senderType,
-        message: mediaCaption == l10n.voiceMessage ? l10n.voiceMessage : mediaCaption,
+        message: mediaCaption == l10n.voiceMessage
+            ? l10n.voiceMessage
+            : mediaCaption,
         messageType: messageType,
         attachmentUrl: messageType == 'image' ? path : null,
         fileUrl: messageType == 'video' || messageType == 'file' ? path : null,
@@ -1311,9 +1349,8 @@ class _SupportChatRoomPageState extends ConsumerState<SupportChatRoomPage> {
       _scrollToBottom();
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(appErrorText(context, e))),
-        );
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(appErrorText(context, e))));
       }
     } finally {
       if (mounted) setState(() => _isSendingMedia = false);
@@ -1326,9 +1363,8 @@ class _SupportChatRoomPageState extends ConsumerState<SupportChatRoomPage> {
     if (user == null) return;
     if (!_isRoomActive() && mounted) {
       final l10n = AppLocalizations.of(context);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.chatClosed)),
-      );
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(l10n.chatClosed)));
       return;
     }
     final l10n = AppLocalizations.of(context);
@@ -1359,9 +1395,8 @@ class _SupportChatRoomPageState extends ConsumerState<SupportChatRoomPage> {
       await _openOutgoingCallSheet(sent.id);
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(appErrorText(context, e))),
-        );
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(appErrorText(context, e))));
       }
     }
   }
@@ -1404,7 +1439,10 @@ class _SupportChatRoomPageState extends ConsumerState<SupportChatRoomPage> {
               const SizedBox(height: 12),
               Text(
                 l10n.callingLabel,
-                style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                style: const TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               const SizedBox(height: 24),
               FilledButton.icon(
@@ -1412,7 +1450,9 @@ class _SupportChatRoomPageState extends ConsumerState<SupportChatRoomPage> {
                   backgroundColor: cs.error,
                   foregroundColor: cs.onError,
                   padding: const EdgeInsets.symmetric(
-                      horizontal: 20, vertical: 12),
+                    horizontal: 20,
+                    vertical: 12,
+                  ),
                 ),
                 icon: const Icon(Icons.call_end_rounded),
                 label: Text(l10n.endCall),
@@ -1442,8 +1482,8 @@ class _SupportChatRoomPageState extends ConsumerState<SupportChatRoomPage> {
   // Auto-close the caller sheet the instant the peer flips the call to any
   // terminal state (accepted / declined / ended) via a live stream event.
   void _closeOutgoingCallOnAnswer(ChatMessage msg, String? meId) {
-    final isCall = msg.messageType == 'call' ||
-        (msg.metaData?['call_type'] != null);
+    final isCall =
+        msg.messageType == 'call' || (msg.metaData?['call_type'] != null);
     if (!isCall) return;
     if (msg.id != _activeCallMessageId) return;
     final status = (msg.metaData?['status'] as String?) ?? 'ringing';
@@ -1465,9 +1505,8 @@ class _SupportChatRoomPageState extends ConsumerState<SupportChatRoomPage> {
     if (!_isRoomActive()) {
       if (mounted) {
         final l10n = AppLocalizations.of(context);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.chatClosed)),
-        );
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(l10n.chatClosed)));
       }
       return;
     }
@@ -1497,9 +1536,8 @@ class _SupportChatRoomPageState extends ConsumerState<SupportChatRoomPage> {
       _scrollToBottom();
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(appErrorText(context, e))),
-      );
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(appErrorText(context, e))));
     }
   }
 
@@ -1532,9 +1570,8 @@ class _SupportChatRoomPageState extends ConsumerState<SupportChatRoomPage> {
       if (mounted) Navigator.of(context).pop();
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(appErrorText(context, e))),
-        );
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(appErrorText(context, e))));
       }
     }
   }
@@ -1568,9 +1605,8 @@ class _SupportChatRoomPageState extends ConsumerState<SupportChatRoomPage> {
       if (mounted) Navigator.of(context).pop();
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(appErrorText(context, e))),
-        );
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(appErrorText(context, e))));
       }
     }
   }
@@ -1593,19 +1629,18 @@ class _SupportChatRoomPageState extends ConsumerState<SupportChatRoomPage> {
           ? l10n.welcomeCustomerMessage(name)
           : '📍 ${l10n.welcomeCustomerMessage(name)}';
 
-      await repo.sendMessage(ChatMessage(
-        id: '',
-        roomId: widget.roomId,
-        senderId: user.id,
-        senderType: 'admin',
-        message: welcomeText,
-        isFromAdmin: true,
-        createdAt: DateTime.now(),
-        metaData: {
-          'sender_name': name,
-          'sender_role': 'admin',
-        },
-      ));
+      await repo.sendMessage(
+        ChatMessage(
+          id: '',
+          roomId: widget.roomId,
+          senderId: user.id,
+          senderType: 'admin',
+          message: welcomeText,
+          isFromAdmin: true,
+          createdAt: DateTime.now(),
+          metaData: {'sender_name': name, 'sender_role': 'admin'},
+        ),
+      );
       await repo.setAssignedAdmin(
         roomId: widget.roomId,
         adminId: user.id,

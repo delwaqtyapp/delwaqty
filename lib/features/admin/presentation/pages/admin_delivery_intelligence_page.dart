@@ -56,7 +56,11 @@ class AdminDeliveryIntelligencePage extends ConsumerWidget {
     );
   }
 
-  Widget _buildContent(DeliveryIntelligence data, ColorScheme cs, BuildContext context) {
+  Widget _buildContent(
+    DeliveryIntelligence data,
+    ColorScheme cs,
+    BuildContext context,
+  ) {
     final l10n = AppLocalizations.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -64,9 +68,8 @@ class AdminDeliveryIntelligencePage extends ConsumerWidget {
         AnimatedFadeIn(
           child: Text(
             l10n.driversSection,
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
+            style: Theme.of(context).textTheme.titleMedium
+                ?.copyWith(fontWeight: FontWeight.bold),
           ),
         ),
         const SizedBox(height: 12),
@@ -83,10 +86,30 @@ class AdminDeliveryIntelligencePage extends ConsumerWidget {
                 crossAxisSpacing: 10,
                 childAspectRatio: 1.4,
                 children: [
-                  _StatCard(l10n.totalDrivers, data.totalDrivers.toString(), Icons.people_outline_rounded, const Color(0xFF007AFF)),
-                  _StatCard(l10n.onlineStat, data.onlineDrivers.toString(), Icons.wifi_rounded, const Color(0xFF34C759)),
-                  _StatCard(l10n.pendingStat, data.pendingDrivers.toString(), Icons.pending_outlined, const Color(0xFFFF9500)),
-                  _StatCard(l10n.verifiedStat, data.verifiedDrivers.toString(), Icons.verified_outlined, const Color(0xFF5B3DF0)),
+                  _StatCard(
+                    l10n.totalDrivers,
+                    data.totalDrivers.toString(),
+                    Icons.people_outline_rounded,
+                    const Color(0xFF007AFF),
+                  ),
+                  _StatCard(
+                    l10n.onlineStat,
+                    data.onlineDrivers.toString(),
+                    Icons.wifi_rounded,
+                    const Color(0xFF34C759),
+                  ),
+                  _StatCard(
+                    l10n.pendingStat,
+                    data.pendingDrivers.toString(),
+                    Icons.pending_outlined,
+                    const Color(0xFFFF9500),
+                  ),
+                  _StatCard(
+                    l10n.verifiedStat,
+                    data.verifiedDrivers.toString(),
+                    Icons.verified_outlined,
+                    const Color(0xFF5B3DF0),
+                  ),
                 ],
               );
             },
@@ -97,9 +120,8 @@ class AdminDeliveryIntelligencePage extends ConsumerWidget {
           delay: const Duration(milliseconds: 150),
           child: Text(
             l10n.deliveryPerformance,
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
+            style: Theme.of(context).textTheme.titleMedium
+                ?.copyWith(fontWeight: FontWeight.bold),
           ),
         ),
         const SizedBox(height: 12),
@@ -116,11 +138,36 @@ class AdminDeliveryIntelligencePage extends ConsumerWidget {
                 crossAxisSpacing: 10,
                 childAspectRatio: 1.6,
                 children: [
-                  _StatCard(l10n.completedDeliveries, data.completedDeliveries.toString(), Icons.check_circle_outline_rounded, const Color(0xFF34C759)),
-                  _StatCard(l10n.pendingDeliveries, data.pendingDeliveries.toString(), Icons.schedule_rounded, const Color(0xFFFF9500)),
-                  _StatCard(l10n.cancelledDeliveries, data.cancelledDeliveries.toString(), Icons.cancel_outlined, const Color(0xFFFF3B30)),
-                  _StatCard(l10n.deliveryGmv, '${l10n.currencySymbol} ${data.deliveryGmv.toStringAsFixed(0)}', Icons.payments_outlined, const Color(0xFF5B3DF0)),
-                  _StatCard(l10n.driverEarnings, '${l10n.currencySymbol} ${data.driverEarningsTotal.toStringAsFixed(0)}', Icons.account_balance_wallet_rounded, const Color(0xFF14B8A6)),
+                  _StatCard(
+                    l10n.completedDeliveries,
+                    data.completedDeliveries.toString(),
+                    Icons.check_circle_outline_rounded,
+                    const Color(0xFF34C759),
+                  ),
+                  _StatCard(
+                    l10n.pendingDeliveries,
+                    data.pendingDeliveries.toString(),
+                    Icons.schedule_rounded,
+                    const Color(0xFFFF9500),
+                  ),
+                  _StatCard(
+                    l10n.cancelledDeliveries,
+                    data.cancelledDeliveries.toString(),
+                    Icons.cancel_outlined,
+                    const Color(0xFFFF3B30),
+                  ),
+                  _StatCard(
+                    l10n.deliveryGmv,
+                    '${l10n.currencySymbol} ${data.deliveryGmv.toStringAsFixed(0)}',
+                    Icons.payments_outlined,
+                    const Color(0xFF5B3DF0),
+                  ),
+                  _StatCard(
+                    l10n.driverEarnings,
+                    '${l10n.currencySymbol} ${data.driverEarningsTotal.toStringAsFixed(0)}',
+                    Icons.account_balance_wallet_rounded,
+                    const Color(0xFF14B8A6),
+                  ),
                 ],
               );
             },
@@ -131,9 +178,8 @@ class AdminDeliveryIntelligencePage extends ConsumerWidget {
           delay: const Duration(milliseconds: 300),
           child: Text(
             l10n.withdrawalsSection,
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
+            style: Theme.of(context).textTheme.titleMedium
+                ?.copyWith(fontWeight: FontWeight.bold),
           ),
         ),
         const SizedBox(height: 12),
@@ -149,17 +195,17 @@ class AdminDeliveryIntelligencePage extends ConsumerWidget {
                     children: [
                       Text(
                         '${l10n.currencySymbol} ${data.pendingWithdrawalAmount.toStringAsFixed(0)}',
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: const Color(0xFFFF9500),
-                        ),
+                        style: Theme.of(context).textTheme.titleMedium
+                            ?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: const Color(0xFFFF9500),
+                            ),
                       ),
                       const SizedBox(height: 2),
                       Text(
                         l10n.pendingWithdrawalsCount(data.pendingWithdrawals),
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: cs.onSurfaceVariant,
-                        ),
+                        style: Theme.of(context).textTheme.bodySmall
+                            ?.copyWith(color: cs.onSurfaceVariant),
                       ),
                     ],
                   ),
@@ -172,17 +218,17 @@ class AdminDeliveryIntelligencePage extends ConsumerWidget {
                     children: [
                       Text(
                         '${l10n.currencySymbol} ${data.paidWithdrawalAmount.toStringAsFixed(0)}',
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: const Color(0xFF34C759),
-                        ),
+                        style: Theme.of(context).textTheme.titleMedium
+                            ?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: const Color(0xFF34C759),
+                            ),
                       ),
                       const SizedBox(height: 2),
                       Text(
                         l10n.paidWithdrawalsCount(data.paidWithdrawals),
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: cs.onSurfaceVariant,
-                        ),
+                        style: Theme.of(context).textTheme.bodySmall
+                            ?.copyWith(color: cs.onSurfaceVariant),
                       ),
                     ],
                   ),
@@ -228,17 +274,15 @@ class _StatCard extends StatelessWidget {
                 fit: BoxFit.scaleDown,
                 child: Text(
                   value,
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: Theme.of(context).textTheme.titleLarge
+                      ?.copyWith(fontWeight: FontWeight.bold),
                 ),
               ),
               const SizedBox(height: 2),
               Text(
                 label,
-                style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                  color: cs.onSurfaceVariant,
-                ),
+                style: Theme.of(context).textTheme.labelSmall
+                    ?.copyWith(color: cs.onSurfaceVariant),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),

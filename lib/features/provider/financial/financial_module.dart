@@ -12,7 +12,8 @@ class FinancialModule extends FeatureModule {
   String get id => 'provider-financial';
 
   @override
-  String name(BuildContext context) => AppLocalizations.of(context).financialCenter;
+  String name(BuildContext context) =>
+      AppLocalizations.of(context).financialCenter;
 
   @override
   IconData? get icon => Icons.account_balance_wallet_outlined;

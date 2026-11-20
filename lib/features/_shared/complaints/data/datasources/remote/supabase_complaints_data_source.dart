@@ -3,7 +3,6 @@ import 'package:delwaqty/core/errors/exceptions.dart';
 import 'package:delwaqty/features/_shared/complaints/domain/entities/complaint.dart';
 
 class SupabaseComplaintsDataSource {
-
   SupabaseComplaintsDataSource(this._client);
   final SupabaseClient _client;
 

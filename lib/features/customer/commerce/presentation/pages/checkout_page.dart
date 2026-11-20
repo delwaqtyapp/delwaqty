@@ -252,12 +252,12 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
                                 discount = cart.deliveryFee;
                                 break;
                             }
-                            final maxDiscount = cart.subtotal + cart.deliveryFee;
+                            final maxDiscount =
+                                cart.subtotal + cart.deliveryFee;
                             discount = discount.clamp(0.0, maxDiscount);
-                            await ref.read(cartProvider.notifier).applyCoupon(
-                                  coupon.code,
-                                  discount: discount,
-                                );
+                            await ref
+                                .read(cartProvider.notifier)
+                                .applyCoupon(coupon.code, discount: discount);
                             if (context.mounted) {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(

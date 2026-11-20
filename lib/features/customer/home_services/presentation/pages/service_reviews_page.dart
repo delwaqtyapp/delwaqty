@@ -54,9 +54,7 @@ class ServiceReviewsPage extends ConsumerWidget {
             if (providerName != null)
               Text(
                 providerName!,
-                style: Theme.of(context)
-                    .textTheme
-                    .bodySmall
+                style: Theme.of(context).textTheme.bodySmall
                     ?.copyWith(fontWeight: FontWeight.w600),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
@@ -95,9 +93,7 @@ class ServiceReviewsPage extends ConsumerWidget {
           const SizedBox(height: 24),
           Text(
             l10n.reviews,
-            style: Theme.of(context)
-                .textTheme
-                .titleMedium
+            style: Theme.of(context).textTheme.titleMedium
                 ?.copyWith(fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 8),
@@ -171,8 +167,9 @@ class SummaryCard extends StatelessWidget {
                   summary.totalReviews == 0
                       ? '—'
                       : summary.averageRating.toStringAsFixed(1),
-                  style: theme.textTheme.displaySmall
-                      ?.copyWith(fontWeight: FontWeight.w800),
+                  style: theme.textTheme.displaySmall?.copyWith(
+                    fontWeight: FontWeight.w800,
+                  ),
                 ),
                 RatingStars(rating: summary.averageRating),
                 const SizedBox(height: 2),
@@ -187,12 +184,7 @@ class SummaryCard extends StatelessWidget {
               child: Column(
                 children: [
                   for (var stars = 5; stars >= 1; stars--)
-                    _buildBar(
-                      stars,
-                      summary.countFor(stars),
-                      maxCount,
-                      theme,
-                    ),
+                    _buildBar(stars, summary.countFor(stars), maxCount, theme),
                 ],
               ),
             ),
@@ -209,10 +201,7 @@ class SummaryCard extends StatelessWidget {
         children: [
           SizedBox(
             width: 30,
-            child: Text(
-              '$stars',
-              style: theme.textTheme.bodySmall,
-            ),
+            child: Text('$stars', style: theme.textTheme.bodySmall),
           ),
           const Icon(Icons.star_rounded, size: 14, color: AppColors.rating),
           const SizedBox(width: 8),
@@ -269,8 +258,9 @@ class _MyReviewCard extends ConsumerWidget {
           children: [
             Text(
               l10n.yourRating,
-              style: theme.textTheme.titleSmall
-                  ?.copyWith(fontWeight: FontWeight.bold),
+              style: theme.textTheme.titleSmall?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
             ),
             const SizedBox(height: 8),
             if (myReview != null)
@@ -312,9 +302,13 @@ class _MyReviewCard extends ConsumerWidget {
                   ),
                 ),
                 icon: Icon(
-                  myReview != null ? Icons.edit_rounded : Icons.rate_review_rounded,
+                  myReview != null
+                      ? Icons.edit_rounded
+                      : Icons.rate_review_rounded,
                 ),
-                label: Text(myReview != null ? l10n.writeReview : l10n.rateService),
+                label: Text(
+                  myReview != null ? l10n.writeReview : l10n.rateService,
+                ),
               ),
             ),
           ],
@@ -325,10 +319,7 @@ class _MyReviewCard extends ConsumerWidget {
 }
 
 class _WriteServiceReviewSheet extends ConsumerStatefulWidget {
-  const _WriteServiceReviewSheet({
-    required this.categoryType,
-    this.providerId,
-  });
+  const _WriteServiceReviewSheet({required this.categoryType, this.providerId});
 
   final String categoryType;
   final String? providerId;
@@ -372,7 +363,9 @@ class _WriteServiceReviewSheetState
                 width: 40,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.3),
+                  color: theme.colorScheme.onSurfaceVariant.withValues(
+                    alpha: 0.3,
+                  ),
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -380,20 +373,23 @@ class _WriteServiceReviewSheetState
             const SizedBox(height: 16),
             Text(
               l10n.rateService,
-              style: theme.textTheme.titleMedium
-                  ?.copyWith(fontWeight: FontWeight.bold),
+              style: theme.textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
             ),
             const SizedBox(height: 4),
             Text(
               serviceTypeLabel(_parseType(widget.categoryType), l10n),
-              style: theme.textTheme.bodyMedium
-                  ?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
             ),
             const SizedBox(height: 16),
             Text(
               l10n.yourRating,
-              style: theme.textTheme.bodyMedium
-                  ?.copyWith(fontWeight: FontWeight.w600),
+              style: theme.textTheme.bodyMedium?.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
             ),
             const SizedBox(height: 8),
             Row(
@@ -420,8 +416,9 @@ class _WriteServiceReviewSheetState
               decoration: InputDecoration(
                 hintText: l10n.yourReview,
                 filled: true,
-                fillColor: theme.colorScheme.surfaceContainerHighest
-                    .withValues(alpha: 0.5),
+                fillColor: theme.colorScheme.surfaceContainerHighest.withValues(
+                  alpha: 0.5,
+                ),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                   borderSide: BorderSide.none,
@@ -490,10 +487,7 @@ class _WriteServiceReviewSheetState
       }
     } catch (e) {
       if (mounted) {
-        AppSnackbar.error(
-          context,
-          message: AppLocalizations.of(context).error,
-        );
+        AppSnackbar.error(context, message: AppLocalizations.of(context).error);
       }
     } finally {
       if (mounted) setState(() => _isSubmitting = false);
@@ -526,8 +520,8 @@ class _ReviewCard extends StatelessWidget {
             child: Text(
               review.userName.isEmpty
                   ? (Localizations.localeOf(context).languageCode == 'ar'
-                      ? '؟'
-                      : '?')
+                        ? '؟'
+                        : '?')
                   : review.userName.characters.first,
               style: const TextStyle(
                 fontWeight: FontWeight.bold,
@@ -544,13 +538,12 @@ class _ReviewCard extends StatelessWidget {
                   children: [
                     Expanded(
                       child: Text(
-                      review.userName.isEmpty
-                          ? '—'
-                          : review.userName,
+                        review.userName.isEmpty ? '—' : review.userName,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: theme.textTheme.titleSmall
-                            ?.copyWith(fontWeight: FontWeight.bold),
+                        style: theme.textTheme.titleSmall?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
                     if (date != null)
@@ -564,10 +557,7 @@ class _ReviewCard extends StatelessWidget {
                 RatingStars(rating: review.rating, size: 15),
                 if (review.comment != null && review.comment!.isNotEmpty) ...[
                   const SizedBox(height: 6),
-                  Text(
-                    review.comment!,
-                    style: theme.textTheme.bodyMedium,
-                  ),
+                  Text(review.comment!, style: theme.textTheme.bodyMedium),
                 ],
               ],
             ),
@@ -594,15 +584,13 @@ class _EmptyReviews extends StatelessWidget {
             color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.4),
           ),
           const SizedBox(height: 8),
-          Text(
-            l10n.noReviewsYet,
-            style: theme.textTheme.titleSmall,
-          ),
+          Text(l10n.noReviewsYet, style: theme.textTheme.titleSmall),
           const SizedBox(height: 2),
           Text(
             l10n.beTheFirst,
-            style: theme.textTheme.bodySmall
-                ?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
           ),
         ],
       ),

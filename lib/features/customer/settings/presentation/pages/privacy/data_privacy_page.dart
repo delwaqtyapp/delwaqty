@@ -1,4 +1,5 @@
 import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -256,8 +257,11 @@ class _DataPrivacyPageState extends ConsumerState<DataPrivacyPage> {
       return;
     }
     try {
-      final profile =
-          await client.from('users').select().eq('id', uid).maybeSingle();
+      final profile = await client
+          .from('users')
+          .select()
+          .eq('id', uid)
+          .maybeSingle();
       final orders = await client
           .from('orders')
           .select('id, status, total_amount, payment_method, created_at')

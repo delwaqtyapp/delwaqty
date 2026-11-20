@@ -12,7 +12,8 @@ class AdminLiveTrackingPage extends ConsumerStatefulWidget {
   const AdminLiveTrackingPage({super.key});
 
   @override
-  ConsumerState<AdminLiveTrackingPage> createState() => _AdminLiveTrackingPageState();
+  ConsumerState<AdminLiveTrackingPage> createState() =>
+      _AdminLiveTrackingPageState();
 }
 
 class _AdminLiveTrackingPageState extends ConsumerState<AdminLiveTrackingPage> {
@@ -60,21 +61,30 @@ class _AdminLiveTrackingPageState extends ConsumerState<AdminLiveTrackingPage> {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(Icons.map_rounded, size: 64, color: cs.primary.withValues(alpha: 0.4)),
+                          Icon(
+                            Icons.map_rounded,
+                            size: 64,
+                            color: cs.primary.withValues(alpha: 0.4),
+                          ),
                           const SizedBox(height: 12),
-                          Text(l10n.mapView, style: Theme.of(context).textTheme.titleMedium),
+                          Text(
+                            l10n.mapView,
+                            style: Theme.of(context).textTheme.titleMedium,
+                          ),
                           const SizedBox(height: 4),
                           Text(
                             '${drivers.length} ${l10n.activeDrivers}',
-                            style: Theme.of(context).textTheme.bodySmall?.copyWith(color: cs.onSurfaceVariant),
+                            style: Theme.of(context).textTheme.bodySmall
+                                ?.copyWith(color: cs.onSurfaceVariant),
                           ),
                           const SizedBox(height: 12),
                           Text(
                             '${l10n.mapApiKeyRequired} (Google Maps / Mapbox)',
-                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: cs.error,
-                              fontStyle: FontStyle.italic,
-                            ),
+                            style: Theme.of(context).textTheme.bodySmall
+                                ?.copyWith(
+                                  color: cs.error,
+                                  fontStyle: FontStyle.italic,
+                                ),
                           ),
                         ],
                       ),
@@ -86,7 +96,8 @@ class _AdminLiveTrackingPageState extends ConsumerState<AdminLiveTrackingPage> {
                 padding: const EdgeInsets.symmetric(horizontal: 12),
                 child: Text(
                   l10n.activeDriversList,
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                  style: Theme.of(context).textTheme.titleMedium
+                      ?.copyWith(fontWeight: FontWeight.bold),
                 ),
               ),
               Expanded(
@@ -117,11 +128,19 @@ class _AdminLiveTrackingPageState extends ConsumerState<AdminLiveTrackingPage> {
                               crossAxisAlignment: CrossAxisAlignment.end,
                               children: [
                                 if (d.speed != null)
-                                  Text('${d.speed!.toStringAsFixed(1)} km/h',
-                                      style: Theme.of(context).textTheme.bodySmall),
+                                  Text(
+                                    '${d.speed!.toStringAsFixed(1)} km/h',
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .bodySmall,
+                                  ),
                                 if (d.heading != null)
-                                  Text('${d.heading!.toStringAsFixed(0)}Â°',
-                                      style: Theme.of(context).textTheme.bodySmall),
+                                  Text(
+                                    '${d.heading!.toStringAsFixed(0)}Â°',
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .bodySmall,
+                                  ),
                               ],
                             ),
                           ),

@@ -22,8 +22,9 @@ void main() {
       );
     }
 
-    testWidgets('renders the unified gold star icon with rateService tooltip',
-        (tester) async {
+    testWidgets('renders the unified gold star icon with rateService tooltip', (
+      tester,
+    ) async {
       await pump(tester);
       expect(find.byIcon(Icons.rate_review_rounded), findsOneWidget);
       expect(find.byType(ServiceReviewsButton), findsOneWidget);

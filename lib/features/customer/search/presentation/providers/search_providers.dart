@@ -34,7 +34,6 @@ final savedPlacesProvider = FutureProvider<List<SavedPlace>>((ref) async {
   return ref.watch(placesRepositoryProvider).getSavedPlaces();
 });
 
-final recentSearchesProvider =
-    FutureProvider<List<RecentSearch>>((ref) async {
+final recentSearchesProvider = FutureProvider<List<RecentSearch>>((ref) async {
   return ref.watch(placesRepositoryProvider).getRecentSearches();
 });

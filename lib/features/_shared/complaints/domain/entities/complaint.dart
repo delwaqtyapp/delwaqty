@@ -1,5 +1,4 @@
 class Complaint {
-
   const Complaint({
     required this.id,
     this.orderId,

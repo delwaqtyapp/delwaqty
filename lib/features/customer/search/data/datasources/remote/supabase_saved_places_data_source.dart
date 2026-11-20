@@ -7,8 +7,8 @@ import 'package:delwaqty/services/supabase/supabase_service.dart';
 
 final supabaseSavedPlacesDataSourceProvider =
     Provider<SupabaseSavedPlacesDataSource>((ref) {
-  return SupabaseSavedPlacesDataSource(ref.watch(supabaseClientProvider));
-});
+      return SupabaseSavedPlacesDataSource(ref.watch(supabaseClientProvider));
+    });
 
 class SupabaseSavedPlacesDataSource {
   SupabaseSavedPlacesDataSource(this._client);
@@ -24,15 +24,15 @@ class SupabaseSavedPlacesDataSource {
   }
 
   SavedPlace _fromRow(Map<String, dynamic> row) => SavedPlace(
-        id: row['id'] as String?,
-        label: row['label'] as String? ?? '',
-        type: SavedPlaceTypeX.fromWire(row['place_type'] as String? ?? 'favorite'),
-        address: row['address'] as String? ?? '',
-        location: GeoPoint(
-          (row['latitude'] as num).toDouble(),
-          (row['longitude'] as num).toDouble(),
-        ),
-      );
+    id: row['id'] as String?,
+    label: row['label'] as String? ?? '',
+    type: SavedPlaceTypeX.fromWire(row['place_type'] as String? ?? 'favorite'),
+    address: row['address'] as String? ?? '',
+    location: GeoPoint(
+      (row['latitude'] as num).toDouble(),
+      (row['longitude'] as num).toDouble(),
+    ),
+  );
 
   Future<List<SavedPlace>> getSavedPlaces() async {
     final rows = await _client

@@ -28,9 +28,10 @@ class _SkeletonLoaderState extends State<SkeletonLoader>
       vsync: this,
       duration: const Duration(milliseconds: 1500),
     )..repeat();
-    _animation = Tween<double>(begin: 0, end: 1).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
-    );
+    _animation = Tween<double>(
+      begin: 0,
+      end: 1,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
   }
 
   @override
@@ -42,9 +43,11 @@ class _SkeletonLoaderState extends State<SkeletonLoader>
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    final base = widget.baseColor ??
+    final base =
+        widget.baseColor ??
         colorScheme.surfaceContainerHighest.withValues(alpha: 0.5);
-    final highlight = widget.highlightColor ??
+    final highlight =
+        widget.highlightColor ??
         colorScheme.surfaceContainerHighest.withValues(alpha: 0.2);
 
     return AnimatedBuilder(
@@ -127,7 +130,11 @@ class RestaurantDetailSkeleton extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const SkeletonBox(width: double.infinity, height: 240, borderRadius: 0),
+          const SkeletonBox(
+            width: double.infinity,
+            height: 240,
+            borderRadius: 0,
+          ),
           Padding(
             padding: const EdgeInsets.all(16),
             child: Column(
@@ -165,7 +172,11 @@ class RestaurantDetailSkeleton extends StatelessWidget {
                 const SizedBox(height: 20),
                 const SkeletonBox(width: 140, height: 18),
                 const SizedBox(height: 12),
-                const SkeletonBox(width: double.infinity, height: 60, borderRadius: 12),
+                const SkeletonBox(
+                  width: double.infinity,
+                  height: 60,
+                  borderRadius: 12,
+                ),
               ],
             ),
           ),

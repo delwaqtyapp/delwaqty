@@ -24,24 +24,25 @@ class DeliveryRepositoryImpl implements DeliveryRepository {
     String? itemsSummary,
     String? notes,
     String priority = 'standard',
-  }) =>
-      _dataSource.requestCourierDelivery(
-        riderId: riderId,
-        pickupLatitude: pickupLatitude,
-        pickupLongitude: pickupLongitude,
-        pickupAddress: pickupAddress,
-        dropoffLatitude: dropoffLatitude,
-        dropoffLongitude: dropoffLongitude,
-        dropoffAddress: dropoffAddress,
-        itemsSummary: itemsSummary,
-        notes: notes,
-        priority: priority,
-      );
+  }) => _dataSource.requestCourierDelivery(
+    riderId: riderId,
+    pickupLatitude: pickupLatitude,
+    pickupLongitude: pickupLongitude,
+    pickupAddress: pickupAddress,
+    dropoffLatitude: dropoffLatitude,
+    dropoffLongitude: dropoffLongitude,
+    dropoffAddress: dropoffAddress,
+    itemsSummary: itemsSummary,
+    notes: notes,
+    priority: priority,
+  );
 
   @override
-  Future<String> dispatchDelivery(String rideId,
-          {double radiusKm = 10, int limit = 5}) =>
-      _dataSource.dispatchDelivery(rideId, radiusKm: radiusKm, limit: limit);
+  Future<String> dispatchDelivery(
+    String rideId, {
+    double radiusKm = 10,
+    int limit = 5,
+  }) => _dataSource.dispatchDelivery(rideId, radiusKm: radiusKm, limit: limit);
 
   @override
   Future<String> acceptDeliveryRequest(String rideId, String driverId) =>
@@ -72,20 +73,28 @@ class DeliveryRepositoryImpl implements DeliveryRepository {
       _dataSource.driverArrivedAtPickup(rideId, driverId);
 
   @override
-  Future<void> startDelivery(
-          String rideId, String driverId, String otp) =>
+  Future<void> startDelivery(String rideId, String driverId, String otp) =>
       _dataSource.startDelivery(rideId, driverId, otp);
 
   @override
-  Future<double> completeDelivery(String rideId, String driverId,
-          {String? proofUrl, double? finalDistanceKm}) =>
-      _dataSource.completeDelivery(rideId, driverId,
-          proofUrl: proofUrl, finalDistanceKm: finalDistanceKm);
+  Future<double> completeDelivery(
+    String rideId,
+    String driverId, {
+    String? proofUrl,
+    double? finalDistanceKm,
+  }) => _dataSource.completeDelivery(
+    rideId,
+    driverId,
+    proofUrl: proofUrl,
+    finalDistanceKm: finalDistanceKm,
+  );
 
   @override
-  Future<void> cancelDelivery(String rideId, {String? reason, bool byDriver = false}) =>
-      _dataSource.cancelDelivery(rideId, reason: reason, byDriver: byDriver);
-
+  Future<void> cancelDelivery(
+    String rideId, {
+    String? reason,
+    bool byDriver = false,
+  }) => _dataSource.cancelDelivery(rideId, reason: reason, byDriver: byDriver);
 
   @override
   Future<DeliveryPricingModel> getDeliveryPricing(String serviceType) =>
@@ -97,9 +106,12 @@ class DeliveryRepositoryImpl implements DeliveryRepository {
     double distanceKm, {
     double weightKg = 1.0,
     String priority = 'standard',
-  }) =>
-      _dataSource.estimateDeliveryFee(serviceType, distanceKm,
-          weightKg: weightKg, priority: priority);
+  }) => _dataSource.estimateDeliveryFee(
+    serviceType,
+    distanceKm,
+    weightKg: weightKg,
+    priority: priority,
+  );
 
   @override
   Future<DriverCapability> getDriverCapabilities(String driverId) =>
@@ -112,12 +124,13 @@ class DeliveryRepositoryImpl implements DeliveryRepository {
     bool acceptsDeliveries = true,
     double maxDistance = 15,
     double maxWeight = 20,
-  }) =>
-      _dataSource.updateDriverCapabilities(driverId,
-          serviceTypes: serviceTypes,
-          acceptsDeliveries: acceptsDeliveries,
-          maxDistance: maxDistance,
-          maxWeight: maxWeight);
+  }) => _dataSource.updateDriverCapabilities(
+    driverId,
+    serviceTypes: serviceTypes,
+    acceptsDeliveries: acceptsDeliveries,
+    maxDistance: maxDistance,
+    maxWeight: maxWeight,
+  );
 
   @override
   Future<MerchantProfile?> getMerchantProfile(String merchantId) =>
@@ -130,26 +143,27 @@ class DeliveryRepositoryImpl implements DeliveryRepository {
     List<String>? serviceTypes,
     int? averagePrepTime,
     double? maxRadius,
-  }) =>
-      _dataSource.upsertMerchantProfile(
-        merchantId: merchantId,
-        userId: userId,
-        serviceTypes: serviceTypes,
-        averagePrepTime: averagePrepTime,
-        maxRadius: maxRadius,
-      );
+  }) => _dataSource.upsertMerchantProfile(
+    merchantId: merchantId,
+    userId: userId,
+    serviceTypes: serviceTypes,
+    averagePrepTime: averagePrepTime,
+    maxRadius: maxRadius,
+  );
 
   @override
   Future<DriverStats> getDashboardStats(String driverId) =>
       _dataSource.getDashboardStats(driverId);
 
   @override
-  Future<List<DriverEarning>> getEarnings(String driverId,
-          {int limit = 30}) =>
+  Future<List<DriverEarning>> getEarnings(String driverId, {int limit = 30}) =>
       _dataSource.getEarnings(driverId, limit: limit);
 
   @override
-  Future<void> rateDelivery(String rideId, String driverId, int stars,
-          {String? comment}) =>
-      _dataSource.rateDelivery(rideId, driverId, stars, comment: comment);
+  Future<void> rateDelivery(
+    String rideId,
+    String driverId,
+    int stars, {
+    String? comment,
+  }) => _dataSource.rateDelivery(rideId, driverId, stars, comment: comment);
 }

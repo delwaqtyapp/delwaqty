@@ -28,12 +28,16 @@ class Sanction {
       amount: (json['amount'] as num?)?.toDouble() ?? 0,
       durationDays: json['duration_days'] as int? ?? 0,
       startDate: DateTime.parse(json['start_date'] as String),
-      endDate: json['end_date'] != null ? DateTime.parse(json['end_date'] as String) : null,
+      endDate: json['end_date'] != null
+          ? DateTime.parse(json['end_date'] as String)
+          : null,
       isActive: json['is_active'] as bool? ?? true,
       notes: json['notes'] as String?,
       issuedBy: json['issued_by'] as String,
       createdAt: DateTime.parse(json['created_at'] as String),
-      updatedAt: json['updated_at'] != null ? DateTime.parse(json['updated_at'] as String) : null,
+      updatedAt: json['updated_at'] != null
+          ? DateTime.parse(json['updated_at'] as String)
+          : null,
     );
   }
 

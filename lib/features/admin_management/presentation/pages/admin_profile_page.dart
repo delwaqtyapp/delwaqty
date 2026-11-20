@@ -17,18 +17,17 @@ class AdminManagementProfilePage extends ConsumerStatefulWidget {
       _AdminProfilePageState();
 }
 
-class _AdminProfilePageState
-    extends ConsumerState<AdminManagementProfilePage> {
+class _AdminProfilePageState extends ConsumerState<AdminManagementProfilePage> {
   bool get _isSelf {
     final me = Supabase.instance.client.auth.currentUser?.id;
     return me == widget.adminId;
   }
 
   String _roleLabel(AppLocalizations loc, String role) => switch (role) {
-        'owner' => loc.adminMgmtRoleOwner,
-        'admin' => loc.adminMgmtRoleAdmin,
-        _ => role,
-      };
+    'owner' => loc.adminMgmtRoleOwner,
+    'admin' => loc.adminMgmtRoleAdmin,
+    _ => role,
+  };
 
   Future<void> _runWithSnack(Future<void> Function() action, String ok) async {
     final loc = AppLocalizations.of(context);
@@ -37,8 +36,7 @@ class _AdminProfilePageState
       if (mounted) {
         ref.invalidate(adminDetailProvider(widget.adminId));
         ref.invalidate(adminsListProvider);
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text(ok)));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(ok)));
       }
     } catch (e) {
       if (mounted) {
@@ -61,11 +59,13 @@ class _AdminProfilePageState
         ),
         actions: [
           TextButton(
-              onPressed: () => Navigator.of(ctx).pop(),
-              child: Text(loc.adminMgmtCancel)),
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: Text(loc.adminMgmtCancel),
+          ),
           FilledButton(
-              onPressed: () => Navigator.of(ctx).pop(ctrl.text.trim()),
-              child: Text(loc.adminMgmtConfirm)),
+            onPressed: () => Navigator.of(ctx).pop(ctrl.text.trim()),
+            child: Text(loc.adminMgmtConfirm),
+          ),
         ],
       ),
     );
@@ -96,204 +96,220 @@ class _AdminProfilePageState
       body: widget.adminId.isEmpty
           ? Center(child: Text(loc.adminMgmtNotFound))
           : detail.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text(loc.adminMgmtFailed)),
-        data: (account) {
-          if (account == null) {
-            return Center(child: Text(loc.adminMgmtNotFound));
-          }
-          final isOwner = account.role == 'owner';
-          final canManage = !_isSelf && !isOwner;
+              loading: () => const Center(child: CircularProgressIndicator()),
+              error: (e, _) => Center(child: Text(loc.adminMgmtFailed)),
+              data: (account) {
+                if (account == null) {
+                  return Center(child: Text(loc.adminMgmtNotFound));
+                }
+                final isOwner = account.role == 'owner';
+                final canManage = !_isSelf && !isOwner;
 
-          return ListView(
-            padding: const EdgeInsets.all(16),
-            children: [
-              _section(
-                loc.adminMgmtIdentity,
-                [
-                  _row(loc.adminMgmtFullName,
-                      account.fullName ?? loc.adminMgmtUnknown),
-                  _row(loc.adminMgmtEmail, account.email),
-                  _row(loc.adminMgmtId, account.id),
-                  _row(loc.adminMgmtCreatedAt,
-                      account.createdAt?.toLocal().toString().split('.')[0] ??
-                          loc.adminMgmtUnknown),
-                ],
-              ),
-              _section(loc.adminMgmtAccountStatus, [
-                _row(
-                  loc.adminMgmtStatus,
-                  account.isActive
-                      ? loc.adminMgmtStatusActive
-                      : loc.adminMgmtStatusInactive,
-                ),
-                _row(loc.adminMgmtLastActivity, loc.adminMgmtNotTracked),
-              ]),
-              _section(
-                loc.adminMgmtRole,
-                [
-                  _row(loc.adminMgmtRoleLabel, _roleLabel(loc, account.role)),
-                  if (canManage)
-                    Align(
-                      alignment: AlignmentDirectional.centerStart,
-                      child: TextButton.icon(
-                        icon: const Icon(Icons.badge),
-                        label: Text(loc.adminMgmtAssignRole),
-                        onPressed: () => _assignRole(context, loc, account),
+                return ListView(
+                  padding: const EdgeInsets.all(16),
+                  children: [
+                    _section(loc.adminMgmtIdentity, [
+                      _row(
+                        loc.adminMgmtFullName,
+                        account.fullName ?? loc.adminMgmtUnknown,
                       ),
-                    ),
-                ],
-              ),
-              _section(
-                loc.adminMgmtHierarchy,
-                [
-                  _row(loc.adminMgmtSupervisor,
-                      account.supervisorEmail ?? loc.adminMgmtNone),
-                  if (canManage)
-                    Align(
-                      alignment: AlignmentDirectional.centerStart,
-                      child: TextButton.icon(
-                        icon: const Icon(Icons.swap_horiz),
-                        label: Text(loc.adminMgmtChangeSupervisor),
-                        onPressed: () => _changeSupervisor(context, loc, account),
+                      _row(loc.adminMgmtEmail, account.email),
+                      _row(loc.adminMgmtId, account.id),
+                      _row(
+                        loc.adminMgmtCreatedAt,
+                        account.createdAt?.toLocal().toString().split('.')[0] ??
+                            loc.adminMgmtUnknown,
                       ),
-                    ),
-                ],
-              ),
-              _section(
-                loc.adminMgmtRegionScope,
-                [
-                  _row(loc.adminMgmtRegion,
-                      account.regionName ?? loc.adminMgmtNone),
-                  _row(
-                    loc.adminMgmtScope,
-                    account.scope == AdminScope.self
-                        ? loc.adminMgmtScopeSelf
-                        : account.scope == AdminScope.descendants
+                    ]),
+                    _section(loc.adminMgmtAccountStatus, [
+                      _row(
+                        loc.adminMgmtStatus,
+                        account.isActive
+                            ? loc.adminMgmtStatusActive
+                            : loc.adminMgmtStatusInactive,
+                      ),
+                      _row(loc.adminMgmtLastActivity, loc.adminMgmtNotTracked),
+                    ]),
+                    _section(loc.adminMgmtRole, [
+                      _row(
+                        loc.adminMgmtRoleLabel,
+                        _roleLabel(loc, account.role),
+                      ),
+                      if (canManage)
+                        Align(
+                          alignment: AlignmentDirectional.centerStart,
+                          child: TextButton.icon(
+                            icon: const Icon(Icons.badge),
+                            label: Text(loc.adminMgmtAssignRole),
+                            onPressed: () => _assignRole(context, loc, account),
+                          ),
+                        ),
+                    ]),
+                    _section(loc.adminMgmtHierarchy, [
+                      _row(
+                        loc.adminMgmtSupervisor,
+                        account.supervisorEmail ?? loc.adminMgmtNone,
+                      ),
+                      if (canManage)
+                        Align(
+                          alignment: AlignmentDirectional.centerStart,
+                          child: TextButton.icon(
+                            icon: const Icon(Icons.swap_horiz),
+                            label: Text(loc.adminMgmtChangeSupervisor),
+                            onPressed: () =>
+                                _changeSupervisor(context, loc, account),
+                          ),
+                        ),
+                    ]),
+                    _section(loc.adminMgmtRegionScope, [
+                      _row(
+                        loc.adminMgmtRegion,
+                        account.regionName ?? loc.adminMgmtNone,
+                      ),
+                      _row(
+                        loc.adminMgmtScope,
+                        account.scope == AdminScope.self
+                            ? loc.adminMgmtScopeSelf
+                            : account.scope == AdminScope.descendants
                             ? loc.adminMgmtScopeDescendants
                             : loc.adminMgmtUnknown,
-                  ),
-                  if (canManage)
-                    Align(
-                      alignment: AlignmentDirectional.centerStart,
-                      child: TextButton.icon(
-                        icon: const Icon(Icons.map),
-                        label: Text(loc.adminMgmtAssignRegion),
-                        onPressed: () => _assignRegion(context, loc, account),
                       ),
-                    ),
-                ],
-              ),
-              _section(loc.adminMgmtPermissions, [
-                Text(loc.adminMgmtEffective),
-                perms.when(
-                  loading: () =>
-                      const LinearProgressIndicator(),
-                  error: (e, _) => Text(loc.adminMgmtFailed),
-                  data: (p) {
-                    final effective = (p['effective'] as List? ?? const [])
-                        .map((e) => e.toString())
-                        .toList();
-                    final granted = (p['grants'] as List? ?? const [])
-                        .map((e) => e.toString())
-                        .toList();
-                    return Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Wrap(
-                          spacing: 6,
-                          children: effective
-                              .map((x) => Chip(
-                                    label: Text(x),
-                                    visualDensity: VisualDensity.compact,
-                                  ))
-                              .toList(),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(loc.adminMgmtGranted),
-                        Wrap(
-                          spacing: 6,
-                          children: granted
-                              .map((x) => Chip(
-                                    label: Text(x),
-                                    visualDensity: VisualDensity.compact,
-                                    backgroundColor: Colors.blue.shade50,
-                                  ))
-                              .toList(),
-                        ),
-                        if (canManage)
-                          Row(
-                            children: [
-                              TextButton.icon(
-                                icon: const Icon(Icons.add),
-                                label: Text(loc.adminMgmtGrant),
-                                onPressed: () => _grantPermission(
-                                    context, loc, account, granted),
-                              ),
-                              TextButton.icon(
-                                icon: const Icon(Icons.remove),
-                                label: Text(loc.adminMgmtRevoke),
-                                onPressed: () => _revokePermission(
-                                    context, loc, account, granted),
-                              ),
-                            ],
+                      if (canManage)
+                        Align(
+                          alignment: AlignmentDirectional.centerStart,
+                          child: TextButton.icon(
+                            icon: const Icon(Icons.map),
+                            label: Text(loc.adminMgmtAssignRegion),
+                            onPressed: () =>
+                                _assignRegion(context, loc, account),
                           ),
-                      ],
-                    );
-                  },
-                ),
-              ]),
-              _section(
-                loc.adminMgmtAudit,
-                [
-                  audit.when(
-                    loading: () => const LinearProgressIndicator(),
-                    error: (e, _) => Text(loc.adminMgmtFailed),
-                    data: (entries) {
-                      if (entries.isEmpty) {
-                        return Text(loc.adminMgmtNoAudit);
-                      }
-                      return Column(
-                        children: entries
-                            .map((e) => ListTile(
-                                  dense: true,
-                                  title: Text(e.action),
-                                  subtitle: Text(
-                                      '${e.resource}${e.resourceId != null ? ' • ${e.resourceId}' : ''}'),
-                                  trailing: e.timestamp != null
-                                      ? Text(e.timestamp!
-                                          .toLocal()
-                                          .toString()
-                                          .split('.')[0])
-                                      : null,
-                                ))
-                            .toList(),
-                      );
-                    },
-                  ),
-                ],
-              ),
-              if (canManage)
-                _section(loc.adminMgmtActions, [
-                  if (account.isActive)
-                    FilledButton.icon(
-                      icon: const Icon(Icons.block),
-                      label: Text(loc.adminMgmtDeactivate),
-                      style: FilledButton.styleFrom(
-                          backgroundColor: Colors.red.shade700),
-                      onPressed: () => _deactivate(context, loc, account),
-                    )
-                  else
-                    FilledButton.icon(
-                      icon: const Icon(Icons.restart_alt),
-                      label: Text(loc.adminMgmtReactivate),
-                      onPressed: () => _reactivate(context, loc, account),
-                    ),
-                ]),
-            ],
-          );
-        },
-      ),
+                        ),
+                    ]),
+                    _section(loc.adminMgmtPermissions, [
+                      Text(loc.adminMgmtEffective),
+                      perms.when(
+                        loading: () => const LinearProgressIndicator(),
+                        error: (e, _) => Text(loc.adminMgmtFailed),
+                        data: (p) {
+                          final effective =
+                              (p['effective'] as List? ?? const [])
+                                  .map((e) => e.toString())
+                                  .toList();
+                          final granted = (p['grants'] as List? ?? const [])
+                              .map((e) => e.toString())
+                              .toList();
+                          return Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Wrap(
+                                spacing: 6,
+                                children: effective
+                                    .map(
+                                      (x) => Chip(
+                                        label: Text(x),
+                                        visualDensity: VisualDensity.compact,
+                                      ),
+                                    )
+                                    .toList(),
+                              ),
+                              const SizedBox(height: 8),
+                              Text(loc.adminMgmtGranted),
+                              Wrap(
+                                spacing: 6,
+                                children: granted
+                                    .map(
+                                      (x) => Chip(
+                                        label: Text(x),
+                                        visualDensity: VisualDensity.compact,
+                                        backgroundColor: Colors.blue.shade50,
+                                      ),
+                                    )
+                                    .toList(),
+                              ),
+                              if (canManage)
+                                Row(
+                                  children: [
+                                    TextButton.icon(
+                                      icon: const Icon(Icons.add),
+                                      label: Text(loc.adminMgmtGrant),
+                                      onPressed: () => _grantPermission(
+                                        context,
+                                        loc,
+                                        account,
+                                        granted,
+                                      ),
+                                    ),
+                                    TextButton.icon(
+                                      icon: const Icon(Icons.remove),
+                                      label: Text(loc.adminMgmtRevoke),
+                                      onPressed: () => _revokePermission(
+                                        context,
+                                        loc,
+                                        account,
+                                        granted,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                            ],
+                          );
+                        },
+                      ),
+                    ]),
+                    _section(loc.adminMgmtAudit, [
+                      audit.when(
+                        loading: () => const LinearProgressIndicator(),
+                        error: (e, _) => Text(loc.adminMgmtFailed),
+                        data: (entries) {
+                          if (entries.isEmpty) {
+                            return Text(loc.adminMgmtNoAudit);
+                          }
+                          return Column(
+                            children: entries
+                                .map(
+                                  (e) => ListTile(
+                                    dense: true,
+                                    title: Text(e.action),
+                                    subtitle: Text(
+                                      '${e.resource}${e.resourceId != null ? ' • ${e.resourceId}' : ''}',
+                                    ),
+                                    trailing: e.timestamp != null
+                                        ? Text(
+                                            e.timestamp!
+                                                .toLocal()
+                                                .toString()
+                                                .split('.')[0],
+                                          )
+                                        : null,
+                                  ),
+                                )
+                                .toList(),
+                          );
+                        },
+                      ),
+                    ]),
+                    if (canManage)
+                      _section(loc.adminMgmtActions, [
+                        if (account.isActive)
+                          FilledButton.icon(
+                            icon: const Icon(Icons.block),
+                            label: Text(loc.adminMgmtDeactivate),
+                            style: FilledButton.styleFrom(
+                              backgroundColor: Colors.red.shade700,
+                            ),
+                            onPressed: () => _deactivate(context, loc, account),
+                          )
+                        else
+                          FilledButton.icon(
+                            icon: const Icon(Icons.restart_alt),
+                            label: Text(loc.adminMgmtReactivate),
+                            onPressed: () => _reactivate(context, loc, account),
+                          ),
+                      ]),
+                  ],
+                );
+              },
+            ),
     );
   }
 
@@ -305,9 +321,10 @@ class _AdminProfilePageState
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(title,
-                style: const TextStyle(
-                    fontWeight: FontWeight.bold, fontSize: 15)),
+            Text(
+              title,
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+            ),
             const SizedBox(height: 8),
             ...children,
           ],
@@ -317,15 +334,17 @@ class _AdminProfilePageState
   }
 
   Widget _row(String label, String value) => Padding(
-        padding: const EdgeInsets.symmetric(vertical: 2),
-        child: Row(
-          children: [
-            Expanded(
-                flex: 2, child: Text(label, style: const TextStyle(color: Colors.grey))),
-            Expanded(flex: 3, child: Text(value)),
-          ],
+    padding: const EdgeInsets.symmetric(vertical: 2),
+    child: Row(
+      children: [
+        Expanded(
+          flex: 2,
+          child: Text(label, style: const TextStyle(color: Colors.grey)),
         ),
-      );
+        Expanded(flex: 3, child: Text(value)),
+      ],
+    ),
+  );
 
   Future<void> _deactivate(
     BuildContext context,
@@ -384,14 +403,17 @@ class _AdminProfilePageState
         ),
         actions: [
           TextButton(
-              onPressed: () => Navigator.of(ctx).pop(),
-              child: Text(loc.adminMgmtCancel)),
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: Text(loc.adminMgmtCancel),
+          ),
         ],
       ),
     );
     if (picked == null) return;
     await _runWithSnack(
-      () => ref.read(adminActionProvider.notifier).assignRole(
+      () => ref
+          .read(adminActionProvider.notifier)
+          .assignRole(
             id: account.id,
             adminId: account.id,
             role: picked,
@@ -422,23 +444,28 @@ class _AdminProfilePageState
           child: ListView(
             shrinkWrap: true,
             children: candidates
-                .map((a) => ListTile(
-                      title: Text(a.fullName ?? a.email),
-                      onTap: () => Navigator.of(ctx).pop(a.id),
-                    ))
+                .map(
+                  (a) => ListTile(
+                    title: Text(a.fullName ?? a.email),
+                    onTap: () => Navigator.of(ctx).pop(a.id),
+                  ),
+                )
                 .toList(),
           ),
         ),
         actions: [
           TextButton(
-              onPressed: () => Navigator.of(ctx).pop(),
-              child: Text(loc.adminMgmtCancel)),
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: Text(loc.adminMgmtCancel),
+          ),
         ],
       ),
     );
     if (picked == null) return;
     await _runWithSnack(
-      () => ref.read(adminActionProvider.notifier).changeSupervisor(
+      () => ref
+          .read(adminActionProvider.notifier)
+          .changeSupervisor(
             id: account.id,
             adminId: account.id,
             newSupervisorId: picked,
@@ -519,7 +546,9 @@ class _AdminProfilePageState
     );
     if (picked == null) return;
     await _runWithSnack(
-      () => ref.read(adminActionProvider.notifier).assignRegion(
+      () => ref
+          .read(adminActionProvider.notifier)
+          .assignRegion(
             id: account.id,
             adminId: account.id,
             regionId: picked,
@@ -535,8 +564,9 @@ class _AdminProfilePageState
     AdminAccount account,
     List<String> granted,
   ) async {
-    final options =
-        adminPermissionVocabulary.where((p) => !granted.contains(p)).toList();
+    final options = adminPermissionVocabulary
+        .where((p) => !granted.contains(p))
+        .toList();
     if (!mounted) return;
     final picked = await showDialog<String>(
       context: context,
@@ -547,23 +577,28 @@ class _AdminProfilePageState
           child: ListView(
             shrinkWrap: true,
             children: options
-                .map((p) => ListTile(
-                      title: Text(p),
-                      onTap: () => Navigator.of(ctx).pop(p),
-                    ))
+                .map(
+                  (p) => ListTile(
+                    title: Text(p),
+                    onTap: () => Navigator.of(ctx).pop(p),
+                  ),
+                )
                 .toList(),
           ),
         ),
         actions: [
           TextButton(
-              onPressed: () => Navigator.of(ctx).pop(),
-              child: Text(loc.adminMgmtCancel)),
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: Text(loc.adminMgmtCancel),
+          ),
         ],
       ),
     );
     if (picked == null) return;
     await _runWithSnack(
-      () => ref.read(adminActionProvider.notifier).grantPermission(
+      () => ref
+          .read(adminActionProvider.notifier)
+          .grantPermission(
             id: account.id,
             adminId: account.id,
             permission: picked,
@@ -592,23 +627,28 @@ class _AdminProfilePageState
           child: ListView(
             shrinkWrap: true,
             children: granted
-                .map((p) => ListTile(
-                      title: Text(p),
-                      onTap: () => Navigator.of(ctx).pop(p),
-                    ))
+                .map(
+                  (p) => ListTile(
+                    title: Text(p),
+                    onTap: () => Navigator.of(ctx).pop(p),
+                  ),
+                )
                 .toList(),
           ),
         ),
         actions: [
           TextButton(
-              onPressed: () => Navigator.of(ctx).pop(),
-              child: Text(loc.adminMgmtCancel)),
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: Text(loc.adminMgmtCancel),
+          ),
         ],
       ),
     );
     if (picked == null) return;
     await _runWithSnack(
-      () => ref.read(adminActionProvider.notifier).revokePermission(
+      () => ref
+          .read(adminActionProvider.notifier)
+          .revokePermission(
             id: account.id,
             adminId: account.id,
             permission: picked,

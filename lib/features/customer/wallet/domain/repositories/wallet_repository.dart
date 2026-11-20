@@ -3,13 +3,22 @@ import 'package:delwaqty/features/customer/wallet/domain/entities/wallet_transac
 
 abstract interface class WalletRepository {
   Future<WalletBalance> getBalance(String userId);
-  Future<List<WalletTransaction>> getTransactions(String userId, {int limit, int offset});
+  Future<List<WalletTransaction>> getTransactions(
+    String userId, {
+    int limit,
+    int offset,
+  });
   Future<WalletTransaction> topUp(
     String userId,
     double amount,
     String method, {
     String? idempotencyKey,
   });
-  Future<WalletTransaction> pay(String userId, double amount, String description, {String? referenceId});
+  Future<WalletTransaction> pay(
+    String userId,
+    double amount,
+    String description, {
+    String? referenceId,
+  });
   Future<WalletTransaction?> getTransactionById(String transactionId);
 }

@@ -163,11 +163,7 @@ class HelpCenterPage extends StatelessWidget {
                       endIndent: 16,
                       color: cs.outlineVariant.withValues(alpha: 0.35),
                     ),
-                  _buildFaq(
-                    context,
-                    question: faqs[i].q,
-                    answer: faqs[i].a,
-                  ),
+                  _buildFaq(context, question: faqs[i].q, answer: faqs[i].a),
                 ],
               ],
             ),
@@ -195,11 +191,7 @@ class HelpCenterPage extends StatelessWidget {
           color: cs.primary.withValues(alpha: 0.10),
           borderRadius: BorderRadius.circular(10),
         ),
-        child: Icon(
-          Icons.help_outline_rounded,
-          color: cs.primary,
-          size: 18,
-        ),
+        child: Icon(Icons.help_outline_rounded, color: cs.primary, size: 18),
       ),
       title: Text(
         question,

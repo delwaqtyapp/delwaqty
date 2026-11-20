@@ -13,8 +13,10 @@ import 'package:delwaqty/l10n/app_localizations.dart';
 
 final _merchantIdProvider = providerMerchantIdProvider;
 
-final _productProvider =
-    FutureProvider.family<Map<String, dynamic>?, String>((ref, productId) async {
+final _productProvider = FutureProvider.family<Map<String, dynamic>?, String>((
+  ref,
+  productId,
+) async {
   if (productId == 'new') return null;
   final repo = ref.watch(merchantDashboardRepositoryProvider);
   final merchantId = await ref.watch(_merchantIdProvider.future);
@@ -63,12 +65,13 @@ class _MerchantProductFormPageState
 
   Future<void> _loadProduct() async {
     try {
-      final product = await ref.read(_productProvider(widget.productId!).future);
+      final product = await ref.read(
+        _productProvider(widget.productId!).future,
+      );
       if (!mounted || product == null) return;
       _nameController.text = product['name'] as String? ?? '';
       _descriptionController.text = product['description'] as String? ?? '';
-      _priceController.text =
-          (product['price'] as num?)?.toString() ?? '';
+      _priceController.text = (product['price'] as num?)?.toString() ?? '';
       _categoryController.text = product['category'] as String? ?? '';
       _imageUrlController.text = product['image_url'] as String? ?? '';
       setState(() {
@@ -104,8 +107,9 @@ class _MerchantProductFormPageState
       final path =
           '$uid/products/${DateTime.now().millisecondsSinceEpoch}_$name';
       await client.storage.from('profile-photos').uploadBinary(path, bytes);
-      final publicUrl =
-          client.storage.from('profile-photos').getPublicUrl(path);
+      final publicUrl = client.storage
+          .from('profile-photos')
+          .getPublicUrl(path);
       if (mounted) {
         setState(() {
           _imageUrlController.text = publicUrl;
@@ -153,9 +157,7 @@ class _MerchantProductFormPageState
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    AnimatedFadeIn(
-                      child: _buildImagePreview(l10n),
-                    ),
+                    AnimatedFadeIn(child: _buildImagePreview(l10n)),
                     const SizedBox(height: 16),
                     AnimatedFadeIn(
                       delay: const Duration(milliseconds: 100),
@@ -373,8 +375,7 @@ class _MerchantProductFormPageState
             value: _isFeatured,
             onChanged: (value) => setState(() => _isFeatured = value),
             shape: const RoundedRectangleBorder(
-              borderRadius:
-                  BorderRadius.vertical(bottom: Radius.circular(16)),
+              borderRadius: BorderRadius.vertical(bottom: Radius.circular(16)),
             ),
           ),
         ],

@@ -9,12 +9,15 @@ void main() {
     // all four flavors but hard-coded '/home', which only the customer
     // registry registers. Driver and provider therefore landed on the
     // router's unrecoverable "page not found" screen.
-    test('resolves the flavor landing route, never the customer-only /home', () {
-      expect(postAuthRoute(AppFlavor.customer), '/home');
-      expect(postAuthRoute(AppFlavor.admin), '/admin');
-      expect(postAuthRoute(AppFlavor.driver), '/driver');
-      expect(postAuthRoute(AppFlavor.provider), '/merchant-dashboard');
-    });
+    test(
+      'resolves the flavor landing route, never the customer-only /home',
+      () {
+        expect(postAuthRoute(AppFlavor.customer), '/home');
+        expect(postAuthRoute(AppFlavor.admin), '/admin');
+        expect(postAuthRoute(AppFlavor.driver), '/driver');
+        expect(postAuthRoute(AppFlavor.provider), '/merchant-dashboard');
+      },
+    );
 
     test('driver and provider never receive the customer-only /home route', () {
       expect(postAuthRoute(AppFlavor.driver), isNot('/home'));

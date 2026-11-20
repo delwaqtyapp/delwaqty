@@ -14,14 +14,17 @@ import 'package:delwaqty/shared/widgets/app_loader.dart';
 import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
 import 'package:delwaqty/shared/widgets/premium_empty_state.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
+
 import 'dart:async';
+
 import 'package:delwaqty/core/errors/app_error_text.dart';
 
 class AdminSupportChatPage extends ConsumerStatefulWidget {
   const AdminSupportChatPage({super.key});
 
   @override
-  ConsumerState<AdminSupportChatPage> createState() => _AdminSupportChatPageState();
+  ConsumerState<AdminSupportChatPage> createState() =>
+      _AdminSupportChatPageState();
 }
 
 class _AdminSupportChatPageState extends ConsumerState<AdminSupportChatPage> {
@@ -63,26 +66,29 @@ class _AdminSupportChatPageState extends ConsumerState<AdminSupportChatPage> {
               final room = rooms[index];
               final refNum = room.referenceNumber;
               final authState = ref.watch(authStateProvider);
-              final myId =
-                  authState is AuthAuthenticated ? authState.user.id : null;
+              final myId = authState is AuthAuthenticated
+                  ? authState.user.id
+                  : null;
               final peerId = room.participantIds.firstWhere(
                 (id) => id.isNotEmpty && id != myId,
-                orElse: () =>
-                    room.participantIds.isNotEmpty ? room.participantIds.first : '',
+                orElse: () => room.participantIds.isNotEmpty
+                    ? room.participantIds.first
+                    : '',
               );
               final peerProfile = peerId.isNotEmpty
                   ? (ref.watch(chatRoomUserProvider(peerId)).asData?.value ??
-                      const <String, dynamic>{})
+                        const <String, dynamic>{})
                   : const <String, dynamic>{};
               final peerName =
                   (peerProfile['full_name'] as String?)?.trim() ?? '';
-              final shortId =
-                  room.id.length >= 8 ? room.id.substring(0, 8) : room.id;
+              final shortId = room.id.length >= 8
+                  ? room.id.substring(0, 8)
+                  : room.id;
               final titleText = peerName.isNotEmpty
                   ? (refNum == null ? peerName : '$peerName • $refNum')
                   : (refNum == null
-                      ? '${l10n.chatRoom} $shortId'
-                      : '${l10n.complaintNo}: $refNum');
+                        ? '${l10n.chatRoom} $shortId'
+                        : '${l10n.complaintNo}: $refNum');
 
               return Padding(
                 padding: const EdgeInsets.only(bottom: 8),
@@ -191,7 +197,11 @@ class _AdminSupportChatPageState extends ConsumerState<AdminSupportChatPage> {
               const SizedBox(width: 4),
               Text(
                 label,
-                style: TextStyle(fontSize: 11, color: color, fontWeight: FontWeight.w600),
+                style: TextStyle(
+                  fontSize: 11,
+                  color: color,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
             ],
           ),
@@ -212,9 +222,8 @@ class _AdminSupportChatPageState extends ConsumerState<AdminSupportChatPage> {
     final selected = await _pickMember();
     if (selected == null || !mounted) return;
     if (selected.id == me.id) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.error)),
-      );
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(l10n.error)));
       return;
     }
 
@@ -232,9 +241,8 @@ class _AdminSupportChatPageState extends ConsumerState<AdminSupportChatPage> {
       unawaited(context.push('/admin/support-chat/room/${created.id}'));
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(appErrorText(context, e))),
-      );
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(appErrorText(context, e))));
     }
   }
 
@@ -273,7 +281,10 @@ class _AdminSupportChatPageState extends ConsumerState<AdminSupportChatPage> {
                 children: [
                   Text(
                     l10n.selectRecipient,
-                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   const SizedBox(height: 12),
                   TextField(
@@ -289,52 +300,62 @@ class _AdminSupportChatPageState extends ConsumerState<AdminSupportChatPage> {
                     decoration: InputDecoration(
                       hintText: '${l10n.search}…',
                       prefixIcon: const Icon(Icons.search_rounded),
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                      ),
                     ),
                   ),
                   const SizedBox(height: 8),
                   Wrap(
                     spacing: 8,
                     children: ['admin', 'provider', 'driver', 'customer']
-                        .map((role) => ChoiceChip(
-                              label: Text(_roleChipLabel(role, l10n)),
-                              selected: roleFilter == role,
-                              onSelected: (sel) {
-                                setModalState(() => roleFilter = sel ? role : null);
-                              },
-                            ))
+                        .map(
+                          (role) => ChoiceChip(
+                            label: Text(_roleChipLabel(role, l10n)),
+                            selected: roleFilter == role,
+                            onSelected: (sel) {
+                              setModalState(
+                                () => roleFilter = sel ? role : null,
+                              );
+                            },
+                          ),
+                        )
                         .toList(),
                   ),
-                const SizedBox(height: 8),
-                Flexible(
-                  child: filtered.isEmpty
-                      ? Padding(
-                          padding: const EdgeInsets.all(24),
-                          child: Text(l10n.noMembersFound),
-                        )
-                      : ListView(
-                          shrinkWrap: true,
-                          children: filtered.take(24).map((m) {
-                            return ListTile(
-                              leading: CircleAvatar(
-                                child: Text(
-                                  safeInitialFrom([
-                                    m.fullName,
-                                    m.username,
-                                    m.email,
-                                  ]),
+                  const SizedBox(height: 8),
+                  Flexible(
+                    child: filtered.isEmpty
+                        ? Padding(
+                            padding: const EdgeInsets.all(24),
+                            child: Text(l10n.noMembersFound),
+                          )
+                        : ListView(
+                            shrinkWrap: true,
+                            children: filtered.take(24).map((m) {
+                              return ListTile(
+                                leading: CircleAvatar(
+                                  child: Text(
+                                    safeInitialFrom([
+                                      m.fullName,
+                                      m.username,
+                                      m.email,
+                                    ]),
+                                  ),
                                 ),
-                              ),
-                              title: Text(m.fullName ?? m.username ?? m.email ?? '—'),
-                              subtitle: Text(_roleDisplayText(m.role, l10n)),
-                              onTap: () => Navigator.of(sheetContext).pop(m),
-                            );
-                          }).toList(),
-                        ),
-                ),
-              ],
-            );
+                                title: Text(
+                                  m.fullName ?? m.username ?? m.email ?? '—',
+                                ),
+                                subtitle: Text(_roleDisplayText(m.role, l10n)),
+                                onTap: () => Navigator.of(sheetContext).pop(m),
+                              );
+                            }).toList(),
+                          ),
+                  ),
+                ],
+              );
             },
           ),
         ),
@@ -360,13 +381,14 @@ class _AdminSupportChatPageState extends ConsumerState<AdminSupportChatPage> {
   }
 
   String _roleChipLabel(String role, AppLocalizations l10n) => switch (role) {
-        'driver' => l10n.chatOriginDriver,
-        'provider' => l10n.chatOriginProvider,
-        'admin' => l10n.chatOriginAdmin,
-        _ => l10n.chatOriginCustomer,
-      };
+    'driver' => l10n.chatOriginDriver,
+    'provider' => l10n.chatOriginProvider,
+    'admin' => l10n.chatOriginAdmin,
+    _ => l10n.chatOriginCustomer,
+  };
 
-  String _roleDisplayText(String? role, AppLocalizations l10n) => switch (role) {
+  String _roleDisplayText(String? role, AppLocalizations l10n) =>
+      switch (role) {
         'driver' || 'delivery' => l10n.chatOriginDriver,
         'provider' || 'merchant' => l10n.chatOriginProvider,
         'admin' || 'owner' => l10n.chatOriginAdmin,
@@ -399,9 +421,8 @@ class _AdminSupportChatPageState extends ConsumerState<AdminSupportChatPage> {
       ref.invalidate(adminAllRoomsProvider);
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(appErrorText(context, e))),
-      );
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(appErrorText(context, e))));
     }
   }
 }

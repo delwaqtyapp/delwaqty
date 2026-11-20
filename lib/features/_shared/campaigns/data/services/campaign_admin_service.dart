@@ -24,7 +24,9 @@ class CampaignAdminService {
         .order('created_at', ascending: false);
 
     return (rows as List)
-        .map((r) => ManagedCampaign.fromRow(Map<String, dynamic>.from(r as Map)))
+        .map(
+          (r) => ManagedCampaign.fromRow(Map<String, dynamic>.from(r as Map)),
+        )
         .toList();
   }
 
@@ -134,8 +136,7 @@ class CampaignAdminService {
         params: {'p_campaign_id': campaignId},
       );
     } on PostgrestException catch (e) {
-      if (e.code != 'PGRST202' &&
-          !e.message.contains('admin_delete_banner')) {
+      if (e.code != 'PGRST202' && !e.message.contains('admin_delete_banner')) {
         rethrow;
       }
       await _client.from('campaigns').delete().eq('id', campaignId);
@@ -159,7 +160,9 @@ class CampaignAdminService {
     final safeExt = _sanitizeExtension(imageExtension);
     final ts = DateTime.now().millisecondsSinceEpoch;
     final imagePath = 'admin/${ts}_$uid.$safeExt';
-    await _client.storage.from(_bucketName).uploadBinary(
+    await _client.storage
+        .from(_bucketName)
+        .uploadBinary(
           imagePath,
           imageBytes,
           fileOptions: FileOptions(
@@ -235,10 +238,7 @@ class CampaignAdminService {
   }
 
   Future<void> publishCampaign(String id) async {
-    await _client.rpc(
-      'campaign_publish',
-      params: {'p_campaign_id': id},
-    );
+    await _client.rpc('campaign_publish', params: {'p_campaign_id': id});
   }
 
   Future<void> pauseCampaign(
@@ -252,10 +252,7 @@ class CampaignAdminService {
   }
 
   Future<void> resumeCampaign(String id) async {
-    await _client.rpc(
-      'campaign_resume',
-      params: {'p_campaign_id': id},
-    );
+    await _client.rpc('campaign_resume', params: {'p_campaign_id': id});
   }
 
   Future<void> cancelCampaign(
@@ -272,7 +269,9 @@ class CampaignAdminService {
     final data = await _client.rpc('provider_list_my_campaigns');
     final rows = (data as List?) ?? const [];
     return rows
-        .map((r) => ManagedCampaign.fromRow(Map<String, dynamic>.from(r as Map)))
+        .map(
+          (r) => ManagedCampaign.fromRow(Map<String, dynamic>.from(r as Map)),
+        )
         .toList();
   }
 
@@ -295,7 +294,9 @@ class CampaignAdminService {
       final safeExt = _sanitizeExtension(imageExtension);
       final ts = DateTime.now().millisecondsSinceEpoch;
       imagePath = 'providers/$uid/$ts.$safeExt';
-      await _client.storage.from(_bucketName).uploadBinary(
+      await _client.storage
+          .from(_bucketName)
+          .uploadBinary(
             imagePath,
             imageBytes,
             fileOptions: FileOptions(
@@ -309,8 +310,9 @@ class CampaignAdminService {
       'provider_create_banner_campaign',
       params: {
         'p_name_ar': titleAr.trim(),
-        'p_name_en':
-            titleEn != null && titleEn.trim().isNotEmpty ? titleEn.trim() : null,
+        'p_name_en': titleEn != null && titleEn.trim().isNotEmpty
+            ? titleEn.trim()
+            : null,
         'p_subtitle_ar': subtitleAr != null && subtitleAr.trim().isNotEmpty
             ? subtitleAr.trim()
             : null,
@@ -326,7 +328,10 @@ class CampaignAdminService {
 
   String _sanitizeExtension(String ext) {
     final lower = ext.toLowerCase().replaceAll('.', '');
-    if (lower == 'png' || lower == 'webp' || lower == 'jpeg' || lower == 'jpg') {
+    if (lower == 'png' ||
+        lower == 'webp' ||
+        lower == 'jpeg' ||
+        lower == 'jpg') {
       return lower;
     }
     return 'jpg';

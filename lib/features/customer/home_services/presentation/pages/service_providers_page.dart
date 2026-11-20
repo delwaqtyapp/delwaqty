@@ -1,4 +1,5 @@
 import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -17,12 +18,13 @@ import 'package:delwaqty/shared/widgets/shimmer_loading.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 
 final _providersForTypeProvider =
-    FutureProvider.family<List<ServiceProvider>, ServiceCategoryType>(
-  (ref, type) async {
-    final repo = ref.watch(serviceBookingRepositoryProvider);
-    return repo.getProviders(categoryType: type);
-  },
-);
+    FutureProvider.family<List<ServiceProvider>, ServiceCategoryType>((
+      ref,
+      type,
+    ) async {
+      final repo = ref.watch(serviceBookingRepositoryProvider);
+      return repo.getProviders(categoryType: type);
+    });
 
 class ServiceProvidersPage extends ConsumerStatefulWidget {
   const ServiceProvidersPage({super.key, this.initialType});
@@ -56,7 +58,8 @@ class _ServiceProvidersPageState extends ConsumerState<ServiceProvidersPage> {
     const r = 6371.0;
     final dLat = _toRad(p.latitude! - uLat);
     final dLng = _toRad(p.longitude! - uLng);
-    final a = math.pow(math.sin(dLat / 2), 2) +
+    final a =
+        math.pow(math.sin(dLat / 2), 2) +
         math.cos(_toRad(uLat)) *
             math.cos(_toRad(p.latitude!)) *
             math.pow(math.sin(dLng / 2), 2);
@@ -76,9 +79,7 @@ class _ServiceProvidersPageState extends ConsumerState<ServiceProvidersPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(serviceTypeLabel(_type, l10n)),
-        actions: [
-          ServiceReviewsButton(categoryType: _type),
-        ],
+        actions: [ServiceReviewsButton(categoryType: _type)],
       ),
       body: Column(
         children: [
@@ -97,27 +98,39 @@ class _ServiceProvidersPageState extends ConsumerState<ServiceProvidersPage> {
                 title: l10n.error,
                 message: l10n.errorLoading,
                 actionLabel: l10n.retry,
-                onAction: () => ref.invalidate(_providersForTypeProvider(_type)),
+                onAction: () =>
+                    ref.invalidate(_providersForTypeProvider(_type)),
               ),
               data: (providers) {
-                final withCoords = providers
-                    .where((p) =>
-                        p.latitude != null &&
-                        p.longitude != null &&
-                        _distanceKm(p, uLat, uLng) <= _radiusKm)
-                    .toList()
-                  ..sort((a, b) => _distanceKm(a, uLat, uLng)
-                      .compareTo(_distanceKm(b, uLat, uLng)));
+                final withCoords =
+                    providers
+                        .where(
+                          (p) =>
+                              p.latitude != null &&
+                              p.longitude != null &&
+                              _distanceKm(p, uLat, uLng) <= _radiusKm,
+                        )
+                        .toList()
+                      ..sort(
+                        (a, b) => _distanceKm(
+                          a,
+                          uLat,
+                          uLng,
+                        ).compareTo(_distanceKm(b, uLat, uLng)),
+                      );
                 final withoutCoords = providers
                     .where((p) => p.latitude == null || p.longitude == null)
                     .toList();
-                final visible = (withCoords.isEmpty &&
+                final visible =
+                    (withCoords.isEmpty &&
                         withoutCoords.isEmpty &&
                         providers.isNotEmpty)
-                    ? (List<ServiceProvider>.from(providers)
-                      ..sort(
-                        (a, b) => _distanceKm(a, uLat, uLng)
-                            .compareTo(_distanceKm(b, uLat, uLng)),
+                    ? (List<ServiceProvider>.from(providers)..sort(
+                        (a, b) => _distanceKm(
+                          a,
+                          uLat,
+                          uLng,
+                        ).compareTo(_distanceKm(b, uLat, uLng)),
                       ))
                     : [...withCoords, ...withoutCoords];
                 if (visible.isEmpty) {
@@ -193,10 +206,7 @@ class _ServiceProvidersPageState extends ConsumerState<ServiceProvidersPage> {
         padding: const EdgeInsets.fromLTRB(16, 4, 16, 4),
         child: Row(
           children: [
-            Text(
-              l10n.searchRadius,
-              style: AppTextStyles.labelLarge,
-            ),
+            Text(l10n.searchRadius, style: AppTextStyles.labelLarge),
             const SizedBox(width: 10),
             for (final r in _radiusOptions) ...[
               NavPillButton(
@@ -217,24 +227,24 @@ class _ServiceProvidersPageState extends ConsumerState<ServiceProvidersPage> {
   }
 
   IconData _categoryIcon(ServiceCategoryType type) => switch (type) {
-        ServiceCategoryType.plumbing => Icons.plumbing_rounded,
-        ServiceCategoryType.electrical => Icons.electrical_services_rounded,
-        ServiceCategoryType.carpentry => Icons.carpenter_rounded,
-        ServiceCategoryType.acMaintenance => Icons.ac_unit_rounded,
-        ServiceCategoryType.painting => Icons.format_paint_rounded,
-        ServiceCategoryType.cleaning => Icons.cleaning_services_rounded,
-        ServiceCategoryType.pestControl => Icons.bug_report_rounded,
-        ServiceCategoryType.applianceRepair => Icons.build_rounded,
-        ServiceCategoryType.pipeChange => Icons.settings_input_component_rounded,
-        ServiceCategoryType.plastering => Icons.format_color_fill_rounded,
-        ServiceCategoryType.carpetCleaning => Icons.local_laundry_service_rounded,
-        ServiceCategoryType.dishRepair => Icons.satellite_alt_rounded,
-        ServiceCategoryType.teacher => Icons.school_rounded,
-        ServiceCategoryType.doctor => Icons.medical_services_rounded,
-        ServiceCategoryType.nurse => Icons.health_and_safety_rounded,
-        ServiceCategoryType.barber => Icons.content_cut_rounded,
-        ServiceCategoryType.other => Icons.home_repair_service_rounded,
-      };
+    ServiceCategoryType.plumbing => Icons.plumbing_rounded,
+    ServiceCategoryType.electrical => Icons.electrical_services_rounded,
+    ServiceCategoryType.carpentry => Icons.carpenter_rounded,
+    ServiceCategoryType.acMaintenance => Icons.ac_unit_rounded,
+    ServiceCategoryType.painting => Icons.format_paint_rounded,
+    ServiceCategoryType.cleaning => Icons.cleaning_services_rounded,
+    ServiceCategoryType.pestControl => Icons.bug_report_rounded,
+    ServiceCategoryType.applianceRepair => Icons.build_rounded,
+    ServiceCategoryType.pipeChange => Icons.settings_input_component_rounded,
+    ServiceCategoryType.plastering => Icons.format_color_fill_rounded,
+    ServiceCategoryType.carpetCleaning => Icons.local_laundry_service_rounded,
+    ServiceCategoryType.dishRepair => Icons.satellite_alt_rounded,
+    ServiceCategoryType.teacher => Icons.school_rounded,
+    ServiceCategoryType.doctor => Icons.medical_services_rounded,
+    ServiceCategoryType.nurse => Icons.health_and_safety_rounded,
+    ServiceCategoryType.barber => Icons.content_cut_rounded,
+    ServiceCategoryType.other => Icons.home_repair_service_rounded,
+  };
 }
 
 class _ProviderCard extends StatelessWidget {
@@ -304,16 +314,22 @@ class _ProviderCard extends StatelessWidget {
                         ),
                         if (provider.isVerified) ...[
                           const SizedBox(width: 4),
-                          const Icon(Icons.verified_rounded,
-                              size: 16, color: AppColors.brandPurple),
+                          const Icon(
+                            Icons.verified_rounded,
+                            size: 16,
+                            color: AppColors.brandPurple,
+                          ),
                         ],
                       ],
                     ),
                     const SizedBox(height: 4),
                     Row(
                       children: [
-                        const Icon(Icons.star_rounded,
-                            size: 15, color: AppColors.rating),
+                        const Icon(
+                          Icons.star_rounded,
+                          size: 15,
+                          color: AppColors.rating,
+                        ),
                         const SizedBox(width: 2),
                         Text(
                           provider.rating.toStringAsFixed(1),
@@ -323,8 +339,11 @@ class _ProviderCard extends StatelessWidget {
                         ),
                         if (distanceKm.isFinite) ...[
                           const SizedBox(width: 8),
-                          Icon(Icons.place_outlined,
-                              size: 14, color: cs.onSurfaceVariant),
+                          Icon(
+                            Icons.place_outlined,
+                            size: 14,
+                            color: cs.onSurfaceVariant,
+                          ),
                           const SizedBox(width: 2),
                           Text(
                             '${distanceKm.toStringAsFixed(1)} ${AppLocalizations.of(context).km}',
@@ -352,8 +371,7 @@ class _ProviderCard extends StatelessWidget {
               const SizedBox(width: 8),
               ServiceReviewsButton(
                 categoryType: provider.categoryType,
-                tooltipLabel:
-                    AppLocalizations.of(context).rateService,
+                tooltipLabel: AppLocalizations.of(context).rateService,
                 onPressedOverride: onReviewsTap,
               ),
             ],

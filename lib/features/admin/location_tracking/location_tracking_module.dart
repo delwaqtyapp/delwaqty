@@ -7,7 +7,8 @@ class LocationTrackingModule extends FeatureModule {
   String get id => 'location_tracking';
 
   @override
-  String name(BuildContext context) => AppLocalizations.of(context).liveTracking;
+  String name(BuildContext context) =>
+      AppLocalizations.of(context).liveTracking;
 
   @override
   IconData? get icon => Icons.map_rounded;

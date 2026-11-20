@@ -15,9 +15,7 @@ void main() {
 
     await tester.pumpWidget(
       ProviderScope(
-        overrides: [
-          adminIsOwnerProvider.overrideWith((ref) async => false),
-        ],
+        overrides: [adminIsOwnerProvider.overrideWith((ref) async => false)],
         child: const MaterialApp(
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,

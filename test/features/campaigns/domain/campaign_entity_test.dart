@@ -44,7 +44,10 @@ void main() {
   group('CampaignStatus', () {
     test('fromDb maps values', () {
       expect(CampaignStatus.fromDb('draft'), CampaignStatus.draft);
-      expect(CampaignStatus.fromDb('pending_review'), CampaignStatus.pendingReview);
+      expect(
+        CampaignStatus.fromDb('pending_review'),
+        CampaignStatus.pendingReview,
+      );
       expect(CampaignStatus.fromDb('approved'), CampaignStatus.approved);
       expect(CampaignStatus.fromDb('published'), CampaignStatus.published);
       expect(CampaignStatus.fromDb('expired'), CampaignStatus.expired);

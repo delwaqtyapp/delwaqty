@@ -36,10 +36,7 @@ class MemberDetailPage extends ConsumerWidget {
               message: l10n.memberNotFoundMessage,
             );
           }
-          return _MemberProfileBody(
-            memberId: memberId,
-            profile: profile,
-          );
+          return _MemberProfileBody(memberId: memberId, profile: profile);
         },
       ),
       floatingActionButton: FloatingActionButton.extended(
@@ -69,10 +66,7 @@ class MemberDetailPage extends ConsumerWidget {
 }
 
 class _IssueSanctionSheet extends ConsumerStatefulWidget {
-  const _IssueSanctionSheet({
-    required this.memberId,
-    required this.onIssued,
-  });
+  const _IssueSanctionSheet({required this.memberId, required this.onIssued});
 
   final String memberId;
   final VoidCallback onIssued;
@@ -121,17 +115,13 @@ class _IssueSanctionSheetState extends ConsumerState<_IssueSanctionSheet> {
       if (mounted) {
         widget.onIssued();
         Navigator.of(context).pop();
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.sanctionIssued)),
-        );
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(l10n.sanctionIssued)));
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(appErrorText(context, e)),
-          ),
-        );
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(appErrorText(context, e))));
       }
     } finally {
       if (mounted) setState(() => _isSubmitting = false);
@@ -164,8 +154,10 @@ class _IssueSanctionSheetState extends ConsumerState<_IssueSanctionSheet> {
               ),
             ),
             const SizedBox(height: 16),
-            Text(l10n.issueSanction,
-                style: Theme.of(context).textTheme.titleLarge),
+            Text(
+              l10n.issueSanction,
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
             const SizedBox(height: 16),
             DropdownButtonFormField<String>(
               initialValue: _selectedType,
@@ -260,10 +252,7 @@ class _IssueSanctionSheetState extends ConsumerState<_IssueSanctionSheet> {
 }
 
 class _MemberProfileBody extends ConsumerWidget {
-  const _MemberProfileBody({
-    required this.memberId,
-    required this.profile,
-  });
+  const _MemberProfileBody({required this.memberId, required this.profile});
 
   final String memberId;
   final Map<String, dynamic> profile;
@@ -309,9 +298,8 @@ class _MemberProfileBody extends ConsumerWidget {
         Center(
           child: Text(
             name,
-            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.w700,
-                ),
+            style: Theme.of(context).textTheme.headlineSmall
+                ?.copyWith(fontWeight: FontWeight.w700),
           ),
         ),
         Center(
@@ -333,19 +321,22 @@ class _MemberProfileBody extends ConsumerWidget {
           ),
         ),
         const SizedBox(height: 20),
-        _InfoCard(title: l10n.contact, items: [
-          if (email.isNotEmpty)
-            _InfoRow(icon: Icons.email_outlined, text: email),
-          if (phone.isNotEmpty)
-            _InfoRow(icon: Icons.phone_outlined, text: phone),
-          _InfoRow(icon: Icons.badge_outlined, text: l10n.roleValueLabel(role)),
-        ]),
+        _InfoCard(
+          title: l10n.contact,
+          items: [
+            if (email.isNotEmpty)
+              _InfoRow(icon: Icons.email_outlined, text: email),
+            if (phone.isNotEmpty)
+              _InfoRow(icon: Icons.phone_outlined, text: phone),
+            _InfoRow(
+              icon: Icons.badge_outlined,
+              text: l10n.roleValueLabel(role),
+            ),
+          ],
+        ),
         const SizedBox(height: 12),
         if (statusAsync.hasValue)
-          _SanctionsSection(
-            memberId: memberId,
-            statusData: statusAsync.value!,
-          ),
+          _SanctionsSection(memberId: memberId, statusData: statusAsync.value!),
         const SizedBox(height: 12),
         _TimelineSection(memberId: memberId),
       ],
@@ -378,10 +369,11 @@ class _InfoCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(title,
-                style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                      fontWeight: FontWeight.w700,
-                    )),
+            Text(
+              title,
+              style: Theme.of(context).textTheme.titleSmall
+                  ?.copyWith(fontWeight: FontWeight.w700),
+            ),
             const SizedBox(height: 8),
             ...items,
           ],
@@ -403,9 +395,11 @@ class _InfoRow extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: 6),
       child: Row(
         children: [
-          Icon(icon,
-              size: 16,
-              color: Theme.of(context).colorScheme.onSurfaceVariant),
+          Icon(
+            icon,
+            size: 16,
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
+          ),
           const SizedBox(width: 8),
           Expanded(
             child: Text(text, style: Theme.of(context).textTheme.bodyMedium),
@@ -417,10 +411,7 @@ class _InfoRow extends StatelessWidget {
 }
 
 class _SanctionsSection extends ConsumerStatefulWidget {
-  const _SanctionsSection({
-    required this.memberId,
-    required this.statusData,
-  });
+  const _SanctionsSection({required this.memberId, required this.statusData});
 
   final String memberId;
   final Map<String, dynamic> statusData;
@@ -442,9 +433,7 @@ class _SanctionsSectionState extends ConsumerState<_SanctionsSection> {
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(
-              l10n.revokeQuestion('${sanction['sanction_type']}'),
-            ),
+            Text(l10n.revokeQuestion('${sanction['sanction_type']}')),
             const SizedBox(height: 12),
             TextField(
               controller: reasonController,
@@ -459,9 +448,7 @@ class _SanctionsSectionState extends ConsumerState<_SanctionsSection> {
             ),
           ],
         ),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(false),
@@ -491,17 +478,13 @@ class _SanctionsSectionState extends ConsumerState<_SanctionsSection> {
         if (mounted) {
           ref.invalidate(memberStatusProvider(widget.memberId));
           ref.invalidate(memberTimelineProvider(widget.memberId));
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(l10n.sanctionRevoked)),
-          );
+          ScaffoldMessenger.of(context)
+              .showSnackBar(SnackBar(content: Text(l10n.sanctionRevoked)));
         }
       } catch (e) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(appErrorText(context, e)),
-            ),
-          );
+          ScaffoldMessenger.of(context)
+              .showSnackBar(SnackBar(content: Text(appErrorText(context, e))));
         }
       } finally {
         if (mounted) setState(() => _isRevoking = false);
@@ -520,10 +503,11 @@ class _SanctionsSectionState extends ConsumerState<_SanctionsSection> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(l10n.activeSanctions,
-                style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                      fontWeight: FontWeight.w700,
-                    )),
+            Text(
+              l10n.activeSanctions,
+              style: Theme.of(context).textTheme.titleSmall
+                  ?.copyWith(fontWeight: FontWeight.w700),
+            ),
             const SizedBox(height: 8),
             if (sanctions.isEmpty)
               Text(
@@ -539,8 +523,11 @@ class _SanctionsSectionState extends ConsumerState<_SanctionsSection> {
                   padding: const EdgeInsets.only(bottom: 6),
                   child: Row(
                     children: [
-                      const Icon(Icons.gavel_rounded,
-                          size: 14, color: AppColors.warningLight),
+                      const Icon(
+                        Icons.gavel_rounded,
+                        size: 14,
+                        color: AppColors.warningLight,
+                      ),
                       const SizedBox(width: 6),
                       Expanded(
                         child: Text(
@@ -555,12 +542,14 @@ class _SanctionsSectionState extends ConsumerState<_SanctionsSection> {
                               ? const SizedBox(
                                   width: 14,
                                   height: 14,
-                                  child:
-                                      CircularProgressIndicator(strokeWidth: 2),
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                  ),
                                 )
                               : const Icon(Icons.undo_rounded, size: 16),
-                          onPressed:
-                              _isRevoking ? null : () => _confirmRevoke(s),
+                          onPressed: _isRevoking
+                              ? null
+                              : () => _confirmRevoke(s),
                           tooltip: l10n.revoke,
                           visualDensity: VisualDensity.compact,
                         ),
@@ -603,17 +592,18 @@ class _TimelineSection extends ConsumerWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(l10n.timeline,
-                style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                      fontWeight: FontWeight.w700,
-                    )),
+            Text(
+              l10n.timeline,
+              style: Theme.of(context).textTheme.titleSmall
+                  ?.copyWith(fontWeight: FontWeight.w700),
+            ),
             const SizedBox(height: 8),
             timelineAsync.when(
-              loading: () => const ShimmerLoading(
-                child: SizedBox(height: 80),
+              loading: () => const ShimmerLoading(child: SizedBox(height: 80)),
+              error: (e, _) => Text(
+                l10n.failedToLoadTimeline,
+                style: Theme.of(context).textTheme.bodySmall,
               ),
-              error: (e, _) => Text(l10n.failedToLoadTimeline,
-                  style: Theme.of(context).textTheme.bodySmall),
               data: (events) {
                 if (events.isEmpty) {
                   return Text(
@@ -625,8 +615,7 @@ class _TimelineSection extends ConsumerWidget {
                   children: events.take(10).map((e) {
                     final type = e['event_type'] as String? ?? '?';
                     final createdAt = e['created_at'] as String? ?? '';
-                    final detail =
-                        e['detail'] as Map<String, dynamic>? ?? {};
+                    final detail = e['detail'] as Map<String, dynamic>? ?? {};
                     final reason = detail['reason'] as String? ?? '';
                     return ListTile(
                       dense: true,

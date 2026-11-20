@@ -6,18 +6,10 @@ part of 'merchant.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-MerchantType _$MerchantTypeFromJson(Object? json) =>
-    _$MerchantTypeEnumMap.entries
-        .firstWhere(
-          (e) => e.value == json,
-          orElse: () => const MapEntry(MerchantType.other, 'other'),
-        )
-        .key;
-
 _Merchant _$MerchantFromJson(Map<String, dynamic> json) => _Merchant(
   id: json['id'] as String,
   name: json['name'] as String,
-  type: _$MerchantTypeFromJson(json['type']),
+  type: $enumDecode(_$MerchantTypeEnumMap, json['type']),
   latitude: (json['latitude'] as num).toDouble(),
   longitude: (json['longitude'] as num).toDouble(),
   address: json['address'] as String?,

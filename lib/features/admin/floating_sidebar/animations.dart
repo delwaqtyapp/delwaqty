@@ -60,10 +60,7 @@ class ScaleFadeAnimation extends StatelessWidget {
         final double scale = beginScale + (1 - beginScale) * controller.value;
         return Opacity(
           opacity: controller.value,
-          child: Transform.scale(
-            scale: scale,
-            child: child,
-          ),
+          child: Transform.scale(scale: scale, child: child),
         );
       },
       child: child,
@@ -90,10 +87,7 @@ class SlideDownAnimation extends StatelessWidget {
       builder: (context, child) {
         return Transform.translate(
           offset: beginOffset * (1 - controller.value),
-          child: Opacity(
-            opacity: controller.value,
-            child: child,
-          ),
+          child: Opacity(opacity: controller.value, child: child),
         );
       },
       child: child,

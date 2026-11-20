@@ -31,10 +31,7 @@ Future<bool> showOtaUpdateIfAvailable({
   await showDialog<void>(
     context: dialogContext,
     barrierDismissible: false,
-    builder: (_) => _OtaUpdateDialog(
-      flavor: flavor,
-      result: result,
-    ),
+    builder: (_) => _OtaUpdateDialog(flavor: flavor, result: result),
   );
   return true;
 }
@@ -48,8 +45,7 @@ Future<void> showUpdateAvailableAndDownload({
   required AppFlavor flavor,
   required OtaCheckResult result,
 }) async {
-  final dialogContext =
-      _navigatorFor(flavor)?.context ?? context;
+  final dialogContext = _navigatorFor(flavor)?.context ?? context;
   if (!dialogContext.mounted) return;
   await showDialog<void>(
     context: dialogContext,
@@ -98,9 +94,7 @@ class _OtaUpdateDialogState extends State<_OtaUpdateDialog> {
           Container(
             padding: const EdgeInsets.all(6),
             decoration: BoxDecoration(
-              color: Theme.of(context)
-                  .colorScheme
-                  .surfaceContainerHighest
+              color: Theme.of(context).colorScheme.surfaceContainerHighest
                   .withValues(alpha: 0.5),
               shape: BoxShape.circle,
             ),
@@ -129,9 +123,7 @@ class _OtaUpdateDialogState extends State<_OtaUpdateDialog> {
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: Theme.of(context)
-                  .colorScheme
-                  .surfaceContainerHighest
+              color: Theme.of(context).colorScheme.surfaceContainerHighest
                   .withValues(alpha: 0.5),
               shape: BoxShape.circle,
             ),
@@ -149,9 +141,7 @@ class _OtaUpdateDialogState extends State<_OtaUpdateDialog> {
           if (_downloading) ...[
             DecoratedBox(
               decoration: BoxDecoration(
-                color: Theme.of(context)
-                    .colorScheme
-                    .surfaceContainerHighest
+                color: Theme.of(context).colorScheme.surfaceContainerHighest
                     .withValues(alpha: 0.5),
                 borderRadius: BorderRadius.circular(14),
                 border: Border.all(
@@ -172,14 +162,17 @@ class _OtaUpdateDialogState extends State<_OtaUpdateDialog> {
                         ),
                         const SizedBox(width: 8),
                         Expanded(
-                          child: Text(isAr ? 'جاري تحميل التحديث…' : 'Downloading…'),
+                          child: Text(
+                            isAr ? 'جاري تحميل التحديث…' : 'Downloading…',
+                          ),
                         ),
                         Text(
                           '${(_progress * 100).clamp(0, 100).round()}%',
-                          style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                            fontWeight: FontWeight.w700,
-                            color: Theme.of(context).colorScheme.primary,
-                          ),
+                          style: Theme.of(context).textTheme.titleSmall
+                              ?.copyWith(
+                                fontWeight: FontWeight.w700,
+                                color: Theme.of(context).colorScheme.primary,
+                              ),
                         ),
                       ],
                     ),
@@ -189,8 +182,9 @@ class _OtaUpdateDialogState extends State<_OtaUpdateDialog> {
                       child: LinearProgressIndicator(
                         value: _progress,
                         minHeight: 8,
-                        backgroundColor:
-                            Theme.of(context).colorScheme.surfaceContainerHighest,
+                        backgroundColor: Theme.of(context)
+                            .colorScheme
+                            .surfaceContainerHighest,
                       ),
                     ),
                   ],
@@ -201,11 +195,11 @@ class _OtaUpdateDialogState extends State<_OtaUpdateDialog> {
             Text(
               isAr
                   ? _downloadError == 'needs_install_permission'
-                      ? 'أكّد السماح بالتثبيت من مصادر غير معروفة في الخطوة التالية ثم أعد المحاولة.'
-                      : 'تعذر تحميل التحديث. تأكد من الاتصال بالإنترنت ثم أعد المحاولة.'
+                        ? 'أكّد السماح بالتثبيت من مصادر غير معروفة في الخطوة التالية ثم أعد المحاولة.'
+                        : 'تعذر تحميل التحديث. تأكد من الاتصال بالإنترنت ثم أعد المحاولة.'
                   : _downloadError == 'needs_install_permission'
-                      ? 'Allow installing from unknown sources in the next step, then retry.'
-                      : 'Could not download the update. Check your connection and try again.',
+                  ? 'Allow installing from unknown sources in the next step, then retry.'
+                  : 'Could not download the update. Check your connection and try again.',
               style: TextStyle(color: Theme.of(context).colorScheme.error),
             ),
           ] else ...[

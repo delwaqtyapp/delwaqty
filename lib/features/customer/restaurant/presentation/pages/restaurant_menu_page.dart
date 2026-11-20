@@ -1,4 +1,5 @@
 import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -11,13 +12,16 @@ import 'package:delwaqty/shared/widgets/premium_empty_state.dart';
 import 'package:delwaqty/shared/widgets/error_state.dart';
 import 'package:delwaqty/shared/widgets/skeleton_loader.dart';
 
-final _categoriesProvider = FutureProvider.family<List<CatalogCategory>, String>((ref, merchantId) async {
-  final repo = ref.watch(catalogCategoryRepositoryProvider);
-  return repo.getCategories(merchantId);
-});
+final _categoriesProvider =
+    FutureProvider.family<List<CatalogCategory>, String>((
+      ref,
+      merchantId,
+    ) async {
+      final repo = ref.watch(catalogCategoryRepositoryProvider);
+      return repo.getCategories(merchantId);
+    });
 
 class MenuState {
-
   const MenuState({
     this.products = const [],
     this.hasMore = true,
@@ -62,9 +66,7 @@ class RestaurantMenuNotifier extends AsyncNotifier<MenuState> {
   @override
   FutureOr<MenuState> build() async {
     final repo = ref.watch(productRepositoryProvider);
-    final products = await repo.getProducts(
-      merchantId: merchantId,
-    );
+    final products = await repo.getProducts(merchantId: merchantId);
     return MenuState(
       products: products,
       hasMore: products.length >= _limit,
@@ -74,7 +76,10 @@ class RestaurantMenuNotifier extends AsyncNotifier<MenuState> {
 
   Future<void> loadNextPage() async {
     final currentState = state.value;
-    if (currentState == null || currentState.isLoadingMore || !currentState.hasMore) return;
+    if (currentState == null ||
+        currentState.isLoadingMore ||
+        !currentState.hasMore)
+      return;
 
     state = AsyncValue.data(currentState.copyWith(isLoadingMore: true));
 
@@ -87,12 +92,14 @@ class RestaurantMenuNotifier extends AsyncNotifier<MenuState> {
       );
 
       final newProducts = [...currentState.products, ...products];
-      state = AsyncValue.data(currentState.copyWith(
-        products: newProducts,
-        hasMore: products.length >= _limit,
-        isLoadingMore: false,
-        offset: currentState.offset + products.length,
-      ));
+      state = AsyncValue.data(
+        currentState.copyWith(
+          products: newProducts,
+          hasMore: products.length >= _limit,
+          isLoadingMore: false,
+          offset: currentState.offset + products.length,
+        ),
+      );
     } catch (e, stack) {
       state = AsyncValue.error(e, stack);
     }
@@ -111,13 +118,15 @@ class RestaurantMenuNotifier extends AsyncNotifier<MenuState> {
         categoryId: categoryId,
       );
 
-      state = AsyncValue.data(MenuState(
-        products: products,
-        hasMore: products.length >= _limit,
-        offset: products.length,
-        categoryId: categoryId,
-        searchQuery: currentState.searchQuery,
-      ));
+      state = AsyncValue.data(
+        MenuState(
+          products: products,
+          hasMore: products.length >= _limit,
+          offset: products.length,
+          categoryId: categoryId,
+          searchQuery: currentState.searchQuery,
+        ),
+      );
     } catch (e, stack) {
       state = AsyncValue.error(e, stack);
     }
@@ -141,25 +150,32 @@ class RestaurantMenuNotifier extends AsyncNotifier<MenuState> {
         products = await repo.searchProducts(query, merchantId: merchantId);
       }
 
-      state = AsyncValue.data(MenuState(
-        products: products,
-        hasMore: query.isEmpty ? products.length >= _limit : false,
-        offset: products.length,
-        categoryId: currentState.categoryId,
-        searchQuery: query,
-      ));
+      state = AsyncValue.data(
+        MenuState(
+          products: products,
+          hasMore: query.isEmpty ? products.length >= _limit : false,
+          offset: products.length,
+          categoryId: currentState.categoryId,
+          searchQuery: query,
+        ),
+      );
     } catch (e, stack) {
       state = AsyncValue.error(e, stack);
     }
   }
 }
 
-final restaurantMenuProvider = AsyncNotifierProvider.autoDispose.family<RestaurantMenuNotifier, MenuState, String>(
-  (merchantId) => RestaurantMenuNotifier(merchantId),
-);
+final restaurantMenuProvider = AsyncNotifierProvider.autoDispose
+    .family<RestaurantMenuNotifier, MenuState, String>(
+      (merchantId) => RestaurantMenuNotifier(merchantId),
+    );
 
 class RestaurantMenuPage extends ConsumerStatefulWidget {
-  const RestaurantMenuPage({super.key, required this.merchantId, this.merchantName});
+  const RestaurantMenuPage({
+    super.key,
+    required this.merchantId,
+    this.merchantName,
+  });
 
   final String merchantId;
   final String? merchantName;
@@ -180,8 +196,11 @@ class _RestaurantMenuPageState extends ConsumerState<RestaurantMenuPage> {
   }
 
   void _onScroll() {
-    if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 200) {
-      ref.read(restaurantMenuProvider(widget.merchantId).notifier).loadNextPage();
+    if (_scrollController.position.pixels >=
+        _scrollController.position.maxScrollExtent - 200) {
+      ref
+          .read(restaurantMenuProvider(widget.merchantId).notifier)
+          .loadNextPage();
     }
   }
 
@@ -189,7 +208,9 @@ class _RestaurantMenuPageState extends ConsumerState<RestaurantMenuPage> {
     if (_debounce?.isActive ?? false) _debounce!.cancel();
     _debounce = Timer(const Duration(milliseconds: 500), () {
       if (mounted) {
-        ref.read(restaurantMenuProvider(widget.merchantId).notifier).setSearchQuery(query.trim());
+        ref
+            .read(restaurantMenuProvider(widget.merchantId).notifier)
+            .setSearchQuery(query.trim());
       }
     });
   }
@@ -210,9 +231,7 @@ class _RestaurantMenuPageState extends ConsumerState<RestaurantMenuPage> {
     final menuStateAsync = ref.watch(restaurantMenuProvider(widget.merchantId));
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.merchantName ?? l10n.menu),
-      ),
+      appBar: AppBar(title: Text(widget.merchantName ?? l10n.menu)),
       body: Column(
         children: [
           Padding(
@@ -243,7 +262,9 @@ class _RestaurantMenuPageState extends ConsumerState<RestaurantMenuPage> {
                       )
                     : null,
                 filled: true,
-                fillColor: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+                fillColor: theme.colorScheme.surfaceContainerHighest.withValues(
+                  alpha: 0.5,
+                ),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                   borderSide: BorderSide.none,
@@ -266,17 +287,28 @@ class _RestaurantMenuPageState extends ConsumerState<RestaurantMenuPage> {
                     _CategoryChip(
                       label: l10n.allCategories,
                       isSelected: selectedCategoryId == null,
-                      onTap: () => ref.read(restaurantMenuProvider(widget.merchantId).notifier).setCategory(null),
+                      onTap: () => ref
+                          .read(
+                            restaurantMenuProvider(widget.merchantId).notifier,
+                          )
+                          .setCategory(null),
                     ),
                     const SizedBox(width: 8),
-                    ...categories.map((cat) => Padding(
-                      padding: const EdgeInsets.only(right: 8),
-                      child: _CategoryChip(
-                        label: cat.name,
-                        isSelected: selectedCategoryId == cat.id,
-                        onTap: () => ref.read(restaurantMenuProvider(widget.merchantId).notifier).setCategory(cat.id),
+                    ...categories.map(
+                      (cat) => Padding(
+                        padding: const EdgeInsets.only(right: 8),
+                        child: _CategoryChip(
+                          label: cat.name,
+                          isSelected: selectedCategoryId == cat.id,
+                          onTap: () => ref
+                              .read(
+                                restaurantMenuProvider(widget.merchantId)
+                                    .notifier,
+                              )
+                              .setCategory(cat.id),
+                        ),
                       ),
-                    )),
+                    ),
                   ],
                 ),
               );
@@ -309,9 +341,7 @@ class _RestaurantMenuPageState extends ConsumerState<RestaurantMenuPage> {
                       if (index == products.length) {
                         return const Padding(
                           padding: EdgeInsets.symmetric(vertical: 16),
-                          child: Center(
-                            child: CircularProgressIndicator(),
-                          ),
+                          child: Center(child: CircularProgressIndicator()),
                         );
                       }
                       final product = products[index];
@@ -331,7 +361,9 @@ class _RestaurantMenuPageState extends ConsumerState<RestaurantMenuPage> {
               },
               loading: () => const RestaurantMenuSkeleton(),
               error: (_, _) => Center(
-                child: ErrorState(message: AppLocalizations.of(context).errorLoading),
+                child: ErrorState(
+                  message: AppLocalizations.of(context).errorLoading,
+                ),
               ),
             ),
           ),
@@ -367,7 +399,9 @@ class _CategoryChip extends StatelessWidget {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(20),
         side: BorderSide(
-          color: isSelected ? theme.colorScheme.primary : theme.colorScheme.outline.withValues(alpha: 0.3),
+          color: isSelected
+              ? theme.colorScheme.primary
+              : theme.colorScheme.outline.withValues(alpha: 0.3),
         ),
       ),
     );
@@ -412,13 +446,16 @@ class _ProductListTile extends StatelessWidget {
                             fit: BoxFit.cover,
                             errorBuilder: (_, _, _) => Icon(
                               Icons.fastfood_outlined,
-                              color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.4),
+                              color: theme.colorScheme.onSurfaceVariant
+                                  .withValues(alpha: 0.4),
                             ),
                           ),
                         )
                       : Icon(
                           Icons.fastfood_outlined,
-                          color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.4),
+                          color: theme.colorScheme.onSurfaceVariant.withValues(
+                            alpha: 0.4,
+                          ),
                         ),
                 ),
                 const SizedBox(width: 12),
@@ -428,7 +465,9 @@ class _ProductListTile extends StatelessWidget {
                     children: [
                       Text(
                         product.name,
-                        style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -456,7 +495,8 @@ class _ProductListTile extends StatelessWidget {
                               overflow: TextOverflow.ellipsis,
                             ),
                           ),
-                          if (product.originalPrice != null && product.originalPrice! > product.price) ...[
+                          if (product.originalPrice != null &&
+                              product.originalPrice! > product.price) ...[
                             const SizedBox(width: 8),
                             Flexible(
                               child: Text(
@@ -476,7 +516,10 @@ class _ProductListTile extends StatelessWidget {
                 ),
                 if (!product.isAvailable)
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 6,
+                      vertical: 2,
+                    ),
                     decoration: BoxDecoration(
                       color: theme.colorScheme.error.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(4),
@@ -491,7 +534,9 @@ class _ProductListTile extends StatelessWidget {
                 else
                   Icon(
                     Icons.chevron_right,
-                    color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
+                    color: theme.colorScheme.onSurfaceVariant.withValues(
+                      alpha: 0.5,
+                    ),
                   ),
               ],
             ),

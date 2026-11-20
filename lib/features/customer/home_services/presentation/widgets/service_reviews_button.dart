@@ -37,10 +37,9 @@ class ServiceReviewsButton extends StatelessWidget {
       color: color,
       iconSize: iconSize,
       icon: const Icon(Icons.rate_review_rounded),
-      onPressed: onPressedOverride ??
-          () => context.push(
-                '/home-services/reviews/${categoryType.name}',
-              ),
+      onPressed:
+          onPressedOverride ??
+          () => context.push('/home-services/reviews/${categoryType.name}'),
     );
   }
 }

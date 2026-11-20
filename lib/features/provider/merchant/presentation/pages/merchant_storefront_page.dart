@@ -30,22 +30,22 @@ class StorefrontData {
   });
 
   factory StorefrontData.fromRow(Map<String, dynamic> row) => StorefrontData(
-        id: row['id'] as String? ?? '',
-        name: row['name'] as String? ?? '',
-        type: (row['type'] as String?)?.isNotEmpty == true
-            ? row['type'] as String
-            : 'restaurant',
-        description: row['description'] as String?,
-        logoUrl: row['logo_url'] as String?,
-        coverUrl: row['cover_url'] as String?,
-        phone: row['phone'] as String?,
-        address: row['address'] as String?,
-        latitude: (row['latitude'] as num?)?.toDouble(),
-        longitude: (row['longitude'] as num?)?.toDouble(),
-        deliveryFee: (row['delivery_fee'] as num?)?.toDouble(),
-        minOrder: (row['min_order'] as num?)?.toDouble(),
-        deliveryTimeMin: (row['delivery_time_min'] as num?)?.toInt(),
-      );
+    id: row['id'] as String? ?? '',
+    name: row['name'] as String? ?? '',
+    type: (row['type'] as String?)?.isNotEmpty == true
+        ? row['type'] as String
+        : 'restaurant',
+    description: row['description'] as String?,
+    logoUrl: row['logo_url'] as String?,
+    coverUrl: row['cover_url'] as String?,
+    phone: row['phone'] as String?,
+    address: row['address'] as String?,
+    latitude: (row['latitude'] as num?)?.toDouble(),
+    longitude: (row['longitude'] as num?)?.toDouble(),
+    deliveryFee: (row['delivery_fee'] as num?)?.toDouble(),
+    minOrder: (row['min_order'] as num?)?.toDouble(),
+    deliveryTimeMin: (row['delivery_time_min'] as num?)?.toInt(),
+  );
 
   final String id;
   final String name;
@@ -85,11 +85,11 @@ class WorkingHoursDay {
       );
 
   Map<String, dynamic> toJson() => {
-        'day': day,
-        'open': open,
-        'close': close,
-        'closed': closed,
-      };
+    'day': day,
+    'open': open,
+    'close': close,
+    'closed': closed,
+  };
 }
 
 final storefrontProvider = FutureProvider<StorefrontData>((ref) async {
@@ -108,8 +108,7 @@ final storefrontProvider = FutureProvider<StorefrontData>((ref) async {
   return StorefrontData.fromRow(row);
 });
 
-final workingHoursProvider =
-    FutureProvider<List<WorkingHoursDay>>((ref) async {
+final workingHoursProvider = FutureProvider<List<WorkingHoursDay>>((ref) async {
   final client = ref.watch(supabaseClientProvider);
   final res = await client.rpc('provider_get_availability');
   final schedule = (res as Map<String, dynamic>?)?['schedule'];
@@ -128,10 +127,7 @@ final workingHoursProvider =
       closed: (e['is_closed'] as bool?) ?? true,
     );
   }
-  return List.generate(
-    7,
-    (i) => byDay[i] ?? WorkingHoursDay(day: i),
-  );
+  return List.generate(7, (i) => byDay[i] ?? WorkingHoursDay(day: i));
 });
 
 String _hhmm(Object? value) {
@@ -170,16 +166,15 @@ class StorefrontNotifier {
     final client = _ref.read(supabaseClientProvider);
     await client.rpc(
       'provider_set_working_hours',
-      params: {
-        'p_schedule': days.map((d) => d.toJson()).toList(),
-      },
+      params: {'p_schedule': days.map((d) => d.toJson()).toList()},
     );
     _ref.invalidate(workingHoursProvider);
   }
 }
 
-final storefrontNotifierProvider =
-    Provider<StorefrontNotifier>(StorefrontNotifier.new);
+final storefrontNotifierProvider = Provider<StorefrontNotifier>(
+  StorefrontNotifier.new,
+);
 
 /// Storefront editor: identity, contact, delivery policy and the weekly
 /// opening hours.
@@ -225,7 +220,10 @@ class _MerchantStorefrontPageState
   double? _longitude;
   GoogleMapController? _mapController;
 
-  List<WorkingHoursDay> _hours = List.generate(7, (i) => WorkingHoursDay(day: i));
+  List<WorkingHoursDay> _hours = List.generate(
+    7,
+    (i) => WorkingHoursDay(day: i),
+  );
   bool _hydrated = false;
   bool _hoursHydrated = false;
   bool _saving = false;
@@ -252,8 +250,9 @@ class _MerchantStorefrontPageState
     if (_hydrated) return;
     _hydrated = true;
     _name.text = data.name;
-    _storeType =
-        _storeCategories.contains(data.type) ? data.type : 'restaurant';
+    _storeType = _storeCategories.contains(data.type)
+        ? data.type
+        : 'restaurant';
     _description.text = data.description ?? '';
     _phone.text = data.phone ?? '';
     _address.text = data.address ?? '';
@@ -263,8 +262,9 @@ class _MerchantStorefrontPageState
     _longitude = data.longitude;
     _deliveryFee.text = data.deliveryFee == null ? '' : '${data.deliveryFee}';
     _minOrder.text = data.minOrder == null ? '' : '${data.minOrder}';
-    _deliveryTime.text =
-        data.deliveryTimeMin == null ? '' : '${data.deliveryTimeMin}';
+    _deliveryTime.text = data.deliveryTimeMin == null
+        ? ''
+        : '${data.deliveryTimeMin}';
   }
 
   String _categoryLabel(AppLocalizations l10n, String category) {
@@ -313,8 +313,9 @@ class _MerchantStorefrontPageState
       final path =
           '$uid/storefront/${DateTime.now().millisecondsSinceEpoch}_$name';
       await client.storage.from('profile-photos').uploadBinary(path, bytes);
-      final publicUrl =
-          client.storage.from('profile-photos').getPublicUrl(path);
+      final publicUrl = client.storage
+          .from('profile-photos')
+          .getPublicUrl(path);
       if (!mounted) return;
       setState(() {
         if (isLogo) {
@@ -325,9 +326,8 @@ class _MerchantStorefrontPageState
       });
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(appErrorText(context, e))),
-      );
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(appErrorText(context, e))));
     } finally {
       if (mounted) {
         setState(() {
@@ -343,13 +343,13 @@ class _MerchantStorefrontPageState
     final l10n = AppLocalizations.of(context);
     setState(() => _gettingGps = true);
     try {
-      final loc =
-          await ref.read(userLocationProvider.notifier).refreshDeepLocked();
+      final loc = await ref
+          .read(userLocationProvider.notifier)
+          .refreshDeepLocked();
       if (!mounted) return;
       if (loc == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.locationUnavailable)),
-        );
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(l10n.locationUnavailable)));
         return;
       }
       setState(() {
@@ -363,14 +363,12 @@ class _MerchantStorefrontPageState
         CameraUpdate.newLatLngZoom(LatLng(loc.latitude, loc.longitude), 17),
       );
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.storeCoordinatesSaved)),
-      );
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(l10n.storeCoordinatesSaved)));
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(appErrorText(context, e))),
-      );
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(appErrorText(context, e))));
     } finally {
       if (mounted) setState(() => _gettingGps = false);
     }
@@ -392,15 +390,11 @@ class _MerchantStorefrontPageState
       }
     });
     await _mapController?.animateCamera(
-      CameraUpdate.newLatLngZoom(
-        LatLng(picked.latitude, picked.longitude),
-        17,
-      ),
+      CameraUpdate.newLatLngZoom(LatLng(picked.latitude, picked.longitude), 17),
     );
     if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(l10n.storeCoordinatesSaved)),
-    );
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text(l10n.storeCoordinatesSaved)));
   }
 
   void _copyDayZeroHoursToAll() {
@@ -424,7 +418,9 @@ class _MerchantStorefrontPageState
     if (!(_formKey.currentState?.validate() ?? false)) return;
     setState(() => _saving = true);
     try {
-      await ref.read(storefrontNotifierProvider).save(
+      await ref
+          .read(storefrontNotifierProvider)
+          .save(
             StorefrontData(
               id: _hydrated ? '' : '',
               name: _name.text.trim(),
@@ -448,20 +444,16 @@ class _MerchantStorefrontPageState
             ),
           );
       if (_hoursDirty) {
-        await ref
-            .read(storefrontNotifierProvider)
-            .saveHours(_hours);
+        await ref.read(storefrontNotifierProvider).saveHours(_hours);
         if (mounted) setState(() => _hoursDirty = false);
       }
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.updatedSuccessfully)),
-      );
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(l10n.updatedSuccessfully)));
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(appErrorText(context, e))),
-      );
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(appErrorText(context, e))));
     } finally {
       if (mounted) setState(() => _saving = false);
     }
@@ -493,10 +485,7 @@ class _MerchantStorefrontPageState
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text(
-                  appErrorText(context, e),
-                  textAlign: TextAlign.center,
-                ),
+                Text(appErrorText(context, e), textAlign: TextAlign.center),
                 const SizedBox(height: 12),
                 FilledButton.tonal(
                   onPressed: () {
@@ -630,11 +619,12 @@ class _MerchantStorefrontPageState
                       onMapCreated: (controller) {
                         _mapController = controller;
                       },
-                      gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
-                        const Factory<OneSequenceGestureRecognizer>(
-                          EagerGestureRecognizer.new,
-                        ),
-                      },
+                      gestureRecognizers:
+                          <Factory<OneSequenceGestureRecognizer>>{
+                            const Factory<OneSequenceGestureRecognizer>(
+                              EagerGestureRecognizer.new,
+                            ),
+                          },
                       markers: {
                         Marker(
                           markerId: const MarkerId('store_location'),
@@ -667,7 +657,9 @@ class _MerchantStorefrontPageState
                             ? const SizedBox(
                                 width: 16,
                                 height: 16,
-                                child: CircularProgressIndicator(strokeWidth: 2),
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                ),
                               )
                             : const Icon(Icons.my_location_rounded),
                         label: Text(l10n.useCurrentStoreGps),
@@ -778,7 +770,10 @@ class _MerchantStorefrontPageState
                         child: _timeField(
                           value: _hours[i].open,
                           onChanged: (v) => setState(() {
-                            _hours[i] = _hours[i].copyWith(open: v, closed: false);
+                            _hours[i] = _hours[i].copyWith(
+                              open: v,
+                              closed: false,
+                            );
                             _hoursDirty = true;
                           }),
                         ),
@@ -791,7 +786,10 @@ class _MerchantStorefrontPageState
                         child: _timeField(
                           value: _hours[i].close,
                           onChanged: (v) => setState(() {
-                            _hours[i] = _hours[i].copyWith(close: v, closed: false);
+                            _hours[i] = _hours[i].copyWith(
+                              close: v,
+                              closed: false,
+                            );
                             _hoursDirty = true;
                           }),
                         ),
@@ -822,14 +820,12 @@ class _MerchantStorefrontPageState
         keyboardType: keyboard,
         decoration: InputDecoration(
           labelText: label,
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
         ),
         validator: required
             ? (v) => (v == null || v.trim().isEmpty)
-                ? AppLocalizations.of(context).fieldRequired
-                : null
+                  ? AppLocalizations.of(context).fieldRequired
+                  : null
             : null,
       ),
     );
@@ -855,8 +851,10 @@ class _MerchantStorefrontPageState
         isDense: true,
         suffixIcon: const Icon(Icons.access_time_rounded, size: 16),
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-        contentPadding:
-            const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 10,
+          vertical: 12,
+        ),
       ),
       onTap: () async {
         final picked = await showTimePicker(
@@ -886,9 +884,9 @@ class _SectionTitle extends StatelessWidget {
       child: Text(
         title,
         style: Theme.of(context).textTheme.titleSmall?.copyWith(
-              color: AppColors.brandPurple,
-              fontWeight: FontWeight.w800,
-            ),
+          color: AppColors.brandPurple,
+          fontWeight: FontWeight.w800,
+        ),
       ),
     );
   }

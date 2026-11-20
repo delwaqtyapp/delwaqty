@@ -33,8 +33,7 @@ void main() {
           ],
         });
       });
-      final provider =
-          GooglePlacesProvider(apiKey: 'KEY', client: client);
+      final provider = GooglePlacesProvider(apiKey: 'KEY', client: client);
       final results = await provider.autocomplete(
         query: 'cairo',
         languageCode: 'ar',
@@ -60,30 +59,45 @@ void main() {
       });
       final provider = GooglePlacesProvider(apiKey: 'KEY', client: client);
       final results = await provider.autocomplete(
-          query: '   ', languageCode: 'en');
+        query: '   ',
+        languageCode: 'en',
+      );
       expect(results, isEmpty);
       expect(called, isFalse);
     });
 
     test('OVER_QUERY_LIMIT maps to rateLimited', () async {
-      final client = MockClient((req) async =>
-          _json({'status': 'OVER_QUERY_LIMIT', 'predictions': []}));
+      final client = MockClient(
+        (req) async => _json({'status': 'OVER_QUERY_LIMIT', 'predictions': []}),
+      );
       final provider = GooglePlacesProvider(apiKey: 'KEY', client: client);
       expect(
         () => provider.autocomplete(query: 'x', languageCode: 'en'),
-        throwsA(isA<GeocodingException>().having(
-            (e) => e.kind, 'kind', GeocodingErrorKind.rateLimited)),
+        throwsA(
+          isA<GeocodingException>().having(
+            (e) => e.kind,
+            'kind',
+            GeocodingErrorKind.rateLimited,
+          ),
+        ),
       );
     });
 
     test('REQUEST_DENIED maps to denied', () async {
-      final client = MockClient((req) async => _json(
-          {'status': 'REQUEST_DENIED', 'error_message': 'bad key'}));
+      final client = MockClient(
+        (req) async =>
+            _json({'status': 'REQUEST_DENIED', 'error_message': 'bad key'}),
+      );
       final provider = GooglePlacesProvider(apiKey: 'KEY', client: client);
       expect(
         () => provider.autocomplete(query: 'x', languageCode: 'en'),
-        throwsA(isA<GeocodingException>().having(
-            (e) => e.kind, 'kind', GeocodingErrorKind.denied)),
+        throwsA(
+          isA<GeocodingException>().having(
+            (e) => e.kind,
+            'kind',
+            GeocodingErrorKind.denied,
+          ),
+        ),
       );
     });
 
@@ -96,8 +110,13 @@ void main() {
       final provider = GooglePlacesProvider(apiKey: '', client: client);
       expect(
         () => provider.autocomplete(query: 'x', languageCode: 'en'),
-        throwsA(isA<GeocodingException>().having(
-            (e) => e.kind, 'kind', GeocodingErrorKind.denied)),
+        throwsA(
+          isA<GeocodingException>().having(
+            (e) => e.kind,
+            'kind',
+            GeocodingErrorKind.denied,
+          ),
+        ),
       );
       await Future<void>.delayed(Duration.zero);
       expect(called, isFalse);
@@ -106,21 +125,22 @@ void main() {
 
   group('GooglePlacesProvider.details', () {
     test('parses place details location', () async {
-      final client = MockClient((req) async => _json({
-            'status': 'OK',
-            'result': {
-              'place_id': 'p1',
-              'name': 'Home',
-              'formatted_address': 'Nasr City, Cairo',
-              'geometry': {
-                'location': {'lat': 30.05, 'lng': 31.34},
-              },
-              'types': ['premise'],
+      final client = MockClient(
+        (req) async => _json({
+          'status': 'OK',
+          'result': {
+            'place_id': 'p1',
+            'name': 'Home',
+            'formatted_address': 'Nasr City, Cairo',
+            'geometry': {
+              'location': {'lat': 30.05, 'lng': 31.34},
             },
-          }));
+            'types': ['premise'],
+          },
+        }),
+      );
       final provider = GooglePlacesProvider(apiKey: 'KEY', client: client);
-      final details = await provider.details(
-          placeId: 'p1', languageCode: 'en');
+      final details = await provider.details(placeId: 'p1', languageCode: 'en');
       expect(details.name, 'Home');
       expect(details.formattedAddress, 'Nasr City, Cairo');
       expect(details.location, const GeoPoint(30.05, 31.34));
@@ -129,11 +149,14 @@ void main() {
 
   group('GooglePlacesProvider.reverseGeocode', () {
     test('returns null on zero results', () async {
-      final client = MockClient((req) async =>
-          _json({'status': 'ZERO_RESULTS', 'results': []}));
+      final client = MockClient(
+        (req) async => _json({'status': 'ZERO_RESULTS', 'results': []}),
+      );
       final provider = GooglePlacesProvider(apiKey: 'KEY', client: client);
       final result = await provider.reverseGeocode(
-          point: const GeoPoint(0, 0), languageCode: 'en');
+        point: const GeoPoint(0, 0),
+        languageCode: 'en',
+      );
       expect(result, isNull);
     });
   });

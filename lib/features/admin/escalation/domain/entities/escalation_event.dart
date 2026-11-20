@@ -1,5 +1,4 @@
 class EscalationEvent {
-
   const EscalationEvent({
     required this.id,
     required this.entityType,

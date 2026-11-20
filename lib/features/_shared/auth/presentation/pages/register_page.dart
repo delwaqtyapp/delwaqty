@@ -1,6 +1,8 @@
 import 'package:delwaqty/core/config/app_mode_provider.dart';
 import 'package:delwaqty/core/router/post_auth_route.dart';
+
 import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -29,12 +31,12 @@ const _kGold = Color(0xFFD4AF37);
 /// customer Home / All-Services screens read). The provider registration
 /// picker renders from here so the account always lists every service the app
 /// actually offers, linked to the real `ServiceCategoryType` ids.
-final providerServicesCatalogProvider = FutureProvider<List<ServiceCategory>>(
-  (ref) {
-    final repo = ref.watch(cachedServiceBookingRepositoryProvider);
-    return repo.getCategories();
-  },
-);
+final providerServicesCatalogProvider = FutureProvider<List<ServiceCategory>>((
+  ref,
+) {
+  final repo = ref.watch(cachedServiceBookingRepositoryProvider);
+  return repo.getCategories();
+});
 
 const _servicePriority = [
   ServiceCategoryType.doctor,
@@ -401,9 +403,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
               decoration: BoxDecoration(
                 color: Colors.white.withValues(alpha: 0.08),
                 borderRadius: BorderRadius.circular(13),
-                border: Border.all(
-                  color: Colors.white.withValues(alpha: 0.12),
-                ),
+                border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
               ),
               child: Icon(
                 _currentStep > 0
@@ -495,7 +495,10 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                     borderRadius: BorderRadius.circular(2),
                     gradient: i < _currentStep
                         ? const LinearGradient(
-                            colors: [AppColors.brandPurple, AppColors.brandCyan],
+                            colors: [
+                              AppColors.brandPurple,
+                              AppColors.brandCyan,
+                            ],
                           )
                         : null,
                     color: i < _currentStep
@@ -796,11 +799,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
               }
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  nameField,
-                  const SizedBox(height: 14),
-                  phoneField,
-                ],
+                children: [nameField, const SizedBox(height: 14), phoneField],
               );
             },
           ),
@@ -1200,11 +1199,7 @@ class _StepHeading extends StatelessWidget {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(
-                Icons.auto_awesome_rounded,
-                color: _kGold,
-                size: 12,
-              ),
+              const Icon(Icons.auto_awesome_rounded, color: _kGold, size: 12),
               const SizedBox(width: 5),
               Text(
                 eyebrow,
@@ -1385,10 +1380,12 @@ class _RolePremiumCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final chipStart =
-        isSelected ? Color.lerp(_kGold, color, 0.4)! : color.withValues(alpha: 0.18);
-    final chipEnd =
-        isSelected ? Color.lerp(_kGold, color, 0.7)! : color.withValues(alpha: 0.07);
+    final chipStart = isSelected
+        ? Color.lerp(_kGold, color, 0.4)!
+        : color.withValues(alpha: 0.18);
+    final chipEnd = isSelected
+        ? Color.lerp(_kGold, color, 0.7)!
+        : color.withValues(alpha: 0.07);
     return PressableScale(
       scale: 0.97,
       onTap: onTap,
@@ -1594,9 +1591,7 @@ class _ServiceChip extends StatelessWidget {
           color: isSelected ? null : Colors.white.withValues(alpha: 0.06),
           borderRadius: BorderRadius.circular(999),
           border: Border.all(
-            color: isSelected
-                ? _kGold
-                : Colors.white.withValues(alpha: 0.14),
+            color: isSelected ? _kGold : Colors.white.withValues(alpha: 0.14),
             width: isSelected ? 1.4 : 1,
           ),
           boxShadow: isSelected
@@ -1675,7 +1670,10 @@ class _ProviderServicesPicker extends ConsumerWidget {
       children: [
         Row(
           children: [
-            const _IconWell(icon: Icons.handyman_outlined, color: Color(0xFF34C759)),
+            const _IconWell(
+              icon: Icons.handyman_outlined,
+              color: Color(0xFF34C759),
+            ),
             const SizedBox(width: 12),
             Expanded(
               child: Column(
@@ -1761,8 +1759,7 @@ class _ProviderServicesPicker extends ConsumerWidget {
                 const SizedBox(height: 10),
                 PressableScale(
                   scale: 0.95,
-                  onTap: () =>
-                      ref.invalidate(providerServicesCatalogProvider),
+                  onTap: () => ref.invalidate(providerServicesCatalogProvider),
                   child: Container(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 14,
@@ -1934,15 +1931,11 @@ class _PremiumField extends StatelessWidget {
         fillColor: Colors.white.withValues(alpha: 0.07),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(18),
-          borderSide: BorderSide(
-            color: Colors.white.withValues(alpha: 0.16),
-          ),
+          borderSide: BorderSide(color: Colors.white.withValues(alpha: 0.16)),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(18),
-          borderSide: BorderSide(
-            color: Colors.white.withValues(alpha: 0.16),
-          ),
+          borderSide: BorderSide(color: Colors.white.withValues(alpha: 0.16)),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(18),

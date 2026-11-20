@@ -19,7 +19,7 @@ void main() {
             'description': 'Top-up',
             'balance_after': 170.5,
             'created_at': '2026-08-22T10:00:00.000Z',
-          }
+          },
         ],
       };
       final s = FinancialSummary.fromJson(json);

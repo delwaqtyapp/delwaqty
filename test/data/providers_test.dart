@@ -9,7 +9,9 @@ void main() {
   setUp(() {
     container = ProviderContainer(
       overrides: [
-        notificationRepositoryProvider.overrideWithValue(MockNotificationRepository()),
+        notificationRepositoryProvider.overrideWithValue(
+          MockNotificationRepository(),
+        ),
       ],
     );
   });
@@ -19,10 +21,13 @@ void main() {
   });
 
   group('Repository providers', () {
-    test('notificationRepositoryProvider returns MockNotificationRepository', () {
-      final repo = container.read(notificationRepositoryProvider);
-      expect(repo, isA<MockNotificationRepository>());
-    });
+    test(
+      'notificationRepositoryProvider returns MockNotificationRepository',
+      () {
+        final repo = container.read(notificationRepositoryProvider);
+        expect(repo, isA<MockNotificationRepository>());
+      },
+    );
 
     test('notificationsProvider returns list of notifications', () async {
       final notifications = await container.read(notificationsProvider.future);

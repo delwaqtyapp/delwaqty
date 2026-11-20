@@ -31,8 +31,7 @@ class MerchantDetailPage extends ConsumerStatefulWidget {
   final String merchantId;
 
   @override
-  ConsumerState<MerchantDetailPage> createState() =>
-      _MerchantDetailPageState();
+  ConsumerState<MerchantDetailPage> createState() => _MerchantDetailPageState();
 }
 
 class _MerchantDetailPageState extends ConsumerState<MerchantDetailPage> {
@@ -126,10 +125,7 @@ class _MerchantDetailPageState extends ConsumerState<MerchantDetailPage> {
         if (merchant == null) {
           return Scaffold(
             appBar: AppBar(title: Text(l10n.error)),
-            body: ErrorState(
-              message: l10n.noData,
-              onRetry: _onRefresh,
-            ),
+            body: ErrorState(message: l10n.noData, onRetry: _onRefresh),
           );
         }
 
@@ -157,9 +153,7 @@ class _MerchantDetailPageState extends ConsumerState<MerchantDetailPage> {
                   ),
                 ),
                 _buildProductGrid(merchant, l10n),
-                SliverToBoxAdapter(
-                  child: _buildReviewsSection(merchant, l10n),
-                ),
+                SliverToBoxAdapter(child: _buildReviewsSection(merchant, l10n)),
                 SliverToBoxAdapter(
                   child: _buildSimilarMerchants(merchant, l10n),
                 ),
@@ -192,7 +186,11 @@ class _MerchantDetailPageState extends ConsumerState<MerchantDetailPage> {
       actions: [
         IconButton(
           tooltip: l10n.reviews,
-          icon: const Icon(Icons.star_rounded, color: AppColors.rating, size: 26),
+          icon: const Icon(
+            Icons.star_rounded,
+            color: AppColors.rating,
+            size: 26,
+          ),
           onPressed: () => context.push('/restaurant/${merchant.id}/reviews'),
         ),
         CartBadge(onTap: () => context.push('/market/cart')),
@@ -242,7 +240,9 @@ class _MerchantDetailPageState extends ConsumerState<MerchantDetailPage> {
                           ),
                           decoration: BoxDecoration(
                             color: _typeColor(merchant.type),
-                            borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
+                            borderRadius: BorderRadius.circular(
+                              AppSpacing.radiusSm,
+                            ),
                           ),
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
@@ -272,12 +272,18 @@ class _MerchantDetailPageState extends ConsumerState<MerchantDetailPage> {
                             ),
                             decoration: BoxDecoration(
                               color: AppColors.brandPurple,
-                              borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
+                              borderRadius: BorderRadius.circular(
+                                AppSpacing.radiusSm,
+                              ),
                             ),
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                const Icon(Icons.verified, size: 12, color: Colors.white),
+                                const Icon(
+                                  Icons.verified,
+                                  size: 12,
+                                  color: Colors.white,
+                                ),
                                 const SizedBox(width: 3),
                                 Text(
                                   l10n.verified,
@@ -374,7 +380,8 @@ class _MerchantDetailPageState extends ConsumerState<MerchantDetailPage> {
               ),
             ),
           ),
-          if (merchant.description != null && merchant.description!.isNotEmpty) ...[
+          if (merchant.description != null &&
+              merchant.description!.isNotEmpty) ...[
             const SizedBox(height: 6),
             AnimatedFadeIn(
               delay: const Duration(milliseconds: 100),
@@ -538,22 +545,24 @@ class _MerchantDetailPageState extends ConsumerState<MerchantDetailPage> {
                   )
                 : null,
             filled: true,
-            fillColor: context.colorScheme.surfaceContainerHighest.withValues(alpha: 0.4),
+            fillColor: context.colorScheme.surfaceContainerHighest.withValues(
+              alpha: 0.4,
+            ),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(14),
               borderSide: BorderSide.none,
             ),
-            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 12,
+            ),
           ),
         ),
       ),
     );
   }
 
-  Widget _buildOffersAndPopular(
-    Merchant merchant,
-    AppLocalizations l10n,
-  ) {
+  Widget _buildOffersAndPopular(Merchant merchant, AppLocalizations l10n) {
     return FutureBuilder<List<Product>>(
       future: _allProductsFuture,
       builder: (context, snap) {
@@ -573,8 +582,9 @@ class _MerchantDetailPageState extends ConsumerState<MerchantDetailPage> {
         final products = snap.data ?? [];
         if (products.isEmpty) return const SizedBox.shrink();
 
-        final offers = products.where((p) =>
-            p.originalPrice != null && p.originalPrice! > p.price).toList();
+        final offers = products
+            .where((p) => p.originalPrice != null && p.originalPrice! > p.price)
+            .toList();
         final popular = products.where((p) => p.isFeatured).toList();
 
         if (offers.isEmpty && popular.isEmpty) return const SizedBox.shrink();
@@ -587,7 +597,11 @@ class _MerchantDetailPageState extends ConsumerState<MerchantDetailPage> {
                 padding: const EdgeInsets.fromLTRB(16, 16, 16, 10),
                 child: Row(
                   children: [
-                    Icon(Icons.local_offer_outlined, size: 20, color: context.colorScheme.error),
+                    Icon(
+                      Icons.local_offer_outlined,
+                      size: 20,
+                      color: context.colorScheme.error,
+                    ),
                     const SizedBox(width: 8),
                     Text(
                       l10n.offers,
@@ -605,8 +619,11 @@ class _MerchantDetailPageState extends ConsumerState<MerchantDetailPage> {
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   itemCount: offers.length,
                   separatorBuilder: (_, _) => const SizedBox(width: 10),
-                  itemBuilder: (context, index) =>
-                      _OfferCard(product: offers[index], merchantId: widget.merchantId, merchant: merchant),
+                  itemBuilder: (context, index) => _OfferCard(
+                    product: offers[index],
+                    merchantId: widget.merchantId,
+                    merchant: merchant,
+                  ),
                 ),
               ),
             ],
@@ -615,7 +632,11 @@ class _MerchantDetailPageState extends ConsumerState<MerchantDetailPage> {
                 padding: const EdgeInsets.fromLTRB(16, 16, 16, 10),
                 child: Row(
                   children: [
-                    const Icon(Icons.star_outline_rounded, size: 20, color: AppColors.rating),
+                    const Icon(
+                      Icons.star_outline_rounded,
+                      size: 20,
+                      color: AppColors.rating,
+                    ),
                     const SizedBox(width: 8),
                     Text(
                       l10n.popularItems,
@@ -633,8 +654,11 @@ class _MerchantDetailPageState extends ConsumerState<MerchantDetailPage> {
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   itemCount: popular.length,
                   separatorBuilder: (_, _) => const SizedBox(width: 10),
-                  itemBuilder: (context, index) =>
-                      _OfferCard(product: popular[index], merchantId: widget.merchantId, merchant: merchant),
+                  itemBuilder: (context, index) => _OfferCard(
+                    product: popular[index],
+                    merchantId: widget.merchantId,
+                    merchant: merchant,
+                  ),
                 ),
               ),
             ],
@@ -684,9 +708,7 @@ class _MerchantDetailPageState extends ConsumerState<MerchantDetailPage> {
                         _selectedCategoryId = null;
                         _filteredProductsFuture = ref
                             .read(productRepositoryProvider)
-                            .getProducts(
-                              merchantId: widget.merchantId,
-                            );
+                            .getProducts(merchantId: widget.merchantId);
                       }),
                     );
                   }
@@ -729,10 +751,7 @@ class _MerchantDetailPageState extends ConsumerState<MerchantDetailPage> {
     );
   }
 
-  Widget _buildProductGrid(
-    Merchant merchant,
-    AppLocalizations l10n,
-  ) {
+  Widget _buildProductGrid(Merchant merchant, AppLocalizations l10n) {
     return SliverToBoxAdapter(
       child: FutureBuilder<List<Product>>(
         future: _filteredProductsFuture,
@@ -765,14 +784,22 @@ class _MerchantDetailPageState extends ConsumerState<MerchantDetailPage> {
 
           final allProducts = prodSnap.data ?? [];
           final products = allProducts.where((p) {
-            final matchesSearch = _searchQuery.isEmpty ||
+            final matchesSearch =
+                _searchQuery.isEmpty ||
                 p.name.toLowerCase().contains(_searchQuery.toLowerCase()) ||
-                (p.description?.toLowerCase().contains(_searchQuery.toLowerCase()) ?? false) ||
-                p.tags.any((t) => t.toLowerCase().contains(_searchQuery.toLowerCase()));
+                (p.description?.toLowerCase().contains(
+                      _searchQuery.toLowerCase(),
+                    ) ??
+                    false) ||
+                p.tags.any(
+                  (t) => t.toLowerCase().contains(_searchQuery.toLowerCase()),
+                );
             return matchesSearch;
           }).toList();
 
-          if (allProducts.isNotEmpty && products.isEmpty && _searchQuery.isNotEmpty) {
+          if (allProducts.isNotEmpty &&
+              products.isEmpty &&
+              _searchQuery.isNotEmpty) {
             return Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: PremiumEmptyState(
@@ -861,7 +888,11 @@ class _MerchantDetailPageState extends ConsumerState<MerchantDetailPage> {
             children: [
               Row(
                 children: [
-                  Icon(Icons.reviews_outlined, size: 20, color: context.colorScheme.primary),
+                  Icon(
+                    Icons.reviews_outlined,
+                    size: 20,
+                    color: context.colorScheme.primary,
+                  ),
                   const SizedBox(width: 8),
                   Text(
                     l10n.reviews,
@@ -878,7 +909,11 @@ class _MerchantDetailPageState extends ConsumerState<MerchantDetailPage> {
                     ),
                   ),
                   const SizedBox(width: 4),
-                  const Icon(Icons.star_rounded, size: 18, color: AppColors.rating),
+                  const Icon(
+                    Icons.star_rounded,
+                    size: 18,
+                    color: AppColors.rating,
+                  ),
                   Text(
                     ' ($total)',
                     style: context.textTheme.bodySmall?.copyWith(
@@ -890,7 +925,9 @@ class _MerchantDetailPageState extends ConsumerState<MerchantDetailPage> {
               const SizedBox(height: 12),
               _buildRatingBars(counts, total),
               const SizedBox(height: 16),
-              ...reviews.take(3).map((review) => _buildReviewCard(review, l10n)),
+              ...reviews
+                  .take(3)
+                  .map((review) => _buildReviewCard(review, l10n)),
             ],
           ),
         );
@@ -925,7 +962,8 @@ class _MerchantDetailPageState extends ConsumerState<MerchantDetailPage> {
                   child: LinearProgressIndicator(
                     value: fraction,
                     minHeight: 6,
-                    backgroundColor: context.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+                    backgroundColor: context.colorScheme.surfaceContainerHighest
+                        .withValues(alpha: 0.5),
                     valueColor: const AlwaysStoppedAnimation(AppColors.rating),
                   ),
                 ),
@@ -962,7 +1000,9 @@ class _MerchantDetailPageState extends ConsumerState<MerchantDetailPage> {
       child: Container(
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: context.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+          color: context.colorScheme.surfaceContainerHighest.withValues(
+            alpha: 0.3,
+          ),
           borderRadius: BorderRadius.circular(12),
         ),
         child: Column(
@@ -972,7 +1012,9 @@ class _MerchantDetailPageState extends ConsumerState<MerchantDetailPage> {
               children: [
                 CircleAvatar(
                   radius: 16,
-                  backgroundColor: context.colorScheme.primary.withValues(alpha: 0.15),
+                  backgroundColor: context.colorScheme.primary.withValues(
+                    alpha: 0.15,
+                  ),
                   child: Text(
                     initial,
                     style: context.textTheme.labelMedium?.copyWith(
@@ -1002,13 +1044,16 @@ class _MerchantDetailPageState extends ConsumerState<MerchantDetailPage> {
                     ],
                   ),
                 ),
-                ...List.generate(5, (i) => Icon(
-                  i < review.rating.round()
-                      ? Icons.star_rounded
-                      : Icons.star_outline_rounded,
-                  size: 14,
-                  color: AppColors.rating,
-                )),
+                ...List.generate(
+                  5,
+                  (i) => Icon(
+                    i < review.rating.round()
+                        ? Icons.star_rounded
+                        : Icons.star_outline_rounded,
+                    size: 14,
+                    color: AppColors.rating,
+                  ),
+                ),
               ],
             ),
             if (review.comment != null && review.comment!.isNotEmpty) ...[
@@ -1078,10 +1123,14 @@ class _MerchantDetailPageState extends ConsumerState<MerchantDetailPage> {
                 margin: const EdgeInsets.only(bottom: 8),
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: context.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+                  color: context.colorScheme.surfaceContainerHighest.withValues(
+                    alpha: 0.3,
+                  ),
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
-                    color: context.colorScheme.outlineVariant.withValues(alpha: 0.15),
+                    color: context.colorScheme.outlineVariant.withValues(
+                      alpha: 0.15,
+                    ),
                   ),
                 ),
                 child: Column(
@@ -1142,7 +1191,11 @@ class _MerchantDetailPageState extends ConsumerState<MerchantDetailPage> {
               padding: const EdgeInsets.fromLTRB(16, 24, 16, 10),
               child: Row(
                 children: [
-                  Icon(Icons.store_outlined, size: 20, color: context.colorScheme.primary),
+                  Icon(
+                    Icons.store_outlined,
+                    size: 20,
+                    color: context.colorScheme.primary,
+                  ),
                   const SizedBox(width: 8),
                   Text(
                     l10n.similarMerchants,
@@ -1404,10 +1457,14 @@ class _ActionButton extends StatelessWidget {
             width: 42,
             height: 42,
             decoration: BoxDecoration(
-              color: context.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+              color: context.colorScheme.surfaceContainerHighest.withValues(
+                alpha: 0.5,
+              ),
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
-                color: context.colorScheme.outlineVariant.withValues(alpha: 0.2),
+                color: context.colorScheme.outlineVariant.withValues(
+                  alpha: 0.2,
+                ),
               ),
             ),
             child: Icon(icon, size: 20, color: context.colorScheme.onSurface),
@@ -1439,7 +1496,8 @@ class _OfferCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final discount = product.originalPrice != null && product.originalPrice! > product.price
+    final discount =
+        product.originalPrice != null && product.originalPrice! > product.price
         ? ((1 - product.price / product.originalPrice!) * 100).round()
         : 0;
 
@@ -1451,7 +1509,9 @@ class _OfferCard extends StatelessWidget {
       child: Container(
         width: 130,
         decoration: BoxDecoration(
-          color: context.colorScheme.surfaceContainerHighest.withValues(alpha: 0.35),
+          color: context.colorScheme.surfaceContainerHighest.withValues(
+            alpha: 0.35,
+          ),
           borderRadius: BorderRadius.circular(14),
           border: Border.all(
             color: context.colorScheme.outlineVariant.withValues(alpha: 0.15),
@@ -1470,20 +1530,31 @@ class _OfferCard extends StatelessWidget {
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                       colors: [
-                        context.colorScheme.primaryContainer.withValues(alpha: 0.3),
+                        context.colorScheme.primaryContainer.withValues(
+                          alpha: 0.3,
+                        ),
                         context.colorScheme.surface,
                       ],
                     ),
-                    borderRadius: const BorderRadius.vertical(top: Radius.circular(14)),
+                    borderRadius: const BorderRadius.vertical(
+                      top: Radius.circular(14),
+                    ),
                   ),
-                  child: product.imageUrl != null && product.imageUrl!.isNotEmpty
+                  child:
+                      product.imageUrl != null && product.imageUrl!.isNotEmpty
                       ? ClipRRect(
-                          borderRadius: const BorderRadius.vertical(top: Radius.circular(14)),
-                          child: Image.network(product.imageUrl!, fit: BoxFit.cover,
+                          borderRadius: const BorderRadius.vertical(
+                            top: Radius.circular(14),
+                          ),
+                          child: Image.network(
+                            product.imageUrl!,
+                            fit: BoxFit.cover,
                             errorBuilder: (_, _, _) => Icon(
                               Icons.shopping_bag_outlined,
                               size: 28,
-                              color: context.colorScheme.primary.withValues(alpha: 0.4),
+                              color: context.colorScheme.primary.withValues(
+                                alpha: 0.4,
+                              ),
                             ),
                           ),
                         )
@@ -1491,7 +1562,9 @@ class _OfferCard extends StatelessWidget {
                           child: Icon(
                             Icons.shopping_bag_outlined,
                             size: 28,
-                            color: context.colorScheme.primary.withValues(alpha: 0.4),
+                            color: context.colorScheme.primary.withValues(
+                              alpha: 0.4,
+                            ),
                           ),
                         ),
                 ),
@@ -1500,7 +1573,10 @@ class _OfferCard extends StatelessWidget {
                     top: 6,
                     left: 6,
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 6,
+                        vertical: 2,
+                      ),
                       decoration: BoxDecoration(
                         color: context.colorScheme.error,
                         borderRadius: BorderRadius.circular(6),
@@ -1633,7 +1709,9 @@ class _SimilarMerchantCard extends StatelessWidget {
       child: Container(
         width: 150,
         decoration: BoxDecoration(
-          color: context.colorScheme.surfaceContainerHighest.withValues(alpha: 0.35),
+          color: context.colorScheme.surfaceContainerHighest.withValues(
+            alpha: 0.35,
+          ),
           borderRadius: BorderRadius.circular(14),
           border: Border.all(
             color: context.colorScheme.outlineVariant.withValues(alpha: 0.15),
@@ -1654,16 +1732,24 @@ class _SimilarMerchantCard extends StatelessWidget {
                     context.colorScheme.surface,
                   ],
                 ),
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(14)),
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(14),
+                ),
               ),
               child: merchant.imageUrl != null && merchant.imageUrl!.isNotEmpty
                   ? ClipRRect(
-                      borderRadius: const BorderRadius.vertical(top: Radius.circular(14)),
-                      child: Image.network(merchant.imageUrl!, fit: BoxFit.cover,
+                      borderRadius: const BorderRadius.vertical(
+                        top: Radius.circular(14),
+                      ),
+                      child: Image.network(
+                        merchant.imageUrl!,
+                        fit: BoxFit.cover,
                         errorBuilder: (_, _, _) => Icon(
                           _typeIcon(merchant.type),
                           size: 28,
-                          color: context.colorScheme.primary.withValues(alpha: 0.5),
+                          color: context.colorScheme.primary.withValues(
+                            alpha: 0.5,
+                          ),
                         ),
                       ),
                     )
@@ -1671,7 +1757,9 @@ class _SimilarMerchantCard extends StatelessWidget {
                       child: Icon(
                         _typeIcon(merchant.type),
                         size: 28,
-                        color: context.colorScheme.primary.withValues(alpha: 0.5),
+                        color: context.colorScheme.primary.withValues(
+                          alpha: 0.5,
+                        ),
                       ),
                     ),
             ),
@@ -1691,7 +1779,11 @@ class _SimilarMerchantCard extends StatelessWidget {
                   const SizedBox(height: 2),
                   Row(
                     children: [
-                      const Icon(Icons.star_rounded, size: 12, color: AppColors.rating),
+                      const Icon(
+                        Icons.star_rounded,
+                        size: 12,
+                        color: AppColors.rating,
+                      ),
                       const SizedBox(width: 2),
                       Text(
                         merchant.rating.toStringAsFixed(1),
@@ -1701,9 +1793,13 @@ class _SimilarMerchantCard extends StatelessWidget {
                       ),
                       const SizedBox(width: 6),
                       Icon(
-                        merchant.isOpenNow ? Icons.circle : Icons.circle_outlined,
+                        merchant.isOpenNow
+                            ? Icons.circle
+                            : Icons.circle_outlined,
                         size: 8,
-                        color: merchant.isOpenNow ? AppColors.successLight : context.colorScheme.error,
+                        color: merchant.isOpenNow
+                            ? AppColors.successLight
+                            : context.colorScheme.error,
                       ),
                     ],
                   ),
@@ -1814,7 +1910,10 @@ class _StickyCartBar extends ConsumerWidget {
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
               decoration: BoxDecoration(
                 gradient: const LinearGradient(
-                  colors: [AppColors.brandGradientStart, AppColors.brandGradientEnd],
+                  colors: [
+                    AppColors.brandGradientStart,
+                    AppColors.brandGradientEnd,
+                  ],
                 ),
                 borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
               ),
@@ -1853,7 +1952,10 @@ class _StickyCartBar extends ConsumerWidget {
             FilledButton(
               onPressed: () => context.push('/market/cart'),
               style: FilledButton.styleFrom(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 10,
+                ),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10),
                 ),
@@ -1893,10 +1995,17 @@ class _CategoryChip extends StatelessWidget {
         decoration: BoxDecoration(
           gradient: isSelected
               ? const LinearGradient(
-                  colors: [AppColors.brandGradientStart, AppColors.brandGradientEnd],
+                  colors: [
+                    AppColors.brandGradientStart,
+                    AppColors.brandGradientEnd,
+                  ],
                 )
               : null,
-          color: isSelected ? null : context.colorScheme.surfaceContainerHighest.withValues(alpha: 0.4),
+          color: isSelected
+              ? null
+              : context.colorScheme.surfaceContainerHighest.withValues(
+                  alpha: 0.4,
+                ),
           borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
           border: Border.all(
             color: isSelected

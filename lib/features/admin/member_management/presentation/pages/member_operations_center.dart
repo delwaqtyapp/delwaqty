@@ -1,4 +1,5 @@
 import 'dart:async';
+
 import 'package:delwaqty/core/utils/avatar_initial.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -190,10 +191,7 @@ class _DesktopLayout extends ConsumerWidget {
             onSelectMember: onSelectMember,
           ),
         ),
-        Container(
-          width: 1,
-          color: cs.outlineVariant.withValues(alpha: 0.3),
-        ),
+        Container(width: 1, color: cs.outlineVariant.withValues(alpha: 0.3)),
         ValueListenableBuilder<String?>(
           valueListenable: selectedMemberId,
           builder: (context, memberId, _) {
@@ -212,9 +210,8 @@ class _DesktopLayout extends ConsumerWidget {
                       const SizedBox(height: 16),
                       Text(
                         l10n.selectMemberHint,
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                              color: cs.onSurfaceVariant,
-                            ),
+                        style: Theme.of(context).textTheme.titleMedium
+                            ?.copyWith(color: cs.onSurfaceVariant),
                       ),
                     ],
                   ),
@@ -396,7 +393,8 @@ class _MemberListPanelState extends ConsumerState<_MemberListPanel> {
                   selected: _roleFilter == 'admin',
                   onTap: () {
                     setState(
-                      () => _roleFilter = _roleFilter == 'admin' ? null : 'admin',
+                      () =>
+                          _roleFilter = _roleFilter == 'admin' ? null : 'admin',
                     );
                     _applyFilters();
                   },
@@ -406,8 +404,9 @@ class _MemberListPanelState extends ConsumerState<_MemberListPanel> {
                   selected: _accountStatusFilter == 'active',
                   onTap: () {
                     setState(() {
-                      _accountStatusFilter =
-                          _accountStatusFilter == 'active' ? null : 'active';
+                      _accountStatusFilter = _accountStatusFilter == 'active'
+                          ? null
+                          : 'active';
                     });
                     _applyFilters();
                   },
@@ -417,8 +416,9 @@ class _MemberListPanelState extends ConsumerState<_MemberListPanel> {
                   selected: _accountStatusFilter == 'suspended',
                   onTap: () {
                     setState(() {
-                      _accountStatusFilter =
-                          _accountStatusFilter == 'suspended' ? null : 'suspended';
+                      _accountStatusFilter = _accountStatusFilter == 'suspended'
+                          ? null
+                          : 'suspended';
                     });
                     _applyFilters();
                   },
@@ -430,8 +430,8 @@ class _MemberListPanelState extends ConsumerState<_MemberListPanel> {
                     setState(() {
                       _verificationStatusFilter =
                           _verificationStatusFilter == 'unverified'
-                              ? null
-                              : 'unverified';
+                          ? null
+                          : 'unverified';
                     });
                     _applyFilters();
                   },
@@ -443,8 +443,8 @@ class _MemberListPanelState extends ConsumerState<_MemberListPanel> {
                     setState(() {
                       _verificationStatusFilter =
                           _verificationStatusFilter == 'verified'
-                              ? null
-                              : 'verified';
+                          ? null
+                          : 'verified';
                     });
                     _applyFilters();
                   },
@@ -469,26 +469,11 @@ class _MemberListPanelState extends ConsumerState<_MemberListPanel> {
               ),
             ),
             items: [
-              DropdownMenuItem(
-                value: 'newest',
-                child: Text(l10n.newest),
-              ),
-              DropdownMenuItem(
-                value: 'oldest',
-                child: Text(l10n.oldest),
-              ),
-              DropdownMenuItem(
-                value: 'name',
-                child: Text(l10n.nameLabel),
-              ),
-              DropdownMenuItem(
-                value: 'orders',
-                child: Text(l10n.orders),
-              ),
-              DropdownMenuItem(
-                value: 'wallet',
-                child: Text(l10n.wallet),
-              ),
+              DropdownMenuItem(value: 'newest', child: Text(l10n.newest)),
+              DropdownMenuItem(value: 'oldest', child: Text(l10n.oldest)),
+              DropdownMenuItem(value: 'name', child: Text(l10n.nameLabel)),
+              DropdownMenuItem(value: 'orders', child: Text(l10n.orders)),
+              DropdownMenuItem(value: 'wallet', child: Text(l10n.wallet)),
             ],
             onChanged: (value) {
               setState(() => _sortBy = value);
@@ -530,7 +515,10 @@ class _MemberListPanelState extends ConsumerState<_MemberListPanel> {
                 );
               }
               return ListView.builder(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 4,
+                ),
                 itemCount: members.length,
                 itemBuilder: (context, index) {
                   final member = members[index];
@@ -623,14 +611,14 @@ class _MemberTileWidget extends StatelessWidget {
       'country_admin' ||
       'governorate_admin' ||
       'center_admin' ||
-      'village_admin' =>
-        const Color(0xFF5B3DF0),
+      'village_admin' => const Color(0xFF5B3DF0),
       'driver' => const Color(0xFF007AFF),
       'merchant' => const Color(0xFFFF9500),
       'customer' => const Color(0xFF00C7BE),
-      _ => _isAdminRoleOrType(member.role, member.userType)
-          ? const Color(0xFF5B3DF0)
-          : Colors.blueGrey,
+      _ =>
+        _isAdminRoleOrType(member.role, member.userType)
+            ? const Color(0xFF5B3DF0)
+            : Colors.blueGrey,
     };
     final cs = Theme.of(context).colorScheme;
 
@@ -691,10 +679,7 @@ class _MemberTileWidget extends StatelessWidget {
                         decoration: BoxDecoration(
                           color: statusColor,
                           shape: BoxShape.circle,
-                          border: Border.all(
-                            color: cs.surface,
-                            width: 2,
-                          ),
+                          border: Border.all(color: cs.surface, width: 2),
                         ),
                       ),
                     ),
@@ -712,9 +697,8 @@ class _MemberTileWidget extends StatelessWidget {
                               member.fullName ?? l10n.unnamed,
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
-                              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                    fontWeight: FontWeight.w700,
-                                  ),
+                              style: Theme.of(context).textTheme.bodyMedium
+                                  ?.copyWith(fontWeight: FontWeight.w700),
                             ),
                           ),
                           const SizedBox(width: 6),
@@ -745,9 +729,8 @@ class _MemberTileWidget extends StatelessWidget {
                             : (member.phone ?? ''),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: cs.onSurfaceVariant,
-                            ),
+                        style: Theme.of(context).textTheme.bodySmall
+                            ?.copyWith(color: cs.onSurfaceVariant),
                       ),
                     ],
                   ),
@@ -766,7 +749,10 @@ class _MemberTileWidget extends StatelessWidget {
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Text(
-                        _accountStatusLabel(l10n, member.accountStatus ?? 'active'),
+                        _accountStatusLabel(
+                          l10n,
+                          member.accountStatus ?? 'active',
+                        ),
                         style: TextStyle(
                           color: statusColor,
                           fontWeight: FontWeight.w700,
@@ -876,30 +862,12 @@ const List<String> _kGranularPlatformPermissionCodes = [
 ];
 
 const List<({String role, IconData icon})> _kSelectableAdminRoles = [
-  (
-    role: 'country_admin',
-    icon: Icons.public_rounded,
-  ),
-  (
-    role: 'governorate_admin',
-    icon: Icons.account_balance_rounded,
-  ),
-  (
-    role: 'center_admin',
-    icon: Icons.location_city_rounded,
-  ),
-  (
-    role: 'village_admin',
-    icon: Icons.holiday_village_rounded,
-  ),
-  (
-    role: 'admin',
-    icon: Icons.admin_panel_settings_rounded,
-  ),
-  (
-    role: 'customer',
-    icon: Icons.person_outline_rounded,
-  ),
+  (role: 'country_admin', icon: Icons.public_rounded),
+  (role: 'governorate_admin', icon: Icons.account_balance_rounded),
+  (role: 'center_admin', icon: Icons.location_city_rounded),
+  (role: 'village_admin', icon: Icons.holiday_village_rounded),
+  (role: 'admin', icon: Icons.admin_panel_settings_rounded),
+  (role: 'customer', icon: Icons.person_outline_rounded),
 ];
 
 class _AssignAdminFromMembersSheet extends ConsumerStatefulWidget {
@@ -1024,13 +992,11 @@ class _AssignAdminFromMembersSheetState
         params: {'p_admin_id': memberId},
       );
       if (res is Map) {
-        final grants = (res['grants'] as List?)
-                ?.map((e) => e.toString())
-                .toSet() ??
+        final grants =
+            (res['grants'] as List?)?.map((e) => e.toString()).toSet() ??
             <String>{};
-        final effective = (res['effective'] as List?)
-                ?.map((e) => e.toString())
-                .toSet() ??
+        final effective =
+            (res['effective'] as List?)?.map((e) => e.toString()).toSet() ??
             <String>{};
         if (mounted) {
           setState(() {
@@ -1088,10 +1054,7 @@ class _AssignAdminFromMembersSheetState
       if (!configuredViaUnifiedRpc) {
         await client.rpc(
           'assign_admin_role',
-          params: {
-            'p_email': identifier,
-            'p_role': _selectedRole,
-          },
+          params: {'p_email': identifier, 'p_role': _selectedRole},
         );
 
         if (_selectedRole != 'customer' && _selectedRegionId != null) {
@@ -1124,20 +1087,14 @@ class _AssignAdminFromMembersSheetState
               try {
                 await client.rpc(
                   'grant_admin_permission',
-                  params: {
-                    'p_admin_id': memberId,
-                    'p_permission': code,
-                  },
+                  params: {'p_admin_id': memberId, 'p_permission': code},
                 );
               } catch (_) {}
             } else if (!isSelected && wasGranted) {
               try {
                 await client.rpc(
                   'revoke_admin_permission',
-                  params: {
-                    'p_admin_id': memberId,
-                    'p_permission': code,
-                  },
+                  params: {'p_admin_id': memberId, 'p_permission': code},
                 );
               } catch (_) {}
             }
@@ -1153,16 +1110,12 @@ class _AssignAdminFromMembersSheetState
       ref.invalidate(adminDetailProvider(memberId));
       ref.invalidate(adminPermissionsProvider(memberId));
 
-      showAnimatedSuccessToast(
-        context,
-        message: l10n.adminAssigned,
-      );
+      showAnimatedSuccessToast(context, message: l10n.adminAssigned);
       Navigator.of(context).pop();
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(appErrorText(context, e))),
-      );
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(appErrorText(context, e))));
     } finally {
       if (mounted) {
         setState(() => _isSaving = false);
@@ -1218,9 +1171,8 @@ class _AssignAdminFromMembersSheetState
                 Expanded(
                   child: Text(
                     l10n.assignSubAdmin,
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
+                    style: Theme.of(context).textTheme.titleMedium
+                        ?.copyWith(fontWeight: FontWeight.bold),
                   ),
                 ),
                 IconButton(
@@ -1278,87 +1230,83 @@ class _AssignAdminFromMembersSheetState
           child: _isSearching
               ? const Center(child: CircularProgressIndicator())
               : _searchResults.isEmpty
-                  ? Center(
-                      child: Text(
-                        l10n.noMembersFound,
-                        style: TextStyle(color: cs.onSurfaceVariant),
-                      ),
-                    )
-                  : ListView.builder(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      itemCount: _searchResults.length,
-                      itemBuilder: (context, index) {
-                        final m = _searchResults[index];
-                        final name =
-                            (m['full_name'] as String?)?.trim().isNotEmpty ==
-                                    true
-                                ? m['full_name'] as String
-                                : l10n.unnamed;
-                        final email = m['email'] as String? ?? '';
-                        final phone = m['phone'] as String? ?? '';
-                        final role = m['role'] as String? ?? 'customer';
-                        final isAdmin = _isAdminRoleOrType(
-                          role,
-                          m['user_type'] as String?,
-                        );
-                        final badgeColor = isAdmin
-                            ? const Color(0xFF5B3DF0)
-                            : cs.primary;
+              ? Center(
+                  child: Text(
+                    l10n.noMembersFound,
+                    style: TextStyle(color: cs.onSurfaceVariant),
+                  ),
+                )
+              : ListView.builder(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  itemCount: _searchResults.length,
+                  itemBuilder: (context, index) {
+                    final m = _searchResults[index];
+                    final name =
+                        (m['full_name'] as String?)?.trim().isNotEmpty == true
+                        ? m['full_name'] as String
+                        : l10n.unnamed;
+                    final email = m['email'] as String? ?? '';
+                    final phone = m['phone'] as String? ?? '';
+                    final role = m['role'] as String? ?? 'customer';
+                    final isAdmin = _isAdminRoleOrType(
+                      role,
+                      m['user_type'] as String?,
+                    );
+                    final badgeColor = isAdmin
+                        ? const Color(0xFF5B3DF0)
+                        : cs.primary;
 
-                        return Card(
-                          margin: const EdgeInsets.only(bottom: 8),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(14),
-                          ),
-                          child: ListTile(
-                            onTap: () => _pickMember(m),
-                            leading: CircleAvatar(
-                              backgroundColor:
-                                  badgeColor.withValues(alpha: 0.14),
-                              child: Text(
-                                safeInitialFrom([name, email, phone]),
-                                style: TextStyle(
-                                  color: badgeColor,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ),
-                            title: Text(
-                              name,
-                              style: const TextStyle(
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                            subtitle: Text(
-                              [
-                                if (email.isNotEmpty) email,
-                                if (phone.isNotEmpty) phone,
-                              ].join(' • '),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                            trailing: Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 10,
-                                vertical: 4,
-                              ),
-                              decoration: BoxDecoration(
-                                color: badgeColor.withValues(alpha: 0.12),
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: Text(
-                                _roleBadgeText(role, l10n),
-                                style: TextStyle(
-                                  color: badgeColor,
-                                  fontWeight: FontWeight.w700,
-                                  fontSize: 11,
-                                ),
-                              ),
+                    return Card(
+                      margin: const EdgeInsets.only(bottom: 8),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                      child: ListTile(
+                        onTap: () => _pickMember(m),
+                        leading: CircleAvatar(
+                          backgroundColor: badgeColor.withValues(alpha: 0.14),
+                          child: Text(
+                            safeInitialFrom([name, email, phone]),
+                            style: TextStyle(
+                              color: badgeColor,
+                              fontWeight: FontWeight.bold,
                             ),
                           ),
-                        );
-                      },
-                    ),
+                        ),
+                        title: Text(
+                          name,
+                          style: const TextStyle(fontWeight: FontWeight.w700),
+                        ),
+                        subtitle: Text(
+                          [
+                            if (email.isNotEmpty) email,
+                            if (phone.isNotEmpty) phone,
+                          ].join(' • '),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        trailing: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 4,
+                          ),
+                          decoration: BoxDecoration(
+                            color: badgeColor.withValues(alpha: 0.12),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Text(
+                            _roleBadgeText(role, l10n),
+                            style: TextStyle(
+                              color: badgeColor,
+                              fontWeight: FontWeight.w700,
+                              fontSize: 11,
+                            ),
+                          ),
+                        ),
+                      ),
+                    );
+                  },
+                ),
         ),
       ],
     );
@@ -1395,8 +1343,8 @@ class _AssignAdminFromMembersSheetState
               children: [
                 CircleAvatar(
                   radius: 22,
-                  backgroundColor:
-                      const Color(0xFF5B3DF0).withValues(alpha: 0.14),
+                  backgroundColor: const Color(0xFF5B3DF0)
+                      .withValues(alpha: 0.14),
                   child: Text(
                     safeInitialFrom([name, email, phone]),
                     style: const TextStyle(
@@ -1443,9 +1391,8 @@ class _AssignAdminFromMembersSheetState
           const SizedBox(height: 18),
           Text(
             l10n.adminRole,
-            style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+            style: Theme.of(context).textTheme.titleSmall
+                ?.copyWith(fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 8),
           Wrap(
@@ -1476,9 +1423,8 @@ class _AssignAdminFromMembersSheetState
             const SizedBox(height: 18),
             Text(
               l10n.assignRegion,
-              style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+              style: Theme.of(context).textTheme.titleSmall
+                  ?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
             OutlinedButton.icon(
@@ -1517,9 +1463,8 @@ class _AssignAdminFromMembersSheetState
                 Expanded(
                   child: Text(
                     l10n.permissionDelegation,
-                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
+                    style: Theme.of(context).textTheme.titleSmall
+                        ?.copyWith(fontWeight: FontWeight.bold),
                   ),
                 ),
                 TextButton(
@@ -1602,4 +1547,3 @@ class _AssignAdminFromMembersSheetState
     );
   }
 }
-

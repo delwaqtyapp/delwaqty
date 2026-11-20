@@ -182,23 +182,23 @@ class _TimelineSection extends StatelessWidget {
                 )
               else
                 ...List.generate(steps.length, (index) {
-                final step = steps[index];
-                final isCompleted = index < currentStatusIndex;
-                final isCurrent = index == currentStatusIndex;
-                final isPending = index > currentStatusIndex;
-                final isLast = index == steps.length - 1;
+                  final step = steps[index];
+                  final isCompleted = index < currentStatusIndex;
+                  final isCurrent = index == currentStatusIndex;
+                  final isPending = index > currentStatusIndex;
+                  final isLast = index == steps.length - 1;
 
-                return _TimelineStep(
-                  step: step,
-                  isCompleted: isCompleted,
-                  isCurrent: isCurrent,
-                  isPending: isPending,
-                  isLast: isLast,
-                  colorScheme: colorScheme,
-                  pulseAnimation: pulseAnimation,
-                  textTheme: textTheme,
-                );
-              }),
+                  return _TimelineStep(
+                    step: step,
+                    isCompleted: isCompleted,
+                    isCurrent: isCurrent,
+                    isPending: isPending,
+                    isLast: isLast,
+                    colorScheme: colorScheme,
+                    pulseAnimation: pulseAnimation,
+                    textTheme: textTheme,
+                  );
+                }),
             ],
           ),
         ),
@@ -286,8 +286,9 @@ class _TimelineStep extends StatelessWidget {
         ? activeColor
         : pendingColor;
 
-    final iconColor =
-        isCompleted || isCurrent ? colorScheme.onPrimary : pendingColor;
+    final iconColor = isCompleted || isCurrent
+        ? colorScheme.onPrimary
+        : pendingColor;
 
     final lineColor = isCompleted ? activeColor : pendingColor;
 

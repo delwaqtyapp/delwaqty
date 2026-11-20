@@ -1,4 +1,5 @@
 import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:delwaqty/core/auth/admin_access.dart';
@@ -42,9 +43,9 @@ class _AdminWebGateState extends State<AdminWebGate> {
   @override
   void initState() {
     super.initState();
-    _authSub = (widget.authStream ??
-            Supabase.instance.client.auth.onAuthStateChange)
-        .listen((_) => _resolve());
+    _authSub =
+        (widget.authStream ?? Supabase.instance.client.auth.onAuthStateChange)
+            .listen((_) => _resolve());
     _resolve();
   }
 
@@ -75,7 +76,9 @@ class _AdminWebGateState extends State<AdminWebGate> {
       role = null;
     }
     if (mounted) {
-      setState(() => _status = adminWebGateStatus(hasSession: true, role: role));
+      setState(
+        () => _status = adminWebGateStatus(hasSession: true, role: role),
+      );
     }
   }
 
@@ -98,9 +101,7 @@ class _AdminWebGateState extends State<AdminWebGate> {
   Widget build(BuildContext context) {
     return switch (_status) {
       AdminWebGateStatus.loading => const _AdminWebLoading(),
-      AdminWebGateStatus.notSignedIn => AdminWebLoginPage(
-        onSignedIn: _resolve,
-      ),
+      AdminWebGateStatus.notSignedIn => AdminWebLoginPage(onSignedIn: _resolve),
       AdminWebGateStatus.denied => const AdminWebDeniedPage(),
       AdminWebGateStatus.authorized =>
         (widget.authorizedBuilder ?? () => const AdminWebShell())(),

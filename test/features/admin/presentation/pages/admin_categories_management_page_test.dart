@@ -90,11 +90,11 @@ void main() {
   );
 
   User userWithRole(String role) => User(
-        id: 'u1',
-        email: 'admin@example.com',
-        role: role,
-        createdAt: createdAt,
-      );
+    id: 'u1',
+    email: 'admin@example.com',
+    role: role,
+    createdAt: createdAt,
+  );
 
   Future<void> pumpPage(
     WidgetTester tester, {
@@ -156,9 +156,6 @@ void main() {
 
     expect(find.byTooltip('Upload image'), findsOneWidget);
     expect(find.byTooltip('Remove image'), findsOneWidget);
-    expect(
-      find.byTooltip('Remove image'),
-      findsOneWidget,
-    );
+    expect(find.byTooltip('Remove image'), findsOneWidget);
   });
 }

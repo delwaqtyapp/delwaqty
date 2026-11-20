@@ -164,8 +164,9 @@ class MerchantTypeChip extends StatelessWidget {
               : null,
           color: selected
               ? null
-              : theme.colorScheme.surfaceContainerHighest
-                  .withValues(alpha: 0.35),
+              : theme.colorScheme.surfaceContainerHighest.withValues(
+                  alpha: 0.35,
+                ),
           borderRadius: BorderRadius.circular(999),
           border: Border.all(
             color: selected

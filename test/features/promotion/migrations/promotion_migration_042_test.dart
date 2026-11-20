@@ -22,22 +22,30 @@ void main() {
       expect(migration, contains('SECURITY DEFINER'));
     });
 
-    test('checks national (NULL), self, and ancestor chain on campaign_targets', () {
-      expect(migration, contains('SELECT 1'));
-      expect(migration, contains('FROM public.campaign_targets t'));
-      expect(migration, contains('t.region_id IS NULL'));
-      expect(migration, contains('t.region_id = p_member_region'));
-      expect(migration, contains('WITH RECURSIVE region_chain AS ('));
-      expect(migration, contains('SELECT p_member_region AS region_id'));
-      expect(migration, contains('JOIN region_chain rc ON r.id = rc.region_id'));
-    });
+    test(
+      'checks national (NULL), self, and ancestor chain on campaign_targets',
+      () {
+        expect(migration, contains('SELECT 1'));
+        expect(migration, contains('FROM public.campaign_targets t'));
+        expect(migration, contains('t.region_id IS NULL'));
+        expect(migration, contains('t.region_id = p_member_region'));
+        expect(migration, contains('WITH RECURSIVE region_chain AS ('));
+        expect(migration, contains('SELECT p_member_region AS region_id'));
+        expect(
+          migration,
+          contains('JOIN region_chain rc ON r.id = rc.region_id'),
+        );
+      },
+    );
   });
 
   group('042 — feed RPC contract', () {
     test('defines get_active_campaigns(p_locale default ar)', () {
       expect(
         migration,
-        contains("CREATE OR REPLACE FUNCTION public.get_active_campaigns(p_locale text DEFAULT 'ar')"),
+        contains(
+          "CREATE OR REPLACE FUNCTION public.get_active_campaigns(p_locale text DEFAULT 'ar')",
+        ),
       );
       expect(migration, contains('RETURNS TABLE ('));
       expect(migration, contains('image_path         text,'));
@@ -60,7 +68,10 @@ void main() {
     test('filters published, non-archived, schedule-open campaigns', () {
       expect(migration, contains("c.status = 'published'"));
       expect(migration, contains('c.archived_at IS NULL'));
-      expect(migration, contains('(c.starts_at IS NULL OR c.starts_at <= now())'));
+      expect(
+        migration,
+        contains('(c.starts_at IS NULL OR c.starts_at <= now())'),
+      );
       expect(migration, contains('(c.ends_at IS NULL OR c.ends_at >= now())'));
     });
 
@@ -69,7 +80,10 @@ void main() {
       expect(migration, contains("cb.placement = 'home_carousel'"));
       expect(migration, contains('cb.is_active'));
       expect(migration, contains('cb.locale = p_locale'));
-      expect(migration, contains('ORDER BY cb.priority ASC, cb.created_at DESC'));
+      expect(
+        migration,
+        contains('ORDER BY cb.priority ASC, cb.created_at DESC'),
+      );
     });
 
     test('orders by priority then recency', () {
@@ -82,19 +96,27 @@ void main() {
     test('revokes public/anon and grants only authenticated + service_role', () {
       expect(
         migration,
-        contains('REVOKE ALL ON FUNCTION public.get_active_campaigns(text) FROM PUBLIC;'),
+        contains(
+          'REVOKE ALL ON FUNCTION public.get_active_campaigns(text) FROM PUBLIC;',
+        ),
       );
       expect(
         migration,
-        contains('REVOKE ALL ON FUNCTION public.get_active_campaigns(text) FROM anon;'),
+        contains(
+          'REVOKE ALL ON FUNCTION public.get_active_campaigns(text) FROM anon;',
+        ),
       );
       expect(
         migration,
-        contains('GRANT EXECUTE ON FUNCTION public.get_active_campaigns(text)\n  TO authenticated, service_role;'),
+        contains(
+          'GRANT EXECUTE ON FUNCTION public.get_active_campaigns(text)\n  TO authenticated, service_role;',
+        ),
       );
       expect(
         migration,
-        contains('REVOKE ALL ON FUNCTION public._campaign_region_visible(uuid, uuid) FROM PUBLIC;'),
+        contains(
+          'REVOKE ALL ON FUNCTION public._campaign_region_visible(uuid, uuid) FROM PUBLIC;',
+        ),
       );
     });
 

@@ -60,8 +60,9 @@ void main() {
     mockRepo = MockUserRepository();
   });
 
-  testWidgets('shows rejected state when verification was rejected',
-      (tester) async {
+  testWidgets('shows rejected state when verification was rejected', (
+    tester,
+  ) async {
     when(() => mockRepo.getCurrentUser())
         .thenAnswer((_) async => _rejectedUser);
 
@@ -98,8 +99,9 @@ void main() {
     expect(find.text('Submit Documents'), findsOneWidget);
   });
 
-  testWidgets('shows review-only state when docs present and pending',
-      (tester) async {
+  testWidgets('shows review-only state when docs present and pending', (
+    tester,
+  ) async {
     when(() => mockRepo.getCurrentUser()).thenAnswer((_) async => _pendingUser);
 
     await tester.pumpWidget(_buildTestApp(mockRepo));

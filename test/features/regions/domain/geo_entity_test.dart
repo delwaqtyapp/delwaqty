@@ -18,7 +18,10 @@ void main() {
         'source_date': '2026-08-15',
         'source_type': 'SECONDARY VERIFIED',
         'confidence': 'HIGH',
-        'provenance': <String, dynamic>{'source': 'geonames', 'source_ref': '6297293'},
+        'provenance': <String, dynamic>{
+          'source': 'geonames',
+          'source_ref': '6297293',
+        },
         'license': null,
         'is_active': true,
         'metadata': <String, dynamic>{},

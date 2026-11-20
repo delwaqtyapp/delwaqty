@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+
 import 'dart:io';
 
 void main() {
@@ -19,7 +20,9 @@ void main() {
   });
 
   test('get_member_profile RPC exists in migration 035', () async {
-    final file = File('supabase/migrations/035_member_management_moderation_deletion.sql');
+    final file = File(
+      'supabase/migrations/035_member_management_moderation_deletion.sql',
+    );
     expect(file.existsSync(), isTrue);
 
     final content = await file.readAsString();
@@ -29,7 +32,9 @@ void main() {
   });
 
   test('issue_sanction and revoke_sanction RPCs exist', () async {
-    final file = File('supabase/migrations/035_member_management_moderation_deletion.sql');
+    final file = File(
+      'supabase/migrations/035_member_management_moderation_deletion.sql',
+    );
     expect(file.existsSync(), isTrue);
 
     final content = await file.readAsString();

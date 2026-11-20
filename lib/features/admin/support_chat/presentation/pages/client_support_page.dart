@@ -11,7 +11,9 @@ import 'package:delwaqty/shared/widgets/app_loader.dart';
 import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
 import 'package:delwaqty/shared/widgets/premium_empty_state.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
+
 import 'dart:async';
+
 import 'package:delwaqty/core/errors/app_error_text.dart';
 
 class ClientSupportPage extends ConsumerStatefulWidget {
@@ -86,7 +88,10 @@ class _ClientSupportPageState extends ConsumerState<ClientSupportPage> {
                           color: cs.primary.withValues(alpha: 0.15),
                           borderRadius: BorderRadius.circular(10),
                         ),
-                        child: Icon(Icons.chat_bubble_rounded, color: cs.primary),
+                        child: Icon(
+                          Icons.chat_bubble_rounded,
+                          color: cs.primary,
+                        ),
                       ),
                       title: Text(
                         refNum == null
@@ -150,9 +155,8 @@ class _ClientSupportPageState extends ConsumerState<ClientSupportPage> {
       unawaited(context.push('/support/room/${created.id}'));
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(appErrorText(context, e))),
-      );
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(appErrorText(context, e))));
     }
   }
 }

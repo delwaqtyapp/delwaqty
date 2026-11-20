@@ -6,16 +6,18 @@ import '../../domain/repositories/provider_verification_repository.dart';
 
 final providerVerificationDataSourceProvider =
     Provider<ProviderVerificationDataSource>(
-  (ref) => ProviderVerificationDataSource(ref.watch(supabaseClientProvider)),
-);
+      (ref) =>
+          ProviderVerificationDataSource(ref.watch(supabaseClientProvider)),
+    );
 
 final providerVerificationRepositoryProvider =
     Provider<ProviderVerificationRepository>(
-  (ref) => ProviderVerificationRepositoryImpl(
-    ref.watch(providerVerificationDataSourceProvider),
-  ),
-);
+      (ref) => ProviderVerificationRepositoryImpl(
+        ref.watch(providerVerificationDataSourceProvider),
+      ),
+    );
 
 final providerVerificationProvider = FutureProvider<Map<String, dynamic>>(
-  (ref) => ref.watch(providerVerificationRepositoryProvider).getMyVerification(),
+  (ref) =>
+      ref.watch(providerVerificationRepositoryProvider).getMyVerification(),
 );

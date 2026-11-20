@@ -57,11 +57,7 @@ class AdminEmptyState extends StatelessWidget {
 }
 
 class AdminErrorState extends StatelessWidget {
-  const AdminErrorState({
-    super.key,
-    required this.message,
-    this.onRetry,
-  });
+  const AdminErrorState({super.key, required this.message, this.onRetry});
 
   final String message;
   final VoidCallback? onRetry;

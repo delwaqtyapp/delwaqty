@@ -9,7 +9,8 @@ class CampaignsModule extends FeatureModule {
   String get id => 'campaigns';
 
   @override
-  String name(BuildContext context) => AppLocalizations.of(context).campaignTitle;
+  String name(BuildContext context) =>
+      AppLocalizations.of(context).campaignTitle;
 
   @override
   IconData? get icon => Icons.campaign_outlined;

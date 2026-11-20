@@ -62,8 +62,8 @@ abstract class AdminAccount with _$AdminAccount {
     final scope = scopeRaw == 'self'
         ? AdminScope.self
         : scopeRaw == 'descendants'
-            ? AdminScope.descendants
-            : AdminScope.unknown;
+        ? AdminScope.descendants
+        : AdminScope.unknown;
     DateTime? createdAt;
     final c = json['created_at'];
     if (c is String) createdAt = DateTime.tryParse(c);

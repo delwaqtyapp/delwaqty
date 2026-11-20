@@ -1,3 +1,4 @@
+import 'package:delwaqty/core/utils/rpc_result.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
@@ -138,14 +139,25 @@ class _MerchantOrdersPageState extends ConsumerState<MerchantOrdersPage> {
                             final messenger = ScaffoldMessenger.of(context);
                             messenger.hideCurrentSnackBar();
                             try {
-                              await Supabase.instance.client.rpc(
-                                'merchant_dispatch_order_driver',
-                                params: {'p_order_id': order.id},
+                              final result = checkedRpcResult(
+                                await Supabase.instance.client.rpc(
+                                  'merchant_dispatch_order_driver',
+                                  params: {'p_order_id': order.id},
+                                ),
+                                onFailure: Exception.new,
                               );
+                              final dispatch = result['dispatch'];
+                              final noDrivers =
+                                  dispatch is Map &&
+                                  dispatch['reason'] == 'no_drivers_available';
                               ref.invalidate(_ordersProvider);
                               messenger.showSnackBar(
                                 SnackBar(
-                                  content: Text(l10n.driverDispatchedSuccess),
+                                  content: Text(
+                                    noDrivers
+                                        ? l10n.noDriversFound
+                                        : l10n.driverDispatchedSuccess,
+                                  ),
                                 ),
                               );
                             } catch (e) {

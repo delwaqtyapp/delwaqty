@@ -2430,5 +2430,9 @@
   "signedAmountHint": "استخدم قيمة سالبة للخصم (مثال: -750)",
   "@signedAmountHint": {
     "description": "Owner wallet adjustment dialog"
-  }
+  },
+  "reviewDriverDocuments": "مراجعة مستندات السائق",
+  "driverDocumentsReviewed": "راجعت الرخصة ومستند ترخيص المركبة",
+  "driverRequiredDocuments": "ارفع رخصة القيادة وترخيص المركبة قبل إرسال الطلب. لازم تبدل أي مستند مرفوض أو منتهي.",
+  "driverActiveVehicleRequired": "أضف مركبة نشطة قبل إرسال طلبك."
 }

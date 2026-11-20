@@ -1,3 +1,5 @@
+import 'package:file_picker/file_picker.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:delwaqty/core/theme/app_colors.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -86,15 +88,78 @@ class DocumentManagementPage extends ConsumerWidget {
   }
 }
 
-class _DocumentListBody extends ConsumerWidget {
+class _DocumentListBody extends ConsumerStatefulWidget {
   const _DocumentListBody({required this.driverId});
 
   final String driverId;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<_DocumentListBody> createState() => _DocumentListBodyState();
+}
+
+class _DocumentListBodyState extends ConsumerState<_DocumentListBody> {
+  bool _uploading = false;
+  String get driverId => widget.driverId;
+
+  Future<void> _uploadDocument(String docType) async {
+    if (_uploading) return;
+    setState(() => _uploading = true);
+    final l10n = AppLocalizations.of(context);
+    try {
+      final file = await FilePicker.pickFile(
+        type: FileType.custom,
+        allowedExtensions: ['jpg', 'jpeg', 'png', 'webp', 'pdf'],
+      );
+      if (file == null) return;
+      final bytes = await file.readAsBytes();
+      if (bytes.length > 10485760) throw StateError('Document exceeds 10 MB');
+      final extension = file.name.split('.').last.toLowerCase();
+      final contentType = switch (extension) {
+        'png' => 'image/png',
+        'webp' => 'image/webp',
+        'pdf' => 'application/pdf',
+        _ => 'image/jpeg',
+      };
+      final path =
+          'driver_documents/$driverId/${DateTime.now().microsecondsSinceEpoch}_$docType.$extension';
+      final client = Supabase.instance.client;
+      await client.storage
+          .from('driver-documents')
+          .uploadBinary(
+            path,
+            bytes,
+            fileOptions: FileOptions(contentType: contentType),
+          );
+      await ref
+          .read(driverRepositoryProvider)
+          .upsertDocument(
+            driverId,
+            docType,
+            path,
+            fileName: file.name,
+            fileSize: bytes.length,
+          );
+      ref.invalidate(_documentsProvider(driverId));
+      if (mounted) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(l10n.documentUploaded)));
+      }
+    } catch (error) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(appErrorText(context, error))));
+      }
+    } finally {
+      if (mounted) setState(() => _uploading = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final documentsAsync = ref.watch(_documentsProvider(driverId));
 
+    if (_uploading) return const Center(child: CircularProgressIndicator());
     return RefreshIndicator(
       onRefresh: () async => ref.invalidate(_documentsProvider(driverId)),
       child: documentsAsync.when(
@@ -103,7 +168,7 @@ class _DocumentListBody extends ConsumerWidget {
         data: (documents) {
           final docMap = <String, DriverDocument>{};
           for (final doc in documents) {
-            docMap[doc.docType] = doc;
+            docMap.putIfAbsent(doc.docType, () => doc);
           }
           return ListView.builder(
             padding: const EdgeInsets.all(16),
@@ -117,7 +182,7 @@ class _DocumentListBody extends ConsumerWidget {
                   docType: entry.key,
                   icon: entry.icon,
                   document: doc,
-                  onTap: () => _showUploadPlaceholder(context),
+                  onTap: () => _uploadDocument(entry.key),
                 ),
               );
             },
@@ -125,12 +190,6 @@ class _DocumentListBody extends ConsumerWidget {
         },
       ),
     );
-  }
-
-  void _showUploadPlaceholder(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-    ScaffoldMessenger.of(context)
-        .showSnackBar(SnackBar(content: Text(l10n.uploadComingSoon)));
   }
 }
 

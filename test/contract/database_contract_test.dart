@@ -249,14 +249,27 @@ void main() {
       expect(body, contains('active_vehicle_id'));
     });
 
-    test('registration makes the driver dispatchable', () {
-      expect(sql, contains('driver_complete_registration'));
-      expect(
-        sql.contains('is_verified'),
-        isTrue,
-        reason: 'an unverified driver is invisible to the dispatch engine',
-      );
-    });
+    test(
+      'registration cannot self-verify; admin review requires documents',
+      () {
+        final latest = File(
+          'supabase/migrations/139_driver_verification_document_custody.sql',
+        ).readAsStringSync();
+        final registration = latest
+            .split(
+              'CREATE OR REPLACE FUNCTION public.driver_complete_registration',
+            )
+            .last
+            .split('CREATE OR REPLACE FUNCTION public.register_ride_driver')
+            .first;
+        expect(registration, contains("false, 'pending'"));
+        expect(registration, isNot(contains('is_verified = true')));
+        expect(latest, contains('driver_application_documents_ready'));
+        expect(latest, contains('REQUIRED_DOCUMENTS_MISSING'));
+        expect(latest, contains('ACTIVE_VEHICLE_REQUIRED'));
+        expect(latest, contains('review_driver_application'));
+      },
+    );
   });
 
   group('manifest contract', () {

@@ -1,3 +1,4 @@
+import 'package:delwaqty/core/utils/rpc_result.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:delwaqty/services/supabase/supabase_service.dart';
@@ -19,13 +20,8 @@ class SupabaseDispatchDataSource {
   static const String _rides = 'rides';
   static const String _requests = 'ride_requests';
 
-  Map<String, dynamic> _checkRpc(dynamic data) {
-    final map = Map<String, dynamic>.from(data as Map);
-    if (map['success'] == false) {
-      throw DispatchException(map['reason'] as String? ?? 'unknown');
-    }
-    return map;
-  }
+  Map<String, dynamic> _checkRpc(dynamic data) =>
+      checkedRpcResult(data, onFailure: DispatchException.new);
 
   Ride _rideFromRow(Map<String, dynamic> row) {
     final status = RideStatus.values.firstWhere(

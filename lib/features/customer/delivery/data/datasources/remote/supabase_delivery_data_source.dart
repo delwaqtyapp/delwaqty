@@ -313,6 +313,21 @@ class SupabaseDeliveryDataSource {
     );
   }
 
+  /// Files a custody incident for a delivery whose goods are already with
+  /// the driver. The server refuses plain cancellation at that stage.
+  Future<void> reportIncident(
+    String rideId,
+    String kind, {
+    String? note,
+  }) async {
+    _checkRpc(
+      await _client.rpc(
+        'report_delivery_incident',
+        params: {'p_ride_id': rideId, 'p_kind': kind, 'p_note': note},
+      ),
+    );
+  }
+
   // ── Pricing ──
 
   Future<DeliveryPricingModel> getDeliveryPricing(String serviceType) async {

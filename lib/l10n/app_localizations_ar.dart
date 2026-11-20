@@ -7015,6 +7015,36 @@ class AppLocalizationsAr extends AppLocalizations {
   String get confirmCancelDeliveryTitle => 'إلغاء التوصيل النشط؟';
 
   @override
+  String get reportIncidentTitle => 'الإبلاغ عن مشكلة';
+
+  @override
+  String get reportIncidentBody => 'الطلب مع المندوب بالفعل، لذا لا يمكن إلغاؤه مباشرة. أبلغ عن المشكلة وسيتدخل الدعم.';
+
+  @override
+  String get incidentKindBreakdown => 'عطل في المركبة';
+
+  @override
+  String get incidentKindAccident => 'حادث';
+
+  @override
+  String get incidentKindGoodsDamaged => 'البضاعة تالفة';
+
+  @override
+  String get incidentKindCustomerUnreachable => 'العميل لا يرد';
+
+  @override
+  String get incidentKindOther => 'سبب آخر';
+
+  @override
+  String get incidentNoteHint => 'ماذا حدث؟ (اختياري)';
+
+  @override
+  String get incidentReported => 'تم إرسال البلاغ. سيتولى الدعم الأمر من هنا.';
+
+  @override
+  String get sendReport => 'إرسال البلاغ';
+
+  @override
   String get confirmCancelDeliveryBody =>
       'هل أنت متأكد من رغبتك في إلغاء مهمة التوصيل الحالية؟';
 

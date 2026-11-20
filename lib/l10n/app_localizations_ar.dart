@@ -6256,6 +6256,12 @@ class AppLocalizationsAr extends AppLocalizations {
   String get paymentVodafoneCash => 'فودافون كاش';
 
   @override
+  String get paymentWallet => 'المحفظة';
+
+  @override
+  String get walletPaymentFailed => 'رصيد المحفظة مش كافي';
+
+  @override
   String get paymentCash => 'كاش';
 
   @override

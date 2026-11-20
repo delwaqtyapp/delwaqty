@@ -6296,6 +6296,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get paymentVodafoneCash => 'Vodafone Cash';
 
   @override
+  String get paymentWallet => 'Wallet';
+
+  @override
+  String get walletPaymentFailed => 'Insufficient wallet balance';
+
+  @override
   String get paymentCash => 'Cash';
 
   @override

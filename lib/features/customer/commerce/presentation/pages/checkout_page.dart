@@ -1,7 +1,9 @@
 import 'package:delwaqty/features/customer/commerce/presentation/providers/cart_providers.dart';
+import 'package:delwaqty/features/customer/wallet/wallet_module.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:delwaqty/features/customer/commerce/commerce_module.dart';
 import 'package:delwaqty/features/customer/commerce/domain/entities/cart.dart'
     as commerce;
@@ -196,6 +198,11 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
                       value: 'vodafone_cash',
                       label: Text(l10n.paymentVodafoneCash),
                       icon: const Icon(Icons.phone_iphone_rounded),
+                    ),
+                    ButtonSegment(
+                      value: 'wallet',
+                      label: Text(l10n.paymentWallet),
+                      icon: const Icon(Icons.account_balance_wallet),
                     ),
                   ],
                   selected: {_paymentMethod},
@@ -410,6 +417,36 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
         deliveryAddress: address,
         paymentMethod: _paymentMethod,
       );
+
+      if (_paymentMethod == 'wallet') {
+        try {
+          final uid = Supabase.instance.client.auth.currentUser?.id ?? '';
+          await ref
+              .read(walletRepositoryProvider)
+              .pay(
+                uid,
+                cart.total,
+                'Order ${order.id}',
+                referenceType: 'order',
+                referenceId: order.id,
+              );
+        } catch (_) {
+          // Never leave an unpaid wallet order hanging: cancel it and tell
+          // the customer why.
+          await orderRepo.cancelOrder(
+            orderId: order.id,
+            reason: 'wallet payment failed',
+          );
+          if (!mounted) return;
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(l10n.walletPaymentFailed),
+              backgroundColor: cs.error,
+            ),
+          );
+          return;
+        }
+      }
 
       await ref.read(cartProvider.notifier).clear();
 

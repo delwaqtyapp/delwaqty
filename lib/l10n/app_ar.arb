@@ -2020,6 +2020,8 @@
   "paymentBankTransfer": "تحويل بنكي",
   "paymentInstapay": "انستا باي",
   "paymentVodafoneCash": "فودافون كاش",
+  "paymentWallet": "المحفظة",
+  "walletPaymentFailed": "رصيد المحفظة مش كافي",
   "paymentCash": "كاش",
   "proofOfPayment": "إثبات التحويل",
   "tapToAddProof": "اضغط لإرفاق إثبات التحويل",

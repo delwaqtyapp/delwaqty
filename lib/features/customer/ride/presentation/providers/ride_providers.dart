@@ -44,7 +44,7 @@ class RideBookingState {
     this.dropoffAddress = '',
     this.dropoffLatitude,
     this.dropoffLongitude,
-    this.rideType = RideType.economy,
+    this.rideType = RideType.motorcycle,
     this.quotes = const [],
     this.isEstimating = false,
     this.promoCode,

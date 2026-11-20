@@ -23,43 +23,8 @@ extension RideStatusX on RideStatus {
   bool get isActive => !isTerminal;
 }
 
-enum RideType { economy, comfort, premium, xl, motorbike, taxi }
-
-extension RideTypeX on RideType {
-  int get passengerCapacity {
-    switch (this) {
-      case RideType.economy:
-        return 4;
-      case RideType.comfort:
-        return 4;
-      case RideType.premium:
-        return 4;
-      case RideType.xl:
-        return 6;
-      case RideType.motorbike:
-        return 1;
-      case RideType.taxi:
-        return 4;
-    }
-  }
-
-  int get luggageCapacity {
-    switch (this) {
-      case RideType.economy:
-        return 2;
-      case RideType.comfort:
-        return 2;
-      case RideType.premium:
-        return 3;
-      case RideType.xl:
-        return 4;
-      case RideType.motorbike:
-        return 0;
-      case RideType.taxi:
-        return 2;
-    }
-  }
-}
+/// Vehicle types in the current delivery fleet. No passenger tiers.
+enum RideType { motorcycle, tuk_tuk, tricycle, car }
 
 @freezed
 abstract class Ride with _$Ride {
@@ -79,7 +44,7 @@ abstract class Ride with _$Ride {
     required double dropoffLatitude,
     required double dropoffLongitude,
     required String dropoffAddress,
-    @Default(RideType.economy) RideType rideType,
+    @Default(RideType.motorcycle) RideType rideType,
     @Default(RideStatus.searching) RideStatus status,
     double? fare,
     double? baseFare,

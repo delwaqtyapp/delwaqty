@@ -62,32 +62,13 @@ void main() {
   });
 
   group('RideType', () {
-    test('enum has all values', () {
-      expect(RideType.values.length, 6);
-      expect(RideType.economy.name, 'economy');
-      expect(RideType.comfort.name, 'comfort');
-      expect(RideType.premium.name, 'premium');
-      expect(RideType.xl.name, 'xl');
-      expect(RideType.motorbike.name, 'motorbike');
-      expect(RideType.taxi.name, 'taxi');
-    });
-
-    test('passengerCapacity returns correct values', () {
-      expect(RideType.economy.passengerCapacity, 4);
-      expect(RideType.comfort.passengerCapacity, 4);
-      expect(RideType.premium.passengerCapacity, 4);
-      expect(RideType.xl.passengerCapacity, 6);
-      expect(RideType.motorbike.passengerCapacity, 1);
-      expect(RideType.taxi.passengerCapacity, 4);
-    });
-
-    test('luggageCapacity returns correct values', () {
-      expect(RideType.economy.luggageCapacity, 2);
-      expect(RideType.comfort.luggageCapacity, 2);
-      expect(RideType.premium.luggageCapacity, 3);
-      expect(RideType.xl.luggageCapacity, 4);
-      expect(RideType.motorbike.luggageCapacity, 0);
-      expect(RideType.taxi.luggageCapacity, 2);
+    test('contains exactly the current delivery fleet', () {
+      expect(RideType.values.map((v) => v.name), [
+        'motorcycle',
+        'tuk_tuk',
+        'tricycle',
+        'car',
+      ]);
     });
   });
 
@@ -109,7 +90,7 @@ void main() {
         'dropoffLatitude': 30.0131,
         'dropoffLongitude': 31.2089,
         'dropoffAddress': 'Cairo Airport',
-        'rideType': 'economy',
+        'rideType': 'motorcycle',
         'status': 'searching',
         'fare': 50.0,
         'baseFare': 10.0,
@@ -148,7 +129,7 @@ void main() {
       expect(ride.dropoffLatitude, 30.0131);
       expect(ride.dropoffLongitude, 31.2089);
       expect(ride.dropoffAddress, 'Cairo Airport');
-      expect(ride.rideType, RideType.economy);
+      expect(ride.rideType, RideType.motorcycle);
       expect(ride.status, RideStatus.searching);
       expect(ride.fare, 50.0);
       expect(ride.baseFare, 10.0);
@@ -182,7 +163,7 @@ void main() {
       final json = ride.toJson();
       expect(json['id'], 'r1');
       expect(json['riderId'], 'u1');
-      expect(json['rideType'], 'economy');
+      expect(json['rideType'], 'motorcycle');
       expect(json['status'], 'searching');
       expect(json['surgeMultiplier'], 1.0);
       expect(json['discountAmount'], 0.0);
@@ -204,7 +185,7 @@ void main() {
         dropoffLatitude: 30.0131,
         dropoffLongitude: 31.2089,
         dropoffAddress: 'Cairo Airport',
-        rideType: RideType.comfort,
+        rideType: RideType.car,
         status: RideStatus.inTrip,
         fare: 75.0,
         baseFare: 15.0,
@@ -305,7 +286,7 @@ void main() {
         createdAt: now,
       );
 
-      expect(ride.rideType, RideType.economy);
+      expect(ride.rideType, RideType.motorcycle);
       expect(ride.status, RideStatus.searching);
       expect(ride.surgeMultiplier, 1.0);
       expect(ride.discountAmount, 0.0);

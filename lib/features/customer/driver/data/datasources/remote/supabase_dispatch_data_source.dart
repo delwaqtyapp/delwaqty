@@ -30,7 +30,7 @@ class SupabaseDispatchDataSource {
     );
     final rideType = RideType.values.firstWhere(
       (t) => t.name == (row['ride_type'] as String?),
-      orElse: () => RideType.economy,
+      orElse: () => RideType.motorcycle,
     );
     return Ride(
       id: row['id'] as String,
@@ -181,7 +181,7 @@ class SupabaseDispatchDataSource {
             if (rideRow['status'] != 'searching') continue;
             final rideType = RideType.values.firstWhere(
               (t) => t.name == (rideRow['ride_type'] as String?),
-              orElse: () => RideType.economy,
+              orElse: () => RideType.motorcycle,
             );
             offers.add(
               RideOffer(

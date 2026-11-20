@@ -18,19 +18,7 @@ final _vehiclesProvider = FutureProvider.family<List<Vehicle>, String>((
   return repo.getVehicles(driverId);
 });
 
-const _vehicleCategories = [
-  'tuk_tuk',
-  'tricycle',
-  'motorcycle',
-  'scooter',
-  'electric_scooter',
-  'mini_scooter',
-  'bicycle',
-  'car',
-  'van',
-  'pickup',
-  'light_transport',
-];
+const _vehicleCategories = ['motorcycle', 'tuk_tuk', 'tricycle', 'car'];
 
 String _categoryLabel(AppLocalizations l10n, String category) {
   switch (category) {
@@ -40,22 +28,8 @@ String _categoryLabel(AppLocalizations l10n, String category) {
       return l10n.vehicleTricycle;
     case 'motorcycle':
       return l10n.vehicleMotorcycle;
-    case 'scooter':
-      return l10n.vehicleScooter;
-    case 'electric_scooter':
-      return l10n.vehicleElectricScooter;
-    case 'mini_scooter':
-      return l10n.vehicleMiniScooter;
-    case 'bicycle':
-      return l10n.vehicleBicycle;
     case 'car':
       return l10n.vehicleCar;
-    case 'van':
-      return l10n.vehicleVan;
-    case 'pickup':
-      return l10n.vehiclePickup;
-    case 'light_transport':
-      return l10n.vehicleLightTransport;
     default:
       return category.isNotEmpty
           ? category[0].toUpperCase() + category.substring(1)
@@ -69,15 +43,7 @@ IconData _categoryIcon(String category) {
     case 'tricycle':
     case 'car':
       return Icons.directions_car_rounded;
-    case 'van':
-    case 'pickup':
-    case 'light_transport':
-      return Icons.local_shipping_rounded;
     case 'motorcycle':
-    case 'scooter':
-    case 'electric_scooter':
-    case 'mini_scooter':
-    case 'bicycle':
       return Icons.two_wheeler_rounded;
     default:
       return Icons.directions_car_rounded;

@@ -123,66 +123,73 @@ class _MerchantPosPageState extends ConsumerState<MerchantPosPage> {
                 .where((p) => p['is_available'] == true)
                 .toList();
             final subtotal = _previewSubtotal(products);
+            final narrow = MediaQuery.sizeOf(context).width < 640;
+            final productsPane = products.isEmpty
+                ? Center(child: Text(l10n.posNoProducts))
+                : GridView.builder(
+                    padding: const EdgeInsets.all(16),
+                    gridDelegate:
+                        const SliverGridDelegateWithMaxCrossAxisExtent(
+                          maxCrossAxisExtent: 180,
+                          // Fixed tile height: fits a 2-line name above the
+                          // price and stock rows without collision.
+                          mainAxisExtent: 150,
+                          mainAxisSpacing: 12,
+                          crossAxisSpacing: 12,
+                        ),
+                    itemCount: products.length,
+                    itemBuilder: (context, i) => _ProductCard(
+                      product: products[i],
+                      qty: _cart[products[i]['id']] ?? 0,
+                      l10n: l10n,
+                      onTap: () {
+                        final id = products[i]['id'] as String;
+                        final stock =
+                            (products[i]['stock_quantity'] as num?)?.toInt() ??
+                            0;
+                        if ((_cart[id] ?? 0) < stock) {
+                          setState(() => _cart[id] = (_cart[id] ?? 0) + 1);
+                        }
+                      },
+                    ),
+                  );
+            final cartPane = _CartPanel(
+              cart: _cart,
+              products: products,
+              l10n: l10n,
+              discountCtrl: _discountCtrl,
+              customerCtrl: _customerCtrl,
+              paymentMethod: _paymentMethod,
+              submitting: _submitting,
+              subtotal: subtotal,
+              onPaymentChanged: (m) => setState(() => _paymentMethod = m),
+              onQtyChanged: (id, qty) => setState(() {
+                if (qty <= 0) {
+                  _cart.remove(id);
+                } else {
+                  _cart[id] = qty;
+                }
+              }),
+              onClear: () => setState(_cart.clear),
+              onComplete: () => _completeSale(merchantId),
+            );
+            if (narrow) {
+              // Stack cart under products; a side-by-side split leaves the
+              // cart unusably narrow on phones.
+              return Column(
+                children: [
+                  Expanded(flex: 3, child: productsPane),
+                  const Divider(height: 1),
+                  Expanded(flex: 2, child: cartPane),
+                ],
+              );
+            }
             return Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Expanded(
-                  flex: 3,
-                  child: products.isEmpty
-                      ? Center(child: Text(l10n.posNoProducts))
-                      : GridView.builder(
-                          padding: const EdgeInsets.all(16),
-                          gridDelegate:
-                              const SliverGridDelegateWithMaxCrossAxisExtent(
-                                maxCrossAxisExtent: 180,
-                                childAspectRatio: 0.85,
-                                mainAxisSpacing: 12,
-                                crossAxisSpacing: 12,
-                              ),
-                          itemCount: products.length,
-                          itemBuilder: (context, i) => _ProductCard(
-                            product: products[i],
-                            qty: _cart[products[i]['id']] ?? 0,
-                            l10n: l10n,
-                            onTap: () {
-                              final id = products[i]['id'] as String;
-                              final stock =
-                                  (products[i]['stock_quantity'] as num?)
-                                      ?.toInt() ??
-                                  0;
-                              if ((_cart[id] ?? 0) < stock) {
-                                setState(
-                                  () => _cart[id] = (_cart[id] ?? 0) + 1,
-                                );
-                              }
-                            },
-                          ),
-                        ),
-                ),
+                Expanded(flex: 3, child: productsPane),
                 const VerticalDivider(width: 1),
-                Expanded(
-                  flex: 2,
-                  child: _CartPanel(
-                    cart: _cart,
-                    products: products,
-                    l10n: l10n,
-                    discountCtrl: _discountCtrl,
-                    customerCtrl: _customerCtrl,
-                    paymentMethod: _paymentMethod,
-                    submitting: _submitting,
-                    subtotal: subtotal,
-                    onPaymentChanged: (m) => setState(() => _paymentMethod = m),
-                    onQtyChanged: (id, qty) => setState(() {
-                      if (qty <= 0) {
-                        _cart.remove(id);
-                      } else {
-                        _cart[id] = qty;
-                      }
-                    }),
-                    onClear: () => setState(_cart.clear),
-                    onComplete: () => _completeSale(merchantId),
-                  ),
-                ),
+                Expanded(flex: 2, child: cartPane),
               ],
             );
           },
@@ -405,7 +412,12 @@ class _CartPanel extends StatelessWidget {
                   child: CircularProgressIndicator(strokeWidth: 2),
                 )
               : const Icon(Icons.point_of_sale_rounded),
-          label: Text(l10n.posCompleteSale),
+          label: Text(
+            l10n.posCompleteSale,
+            maxLines: 1,
+            softWrap: false,
+            overflow: TextOverflow.ellipsis,
+          ),
           style: FilledButton.styleFrom(minimumSize: const Size.fromHeight(48)),
         ),
       ],

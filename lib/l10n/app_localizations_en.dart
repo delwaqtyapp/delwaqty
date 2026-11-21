@@ -1409,7 +1409,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get reportRestaurant => 'Report';
 
   @override
-  String get merchantDashboard => 'Merchant Dashboard';
+  String get merchantDashboard => 'Dashboard';
 
   @override
   String get overview => 'Overview';

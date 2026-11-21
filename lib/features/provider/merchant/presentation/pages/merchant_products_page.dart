@@ -53,10 +53,14 @@ class _MerchantProductsPageState extends ConsumerState<MerchantProductsPage> {
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => context.push('/merchant-dashboard/products/new'),
-        icon: const Icon(Icons.add),
-        label: Text(l10n.addProduct),
+      floatingActionButton: Padding(
+        // Keep the FAB above the shell's floating bottom navigation bar.
+        padding: const EdgeInsets.only(bottom: 96),
+        child: FloatingActionButton.extended(
+          onPressed: () => context.push('/merchant-dashboard/products/new'),
+          icon: const Icon(Icons.add),
+          label: Text(l10n.addProduct),
+        ),
       ),
       body: Column(
         children: [

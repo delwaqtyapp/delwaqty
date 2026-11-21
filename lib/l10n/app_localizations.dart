@@ -2765,7 +2765,7 @@ abstract class AppLocalizations {
   /// No description provided for @merchantDashboard.
   ///
   /// In en, this message translates to:
-  /// **'Merchant Dashboard'**
+  /// **'Dashboard'**
   String get merchantDashboard;
 
   /// No description provided for @overview.

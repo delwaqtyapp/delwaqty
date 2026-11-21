@@ -1403,7 +1403,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get reportRestaurant => 'إبلاغ';
 
   @override
-  String get merchantDashboard => 'لوحة التاجر';
+  String get merchantDashboard => 'لوحة التحكم';
 
   @override
   String get overview => 'نظرة عامة';

@@ -478,3 +478,16 @@ Code-level only (no Flutter SDK in sandbox); every item needs an Antigravity reb
 
 - 184 cancel cutoff: implemented = self-cancel blocked only at 'delivering' (migration line 53). His first line said cancellation closes at DRIVER ACCEPTANCE. If confirmed: extend the status guard to driver-accepted/preparing states.
 - 184 refusal suspension: implemented = warn at refusals 1-2, suspend at 3rd (`v_count >= 3`, line 372). If he means 2nd: change to `>= 2` and adjust warning copy.
+
+## Migration 185-186: monthly allowances + driver-delay compensation (applied + live-probed 2026-11-21 3:05 PM, commit 9f7eafd)
+
+Owner confirmation: written WhatsApp recap 2:58 PM + his "تمام" reply 2:59 PM. Refusal threshold (warn 1+2, suspend 3rd) confirmed UNCHANGED; window is now monthly.
+
+- cancel allowance: 2/calendar-month (UTC) replacing lifetime; 'delivering' cutoff unchanged. Probed: 2 this-month cancels -> CANCEL_ALLOWANCE_EXHAUSTED; 40-day-old cancel excluded; cancel succeeds with room.
+- edits: 3/month via order_edit_events; probed EDIT_ALLOWANCE_EXHAUSTED fires before item validation.
+- refusals: monthly count from orders.cancelled_by='customer_refusal'; suspension at 3rd IN MONTH. (Window logic mirrors cancel probe; refusal RPC path itself not re-probed end-to-end - needs a delivering order fixture.)
+- driver delay: report_driver_delay / redispatch_delayed_order -> _driver_delay_redispatch (server-only). Ride -> searching, re-offered (146 engine), driver excused no deduction, monthly allowance (platform_settings.driver_delay_monthly_allowance, default 3), beyond-allowance -> high-priority ops complaint, no auto penalty. Probed end-to-end on bughunt rig: event row, ride/order state, driver+customer notifications (Egyptian Arabic apology naming previous captain's breakdown), PENDING_DISPATCH fallback when no drivers free.
+- apology credit: platform_settings.delay_apology_discount_egp (default 5) wallet credit, once per order, event row ties amount to order for ops-share reporting.
+- 186 (bug found by probing): wallet_refund's 145 guard silently dropped credits to ANOTHER user - hit 185's apology AND 184's driver-reported refusal refund AND admin-cancel refunds. Fixed via revoked server-only _wallet_credit; all three flows rerouted. Re-probed: wallet +5 and delay_apology txn land.
+- ANTIGRAVITY BUILD LIST: driver app button to report a delay/breakdown (report_driver_delay), merchant re-dispatch action (redispatch_delayed_order), surface EDIT/CANCEL_ALLOWANCE_EXHAUSTED errors in customer app.
+- OPEN for owner: driver-delay allowance exact number (3 now, he said 3-4 - one UPDATE to platform_settings); apology amount exact (5 now, he said ~5-7 - same); consequence beyond driver allowance (currently: logged + ops complaint, no penalty); refusal suspension 2nd-vs-3rd was NOT answered (kept 3rd).

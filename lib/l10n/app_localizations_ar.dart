@@ -7562,4 +7562,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get drugImportInvalidPrice => 'أدخل سعرًا صحيحًا';
+
+  @override
+  String get each => 'للقطعة';
 }

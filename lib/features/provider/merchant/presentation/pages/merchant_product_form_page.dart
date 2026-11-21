@@ -184,6 +184,9 @@ class _MerchantProductFormPageState
                         ),
                       ),
                     ),
+                    // Keep the primary action clear of the shell's floating
+                    // bottom navigation bar.
+                    const SizedBox(height: 110),
                   ],
                 ),
               ),
@@ -328,6 +331,11 @@ class _MerchantProductFormPageState
                 labelText: l10n.category,
                 hintText: l10n.enterCategory,
                 border: const OutlineInputBorder(),
+                suffixIcon: IconButton(
+                  icon: const Icon(Icons.arrow_drop_down),
+                  tooltip: l10n.category,
+                  onPressed: _openCategoryPicker,
+                ),
               ),
             ),
             const SizedBox(height: 16),
@@ -381,6 +389,44 @@ class _MerchantProductFormPageState
         ],
       ),
     );
+  }
+
+  Future<void> _openCategoryPicker() async {
+    final repo = ref.read(merchantDashboardRepositoryProvider);
+    final merchantId = await ref.read(_merchantIdProvider.future);
+    if (!mounted) return;
+    List<String> categories;
+    try {
+      final products = await repo.getMerchantProducts(merchantId);
+      categories =
+          products
+              .map((p) => (p['category'] as String? ?? '').trim())
+              .where((c) => c.isNotEmpty)
+              .toSet()
+              .toList()
+            ..sort();
+    } catch (_) {
+      categories = const [];
+    }
+    if (!mounted || categories.isEmpty) return;
+    final picked = await showModalBottomSheet<String>(
+      context: context,
+      builder: (sheetCtx) => SafeArea(
+        child: ListView(
+          shrinkWrap: true,
+          children: [
+            for (final c in categories)
+              ListTile(
+                title: Text(c),
+                onTap: () => Navigator.of(sheetCtx).pop(c),
+              ),
+          ],
+        ),
+      ),
+    );
+    if (picked != null && mounted) {
+      setState(() => _categoryController.text = picked);
+    }
   }
 
   Future<void> _save(AppLocalizations l10n) async {

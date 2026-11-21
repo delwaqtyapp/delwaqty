@@ -254,6 +254,14 @@ class _MerchantDashboardPageState extends ConsumerState<MerchantDashboardPage> {
     );
   }
 
+  bool _isPharmacyWorkspace() {
+    final profilesState = ref.read(providerProfilesProvider).value;
+    final cat = profilesState != null && profilesState.activeCategory.isNotEmpty
+        ? profilesState.activeCategory
+        : '';
+    return cat == 'pharmacy';
+  }
+
   String _categoryLabel(AppLocalizations l10n, String category) {
     switch (category) {
       case 'restaurant':
@@ -428,7 +436,7 @@ class _MerchantDashboardPageState extends ConsumerState<MerchantDashboardPage> {
         },
         child: SingleChildScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
-          padding: const EdgeInsets.fromLTRB(16, 12, 16, 110),
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 132),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -439,8 +447,10 @@ class _MerchantDashboardPageState extends ConsumerState<MerchantDashboardPage> {
                       : l10n.merchantDashboard,
                   logoUrl: storeData?.logoUrl,
                   category: profilesState.activeCategory.isNotEmpty
-                      ? profilesState.activeCategory
-                      : (storeData?.type ?? ''),
+                      ? _categoryLabel(l10n, profilesState.activeCategory)
+                      : ((storeData?.type ?? '').isNotEmpty
+                            ? _categoryLabel(l10n, storeData!.type)
+                            : ''),
                   rating: statsAsync.value?.averageRating ?? 5.0,
                   isOpen: isOpen,
                   toggling: _togglingOpen,
@@ -581,7 +591,7 @@ class _MerchantDashboardPageState extends ConsumerState<MerchantDashboardPage> {
           color: AppColors.brandPurple,
           onTap: () => context.push('/merchant-dashboard/products'),
         ),
-      if (caps.contains(ProviderCapability.catalog))
+      if (caps.contains(ProviderCapability.catalog) && _isPharmacyWorkspace())
         _QuickActionItem(
           title: l10n.drugImportTitle,
           icon: Icons.medication_rounded,

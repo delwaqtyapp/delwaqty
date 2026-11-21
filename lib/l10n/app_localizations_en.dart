@@ -7621,4 +7621,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get drugImportInvalidPrice => 'Enter a valid price';
+
+  @override
+  String get each => 'each';
 }

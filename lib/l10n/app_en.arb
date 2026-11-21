@@ -2530,5 +2530,9 @@
   "drugImportAction": "Stock it",
   "drugImportSuccess": "Added to your products",
   "drugImportFailed": "Import failed",
-  "drugImportInvalidPrice": "Enter a valid price"
+  "drugImportInvalidPrice": "Enter a valid price",
+  "each": "each",
+  "@each": {
+    "description": "Unit-price suffix on a cart line, e.g. '25 EGP each'"
+  }
 }

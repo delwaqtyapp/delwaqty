@@ -2471,5 +2471,9 @@
   "drugImportAction": "أضف للمخزون",
   "drugImportSuccess": "تمت الإضافة إلى منتجاتك",
   "drugImportFailed": "فشل الاستيراد",
-  "drugImportInvalidPrice": "أدخل سعرًا صحيحًا"
+  "drugImportInvalidPrice": "أدخل سعرًا صحيحًا",
+  "each": "للقطعة",
+  "@each": {
+    "description": "Unit-price suffix on a cart line, e.g. '25 EGP each'"
+  }
 }

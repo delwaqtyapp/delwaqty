@@ -149,7 +149,7 @@ class CartPage extends ConsumerWidget {
                                 ],
                                 const SizedBox(height: 4),
                                 Text(
-                                  '${item.unitPrice.toStringAsFixed(0)} ${l10n.egp} / ${l10n.quantity.toLowerCase()}',
+                                  '${item.unitPrice.toStringAsFixed(0)} ${l10n.egp} ${l10n.each}',
                                   style: textTheme.bodySmall?.copyWith(
                                     color: colorScheme.onSurfaceVariant,
                                   ),

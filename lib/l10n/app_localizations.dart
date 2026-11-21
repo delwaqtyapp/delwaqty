@@ -14527,6 +14527,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Enter a valid price'**
   String get drugImportInvalidPrice;
+
+  /// Unit-price suffix on a cart line, e.g. '25 EGP each'
+  ///
+  /// In en, this message translates to:
+  /// **'each'**
+  String get each;
 }
 
 class _AppLocalizationsDelegate

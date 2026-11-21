@@ -1,4 +1,4 @@
--- geo seed chunk 27 (split from 032_egypt_geographic_seed.sql, ADR-057; idempotent)
+-- geo seed chunk 27 (split from 032_egypt_geographic_seed.sql, ADR-057; regions depth-ordered parents-first; idempotent)
 INSERT INTO public.geo_aliases (entity_type, entity_id, alias, lang, is_primary, source) VALUES ('place', 'a101d2c4-f18d-5f65-8870-77a3653c8e82', 'Sphinx', 'ar', TRUE, 'geonames') ON CONFLICT DO NOTHING;
 INSERT INTO public.geo_aliases (entity_type, entity_id, alias, lang, is_primary, source) VALUES ('place', 'a101d2c4-f18d-5f65-8870-77a3653c8e82', 'Great Sphinx of Giza', 'en', FALSE, 'geonames') ON CONFLICT DO NOTHING;
 INSERT INTO public.geo_aliases (entity_type, entity_id, alias, lang, is_primary, source) VALUES ('place', '94eda4c0-511e-5bea-9c8e-063353741554', 'Step Pyramid of Zoser', 'ar', TRUE, 'geonames') ON CONFLICT DO NOTHING;

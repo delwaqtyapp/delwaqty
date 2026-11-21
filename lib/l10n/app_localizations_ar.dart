@@ -871,7 +871,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get loginWithPhone => 'المتابعة برقم الهاتف';
 
   @override
-  String get orContinueWith => 'أو تابع بـ';
+  String get orContinueWith => 'أو تابع عبر';
 
   @override
   String get agreementPrefix => 'بالمتابعة، أنت توافق على ';

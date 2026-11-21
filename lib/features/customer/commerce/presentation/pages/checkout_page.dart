@@ -32,6 +32,11 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
   @override
   void initState() {
     super.initState();
+    // A snackbar queued on an earlier page (e.g. add-to-cart) must never
+    // overlay Place Order; drop it as checkout opens.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) ScaffoldMessenger.of(context).hideCurrentSnackBar();
+    });
     final loc = ref.read(userLocationProvider).value;
     if (loc != null && loc.detailedAddress.isNotEmpty) {
       _addressController.text = loc.detailedAddress;

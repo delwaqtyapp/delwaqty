@@ -1,4 +1,4 @@
--- geo seed chunk 24 (split from 032_egypt_geographic_seed.sql, ADR-057; idempotent)
+-- geo seed chunk 24 (split from 032_egypt_geographic_seed.sql, ADR-057; regions depth-ordered parents-first; idempotent)
 INSERT INTO public.geo_aliases (entity_type, entity_id, alias, lang, is_primary, source) VALUES ('region', 'af9276b4-6f57-57ed-a4a1-acbbda25f816', 'كفرالفرايحة', 'ar', TRUE, 'cod-ab') ON CONFLICT DO NOTHING;
 INSERT INTO public.geo_aliases (entity_type, entity_id, alias, lang, is_primary, source) VALUES ('region', '51a45ebb-57e2-58e2-b34c-7ef16816c95c', 'كفرالفرعونية', 'ar', TRUE, 'cod-ab') ON CONFLICT DO NOTHING;
 INSERT INTO public.geo_aliases (entity_type, entity_id, alias, lang, is_primary, source) VALUES ('region', '5ba20396-c293-5f3a-a57a-7b797239a6a0', 'كفرالفقهاء', 'ar', TRUE, 'cod-ab') ON CONFLICT DO NOTHING;

@@ -21,6 +21,13 @@ class CartPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // A snackbar queued on an earlier page (e.g. add-to-cart) must never
+    // overlay the checkout button; drop it as the cart opens.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).hideCurrentSnackBar();
+      }
+    });
     final l10n = AppLocalizations.of(context);
     final colorScheme = context.colorScheme;
     final textTheme = context.textTheme;

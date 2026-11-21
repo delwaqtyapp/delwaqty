@@ -45,7 +45,9 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
       return _buildGuestProfile(context, l10n);
     }
 
-    final isProvider = ref.watch(appFlavorProvider) == AppFlavor.provider;
+    final flavor = ref.watch(appFlavorProvider);
+    final isProvider = flavor == AppFlavor.provider;
+    final isDriver = flavor == AppFlavor.driver;
 
     return Scaffold(
       body: GradientBackground(
@@ -65,7 +67,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
               sliver: SliverList(
                 delegate: SliverChildListDelegate([
                   AnimatedFadeIn(
-                    child: _buildBentoQuickActions(context, isProvider, l10n),
+                    child: _buildBentoQuickActions(context, isProvider, isDriver, l10n),
                   ),
                   const SizedBox(height: 18),
                   AnimatedFadeIn(
@@ -424,9 +426,31 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
   Widget _buildBentoQuickActions(
     BuildContext context,
     bool isProvider,
+    bool isDriver,
     AppLocalizations l10n,
   ) {
-    final items = isProvider
+    final items = isDriver
+        ? [
+            _BentoActionItem(
+              icon: Icons.account_balance_wallet_rounded,
+              label: l10n.financialCenter,
+              accent: AppColors.brandPurple,
+              onTap: () => context.push('/driver/financial-center'),
+            ),
+            _BentoActionItem(
+              icon: Icons.payments_rounded,
+              label: l10n.earnings,
+              accent: AppColors.brandGold,
+              onTap: () => context.push('/driver/earnings'),
+            ),
+            _BentoActionItem(
+              icon: Icons.two_wheeler_rounded,
+              label: l10n.vehicleManagement,
+              accent: AppColors.brandViolet,
+              onTap: () => context.push('/driver/vehicles'),
+            ),
+          ]
+        : isProvider
         ? [
             _BentoActionItem(
               icon: Icons.account_balance_wallet_rounded,

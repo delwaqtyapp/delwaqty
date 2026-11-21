@@ -24,6 +24,7 @@ enum AppErrorKind {
   notFound,
   conflict,
   server,
+  location,
   unknown,
 }
 
@@ -85,6 +86,13 @@ AppErrorKind classifyAppError(Object? error) {
   if (lowered.contains('jwt') || lowered.contains('not authenticated')) {
     return AppErrorKind.unauthenticated;
   }
+  // Driver location States (DriverPositionSource) must be recognised before
+  // the generic 'permission' substring below routes them to forbidden.
+  if (lowered.contains('location_permission_required') ||
+      lowered.contains('location_unavailable') ||
+      lowered.contains('stale_location')) {
+    return AppErrorKind.location;
+  }
   if (lowered.contains('row-level security') ||
       lowered.contains('permission')) {
     return AppErrorKind.forbidden;
@@ -120,6 +128,8 @@ String appErrorMessage(AppLocalizations l10n, Object? error) {
       return l10n.errorConflict;
     case AppErrorKind.server:
       return l10n.errorServerIssue;
+    case AppErrorKind.location:
+      return l10n.locationPermissionRequired;
     case AppErrorKind.unknown:
       return l10n.somethingWentWrong;
   }

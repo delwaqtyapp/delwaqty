@@ -5816,6 +5816,18 @@ abstract class AppLocalizations {
   /// **'Could not get your location'**
   String get locationError;
 
+  /// No description provided for @locationPermissionRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Location permission is needed to go online and receive deliveries'**
+  String get locationPermissionRequired;
+
+  /// No description provided for @openSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Open settings'**
+  String get openSettings;
+
   /// No description provided for @accuracyInsufficient.
   ///
   /// In en, this message translates to:

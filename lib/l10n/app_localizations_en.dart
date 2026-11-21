@@ -3003,6 +3003,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get locationError => 'Could not get your location';
 
   @override
+  String get locationPermissionRequired =>
+      'Location permission is needed to go online and receive deliveries';
+
+  @override
+  String get openSettings => 'Open settings';
+
+  @override
   String get accuracyInsufficient =>
       'Current accuracy is insufficient (1 m required). Move near a window or go to an open area and try again.';
 

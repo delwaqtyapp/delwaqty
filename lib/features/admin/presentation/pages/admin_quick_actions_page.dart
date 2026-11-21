@@ -311,67 +311,65 @@ class _AdminQuickActionsPageState extends ConsumerState<AdminQuickActionsPage> {
                           ),
                         ),
                         const SizedBox(height: 10),
-                        LayoutBuilder(
-                          builder: (context, constraints) {
-                            final crossAxisCount = constraints.maxWidth > 600
-                                ? 4
-                                : 3;
-                            return GridView.builder(
-                              gridDelegate:
-                                  SliverGridDelegateWithFixedCrossAxisCount(
-                                    crossAxisCount: crossAxisCount,
-                                    mainAxisSpacing: 8,
-                                    crossAxisSpacing: 8,
+                        PremiumCard(
+                          padding: EdgeInsets.zero,
+                          child: Column(
+                            children: [
+                              for (
+                                var index = 0;
+                                index < filtered[g].$4.length;
+                                index++
+                              ) ...[
+                                if (index > 0)
+                                  Divider(
+                                    height: 1,
+                                    indent: 60,
+                                    endIndent: 12,
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .outlineVariant
+                                        .withValues(alpha: 0.5),
                                   ),
-                              shrinkWrap: true,
-                              physics: const NeverScrollableScrollPhysics(),
-                              itemCount: filtered[g].$4.length,
-                              itemBuilder: (context, index) {
-                                final action = filtered[g].$4[index];
-                                return GestureDetector(
-                                  onTap: () => context.push(action.route),
-                                  child: PremiumCard(
+                                ListTile(
+                                  onTap: () =>
+                                      context.push(filtered[g].$4[index].route),
+                                  dense: true,
+                                  visualDensity: VisualDensity.compact,
+                                  contentPadding:
+                                      const EdgeInsets.symmetric(
+                                        horizontal: 12,
+                                        vertical: 2,
+                                      ),
+                                  leading: Container(
                                     padding: const EdgeInsets.all(8),
-                                    child: Column(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      children: [
-                                        Container(
-                                          padding: const EdgeInsets.all(10),
-                                          decoration: BoxDecoration(
-                                            color: action.color.withValues(
-                                              alpha: 0.15,
-                                            ),
-                                            borderRadius: BorderRadius.circular(
-                                              14,
-                                            ),
-                                          ),
-                                          child: Icon(
-                                            action.icon,
-                                            color: action.color,
-                                            size: 22,
-                                          ),
-                                        ),
-                                        const SizedBox(height: 6),
-                                        Text(
-                                          action.label,
-                                          style: Theme.of(context)
-                                              .textTheme
-                                              .labelSmall
-                                              ?.copyWith(
-                                                fontWeight: FontWeight.w600,
-                                              ),
-                                          textAlign: TextAlign.center,
-                                          maxLines: 2,
-                                          overflow: TextOverflow.ellipsis,
-                                        ),
-                                      ],
+                                    decoration: BoxDecoration(
+                                      color: filtered[g].$4[index].color
+                                          .withValues(alpha: 0.12),
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                    child: Icon(
+                                      filtered[g].$4[index].icon,
+                                      color: filtered[g].$4[index].color,
+                                      size: 20,
                                     ),
                                   ),
-                                );
-                              },
-                            );
-                          },
+                                  title: Text(
+                                    filtered[g].$4[index].label,
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .bodyMedium
+                                        ?.copyWith(fontWeight: FontWeight.w600),
+                                  ),
+                                  trailing: Icon(
+                                    Icons.chevron_right_rounded,
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.onSurfaceVariant,
+                                  ),
+                                ),
+                              ],
+                            ],
+                          ),
                         ),
                       ],
                     ],

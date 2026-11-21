@@ -402,7 +402,7 @@ class _OrderCard extends StatelessWidget {
                     ),
                     decoration: BoxDecoration(
                       color: statusColor.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(8),
+                      borderRadius: AppSpacing.borderRadiusMd,
                     ),
                     child: Text(
                       statusLabel,
@@ -602,7 +602,9 @@ class _ActionButton extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
           minimumSize: Size.zero,
           tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+          shape: const RoundedRectangleBorder(
+            borderRadius: AppSpacing.borderRadiusMd,
+          ),
         ),
         child: Text(label, style: textStyle),
       );
@@ -616,7 +618,9 @@ class _ActionButton extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         minimumSize: Size.zero,
         tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        shape: const RoundedRectangleBorder(
+          borderRadius: AppSpacing.borderRadiusMd,
+        ),
       ),
       child: Text(label, style: textStyle.copyWith(color: Colors.white)),
     );
@@ -666,7 +670,7 @@ class _ElapsedPillState extends State<_ElapsedPill> {
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: AppSpacing.borderRadiusMd,
       ),
       child: Text(
         age.inHours >= 1

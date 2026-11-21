@@ -627,8 +627,7 @@ class _DeliveryOfferSheetState extends State<_DeliveryOfferSheet>
                 Expanded(
                   child: Text(
                     fareText,
-                    style: AppTextStyles.price.copyWith(
-                      fontSize: 32,
+                    style: AppTextStyles.priceHero.copyWith(
                       color: cs.onSurface,
                     ),
                   ),

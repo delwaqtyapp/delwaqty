@@ -159,6 +159,15 @@ abstract final class AppTextStyles {
     fontFeatures: [FontFeature.tabularFigures()],
   );
 
+  /// Hero money figure (driver offer sheet, dashboard hero) — 32sp.
+  static const TextStyle priceHero = TextStyle(
+    fontSize: 32,
+    fontWeight: FontWeight.w800,
+    letterSpacing: 0,
+    height: 1.3,
+    fontFeatures: [FontFeature.tabularFigures()],
+  );
+
   // ---------------------------------------------------------------------------
   // Helpers
   // ---------------------------------------------------------------------------

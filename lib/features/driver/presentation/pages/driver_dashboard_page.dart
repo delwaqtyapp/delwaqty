@@ -14,6 +14,7 @@ import 'package:delwaqty/shared/widgets/floating_glass_buttons.dart';
 import 'package:delwaqty/shared/widgets/shimmer_loading.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 import 'package:delwaqty/core/errors/app_error_text.dart';
+import 'package:delwaqty/core/theme/app_spacing.dart';
 import 'package:delwaqty/core/theme/app_text_styles.dart';
 import 'package:delwaqty/features/customer/driver/presentation/providers/dispatch_providers.dart';
 import 'package:delwaqty/core/auth/platform_capabilities.dart';
@@ -359,7 +360,7 @@ class _OnlineHeader extends ConsumerWidget {
             theme.colorScheme.primary.withValues(alpha: 0.8),
           ],
         ),
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: AppSpacing.borderRadiusXl,
       ),
       child: Row(
         children: [
@@ -418,7 +419,7 @@ class _TodayEarningsHero extends StatelessWidget {
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: AppSpacing.borderRadiusXl,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -435,8 +436,7 @@ class _TodayEarningsHero extends StatelessWidget {
               performance.todayEarnings.toStringAsFixed(2),
               l10n.currencySymbol,
             ),
-            style: AppTextStyles.price.copyWith(
-              fontSize: 32,
+            style: AppTextStyles.priceHero.copyWith(
               color: theme.colorScheme.onSurface,
             ),
           ),
@@ -458,7 +458,7 @@ class _EarningsOverviewCard extends StatelessWidget {
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: AppSpacing.borderRadiusXl,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -566,7 +566,7 @@ class _PerformanceGrid extends StatelessWidget {
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: AppSpacing.borderRadiusXl,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

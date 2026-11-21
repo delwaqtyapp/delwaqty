@@ -467,3 +467,14 @@ Code-level only (no Flutter SDK in sandbox); every item needs an Antigravity reb
 6. Admin quick-access page: 3-4col cube grid replaced with grouped list rows (icon chip + label + chevron); search retained. Also fixed dead '/welcome' in admin app (registered WelcomeModule). (bd9da42)
 7. Dedupe: privacy/terms links removed from privacy hub (kept once in profile Support & Legal). (bd9da42)
 8. Verification card: registration DOES upload docs (id/license/trade/photo) at signup; admin fetch only surfaced ID+photo. Added VerificationDocuments + repo/service/provider + _VerificationDocsSection on admin verification page (thumbs of all docs, openable; red no-docs warning). Reject-with-reason already existed (p_reason). (5cd21b2)
+
+## Launch checklist (owner decisions 2026-11-21 PM)
+
+- [ ] Test data STAYS during testing (owner decision: Bughunt accounts and all test data remain for now).
+- [ ] DAY BEFORE STORE UPLOAD: full test-data cleanup pass — remove Bughunt test accounts (bughunt.customer/merchant/driver), test orders, wallets, transactions, notifications and any other seeded rows from production; verify admin/driver/customer apps show clean state. Only then proceed to store release.
+- [ ] Store upload / release after cleanup is verified.
+
+## Open policy confirmations (asked 2:50 PM, answer pending — DO NOT change until confirmed)
+
+- 184 cancel cutoff: implemented = self-cancel blocked only at 'delivering' (migration line 53). His first line said cancellation closes at DRIVER ACCEPTANCE. If confirmed: extend the status guard to driver-accepted/preparing states.
+- 184 refusal suspension: implemented = warn at refusals 1-2, suspend at 3rd (`v_count >= 3`, line 372). If he means 2nd: change to `>= 2` and adjust warning copy.

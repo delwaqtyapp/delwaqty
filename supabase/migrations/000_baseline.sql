@@ -21,6 +21,19 @@ CREATE TYPE public.delivery_vehicle_type AS ENUM ('motorbike', 'bicycle', 'van',
 -- sequences
 CREATE SEQUENCE IF NOT EXISTS public.chat_reference_seq;
 
+-- early: column-default dependency for chat_rooms.reference_number
+CREATE OR REPLACE FUNCTION public.next_chat_reference()
+ RETURNS text
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO 'public', 'pg_temp'
+AS $function$
+BEGIN
+  RETURN 'DWQ-' || nextval('public.chat_reference_seq')::text;
+END;
+$function$
+;
+
 -- tables
 CREATE TABLE public.activity_logs (id uuid DEFAULT gen_random_uuid() NOT NULL, user_id text NOT NULL, action text NOT NULL, resource text NOT NULL, resource_id text, details jsonb, ip_address text, user_agent text, "timestamp" timestamp with time zone DEFAULT now());
 CREATE TABLE public.activity_logs_archive (id uuid NOT NULL, user_id text NOT NULL, action text NOT NULL, resource text NOT NULL, resource_id text, details jsonb, ip_address text, user_agent text, "timestamp" timestamp with time zone, archived_at timestamp with time zone DEFAULT now());
@@ -13121,17 +13134,6 @@ BEGIN
     'product_id', v_product_id::text,
     'merchant_id', p_merchant_id::text
   );
-END;
-$function$
-;
-CREATE OR REPLACE FUNCTION public.next_chat_reference()
- RETURNS text
- LANGUAGE plpgsql
- SECURITY DEFINER
- SET search_path TO 'public', 'pg_temp'
-AS $function$
-BEGIN
-  RETURN 'DWQ-' || nextval('public.chat_reference_seq')::text;
 END;
 $function$
 ;

@@ -357,4 +357,109 @@ void main() {
       expect(ar['egp'], 'ج.م');
     });
   });
+
+  group('order dispatch lifecycle (migration 217)', () {
+    // Sim lab full-order smoke test: three defects that broke the
+    // create -> dispatch -> accept lifecycle for app-created orders.
+    // Assertions run against the LATEST migration file defining each
+    // function (later migrations supersede earlier definitions).
+    String latestDefining(String marker) {
+      // Application order is numeric by migration prefix, not file path:
+      // migrations_archive/ holds 001-214, migrations/ holds 000 + 215+.
+      int numOf(File f) => int.parse(f.path.split('/').last.split('_').first);
+      final hits =
+          migrationFiles
+              .where((f) => f.readAsStringSync().contains(marker))
+              .toList()
+            ..sort((a, b) => numOf(a).compareTo(numOf(b)));
+      expect(hits, isNotEmpty, reason: '$marker not found in migrations');
+      return hits.last.readAsStringSync();
+    }
+
+    test('create_order_idempotent accepts and stores delivery coordinates', () {
+      expect(sql, contains('p_delivery_latitude numeric DEFAULT NULL'));
+      final latest = latestDefining('FUNCTION public.create_order_idempotent');
+      expect(latest, contains('delivery_latitude'));
+      expect(latest, contains('p_delivery_longitude'));
+    });
+
+    test('accept_order ride propagation never filters on ride_type', () {
+      // rides.ride_type is a vehicle class per rides_ride_type_check, so
+      // ride_type = 'delivery' can never match and silently updated 0 rows.
+      final latest = latestDefining(
+        'FUNCTION public.accept_order(p_order_id uuid, p_driver_id uuid)',
+      );
+      expect(latest, isNot(contains("ride_type = 'delivery'")));
+      expect(latest, contains("AND status = 'searching'"));
+    });
+
+    test('accept_ride_request writes the enum-checked vehicle category', () {
+      // veh.make || ' ' || veh.model violates
+      // rides_delivery_vehicle_type_check (23514) whenever set.
+      final latest = latestDefining('FUNCTION public.accept_ride_request');
+      expect(latest, isNot(contains("veh.make || ' ' || veh.model")));
+      expect(latest, contains('COALESCE(veh.category, drv.vehicle_type)'));
+    });
+
+    test('the canonical ride path expires parallel dispatch offers', () {
+      final latest = latestDefining(
+        'FUNCTION public.sync_linked_delivery_order',
+      );
+      expect(latest, contains("status='expired'"));
+    });
+  });
+
+  group('rpc grant lockdown (migration 218)', () {
+    // Security reviewer C4/C5: client-callable SECURITY DEFINER money and
+    // pricing functions. The app calls none of them; they must be revoked
+    // from public/anon/authenticated after every migration apply.
+    test('client-exploitable RPCs are revoked in the lockdown migration', () {
+      final lockdown = migrationFiles
+          .where((f) => f.path.contains('218_rpc_grant_lockdown'))
+          .single
+          .readAsStringSync();
+      for (final fn in [
+        'wallet_topup',
+        'wallet_refund',
+        'apply_coupon',
+        'run_member_engines',
+        'log_admin_action',
+        'write_audit',
+        'create_order_idempotent',
+      ]) {
+        expect(lockdown, contains("'$fn'"), reason: '$fn missing from sweep');
+      }
+      expect(
+        lockdown,
+        contains(
+          'REVOKE EXECUTE ON FUNCTION %s FROM public, anon, authenticated',
+        ),
+      );
+      // And the recurrence guard for functions created later.
+      expect(lockdown, contains('ALTER DEFAULT PRIVILEGES FOR ROLE postgres'));
+    });
+
+    test('the app never calls the revoked RPCs', () {
+      final libFiles = Directory('lib')
+          .listSync(recursive: true)
+          .whereType<File>()
+          .where((f) => f.path.endsWith('.dart'));
+      for (final fn in [
+        "'wallet_topup'",
+        "'wallet_refund'",
+        "'apply_coupon'",
+        "'run_member_engines'",
+        "'create_order_idempotent'",
+      ]) {
+        for (final f in libFiles) {
+          expect(
+            f.readAsStringSync().contains('.rpc(\n        $fn,') ||
+                f.readAsStringSync().contains("rpc($fn"),
+            isFalse,
+            reason: '${f.path} still calls $fn',
+          );
+        }
+      }
+    });
+  });
 }

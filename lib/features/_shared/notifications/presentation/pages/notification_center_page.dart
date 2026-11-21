@@ -72,6 +72,46 @@ class _NotificationCenterPageState
     await _loadMore();
   }
 
+  void _showNotificationDetails(AppNotification notification) {
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      showDragHandle: true,
+      builder: (sheetContext) {
+        final theme = Theme.of(sheetContext);
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  notification.title,
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  notification.body,
+                  style: theme.textTheme.bodyMedium,
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  notification.createdAt.toLocal().toString().substring(0, 16),
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   void _invalidateNotificationProviders() {
     ref.invalidate(unreadCountProvider);
     ref.invalidate(unreadCountStreamProvider);
@@ -232,7 +272,12 @@ class _NotificationCenterPageState
                                 .matches;
                             if (matches.isNotEmpty) {
                               unawaited(context.push(route));
+                            } else {
+                              _showNotificationDetails(notification);
                             }
+                          } else {
+                            // No deep link: tapping still opens the content.
+                            _showNotificationDetails(notification);
                           }
                         }
                       },

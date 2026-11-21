@@ -131,18 +131,28 @@ async function handleRequest(req: Request): Promise<Response> {
 
   const { data: notification, error: notifError } = await supabase
     .from("notifications")
-    .select("id, user_id, title, body, type, deep_link, data")
+    .select("id, user_id, title, body, type, deep_link, data, audience")
     .eq("id", notificationId)
     .single();
   if (notifError || !notification || !notification.user_id) {
     return json({ ok: false, error: "notification_not_found" }, 404);
   }
 
-  const { data: tokens } = await supabase
+  // Audience targeting: an app-scoped notification only reaches tokens
+  // registered by that app flavor. Untagged (pre-migration) tokens keep
+  // receiving everything until the app re-registers with its flavor.
+  const audience: string = typeof notification.audience === "string" && notification.audience.length > 0
+    ? notification.audience
+    : "all";
+  let tokensQuery = supabase
     .from("notification_tokens")
-    .select("token, device_id")
+    .select("token, device_id, app")
     .eq("user_id", notification.user_id)
     .eq("is_active", true);
+  if (audience !== "all") {
+    tokensQuery = tokensQuery.or(`app.is.null,app.eq.${audience}`);
+  }
+  const { data: tokens } = await tokensQuery;
 
   if (!tokens || tokens.length === 0) {
     await markStatus(supabase, notificationId, "failed", "no_active_tokens");
@@ -172,6 +182,7 @@ async function handleRequest(req: Request): Promise<Response> {
   const payloadData: Record<string, string> = {
     type: notifType,
     notification_id: notificationId,
+    audience,
   };
   if (deepLink) payloadData.deep_link = deepLink;
 

@@ -130,7 +130,7 @@ class SupabaseNotificationDataSource {
     try {
       final rows = await _client
           .from('notifications')
-          .select('id, type, deep_link, data')
+          .select('id, type, deep_link, data, audience')
           .eq('user_id', userId)
           .eq('is_read', false);
 
@@ -161,7 +161,7 @@ class SupabaseNotificationDataSource {
 
     final rows = await _client
         .from('notifications')
-        .select('id, type, deep_link, data')
+        .select('id, type, deep_link, data, audience')
         .eq('user_id', userId)
         .eq('is_read', false);
 
@@ -195,7 +195,7 @@ class SupabaseNotificationDataSource {
 
     final rows = await _client
         .from('notifications')
-        .select('id, type, deep_link, data')
+        .select('id, type, deep_link, data, audience')
         .eq('user_id', userId);
 
     final matchingIds = (rows as List)

@@ -213,7 +213,12 @@ class SupabaseOrderDataSource {
           'p_merchant_id': merchantId,
           'p_items': items
               .map(
-                (ci) => {'product_id': ci.productId, 'quantity': ci.quantity},
+                (ci) => {
+                  'product_id': ci.productId,
+                  'quantity': ci.quantity,
+                  if (ci.modifierOptionIds.isNotEmpty)
+                    'modifier_option_ids': ci.modifierOptionIds,
+                },
               )
               .toList(),
           'p_delivery_address': deliveryAddress,

@@ -456,6 +456,9 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage> {
                               unitPrice: unitPrice + modifierTotal,
                               totalPrice: totalPrice,
                               specialInstructions: specialInstructions,
+                              // Server re-prices these (migration 226);
+                              // the client prices are display-only.
+                              modifierOptionIds: _selectedModifierIds.toList(),
                             ),
                           );
                           if (context.mounted) {

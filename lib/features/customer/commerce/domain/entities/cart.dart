@@ -33,6 +33,7 @@ abstract class CartItem with _$CartItem {
     required double unitPrice,
     double? totalPrice,
     String? specialInstructions,
+    @Default([]) List<String> modifierOptionIds,
   }) = _CartItem;
 
   factory CartItem.fromJson(Map<String, dynamic> json) =>

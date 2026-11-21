@@ -440,6 +440,26 @@ void main() {
     });
   });
 
+  group('modifier pricing (migration 226)', () {
+    // MEDIUM-3: modifier price adjustments must be priced server-side from
+    // product_modifier_options, never from client-supplied amounts.
+    test('create_order prices modifiers from the catalog', () {
+      final latest = latestDefining221('FUNCTION public.create_order(');
+      expect(latest, contains('product_modifier_options'));
+      expect(latest, contains('price_adjustment'));
+      expect(latest, contains('INVALID_MODIFIER'));
+      expect(latest, contains('modifier_option_ids'));
+    });
+
+    test('create_order_idempotent forwards modifier selections', () {
+      final latest = latestDefining221(
+        'FUNCTION public.create_order_idempotent',
+      );
+      expect(latest, contains('modifier_option_ids'));
+      expect(latest, isNot(contains('p_subtotal,')));
+    });
+  });
+
   group('rpc grant lockdown (migration 218)', () {
     // Security reviewer C4/C5: client-callable SECURITY DEFINER money and
     // pricing functions. The app calls none of them; they must be revoked

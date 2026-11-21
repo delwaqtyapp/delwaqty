@@ -29,26 +29,37 @@ abstract final class AppConfig {
 
   // ─── Supabase ──────────────────────────────────────────────
 
-  static const String supabaseUrl = String.fromEnvironment('SUPABASE_URL');
+  static const String supabaseUrl = String.fromEnvironment(
+    'SUPABASE_URL',
+    // Publishable client config: shipped in every APK/web bundle by design.
+    defaultValue: 'https://bttnlkmwhorjamzemwda.supabase.co',
+  );
 
   static const String supabaseAnonKey = String.fromEnvironment(
     'SUPABASE_ANON_KEY',
+    defaultValue: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ0dG5sa213aG9yamFtemVtd2RhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQxODc4MzgsImV4cCI6MjA5OTc2MzgzOH0.IsksTaJz-k9Gbc-6f7Is6HxWd0wOZRhSGpYI00gYkH4',
   );
 
   // ─── Firebase ──────────────────────────────────────────────
 
   static const String firebaseProjectId = String.fromEnvironment(
     'FIREBASE_PROJECT_ID',
+    defaultValue: 'delwaqty0',
   );
 
   static const String firebaseApiKey = String.fromEnvironment(
     'FIREBASE_API_KEY',
+    defaultValue: 'AIzaSyBsBH-EQilAypJ2LGVyOK40UpqGWfjHt1A',
   );
 
-  static const String firebaseAppId = String.fromEnvironment('FIREBASE_APP_ID');
+  static const String firebaseAppId = String.fromEnvironment(
+    'FIREBASE_APP_ID',
+    defaultValue: '1:772052634679:android:17267a5736408b918b43b2',
+  );
 
   static const String firebaseMessagingSenderId = String.fromEnvironment(
     'FIREBASE_MESSAGING_SENDER_ID',
+    defaultValue: '772052634679',
   );
 
   static const String firebaseStorageBucket = String.fromEnvironment(

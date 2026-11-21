@@ -142,7 +142,7 @@ class CartPage extends ConsumerWidget {
                                 ],
                                 const SizedBox(height: 4),
                                 Text(
-                                  '${item.unitPrice.toStringAsFixed(0)} ${l10n.sar} / ${l10n.quantity.toLowerCase()}',
+                                  '${item.unitPrice.toStringAsFixed(0)} ${l10n.egp} / ${l10n.quantity.toLowerCase()}',
                                   style: textTheme.bodySmall?.copyWith(
                                     color: colorScheme.onSurfaceVariant,
                                   ),
@@ -220,25 +220,25 @@ class CartPage extends ConsumerWidget {
                       _SummaryRow(
                         label: l10n.subtotal,
                         value:
-                            '${cart.subtotal.toStringAsFixed(0)} ${l10n.sar}',
+                            '${cart.subtotal.toStringAsFixed(0)} ${l10n.egp}',
                       ),
                       if (cart.deliveryFee > 0)
                         _SummaryRow(
                           label: l10n.deliveryFee,
                           value:
-                              '${cart.deliveryFee.toStringAsFixed(0)} ${l10n.sar}',
+                              '${cart.deliveryFee.toStringAsFixed(0)} ${l10n.egp}',
                         ),
                       if (cart.discount > 0)
                         _SummaryRow(
                           label: l10n.discount,
                           value:
-                              '-${cart.discount.toStringAsFixed(0)} ${l10n.sar}',
+                              '-${cart.discount.toStringAsFixed(0)} ${l10n.egp}',
                           color: colorScheme.primary,
                         ),
                       Divider(color: colorScheme.outlineVariant),
                       _SummaryRow(
                         label: l10n.total,
-                        value: '${cart.total.toStringAsFixed(0)} ${l10n.sar}',
+                        value: '${cart.total.toStringAsFixed(0)} ${l10n.egp}',
                         isBold: true,
                       ),
                       const SizedBox(height: 12),

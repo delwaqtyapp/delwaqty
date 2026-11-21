@@ -594,6 +594,7 @@ class _ProductDetailBottomSheetState
                         action: SnackBarAction(
                           label: l10n.viewCart,
                           onPressed: () {
+                            messenger.hideCurrentSnackBar();
                             router.push('/market/cart');
                           },
                         ),

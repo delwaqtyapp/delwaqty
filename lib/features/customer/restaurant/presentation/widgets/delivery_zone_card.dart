@@ -104,7 +104,7 @@ class DeliveryZoneCard extends ConsumerWidget {
                         Text(
                           zone.deliveryFee == 0
                               ? l10n.freeDelivery
-                              : '${zone.deliveryFee.toStringAsFixed(0)} ${l10n.sar}',
+                              : '${zone.deliveryFee.toStringAsFixed(0)} ${l10n.egp}',
                           style: theme.textTheme.labelMedium?.copyWith(
                             color: zone.deliveryFee == 0
                                 ? AppColors.successLight

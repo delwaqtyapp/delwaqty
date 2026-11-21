@@ -440,7 +440,7 @@ class _OrderDetailsCard extends StatelessWidget {
                         ),
                       ),
                       Text(
-                        '${item.totalPrice.toStringAsFixed(2)} ${l10n.sar}',
+                        '${item.totalPrice.toStringAsFixed(2)} ${l10n.egp}',
                         style: textTheme.bodyMedium?.copyWith(
                           fontWeight: FontWeight.w500,
                         ),
@@ -452,27 +452,27 @@ class _OrderDetailsCard extends StatelessWidget {
               const Divider(height: 32),
               _PriceRow(
                 label: l10n.subtotal,
-                value: '${order.subtotal.toStringAsFixed(2)} ${l10n.sar}',
+                value: '${order.subtotal.toStringAsFixed(2)} ${l10n.egp}',
                 textTheme: textTheme,
               ),
               const SizedBox(height: 8),
               _PriceRow(
                 label: l10n.deliveryFee,
-                value: '${order.deliveryFee.toStringAsFixed(2)} ${l10n.sar}',
+                value: '${order.deliveryFee.toStringAsFixed(2)} ${l10n.egp}',
                 textTheme: textTheme,
               ),
               if (order.discount > 0) ...[
                 const SizedBox(height: 8),
                 _PriceRow(
                   label: l10n.discount,
-                  value: '-${order.discount.toStringAsFixed(2)} ${l10n.sar}',
+                  value: '-${order.discount.toStringAsFixed(2)} ${l10n.egp}',
                   textTheme: textTheme,
                 ),
               ],
               const Divider(height: 24),
               _PriceRow(
                 label: l10n.total,
-                value: '${order.total.toStringAsFixed(2)} ${l10n.sar}',
+                value: '${order.total.toStringAsFixed(2)} ${l10n.egp}',
                 textTheme: textTheme,
                 isBold: true,
               ),

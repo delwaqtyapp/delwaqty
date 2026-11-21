@@ -810,7 +810,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get itemCountOther => 'items';
 
   @override
-  String get sar => 'EGP';
+  String get egp => 'EGP';
 
   @override
   String get searchRestaurants => 'Search restaurants...';

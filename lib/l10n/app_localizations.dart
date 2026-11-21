@@ -1634,11 +1634,11 @@ abstract class AppLocalizations {
   /// **'items'**
   String get itemCountOther;
 
-  /// No description provided for @sar.
+  /// No description provided for @egp.
   ///
   /// In en, this message translates to:
   /// **'EGP'**
-  String get sar;
+  String get egp;
 
   /// No description provided for @searchRestaurants.
   ///

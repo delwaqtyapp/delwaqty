@@ -804,7 +804,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get itemCountOther => 'منتجات';
 
   @override
-  String get sar => 'ج.م';
+  String get egp => 'ج.م';
 
   @override
   String get searchRestaurants => 'ابحث عن مطاعم...';

@@ -462,11 +462,17 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage> {
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
                                 content: Text(
-                                  '${l10n.addToCart} - ${totalPrice.toStringAsFixed(0)} ${l10n.currencySymbol}',
+                                  '${l10n.addedToCart} - ${totalPrice.toStringAsFixed(0)} ${l10n.currencySymbol}',
                                 ),
                                 action: SnackBarAction(
-                                  label: l10n.cart,
-                                  onPressed: () => context.push('/market/cart'),
+                                  label: l10n.viewCart,
+                                  onPressed: () {
+                                    // Dismiss first: this bar must never
+                                    // overlay the cart page's checkout button.
+                                    ScaffoldMessenger.of(context)
+                                        .hideCurrentSnackBar();
+                                    context.push('/market/cart');
+                                  },
                                 ),
                               ),
                             );

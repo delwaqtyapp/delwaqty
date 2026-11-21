@@ -487,7 +487,7 @@ class _ProductListTile extends StatelessWidget {
                         children: [
                           Flexible(
                             child: Text(
-                              '${product.price.toStringAsFixed(0)} ${l10n.sar}',
+                              '${product.price.toStringAsFixed(0)} ${l10n.egp}',
                               style: theme.textTheme.bodyMedium?.copyWith(
                                 fontWeight: FontWeight.bold,
                                 color: theme.colorScheme.primary,
@@ -500,7 +500,7 @@ class _ProductListTile extends StatelessWidget {
                             const SizedBox(width: 8),
                             Flexible(
                               child: Text(
-                                '${product.originalPrice!.toStringAsFixed(0)} ${l10n.sar}',
+                                '${product.originalPrice!.toStringAsFixed(0)} ${l10n.egp}',
                                 style: theme.textTheme.bodySmall?.copyWith(
                                   decoration: TextDecoration.lineThrough,
                                   color: theme.colorScheme.onSurfaceVariant,

@@ -81,7 +81,7 @@ class _OfferCard extends StatelessWidget {
     final isPercentage = offer.discountType == 'percentage';
     final discountText = isPercentage
         ? '${offer.discountValue.toStringAsFixed(0)}% OFF'
-        : '${offer.discountValue.toStringAsFixed(0)} ${l10n.sar} OFF';
+        : '${offer.discountValue.toStringAsFixed(0)} ${l10n.egp} OFF';
 
     final isExpired =
         offer.expiresAt != null && offer.expiresAt!.isBefore(DateTime.now());
@@ -195,7 +195,7 @@ class _OfferCard extends StatelessWidget {
                               child: Text(
                                 l10n.minOrderRequired(
                                   offer.minimumOrder.toStringAsFixed(0),
-                                  l10n.sar,
+                                  l10n.egp,
                                 ),
                                 style: theme.textTheme.bodySmall?.copyWith(
                                   color: theme.colorScheme.onSurfaceVariant,

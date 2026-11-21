@@ -277,7 +277,7 @@
   "orderTimeline": "Order Timeline",
   "itemCount": "{count, plural, =0{No items} =1{1 item} other{{count} items}}",
   "itemCountOther": "items",
-  "sar": "EGP",
+  "egp": "EGP",
   "searchRestaurants": "Search restaurants...",
   "searchProducts": "Search products...",
   "filters": "Filters",

@@ -270,7 +270,7 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
                                   content: Text(
-                                    '${l10n.couponApplied} -${discount.toStringAsFixed(0)} ${l10n.sar}',
+                                    '${l10n.couponApplied} -${discount.toStringAsFixed(0)} ${l10n.egp}',
                                   ),
                                   backgroundColor: colorScheme.primary,
                                 ),
@@ -323,25 +323,25 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
                         _SummaryRow(
                           label: l10n.subtotal,
                           value:
-                              '${cart.subtotal.toStringAsFixed(0)} ${l10n.sar}',
+                              '${cart.subtotal.toStringAsFixed(0)} ${l10n.egp}',
                         ),
                         if (cart.deliveryFee > 0)
                           _SummaryRow(
                             label: l10n.deliveryFee,
                             value:
-                                '${cart.deliveryFee.toStringAsFixed(0)} ${l10n.sar}',
+                                '${cart.deliveryFee.toStringAsFixed(0)} ${l10n.egp}',
                           ),
                         if (cart.discount > 0)
                           _SummaryRow(
                             label: l10n.discount,
                             value:
-                                '-${cart.discount.toStringAsFixed(0)} ${l10n.sar}',
+                                '-${cart.discount.toStringAsFixed(0)} ${l10n.egp}',
                             color: colorScheme.primary,
                           ),
                         Divider(color: colorScheme.outlineVariant),
                         _SummaryRow(
                           label: l10n.total,
-                          value: '${cart.total.toStringAsFixed(0)} ${l10n.sar}',
+                          value: '${cart.total.toStringAsFixed(0)} ${l10n.egp}',
                           isBold: true,
                         ),
                       ],

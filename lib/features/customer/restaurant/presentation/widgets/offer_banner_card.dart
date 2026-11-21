@@ -15,7 +15,7 @@ class OfferBannerCard extends StatelessWidget {
     final isPercentage = offer.discountType == 'percentage';
     final discountText = isPercentage
         ? l10n.percentageOff(offer.discountValue.toStringAsFixed(0))
-        : l10n.fixedOff(offer.discountValue.toStringAsFixed(0), l10n.sar);
+        : l10n.fixedOff(offer.discountValue.toStringAsFixed(0), l10n.egp);
 
     return Container(
       width: 200,
@@ -63,7 +63,7 @@ class OfferBannerCard extends StatelessWidget {
             Text(
               l10n.minOrderRequired(
                 offer.minimumOrder.toStringAsFixed(0),
-                l10n.sar,
+                l10n.egp,
               ),
               style: theme.textTheme.bodySmall?.copyWith(
                 color: theme.colorScheme.onSurfaceVariant,

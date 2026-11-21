@@ -374,8 +374,10 @@ class SupabaseDeliveryDataSource {
   // ── Driver capabilities ──
 
   Future<DriverCapability> getDriverCapabilities(String driverId) async {
+    // 198: the drivers table no longer exposes raw rows to non-parties;
+    // capability/discovery reads go through the safe-column directory view.
     final row = await _client
-        .from('drivers')
+        .from('driver_directory')
         .select(
           'service_types, accepts_deliveries, max_delivery_distance_km, max_weight_kg',
         )

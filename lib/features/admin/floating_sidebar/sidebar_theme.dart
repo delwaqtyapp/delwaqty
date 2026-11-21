@@ -2,6 +2,8 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 
+import 'package:delwaqty/core/theme/app_colors.dart';
+
 class SidebarTheme extends ThemeExtension<SidebarTheme> {
   const SidebarTheme({
     required this.cardGradientTop,
@@ -39,50 +41,45 @@ class SidebarTheme extends ThemeExtension<SidebarTheme> {
   final Color badgeTextColor;
   final Color quickSettingsBackground;
 
-  static const _darkTop = Color(0xFF262637);
-  static const _darkBottom = Color(0xFF171820);
-  static const _lightTop = Color(0xFFF8F9FE);
-  static const _lightBottom = Color(0xFFEEEFF5);
-
-  static const _selectedStart = Color(0xFF6C63FF);
-  static const _selectedEnd = Color(0xFF8B7BFF);
-
-  static const SidebarTheme dark = SidebarTheme(
-    cardGradientTop: _darkTop,
-    cardGradientBottom: _darkBottom,
+  // Derived from AppColors (design batch 4.1): the selected state runs the
+  // brandPurple -> brandViolet gradient; surfaces and text use the shared
+  // tokens so the sidebar follows palette changes automatically.
+  static final SidebarTheme dark = SidebarTheme(
+    cardGradientTop: AppColors.surfaceContainerHighDark,
+    cardGradientBottom: AppColors.surfaceContainerLowDark,
     cardOpacity: 0.96,
-    cardBorderColor: Color(0x14FFFFFF),
-    cardShadowColor: Color(0x33000000),
-    selectedGradientStart: _selectedStart,
-    selectedGradientEnd: _selectedEnd,
-    selectedIndicatorColor: _selectedStart,
-    iconColor: Color(0xFF9E9EB8),
-    textPrimary: Color(0xFFF5F5FA),
-    textSecondary: Color(0xFF8E8EA8),
-    dividerColor: Color(0x1AFFFFFF),
-    sectionTitleColor: Color(0xFF7C7C9A),
-    badgeBackground: Color(0xFF6C63FF),
-    badgeTextColor: Color(0xFFFFFFFF),
-    quickSettingsBackground: Color(0x0DFFFFFF),
+    cardBorderColor: Colors.white.withValues(alpha: 0.08),
+    cardShadowColor: Colors.black.withValues(alpha: 0.2),
+    selectedGradientStart: AppColors.brandPurple,
+    selectedGradientEnd: AppColors.brandViolet,
+    selectedIndicatorColor: AppColors.brandPurple,
+    iconColor: Colors.white.withValues(alpha: 0.62),
+    textPrimary: Colors.white.withValues(alpha: 0.96),
+    textSecondary: Colors.white.withValues(alpha: 0.56),
+    dividerColor: Colors.white.withValues(alpha: 0.1),
+    sectionTitleColor: Colors.white.withValues(alpha: 0.49),
+    badgeBackground: AppColors.brandPurple,
+    badgeTextColor: Colors.white,
+    quickSettingsBackground: Colors.white.withValues(alpha: 0.05),
   );
 
-  static const SidebarTheme light = SidebarTheme(
-    cardGradientTop: _lightTop,
-    cardGradientBottom: _lightBottom,
+  static final SidebarTheme light = SidebarTheme(
+    cardGradientTop: AppColors.brandLavenderSoft,
+    cardGradientBottom: AppColors.brandSoftGray,
     cardOpacity: 0.98,
-    cardBorderColor: Color(0x1A000000),
-    cardShadowColor: Color(0x08000000),
-    selectedGradientStart: _selectedStart,
-    selectedGradientEnd: _selectedEnd,
-    selectedIndicatorColor: _selectedStart,
-    iconColor: Color(0xFF6B7280),
-    textPrimary: Color(0xFF1F2937),
-    textSecondary: Color(0xFF9CA3AF),
-    dividerColor: Color(0x1A000000),
-    sectionTitleColor: Color(0xFF9CA3AF),
-    badgeBackground: Color(0xFF6C63FF),
-    badgeTextColor: Color(0xFFFFFFFF),
-    quickSettingsBackground: Color(0x0D000000),
+    cardBorderColor: Colors.black.withValues(alpha: 0.1),
+    cardShadowColor: Colors.black.withValues(alpha: 0.03),
+    selectedGradientStart: AppColors.brandPurple,
+    selectedGradientEnd: AppColors.brandViolet,
+    selectedIndicatorColor: AppColors.brandPurple,
+    iconColor: AppColors.textMuted,
+    textPrimary: AppColors.textPrimary,
+    textSecondary: AppColors.textMuted,
+    dividerColor: AppColors.borderSubtle,
+    sectionTitleColor: AppColors.textMuted,
+    badgeBackground: AppColors.brandPurple,
+    badgeTextColor: Colors.white,
+    quickSettingsBackground: Colors.black.withValues(alpha: 0.05),
   );
 
   @override

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:delwaqty/shared/widgets/responsive_content.dart';
 import 'package:delwaqty/core/localization/admin_locale_provider.dart';
 import 'package:delwaqty/core/module/feature_module.dart';
 import 'package:delwaqty/core/theme/app_colors.dart';
@@ -433,7 +434,13 @@ class _AdminCanvas extends StatelessWidget {
               ),
             ),
           ),
-          Expanded(child: child),
+          Expanded(
+            child: ResponsiveContent(
+              maxWidth: 1240,
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: child,
+            ),
+          ),
         ],
       ),
     );

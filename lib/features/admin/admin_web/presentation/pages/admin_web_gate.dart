@@ -170,7 +170,7 @@ class _AdminWebLoginPageState extends State<AdminWebLoginPage> {
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24),
           child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 400),
+            constraints: const BoxConstraints(maxWidth: 560),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -274,7 +274,7 @@ class AdminWebDeniedPage extends StatelessWidget {
     return Scaffold(
       body: Center(
         child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 420),
+          constraints: const BoxConstraints(maxWidth: 560),
           child: Padding(
             padding: const EdgeInsets.all(24),
             child: Column(

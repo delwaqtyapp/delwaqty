@@ -201,3 +201,25 @@ Any authenticated user can create an order with arbitrary prices.
   order while the merchant prepares it. No stock restore either (moot, F13).
 - Fix: block customer cancel once accepted (merchant/driver-confirmed cancel),
   notify merchant + driver, unassign driver, clean deliveries.
+
+## F15 — HIGH — Merchant self-PATCH sets own public rating (live-verified)
+
+- merchants guard blocks is_featured + status but NOT rating / total_reviews /
+  total_orders. Live: merchant session PATCHed own row to rating=5.00,
+  total_reviews=999; customer seat correctly blocked by RLS. Reset to 0/0.
+- Fix: extend guard trigger to rating/total_reviews/total_orders; recompute
+  from reviews/orders only.
+
+## Verified clean (order/merchant seats)
+
+- Order status regression: customer/driver/merchant PATCHes all blocked by
+  orders guards; state unchanged.
+- mark_order_paid_by_merchant_order: FORBIDDEN (user seats), permission denied
+  (anon); payment_status unchanged.
+- assign_order_manual: admin-only (forbidden from merchant + driver seats).
+- accept_order: caller must own p_driver_id (cross-driver FORBIDDEN).
+- provider_create_banner_campaign: provider-only, pending_review flow;
+  campaign_cancel admin-only. (PostgREST PGRST202 when DEFAULT params omitted -
+  call-shape quirk, not a bug.)
+- cancel_delivery/cancel_ride_lifecycle: actor derived from auth.uid(), not the
+  client-supplied p_actor_role.

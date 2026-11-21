@@ -460,6 +460,20 @@ void main() {
     });
   });
 
+  group('modifier group rules (migration 229)', () {
+    // Reviewer #20: is_required and max_selections from
+    // product_modifier_groups must be enforced server-side; duplicate
+    // option ids are deduped so one option can never be charged twice.
+    test('create_order enforces group rules and dedupes options', () {
+      final latest = latestDefining221('FUNCTION public.create_order(');
+      expect(latest, contains('REQUIRED_MODIFIER_MISSING'));
+      expect(latest, contains('MODIFIER_MAX_EXCEEDED'));
+      expect(latest, contains('product_modifier_groups'));
+      expect(latest, contains('max_selections'));
+      expect(latest, contains('select distinct value #>>'));
+    });
+  });
+
   group('rpc grant lockdown (migration 218)', () {
     // Security reviewer C4/C5: client-callable SECURITY DEFINER money and
     // pricing functions. The app calls none of them; they must be revoked

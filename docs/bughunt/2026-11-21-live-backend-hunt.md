@@ -569,3 +569,52 @@ Source: owner's 2026-11-21 15:14 voice note (full spec, all 5 items).
 - No lat/lon on regions: "nearest available admin" falls back to region-tree
   distance, not geography.
 - Beyond-allowance driver-delay consequence: still ops-flag-only (no owner pick).
+
+## Notifications root fix (189 + send-push v7 + app patches, 2026-11-21 ~15:40 EET)
+
+Owner report (15:34 voice): push arrives in provider app, tap opens nothing,
+badge never clears, and a customer notification leaked into driver + provider
+apps. Root causes found (all evidence-backed):
+
+1. NO audience concept in the data model: notifications had no audience column;
+   0 of 107 live rows carried any marker. send-push blasted every push to ALL
+   active tokens of the user; notification_tokens had no app/flavor tag, and
+   register_device_token never cleaned other accounts' tokens on the same
+   device+app (stale cross-account push delivery).
+2. ~30% of live rows have no deep_link; in-app tap was a designed no-op
+   (route == fallback -> nothing, no detail view exists). Admin router wired
+   only standalone routes, so /notifications 404'd in the admin app.
+3. Badge: RLS fine (probed); the local-notification tap path returned early
+   when no navigator context existed (cold start) BEFORE marking read, and
+   getInitialMessage navigation was lost entirely.
+
+Fixes:
+- Migration 189: notifications.audience (customer/driver/provider/admin/all)
+  + BEFORE-INSERT trigger deriving audience (explicit data marker -> app-owned
+  deep_link prefix -> unambiguous ops types -> recipient role -> all) with a
+  pure _notification_audience_for function; full backfill (43 customer /
+  42 provider / 13 driver / 9 admin / 0 all). notification_tokens.app column;
+  register_device_token(..., p_app) tags the flavor and deactivates OTHER
+  accounts' tokens for the same device+app (cross-account leak killed);
+  deactivate_device_tokens gains optional p_app scoping.
+  Live probes: order->customer, explicit target_app=admin honored,
+  cross-account same-device+app token deactivated on re-register.
+- send-push edge function v7 (deployed via management API): filters tokens by
+  notification audience (untagged legacy tokens receive everything until
+  re-registration) and includes `audience` in the FCM data payload.
+- App patches (repo; ship with his next build):
+  * Tokens register with the running flavor; logout deactivates app-scoped.
+  * Incoming pushes (foreground, opened-app, realtime local display) are
+    dropped when data.audience doesn't match the running flavor.
+  * Tap marks read FIRST, before any routing attempt (cold-start badge fix).
+  * Cold-start taps: _routeWhenReady polls for a navigator up to 10s instead
+    of dropping the deep link.
+  * Notifications without a deep link open a detail bottom sheet (title,
+    body, time) in both the notification center and the bell menu - no more
+    dead taps.
+  * Admin router registers /notifications.
+  * Notification selects include the audience column so bell counts/lists
+    filter on it (isRowVisibleInContext already honors row.audience).
+
+Residual: existing app installs keep untagged tokens until users open the
+updated build once (re-registration happens on initialize/login).

@@ -143,7 +143,62 @@ Future<void> showChatCallNotification({
   }
 }
 
+
+/// Static accessor for the running app flavor so top-level handlers can gate
+/// audience-targeted pushes without a Ref. Set by PushNotificationService on
+/// initialize; defaults to customer (least privileged).
+AppFlavor _activeFlavor = AppFlavor.customer;
+
+/// Deep link stashed when a push tap arrives before the router is ready
+/// (cold start). The retry loop in [_routeWhenReady] consumes it once a
+/// navigator context exists.
+Map<String, dynamic>? _pendingPushTap;
+
+/// True when an incoming message's audience matches the running flavor.
+/// Untagged legacy messages (no audience) are shown, matching backend behavior
+/// for untagged tokens.
+bool _audienceMatches(Map<String, dynamic> data) {
+  final raw = (data['audience'] ?? '').toString().trim().toLowerCase();
+  if (raw.isEmpty || raw == 'all' || raw == 'broadcast') return true;
+  return raw == _activeFlavor.name;
+}
+
+/// Drops [data] into [_pendingPushTap] and polls until a navigator context is
+/// available (cold start), then routes. Always safe to call.
+void _routeWhenReady(Map<String, dynamic> data, {int attempts = 0}) {
+  final anyContext =
+      rootNavigatorKey.currentContext ??
+      adminNavigatorKey.currentContext ??
+      driverRootNavigatorKey.currentContext ??
+      providerRootNavigatorKey.currentContext;
+  if (anyContext == null) {
+    _pendingPushTap = data;
+    if (attempts < 40) {
+      Future.delayed(const Duration(milliseconds: 250), () {
+        final stashed = _pendingPushTap;
+        if (stashed == data) {
+          _routeWhenReady(data, attempts: attempts + 1);
+        }
+      });
+    }
+    return;
+  }
+  _pendingPushTap = null;
+  final flavor = ProviderScope.containerOf(anyContext).read(appFlavorProvider);
+  final context = activeNavigatorContext(flavor);
+  if (context == null) return;
+  final payload = NotificationPayload.fromMap(data);
+  final deepLink = NotificationRouteResolver.safePayload(payload);
+  GoRouter.of(context).push(deepLink);
+}
+
 void _handleNotificationTap(Map<String, dynamic> data) {
+  // Read-state first: a tap is a read even if routing cannot run yet.
+  final tapId = data['notification_id'] as String?;
+  if (tapId != null && tapId.isNotEmpty) {
+    _markNotificationRead(tapId);
+  }
+  if (!_audienceMatches(data)) return;
   final chatRoomId = data['chat_room_id'] as String?;
   if (chatRoomId != null && chatRoomId.isNotEmpty) {
     // Resolve the ACTIVE flavor navigator: rootNavigatorKey only exists
@@ -168,25 +223,7 @@ void _handleNotificationTap(Map<String, dynamic> data) {
     return;
   }
 
-  final payload = NotificationPayload.fromMap(data);
-  final deepLink = NotificationRouteResolver.safePayload(payload);
-  final anyContext =
-      rootNavigatorKey.currentContext ??
-      adminNavigatorKey.currentContext ??
-      driverRootNavigatorKey.currentContext ??
-      providerRootNavigatorKey.currentContext;
-  if (anyContext == null) return;
-
-  final flavor = ProviderScope.containerOf(anyContext).read(appFlavorProvider);
-  final activeContext = activeNavigatorContext(flavor);
-  if (activeContext == null) return;
-  final context = activeContext;
-  final router = GoRouter.of(context);
-  router.push(deepLink);
-
-  if (payload.notificationId != null) {
-    _markNotificationRead(payload.notificationId!, context: context);
-  }
+  _routeWhenReady(data);
 }
 
 Future<void> _markNotificationRead(
@@ -252,6 +289,7 @@ class PushNotificationService {
           _logger.i('Push notification permission denied');
         }
 
+        _activeFlavor = _ref.read(appFlavorProvider);
         _localAndFcmReady = true;
       }
 
@@ -297,6 +335,7 @@ class PushNotificationService {
               final recordUserId = record['user_id'] as String?;
               final isOwn = recordUserId == userId;
               if (!isOwn) return;
+              if (!_audienceMatches(record)) return;
 
               _logger.i('Realtime notification: $title');
               final notificationPayload = jsonEncode({
@@ -337,6 +376,7 @@ class PushNotificationService {
           'p_token': token,
           'p_platform': _platformName(),
           'p_device_id': deviceId,
+          'p_app': _ref.read(appFlavorProvider).name,
         },
       );
 
@@ -378,30 +418,19 @@ class PushNotificationService {
 
   void _handleForegroundMessage(RemoteMessage message) {
     _logger.i('Foreground message: ${message.notification?.title}');
+    if (!_audienceMatches(message.data)) return;
     _showNotification(message);
   }
 
   void _handleBackgroundMessage(RemoteMessage message) {
     _logger.i('Opened message: ${message.notification?.title}');
-    final payload = NotificationPayload.fromMap(message.data);
-    final deepLink = NotificationRouteResolver.safePayload(payload);
-
-    final anyCtx =
-        rootNavigatorKey.currentContext ??
-        adminNavigatorKey.currentContext ??
-        driverRootNavigatorKey.currentContext ??
-        providerRootNavigatorKey.currentContext;
-    BuildContext? navContext;
-    if (anyCtx != null) {
-      final flavor = ProviderScope.containerOf(anyCtx).read(appFlavorProvider);
-      navContext = activeNavigatorContext(flavor);
-      if (navContext == null) return;
-      GoRouter.of(navContext).push(deepLink);
+    // A tap is a read even when the router is not built yet (cold start).
+    final openedId = message.data['notification_id'] as String?;
+    if (openedId != null && openedId.isNotEmpty) {
+      _markNotificationRead(openedId);
     }
-
-    if (payload.notificationId != null) {
-      _markNotificationRead(payload.notificationId!, context: navContext);
-    }
+    if (!_audienceMatches(message.data)) return;
+    _routeWhenReady(Map<String, dynamic>.from(message.data));
   }
 
   Future<void> deactivateTokensOnLogout() async {
@@ -412,7 +441,10 @@ class PushNotificationService {
         _deviceId = deviceId;
         await client.rpc(
           'deactivate_device_tokens',
-          params: {'p_device_id': deviceId},
+          params: {
+            'p_device_id': deviceId,
+            'p_app': _ref.read(appFlavorProvider).name,
+          },
         );
       }
 

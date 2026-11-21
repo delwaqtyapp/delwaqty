@@ -7,6 +7,7 @@ import 'package:delwaqty/features/_shared/auth/domain/auth_state.dart';
 import 'package:delwaqty/features/_shared/auth/presentation/auth_provider.dart';
 import 'package:delwaqty/features/_shared/device_lock/device_lock_provider.dart';
 import 'package:delwaqty/features/_shared/device_lock/presentation/device_unlock_page.dart';
+import 'package:delwaqty/features/_shared/notifications/presentation/pages/notification_center_page.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
 
 final GlobalKey<NavigatorState> adminNavigatorKey = GlobalKey<NavigatorState>(
@@ -60,6 +61,14 @@ final adminGoRouterProvider = Provider<GoRouter>((ref) {
     },
     routes: [
       ...registry.allStandaloneRoutes,
+      // The admin router wires only standalone routes; module shell routes
+      // like /notifications must be registered explicitly or notification
+      // taps (push deep links, bell menu) hit the error page.
+      GoRoute(
+        path: '/notifications',
+        name: 'notifications',
+        builder: (context, state) => const NotificationCenterPage(),
+      ),
       GoRoute(
         path: '/device-unlock',
         builder: (context, state) => const DeviceUnlockPage(),

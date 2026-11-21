@@ -6,11 +6,15 @@ import 'package:flutter_test/flutter_test.dart';
 /// The migration is the source of truth, so the test parses the SQL seed
 /// (and the canonical 030 seed) rather than duplicating the data in Dart.
 void main() {
-  final seedFile = File('supabase/migrations/032_egypt_geographic_seed.sql');
-  final schemaFile = File(
-    'supabase/migrations/032_egypt_geographic_schema.sql',
+  final seedFile = File(
+    'supabase/migrations_archive/032_egypt_geographic_seed.sql',
   );
-  final canonicalFile = File('supabase/migrations/030_regional_system.sql');
+  final schemaFile = File(
+    'supabase/migrations_archive/032_egypt_geographic_schema.sql',
+  );
+  final canonicalFile = File(
+    'supabase/migrations_archive/030_regional_system.sql',
+  );
 
   final lines = seedFile.readAsLinesSync();
   final schema = schemaFile.readAsStringSync();

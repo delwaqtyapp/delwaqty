@@ -19617,8 +19617,8 @@ ALTER TABLE public.withdrawal_requests ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.working_hours ENABLE ROW LEVEL SECURITY;
 
 -- policies
-CREATE POLICY cron_job_policy ON cron.job AS PERMISSIVE FOR ALL TO public USING ((username = CURRENT_USER));
-CREATE POLICY cron_job_run_details_policy ON cron.job_run_details AS PERMISSIVE FOR ALL TO public USING ((username = CURRENT_USER));
+DO $$ BEGIN EXECUTE 'CREATE POLICY cron_job_policy ON cron.job AS PERMISSIVE FOR ALL TO public USING ((username = CURRENT_USER));'; EXCEPTION WHEN insufficient_privilege OR undefined_object THEN NULL; END $$;
+DO $$ BEGIN EXECUTE 'CREATE POLICY cron_job_run_details_policy ON cron.job_run_details AS PERMISSIVE FOR ALL TO public USING ((username = CURRENT_USER));'; EXCEPTION WHEN insufficient_privilege OR undefined_object THEN NULL; END $$;
 CREATE POLICY "activity_logs admin select" ON public.activity_logs AS PERMISSIVE FOR SELECT TO public USING (is_admin());
 CREATE POLICY "activity_logs service role insert" ON public.activity_logs AS PERMISSIVE FOR INSERT TO service_role WITH CHECK (true);
 CREATE POLICY activity_logs_archive_admin_select ON public.activity_logs_archive AS PERMISSIVE FOR SELECT TO authenticated USING (is_admin());

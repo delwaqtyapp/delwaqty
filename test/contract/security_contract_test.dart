@@ -14,15 +14,16 @@ import 'package:flutter_test/flutter_test.dart';
 /// an identity-document path view comes back, or if the migration that fixed it
 /// stops being applied.
 void main() {
-  final migrations = Directory('supabase/migrations');
-
-  List<File> sqlFiles() =>
-      migrations
-          .listSync()
-          .whereType<File>()
-          .where((f) => f.path.endsWith('.sql'))
-          .toList()
-        ..sort((a, b) => a.path.compareTo(b.path));
+  List<File> sqlFiles() => <File>[
+    for (final migrations in [
+      Directory('supabase/migrations_archive'),
+      Directory('supabase/migrations'),
+    ])
+      if (migrations.existsSync())
+        ...migrations.listSync().whereType<File>().where(
+          (f) => f.path.endsWith('.sql'),
+        ),
+  ]..sort((a, b) => a.path.compareTo(b.path));
 
   String read(File f) => f.readAsStringSync();
   String all() => sqlFiles().map(read).join('\n');

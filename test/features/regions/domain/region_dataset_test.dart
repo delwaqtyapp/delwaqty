@@ -6,7 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 /// The migration is the source of truth, so the test parses the SQL seed
 /// rather than duplicating the data in Dart.
 void main() {
-  final seedFile = File('supabase/migrations/030_regional_system.sql');
+  final seedFile = File('supabase/migrations_archive/030_regional_system.sql');
   final seedRows = _parseSeedRows(seedFile);
 
   const countryId = '00000000-0000-0000-0000-000000000001';

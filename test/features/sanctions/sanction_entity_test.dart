@@ -82,7 +82,7 @@ void main() {
 
   test('issue_sanction RPC signature matches migration 035', () async {
     final file = File(
-      'supabase/migrations/035_member_management_moderation_deletion.sql',
+      'supabase/migrations_archive/035_member_management_moderation_deletion.sql',
     );
     final content = await file.readAsString();
 
@@ -98,7 +98,7 @@ void main() {
 
   test('revoke_sanction RPC signature matches migration 035', () async {
     final file = File(
-      'supabase/migrations/035_member_management_moderation_deletion.sql',
+      'supabase/migrations_archive/035_member_management_moderation_deletion.sql',
     );
     final content = await file.readAsString();
 
@@ -110,7 +110,7 @@ void main() {
 
   test('issue_sanction checks permissions via has_permission', () async {
     final file = File(
-      'supabase/migrations/035_member_management_moderation_deletion.sql',
+      'supabase/migrations_archive/035_member_management_moderation_deletion.sql',
     );
     final content = await file.readAsString();
 
@@ -124,7 +124,7 @@ void main() {
 
   test('revoke_sanction checks MEMBER_MODERATE permission', () async {
     final file = File(
-      'supabase/migrations/035_member_management_moderation_deletion.sql',
+      'supabase/migrations_archive/035_member_management_moderation_deletion.sql',
     );
     final content = await file.readAsString();
 
@@ -133,7 +133,7 @@ void main() {
 
   test('issue_sanction blocks admin targets', () async {
     final file = File(
-      'supabase/migrations/035_member_management_moderation_deletion.sql',
+      'supabase/migrations_archive/035_member_management_moderation_deletion.sql',
     );
     final content = await file.readAsString();
 
@@ -146,7 +146,7 @@ void main() {
 
   test('issue_sanction routes bans through approval', () async {
     final file = File(
-      'supabase/migrations/035_member_management_moderation_deletion.sql',
+      'supabase/migrations_archive/035_member_management_moderation_deletion.sql',
     );
     final content = await file.readAsString();
 
@@ -166,7 +166,7 @@ void main() {
     'revoke_sanction writes audit via _member_exec_revoke_sanction',
     () async {
       final file = File(
-        'supabase/migrations/035_member_management_moderation_deletion.sql',
+        'supabase/migrations_archive/035_member_management_moderation_deletion.sql',
       );
       final content = await file.readAsString();
 
@@ -180,7 +180,7 @@ void main() {
 
   test('RPCs are revoked from anon and PUBLIC', () async {
     final file = File(
-      'supabase/migrations/035_member_management_moderation_deletion.sql',
+      'supabase/migrations_archive/035_member_management_moderation_deletion.sql',
     );
     final content = await file.readAsString();
 
@@ -198,7 +198,7 @@ void main() {
 
   test('RPCs are granted to authenticated only', () async {
     final file = File(
-      'supabase/migrations/035_member_management_moderation_deletion.sql',
+      'supabase/migrations_archive/035_member_management_moderation_deletion.sql',
     );
     final content = await file.readAsString();
 

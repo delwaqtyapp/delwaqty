@@ -7,9 +7,9 @@ import 'package:flutter_test/flutter_test.dart';
 /// region-scoped (national OR ancestor chain), banner-joined, and never grant
 /// anon/pubic execution.
 void main() {
-  final migration = File('supabase/migrations/042_campaign_feed_rpc.sql')
-      .readAsStringSync()
-      .replaceAll('\r\n', '\n');
+  final migration = File(
+    'supabase/migrations_archive/042_campaign_feed_rpc.sql',
+  ).readAsStringSync().replaceAll('\r\n', '\n');
 
   group('042 — _campaign_region_visible helper', () {
     test('exists and is SECURITY DEFINER STABLE', () {

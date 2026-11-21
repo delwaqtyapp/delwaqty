@@ -29,11 +29,13 @@ import 'package:flutter_test/flutter_test.dart';
 /// (no network in tests); the assertions are written against plain
 /// substring presence rather than brittle regexes.
 void main() {
-  final migrationDir = Directory('supabase/migrations');
-  final migrationFiles = migrationDir.existsSync()
-      ? (migrationDir.listSync().whereType<File>().toList()
-          ..sort((a, b) => a.path.compareTo(b.path)))
-      : <File>[];
+  final migrationFiles = <File>[
+    for (final dir in [
+      Directory('supabase/migrations_archive'),
+      Directory('supabase/migrations'),
+    ])
+      if (dir.existsSync()) ...dir.listSync().whereType<File>(),
+  ]..sort((a, b) => a.path.compareTo(b.path));
 
   String readSql() =>
       migrationFiles.map((f) => f.readAsStringSync()).join('\n;\n');
@@ -189,7 +191,7 @@ void main() {
 
     test('provider_delete_document targets the real ownership column', () {
       final file = File(
-        'supabase/migrations/104_provider_document_delete_rpc.sql',
+        'supabase/migrations_archive/104_provider_document_delete_rpc.sql',
       );
       expect(file.existsSync(), isTrue);
       final body = file.readAsStringSync();
@@ -202,7 +204,9 @@ void main() {
     });
 
     test('a merchant reply cannot overwrite the customer review text', () {
-      final file = File('supabase/migrations/108_merchant_review_reply.sql');
+      final file = File(
+        'supabase/migrations_archive/108_merchant_review_reply.sql',
+      );
       expect(file.existsSync(), isTrue);
       final body = file.readAsStringSync();
       final update = RegExp(
@@ -253,7 +257,7 @@ void main() {
       'registration cannot self-verify; admin review requires documents',
       () {
         final latest = File(
-          'supabase/migrations/139_driver_verification_document_custody.sql',
+          'supabase/migrations_archive/139_driver_verification_document_custody.sql',
         ).readAsStringSync();
         final registration = latest
             .split(
@@ -349,8 +353,8 @@ void main() {
       final en = arb('app_en');
       final ar = arb('app_ar');
       // The platform is Egypt-only: EGP / ج.م.
-      expect(en['sar'], 'EGP');
-      expect(ar['sar'], 'ج.م');
+      expect(en['egp'], 'EGP');
+      expect(ar['egp'], 'ج.م');
     });
   });
 }

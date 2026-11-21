@@ -9,9 +9,13 @@ import 'package:flutter_test/flutter_test.dart';
 /// not restock, could not edit their storefront or hours, and the admin had
 /// no emergency console, no audit view and could not claim a complaint.
 void main() {
-  final migrations =
-      Directory('supabase/migrations').listSync().whereType<File>().toList()
-        ..sort((a, b) => a.path.compareTo(b.path));
+  final migrations = <File>[
+    for (final dir in [
+      Directory('supabase/migrations_archive'),
+      Directory('supabase/migrations'),
+    ])
+      if (dir.existsSync()) ...dir.listSync().whereType<File>(),
+  ]..sort((a, b) => a.path.compareTo(b.path));
   final sql = migrations.map((f) => f.readAsStringSync()).join('\n---\n');
 
   String read(String path) => File(path).readAsStringSync();

@@ -4,7 +4,9 @@ import 'dart:io';
 
 void main() {
   test('migration 044 exists and is syntactically valid', () async {
-    final file = File('supabase/migrations/044_member_management_list_rpc.sql');
+    final file = File(
+      'supabase/migrations_archive/044_member_management_list_rpc.sql',
+    );
     expect(file.existsSync(), isTrue, reason: 'Migration 044 missing');
 
     final content = await file.readAsString();
@@ -21,7 +23,7 @@ void main() {
 
   test('get_member_profile RPC exists in migration 035', () async {
     final file = File(
-      'supabase/migrations/035_member_management_moderation_deletion.sql',
+      'supabase/migrations_archive/035_member_management_moderation_deletion.sql',
     );
     expect(file.existsSync(), isTrue);
 
@@ -33,7 +35,7 @@ void main() {
 
   test('issue_sanction and revoke_sanction RPCs exist', () async {
     final file = File(
-      'supabase/migrations/035_member_management_moderation_deletion.sql',
+      'supabase/migrations_archive/035_member_management_moderation_deletion.sql',
     );
     expect(file.existsSync(), isTrue);
 

@@ -6,6 +6,7 @@ import 'package:delwaqty/features/_shared/auth/presentation/auth_provider.dart';
 import 'package:delwaqty/features/_shared/auth/domain/auth_state.dart';
 import 'package:delwaqty/features/driver/driver_module.dart';
 import 'package:delwaqty/features/driver/domain/entities/driver_profile.dart';
+import 'package:delwaqty/features/driver/domain/entities/vehicle.dart';
 import 'package:delwaqty/features/driver/domain/entities/driver_performance.dart';
 import 'package:delwaqty/shared/widgets/animated_fade_in.dart';
 import 'package:delwaqty/shared/widgets/floating_glass_buttons.dart';
@@ -618,12 +619,25 @@ class _ActionGrid extends StatelessWidget {
   }
 }
 
-class _VehicleInfoCard extends StatelessWidget {
+/// The vehicles table is the single source of truth for the driver's
+/// vehicle; the dashboard card and the management page must agree.
+final _activeVehicleProvider = FutureProvider.family<Vehicle?, String>((
+  ref,
+  driverId,
+) async {
+  final vehicles = await ref
+      .watch(driverRepositoryProvider)
+      .getVehicles(driverId);
+  final active = vehicles.where((v) => v.isActive);
+  return active.isEmpty ? null : active.first;
+});
+
+class _VehicleInfoCard extends ConsumerWidget {
   const _VehicleInfoCard({required this.profile});
   final DriverProfile profile;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     return Container(
@@ -640,21 +654,41 @@ class _VehicleInfoCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  profile.vehicleType ?? l10n.notSet,
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
-                  overflow: TextOverflow.ellipsis,
+                Builder(
+                  builder: (context) {
+                    final vehicle = ref
+                        .watch(_activeVehicleProvider(profile.id))
+                        .value;
+                    final title = vehicle != null
+                        ? [
+                            vehicle.category,
+                            if (vehicle.make != null) vehicle.make,
+                            if (vehicle.model != null) vehicle.model,
+                          ].join(' ')
+                        : (profile.vehicleType ?? l10n.notSet);
+                    final plate = vehicle?.plateNumber ?? profile.vehiclePlate;
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          title,
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        if (plate != null)
+                          Text(
+                            plate,
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: theme.colorScheme.onSurfaceVariant,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                      ],
+                    );
+                  },
                 ),
-                if (profile.vehiclePlate != null)
-                  Text(
-                    profile.vehiclePlate!,
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: theme.colorScheme.onSurfaceVariant,
-                    ),
-                    overflow: TextOverflow.ellipsis,
-                  ),
               ],
             ),
           ),

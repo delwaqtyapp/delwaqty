@@ -139,3 +139,12 @@ Any authenticated user can create an order with arbitrary prices.
   correctly gated to assigned driver / owner, idempotent, cash-only, lifecycle-checked.
 - `create_order` (new path): server-side pricing, quantity bounds, stock check,
   min-order, coupon merchant scoping — clean.
+
+## F9 — HIGH — Live location share tokens publicly enumerable (policy + live-probe)
+
+- RLS "live share public read by token": roles {public}, qual
+  `(is_active = true) AND (expires_at > now())` — the share token is never checked.
+  Anyone (anon) can list every active session's user_id, ride_id AND share_token
+  (the capability secret itself), breaking the share-link model.
+- Live probe returned zero rows today (no active sessions); the hole is standing.
+- Fix: drop public SELECT; serve shares via a SECURITY DEFINER function keyed by token.

@@ -245,13 +245,41 @@ class SupabaseDeliveryDataSource {
         .limit(1)
         .maybeSingle();
     if (row == null) return null;
-    return _deliveryFromRow(row);
+    return _enrichWithOrderContact(row, _deliveryFromRow(row));
+  }
+
+  /// Food orders carry no recipient_* on the ride; the customer's contact
+  /// lives on the ordering user, reachable for a driver only through the
+  /// scoped driver_order_contacts RPC (migration 224, item 18).
+  Future<DeliveryOrder> _enrichWithOrderContact(
+    Map<String, dynamic> row,
+    DeliveryOrder order,
+  ) async {
+    final hasPhone = order.recipientPhone?.trim().isNotEmpty == true;
+    final orderId = row['order_id'] as String?;
+    if (hasPhone || orderId == null) return order;
+    try {
+      final rows = await _client.rpc('driver_order_contacts');
+      for (final c in (rows as List<dynamic>)) {
+        final contact = c as Map<String, dynamic>;
+        if (contact['order_id'] == orderId) {
+          return order.copyWith(
+            recipientPhone: contact['phone'] as String? ?? order.recipientPhone,
+            recipientName:
+                contact['full_name'] as String? ?? order.recipientName,
+          );
+        }
+      }
+    } catch (_) {
+      // Contact enrichment is best-effort; the order itself already loaded.
+    }
+    return order;
   }
 
   Future<DeliveryOrder?> getDeliveryOrderById(String id) async {
     final row = await _client.from('rides').select().eq('id', id).maybeSingle();
     if (row == null) return null;
-    return _deliveryFromRow(row);
+    return _enrichWithOrderContact(row, _deliveryFromRow(row));
   }
 
   Future<void> driverArrivedAtPickup(String rideId, String driverId) async {

@@ -834,7 +834,7 @@ class _PremiumTypewriterSearchBarState
             filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
             child: Container(
               height: 48,
-              padding: const EdgeInsets.symmetric(horizontal: 14),
+              padding: const EdgeInsets.symmetric(horizontal: 12),
               decoration: BoxDecoration(
                 color: Colors.white.withValues(alpha: 0.08),
                 borderRadius: BorderRadius.circular(26),
@@ -883,34 +883,23 @@ class _PremiumTypewriterSearchBarState
                       ],
                     ),
                   ),
-                  const SizedBox(width: 8),
+                  const SizedBox(width: 6),
                   Container(
-                    height: 28,
-                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                    height: 24,
+                    width: 24,
                     decoration: BoxDecoration(
                       color: Colors.white.withValues(alpha: 0.12),
-                      borderRadius: BorderRadius.circular(14),
+                      borderRadius: BorderRadius.circular(12),
                       border: Border.all(
                         color: Colors.white.withValues(alpha: 0.32),
                       ),
                     ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Icon(
-                          Icons.auto_awesome_rounded,
-                          size: 13,
-                          color: AppColors.brandGold,
-                        ),
-                        const SizedBox(width: 3),
-                        Icon(
-                          isRtl
-                              ? Icons.arrow_back_rounded
-                              : Icons.arrow_forward_rounded,
-                          size: 13,
-                          color: Colors.white,
-                        ),
-                      ],
+                    child: Icon(
+                      isRtl
+                          ? Icons.arrow_back_rounded
+                          : Icons.arrow_forward_rounded,
+                      size: 13,
+                      color: Colors.white,
                     ),
                   ),
                 ],

@@ -7419,7 +7419,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get searchHintMarket => 'Search groceries or products...';
 
   @override
-  String get searchHintServices => 'Search plumbing, AC, or services...';
+  String get searchHintServices => 'Search services or repairs...';
 
   @override
   String get searchHintDelivery => 'Search pharmacy or fast delivery...';

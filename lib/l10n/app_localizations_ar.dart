@@ -7359,13 +7359,13 @@ class AppLocalizationsAr extends AppLocalizations {
   String get searchHintRestaurants => 'ابحث عن مطعم أو وجبة...';
 
   @override
-  String get searchHintMarket => 'ابحث عن سوبر ماركت أو منتج...';
+  String get searchHintMarket => 'ابحث عن منتج أو ماركت...';
 
   @override
-  String get searchHintServices => 'ابحث عن سباك أو كهربائي أو صيانة...';
+  String get searchHintServices => 'ابحث عن خدمة أو صيانة...';
 
   @override
-  String get searchHintDelivery => 'ابحث عن صيدلية أو توصيل سريع...';
+  String get searchHintDelivery => 'ابحث عن صيدلية أو توصيل...';
 
   @override
   String get orderNowFast => 'اطلب الآن وسيصلك المندوب فوراً';

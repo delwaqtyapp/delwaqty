@@ -14147,7 +14147,7 @@ abstract class AppLocalizations {
   /// No description provided for @searchHintServices.
   ///
   /// In en, this message translates to:
-  /// **'Search plumbing, AC, or services...'**
+  /// **'Search services or repairs...'**
   String get searchHintServices;
 
   /// No description provided for @searchHintDelivery.

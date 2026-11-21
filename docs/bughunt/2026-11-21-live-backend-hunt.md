@@ -422,3 +422,35 @@ Six decisions relayed by main; all executed same day except Meta (gated).
 6. Emergency chat: owner decided NO rate limit on open_emergency_chat.
    Recorded as a decision, not a bug — the LOW spam-vector note above is
    closed by this decision.
+
+## Owner decisions 2026-11-21 (second voice note ~2:28 PM) + execution
+
+Owner has no registered business yet (no سجل تجاري / بطاقة ضريبية /
+address proof; startup phase, paperwork comes later).
+
+1. META LIVE FLIP: PARKED entirely until he has سجل تجاري + بطاقة
+   ضريبية. The standing flip plan is stood down; no further verification
+   re-checks until he says the paperwork exists. State at parking:
+   portfolio 999347779858871 is "مؤهلة للتحقق" (eligible) with an active
+   "بدء التحقق" button, business NOT verified, Publish not enabled.
+2. WhatsApp OTP independence — verified against code + live RPCs: the
+   OTP path today is request_whatsapp_otp (DB: generates 6-digit code,
+   10-min expiry, invalidates older codes, 3-per-10-min cap) +
+   verify_whatsapp_otp (DB check) + a wa.me deep link where the USER
+   sends the code from their own WhatsApp to the support number. No
+   Graph API / Cloud API call exists anywhere in the repo. So nothing in
+   the live registration path depends on the Meta app's Live status or
+   business verification; parking the flip degrades NOTHING today. What
+   stays unbuilt (was always future work, not a regression): (a)
+   business-initiated OTP delivery (code pushed to the user's WhatsApp
+   instead of shown in-app), (b) inbound webhook auto-confirmation that
+   the user actually sent the message from that number — today
+   possession of the WhatsApp number is not cryptographically proven
+   (ceremonial, known since pass 1).
+3. Facebook login button hidden (commit a32658e):
+   kFacebookLoginEnabled=false in lib/shared/widgets/social_auth_buttons.dart
+   removes the button from every surface (welcome, login, register —
+   the only three callers; driver/merchant apps have no Facebook UI).
+   OAuth data layer untouched; flipping the const back re-enables.
+   Registration/login now: phone + WhatsApp OTP, Google.
+   ANTIGRAVITY BUILD LIST: rebuild the app so the hidden button ships.

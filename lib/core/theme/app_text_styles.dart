@@ -164,8 +164,50 @@ abstract final class AppTextStyles {
   // ---------------------------------------------------------------------------
 
   /// Returns a [TextTheme] mapping suitable for passing to [ThemeData.textTheme].
-  static TextTheme toTextTheme({Color? color}) {
+  ///
+  /// [arabicFirst] selects the Arabic-first rhythm (zero letter-spacing,
+  /// taller line-heights). The customer app passes `false` to keep its
+  /// original look frozen by owner decision (Nov 2026); merchant, driver
+  /// and admin use the Arabic-first rhythm.
+  static TextTheme toTextTheme({Color? color, bool arabicFirst = true}) {
     final base = color != null ? TextStyle(color: color) : const TextStyle();
+    if (!arabicFirst) {
+      return TextTheme(
+        displayLarge: displayLarge
+            .copyWith(letterSpacing: -0.25, height: 1.12)
+            .merge(base),
+        displayMedium: displayMedium.copyWith(height: 1.16).merge(base),
+        displaySmall: displaySmall.copyWith(height: 1.22).merge(base),
+        headlineLarge: headlineLarge.copyWith(height: 1.25).merge(base),
+        headlineMedium: headlineMedium.copyWith(height: 1.29).merge(base),
+        headlineSmall: headlineSmall.copyWith(height: 1.33).merge(base),
+        titleLarge: titleLarge.copyWith(height: 1.27).merge(base),
+        titleMedium: titleMedium
+            .copyWith(letterSpacing: 0.15, height: 1.5)
+            .merge(base),
+        titleSmall: titleSmall
+            .copyWith(letterSpacing: 0.1, height: 1.43)
+            .merge(base),
+        bodyLarge: bodyLarge
+            .copyWith(letterSpacing: 0.5, height: 1.5)
+            .merge(base),
+        bodyMedium: bodyMedium
+            .copyWith(letterSpacing: 0.25, height: 1.43)
+            .merge(base),
+        bodySmall: bodySmall
+            .copyWith(letterSpacing: 0.4, height: 1.33)
+            .merge(base),
+        labelLarge: labelLarge
+            .copyWith(letterSpacing: 0.1, height: 1.43)
+            .merge(base),
+        labelMedium: labelMedium
+            .copyWith(letterSpacing: 0.5, height: 1.33)
+            .merge(base),
+        labelSmall: labelSmall
+            .copyWith(letterSpacing: 0.5, height: 1.45)
+            .merge(base),
+      );
+    }
     return TextTheme(
       displayLarge: displayLarge.merge(base),
       displayMedium: displayMedium.merge(base),

@@ -11,7 +11,10 @@ import '../../features/admin/floating_sidebar/sidebar_theme.dart';
 /// the central system rather than hard-coded values.
 abstract final class AppTheme {
   /// Creates the light [ThemeData].
-  static ThemeData lightTheme({String? fontFamily}) {
+  static ThemeData lightTheme({
+    String? fontFamily,
+    bool arabicFirstText = true,
+  }) {
     final colorScheme = ColorScheme.fromSeed(
       seedColor: AppColors.brandPurple,
       primary: AppColors.brandPurple,
@@ -30,11 +33,14 @@ abstract final class AppTheme {
       outlineVariant: const Color(0xFFE4E4EC),
     );
 
-    return _buildTheme(colorScheme, fontFamily);
+    return _buildTheme(colorScheme, fontFamily, arabicFirstText);
   }
 
   /// Creates the dark [ThemeData].
-  static ThemeData darkTheme({String? fontFamily}) {
+  static ThemeData darkTheme({
+    String? fontFamily,
+    bool arabicFirstText = true,
+  }) {
     final colorScheme = ColorScheme.fromSeed(
       seedColor: AppColors.brandViolet,
       brightness: Brightness.dark,
@@ -45,15 +51,20 @@ abstract final class AppTheme {
       surface: AppColors.surfaceDark,
     );
 
-    return _buildTheme(colorScheme, fontFamily);
+    return _buildTheme(colorScheme, fontFamily, arabicFirstText);
   }
 
-  static ThemeData _buildTheme(ColorScheme colorScheme, String? fontFamily) {
+  static ThemeData _buildTheme(
+    ColorScheme colorScheme,
+    String? fontFamily,
+    bool arabicFirstText,
+  ) {
     final resolvedFamily = fontFamily ?? _defaultFontFamily;
-    final baseTextTheme = AppTextStyles.toTextTheme().apply(
-      bodyColor: colorScheme.onSurface,
-      displayColor: colorScheme.onSurface,
-    );
+    final baseTextTheme =
+        AppTextStyles.toTextTheme(arabicFirst: arabicFirstText).apply(
+          bodyColor: colorScheme.onSurface,
+          displayColor: colorScheme.onSurface,
+        );
 
     return ThemeData(
       useMaterial3: true,

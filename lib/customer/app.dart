@@ -122,8 +122,9 @@ class _AppState extends ConsumerState<App> {
       child: MaterialApp.router(
         title: 'Delwaqty',
         debugShowCheckedModeBanner: false,
-        theme: AppTheme.lightTheme(),
-        darkTheme: AppTheme.darkTheme(),
+        // Customer look frozen by owner decision: pre-1.1 text rhythm.
+        theme: AppTheme.lightTheme(arabicFirstText: false),
+        darkTheme: AppTheme.darkTheme(arabicFirstText: false),
         themeMode: themeMode,
         routerConfig: goRouter,
         locale: locale,

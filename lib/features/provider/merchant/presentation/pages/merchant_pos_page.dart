@@ -44,8 +44,9 @@ class _MerchantPosPageState extends ConsumerState<MerchantPosPage> {
     return sum;
   }
 
+  // Note: 1 << 32 overflows to 0 in compiled web JS; keep the bound < 2^31.
   static String _newSaleKey() =>
-      'pos-${DateTime.now().microsecondsSinceEpoch}-${Random().nextInt(1 << 32)}';
+      'pos-${DateTime.now().microsecondsSinceEpoch}-${Random().nextInt(1 << 30)}';
 
   Future<void> _completeSale(String merchantId) async {
     if (_cart.isEmpty || _submitting) return;
@@ -54,7 +55,7 @@ class _MerchantPosPageState extends ConsumerState<MerchantPosPage> {
     try {
       final items = [
         for (final e in _cart.entries)
-          {'product_id': e.key, 'quantity': e.value},
+          {'product_id': e.key, 'qty': e.value},
       ];
       final discount = double.tryParse(_discountCtrl.text.trim()) ?? 0;
       final res = await Supabase.instance.client.rpc(

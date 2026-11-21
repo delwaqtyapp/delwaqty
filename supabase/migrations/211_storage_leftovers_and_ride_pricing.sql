@@ -7,7 +7,7 @@ DROP POLICY IF EXISTS "verification_docs_select_admin" ON storage.objects;
 
 -- L3: ride_pricing was publicly readable; no anonymous client reads it.
 DROP POLICY IF EXISTS "pricing public read" ON public.ride_pricing;
-CREATE POLICY "pricing read signed-in"
-  ON public.ride_pricing FOR SELECT TO authenticated USING (true);
+-- Table has no client grants at all (server-only via definer RPCs); the old
+-- "public read" policy was decorative. Leave it grantless.
 
 NOTIFY pgrst, 'reload schema';

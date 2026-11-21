@@ -2524,5 +2524,11 @@
   "posTapToAdd": "Tap a product to add it",
   "posVodafoneCash": "Vodafone Cash",
   "posSaleFailed": "Sale failed",
-  "posNoProducts": "No sellable products yet"
+  "posNoProducts": "No sellable products yet",
+  "drugImportTitle": "Drug Catalog",
+  "drugImportSearchHint": "Search drugs by name or ingredient...",
+  "drugImportAction": "Stock it",
+  "drugImportSuccess": "Added to your products",
+  "drugImportFailed": "Import failed",
+  "drugImportInvalidPrice": "Enter a valid price"
 }

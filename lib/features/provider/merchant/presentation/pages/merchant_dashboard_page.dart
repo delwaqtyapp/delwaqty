@@ -583,6 +583,13 @@ class _MerchantDashboardPageState extends ConsumerState<MerchantDashboardPage> {
         ),
       if (caps.contains(ProviderCapability.catalog))
         _QuickActionItem(
+          title: l10n.drugImportTitle,
+          icon: Icons.medication_rounded,
+          color: AppColors.infoLight,
+          onTap: () => context.push('/merchant-dashboard/drugs'),
+        ),
+      if (caps.contains(ProviderCapability.catalog))
+        _QuickActionItem(
           title: l10n.posCashier,
           icon: Icons.point_of_sale_rounded,
           color: AppColors.brandCyan,

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:delwaqty/core/errors/app_error_text.dart';
 import 'package:delwaqty/core/theme/app_colors.dart';
 import 'package:delwaqty/features/admin/presentation/widgets/admin_page_header.dart';
 import 'package:delwaqty/features/admin/presentation/widgets/admin_states.dart';
@@ -140,7 +141,7 @@ class _AdminUsersWebPageState extends State<AdminUsersWebPage> {
                 }
                 if (snap.hasError) {
                   return AdminErrorState(
-                    message: snap.error.toString(),
+                    message: appErrorText(context, snap.error!),
                     onRetry: _refresh,
                   );
                 }
@@ -192,8 +193,7 @@ class _UserRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final name =
-        (user['full_name'] ?? user['email'] ?? '—').toString();
+    final name = (user['full_name'] ?? user['email'] ?? '—').toString();
     final email = (user['email'] ?? '').toString();
     final phone = (user['phone'] ?? '').toString();
     final status = (user['account_status'] ?? 'active').toString();
@@ -202,7 +202,10 @@ class _UserRow extends StatelessWidget {
     final shownRole = roleKey == 'owner' ? 'owner' : role;
     final created = DateTime.tryParse((user['created_at'] ?? '').toString());
     final initials = name.isNotEmpty
-        ? name.trim().substring(0, name.trim().length >= 2 ? 2 : 1).toUpperCase()
+        ? name
+              .trim()
+              .substring(0, name.trim().length >= 2 ? 2 : 1)
+              .toUpperCase()
         : '?';
 
     return ListTile(
@@ -229,10 +232,7 @@ class _UserRow extends StatelessWidget {
       trailing: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          _Chip(
-            label: shownRole,
-            color: AppColors.brandPurple,
-          ),
+          _Chip(label: shownRole, color: AppColors.brandPurple),
           const SizedBox(width: 8),
           _Chip(
             label: status == 'active' ? l10n.active : status,

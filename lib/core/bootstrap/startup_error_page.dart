@@ -22,44 +22,44 @@ class StartupErrorPage extends StatelessWidget {
       child: Material(
         color: const Color(0xFF241E44),
         child: SafeArea(
-        child: Center(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(24),
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 420),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  const Icon(
-                    Icons.error_outline_rounded,
-                    color: Color(0xFF7A5CFF),
-                    size: 56,
-                  ),
-                  const SizedBox(height: 16),
-                  const Text(
-                    'خطأ في الإعدادات',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 22,
-                      fontWeight: FontWeight.w700,
+          child: Center(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(24),
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 420),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    const Icon(
+                      Icons.error_outline_rounded,
+                      color: Color(0xFF7A5CFF),
+                      size: 56,
                     ),
-                  ),
-                  const SizedBox(height: 8),
-                  const Text(
-                    'Configuration Error',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(color: Color(0x99FFFFFF), fontSize: 14),
-                  ),
-                  const SizedBox(height: 24),
-                  for (final error in result.errors) ...[
-                    _ErrorTile(message: error),
+                    const SizedBox(height: 16),
+                    const Text(
+                      'خطأ في الإعدادات',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 22,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
                     const SizedBox(height: 8),
+                    const Text(
+                      'Configuration Error',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(color: Color(0x99FFFFFF), fontSize: 14),
+                    ),
+                    const SizedBox(height: 24),
+                    for (final error in result.errors) ...[
+                      _ErrorTile(message: error),
+                      const SizedBox(height: 8),
+                    ],
+                    const SizedBox(height: 16),
+                    const _HintBox(),
                   ],
-                  const SizedBox(height: 16),
-                  const _HintBox(),
-                ],
                 ),
               ),
             ),

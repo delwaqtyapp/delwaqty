@@ -337,42 +337,44 @@ class _AdminQuickActionsPageState extends ConsumerState<AdminQuickActionsPage> {
                                 Material(
                                   type: MaterialType.transparency,
                                   child: ListTile(
-                                  onTap: () =>
-                                      context.push(filtered[g].$4[index].route),
-                                  dense: true,
-                                  visualDensity: VisualDensity.compact,
-                                  contentPadding:
-                                      const EdgeInsets.symmetric(
-                                        horizontal: 12,
-                                        vertical: 2,
+                                    onTap: () => context.push(
+                                      filtered[g].$4[index].route,
+                                    ),
+                                    dense: true,
+                                    visualDensity: VisualDensity.compact,
+                                    contentPadding: const EdgeInsets.symmetric(
+                                      horizontal: 12,
+                                      vertical: 2,
+                                    ),
+                                    leading: Container(
+                                      padding: const EdgeInsets.all(8),
+                                      decoration: BoxDecoration(
+                                        color: filtered[g].$4[index].color
+                                            .withValues(alpha: 0.12),
+                                        borderRadius: BorderRadius.circular(10),
                                       ),
-                                  leading: Container(
-                                    padding: const EdgeInsets.all(8),
-                                    decoration: BoxDecoration(
-                                      color: filtered[g].$4[index].color
-                                          .withValues(alpha: 0.12),
-                                      borderRadius: BorderRadius.circular(10),
+                                      child: Icon(
+                                        filtered[g].$4[index].icon,
+                                        color: filtered[g].$4[index].color,
+                                        size: 20,
+                                      ),
                                     ),
-                                    child: Icon(
-                                      filtered[g].$4[index].icon,
-                                      color: filtered[g].$4[index].color,
-                                      size: 20,
+                                    title: Text(
+                                      filtered[g].$4[index].label,
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodyMedium
+                                          ?.copyWith(
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                    ),
+                                    trailing: Icon(
+                                      Icons.chevron_right_rounded,
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .onSurfaceVariant,
                                     ),
                                   ),
-                                  title: Text(
-                                    filtered[g].$4[index].label,
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .bodyMedium
-                                        ?.copyWith(fontWeight: FontWeight.w600),
-                                  ),
-                                  trailing: Icon(
-                                    Icons.chevron_right_rounded,
-                                    color: Theme.of(
-                                      context,
-                                    ).colorScheme.onSurfaceVariant,
-                                  ),
-                                ),
                                 ),
                               ],
                             ],

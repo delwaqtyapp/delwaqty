@@ -14419,6 +14419,114 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Ask the merchant or sender for their code when collecting the items.'**
   String get askPickupHandoff;
+
+  /// No description provided for @adminUsersPageSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Every registered account on the platform'**
+  String get adminUsersPageSubtitle;
+
+  /// No description provided for @adminUsersSearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search by name, email, or phone...'**
+  String get adminUsersSearchHint;
+
+  /// No description provided for @joinedDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Joined'**
+  String get joinedDate;
+
+  /// No description provided for @posCashier.
+  ///
+  /// In en, this message translates to:
+  /// **'Cashier (POS)'**
+  String get posCashier;
+
+  /// No description provided for @posCompleteSale.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete Sale'**
+  String get posCompleteSale;
+
+  /// No description provided for @posSaleComplete.
+  ///
+  /// In en, this message translates to:
+  /// **'Sale completed'**
+  String get posSaleComplete;
+
+  /// No description provided for @posSaleTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'Charged total'**
+  String get posSaleTotal;
+
+  /// No description provided for @posCustomerNameOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'Customer name (optional)'**
+  String get posCustomerNameOptional;
+
+  /// No description provided for @posTapToAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap a product to add it'**
+  String get posTapToAdd;
+
+  /// No description provided for @posVodafoneCash.
+  ///
+  /// In en, this message translates to:
+  /// **'Vodafone Cash'**
+  String get posVodafoneCash;
+
+  /// No description provided for @posSaleFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Sale failed'**
+  String get posSaleFailed;
+
+  /// No description provided for @posNoProducts.
+  ///
+  /// In en, this message translates to:
+  /// **'No sellable products yet'**
+  String get posNoProducts;
+
+  /// No description provided for @drugImportTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Drug Catalog'**
+  String get drugImportTitle;
+
+  /// No description provided for @drugImportSearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search drugs by name or ingredient...'**
+  String get drugImportSearchHint;
+
+  /// No description provided for @drugImportAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Stock it'**
+  String get drugImportAction;
+
+  /// No description provided for @drugImportSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Added to your products'**
+  String get drugImportSuccess;
+
+  /// No description provided for @drugImportFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Import failed'**
+  String get drugImportFailed;
+
+  /// No description provided for @drugImportInvalidPrice.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a valid price'**
+  String get drugImportInvalidPrice;
 }
 
 class _AppLocalizationsDelegate

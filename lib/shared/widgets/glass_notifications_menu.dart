@@ -187,7 +187,7 @@ class _GlassNotificationsMenuOverlayState
                   );
                 },
                 child: _GlassNotificationsPanel(
-                hostContext: widget.hostContext,
+                  hostContext: widget.hostContext,
                   onClose: _close,
                   router: widget.router,
                 ),
@@ -518,7 +518,6 @@ class _GlassNotificationsPanel extends ConsumerWidget {
     );
   }
 }
-
 
 /// Full-content view for notifications that carry no deep link: tapping the
 /// item opens the message instead of being a dead no-op.

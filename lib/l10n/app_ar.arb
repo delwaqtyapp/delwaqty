@@ -2465,5 +2465,11 @@
   "posTapToAdd": "اضغط على منتج لإضافته",
   "posVodafoneCash": "فودافون كاش",
   "posSaleFailed": "فشل البيع",
-  "posNoProducts": "لا توجد منتجات قابلة للبيع بعد"
+  "posNoProducts": "لا توجد منتجات قابلة للبيع بعد",
+  "drugImportTitle": "دليل الأدوية",
+  "drugImportSearchHint": "ابحث بالاسم أو المادة الفعالة...",
+  "drugImportAction": "أضف للمخزون",
+  "drugImportSuccess": "تمت الإضافة إلى منتجاتك",
+  "drugImportFailed": "فشل الاستيراد",
+  "drugImportInvalidPrice": "أدخل سعرًا صحيحًا"
 }

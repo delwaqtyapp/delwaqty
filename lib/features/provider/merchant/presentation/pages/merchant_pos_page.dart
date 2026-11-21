@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+
 import 'dart:math';
+
+import 'package:delwaqty/core/errors/app_error_text.dart';
 import 'package:delwaqty/core/theme/app_colors.dart';
 import 'package:delwaqty/features/provider/merchant/presentation/providers/merchant_providers.dart';
 import 'package:delwaqty/l10n/app_localizations.dart';
@@ -54,8 +57,7 @@ class _MerchantPosPageState extends ConsumerState<MerchantPosPage> {
     setState(() => _submitting = true);
     try {
       final items = [
-        for (final e in _cart.entries)
-          {'product_id': e.key, 'qty': e.value},
+        for (final e in _cart.entries) {'product_id': e.key, 'qty': e.value},
       ];
       final discount = double.tryParse(_discountCtrl.text.trim()) ?? 0;
       final res = await Supabase.instance.client.rpc(
@@ -93,7 +95,7 @@ class _MerchantPosPageState extends ConsumerState<MerchantPosPage> {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('${l10n.posSaleFailed}: $e'),
+          content: Text('${l10n.posSaleFailed}: ${appErrorText(context, e)}'),
           backgroundColor: AppColors.errorLight,
         ),
       );
@@ -112,10 +114,10 @@ class _MerchantPosPageState extends ConsumerState<MerchantPosPage> {
       appBar: AppBar(title: Text(l10n.posCashier)),
       body: merchantIdAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('$e')),
+        error: (e, _) => Center(child: Text(appErrorText(context, e))),
         data: (merchantId) => productsAsync.when(
           loading: () => const Center(child: CircularProgressIndicator()),
-          error: (e, _) => Center(child: Text('$e')),
+          error: (e, _) => Center(child: Text(appErrorText(context, e))),
           data: (allProducts) {
             final products = allProducts
                 .where((p) => p['is_available'] == true)
@@ -138,24 +140,23 @@ class _MerchantPosPageState extends ConsumerState<MerchantPosPage> {
                                 crossAxisSpacing: 12,
                               ),
                           itemCount: products.length,
-                          itemBuilder: (context, i) =>
-                              _ProductCard(
-                                product: products[i],
-                                qty: _cart[products[i]['id']] ?? 0,
-                                l10n: l10n,
-                                onTap: () {
-                                  final id = products[i]['id'] as String;
-                                  final stock =
-                                      (products[i]['stock_quantity'] as num?)
-                                          ?.toInt() ??
-                                      0;
-                                  if ((_cart[id] ?? 0) < stock) {
-                                    setState(
-                                      () => _cart[id] = (_cart[id] ?? 0) + 1,
-                                    );
-                                  }
-                                },
-                              ),
+                          itemBuilder: (context, i) => _ProductCard(
+                            product: products[i],
+                            qty: _cart[products[i]['id']] ?? 0,
+                            l10n: l10n,
+                            onTap: () {
+                              final id = products[i]['id'] as String;
+                              final stock =
+                                  (products[i]['stock_quantity'] as num?)
+                                      ?.toInt() ??
+                                  0;
+                              if ((_cart[id] ?? 0) < stock) {
+                                setState(
+                                  () => _cart[id] = (_cart[id] ?? 0) + 1,
+                                );
+                              }
+                            },
+                          ),
                         ),
                 ),
                 const VerticalDivider(width: 1),
@@ -170,8 +171,7 @@ class _MerchantPosPageState extends ConsumerState<MerchantPosPage> {
                     paymentMethod: _paymentMethod,
                     submitting: _submitting,
                     subtotal: subtotal,
-                    onPaymentChanged: (m) =>
-                        setState(() => _paymentMethod = m),
+                    onPaymentChanged: (m) => setState(() => _paymentMethod = m),
                     onQtyChanged: (id, qty) => setState(() {
                       if (qty <= 0) {
                         _cart.remove(id);
@@ -326,15 +326,16 @@ class _CartPanel extends StatelessWidget {
                 children: [
                   IconButton(
                     icon: const Icon(Icons.remove_circle_outline),
-                    onPressed: () =>
-                        onQtyChanged(p['id'] as String, (cart[p['id']] ?? 1) - 1),
+                    onPressed: () => onQtyChanged(
+                      p['id'] as String,
+                      (cart[p['id']] ?? 1) - 1,
+                    ),
                   ),
                   Text('${cart[p['id']]}'),
                   IconButton(
                     icon: const Icon(Icons.add_circle_outline),
                     onPressed: () {
-                      final stock =
-                          (p['stock_quantity'] as num?)?.toInt() ?? 0;
+                      final stock = (p['stock_quantity'] as num?)?.toInt() ?? 0;
                       final cur = cart[p['id']] ?? 0;
                       if (cur < stock) {
                         onQtyChanged(p['id'] as String, cur + 1);
@@ -405,9 +406,7 @@ class _CartPanel extends StatelessWidget {
                 )
               : const Icon(Icons.point_of_sale_rounded),
           label: Text(l10n.posCompleteSale),
-          style: FilledButton.styleFrom(
-            minimumSize: const Size.fromHeight(48),
-          ),
+          style: FilledButton.styleFrom(minimumSize: const Size.fromHeight(48)),
         ),
       ],
     );

@@ -27,47 +27,48 @@ class WelcomePage extends ConsumerWidget {
         children: [
           const CinematicAuthBackground(),
           SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 32),
-            child: Column(
-              children: [
-                const Spacer(flex: 2),
-                AnimatedFadeIn(
-                  duration: const Duration(milliseconds: 1000),
-                  child: Hero(
-                    tag: 'app_logo',
-                    child: Container(
-                      width: 120,
-                      height: 120,
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(30),
-                        boxShadow: const [
-                          BoxShadow(
-                            color: Color(0x4D5B3DF0),
-                            blurRadius: 40,
-                            offset: Offset(0, 12),
-                          ),
-                          BoxShadow(
-                            color: Color(0x26D8A84E),
-                            blurRadius: 24,
-                            offset: Offset(0, 4),
-                          ),
-                        ],
-                      ),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(30),
-                        child: Image.asset(
-                          'assets/logo app/logo.webp',
-                          width: 84,
-                          height: 84,
-                          fit: BoxFit.contain,
-                          errorBuilder: (_, _, _) => Center(
-                            child: Text(
-                              l10n.appNameAr,
-                              style: AppTextStyles.headlineLarge.copyWith(
-                                fontWeight: FontWeight.bold,
-                                color: context.colorScheme.primary,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 32),
+              child: Column(
+                children: [
+                  const Spacer(flex: 2),
+                  AnimatedFadeIn(
+                    duration: const Duration(milliseconds: 1000),
+                    child: Hero(
+                      tag: 'app_logo',
+                      child: Container(
+                        width: 120,
+                        height: 120,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(30),
+                          boxShadow: const [
+                            BoxShadow(
+                              color: Color(0x4D5B3DF0),
+                              blurRadius: 40,
+                              offset: Offset(0, 12),
+                            ),
+                            BoxShadow(
+                              color: Color(0x26D8A84E),
+                              blurRadius: 24,
+                              offset: Offset(0, 4),
+                            ),
+                          ],
+                        ),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(30),
+                          child: Image.asset(
+                            'assets/logo app/logo.webp',
+                            width: 84,
+                            height: 84,
+                            fit: BoxFit.contain,
+                            errorBuilder: (_, _, _) => Center(
+                              child: Text(
+                                l10n.appNameAr,
+                                style: AppTextStyles.headlineLarge.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  color: context.colorScheme.primary,
+                                ),
                               ),
                             ),
                           ),
@@ -75,84 +76,84 @@ class WelcomePage extends ConsumerWidget {
                       ),
                     ),
                   ),
-                ),
-                const SizedBox(height: 32),
-                AnimatedSlideIn(
-                  delay: const Duration(milliseconds: 200),
-                  child: Text(
-                    l10n.welcomeTitle,
-                    style: context.textTheme.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: context.colorScheme.onPrimary,
+                  const SizedBox(height: 32),
+                  AnimatedSlideIn(
+                    delay: const Duration(milliseconds: 200),
+                    child: Text(
+                      l10n.welcomeTitle,
+                      style: context.textTheme.headlineSmall?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: context.colorScheme.onPrimary,
+                      ),
+                      textAlign: TextAlign.center,
                     ),
-                    textAlign: TextAlign.center,
                   ),
-                ),
-                const SizedBox(height: 12),
-                AnimatedSlideIn(
-                  delay: const Duration(milliseconds: 400),
-                  child: Text(
-                    l10n.welcomeSubtitle,
-                    style: context.textTheme.bodyLarge?.copyWith(
-                      color: context.colorScheme.onPrimary.withValues(
-                        alpha: 0.85,
+                  const SizedBox(height: 12),
+                  AnimatedSlideIn(
+                    delay: const Duration(milliseconds: 400),
+                    child: Text(
+                      l10n.welcomeSubtitle,
+                      style: context.textTheme.bodyLarge?.copyWith(
+                        color: context.colorScheme.onPrimary.withValues(
+                          alpha: 0.85,
+                        ),
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                  const Spacer(flex: 3),
+                  AnimatedSlideIn(
+                    delay: const Duration(milliseconds: 600),
+                    child: _WelcomePrimaryButton(
+                      onPressed: () => context.pushNamed('login'),
+                      label: l10n.welcomeLoginButton,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  AnimatedSlideIn(
+                    delay: const Duration(milliseconds: 700),
+                    child: _WelcomeOutlineButton(
+                      onPressed: () => context.pushNamed('register'),
+                      label: l10n.welcomeRegisterButton,
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  AnimatedSlideIn(
+                    delay: const Duration(milliseconds: 750),
+                    child: SocialAuthButtons(
+                      onGoogle: () => ref
+                          .read(authStateProvider.notifier)
+                          .signInWithGoogle(),
+                      onFacebook: () => ref
+                          .read(authStateProvider.notifier)
+                          .signInWithFacebook(),
+                      dividerColor: context.colorScheme.onPrimary.withValues(
+                        alpha: 0.7,
                       ),
                     ),
-                    textAlign: TextAlign.center,
                   ),
-                ),
-                const Spacer(flex: 3),
-                AnimatedSlideIn(
-                  delay: const Duration(milliseconds: 600),
-                  child: _WelcomePrimaryButton(
-                    onPressed: () => context.pushNamed('login'),
-                    label: l10n.welcomeLoginButton,
-                  ),
-                ),
-                const SizedBox(height: 12),
-                AnimatedSlideIn(
-                  delay: const Duration(milliseconds: 700),
-                  child: _WelcomeOutlineButton(
-                    onPressed: () => context.pushNamed('register'),
-                    label: l10n.welcomeRegisterButton,
-                  ),
-                ),
-                const SizedBox(height: 24),
-                AnimatedSlideIn(
-                  delay: const Duration(milliseconds: 750),
-                  child: SocialAuthButtons(
-                    onGoogle: () =>
-                        ref.read(authStateProvider.notifier).signInWithGoogle(),
-                    onFacebook: () => ref
-                        .read(authStateProvider.notifier)
-                        .signInWithFacebook(),
-                    dividerColor: context.colorScheme.onPrimary.withValues(
-                      alpha: 0.7,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 24),
-                AnimatedFadeIn(
-                  delay: const Duration(milliseconds: 800),
-                  child: TextButton(
-                    onPressed: () {
-                      ref.read(authStateProvider.notifier).enterGuestMode();
-                      context.go(postAuthRoute(ref.read(appFlavorProvider)));
-                    },
-                    child: Text(
-                      l10n.welcomeGuestButton,
-                      style: AppTextStyles.labelLarge.copyWith(
-                        color: context.colorScheme.onPrimary.withValues(
-                          alpha: 0.7,
+                  const SizedBox(height: 24),
+                  AnimatedFadeIn(
+                    delay: const Duration(milliseconds: 800),
+                    child: TextButton(
+                      onPressed: () {
+                        ref.read(authStateProvider.notifier).enterGuestMode();
+                        context.go(postAuthRoute(ref.read(appFlavorProvider)));
+                      },
+                      child: Text(
+                        l10n.welcomeGuestButton,
+                        style: AppTextStyles.labelLarge.copyWith(
+                          color: context.colorScheme.onPrimary.withValues(
+                            alpha: 0.7,
+                          ),
                         ),
                       ),
                     ),
                   ),
-                ),
-                const SizedBox(height: 16),
-              ],
+                  const SizedBox(height: 16),
+                ],
+              ),
             ),
-          ),
           ),
         ],
       ),

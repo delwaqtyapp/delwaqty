@@ -7566,4 +7566,59 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get askPickupHandoff =>
       'Ask the merchant or sender for their code when collecting the items.';
+
+  @override
+  String get adminUsersPageSubtitle =>
+      'Every registered account on the platform';
+
+  @override
+  String get adminUsersSearchHint => 'Search by name, email, or phone...';
+
+  @override
+  String get joinedDate => 'Joined';
+
+  @override
+  String get posCashier => 'Cashier (POS)';
+
+  @override
+  String get posCompleteSale => 'Complete Sale';
+
+  @override
+  String get posSaleComplete => 'Sale completed';
+
+  @override
+  String get posSaleTotal => 'Charged total';
+
+  @override
+  String get posCustomerNameOptional => 'Customer name (optional)';
+
+  @override
+  String get posTapToAdd => 'Tap a product to add it';
+
+  @override
+  String get posVodafoneCash => 'Vodafone Cash';
+
+  @override
+  String get posSaleFailed => 'Sale failed';
+
+  @override
+  String get posNoProducts => 'No sellable products yet';
+
+  @override
+  String get drugImportTitle => 'Drug Catalog';
+
+  @override
+  String get drugImportSearchHint => 'Search drugs by name or ingredient...';
+
+  @override
+  String get drugImportAction => 'Stock it';
+
+  @override
+  String get drugImportSuccess => 'Added to your products';
+
+  @override
+  String get drugImportFailed => 'Import failed';
+
+  @override
+  String get drugImportInvalidPrice => 'Enter a valid price';
 }

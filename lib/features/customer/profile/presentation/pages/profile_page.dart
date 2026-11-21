@@ -67,7 +67,12 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
               sliver: SliverList(
                 delegate: SliverChildListDelegate([
                   AnimatedFadeIn(
-                    child: _buildBentoQuickActions(context, isProvider, isDriver, l10n),
+                    child: _buildBentoQuickActions(
+                      context,
+                      isProvider,
+                      isDriver,
+                      l10n,
+                    ),
                   ),
                   const SizedBox(height: 18),
                   AnimatedFadeIn(

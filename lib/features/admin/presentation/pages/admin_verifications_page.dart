@@ -632,9 +632,7 @@ class _VerificationDocsSection extends ConsumerWidget {
                 Expanded(
                   child: Text(
                     l10n.noDocuments,
-                    style: Theme.of(context)
-                        .textTheme
-                        .bodySmall
+                    style: Theme.of(context).textTheme.bodySmall
                         ?.copyWith(color: cs.error),
                   ),
                 ),

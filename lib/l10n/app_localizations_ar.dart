@@ -7508,4 +7508,58 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get askPickupHandoff =>
       'اطلب كود الاستلام من التاجر أو المرسل عند استلام الطلب فعليًا.';
+
+  @override
+  String get adminUsersPageSubtitle => 'كل الحسابات المسجلة على المنصة';
+
+  @override
+  String get adminUsersSearchHint => 'ابحث بالاسم أو البريد أو الهاتف...';
+
+  @override
+  String get joinedDate => 'انضم في';
+
+  @override
+  String get posCashier => 'الكاشير (نقطة البيع)';
+
+  @override
+  String get posCompleteSale => 'إتمام البيع';
+
+  @override
+  String get posSaleComplete => 'تم البيع بنجاح';
+
+  @override
+  String get posSaleTotal => 'الإجمالي المحصل';
+
+  @override
+  String get posCustomerNameOptional => 'اسم العميل (اختياري)';
+
+  @override
+  String get posTapToAdd => 'اضغط على منتج لإضافته';
+
+  @override
+  String get posVodafoneCash => 'فودافون كاش';
+
+  @override
+  String get posSaleFailed => 'فشل البيع';
+
+  @override
+  String get posNoProducts => 'لا توجد منتجات قابلة للبيع بعد';
+
+  @override
+  String get drugImportTitle => 'دليل الأدوية';
+
+  @override
+  String get drugImportSearchHint => 'ابحث بالاسم أو المادة الفعالة...';
+
+  @override
+  String get drugImportAction => 'أضف للمخزون';
+
+  @override
+  String get drugImportSuccess => 'تمت الإضافة إلى منتجاتك';
+
+  @override
+  String get drugImportFailed => 'فشل الاستيراد';
+
+  @override
+  String get drugImportInvalidPrice => 'أدخل سعرًا صحيحًا';
 }

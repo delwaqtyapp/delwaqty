@@ -143,7 +143,6 @@ Future<void> showChatCallNotification({
   }
 }
 
-
 /// Static accessor for the running app flavor so top-level handlers can gate
 /// audience-targeted pushes without a Ref. Set by PushNotificationService on
 /// initialize; defaults to customer (least privileged).

@@ -3599,7 +3599,7 @@ abstract class AppLocalizations {
   /// No description provided for @driverDashboard.
   ///
   /// In en, this message translates to:
-  /// **'Delivery Dashboard'**
+  /// **'Dashboard'**
   String get driverDashboard;
 
   /// No description provided for @deliveryAccess.

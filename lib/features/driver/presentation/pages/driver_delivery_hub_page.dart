@@ -214,6 +214,14 @@ class _DeliveryHubBodyState extends ConsumerState<_DeliveryHubBody> {
             const AnimatedFadeIn(
               delay: Duration(milliseconds: 200),
               child: _RadarPulseWidget(),
+            )
+          else
+            AnimatedFadeIn(
+              delay: const Duration(milliseconds: 200),
+              child: _OfflineHubHint(
+                onGoOnline: () =>
+                    ref.read(driverOnlineProvider(_driverId).notifier).toggle(),
+              ),
             ),
         ],
       ),
@@ -867,6 +875,56 @@ class _HubErrorCard extends StatelessWidget {
             TextButton(onPressed: onRetry, child: Text(l10n.retry)),
           ],
         ),
+      ),
+    );
+  }
+}
+
+/// Fills the offline hub so it never reads as a blank page: explains the
+/// state and gives the one action that matters (go online).
+class _OfflineHubHint extends StatelessWidget {
+  const _OfflineHubHint({required this.onGoOnline});
+
+  final VoidCallback onGoOnline;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surfaceContainerLowest,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: Theme.of(context).colorScheme.outlineVariant
+              .withValues(alpha: 0.5),
+        ),
+      ),
+      child: Column(
+        children: [
+          Icon(
+            Icons.wifi_off_rounded,
+            size: 40,
+            color: Theme.of(context).colorScheme.onSurface
+                .withValues(alpha: 0.45),
+          ),
+          const SizedBox(height: 12),
+          Text(
+            l10n.offlineTapToGoOnline,
+            textAlign: TextAlign.center,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: Theme.of(context).colorScheme.onSurface
+                  .withValues(alpha: 0.7),
+            ),
+          ),
+          const SizedBox(height: 16),
+          FilledButton.tonalIcon(
+            onPressed: onGoOnline,
+            icon: const Icon(Icons.wifi_rounded, size: 18),
+            label: Text(l10n.goOnline),
+          ),
+        ],
       ),
     );
   }

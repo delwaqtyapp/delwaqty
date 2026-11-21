@@ -1837,7 +1837,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get loginToViewWallet => 'سجل الدخول لعرض محفظتك';
 
   @override
-  String get driverDashboard => 'لوحة تحكم الدليفرى';
+  String get driverDashboard => 'لوحة التحكم';
 
   @override
   String get deliveryAccess => 'صلاحياتك';

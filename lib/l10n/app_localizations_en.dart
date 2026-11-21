@@ -1845,7 +1845,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get loginToViewWallet => 'Please log in to view your wallet';
 
   @override
-  String get driverDashboard => 'Delivery Dashboard';
+  String get driverDashboard => 'Dashboard';
 
   @override
   String get deliveryAccess => 'Your Access';

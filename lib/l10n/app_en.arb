@@ -604,7 +604,7 @@
   "bankTransfer": "Bank Transfer",
   "confirmTopUp": "Confirm Top Up",
   "loginToViewWallet": "Please log in to view your wallet",
-  "driverDashboard": "Delivery Dashboard",
+  "driverDashboard": "Dashboard",
   "deliveryAccess": "Your Access",
   "deliveryAccessSubtitle": "Delivery operational profile",
   "accessManagedInAdmin": "Role and permission administration is managed in DelwaQty Admin.",

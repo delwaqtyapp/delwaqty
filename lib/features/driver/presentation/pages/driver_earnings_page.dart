@@ -328,6 +328,13 @@ class _BalanceCard extends ConsumerWidget {
               onPressed: stats.balance <= 0
                   ? null
                   : () => _withdrawDialog(context, ref, stats),
+              style: FilledButton.styleFrom(
+                // Disabled state must stay legible, not fade to invisible.
+                disabledForegroundColor: Theme.of(context).colorScheme.onSurface
+                    .withValues(alpha: 0.55),
+                disabledBackgroundColor: Theme.of(context).colorScheme.onSurface
+                    .withValues(alpha: 0.10),
+              ),
               child: Text(l10n.withdrawFunds),
             ),
           ),

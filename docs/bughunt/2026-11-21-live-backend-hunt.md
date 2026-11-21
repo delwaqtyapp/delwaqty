@@ -454,3 +454,16 @@ address proof; startup phase, paperwork comes later).
    OAuth data layer untouched; flipping the const back re-enables.
    Registration/login now: phone + WhatsApp OTP, Google.
    ANTIGRAVITY BUILD LIST: rebuild the app so the hidden button ships.
+
+## UI/UX audit (user voice-note review, 2026-11-21 PM)
+
+Code-level only (no Flutter SDK in sandbox); every item needs an Antigravity rebuild to verify on device.
+
+1. Login redesign: biometric fingerprint icon moved beside a shrunken login button (login_page.dart); bottom biometric block removed. (e8413cc)
+2. Auto-login bug: registration never saved device credentials, so the app-lock gate never engaged for accounts created on device. register_page now saves credentials after signup (mirrors _handlePostLoginSave). Biometrics/app-lock is wired in all 4 apps' routers, not owner-only. (e8413cc)
+3. Welcome page restyled to CinematicAuthBackground + login-style buttons to match auth screens. (e8413cc)
+4. Driver app: settings gear pushed dead route '/settings' -> now '/settings/privacy-security'. Location permission errors classified as AppErrorKind.location with clear message + Open Settings action (was generic error). Profile quick actions in driver flavor pushed customer dead routes (/wallet, /rewards, /market/orders) -> now driver routes. (e8413cc, bd9da42)
+5. Customer app: full static route audit (recursive nested-route resolver vs registry) — no dead routes; provider tiles are flavor-gated and never fire in customer flavor. (bd9da42)
+6. Admin quick-access page: 3-4col cube grid replaced with grouped list rows (icon chip + label + chevron); search retained. Also fixed dead '/welcome' in admin app (registered WelcomeModule). (bd9da42)
+7. Dedupe: privacy/terms links removed from privacy hub (kept once in profile Support & Legal). (bd9da42)
+8. Verification card: registration DOES upload docs (id/license/trade/photo) at signup; admin fetch only surfaced ID+photo. Added VerificationDocuments + repo/service/provider + _VerificationDocsSection on admin verification page (thumbs of all docs, openable; red no-docs warning). Reject-with-reason already existed (p_reason). (5cd21b2)

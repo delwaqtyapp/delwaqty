@@ -495,3 +495,66 @@ Owner confirmation: written WhatsApp recap 2:58 PM + his "تمام" reply 2:59 P
 ## Migration 187: Cairo month windows (applied + probed 3:07 PM, commit 2a9cecc)
 
 All four allowance functions (cancel_order, add_order_items, report_delivery_refusal, _driver_delay_redispatch) now bound months by Africa/Cairo local month start (verified: Nov 2026 Cairo start = 2026-10-31 22:00 UTC). Cancel path re-probed live after the swap. Change made on main's call under the owner's blanket authority.
+
+## Migration 188 - Policy spec 2026 rules (shipped 2026-11-21 ~15:24 EET)
+
+Source: owner's 2026-11-21 15:14 voice note (full spec, all 5 items).
+
+1. **Delay compensation redesign** - `_driver_delay_redispatch`: no deduction from the
+   delayed driver; platform takes NO commission on the replacement driver's order
+   (waiver wired into `_record_delivery_earnings` + `_record_order_settlement` for
+   delay-flagged orders); customer gift = `delay_apology_percent` (default 7%) of
+   order total as a platform gift ("patience appreciation"); monthly delay
+   allowance still settles at 3/month (185).
+2. **Cancellations** - 2/month (185); on the 3rd, cancel executes then a 5-day
+   suspension via `_member_exec_sanction` + Arabic notification; appeal can
+   reinstate at management discretion.
+3. **Refusals** - refusals 1-2 keep the warn+cancel flow; the 3rd monthly refusal
+   is NOT a cancellation: the order stays out for delivery (forced receipt),
+   suspension executes at the driver's report, and a `delivery_incidents` row
+   (kind `final_refusal_suspension`) is filed for ops. New `refusal_events` table
+   is the single monthly counting source.
+4. **Admin regions** - `_admin_covers_region` + `_duty_admin_for_region`
+   (assigned+available -> nearest ancestor region -> any global admin -> owner),
+   `admin_availability` + `set_admin_availability`, `appeals` table with
+   `submit_appeal` (customer) / `decide_appeal` (duty admin or owner; approve
+   revokes the sanction). `_lift_expired_member_sanctions` runs every 15 min via
+   pg_cron so expired suspensions clear without manual action.
+5. **Ops automation** - internal AI only; nothing built for Instinct embedding
+   (concept-only per spec).
++ `create_order` now rejects suspended/banned customers (`ACCOUNT_SUSPENDED`).
+
+### Live probes (all passed, fixtures cleaned)
+- 3rd cancel -> `suspended:true, 5 days`; sanction row + `account_status=suspended`.
+- `create_order` while suspended -> `ACCOUNT_SUSPENDED`.
+- Appeal: `submit_appeal` routed to duty admin (owner, no region on test user);
+  `decide_appeal(approve)` -> sanction `action_status=revoked`, account active.
+- Duty resolver: no assignments -> owner (region and null-region cases).
+- Refusals: 1st/2nd -> warning + order cancelled; 3rd -> `account_suspended`,
+  order NOT cancelled (`delivering`), incident filed, suspension active.
+- Delay: `report_driver_delay` -> `apology_amount 8.40` = 7% of 120 order total,
+  wallet 240 -> 248.40, ride back to `searching` for redispatch.
+- Static: commission waiver present in both settlement functions'
+  live prosrc; `_duty_admin_for_region` + `_lift_expired_member_sanctions` exist.
+
+### Infra incident during 188
+- pg_cron extension was DROPPED from the live project between the 187 probes
+  (~15:07) and 188 application (~15:19). Re-enabled via SQL; re-created the 3
+  jobs from migration 055 (deactivate-stale-tokens, apply-retention-policies,
+  run-member-engines) plus 188's lift-expired-member-sanctions. 4 jobs live.
+  Cause unknown - worth asking who touched the project dashboard.
+
+### App-side work (Antigravity, not in this migration)
+- Appeal button in the customer app (routes to `submit_appeal`).
+- Pre-warning copy for customers with 2 refusals ("next refusal = 5-day
+  suspension, order must be received").
+- Friendly error surfaces for `ACCOUNT_SUSPENDED`.
+- Admin app: appeals queue (decide_appeal), availability toggle
+  (set_admin_availability), incidents queue already exists (146).
+
+### Open residuals
+- Region scoping beyond appeals (member moderation, verifications) not yet
+  enforced - `is_admin_for_region` exists but unapplied there.
+- No lat/lon on regions: "nearest available admin" falls back to region-tree
+  distance, not geography.
+- Beyond-allowance driver-delay consequence: still ops-flag-only (no owner pick).
